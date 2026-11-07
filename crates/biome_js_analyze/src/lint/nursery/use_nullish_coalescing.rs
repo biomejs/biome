@@ -570,7 +570,7 @@ fn run_logical_or(
     }
 
     if options.ignore_boolean_coercion()
-        && is_in_boolean_call_context(&AnyJsLogicalOrLikeExpression::from(logical.clone()))
+        && is_in_boolean_call_context(ctx, &AnyJsLogicalOrLikeExpression::from(logical.clone()))
     {
         return None;
     }
@@ -613,7 +613,7 @@ fn run_logical_or_assignment(
     }
 
     if options.ignore_boolean_coercion()
-        && is_in_boolean_call_context(&AnyJsLogicalOrLikeExpression::from(assignment.clone()))
+        && is_in_boolean_call_context(ctx, &AnyJsLogicalOrLikeExpression::from(assignment.clone()))
     {
         return None;
     }
@@ -1075,9 +1075,12 @@ fn operand_reaches_logical_and(operand: SyntaxResult<AnyJsExpression>) -> bool {
 /// since the coerced value still flows into the call) so that
 /// `Boolean(a || b || c)` and `Boolean(x && (a || b))` are both treated as
 /// coerced, then inspects the first ancestor that is neither. That ancestor must
-/// be the argument list of a `Boolean(...)` call for the expression to be
-/// considered coerced.
-fn is_in_boolean_call_context(node: &AnyJsLogicalOrLikeExpression) -> bool {
+/// be the argument list of a call to the global `Boolean` for the expression to
+/// be considered coerced. A `Boolean` bound in scope is a different function.
+fn is_in_boolean_call_context(
+    ctx: &RuleContext<UseNullishCoalescing>,
+    node: &AnyJsLogicalOrLikeExpression,
+) -> bool {
     node.syntax()
         .ancestors()
         .skip(1)
@@ -1088,7 +1091,14 @@ fn is_in_boolean_call_context(node: &AnyJsLogicalOrLikeExpression) -> bool {
         .and_then(JsCallArgumentList::cast)
         .and_then(|list| list.parent::<JsCallArguments>())
         .and_then(|args| args.parent::<JsCallExpression>())
-        .is_some_and(|call| call.has_callee("Boolean"))
+        .and_then(|call| call.callee().ok())
+        .is_some_and(|callee| {
+            callee
+                .as_js_reference_identifier()
+                .is_some_and(|reference| {
+                    reference.has_name("Boolean") && !ctx.has_binding(&reference)
+                })
+        })
 }
 
 fn is_in_test_position(logical: &JsLogicalExpression) -> bool {
