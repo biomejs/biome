@@ -2612,6 +2612,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_getter_return::UseGetterReturnOptions>(),
     ));
     result.push((
+        "nursery",
+        "useGlobalRegexInMatchAll",
+        TypeId::of::<
+            biome_rule_options::use_global_regex_in_match_all::UseGlobalRegexInMatchAllOptions,
+        >(),
+    ));
+    result.push((
         "style",
         "useGlobalThis",
         TypeId::of::<biome_rule_options::use_global_this::UseGlobalThisOptions>(),

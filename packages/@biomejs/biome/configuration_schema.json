@@ -10126,6 +10126,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useGlobalRegexInMatchAll": {
+					"description": "Require regular expressions passed to matchAll() to have the g flag.\nSee https://biomejs.dev/linter/rules/use-global-regex-in-match-all",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseGlobalRegexInMatchAllConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useIncludes": {
 					"description": "Prefer Array#includes() over Array#indexOf(), Array#lastIndexOf(), and Array#some() when checking for existence or non-existence.\nSee https://biomejs.dev/linter/rules/use-includes",
 					"anyOf": [
@@ -17437,6 +17444,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseGlobalRegexInMatchAllOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseGlobalRegexInMatchAllOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseGlobalThisOptions": {
 			"type": "object",
 			"properties": {
@@ -23020,6 +23036,16 @@
 			]
 		},
 		"UseGetterReturnOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseGlobalRegexInMatchAllConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseGlobalRegexInMatchAllOptions" }
+			]
+		},
+		"UseGlobalRegexInMatchAllOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
