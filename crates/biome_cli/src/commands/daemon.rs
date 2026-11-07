@@ -87,11 +87,9 @@ pub(crate) fn run_server(
     let factory = ServerFactory::new(stop_on_disconnect, instruction_channel.sender.clone());
     let cancellation = factory.cancellation();
 
-    let workspace = factory.workspace();
-    let db_state = factory.db_state();
-    rt.spawn_blocking(move || {
-        workspace.start_watcher(&db_state, watcher);
-    });
+    factory
+        .workspace()
+        .start_watcher(factory.db_state(), watcher)?;
 
     rt.block_on(async move {
         tokio::select! {
