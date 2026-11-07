@@ -1,6 +1,7 @@
 mod builder;
 mod model;
 mod snippets;
+mod table;
 
 pub use model::*;
 pub use snippets::AstroSnippet;
@@ -43,7 +44,7 @@ pub fn astro_model(host: &HtmlRoot, snippets: &[AstroSnippet]) -> AstroSemanticM
             content,
             Some(scope),
         );
-        builder.data.scopes[scope.index()].kind = ScopeKind::Module(Some(block));
+        builder.data.scopes[scope].kind = ScopeKind::Module(Some(block));
         block
     });
 
@@ -171,6 +172,6 @@ fn add_block(
     let scope = module_scope.then(|| builder.add_scope(ScopeKind::Module(None), None));
     let block = builder.add_block(kind, range, content, scope);
     if let Some(scope) = scope {
-        builder.data.scopes[scope.index()].kind = ScopeKind::Module(Some(block));
+        builder.data.scopes[scope].kind = ScopeKind::Module(Some(block));
     }
 }
