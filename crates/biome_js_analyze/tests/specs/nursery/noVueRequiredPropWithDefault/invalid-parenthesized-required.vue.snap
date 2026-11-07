@@ -1,0 +1,55 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-parenthesized-required.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+defineProps({
+  name: {
+    required: (true),
+    default: "Foo",
+  },
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-parenthesized-required.vue:5:5 lint/nursery/noVueRequiredPropWithDefault  FIXABLE  ━━━━━━━━━━
+
+  ! The prop name is required, but it also has a default value.
+  
+    3 │ defineProps({
+    4 │   name: {
+  > 5 │     required: (true),
+      │     ^^^^^^^^^^^^^^^^
+    6 │     default: "Foo",
+    7 │   },
+  
+  i The default value is declared here.
+  
+    4 │   name: {
+    5 │     required: (true),
+  > 6 │     default: "Foo",
+      │     ^^^^^^^^^^^^^^
+    7 │   },
+    8 │ });
+  
+  i Parent components are expected to always pass a required prop, so its default value should never be needed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Make the prop optional.
+  
+    2 2 │   defineProps({
+    3 3 │     name: {
+    4   │ - ····required:·(true),
+      4 │ + ····required:·(false),
+    5 5 │       default: "Foo",
+    6 6 │     },
+  
+
+```

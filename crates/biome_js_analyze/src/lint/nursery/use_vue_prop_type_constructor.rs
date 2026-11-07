@@ -7,10 +7,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_syntax::{
-    AnyJsArrayElement, AnyJsExpression, AnyJsLiteralExpression, AnyJsObjectMember,
-    JsPropertyObjectMember, JsSyntaxKind, T,
-};
+use biome_js_syntax::{AnyJsArrayElement, AnyJsExpression, AnyJsLiteralExpression, JsSyntaxKind, T};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TextRange};
 use biome_rule_options::use_vue_prop_type_constructor::UseVuePropTypeConstructorOptions;
 use biome_unicode_table::is_js_ident;
@@ -108,7 +105,12 @@ impl Rule for UseVuePropTypeConstructor {
         if !matches!(prop.form(), Some(PropForm::Constructor | PropForm::Options)) {
             return Box::default();
         }
-        let Some(types) = prop_types(ctx) else {
+        let Some(types) = prop
+            .runtime_type_node()
+            .and_then(|types| ctx.vue_model().node(&types))
+            .and_then(AnyJsExpression::cast)
+            .and_then(|types| types.inner_expression())
+        else {
             return Box::default();
         };
         match types {
@@ -174,32 +176,6 @@ impl Rule for UseVuePropTypeConstructor {
             mutation,
         ))
     }
-}
-
-/// Returns the expression that declares the types of the queried prop: the value of the prop in
-/// `size: Number`, or the value of its `type` option in `size: { type: Number }`.
-fn prop_types(ctx: &RuleContext<UseVuePropTypeConstructor>) -> Option<AnyJsExpression> {
-    let declaration = ctx
-        .root()
-        .syntax()
-        .covering_element(ctx.query().declaration_range())
-        .into_node()?;
-    let value = JsPropertyObjectMember::cast(declaration)?
-        .value()
-        .ok()?
-        .inner_expression()?;
-    let AnyJsExpression::JsObjectExpression(options) = value else {
-        return Some(value);
-    };
-    options.members().iter().find_map(|member| {
-        let AnyJsObjectMember::JsPropertyObjectMember(member) = member.ok()? else {
-            return None;
-        };
-        if member.name().ok()?.name()?.text() != "type" {
-            return None;
-        }
-        member.value().ok()?.inner_expression()
-    })
 }
 
 /// Returns `true` for expressions that can never evaluate to a constructor, such as a string or
