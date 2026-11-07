@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: attributes/class-style-errors.html
+---
+
+# Input
+
+```html
+<div style='color: rgb('></div>
+<div style="color: ;"></div>
+<div
+  style='
+    color: rgb(
+  '
+></div>
+
+```
+
+
+# Formatted
+
+```html
+<div style="color: rgb("></div>
+<div style="color: ;"></div>
+<div
+	style="
+    color: rgb(
+  "
+></div>
+
+```

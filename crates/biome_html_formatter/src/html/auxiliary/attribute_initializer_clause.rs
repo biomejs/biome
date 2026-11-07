@@ -1,11 +1,12 @@
 use crate::html::auxiliary::attribute_single_text_expression::HtmlAttributeSingleTextExpressionLayout;
+use crate::html::auxiliary::string::normalize_class_attribute;
 use crate::prelude::*;
 use crate::shared::FmtAnyAttributeInitializer;
 use crate::utils::srcset::{FormatSrcsetCandidates, parse_srcset};
 use biome_formatter::{CstFormatContext, FormatRuleWithOptions, write};
 use biome_html_syntax::{
     AnyHtmlAttributeInitializer, HtmlAttributeInitializerClause,
-    HtmlAttributeInitializerClauseFields,
+    HtmlAttributeInitializerClauseFields, element_ext::AnyHtmlTagElement,
 };
 use biome_rowan::TokenText;
 use std::fmt::Debug;
@@ -96,7 +97,38 @@ impl FormatNodeRule<HtmlAttributeInitializerClause> for FormatHtmlAttributeIniti
                 if let Some(html_string) = value.as_ref()?.as_html_string()
                     && !f.context().comments().is_suppressed(html_string.syntax())
                 {
+                    let is_component = node
+                        .syntax()
+                        .ancestors()
+                        .find_map(AnyHtmlTagElement::cast)
+                        .is_some_and(|element| element.is_custom_component());
                     match (self.tag_name.as_deref(), self.attribute_name.as_deref()) {
+                        (_, Some(attribute_name))
+                            if attribute_name.eq_ignore_ascii_case("class") && !is_component =>
+                        {
+                            let value_token = html_string.value_token()?;
+                            let content = html_string.inner_string_text()?;
+                            if let Some(quoted) = normalize_class_attribute(
+                                value_token.text_trimmed(),
+                                content.text(),
+                            ) {
+                                write!(
+                                    f,
+                                    [
+                                        fmt_eq_token,
+                                        format_replaced(
+                                            &value_token,
+                                            &text(
+                                                &quoted,
+                                                Some(value_token.text_trimmed_range().start())
+                                            )
+                                        )
+                                    ]
+                                )
+                            } else {
+                                write!(f, [fmt_eq_token, value.format()])
+                            }
+                        }
                         // Prettier 3.7 handles allow attribute on iframes specially by splitting the
                         // value on semicolons and formatting it like a list, breaking if its too long, or leaving it on one line if it fits in the line width.
                         // It also trims whitespace around each item, and removes empty items.

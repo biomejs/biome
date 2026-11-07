@@ -1,0 +1,52 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: attributes/class-style.html
+---
+
+# Input
+
+```html
+<p
+  class="
+    foo
+    bar
+    baz
+  "
+></p>
+
+<div class="  foo   bar	baz  "></div>
+<div class='  foo   "bar"   baz  '></div>
+<div class=""></div>
+
+<div
+  style="
+    color:red;
+    font-size:10px;
+  "
+></div>
+
+<div style='font-family: "Rotis Sans";color:red'></div>
+<div style="font-family: &quot;Rotis Sans&quot;;color:red"></div>
+<div style="content: 'a; b';color:red"></div>
+<div style='content:"a";/* "quoted" */color:red'></div>
+
+```
+
+
+# Formatted
+
+```html
+<p class="foo bar baz"></p>
+
+<div class="foo bar baz"></div>
+<div class='foo "bar" baz'></div>
+<div class=""></div>
+
+<div style="color: red; font-size: 10px;"></div>
+
+<div style="font-family: 'Rotis Sans'; color: red;"></div>
+<div style="font-family: 'Rotis Sans'; color: red;"></div>
+<div style="content: 'a; b'; color: red;"></div>
+<div style="content: 'a'; /* &quot;quoted&quot; */ color: red;"></div>
+
+```

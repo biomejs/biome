@@ -215,6 +215,12 @@ impl Group {
         }
     }
 
+    pub(crate) fn reset_propagated_expand(&self) {
+        if self.mode.get() == GroupMode::Propagated {
+            self.mode.set(GroupMode::Flat)
+        }
+    }
+
     pub fn id(&self) -> Option<GroupId> {
         self.id
     }
