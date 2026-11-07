@@ -1,4 +1,6 @@
-use biome_js_syntax::{JsTemplateChunkElement, JsTemplateElement};
+use biome_js_syntax::{
+    JsStringLiteralExpression, JsSyntaxNode, JsTemplateChunkElement, JsTemplateElement,
+};
 use biome_rowan::{AstNode, NodeCache, TextRange, TextSize, TokenText};
 use biome_tailwind_logic::syntax_service::TailwindSyntax;
 use biome_tailwind_logic::use_tailwind_sorted_classes::{TailwindDesignSystem, sort_class_list};
@@ -122,6 +124,76 @@ impl TemplateLiteralSpaceContext {
         })
     }
 
+    pub(crate) fn from_string_literal(string_literal: &JsStringLiteralExpression) -> Option<Self> {
+        let value = string_literal.inner_string_text().ok()?;
+        let value = value.text();
+        if value.trim().is_empty() {
+            return None;
+        }
+
+        let template_element = string_literal
+            .syntax()
+            .ancestors()
+            .find_map(JsTemplateElement::cast)?;
+        let syntax = template_element.syntax();
+
+        let prefix_is_var = syntax
+            .prev_sibling()
+            .is_some_and(Self::needs_leading_boundary_protection);
+        let postfix_is_var = syntax
+            .next_sibling()
+            .is_some_and(Self::needs_trailing_boundary_protection);
+
+        if !prefix_is_var && !postfix_is_var {
+            return None;
+        }
+
+        Some(Self {
+            prefix_is_var,
+            postfix_is_var,
+            leading_space: value.starts_with(' '),
+            trailing_space: value.ends_with(' '),
+        })
+    }
+
+    fn needs_leading_boundary_protection(sibling: JsSyntaxNode) -> bool {
+        if JsTemplateElement::can_cast(sibling.kind()) {
+            return true;
+        }
+
+        JsTemplateChunkElement::cast(sibling).is_some_and(|chunk| {
+            chunk.template_chunk_token().is_ok_and(|token| {
+                let value = token.text_trimmed();
+                if value.is_empty() {
+                    return chunk
+                        .syntax()
+                        .prev_sibling()
+                        .is_some_and(|sibling| JsTemplateElement::can_cast(sibling.kind()));
+                }
+                !value.ends_with(' ')
+            })
+        })
+    }
+
+    fn needs_trailing_boundary_protection(sibling: JsSyntaxNode) -> bool {
+        if JsTemplateElement::can_cast(sibling.kind()) {
+            return true;
+        }
+
+        JsTemplateChunkElement::cast(sibling).is_some_and(|chunk| {
+            chunk.template_chunk_token().is_ok_and(|token| {
+                let value = token.text_trimmed();
+                if value.is_empty() {
+                    return chunk
+                        .syntax()
+                        .next_sibling()
+                        .is_some_and(|sibling| JsTemplateElement::can_cast(sibling.kind()));
+                }
+                !value.starts_with(' ')
+            })
+        })
+    }
+
     /// Skip first class from sorting when it's connected to a variable: `${var}px-2 m-4`
     #[inline]
     pub(crate) fn ignore_prefix(&self) -> bool {
@@ -155,6 +227,9 @@ pub(crate) fn get_template_literal_space_context(
     node: &AnyTailwindClassString,
 ) -> Option<TemplateLiteralSpaceContext> {
     match node {
+        AnyTailwindClassString::JsStringLiteralExpression(string_literal) => {
+            TemplateLiteralSpaceContext::from_string_literal(string_literal)
+        }
         AnyTailwindClassString::JsTemplateChunkElement(chunk) => {
             TemplateLiteralSpaceContext::from_chunk(chunk)
         }
