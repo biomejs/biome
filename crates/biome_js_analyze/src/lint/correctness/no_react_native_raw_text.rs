@@ -6,6 +6,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsxTag, JsxExpressionChild, JsxText,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, TextRange, TokenText, declare_node_union};
 use biome_rule_options::no_react_native_raw_text::NoReactNativeRawTextOptions;
 
@@ -106,6 +107,14 @@ impl Rule for NoReactNativeRawText {
     type Options = NoReactNativeRawTextOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        if ctx
+            .source_type::<JsFileSource>()
+            .as_embedding_kind()
+            .is_astro_template()
+        {
+            return None;
+        }
+
         let node = ctx.query();
         let kind = node.extract_text()?;
 

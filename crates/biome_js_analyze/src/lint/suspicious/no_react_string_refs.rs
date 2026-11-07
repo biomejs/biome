@@ -13,6 +13,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsMemberExpression, AnyJsTemplateElement, AnyJsxAttributeValue,
     JsTemplateExpression, JsxAttribute,
 };
+use biome_languages::JsFileSource;
 use biome_package::PackageJson;
 use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_react_string_refs::NoReactStringRefsOptions;
@@ -85,6 +86,14 @@ impl Rule for NoReactStringRefs {
     type Options = NoReactStringRefsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        if ctx
+            .source_type::<JsFileSource>()
+            .as_embedding_kind()
+            .is_astro_template()
+        {
+            return None;
+        }
+
         match ctx.query() {
             AnyNoReactStringRefsQuery::JsxAttribute(attribute) => {
                 let name = attribute.name().ok()?;

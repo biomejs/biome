@@ -5,6 +5,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_r
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsxAttributeName, JsCallExpression, JsxAttribute};
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_dangerously_set_inner_html::NoDangerouslySetInnerHtmlOptions;
 
@@ -74,6 +75,14 @@ impl Rule for NoDangerouslySetInnerHtml {
     type Options = NoDangerouslySetInnerHtmlOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        if ctx
+            .source_type::<JsFileSource>()
+            .as_embedding_kind()
+            .is_astro_template()
+        {
+            return None;
+        }
+
         let node = ctx.query();
         let model = ctx.model();
         match node {

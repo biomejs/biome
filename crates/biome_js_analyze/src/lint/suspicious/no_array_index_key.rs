@@ -10,6 +10,7 @@ use biome_js_syntax::{
     JsObjectMemberList, JsParameterList, JsParameters, JsPropertyObjectMember,
     JsReferenceIdentifier, JsxAttribute,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_array_index_key::NoArrayIndexKeyOptions;
 
@@ -131,6 +132,14 @@ impl Rule for NoArrayIndexKey {
     type Options = NoArrayIndexKeyOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        if ctx
+            .source_type::<JsFileSource>()
+            .as_embedding_kind()
+            .is_astro_template()
+        {
+            return None;
+        }
+
         let node = ctx.query();
 
         if !node.is_key_property()? {
