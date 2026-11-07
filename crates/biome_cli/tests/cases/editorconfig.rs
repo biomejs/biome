@@ -901,3 +901,63 @@ indent_size = 2
         result,
     ));
 }
+
+#[test]
+fn should_apply_section_with_negative_numeric_range() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Utf8Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+
+[file{-1..1}.js]
+indent_size = 2
+"#,
+    );
+
+    let contents = r#"function setName(name) {
+ currentName = name;
+}
+"#;
+    // Inside the range: formatted with `indent_size = 2`
+    let negative_file = Utf8Path::new("file-1.js");
+    fs.insert(negative_file.into(), contents);
+    let zero_file = Utf8Path::new("file0.js");
+    fs.insert(zero_file.into(), contents);
+    // Outside the range: formatted with `indent_size = 4`
+    let outside_file = Utf8Path::new("file2.js");
+    fs.insert(outside_file.into(), contents);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--use-editorconfig=true",
+                negative_file.as_str(),
+                zero_file.as_str(),
+                outside_file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_apply_section_with_negative_numeric_range",
+        fs,
+        console,
+        result,
+    ));
+}
