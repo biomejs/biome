@@ -11,7 +11,7 @@ use biome_rule_options::no_duplicate_properties::NoDuplicatePropertiesOptions;
 use rustc_hash::FxHashMap;
 use std::collections::hash_map::Entry;
 
-use crate::utils::AnyPropertyStatement;
+use crate::utils::{AnyPropertyStatement, is_tailwind_utility_fallback};
 
 declare_lint_rule! {
     /// Disallow duplicate properties within declaration blocks.
@@ -62,13 +62,12 @@ impl Rule for NoDuplicateProperties {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
 
-        // Tailwind resolves each `--value()` in a `@utility` and keeps the declarations that resolve,
-        // so repeating a property there is the documented way to write fallbacks.
-        if node.syntax().ancestors().any(|ancestor| {
-            CssKeyframesAtRule::can_cast(ancestor.kind())
-                || TwUtilityAtRule::can_cast(ancestor.kind())
-        }) {
-            return None;
+        let mut in_utility = false;
+        for ancestor in node.syntax().ancestors() {
+            if CssKeyframesAtRule::can_cast(ancestor.kind()) {
+                return None;
+            }
+            in_utility |= TwUtilityAtRule::can_cast(ancestor.kind());
         }
 
         let mut seen: FxHashMap<TokenText, TextRange> = FxHashMap::default();
@@ -77,6 +76,9 @@ impl Rule for NoDuplicateProperties {
             let AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(declaration) = item else {
                 continue;
             };
+            if in_utility && is_tailwind_utility_fallback(&declaration) {
+                continue;
+            }
             let Some(name) = AnyPropertyStatement::from(declaration).name() else {
                 continue;
             };

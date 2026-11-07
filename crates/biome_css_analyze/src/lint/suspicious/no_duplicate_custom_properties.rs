@@ -1,4 +1,4 @@
-use crate::utils::AnyPropertyStatement;
+use crate::utils::{AnyPropertyStatement, is_tailwind_utility_fallback};
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -61,15 +61,10 @@ impl Rule for NoDuplicateCustomProperties {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
 
-        // Tailwind resolves each `--value()` in a `@utility` and keeps the declarations that resolve,
-        // so repeating a property there is the documented way to write fallbacks.
-        if node
+        let in_utility = node
             .syntax()
             .ancestors()
-            .any(|ancestor| TwUtilityAtRule::can_cast(ancestor.kind()))
-        {
-            return None;
-        }
+            .any(|ancestor| TwUtilityAtRule::can_cast(ancestor.kind()));
 
         let mut seen: FxHashMap<TokenText, TextRange> = FxHashMap::default();
 
@@ -77,6 +72,9 @@ impl Rule for NoDuplicateCustomProperties {
             let AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(declaration) = item else {
                 continue;
             };
+            if in_utility && is_tailwind_utility_fallback(&declaration) {
+                continue;
+            }
             let Some(name) = AnyPropertyStatement::from(declaration).name() else {
                 continue;
             };
