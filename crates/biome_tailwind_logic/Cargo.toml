@@ -38,7 +38,7 @@ salsa                  = { workspace = true }
 smallvec               = { workspace = true }
 
 [dev-dependencies]
-criterion     = { package = "codspeed-criterion-compat", version = "=5.0.1" }
+criterion     = { package = "codspeed-criterion-compat", version = "=6.0.0" }
 insta         = { workspace = true, features = ["glob"] }
 json_comments = "0.2.2"
 serde_json    = { workspace = true }
