@@ -20,14 +20,12 @@ pub(crate) struct NewSymbol {
 
 impl ModelBuilder {
     pub(crate) fn add_scope(&mut self, kind: ScopeKind, parent: Option<ScopeId>) -> ScopeId {
-        let id = ScopeId::new(self.data.scopes.len());
         self.data.scopes.push(ScopeData {
             kind,
             parent,
             symbols: Vec::new(),
             open: [OpenReasons::default(); Namespace::COUNT],
-        });
-        id
+        })
     }
 
     pub(crate) fn add_block(
@@ -37,15 +35,13 @@ impl ModelBuilder {
         content: Option<TextRange>,
         scope: Option<ScopeId>,
     ) -> BlockId {
-        let id = BlockId::new(self.data.blocks.len());
         self.data.blocks.push(BlockData {
             kind,
             range,
             content,
             scope,
             snippet: None,
-        });
-        id
+        })
     }
 
     pub(crate) fn add_snippet(
@@ -55,8 +51,7 @@ impl ModelBuilder {
         source: biome_languages::JsFileSource,
         host: SnippetHost,
     ) -> SnippetId {
-        let id = SnippetId::new(self.data.snippets.len());
-        self.data.snippets.push(SnippetData {
+        let id = self.data.snippets.push(SnippetData {
             range,
             offset,
             source,
@@ -64,7 +59,7 @@ impl ModelBuilder {
         });
         match host {
             SnippetHost::Frontmatter(block) | SnippetHost::Script(block) => {
-                self.data.blocks[block.index()].snippet = Some(id);
+                self.data.blocks[block].snippet = Some(id);
             }
             SnippetHost::Expression | SnippetHost::Unknown => {}
         }
@@ -72,9 +67,7 @@ impl ModelBuilder {
     }
 
     pub(crate) fn add_symbol(&mut self, symbol: NewSymbol) -> SymbolId {
-        let id = SymbolId::new(self.data.symbols.len());
-        self.data.scopes[symbol.scope.index()].symbols.push(id);
-        self.data.symbols.push(SymbolData {
+        let id = self.data.symbols.push(SymbolData {
             name: symbol.name,
             range: symbol.range,
             declaration: symbol.declaration,
@@ -85,7 +78,9 @@ impl ModelBuilder {
             origin: symbol.origin,
             type_only: symbol.type_only,
         });
-        self.data.uses.push(Vec::new());
+        self.data.scopes[symbol.scope].symbols.push(id);
+        let uses = self.data.uses.push(Vec::new());
+        debug_assert_eq!(uses, id, "`uses` must have one row per symbol");
         id
     }
 
