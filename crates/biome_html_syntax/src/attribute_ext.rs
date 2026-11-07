@@ -7,6 +7,30 @@ use biome_aria::Attribute;
 use biome_rowan::{AstNode, AstNodeList, TextRange, TokenText};
 use biome_string_case::StrOnlyExtension;
 
+fn has_template_substitution(text: &str) -> bool {
+    let mut bytes = text.as_bytes().iter().copied().peekable();
+    while let Some(byte) = bytes.next() {
+        match byte {
+            b'\\' => {
+                bytes.next();
+            }
+            b'$' if bytes.peek() == Some(&b'{') => return true,
+            _ => {}
+        }
+    }
+    false
+}
+
+fn html_string_static_value(string: &HtmlString) -> Option<StaticValue> {
+    let token = string.value_token().ok()?;
+    let text = token.text_trimmed();
+    if text.starts_with('`') && has_template_substitution(text) {
+        None
+    } else {
+        Some(StaticValue::String(token))
+    }
+}
+
 /// Extracts a static value from a Vue directive's binding value.
 ///
 /// For Vue bindings like `:attr="'value'"` (HTML string containing a JS string literal),
@@ -41,10 +65,7 @@ impl AnyHtmlAttributeInitializer {
     /// Returns the string value of the attribute, if available, without quotes.
     pub fn as_static_value(&self) -> Option<StaticValue> {
         match self {
-            Self::HtmlString(string) => {
-                let token = string.value_token().ok()?;
-                Some(StaticValue::String(token))
-            }
+            Self::HtmlString(string) => html_string_static_value(string),
             Self::HtmlAttributeSingleTextExpression(expression) => {
                 expression.expression().ok()?.as_static_value()
             }

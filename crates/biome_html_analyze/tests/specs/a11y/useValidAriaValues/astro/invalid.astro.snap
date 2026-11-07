@@ -14,6 +14,12 @@ expression: invalid.astro
 <!-- invalid tristate value -->
 <span aria-checked="test">some text</span>
 
+<!-- invalid static template value -->
+<button aria-pressed=`yes`>Button</button>
+
+<!-- escaped interpolation is static text -->
+<button aria-pressed=`\${view}`>Button</button>
+
 ```
 
 # Diagnostics
@@ -48,10 +54,54 @@ invalid.astro:9:7 lint/a11y/useValidAriaValues ━━━━━━━━━━━
    > 9 │ <span aria-checked="test">some text</span>
        │       ^^^^^^^^^^^^^^^^^^^
     10 │ 
+    11 │ <!-- invalid static template value -->
   
   i Use a valid value for the aria-checked attribute according to the WAI-ARIA specification.
   
   i The only supported values for the aria-checked property are:
+  
+  - false
+  - true
+  - mixed
+  
+
+```
+
+```
+invalid.astro:12:9 lint/a11y/useValidAriaValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of the ARIA attribute aria-pressed is not correct.
+  
+    11 │ <!-- invalid static template value -->
+  > 12 │ <button aria-pressed=`yes`>Button</button>
+       │         ^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ <!-- escaped interpolation is static text -->
+  
+  i Use a valid value for the aria-pressed attribute according to the WAI-ARIA specification.
+  
+  i The only supported values for the aria-pressed property are:
+  
+  - false
+  - true
+  - mixed
+  
+
+```
+
+```
+invalid.astro:15:9 lint/a11y/useValidAriaValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of the ARIA attribute aria-pressed is not correct.
+  
+    14 │ <!-- escaped interpolation is static text -->
+  > 15 │ <button aria-pressed=`\${view}`>Button</button>
+       │         ^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+  
+  i Use a valid value for the aria-pressed attribute according to the WAI-ARIA specification.
+  
+  i The only supported values for the aria-pressed property are:
   
   - false
   - true
