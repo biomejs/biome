@@ -43,6 +43,11 @@ impl AnyHtmlAttributeInitializer {
         match self {
             Self::HtmlString(string) => {
                 let token = string.value_token().ok()?;
+                // Astro template literals with `${...}` interpolations are evaluated at runtime.
+                let text = token.text_trimmed();
+                if text.starts_with('`') && text.contains("${") {
+                    return None;
+                }
                 Some(StaticValue::String(token))
             }
             Self::HtmlAttributeSingleTextExpression(expression) => {
