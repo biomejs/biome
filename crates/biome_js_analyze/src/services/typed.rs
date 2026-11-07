@@ -6,8 +6,8 @@ use biome_analyze::{
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsFunction, AnyJsRoot, JsCallArgumentList,
-    JsClassDeclaration, JsClassExpression, JsLanguage, JsObjectExpression, JsReferenceIdentifier,
-    JsSyntaxNode,
+    JsClassDeclaration, JsClassExpression, JsLanguage, JsLogicalOperator, JsObjectExpression,
+    JsReferenceIdentifier, JsSyntaxNode,
 };
 use biome_js_type_info::InferredType;
 use biome_module_graph::{
@@ -23,7 +23,11 @@ use biome_module_graph::{
     },
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
+use biome_tsrs::{TsrsProject, TsrsSnapshot, ValueKind};
+use camino::{Utf8Path, Utf8PathBuf};
+use rustc_hash::FxHashMap;
 use std::rc::Rc;
+use std::sync::{Arc, LazyLock, Mutex, OnceLock};
 
 #[derive(Clone)]
 pub(crate) struct TypedModule {
@@ -46,6 +50,136 @@ pub struct TypedService {
     module: Option<TypedModule>,
     model: Option<SemanticModel>,
     caller: TypeInferenceCaller,
+    tsrs: Option<Arc<TsrsFile>>,
+}
+
+/// The tsrs view of the file being analyzed, used instead of Biome's own inference.
+///
+/// Experimental: only created when the `BIOME_TSRS` environment variable is set. The file belongs to the
+/// project of the nearest `tsconfig.json`, or else to a project over every file under its directory. Projects
+/// are shared by every file that belongs to them, and the first query brings the project up to date with the
+/// text being analyzed.
+pub(crate) struct TsrsFile {
+    project: Arc<TsrsProject>,
+    path: Utf8PathBuf,
+    snapshot: OnceLock<Option<TsrsSnapshot>>,
+}
+
+/// Projects by `tsconfig.json` path, or by directory for files without one. The map's lock only covers the
+/// lookup, so that different projects build in parallel.
+static TSRS_PROJECTS: LazyLock<Mutex<FxHashMap<Utf8PathBuf, TsrsProjectCell>>> =
+    LazyLock::new(Default::default);
+
+type TsrsProjectCell = Arc<OnceLock<Arc<TsrsProject>>>;
+
+impl TsrsFile {
+    pub(crate) fn new(path: &Utf8Path) -> Option<Self> {
+        std::env::var_os("BIOME_TSRS")?;
+        let path = path.canonicalize_utf8().ok()?;
+        let directory = path.parent()?;
+        let tsconfig = directory
+            .ancestors()
+            .map(|ancestor| ancestor.join("tsconfig.json"))
+            .find(|candidate| candidate.is_file());
+        let key = tsconfig.clone().unwrap_or_else(|| directory.to_path_buf());
+        let cell = TSRS_PROJECTS
+            .lock()
+            .unwrap()
+            .entry(key.clone())
+            .or_default()
+            .clone();
+        let project = cell
+            .get_or_init(|| {
+                let start = std::time::Instant::now();
+                let project = tsconfig
+                    .and_then(|tsconfig| TsrsProject::from_tsconfig(&tsconfig).ok())
+                    .unwrap_or_else(|| TsrsProject::from_directory(directory));
+                if tsrs_verbose() {
+                    eprintln!("tsrs: built project {key} in {:?}", start.elapsed());
+                }
+                Arc::new(project)
+            })
+            .clone();
+        Some(Self {
+            project,
+            path,
+            snapshot: OnceLock::new(),
+        })
+    }
+
+    /// The project as of the text of the file that contains `node`.
+    fn snapshot(&self, node: &JsSyntaxNode) -> Option<&TsrsSnapshot> {
+        self.snapshot
+            .get_or_init(|| {
+                let root = node.ancestors().last()?;
+                let snapshot = self
+                    .project
+                    .snapshot(&self.path, &root.text_with_trivia().to_string());
+                if snapshot.is_none() && tsrs_verbose() {
+                    eprintln!("tsrs: {} is not part of its project", self.path);
+                }
+                snapshot
+            })
+            .as_ref()
+    }
+}
+
+/// Whether `BIOME_TSRS=verbose` asks for project builds and unplaced files on stderr.
+fn tsrs_verbose() -> bool {
+    std::env::var_os("BIOME_TSRS").is_some_and(|value| value == "verbose")
+}
+
+/// Whether `matches` holds for any operand `expression` can evaluate to, as typescript-eslint's
+/// `no-floating-promises` checks: the operands of `&&`, `||` and `??` and the branches of `?:`.
+///
+/// Unlike typescript-eslint, an operand is skipped when the checker proves it unreachable from the type of
+/// the left operand or the condition. The type of the whole expression isn't enough: in
+/// `unknown || Promise.reject()`, `unknown` absorbs the Promise.
+fn any_tsrs_operand(
+    snapshot: &TsrsSnapshot,
+    expression: &AnyJsExpression,
+    matches: impl Fn(&TsrsSnapshot, TextRange) -> Option<bool> + Copy,
+) -> Option<bool> {
+    let may_be = |expression: &AnyJsExpression, kind| {
+        snapshot.may_be(expression.range(), kind).unwrap_or(true)
+    };
+    match expression {
+        AnyJsExpression::JsParenthesizedExpression(expression) => {
+            any_tsrs_operand(snapshot, &expression.expression().ok()?, matches)
+        }
+        AnyJsExpression::JsLogicalExpression(expression) => {
+            let left = expression.left().ok()?;
+            if any_tsrs_operand(snapshot, &left, matches)? {
+                return Some(true);
+            }
+            let right_reachable = match expression.operator().ok()? {
+                JsLogicalOperator::LogicalOr => may_be(&left, ValueKind::Falsy),
+                JsLogicalOperator::LogicalAnd => may_be(&left, ValueKind::Truthy),
+                JsLogicalOperator::NullishCoalescing => may_be(&left, ValueKind::Nullish),
+            };
+            if !right_reachable {
+                return Some(false);
+            }
+            any_tsrs_operand(snapshot, &expression.right().ok()?, matches)
+        }
+        AnyJsExpression::JsConditionalExpression(expression) => {
+            let test = expression.test().ok()?;
+            Some(
+                (may_be(&test, ValueKind::Truthy)
+                    && any_tsrs_operand(snapshot, &expression.consequent().ok()?, matches)?)
+                    || (may_be(&test, ValueKind::Falsy)
+                        && any_tsrs_operand(snapshot, &expression.alternate().ok()?, matches)?),
+            )
+        }
+        _ => matches(snapshot, expression.range()),
+    }
+}
+
+fn classify_tsrs(matches: Option<bool>) -> TypeInferenceClassification {
+    match matches {
+        Some(true) => TypeInferenceClassification::Match,
+        Some(false) | None => TypeInferenceClassification::NoMatch,
+    }
 }
 
 impl TypedService {
@@ -89,6 +223,11 @@ impl TypedService {
         &self,
         expression: &AnyJsExpression,
     ) -> TypeInferenceClassification {
+        if let Some(tsrs) = &self.tsrs {
+            return classify_tsrs(tsrs.snapshot(expression.syntax()).and_then(|snapshot| {
+                any_tsrs_operand(snapshot, expression, TsrsSnapshot::is_promise_like)
+            }));
+        }
         let Some(typed_module) = self.module.as_ref() else {
             return TypeInferenceClassification::Indeterminate;
         };
@@ -120,6 +259,12 @@ impl TypedService {
         &self,
         expression: &AnyJsExpression,
     ) -> TypeInferenceClassification {
+        if let Some(tsrs) = &self.tsrs {
+            return classify_tsrs(
+                tsrs.snapshot(expression.syntax())
+                    .and_then(|snapshot| snapshot.is_promise_array(expression.range())),
+            );
+        }
         let Some(typed_module) = self.module.as_ref() else {
             return TypeInferenceClassification::Indeterminate;
         };
@@ -345,10 +490,15 @@ impl FromServices for TypedService {
             .flatten();
         let model = services.get_service::<SemanticModel>().cloned();
         let caller = TypeInferenceCaller::new(rule_key.group(), rule_key.rule_name());
+        let tsrs = services
+            .get_service::<Option<Arc<TsrsFile>>>()
+            .cloned()
+            .flatten();
         Ok(Self {
             module,
             model,
             caller,
+            tsrs,
         })
     }
 }
