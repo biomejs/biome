@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: valid-astro.astro
+---
+# Input
+```astro
+---
+// should not generate diagnostics
+import Script from "next/script";
+---
+{true && <script src="https://polyfill.io/v3/polyfill.min.js?features=Object.fromEntries" />}
+{true && <Script src="https://polyfill.io/v3/polyfill.min.js?features=Array.from" />}
+
+```
