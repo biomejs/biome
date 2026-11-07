@@ -4,6 +4,7 @@
 //! offsets retain the guest origin needed by integrations that operate on an
 //! embedded syntax tree.
 
+use super::table::{Table, TableId};
 use biome_languages::JsFileSource;
 use biome_rowan::{TextRange, TextSize, TokenText};
 use enumflags2::{BitFlags, bitflags};
@@ -22,6 +23,16 @@ macro_rules! define_id {
 
             pub(crate) fn index(self) -> usize {
                 self.0 as usize
+            }
+        }
+
+        impl TableId for $name {
+            fn from_index(index: usize) -> Self {
+                Self::new(index)
+            }
+
+            fn to_index(self) -> usize {
+                self.index()
             }
         }
     };
@@ -262,12 +273,12 @@ pub(crate) struct ReferenceData {
 
 #[derive(Debug, Default, Eq, PartialEq)]
 pub(crate) struct SemanticModelData {
-    pub(crate) blocks: Vec<BlockData>,
-    pub(crate) snippets: Vec<SnippetData>,
-    pub(crate) scopes: Vec<ScopeData>,
-    pub(crate) symbols: Vec<SymbolData>,
-    pub(crate) references: Vec<ReferenceData>,
-    pub(crate) uses: Vec<Vec<ReferenceId>>,
+    pub(crate) blocks: Table<BlockId, BlockData>,
+    pub(crate) snippets: Table<SnippetId, SnippetData>,
+    pub(crate) scopes: Table<ScopeId, ScopeData>,
+    pub(crate) symbols: Table<SymbolId, SymbolData>,
+    pub(crate) references: Table<ReferenceId, ReferenceData>,
+    pub(crate) uses: Table<SymbolId, Vec<ReferenceId>>,
 }
 
 /// The semantic model of one Astro document.
@@ -298,7 +309,7 @@ macro_rules! define_handle {
             }
 
             fn row(&self) -> &$row {
-                &self.data.$table[self.id.index()]
+                &self.data.$table[self.id]
             }
         }
 
@@ -574,7 +585,7 @@ impl Symbol {
 
     /// Returns references that resolve to this declaration.
     pub fn uses(&self) -> impl Iterator<Item = Reference> + '_ {
-        self.data.uses[self.id.index()].iter().map(|id| Reference {
+        self.data.uses[self.id].iter().map(|id| Reference {
             data: self.data.clone(),
             id: *id,
         })
