@@ -128,12 +128,19 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
     ) -> Result<Vec<Diagnostic>, WorkspaceError>;
 
     /// Runs the framework loaders of each package of the project, and records
-    /// what the frameworks inject.
+    /// what the frameworks inject. Returns the diagnostics that tell when what
+    /// they inject can't all be known.
     ///
     /// The files that the loaders visit, and the declaration files that their
     /// `/// <reference path="..." />` directives name, are indexed with `index`
     /// first.
-    fn index_framework_files(&self, _project_key: ProjectKey, _index: &dyn Fn(Vec<Utf8PathBuf>)) {}
+    fn index_framework_files(
+        &self,
+        _project_key: ProjectKey,
+        _index: &dyn Fn(Vec<Utf8PathBuf>),
+    ) -> Vec<Error> {
+        Vec::new()
+    }
 
     /// Returns whether `path` is the configuration file of a framework that a
     /// framework loader reads, such as `astro.config.mjs`.
@@ -143,6 +150,12 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
 
     /// Returns whether the folder at `path` contains a package, or is one.
     fn contains_package(&self, _path: &Utf8Path) -> bool {
+        false
+    }
+
+    /// Returns whether `path` is a stylesheet that an entry of the
+    /// `css.globals` option of its configuration names.
+    fn is_css_global(&self, _path: &Utf8Path) -> bool {
         false
     }
 }
@@ -258,15 +271,17 @@ impl<'a, W: WorkspaceScannerBridge> ScannerWatcherBridge<'a, W> {
     }
 
     /// Returns whether the change at `path` affects what the framework
-    /// loaders read: the configuration file of a framework, or a manifest,
-    /// when `manifest_changed` is set.
+    /// loaders read: the configuration file of a framework, a stylesheet that
+    /// `css.globals` names, or a manifest, when `manifest_changed` is set.
     ///
     /// The loaders read `package.json` manifests, but not the other manifests
     /// of the resolver, such as `tsconfig.json`.
     fn affects_frameworks(&self, path: &Utf8Path, manifest_changed: bool) -> bool {
         let is_package_or_folder =
             path.file_name() == Some("package.json") || path.extension().is_none();
-        (manifest_changed && is_package_or_folder) || self.workspace.is_framework_config(path)
+        (manifest_changed && is_package_or_folder)
+            || self.workspace.is_framework_config(path)
+            || self.workspace.is_css_global(path)
     }
 
     /// Runs the framework loaders of the project again when `affected` is

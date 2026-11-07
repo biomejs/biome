@@ -1,0 +1,49 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint theme.css
+```
+
+## `biome.json`
+
+```json
+{
+  "overrides": [
+    { "includes": ["**/*.css"], "css": { "globals": ["theme.css"] } }
+  ]
+}
+```
+
+## `theme.css`
+
+```css
+.theme {
+  color: red;
+}
+```
+
+# Emitted Messages
+
+```block
+biome.json:2:19 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The option css.globals isn't supported in overrides.
+  
+    1 │ {
+  > 2 │     "overrides": [{ "includes": ["**/*.css"], "css": { "globals": ["theme.css"] } }]
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ }
+    4 │ 
+  
+  i Biome ignores it. Set the option at the top level of the configuration instead.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

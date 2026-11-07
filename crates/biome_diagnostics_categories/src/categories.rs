@@ -776,6 +776,7 @@ define_categories! {
     "deserialize",
     "plugin",
     "project",
+    "project/frameworks",
     "search",
     "inspect",
     "internalError/io",
