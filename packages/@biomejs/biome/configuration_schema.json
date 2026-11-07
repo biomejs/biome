@@ -5171,6 +5171,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoInvalidFetchOptionsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoInvalidFetchOptionsOptions" }
+			]
+		},
+		"NoInvalidFetchOptionsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoInvalidFileInputAcceptConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8953,6 +8963,13 @@
 					"description": "Disallow the use of eval()-like methods.\nSee https://biomejs.dev/linter/rules/no-implied-eval",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoImpliedEvalConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noInvalidFetchOptions": {
+					"description": "Disallow a request body in fetch() and new Request() when the method is GET or HEAD.\nSee https://biomejs.dev/linter/rules/no-invalid-fetch-options",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoInvalidFetchOptionsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13237,6 +13254,15 @@
 				"options": {
 					"$ref": "#/$defs/NoInvalidDirectionInLinearGradientOptions"
 				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoInvalidFetchOptionsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoInvalidFetchOptionsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
