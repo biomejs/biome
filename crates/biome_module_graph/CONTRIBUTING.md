@@ -58,7 +58,8 @@ Reads inside a nested function do not inherit facts from the outer function.
 Biome uses its semantic model to distinguish variables with the same name.
 
 `src/db/type_inference/flow.rs` applies `typeof`, literal equality, nullish, and
-truthiness tests, and the tests that calls to local type guards report. Where branches meet, or a loop returns to an earlier point,
+truthiness tests, and the tests that calls to local type guards report or
+assert. Where branches meet, or a loop returns to an earlier point,
 it keeps every type still possible on a reachable path. `flow_expressions.rs`
 uses narrowed operands when inferring member accesses, calls, logical and
 conditional expressions, and `await`. Complete module inference uses the same
@@ -70,7 +71,8 @@ enabled, collection (`src/js_module_info/flow.rs`) builds a graph of the
 possible paths through each execution root that tests one of its own
 variables. The module visitor selects the roots that contain a condition and
 only supported syntax during its own syntax walk, so collection never walks the
-whole module again and a module without conditions builds no graph.
+whole module again. In a module with an `asserts` annotation, a standalone call
+also selects its root. A module without either builds no graph.
 Declaration files (`.d.ts`, `.d.mts`, `.d.cts`, in any letter case) contain no
 code that runs, so the visitor does not look for flow roots in them. Collection
 decomposes every condition into guards on semantic bindings. For
@@ -107,13 +109,29 @@ So are spread arguments before or at the tested one, and predicates on `this`.
 The tested parameter must be named, must not be a rest parameter, and must not
 have a default value, because a default replaces an `undefined` argument.
 
+A standalone call to a local assertion function narrows later reads, because
+the call returns only when its assertion holds. Collection adds a condition
+after the call, so the call and its arguments still use the types from before
+it. `asserts value is T` narrows an identifier argument like a type guard's
+predicate, so asserting `boolean` does not prove that the value is `true`.
+`asserts value` decomposes the argument as a condition that holds, so
+`assert(value !== null)` excludes `null` from `value`.
+
+The assertion call must be non-optional and form the whole expression statement;
+parentheses around it are allowed. Calls inside assignments, logical or
+conditional expressions, return values, or other expressions do not add facts.
+The assertion function follows the same restrictions as a type guard. Calling a
+type guard without testing its result does not add facts. The visitor selects a
+function whose only flow construct is a standalone call only when the module
+contains an `asserts` annotation.
+
 An object shape such as `{}` can also describe `0` or `""`. Removing `null`
 therefore does not prove that the value is truthy. A `void` return annotation
 does not guarantee runtime `undefined` either. These cases must retain
 uncertainty.
 
-Narrowing does not support `var`, imported variables, assertion functions,
-or facts about individual object properties. Unsupported control flow
+Narrowing does not support `var`, imported variables, facts about individual
+object properties, or the effects of calls that never return. Unsupported control flow
 includes exception handlers, `switch`, `for-in`/`for-of`, destructuring, classes,
 and logical assignments. Roots that read the global `eval` or the implicit
 `arguments` object, directly or in a nested function, and roots that exceed a

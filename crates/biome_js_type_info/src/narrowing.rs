@@ -7,10 +7,14 @@ use biome_js_syntax::numbers::{
 };
 use biome_rowan::Text;
 
-use crate::globals::{GLOBAL_ANY_KEYWORD_ID, GLOBAL_UNKNOWN_ID};
+use crate::globals::{
+    GLOBAL_ANY_KEYWORD_ID, GLOBAL_BIGINT_KEYWORD_ID, GLOBAL_BOOLEAN_KEYWORD_ID,
+    GLOBAL_NULL_KEYWORD_ID, GLOBAL_NUMBER_KEYWORD_ID, GLOBAL_STRING_KEYWORD_ID,
+    GLOBAL_SYMBOL_KEYWORD_ID, GLOBAL_UNKNOWN_ID,
+};
 use crate::interned_types::{InternedLiteral, Literal};
 use crate::resolved::InferredTypeData;
-use crate::{RawTypeData, RawTypeId, TypeDb, TypeReference};
+use crate::{RawTypeData, RawTypeId, TypeDb, TypeReference, TypeReferenceQualifier};
 
 const MAX_NARROWING_STEPS: usize = 256;
 const MAX_LITERAL_BYTES: usize = 1024;
@@ -68,6 +72,94 @@ pub fn is_raw_narrowing_invariant(reference: &TypeReference, raw_types: &[RawTyp
             Some(RawTypeData::Unknown | RawTypeData::AnyKeyword)
         ),
     }
+}
+
+/// Limits the chain of raw references that [`raw_primitive_target`] follows.
+const MAX_RAW_REFERENCE_STEPS: usize = 16;
+
+/// What a collected type reference can resolve to, as far as raw tables tell.
+#[derive(Debug)]
+pub enum RawPrimitiveTarget<'a> {
+    /// The reference resolves to a primitive type or a primitive literal.
+    Primitive,
+    /// The reference cannot resolve to a primitive type or a primitive literal.
+    Other,
+    /// The reference names a type without type arguments. Only the scope that
+    /// declares the name tells whether it is a type alias for a primitive.
+    Named(&'a TypeReferenceQualifier),
+}
+
+/// Classifies whether a collected type reference can resolve to a primitive
+/// type or a primitive literal, without resolving it.
+///
+/// `raw_types` is the module table that local references index. A chain of
+/// raw references longer than the step limit is [`RawPrimitiveTarget::Other`].
+pub fn raw_primitive_target<'a>(
+    reference: &'a TypeReference,
+    raw_types: &'a [RawTypeData],
+) -> RawPrimitiveTarget<'a> {
+    let mut reference = reference;
+    for _ in 0..MAX_RAW_REFERENCE_STEPS {
+        let local = match reference {
+            TypeReference::Qualifier(qualifier) if qualifier.type_parameters.is_empty() => {
+                return RawPrimitiveTarget::Named(qualifier);
+            }
+            TypeReference::Qualifier(_) | TypeReference::Import(_) => {
+                return RawPrimitiveTarget::Other;
+            }
+            TypeReference::Resolved(id @ RawTypeId::Global(_)) => {
+                let primitive = [
+                    GLOBAL_BIGINT_KEYWORD_ID,
+                    GLOBAL_BOOLEAN_KEYWORD_ID,
+                    GLOBAL_NULL_KEYWORD_ID,
+                    GLOBAL_NUMBER_KEYWORD_ID,
+                    GLOBAL_STRING_KEYWORD_ID,
+                    GLOBAL_SYMBOL_KEYWORD_ID,
+                ]
+                .contains(id);
+                return if primitive {
+                    RawPrimitiveTarget::Primitive
+                } else {
+                    RawPrimitiveTarget::Other
+                };
+            }
+            TypeReference::Resolved(RawTypeId::Local(local)) => local,
+        };
+        let primitive = match raw_types.get(local.index()) {
+            Some(RawTypeData::Reference(next)) => {
+                reference = next;
+                continue;
+            }
+            Some(
+                RawTypeData::BigInt
+                | RawTypeData::Boolean
+                | RawTypeData::Null
+                | RawTypeData::Number
+                | RawTypeData::String
+                | RawTypeData::Symbol
+                | RawTypeData::Undefined,
+            ) => true,
+            Some(RawTypeData::Literal(literal)) => matches!(
+                literal.as_ref(),
+                crate::Literal::BigInt(_)
+                    | crate::Literal::Boolean(_)
+                    | crate::Literal::Number(_)
+                    | crate::Literal::String(_)
+            ),
+            // A reference by name to a type collects as an instance of it.
+            Some(RawTypeData::InstanceOf(instance)) if instance.type_parameters.is_empty() => {
+                reference = &instance.ty;
+                continue;
+            }
+            _ => false,
+        };
+        return if primitive {
+            RawPrimitiveTarget::Primitive
+        } else {
+            RawPrimitiveTarget::Other
+        };
+    }
+    RawPrimitiveTarget::Other
 }
 
 /// Retains the values of `ty` that can pass a runtime test.

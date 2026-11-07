@@ -38,7 +38,8 @@ pub use inferred_type::{
 };
 pub use interned_types::{RawTypeData, TypeDb};
 pub use narrowing::{
-    NarrowingPredicate, TypeofKind, is_narrowing_invariant, is_raw_narrowing_invariant, narrow_type,
+    NarrowingPredicate, RawPrimitiveTarget, TypeofKind, is_narrowing_invariant,
+    is_raw_narrowing_invariant, narrow_type, raw_primitive_target,
 };
 pub use return_type_relation::{
     NarrowedTypeCandidates, ReturnTypeRelation, ReturnTypeVerdict, compare_declared_return_type,

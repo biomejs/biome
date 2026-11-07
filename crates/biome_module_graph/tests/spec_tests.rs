@@ -36,6 +36,8 @@ use salsa::plumbing::{AsId, FromId};
 use std::collections::BTreeMap;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
+#[path = "spec_tests/assertions.test.rs"]
+mod assertions;
 #[path = "spec_tests/callback_parameters.test.rs"]
 mod callback_parameters;
 #[path = "spec_tests/calls.test.rs"]
