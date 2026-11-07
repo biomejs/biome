@@ -7,7 +7,8 @@ mod trivia;
 
 use crate::{AstNode, RawSyntaxKind};
 pub use borrowed_token::{
-    BorrowedToken, BorrowedTokensIterator, BorrowedTriviaPiece, BorrowedTriviaPiecesIterator,
+    BorrowedToken, BorrowedTokensIterator, BorrowedTokensWithCommentsIterator, BorrowedTriviaPiece,
+    BorrowedTriviaPiecesIterator,
 };
 pub use element::{SyntaxElement, SyntaxElementKey};
 pub use node::{
