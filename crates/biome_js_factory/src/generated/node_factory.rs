@@ -3444,6 +3444,18 @@ impl JsSvelteDeclarationRootBuilder {
         ))
     }
 }
+pub fn js_svelte_legacy_const_root(
+    declarator: AnyJsSvelteLegacyConstDeclarator,
+    eof_token: SyntaxToken,
+) -> JsSvelteLegacyConstRoot {
+    JsSvelteLegacyConstRoot::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_SVELTE_LEGACY_CONST_ROOT,
+        [
+            Some(SyntaxElement::Node(declarator.into_syntax())),
+            Some(SyntaxElement::Token(eof_token)),
+        ],
+    ))
+}
 pub fn js_svelte_snippet_root(
     name: AnyJsBinding,
     parameters: JsParameters,

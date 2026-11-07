@@ -672,6 +672,7 @@ fn handle_root_comments(comment: DecoratedComment<JsLanguage>) -> CommentPlaceme
             AnyJsRoot::JsExpressionSnippet(_) => false,
             AnyJsRoot::JsExpressionTemplateRoot(_) => false,
             AnyJsRoot::JsSvelteDeclarationRoot(_) => false,
+            AnyJsRoot::JsSvelteLegacyConstRoot(_) => false,
             AnyJsRoot::JsSvelteSnippetRoot(_) => false,
             AnyJsRoot::JsVueSlotPropsRoot(_) => false,
             AnyJsRoot::JsVueGenericRoot(_) => false,
