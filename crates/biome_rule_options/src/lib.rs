@@ -662,6 +662,7 @@ pub mod use_package_json_cpu;
 pub mod use_package_json_engines;
 pub mod use_package_json_valid_cpu;
 pub mod use_package_json_valid_engines;
+pub mod use_package_json_valid_license;
 pub mod use_parse_int_radix;
 pub mod use_playwright_valid_describe_callback;
 pub mod use_promise_reject_errors;

@@ -1,0 +1,12 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+	"name": "my-package",
+	"license": "(GPL-3.0-only OR BSD-2-Clause) AND MIT"
+}
+
+```

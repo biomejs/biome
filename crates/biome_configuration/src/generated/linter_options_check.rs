@@ -3070,6 +3070,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
+        "nursery",
+        "usePackageJsonValidLicense",
+        TypeId::of::<
+            biome_rule_options::use_package_json_valid_license::UsePackageJsonValidLicenseOptions,
+        >(),
+    ));
+    result.push((
         "correctness",
         "useParseIntRadix",
         TypeId::of::<biome_rule_options::use_parse_int_radix::UseParseIntRadixOptions>(),
