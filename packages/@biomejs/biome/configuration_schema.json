@@ -8243,6 +8243,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoVueExposeAfterAwaitConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueExposeAfterAwaitOptions" }
+			]
+		},
+		"NoVueExposeAfterAwaitOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueImportCompilerMacrosConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9724,6 +9734,13 @@
 					"description": "Limit the number of props a Vue component can declare.\nSee https://biomejs.dev/linter/rules/no-vue-excessive-props",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueExcessivePropsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueExposeAfterAwait": {
+					"description": "Disallow calling expose() or defineExpose() after an await in setup().\nSee https://biomejs.dev/linter/rules/no-vue-expose-after-await",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueExposeAfterAwaitConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -16108,6 +16125,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueExcessivePropsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueExposeAfterAwaitOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueExposeAfterAwaitOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

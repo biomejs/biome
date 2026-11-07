@@ -3618,6 +3618,11 @@ export interface Nursery {
 	 */
 	noVueExcessiveProps?: NoVueExcessivePropsConfiguration;
 	/**
+	 * Disallow calling expose() or defineExpose() after an await in setup().
+	 * See https://biomejs.dev/linter/rules/no-vue-expose-after-await
+	 */
+	noVueExposeAfterAwait?: NoVueExposeAfterAwaitConfiguration;
+	/**
 	 * Disallow registering Vue lifecycle hooks after an await in setup().
 	 * See https://biomejs.dev/linter/rules/no-vue-lifecycle-after-await
 	 */
@@ -6900,6 +6905,9 @@ export type NoVueDeprecatedVOnNativeModifierConfiguration =
 export type NoVueExcessivePropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueExcessivePropsOptions;
+export type NoVueExposeAfterAwaitConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueExposeAfterAwaitOptions;
 export type NoVueLifecycleAfterAwaitConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueLifecycleAfterAwaitOptions;
@@ -10109,6 +10117,10 @@ export interface RuleWithNoVueExcessivePropsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueExcessivePropsOptions;
 }
+export interface RuleWithNoVueExposeAfterAwaitOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueExposeAfterAwaitOptions;
+}
 export interface RuleWithNoVueLifecycleAfterAwaitOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueLifecycleAfterAwaitOptions;
@@ -13144,6 +13156,7 @@ export interface NoVueExcessivePropsOptions {
 	 */
 	maxProps?: number;
 }
+export type NoVueExposeAfterAwaitOptions = {};
 export type NoVueLifecycleAfterAwaitOptions = {};
 export interface NoVueLoneTemplateOptions {
 	/**
@@ -15246,6 +15259,7 @@ export type Category =
 	| "lint/nursery/noVueRestrictedCallAfterAwait"
 	| "lint/nursery/noVueDeprecatedVBindSync"
 	| "lint/nursery/noVueRootVIf"
+	| "lint/nursery/noVueExposeAfterAwait"
 	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRefObjectReactivityLoss"

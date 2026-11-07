@@ -440,6 +440,7 @@ pub mod no_vue_deprecated_v_bind_sync;
 pub mod no_vue_deprecated_v_on_native_modifier;
 pub mod no_vue_duplicate_keys;
 pub mod no_vue_excessive_props;
+pub mod no_vue_expose_after_await;
 pub mod no_vue_import_compiler_macros;
 pub mod no_vue_lifecycle_after_await;
 pub mod no_vue_lone_template;

@@ -390,6 +390,7 @@ define_categories! {
     "lint/nursery/noVueRestrictedCallAfterAwait": "https://biomejs.dev/linter/rules/no-vue-restricted-call-after-await",
     "lint/nursery/noVueDeprecatedVBindSync": "https://biomejs.dev/linter/rules/no-vue-deprecated-v-bind-sync",
     "lint/nursery/noVueRootVIf": "https://biomejs.dev/linter/rules/no-vue-root-v-if",
+    "lint/nursery/noVueExposeAfterAwait": "https://biomejs.dev/linter/rules/no-vue-expose-after-await",
     "lint/nursery/noVueImportCompilerMacros": "https://biomejs.dev/linter/rules/no-vue-import-compiler-macros",
     "lint/nursery/noVueRefAsOperand": "https://biomejs.dev/linter/rules/no-vue-ref-as-operand",
     "lint/nursery/noVueRefObjectReactivityLoss": "https://biomejs.dev/linter/rules/no-vue-ref-object-reactivity-loss",
