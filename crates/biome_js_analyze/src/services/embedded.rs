@@ -1,4 +1,7 @@
 use biome_analyze::{FromServices, RuleKey, RuleMetadata, ServiceBag, ServicesDiagnostic};
+use biome_astro_semantic::{
+    AstroSemanticModelOptions, Namespace, Scope, astro_model_from_source_with_options,
+};
 use biome_db::Source;
 use biome_embeds::EmbeddedData;
 use biome_embeds::bindings::{
@@ -9,7 +12,9 @@ use biome_embeds::references::{
     InternedReference, is_reference_used, is_svelte_store_reference_used, is_type_reference_used,
     is_value_reference_used, is_vue_directive_reference_used,
 };
-use biome_languages::{LanguageDb, has_embedded_content};
+use biome_js_syntax::unescape_js_identifier;
+use biome_languages::{DocumentFileSource, LanguageDb, has_embedded_content};
+use biome_parser::db::SourceExt;
 use biome_rowan::{TextRange, TextSize, TokenText};
 use std::rc::Rc;
 use std::sync::Arc;
@@ -24,6 +29,11 @@ pub struct EmbeddedService {
 #[derive(Clone)]
 enum EmbeddedSource {
     Empty,
+    Astro {
+        scope: Option<Scope>,
+        db: Rc<dyn LanguageDb>,
+        document: Source,
+    },
     Workspace {
         db: Rc<dyn LanguageDb>,
         /// The host document of the analyzed source.
@@ -32,15 +42,66 @@ enum EmbeddedSource {
     Interned(Arc<EmbeddedData>),
 }
 
+fn astro_contains_binding(scope: Option<&Scope>, name: &str) -> bool {
+    let name = unescape_js_identifier(name);
+    let Some(scope) = scope else {
+        return false;
+    };
+    [Namespace::Value, Namespace::Type, Namespace::Namespace]
+        .into_iter()
+        .any(|namespace| {
+            scope.lookup(namespace, name.as_ref()).is_some() || scope.is_open(namespace)
+        })
+}
+
+fn astro_is_used(scope: Option<&Scope>, name: &str, namespaces: &[Namespace]) -> bool {
+    let name = unescape_js_identifier(name);
+    let Some(scope) = scope else {
+        return false;
+    };
+    namespaces.iter().copied().any(|namespace| {
+        scope.is_open(namespace)
+            || scope
+                .lookup(namespace, name.as_ref())
+                .is_some_and(|symbol| {
+                    symbol
+                        .uses()
+                        .any(|reference| reference.namespace() == namespace)
+                })
+    })
+}
+
 impl EmbeddedService {
     /// Creates the service for a source whose host document in `db` is
     /// `document`. Without a document, the service finds no embedded content.
-    pub(crate) fn new(
+    pub(crate) fn new_with_globals(
         db: Rc<dyn LanguageDb>,
         document: Option<Source>,
         snippet_offset: TextSize,
+        globals: &[Box<str>],
     ) -> Self {
         let source = match document {
+            Some(document)
+                if matches!(
+                    db.source_from_index(document.document_source_index(db.as_ref())),
+                    Some(DocumentFileSource::Html(html)) if html.is_astro()
+                ) =>
+            {
+                let model = astro_model_from_source_with_options(
+                    db.as_ref(),
+                    document,
+                    AstroSemanticModelOptions {
+                        globals: globals.to_vec(),
+                    },
+                );
+                EmbeddedSource::Astro {
+                    scope: model
+                        .snippet_at_offset(snippet_offset)
+                        .and_then(|snippet| snippet.scope()),
+                    db,
+                    document,
+                }
+            }
             Some(document) if has_embedded_content(db.as_ref(), document) => {
                 EmbeddedSource::Workspace { db, document }
             }
@@ -62,6 +123,9 @@ impl EmbeddedService {
     pub(crate) fn contains_binding(&self, binding: TokenText) -> bool {
         match &self.source {
             EmbeddedSource::Empty => false,
+            EmbeddedSource::Astro { scope, .. } => {
+                astro_contains_binding(scope.as_ref(), binding.text())
+            }
             EmbeddedSource::Workspace { db, document } => get_binding_by_name(
                 db.as_ref(),
                 InternedBindingTokenText::new(db.as_ref(), *document, binding),
@@ -74,6 +138,7 @@ impl EmbeddedService {
     pub(crate) fn contains_binding_text(&self, binding: &str) -> bool {
         match &self.source {
             EmbeddedSource::Empty => false,
+            EmbeddedSource::Astro { scope, .. } => astro_contains_binding(scope.as_ref(), binding),
             EmbeddedSource::Workspace { db, document } => get_binding_by_text(
                 db.as_ref(),
                 InternedBindingText::new(db.as_ref(), *document, binding.to_string()),
@@ -86,6 +151,9 @@ impl EmbeddedService {
     pub(crate) fn is_used_as_value(&self, identifier: TokenText) -> bool {
         match &self.source {
             EmbeddedSource::Empty => false,
+            EmbeddedSource::Astro { scope, .. } => {
+                astro_is_used(scope.as_ref(), identifier.text(), &[Namespace::Value])
+            }
             EmbeddedSource::Workspace { db, document } => is_value_reference_used(
                 db.as_ref(),
                 InternedReference::new(db.as_ref(), *document, identifier),
@@ -97,6 +165,11 @@ impl EmbeddedService {
     pub(crate) fn is_used_as_type(&self, identifier: TokenText) -> bool {
         match &self.source {
             EmbeddedSource::Empty => false,
+            EmbeddedSource::Astro { scope, .. } => astro_is_used(
+                scope.as_ref(),
+                identifier.text(),
+                &[Namespace::Type, Namespace::Namespace],
+            ),
             EmbeddedSource::Workspace { db, document } => is_type_reference_used(
                 db.as_ref(),
                 InternedReference::new(db.as_ref(), *document, identifier),
@@ -108,6 +181,11 @@ impl EmbeddedService {
     pub(crate) fn is_used(&self, identifier: TokenText) -> bool {
         match &self.source {
             EmbeddedSource::Empty => false,
+            EmbeddedSource::Astro { scope, .. } => astro_is_used(
+                scope.as_ref(),
+                identifier.text(),
+                &[Namespace::Value, Namespace::Type, Namespace::Namespace],
+            ),
             EmbeddedSource::Workspace { db, document } => is_reference_used(
                 db.as_ref(),
                 InternedReference::new(db.as_ref(), *document, identifier),
@@ -121,7 +199,7 @@ impl EmbeddedService {
     /// See also: https://svelte.dev/docs/svelte/stores
     pub(crate) fn is_svelte_store_used(&self, identifier: TokenText) -> bool {
         match &self.source {
-            EmbeddedSource::Empty => false,
+            EmbeddedSource::Empty | EmbeddedSource::Astro { .. } => false,
             EmbeddedSource::Workspace { db, document } => is_svelte_store_reference_used(
                 db.as_ref(),
                 InternedReference::new(db.as_ref(), *document, identifier),
@@ -137,7 +215,7 @@ impl EmbeddedService {
     /// See also: https://vuejs.org/guide/reusability/custom-directives.html
     pub(crate) fn is_vue_directive_used(&self, identifier: TokenText) -> bool {
         match &self.source {
-            EmbeddedSource::Empty => false,
+            EmbeddedSource::Empty | EmbeddedSource::Astro { .. } => false,
             EmbeddedSource::Workspace { db, document } => is_vue_directive_reference_used(
                 db.as_ref(),
                 InternedReference::new(db.as_ref(), *document, identifier),
@@ -156,7 +234,8 @@ impl EmbeddedService {
         let range = range + self.snippet_offset;
         match &self.source {
             EmbeddedSource::Empty => None,
-            EmbeddedSource::Workspace { db, document } => {
+            EmbeddedSource::Astro { db, document, .. }
+            | EmbeddedSource::Workspace { db, document } => {
                 component_at(db.as_ref(), *document, range)
             }
             EmbeddedSource::Interned(data) => data.component_at(range).cloned(),
@@ -188,8 +267,10 @@ impl FromServices for EmbeddedService {
 mod tests {
     use super::*;
     use biome_db::testing::Events;
-    use biome_js_parser::{JsParserOptions, parse};
-    use biome_languages::{DocumentFileSource, JsFileSource};
+    use biome_html_parser::{HtmlParserOptions, parse_html};
+    use biome_js_parser::{JsParserOptions, parse, parse_js_with_offset};
+    use biome_languages::javascript::JsEmbeddingKind;
+    use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource};
     use biome_parser::db::{ParseDb, SnippetOutput, SourceOutput};
     use biome_rowan::RawSyntaxKind;
     use camino::{Utf8Path, Utf8PathBuf};
@@ -267,9 +348,92 @@ mod tests {
         let document = Source::new(&db, path, source.into(), 0);
         db.parsed = Some(document);
 
-        let service = EmbeddedService::new(Rc::new(db), Some(document), TextSize::default());
+        let service = EmbeddedService::new_with_globals(
+            Rc::new(db),
+            Some(document),
+            TextSize::default(),
+            &[],
+        );
         (service, events)
     }
+
+    const ASTRO_SOURCE: usize = 0;
+    const ASTRO_FRONTMATTER_SOURCE: usize = 1;
+    const ASTRO_EXPRESSION_SOURCE: usize = 2;
+    const ASTRO_SCRIPT_SOURCE: usize = 3;
+
+    #[salsa::db]
+    struct AstroTestDb {
+        parsed: Option<Source>,
+        snippets: Vec<(&'static str, usize)>,
+        storage: Storage<Self>,
+    }
+
+    impl AstroTestDb {
+        fn new(snippets: Vec<(&'static str, usize)>) -> Self {
+            Self {
+                parsed: None,
+                snippets,
+                storage: Storage::default(),
+            }
+        }
+    }
+
+    #[salsa::db]
+    impl LanguageDb for AstroTestDb {
+        fn source_from_index(&self, index: usize) -> Option<DocumentFileSource> {
+            Some(match index {
+                ASTRO_SOURCE => DocumentFileSource::Html(HtmlFileSource::astro()),
+                ASTRO_FRONTMATTER_SOURCE => DocumentFileSource::Js(JsFileSource::astro()),
+                ASTRO_EXPRESSION_SOURCE => DocumentFileSource::Js(
+                    JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Astro {
+                        frontmatter: false,
+                        is_class_attribute: false,
+                    }),
+                ),
+                ASTRO_SCRIPT_SOURCE => DocumentFileSource::Js(JsFileSource::js_module()),
+                _ => return None,
+            })
+        }
+    }
+
+    #[salsa::db]
+    impl ParseDb for AstroTestDb {
+        fn parse_source(&self, source: Source) -> SourceOutput {
+            let text = source.text(self);
+            let source_index = source.file_source_index(self);
+            let parse = parse_html(text, HtmlParserOptions::from(&HtmlFileSource::astro()));
+            let snippets = self
+                .snippets
+                .iter()
+                .filter_map(|(snippet, index)| {
+                    let start = TextSize::from(text.rfind(snippet)? as u32);
+                    let range = TextRange::at(start, TextSize::of(*snippet));
+                    let source = self.source_from_index(*index)?.to_js_file_source()?;
+                    let parsed =
+                        parse_js_with_offset(snippet, start, source, JsParserOptions::default());
+                    Some(SnippetOutput::new(
+                        parsed.into(),
+                        range,
+                        range,
+                        start,
+                        *index,
+                    ))
+                })
+                .collect();
+            SourceOutput::new(parse.into(), source_index).with_snippets(snippets)
+        }
+    }
+
+    #[salsa::db]
+    impl biome_db::Db for AstroTestDb {
+        fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<Source> {
+            self.parsed
+        }
+    }
+
+    #[salsa::db]
+    impl salsa::Database for AstroTestDb {}
 
     fn token_text(text: &str) -> TokenText {
         TokenText::new_raw(RawSyntaxKind(0), text)
@@ -311,5 +475,106 @@ mod tests {
         assert!(service.is_used(token_text("used")));
         assert!(service.is_used_as_value(token_text("used")));
         assert!(!service.is_used(token_text("missing")));
+    }
+
+    #[test]
+    fn malformed_astro_snippets_are_conservatively_used() {
+        const FRONTMATTER: &str = "const visible = 1;\nconst broken =";
+        let source = format!("---\n{FRONTMATTER}\n---\n");
+        let frontmatter_offset = TextSize::from(source.find(FRONTMATTER).unwrap() as u32);
+        let mut db = AstroTestDb::new(vec![(FRONTMATTER, ASTRO_FRONTMATTER_SOURCE)]);
+        let document = Source::new(
+            &db,
+            Utf8PathBuf::from("src/component.astro"),
+            source.into(),
+            ASTRO_SOURCE,
+        );
+        db.parsed = Some(document);
+        let service =
+            EmbeddedService::new_with_globals(Rc::new(db), Some(document), frontmatter_offset, &[]);
+
+        assert!(service.contains_binding_text("possiblyHidden"));
+        assert!(service.is_used(token_text("possiblyHidden")));
+        assert!(service.is_used_as_value(token_text("possiblyHidden")));
+        assert!(service.is_used_as_type(token_text("possiblyHidden")));
+    }
+
+    #[test]
+    fn workspace_astro_model_applies_configured_globals() {
+        const SCRIPT: &str = "configuredGlobal;";
+        let source = format!("<script>{SCRIPT}</script>\n");
+        let mut db = AstroTestDb::new(vec![(SCRIPT, ASTRO_SCRIPT_SOURCE)]);
+        let document = Source::new(
+            &db,
+            Utf8PathBuf::from("src/component.astro"),
+            source.into(),
+            ASTRO_SOURCE,
+        );
+        db.parsed = Some(document);
+        let model = astro_model_from_source_with_options(
+            &db,
+            document,
+            AstroSemanticModelOptions {
+                globals: vec!["configuredGlobal".into()],
+            },
+        );
+
+        assert!(model.references().any(|reference| {
+            reference.name() == "configuredGlobal"
+                && reference.resolution() == biome_astro_semantic::Resolution::Global
+        }));
+    }
+
+    #[test]
+    fn astro_model_answers_binding_and_reference_queries() {
+        const FRONTMATTER: &str = r#"import Card from "./Card.astro";
+const \u0074itle = "Hello";
+interface Props {}"#;
+        const EXPRESSION: &str = "title";
+        let source = format!("---\n{FRONTMATTER}\n---\n<Card>{{{EXPRESSION}}}</Card>\n");
+        let frontmatter_offset = TextSize::from(source.find(FRONTMATTER).unwrap() as u32);
+        let expression_offset = TextSize::from(source.rfind(EXPRESSION).unwrap() as u32);
+        let title_offset = TextSize::from(source.find(r"\u0074itle").unwrap() as u32);
+        let mut db = AstroTestDb::new(vec![
+            (FRONTMATTER, ASTRO_FRONTMATTER_SOURCE),
+            (EXPRESSION, ASTRO_EXPRESSION_SOURCE),
+        ]);
+        let document = Source::new(
+            &db,
+            Utf8PathBuf::from("src/component.astro"),
+            source.into(),
+            ASTRO_SOURCE,
+        );
+        db.parsed = Some(document);
+        let db: Rc<dyn LanguageDb> = Rc::new(db);
+        let frontmatter =
+            EmbeddedService::new_with_globals(db.clone(), Some(document), frontmatter_offset, &[]);
+        let expression =
+            EmbeddedService::new_with_globals(db, Some(document), expression_offset, &[]);
+
+        let EmbeddedSource::Astro {
+            scope: Some(scope), ..
+        } = &frontmatter.source
+        else {
+            panic!("expected Astro semantics");
+        };
+        let title = scope.lookup(Namespace::Value, "title").unwrap();
+        assert_eq!(
+            title.host_range(),
+            TextRange::at(title_offset, TextSize::of(r"\u0074itle"))
+        );
+        assert!(title.uses().any(|reference| {
+            reference.host_range() == TextRange::at(expression_offset, TextSize::of(EXPRESSION))
+        }));
+
+        assert!(frontmatter.is_used(token_text("Card")));
+        assert!(frontmatter.is_used_as_value(token_text(r"\u0074itle")));
+        assert!(frontmatter.is_used_as_type(token_text("Props")));
+        assert!(!frontmatter.is_used_as_value(token_text("Props")));
+        assert!(!frontmatter.is_used(token_text("missing")));
+
+        assert!(expression.contains_binding(token_text("title")));
+        assert!(expression.contains_binding(token_text("Astro")));
+        assert!(!expression.contains_binding(token_text("missing")));
     }
 }
