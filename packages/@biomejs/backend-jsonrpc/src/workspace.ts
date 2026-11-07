@@ -3383,6 +3383,11 @@ export interface Nursery {
 	 */
 	noTailwindRawColors?: NoTailwindRawColorsConfiguration;
 	/**
+	 * Disallow Tailwind CSS classes and variants that your project doesn't allow.
+	 * See https://biomejs.dev/linter/rules/no-tailwind-restricted-classes
+	 */
+	noTailwindRestrictedClasses?: NoTailwindRestrictedClassesConfiguration;
+	/**
 	 * Disallow Tailwind utilities that override the appearance of components.
 	 * See https://biomejs.dev/linter/rules/no-tailwind-restyled-components
 	 */
@@ -6759,6 +6764,9 @@ export type NoTailwindLegacyUtilitiesConfiguration =
 export type NoTailwindRawColorsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTailwindRawColorsOptions;
+export type NoTailwindRestrictedClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTailwindRestrictedClassesOptions;
 export type NoTailwindRestyledComponentsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTailwindRestyledComponentsOptions;
@@ -9872,6 +9880,14 @@ export interface RuleWithNoTailwindLegacyUtilitiesOptions {
 export interface RuleWithNoTailwindRawColorsOptions {
 	level: RulePlainConfiguration;
 	options?: NoTailwindRawColorsOptions;
+}
+export interface RuleWithNoTailwindRestrictedClassesOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoTailwindRestrictedClassesOptions;
 }
 export interface RuleWithNoTailwindRestyledComponentsOptions {
 	level: RulePlainConfiguration;
@@ -13059,6 +13075,28 @@ export interface NoTailwindRawColorsOptions {
 	 */
 	allowedColors?: string[];
 }
+export interface NoTailwindRestrictedClassesOptions {
+	/**
+	 * Classes to restrict.
+	 *
+	 * Each key is a class without variants or `!`, such as `text-green-500`.
+	 * A `*` can stand for the whole utility name, as in `*-md`, the whole
+	 * value, as in `bg-*`, or the value of an arbitrary property, as in
+	 * `[color:*]`. Each value is either the message to show, or an object with
+	 * an optional `message` and an optional `use` replacement.
+	 */
+	classes?: Record<string, TailwindRestriction>;
+	/**
+	 * Variants to restrict.
+	 *
+	 * Each key is a variant, such as `dark` or `group-hover`. A `*` can stand
+	 * for the parts at the end, as in `group-*`, or at the start, as in
+	 * `*-hover`, and `[*]` matches any arbitrary variant. Each value is either
+	 * the message to show, or an object with an optional `message` and an
+	 * optional `use` replacement.
+	 */
+	variants?: Record<string, TailwindRestriction>;
+}
 export interface NoTailwindRestyledComponentsOptions {
 	/**
 	 * Additional component-specific exceptions. Defaults to an empty list.
@@ -14477,6 +14515,10 @@ export type TailwindUtilityCategory =
 	| "effects"
 	| "motion"
 	| "layout";
+/**
+ * The message and replacement of a restricted class or variant.
+ */
+export type TailwindRestriction = string | TailwindRestrictionOptions;
 export interface TailwindComponentAllowance {
 	/**
 	 * Instructions on how to fix the problem, shown in diagnostics for the matching
@@ -14676,6 +14718,17 @@ export type VueDirectiveStyle2 = "shorthand" | "longhand";
 export type AvailabilityTarget = AvailabilityNamed | number;
 export type GroupMatcher = ImportMatcher | SourceMatcher;
 export type StableHookResult = boolean | number[] | string[];
+export interface TailwindRestrictionOptions {
+	/**
+	 * The message to show.
+	 */
+	message?: string;
+	/**
+	 * The class or variant to use instead. Biome suggests a fix that uses it
+	 * when the key has no `*`.
+	 */
+	use?: string;
+}
 export type TailwindAllowedComponents = string | string[];
 export type RestrictedFunctionPath = string | string[];
 export interface PathOptions {
@@ -15189,6 +15242,7 @@ export type Category =
 	| "lint/nursery/noTailwindArbitraryValue"
 	| "lint/nursery/noTailwindLegacyUtilities"
 	| "lint/nursery/noTailwindRawColors"
+	| "lint/nursery/noTailwindRestrictedClasses"
 	| "lint/nursery/noTailwindRestyledComponents"
 	| "lint/nursery/noTanstackQueryRestDestructuring"
 	| "lint/nursery/noTanstackQueryVoidQueryFn"
