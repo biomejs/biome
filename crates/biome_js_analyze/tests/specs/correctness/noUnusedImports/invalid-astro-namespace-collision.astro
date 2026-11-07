@@ -1,0 +1,9 @@
+---
+import type { Thing } from "./types";
+const Thing = 1;
+---
+<!-- should generate diagnostics -->
+{Thing}
+<script>
+import ClientUnused from "./client";
+</script>

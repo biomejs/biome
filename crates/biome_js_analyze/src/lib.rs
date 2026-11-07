@@ -29,7 +29,7 @@ use biome_module_graph::ModuleDb;
 use biome_package::TurboJson;
 use biome_parser::db::AnalyzedSource;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::TextSize;
+use biome_rowan::{AstNode, TextSize};
 use biome_tailwind_logic::syntax_service::TwSyntaxService;
 use biome_tailwind_logic::use_tailwind_sorted_classes::TailwindDesignSystem;
 use std::ops::Deref;
@@ -314,8 +314,13 @@ where
         services.insert_service(db.clone());
     }
     let snippet_offset = snippet_offset.unwrap_or_default();
+    let snippet_len = root.syntax().text_range_with_trivia().len();
     if let Some(embedded_data) = embedded_data {
-        services.insert_service(EmbeddedService::from_data(embedded_data, snippet_offset));
+        services.insert_service(EmbeddedService::from_data(
+            embedded_data,
+            snippet_offset,
+            snippet_len,
+        ));
     } else if let Some(embedded_db) = embedded_db {
         // A path can have a different document for each client of the
         // workspace, so the embedded content comes from the analyzed document
@@ -324,6 +329,7 @@ where
             embedded_db,
             document,
             snippet_offset,
+            snippet_len,
             options.globals(),
         ));
     }

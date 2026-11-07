@@ -1,0 +1,31 @@
+---
+import type * as TypeOnlyImport from "./types";
+const serverOnly = 1;
+const vars = {};
+interface TypeOnly {}
+TypeOnlyImport;
+function nestedTypeOnlyUse() {
+    type NestedType = {};
+    NestedType;
+}
+missingFrontmatter;
+---
+<!-- should generate diagnostics -->
+<div>{missingTemplate}</div>
+<script>
+serverOnly;
+Astro;
+sibling;
+TypeOnly;
+missingClient;
+</script>
+<script>
+const sibling = 1;
+</script>
+<script define:vars={{ known: serverOnly }}>
+known;
+missingStatic;
+</script>
+<script define:vars={{ ...vars }}>
+anything;
+</script>
