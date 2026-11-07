@@ -3008,6 +3008,11 @@ export interface Nursery {
 	 */
 	noChainedComparison?: NoChainedComparisonConfiguration;
 	/**
+	 * Disallow splice() and toSpliced() calls that are harder to read than the operation they perform.
+	 * See https://biomejs.dev/linter/rules/no-confusing-array-splice
+	 */
+	noConfusingArraySplice?: NoConfusingArraySpliceConfiguration;
+	/**
 	 * Disallow leading and trailing spaces in console method arguments.
 	 * See https://biomejs.dev/linter/rules/no-console-spaces
 	 */
@@ -6534,6 +6539,9 @@ export type NoBunModulesConfiguration =
 export type NoChainedComparisonConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoChainedComparisonOptions;
+export type NoConfusingArraySpliceConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoConfusingArraySpliceOptions;
 export type NoConsoleSpacesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoConsoleSpacesOptions;
@@ -9476,6 +9484,14 @@ export interface RuleWithNoBunModulesOptions {
 export interface RuleWithNoChainedComparisonOptions {
 	level: RulePlainConfiguration;
 	options?: NoChainedComparisonOptions;
+}
+export interface RuleWithNoConfusingArraySpliceOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoConfusingArraySpliceOptions;
 }
 export interface RuleWithNoConsoleSpacesOptions {
 	/**
@@ -12878,6 +12894,7 @@ export interface NoBaseToStringOptions {
 export type NoBooleanSortComparatorOptions = {};
 export type NoBunModulesOptions = {};
 export type NoChainedComparisonOptions = {};
+export type NoConfusingArraySpliceOptions = {};
 export type NoConsoleSpacesOptions = {};
 export type NoConstantComparisonsOptions = {};
 export type NoDanglingUnderscoreOptions = {};
@@ -15095,6 +15112,7 @@ export type Category =
 	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noConfusingArraySplice"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
