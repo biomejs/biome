@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-issue-8762.ts
+---
+# Input
+```ts
+/**
+ * Helpers for working with {@linkcode Foo}.
+ *
+ * @see {@link Bar} for more info.
+ * @module
+ */
+
+/* should not generate diagnostics */
+
+import type { Foo } from "./foo";
+import type { Bar } from "./bar";
+
+console.log("side effect");
+
+```
