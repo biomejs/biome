@@ -1,8 +1,25 @@
 use crate::{prelude::*, utils::formatters::FormatTokenAsLowercase};
-use biome_formatter::write;
+use biome_formatter::{FormatRuleWithOptions, write};
 use biome_html_syntax::{HtmlDirective, HtmlDirectiveFields};
+
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatHtmlDirective;
+pub(crate) struct FormatHtmlDirective {
+    comments_as_children: bool,
+}
+
+pub(crate) struct FormatHtmlDirectiveOptions {
+    pub comments_as_children: bool,
+}
+
+impl FormatRuleWithOptions<HtmlDirective> for FormatHtmlDirective {
+    type Options = FormatHtmlDirectiveOptions;
+
+    fn with_options(mut self, options: Self::Options) -> Self {
+        self.comments_as_children = options.comments_as_children;
+        self
+    }
+}
+
 impl FormatNodeRule<HtmlDirective> for FormatHtmlDirective {
     fn fmt_fields(&self, node: &HtmlDirective, f: &mut HtmlFormatter) -> FormatResult<()> {
         let HtmlDirectiveFields {
@@ -52,5 +69,29 @@ impl FormatNodeRule<HtmlDirective> for FormatHtmlDirective {
         }
         write!(f, [r_angle_token.format(), hard_line_break()])?;
         Ok(())
+    }
+
+    fn fmt_leading_comments(
+        &self,
+        node: &HtmlDirective,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        if self.comments_as_children {
+            Ok(())
+        } else {
+            format_html_leading_comments_for_block(node.syntax()).fmt(f)
+        }
+    }
+
+    fn fmt_trailing_comments(
+        &self,
+        node: &HtmlDirective,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        if self.comments_as_children {
+            Ok(())
+        } else {
+            format_html_trailing_comments(node.syntax()).fmt(f)
+        }
     }
 }

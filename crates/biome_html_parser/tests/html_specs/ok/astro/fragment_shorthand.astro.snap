@@ -27,9 +27,7 @@ HtmlRoot {
         },
         r_fence_token: FENCE@17..20 "---" [] [],
     },
-    processing_instruction: missing (optional),
-    directive: missing (optional),
-    html: HtmlElementList [
+    items: HtmlRootItemList [
         AstroFragment {
             opening_fragment: AstroOpeningFragment {
                 l_angle_token: L_ANGLE@20..22 "<" [Newline("\n")] [],
@@ -137,9 +135,7 @@ HtmlRoot {
     1: ASTRO_EMBEDDED_CONTENT@3..17
       0: HTML_LITERAL@3..17 "const a = 1;\n" [Newline("\n")] []
     2: FENCE@17..20 "---" [] []
-  2: (empty)
-  3: (empty)
-  4: HTML_ELEMENT_LIST@20..67
+  2: HTML_ROOT_ITEM_LIST@20..67
     0: ASTRO_FRAGMENT@20..34
       0: ASTRO_OPENING_FRAGMENT@20..23
         0: L_ANGLE@20..22 "<" [Newline("\n")] []
@@ -204,6 +200,6 @@ HtmlRoot {
         2: HTML_TAG_NAME@62..66
           0: BODY_KW@62..66 "body" [] []
         3: R_ANGLE@66..67 ">" [] []
-  5: EOF@67..68 "" [Newline("\n")] []
+  3: EOF@67..68 "" [Newline("\n")] []
 
 ```
