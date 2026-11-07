@@ -83,6 +83,26 @@ impl AngularElseIfClause {
         )
     }
 }
+impl AngularEmptyClause {
+    pub fn with_at_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_empty_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_children(self, element: AngularBlockBody) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl AngularEventBinding {
     pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -107,6 +127,138 @@ impl AngularEventBinding {
             3usize..=3usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
+    }
+}
+impl AngularForBlock {
+    pub fn with_opening_block(self, element: AngularForOpeningBlock) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_empty_clause(self, element: Option<AngularEmptyClause>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            1usize..=1usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+}
+impl AngularForExpression {
+    pub fn with_variable(self, element: HtmlTextExpression) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_of_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_iterable(self, element: HtmlTextExpression) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl AngularForLetClause {
+    pub fn with_semicolon_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_let_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_bindings(self, element: AngularForLetBindingList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl AngularForOpeningBlock {
+    pub fn with_at_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_for_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_parameters(self, element: AngularForParameters) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_children(self, element: AngularBlockBody) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl AngularForParameters {
+    pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_expression(self, element: AngularForExpression) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_semicolon_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_track_clause(self, element: AngularForTrackClause) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_let_clause(self, element: Option<AngularForLetClause>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            4usize..=4usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+    pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(5usize..=5usize, once(Some(element.into()))),
+        )
+    }
+}
+impl AngularForTrackClause {
+    pub fn with_track_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_expression(self, element: HtmlTextExpression) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
     }
 }
 impl AngularIfAsClause {

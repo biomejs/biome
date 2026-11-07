@@ -8,6 +8,7 @@ impl FormatRule<AnyAngularBlock> for FormatAnyAngularBlock {
     type Context = HtmlFormatContext;
     fn fmt(&self, node: &AnyAngularBlock, f: &mut HtmlFormatter) -> FormatResult<()> {
         match node {
+            AnyAngularBlock::AngularForBlock(node) => node.format().fmt(f),
             AnyAngularBlock::AngularIfBlock(node) => node.format().fmt(f),
             AnyAngularBlock::AngularLetBlock(node) => node.format().fmt(f),
         }
