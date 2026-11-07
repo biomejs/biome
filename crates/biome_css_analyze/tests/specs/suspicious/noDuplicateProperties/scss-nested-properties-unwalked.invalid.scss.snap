@@ -22,6 +22,15 @@ $side: top;
   }
 }
 
+.if-in-interpolated-group {
+  border-#{$side}: {
+    @if true {
+      width: 1px;
+      width: 2px;
+    }
+  }
+}
+
 ```
 
 # Diagnostics
@@ -63,7 +72,7 @@ scss-nested-properties-unwalked.invalid.scss:14:5 lint/suspicious/noDuplicatePro
     15 │   }
     16 │ }
   
-  i top is already defined here.
+  i margin-top is already defined here.
   
     11 │ @page {
     12 │   margin: {
@@ -71,6 +80,32 @@ scss-nested-properties-unwalked.invalid.scss:14:5 lint/suspicious/noDuplicatePro
        │     ^^^
     14 │     top: 2px;
     15 │   }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+scss-nested-properties-unwalked.invalid.scss:22:7 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    20 │     @if true {
+    21 │       width: 1px;
+  > 22 │       width: 2px;
+       │       ^^^^^
+    23 │     }
+    24 │   }
+  
+  i width is already defined here.
+  
+    19 │   border-#{$side}: {
+    20 │     @if true {
+  > 21 │       width: 1px;
+       │       ^^^^^
+    22 │       width: 2px;
+    23 │     }
   
   i Remove or rename the duplicate property to ensure consistent styling.
   

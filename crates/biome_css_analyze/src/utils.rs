@@ -11,8 +11,8 @@ use biome_css_syntax::keywords::{
     VENDOR_PREFIXES, VENDOR_SPECIFIC_PSEUDO_ELEMENTS,
 };
 use biome_css_syntax::{
-    CssDeclarationWithSemicolon, CssFunction, CssSyntaxKind, CssSyntaxNode, CssSyntaxToken,
-    ScssFunctionAtRule, ScssNestingDeclaration,
+    CssDeclarationOrRuleList, CssDeclarationWithSemicolon, CssFunction, CssSyntaxKind,
+    CssSyntaxNode, CssSyntaxToken, ScssFunctionAtRule, ScssNestingDeclaration,
 };
 use biome_rowan::{AstNode, declare_node_union};
 use biome_string_case::{StrLikeExtension, StrOnlyExtension};
@@ -195,9 +195,14 @@ impl AnyPropertyStatement {
     /// group, or if a nested rule or any other at-rule, such as `@media`, is
     /// between them.
     pub fn group(&self) -> Option<Self> {
-        self.syntax()
+        Self::from_contained_list(&CssDeclarationOrRuleList::cast(self.syntax().parent()?)?)
+    }
+
+    /// Returns the SCSS group of nested properties whose block contains
+    /// `list`, looking through the same blocks as [Self::group].
+    pub fn from_contained_list(list: &CssDeclarationOrRuleList) -> Option<Self> {
+        list.syntax()
             .ancestors()
-            .skip(1)
             .find(|ancestor| {
                 !matches!(
                     ancestor.kind(),

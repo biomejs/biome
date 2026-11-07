@@ -8,6 +8,7 @@ expression: scss-nested-properties.valid.scss
 /* should not generate diagnostics */
 $start: top;
 $end: bottom;
+$c: true;
 
 .distinct {
   border: {
@@ -29,6 +30,25 @@ $end: bottom;
   }
   border-#{$end}: {
     width: 2px;
+  }
+}
+
+.conditional-override {
+  border-radius: 1px;
+  border: {
+    @if $c {
+      radius: 2px;
+    }
+  }
+}
+
+.branches {
+  border: {
+    @if $c {
+      radius: 1px;
+    } @else {
+      radius: 2px;
+    }
   }
 }
 

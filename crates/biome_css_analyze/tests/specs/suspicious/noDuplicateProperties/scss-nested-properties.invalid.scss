@@ -1,4 +1,7 @@
 /* should generate diagnostics */
+$c: true;
+$items: a b;
+
 .prefixed-then-nested {
   border-radius: 1px;
   border: {
@@ -35,5 +38,34 @@
   }
   margin: {
     top: 2px;
+  }
+}
+
+.if-in-group {
+  border: {
+    @if $c {
+      radius: 1px;
+      radius: 2px;
+    }
+  }
+}
+
+.each-in-group {
+  border: {
+    @each $item in $items {
+      radius: 1px;
+      radius: 2px;
+    }
+  }
+}
+
+.if-in-deeply-nested-group {
+  border: {
+    top: {
+      @if $c {
+        left-radius: 1px;
+        left-radius: 2px;
+      }
+    }
   }
 }
