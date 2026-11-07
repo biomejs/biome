@@ -1,7 +1,10 @@
 pub mod builder;
 pub mod db;
+mod flavor;
 pub mod model;
 pub mod specificity;
+
+pub use flavor::SemanticFlavor;
 
 use biome_css_syntax::AnyCssRoot;
 use biome_rowan::AstNode;
@@ -10,9 +13,33 @@ use model::SemanticModel;
 
 use crate::events::SemanticEventExtractor;
 
+/// Additional behavior selected for CSS semantic construction.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct SemanticModelOptions {
+    /// Framework-specific CSS semantics.
+    pub flavor: SemanticFlavor,
+}
+
+impl From<&biome_languages::CssFileSource> for SemanticModelOptions {
+    fn from(source: &biome_languages::CssFileSource) -> Self {
+        Self {
+            flavor: source.into(),
+        }
+    }
+}
+
 pub fn semantic_model(root: &AnyCssRoot) -> SemanticModel {
+    semantic_model_with_options(root, SemanticModelOptions::default())
+}
+
+/// Builds a CSS semantic model with the supplied options.
+pub fn semantic_model_with_options(
+    root: &AnyCssRoot,
+    options: SemanticModelOptions,
+) -> SemanticModel {
     let mut extractor = SemanticEventExtractor::default();
     let mut builder = SemanticModelBuilder::new(root.clone());
+    builder.set_flavor(options.flavor);
 
     let root = root.syntax();
     for node in root.preorder_of_kinds(SemanticEventExtractor::VISITED_KINDS) {

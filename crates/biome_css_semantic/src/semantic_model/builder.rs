@@ -7,6 +7,7 @@ use biome_rowan::{AstNode, AstPtr, SyntaxKindSet, TextRange, TokenText};
 use rustc_hash::FxHashMap;
 use std::{collections::BTreeMap, sync::LazyLock};
 
+use super::SemanticFlavor;
 use super::model::{
     CssGlobalCustomVariableData, CssModelDeclarationData, CssPropertyAtRuleData, ResolvedSelector,
     RuleData, RuleId, SelectorData, SemanticModel, SemanticModelData, Specificity,
@@ -29,6 +30,7 @@ const NON_SELECTOR_RULE_KINDS: SyntaxKindSet<CssLanguage> = CssContainerAtRule::
 
 pub struct SemanticModelBuilder {
     root: AnyCssRoot,
+    flavor: SemanticFlavor,
     /// All rules, indexed by RuleId
     all_rules: Vec<RuleData>,
     /// IDs of top-level rules only
@@ -51,6 +53,7 @@ impl SemanticModelBuilder {
     pub fn new(root: AnyCssRoot) -> Self {
         Self {
             root,
+            flavor: SemanticFlavor::default(),
             all_rules: Vec::new(),
             top_level_rule_ids: Vec::new(),
             root_declarations: Vec::new(),
@@ -63,6 +66,11 @@ impl SemanticModelBuilder {
             range_to_rule_id: BTreeMap::default(),
             is_in_root_selector: false,
         }
+    }
+
+    #[inline]
+    pub fn set_flavor(&mut self, flavor: SemanticFlavor) {
+        self.flavor = flavor;
     }
 
     /// Returns the nearest enclosing rule that carries selectors, skipping
@@ -141,6 +149,7 @@ impl SemanticModelBuilder {
             .sort_by(|left, right| compare_scss_function_names(left.text(), right.text()));
         let data = SemanticModelData {
             root: self.root.syntax().as_send().expect("To be a root node"),
+            flavor: self.flavor,
             all_rules: self.all_rules,
             top_level_rule_ids: self.top_level_rule_ids,
             root_declarations: self.root_declarations,

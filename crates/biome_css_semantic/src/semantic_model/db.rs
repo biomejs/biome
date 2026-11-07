@@ -1,12 +1,13 @@
 use crate::model::SemanticModel;
-use crate::semantic_model;
+use crate::{SemanticModelOptions, semantic_model_with_options};
 use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
 use biome_css_syntax::{
     AnyCssRoot, CssComplexSelector, CssCompoundSelector, CssNestedQualifiedRule,
     CssPseudoClassIdentifier, CssQualifiedRule, CssSyntaxNode, decode_css_identifier,
 };
 use biome_db::Source;
-use biome_parser::db::{AnalyzedSource, ParseDb, SourceExt, TrackedSnippet};
+use biome_languages::{CssFileSource, LanguageDb};
+use biome_parser::db::{AnalyzedSource, SourceExt, TrackedSnippet};
 use biome_rowan::{AstNode, AstNodeList, TextRange, TokenText};
 
 /// The name and source range of a custom property definition.
@@ -34,40 +35,64 @@ impl CssPropertyDefinition {
 // The model holds the syntax tree of the file, so it has the same cache limit
 // as the parse.
 #[salsa::tracked(lru = 200)]
-pub(crate) fn css_model_from_parsed_source(db: &dyn ParseDb, file: Source) -> SemanticModel {
+pub(crate) fn css_model_from_parsed_source(db: &dyn LanguageDb, file: Source) -> SemanticModel {
     let parsed: AnyCssRoot = file.parsed(db).tree();
-    semantic_model(&parsed)
+    let path = file.path(db);
+    let source = db.source_from_index(file.document_source_index(db));
+    let source_type = source
+        .map_or(CssFileSource::try_from(path.as_path()).ok(), |source| {
+            source.to_css_file_source()
+        })
+        .unwrap_or_default();
+    semantic_model_with_options(&parsed, SemanticModelOptions::from(&source_type))
 }
 
 // The model holds the syntax tree of the snippet, so it has the same cache
 // limit as the parse.
 #[salsa::tracked(lru = 200)]
 pub(crate) fn css_model_from_parsed_snippet<'db>(
-    db: &'db dyn ParseDb,
+    db: &'db dyn LanguageDb,
     file: TrackedSnippet<'db>,
 ) -> SemanticModel {
     let parsed: AnyCssRoot = file.parsed(db).tree();
-    semantic_model(&parsed)
+    let source = db.source_from_index(file.document_source_index(db));
+    let source_type = source
+        .and_then(|source| source.to_css_file_source())
+        .unwrap_or_default();
+    semantic_model_with_options(&parsed, SemanticModelOptions::from(&source_type))
 }
 
 /// Returns custom property definitions from a parsed CSS document.
 #[salsa::tracked]
 pub fn css_property_definitions_from_source(
-    db: &dyn ParseDb,
+    db: &dyn LanguageDb,
     file: Source,
 ) -> Vec<CssPropertyDefinition> {
     let parsed: AnyCssRoot = file.parsed(db).tree();
-    collect_property_definitions(&semantic_model(&parsed))
+    let path = file.path(db);
+    let source = db.source_from_index(file.document_source_index(db));
+    let source_type = source
+        .map_or(CssFileSource::try_from(path.as_path()).ok(), |source| {
+            source.to_css_file_source()
+        })
+        .unwrap_or_default();
+    let model = semantic_model_with_options(&parsed, SemanticModelOptions::from(&source_type));
+    collect_property_definitions(&model)
 }
 
 /// Returns custom property definitions from an embedded CSS document.
 #[salsa::tracked]
 pub fn css_property_definitions_from_snippet<'db>(
-    db: &'db dyn ParseDb,
+    db: &'db dyn LanguageDb,
     file: TrackedSnippet<'db>,
 ) -> Vec<CssPropertyDefinition> {
     let parsed: AnyCssRoot = file.parsed(db).tree();
-    collect_property_definitions(&semantic_model(&parsed))
+    let source = db.source_from_index(file.document_source_index(db));
+    let source_type = source
+        .and_then(|source| source.to_css_file_source())
+        .unwrap_or_default();
+    let model = semantic_model_with_options(&parsed, SemanticModelOptions::from(&source_type));
+    collect_property_definitions(&model)
 }
 
 fn collect_property_definitions(model: &SemanticModel) -> Vec<CssPropertyDefinition> {
@@ -157,7 +182,7 @@ fn is_global_pseudo_identifier(selector: &CssPseudoClassIdentifier) -> bool {
 /// Returns `None` for a snippet that the current parse of its document doesn't
 /// contain anymore.
 pub fn css_semantic_model<'db>(
-    db: &'db dyn ParseDb,
+    db: &'db dyn LanguageDb,
     file: &AnalyzedSource,
 ) -> Option<&'db SemanticModel> {
     match file {
@@ -171,9 +196,10 @@ pub fn css_semantic_model<'db>(
 #[cfg(test)]
 mod tests {
     use super::{
-        collect_property_definitions, css_model_from_parsed_source,
+        collect_property_definitions, css_model_from_parsed_snippet, css_model_from_parsed_source,
         css_property_definitions_from_snippet, css_property_definitions_from_source,
     };
+    use crate::SemanticFlavor;
     use biome_css_parser::{CssParserOptions, parse_css};
     use biome_css_syntax::property_syntax::{
         PropertySyntax, PropertySyntaxComponentName, PropertySyntaxResult, PropertySyntaxType,
@@ -182,7 +208,9 @@ mod tests {
     use biome_db::testing::{
         Events, assert_function_query_was_not_run, assert_function_query_was_run,
     };
-    use biome_languages::css::CssFileSource;
+    use biome_languages::css::{
+        CssEmbeddingKind, CssFileSource, EmbeddingHtmlKind, EmbeddingStyleApplicability,
+    };
     use biome_languages::{DocumentFileSource, LanguageDb};
     use biome_parser::db::{ParseDb, SnippetOutput, SourceExt, SourceOutput};
     use biome_rowan::TextSize;
@@ -194,6 +222,7 @@ mod tests {
     struct TestDb {
         /// Whether a document embeds a copy of itself as a snippet.
         embeds_itself: bool,
+        file_source: Option<DocumentFileSource>,
         events: Events,
         storage: Storage<Self>,
     }
@@ -203,6 +232,7 @@ mod tests {
             let events = Events::default();
             Self {
                 embeds_itself: false,
+                file_source: None,
                 storage: salsa::Storage::new(Some(Box::new({
                     let events = events.clone();
                     move |event| {
@@ -260,7 +290,7 @@ mod tests {
     #[salsa::db]
     impl LanguageDb for TestDb {
         fn source_from_index(&self, _index: usize) -> Option<DocumentFileSource> {
-            unreachable!("Not used in this test")
+            self.file_source
         }
     }
 
@@ -280,6 +310,30 @@ mod tests {
         let events = db.take_salsa_events();
 
         assert_function_query_was_not_run(&db, css_model_from_parsed_source, file, &events);
+    }
+
+    #[test]
+    fn semantic_model_uses_source_flavor() {
+        let mut db = TestDb::new();
+        db.embeds_itself = true;
+        db.file_source = Some(
+            CssFileSource::css()
+                .with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Astro {
+                    applicability: EmbeddingStyleApplicability::Local,
+                }))
+                .into(),
+        );
+        let file = make_file(&db, "p { color: red; }");
+
+        assert_eq!(
+            css_model_from_parsed_source(&db, file).flavor(),
+            SemanticFlavor::Astro
+        );
+        let snippet = file.snippets(&db)[0];
+        assert_eq!(
+            css_model_from_parsed_snippet(&db, snippet).flavor(),
+            SemanticFlavor::Astro
+        );
     }
 
     #[test]

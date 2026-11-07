@@ -17,6 +17,8 @@ use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
+use super::SemanticFlavor;
+
 /// The façade for all semantic information of a CSS document.
 ///
 /// This struct provides access to the root, rules, and individual nodes of the CSS document.
@@ -35,6 +37,11 @@ impl SemanticModel {
 
     pub fn root(&self) -> AnyCssRoot {
         self.data.root()
+    }
+
+    /// Returns the framework-specific semantic flavor of this model.
+    pub fn flavor(&self) -> SemanticFlavor {
+        self.data.flavor
     }
 
     /// Returns all top-level rules in the CSS document.
@@ -177,6 +184,7 @@ impl SemanticModel {
 #[derive(Debug)]
 pub(crate) struct SemanticModelData {
     pub(crate) root: SendNode,
+    pub(crate) flavor: SemanticFlavor,
     /// Single source of truth for all rules, indexed by RuleId
     pub(crate) all_rules: Vec<RuleData>,
     /// IDs of top-level rules only
@@ -219,7 +227,8 @@ impl PartialEq for SemanticModel {
         let self_root = self.data.root();
         let other_root = other.data.root();
 
-        self_rules.len() == other_rules.len()
+        self.data.flavor == other.data.flavor
+            && self_rules.len() == other_rules.len()
             && self_rules
                 .iter()
                 .zip(other_rules.iter())
