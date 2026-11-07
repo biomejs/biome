@@ -4,3 +4,9 @@
   tab-size: --value(integer);
   tab-size: --value(--tab-size-*);
 }
+
+@utility fallback-* {
+  tab-size: 4;
+  tab-size: --value(integer);
+  tab-size: --modifier(integer);
+}
