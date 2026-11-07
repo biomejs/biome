@@ -132,12 +132,12 @@ fn semantic_queries_are_lazy_cached_and_refresh_locations() {
     let source = Source::new(
         &db,
         "/file.css".into(),
-        "a { color: red; color: red; }".into(),
+        "a { color: red; } a { color: blue; }".into(),
         0,
     );
     let root: AnyCssRoot = source.parsed(&db).tree();
     let mut db = Rc::new(db);
-    let rule = RuleFilter::Rule("suspicious", "noDuplicateProperties");
+    let rule = RuleFilter::Rule("suspicious", "noDuplicateSelectors");
 
     analyze(
         &db,
@@ -153,7 +153,7 @@ fn semantic_queries_are_lazy_cached_and_refresh_locations() {
     assert_eq!(db.query_count("css_model_from_parsed_source"), 0);
 
     let changed = parse_css(
-        "\na { color: red; color: red; }",
+        "\na { color: red; } a { color: blue; }",
         CssFileSource::css(),
         CssParserOptions::default(),
     );
@@ -166,7 +166,7 @@ fn semantic_queries_are_lazy_cached_and_refresh_locations() {
     assert_eq!(db.query_count("css_model_from_parsed_source"), 0);
     source
         .set_text(Rc::get_mut(&mut db).unwrap())
-        .to("\na { color: red; color: red; }".into());
+        .to("\na { color: red; } a { color: blue; }".into());
     let changed_root: AnyCssRoot = source.parsed(db.as_ref()).tree();
     assert_eq!(
         analyze(&db, &changed_root, Some(source.into()), rule),
@@ -181,11 +181,11 @@ fn semantic_queries_cache_offset_snippets() {
     let source = Source::new(
         &db,
         "/file.css".into(),
-        ".host {}<style>a { color: red; color: red; }".into(),
+        ".host {}<style>a { color: red; } a { color: blue; }".into(),
         0,
     );
     let db = Rc::new(db);
-    let rule = RuleFilter::Rule("suspicious", "noDuplicateProperties");
+    let rule = RuleFilter::Rule("suspicious", "noDuplicateSelectors");
     let snippet = source.snippets(db.as_ref())[0].to_ref(db.as_ref());
     let root: AnyCssRoot = snippet.parsed().tree();
 

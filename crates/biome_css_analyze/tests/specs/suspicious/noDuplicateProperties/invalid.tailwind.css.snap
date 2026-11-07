@@ -1,0 +1,133 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
+expression: invalid.tailwind.css
+---
+# Input
+```css
+@utility plain {
+  color: red;
+  color: blue;
+}
+
+@utility nested {
+  &:hover {
+    color: red;
+    color: blue;
+  }
+}
+
+@utility mixed-* {
+  color: red;
+  tab-size: --value(integer);
+  color: blue;
+}
+
+a {
+  tab-size: --value(integer);
+  tab-size: --value(number);
+}
+
+```
+
+# Diagnostics
+```
+invalid.tailwind.css:3:3 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    1 │ @utility plain {
+    2 │   color: red;
+  > 3 │   color: blue;
+      │   ^^^^^
+    4 │ }
+    5 │ 
+  
+  i color is already defined here.
+  
+    1 │ @utility plain {
+  > 2 │   color: red;
+      │   ^^^^^
+    3 │   color: blue;
+    4 │ }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.tailwind.css:9:5 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+     7 │   &:hover {
+     8 │     color: red;
+   > 9 │     color: blue;
+       │     ^^^^^
+    10 │   }
+    11 │ }
+  
+  i color is already defined here.
+  
+     6 │ @utility nested {
+     7 │   &:hover {
+   > 8 │     color: red;
+       │     ^^^^^
+     9 │     color: blue;
+    10 │   }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.tailwind.css:16:3 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    14 │   color: red;
+    15 │   tab-size: --value(integer);
+  > 16 │   color: blue;
+       │   ^^^^^
+    17 │ }
+    18 │ 
+  
+  i color is already defined here.
+  
+    13 │ @utility mixed-* {
+  > 14 │   color: red;
+       │   ^^^^^
+    15 │   tab-size: --value(integer);
+    16 │   color: blue;
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.tailwind.css:21:3 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    19 │ a {
+    20 │   tab-size: --value(integer);
+  > 21 │   tab-size: --value(number);
+       │   ^^^^^^^^
+    22 │ }
+    23 │ 
+  
+  i tab-size is already defined here.
+  
+    19 │ a {
+  > 20 │   tab-size: --value(integer);
+       │   ^^^^^^^^
+    21 │   tab-size: --value(number);
+    22 │ }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```

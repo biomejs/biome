@@ -1,0 +1,26 @@
+/* should not generate diagnostics */
+$start: top;
+$end: bottom;
+
+.distinct {
+  border: {
+    radius: 1px;
+    width: 2px;
+  }
+  border-color: red;
+  margin: {
+    top: 1px;
+  }
+  margin: {
+    bottom: 1px;
+  }
+}
+
+.interpolated {
+  border-#{$start}: {
+    width: 1px;
+  }
+  border-#{$end}: {
+    width: 2px;
+  }
+}
