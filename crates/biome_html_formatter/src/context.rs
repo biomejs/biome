@@ -425,6 +425,9 @@ pub struct HtmlFormatContext {
     /// Content ranges of the embedded snippets whose formatting is delegated to
     /// the formatter of their language, sorted by position.
     embedded_node_ranges: Vec<TextRange>,
+
+    /// Content ranges of failed embedded snippets that retain their source text.
+    verbatim_embedded_node_ranges: Vec<TextRange>,
 }
 
 impl HtmlFormatContext {
@@ -434,6 +437,7 @@ impl HtmlFormatContext {
             comments: Rc::new(comments),
             source_map: None,
             embedded_node_ranges: Vec::new(),
+            verbatim_embedded_node_ranges: Vec::new(),
         }
     }
 
@@ -448,6 +452,19 @@ impl HtmlFormatContext {
         self
     }
 
+    pub fn with_verbatim_embedded_node_ranges(
+        mut self,
+        mut verbatim_embedded_node_ranges: Vec<TextRange>,
+    ) -> Self {
+        verbatim_embedded_node_ranges.sort_unstable_by_key(|range| (range.start(), range.end()));
+        self.verbatim_embedded_node_ranges = verbatim_embedded_node_ranges;
+        self
+    }
+
+    pub fn has_embedded_node_ranges(&self) -> bool {
+        !self.embedded_node_ranges.is_empty() || !self.verbatim_embedded_node_ranges.is_empty()
+    }
+
     pub fn should_delegate_fmt_embedded_nodes(&self) -> bool {
         !self.embedded_node_ranges.is_empty()
     }
@@ -460,6 +477,14 @@ impl HtmlFormatContext {
     /// node's own formatting.
     pub fn is_embedded_node_range(&self, range: TextRange) -> bool {
         self.embedded_node_ranges
+            .binary_search_by_key(&(range.start(), range.end()), |range| {
+                (range.start(), range.end())
+            })
+            .is_ok()
+    }
+
+    pub fn is_verbatim_embedded_node_range(&self, range: TextRange) -> bool {
+        self.verbatim_embedded_node_ranges
             .binary_search_by_key(&(range.start(), range.end()), |range| {
                 (range.start(), range.end())
             })

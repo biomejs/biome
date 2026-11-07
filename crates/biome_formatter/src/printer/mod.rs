@@ -460,7 +460,25 @@ impl<'a, S: Source> Printer<'a, S> {
                 }
             }
             Text::Text { text, text_width } => {
-                if let Some(width) = text_width.and_then(TextWidth::width) {
+                if text_width.is_some_and(TextWidth::preserves_line_endings) {
+                    self.state.buffer.push_str(text);
+                    if let Some(last_line_break) = text.rfind(['\r', '\n']) {
+                        let suffix = &text[last_line_break + 1..];
+                        self.state.line_width =
+                            TextWidth::from_text(suffix, self.options.indent_width())
+                                .width()
+                                .map_or(0, |width| width.value() as usize);
+                        self.state.measured_group_fits = false;
+                    } else {
+                        self.state.line_width +=
+                            TextWidth::from_text(text, self.options.indent_width())
+                                .width()
+                                .map_or(0, |width| width.value() as usize);
+                    }
+                    if !text.is_empty() {
+                        self.state.has_empty_line = false;
+                    }
+                } else if let Some(width) = text_width.and_then(TextWidth::width) {
                     self.state.buffer.push_str(text);
                     self.state.line_width += width.value() as usize;
                     if !text.is_empty() {
@@ -1578,10 +1596,14 @@ impl<'a, 'print, S: Source> FitsMeasurer<'a, 'print, S> {
                 if let Some(width) = text_width.and_then(TextWidth::width) {
                     self.state.line_width += width.value() as usize;
                 } else {
+                    let preserves_line_endings =
+                        text_width.is_some_and(TextWidth::preserves_line_endings);
                     for c in text.chars() {
                         let char_width = match c {
                             '\t' => self.options().indent_width.value() as usize,
-                            '\n' => {
+                            line_break @ ('\n' | '\r')
+                                if line_break == '\n' || preserves_line_endings =>
+                            {
                                 return if self.must_be_flat
                                     || self.state.line_width > self.options().print_width.into()
                                 {
@@ -1699,6 +1721,7 @@ struct FitsState {
 #[cfg(test)]
 mod tests {
     use crate::LineEnding;
+    use crate::format_element::TextWidth;
     use crate::prelude::*;
     use crate::printer::{PrintWidth, Printer, PrinterOptions};
     use crate::{
@@ -1817,6 +1840,32 @@ a"#,
             "function main() {\r\n\tlet x = `This is a multiline\r\nstring`;\r\n}\r\n",
             result.as_code()
         );
+    }
+
+    #[test]
+    fn it_preserves_marked_text_line_endings() {
+        let options = PrinterOptions {
+            line_ending: LineEnding::Crlf,
+            ..PrinterOptions::default()
+        };
+
+        let result = format_with_options(
+            &format_args![
+                format_with(|f| {
+                    f.write_element(FormatElement::Text {
+                        text: "first\nsecond\r\nthird\rfourth".into(),
+                        text_width: TextWidth::from_text_preserving_line_endings(
+                            "first\nsecond\r\nthird\rfourth",
+                            2.try_into().unwrap(),
+                        ),
+                    })
+                }),
+                hard_line_break()
+            ],
+            options,
+        );
+
+        assert_eq!("first\nsecond\r\nthird\rfourth\r\n", result.as_code());
     }
 
     #[test]

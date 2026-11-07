@@ -392,14 +392,26 @@ impl Width {
     }
 }
 
-/// The pre-computed unicode width of single-line text, or a marker for multiline text.
+/// The pre-computed unicode width of single-line text, or a marker for text
+/// that requires special multiline printing.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum TextWidth {
     Width(Width),
     Multiline,
+    /// Prints the text without replacing its source line endings.
+    PreserveLineEndings(Option<Width>),
 }
 
 impl TextWidth {
+    pub fn from_text_preserving_line_endings(text: &str, indent_width: IndentWidth) -> Self {
+        let width = if text.contains(['\r', '\n']) {
+            None
+        } else {
+            Self::from_text(text, indent_width).width()
+        };
+        Self::PreserveLineEndings(width)
+    }
+
     pub fn from_text(text: &str, indent_width: IndentWidth) -> Self {
         const fn is_printable_ascii(byte: u8) -> bool {
             matches!(byte, b' '..=b'~')
@@ -437,12 +449,17 @@ impl TextWidth {
     pub const fn width(self) -> Option<Width> {
         match self {
             Self::Width(width) => Some(width),
+            Self::PreserveLineEndings(width) => width,
             Self::Multiline => None,
         }
     }
 
     pub(crate) const fn is_multiline(self) -> bool {
-        matches!(self, Self::Multiline)
+        matches!(self, Self::Multiline | Self::PreserveLineEndings(None))
+    }
+
+    pub(crate) const fn preserves_line_endings(self) -> bool {
+        matches!(self, Self::PreserveLineEndings(_))
     }
 }
 

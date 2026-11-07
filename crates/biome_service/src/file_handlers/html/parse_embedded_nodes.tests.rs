@@ -233,6 +233,25 @@ fn vue_v_for_default_values_are_parsed_as_javascript() {
 }
 
 #[test]
+fn unsupported_script_and_style_languages_are_opaque() {
+    assert_no_diagnostics(
+        "/project/file.astro",
+        r#"<style lang="less">
+.mixin(@color) { color: @color; }
+</style>
+<script lang="coffee">
+square = (value) -> value * value
+</script>"#,
+    );
+    assert_no_diagnostics(
+        "/project/file.html",
+        r#"<style type="text/less">
+.mixin(@color) { color: @color; }
+</style>"#,
+    );
+}
+
+#[test]
 fn html_style_attribute_is_parsed_as_css() {
     assert_diagnostics("/project/file.html", r#"<div style="color: rgb("></div>"#);
 }
