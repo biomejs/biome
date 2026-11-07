@@ -1,3 +1,4 @@
+use super::normalize_style_attribute_quotes;
 use crate::Workspace;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
@@ -252,6 +253,54 @@ fn html_style_attribute_reports_invalid_declaration() {
     ] {
         assert_diagnostics("/project/file.html", content);
     }
+}
+
+#[test]
+fn style_attribute_quote_normalization_preserves_offsets() {
+    for (source, expected) in [
+        (
+            "font-family:&quot;Rotis Sans&quot;;",
+            "font-family:     \"Rotis Sans\"     ;",
+        ),
+        (
+            r#"content:&quot;a\&quot;b&quot;;"#,
+            r#"content:     "a\000022b"     ;"#,
+        ),
+        (
+            "content:&quot;a&apos;b&quot;;",
+            r#"content:     "a\0027 b"     ;"#,
+        ),
+        (r#"content:\&#34;;"#, r#"content:\0022 ;"#),
+    ] {
+        let normalized = normalize_style_attribute_quotes(source);
+        assert_eq!(normalized, expected);
+        assert_eq!(normalized.len(), source.len());
+    }
+}
+
+#[test]
+fn html_style_attribute_decodes_character_references() {
+    for quote in ["&quot;", "&QUOT;", "&#34;", "&#x22;"] {
+        let content = format!(
+            r#"<p style="font-family:RotisSansCyrillic, {quote}Rotis Sans Cyrillic{quote}, sans-serif; font-size:10px;">test</p>"#
+        );
+        assert_no_diagnostics("/project/file.html", &content);
+    }
+    for quote in ["&apos;", "&#39;", "&#x27;"] {
+        let content = format!(r#"<p style="font-family:{quote}Rotis Sans{quote};">test</p>"#);
+        assert_no_diagnostics("/project/file.html", &content);
+    }
+
+    let svg = r#"<text style="font-family:&quot;Rotis Sans Cyrillic&quot;;">test</text>"#;
+    assert_no_diagnostics("/project/file.svg", svg);
+}
+
+#[test]
+fn html_style_attribute_reports_unclosed_character_reference_quote() {
+    assert_diagnostics(
+        "/project/file.html",
+        r#"<p style="font-family:&quot;Rotis Sans;">test</p>"#,
+    );
 }
 
 #[test]
