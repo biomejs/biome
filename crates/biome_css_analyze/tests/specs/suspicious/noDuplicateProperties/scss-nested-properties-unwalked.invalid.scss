@@ -14,3 +14,12 @@ $side: top;
     top: 2px;
   }
 }
+
+.if-in-interpolated-group {
+  border-#{$side}: {
+    @if true {
+      width: 1px;
+      width: 2px;
+    }
+  }
+}

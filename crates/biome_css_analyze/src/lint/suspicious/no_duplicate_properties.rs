@@ -11,7 +11,7 @@ use biome_rowan::{AstNode, AstNodeList, Text, TextRange};
 use biome_rule_options::no_duplicate_properties::NoDuplicatePropertiesOptions;
 use rustc_hash::FxHashMap;
 
-use crate::utils::{AnyPropertyStatement, is_tailwind_utility_fallback};
+use crate::utils::{AnyPropertyStatement, is_tailwind_utility_fallback, nested_property_name};
 
 declare_lint_rule! {
     /// Disallow duplicate properties within declaration blocks.
@@ -87,7 +87,22 @@ impl Rule for NoDuplicateProperties {
             in_utility |= TwUtilityAtRule::can_cast(ancestor.kind());
         }
 
-        find_duplicate(node, None, in_utility, &mut FxHashMap::default())
+        // A list the walk above doesn't cover, such as an `@if` body in a group, still emits its
+        // properties under the group's name.
+        let prefix = AnyPropertyStatement::from_contained_list(node).and_then(|group| {
+            let name = group.name()?;
+            match group.group() {
+                Some(outer) => nested_property_name(name.text_trimmed(), outer),
+                None => Some(name.text_trimmed().to_owned()),
+            }
+        });
+
+        find_duplicate(
+            node,
+            prefix.as_deref(),
+            in_utility,
+            &mut FxHashMap::default(),
+        )
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
