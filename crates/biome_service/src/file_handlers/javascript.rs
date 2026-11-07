@@ -1395,7 +1395,8 @@ pub(super) fn lint_with_inspector(
         params.project_layout.clone(),
         files_source,
     )
-    .with_snippet_offset(params.parsed_source.diagnostic_offset());
+    .with_snippet_offset(params.parsed_source.diagnostic_offset())
+    .with_reports_file_diagnostics(params.reports_file_diagnostics);
     #[cfg(feature = "html_embeds")]
     let services = services.with_embedded_data(params.embedded_data.clone());
 
