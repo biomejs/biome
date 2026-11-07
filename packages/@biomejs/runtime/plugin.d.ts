@@ -14,6 +14,7 @@ export * from "./js_ast";
 export * from "./semantic";
 
 declare const queriedNode: unique symbol;
+declare const queryContext: unique symbol;
 declare const nativeMutation: unique symbol;
 declare const nodeKindSet: unique symbol;
 declare const tokenKindSet: unique symbol;
@@ -24,14 +25,43 @@ declare const tokenKindSet: unique symbol;
  * `N` is the union of the node types matched by the query; it only exists at
  * the type level, to infer the argument type of {@link Rule#run}.
  */
-interface Query<N extends JsAstNode, K extends keyof ContextByQuery> {
-	readonly type: K;
-	readonly kinds: readonly (keyof JsNodeByKind)[];
+type QueryType<K extends keyof ContextByQuery> = K extends "gritSemantic"
+	? "grit"
+	: K;
+
+interface Query<
+	N extends JsAstNode | JsAstToken,
+	K extends keyof ContextByQuery,
+> {
+	readonly type: QueryType<K>;
 	readonly [queriedNode]?: N;
+	readonly [queryContext]?: K;
 }
 
-export type AstQuery<N extends JsAstNode> = Query<N, "ast">;
-export type SemanticQuery<N extends JsAstNode> = Query<N, "semantic">;
+export interface AstQuery<N extends JsAstNode> extends Query<N, "ast"> {
+	readonly kinds: readonly (keyof JsNodeByKind)[];
+}
+
+export interface SemanticQuery<N extends JsAstNode>
+	extends Query<N, "semantic"> {
+	readonly kinds: readonly (keyof JsNodeByKind)[];
+}
+
+/**
+ * A query matching the nodes and tokens selected by a GritQL pattern, created
+ * with {@link grit}.
+ */
+export interface GritQuery extends Query<JsAstElement, "grit"> {
+	readonly pattern: string;
+}
+
+/**
+ * A Grit query created with `semantic: true`, whose `run` receives a semantic
+ * model.
+ */
+export interface SemanticGritQuery extends Query<JsAstElement, "gritSemantic"> {
+	readonly pattern: string;
+}
 
 /** File information supplied to each invocation of a rule. */
 export interface RuleContext {
@@ -50,6 +80,8 @@ export interface SemanticRuleContext extends RuleContext {
 type ContextByQuery = {
 	ast: RuleContext;
 	semantic: SemanticRuleContext;
+	grit: RuleContext;
+	gritSemantic: SemanticRuleContext;
 };
 
 /** JavaScript or TypeScript parsing settings for the analyzed source. */
@@ -95,7 +127,7 @@ export type JsEmbeddingKind =
  * with `export const`. The name of the export is used as the rule name.
  */
 export interface Rule<
-	N extends JsAstNode,
+	N extends JsAstElement,
 	K extends keyof ContextByQuery = "ast",
 > {
 	/**
@@ -104,7 +136,7 @@ export interface Rule<
 	readonly query: Query<N, K>;
 
 	/**
-	 * Called with every node matching the query.
+	 * Called with every node, or token for Grit queries, matching the query.
 	 * `context` information is read-only
 	 *
 	 * For example, inspect declarations only in TypeScript sources:
@@ -149,11 +181,46 @@ export function semantic<K extends readonly (keyof JsNodeByKind)[]>(
 ): SemanticQuery<JsNodeByKind[K[number]]>;
 
 /**
+ * Creates a query matching the nodes selected by a GritQL pattern.
+ *
+ * The pattern runs against the analyzed file and `run` is called once for each
+ * match. When the pattern matches a list, such as several sibling statements,
+ * `run` is called for each node in the list. Patterns may also match leaf
+ * tokens, in which case `run` receives a token.
+ *
+ * The pattern cannot contain a rewrite. Report diagnostics from `run`
+ * instead. When the pattern matches a token, `run` receives a token and
+ * diagnostics can be reported on its `parent` node.
+ *
+ * Pass `{ semantic: true }` to provide a semantic model in `context`.
+ *
+ * For example, inspect console calls without a fixed list of syntax kinds:
+ * ```ts
+ * export const noConsole = defineRule({
+ *   query: grit("`console.log($args)`"),
+ *   run(element) {
+ *     if (element.kind !== "JS_CALL_EXPRESSION") return;
+ *     registerDiagnostic(element, "warning", "Unexpected console.log.");
+ *   },
+ * });
+ * ```
+ */
+export function grit(pattern: string): GritQuery;
+export function grit(
+	pattern: string,
+	options: { semantic: true },
+): SemanticGritQuery;
+export function grit(
+	pattern: string,
+	options?: { semantic?: false },
+): GritQuery;
+
+/**
  * Defines a lint rule. Export the returned rule with `export const` to
  * register it to the analyzer.
  */
 export function defineRule<
-	N extends JsAstNode,
+	N extends JsAstElement,
 	K extends keyof ContextByQuery = "ast",
 >(rule: Rule<N, K>): Rule<N, K>;
 

@@ -1,6 +1,6 @@
 use crate::grit_context::{GritExecContext, GritQueryContext};
 use crate::grit_resolved_pattern::GritResolvedPattern;
-use crate::grit_target_node::GritTargetSyntaxKind;
+use crate::grit_target_node::{GritTargetNode, GritTargetSyntaxKind};
 use biome_js_syntax::JsSyntaxKind;
 use grit_pattern_matcher::binding::Binding;
 use grit_pattern_matcher::context::ExecContext;
@@ -39,19 +39,46 @@ impl Matcher<GritQueryContext> for GritCodeSnippet {
             return Ok(resolved.text(&state.files, context.language())?.trim() == self.source);
         };
 
-        let Some(node) = binding.singleton() else {
+        // A single-child list is unwrapped to its child, like Grit's other
+        // node patterns do. Multi-child lists are matched as a list below.
+        if let Some(node) = binding.singleton() {
+            return self.execute_at_node(&node, resolved, state, context, logs);
+        }
+
+        if !context.node_selector {
+            return Ok(false);
+        }
+
+        let Some(node) = binding.as_node() else {
             return Ok(false);
         };
+        if binding.is_list() {
+            return self.execute_at_node(&node, resolved, state, context, logs);
+        }
 
-        // First, try to match with the exact kind (fast path)
+        Ok(false)
+    }
+}
+
+impl GritCodeSnippet {
+    fn execute_at_node<'a>(
+        &'a self,
+        node: &GritTargetNode<'a>,
+        resolved: &GritResolvedPattern<'a>,
+        state: &mut State<'a, GritQueryContext>,
+        context: &'a GritExecContext,
+        logs: &mut AnalysisLogs,
+    ) -> GritResult<bool> {
+        // First, try to match with the exact kind (fast path).
         if let Some((_, pattern)) = self.patterns.iter().find(|(kind, _)| *kind == node.kind())
             && pattern.execute(resolved, state, context, logs)?
         {
             return Ok(true);
         }
 
-        // If node has a single child, try matching against the child
-        // This handles wrapper nodes like JS_IDENTIFIER_EXPRESSION wrapping JS_REFERENCE_IDENTIFIER
+        // If node has a single child, try matching against the child.
+        // This handles wrapper nodes like JS_IDENTIFIER_EXPRESSION wrapping
+        // JS_REFERENCE_IDENTIFIER.
         if node.kind() == GritTargetSyntaxKind::JsSyntaxKind(JsSyntaxKind::JS_IDENTIFIER_EXPRESSION)
             && let Some(child) = node.first_child()
             && child.next_sibling().is_none()

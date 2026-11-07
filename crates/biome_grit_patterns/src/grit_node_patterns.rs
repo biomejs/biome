@@ -56,6 +56,48 @@ pub struct GritNodePattern {
     pub args: Vec<GritNodePatternArg>,
 }
 
+impl GritNodePattern {
+    /// Matches each argument against the corresponding child slot of a list.
+    fn execute_list<'a>(
+        &'a self,
+        node: &GritTargetNode<'a>,
+        init_state: &mut State<'a, GritQueryContext>,
+        context: &'a GritExecContext,
+        logs: &mut AnalysisLogs,
+    ) -> GritResult<bool> {
+        if node.kind() != self.kind {
+            return Ok(false);
+        }
+
+        // A list pattern describes exactly the listed nodes. Extra children
+        // mean the surrounding sequence is different from the pattern.
+        if node.slots().map(Iterator::count) != Some(self.args.len()) {
+            return Ok(false);
+        }
+
+        let mut running_state = init_state.clone();
+        for arg in &self.args {
+            let Some(child) = node.child_by_slot_index(arg.slot_index) else {
+                return Ok(false);
+            };
+
+            let mut cur_state = running_state.clone();
+            let child_binding = GritResolvedPattern::from_node_binding(child);
+            if arg
+                .pattern
+                .execute(&child_binding, &mut cur_state, context, logs)?
+            {
+                running_state = cur_state;
+            } else {
+                return Ok(false);
+            }
+        }
+
+        *init_state = running_state;
+        Ok(true)
+    }
+}
+
 impl AstNodePattern<GritQueryContext> for GritNodePattern {
     const INCLUDES_TRIVIA: bool = true;
 
@@ -85,17 +127,16 @@ impl Matcher<GritQueryContext> for GritNodePattern {
         let Some(binding) = binding.get_last_binding() else {
             return Ok(false);
         };
+        // Single-child lists are unwrapped to their child. Multi-child lists
+        // are matched as a sequence by `execute_list`.
         let Some(node) = binding.singleton() else {
-            return Ok(false);
+            return match binding.as_node() {
+                Some(node) if node.is_list() && context.node_selector => {
+                    self.execute_list(&node, init_state, context, logs)
+                }
+                _ => Ok(false),
+            };
         };
-        if binding.is_list() {
-            return self.execute(
-                &ResolvedPattern::from_node_binding(node),
-                init_state,
-                context,
-                logs,
-            );
-        }
 
         // Check if we need to handle import structure transformation
         let needs_import_transformation = self.is_import_transformation_needed(node.kind());
