@@ -1,0 +1,22 @@
+@utility plain {
+  color: red;
+  color: blue;
+}
+
+@utility nested {
+  &:hover {
+    color: red;
+    color: blue;
+  }
+}
+
+@utility mixed-* {
+  color: red;
+  tab-size: --value(integer);
+  color: blue;
+}
+
+a {
+  tab-size: --value(integer);
+  tab-size: --value(number);
+}
