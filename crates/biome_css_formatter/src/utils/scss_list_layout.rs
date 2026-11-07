@@ -7,7 +7,7 @@ use crate::utils::scss_closing_comments::{
     ClosingCommentSpacing, owns_include_closing_comments, write_include_closing_comments,
 };
 use biome_css_syntax::{
-    CssDeclaration, CssDeclarationWithSemicolon, CssGenericProperty, ScssExpression,
+    CssDeclaration, CssDeclarationWithSemicolon, CssGenericProperty, CssSyntaxKind, ScssExpression,
     ScssExpressionItemList, ScssListExpression, ScssListExpressionElement,
     ScssListExpressionElementList, ScssListExpressionFields, ScssModuleConfiguration,
     ScssParenthesizedExpression, ScssVariableDeclaration, css_grid_template_property,
@@ -95,6 +95,12 @@ impl<'a> ScssListLayout<'a> {
         if should_preserve_source_group_breaks(self.node, f) {
             let elements = format_elements_with_source_breaks(&elements);
             return write!(f, [group(&format_args![soft_line_break(), elements])]);
+        }
+
+        if is_statement_at_rule_value_list(self.node) {
+            // Print `@return a b,
+            //   c d, e f;`.
+            return write!(f, [indent(&format_filled_elements(&elements))]);
         }
 
         write!(
@@ -243,6 +249,45 @@ fn format_elements_with_source_breaks(
 
         Ok(())
     })
+}
+
+fn format_filled_elements(
+    elements: &ScssListExpressionElementList,
+) -> impl Format<CssFormatContext> + '_ {
+    format_with(|f| {
+        let separator = soft_line_break_or_space();
+        let mut fill = f.fill();
+        let separated = elements.format_separated(",").with_trailing_separator(
+            if has_required_trailing_comma(elements) {
+                TrailingSeparator::Mandatory
+            } else {
+                TrailingSeparator::Omit
+            },
+        );
+
+        for formatted in separated {
+            fill.entry(&separator, &formatted);
+        }
+
+        fill.finish()
+    })
+}
+
+/// Checks that the list is the whole value of `@return`, `@debug`, `@warn` or
+/// `@error`, which keep the first item on the keyword line.
+fn is_statement_at_rule_value_list(node: &ScssListExpression) -> bool {
+    node.parent::<ScssExpressionItemList>()
+        .and_then(|items| items.parent::<ScssExpression>())
+        .and_then(|expression| expression.syntax().parent())
+        .is_some_and(|parent| {
+            matches!(
+                parent.kind(),
+                CssSyntaxKind::SCSS_RETURN_AT_RULE
+                    | CssSyntaxKind::SCSS_DEBUG_AT_RULE
+                    | CssSyntaxKind::SCSS_WARN_AT_RULE
+                    | CssSyntaxKind::SCSS_ERROR_AT_RULE
+            )
+        })
 }
 
 /// Returns whether an SCSS declaration value preserves source breaks between
