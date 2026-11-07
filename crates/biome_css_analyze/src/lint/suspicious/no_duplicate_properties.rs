@@ -87,8 +87,8 @@ impl Rule for NoDuplicateProperties {
             in_utility |= TwUtilityAtRule::can_cast(ancestor.kind());
         }
 
-        // A list the walk above doesn't cover, such as an `@if` body in a group, still emits its
-        // properties under the group's name.
+        // A list that `find_duplicate` doesn't reach from an enclosing list, such as an `@if` body
+        // in a group or a group inside `@page`, is checked on its own under the group's name.
         let prefix = AnyPropertyStatement::from_contained_list(node).and_then(|group| {
             let name = group.name()?;
             match group.group() {

@@ -23,3 +23,14 @@ $side: top;
     }
   }
 }
+
+.if-under-interpolated-group {
+  border-#{$side}: {
+    top: {
+      @if true {
+        width: 1px;
+        width: 2px;
+      }
+    }
+  }
+}
