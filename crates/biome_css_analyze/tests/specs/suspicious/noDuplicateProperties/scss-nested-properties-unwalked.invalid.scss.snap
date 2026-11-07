@@ -31,6 +31,17 @@ $side: top;
   }
 }
 
+.if-under-interpolated-group {
+  border-#{$side}: {
+    top: {
+      @if true {
+        width: 1px;
+        width: 2px;
+      }
+    }
+  }
+}
+
 ```
 
 # Diagnostics
@@ -106,6 +117,32 @@ scss-nested-properties-unwalked.invalid.scss:22:7 lint/suspicious/noDuplicatePro
        │       ^^^^^
     22 │       width: 2px;
     23 │     }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+scss-nested-properties-unwalked.invalid.scss:32:9 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    30 │       @if true {
+    31 │         width: 1px;
+  > 32 │         width: 2px;
+       │         ^^^^^
+    33 │       }
+    34 │     }
+  
+  i width is already defined here.
+  
+    29 │     top: {
+    30 │       @if true {
+  > 31 │         width: 1px;
+       │         ^^^^^
+    32 │         width: 2px;
+    33 │       }
   
   i Remove or rename the duplicate property to ensure consistent styling.
   

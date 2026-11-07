@@ -2,6 +2,10 @@
 $c: true;
 $items: a b;
 
+@mixin m {
+  @content;
+}
+
 .prefixed-then-nested {
   border-radius: 1px;
   border: {
@@ -66,6 +70,26 @@ $items: a b;
         left-radius: 1px;
         left-radius: 2px;
       }
+    }
+  }
+}
+
+.else-in-group {
+  border: {
+    @if $c {
+      width: 1px;
+    } @else {
+      radius: 1px;
+      radius: 2px;
+    }
+  }
+}
+
+.include-in-group {
+  border: {
+    @include m {
+      radius: 1px;
+      radius: 2px;
     }
   }
 }
