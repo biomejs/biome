@@ -12,4 +12,10 @@ expression: valid.tailwind.css
   tab-size: --value(--tab-size-*);
 }
 
+@utility fallback-* {
+  tab-size: 4;
+  tab-size: --value(integer);
+  tab-size: --modifier(integer);
+}
+
 ```
