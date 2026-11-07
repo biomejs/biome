@@ -709,6 +709,7 @@ pub mod use_valid_aria_props;
 pub mod use_valid_aria_role;
 pub mod use_valid_aria_values;
 pub mod use_valid_autocomplete;
+pub mod use_valid_character_comparison;
 pub mod use_valid_for_direction;
 pub mod use_valid_lang;
 pub mod use_valid_test_title;
