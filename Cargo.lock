@@ -219,6 +219,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_astro_semantic"
+version = "0.1.0"
+dependencies = [
+ "biome_html_parser",
+ "biome_html_syntax",
+ "biome_js_parser",
+ "biome_js_semantic",
+ "biome_js_syntax",
+ "biome_languages",
+ "biome_rowan",
+ "enumflags2",
+ "insta",
+]
+
+[[package]]
 name = "biome_cli"
 version = "0.0.0"
 dependencies = [
