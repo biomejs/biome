@@ -35,6 +35,8 @@ unknown::view-transition-group(page) {
 
 ::cue(unknown) {
 }
+from {}
+to {}
 
 ```
 
@@ -235,7 +237,48 @@ invalid.css:30:7 lint/correctness/noUnknownTypeSelector ━━━━━━━━
   > 30 │ ::cue(unknown) {
        │       ^^^^^^^
     31 │ }
-    32 │ 
+    32 │ from {}
+  
+  i See MDN web docs for more details.
+  
+  i A selector for an element that does not exist never matches, so its styles are never applied.
+  
+  i Consider replacing the unknown type selector with valid one.
+  
+
+```
+
+```
+invalid.css:32:1 lint/correctness/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown type selector is not allowed.
+  
+    30 │ ::cue(unknown) {
+    31 │ }
+  > 32 │ from {}
+       │ ^^^^
+    33 │ to {}
+    34 │ 
+  
+  i See MDN web docs for more details.
+  
+  i A selector for an element that does not exist never matches, so its styles are never applied.
+  
+  i Consider replacing the unknown type selector with valid one.
+  
+
+```
+
+```
+invalid.css:33:1 lint/correctness/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown type selector is not allowed.
+  
+    31 │ }
+    32 │ from {}
+  > 33 │ to {}
+       │ ^^
+    34 │ 
   
   i See MDN web docs for more details.
   
