@@ -95,6 +95,8 @@ use biome_js_syntax::{
 use biome_json_syntax::JsonLanguage;
 use biome_languages::HtmlFileSource;
 #[cfg(feature = "html_embeds")]
+use biome_languages::html::HtmlVariant;
+#[cfg(feature = "html_embeds")]
 use biome_parser::AnyParse;
 use biome_parser::db::AnalyzedSource;
 use biome_rowan::{AstNode, BatchMutation, NodeCache, SendNode, TextRange, TextSize};
@@ -1132,7 +1134,7 @@ pub(super) fn lint_with_inspector(
     let mut snippets = {
         let mut snippets: Vec<Box<dyn SnippetAnalyzer<Never, Output = LintResults> + '_>> =
             Vec::new();
-        for snippet in params
+        let parsed_snippets: Vec<_> = params
             .parsed_source
             .snippets(&params.workspace_db)
             .for_analysis(
@@ -1142,15 +1144,42 @@ pub(super) fn lint_with_inspector(
                 params.path,
                 &params.workspace_db,
             )
-        {
+            .collect();
+        let host_document_js_snippet =
+            super::js_host_document_snippet_index(&parsed_snippets, &params.workspace_db);
+        if host_document_js_snippet.is_none() {
+            let host_source = match params
+                .language
+                .to_html_file_source()
+                .unwrap_or_default()
+                .variant()
+            {
+                HtmlVariant::Astro => biome_languages::JsFileSource::astro(),
+                HtmlVariant::Vue => biome_languages::JsFileSource::vue(),
+                HtmlVariant::Svelte => biome_languages::JsFileSource::svelte(),
+                HtmlVariant::Standard(_) | HtmlVariant::Angular => {
+                    biome_languages::JsFileSource::js_module()
+                }
+            };
+            snippets.push(Box::new(LintSnippetAnalyzer::new(
+                params.for_js_host_document(host_source),
+                TextSize::default(),
+                &biome_js_analyze::METADATA,
+                javascript::lint_with_inspector,
+            )));
+        }
+        for (index, snippet) in parsed_snippets.into_iter().enumerate() {
             let Some(language) = snippet.file_source(&params.workspace_db) else {
                 continue;
             };
             let offset = snippet.content_offset();
             let snippet_params = params.for_snippet(&snippet, language);
-            let analyzer = if language.to_js_file_source().is_some() {
+            let analyzer = if let Some(source) = language.to_js_file_source() {
                 LintSnippetAnalyzer::new(
-                    snippet_params,
+                    snippet_params.with_rule_execution(super::js_rule_execution_context(
+                        source,
+                        host_document_js_snippet == Some(index),
+                    )),
                     offset,
                     &biome_js_analyze::METADATA,
                     javascript::lint_with_inspector,

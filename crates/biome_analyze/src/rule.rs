@@ -21,6 +21,83 @@ use std::fmt::Debug;
 use std::ops::Add;
 use std::str::FromStr;
 
+/// Determines how often a rule runs when a document contains embedded code.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+pub enum RuleExecutionScope {
+    /// Runs once for the containing document.
+    HostDocument,
+    /// Runs for each complete program embedded in the document.
+    Program,
+    /// Runs for every parsed source, including programs and expression snippets.
+    #[default]
+    Snippet,
+}
+
+/// Describes the source currently being analyzed so rule execution can honor
+/// [`RuleExecutionScope`].
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct RuleExecutionContext {
+    embedded: bool,
+    host_document: bool,
+    program: bool,
+    snippet: bool,
+}
+
+impl RuleExecutionContext {
+    /// Creates a context that permits every execution scope.
+    pub const fn new() -> Self {
+        Self {
+            embedded: false,
+            host_document: true,
+            program: true,
+            snippet: true,
+        }
+    }
+
+    /// Creates a context for one embedded source.
+    ///
+    /// `host_document` selects the source that runs document-level rules.
+    /// `program` indicates whether the source is a complete program rather than
+    /// an expression or another fragment.
+    pub const fn new_embedded(host_document: bool, program: bool) -> Self {
+        Self {
+            embedded: true,
+            host_document,
+            program,
+            snippet: true,
+        }
+    }
+
+    /// Creates a context that only permits document-level rules.
+    pub const fn new_host_document() -> Self {
+        Self {
+            embedded: true,
+            host_document: true,
+            program: false,
+            snippet: false,
+        }
+    }
+
+    pub(crate) const fn includes(self, scope: RuleExecutionScope) -> bool {
+        if !self.embedded {
+            return true;
+        }
+        match scope {
+            RuleExecutionScope::HostDocument => self.host_document,
+            RuleExecutionScope::Program => self.program,
+            RuleExecutionScope::Snippet => self.snippet,
+        }
+    }
+}
+
+impl Default for RuleExecutionContext {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
@@ -51,6 +128,8 @@ pub struct RuleMetadata {
     pub issue_number: Option<&'static str>,
     /// A preset this rule belongs to.
     pub rule_presets: &'static [RulePreset],
+    /// Controls how often the rule runs for embedded code.
+    pub execution_scope: RuleExecutionScope,
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -944,6 +1023,7 @@ impl RuleMetadata {
             domains: &[],
             issue_number: None,
             rule_presets: &[],
+            execution_scope: RuleExecutionScope::Snippet,
         }
     }
 
@@ -989,6 +1069,11 @@ impl RuleMetadata {
 
     pub const fn rule_presets(mut self, rule_presets: &'static [RulePreset]) -> Self {
         self.rule_presets = rule_presets;
+        self
+    }
+
+    pub const fn execution_scope(mut self, execution_scope: RuleExecutionScope) -> Self {
+        self.execution_scope = execution_scope;
         self
     }
 

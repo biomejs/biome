@@ -1,0 +1,68 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --only=style/useFilenamingConvention AstroComponent.astro
+```
+
+## `biome.json`
+
+```json
+{
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "linter": { "enabled": true }
+  },
+  "linter": {
+    "rules": {
+      "preset": "none",
+      "style": { "useFilenamingConvention": "error" }
+    }
+  }
+}
+```
+
+## `AstroComponent.astro`
+
+```astro
+<main>
+  <h1>Markup only</h1>
+</main>
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+AstroComponent.astro lint/style/useFilenamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The filename should be in camelCase or kebab-case or snake_case or equal to the name of an export.
+  
+  i A consistent filename style makes files easier to find. It also avoids problems on file systems that ignore letter case.
+  
+  i The filename could be renamed to one of the following names:
+    astro-component.astro
+    astroComponent.astro
+    astro_component.astro
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```
