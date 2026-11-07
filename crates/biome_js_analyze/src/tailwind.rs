@@ -4,7 +4,7 @@ use biome_js_factory::make::{
     js_literal_member_name, js_string_literal, js_string_literal_expression,
     js_string_literal_single_quotes, js_template_chunk, js_template_chunk_element, jsx_string,
 };
-use biome_js_syntax::JsLanguage;
+use biome_js_syntax::{JsLanguage, JsSyntaxKind};
 use biome_rowan::{BatchMutation, TextRange, TextSize};
 
 pub(crate) type AnyTailwindClassString = AnyClassStringLike;
@@ -74,7 +74,14 @@ fn inner_text_start(node: &AnyTailwindClassString) -> Option<TextSize> {
             Some(node.value_token().ok()?.text_trimmed_range().start() + TextSize::from(1))
         }
         AnyTailwindClassString::JsLiteralMemberName(node) => {
-            Some(node.value().ok()?.text_trimmed_range().start() + TextSize::from(1))
+            let value = node.value().ok()?;
+            // Only string literal keys have an opening quote to skip.
+            let quote_len = if value.kind() == JsSyntaxKind::JS_STRING_LITERAL {
+                TextSize::from(1)
+            } else {
+                TextSize::from(0)
+            };
+            Some(value.text_trimmed_range().start() + quote_len)
         }
         AnyTailwindClassString::JsxString(node) => {
             Some(node.value_token().ok()?.text_trimmed_range().start() + TextSize::from(1))
