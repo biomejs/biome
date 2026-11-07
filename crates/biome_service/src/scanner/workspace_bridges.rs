@@ -36,6 +36,13 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
         path_kind: Option<PathKind>,
     ) -> Result<bool, WorkspaceError>;
 
+    /// Returns the Tailwind CSS stylesheets that the settings of the project
+    /// with the given `project_key` point to.
+    ///
+    /// Every scan kind except [`ScanKind::NoScanner`] indexes them and the
+    /// files they import, because the Tailwind rules read them.
+    fn get_tailwind_stylesheets(&self, project_key: ProjectKey) -> Vec<Utf8PathBuf>;
+
     /// Returns whether the given `path` has been indexed.
     fn is_indexed(&self, path: &Utf8Path) -> bool;
 
