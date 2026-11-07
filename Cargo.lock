@@ -222,15 +222,19 @@ dependencies = [
 name = "biome_astro_semantic"
 version = "0.1.0"
 dependencies = [
+ "biome_db",
  "biome_html_parser",
  "biome_html_syntax",
  "biome_js_parser",
  "biome_js_semantic",
  "biome_js_syntax",
  "biome_languages",
+ "biome_parser",
  "biome_rowan",
  "enumflags2",
  "insta",
+ "ryu-js",
+ "salsa",
 ]
 
 [[package]]
@@ -404,6 +408,7 @@ version = "0.7.0"
 dependencies = [
  "biome_analyze",
  "biome_analyze_macros",
+ "biome_astro_semantic",
  "biome_console",
  "biome_css_factory",
  "biome_css_parser",
@@ -1722,6 +1727,7 @@ dependencies = [
 name = "biome_module_graph"
 version = "0.7.0"
 dependencies = [
+ "biome_astro_semantic",
  "biome_configuration",
  "biome_console",
  "biome_css_formatter",

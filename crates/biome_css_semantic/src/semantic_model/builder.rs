@@ -3,16 +3,16 @@ use biome_css_syntax::{
     CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxKind, CssSyntaxToken, ScssAtRootAtRule, T,
     single_expression_item,
 };
-use biome_rowan::{AstNode, AstPtr, SyntaxKindSet, TextRange, TokenText};
+use biome_rowan::{AstNode, AstPtr, RawSyntaxKind, SyntaxKindSet, TextRange, TokenText};
 use rustc_hash::FxHashMap;
 use std::{collections::BTreeMap, sync::LazyLock};
 
-use super::SemanticFlavor;
 use super::model::{
     CssGlobalCustomVariableData, CssModelDeclarationData, CssPropertyAtRuleData, ResolvedSelector,
     RuleData, RuleId, SelectorData, SemanticModel, SemanticModelData, Specificity,
     compare_scss_function_names, selector_tokens,
 };
+use super::{SemanticFlavor, SemanticModelOptions, SyntheticCustomProperty};
 use crate::events::SemanticEvent;
 use crate::model::{AnyCssSelectorLike, AnyRuleStart};
 
@@ -31,6 +31,8 @@ const NON_SELECTOR_RULE_KINDS: SyntaxKindSet<CssLanguage> = CssContainerAtRule::
 pub struct SemanticModelBuilder {
     root: AnyCssRoot,
     flavor: SemanticFlavor,
+    synthetic_custom_properties: Vec<SyntheticCustomProperty>,
+    custom_properties_open: bool,
     /// All rules, indexed by RuleId
     all_rules: Vec<RuleData>,
     /// IDs of top-level rules only
@@ -54,6 +56,8 @@ impl SemanticModelBuilder {
         Self {
             root,
             flavor: SemanticFlavor::default(),
+            synthetic_custom_properties: Vec::new(),
+            custom_properties_open: false,
             all_rules: Vec::new(),
             top_level_rule_ids: Vec::new(),
             root_declarations: Vec::new(),
@@ -71,6 +75,22 @@ impl SemanticModelBuilder {
     #[inline]
     pub fn set_flavor(&mut self, flavor: SemanticFlavor) {
         self.flavor = flavor;
+    }
+
+    pub fn set_options(&mut self, options: SemanticModelOptions) {
+        self.flavor = options.flavor;
+        self.custom_properties_open = options.custom_properties_open;
+        self.synthetic_custom_properties.clear();
+        for property in options.synthetic_custom_properties {
+            if self
+                .synthetic_custom_properties
+                .iter()
+                .any(|existing| existing.name() == property.name())
+            {
+                continue;
+            }
+            self.synthetic_custom_properties.push(property);
+        }
     }
 
     /// Returns the nearest enclosing rule that carries selectors, skipping
@@ -145,11 +165,23 @@ impl SemanticModelBuilder {
     }
 
     pub fn build(mut self) -> SemanticModel {
+        for property in &self.synthetic_custom_properties {
+            self.global_custom_variables
+                .entry(TokenText::new_raw(RawSyntaxKind(0), property.name()))
+                .or_default()
+                .synthetic_range = Some(
+                property
+                    .host_range()
+                    .unwrap_or_else(|| TextRange::empty(0.into())),
+            );
+        }
         self.scss_function_names
             .sort_by(|left, right| compare_scss_function_names(left.text(), right.text()));
         let data = SemanticModelData {
             root: self.root.syntax().as_send().expect("To be a root node"),
             flavor: self.flavor,
+            synthetic_custom_properties: self.synthetic_custom_properties,
+            custom_properties_open: self.custom_properties_open,
             all_rules: self.all_rules,
             top_level_rule_ids: self.top_level_rule_ids,
             root_declarations: self.root_declarations,
