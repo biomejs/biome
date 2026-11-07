@@ -37,7 +37,7 @@ const Component4 = () => {
 
 const Component5 = () => {
 	const [isOpen, setIsOpen] = useState(false);
-	const [isReady] = useState<boolean>();
+	const [isReady] = useState(true);
 	return (
 		<div>
 			{isOpen && <Modal />}
@@ -50,3 +50,8 @@ const Component5 = () => {
 const Component6 = ({ fallback }) => {
 	return <div>{isOpen ? <Modal /> : fallback}</div>;
 };
+
+const Component7 = ({ count }) => {
+	return <div>{!(count && <Modal />)}</div>;
+};
+

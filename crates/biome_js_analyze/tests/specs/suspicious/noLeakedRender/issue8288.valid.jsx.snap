@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
 expression: issue8288.valid.jsx
 ---
 # Input
@@ -43,7 +44,7 @@ const Component4 = () => {
 
 const Component5 = () => {
 	const [isOpen, setIsOpen] = useState(false);
-	const [isReady] = useState<boolean>();
+	const [isReady] = useState(true);
 	return (
 		<div>
 			{isOpen && <Modal />}
@@ -57,6 +58,9 @@ const Component6 = ({ fallback }) => {
 	return <div>{isOpen ? <Modal /> : fallback}</div>;
 };
 
-```
+const Component7 = ({ count }) => {
+	return <div>{!(count && <Modal />)}</div>;
+};
 
-_Note: The parser emitted 1 diagnostics which are not shown here._
+
+```

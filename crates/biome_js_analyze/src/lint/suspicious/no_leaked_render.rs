@@ -225,6 +225,12 @@ fn is_inside_jsx_child(node: &JsSyntaxNode) -> bool {
         {
             return false;
         }
+        if biome_js_syntax::JsUnaryExpression::cast(parent.clone())
+            .and_then(|unary| unary.operator().ok())
+            == Some(JsUnaryOperator::LogicalNot)
+        {
+            return false;
+        }
         if !matches!(
             parent.kind(),
             JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION
@@ -317,15 +323,11 @@ fn is_boolean_state_binding(model: &SemanticModel, ident: &JsReferenceIdentifier
 fn find_variable(model: &SemanticModel, name: &JsReferenceIdentifier) -> Option<AnyJsExpression> {
     let binding = model.binding(name)?;
     let declaration = binding.tree().declaration()?;
-    let declarator = declaration
-        .parent_binding_pattern_declaration()
-        .unwrap_or(declaration);
-    let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) = declarator else {
+    let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) = declaration else {
         return None;
     };
 
-    let expr = declarator.initializer()?.expression().ok()?;
-    Some(expr)
+    declarator.initializer()?.expression().ok()
 }
 
 fn is_unsafe_literal(literal: &AnyJsLiteralExpression) -> Option<bool> {
