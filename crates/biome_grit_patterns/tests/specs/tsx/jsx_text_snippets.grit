@@ -1,0 +1,4 @@
+or {
+    `process.env = $value`,
+    `Hello $name`
+}
