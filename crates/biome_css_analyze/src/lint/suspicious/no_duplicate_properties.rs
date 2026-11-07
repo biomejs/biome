@@ -142,7 +142,14 @@ fn find_duplicate(
             continue;
         };
         let prop_name: Text = match prefix {
-            Some(prefix) => format!("{prefix}-{}", name.text_trimmed()).into(),
+            Some(prefix) => {
+                let name = name.text_trimmed();
+                let mut joined = String::with_capacity(prefix.len() + 1 + name.len());
+                joined.push_str(prefix);
+                joined.push('-');
+                joined.push_str(name);
+                joined.into()
+            }
             None => name.token_text_trimmed().into(),
         };
 
