@@ -38,6 +38,9 @@ lang_html    = []
 lang_js      = []
 lang_json    = []
 lang_md      = []
+# MDX is still in development and stays out of release builds until this
+# feature is removed.
+lang_mdx     = ["lang_md"]
 lang_yaml    = []
 # Insert here only languages that are **exposed to the user** or enabled via feature flags
 schema       = ["dep:schemars", "lang_css", "lang_graphql", "lang_grit", "lang_html", "lang_js", "lang_json"]
