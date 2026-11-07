@@ -16,4 +16,10 @@ expression: valid.astro
 
 <div role="grid" aria-rowcount={count}></div>
 
+<button type="button" aria-pressed=`${view === 'cards' ? 'true' : 'false'}`>Button</button>
+<button type="button" aria-pressed={view === 'cards' ? 'true' : 'false'}>Button</button>
+<button type="button" aria-pressed={view === 'cards'}>Button</button>
+<button type="button" aria-pressed=`\\${state}`>Button</button>
+<button type="button" aria-pressed=`true`>Button</button>
+
 ```
