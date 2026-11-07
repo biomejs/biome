@@ -1,0 +1,100 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidUsing.js
+---
+# Input
+```js
+/* should generate diagnostics */
+switch (a) {
+	case 1:
+		using x = foo();
+		break;
+	default:
+		await using y = bar();
+		break;
+}
+
+```
+
+# Diagnostics
+```
+invalidUsing.js:4:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Other switch clauses can erroneously access this declaration.
+    Wrap the declaration in a block to restrict its access to the switch clause.
+  
+    2 │ switch (a) {
+    3 │ 	case 1:
+  > 4 │ 		using x = foo();
+      │ 		^^^^^^^^^^^^^^^
+    5 │ 		break;
+    6 │ 	default:
+  
+  i The declaration is defined in this switch clause:
+  
+    1 │ /* should generate diagnostics */
+    2 │ switch (a) {
+  > 3 │ 	case 1:
+      │ 	^^^^^^^
+  > 4 │ 		using x = foo();
+  > 5 │ 		break;
+      │ 		^^^^^^
+    6 │ 	default:
+    7 │ 		await using y = bar();
+  
+  i Safe fix: Wrap the declaration in a block.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   switch (a) {
+     3    │ - → case·1:
+        3 │ + → case·1:·{
+     4  4 │       using x = foo();
+     5    │ - → → break;
+        5 │ + → → break;
+        6 │ + → }
+     6  7 │     default:
+     7  8 │       await using y = bar();
+  
+
+```
+
+```
+invalidUsing.js:7:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Other switch clauses can erroneously access this declaration.
+    Wrap the declaration in a block to restrict its access to the switch clause.
+  
+    5 │ 		break;
+    6 │ 	default:
+  > 7 │ 		await using y = bar();
+      │ 		^^^^^^^^^^^^^^^^^^^^^
+    8 │ 		break;
+    9 │ }
+  
+  i The declaration is defined in this switch clause:
+  
+     4 │ 		using x = foo();
+     5 │ 		break;
+   > 6 │ 	default:
+       │ 	^^^^^^^^
+   > 7 │ 		await using y = bar();
+   > 8 │ 		break;
+       │ 		^^^^^^
+     9 │ }
+    10 │ 
+  
+  i Safe fix: Wrap the declaration in a block.
+  
+     4  4 │       using x = foo();
+     5  5 │       break;
+     6    │ - → default:
+        6 │ + → default:·{
+     7  7 │       await using y = bar();
+     8    │ - → → break;
+        8 │ + → → break;
+        9 │ + → }
+     9 10 │   }
+    10 11 │   
+  
+
+```
