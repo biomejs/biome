@@ -9,8 +9,11 @@ pub fn generate_grit_mappings(ast: &AstSrc, language_kind: LanguageKind) -> Resu
     let native_nodes = ast
         .nodes
         .iter()
-        // Filter out nodes that are lists or start with "Any"
-        .filter(|node| !node.name.contains("List") && !node.name.starts_with("Any"))
+        // `AstSrc` keeps lists and unions in dedicated fields, so `ast.nodes` only holds regular
+        // nodes. A name-based `List` filter therefore only drops regular nodes that happen to have
+        // "List" in their name (e.g. `CssPseudoClassFunctionSelectorList`), making them unusable in
+        // Grit plugins. Unions still need excluding, as their names are not emitted as node kinds.
+        .filter(|node| !node.name.starts_with("Any"))
         .collect::<Vec<_>>();
 
     let legacy_patterns = lang.legacy_patterns;
