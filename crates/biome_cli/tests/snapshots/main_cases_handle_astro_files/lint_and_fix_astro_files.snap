@@ -12,6 +12,7 @@ biome lint --write --unsafe file.astro
 
 ```astro
 ---
+
 ---
 <div></div>
 ```
