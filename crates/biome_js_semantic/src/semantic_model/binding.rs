@@ -560,9 +560,34 @@ impl Binding {
             .to_node(self.data.to_root().syntax())
     }
 
+    /// Returns the node of this binding, like [Self::syntax], but resolves
+    /// it near `node` with [biome_rowan::SyntaxNodePtr::as_node_near]
+    /// instead of from the root.
+    ///
+    /// This is cheaper than [Self::syntax] when `node` is close to the
+    /// binding. `node` must belong to the tree the model was built from.
+    ///
+    /// ## Panics
+    ///
+    /// Panics if the binding's node can't be found in the tree of `node`.
+    pub fn syntax_near(&self, node: &JsSyntaxNode) -> JsSyntaxNode {
+        let binding = self.data.binding(self.id);
+        self.data.binding_node_by_start[&binding.range.start()].unwrap_node_near(node)
+    }
+
     /// Returns the typed AST node associated with this binding.
     pub fn tree(&self) -> AnyJsIdentifierBinding {
         AnyJsIdentifierBinding::unwrap_cast(self.syntax().clone())
+    }
+
+    /// Returns the typed AST node of this binding, like [Self::tree], but
+    /// resolves it near `node`.
+    ///
+    /// ## Panics
+    ///
+    /// Panics in the same cases as [Self::syntax_near].
+    pub fn tree_near(&self, node: &JsSyntaxNode) -> AnyJsIdentifierBinding {
+        AnyJsIdentifierBinding::unwrap_cast(self.syntax_near(node))
     }
 
     /// Returns an iterator to all references of this binding.
