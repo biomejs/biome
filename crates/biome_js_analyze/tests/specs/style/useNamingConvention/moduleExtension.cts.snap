@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: moduleExtension.cts
+---
+# Input
+```cts
+// should generate diagnostics
+const module_value = 1;
+console.log(module_value);
+
+```
+
+# Diagnostics
+```
+moduleExtension.cts:2:7 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This global const name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+    1 │ // should generate diagnostics
+  > 2 │ const module_value = 1;
+      │       ^^^^^^^^^^^^
+    3 │ console.log(module_value);
+    4 │ 
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+    1 1 │   // should generate diagnostics
+    2   │ - const·module_value·=·1;
+    3   │ - console.log(module_value);
+      2 │ + const·moduleValue·=·1;
+      3 │ + console.log(moduleValue);
+    4 4 │   
+  
+
+```
