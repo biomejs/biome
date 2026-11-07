@@ -5,10 +5,10 @@ expression: issue8288.invalid.jsx
 # Input
 ```jsx
 /* should generate diagnostics */
-const Component1 = () => {
+const Component1 = ({ count }) => {
 	return (
 		<Nested>
-			<SecondNested>{userId ? 1 : undefined} </SecondNested>
+			<SecondNested>{count && <NestedChild />} </SecondNested>
 		</Nested>
 	);
 };
@@ -23,14 +23,14 @@ issue8288.invalid.jsx:5:19 lint/suspicious/noLeakedRender ━━━━━━━�
   
     3 │ 	return (
     4 │ 		<Nested>
-  > 5 │ 			<SecondNested>{userId ? 1 : undefined} </SecondNested>
-      │ 			               ^^^^^^^^^^^^^^^^^^^^^^
+  > 5 │ 			<SecondNested>{count && <NestedChild />} </SecondNested>
+      │ 			               ^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ 		</Nested>
     7 │ 	);
   
-  i This happens when you use ternary operators in JSX with alternate values that could be variables.
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
-  i Replace with a safe alternate value like an empty string , null or another JSX element.
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
   
 
 ```

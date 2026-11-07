@@ -1,8 +1,8 @@
 /* should generate diagnostics */
-const Component1 = () => {
+const Component1 = ({ count }) => {
 	return (
 		<Nested>
-			<SecondNested>{userId ? 1 : undefined} </SecondNested>
+			<SecondNested>{count && <NestedChild />} </SecondNested>
 		</Nested>
 	);
 };

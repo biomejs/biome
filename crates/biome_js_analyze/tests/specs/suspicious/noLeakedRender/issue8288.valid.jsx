@@ -30,6 +30,23 @@ const Component4 = () => {
 	return (
 		<Nested>
 			<SecondNested>{userId ? 1 : null} </SecondNested>
+			<SecondNested>{userId ? 1 : undefined} </SecondNested>
 		</Nested>
 	);
+};
+
+const Component5 = () => {
+	const [isOpen, setIsOpen] = useState(false);
+	const [isReady] = useState<boolean>();
+	return (
+		<div>
+			{isOpen && <Modal />}
+			{isReady && <Modal />}
+			{(isOpen && <Modal />)}
+		</div>
+	);
+};
+
+const Component6 = ({ fallback }) => {
+	return <div>{isOpen ? <Modal /> : fallback}</div>;
 };
