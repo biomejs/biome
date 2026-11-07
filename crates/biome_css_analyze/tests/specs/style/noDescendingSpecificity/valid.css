@@ -17,11 +17,11 @@ c {
     }
 }
 
-e:hover {
+e {
     color: red;
 }
 
-e {
+e:hover {
     color: red;
 }
 
@@ -48,5 +48,23 @@ e {
 
 /* This selector is overwritten by the one above it, but this is not an error because the rule only evaluates it as a compound selector */
 :where(#h) :is(h) {
+    color: red;
+}
+.s ::slotted(.k:hover) {
+    color: red;
+}
+
+::slotted(.k) {
+    color: red;
+}
+
+/* `ul li.active` and `.active` have different subjects, as in the flat form. */
+ul li {
+    &.active {
+        color: red;
+    }
+}
+
+.active {
     color: red;
 }

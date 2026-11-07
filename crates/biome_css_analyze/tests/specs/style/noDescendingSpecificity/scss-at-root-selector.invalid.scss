@@ -1,9 +1,9 @@
 /* should generate diagnostics */
 .outer {
-  @at-root .direct-parent .direct-target, .direct-target {}
+  @at-root .direct-parent .direct-target, .direct-target { color: red; }
 
   @at-root .direct-root {
-    .nested-parent .nested-target {}
-    .nested-target {}
+    .nested-parent .nested-target { color: red; }
+    .nested-target { color: red; }
   }
 }

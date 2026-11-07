@@ -1,6 +1,7 @@
 use biome_css_parser::{CssParserOptions, parse_css};
 use biome_languages::CssFileSource;
 
+use crate::model::Selector;
 use crate::semantic_model;
 
 #[test]
@@ -644,6 +645,10 @@ fn test_deeply_nested_ampersand() {
 }
 
 fn resolved_deepest_scss_selector(source: &str, depth: usize) -> String {
+    deepest_scss_selector(source, depth).resolved().to_string()
+}
+
+fn deepest_scss_selector(source: &str, depth: usize) -> Selector {
     let parse = parse_css(source, CssFileSource::scss(), CssParserOptions::default());
     assert!(parse.diagnostics().is_empty(), "{:#?}", parse.diagnostics());
 
@@ -668,8 +673,82 @@ fn resolved_deepest_scss_selector(source: &str, depth: usize) -> String {
     rule.selectors
         .first()
         .expect("expected the nested rule selector")
+        .clone()
+}
+
+/// Returns each compound of the selector as `combinator|simple selectors`, with simple selectors
+/// formatted as `kind:text`.
+fn compounds(source: &str, depth: usize) -> Vec<String> {
+    let selector = deepest_scss_selector(source, depth);
+    selector
         .resolved()
-        .to_string()
+        .compounds()
+        .map(|compound| {
+            let combinator = compound.combinator().map_or("", |(_, text)| text.text());
+            let simple_selectors: Vec<_> = compound
+                .simple_selectors()
+                .map(|simple| {
+                    let text: String = simple.tokens().iter().map(|(_, t)| t.text()).collect();
+                    format!("{:?}:{text}", simple.kind())
+                })
+                .collect();
+            format!("{combinator}|{}", simple_selectors.join(" "))
+        })
+        .collect()
+}
+
+#[test]
+fn test_compounds_split_at_top_level_combinators() {
+    assert_eq!(
+        compounds("ul > li.a:not(.b > .c)[x~=y]::before {}", 0),
+        [
+            "|Type:ul",
+            ">|Type:li Class:.a PseudoClass::not(.b>.c) Attribute:[x~=y] PseudoElement:::before",
+        ]
+    );
+    assert_eq!(
+        compounds("a:nth-child(2n + 1) b:is(.c .d) {}", 0),
+        [
+            "|Type:a PseudoClass::nth-child(2n+1)",
+            " |Type:b PseudoClass::is(.c .d)"
+        ]
+    );
+}
+
+#[test]
+fn test_compounds_keep_scss_suffix_on_parent_selector() {
+    assert_eq!(
+        compounds(".a { &--x + &--y#id {} }", 1),
+        ["|Class:.a--x", "+|Class:.a--y Id:#id"]
+    );
+}
+
+#[test]
+fn test_compounds_classify_scss_selectors() {
+    assert_eq!(
+        compounds("%p.a#{$b} {}", 0),
+        ["|Placeholder:%p Class:.a Interpolation:#{$b}"]
+    );
+}
+
+#[test]
+fn test_subject_is_last_compound() {
+    let selector = deepest_scss_selector(".a { ul li:hover {} }", 1);
+    let subject = selector.resolved().subject();
+    assert_eq!(subject.combinator().map(|(_, text)| text.text()), Some(" "));
+    let names: Vec<_> = subject
+        .simple_selectors()
+        .map(|simple| simple.name())
+        .collect();
+    assert_eq!(names, [Some("li"), Some("hover")]);
+}
+
+#[test]
+fn test_normalize_sorts_and_lowercases() {
+    let normalize = |source| deepest_scss_selector(source, 0).resolved().normalize();
+    assert_eq!(normalize("DIV.b.a > A:hover {}"), "div.a.b > a:hover");
+    assert_eq!(normalize(":not(.b.a).c {}"), ".c:not(.b.a)");
+    assert_eq!(normalize("a:is(.b > .c) {}"), "a:is(.b > .c)");
 }
 
 #[test]
@@ -715,4 +794,18 @@ fn test_resolve_scss_partial_combinator_without_left_selector() {
 fn test_resolve_scss_partial_combinator_with_nesting_selector() {
     let resolved = resolved_deepest_scss_selector(".navbar { & ~ { .container {} } }", 2);
     assert_eq!(resolved, ".navbar ~ .container");
+}
+
+#[test]
+fn test_requires_scss_evaluation() {
+    let requires = |source| {
+        deepest_scss_selector(source, 0)
+            .resolved()
+            .requires_scss_evaluation()
+    };
+    assert!(requires("%placeholder {}"));
+    assert!(requires(".a-#{$b} {}"));
+    assert!(requires("[title=\"#{$x}\"] {}"));
+    assert!(!requires("[data-x=\"50%\"] {}"));
+    assert!(!requires("#id {}"));
 }
