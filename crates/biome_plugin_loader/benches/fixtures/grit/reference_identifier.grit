@@ -1,0 +1,3 @@
+JsReferenceIdentifier() as $reference where {
+    register_diagnostic(span = $reference, message = "Reference identifier")
+}

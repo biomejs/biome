@@ -45,7 +45,7 @@ impl Matcher<GritQueryContext> for GritCodeSnippet {
             return self.execute_at_node(&node, resolved, state, context, logs);
         }
 
-        if !context.allow_list_matches {
+        if !context.node_selector {
             return Ok(false);
         }
 

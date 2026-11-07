@@ -77,11 +77,20 @@ const AWAIT_IN_LOOP: Scenario = Scenario {
     js: include_str!("fixtures/js/await_in_loop.js"),
 };
 
+/// Selects every identifier reference, exercising many distinct matches per file.
+const REFERENCE_IDENTIFIER: Scenario = Scenario {
+    name: "reference_identifier",
+    grit: include_str!("fixtures/grit/reference_identifier.grit"),
+    grit_in_js: include_str!("fixtures/grit_in_js/reference_identifier_grit.js"),
+    js: include_str!("fixtures/js/reference_identifier.js"),
+};
+
 const SCENARIOS: &[&Scenario] = &[
     &CONSOLE_LOG,
     &RESTRICTED_CALLEE,
     &UNDEFINED_REFERENCE,
     &AWAIT_IN_LOOP,
+    &REFERENCE_IDENTIFIER,
 ];
 
 #[derive(Clone, Copy)]
@@ -325,6 +334,7 @@ fn assert_parity() {
             for fixture in FIXTURES {
                 let root = parse_fixture(fixture);
                 let grit = analyze(&root, &plugins(Engine::Grit.load(scenario)));
+                let grit_in_js = analyze(&root, &plugins(Engine::GritInJs.load(scenario)));
                 let js = analyze(&root, &plugins(Engine::Js.load(scenario)));
                 assert!(
                     !grit.is_empty(),
@@ -335,6 +345,11 @@ fn assert_parity() {
                 assert_eq!(
                     grit, js,
                     "{}/{}: the Grit and JS plugins report different ranges",
+                    scenario.name, fixture.name
+                );
+                assert_eq!(
+                    grit_in_js, js,
+                    "{}/{}: the Grit-in-JS and JS plugins report different ranges",
                     scenario.name, fixture.name
                 );
             }

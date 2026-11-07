@@ -131,7 +131,7 @@ impl Matcher<GritQueryContext> for GritNodePattern {
         // are matched as a sequence by `execute_list`.
         let Some(node) = binding.singleton() else {
             return match binding.as_node() {
-                Some(node) if node.is_list() && context.allow_list_matches => {
+                Some(node) if node.is_list() && context.node_selector => {
                     self.execute_list(&node, init_state, context, logs)
                 }
                 _ => Ok(false),

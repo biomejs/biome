@@ -58,11 +58,11 @@ pub struct GritExecContext<'a> {
 
     pub diagnostics: Mutex<Vec<(RuleDiagnostic, Applicability)>>,
 
-    /// Whether snippets may match lists with more than one child.
+    /// Whether the query was compiled as a node selector.
     ///
-    /// Only node selector queries enable this, so regular Grit queries keep
-    /// their existing list-matching behavior.
-    pub allow_list_matches: bool,
+    /// Selector queries allow snippets to match multi-child lists. Regular
+    /// Grit queries keep their existing list-matching behavior.
+    pub node_selector: bool,
 }
 
 impl GritExecContext<'_> {

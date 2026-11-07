@@ -22,6 +22,7 @@ use biome_analyze::RuleDiagnostic;
 use biome_diagnostics::Applicability;
 use biome_grit_syntax::{GritRoot, GritRootExt, GritSyntaxKind};
 use biome_rowan::AstNode;
+use biome_rowan::syntax::SyntaxElementKey;
 use camino::Utf8Path;
 use grit_pattern_matcher::constants::{
     ABSOLUTE_PATH_INDEX, FILENAME_INDEX, GLOBAL_VARS_SCOPE_INDEX, NEW_FILES_INDEX, PROGRAM_INDEX,
@@ -29,11 +30,12 @@ use grit_pattern_matcher::constants::{
 use grit_pattern_matcher::context::ExecContext;
 use grit_pattern_matcher::file_owners::{FileOwner, FileOwners};
 use grit_pattern_matcher::pattern::{
-    File as GritFileTrait, FilePtr, FileRegistry, Matcher, Pattern, Predicate, ResolvedPattern,
-    State, VariableSource,
+    Container, File as GritFileTrait, FilePtr, FileRegistry, Matcher, Pattern, Predicate,
+    ResolvedPattern, State, Variable, VariableSource,
 };
 use grit_util::error::{GritPatternError, GritResult};
 use grit_util::{AnalysisLogs, Ast, ByteRange, InputRanges, Range, VariableMatch};
+use rustc_hash::FxHashSet;
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
@@ -96,7 +98,7 @@ impl GritQuery {
             patterns: &self.definitions.patterns,
             predicates: &self.definitions.predicates,
             diagnostics: Mutex::new(Vec::new()),
-            allow_list_matches: self.selector_pattern.is_some(),
+            node_selector: self.selector_pattern.is_some(),
         }
     }
 
@@ -160,7 +162,12 @@ impl GritQuery {
         let patterns = selector_patterns(selector_pattern);
 
         let mut matches = Vec::new();
+        let mut match_keys = FxHashSet::default();
         for candidate in candidates {
+            if !self.anchor_kinds.is_empty() && !self.anchor_kinds.contains(&candidate.kind()) {
+                continue;
+            }
+
             for pattern in &patterns {
                 // Each attempt starts from the same state, so variables bound by
                 // a failed attempt cannot affect later candidates.
@@ -169,10 +176,10 @@ impl GritQuery {
                 if pattern.execute(&binding, &mut candidate_state, &context, &mut logs)? {
                     if candidate.is_list() {
                         for child in candidate.named_children() {
-                            push_unique(&mut matches, child.language_node().clone());
+                            push_unique(&mut matches, &mut match_keys, child.language_node());
                         }
                     } else {
-                        push_unique(&mut matches, candidate.language_node().clone());
+                        push_unique(&mut matches, &mut match_keys, candidate.language_node());
                     }
                     break;
                 }
@@ -693,9 +700,13 @@ fn selection_candidates<'a>(node: &GritTargetNode<'a>) -> Vec<GritTargetNode<'a>
     candidates
 }
 
-fn push_unique(matches: &mut Vec<GritTargetLanguageNode>, node: GritTargetLanguageNode) {
-    if !matches.contains(&node) {
-        matches.push(node);
+fn push_unique(
+    matches: &mut Vec<GritTargetLanguageNode>,
+    keys: &mut FxHashSet<SyntaxElementKey>,
+    node: &GritTargetLanguageNode,
+) {
+    if keys.insert(node.key()) {
+        matches.push(node.clone());
     }
 }
 
@@ -723,8 +734,10 @@ fn extract_anchor_kinds(pattern: &Pattern<GritQueryContext>) -> Vec<GritTargetSy
         Pattern::Bubble(bubble) => extract_anchor_kinds(bubble.pattern_def.pattern()),
         Pattern::Where(where_pat) => {
             let mut kinds = extract_anchor_kinds(&where_pat.pattern);
-            if kinds.is_empty() {
-                kinds = extract_anchor_kinds_from_predicate(&where_pat.side_condition);
+            if kinds.is_empty()
+                && let Pattern::Variable(variable) = &where_pat.pattern
+            {
+                kinds = extract_anchor_kinds_from_predicate(&where_pat.side_condition, variable);
             }
             kinds
         }
@@ -755,7 +768,8 @@ fn extract_anchor_kinds(pattern: &Pattern<GritQueryContext>) -> Vec<GritTargetSy
         // restricting to X's kinds would miss valid matches.
         Pattern::Not(_) => vec![],
         Pattern::Rewrite(rw) => extract_anchor_kinds(&rw.left),
-        Pattern::Maybe(maybe) => extract_anchor_kinds(&maybe.pattern),
+        // Maybe matches every node because its inner pattern is optional.
+        Pattern::Maybe(_) => vec![],
         Pattern::Limit(limit) => extract_anchor_kinds(&limit.pattern),
         Pattern::CodeSnippet(snippet) => snippet.patterns.iter().map(|(kind, _)| *kind).collect(),
         Pattern::AstNode(node) => vec![node.kind],
@@ -763,28 +777,49 @@ fn extract_anchor_kinds(pattern: &Pattern<GritQueryContext>) -> Vec<GritTargetSy
     }
 }
 
-/// Extracts anchor kinds from a predicate expression.
+/// Extracts anchor kinds for `variable` from a predicate.
+///
+/// Only constraints on the same variable determine the kind of the node that
+/// matched. Predicates on other variables, such as `$program`, cannot narrow
+/// the candidate kinds.
 fn extract_anchor_kinds_from_predicate(
     predicate: &Predicate<GritQueryContext>,
+    variable: &Variable,
 ) -> Vec<GritTargetSyntaxKind> {
     match predicate {
         Predicate::Match(m) => {
-            if let Some(pattern) = &m.pattern {
-                extract_anchor_kinds(pattern)
-            } else {
-                vec![]
+            let Container::Variable(predicate_variable) = &m.val else {
+                return vec![];
+            };
+            let (Ok(predicate_scope), Ok(predicate_index)) = (
+                predicate_variable.try_scope(),
+                predicate_variable.try_index(),
+            ) else {
+                return vec![];
+            };
+            let (Ok(variable_scope), Ok(variable_index)) =
+                (variable.try_scope(), variable.try_index())
+            else {
+                return vec![];
+            };
+            if predicate_scope != variable_scope || predicate_index != variable_index {
+                return vec![];
             }
+            m.pattern
+                .as_ref()
+                .map(extract_anchor_kinds)
+                .unwrap_or_default()
         }
-        Predicate::And(a) => a
+        Predicate::And(and) => and
             .predicates
             .iter()
-            .flat_map(extract_anchor_kinds_from_predicate)
+            .flat_map(|predicate| extract_anchor_kinds_from_predicate(predicate, variable))
             .collect(),
-        Predicate::Or(o) => {
-            let all: Vec<_> = o
+        Predicate::Or(or) => {
+            let all: Vec<_> = or
                 .predicates
                 .iter()
-                .map(extract_anchor_kinds_from_predicate)
+                .map(|predicate| extract_anchor_kinds_from_predicate(predicate, variable))
                 .collect();
             if all.iter().any(|kinds| kinds.is_empty()) {
                 return vec![];
@@ -858,12 +893,31 @@ mod tests {
 
     #[test]
     fn anchor_kinds_returns_empty_for_not() {
-        // `not` negation: can't restrict to specific kinds.
         let query = compile_js_query("not `console.log($msg)`");
         let kinds = query.anchor_kinds();
         assert!(
             kinds.is_empty(),
             "Not patterns should return empty anchor kinds"
+        );
+    }
+
+    #[test]
+    fn anchor_kinds_returns_empty_for_maybe() {
+        let query = compile_js_query("maybe `console.log($msg)`");
+        let kinds = query.anchor_kinds();
+        assert!(
+            kinds.is_empty(),
+            "Maybe patterns match every node and cannot be narrowed by kind"
+        );
+    }
+
+    #[test]
+    fn anchor_kinds_ignores_predicates_on_other_variables() {
+        let query = compile_js_query("$x where { $program <: contains `console.log($msg)` }");
+        let kinds = query.anchor_kinds();
+        assert!(
+            kinds.is_empty(),
+            "predicates on another variable cannot narrow the matched kind"
         );
     }
 
@@ -1061,6 +1115,16 @@ mod tests {
                 JsSyntaxKind::JS_EXPRESSION_STATEMENT
             ]
         );
+    }
+
+    #[test]
+    fn find_matches_does_not_duplicate_wrapper_and_child_matches() {
+        let query = compile_js_selector("`undefined`");
+        let matches = query
+            .find_matches(make_js_file("undefined; undefined;"))
+            .expect("selector failed");
+
+        assert_eq!(matches.len(), 2, "got {matches:?}");
     }
 
     #[test]
