@@ -8,7 +8,8 @@ pub(crate) use biome_module_graph::resolve_html_module;
 pub(crate) use biome_module_graph::resolve_js_module;
 #[cfg(feature = "module_graph")]
 pub(crate) use biome_module_graph::{
-    ModuleDb, ModuleDependencies, ModuleInfo, ModuleInfoKind, module_dependencies,
+    ModuleDb, ModuleDependencies, ModuleInfo, ModuleInfoKind, ambient_module_path,
+    module_dependencies,
 };
 
 #[cfg(not(feature = "module_graph"))]

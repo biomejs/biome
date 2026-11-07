@@ -537,6 +537,16 @@ impl Scanner {
                 // The other files read the manifests that the setup phase
                 // deferred, so they're indexed first.
                 ctx.index_files_in_parallel(deferred_paths);
+                // The files of the project resolve imports to the modules that
+                // the framework files declare, so these are indexed before.
+                // Folders that the watcher indexes later don't change them.
+                #[cfg(not(target_family = "wasm"))]
+                if trigger == IndexTrigger::InitialScan
+                    && (scan_options.scan_kind.is_project()
+                        || scan_options.scan_kind.is_type_aware())
+                {
+                    index_framework_files(project_key, ctx);
+                }
                 let traversal_ctx = &*ctx;
                 ctx.workspace
                     .fs()
@@ -730,6 +740,40 @@ impl ProjectScan {
     /// Returns the nested configuration files of the project.
     pub(crate) fn configuration_files(&self) -> &[BiomePath] {
         &self.setup.configuration_files
+    }
+}
+
+/// Indexes the files that the framework loaders of the packages of the
+/// project visit, and the declaration files that they reference, then records
+/// the modules that these files declare for each package.
+///
+/// The dependencies of these files are added to [ScanContext::dependencies].
+#[cfg(not(target_family = "wasm"))]
+fn index_framework_files<W: WorkspaceScannerBridge>(project_key: ProjectKey, ctx: &ScanContext<W>) {
+    for (package_path, visits) in ctx.workspace.framework_visits(project_key) {
+        let mut seen = FxHashSet::default();
+        let mut files = Vec::new();
+        let mut pending: Vec<_> = visits
+            .into_iter()
+            .filter(|path| seen.insert(path.clone()))
+            .collect();
+        while !pending.is_empty() {
+            let unindexed = pending
+                .iter()
+                .filter(|path| !ctx.workspace.is_indexed(path))
+                .cloned()
+                .collect();
+            ctx.index_files_in_parallel(unindexed);
+            let references: Vec<_> = pending
+                .iter()
+                .flat_map(|path| ctx.workspace.declaration_references(path))
+                .filter(|reference| seen.insert(reference.clone()))
+                .collect();
+            files.append(&mut pending);
+            pending = references;
+        }
+        ctx.workspace
+            .register_framework_modules(&package_path, &files);
     }
 }
 

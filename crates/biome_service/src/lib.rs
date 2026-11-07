@@ -16,6 +16,8 @@ mod scanner;
 mod utils;
 
 mod embed;
+#[cfg(feature = "module_graph")]
+mod frameworks;
 mod module_graph;
 
 #[cfg(any(test, feature = "testing"))]

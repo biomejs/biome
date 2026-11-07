@@ -7523,3 +7523,114 @@ export const reportArguments = defineRule({
         assert_eq!(diagnostic.location().span, Some(range));
     }
 }
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn modules_that_frameworks_declare_resolve_after_an_lsp_scan() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    for (path, content) in [
+        (
+            "/project/package.json",
+            r#"{ "dependencies": { "astro": "^7.0.0" } }"#,
+        ),
+        (
+            "/project/node_modules/astro/package.json",
+            r#"{ "name": "astro", "version": "7.4.2" }"#,
+        ),
+        (
+            "/project/node_modules/astro/client.d.ts",
+            r#"declare module "astro:content" { export const getCollection: () => void; }"#,
+        ),
+        (
+            "/project/src/index.ts",
+            r#"import { getCollection } from "astro:content";"#,
+        ),
+    ] {
+        fs.insert(path.into(), content);
+    }
+
+    let (workspace, _) = scanned_lsp_workspace(&fs, "/project");
+
+    assert_eq!(
+        resolved_import(&workspace, "/project/src/index.ts", "astro:content"),
+        Some(Utf8PathBuf::from(
+            "/project/node_modules/astro/client.d.ts#0"
+        ))
+    );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn ambient_module_entries_follow_their_declaring_file() {
+    const PATH: &str = "/project/src/env.d.ts";
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert("/project/package.json".into(), "{}");
+    fs.insert(
+        PATH.into(),
+        r#"declare module "first" { export const first: number; }
+declare module "second" { export const second: number; }"#,
+    );
+    let (workspace, project_key) = scanned_lsp_workspace(&fs, "/project");
+    let has_module = |path: &str| {
+        workspace
+            .get_db()
+            .module_for_path(Utf8Path::new(path))
+            .is_some()
+    };
+    assert!(has_module("/project/src/env.d.ts#0"));
+    assert!(has_module("/project/src/env.d.ts#1"));
+
+    fs.insert(
+        PATH.into(),
+        r#"declare module "first" { export const first: number; }"#,
+    );
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new(PATH))
+        .unwrap();
+    assert!(has_module("/project/src/env.d.ts#0"));
+    assert!(!has_module("/project/src/env.d.ts#1"));
+
+    fs.remove(Utf8Path::new(PATH));
+    watcher(&workspace)
+        .unload_path(Utf8Path::new("/project/src"), project_key)
+        .unwrap();
+    assert!(!has_module("/project/src/env.d.ts#0"));
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn modules_that_frameworks_declare_disappear_with_their_declaring_file() {
+    const DECLARATIONS: &str = "/project/node_modules/astro/client.d.ts";
+    let fs = Arc::new(MemoryFileSystem::default());
+    for (path, content) in [
+        (
+            "/project/package.json",
+            r#"{ "dependencies": { "astro": "^7.0.0" } }"#,
+        ),
+        (
+            "/project/node_modules/astro/package.json",
+            r#"{ "name": "astro", "version": "7.4.2" }"#,
+        ),
+        (
+            DECLARATIONS,
+            r#"declare module "astro:content" { export const getCollection: () => void; }"#,
+        ),
+        (
+            "/project/src/index.ts",
+            r#"import { getCollection } from "astro:content";"#,
+        ),
+    ] {
+        fs.insert(path.into(), content);
+    }
+    let (workspace, project_key) = scanned_lsp_workspace(&fs, "/project");
+    assert!(resolved_import(&workspace, "/project/src/index.ts", "astro:content").is_some());
+
+    fs.remove(Utf8Path::new(DECLARATIONS));
+    watcher(&workspace)
+        .unload_file(Utf8Path::new(DECLARATIONS), project_key)
+        .unwrap();
+    assert_eq!(
+        resolved_import(&workspace, "/project/src/index.ts", "astro:content"),
+        None
+    );
+}
