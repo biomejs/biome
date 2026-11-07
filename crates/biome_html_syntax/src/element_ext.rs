@@ -45,6 +45,7 @@ impl AnyHtmlElement {
             | Self::HtmlBogusElement(_)
             | Self::HtmlSelfClosingElement(_)
             | Self::HtmlProcessingInstruction(_)
+            | Self::HtmlDirective(_)
             | Self::HtmlCdataSection(_) => false,
             Self::HtmlElement(element) => element.is_javascript_tag(),
         }
@@ -57,6 +58,7 @@ impl AnyHtmlElement {
             | Self::HtmlBogusElement(_)
             | Self::HtmlSelfClosingElement(_)
             | Self::HtmlProcessingInstruction(_)
+            | Self::HtmlDirective(_)
             | Self::HtmlCdataSection(_) => false,
             Self::HtmlElement(element) => element.is_style_tag(),
         }
@@ -76,6 +78,7 @@ impl AnyHtmlElement {
             Self::AnyHtmlContent(_)
             | Self::AstroFragment(_)
             | Self::HtmlBogusElement(_)
+            | Self::HtmlDirective(_)
             | Self::HtmlCdataSection(_) => None,
         }
     }

@@ -79,6 +79,7 @@ AnyHtmlElement =
 	| AnyHtmlContent
 	| HtmlCdataSection
 	| HtmlProcessingInstruction
+	| HtmlDirective
 	| HtmlBogusElement
 
 AnyHtmlContent =
