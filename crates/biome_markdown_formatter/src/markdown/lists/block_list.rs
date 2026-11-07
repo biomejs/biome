@@ -772,10 +772,11 @@ fn next_content_block_is_link_reference_definition(
 /// Whether the list terminates its own line.
 ///
 /// This is the case when the last block of its last bullet carries the line
-/// ending: a paragraph or table ending with a newline, a quote whose last block
-/// carries it, or a blank line swallowed by the bullet as [MdNewline]. Blocks
-/// that end with their last visible character, like a thematic break, leave the
-/// line terminator to the enclosing block list.
+/// ending: a paragraph ending with a newline or a hard line break, a table
+/// ending with a newline, a quote whose last block carries it, or a blank line
+/// swallowed by the bullet as [MdNewline]. Blocks that end with their last
+/// visible character, like a thematic break, leave the line terminator to the
+/// enclosing block list.
 ///
 /// [MdNewline]: biome_markdown_syntax::MdNewline
 pub(crate) fn list_ends_with_line_break(item: &AnyListItem) -> bool {
@@ -785,16 +786,14 @@ pub(crate) fn list_ends_with_line_break(item: &AnyListItem) -> bool {
     let mut content = last_bullet.content();
     loop {
         match content.iter().last() {
-            Some(AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(_))) => return true,
-            Some(AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph))) => {
-                return paragraph.ends_with_newline();
-            }
-            Some(AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::GfmTable(table))) => {
-                return table_ends_with_line_break(&table);
-            }
-            Some(block @ AnyMdBlock::AnyMdContainerBlock(AnyMdContainerBlock::MdQuote(_))) => {
-                return block_ends_with_line_break(&block);
-            }
+            Some(
+                block @ (AnyMdBlock::AnyMdLeafBlock(
+                    AnyMdLeafBlock::MdNewline(_)
+                    | AnyMdLeafBlock::MdParagraph(_)
+                    | AnyMdLeafBlock::GfmTable(_),
+                )
+                | AnyMdBlock::AnyMdContainerBlock(AnyMdContainerBlock::MdQuote(_))),
+            ) => return block_ends_with_line_break(&block),
             Some(block) => match block
                 .as_any_list_item()
                 .and_then(|nested| nested.list().iter().last())

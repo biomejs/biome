@@ -100,3 +100,8 @@ Paragraph after a top-level quote ending with a list item.
 
 
 Paragraph after several blank lines.
+
+- a
+  > - b  
+
+Paragraph after a quote ending with a list and a hard line break.
