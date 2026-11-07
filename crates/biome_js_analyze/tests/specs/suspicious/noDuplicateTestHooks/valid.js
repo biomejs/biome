@@ -125,3 +125,15 @@ describe("something", () => {
     beforeEach(() => {});
   });
 });
+
+describe("local functions named like hooks", () => {
+	const before = (n) => n + 1;
+	function after() {}
+
+	it("calls them twice", () => {
+		expect(before(1)).toBe(2);
+		expect(before(2)).toBe(3);
+		after();
+		after();
+	});
+});

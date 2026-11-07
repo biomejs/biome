@@ -1,11 +1,11 @@
+use crate::services::semantic::Semantic;
 use biome_analyze::{
-    AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleDomain, RuleSource,
-    ServiceBag, Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsLanguage, TextRange};
-use biome_rowan::{AstNode, Language, SyntaxKindSet, SyntaxNode, WalkEvent};
+use biome_js_syntax::{AnyJsExpression, JsCallExpression};
+use biome_rowan::{AstNode, WalkEvent};
 use biome_rule_options::no_duplicate_test_hooks::NoDuplicateTestHooksOptions;
 
 declare_lint_rule! {
@@ -72,28 +72,73 @@ declare_lint_rule! {
     }
 }
 
-// Declare a query match struct type containing a JavaScript function node
-pub struct DuplicateHooks(JsCallExpression);
-
 impl Rule for NoDuplicateTestHooks {
-    type Query = DuplicateHooks;
-    type State = ();
-    type Signals = Option<Self::State>;
+    type Query = Semantic<JsCallExpression>;
+    type State = JsCallExpression;
+    type Signals = Box<[Self::State]>;
     type Options = NoDuplicateTestHooksOptions;
 
-    fn run(_: &RuleContext<Self>) -> Self::Signals {
-        Some(())
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let describe = ctx.query();
+        if !is_test_describe_call(describe) {
+            return Box::default();
+        }
+        let model = ctx.model();
+        let mut hooks = HooksContext::default();
+        let mut duplicates = Vec::new();
+        let mut preorder = describe.syntax().preorder();
+        while let Some(event) = preorder.next() {
+            let WalkEvent::Enter(node) = event else {
+                continue;
+            };
+            let Some(call) = JsCallExpression::cast(node) else {
+                continue;
+            };
+            if call == *describe {
+                continue;
+            }
+            // Hooks of a nested `describe` are counted by its own run.
+            if is_test_describe_call(&call) {
+                preorder.skip_subtree();
+                continue;
+            }
+            let Ok(AnyJsExpression::JsIdentifierExpression(identifier)) = call.callee() else {
+                continue;
+            };
+            let Ok(reference) = identifier.name() else {
+                continue;
+            };
+            let Ok(name) = reference.value_token() else {
+                continue;
+            };
+            if !matches!(
+                name.text_trimmed(),
+                "beforeEach" | "beforeAll" | "afterEach" | "afterAll" | "after" | "before"
+            ) {
+                continue;
+            }
+            // A binding that is not an import is a local `before` etc., not a test hook.
+            if model
+                .binding(&reference)
+                .is_some_and(|binding| !binding.is_imported())
+            {
+                continue;
+            }
+            if hooks.add(name.text_trimmed()) > 1 {
+                duplicates.push(call);
+            }
+        }
+        duplicates.into_boxed_slice()
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
+    fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
         let callee = node.callee().ok()?;
         let node_name = callee.get_callee_object_name()?;
 
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                ctx.query().range(),
+                node.range(),
                 markup! {
                     "Duplicate "<Emphasis>{node_name.text_trimmed()}</Emphasis>" hook found."
                 },
@@ -134,125 +179,30 @@ impl HooksContext {
     }
 }
 
-#[derive(Default)]
-struct DuplicateHooksVisitor {
-    stack: Vec<HooksContext>,
-}
+/// Determines if a [call expression] is a `describe.` call by checking:
+/// 1. The node must be a test call expression
+///    e.g. `it.only`, `describe.skip`, `test`
+/// 2. The test call must be a `describe.` call
+///    first section = `describe` | `fdescribe` | `xdescribe` e.g. `describe.only`, `describe.skip`
+///    or second section = `describe` e.g. `test.describe`
+///
+/// [call expression]: crate::JsCallExpression
+fn is_test_describe_call(node: &JsCallExpression) -> bool {
+    if let Ok(callee) = node.callee()
+        && node.is_test_call_expression() == Ok(true)
+    {
+        let text = callee.to_trimmed_text();
+        let mut split = text.split('.');
 
-impl Visitor for DuplicateHooksVisitor {
-    type Language = JsLanguage;
+        let first = split.next();
+        let second = split.next();
 
-    fn visited_kinds(
-        &self,
-        _: Option<SyntaxKindSet<JsLanguage>>,
-    ) -> Option<SyntaxKindSet<JsLanguage>> {
-        Some(JsCallExpression::KIND_SET)
-    }
-
-    fn visit(
-        &mut self,
-        event: &WalkEvent<SyntaxNode<Self::Language>>,
-        mut ctx: VisitorContext<Self::Language>,
-    ) {
-        match event {
-            WalkEvent::Enter(node) => {
-                let Some(node) = JsCallExpression::cast_ref(node) else {
-                    return;
-                };
-
-                // When the visitor enters a function node, push a new entry on the stack
-                if Self::is_test_describe_call(&node) {
-                    self.stack.push(HooksContext::default());
-                }
-
-                if let Ok(AnyJsExpression::JsIdentifierExpression(identifier)) = node.callee() {
-                    identifier
-                        .name()
-                        .and_then(|name| name.value_token())
-                        .map_or((), |name| {
-                            if let Some(hooks_context) = self.stack.last_mut() {
-                                match name.text_trimmed() {
-                                    "beforeEach" | "beforeAll" | "afterEach" | "afterAll"
-                                    | "after" | "before" => {
-                                        let counter =
-                                            HooksContext::add(hooks_context, name.text_trimmed());
-                                        if counter > 1 {
-                                            ctx.match_query(DuplicateHooks(node.clone()));
-                                        }
-                                    }
-                                    _ => {}
-                                };
-                            };
-                        })
-                }
-            }
-            WalkEvent::Leave(node) => {
-                // When the visitor exits a function, if it matches the node of the top-most
-                // entry of the stack and the `has_yield` flag is `false`, emit a query match
-                if let Some(node) = JsCallExpression::cast_ref(node)
-                    && Self::is_test_describe_call(&node)
-                {
-                    self.stack.pop();
-                }
-            }
-        }
-    }
-}
-
-impl DuplicateHooksVisitor {
-    /// Determines if a [call expression] is a `describe.` call by checking:
-    /// 1. The node must be a test call expression
-    ///    e.g. `it.only`, `describe.skip`, `test`
-    /// 2. The test call must be a `describe.` call
-    ///    first section = `describe` | `fdescribe` | `xdescribe` e.g. `describe.only`, `describe.skip`
-    ///    or second section = `describe` e.g. `test.describe`
-    ///
-    /// [call expression]: crate::JsCallExpression
-    fn is_test_describe_call(node: &JsCallExpression) -> bool {
-        if let Ok(callee) = node.callee()
-            && node.is_test_call_expression() == Ok(true)
+        if matches!(first, Some("describe" | "fdescribe" | "xdescribe"))
+            || second == Some("describe")
         {
-            let text = callee.to_trimmed_text();
-            let mut split = text.split('.');
-
-            let first = split.next();
-            let second = split.next();
-
-            if matches!(first, Some("describe" | "fdescribe" | "xdescribe"))
-                || second == Some("describe")
-            {
-                return true;
-            }
+            return true;
         }
-
-        false
-    }
-}
-
-impl QueryMatch for DuplicateHooks {
-    fn text_range(&self) -> TextRange {
-        self.0.range()
-    }
-}
-
-impl Queryable for DuplicateHooks {
-    // `Input` is the type that `ctx.match_query()` is called with in the visitor
-    type Input = Self;
-    type Language = JsLanguage;
-    // `Output` if the type that `ctx.query()` will return in the rule
-    type Output = JsCallExpression;
-    type Services = ();
-
-    fn build_visitor(
-        analyzer: &mut impl AddVisitor<Self::Language>,
-        _: &<Self::Language as Language>::Root,
-    ) {
-        // Register our custom visitor to run in the `Syntax` phase
-        analyzer.add_visitor(Phases::Syntax, DuplicateHooksVisitor::default);
     }
 
-    // Extract the output object from the input type
-    fn unwrap_match(_: &ServiceBag, query: &Self::Input) -> Self::Output {
-        query.0.clone()
-    }
+    false
 }
