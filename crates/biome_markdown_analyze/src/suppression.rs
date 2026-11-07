@@ -1,5 +1,7 @@
-use biome_analyze::{AnalyzerSuppression, Suppression, to_analyzer_suppressions};
-use biome_markdown_syntax::{MdQuote, MdRoot};
+use biome_analyze::{
+    AnalyzerSuppression, Suppression, SuppressionComment, to_analyzer_suppressions,
+};
+use biome_markdown_syntax::{MdQuote, MdRoot, MdxExpressionContent};
 use biome_rowan::{AstNode, Direction, SyntaxElement, TextRange, WalkEvent};
 use biome_suppression::{
     SuppressionDiagnostic, parse_suppression_comment, parse_suppression_comment_with_line_prefix,
@@ -21,6 +23,10 @@ pub struct MarkdownSuppression {
     /// Storing the range allows us to not strip the `>` altogether, because the trivia stores the quotes too.
     /// This is a limitation of how rowan works, and it represents data (CST).
     quoted_comments: Vec<TextRange>,
+    /// The literal range, literal text, and comment ranges of each MDX
+    /// expression that holds only comments, in source order.
+    /// `{/* biome-ignore ... */}` is the MDX form of a suppression comment.
+    mdx_comments: Vec<(TextRange, String, Vec<TextRange>)>,
 }
 
 impl MarkdownSuppression {
@@ -49,7 +55,25 @@ impl MarkdownSuppression {
             }
         }
 
-        Self { quoted_comments }
+        let mdx_comments = root
+            .syntax()
+            .descendants()
+            .filter_map(MdxExpressionContent::cast)
+            .filter_map(|content| {
+                let ranges = content.comment_ranges().ok()??;
+                let token = content.value_token().ok()?;
+                Some((
+                    token.text_trimmed_range(),
+                    token.text_trimmed().to_string(),
+                    ranges,
+                ))
+            })
+            .collect();
+
+        Self {
+            quoted_comments,
+            mdx_comments,
+        }
     }
 }
 
@@ -78,6 +102,30 @@ impl Suppression for MarkdownSuppression {
             }
         }
         result
+    }
+
+    fn parse_snippet(&self, range: TextRange) -> Vec<SuppressionComment<'_, Self::Diagnostic>> {
+        let Ok(index) = self
+            .mdx_comments
+            .binary_search_by_key(&range.start(), |(literal, ..)| literal.start())
+        else {
+            return Vec::new();
+        };
+        let (literal, text, comments) = &self.mdx_comments[index];
+        if *literal != range {
+            return Vec::new();
+        }
+        comments
+            .iter()
+            .filter_map(|comment| {
+                let text = &text[*comment - range.start()];
+                let suppressions = self.parse_comment(text, *comment);
+                (!suppressions.is_empty()).then_some(SuppressionComment {
+                    range: *comment,
+                    suppressions,
+                })
+            })
+            .collect()
     }
 }
 

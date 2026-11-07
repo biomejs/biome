@@ -172,6 +172,10 @@ fn collect_embedded_bindings(
     host_parse: &AnyParse,
     snippets: &[EmbeddedSnippet],
 ) -> CollectedEmbeddedBindings {
+    if is_mdx_document(snippets) {
+        return collect_mdx_bindings(snippets);
+    }
+
     let Some(host_file_source) = host_source.to_html_file_source() else {
         return CollectedEmbeddedBindings::default();
     };
@@ -221,6 +225,46 @@ fn collect_embedded_bindings(
             builder.vue_directive_option_names,
             builder.has_unknown_vue_directive_options,
         ),
+    }
+}
+
+/// Returns whether `snippets` come from an MDX document, whose JavaScript is
+/// split into ESM, expression, and tag snippets.
+fn is_mdx_document(snippets: &[EmbeddedSnippet]) -> bool {
+    snippets.iter().any(|snippet| {
+        snippet
+            .file_source
+            .to_js_file_source()
+            .is_some_and(|source| source.as_embedding_kind().is_mdx())
+    })
+}
+
+/// Collects the bindings of an MDX document: the imports and declarations of
+/// its ESM snippets, which its expressions and JSX tags can reference.
+fn collect_mdx_bindings(snippets: &[EmbeddedSnippet]) -> CollectedEmbeddedBindings {
+    let mut builder = EmbeddedBindingsBuilder::new();
+    for snippet in snippets {
+        let is_esm = snippet
+            .file_source
+            .to_js_file_source()
+            .is_some_and(|source| source.as_embedding_kind().is_mdx_esm());
+        if let AnyJsRoot::JsModule(module) = snippet.parse.tree()
+            && is_esm
+        {
+            builder.visit_module_item_list(module.items());
+        }
+    }
+    CollectedEmbeddedBindings {
+        bindings: builder
+            .js_bindings
+            .into_iter()
+            .map(|(range, text, source)| EmbeddedBinding {
+                range,
+                text,
+                source,
+            })
+            .collect(),
+        vue_directive_declarations: VueDirectiveDeclarations::default(),
     }
 }
 
@@ -284,6 +328,9 @@ fn collect_embedded_references(
     let is_svelte = host_source
         .to_html_file_source()
         .is_some_and(|s| s.is_svelte());
+    // An MDX document compiles to one module, so a binding of one ESM block
+    // counts as used when another ESM block references it.
+    let is_mdx = is_mdx_document(snippets);
 
     let mut builder = EmbeddedReferencesBuilder::new();
     let generic_names: Vec<_> = vue_generic_parameter_names(snippets)
@@ -298,7 +345,13 @@ fn collect_embedded_references(
         // A Svelte component's `<script module>` and `<script>` compile to
         // one module and share a top-level scope, so a binding used only in
         // the other block must still count as used.
-        if !js_file_source.is_embedded_source() || is_svelte {
+        // In an MDX document, only the snippets of MDX constructs are part of
+        // the module: code fences are examples.
+        if is_mdx {
+            if js_file_source.as_embedding_kind().is_mdx() {
+                builder.visit_non_source_snippet(&snippet.parse.tree(), &js_file_source);
+            }
+        } else if !js_file_source.is_embedded_source() || is_svelte {
             builder.visit_non_source_snippet(&snippet.parse.tree(), &js_file_source);
         } else if js_file_source.as_embedding_kind().is_vue_setup() && !generic_names.is_empty() {
             builder.visit_vue_setup_generic_references(&snippet.parse.tree(), &generic_names);

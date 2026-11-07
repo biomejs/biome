@@ -1,0 +1,12 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+assertion_line: 358
+expression: ignoreAllMdx.mdx
+---
+# Input
+```md
+{/* biome-ignore-all lint/nursery/useTopLevelHeading: the page title comes from the layout */}
+
+Some text
+
+```

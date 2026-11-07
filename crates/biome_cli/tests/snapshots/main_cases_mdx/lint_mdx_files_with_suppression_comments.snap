@@ -1,0 +1,47 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 712
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint file.mdx
+```
+
+## `biome.json`
+
+```json
+{
+  "markdown": {
+    "analyzeEmbeds": true
+  },
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUndeclaredVariables": "error",
+        "noUnusedImports": "error"
+      },
+      "nursery": {
+        "useTopLevelHeading": "error"
+      }
+    }
+  }
+}
+```
+
+## `file.mdx`
+
+```mdx
+{/* biome-ignore lint/correctness/noUnusedImports: the example shows an import */}
+import {Unused} from './unused.js'
+
+# Hello
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

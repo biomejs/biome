@@ -647,12 +647,27 @@ pub(crate) fn lint_with_inspector(
     // The syntax errors of MDX JavaScript belong to the document. Snippets
     // that aren't analyzed don't report them, so they're added here.
     #[cfg(feature = "lang_mdx")]
-    if !analyze_embeds_enabled(params.settings.as_ref(), params.path) {
+    {
+        let analyzed: Vec<_> = params
+            .parsed_source
+            .snippets(&params.workspace_db)
+            .for_analysis(
+                &params.parsed_source,
+                params.language,
+                params.settings.as_ref(),
+                params.path.as_path(),
+                &params.workspace_db,
+            )
+            .map(|snippet| snippet.content_range())
+            .collect();
         diagnostics.extend(
             params
                 .parsed_source
                 .snippets(&params.workspace_db)
-                .filter(|snippet| super::is_mdx_snippet(snippet, &params.workspace_db))
+                .filter(|snippet| {
+                    super::is_mdx_snippet(snippet, &params.workspace_db)
+                        && !analyzed.contains(&snippet.content_range())
+                })
                 .flat_map(|snippet| snippet.serde_diagnostics()),
         );
     }
@@ -899,4 +914,34 @@ pub(crate) fn is_quoted_multiline_mdx_snippet(
         && token
             .ancestors()
             .any(|node| node.kind() == MarkdownSyntaxKind::MD_QUOTE)
+}
+
+/// Returns whether `snippet` is an MDX expression that holds only comments,
+/// such as `{/* biome-ignore lint: reason */}`. Its comments belong to the
+/// Markdown document, which reads them as suppression comments, so the
+/// snippet isn't analyzed on its own.
+#[cfg(feature = "lang_mdx")]
+pub(crate) fn is_mdx_comment_snippet(
+    snippet: &super::ParsedSnippetOrigin,
+    db: &WorkspaceDb,
+) -> bool {
+    use biome_js_syntax::AnyJsRoot;
+    use biome_languages::javascript::{JsEmbeddingKind, MdxEmbeddingKind};
+
+    let is_expression = snippet
+        .file_source(db)
+        .and_then(|source| source.to_js_file_source())
+        .is_some_and(|source| {
+            matches!(
+                source.as_embedding_kind(),
+                JsEmbeddingKind::Mdx {
+                    kind: MdxEmbeddingKind::Expression
+                }
+            )
+        });
+    is_expression
+        && matches!(
+            snippet.parsed_origin().parse(db).tree::<AnyJsRoot>(),
+            AnyJsRoot::JsExpressionTemplateRoot(root) if root.expression().is_none()
+        )
 }
