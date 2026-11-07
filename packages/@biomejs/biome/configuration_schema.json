@@ -1847,16 +1847,14 @@
 					"anyOf": [
 						{ "$ref": "#/$defs/CssAssistConfiguration" },
 						{ "type": "null" }
-					],
-					"default": null
+					]
 				},
 				"formatter": {
 					"description": "CSS formatter options.",
 					"anyOf": [
 						{ "$ref": "#/$defs/CssFormatterConfiguration" },
 						{ "type": "null" }
-					],
-					"default": null
+					]
 				},
 				"globals": {
 					"description": "Reserved for future CSS analyzer support. This option currently has no effect.",
@@ -1869,16 +1867,14 @@
 					"anyOf": [
 						{ "$ref": "#/$defs/CssLinterConfiguration" },
 						{ "type": "null" }
-					],
-					"default": null
+					]
 				},
 				"parser": {
 					"description": "CSS parsing options.",
 					"anyOf": [
 						{ "$ref": "#/$defs/CssParserConfiguration" },
 						{ "type": "null" }
-					],
-					"default": null
+					]
 				}
 			},
 			"additionalProperties": false
@@ -1894,6 +1890,10 @@
 				"enabled": {
 					"description": "Enables or disables the formatter for CSS and languages that extend it.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				},
+				"expand": {
+					"description": "Controls whether SCSS maps, and lists used as map values, are expanded onto multiple lines.\n`auto` and `always` expand them regardless of width, matching Prettier. `never` keeps them\non one line when they fit within the line width.\n\nIf unset, inherits the global expansion setting.",
+					"anyOf": [{ "$ref": "#/$defs/Expand" }, { "type": "null" }]
 				},
 				"indentStyle": {
 					"description": "The indent style applied to CSS and languages that extend it. If unset, inherits the global\nindentation style.",

@@ -2216,6 +2216,9 @@ impl OverrideSettingPattern {
         {
             options.set_delimiter_spacing(delimiter_spacing);
         }
+        if let Some(expand) = css_formatter.expand.or(formatter.expand) {
+            options.set_expand(expand);
+        }
         if let Some(trailing_newline) = css_formatter
             .trailing_newline
             .or(formatter.trailing_newline)

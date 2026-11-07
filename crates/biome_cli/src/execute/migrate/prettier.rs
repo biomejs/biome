@@ -2,6 +2,7 @@ use super::{eslint_eslint::ShorthandVec, node};
 use crate::CliDiagnostic;
 use crate::diagnostics::MigrationDiagnostic;
 use anyhow::{Context, Error};
+use biome_configuration::css::{CssConfiguration, CssFormatterConfiguration};
 use biome_configuration::html::HtmlFormatterConfiguration;
 use biome_configuration::javascript::JsFormatterConfiguration;
 use biome_configuration::markdown::MarkdownFormatterConfiguration;
@@ -260,7 +261,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
             attribute_position: Some(AttributePosition::default()),
             bracket_spacing: Some(value.bracket_spacing.into()),
             delimiter_spacing: None,
-            expand: Some(value.object_wrap.into()),
+            expand: Some(value.object_wrap.clone().into()),
             format_with_errors: Some(false.into()),
             includes: None,
             enabled: Some(true.into()),
@@ -324,6 +325,17 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
 
         result.javascript = Some(js_config);
         result.html = Some(html_config);
+        // `objectWrap` only affects JavaScript objects in Prettier, so SCSS maps
+        // keep Prettier's layout instead of following the global `never`.
+        if value.object_wrap == ObjectWrap::Collapse {
+            result.css = Some(CssConfiguration {
+                formatter: Some(CssFormatterConfiguration {
+                    expand: Some(Expand::Auto),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            });
+        }
         result.markdown = value.embedded_language_formatting.map(Into::into);
         if !value.overrides.is_empty() {
             let mut overrides = biome_configuration::Overrides::default();
