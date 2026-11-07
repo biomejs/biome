@@ -190,6 +190,7 @@ impl JsAstNode {
             }
             JsSyntaxKind::JS_VUE_SLOT_PROPS_ROOT => js_string!("JS_VUE_SLOT_PROPS_ROOT"),
             JsSyntaxKind::JS_VUE_GENERIC_ROOT => js_string!("JS_VUE_GENERIC_ROOT"),
+            JsSyntaxKind::JSX_SINGLE_TAG_ROOT => js_string!("JSX_SINGLE_TAG_ROOT"),
             JsSyntaxKind::JS_DIRECTIVE => js_string!("JS_DIRECTIVE"),
             JsSyntaxKind::JS_DIRECTIVE_LIST => js_string!("JS_DIRECTIVE_LIST"),
             JsSyntaxKind::JS_STATEMENT_LIST => js_string!("JS_STATEMENT_LIST"),
@@ -1225,6 +1226,7 @@ impl JsAstNode {
             "JSX_REFERENCE_IDENTIFIER" => JsSyntaxKind::JSX_REFERENCE_IDENTIFIER,
             "JSX_SELF_CLOSING_ELEMENT" => JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT,
             "JSX_SHORTHAND_ATTRIBUTE" => JsSyntaxKind::JSX_SHORTHAND_ATTRIBUTE,
+            "JSX_SINGLE_TAG_ROOT" => JsSyntaxKind::JSX_SINGLE_TAG_ROOT,
             "JSX_SPREAD_ATTRIBUTE" => JsSyntaxKind::JSX_SPREAD_ATTRIBUTE,
             "JSX_SPREAD_CHILD" => JsSyntaxKind::JSX_SPREAD_CHILD,
             "JSX_STRING" => JsSyntaxKind::JSX_STRING,
@@ -1646,6 +1648,7 @@ impl JsAstNode {
             JsSyntaxKind::JSX_REFERENCE_IDENTIFIER => &JSX_REFERENCE_IDENTIFIER_FIELDS,
             JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT => &JSX_SELF_CLOSING_ELEMENT_FIELDS,
             JsSyntaxKind::JSX_SHORTHAND_ATTRIBUTE => &JSX_SHORTHAND_ATTRIBUTE_FIELDS,
+            JsSyntaxKind::JSX_SINGLE_TAG_ROOT => &JSX_SINGLE_TAG_ROOT_FIELDS,
             JsSyntaxKind::JSX_SPREAD_ATTRIBUTE => &JSX_SPREAD_ATTRIBUTE_FIELDS,
             JsSyntaxKind::JSX_SPREAD_CHILD => &JSX_SPREAD_CHILD_FIELDS,
             JsSyntaxKind::JSX_STRING => &JSX_STRING_FIELDS,
@@ -8068,6 +8071,30 @@ static JSX_SHORTHAND_ATTRIBUTE_FIELDS: JsAstNodeFields = JsAstNodeFields {
             value: JsAstFieldValue::Token {
                 kinds: &[T!['}']],
                 expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static JSX_SINGLE_TAG_ROOT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JSX_SINGLE_TAG_ROOT,
+    name: "JsxSingleTagRoot",
+    fields: &[
+        JsAstField {
+            property: "tag",
+            updater: "withTag",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsxSingleTag",
+                can_cast: AnyJsxSingleTag::can_cast,
+            },
+        },
+        JsAstField {
+            property: "eofToken",
+            updater: "withEofToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![EOF]],
+                expected: "\"EOF\"",
             },
         },
     ],

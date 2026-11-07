@@ -8,7 +8,9 @@ use biome_diagnostics::{print_diagnostic_to_string, termcolor};
 use biome_fs::BiomePath;
 use biome_js_parser::{JsParserOptions, parse, parse_with_metavariables};
 use biome_languages::JsFileSource;
-use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind, SvelteFileKind};
+use biome_languages::javascript::{
+    JsEmbeddingKind, MdxEmbeddingKind, SvelteEmbeddingKind, SvelteFileKind,
+};
 use biome_rowan::SyntaxKind;
 use biome_service::settings::Settings;
 use biome_test_utils::{
@@ -125,6 +127,21 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         file_source = file_source.with_embedding_kind(JsEmbeddingKind::Astro {
             frontmatter: false,
             is_class_attribute: false,
+        });
+    } else if file_name.contains(".mdx_esm.") {
+        // Fixture text is an MDX ESM block: top-level imports and exports.
+        file_source = file_source.with_embedding_kind(JsEmbeddingKind::Mdx {
+            kind: MdxEmbeddingKind::Esm,
+        });
+    } else if file_name.contains(".mdx_expr.") {
+        // Fixture text is the brace-less body of an MDX `{...}` expression.
+        file_source = file_source.with_embedding_kind(JsEmbeddingKind::Mdx {
+            kind: MdxEmbeddingKind::Expression,
+        });
+    } else if file_name.contains(".mdx_tag.") {
+        // Fixture text is a single JSX tag of an MDX document.
+        file_source = file_source.with_embedding_kind(JsEmbeddingKind::Mdx {
+            kind: MdxEmbeddingKind::Tag,
         });
     } else if file_name.contains(".astro_frontmatter.") {
         // Fixture text is the TypeScript between the `---` fences of an Astro file.

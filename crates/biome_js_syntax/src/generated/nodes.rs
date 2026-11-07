@@ -8169,6 +8169,46 @@ pub struct JsxShorthandAttributeFields {
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct JsxSingleTagRoot {
+    pub(crate) syntax: SyntaxNode,
+}
+impl JsxSingleTagRoot {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> JsxSingleTagRootFields {
+        JsxSingleTagRootFields {
+            tag: self.tag(),
+            eof_token: self.eof_token(),
+        }
+    }
+    pub fn tag(&self) -> SyntaxResult<AnyJsxSingleTag> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+impl Serialize for JsxSingleTagRoot {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct JsxSingleTagRootFields {
+    pub tag: SyntaxResult<AnyJsxSingleTag>,
+    pub eof_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsxSpreadAttribute {
     pub(crate) syntax: SyntaxNode,
 }
@@ -15460,6 +15500,7 @@ pub enum AnyJsRoot {
     JsSvelteSnippetRoot(JsSvelteSnippetRoot),
     JsVueGenericRoot(JsVueGenericRoot),
     JsVueSlotPropsRoot(JsVueSlotPropsRoot),
+    JsxSingleTagRoot(JsxSingleTagRoot),
     TsDeclarationModule(TsDeclarationModule),
 }
 impl AnyJsRoot {
@@ -15508,6 +15549,12 @@ impl AnyJsRoot {
     pub fn as_js_vue_slot_props_root(&self) -> Option<&JsVueSlotPropsRoot> {
         match &self {
             Self::JsVueSlotPropsRoot(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_jsx_single_tag_root(&self) -> Option<&JsxSingleTagRoot> {
+        match &self {
+            Self::JsxSingleTagRoot(item) => Some(item),
             _ => None,
         }
     }
@@ -16050,6 +16097,53 @@ impl AnyJsxObjectName {
     pub fn as_jsx_reference_identifier(&self) -> Option<&JsxReferenceIdentifier> {
         match &self {
             Self::JsxReferenceIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyJsxSingleTag {
+    JsBogus(JsBogus),
+    JsxClosingElement(JsxClosingElement),
+    JsxClosingFragment(JsxClosingFragment),
+    JsxOpeningElement(JsxOpeningElement),
+    JsxOpeningFragment(JsxOpeningFragment),
+    JsxSelfClosingElement(JsxSelfClosingElement),
+}
+impl AnyJsxSingleTag {
+    pub fn as_js_bogus(&self) -> Option<&JsBogus> {
+        match &self {
+            Self::JsBogus(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_jsx_closing_element(&self) -> Option<&JsxClosingElement> {
+        match &self {
+            Self::JsxClosingElement(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_jsx_closing_fragment(&self) -> Option<&JsxClosingFragment> {
+        match &self {
+            Self::JsxClosingFragment(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_jsx_opening_element(&self) -> Option<&JsxOpeningElement> {
+        match &self {
+            Self::JsxOpeningElement(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_jsx_opening_fragment(&self) -> Option<&JsxOpeningFragment> {
+        match &self {
+            Self::JsxOpeningFragment(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_jsx_self_closing_element(&self) -> Option<&JsxSelfClosingElement> {
+        match &self {
+            Self::JsxSelfClosingElement(item) => Some(item),
             _ => None,
         }
     }
@@ -26427,6 +26521,54 @@ impl From<JsxShorthandAttribute> for SyntaxNode {
 }
 impl From<JsxShorthandAttribute> for SyntaxElement {
     fn from(n: JsxShorthandAttribute) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for JsxSingleTagRoot {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JSX_SINGLE_TAG_ROOT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JSX_SINGLE_TAG_ROOT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsxSingleTagRoot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsxSingleTagRoot")
+                .field("tag", &support::DebugSyntaxResult(self.tag()))
+                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+                .finish()
+        } else {
+            f.debug_struct("JsxSingleTagRoot").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<JsxSingleTagRoot> for SyntaxNode {
+    fn from(n: JsxSingleTagRoot) -> Self {
+        n.syntax
+    }
+}
+impl From<JsxSingleTagRoot> for SyntaxElement {
+    fn from(n: JsxSingleTagRoot) -> Self {
         n.syntax.into()
     }
 }
@@ -37608,6 +37750,11 @@ impl From<JsVueSlotPropsRoot> for AnyJsRoot {
         Self::JsVueSlotPropsRoot(node)
     }
 }
+impl From<JsxSingleTagRoot> for AnyJsRoot {
+    fn from(node: JsxSingleTagRoot) -> Self {
+        Self::JsxSingleTagRoot(node)
+    }
+}
 impl From<TsDeclarationModule> for AnyJsRoot {
     fn from(node: TsDeclarationModule) -> Self {
         Self::TsDeclarationModule(node)
@@ -37623,6 +37770,7 @@ impl AstNode for AnyJsRoot {
         .union(JsSvelteSnippetRoot::KIND_SET)
         .union(JsVueGenericRoot::KIND_SET)
         .union(JsVueSlotPropsRoot::KIND_SET)
+        .union(JsxSingleTagRoot::KIND_SET)
         .union(TsDeclarationModule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
@@ -37635,6 +37783,7 @@ impl AstNode for AnyJsRoot {
                 | JS_SVELTE_SNIPPET_ROOT
                 | JS_VUE_GENERIC_ROOT
                 | JS_VUE_SLOT_PROPS_ROOT
+                | JSX_SINGLE_TAG_ROOT
                 | TS_DECLARATION_MODULE
         )
     }
@@ -37652,6 +37801,7 @@ impl AstNode for AnyJsRoot {
             JS_SVELTE_SNIPPET_ROOT => Self::JsSvelteSnippetRoot(JsSvelteSnippetRoot { syntax }),
             JS_VUE_GENERIC_ROOT => Self::JsVueGenericRoot(JsVueGenericRoot { syntax }),
             JS_VUE_SLOT_PROPS_ROOT => Self::JsVueSlotPropsRoot(JsVueSlotPropsRoot { syntax }),
+            JSX_SINGLE_TAG_ROOT => Self::JsxSingleTagRoot(JsxSingleTagRoot { syntax }),
             TS_DECLARATION_MODULE => Self::TsDeclarationModule(TsDeclarationModule { syntax }),
             _ => return None,
         };
@@ -37667,6 +37817,7 @@ impl AstNode for AnyJsRoot {
             Self::JsSvelteSnippetRoot(it) => it.syntax(),
             Self::JsVueGenericRoot(it) => it.syntax(),
             Self::JsVueSlotPropsRoot(it) => it.syntax(),
+            Self::JsxSingleTagRoot(it) => it.syntax(),
             Self::TsDeclarationModule(it) => it.syntax(),
         }
     }
@@ -37680,6 +37831,7 @@ impl AstNode for AnyJsRoot {
             Self::JsSvelteSnippetRoot(it) => it.into_syntax(),
             Self::JsVueGenericRoot(it) => it.into_syntax(),
             Self::JsVueSlotPropsRoot(it) => it.into_syntax(),
+            Self::JsxSingleTagRoot(it) => it.into_syntax(),
             Self::TsDeclarationModule(it) => it.into_syntax(),
         }
     }
@@ -37695,6 +37847,7 @@ impl std::fmt::Debug for AnyJsRoot {
             Self::JsSvelteSnippetRoot(it) => std::fmt::Debug::fmt(it, f),
             Self::JsVueGenericRoot(it) => std::fmt::Debug::fmt(it, f),
             Self::JsVueSlotPropsRoot(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxSingleTagRoot(it) => std::fmt::Debug::fmt(it, f),
             Self::TsDeclarationModule(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -37710,6 +37863,7 @@ impl From<AnyJsRoot> for SyntaxNode {
             AnyJsRoot::JsSvelteSnippetRoot(it) => it.into_syntax(),
             AnyJsRoot::JsVueGenericRoot(it) => it.into_syntax(),
             AnyJsRoot::JsVueSlotPropsRoot(it) => it.into_syntax(),
+            AnyJsRoot::JsxSingleTagRoot(it) => it.into_syntax(),
             AnyJsRoot::TsDeclarationModule(it) => it.into_syntax(),
         }
     }
@@ -39013,6 +39167,120 @@ impl From<AnyJsxObjectName> for SyntaxNode {
 }
 impl From<AnyJsxObjectName> for SyntaxElement {
     fn from(n: AnyJsxObjectName) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<JsBogus> for AnyJsxSingleTag {
+    fn from(node: JsBogus) -> Self {
+        Self::JsBogus(node)
+    }
+}
+impl From<JsxClosingElement> for AnyJsxSingleTag {
+    fn from(node: JsxClosingElement) -> Self {
+        Self::JsxClosingElement(node)
+    }
+}
+impl From<JsxClosingFragment> for AnyJsxSingleTag {
+    fn from(node: JsxClosingFragment) -> Self {
+        Self::JsxClosingFragment(node)
+    }
+}
+impl From<JsxOpeningElement> for AnyJsxSingleTag {
+    fn from(node: JsxOpeningElement) -> Self {
+        Self::JsxOpeningElement(node)
+    }
+}
+impl From<JsxOpeningFragment> for AnyJsxSingleTag {
+    fn from(node: JsxOpeningFragment) -> Self {
+        Self::JsxOpeningFragment(node)
+    }
+}
+impl From<JsxSelfClosingElement> for AnyJsxSingleTag {
+    fn from(node: JsxSelfClosingElement) -> Self {
+        Self::JsxSelfClosingElement(node)
+    }
+}
+impl AstNode for AnyJsxSingleTag {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = JsBogus::KIND_SET
+        .union(JsxClosingElement::KIND_SET)
+        .union(JsxClosingFragment::KIND_SET)
+        .union(JsxOpeningElement::KIND_SET)
+        .union(JsxOpeningFragment::KIND_SET)
+        .union(JsxSelfClosingElement::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            JS_BOGUS
+                | JSX_CLOSING_ELEMENT
+                | JSX_CLOSING_FRAGMENT
+                | JSX_OPENING_ELEMENT
+                | JSX_OPENING_FRAGMENT
+                | JSX_SELF_CLOSING_ELEMENT
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            JS_BOGUS => Self::JsBogus(JsBogus { syntax }),
+            JSX_CLOSING_ELEMENT => Self::JsxClosingElement(JsxClosingElement { syntax }),
+            JSX_CLOSING_FRAGMENT => Self::JsxClosingFragment(JsxClosingFragment { syntax }),
+            JSX_OPENING_ELEMENT => Self::JsxOpeningElement(JsxOpeningElement { syntax }),
+            JSX_OPENING_FRAGMENT => Self::JsxOpeningFragment(JsxOpeningFragment { syntax }),
+            JSX_SELF_CLOSING_ELEMENT => {
+                Self::JsxSelfClosingElement(JsxSelfClosingElement { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::JsBogus(it) => it.syntax(),
+            Self::JsxClosingElement(it) => it.syntax(),
+            Self::JsxClosingFragment(it) => it.syntax(),
+            Self::JsxOpeningElement(it) => it.syntax(),
+            Self::JsxOpeningFragment(it) => it.syntax(),
+            Self::JsxSelfClosingElement(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::JsBogus(it) => it.into_syntax(),
+            Self::JsxClosingElement(it) => it.into_syntax(),
+            Self::JsxClosingFragment(it) => it.into_syntax(),
+            Self::JsxOpeningElement(it) => it.into_syntax(),
+            Self::JsxOpeningFragment(it) => it.into_syntax(),
+            Self::JsxSelfClosingElement(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyJsxSingleTag {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::JsBogus(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxClosingElement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxClosingFragment(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxOpeningElement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxOpeningFragment(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxSelfClosingElement(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyJsxSingleTag> for SyntaxNode {
+    fn from(n: AnyJsxSingleTag) -> Self {
+        match n {
+            AnyJsxSingleTag::JsBogus(it) => it.into_syntax(),
+            AnyJsxSingleTag::JsxClosingElement(it) => it.into_syntax(),
+            AnyJsxSingleTag::JsxClosingFragment(it) => it.into_syntax(),
+            AnyJsxSingleTag::JsxOpeningElement(it) => it.into_syntax(),
+            AnyJsxSingleTag::JsxOpeningFragment(it) => it.into_syntax(),
+            AnyJsxSingleTag::JsxSelfClosingElement(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyJsxSingleTag> for SyntaxElement {
+    fn from(n: AnyJsxSingleTag) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -41342,6 +41610,11 @@ impl std::fmt::Display for AnyJsxObjectName {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyJsxSingleTag {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyJsxTag {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -42318,6 +42591,11 @@ impl std::fmt::Display for JsxSelfClosingElement {
     }
 }
 impl std::fmt::Display for JsxShorthandAttribute {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for JsxSingleTagRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

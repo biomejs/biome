@@ -171,6 +171,27 @@ pub enum SvelteEmbeddingKind {
     Declaration,
 }
 
+/// Identifies the JavaScript construct an MDX snippet comes from.
+///
+/// MDX keeps the Markdown between an opening and a closing JSX tag outside
+/// JavaScript, so each construct is a separate snippet with its own root.
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
+pub enum MdxEmbeddingKind {
+    /// Top-level `import` and `export` statements, parsed as a module that
+    /// may only contain imports and exports. This is where the bindings of
+    /// the document are defined.
+    #[default]
+    Esm,
+    /// The content of a `{...}` expression, parsed as a single expression
+    /// that may be empty or hold only comments.
+    Expression,
+    /// A single JSX tag, such as `<Note type="tip">` or `</Note>`.
+    Tag,
+}
+
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
@@ -218,6 +239,8 @@ pub enum JsEmbeddingKind {
         /// `<script context="module">` block.
         is_module_script: bool,
     },
+    /// JavaScript embedded in an MDX document.
+    Mdx { kind: MdxEmbeddingKind },
     #[default]
     None,
 }
@@ -283,6 +306,40 @@ impl JsEmbeddingKind {
     }
     pub const fn is_svelte(&self) -> bool {
         matches!(self, Self::Svelte { .. })
+    }
+    pub const fn is_mdx(&self) -> bool {
+        matches!(self, Self::Mdx { .. })
+    }
+    pub const fn is_mdx_esm(&self) -> bool {
+        matches!(
+            self,
+            Self::Mdx {
+                kind: MdxEmbeddingKind::Esm
+            }
+        )
+    }
+    /// Returns `true` when the snippet is a single JSX tag from an MDX
+    /// document.
+    pub const fn is_mdx_tag(&self) -> bool {
+        matches!(
+            self,
+            Self::Mdx {
+                kind: MdxEmbeddingKind::Tag
+            }
+        )
+    }
+    /// Returns `true` when an expression snippet may be empty or hold only
+    /// comments, as Astro and MDX allow for `{/* comment */}`.
+    pub const fn allows_empty_expression(&self) -> bool {
+        matches!(
+            self,
+            Self::Astro {
+                frontmatter: false,
+                ..
+            } | Self::Mdx {
+                kind: MdxEmbeddingKind::Expression
+            }
+        )
     }
     pub const fn is_class_attribute(&self) -> bool {
         matches!(
@@ -554,6 +611,7 @@ impl JsFileSource {
             JsEmbeddingKind::Svelte { .. }
                 | JsEmbeddingKind::Vue { .. }
                 | JsEmbeddingKind::Astro { .. }
+                | JsEmbeddingKind::Mdx { .. }
         )
     }
 
@@ -570,6 +628,8 @@ impl JsFileSource {
             } | JsEmbeddingKind::Astro {
                 frontmatter: true,
                 ..
+            } | JsEmbeddingKind::Mdx {
+                kind: MdxEmbeddingKind::Esm
             }
         )
     }
@@ -593,6 +653,8 @@ impl JsFileSource {
             } | JsEmbeddingKind::Astro {
                 frontmatter: false,
                 ..
+            } | JsEmbeddingKind::Mdx {
+                kind: MdxEmbeddingKind::Expression
             }
         )
     }

@@ -194,6 +194,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "JS_SVELTE_DECLARATION_ROOT",
         "JS_VUE_SLOT_PROPS_ROOT",
         "JS_VUE_GENERIC_ROOT",
+        "JSX_SINGLE_TAG_ROOT",
         "JS_DIRECTIVE",
         "JS_DIRECTIVE_LIST",
         "JS_STATEMENT_LIST",

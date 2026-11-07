@@ -1,0 +1,18 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: mdx_tag/closing_tag.jsx
+---
+
+# Input
+
+```jsx
+</  Note  >
+```
+
+
+# Formatted
+
+```jsx
+</Note>
+```
