@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_strings_script.cjs
+---
+# Input
+```cjs
+/* should generate diagnostics */
+// The fix would change the escape sequence `\1` into `\12`
+var a = '\1' + '2'
+
+```
+
+# Diagnostics
+```
+invalid_strings_script.cjs:3:9 lint/complexity/noUselessStringConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    1 │ /* should generate diagnostics */
+    2 │ // The fix would change the escape sequence `\1` into `\12`
+  > 3 │ var a = '\1' + '2'
+      │         ^^^^^^^^^^
+    4 │ 
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+
+```
