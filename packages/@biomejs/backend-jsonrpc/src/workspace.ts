@@ -3833,6 +3833,11 @@ export interface Nursery {
 	 */
 	useConsistentBlockLang?: UseConsistentBlockLangConfiguration;
 	/**
+	 * Require a consistent style for JSX props with the value true.
+	 * See https://biomejs.dev/linter/rules/use-consistent-boolean-props
+	 */
+	useConsistentBooleanProps?: UseConsistentBooleanPropsConfiguration;
+	/**
 	 * Enforce consistent use of function declarations or expressions assigned to variables.
 	 * See https://biomejs.dev/linter/rules/use-consistent-function-style
 	 */
@@ -7029,6 +7034,9 @@ export type UseCapitalizedConstructorsConfiguration =
 export type UseConsistentBlockLangConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentBlockLangOptions;
+export type UseConsistentBooleanPropsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentBooleanPropsOptions;
 export type UseConsistentFunctionStyleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentFunctionStyleOptions;
@@ -10321,6 +10329,14 @@ export interface RuleWithUseConsistentBlockLangOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentBlockLangOptions;
 }
+export interface RuleWithUseConsistentBooleanPropsOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseConsistentBooleanPropsOptions;
+}
 export interface RuleWithUseConsistentFunctionStyleOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentFunctionStyleOptions;
@@ -13245,6 +13261,12 @@ export interface UseConsistentBlockLangOptions {
 	 */
 	blocks?: Record<string, BlockLangOptions>;
 }
+export interface UseConsistentBooleanPropsOptions {
+	/**
+	 * How to write JSX props whose value is `true`. Defaults to `explicit`.
+	 */
+	mode?: BooleanPropMode;
+}
 /**
  * Configures the required function style and whether declaration mode permits arrow functions.
  */
@@ -14560,6 +14582,7 @@ export interface BlockLangOptions {
 	 */
 	required?: boolean;
 }
+export type BooleanPropMode = "implicit" | "explicit";
 /**
  * The required form for function definitions: `"expression"` or `"declaration"`.
  */
@@ -15285,6 +15308,7 @@ export type Category =
 	| "lint/nursery/useBlockStatementOverIife"
 	| "lint/nursery/useCapitalizedConstructors"
 	| "lint/nursery/useConsistentBlockLang"
+	| "lint/nursery/useConsistentBooleanProps"
 	| "lint/nursery/useConsistentFunctionStyle"
 	| "lint/nursery/useConsistentHeadingLevel"
 	| "lint/nursery/useConsistentJsonFileRead"

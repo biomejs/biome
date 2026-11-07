@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: explicit.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+<Foo first={true} bar /* keep */ last={false} enabled={flag} />;
+
+```
+
+# Diagnostics
+```
+explicit.jsx:2:19 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSX attribute omits the required explicit true value.
+  
+    1 │ // should generate diagnostics
+  > 2 │ <Foo first={true} bar /* keep */ last={false} enabled={flag} />;
+      │                   ^^^
+    3 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Add an explicit true value.
+  
+    2 │ <Foo·first={true}·bar={true}·/*·keep·*/·last={false}·enabled={flag}·/>;
+      │                      +++++++                                           
+
+```

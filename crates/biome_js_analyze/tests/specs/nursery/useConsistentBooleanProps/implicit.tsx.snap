@@ -1,0 +1,165 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: implicit.tsx
+---
+# Input
+```tsx
+// should generate diagnostics
+<Foo first bar={true} last />;
+<Foo a={true}b={true}c />;
+<input disabled={  true  } /* keep */ />;
+<Foo bar={/* keep */ true} />;
+<Foo bar /* keep */ ={true} />;
+<Foo key={true} __self={true} __source={true} />;
+<Foo enabled={false} checked={flag} text="true" />;
+<Foo enabled={(true)} />;
+
+```
+
+# Diagnostics
+```
+implicit.tsx:2:12 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSX attribute already implies true when written without a value.
+  
+    1 │ // should generate diagnostics
+  > 2 │ <Foo first bar={true} last />;
+      │            ^^^^^^^^^^
+    3 │ <Foo a={true}b={true}c />;
+    4 │ <input disabled={  true  } /* keep */ />;
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the explicit true value.
+  
+    2 │ <Foo·first·bar={true}·last·/>;
+      │               -------         
+
+```
+
+```
+implicit.tsx:3:6 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSX attribute already implies true when written without a value.
+  
+    1 │ // should generate diagnostics
+    2 │ <Foo first bar={true} last />;
+  > 3 │ <Foo a={true}b={true}c />;
+      │      ^^^^^^^^
+    4 │ <input disabled={  true  } /* keep */ />;
+    5 │ <Foo bar={/* keep */ true} />;
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the explicit true value.
+  
+     1  1 │   // should generate diagnostics
+     2  2 │   <Foo first bar={true} last />;
+     3    │ - <Foo·a={true}b={true}c·/>;
+        3 │ + <Foo·a·b={true}c·/>;
+     4  4 │   <input disabled={  true  } /* keep */ />;
+     5  5 │   <Foo bar={/* keep */ true} />;
+  
+
+```
+
+```
+implicit.tsx:3:14 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSX attribute already implies true when written without a value.
+  
+    1 │ // should generate diagnostics
+    2 │ <Foo first bar={true} last />;
+  > 3 │ <Foo a={true}b={true}c />;
+      │              ^^^^^^^^
+    4 │ <input disabled={  true  } /* keep */ />;
+    5 │ <Foo bar={/* keep */ true} />;
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the explicit true value.
+  
+     1  1 │   // should generate diagnostics
+     2  2 │   <Foo first bar={true} last />;
+     3    │ - <Foo·a={true}b={true}c·/>;
+        3 │ + <Foo·a={true}b·c·/>;
+     4  4 │   <input disabled={  true  } /* keep */ />;
+     5  5 │   <Foo bar={/* keep */ true} />;
+  
+
+```
+
+```
+implicit.tsx:4:8 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSX attribute already implies true when written without a value.
+  
+    2 │ <Foo first bar={true} last />;
+    3 │ <Foo a={true}b={true}c />;
+  > 4 │ <input disabled={  true  } /* keep */ />;
+      │        ^^^^^^^^^^^^^^^^^^^
+    5 │ <Foo bar={/* keep */ true} />;
+    6 │ <Foo bar /* keep */ ={true} />;
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the explicit true value.
+  
+    4 │ <input·disabled={··true··}·/*·keep·*/·/>;
+      │                -----------               
+
+```
+
+```
+implicit.tsx:5:6 lint/nursery/useConsistentBooleanProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSX attribute already implies true when written without a value.
+  
+    3 │ <Foo a={true}b={true}c />;
+    4 │ <input disabled={  true  } /* keep */ />;
+  > 5 │ <Foo bar={/* keep */ true} />;
+      │      ^^^^^^^^^^^^^^^^^^^^^
+    6 │ <Foo bar /* keep */ ={true} />;
+    7 │ <Foo key={true} __self={true} __source={true} />;
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+implicit.tsx:6:6 lint/nursery/useConsistentBooleanProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSX attribute already implies true when written without a value.
+  
+    4 │ <input disabled={  true  } /* keep */ />;
+    5 │ <Foo bar={/* keep */ true} />;
+  > 6 │ <Foo bar /* keep */ ={true} />;
+      │      ^^^^^^^^^^^^^^^^^^^^^^
+    7 │ <Foo key={true} __self={true} __source={true} />;
+    8 │ <Foo enabled={false} checked={flag} text="true" />;
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+implicit.tsx:9:6 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSX attribute already implies true when written without a value.
+  
+     7 │ <Foo key={true} __self={true} __source={true} />;
+     8 │ <Foo enabled={false} checked={flag} text="true" />;
+   > 9 │ <Foo enabled={(true)} />;
+       │      ^^^^^^^^^^^^^^^^
+    10 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the explicit true value.
+  
+    9 │ <Foo·enabled={(true)}·/>;
+      │             ---------    
+
+```

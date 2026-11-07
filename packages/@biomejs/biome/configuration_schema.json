@@ -513,6 +513,7 @@
 			]
 		},
 		"Bool": { "type": "boolean" },
+		"BooleanPropMode": { "type": "string", "enum": ["implicit", "explicit"] },
 		"BooleanPropStyle": {
 			"oneOf": [
 				{
@@ -10028,6 +10029,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentBooleanProps": {
+					"description": "Require a consistent style for JSX props with the value true.\nSee https://biomejs.dev/linter/rules/use-consistent-boolean-props",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentBooleanPropsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentFunctionStyle": {
 					"description": "Enforce consistent use of function declarations or expressions assigned to variables.\nSee https://biomejs.dev/linter/rules/use-consistent-function-style",
 					"anyOf": [
@@ -16890,6 +16898,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConsistentBooleanPropsOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentBooleanPropsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseConsistentBuiltinInstantiationOptions": {
 			"type": "object",
 			"properties": {
@@ -22338,6 +22359,22 @@
 					"description": "The top-level blocks to check in Vue and Svelte components.\n\nEach key is the tag name of a block, without angle brackets, such as\n`script`, `style`, or a Vue custom block like `i18n`. Blocks that aren't\nlisted aren't checked. When this option is omitted, the rule doesn't\ncheck anything.",
 					"type": ["object", "null"],
 					"additionalProperties": { "$ref": "#/$defs/BlockLangOptions" }
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseConsistentBooleanPropsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentBooleanPropsOptions" }
+			]
+		},
+		"UseConsistentBooleanPropsOptions": {
+			"type": "object",
+			"properties": {
+				"mode": {
+					"description": "How to write JSX props whose value is `true`. Defaults to `explicit`.",
+					"anyOf": [{ "$ref": "#/$defs/BooleanPropMode" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false

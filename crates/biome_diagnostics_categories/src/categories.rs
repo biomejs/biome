@@ -429,6 +429,7 @@ define_categories! {
     "lint/nursery/useBlockStatementOverIife": "https://biomejs.dev/linter/rules/use-block-statement-over-iife",
     "lint/nursery/useCapitalizedConstructors": "https://biomejs.dev/linter/rules/use-capitalized-constructors",
     "lint/nursery/useConsistentBlockLang": "https://biomejs.dev/linter/rules/use-consistent-block-lang",
+    "lint/nursery/useConsistentBooleanProps": "https://biomejs.dev/linter/rules/use-consistent-boolean-props",
     "lint/nursery/useConsistentFunctionStyle": "https://biomejs.dev/linter/rules/use-consistent-function-style",
     "lint/nursery/useConsistentHeadingLevel": "https://biomejs.dev/linter/rules/use-consistent-heading-level",
     "lint/nursery/useConsistentJsonFileRead": "https://biomejs.dev/linter/rules/use-consistent-json-file-read",
