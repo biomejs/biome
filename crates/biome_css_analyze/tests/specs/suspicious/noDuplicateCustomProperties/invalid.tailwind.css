@@ -15,3 +15,8 @@
   --tab: --value(integer);
   --accent: blue;
 }
+
+a {
+  --tab: --value(integer);
+  --tab: --value(number);
+}
