@@ -1,0 +1,48 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write file.svelte
+biome lint --only=correctness/noUndeclaredVariables file.svelte
+```
+
+## `biome.json`
+
+```json
+{
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "formatter": { "enabled": true }
+  }
+}
+```
+
+## `file.svelte`
+
+```svelte
+<script lang="ts">
+const items = [1, 2, 3];
+</script>
+
+{#each items as item}
+	{@const doubled: number = item * 2}
+	{@const cells: Record<string, typeof item> = { value: item }}
+	{@const { value }: { value: number } = cells}
+	{@const [first]: number[] = [item]}
+	<span>{doubled}{cells.value}{value}{first}</span>
+{/each}
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

@@ -158,11 +158,10 @@ pub enum SvelteEmbeddingKind {
     TextInterpolation,
     /// The name and parameters from a `{#snippet ...}` block parsed as a Svelte snippet root.
     SnippetSignature,
-    /// The payload of a `{@const ...}` block parsed as an assignment expression.
+    /// The payload of a `{@const ...}` block parsed as a variable declarator.
     ///
     /// The HTML syntax stores the `const` token separately, so this mode receives
-    /// only the assignment payload. It must retain expression-root parsing for
-    /// compatibility with that representation.
+    /// only the binding, optional type annotation, and initializer.
     LegacyConst,
     /// The payload of a `{let ...}` or `{const ...}` tag parsed as a Svelte declaration root.
     ///
@@ -584,8 +583,7 @@ impl JsFileSource {
             JsEmbeddingKind::Svelte {
                 embedding_kind: SvelteEmbeddingKind::Expression
                     | SvelteEmbeddingKind::TextInterpolation
-                    | SvelteEmbeddingKind::SnippetSignature
-                    | SvelteEmbeddingKind::LegacyConst,
+                    | SvelteEmbeddingKind::SnippetSignature,
                 ..
             } | JsEmbeddingKind::Vue {
                 allow_statements: false,
