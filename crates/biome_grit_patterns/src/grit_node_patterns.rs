@@ -56,6 +56,11 @@ pub struct GritNodePattern {
     pub args: Vec<GritNodePatternArg>,
 }
 
+/// Returns whether a node is a separator token that may trail a list.
+fn is_list_separator(node: &GritTargetNode<'_>) -> bool {
+    node.is_token() && matches!(node.text(), "," | ";")
+}
+
 impl GritNodePattern {
     /// Matches each argument against the corresponding child slot of a list.
     fn execute_list<'a>(
@@ -69,10 +74,24 @@ impl GritNodePattern {
             return Ok(false);
         }
 
-        // A list pattern describes exactly the listed nodes. Extra children
-        // mean the surrounding sequence is different from the pattern.
-        if node.slots().map(Iterator::count) != Some(self.args.len()) {
+        // A list pattern describes the listed nodes. Extra trailing separators,
+        // such as the comma in `function f(a, b,)`, are allowed.
+        let Some(slot_count) = node.slots().map(Iterator::count) else {
             return Ok(false);
+        };
+        let last_matched_slot = self
+            .args
+            .iter()
+            .map(|arg| arg.slot_index)
+            .max()
+            .map_or(0, |index| index as usize + 1);
+        for index in last_matched_slot..slot_count {
+            if node
+                .child_by_slot_index(index as u32)
+                .is_none_or(|child| !is_list_separator(&child))
+            {
+                return Ok(false);
+            }
         }
 
         let mut running_state = init_state.clone();
