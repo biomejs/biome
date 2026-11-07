@@ -12,6 +12,10 @@ var xs = new Array(0, 1, 2);
 
 var xs = new Array(...args);
 
+var xs = Array(...args, 1);
+
+var xs = new Array(...args, ...rest);
+
 var xs = /**A*/ new /**B*/ Array /**C*/ ( /**D*/ 0 /**E*/, /**F*/ 1 /**G*/) /**H*/;
 
 var xs = (Array)(
