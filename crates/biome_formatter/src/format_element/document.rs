@@ -177,12 +177,14 @@ impl<S: Source> Document<S> {
     /// Transforms the document by visiting every embedded element, optionally
     /// replacing its content.
     ///
-    /// Accepts a `format_embedded` function that will be called with the key of
-    /// each embedded element, and which may optionally return the [Document] that
-    /// replaces the element's content.
+    /// Accepts a `format_embedded` function that will be called with the key and
+    /// the layout of each embedded element, and which may optionally return the
+    /// [Document] that replaces the element's content. The content of an
+    /// [EmbeddedLayout::SingleLine] element isn't replaced by a document that
+    /// [breaks](FormatElements::will_break).
     pub fn replace_embedded(
         &mut self,
-        format_embedded: &mut impl FnMut(S::EmbeddedKey) -> Option<Self>,
+        format_embedded: &mut impl FnMut(S::EmbeddedKey, EmbeddedLayout) -> Option<Self>,
     ) {
         replace_embedded_elements(&mut self.elements, format_embedded);
     }
@@ -198,7 +200,7 @@ fn collect_embedded_contents<S: Source>(
     for element in elements {
         let host_content_key = embedded_key.take();
         match element {
-            FormatElement::Tag(Tag::StartEmbedded(key)) => embedded_key = Some(key.clone()),
+            FormatElement::Tag(Tag::StartEmbedded(key, _)) => embedded_key = Some(key.clone()),
             FormatElement::Interned(interned) => {
                 if let Some(key) = host_content_key {
                     contents.insert(key, interned.clone());
@@ -224,17 +226,22 @@ fn collect_embedded_contents<S: Source>(
 /// again.
 fn replace_embedded_elements<S: Source>(
     elements: &mut [FormatElement<S>],
-    format_embedded: &mut impl FnMut(S::EmbeddedKey) -> Option<Document<S>>,
+    format_embedded: &mut impl FnMut(S::EmbeddedKey, EmbeddedLayout) -> Option<Document<S>>,
 ) {
-    // The key of the embedded element whose host content is the next element.
-    let mut embedded_key = None;
+    // The key and the layout of the embedded element whose host content is the
+    // next element.
+    let mut embedded = None;
     for element in elements {
-        let host_content_key = embedded_key.take();
+        let host_content = embedded.take();
         match element {
-            FormatElement::Tag(Tag::StartEmbedded(key)) => embedded_key = Some(key.clone()),
-            FormatElement::Interned(interned) => match host_content_key {
-                Some(key) => {
-                    if let Some(document) = format_embedded(key) {
+            FormatElement::Tag(Tag::StartEmbedded(key, layout)) => {
+                embedded = Some((key.clone(), *layout));
+            }
+            FormatElement::Interned(interned) => match host_content {
+                Some((key, layout)) => {
+                    if let Some(document) = format_embedded(key, layout)
+                        && (layout != EmbeddedLayout::SingleLine || !document.will_break())
+                    {
                         *interned = Interned::new(document.into_elements());
                     }
                 }
@@ -733,7 +740,7 @@ impl<S: Source> Format<IrFormatContext<S>> for &[FormatElement<S>] {
                             write!(f, [token("fill(")])?;
                         }
 
-                        StartEmbedded(_) => {
+                        StartEmbedded(..) => {
                             write!(f, [token("embedded(")])?;
                         }
                         StartEntry | StartBestFittingEntry => {

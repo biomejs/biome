@@ -330,7 +330,7 @@ impl<'a, S: Source> Printer<'a, S> {
             }
 
             FormatElement::Tag(
-                tag @ (StartLabelled(_) | StartEntry | StartEmbedded(_) | StartBestFittingEntry),
+                tag @ (StartLabelled(_) | StartEntry | StartEmbedded(..) | StartBestFittingEntry),
             ) => {
                 stack.push(tag.kind(), args);
             }
@@ -1514,7 +1514,7 @@ impl<'a, 'print, S: Source> FitsMeasurer<'a, 'print, S> {
                 | StartLabelled(_)
                 | StartEntry
                 | StartBestFittingEntry
-                | StartEmbedded(_)),
+                | StartEmbedded(..)),
             ) => {
                 self.stack.push(tag.kind(), args);
             }
