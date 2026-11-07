@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: issue12622Valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+type Media = { readonly items: ReadonlyArray<string> } | null;
+
+export function paths(media: Media): string[] {
+	return [...(media?.items ?? [])];
+}
+
+type Movie = { characters: string[] } | undefined;
+
+export function characters(movie: Movie): string[] {
+	return movie?.characters ?? [];
+}
+
+```

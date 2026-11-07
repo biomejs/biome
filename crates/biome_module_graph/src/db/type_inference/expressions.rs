@@ -2157,6 +2157,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Union(union) => {
                     pending.extend(union.types(self.db).iter().copied());
                 }
+                InferredTypeData::InstanceOf(instance) => pending.push(instance.ty(self.db)),
                 InferredTypeData::Unknown
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
@@ -2182,7 +2183,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredTypeData::IndexedAccess(_)
                 | InferredTypeData::MappedType(_)
                 | InferredTypeData::Literal(_)
-                | InferredTypeData::InstanceOf(_)
                 | InferredTypeData::MergedReference(_)
                 | InferredTypeData::TypeofExpression(_)
                 | InferredTypeData::TypeofType(_)
