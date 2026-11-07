@@ -1,6 +1,6 @@
 use biome_rowan::{
-    AstNode, AstSeparatedElement, AstSeparatedList, Language, SyntaxError, SyntaxNode, SyntaxToken,
-    chain_trivia_pieces, trim_trailing_trivia_pieces,
+    AstNode, AstSeparatedElement, AstSeparatedList, Direction, Language, SyntaxError, SyntaxNode,
+    SyntaxToken, chain_trivia_pieces, trim_trailing_trivia_pieces,
 };
 use std::cmp::Ordering;
 
@@ -50,6 +50,9 @@ pub fn is_separated_list_sorted_by<'a, L: Language + 'a, N: AstNode<Language = L
 /// Chunks are sorted separately.
 ///
 /// This sort is stable (i.e., does not reorder equal elements).
+///
+/// A single-line comment is never left on the same line as the token that follows it:
+/// a line break is added after the comment when sorting would put them together.
 pub fn sorted_separated_list_by<'a, L, List, Node, Key>(
     list: &List,
     get_key: impl Fn(&Node) -> Option<Key>,
@@ -88,6 +91,49 @@ where
         );
     }
 
+    // The line break ending a comment belongs to the leading trivia of the next token,
+    // so it does not move with the comment. Restore it to avoid commenting out the token that follows.
+    let token_before_list = list
+        .syntax()
+        .first_token()
+        .and_then(|token| token.prev_token());
+    let token_after_list = list
+        .syntax()
+        .last_token()
+        .and_then(|token| token.next_token());
+    let line_break = || {
+        list.syntax()
+            .descendants_tokens(Direction::Next)
+            .chain(token_after_list.clone())
+            .find_map(|token| {
+                token
+                    .leading_trivia()
+                    .pieces()
+                    .find(|piece| piece.is_newline())
+            })
+    };
+    if let Some((_, first, _)) = elements.first_mut()
+        && token_before_list.is_some_and(|token| has_trailing_single_line_comment(&token))
+        && !first.syntax().has_leading_newline()
+        && let Some(line_break) = line_break()
+        && let Some(new_first) = first.clone().prepend_trivia_pieces([line_break])
+    {
+        *first = new_first;
+    }
+    for index in 0..elements.len() {
+        let next_token = match elements.get(index + 1) {
+            Some((_, next, _)) => next.syntax().first_token(),
+            None => token_after_list.clone(),
+        };
+        if let Some(separator) = &mut elements[index].2
+            && has_trailing_single_line_comment(separator)
+            && next_token.is_some_and(|token| !token.has_leading_newline())
+            && let Some(line_break) = line_break()
+        {
+            *separator = separator.append_trivia_pieces([line_break]);
+        }
+    }
+
     let separators: Vec<_> = elements
         .iter_mut()
         .filter_map(|(_, _, sep)| sep.take())
@@ -105,6 +151,13 @@ where
             }
         }),
     )))
+}
+
+fn has_trailing_single_line_comment<L: Language>(token: &SyntaxToken<L>) -> bool {
+    token
+        .trailing_trivia()
+        .pieces()
+        .any(|piece| piece.kind().is_single_line_comment())
 }
 
 /// Fix the ordered sequence of nodes and separators adding missing separators and removing an extra separator.
