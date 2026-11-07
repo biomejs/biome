@@ -11,11 +11,14 @@ use biome_js_syntax::{
     AnyJsFunction, AnyJsMemberExpression, AnyTsType, JsArrayExpression, JsAssignmentExpression,
     JsBinaryOperator, JsCallArgumentList, JsCallArguments, JsCallExpression,
     JsConditionalExpression, JsFormalParameter, JsIdentifierExpression, JsImportCallExpression,
-    JsNewExpression, JsParameterList, JsParameters, JsPostUpdateExpression, JsPreUpdateExpression,
-    JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclarator,
-    binding_ext::AnyJsBindingDeclaration,
+    JsLanguage, JsNewExpression, JsParameterList, JsParameters, JsPostUpdateExpression,
+    JsPreUpdateExpression, JsSpread, JsSyntaxNode, JsSyntaxToken, JsTemplateExpression,
+    JsUnaryExpression, JsUnaryOperator, JsVariableDeclarator, binding_ext::AnyJsBindingDeclaration,
+    global_identifier,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxTriviaPiece};
+use biome_rowan::{
+    AstNode, AstSeparatedList, BatchMutationExt, SyntaxKindSet, SyntaxTriviaPiece, WalkEvent,
+};
 use biome_rule_options::use_math_min_max::UseMathMinMaxOptions;
 
 declare_lint_rule! {
@@ -35,6 +38,12 @@ declare_lint_rule! {
     ///
     /// ```js,expect_diagnostic
     /// height < 50 ? 50 : height;
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// const width = 100;
+    /// const maxWidth = 200;
+    /// Math.min(width, maxWidth) < height ? Math.min(width, maxWidth) : height;
     /// ```
     ///
     /// ### Valid
@@ -84,8 +93,8 @@ impl Rule for UseMathMinMax {
             return None;
         }
 
-        let left_repeatability = operand_repeatability(&comparison.left)?;
-        let right_repeatability = operand_repeatability(&comparison.right)?;
+        let left_repeatability = operand_repeatability(&comparison.left, model)?;
+        let right_repeatability = operand_repeatability(&comparison.right, model)?;
 
         if matches!(
             (left_repeatability, right_repeatability),
@@ -141,6 +150,19 @@ impl Rule for UseMathMinMax {
 
         let conditional = ctx.query();
         let comparison = extract_comparison(conditional)?;
+        // Moving comments from repeated calls can lose inner trivia or a line terminator.
+        if conditional.syntax().has_inner_comments()
+            && [&comparison.left, &comparison.right]
+                .into_iter()
+                .any(|expression| {
+                    expression
+                        .syntax()
+                        .preorder_of_kinds(JsCallExpression::KIND_SET)
+                        .any(|event| matches!(event, WalkEvent::Enter(_)))
+                })
+        {
+            return None;
+        }
         let test = conditional.test().ok()?.omit_parentheses();
         let binary = test.as_js_binary_expression()?;
         let consequent = conditional.consequent().ok()?;
@@ -469,11 +491,25 @@ fn classify_method(
     }
 }
 
-fn operand_repeatability(expression: &AnyJsExpression) -> Option<OperandRepeatability> {
-    let root = expression.syntax().clone();
+fn operand_repeatability(
+    expression: &AnyJsExpression,
+    model: &SemanticModel,
+) -> Option<OperandRepeatability> {
+    const KINDS: SyntaxKindSet<JsLanguage> = JsAssignmentExpression::KIND_SET
+        .union(JsPreUpdateExpression::KIND_SET)
+        .union(JsPostUpdateExpression::KIND_SET)
+        .union(JsUnaryExpression::KIND_SET)
+        .union(JsCallExpression::KIND_SET)
+        .union(JsImportCallExpression::KIND_SET)
+        .union(JsNewExpression::KIND_SET)
+        .union(JsSpread::KIND_SET)
+        .union(JsTemplateExpression::KIND_SET);
     let mut has_potential_repeated_evaluation = false;
 
-    for node in std::iter::once(root.clone()).chain(root.descendants()) {
+    for event in expression.syntax().preorder_of_kinds(KINDS) {
+        let WalkEvent::Enter(node) = event else {
+            continue;
+        };
         if JsAssignmentExpression::can_cast(node.kind())
             || JsPreUpdateExpression::can_cast(node.kind())
             || JsPostUpdateExpression::can_cast(node.kind())
@@ -487,9 +523,13 @@ fn operand_repeatability(expression: &AnyJsExpression) -> Option<OperandRepeatab
             return Some(OperandRepeatability::DefinitelyNonIdempotent);
         }
 
-        if JsCallExpression::can_cast(node.kind())
+        if JsCallExpression::cast_ref(&node)
+            .is_some_and(|call| !is_repeatable_math_call(&call, model))
             || JsImportCallExpression::can_cast(node.kind())
             || JsNewExpression::can_cast(node.kind())
+            || JsSpread::can_cast(node.kind())
+            || JsTemplateExpression::cast_ref(&node)
+                .is_some_and(|template| template.tag().is_some())
         {
             has_potential_repeated_evaluation = true;
         }
@@ -500,6 +540,110 @@ fn operand_repeatability(expression: &AnyJsExpression) -> Option<OperandRepeatab
     } else {
         OperandRepeatability::Idempotent
     })
+}
+
+fn is_repeatable_math_call(call: &JsCallExpression, model: &SemanticModel) -> bool {
+    math_min_max_method(call, model).is_some()
+        && call.arguments().is_ok_and(|arguments| {
+            arguments.args().iter().all(|argument| {
+                argument.is_ok_and(|argument| {
+                    argument.as_any_js_expression().is_some_and(|expression| {
+                        has_side_effect_free_numeric_conversion(expression, model).unwrap_or(false)
+                    })
+                })
+            })
+        })
+}
+
+fn has_side_effect_free_numeric_conversion(
+    expression: &AnyJsExpression,
+    model: &SemanticModel,
+) -> Option<bool> {
+    let mut expression = expression.clone();
+    loop {
+        expression = expression.omit_type_wrappers()?;
+        let identifier = match &expression {
+            AnyJsExpression::AnyJsLiteralExpression(literal) => {
+                return Some(literal.as_static_value().is_some());
+            }
+            AnyJsExpression::JsUnaryExpression(unary) => {
+                return unary.is_signed_numeric_literal().ok();
+            }
+            AnyJsExpression::JsCallExpression(call) => {
+                // Descendant calls are checked separately by operand_repeatability.
+                return Some(math_min_max_method(call, model).is_some());
+            }
+            AnyJsExpression::JsIdentifierExpression(identifier) => identifier,
+            _ => return Some(false),
+        };
+        let reference = identifier.name().ok()?;
+        let Some(binding) = model.binding(&reference) else {
+            return Some(matches!(
+                reference.value_token().ok()?.text_trimmed(),
+                "undefined" | "NaN" | "Infinity"
+            ));
+        };
+        if binding.all_writes().next().is_some() {
+            return Some(false);
+        }
+        let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) =
+            binding.tree().declaration()?
+        else {
+            return Some(false);
+        };
+        if !declarator.declaration()?.is_const()
+            || !matches!(
+                declarator.id().ok()?,
+                AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(_))
+            )
+        {
+            return Some(false);
+        }
+        let initializer = declarator.initializer()?.expression().ok()?;
+        // Earlier initializers make alias traversal terminate even for cyclic declarations.
+        if initializer.range().end() > expression.range().start() {
+            return Some(false);
+        }
+        expression = initializer;
+    }
+}
+
+fn math_min_max_method(
+    call: &JsCallExpression,
+    model: &SemanticModel,
+) -> Option<PreferredMathMethod> {
+    if call.optional_chain_token().is_some()
+        || call
+            .arguments()
+            .ok()?
+            .args()
+            .iter()
+            .any(|argument| !matches!(argument, Ok(AnyJsCallArgument::AnyJsExpression(_))))
+    {
+        return None;
+    }
+
+    let callee = call.callee().ok()?.omit_parentheses();
+    let member = callee.as_js_static_member_expression()?;
+    if member.operator_token().ok()?.kind() != T![.] {
+        return None;
+    }
+
+    let method = match member
+        .member()
+        .ok()?
+        .as_js_name()?
+        .value_token()
+        .ok()?
+        .text_trimmed()
+    {
+        "min" => PreferredMathMethod::Min,
+        "max" => PreferredMathMethod::Max,
+        _ => return None,
+    };
+    let object = member.object().ok()?.omit_parentheses();
+    let (reference, name) = global_identifier(&object.as_any_global_identifier_expression()?)?;
+    (name.text() == "Math" && model.binding(&reference).is_none()).then_some(method)
 }
 
 /// Removes trivia from an operand before inserting it into `Math.min()`/`Math.max()`.
