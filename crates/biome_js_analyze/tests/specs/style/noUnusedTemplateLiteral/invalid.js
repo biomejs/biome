@@ -10,3 +10,4 @@ function foo() { `use strict`; foo(); }
 var foo = `foo\\nbar`;
 var foo = `foo\\\nbar`;
 var foo = `foo\\\\\\\nbar`;
+var foo = `C:\\temp`;
