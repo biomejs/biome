@@ -3550,6 +3550,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoAstroComponentDefaultExportConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAstroComponentDefaultExportOptions" }
+			]
+		},
+		"NoAstroComponentDefaultExportOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoAstroConflictingSetDirectivesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8719,6 +8729,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noAstroComponentDefaultExport": {
+					"description": "Disallow runtime default exports in Astro component frontmatter.\nSee https://biomejs.dev/linter/rules/no-astro-component-default-export",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAstroComponentDefaultExportConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noAstroConflictingSetDirectives": {
 					"description": "Disallow conflicting content sources on Astro elements.\nSee https://biomejs.dev/linter/rules/no-astro-conflicting-set-directives",
 					"anyOf": [
@@ -11578,6 +11595,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoAssignInExpressionsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAstroComponentDefaultExportOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAstroComponentDefaultExportOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
