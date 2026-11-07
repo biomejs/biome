@@ -19,7 +19,7 @@ mod guards;
 mod scanner;
 
 pub(crate) use expressions::AnyFlowExpression;
-pub(crate) use guards::{FlowGuard, FlowTest};
+pub(crate) use guards::{FlowGuard, FlowTest, guard_signature};
 pub(crate) use scanner::FlowRootScanner;
 
 use biome_js_semantic::{JsDeclarationKind, SemanticModel};
@@ -27,6 +27,7 @@ use biome_js_syntax::JsIdentifierBinding;
 use biome_js_type_info::{RawTypeData, TypeReference, is_raw_narrowing_invariant};
 use biome_rowan::{AstNode, TextRange};
 use builder::{BuiltRoot, build_root};
+use guards::GuardFunctions;
 use rustc_hash::{FxHashMap, FxHashSet};
 use scanner::SelectedRoot;
 
@@ -110,11 +111,12 @@ impl ModuleFlow {
         relevance_budget: usize,
     ) -> Self {
         let mut flow = Self::default();
-        let collector = RootCollector {
+        let mut collector = RootCollector {
             model,
             raw_types,
             raw_binding_types,
             relevance_budget,
+            functions: GuardFunctions::new(raw_types, raw_binding_types, roots.has_dynamic_scope()),
         };
         for root in roots.selected() {
             collector.add_root(&mut flow, root);
@@ -142,10 +144,11 @@ struct RootCollector<'a> {
     raw_types: &'a [RawTypeData],
     raw_binding_types: &'a FxHashMap<TextRange, TypeReference>,
     relevance_budget: usize,
+    functions: GuardFunctions<'a>,
 }
 
 impl RootCollector<'_> {
-    fn add_root(&self, flow: &mut ModuleFlow, selected: &SelectedRoot) {
+    fn add_root(&mut self, flow: &mut ModuleFlow, selected: &SelectedRoot) {
         let eligible: FxHashSet<TextRange> = selected
             .bindings
             .iter()
@@ -161,7 +164,7 @@ impl RootCollector<'_> {
             guards,
             mentions,
             reads,
-        }) = build_root(&selected.root, self.model)
+        }) = build_root(&selected.root, self.model, &mut self.functions)
         else {
             return;
         };
