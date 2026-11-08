@@ -3248,6 +3248,11 @@ export interface Nursery {
 	 */
 	noPseudoElementInFunctionalPseudoClass?: NoPseudoElementInFunctionalPseudoClassConfiguration;
 	/**
+	 * Disallow mutating this.state directly in React class components.
+	 * See https://biomejs.dev/linter/rules/no-react-direct-state-mutation
+	 */
+	noReactDirectStateMutation?: NoReactDirectStateMutationConfiguration;
+	/**
 	 * Disallow array, object, and function values as default props in React components.
 	 * See https://biomejs.dev/linter/rules/no-react-object-type-as-default-prop
 	 */
@@ -6678,6 +6683,9 @@ export type NoPromiseExecutorReturnConfiguration =
 export type NoPseudoElementInFunctionalPseudoClassConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPseudoElementInFunctionalPseudoClassOptions;
+export type NoReactDirectStateMutationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReactDirectStateMutationOptions;
 export type NoReactObjectTypeAsDefaultPropConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactObjectTypeAsDefaultPropOptions;
@@ -9728,6 +9736,10 @@ export interface RuleWithNoPromiseExecutorReturnOptions {
 export interface RuleWithNoPseudoElementInFunctionalPseudoClassOptions {
 	level: RulePlainConfiguration;
 	options?: NoPseudoElementInFunctionalPseudoClassOptions;
+}
+export interface RuleWithNoReactDirectStateMutationOptions {
+	level: RulePlainConfiguration;
+	options?: NoReactDirectStateMutationOptions;
 }
 export interface RuleWithNoReactObjectTypeAsDefaultPropOptions {
 	level: RulePlainConfiguration;
@@ -12982,6 +12994,7 @@ export type NoPlaywrightUnsafeReferencesOptions = {};
 export type NoProcessExitOptions = {};
 export type NoPromiseExecutorReturnOptions = {};
 export type NoPseudoElementInFunctionalPseudoClassOptions = {};
+export type NoReactDirectStateMutationOptions = {};
 export type NoReactObjectTypeAsDefaultPropOptions = {};
 export type NoRestrictedDependenciesOptions = {};
 export type NoReturnArrayPushOptions = {};
@@ -15159,6 +15172,7 @@ export type Category =
 	| "lint/nursery/noProcessExit"
 	| "lint/nursery/noPromiseExecutorReturn"
 	| "lint/nursery/noPseudoElementInFunctionalPseudoClass"
+	| "lint/nursery/noReactDirectStateMutation"
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"

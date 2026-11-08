@@ -6132,6 +6132,16 @@
 			]
 		},
 		"NoReExportAllOptions": { "type": "object", "additionalProperties": false },
+		"NoReactDirectStateMutationConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReactDirectStateMutationOptions" }
+			]
+		},
+		"NoReactDirectStateMutationOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoReactForwardRefConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9200,6 +9210,13 @@
 						{
 							"$ref": "#/$defs/NoPseudoElementInFunctionalPseudoClassConfiguration"
 						},
+						{ "type": "null" }
+					]
+				},
+				"noReactDirectStateMutation": {
+					"description": "Disallow mutating this.state directly in React class components.\nSee https://biomejs.dev/linter/rules/no-react-direct-state-mutation",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactDirectStateMutationConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14200,6 +14217,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoReExportAllOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoReactDirectStateMutationOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReactDirectStateMutationOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
