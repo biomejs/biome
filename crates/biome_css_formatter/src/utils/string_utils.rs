@@ -13,6 +13,7 @@ use biome_formatter::{
 };
 use biome_rowan::SyntaxToken;
 use biome_string_case::StrLikeExtension;
+use biome_unicode_table::html_quote_reference;
 
 use crate::{AsFormat, CssFormatter, prelude::CssFormatContext};
 
@@ -108,6 +109,21 @@ impl Format<CssFormatContext> for FormatLiteralStringToken<'_> {
         // metavariables may contain the same quotes.
         let range = self.token.text_trimmed_range();
         if f.context().metavariable_ranges_in(range).next().is_some() {
+            return self.token.format().fmt(f);
+        }
+
+        // In an HTML `style` attribute, a string that contains an HTML
+        // reference for a quote, such as `&quot;`, is kept as written. Changing
+        // its quotes would require decoding and encoding the references.
+        let text = self.token.text_trimmed();
+        if f.options()
+            .file_source()
+            .as_embedding_kind()
+            .is_html_style_attribute()
+            && text
+                .match_indices('&')
+                .any(|(index, _)| html_quote_reference(&text.as_bytes()[index..]).is_some())
+        {
             return self.token.format().fmt(f);
         }
 

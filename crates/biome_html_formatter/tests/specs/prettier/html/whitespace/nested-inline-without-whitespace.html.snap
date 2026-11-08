@@ -28,7 +28,7 @@ info: html/whitespace/nested-inline-without-whitespace.html
 @@ -1,5 +1,5 @@
  <a href="/wiki/Help:IPA/English" title="Help:IPA/English"
 -  >/<span style="border-bottom: 1px dotted"
-+  >/<span style="border-bottom:1px dotted"
++  >/<span style="border-bottom: 1px dotted;"
      ><span title="/ˌ/: secondary stress follows">ˌ</span
      ><span title="/ɪ/: &#39;i&#39; in &#39;kit&#39;">ɪ</span
      ><span title="&#39;l&#39; in &#39;lie&#39;">l</span
@@ -38,7 +38,7 @@ info: html/whitespace/nested-inline-without-whitespace.html
 
 ```html
 <a href="/wiki/Help:IPA/English" title="Help:IPA/English"
-  >/<span style="border-bottom:1px dotted"
+  >/<span style="border-bottom: 1px dotted;"
     ><span title="/ˌ/: secondary stress follows">ˌ</span
     ><span title="/ɪ/: &#39;i&#39; in &#39;kit&#39;">ɪ</span
     ><span title="&#39;l&#39; in &#39;lie&#39;">l</span

@@ -56,7 +56,7 @@ use biome_formatter::rowan::Printed;
 #[cfg(feature = "html_embeds")]
 use biome_formatter::rowan::prelude::{
     Document, Interned, RowanSource, SimpleFormatContext, format_args, format_with, group, indent,
-    line_suffix_boundary, soft_line_break, token,
+    line_suffix_boundary, soft_line_break, text, token,
 };
 use biome_formatter::{
     AttributePosition, BracketSameLine, IndentStyle, IndentWidth, LineEnding, LineWidth,
@@ -922,20 +922,30 @@ fn format_embedded(
                     .ok()?
                     .into_document()
             }
-            // The CSS formatter prints each declaration of a `style` attribute
-            // on its own line.
-            DocumentFileSource::Css(_) if attribute_snippet.is_some() => return None,
             DocumentFileSource::Css(_) => {
-                let css_options = css::resolve_format_options(
+                let mut css_options = css::resolve_format_options(
                     biome_path,
                     &snippet_file_source,
                     settings,
                     &workspace_db,
                 );
+                if attribute_snippet.is_some() {
+                    css_options = css_options
+                        .with_quote_style(QuoteStyle::Single)
+                        .with_trailing_newline(TrailingNewline::from(false));
+                }
                 let node = parse.embedded_syntax::<CssLanguage>();
-                biome_css_formatter::format_node_with_offset(css_options, &node)
-                    .ok()?
-                    .into_document()
+                let formatted =
+                    biome_css_formatter::format_node_with_offset(css_options, &node).ok()?;
+                if attribute_snippet.is_some() {
+                    let printed = formatted.print().ok()?;
+                    if printed.as_code().contains(['\n', '\r']) {
+                        return None;
+                    }
+                    format_css_attribute_value(printed.as_code())?
+                } else {
+                    formatted.into_document()
+                }
             }
             _ => return None,
         };
@@ -1068,6 +1078,25 @@ fn format_attribute_value(root: &AnyJsRoot, document: Document) -> Option<Docume
         )
     };
     Some(formatted.ok()?.into_document())
+}
+
+#[cfg(feature = "html_embeds")]
+fn format_css_attribute_value(code: &str) -> Option<Document> {
+    let code = if code.contains('"') {
+        Cow::Owned(code.replace('"', "&quot;"))
+    } else {
+        Cow::Borrowed(code)
+    };
+    biome_formatter::format!(
+        SimpleFormatContext::<RowanSource>::from_options(SimpleFormatOptions::default()),
+        [
+            token("\""),
+            text(code.as_ref(), None::<TextSize>),
+            token("\"")
+        ]
+    )
+    .ok()
+    .map(|formatted| formatted.into_document())
 }
 
 #[cfg(not(feature = "html_embeds"))]
