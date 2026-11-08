@@ -1128,6 +1128,29 @@ mod tests {
     }
 
     #[test]
+    fn find_matches_allows_trailing_list_separators() {
+        let query = compile_js_selector("`a, b`");
+        let without_trailing_comma = query
+            .find_matches(make_js_file("function f(a, b) {}"))
+            .expect("selector failed");
+        let with_trailing_comma = query
+            .find_matches(make_js_file("function f(a, b,) {}"))
+            .expect("selector failed");
+
+        assert_eq!(with_trailing_comma.len(), 2);
+        assert_eq!(
+            with_trailing_comma
+                .iter()
+                .map(|node| node.text_trimmed_range())
+                .collect::<Vec<_>>(),
+            without_trailing_comma
+                .iter()
+                .map(|node| node.text_trimmed_range())
+                .collect::<Vec<_>>()
+        );
+    }
+
+    #[test]
     fn find_matches_requires_the_whole_sequence() {
         let query = compile_js_selector("`foo(); bar()`");
         let matches = query
