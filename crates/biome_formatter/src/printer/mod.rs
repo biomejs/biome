@@ -460,7 +460,25 @@ impl<'a, S: Source> Printer<'a, S> {
                 }
             }
             Text::Text { text, text_width } => {
-                if let Some(width) = text_width.and_then(TextWidth::width) {
+                if text_width.is_some_and(TextWidth::preserves_line_endings) {
+                    self.state.buffer.push_str(text);
+                    if let Some(last_line_break) = text.rfind(['\r', '\n']) {
+                        let suffix = &text[last_line_break + 1..];
+                        self.state.line_width =
+                            TextWidth::from_text(suffix, self.options.indent_width())
+                                .width()
+                                .map_or(0, |width| width.value() as usize);
+                        self.state.measured_group_fits = false;
+                    } else {
+                        self.state.line_width +=
+                            TextWidth::from_text(text, self.options.indent_width())
+                                .width()
+                                .map_or(0, |width| width.value() as usize);
+                    }
+                    if !text.is_empty() {
+                        self.state.has_empty_line = false;
+                    }
+                } else if let Some(width) = text_width.and_then(TextWidth::width) {
                     self.state.buffer.push_str(text);
                     self.state.line_width += width.value() as usize;
                     if !text.is_empty() {
@@ -1578,10 +1596,14 @@ impl<'a, 'print, S: Source> FitsMeasurer<'a, 'print, S> {
                 if let Some(width) = text_width.and_then(TextWidth::width) {
                     self.state.line_width += width.value() as usize;
                 } else {
+                    let preserves_line_endings =
+                        text_width.is_some_and(TextWidth::preserves_line_endings);
                     for c in text.chars() {
                         let char_width = match c {
                             '\t' => self.options().indent_width.value() as usize,
-                            '\n' => {
+                            line_break @ ('\n' | '\r')
+                                if line_break == '\n' || preserves_line_endings =>
+                            {
                                 return if self.must_be_flat
                                     || self.state.line_width > self.options().print_width.into()
                                 {
@@ -1699,6 +1721,7 @@ struct FitsState {
 #[cfg(test)]
 mod tests {
     use crate::LineEnding;
+    use crate::format_element::TextWidth;
     use crate::prelude::*;
     use crate::printer::{PrintWidth, Printer, PrinterOptions};
     use crate::{
@@ -1817,6 +1840,329 @@ a"#,
             "function main() {\r\n\tlet x = `This is a multiline\r\nstring`;\r\n}\r\n",
             result.as_code()
         );
+    }
+
+    #[test]
+    fn it_preserves_marked_text_line_endings() {
+        let options = PrinterOptions {
+            line_ending: LineEnding::Crlf,
+            ..PrinterOptions::default()
+        };
+
+        let result = format_with_options(
+            &format_args![
+                format_with(|f| {
+                    f.write_element(FormatElement::Text {
+                        text: "first\nsecond\r\nthird\rfourth".into(),
+                        text_width: TextWidth::from_text_preserving_line_endings(
+                            "first\nsecond\r\nthird\rfourth",
+                            2.try_into().unwrap(),
+                        ),
+                    })
+                }),
+                hard_line_break()
+            ],
+            options,
+        );
+
+        assert_eq!("first\nsecond\r\nthird\rfourth\r\n", result.as_code());
+    }
+
+    /// Writes `text` as one text element with the given `text_width`.
+    struct TextWithWidth<'a> {
+        text: &'a str,
+        text_width: TextWidth,
+    }
+
+    impl Format<SimpleFormatContext> for TextWithWidth<'_> {
+        fn fmt(&self, f: &mut Formatter<SimpleFormatContext>) -> FormatResult<()> {
+            f.write_element(FormatElement::Text {
+                text: self.text.into(),
+                text_width: self.text_width,
+            })
+        }
+    }
+
+    fn preserved_text(text: &str) -> TextWithWidth<'_> {
+        TextWithWidth {
+            text,
+            text_width: TextWidth::from_text_preserving_line_endings(text, 4.try_into().unwrap()),
+        }
+    }
+
+    fn ordinary_text(text: &str) -> TextWithWidth<'_> {
+        TextWithWidth {
+            text,
+            text_width: TextWidth::from_text(text, 4.try_into().unwrap()),
+        }
+    }
+
+    /// Writes `self.0` as mapped text, which has no pre-computed width.
+    struct MappedText<'a>(&'a str);
+
+    impl Format<SimpleFormatContext> for MappedText<'_> {
+        fn fmt(&self, f: &mut Formatter<SimpleFormatContext>) -> FormatResult<()> {
+            f.write_element(FormatElement::MappedText {
+                text: self.0.into(),
+                source_position: 0,
+            })
+        }
+    }
+
+    /// Prints `root` on lines of ten columns. Tabs take four columns.
+    fn print_narrow(root: &dyn Format<SimpleFormatContext>) -> String {
+        format_with_options(
+            root,
+            PrinterOptions {
+                print_width: PrintWidth::new(10),
+                indent_width: 4.try_into().unwrap(),
+                ..PrinterOptions::default()
+            },
+        )
+        .into_code()
+    }
+
+    /// Prints `content` before a group that takes four columns when flat.
+    ///
+    /// The group stays flat only if `content` ends at column six or earlier.
+    fn print_narrow_before_group(content: &dyn Format<SimpleFormatContext>) -> String {
+        print_narrow(&format_args![
+            content,
+            group(&format_args![token("ab"), soft_line_break(), token("cd")])
+        ])
+    }
+
+    /// Prints `content` after a soft line break in a boundary group.
+    ///
+    /// Multiline text expands a regular group before printing. A boundary
+    /// group stays unmarked, so the printer measures whether `content` fits.
+    fn print_narrow_in_boundary_group(content: &dyn Format<SimpleFormatContext>) -> String {
+        print_narrow(&boundary_group(&format_args![
+            token("ab"),
+            soft_line_break(),
+            content
+        ]))
+    }
+
+    /// Prints a fill of `item` and a `c` item.
+    ///
+    /// Fill items are measured with the requirement that they stay flat.
+    fn print_narrow_fill(item: &dyn Format<SimpleFormatContext>) -> String {
+        print_narrow(&format_with(|f| {
+            f.fill()
+                .entry(&soft_line_break_or_space(), item)
+                .entry(&soft_line_break_or_space(), &token("c"))
+                .finish()
+        }))
+    }
+
+    #[test]
+    fn preserved_text_measures_the_next_group_from_its_last_line() {
+        for line_break in ["\n", "\r", "\r\n"] {
+            let fits = std::format!("first{line_break}123456");
+            let exceeds = std::format!("first{line_break}1234567");
+
+            assert_eq!(
+                print_narrow_before_group(&format_args![token("prefix"), preserved_text(&fits)]),
+                std::format!("prefix{fits}abcd"),
+            );
+            assert_eq!(
+                print_narrow_before_group(&format_args![token("prefix"), preserved_text(&exceeds)]),
+                std::format!("prefix{exceeds}ab\ncd"),
+            );
+        }
+    }
+
+    #[test]
+    fn preserved_text_measures_the_next_group_from_after_its_last_line_break() {
+        for (fits, exceeds) in [
+            ("a\n12345678\r123456", "a\n12345678\r1234567"),
+            ("a\r12345678\n123456", "a\r12345678\n1234567"),
+        ] {
+            assert_eq!(
+                print_narrow_before_group(&preserved_text(fits)),
+                std::format!("{fits}abcd"),
+            );
+            assert_eq!(
+                print_narrow_before_group(&preserved_text(exceeds)),
+                std::format!("{exceeds}ab\ncd"),
+            );
+        }
+    }
+
+    #[test]
+    fn preserved_text_ending_with_a_line_break_restarts_the_line() {
+        for line_break in ["\n", "\r", "\r\n"] {
+            let content = std::format!("first line{line_break}");
+
+            assert_eq!(
+                print_narrow_before_group(&format_args![
+                    token("long prefix"),
+                    preserved_text(&content)
+                ]),
+                std::format!("long prefix{content}abcd"),
+            );
+            // The printer drops a space at the start of a line.
+            assert_eq!(
+                print_narrow(&format_args![
+                    token("long prefix"),
+                    preserved_text(&content),
+                    space(),
+                    token("z")
+                ]),
+                std::format!("long prefix{content}z"),
+            );
+        }
+    }
+
+    #[test]
+    fn preserved_text_measures_wide_characters_and_tabs() {
+        for earlier_lines in ["", "first\n"] {
+            for (fits, exceeds) in [("寿司ab", "寿司abc"), ("\tab", "\tabc")] {
+                let fits = std::format!("{earlier_lines}{fits}");
+                let exceeds = std::format!("{earlier_lines}{exceeds}");
+
+                assert_eq!(
+                    print_narrow_before_group(&preserved_text(&fits)),
+                    std::format!("{fits}abcd"),
+                );
+                assert_eq!(
+                    print_narrow_before_group(&preserved_text(&exceeds)),
+                    std::format!("{exceeds}ab\ncd"),
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn preserved_single_line_text_adds_its_width_to_the_line() {
+        assert_eq!(
+            print_narrow_before_group(&format_args![token("ab"), preserved_text("1234")]),
+            "ab1234abcd",
+        );
+        assert_eq!(
+            print_narrow_before_group(&format_args![token("ab"), preserved_text("12345")]),
+            "ab12345ab\ncd",
+        );
+    }
+
+    #[test]
+    fn preserved_text_line_break_measures_the_next_group_again() {
+        for line_break in ["\n", "\r", "\r\n"] {
+            let content = std::format!("first{line_break}1234567");
+
+            // The boundary group fits up to the line break and prints flat.
+            // The nested group no longer fits after the last line of the text.
+            let result = print_narrow(&boundary_group(&format_args![
+                preserved_text(&content),
+                group(&format_args![token("ab"), soft_line_break(), token("cd")]),
+            ]));
+
+            assert_eq!(result, std::format!("{content}ab\ncd"));
+        }
+    }
+
+    #[test]
+    fn empty_line_after_preserved_text_prints_a_blank_line() {
+        for (content, expected) in [
+            ("b", "a\n\nb\n\nz"),
+            ("b\nc", "a\n\nb\nc\n\nz"),
+            ("b\n", "a\n\nb\n\nz"),
+        ] {
+            let result = format(&format_args![
+                token("a"),
+                empty_line(),
+                preserved_text(content),
+                empty_line(),
+                token("z")
+            ]);
+
+            assert_eq!(result.as_code(), expected);
+        }
+    }
+
+    #[test]
+    fn empty_line_after_empty_preserved_text_prints_no_extra_blank_line() {
+        let result = format(&format_args![
+            token("a"),
+            empty_line(),
+            preserved_text(""),
+            empty_line(),
+            token("z")
+        ]);
+
+        assert_eq!(result.as_code(), "a\n\nz");
+    }
+
+    #[test]
+    fn preserved_text_line_break_ends_the_fit_measurement() {
+        for line_break in ["\r\n", "\n", "\r"] {
+            let content = std::format!("cd{line_break}a line wider than ten columns");
+
+            assert_eq!(
+                print_narrow_in_boundary_group(&preserved_text(&content)),
+                std::format!("ab{content}"),
+            );
+            // A group also measures the content that follows it.
+            assert_eq!(
+                print_narrow(&format_args![
+                    group(&format_args![token("ab"), soft_line_break(), token("ef")]),
+                    preserved_text(&content)
+                ]),
+                std::format!("abef{content}"),
+            );
+        }
+    }
+
+    #[test]
+    fn preserved_text_must_fit_up_to_its_first_line_break() {
+        for line_break in ["\r\n", "\n", "\r"] {
+            let fits = std::format!("cdefghij{line_break}z");
+            let exceeds = std::format!("cdefghijk{line_break}z");
+
+            assert_eq!(
+                print_narrow_in_boundary_group(&preserved_text(&fits)),
+                std::format!("ab{fits}"),
+            );
+            assert_eq!(
+                print_narrow_in_boundary_group(&preserved_text(&exceeds)),
+                std::format!("ab\n{exceeds}"),
+            );
+        }
+    }
+
+    #[test]
+    fn ordinary_text_is_measured_past_a_carriage_return() {
+        assert_eq!(
+            print_narrow_in_boundary_group(&MappedText("cd\reeeeeeee")),
+            "ab\ncd\reeeeeeee",
+        );
+        assert_eq!(
+            print_narrow_in_boundary_group(&ordinary_text("cd\reeeeeeee\nz")),
+            "ab\ncd\reeeeeeee\nz",
+        );
+        assert_eq!(
+            print_narrow_in_boundary_group(&ordinary_text("cd\reeeeeeee")),
+            "ab\ncd\reeeeeeee",
+        );
+    }
+
+    #[test]
+    fn flat_fill_item_rejects_preserved_text_line_breaks() {
+        for line_break in ["\r\n", "\n", "\r"] {
+            let item = std::format!("a{line_break}b");
+
+            assert_eq!(
+                print_narrow_fill(&preserved_text(&item)),
+                std::format!("{item}\nc"),
+            );
+        }
+    }
+
+    #[test]
+    fn flat_fill_item_accepts_ordinary_carriage_returns() {
+        assert_eq!(print_narrow_fill(&MappedText("a\rb")), "a\rb c");
+        assert_eq!(print_narrow_fill(&ordinary_text("a\rb")), "a\rb c");
     }
 
     #[test]

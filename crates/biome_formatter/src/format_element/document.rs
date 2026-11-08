@@ -1069,6 +1069,50 @@ mod tests {
     }
 
     #[test]
+    fn preserved_text_expands_enclosing_groups_only_with_a_line_break() {
+        use crate::format_element::tag::Tag::*;
+
+        fn modes_of_groups_around(text: &str) -> Vec<GroupMode> {
+            let mut document = Document::from(vec![
+                FormatElement::Tag(StartGroup(tag::Group::new())),
+                FormatElement::Tag(StartGroup(tag::Group::new())),
+                FormatElement::Text {
+                    text: text.into(),
+                    text_width: TextWidth::from_text_preserving_line_endings(
+                        text,
+                        IrFormatOptions.indent_width(),
+                    ),
+                },
+                FormatElement::Tag(EndGroup),
+                FormatElement::Tag(EndGroup),
+            ]);
+
+            document.propagate_expand();
+
+            document
+                .as_elements()
+                .iter()
+                .filter_map(|element| match element {
+                    FormatElement::Tag(StartGroup(group)) => Some(group.mode()),
+                    _ => None,
+                })
+                .collect()
+        }
+
+        for text in ["a\r\nb", "a\nb", "a\rb"] {
+            assert_eq!(
+                modes_of_groups_around(text),
+                [GroupMode::Propagated, GroupMode::Propagated],
+                "{text:?}",
+            );
+        }
+        assert_eq!(
+            modes_of_groups_around("a"),
+            [GroupMode::Flat, GroupMode::Flat],
+        );
+    }
+
+    #[test]
     fn display_literal_line_break() {
         let document = Document::from(vec![FormatElement::Line(LineMode::Literal {
             source_position: None,
