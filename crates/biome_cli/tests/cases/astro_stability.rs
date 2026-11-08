@@ -13,6 +13,22 @@ const CONFIG: &str = r#"{
     "assist": { "enabled": false }
 }"#;
 
+const RUNTIME_RULE_CONFIG: &str = r#"{
+    "html": {
+        "experimentalFullSupportEnabled": true,
+        "linter": { "enabled": true }
+    },
+    "linter": {
+        "domains": {
+            "next": "recommended",
+            "react": "recommended",
+            "reactNative": "recommended"
+        }
+    },
+    "formatter": { "enabled": false },
+    "assist": { "enabled": false }
+}"#;
+
 const INPUT: &str = r#"---
 import Card from "./Card.astro";
 const title="Hello";
@@ -73,6 +89,51 @@ fn astro_full_support_formatting_is_idempotent() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "astro_full_support_formatting_is_idempotent",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn astro_template_skips_runtime_specific_rules() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("biome.json".into(), RUNTIME_RULE_CONFIG.as_bytes());
+    fs.insert(
+        "runtime-rules.astro".into(),
+        br#"---
+import Component from "./Component.astro";
+import Script from "next/script";
+const content = "child";
+const html = "<strong>safe</strong>";
+const image = "/hero.png";
+const items = ["a", "b"];
+---
+{true && <head><title>Astro</title></head>}
+{true && <img src={image} alt="Hero" />}
+{true && <Component children={content} />}
+{items.map((item, index) => <div key={index} ref="node">{item}</div>)}
+{[<span>one</span>, <span>two</span>]}
+{true && <svg:path />}
+{true && <div>raw text</div>}
+{true && <div dangerouslySetInnerHTML={{ __html: html }} />}
+{true && <div dangerouslySetInnerHTML={{ __html: html }}>fallback</div>}
+{true && <script src="https://polyfill.io/v3/polyfill.min.js?features=Object.fromEntries" />}
+{true && <Script src="https://polyfill.io/v3/polyfill.min.js?features=Array.from" />}
+"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "runtime-rules.astro"].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}\n{console:#?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "astro_template_skips_runtime_specific_rules",
         fs,
         console,
         result,
