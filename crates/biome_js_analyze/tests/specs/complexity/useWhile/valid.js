@@ -8,14 +8,6 @@ for (let i = 0; i < 16;) {
     i++;
 }
 
-let j = 0;
-for(;;) {
-    if (j >= 10) {
-        break;
-    }
-    j++
-}
-
 for(x of [0]) {}
 
 let k = 0;
