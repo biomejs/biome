@@ -1199,6 +1199,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_re_export_all::NoReExportAllOptions>(),
     ));
     result.push((
+        "nursery",
+        "noReactDirectStateMutation",
+        TypeId::of::<
+            biome_rule_options::no_react_direct_state_mutation::NoReactDirectStateMutationOptions,
+        >(),
+    ));
+    result.push((
         "suspicious",
         "noReactForwardRef",
         TypeId::of::<biome_rule_options::no_react_forward_ref::NoReactForwardRefOptions>(),
