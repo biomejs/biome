@@ -44,13 +44,20 @@ declare_lint_rule! {
     ///
     /// ```jsx,expect_diagnostic
     /// const Component = () => {
-    ///   const user = null;
-    ///   return <div>{user && <Profile user={user} />}</div>;
+    ///   const text = "";
+    ///   return <div>{text && <span>{text}</span>}</div>;
     /// }
     /// ```
     ///
     ///
     /// ### Valid
+    ///
+    /// ```jsx
+    /// const Component = () => {
+    ///   const user = null;
+    ///   return <div>{user && <Profile user={user} />}</div>;
+    /// }
+    /// ```
     ///
     /// ```jsx
     /// const Component = () => {
