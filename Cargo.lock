@@ -537,6 +537,7 @@ dependencies = [
  "biome_css_parser",
  "biome_diagnostics",
  "biome_formatter",
+ "biome_languages",
  "biome_rowan",
  "biome_string_case",
  "biome_unicode_table",

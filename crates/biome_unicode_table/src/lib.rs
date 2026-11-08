@@ -4,10 +4,12 @@ use crate::bytes::DISPATCHER;
 use crate::tables::derived_property::{ID_Continue, ID_Start};
 
 mod bytes;
+mod character_reference;
 mod punctuation;
 mod tables;
 
 pub use crate::bytes::Dispatch;
+pub use crate::character_reference::html_quote_reference;
 pub use crate::punctuation::is_unicode_punctuation;
 pub use crate::tables::html::{
     is_cjk_punctuation, is_cjk_segment_break_character, is_default_ignorable_code_point,
