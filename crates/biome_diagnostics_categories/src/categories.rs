@@ -303,6 +303,7 @@ define_categories! {
     "lint/nursery/noProcessExit": "https://biomejs.dev/linter/rules/no-process-exit",
     "lint/nursery/noPromiseExecutorReturn": "https://biomejs.dev/linter/rules/no-promise-executor-return",
     "lint/nursery/noPseudoElementInFunctionalPseudoClass": "https://biomejs.dev/linter/rules/no-pseudo-element-in-functional-pseudo-class",
+    "lint/nursery/noReactDirectStateMutation": "https://biomejs.dev/linter/rules/no-react-direct-state-mutation",
     "lint/nursery/noReactNativeDeepImports": "https://biomejs.dev/linter/rules/no-react-native-deep-imports",
     "lint/nursery/noReactNativeLiteralColors": "https://biomejs.dev/linter/rules/no-react-native-literal-colors",
     "lint/nursery/noReactNativeRawText": "https://biomejs.dev/linter/rules/no-react-native-raw-text",

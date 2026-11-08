@@ -744,7 +744,7 @@ impl ReactSuperClass {
     /// This check isn't precise since it doesn't check that those components were
     /// actually imported from React/React-like library.
     /// This might be improved in the future if required.
-    fn from_extends_clause(extends_clause: &JsExtendsClause) -> Option<Self> {
+    pub(crate) fn from_extends_clause(extends_clause: &JsExtendsClause) -> Option<Self> {
         let super_class = extends_clause.super_class().ok()?;
         let super_class_member = super_class.get_callee_member_name()?;
         let class_name = super_class_member.text_trimmed();
