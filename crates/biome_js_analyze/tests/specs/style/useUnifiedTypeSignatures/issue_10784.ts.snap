@@ -1,0 +1,126 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_10784.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// Test A — Original issue: zero versus one parameter
+interface Api {
+	run(): void;
+	run(input: string): void;
+}
+
+type RunArgs = Parameters<Api["run"]>;
+
+const args = ["value"] as RunArgs;
+const requiredArgs: [string] = args;
+
+console.log(requiredArgs);
+
+// Test B — One versus two required parameters
+interface Api {
+	send(message: string): void;
+	send(message: string, priority: number): void;
+}
+
+// Test C — Identical duplicate signatures
+interface Api {
+	calculate(value: number): number;
+	calculate(value: number): number;
+}
+
+// Test D — Existing optional parameter
+interface Api {
+	update(id: number): void;
+	update(id: number, name?: string): void;
+}
+
+
+```
+
+# Diagnostics
+```
+issue_10784.ts:5:2 lint/style/useUnifiedTypeSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This overload signature can be combined with a similar one.
+  
+    3 │ // Test A — Original issue: zero versus one parameter
+    4 │ interface Api {
+  > 5 │ 	run(): void;
+      │ 	^^^^^^^^^^^^
+    6 │ 	run(input: string): void;
+    7 │ }
+  
+  i Multiple similar overload signatures are hard to read and maintain.
+  
+
+```
+
+```
+issue_10784.ts:18:2 lint/style/useUnifiedTypeSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This overload signature can be combined with a similar one.
+  
+    16 │ // Test B — One versus two required parameters
+    17 │ interface Api {
+  > 18 │ 	send(message: string): void;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 	send(message: string, priority: number): void;
+    20 │ }
+  
+  i Multiple similar overload signatures are hard to read and maintain.
+  
+
+```
+
+```
+issue_10784.ts:24:2 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This overload signature can be combined with a similar one.
+  
+    22 │ // Test C — Identical duplicate signatures
+    23 │ interface Api {
+  > 24 │ 	calculate(value: number): number;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ 	calculate(value: number): number;
+    26 │ }
+  
+  i Multiple similar overload signatures are hard to read and maintain.
+  
+  i Unsafe fix: Remove the unnecessary overload signature.
+  
+    22 22 │   // Test C — Identical duplicate signatures
+    23 23 │   interface Api {
+    24    │ - → calculate(value:·number):·number;
+    25 24 │     calculate(value: number): number;
+    26 25 │   }
+  
+
+```
+
+```
+issue_10784.ts:30:2 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This overload signature can be combined with a similar one.
+  
+    28 │ // Test D — Existing optional parameter
+    29 │ interface Api {
+  > 30 │ 	update(id: number): void;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ 	update(id: number, name?: string): void;
+    32 │ }
+  
+  i Multiple similar overload signatures are hard to read and maintain.
+  
+  i Unsafe fix: Remove the unnecessary overload signature.
+  
+    28 28 │   // Test D — Existing optional parameter
+    29 29 │   interface Api {
+    30    │ - → update(id:·number):·void;
+    31 30 │     update(id: number, name?: string): void;
+    32 31 │   }
+  
+
+```

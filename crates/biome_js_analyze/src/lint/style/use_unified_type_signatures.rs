@@ -212,6 +212,18 @@ impl Rule for UseUnifiedTypeSignatures {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleAction<JsLanguage>> {
+        // Do not provide an unsafe fix if any parameter needs to be made optional.
+        // Converting a required parameter into an optional parameter changes tuple types
+        // like `Parameters<T>` (e.g. from `[T]` to `[T?]`) and allows passing `undefined`
+        // at call sites, which can break type checking under `tsc`.
+        if state
+            .parameters_to_merge
+            .iter()
+            .any(|info| matches!(info.operation, MergeParameterOperation::MakeOptional))
+        {
+            return None;
+        }
+
         let mut mutation = ctx.root().begin();
 
         // When removing the signature, we need to get the wrapper node.
