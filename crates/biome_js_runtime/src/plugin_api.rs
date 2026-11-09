@@ -399,7 +399,7 @@ impl JsPluginApi {
                 ))
                 .into());
         };
-        if node.node.ancestors().last().as_ref() != Some(source) {
+        if &node.node.tree_top() != source {
             return Err(JsNativeError::typ()
                 .with_message("The diagnostic's node does not belong to the source being analyzed. Pass a node from that source to registerDiagnostic().")
                 .into());

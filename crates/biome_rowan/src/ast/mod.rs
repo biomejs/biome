@@ -926,8 +926,7 @@ impl<L: Language> SyntaxNodePtr<L> {
     /// several nodes can share an empty range at a boundary.
     pub fn as_node_near(&self, node: &SyntaxNode<L>) -> Option<SyntaxNode<L>> {
         if self.range.is_empty() {
-            let root = node.ancestors().last()?;
-            return self.try_to_node(&root);
+            return self.try_to_node(&node.tree_top());
         }
 
         // Every node whose range contains a non-empty range lies on the path
