@@ -3548,6 +3548,11 @@ export interface Nursery {
 	 */
 	noUselessSplice?: NoUselessSpliceConfiguration;
 	/**
+	 * Disallow spread syntax that has no effect.
+	 * See https://biomejs.dev/linter/rules/no-useless-spread
+	 */
+	noUselessSpread?: NoUselessSpreadConfiguration;
+	/**
 	 * Disallow type assertions that don't change the type of an expression.
 	 * See https://biomejs.dev/linter/rules/no-useless-type-assertion
 	 */
@@ -6928,6 +6933,9 @@ export type NoUselessRecursionConfiguration =
 export type NoUselessSpliceConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessSpliceOptions;
+export type NoUselessSpreadConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessSpreadOptions;
 export type NoUselessTypeAssertionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessTypeAssertionOptions;
@@ -10149,6 +10157,14 @@ export interface RuleWithNoUselessSpliceOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessSpliceOptions;
 }
+export interface RuleWithNoUselessSpreadOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoUselessSpreadOptions;
+}
 export interface RuleWithNoUselessTypeAssertionOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -13360,6 +13376,7 @@ export type NoUselessParameterPropertyAssignmentOptions = {};
 export type NoUselessQualifierOptions = {};
 export type NoUselessRecursionOptions = {};
 export type NoUselessSpliceOptions = {};
+export type NoUselessSpreadOptions = {};
 export type NoUselessTypeAssertionOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueBooleanDefaultOptions = {};
@@ -15520,6 +15537,7 @@ export type Category =
 	| "lint/nursery/noUselessQualifier"
 	| "lint/nursery/noUselessRecursion"
 	| "lint/nursery/noUselessSplice"
+	| "lint/nursery/noUselessSpread"
 	| "lint/nursery/noUselessTypeAssertion"
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"

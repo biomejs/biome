@@ -368,6 +368,7 @@ define_categories! {
     "lint/nursery/noUselessQualifier": "https://biomejs.dev/linter/rules/no-useless-qualifier",
     "lint/nursery/noUselessRecursion": "https://biomejs.dev/linter/rules/no-useless-recursion",
     "lint/nursery/noUselessSplice": "https://biomejs.dev/linter/rules/no-useless-splice",
+    "lint/nursery/noUselessSpread": "https://biomejs.dev/linter/rules/no-useless-spread",
     "lint/nursery/noUselessTypeAssertion": "https://biomejs.dev/linter/rules/no-useless-type-assertion",
     "lint/nursery/noUselessTypeConversion": "https://biomejs.dev/linter/rules/no-useless-type-conversion",
     "lint/nursery/noVueBooleanDefault": "https://biomejs.dev/linter/rules/no-vue-boolean-default",

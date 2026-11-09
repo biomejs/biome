@@ -410,6 +410,7 @@ pub mod no_useless_regex_backrefs;
 pub mod no_useless_rename;
 pub mod no_useless_return;
 pub mod no_useless_splice;
+pub mod no_useless_spread;
 pub mod no_useless_string_concat;
 pub mod no_useless_string_raw;
 pub mod no_useless_switch_case;
