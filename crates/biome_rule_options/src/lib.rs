@@ -510,6 +510,7 @@ pub mod no_xor_as_exponentiation;
 pub mod no_yaml_boolean_keys;
 pub mod no_yaml_empty_map_keys;
 pub mod no_yaml_empty_map_values;
+pub mod no_yaml_empty_sequence_entries;
 pub mod no_yoda_expression;
 pub mod no_zero_fractions;
 pub mod no_zero_length_unit;

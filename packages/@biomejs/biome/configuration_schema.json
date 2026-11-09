@@ -9161,6 +9161,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoYamlEmptySequenceEntriesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoYamlEmptySequenceEntriesOptions" }
+			]
+		},
+		"NoYamlEmptySequenceEntriesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoYodaExpressionConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -10617,6 +10627,13 @@
 					"description": "Disallow keys without a value in YAML maps.\nSee https://biomejs.dev/linter/rules/no-yaml-empty-map-values",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoYamlEmptyMapValuesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noYamlEmptySequenceEntries": {
+					"description": "Disallow empty items in YAML lists.\nSee https://biomejs.dev/linter/rules/no-yaml-empty-sequence-entries",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoYamlEmptySequenceEntriesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -17550,6 +17567,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoYamlEmptyMapValuesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoYamlEmptySequenceEntriesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoYamlEmptySequenceEntriesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

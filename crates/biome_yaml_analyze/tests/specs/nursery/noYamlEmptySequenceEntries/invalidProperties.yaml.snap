@@ -1,0 +1,96 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: invalidProperties.yaml
+---
+# Input
+```yaml
+# should generate diagnostics
+- &anchor
+- !!str
+- &other !!str
+- # a comment after the dash
+
+```
+
+# Diagnostics
+```
+invalidProperties.yaml:2:1 lint/nursery/noYamlEmptySequenceEntries ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This list item is empty.
+  
+    1 │ # should generate diagnostics
+  > 2 │ - &anchor
+      │ ^
+    3 │ - !!str
+    4 │ - &other !!str
+  
+  i An item with no value is read as null, and is often left by mistake.
+  
+  i Add a value to the item, or remove the item. If the item is meant to have no value, write null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidProperties.yaml:3:1 lint/nursery/noYamlEmptySequenceEntries ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This list item is empty.
+  
+    1 │ # should generate diagnostics
+    2 │ - &anchor
+  > 3 │ - !!str
+      │ ^
+    4 │ - &other !!str
+    5 │ - # a comment after the dash
+  
+  i An item with no value is read as null, and is often left by mistake.
+  
+  i Add a value to the item, or remove the item. If the item is meant to have no value, write null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidProperties.yaml:4:1 lint/nursery/noYamlEmptySequenceEntries ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This list item is empty.
+  
+    2 │ - &anchor
+    3 │ - !!str
+  > 4 │ - &other !!str
+      │ ^
+    5 │ - # a comment after the dash
+    6 │ 
+  
+  i An item with no value is read as null, and is often left by mistake.
+  
+  i Add a value to the item, or remove the item. If the item is meant to have no value, write null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidProperties.yaml:5:1 lint/nursery/noYamlEmptySequenceEntries ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This list item is empty.
+  
+    3 │ - !!str
+    4 │ - &other !!str
+  > 5 │ - # a comment after the dash
+      │ ^
+    6 │ 
+  
+  i An item with no value is read as null, and is often left by mistake.
+  
+  i Add a value to the item, or remove the item. If the item is meant to have no value, write null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -3923,6 +3923,11 @@ export interface Nursery {
 	 */
 	noYamlEmptyMapValues?: NoYamlEmptyMapValuesConfiguration;
 	/**
+	 * Disallow empty items in YAML lists.
+	 * See https://biomejs.dev/linter/rules/no-yaml-empty-sequence-entries
+	 */
+	noYamlEmptySequenceEntries?: NoYamlEmptySequenceEntriesConfiguration;
+	/**
 	 * Disallow number literals with zero fractions or dangling dots.
 	 * See https://biomejs.dev/linter/rules/no-zero-fractions
 	 */
@@ -7278,6 +7283,9 @@ export type NoYamlEmptyMapKeysConfiguration =
 export type NoYamlEmptyMapValuesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoYamlEmptyMapValuesOptions;
+export type NoYamlEmptySequenceEntriesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoYamlEmptySequenceEntriesOptions;
 export type NoZeroFractionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoZeroFractionsOptions;
@@ -10713,6 +10721,10 @@ export interface RuleWithNoYamlEmptyMapValuesOptions {
 	level: RulePlainConfiguration;
 	options?: NoYamlEmptyMapValuesOptions;
 }
+export interface RuleWithNoYamlEmptySequenceEntriesOptions {
+	level: RulePlainConfiguration;
+	options?: NoYamlEmptySequenceEntriesOptions;
+}
 export interface RuleWithNoZeroFractionsOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -13908,6 +13920,7 @@ export type NoXorAsExponentiationOptions = {};
 export type NoYamlBooleanKeysOptions = {};
 export type NoYamlEmptyMapKeysOptions = {};
 export type NoYamlEmptyMapValuesOptions = {};
+export type NoYamlEmptySequenceEntriesOptions = {};
 export type NoZeroFractionsOptions = {};
 export type NoZeroLengthUnitOptions = {};
 export type UseAccessorPairsOptions = {};
@@ -15894,6 +15907,7 @@ export type Category =
 	| "lint/nursery/noDynamicRequire"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
+	| "lint/nursery/noYamlEmptySequenceEntries"
 	| "lint/nursery/noErasingOperation"
 	| "lint/nursery/noExcessiveNestedBlocks"
 	| "lint/nursery/noExcessiveNestedCallbacks"
