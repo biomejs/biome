@@ -10538,6 +10538,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useValidCharacterComparison": {
+					"description": "Disallow comparing a single character with a string that has more than one character.\nSee https://biomejs.dev/linter/rules/use-valid-character-comparison",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseValidCharacterComparisonConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useValidTestTitle": {
 					"description": "Enforce valid titles for unit test cases and test suites.\nSee https://biomejs.dev/linter/rules/use-valid-test-title",
 					"anyOf": [
@@ -19047,6 +19054,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseValidCharacterComparisonOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseValidCharacterComparisonOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseValidForDirectionOptions": {
 			"type": "object",
 			"properties": {
@@ -24892,6 +24908,16 @@
 					"items": { "type": "string" }
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseValidCharacterComparisonConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseValidCharacterComparisonOptions" }
+			]
+		},
+		"UseValidCharacterComparisonOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseValidForDirectionConfiguration": {

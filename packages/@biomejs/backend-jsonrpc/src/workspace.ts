@@ -4153,6 +4153,11 @@ export interface Nursery {
 	 */
 	useUnaryMinus?: UseUnaryMinusConfiguration;
 	/**
+	 * Disallow comparing a single character with a string that has more than one character.
+	 * See https://biomejs.dev/linter/rules/use-valid-character-comparison
+	 */
+	useValidCharacterComparison?: UseValidCharacterComparisonConfiguration;
+	/**
 	 * Enforce valid titles for unit test cases and test suites.
 	 * See https://biomejs.dev/linter/rules/use-valid-test-title
 	 */
@@ -7251,6 +7256,9 @@ export type UseTopLevelHeadingConfiguration =
 export type UseUnaryMinusConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUnaryMinusOptions;
+export type UseValidCharacterComparisonConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseValidCharacterComparisonOptions;
 export type UseValidTestTitleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseValidTestTitleOptions;
@@ -10741,6 +10749,10 @@ export interface RuleWithUseUnaryMinusOptions {
 	level: RulePlainConfiguration;
 	options?: UseUnaryMinusOptions;
 }
+export interface RuleWithUseValidCharacterComparisonOptions {
+	level: RulePlainConfiguration;
+	options?: UseValidCharacterComparisonOptions;
+}
 export interface RuleWithUseValidTestTitleOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -13549,6 +13561,7 @@ export type UseTanstackQueryInfiniteQueryPropertyOrderOptions = {};
 export type UseTanstackQueryStableQueryClientOptions = {};
 export type UseTopLevelHeadingOptions = {};
 export type UseUnaryMinusOptions = {};
+export type UseValidCharacterComparisonOptions = {};
 export interface UseValidTestTitleOptions {
 	/**
 	 * A list of words that are disallowed in test titles.
@@ -15450,6 +15463,7 @@ export type Category =
 	| "lint/nursery/useUniqueGraphqlOperationName"
 	| "lint/nursery/useUniqueInputFieldNames"
 	| "lint/nursery/useUniqueVariableNames"
+	| "lint/nursery/useValidCharacterComparison"
 	| "lint/nursery/useValidTestTitle"
 	| "lint/nursery/useVueBaseImport"
 	| "lint/nursery/useVueBlockOrder"
