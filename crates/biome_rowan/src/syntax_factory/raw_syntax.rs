@@ -20,15 +20,11 @@ impl<K: SyntaxKind> RawSyntaxNode<K> {
         I: IntoIterator<Item = Option<RawSyntaxElement<K>>>,
         I::IntoIter: ExactSizeIterator,
     {
-        // Mapping through `by_ref` keeps the iterator where the caller put it.
-        // Moving it into a `Map` copies it with wide loads that cannot be
-        // forwarded from the caller's narrower stores, which stalls every call.
-        let mut slots = slots.into_iter();
         Self {
             raw: GreenNode::new(
                 kind.to_raw(),
                 slots
-                    .by_ref()
+                    .into_iter()
                     .map(|slot| slot.map(|element| element.into_green())),
             ),
             ph: PhantomData,
