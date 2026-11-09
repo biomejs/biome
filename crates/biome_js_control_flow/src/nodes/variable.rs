@@ -1,4 +1,4 @@
-use biome_js_syntax::JsVariableStatement;
+use biome_js_syntax::{AnyJsBindingPattern, JsVariableStatement};
 use biome_rowan::{AstNode, SyntaxResult};
 
 use crate::{
@@ -18,9 +18,15 @@ impl NodeVisitor for VariableVisitor {
     ) -> SyntaxResult<Self> {
         let declaration = node.declaration()?;
         for declarator in declaration.declarators() {
-            if let Some(initializer) = declarator?.initializer() {
+            let declarator = declarator?;
+            if let Some(initializer) = declarator.initializer() {
                 let expr = initializer.expression()?;
                 builder.append_statement().with_node(expr.into_syntax());
+                // Default values of a destructuring pattern run after the initializer
+                let id = declarator.id()?;
+                if !matches!(id, AnyJsBindingPattern::AnyJsBinding(_)) {
+                    builder.append_statement().with_node(id.into_syntax());
+                }
             }
         }
 
