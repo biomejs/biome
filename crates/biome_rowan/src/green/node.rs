@@ -352,31 +352,7 @@ impl GreenNode {
         I: IntoIterator<Item = Option<GreenElement>>,
         I::IntoIter: ExactSizeIterator,
     {
-        let mut text_len: TextSize = 0.into();
-        let mut flags = GreenElementFlags::default();
-        let slots = slots.into_iter().map(|el| {
-            let rel_offset = text_len;
-            match el {
-                Some(el) => {
-                    text_len += el.text_len();
-                    match &el {
-                        NodeOrToken::Node(node) => {
-                            flags.insert(node.flags());
-                        }
-                        NodeOrToken::Token(token) => {
-                            flags.insert(token.flags());
-                        }
-                    }
-                    match el {
-                        NodeOrToken::Node(node) => Slot::Node { rel_offset, node },
-                        NodeOrToken::Token(token) => Slot::Token { rel_offset, token },
-                    }
-                }
-                None => Slot::Empty { rel_offset },
-            }
-        });
-
-        let data = ThinArc::from_header_and_iter(
+        let data = ThinArc::from_header_and_iter_with(
             GreenNodeHead {
                 kind,
                 flags: GreenElementFlags::default(),
@@ -384,19 +360,24 @@ impl GreenNode {
                 #[cfg(feature = "countme")]
                 _c: countme::Count::new(),
             },
-            slots,
+            slots.into_iter(),
+            |head, el| {
+                let rel_offset = head.text_len;
+                match el {
+                    Some(NodeOrToken::Node(node)) => {
+                        head.text_len += node.text_len();
+                        head.flags.insert(node.flags());
+                        Slot::Node { rel_offset, node }
+                    }
+                    Some(NodeOrToken::Token(token)) => {
+                        head.text_len += token.text_len();
+                        head.flags.insert(token.flags());
+                        Slot::Token { rel_offset, token }
+                    }
+                    None => Slot::Empty { rel_offset },
+                }
+            },
         );
-
-        // XXX: fix up aggregate data after construction, because we can't
-        // iterate `slots` twice.
-        let data = {
-            let mut data = Arc::from_thin(data);
-            debug_assert!(data.is_unique());
-            let head = &mut Arc::get_mut(&mut data).unwrap().header;
-            head.text_len = text_len;
-            head.flags = flags;
-            Arc::into_thin(data)
-        };
 
         Self { ptr: data }
     }

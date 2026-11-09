@@ -187,7 +187,7 @@ impl GreenToken {
             #[cfg(feature = "countme")]
             _c: countme::Count::new(),
         };
-        let ptr = ThinArc::from_header_and_iter(head, text.bytes());
+        let ptr = ThinArc::from_header_and_slice(head, text.as_bytes());
         Self { ptr }
     }
 
