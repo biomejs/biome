@@ -1,0 +1,75 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidRenamed.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+	async setup(props, { expose: exposeProperties }) {
+		await doSomething();
+		exposeProperties({});
+		(exposeProperties)({});
+	},
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalidRenamed.vue:6:3 lint/nursery/noVueExposeAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expose() call comes after an await, so it runs too late.
+  
+    4 │ 	async setup(props, { expose: exposeProperties }) {
+    5 │ 		await doSomething();
+  > 6 │ 		exposeProperties({});
+      │ 		^^^^^^^^^^^^^^^^^^^^
+    7 │ 		(exposeProperties)({});
+    8 │ 	},
+  
+  i The component's setup code pauses here. A parent component might not receive the exposed properties.
+  
+    3 │ export default {
+    4 │ 	async setup(props, { expose: exposeProperties }) {
+  > 5 │ 		await doSomething();
+      │ 		^^^^^
+    6 │ 		exposeProperties({});
+    7 │ 		(exposeProperties)({});
+  
+  i Call expose() before the first await.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidRenamed.vue:7:3 lint/nursery/noVueExposeAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expose() call comes after an await, so it runs too late.
+  
+    5 │ 		await doSomething();
+    6 │ 		exposeProperties({});
+  > 7 │ 		(exposeProperties)({});
+      │ 		^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 	},
+    9 │ };
+  
+  i The component's setup code pauses here. A parent component might not receive the exposed properties.
+  
+    3 │ export default {
+    4 │ 	async setup(props, { expose: exposeProperties }) {
+  > 5 │ 		await doSomething();
+      │ 		^^^^^
+    6 │ 		exposeProperties({});
+    7 │ 		(exposeProperties)({});
+  
+  i Call expose() before the first await.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
