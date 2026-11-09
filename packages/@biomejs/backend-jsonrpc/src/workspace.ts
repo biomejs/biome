@@ -3933,6 +3933,11 @@ export interface Nursery {
 	 */
 	useFlatMathMinMax?: UseFlatMathMinMaxConfiguration;
 	/**
+	 * Require regular expressions passed to matchAll() to have the g flag.
+	 * See https://biomejs.dev/linter/rules/use-global-regex-in-match-all
+	 */
+	useGlobalRegexInMatchAll?: UseGlobalRegexInMatchAllConfiguration;
+	/**
 	 * Require regular expressions passed to replaceAll() to use the global flag.
 	 * See https://biomejs.dev/linter/rules/use-global-regex-in-replace-all
 	 */
@@ -7129,6 +7134,9 @@ export type UseFencedCodeLanguageConfiguration =
 export type UseFlatMathMinMaxConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseFlatMathMinMaxOptions;
+export type UseGlobalRegexInMatchAllConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseGlobalRegexInMatchAllOptions;
 export type UseGlobalRegexInReplaceAllConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseGlobalRegexInReplaceAllOptions;
@@ -10505,6 +10513,10 @@ export interface RuleWithUseFlatMathMinMaxOptions {
 	level: RulePlainConfiguration;
 	options?: UseFlatMathMinMaxOptions;
 }
+export interface RuleWithUseGlobalRegexInMatchAllOptions {
+	level: RulePlainConfiguration;
+	options?: UseGlobalRegexInMatchAllOptions;
+}
 export interface RuleWithUseGlobalRegexInReplaceAllOptions {
 	level: RulePlainConfiguration;
 	options?: UseGlobalRegexInReplaceAllOptions;
@@ -13525,6 +13537,7 @@ export interface UseFencedCodeLanguageOptions {
 	languageOnly?: boolean;
 }
 export type UseFlatMathMinMaxOptions = {};
+export type UseGlobalRegexInMatchAllOptions = {};
 export type UseGlobalRegexInReplaceAllOptions = {};
 /**
  * Options for the `useIncludes` rule.
@@ -15508,6 +15521,7 @@ export type Category =
 	| "lint/nursery/useFencedCodeLanguage"
 	| "lint/nursery/useFind"
 	| "lint/nursery/useFlatMathMinMax"
+	| "lint/nursery/useGlobalRegexInMatchAll"
 	| "lint/nursery/useGlobalRegexInReplaceAll"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useIncludes"
