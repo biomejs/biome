@@ -14,7 +14,7 @@ use crate::{
         },
         table_row::{FormatGfmTableRowOptions, FormatGfmTableRowWithOptions},
     },
-    quote::{QuoteLinePrefix, quote_line_prefix, should_format_quote_structurally},
+    quote::{quote_line_prefix, should_format_quote_structurally},
 };
 use biome_formatter::{FormatOptions, GroupId, format_args, printer::Printer, write};
 use biome_markdown_syntax::{GfmTable, GfmTableDelimiterRow, GfmTableRow, MdBullet, MdQuote};
@@ -172,6 +172,10 @@ impl FormatNodeRule<GfmTable> for FormatGfmTable {
         };
 
         let line_prefix = quote_line_prefix(node.syntax())?;
+        // When set, every row after the header that has quote prefixes in the
+        // source starts with the prefix of the quotes and list items that
+        // enclose the table, printed from the start of the line, and the row's
+        // own quote prefixes are removed.
         let quote_prefix = (preserve_quote_prefixes
             && !line_prefix.is_empty()
             && cannot_reuse_source_quote_prefixes(node)?)
@@ -196,7 +200,17 @@ impl FormatNodeRule<GfmTable> for FormatGfmTable {
             }
             let delimiter_quote_prefix =
                 quote_prefix.filter(|_| !delimiter.quote_prefixes().is_empty());
-            write_table_line_break(f, delimiter_quote_prefix)?;
+            if let Some(prefix) = delimiter_quote_prefix {
+                write!(
+                    f,
+                    [dedent_to_root(&format_args![
+                        hard_line_break(),
+                        prefix.format(true)
+                    ])]
+                )?;
+            } else {
+                write!(f, [hard_line_break()])?;
+            }
             write!(
                 f,
                 [FormatGfmTableDelimiterRowWithOptions::new(
@@ -212,7 +226,17 @@ impl FormatNodeRule<GfmTable> for FormatGfmTable {
 
             for (row, cells) in body.iter().zip(&table.body) {
                 let row_quote_prefix = quote_prefix.filter(|_| !row.quote_prefixes().is_empty());
-                write_table_line_break(f, row_quote_prefix)?;
+                if let Some(prefix) = row_quote_prefix {
+                    write!(
+                        f,
+                        [dedent_to_root(&format_args![
+                            hard_line_break(),
+                            prefix.format(true)
+                        ])]
+                    )?;
+                } else {
+                    write!(f, [hard_line_break()])?;
+                }
                 write!(
                     f,
                     [FormatGfmTableRowWithOptions::new(
@@ -260,25 +284,4 @@ fn cannot_reuse_source_quote_prefixes(table: &GfmTable) -> FormatResult<bool> {
         }
     }
     Ok(false)
-}
-
-/// Ends the current table row and starts the next one.
-///
-/// With a `quote_prefix`, the next line starts with the prefix of the quotes
-/// and list items that enclose the table, printed from the start of the line,
-/// so the caller must remove the quote prefixes stored on the row.
-fn write_table_line_break(
-    f: &mut MarkdownFormatter,
-    quote_prefix: Option<&QuoteLinePrefix>,
-) -> FormatResult<()> {
-    match quote_prefix {
-        Some(prefix) => write!(
-            f,
-            [dedent_to_root(&format_args![
-                hard_line_break(),
-                prefix.format(true)
-            ])]
-        ),
-        None => write!(f, [hard_line_break()]),
-    }
 }
