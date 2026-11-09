@@ -3883,6 +3883,11 @@ export interface Nursery {
 	 */
 	useConsistentBlockLang?: UseConsistentBlockLangConfiguration;
 	/**
+	 * Require boolean names to start with a prefix such as is or has, and reserve those prefixes for booleans.
+	 * See https://biomejs.dev/linter/rules/use-consistent-boolean-name
+	 */
+	useConsistentBooleanName?: UseConsistentBooleanNameConfiguration;
+	/**
 	 * Enforce a consistent notation for font weights.
 	 * See https://biomejs.dev/linter/rules/use-consistent-font-weight-notation
 	 */
@@ -7134,6 +7139,9 @@ export type UseCapitalizedConstructorsConfiguration =
 export type UseConsistentBlockLangConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentBlockLangOptions;
+export type UseConsistentBooleanNameConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentBooleanNameOptions;
 export type UseConsistentFontWeightNotationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentFontWeightNotationOptions;
@@ -10493,6 +10501,10 @@ export interface RuleWithUseConsistentBlockLangOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentBlockLangOptions;
 }
+export interface RuleWithUseConsistentBooleanNameOptions {
+	level: RulePlainConfiguration;
+	options?: UseConsistentBooleanNameOptions;
+}
 export interface RuleWithUseConsistentFontWeightNotationOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -13531,6 +13543,22 @@ export interface UseConsistentBlockLangOptions {
 	 */
 	blocks?: Record<string, BlockLangOptions>;
 }
+/**
+ * Options for the `useConsistentBooleanName` rule.
+ */
+export interface UseConsistentBooleanNameOptions {
+	/**
+	 * Names that the rule doesn't check.
+	 */
+	ignore?: string[];
+	/**
+	 * Prefixes to enable or disable, merged with the default prefixes.
+	 *
+	 * A prefix set to `true` is accepted on boolean names, and names that
+	 * start with it must be booleans. A prefix set to `false` is disabled.
+	 */
+	prefixes?: Record<string, boolean>;
+}
 export interface UseConsistentFontWeightNotationOptions {
 	/**
 	 * Whether to allow the relative keywords `bolder` and `lighter` when `notation` is `"numeric"`.
@@ -15608,6 +15636,7 @@ export type Category =
 	| "lint/nursery/useBlockStatementOverIife"
 	| "lint/nursery/useCapitalizedConstructors"
 	| "lint/nursery/useConsistentBlockLang"
+	| "lint/nursery/useConsistentBooleanName"
 	| "lint/nursery/useConsistentFontWeightNotation"
 	| "lint/nursery/useConsistentFunctionStyle"
 	| "lint/nursery/useConsistentHeadingLevel"

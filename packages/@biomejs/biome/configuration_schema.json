@@ -10327,6 +10327,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentBooleanName": {
+					"description": "Require boolean names to start with a prefix such as is or has, and reserve those prefixes for booleans.\nSee https://biomejs.dev/linter/rules/use-consistent-boolean-name",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentBooleanNameConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentFontWeightNotation": {
 					"description": "Enforce a consistent notation for font weights.\nSee https://biomejs.dev/linter/rules/use-consistent-font-weight-notation",
 					"anyOf": [
@@ -17328,6 +17335,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConsistentBooleanNameOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentBooleanNameOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseConsistentBuiltinInstantiationOptions": {
 			"type": "object",
 			"properties": {
@@ -22855,6 +22871,29 @@
 					"description": "The top-level blocks to check in Vue and Svelte components.\n\nEach key is the tag name of a block, without angle brackets, such as\n`script`, `style`, or a Vue custom block like `i18n`. Blocks that aren't\nlisted aren't checked. When this option is omitted, the rule doesn't\ncheck anything.",
 					"type": ["object", "null"],
 					"additionalProperties": { "$ref": "#/$defs/BlockLangOptions" }
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseConsistentBooleanNameConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentBooleanNameOptions" }
+			]
+		},
+		"UseConsistentBooleanNameOptions": {
+			"description": "Options for the `useConsistentBooleanName` rule.",
+			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "Names that the rule doesn't check.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"prefixes": {
+					"description": "Prefixes to enable or disable, merged with the default prefixes.\n\nA prefix set to `true` is accepted on boolean names, and names that\nstart with it must be booleans. A prefix set to `false` is disabled.",
+					"type": ["object", "null"],
+					"additionalProperties": { "type": "boolean" }
 				}
 			},
 			"additionalProperties": false

@@ -2432,6 +2432,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_consistent_block_lang::UseConsistentBlockLangOptions>(
         ),
     ));
+    result.push((
+        "nursery",
+        "useConsistentBooleanName",
+        TypeId::of::<
+            biome_rule_options::use_consistent_boolean_name::UseConsistentBooleanNameOptions,
+        >(),
+    ));
     result.push(("style", "useConsistentBuiltinInstantiation", TypeId::of::<biome_rule_options::use_consistent_builtin_instantiation::UseConsistentBuiltinInstantiationOptions>()));
     result.push((
         "style",
