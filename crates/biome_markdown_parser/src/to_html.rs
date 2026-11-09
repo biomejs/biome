@@ -1634,7 +1634,12 @@ fn render_textual(text: &MdTextual, out: &mut String) {
 fn render_inline_code(code: &MdInlineCode, out: &mut String) {
     out.push_str("<code>");
 
-    let mut content = collect_raw_inline_text(&code.content());
+    let mut content = String::new();
+    for item in code.content().iter() {
+        if !matches!(item, AnyMdInline::MdQuotePrefix(_)) {
+            collect_raw_inline_item(&item, &mut content);
+        }
+    }
     if code
         .syntax()
         .ancestors()
