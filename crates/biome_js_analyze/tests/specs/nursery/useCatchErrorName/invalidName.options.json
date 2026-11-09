@@ -1,0 +1,14 @@
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useCatchErrorName": {
+          "level": "error",
+          "options": {
+            "name": "exception"
+          }
+        }
+      }
+    }
+  }
+}
