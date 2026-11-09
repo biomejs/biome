@@ -276,6 +276,28 @@ pub(crate) fn migrate_stylelint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_level));
         }
+        "scss/at-if-no-null" => {
+            if !options.include_inspired {
+                results.add(
+                    stylelint_name,
+                    eslint_to_biome::RuleMigrationResult::Inspired,
+                );
+                return false;
+            }
+            if !options.include_nursery {
+                results.add(
+                    stylelint_name,
+                    eslint_to_biome::RuleMigrationResult::Nursery,
+                );
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_scss_null_comparison
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_level));
+        }
         "scss/dollar-variable-no-missing-interpolation" => {
             if !options.include_inspired {
                 results.add(
