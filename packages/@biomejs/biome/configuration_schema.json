@@ -7475,6 +7475,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnresolvedDefaultImportConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnresolvedDefaultImportOptions" }
+			]
+		},
+		"NoUnresolvedDefaultImportOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUnresolvedImportsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9679,6 +9689,13 @@
 					"description": "Disallow immediately called arrow functions whose body is wrapped in parentheses.\nSee https://biomejs.dev/linter/rules/no-unreadable-iife",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnreadableIifeConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnresolvedDefaultImport": {
+					"description": "Disallow default imports from modules that have no default export.\nSee https://biomejs.dev/linter/rules/no-unresolved-default-import",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnresolvedDefaultImportConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -15502,6 +15519,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnreadableIifeOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnresolvedDefaultImportOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnresolvedDefaultImportOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
