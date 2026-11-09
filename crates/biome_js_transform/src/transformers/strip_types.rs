@@ -24,8 +24,7 @@ use biome_js_syntax::{
     TsTypeArguments, TsTypeAssertionAssignment, TsTypeAssertionExpression, TsTypeParameters,
 };
 use biome_rowan::{
-    AstNode, BatchMutationExt, NodeOrToken, SyntaxTriviaPiece, TextRange, TriviaPiece,
-    declare_node_union,
+    AstNode, BatchMutationExt, SyntaxTriviaPiece, TextRange, TriviaPiece, declare_node_union,
 };
 
 declare_transformation! {
@@ -479,10 +478,7 @@ fn tokens_in_ranges(root: &JsSyntaxNode, ranges: &[TextRange]) -> Vec<JsSyntaxTo
     let mut tokens: Vec<JsSyntaxToken> = Vec::new();
 
     for range in ranges {
-        let mut token = match root.covering_element(*range) {
-            NodeOrToken::Token(token) => Some(token),
-            NodeOrToken::Node(node) => node.first_token(),
-        };
+        let mut token = root.covering_element(*range).first_token();
 
         while let Some(current) = token {
             let current_range = current.text_range();

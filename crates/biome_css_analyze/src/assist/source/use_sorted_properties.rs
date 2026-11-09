@@ -250,7 +250,7 @@ fn with_terminated_line_comment(
 
     let next_token = match next_item {
         Some(next) => next.syntax().first_token()?,
-        None => item.syntax().parent()?.last_token()?.next_token()?,
+        None => item.syntax().parent()?.next_token()?,
     };
     if next_token
         .leading_trivia()

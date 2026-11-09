@@ -241,12 +241,7 @@ impl JsExecContext {
     /// The returned value is bound to this context: it must not outlive it, nor
     /// be passed to another [`JsExecContext`].
     pub fn create_js_element(&mut self, element: JsSyntaxElement) -> JsValue {
-        let root = match &element {
-            JsSyntaxElement::Node(node) => node.ancestors().last(),
-            JsSyntaxElement::Token(token) => {
-                token.parent().and_then(|parent| parent.ancestors().last())
-            }
-        };
+        let root = element.tree_top();
         self.api.set_source(root);
         JsAstNode::from_element(element, &mut self.ctx)
     }
