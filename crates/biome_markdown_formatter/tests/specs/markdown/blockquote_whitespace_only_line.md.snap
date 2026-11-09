@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/blockquote_whitespace_only_line.md
+---
+
+# Input
+
+```md
+> a
+>      
+> b after spaces
+
+> a
+>		
+> b after tabs
+
+> > a
+>		
+> b after fewer markers
+
+```
+
+
+# Formatted
+
+```md
+> a
+> 
+> b after spaces
+
+> a
+>
+> b after tabs
+
+> > a
+>
+> b after fewer markers
+
+```

@@ -1679,7 +1679,7 @@ fn is_quote_only_blank_line_from_source(p: &MarkdownParser, depth: usize) -> boo
     // Consume quote markers and optional single space after each
     for _ in 0..depth {
         if idx >= source.len() || source.as_bytes()[idx] != b'>' {
-            return false;
+            break;
         }
         idx += 1;
         if idx < source.len() {

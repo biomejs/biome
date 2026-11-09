@@ -592,6 +592,26 @@ impl ParseNodeList for QuoteBlockList {
             return Absent;
         }
 
+        // A line with only spaces and tabs is blank however wide its
+        // indentation is, so it can't start an indented code block.
+        if rest_of_line_is_blank(p) {
+            // Trailing spaces are lexed together with the newline as a hard
+            // line break, which would swallow the newline as trivia.
+            if p.at(MD_HARD_LINE_LITERAL) {
+                p.force_relex_heading_content();
+            }
+            while p.at(MD_TEXTUAL_LITERAL)
+                && p.cur_text()
+                    .bytes()
+                    .all(|byte| matches!(byte, b' ' | b'\t'))
+            {
+                p.consume_as_whitespace_trivia();
+            }
+            if p.at(T![EOF]) {
+                return Absent;
+            }
+        }
+
         if p.at(NEWLINE) {
             return self.handle_newline(p);
         }
@@ -777,6 +797,16 @@ pub(crate) fn at_quote_indented_code_start(p: &MarkdownParser) -> bool {
         }
     }
     column - start_col >= INDENT_CODE_BLOCK_SPACES
+}
+
+fn rest_of_line_is_blank(p: &MarkdownParser) -> bool {
+    matches!(
+        p.source_after_current()
+            .trim_start_matches([' ', '\t'])
+            .as_bytes()
+            .first(),
+        None | Some(b'\n' | b'\r')
+    )
 }
 
 fn quote_tab_starts_nested_prefix(p: &mut MarkdownParser) -> bool {
