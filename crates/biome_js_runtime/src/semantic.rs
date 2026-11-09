@@ -1,4 +1,5 @@
 use crate::ast::JsAstNode;
+use crate::js_object::js_object;
 use biome_js_semantic::{
     Binding, GlobalReference, JsDeclarationKind, Reference, Scope, SemanticModel,
     UnresolvedReference,
@@ -6,81 +7,17 @@ use biome_js_semantic::{
 use biome_js_syntax::binding_ext::AnyJsIdentifierBinding;
 use biome_js_syntax::{AnyJsIdentifierReference, JsSyntaxNode};
 use biome_rowan::AstNode;
-use boa_engine::class::{Class, ClassBuilder};
+use boa_engine::class::Class;
+use boa_engine::object::ObjectInitializer;
 use boa_engine::object::builtins::JsArray;
-use boa_engine::object::{JsObject, ObjectInitializer};
 use boa_engine::property::Attribute;
-use boa_engine::{
-    Context, Finalize, JsData, JsNativeError, JsResult, JsValue, NativeFunction, Trace, js_string,
-};
-use std::rc::Rc;
+use boa_engine::{Context, JsNativeError, JsResult, JsValue, js_string};
 
-/// Declares a Boa class wrapping an owned semantic handle and its JavaScript methods.
-///
-/// Each method entry is `(name, argument_count, |handle, args, context| { ... })`.
-/// The count excludes `this`: it sets the function's `length` and the exact number
-/// of arguments accepted. The receiver and argument count are checked before the
-/// body runs. `handle` is an `Rc` to the native value; the body returns `JsResult<JsValue>`.
-macro_rules! semantic_object {
-    ($wrapper:ident, $native:ty, $name:literal, $(($method:literal, $arity:literal, |$value:ident, $args:ident, $context:ident| $body:block)),+ $(,)?) => {
-        #[derive(Clone, JsData)]
-        pub(crate) struct $wrapper(Rc<$native>);
-
-        impl Finalize for $wrapper {}
-
-        // SAFETY: Semantic handles own Rust model data, which contains no Boa-managed values.
-        unsafe impl Trace for $wrapper {
-            boa_engine::gc::empty_trace!();
-        }
-
-        impl $wrapper {
-            pub(crate) fn wrap(value: $native, context: &mut Context) -> JsValue {
-                let prototype = context.get_global_class::<Self>().map(|class| class.prototype());
-                JsObject::from_proto_and_data(prototype, Self(Rc::new(value))).into()
-            }
-
-            fn from_value(value: &JsValue) -> JsResult<Rc<$native>> {
-                let object = value.as_object().ok_or_else(|| JsNativeError::typ()
-                    .with_message(concat!("Call this method on a ", $name, " returned by Biome.")))?;
-                let native = object.downcast_ref::<Self>().ok_or_else(|| JsNativeError::typ()
-                    .with_message(concat!("Call this method on a ", $name, " returned by Biome.")))?;
-                Ok(Rc::clone(&native.0))
-            }
-        }
-
-        impl Class for $wrapper {
-            const NAME: &'static str = $name;
-
-            fn init(class: &mut ClassBuilder<'_>) -> JsResult<()> {
-                $(class.method(
-                    js_string!($method), $arity,
-                    NativeFunction::from_fn_ptr(|this, $args, $context| {
-                        let $value = Self::from_value(this)?;
-                        let _ = &$context;
-                        if $args.len() != $arity {
-                            return Err(JsNativeError::typ().with_message(format!(
-                                "{}.{}() requires {} argument(s).", $name, $method, $arity,
-                            )).into());
-                        }
-                        $body
-                    }),
-                );)+
-                Ok(())
-            }
-
-            fn data_constructor(_new_target: &JsValue, _args: &[JsValue], _context: &mut Context) -> JsResult<Self> {
-                Err(JsNativeError::typ().with_message(concat!(
-                    $name, " has no public constructor. Obtain semantic information through context.model in a semantic rule.",
-                )).into())
-            }
-        }
-    };
-}
-
-semantic_object!(
+js_object!(
     JsSemanticModel,
     SemanticModel,
     "SemanticModel",
+    "Obtain semantic information through context.model in a semantic rule.",
     ("binding", 1, |model, args, context| {
         let node = model_node(&model, &args[0])?;
         let reference = reference_node(node)?;
@@ -167,10 +104,11 @@ semantic_object!(
     }),
 );
 
-semantic_object!(
+js_object!(
     JsBinding,
     Binding,
     "Binding",
+    "Obtain bindings through context.model in a semantic rule.",
     ("syntax", 0, |binding, args, context| {
         Ok(JsAstNode::from_node(binding.syntax(), context))
     }),
@@ -237,10 +175,11 @@ semantic_object!(
     }),
 );
 
-semantic_object!(
+js_object!(
     JsReference,
     Reference,
     "Reference",
+    "Obtain references through context.model in a semantic rule.",
     ("syntax", 0, |reference, args, context| {
         Ok(JsAstNode::from_node(reference.syntax(), context))
     }),
@@ -258,10 +197,11 @@ semantic_object!(
     }),
 );
 
-semantic_object!(
+js_object!(
     JsScope,
     Scope,
     "Scope",
+    "Obtain scopes through context.model in a semantic rule.",
     ("syntax", 0, |scope, args, context| {
         Ok(JsAstNode::from_node(scope.syntax(), context))
     }),
@@ -291,10 +231,11 @@ semantic_object!(
     }),
 );
 
-semantic_object!(
+js_object!(
     JsGlobalReference,
     GlobalReference,
     "GlobalReference",
+    "Obtain global references through context.model in a semantic rule.",
     ("syntax", 0, |reference, args, context| {
         Ok(JsAstNode::from_node(reference.syntax(), context))
     }),
@@ -306,10 +247,11 @@ semantic_object!(
     }),
 );
 
-semantic_object!(
+js_object!(
     JsUnresolvedReference,
     UnresolvedReference,
     "UnresolvedReference",
+    "Obtain unresolved references through context.model in a semantic rule.",
     ("syntax", 0, |reference, args, context| {
         Ok(JsAstNode::from_node(reference.syntax(), context))
     }),

@@ -76,6 +76,14 @@ pub struct InferredType<'db> {
     data: TypeData<'db>,
 }
 
+impl std::fmt::Display for InferredType<'_> {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str(&crate::format_inferred_type_info::format_inferred_type(
+            self.db, self.data,
+        ))
+    }
+}
+
 impl<'db> InferredType<'db> {
     pub const fn new(db: &'db dyn TypeDb, data: TypeData<'db>) -> Self {
         Self { db, data }

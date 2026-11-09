@@ -1,0 +1,84 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
+export const rule = defineRule({
+	query: ast("JS_VARIABLE_DECLARATOR", { types: true }),
+	run(node, { types }) {
+		const expression = node.initializer?.expression;
+		const ty = expression && types.typeOf(expression);
+		registerDiagnostic(
+			node,
+			"information",
+			[
+				ty?.toString(),
+				ty?.kind(),
+				`string=${ty?.isStringLike()}`,
+				`promise=${String(ty?.isPromise())}`,
+			].join(" | "),
+		);
+	},
+});
+```
+
+# Input
+
+## `/file.ts`
+
+```ts
+const text = "hello";
+const amount = 42;
+const values = [1, 2, 3];
+const pending = Promise.resolve("done");
+```
+
+# Diagnostics
+
+```block
+/file.ts:1:7 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i string: hello | string | string=true | promise=false
+  
+  > 1 │ const text = "hello";
+      │       ^^^^^^^^^^^^^^
+    2 │ const amount = 42;
+    3 │ const values = [1, 2, 3];
+  
+
+/file.ts:2:7 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i number: 42 | number | string=false | promise=false
+  
+    1 │ const text = "hello";
+  > 2 │ const amount = 42;
+      │       ^^^^^^^^^^^
+    3 │ const values = [1, 2, 3];
+    4 │ const pending = Promise.resolve("done");
+  
+
+/file.ts:3:7 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i instanceof Array<number> | global | string=false | promise=false
+  
+    1 │ const text = "hello";
+    2 │ const amount = 42;
+  > 3 │ const values = [1, 2, 3];
+      │       ^^^^^^^^^^^^^^^^^^
+    4 │ const pending = Promise.resolve("done");
+  
+
+/file.ts:4:7 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i instanceof Promise<string: done> | class | string=false | promise=true
+  
+    2 │ const amount = 42;
+    3 │ const values = [1, 2, 3];
+  > 4 │ const pending = Promise.resolve("done");
+      │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+```

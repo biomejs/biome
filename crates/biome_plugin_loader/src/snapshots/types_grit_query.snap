@@ -1,0 +1,45 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import { defineRule, grit, registerDiagnostic } from "@biomejs/runtime/plugin";
+export const rule = defineRule({
+	query: grit("`load()`", { types: true }),
+	run(node, { types }) {
+		const ty = types.typeOf(node);
+		registerDiagnostic(
+			node,
+			"information",
+			[ty?.toString(), ty?.kind(), types.classifiesAs(node, "promise")].join(
+				" | ",
+			),
+		);
+	},
+});
+```
+
+# Input
+
+## `/file.ts`
+
+```ts
+async function load(): Promise<string> { return "done"; }
+load();
+```
+
+# Diagnostics
+
+```block
+/file.ts:2:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i instanceof Promise<string> | global | match
+  
+    1 │ async function load(): Promise<string> { return "done"; }
+  > 2 │ load();
+      │ ^^^^^^
+```

@@ -93,13 +93,22 @@ fn collect_rule_entries(
     let mut diagnostics = ctx.pull_diagnostics();
 
     if let Err(err) = result {
+        let message = err.to_string();
+        let mut diagnostic = RuleDiagnostic::new(
+            category!("plugin"),
+            None::<TextRange>,
+            markup!("Rule "<Emphasis>{name}</Emphasis>" errored: "<Error>{&message}</Error>),
+        )
+        .with_severity(Severity::Error);
+        if message.contains(biome_js_runtime::TYPE_INFERENCE_UNAVAILABLE) {
+            diagnostic = diagnostic.note(markup! {
+                "Enable the "<Emphasis>"types"</Emphasis>" domain in the Biome configuration, "
+                "for example with "<Emphasis>"linter.domains.types"</Emphasis>": "
+                <Emphasis>"\"all\""</Emphasis>"."
+            });
+        }
         diagnostics.push(PluginDiagnosticEntry {
-            diagnostic: RuleDiagnostic::new(
-                category!("plugin"),
-                None::<TextRange>,
-                markup!("Rule "<Emphasis>{name}</Emphasis>" errored: "<Error>{err.to_string()}</Error>),
-            )
-            .with_severity(Severity::Error),
+            diagnostic,
             action: None,
         });
     }
@@ -124,6 +133,7 @@ pub struct AnalyzerJsPlugin {
     /// that haven't loaded the plugin yet.
     kinds: Vec<RawSyntaxKind>,
     requires_semantic_model: bool,
+    requires_types: bool,
 
     /// Glob patterns that restrict which files this plugin runs on.
     /// `None` means the plugin runs on all files.
@@ -157,13 +167,16 @@ impl AnalyzerJsPlugin {
         kinds.sort_unstable_by_key(|kind| kind.0);
         kinds.dedup();
 
+        let requires_types = plugin.rules.iter().any(|rule| rule.rule.requires_types);
         Ok(Self {
             fs,
             path: path.to_owned(),
             name: None,
             loaded: ThreadLocalCell::new(),
             kinds,
-            requires_semantic_model: plugin.rules.iter().any(|rule| rule.rule.requires_semantic),
+            requires_semantic_model: requires_types
+                || plugin.rules.iter().any(|rule| rule.rule.requires_semantic),
+            requires_types,
             includes,
         })
     }
@@ -259,6 +272,15 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
 
         let kind = node.kind();
         let mut entries = Vec::new();
+        let type_inference = if self.requires_types
+            && rules
+                .iter()
+                .any(|rule| rule.rule.requires_types && rule.rule.kinds.contains(&kind))
+        {
+            crate::type_inference::provider(services, &path)
+        } else {
+            None
+        };
 
         for loaded_rule in rules.iter().filter(|rule| rule.rule.kinds.contains(&kind)) {
             let name = self.name.as_deref().unwrap_or(&loaded_rule.rule.name);
@@ -285,6 +307,7 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
                                 &path,
                                 *source_type,
                                 services,
+                                type_inference.clone(),
                             );
                             collect_rule_entries(ctx, name, result, &mut entries);
                         }
@@ -308,6 +331,7 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
                     &path,
                     *source_type,
                     services,
+                    type_inference.clone(),
                 );
                 collect_rule_entries(ctx, name, result, &mut entries);
             }
@@ -2442,6 +2466,10 @@ mod semantic_tests;
 #[cfg(test)]
 #[path = "grit.tests.rs"]
 mod grit_tests;
+
+#[cfg(test)]
+#[path = "types.tests.rs"]
+mod types_tests;
 
 #[cfg(test)]
 #[path = "kind_sets.tests.rs"]

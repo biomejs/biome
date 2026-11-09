@@ -7,13 +7,40 @@ use biome_diagnostics::{Applicability, Severity, category};
 use biome_js_syntax::{JsLanguage, JsSyntaxNode};
 use boa_engine::module::SyntheticModuleInitializer;
 use boa_engine::object::builtins::JsArray;
-use boa_engine::object::{FunctionObjectBuilder, ObjectInitializer};
+use boa_engine::object::{FunctionObjectBuilder, JsObject, ObjectInitializer};
 use boa_engine::property::Attribute;
 use boa_engine::{
     Context, JsNativeError, JsResult, JsString, JsValue, Module, NativeFunction, js_string,
 };
 use std::cell::RefCell;
 use std::rc::Rc;
+
+fn query_options(options: Option<&JsObject>, context: &mut Context) -> JsResult<(bool, bool)> {
+    let Some(options) = options else {
+        return Ok((false, false));
+    };
+    let semantic = boolean_property(options, "semantic", context)?;
+    let types = boolean_property(options, "types", context)?;
+    Ok((semantic, types))
+}
+
+/// Reads a boolean option and treats an absent option as `false`.
+pub(crate) fn boolean_property(
+    object: &JsObject,
+    name: &str,
+    context: &mut Context,
+) -> JsResult<bool> {
+    let value = object.get(JsString::from(name), context)?;
+    if value.is_undefined() {
+        Ok(false)
+    } else {
+        value.as_boolean().ok_or_else(|| {
+            JsNativeError::typ()
+                .with_message(format!("The `{name}` query option must be a boolean."))
+                .into()
+        })
+    }
+}
 
 pub(crate) struct JsPluginApi {
     diagnostics: Rc<RefCell<Vec<PluginDiagnosticEntry>>>,
@@ -214,9 +241,9 @@ impl JsPluginApi {
         )
     }
 
-    /// Implements `ast(...kinds)`: builds an AST query object from syntax kind names.
+    /// Implements `ast(...kinds, options)`: builds an AST query object from syntax kind names.
     fn ast_query(_this: &JsValue, args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
-        Self::node_query("ast", args, context)
+        Self::node_query("ast", false, args, context)
     }
 
     fn semantic_query(
@@ -224,31 +251,21 @@ impl JsPluginApi {
         args: &[JsValue],
         context: &mut Context,
     ) -> JsResult<JsValue> {
-        Self::node_query("semantic", args, context)
+        Self::node_query("semantic", true, args, context)
     }
 
     /// Implements `grit(pattern, options)`: builds a Grit query object from a pattern string.
     fn grit_query(_this: &JsValue, args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
-        let (pattern, semantic) = match args {
-            [pattern] => (pattern, false),
-            [pattern, options] if options.is_undefined() => (pattern, false),
+        let (pattern, options) = match args {
+            [pattern] => (pattern, None),
+            [pattern, options] if options.is_undefined() => (pattern, None),
             [pattern, options] => {
                 let Some(options) = options.as_object() else {
                     return Err(JsNativeError::typ()
-                        .with_message("grit() options must be an object. Pass { semantic: true } as the second argument.")
+                        .with_message("grit() options must be an object. Pass { semantic: true } or { types: true } as the second argument.")
                         .into());
                 };
-                let semantic = options.get(js_string!("semantic"), context)?;
-                let semantic = if semantic.is_undefined() {
-                    false
-                } else {
-                    semantic.as_boolean().ok_or_else(|| {
-                        JsNativeError::typ().with_message(
-                            "grit() option semantic must be a boolean. Pass { semantic: true } as the second argument.",
-                        )
-                    })?
-                };
-                (pattern, semantic)
+                (pattern, Some(options))
             }
             _ => {
                 return Err(JsNativeError::typ()
@@ -261,6 +278,8 @@ impl JsPluginApi {
                 .with_message("grit() requires a Grit pattern string. Pass a string such as \"`console.log($args)`\", not a node or other value.")
                 .into());
         };
+        let (semantic, types) = query_options(options.as_ref(), context)?;
+        let requires_semantic = semantic || types;
 
         let query = ObjectInitializer::new(context)
             .property(
@@ -275,7 +294,12 @@ impl JsPluginApi {
             )
             .property(
                 js_string!("requiresSemantic"),
-                JsValue::from(semantic),
+                JsValue::from(requires_semantic),
+                Attribute::ENUMERABLE,
+            )
+            .property(
+                js_string!("requiresTypes"),
+                JsValue::from(types),
                 Attribute::ENUMERABLE,
             )
             .build();
@@ -283,15 +307,27 @@ impl JsPluginApi {
         Ok(query.into())
     }
 
-    fn node_query(query_type: &str, args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
-        if args.is_empty() {
+    fn node_query(
+        query_type: &str,
+        force_semantic: bool,
+        args: &[JsValue],
+        context: &mut Context,
+    ) -> JsResult<JsValue> {
+        let (kinds_args, options) = match args.split_last() {
+            Some((last, rest)) if last.as_object().is_some() => (rest, last.as_object()),
+            _ => (args, None),
+        };
+        let (options_semantic, types) = query_options(options.as_ref(), context)?;
+        let requires_semantic = force_semantic || options_semantic || types;
+
+        if kinds_args.is_empty() {
             return Err(JsNativeError::typ()
                 .with_message(format!("{query_type}() requires at least one node kind. Pass a kind from JsNodeByKind, such as {query_type}(\"JS_CALL_EXPRESSION\")."))
                 .into());
         }
 
-        let mut kinds = Vec::with_capacity(args.len());
-        for arg in args {
+        let mut kinds = Vec::with_capacity(kinds_args.len());
+        for arg in kinds_args {
             let Some(kind) = arg.as_string() else {
                 return Err(JsNativeError::typ()
                     .with_message(format!("{query_type}() requires node kind names as strings. Pass names such as \"JS_CALL_EXPRESSION\", not node objects."))
@@ -316,6 +352,16 @@ impl JsPluginApi {
                 Attribute::ENUMERABLE,
             )
             .property(js_string!("kinds"), kinds, Attribute::ENUMERABLE)
+            .property(
+                js_string!("requiresSemantic"),
+                JsValue::from(requires_semantic),
+                Attribute::ENUMERABLE,
+            )
+            .property(
+                js_string!("requiresTypes"),
+                JsValue::from(types),
+                Attribute::ENUMERABLE,
+            )
             .build();
 
         Ok(query.into())

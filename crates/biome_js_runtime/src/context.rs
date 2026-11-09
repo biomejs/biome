@@ -2,11 +2,12 @@ use crate::JsModuleLoader;
 use crate::ast::JsAstNode;
 use crate::kind_set::{JsNodeKindSet, JsTokenKindSet};
 use crate::mutation::JsMutation;
-use crate::plugin_api::JsPluginApi;
+use crate::plugin_api::{JsPluginApi, boolean_property};
 use crate::rule_context::create_rule_context;
 use crate::semantic::register_semantic;
 use crate::source::read_module_source;
 use crate::token::JsAstToken;
+use crate::types::{TYPE_INFERENCE_UNAVAILABLE, TypeInferenceProvider, register_types};
 use biome_analyze::{PluginDiagnosticEntry, ServiceBag};
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxElement, JsSyntaxKind, JsSyntaxNode};
@@ -44,6 +45,9 @@ pub struct JsPluginRule {
 
     pub requires_semantic: bool,
 
+    /// Whether the rule requests inferred type information.
+    pub requires_types: bool,
+
     /// The `run()` function of the rule, called with every node or token matching the query.
     pub run: JsFunction,
 
@@ -69,6 +73,7 @@ impl JsExecContext {
         JsTokenKindSet::<JsLanguage>::register(&mut ctx)?;
         JsMutation::register(&mut ctx)?;
         register_semantic(&mut ctx)?;
+        register_types(&mut ctx)?;
 
         module_loader.register_module(
             js_string!("@biomejs/runtime/plugin"),
@@ -159,10 +164,24 @@ impl JsExecContext {
             };
 
             let query_type = query.get(js_string!("type"), ctx)?;
-            let (requires_semantic, grit) = match query_type.as_string() {
-                Some(ty) if ty == "ast" => (false, None),
-                Some(ty) if ty == "semantic" => (true, None),
-                Some(ty) if ty == "grit" => {
+            let query_type = query_type.as_string().map(|ty| ty.to_std_string_lossy());
+            let requires_types = boolean_property(&query, "requiresTypes", ctx)?;
+            let requires_semantic = match query_type.as_deref() {
+                Some("ast") => boolean_property(&query, "requiresSemantic", ctx)? || requires_types,
+                Some("semantic") => true,
+                Some("grit") => {
+                    boolean_property(&query, "requiresSemantic", ctx)? || requires_types
+                }
+                _ => {
+                    return Err(JsNativeError::typ()
+                        .with_message(format!(
+                            "Rule {name} has an unsupported query type. Use ast(...), semantic(...), or grit(...)."
+                        ))
+                        .into());
+                }
+            };
+            let grit = match query_type.as_deref() {
+                Some("grit") => {
                     let pattern = query.get(js_string!("pattern"), ctx)?;
                     let Some(pattern) = pattern.as_string() else {
                         return Err(JsNativeError::typ()
@@ -171,17 +190,9 @@ impl JsExecContext {
                             ))
                             .into());
                     };
-                    let requires_semantic = query
-                        .get(js_string!("requiresSemantic"), ctx)?
-                        .as_boolean()
-                        .unwrap_or(false);
-                    (requires_semantic, Some(pattern.to_std_string_lossy()))
+                    Some(pattern.to_std_string_lossy())
                 }
-                _ => return Err(JsNativeError::typ()
-                    .with_message(format!(
-                        "Rule {name} has an unsupported query type. Use ast(...), semantic(...), or grit(...)."
-                    ))
-                    .into()),
+                _ => None,
             };
 
             let rule_kinds = if grit.is_some() {
@@ -219,6 +230,7 @@ impl JsExecContext {
                 name,
                 kinds: rule_kinds,
                 requires_semantic,
+                requires_types,
                 run,
                 grit,
             });
@@ -264,7 +276,7 @@ impl JsExecContext {
 
     /// Creates file metadata whose values remain associated with this invocation's source.
     pub fn create_rule_context(&mut self, path: &Utf8Path, source_type: JsFileSource) -> JsValue {
-        create_rule_context(path, source_type, None, &mut self.ctx)
+        create_rule_context(path, source_type, None, None, &mut self.ctx)
     }
 
     pub fn call_rule(
@@ -274,6 +286,7 @@ impl JsExecContext {
         path: &Utf8Path,
         source_type: JsFileSource,
         services: &ServiceBag,
+        type_inference: Option<Rc<dyn TypeInferenceProvider>>,
     ) -> JsResult<JsValue> {
         let model = if rule.requires_semantic {
             Some(services.get_service::<SemanticModel>().ok_or_else(|| {
@@ -282,8 +295,17 @@ impl JsExecContext {
         } else {
             None
         };
+        let types = if rule.requires_types {
+            Some(type_inference.ok_or_else(|| {
+                JsNativeError::typ().with_message(format!(
+                    "{TYPE_INFERENCE_UNAVAILABLE}. Enable the `types` domain in the Biome configuration so files are indexed with type information."
+                ))
+            })?)
+        } else {
+            None
+        };
         let ast = self.create_js_element(element);
-        let context = create_rule_context(path, source_type, model, &mut self.ctx);
+        let context = create_rule_context(path, source_type, model, types, &mut self.ctx);
         self.call_function(&rule.run, &JsValue::undefined(), &[ast, context])
     }
 }

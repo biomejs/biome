@@ -72,6 +72,14 @@ impl JsModuleInfo {
         self.diagnostics.as_slice()
     }
 
+    /// Returns whether type information was collected for this module.
+    ///
+    /// This is `false` when the module was indexed without type inference, in
+    /// which case type queries return no results.
+    pub fn has_type_inference(&self) -> bool {
+        self.infer_types
+    }
+
     /// Returns the module's global scope.
     pub fn global_scope(&self) -> JsScope {
         JsScope {

@@ -1,0 +1,33 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import { ast, defineRule } from "@biomejs/runtime/plugin";
+export const rule = defineRule({
+	query: ast("JS_IDENTIFIER_EXPRESSION", { types: true }),
+	run() {},
+});
+```
+
+# Input
+
+## `/file.ts`
+
+```ts
+const value = 1; value;
+```
+
+# Diagnostics
+
+```block
+plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Rule rule errored: TypeError: Type information is unavailable for this file. Enable the `types` domain in the Biome configuration so files are indexed with type information. (native)
+  
+  i Enable the types domain in the Biome configuration, for example with linter.domains.types: "all".
+```

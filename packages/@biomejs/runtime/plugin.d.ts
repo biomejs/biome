@@ -8,10 +8,12 @@ import type {
 	JsTokenKind,
 } from "./js_ast";
 import type { SemanticModel } from "./semantic";
+import type { TypeService } from "./types";
 
 export * from "./diagnostics";
 export * from "./js_ast";
 export * from "./semantic";
+export * from "./types";
 
 declare const queriedNode: unique symbol;
 declare const queryContext: unique symbol;
@@ -25,9 +27,14 @@ declare const tokenKindSet: unique symbol;
  * `N` is the union of the node types matched by the query; it only exists at
  * the type level, to infer the argument type of {@link Rule#run}.
  */
-type QueryType<K extends keyof ContextByQuery> = K extends "gritSemantic"
+type QueryType<K extends keyof ContextByQuery> = K extends
+	| "grit"
+	| "gritSemantic"
+	| "gritTyped"
 	? "grit"
-	: K;
+	: K extends "semantic"
+		? "semantic"
+		: "ast";
 
 interface Query<
 	N extends JsAstNode | JsAstToken,
@@ -38,7 +45,10 @@ interface Query<
 	readonly [queryContext]?: K;
 }
 
-export interface AstQuery<N extends JsAstNode> extends Query<N, "ast"> {
+export interface AstQuery<
+	N extends JsAstNode,
+	K extends keyof ContextByQuery = "ast",
+> extends Query<N, K> {
 	readonly kinds: readonly (keyof JsNodeByKind)[];
 }
 
@@ -51,7 +61,8 @@ export interface SemanticQuery<N extends JsAstNode>
  * A query matching the nodes and tokens selected by a GritQL pattern, created
  * with {@link grit}.
  */
-export interface GritQuery extends Query<JsAstElement, "grit"> {
+export interface GritQuery<K extends keyof ContextByQuery = "grit">
+	extends Query<JsAstElement, K> {
 	readonly pattern: string;
 }
 
@@ -59,9 +70,13 @@ export interface GritQuery extends Query<JsAstElement, "grit"> {
  * A Grit query created with `semantic: true`, whose `run` receives a semantic
  * model.
  */
-export interface SemanticGritQuery extends Query<JsAstElement, "gritSemantic"> {
-	readonly pattern: string;
-}
+export interface SemanticGritQuery extends GritQuery<"gritSemantic"> {}
+
+/**
+ * A Grit query created with `types: true`, whose `run` receives type
+ * information.
+ */
+export interface TypedGritQuery extends GritQuery<"gritTyped"> {}
 
 /** File information supplied to each invocation of a rule. */
 export interface RuleContext {
@@ -77,11 +92,23 @@ export interface SemanticRuleContext extends RuleContext {
 	readonly model: SemanticModel;
 }
 
+/**
+ * File information, semantic analysis, and type information supplied to a rule
+ * that requests the `types` capability.
+ */
+export interface TypedRuleContext extends SemanticRuleContext {
+	/** Inferred types for the analyzed source. */
+	readonly types: TypeService;
+}
+
 type ContextByQuery = {
 	ast: RuleContext;
+	astSemantic: SemanticRuleContext;
 	semantic: SemanticRuleContext;
 	grit: RuleContext;
 	gritSemantic: SemanticRuleContext;
+	typed: TypedRuleContext;
+	gritTyped: TypedRuleContext;
 };
 
 /** JavaScript or TypeScript parsing settings for the analyzed source. */
@@ -155,10 +182,23 @@ export interface Rule<
 
 /**
  * Creates a query matching every node of the given syntax kinds.
+ *
+ * Pass `{ semantic: true }` to provide a semantic model in `context`, or
+ * `{ types: true }` to provide type information. The `types` option also
+ * provides the semantic model.
  */
 export function ast<K extends readonly (keyof JsNodeByKind)[]>(
 	...kinds: K
 ): AstQuery<JsNodeByKind[K[number]]>;
+export function ast<K extends readonly (keyof JsNodeByKind)[]>(
+	...kinds: [...K, { types: true; semantic?: boolean }]
+): AstQuery<JsNodeByKind[K[number]], "typed">;
+export function ast<K extends readonly (keyof JsNodeByKind)[]>(
+	...kinds: [...K, { semantic: true; types?: false }]
+): AstQuery<JsNodeByKind[K[number]], "astSemantic">;
+export function ast<K extends readonly (keyof JsNodeByKind)[]>(
+	...kinds: [...K, { semantic?: false; types?: false }]
+): AstQuery<JsNodeByKind[K[number]], "ast">;
 
 /**
  * Matches nodes by their syntax kinds and provides a semantic model in `context`.
@@ -192,7 +232,9 @@ export function semantic<K extends readonly (keyof JsNodeByKind)[]>(
  * instead. When the pattern matches a token, `run` receives a token and
  * diagnostics can be reported on its `parent` node.
  *
- * Pass `{ semantic: true }` to provide a semantic model in `context`.
+ * Pass `{ semantic: true }` to provide a semantic model in `context`, or
+ * `{ types: true }` to provide type information. The `types` option also
+ * provides the semantic model.
  *
  * For example, inspect console calls without a fixed list of syntax kinds:
  * ```ts
@@ -208,11 +250,15 @@ export function semantic<K extends readonly (keyof JsNodeByKind)[]>(
 export function grit(pattern: string): GritQuery;
 export function grit(
 	pattern: string,
-	options: { semantic: true },
+	options: { types: true; semantic?: boolean },
+): TypedGritQuery;
+export function grit(
+	pattern: string,
+	options: { semantic: true; types?: false },
 ): SemanticGritQuery;
 export function grit(
 	pattern: string,
-	options?: { semantic?: false },
+	options?: { semantic?: false; types?: false },
 ): GritQuery;
 
 /**

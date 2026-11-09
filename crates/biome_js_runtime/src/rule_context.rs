@@ -1,3 +1,4 @@
+use crate::types::{JsTypeService, TypeInferenceProvider};
 use biome_languages::JsFileSource;
 use biome_languages::javascript::{
     JsEmbeddingKind, Language, LanguageVariant, LanguageVersion, ModuleKind, SvelteEmbeddingKind,
@@ -7,11 +8,13 @@ use boa_engine::object::ObjectInitializer;
 use boa_engine::property::Attribute;
 use boa_engine::{Context, JsString, JsValue, js_string};
 use camino::Utf8Path;
+use std::rc::Rc;
 
 pub(crate) fn create_rule_context(
     path: &Utf8Path,
     source_type: JsFileSource,
     model: Option<&SemanticModel>,
+    types: Option<Rc<dyn TypeInferenceProvider>>,
     context: &mut Context,
 ) -> JsValue {
     let language = match source_type.language() {
@@ -61,6 +64,7 @@ pub(crate) fn create_rule_context(
         )
         .build();
     let model = model.map(|model| JsSemanticModel::wrap(model.clone(), context));
+    let types = types.map(|provider| JsTypeService::wrap(provider, context));
     let mut object = ObjectInitializer::new(context);
     object
         .property(
@@ -71,6 +75,9 @@ pub(crate) fn create_rule_context(
         .property(js_string!("sourceType"), source_type, Attribute::ENUMERABLE);
     if let Some(model) = model {
         object.property(js_string!("model"), model, Attribute::ENUMERABLE);
+    }
+    if let Some(types) = types {
+        object.property(js_string!("types"), types, Attribute::ENUMERABLE);
     }
     object.build().into()
 }

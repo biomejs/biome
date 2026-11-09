@@ -13,7 +13,8 @@
     "plugin.d.ts",
     "plugin.js",
     "js_ast.d.ts",
-    "semantic.d.ts"
+    "semantic.d.ts",
+    "types.d.ts"
   ],
   "exports": {
     "./plugin": {

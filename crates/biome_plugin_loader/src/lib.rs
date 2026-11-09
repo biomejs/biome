@@ -11,6 +11,8 @@ mod test_utils;
 mod analyzer_js_plugin;
 #[cfg(feature = "js_plugin")]
 mod thread_local;
+#[cfg(feature = "js_plugin")]
+mod type_inference;
 
 mod configuration;
 
