@@ -376,9 +376,9 @@ impl<H, T> ThinArc<H, T> {
     ///
     /// # Panics
     ///
-    /// Panics if `items` yields fewer items than its `len()`. Extra items are
-    /// not consumed. If `map` panics, the allocation and the items already
-    /// written are leaked.
+    /// Panics if `items` yields more or fewer items than its `len()`. If `map`
+    /// or the iterator panics, the allocation and the items already written
+    /// are leaked.
     #[inline]
     pub(crate) fn from_header_and_iter_with<I, F>(mut header: H, mut items: I, mut map: F) -> Self
     where
@@ -398,7 +398,7 @@ impl<H, T> ThinArc<H, T> {
                 ptr::write(current, map(&mut header, item));
                 current = current.add(1);
             }
-            debug_assert!(
+            assert!(
                 items.next().is_none(),
                 "ExactSizeIterator under-reported length"
             );
@@ -570,5 +570,31 @@ mod tests {
     #[should_panic(expected = "ExactSizeIterator over-reported length")]
     fn from_header_and_iter_with_panics_on_missing_items() {
         ThinArc::from_header_and_iter_with((), OverReported, |_, item| item);
+    }
+
+    /// An iterator whose `len()` claims fewer items than it yields.
+    struct UnderReported(u32);
+
+    impl Iterator for UnderReported {
+        type Item = u32;
+
+        fn next(&mut self) -> Option<u32> {
+            self.0 += 1;
+            (self.0 <= 2).then_some(self.0)
+        }
+
+        fn size_hint(&self) -> (usize, Option<usize>) {
+            (1, Some(1))
+        }
+    }
+
+    impl ExactSizeIterator for UnderReported {}
+
+    // The panic leaks the allocation by design, which Miri reports as an error.
+    #[cfg_attr(miri, ignore)]
+    #[test]
+    #[should_panic(expected = "ExactSizeIterator under-reported length")]
+    fn from_header_and_iter_with_panics_on_extra_items() {
+        ThinArc::from_header_and_iter_with((), UnderReported(0), |_, item| item);
     }
 }
