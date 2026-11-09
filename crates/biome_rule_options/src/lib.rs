@@ -99,6 +99,7 @@ pub mod no_duplicate_properties;
 pub mod no_duplicate_selectors;
 pub mod no_duplicate_selectors_keyframe_block;
 pub mod no_duplicate_test_hooks;
+pub mod no_duplicate_type_constituents;
 pub mod no_duplicate_variable_names;
 pub mod no_duplicated_spread_props;
 pub mod no_dynamic_delete;
