@@ -352,10 +352,7 @@ impl<H, T> ThinArc<H, T> {
                 ptr::addr_of_mut!((*ptr).data.slice) as usize - buffer as usize,
                 slice_offset
             );
-            ptr::write(
-                ptr::addr_of_mut!((*ptr).count),
-                atomic::AtomicUsize::new(1),
-            );
+            ptr::write(ptr::addr_of_mut!((*ptr).count), atomic::AtomicUsize::new(1));
             ptr::write(ptr::addr_of_mut!((*ptr).data.length), num_items);
             ptr::NonNull::new_unchecked(ptr)
         }
@@ -513,5 +510,65 @@ impl<H: Eq, T: Eq> Eq for ThinArc<H, T> {}
 impl<H: Hash, T: Hash> Hash for ThinArc<H, T> {
     fn hash<HSR: Hasher>(&self, state: &mut HSR) {
         (**self).hash(state)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::ThinArc;
+
+    #[test]
+    fn from_header_and_slice_copies_items() {
+        let arc = ThinArc::from_header_and_slice(7u16, b"hello");
+        assert_eq!(arc.header, 7);
+        assert_eq!(arc.len(), 5);
+        assert_eq!(arc.slice(), b"hello");
+
+        let empty = ThinArc::<u16, u8>::from_header_and_slice(1, &[]);
+        assert_eq!(empty.header, 1);
+        assert_eq!(empty.len(), 0);
+        assert!(empty.slice().is_empty());
+    }
+
+    #[test]
+    fn from_header_and_iter_with_updates_header_in_order() {
+        let arc =
+            ThinArc::from_header_and_iter_with(0u32, [1u32, 2, 3].into_iter(), |sum, item| {
+                let offset = *sum;
+                *sum += item;
+                offset
+            });
+        assert_eq!(arc.header, 6);
+        assert_eq!(arc.slice(), &[0, 1, 3]);
+
+        let empty =
+            ThinArc::from_header_and_iter_with(5u32, std::iter::empty::<u32>(), |_, item| item);
+        assert_eq!(empty.header, 5);
+        assert!(empty.slice().is_empty());
+    }
+
+    /// An iterator whose `len()` claims more items than it yields.
+    struct OverReported;
+
+    impl Iterator for OverReported {
+        type Item = u32;
+
+        fn next(&mut self) -> Option<u32> {
+            None
+        }
+
+        fn size_hint(&self) -> (usize, Option<usize>) {
+            (2, Some(2))
+        }
+    }
+
+    impl ExactSizeIterator for OverReported {}
+
+    // The panic leaks the allocation by design, which Miri reports as an error.
+    #[cfg_attr(miri, ignore)]
+    #[test]
+    #[should_panic(expected = "ExactSizeIterator over-reported length")]
+    fn from_header_and_iter_with_panics_on_missing_items() {
+        ThinArc::from_header_and_iter_with((), OverReported, |_, item| item);
     }
 }

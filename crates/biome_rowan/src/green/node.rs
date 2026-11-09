@@ -591,6 +591,8 @@ impl FusedIterator for Children<'_> {}
 
 #[cfg(test)]
 mod tests {
+    use crate::TextSize;
+    use crate::green::node::Slot;
     use crate::green::{GreenElement, GreenTrivia};
     use crate::raw_language::{RawLanguageKind, RawSyntaxTreeBuilder};
     use crate::{GreenNode, GreenToken, RawSyntaxKind, TextRange, TriviaPiece, TriviaPieceKind};
@@ -714,6 +716,36 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn slot_offsets_and_text_len() {
+        let token = |text: &str| GreenElement::Token(GreenToken::new_raw(RawSyntaxKind(1), text));
+        let node = GreenNode::new(
+            RawSyntaxKind(0),
+            [
+                Some(token("ab")),
+                None,
+                Some(GreenElement::Node(GreenNode::new(
+                    RawSyntaxKind(2),
+                    [Some(token("c"))],
+                ))),
+                Some(token("")),
+                Some(token("def")),
+            ],
+        );
+
+        assert_eq!(node.kind(), RawSyntaxKind(0));
+        assert_eq!(node.text_len(), TextSize::from(6));
+        assert_eq!(
+            node.slots().map(Slot::rel_offset).collect::<Vec<_>>(),
+            [0, 2, 2, 3, 3].map(TextSize::from)
+        );
+        assert!(matches!(node.slice()[1], Slot::Empty { .. }));
+        assert!(matches!(node.slice()[2], Slot::Node { .. }));
+        let mut text = String::new();
+        node.write_source_text(&mut text);
+        assert_eq!(text, "abcdef");
     }
 
     #[test]
