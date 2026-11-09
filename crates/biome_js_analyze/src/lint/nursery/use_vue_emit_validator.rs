@@ -9,7 +9,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsExpression, AnyJsFunctionBody, AnyJsObjectMember,
-    AnyJsRoot, T,
+    T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 use biome_rule_options::use_vue_emit_validator::UseVueEmitValidatorOptions;
@@ -102,7 +102,7 @@ impl Rule for UseVueEmitValidator {
                 if emit.validator_range().is_some() {
                     return None;
                 }
-                let member = object_member_at(&ctx.root(), emit.declaration_range())?;
+                let member = AnyJsObjectMember::cast(ctx.vue_model().node(emit)?)?;
                 // A shorthand member, as in `{ change }`, refers to a variable that may hold a
                 // validator declared elsewhere.
                 let AnyJsObjectMember::JsPropertyObjectMember(property) = member else {
@@ -199,12 +199,4 @@ impl biome_console::fmt::Display for MissingValidator {
             Self::NameOnly | Self::NotFunction => "without a validator function",
         })
     }
-}
-
-/// Returns the object member that spans `range` in `root`.
-fn object_member_at(root: &AnyJsRoot, range: TextRange) -> Option<AnyJsObjectMember> {
-    root.syntax()
-        .covering_element(range)
-        .ancestors()
-        .find_map(AnyJsObjectMember::cast)
 }

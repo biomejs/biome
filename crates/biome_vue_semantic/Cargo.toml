@@ -12,6 +12,7 @@ categories.workspace = true
 publish              = false
 
 [dependencies]
+biome_analyze     = { workspace = true }
 biome_db          = { workspace = true }
 biome_html_syntax = { workspace = true }
 biome_js_semantic = { workspace = true }

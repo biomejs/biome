@@ -7,7 +7,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsFunctionBody, AnyJsObjectMember, AnyJsRoot, TextRange,
+    AnyJsExpression, AnyJsFunctionBody, AnyJsObjectMember, JsSyntaxNode, TextRange,
 };
 use biome_rowan::{AstNode, AstSeparatedList};
 use biome_rule_options::use_vue_computed_property_return::UseVueComputedPropertyReturnOptions;
@@ -140,12 +140,12 @@ impl Rule for UseVueComputedPropertyReturn {
     type Options = UseVueComputedPropertyReturnOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let root = ctx.root();
         let mut signals = Vec::new();
         for computed in ctx.query().computed() {
             let Some(getter) = computed
-                .getter_range()
-                .and_then(|range| getter_function(&root, range))
+                .getter_node()
+                .and_then(|getter| ctx.vue_model().node(&getter))
+                .and_then(getter_function)
             else {
                 continue;
             };
@@ -218,22 +218,14 @@ impl InvalidComputedReturn {
     }
 }
 
-/// Returns the getter function of a computed property from the range the Vue
-/// semantic model records for it.
+/// Returns the getter function of a computed property from the getter node
+/// the Vue semantic model records for it.
 ///
-/// The range covers one of `fullName() {}`, `fullName: function () {}`, a
-/// `get` member of an object, or the first argument of `computed()`. Returns
-/// `None` when the getter isn't a function written in place, and for an arrow
+/// The node is one of `fullName() {}`, `fullName: function () {}`, a `get`
+/// member of an object, or the first argument of `computed()`. Returns `None`
+/// when the getter isn't a function written in place, and for an arrow
 /// function with an expression body, which always returns a value.
-fn getter_function(root: &AnyJsRoot, range: TextRange) -> Option<AnyJsControlFlowRoot> {
-    if !root.syntax().text_range_with_trivia().contains_range(range) {
-        return None;
-    }
-    let node = root
-        .syntax()
-        .covering_element(range)
-        .ancestors()
-        .find(|node| node.text_trimmed_range() == range)?;
+fn getter_function(node: JsSyntaxNode) -> Option<AnyJsControlFlowRoot> {
     match AnyJsObjectMember::cast_ref(&node) {
         Some(member) => getter_function_from_member(member),
         None => getter_function_from_expression(&AnyJsExpression::cast(node)?),
