@@ -3188,6 +3188,11 @@ export interface Nursery {
 	 */
 	noNestedTemplateLiterals?: NoNestedTemplateLiteralsConfiguration;
 	/**
+	 * Disallow new Array() with a single argument.
+	 * See https://biomejs.dev/linter/rules/no-new-array
+	 */
+	noNewArray?: NoNewArrayConfiguration;
+	/**
 	 * Disallow calling require with the new operator.
 	 * See https://biomejs.dev/linter/rules/no-new-require
 	 */
@@ -6732,6 +6737,9 @@ export type NoNestedSwitchConfiguration =
 export type NoNestedTemplateLiteralsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNestedTemplateLiteralsOptions;
+export type NoNewArrayConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoNewArrayOptions;
 export type NoNewRequireConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNewRequireOptions;
@@ -9808,6 +9816,14 @@ export interface RuleWithNoNestedSwitchOptions {
 export interface RuleWithNoNestedTemplateLiteralsOptions {
 	level: RulePlainConfiguration;
 	options?: NoNestedTemplateLiteralsOptions;
+}
+export interface RuleWithNoNewArrayOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoNewArrayOptions;
 }
 export interface RuleWithNoNewRequireOptions {
 	level: RulePlainConfiguration;
@@ -13282,6 +13298,7 @@ export type NoNegatedArrayPredicateOptions = {};
 export type NoNegationInEqualityCheckOptions = {};
 export type NoNestedSwitchOptions = {};
 export type NoNestedTemplateLiteralsOptions = {};
+export type NoNewArrayOptions = {};
 export type NoNewRequireOptions = {};
 export type NoNonScalableViewportOptions = {};
 export type NoNullOptions = {};
@@ -15504,6 +15521,7 @@ export type Category =
 	| "lint/nursery/noNegationInEqualityCheck"
 	| "lint/nursery/noNestedSwitch"
 	| "lint/nursery/noNestedTemplateLiterals"
+	| "lint/nursery/noNewArray"
 	| "lint/nursery/noNewRequire"
 	| "lint/nursery/noNonScalableViewport"
 	| "lint/nursery/noNull"
