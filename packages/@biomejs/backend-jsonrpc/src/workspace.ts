@@ -3053,6 +3053,11 @@ export interface Nursery {
 	 */
 	noExcessiveNestedBlocks?: NoExcessiveNestedBlocksConfiguration;
 	/**
+	 * Limit how complex selectors can be, and disallow chosen parts of selectors.
+	 * See https://biomejs.dev/linter/rules/no-excessive-selector-complexity
+	 */
+	noExcessiveSelectorComplexity?: NoExcessiveSelectorComplexityConfiguration;
+	/**
 	 * Enforce a maximum number of statements allowed in a function.
 	 * See https://biomejs.dev/linter/rules/no-excessive-statements-per-function
 	 */
@@ -6596,6 +6601,9 @@ export type NoErasingOperationConfiguration =
 export type NoExcessiveNestedBlocksConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExcessiveNestedBlocksOptions;
+export type NoExcessiveSelectorComplexityConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoExcessiveSelectorComplexityOptions;
 export type NoExcessiveStatementsPerFunctionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExcessiveStatementsPerFunctionOptions;
@@ -9576,6 +9584,10 @@ export interface RuleWithNoErasingOperationOptions {
 export interface RuleWithNoExcessiveNestedBlocksOptions {
 	level: RulePlainConfiguration;
 	options?: NoExcessiveNestedBlocksOptions;
+}
+export interface RuleWithNoExcessiveSelectorComplexityOptions {
+	level: RulePlainConfiguration;
+	options?: NoExcessiveSelectorComplexityOptions;
 }
 export interface RuleWithNoExcessiveStatementsPerFunctionOptions {
 	level: RulePlainConfiguration;
@@ -12989,6 +13001,87 @@ export interface NoExcessiveNestedBlocksOptions {
 	 */
 	max?: number;
 }
+export interface NoExcessiveSelectorComplexityOptions {
+	/**
+	 * Attribute selector operators that aren't allowed.
+	 *
+	 * Accepted values are `"="`, `"~="`, `"|="`, `"^="`, `"$="`, and `"*="`.
+	 */
+	disallowAttributeMatchers?: AttributeMatcherOperator[];
+	/**
+	 * Attribute names that aren't allowed in attribute selectors, such as `"class"`.
+	 * Names must match exactly, including letter case.
+	 */
+	disallowAttributes?: string[];
+	/**
+	 * Combinators that aren't allowed in selectors.
+	 *
+	 * Accepted values are `" "` (a space, which selects descendants), `">"`, `"+"`, `"~"`,
+	 * and `"||"`.
+	 */
+	disallowCombinators?: SelectorCombinator[];
+	/**
+	 * Pseudo-classes that aren't allowed in selectors, written without the leading colon,
+	 * such as `"hover"`. Names are compared without regard to letter case.
+	 */
+	disallowPseudoClasses?: string[];
+	/**
+	 * Pseudo-elements that aren't allowed in selectors, written without the leading colons,
+	 * such as `"before"`. Names are compared without regard to letter case.
+	 *
+	 * The older single-colon forms `:before`, `:after`, `:first-line`, and `:first-letter`
+	 * count as pseudo-elements.
+	 */
+	disallowPseudoElements?: string[];
+	/**
+	 * The maximum number of attribute selectors, such as `[type="text"]`, allowed in a single
+	 * selector.
+	 *
+	 * When this option isn't set, any number of attribute selectors is allowed.
+	 */
+	maxAttributes?: number;
+	/**
+	 * The maximum number of combinators allowed in a single selector.
+	 *
+	 * A combinator joins two compound selectors: a space, `>`, `+`, `~`, or `||`.
+	 *
+	 * When this option isn't set, any number of combinators is allowed.
+	 */
+	maxCombinators?: number;
+	/**
+	 * The maximum number of compound selectors allowed in a single selector.
+	 *
+	 * A compound selector is a group of selectors written together without spaces or
+	 * combinators, such as `a.link:hover`.
+	 *
+	 * When this option isn't set, any number of compound selectors is allowed.
+	 */
+	maxCompounds?: number;
+	/**
+	 * The maximum number of ID selectors, such as `#main`, allowed in a single selector.
+	 *
+	 * When this option isn't set, any number of ID selectors is allowed.
+	 */
+	maxIds?: number;
+	/**
+	 * The maximum number of pseudo-classes, such as `:hover`, allowed in a single selector.
+	 *
+	 * When this option isn't set, any number of pseudo-classes is allowed.
+	 */
+	maxPseudoClasses?: number;
+	/**
+	 * The maximum number of type selectors, such as `div` or `a`, allowed in a single selector.
+	 *
+	 * When this option isn't set, any number of type selectors is allowed.
+	 */
+	maxTypes?: number;
+	/**
+	 * The maximum number of universal selectors (`*`) allowed in a single selector.
+	 *
+	 * When this option isn't set, any number of universal selectors is allowed.
+	 */
+	maxUniversals?: number;
+}
 export interface NoExcessiveStatementsPerFunctionOptions {
 	/**
 	 * When this option is set to `true`, a function that isn't nested in another function is
@@ -14536,6 +14629,14 @@ export interface Hook {
 	 */
 	stableResult?: StableHookResult;
 }
+/**
+ * An operator that compares an attribute's value in an attribute selector.
+ */
+export type AttributeMatcherOperator = "=" | "~=" | "|=" | "^=" | "$=" | "*=";
+/**
+ * A symbol that joins two compound selectors.
+ */
+export type SelectorCombinator = " " | ">" | "+" | "~" | "||";
 export interface RestrictedPropertyEntry {
 	/**
 	 * Objects that are allowed when `property` is restricted globally.
@@ -15206,6 +15307,7 @@ export type Category =
 	| "lint/nursery/noExcessiveNestedBlocks"
 	| "lint/nursery/noExcessiveNestedCallbacks"
 	| "lint/nursery/noExcessiveSelectorClasses"
+	| "lint/nursery/noExcessiveSelectorComplexity"
 	| "lint/nursery/noExcessiveStatementsPerFunction"
 	| "lint/nursery/noExtendNative"
 	| "lint/nursery/noFloatingPromises"

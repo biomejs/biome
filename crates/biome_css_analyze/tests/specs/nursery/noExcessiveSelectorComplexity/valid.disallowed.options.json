@@ -1,0 +1,32 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noExcessiveSelectorComplexity": {
+          "level": "error",
+          "options": {
+            "disallowCombinators": [
+              ">",
+              " "
+            ],
+            "disallowPseudoClasses": [
+              "hover"
+            ],
+            "disallowPseudoElements": [
+              "marker",
+              "before"
+            ],
+            "disallowAttributes": [
+              "class"
+            ],
+            "disallowAttributeMatchers": [
+              "*=",
+              "^="
+            ]
+          }
+        }
+      }
+    }
+  }
+}

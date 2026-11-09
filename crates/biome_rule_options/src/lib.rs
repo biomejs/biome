@@ -123,6 +123,7 @@ pub mod no_excessive_nested_blocks;
 pub mod no_excessive_nested_callbacks;
 pub mod no_excessive_nested_test_suites;
 pub mod no_excessive_selector_classes;
+pub mod no_excessive_selector_complexity;
 pub mod no_excessive_statements_per_function;
 pub mod no_explicit_any;
 pub mod no_exported_imports;

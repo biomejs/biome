@@ -431,6 +431,41 @@
 			},
 			"additionalProperties": false
 		},
+		"AttributeMatcherOperator": {
+			"description": "An operator that compares an attribute's value in an attribute selector.",
+			"oneOf": [
+				{
+					"description": "`=`: the value is exactly the given text.",
+					"type": "string",
+					"const": "="
+				},
+				{
+					"description": "`~=`: the value is a space-separated list that contains the given word.",
+					"type": "string",
+					"const": "~="
+				},
+				{
+					"description": "`|=`: the value is the given text, or starts with the given text followed by `-`.",
+					"type": "string",
+					"const": "|="
+				},
+				{
+					"description": "`^=`: the value starts with the given text.",
+					"type": "string",
+					"const": "^="
+				},
+				{
+					"description": "`$=`: the value ends with the given text.",
+					"type": "string",
+					"const": "$="
+				},
+				{
+					"description": "`*=`: the value contains the given text.",
+					"type": "string",
+					"const": "*="
+				}
+			]
+		},
 		"AttributePosition": {
 			"description": "Controls attribute placement in HTML-like languages.",
 			"oneOf": [
@@ -4730,6 +4765,92 @@
 			},
 			"additionalProperties": false
 		},
+		"NoExcessiveSelectorComplexityConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoExcessiveSelectorComplexityOptions" }
+			]
+		},
+		"NoExcessiveSelectorComplexityOptions": {
+			"type": "object",
+			"properties": {
+				"disallowAttributeMatchers": {
+					"description": "Attribute selector operators that aren't allowed.\n\nAccepted values are `\"=\"`, `\"~=\"`, `\"|=\"`, `\"^=\"`, `\"$=\"`, and `\"*=\"`.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/AttributeMatcherOperator" }
+				},
+				"disallowAttributes": {
+					"description": "Attribute names that aren't allowed in attribute selectors, such as `\"class\"`.\nNames must match exactly, including letter case.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"disallowCombinators": {
+					"description": "Combinators that aren't allowed in selectors.\n\nAccepted values are `\" \"` (a space, which selects descendants), `\">\"`, `\"+\"`, `\"~\"`,\nand `\"||\"`.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/SelectorCombinator" }
+				},
+				"disallowPseudoClasses": {
+					"description": "Pseudo-classes that aren't allowed in selectors, written without the leading colon,\nsuch as `\"hover\"`. Names are compared without regard to letter case.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"disallowPseudoElements": {
+					"description": "Pseudo-elements that aren't allowed in selectors, written without the leading colons,\nsuch as `\"before\"`. Names are compared without regard to letter case.\n\nThe older single-colon forms `:before`, `:after`, `:first-line`, and `:first-letter`\ncount as pseudo-elements.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"maxAttributes": {
+					"description": "The maximum number of attribute selectors, such as `[type=\"text\"]`, allowed in a single\nselector.\n\nWhen this option isn't set, any number of attribute selectors is allowed.",
+					"type": ["integer", "null"],
+					"format": "uint16",
+					"maximum": 65535,
+					"minimum": 0
+				},
+				"maxCombinators": {
+					"description": "The maximum number of combinators allowed in a single selector.\n\nA combinator joins two compound selectors: a space, `>`, `+`, `~`, or `||`.\n\nWhen this option isn't set, any number of combinators is allowed.",
+					"type": ["integer", "null"],
+					"format": "uint16",
+					"maximum": 65535,
+					"minimum": 0
+				},
+				"maxCompounds": {
+					"description": "The maximum number of compound selectors allowed in a single selector.\n\nA compound selector is a group of selectors written together without spaces or\ncombinators, such as `a.link:hover`.\n\nWhen this option isn't set, any number of compound selectors is allowed.",
+					"type": ["integer", "null"],
+					"format": "uint16",
+					"maximum": 65535,
+					"minimum": 0
+				},
+				"maxIds": {
+					"description": "The maximum number of ID selectors, such as `#main`, allowed in a single selector.\n\nWhen this option isn't set, any number of ID selectors is allowed.",
+					"type": ["integer", "null"],
+					"format": "uint16",
+					"maximum": 65535,
+					"minimum": 0
+				},
+				"maxPseudoClasses": {
+					"description": "The maximum number of pseudo-classes, such as `:hover`, allowed in a single selector.\n\nWhen this option isn't set, any number of pseudo-classes is allowed.",
+					"type": ["integer", "null"],
+					"format": "uint16",
+					"maximum": 65535,
+					"minimum": 0
+				},
+				"maxTypes": {
+					"description": "The maximum number of type selectors, such as `div` or `a`, allowed in a single selector.\n\nWhen this option isn't set, any number of type selectors is allowed.",
+					"type": ["integer", "null"],
+					"format": "uint16",
+					"maximum": 65535,
+					"minimum": 0
+				},
+				"maxUniversals": {
+					"description": "The maximum number of universal selectors (`*`) allowed in a single selector.\n\nWhen this option isn't set, any number of universal selectors is allowed.",
+					"type": ["integer", "null"],
+					"format": "uint16",
+					"maximum": 65535,
+					"minimum": 0
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoExcessiveStatementsPerFunctionConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8980,6 +9101,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noExcessiveSelectorComplexity": {
+					"description": "Limit how complex selectors can be, and disallow chosen parts of selectors.\nSee https://biomejs.dev/linter/rules/no-excessive-selector-complexity",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoExcessiveSelectorComplexityConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noExcessiveStatementsPerFunction": {
 					"description": "Enforce a maximum number of statements allowed in a function.\nSee https://biomejs.dev/linter/rules/no-excessive-statements-per-function",
 					"anyOf": [
@@ -12894,6 +13022,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoExcessiveSelectorClassesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoExcessiveSelectorComplexityOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoExcessiveSelectorComplexityOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -19963,6 +20100,36 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"SelectorCombinator": {
+			"description": "A symbol that joins two compound selectors.",
+			"oneOf": [
+				{
+					"description": "A space, as in `nav a`. Selects elements inside another element.",
+					"type": "string",
+					"const": " "
+				},
+				{
+					"description": "`>`, as in `ul > li`. Selects direct children.",
+					"type": "string",
+					"const": ">"
+				},
+				{
+					"description": "`+`, as in `h1 + p`. Selects the element right after another element.",
+					"type": "string",
+					"const": "+"
+				},
+				{
+					"description": "`~`, as in `h1 ~ p`. Selects any later element with the same parent.",
+					"type": "string",
+					"const": "~"
+				},
+				{
+					"description": "`||`, as in `col || td`. Selects cells that belong to a table column.",
+					"type": "string",
+					"const": "||"
+				}
+			]
 		},
 		"SelfCloseVoidElements": {
 			"description": "Controls whether HTML void elements such as `<img>` and `<input>` include a slash before `>`.",
