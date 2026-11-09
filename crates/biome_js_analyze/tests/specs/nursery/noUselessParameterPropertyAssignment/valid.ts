@@ -1,0 +1,311 @@
+/* should not generate diagnostics */
+class NotParameterProperty {
+	constructor(foo: string) {}
+}
+
+class NoAssignment {
+	constructor(private foo: string) {}
+}
+
+class OtherValue {
+	constructor(private foo: string) {
+		this.foo = bar;
+	}
+}
+
+class MemberOfParameter {
+	constructor(private foo: any) {
+		this.foo = foo.bar;
+	}
+}
+
+class OtherMember {
+	constructor(private foo: string) {
+		this.foo = this.bar;
+	}
+}
+
+class DeclaredField {
+	foo: string;
+	constructor(foo: string) {
+		this.foo = foo;
+	}
+}
+
+class DifferentProperty {
+	bar: string;
+	constructor(private foo: string) {
+		this.bar = foo;
+	}
+}
+
+class InsideArrow {
+	constructor(private foo: string) {
+		this.bar = () => {
+			this.foo = foo;
+		};
+	}
+}
+
+class InsideFunctionIife {
+	constructor(private foo: string) {
+		(function () {
+			this.foo = foo;
+		})();
+	}
+}
+
+class InsideObjectMethod {
+	constructor(private foo: string) {
+		const object = {
+			method() {
+				this.foo = foo;
+			},
+		};
+	}
+}
+
+class DynamicTemplateKey {
+	constructor(private foo: string) {
+		this[`${foo}`] = foo;
+	}
+}
+
+class ComputedKey {
+	constructor(public foo: string) {
+		this[foo] = foo;
+	}
+}
+
+class PrivateName {
+	#foo: string;
+	constructor(public foo: string) {
+		this.#foo = foo;
+	}
+}
+
+class OtherObject {
+	constructor(public foo: number) {
+		OtherObject.foo = foo;
+	}
+}
+
+class CompoundOperators {
+	constructor(public foo: number) {
+		this.foo += foo;
+		this.foo -= foo;
+		this.foo *= foo;
+		this.foo /= foo;
+		this.foo %= foo;
+		this.foo **= foo;
+	}
+}
+
+class PropertyChangedBefore {
+	constructor(public foo: number) {
+		this.foo += 1;
+		this.foo = foo;
+	}
+}
+
+class PropertySetBefore {
+	constructor(public foo: number) {
+		this.foo = 0;
+		this.foo = foo;
+	}
+}
+
+class PropertyIncrementedBefore {
+	constructor(public foo: number) {
+		this.foo++;
+		this.foo = foo;
+	}
+}
+
+class PropertyDestructuredBefore {
+	constructor(public foo: number, other: { foo: number }) {
+		({ foo: this.foo } = other);
+		this.foo = foo;
+	}
+}
+
+class PropertyChangedInIife {
+	constructor(public foo: number) {
+		(() => {
+			this.foo += 1;
+		})();
+		this.foo = foo;
+	}
+}
+
+class PropertyChangedInOtherBranch {
+	constructor(
+		public foo: number,
+		bar: boolean,
+	) {
+		if (bar) {
+			this.foo += 1;
+		} else {
+			this.foo = foo;
+		}
+	}
+}
+
+class PropertyChangedByField {
+	constructor(public foo: number) {
+		this.foo = foo;
+	}
+	init = (this.foo += 1);
+}
+
+class PropertyChangedByFieldIife {
+	constructor(public foo: number) {
+		this.foo = foo;
+	}
+	init = (() => {
+		this.foo += 1;
+	})();
+}
+
+class ShadowedParameter {
+	constructor(public foo: number) {
+		{
+			const foo = 1;
+			this.foo = foo;
+		}
+	}
+}
+
+class ParameterReassignedBefore {
+	constructor(public name: string) {
+		name = name.trim();
+		this.name = name;
+	}
+}
+
+class ParameterCompoundBefore {
+	constructor(public name: string) {
+		name += "!";
+		this.name = name;
+	}
+}
+
+class ParameterIncrementedBefore {
+	constructor(public count: number) {
+		count++;
+		this.count = count;
+	}
+}
+
+class ParameterReassignedConditionally {
+	constructor(
+		public name: string,
+		flag: boolean,
+	) {
+		if (flag) {
+			name = name.trim();
+		}
+		this.name = name;
+	}
+}
+
+class ParameterReassignedInClosure {
+	constructor(public name: string) {
+		const trim = () => {
+			name = name.trim();
+		};
+		trim();
+		this.name = name;
+	}
+}
+
+class Overloads {
+	constructor(public foo: string);
+	constructor(public foo: number);
+	constructor(public foo: string | number) {}
+}
+
+declare class Declared {
+	constructor(public foo: string);
+}
+
+function Plain(foo) {
+	this.foo = foo;
+}
+
+class ParameterChangedLaterInLoop {
+	constructor(public name: string) {
+		for (let i = 0; i < 2; i++) {
+			this.name = name;
+			name = name.trim();
+		}
+	}
+}
+
+class PropertyChangedLaterInLoop {
+	constructor(public foo: number) {
+		while (Math.random() > 0.5) {
+			this.foo = foo;
+			this.foo += 1;
+		}
+	}
+}
+
+class ParameterChangedByHoistedFunction {
+	constructor(public name: string) {
+		change();
+		this.name = name;
+		function change() {
+			name = "x";
+		}
+	}
+}
+
+class PropertyDeletedBefore {
+	constructor(public foo?: number) {
+		delete this.foo;
+		this.foo = foo;
+	}
+}
+
+class PropertyChangedInAsyncIife {
+	constructor(public foo: number) {
+		(async () => {
+			this.foo = 1;
+			await 0;
+		})();
+		this.foo = foo;
+	}
+}
+
+class InsideAsyncIife {
+	constructor(public foo: number) {
+		(async () => {
+			await 0;
+			this.foo = foo;
+		})();
+		this.foo = 2;
+	}
+}
+
+class ParameterChangedInSequence {
+	constructor(public foo: string) {
+		this.foo = (foo = foo.trim(), foo);
+	}
+}
+
+class PropertyChangedInSequence {
+	constructor(public foo: string) {
+		this.foo = (this.foo = "x", foo);
+	}
+}
+
+class SideEffectInSequence {
+	constructor(public foo: string) {
+		this.foo = (console.log(), foo);
+	}
+}
+
+class CopyInParameterDefault {
+	constructor(public foo: string, bar = (this.foo = foo)) {}
+}

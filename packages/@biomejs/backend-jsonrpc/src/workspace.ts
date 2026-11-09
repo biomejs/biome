@@ -3503,6 +3503,11 @@ export interface Nursery {
 	 */
 	noUselessLengthCheck?: NoUselessLengthCheckConfiguration;
 	/**
+	 * Disallow assigning a parameter property to itself in the constructor.
+	 * See https://biomejs.dev/linter/rules/no-useless-parameter-property-assignment
+	 */
+	noUselessParameterPropertyAssignment?: NoUselessParameterPropertyAssignmentConfiguration;
+	/**
 	 * Disallow functions that return a call to themselves when a loop can do the same work.
 	 * See https://biomejs.dev/linter/rules/no-useless-recursion
 	 */
@@ -6841,6 +6846,9 @@ export type NoUselessDateGetTimeConfiguration =
 export type NoUselessLengthCheckConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessLengthCheckOptions;
+export type NoUselessParameterPropertyAssignmentConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessParameterPropertyAssignmentOptions;
 export type NoUselessRecursionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessRecursionOptions;
@@ -10005,6 +10013,10 @@ export interface RuleWithNoUselessLengthCheckOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessLengthCheckOptions;
 }
+export interface RuleWithNoUselessParameterPropertyAssignmentOptions {
+	level: RulePlainConfiguration;
+	options?: NoUselessParameterPropertyAssignmentOptions;
+}
 export interface RuleWithNoUselessRecursionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessRecursionOptions;
@@ -13115,6 +13127,7 @@ export type NoUselessAwaitOptions = {};
 export type NoUselessCallOptions = {};
 export type NoUselessDateGetTimeOptions = {};
 export type NoUselessLengthCheckOptions = {};
+export type NoUselessParameterPropertyAssignmentOptions = {};
 export type NoUselessRecursionOptions = {};
 export type NoUselessSpliceOptions = {};
 export type NoUselessTypeAssertionOptions = {};
@@ -15241,6 +15254,7 @@ export type Category =
 	| "lint/nursery/noUselessCall"
 	| "lint/nursery/noUselessDateGetTime"
 	| "lint/nursery/noUselessLengthCheck"
+	| "lint/nursery/noUselessParameterPropertyAssignment"
 	| "lint/nursery/noUselessRecursion"
 	| "lint/nursery/noUselessSplice"
 	| "lint/nursery/noUselessTypeAssertion"
