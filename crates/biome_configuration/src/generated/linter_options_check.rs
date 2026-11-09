@@ -3488,6 +3488,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useValidNamespaceImports",
+        TypeId::of::<
+            biome_rule_options::use_valid_namespace_imports::UseValidNamespaceImportsOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "useValidTestTitle",
         TypeId::of::<biome_rule_options::use_valid_test_title::UseValidTestTitleOptions>(),
     ));

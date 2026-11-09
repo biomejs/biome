@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validCommonJs.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+module.exports = { a: 1 };
+
+```

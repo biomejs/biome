@@ -1,0 +1,86 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import * as names from "./validNamedExports.js";
+import * as barrel from "./validBarrel.js";
+import * as unresolvedBarrel from "./validUnresolvedBarrel.js";
+import * as commonJs from "./validCommonJs.js";
+import * as commonJsBarrel from "./validCommonJsBarrel.js";
+import * as script from "./validScript.js";
+import * as assigned from "./validExportAssignment.ts";
+import * as missingModule from "./does-not-exist.js";
+import defaultNamespace from "./validDefaultNamespace.js";
+import { deep } from "./validNamedExports.js";
+import { "deep" as quotedDeep } from "./validNamedExports.js";
+export * as reexported from "./validNamedExports.js";
+
+names.a;
+names.b;
+names.d;
+new names.ExportedClass();
+names?.a;
+(names).a;
+names.deep.e;
+names.deep.deeper.f;
+// `a` isn't a namespace, so its members aren't checked.
+names.a.anything;
+(names.b).c;
+names.deep.e.anything;
+// Computed keys can't be checked.
+names["c"];
+names[key];
+
+const { a } = names;
+const { d: c } = names;
+const { a: renamed = 1 } = names;
+const { "a": quoted } = names;
+const { ExportedClass: { length } } = names;
+const { deep: { e, deeper: { f } } } = names;
+const { a: first, ...rest } = names;
+const { [key]: computed } = names;
+const notNamespace = names;
+
+barrel.a;
+barrel.deep.e;
+barrel.importedDeep.e;
+barrel.importedDeep.deeper.f;
+// `renamedE` isn't a namespace, so its members aren't checked.
+barrel.renamedE.anything;
+unresolvedBarrel.anything;
+commonJs.anything;
+// Names re-exported from CommonJS modules can't be checked.
+commonJsBarrel.foo;
+commonJsBarrel.anything;
+const { foo } = commonJsBarrel;
+script.anything;
+assigned.anything;
+missingModule.anything;
+defaultNamespace.e;
+defaultNamespace.deeper.f;
+deep.e;
+deep.deeper.f;
+quotedDeep.e;
+
+function shadowedParameter(names) {
+	names.c;
+	names.c = 1;
+}
+
+function shadowedVariable() {
+	let names = null;
+	const { c } = names;
+}
+
+// Reading the namespace before the import statement is still checked, because imports are hoisted.
+function hoisted() {
+	return later.e;
+}
+import * as later from "./validDeep.js";
+
+let key;
+
+```

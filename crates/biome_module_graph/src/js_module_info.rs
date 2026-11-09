@@ -471,7 +471,10 @@ pub enum JsOwnExport {
 #[derive(Clone, Debug, PartialEq, Hash)]
 pub enum JsExportedSymbolLookup {
     /// The symbol is exported by the module.
-    Found(JsOwnExport),
+    ///
+    /// The [ModuleInfo] is the module that defines the export, which differs
+    /// from the module the lookup started in when the symbol is re-exported.
+    Found(JsOwnExport, ModuleInfo),
     /// Every re-export could be followed and the symbol is not there.
     Missing,
     /// A re-export target could not be resolved, so the symbol may still

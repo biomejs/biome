@@ -11253,6 +11253,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useValidNamespaceImports": {
+					"description": "Require that names read from a namespace import are exported by the imported module.\nSee https://biomejs.dev/linter/rules/use-valid-namespace-imports",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseValidNamespaceImportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useValidTestTitle": {
 					"description": "Enforce valid titles for unit test cases and test suites.\nSee https://biomejs.dev/linter/rules/use-valid-test-title",
 					"anyOf": [
@@ -20212,6 +20219,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseValidNamespaceImportsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseValidNamespaceImportsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseValidTestTitleOptions": {
 			"type": "object",
 			"properties": {
@@ -26331,6 +26347,16 @@
 			]
 		},
 		"UseValidLangOptions": { "type": "object", "additionalProperties": false },
+		"UseValidNamespaceImportsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseValidNamespaceImportsOptions" }
+			]
+		},
+		"UseValidNamespaceImportsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseValidTestTitleConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },

@@ -1,0 +1,767 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import * as names from "./validNamedExports.js";
+import * as barrel from "./validBarrel.js";
+import * as empty from "./validEmpty.js";
+import * as starBarrel from "./validStarBarrel.js";
+import defaultNamespace from "./validDefaultNamespace.js";
+import first, * as combined from "./validNamedExports.js";
+import { deep } from "./validNamedExports.js";
+import { "deep" as quotedDeep } from "./validNamedExports.js";
+export * as reexportedEmpty from "./validEmpty.js";
+
+names.c;
+names?.c;
+(names).c;
+names.default;
+names.deep.missing;
+names.deep.deeper.missing;
+(names.deep).missing;
+
+const { c } = names;
+const { c: renamed } = names;
+const { c: { nested } } = names;
+const { "c": quoted } = names;
+const { deep: { missing } } = names;
+const { deep: { deeper: { missing: alsoMissing } } } = names;
+
+function inner() {
+	const { c } = names;
+	return names.c;
+}
+
+names.a = 1;
+names.c = 1;
+names["a"] = 1;
+names.deep.e = 1;
+names.a += 1;
+names.a++;
+[names.a] = [1];
+({ value: names.a } = { value: 1 });
+
+barrel.c;
+barrel.importedDeep.missing;
+defaultNamespace.missing;
+combined.c;
+deep.missing;
+deep.deeper.missing;
+quotedDeep.missing;
+empty.anything;
+// `export * from` doesn't forward the default export.
+starBarrel.default;
+
+```
+
+# Diagnostics
+```
+invalid.js:12:7 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace names has no export named c.
+  
+    10 │ export * as reexportedEmpty from "./validEmpty.js";
+    11 │ 
+  > 12 │ names.c;
+       │       ^
+    13 │ names?.c;
+    14 │ (names).c;
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:8 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace names has no export named c.
+  
+    12 │ names.c;
+  > 13 │ names?.c;
+       │        ^
+    14 │ (names).c;
+    15 │ names.default;
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:9 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace (names) has no export named c.
+  
+    12 │ names.c;
+    13 │ names?.c;
+  > 14 │ (names).c;
+       │         ^
+    15 │ names.default;
+    16 │ names.deep.missing;
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:7 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace names has no export named default.
+  
+    13 │ names?.c;
+    14 │ (names).c;
+  > 15 │ names.default;
+       │       ^^^^^^^
+    16 │ names.deep.missing;
+    17 │ names.deep.deeper.missing;
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:12 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace names.deep has no export named missing.
+  
+    14 │ (names).c;
+    15 │ names.default;
+  > 16 │ names.deep.missing;
+       │            ^^^^^^^
+    17 │ names.deep.deeper.missing;
+    18 │ (names.deep).missing;
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:19 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace names.deep.deeper has no export named missing.
+  
+    15 │ names.default;
+    16 │ names.deep.missing;
+  > 17 │ names.deep.deeper.missing;
+       │                   ^^^^^^^
+    18 │ (names.deep).missing;
+    19 │ 
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:14 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace (names.deep) has no export named missing.
+  
+    16 │ names.deep.missing;
+    17 │ names.deep.deeper.missing;
+  > 18 │ (names.deep).missing;
+       │              ^^^^^^^
+    19 │ 
+    20 │ const { c } = names;
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:9 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace names has no export named c.
+  
+    18 │ (names.deep).missing;
+    19 │ 
+  > 20 │ const { c } = names;
+       │         ^
+    21 │ const { c: renamed } = names;
+    22 │ const { c: { nested } } = names;
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:9 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace names has no export named c.
+  
+    20 │ const { c } = names;
+  > 21 │ const { c: renamed } = names;
+       │         ^
+    22 │ const { c: { nested } } = names;
+    23 │ const { "c": quoted } = names;
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:9 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace names has no export named c.
+  
+    20 │ const { c } = names;
+    21 │ const { c: renamed } = names;
+  > 22 │ const { c: { nested } } = names;
+       │         ^
+    23 │ const { "c": quoted } = names;
+    24 │ const { deep: { missing } } = names;
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:9 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace names has no export named "c".
+  
+    21 │ const { c: renamed } = names;
+    22 │ const { c: { nested } } = names;
+  > 23 │ const { "c": quoted } = names;
+       │         ^^^
+    24 │ const { deep: { missing } } = names;
+    25 │ const { deep: { deeper: { missing: alsoMissing } } } = names;
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:17 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace names.deep has no export named missing.
+  
+    22 │ const { c: { nested } } = names;
+    23 │ const { "c": quoted } = names;
+  > 24 │ const { deep: { missing } } = names;
+       │                 ^^^^^^^
+    25 │ const { deep: { deeper: { missing: alsoMissing } } } = names;
+    26 │ 
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:27 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace names.deep.deeper has no export named missing.
+  
+    23 │ const { "c": quoted } = names;
+    24 │ const { deep: { missing } } = names;
+  > 25 │ const { deep: { deeper: { missing: alsoMissing } } } = names;
+       │                           ^^^^^^^
+    26 │ 
+    27 │ function inner() {
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:10 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace names has no export named c.
+  
+    27 │ function inner() {
+  > 28 │ 	const { c } = names;
+       │ 	        ^
+    29 │ 	return names.c;
+    30 │ }
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:15 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace names has no export named c.
+  
+    27 │ function inner() {
+    28 │ 	const { c } = names;
+  > 29 │ 	return names.c;
+       │ 	             ^
+    30 │ }
+    31 │ 
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:1 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The members of the namespace names can't be reassigned.
+  
+    30 │ }
+    31 │ 
+  > 32 │ names.a = 1;
+       │ ^^^^^^^
+    33 │ names.c = 1;
+    34 │ names["a"] = 1;
+  
+  i Namespace imports are read-only, so this assignment throws an error at runtime.
+  
+  i To change a value that a module exports, export a function from that module that changes it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:33:1 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The members of the namespace names can't be reassigned.
+  
+    32 │ names.a = 1;
+  > 33 │ names.c = 1;
+       │ ^^^^^^^
+    34 │ names["a"] = 1;
+    35 │ names.deep.e = 1;
+  
+  i Namespace imports are read-only, so this assignment throws an error at runtime.
+  
+  i To change a value that a module exports, export a function from that module that changes it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:34:1 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The members of the namespace names can't be reassigned.
+  
+    32 │ names.a = 1;
+    33 │ names.c = 1;
+  > 34 │ names["a"] = 1;
+       │ ^^^^^^^^^^
+    35 │ names.deep.e = 1;
+    36 │ names.a += 1;
+  
+  i Namespace imports are read-only, so this assignment throws an error at runtime.
+  
+  i To change a value that a module exports, export a function from that module that changes it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:1 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The members of the namespace names.deep can't be reassigned.
+  
+    33 │ names.c = 1;
+    34 │ names["a"] = 1;
+  > 35 │ names.deep.e = 1;
+       │ ^^^^^^^^^^^^
+    36 │ names.a += 1;
+    37 │ names.a++;
+  
+  i Namespace imports are read-only, so this assignment throws an error at runtime.
+  
+  i To change a value that a module exports, export a function from that module that changes it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:36:1 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The members of the namespace names can't be reassigned.
+  
+    34 │ names["a"] = 1;
+    35 │ names.deep.e = 1;
+  > 36 │ names.a += 1;
+       │ ^^^^^^^
+    37 │ names.a++;
+    38 │ [names.a] = [1];
+  
+  i Namespace imports are read-only, so this assignment throws an error at runtime.
+  
+  i To change a value that a module exports, export a function from that module that changes it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:37:1 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The members of the namespace names can't be reassigned.
+  
+    35 │ names.deep.e = 1;
+    36 │ names.a += 1;
+  > 37 │ names.a++;
+       │ ^^^^^^^
+    38 │ [names.a] = [1];
+    39 │ ({ value: names.a } = { value: 1 });
+  
+  i Namespace imports are read-only, so this assignment throws an error at runtime.
+  
+  i To change a value that a module exports, export a function from that module that changes it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:38:2 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The members of the namespace names can't be reassigned.
+  
+    36 │ names.a += 1;
+    37 │ names.a++;
+  > 38 │ [names.a] = [1];
+       │  ^^^^^^^
+    39 │ ({ value: names.a } = { value: 1 });
+    40 │ 
+  
+  i Namespace imports are read-only, so this assignment throws an error at runtime.
+  
+  i To change a value that a module exports, export a function from that module that changes it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:11 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The members of the namespace names can't be reassigned.
+  
+    37 │ names.a++;
+    38 │ [names.a] = [1];
+  > 39 │ ({ value: names.a } = { value: 1 });
+       │           ^^^^^^^
+    40 │ 
+    41 │ barrel.c;
+  
+  i Namespace imports are read-only, so this assignment throws an error at runtime.
+  
+  i To change a value that a module exports, export a function from that module that changes it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:8 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace barrel has no export named c.
+  
+    39 │ ({ value: names.a } = { value: 1 });
+    40 │ 
+  > 41 │ barrel.c;
+       │        ^
+    42 │ barrel.importedDeep.missing;
+    43 │ defaultNamespace.missing;
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:42:21 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace barrel.importedDeep has no export named missing.
+  
+    41 │ barrel.c;
+  > 42 │ barrel.importedDeep.missing;
+       │                     ^^^^^^^
+    43 │ defaultNamespace.missing;
+    44 │ combined.c;
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:24 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The module ./validEmpty.js has no exports.
+  
+    2 │ import * as names from "./validNamedExports.js";
+    3 │ import * as barrel from "./validBarrel.js";
+  > 4 │ import * as empty from "./validEmpty.js";
+      │                        ^^^^^^^^^^^^^^^^^
+    5 │ import * as starBarrel from "./validStarBarrel.js";
+    6 │ import defaultNamespace from "./validDefaultNamespace.js";
+  
+  i A namespace import of a module without exports is an empty object, so there is nothing to read from it.
+  
+  i Add exports to the module, or import it only for its side effects with import "./validEmpty.js".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:48:7 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace empty has no export named anything.
+  
+    46 │ deep.deeper.missing;
+    47 │ quotedDeep.missing;
+  > 48 │ empty.anything;
+       │       ^^^^^^^^
+    49 │ // `export * from` doesn't forward the default export.
+    50 │ starBarrel.default;
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:50:12 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace starBarrel has no export named default.
+  
+    48 │ empty.anything;
+    49 │ // `export * from` doesn't forward the default export.
+  > 50 │ starBarrel.default;
+       │            ^^^^^^^
+    51 │ 
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:43:18 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace defaultNamespace has no export named missing.
+  
+    41 │ barrel.c;
+    42 │ barrel.importedDeep.missing;
+  > 43 │ defaultNamespace.missing;
+       │                  ^^^^^^^
+    44 │ combined.c;
+    45 │ deep.missing;
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:44:10 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace combined has no export named c.
+  
+    42 │ barrel.importedDeep.missing;
+    43 │ defaultNamespace.missing;
+  > 44 │ combined.c;
+       │          ^
+    45 │ deep.missing;
+    46 │ deep.deeper.missing;
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:45:6 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace deep has no export named missing.
+  
+    43 │ defaultNamespace.missing;
+    44 │ combined.c;
+  > 45 │ deep.missing;
+       │      ^^^^^^^
+    46 │ deep.deeper.missing;
+    47 │ quotedDeep.missing;
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:46:13 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace deep.deeper has no export named missing.
+  
+    44 │ combined.c;
+    45 │ deep.missing;
+  > 46 │ deep.deeper.missing;
+       │             ^^^^^^^
+    47 │ quotedDeep.missing;
+    48 │ empty.anything;
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:47:12 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace quotedDeep has no export named missing.
+  
+    45 │ deep.missing;
+    46 │ deep.deeper.missing;
+  > 47 │ quotedDeep.missing;
+       │            ^^^^^^^
+    48 │ empty.anything;
+    49 │ // `export * from` doesn't forward the default export.
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:34 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The module ./validEmpty.js has no exports.
+  
+     8 │ import { deep } from "./validNamedExports.js";
+     9 │ import { "deep" as quotedDeep } from "./validNamedExports.js";
+  > 10 │ export * as reexportedEmpty from "./validEmpty.js";
+       │                                  ^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ names.c;
+  
+  i A namespace import of a module without exports is an empty object, so there is nothing to read from it.
+  
+  i Add exports to the module, or import it only for its side effects with import "./validEmpty.js".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -4348,6 +4348,11 @@ export interface Nursery {
 	 */
 	useValidCharacterComparison?: UseValidCharacterComparisonConfiguration;
 	/**
+	 * Require that names read from a namespace import are exported by the imported module.
+	 * See https://biomejs.dev/linter/rules/use-valid-namespace-imports
+	 */
+	useValidNamespaceImports?: UseValidNamespaceImportsConfiguration;
+	/**
 	 * Enforce valid titles for unit test cases and test suites.
 	 * See https://biomejs.dev/linter/rules/use-valid-test-title
 	 */
@@ -7573,6 +7578,9 @@ export type UseUnaryMinusConfiguration =
 export type UseValidCharacterComparisonConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseValidCharacterComparisonOptions;
+export type UseValidNamespaceImportsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseValidNamespaceImportsOptions;
 export type UseValidTestTitleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseValidTestTitleOptions;
@@ -11269,6 +11277,10 @@ export interface RuleWithUseValidCharacterComparisonOptions {
 	level: RulePlainConfiguration;
 	options?: UseValidCharacterComparisonOptions;
 }
+export interface RuleWithUseValidNamespaceImportsOptions {
+	level: RulePlainConfiguration;
+	options?: UseValidNamespaceImportsOptions;
+}
 export interface RuleWithUseValidTestTitleOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -14309,6 +14321,7 @@ export type UseTopLevelHeadingOptions = {};
 export type UseTopLevelRequireOptions = {};
 export type UseUnaryMinusOptions = {};
 export type UseValidCharacterComparisonOptions = {};
+export type UseValidNamespaceImportsOptions = {};
 export interface UseValidTestTitleOptions {
 	/**
 	 * A list of words that are disallowed in test titles.
@@ -16304,6 +16317,7 @@ export type Category =
 	| "lint/nursery/useUniqueInputFieldNames"
 	| "lint/nursery/useUniqueVariableNames"
 	| "lint/nursery/useValidCharacterComparison"
+	| "lint/nursery/useValidNamespaceImports"
 	| "lint/nursery/useValidTestTitle"
 	| "lint/nursery/useVueBaseImport"
 	| "lint/nursery/useVueBlockOrder"
