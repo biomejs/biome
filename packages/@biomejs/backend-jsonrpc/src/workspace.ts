@@ -3278,6 +3278,11 @@ export interface Nursery {
 	 */
 	noReactObjectTypeAsDefaultProp?: NoReactObjectTypeAsDefaultPropConfiguration;
 	/**
+	 * Disallow members of union and intersection types that have no effect.
+	 * See https://biomejs.dev/linter/rules/no-redundant-type-constituents
+	 */
+	noRedundantTypeConstituents?: NoRedundantTypeConstituentsConfiguration;
+	/**
 	 * Disallow dependencies that are known to have better alternatives.
 	 * See https://biomejs.dev/linter/rules/no-restricted-dependencies
 	 */
@@ -6796,6 +6801,9 @@ export type NoReactDirectStateMutationConfiguration =
 export type NoReactObjectTypeAsDefaultPropConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactObjectTypeAsDefaultPropOptions;
+export type NoRedundantTypeConstituentsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoRedundantTypeConstituentsOptions;
 export type NoRestrictedDependenciesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoRestrictedDependenciesOptions;
@@ -9916,6 +9924,10 @@ export interface RuleWithNoReactDirectStateMutationOptions {
 export interface RuleWithNoReactObjectTypeAsDefaultPropOptions {
 	level: RulePlainConfiguration;
 	options?: NoReactObjectTypeAsDefaultPropOptions;
+}
+export interface RuleWithNoRedundantTypeConstituentsOptions {
+	level: RulePlainConfiguration;
+	options?: NoRedundantTypeConstituentsOptions;
 }
 export interface RuleWithNoRestrictedDependenciesOptions {
 	level: RulePlainConfiguration;
@@ -13332,6 +13344,7 @@ export type NoPromiseExecutorReturnOptions = {};
 export type NoPseudoElementInFunctionalPseudoClassOptions = {};
 export type NoReactDirectStateMutationOptions = {};
 export type NoReactObjectTypeAsDefaultPropOptions = {};
+export type NoRedundantTypeConstituentsOptions = {};
 export type NoRestrictedDependenciesOptions = {};
 export type NoReturnArrayPushOptions = {};
 export type NoReturnInFinallyOptions = {};
@@ -15579,6 +15592,7 @@ export type Category =
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noReactObjectTypeAsDefaultProp"
+	| "lint/nursery/noRedundantTypeConstituents"
 	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noReturnArrayPush"
 	| "lint/nursery/noReturnInFinally"
