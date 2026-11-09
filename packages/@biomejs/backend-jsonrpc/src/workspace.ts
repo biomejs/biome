@@ -2983,6 +2983,11 @@ export interface Nursery {
 	 */
 	noAstroSetHtmlDirective?: NoAstroSetHtmlDirectiveConfiguration;
 	/**
+	 * Disallow async functions as .finally() callbacks.
+	 * See https://biomejs.dev/linter/rules/no-async-promise-finally
+	 */
+	noAsyncPromiseFinally?: NoAsyncPromiseFinallyConfiguration;
+	/**
 	 * Disallow using await inside the array passed to Promise.all(), Promise.allSettled(), Promise.any(), or Promise.race().
 	 * See https://biomejs.dev/linter/rules/no-await-in-promise-methods
 	 */
@@ -6584,6 +6589,9 @@ export type NoAstroConflictingSetDirectivesConfiguration =
 export type NoAstroSetHtmlDirectiveConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAstroSetHtmlDirectiveOptions;
+export type NoAsyncPromiseFinallyConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAsyncPromiseFinallyOptions;
 export type NoAwaitInPromiseMethodsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAwaitInPromiseMethodsOptions;
@@ -9552,6 +9560,10 @@ export interface RuleWithNoAstroConflictingSetDirectivesOptions {
 export interface RuleWithNoAstroSetHtmlDirectiveOptions {
 	level: RulePlainConfiguration;
 	options?: NoAstroSetHtmlDirectiveOptions;
+}
+export interface RuleWithNoAsyncPromiseFinallyOptions {
+	level: RulePlainConfiguration;
+	options?: NoAsyncPromiseFinallyOptions;
 }
 export interface RuleWithNoAwaitInPromiseMethodsOptions {
 	/**
@@ -13039,6 +13051,7 @@ export type NoArrayMethodsOnArgumentsOptions = {};
 export type NoArraySortForMinMaxOptions = {};
 export type NoAstroConflictingSetDirectivesOptions = {};
 export type NoAstroSetHtmlDirectiveOptions = {};
+export type NoAsyncPromiseFinallyOptions = {};
 export type NoAwaitInPromiseMethodsOptions = {};
 export interface NoBaseToStringOptions {
 	ignoredTypeNames?: string[];
@@ -15366,6 +15379,7 @@ export type Category =
 	| "lint/nursery/noArraySortForMinMax"
 	| "lint/nursery/noAstroConflictingSetDirectives"
 	| "lint/nursery/noAstroSetHtmlDirective"
+	| "lint/nursery/noAsyncPromiseFinally"
 	| "lint/nursery/noAwaitInPromiseMethods"
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noBooleanSortComparator"
