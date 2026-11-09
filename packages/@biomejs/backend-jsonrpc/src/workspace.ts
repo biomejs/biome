@@ -3913,6 +3913,11 @@ export interface Nursery {
 	 */
 	noYamlBooleanKeys?: NoYamlBooleanKeysConfiguration;
 	/**
+	 * Disallow empty keys in YAML maps.
+	 * See https://biomejs.dev/linter/rules/no-yaml-empty-map-keys
+	 */
+	noYamlEmptyMapKeys?: NoYamlEmptyMapKeysConfiguration;
+	/**
 	 * Disallow keys without a value in YAML maps.
 	 * See https://biomejs.dev/linter/rules/no-yaml-empty-map-values
 	 */
@@ -7267,6 +7272,9 @@ export type NoXorAsExponentiationConfiguration =
 export type NoYamlBooleanKeysConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoYamlBooleanKeysOptions;
+export type NoYamlEmptyMapKeysConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoYamlEmptyMapKeysOptions;
 export type NoYamlEmptyMapValuesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoYamlEmptyMapValuesOptions;
@@ -10697,6 +10705,10 @@ export interface RuleWithNoYamlBooleanKeysOptions {
 	level: RulePlainConfiguration;
 	options?: NoYamlBooleanKeysOptions;
 }
+export interface RuleWithNoYamlEmptyMapKeysOptions {
+	level: RulePlainConfiguration;
+	options?: NoYamlEmptyMapKeysOptions;
+}
 export interface RuleWithNoYamlEmptyMapValuesOptions {
 	level: RulePlainConfiguration;
 	options?: NoYamlEmptyMapValuesOptions;
@@ -13894,6 +13906,7 @@ export type NoVueVTextVHtmlOnComponentOptions = {};
 export type NoVueWatchAfterAwaitOptions = {};
 export type NoXorAsExponentiationOptions = {};
 export type NoYamlBooleanKeysOptions = {};
+export type NoYamlEmptyMapKeysOptions = {};
 export type NoYamlEmptyMapValuesOptions = {};
 export type NoZeroFractionsOptions = {};
 export type NoZeroLengthUnitOptions = {};
@@ -16072,6 +16085,7 @@ export type Category =
 	| "lint/nursery/noVueWatchAfterAwait"
 	| "lint/nursery/noXorAsExponentiation"
 	| "lint/nursery/noYamlBooleanKeys"
+	| "lint/nursery/noYamlEmptyMapKeys"
 	| "lint/nursery/noYamlEmptyMapValues"
 	| "lint/nursery/noZeroFractions"
 	| "lint/nursery/noZeroLengthUnit"
