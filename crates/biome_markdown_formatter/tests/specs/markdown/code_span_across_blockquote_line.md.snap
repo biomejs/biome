@@ -1,0 +1,35 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/code_span_across_blockquote_line.md
+---
+
+# Input
+
+```md
+> `a
+> b` c `d`
+
+> > `a
+> > b` c `d`
+
+> The session logs `Error: Unsupported item type:
+> agent_config_update` thrown by `livekitItemToOpenAIItem` via
+> `createChatCtxUpdateEvents`.
+
+```
+
+
+# Formatted
+
+```md
+> `a
+> b` c `d`
+
+> > `a
+> > b` c `d`
+
+> The session logs `Error: Unsupported item type:
+> agent_config_update` thrown by `livekitItemToOpenAIItem` via
+> `createChatCtxUpdateEvents`.
+
+```

@@ -6,7 +6,7 @@ use biome_rowan::TextSize;
 
 use crate::MarkdownParser;
 use crate::lexer::MarkdownLexContext;
-use crate::syntax::{TAB_STOP_SPACES, at_block_interrupt, at_setext_underline_after_newline};
+use crate::syntax::{InlineNewlineAction, TAB_STOP_SPACES, handle_line_continuation};
 
 /// Parse a hard line break.
 ///
@@ -48,18 +48,13 @@ fn matching_code_span_closer(p: &mut MarkdownParser, opening_count: usize) -> Op
                 return None;
             }
 
-            // Per CommonMark §4.3, setext heading underlines take priority over
-            // inline code spans. If crossing a newline would land on a setext
-            // underline, the code span is invalid — the underline forms a heading.
             if p.at(NEWLINE) {
                 p.bump_remap_with_context(MD_TEXTUAL_LITERAL, MarkdownLexContext::CodeSpan);
-                if at_setext_underline_after_newline(p).is_some() {
-                    return None;
-                }
-                // Per CommonMark, block interrupts (including list markers) can
-                // terminate paragraphs. A code span cannot cross a block boundary.
-                // The list check uses regular lexing, so its token changes must be rewound.
-                if at_block_interrupt(p) || p.lookahead(is_at_list_marker_after_newline) {
+                if matches!(
+                    handle_line_continuation(p, true, false),
+                    InlineNewlineAction::Break
+                ) || p.lookahead(is_at_list_marker_after_newline)
+                {
                     return None;
                 }
                 continue;
@@ -219,6 +214,13 @@ pub(crate) fn parse_inline_code(p: &mut MarkdownParser) -> ParsedSyntax {
             let text_m = p.start();
             p.bump_remap_with_context(MD_TEXTUAL_LITERAL, MarkdownLexContext::CodeSpan);
             text_m.complete(p, MD_TEXTUAL);
+            if matches!(
+                handle_line_continuation(p, true, false),
+                InlineNewlineAction::Break
+            ) || p.lookahead(is_at_list_marker_after_newline)
+            {
+                break;
+            }
             continue;
         }
 

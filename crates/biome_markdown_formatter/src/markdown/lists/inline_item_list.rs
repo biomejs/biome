@@ -228,7 +228,9 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
             return self.fmt_inside_list(node, f);
         } else if self.print_mode.is_auto_link_like() {
             return self.fmt_auto_link_like(node, f);
-        } else if self.print_mode.is_normalize_words() {
+        } else if self.print_mode.is_normalize_words()
+            || self.print_mode.is_normalize_words_preserve_lines()
+        {
             return self.fmt_normalize_words(node, f);
         } else if self.print_mode.is_trim_all() {
             return self.fmt_trim_all(node, f);
@@ -655,9 +657,10 @@ impl FormatMdInlineItemList {
         joiner.finish()
     }
 
-    /// Normalizes all whitespace in textual nodes to `hard_space`.
+    /// Normalizes whitespace in textual nodes to `hard_space`.
     ///
-    /// For example, `[  Foo   Bar  ]` becomes `[ Foo Bar ]`.
+    /// `NormalizeWordsPreserveLines` keeps textual line breaks unchanged. For example,
+    /// `[  Foo   Bar  ]` becomes `[ Foo Bar ]` in both modes.
     fn fmt_normalize_words(
         &self,
         node: &MdInlineItemList,
@@ -667,6 +670,12 @@ impl FormatMdInlineItemList {
 
         for item in node.iter() {
             match item {
+                AnyMdInline::MdTextual(text)
+                    if self.print_mode.is_normalize_words_preserve_lines()
+                        && text.is_newline()? =>
+                {
+                    joiner.entry(&text.format());
+                }
                 AnyMdInline::MdTextual(text) => {
                     joiner.entry(&text.format().with_options(FormatMdTextualOptions {
                         print_mode: TextPrintMode::Trim(TrimMode::NormalizeWords),
@@ -872,13 +881,28 @@ impl FormatMdInlineItemList {
             items.remove_spaces_after_soft_breaks();
         }
         let items = items.as_slice();
-
-        match prose_wrap {
+        let task_list_indent = if inside_list {
+            node.iter().next().and_then(|item| match item {
+                AnyMdInline::GfmTaskListItem(task_list_item) => {
+                    Some(usize::from(task_list_item.range().len()) + 1)
+                }
+                _ => None,
+            })
+        } else {
+            None
+        };
+        let prose = format_with(|f| match prose_wrap {
             ProseWrap::Preserve => {
-                self.fmt_prose_preserve(node, items, &indented_block_marker_lines, f, inside_list)?
+                self.fmt_prose_preserve(node, items, &indented_block_marker_lines, f, inside_list)
             }
-            ProseWrap::Always => self.fmt_prose_always(items, f)?,
-            ProseWrap::Never => self.fmt_prose_never(items, f)?,
+            ProseWrap::Always => self.fmt_prose_always(items, f),
+            ProseWrap::Never => self.fmt_prose_never(items, f),
+        });
+
+        if let Some(task_list_indent) = task_list_indent {
+            write!(f, [align(" ".repeat(task_list_indent), &prose)])?;
+        } else {
+            prose.fmt(f)?;
         }
 
         if !inside_list {

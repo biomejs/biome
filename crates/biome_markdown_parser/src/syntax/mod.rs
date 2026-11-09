@@ -1676,11 +1676,10 @@ fn is_quote_only_blank_line_from_source(p: &MarkdownParser, depth: usize) -> boo
         }
     }
 
-    // Consume quote markers and optional single space after each
-    for _ in 0..depth {
-        if idx >= source.len() || source.as_bytes()[idx] != b'>' {
-            return false;
-        }
+    // A blank line may continue only the outer quotes, closing deeper quotes.
+    let mut marker_count = 0;
+    while marker_count < depth && idx < source.len() && source.as_bytes()[idx] == b'>' {
+        marker_count += 1;
         idx += 1;
         if idx < source.len() {
             let c = source.as_bytes()[idx];
@@ -1688,6 +1687,9 @@ fn is_quote_only_blank_line_from_source(p: &MarkdownParser, depth: usize) -> boo
                 idx += 1;
             }
         }
+    }
+    if marker_count == 0 {
+        return false;
     }
 
     // Skip trailing whitespace
