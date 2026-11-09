@@ -4566,6 +4566,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoYamlEmptyMapValuesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoYamlEmptyMapValuesOptions" }
+			]
+		},
+		"NoYamlEmptyMapValuesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoEmptyObjectKeysConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9212,6 +9222,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noYamlEmptyMapValues": {
+					"description": "Disallow keys without a value in YAML maps.\nSee https://biomejs.dev/linter/rules/no-yaml-empty-map-values",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoYamlEmptyMapValuesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noErasingOperation": {
 					"description": "Disallow operations with zero that always result in zero.\nSee https://biomejs.dev/linter/rules/no-erasing-operation",
 					"anyOf": [
@@ -13112,6 +13129,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoEmptyInterfaceOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoYamlEmptyMapValuesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoYamlEmptyMapValuesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

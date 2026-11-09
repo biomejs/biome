@@ -3053,6 +3053,11 @@ export interface Nursery {
 	 */
 	noEagerArrayMethodsInLoops?: NoEagerArrayMethodsInLoopsConfiguration;
 	/**
+	 * Disallow keys without a value in YAML maps.
+	 * See https://biomejs.dev/linter/rules/no-yaml-empty-map-values
+	 */
+	noYamlEmptyMapValues?: NoYamlEmptyMapValuesConfiguration;
+	/**
 	 * Disallow operations with zero that always result in zero.
 	 * See https://biomejs.dev/linter/rules/no-erasing-operation
 	 */
@@ -6676,6 +6681,9 @@ export type NoDynamicDeleteConfiguration =
 export type NoEagerArrayMethodsInLoopsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoEagerArrayMethodsInLoopsOptions;
+export type NoYamlEmptyMapValuesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoYamlEmptyMapValuesOptions;
 export type NoErasingOperationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoErasingOperationOptions;
@@ -9708,6 +9716,10 @@ export interface RuleWithNoDynamicDeleteOptions {
 export interface RuleWithNoEagerArrayMethodsInLoopsOptions {
 	level: RulePlainConfiguration;
 	options?: NoEagerArrayMethodsInLoopsOptions;
+}
+export interface RuleWithNoYamlEmptyMapValuesOptions {
+	level: RulePlainConfiguration;
+	options?: NoYamlEmptyMapValuesOptions;
 }
 export interface RuleWithNoErasingOperationOptions {
 	level: RulePlainConfiguration;
@@ -13201,6 +13213,7 @@ export interface NoDuplicateTypeConstituentsOptions {
 }
 export type NoDynamicDeleteOptions = {};
 export type NoEagerArrayMethodsInLoopsOptions = {};
+export type NoYamlEmptyMapValuesOptions = {};
 export type NoErasingOperationOptions = {};
 export interface NoExcessiveNestedBlocksOptions {
 	/**
@@ -15568,6 +15581,7 @@ export type Category =
 	| "lint/nursery/noDuplicateTypeConstituents"
 	| "lint/nursery/noDynamicDelete"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
+	| "lint/nursery/noYamlEmptyMapValues"
 	| "lint/nursery/noEmptyObjectKeys"
 	| "lint/nursery/noErasingOperation"
 	| "lint/nursery/noExcessiveNestedBlocks"

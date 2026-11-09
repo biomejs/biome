@@ -433,6 +433,7 @@ define_categories! {
     "lint/nursery/noVueWatchAfterAwait": "https://biomejs.dev/linter/rules/no-vue-watch-after-await",
     "lint/nursery/noXorAsExponentiation": "https://biomejs.dev/linter/rules/no-xor-as-exponentiation",
     "lint/nursery/noYamlBooleanKeys": "https://biomejs.dev/linter/rules/no-yaml-boolean-keys",
+    "lint/nursery/noYamlEmptyMapValues": "https://biomejs.dev/linter/rules/no-yaml-empty-map-values",
     "lint/nursery/noZeroFractions": "https://biomejs.dev/linter/rules/no-zero-fractions",
     "lint/nursery/noZeroLengthUnit": "https://biomejs.dev/linter/rules/no-zero-length-unit",
     "lint/nursery/useAccessorPairs": "https://biomejs.dev/linter/rules/use-accessor-pairs",
