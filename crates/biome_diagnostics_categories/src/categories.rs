@@ -882,7 +882,13 @@ define_categories! {
     "transformations/stripTypes",
 
     // General categories
-    "files/missingHandler",
+    "fs/missingHandler",
+    "fs/cantRead",
+    "fs/deeplyNestedSymlinkExpansion",
+    "fs/dereferencedSymlink",
+    "fs/io",
+    "fs/nonUtf8Path",
+    "fs/unknownFileType",
     "format",
     "check",
     "ci",

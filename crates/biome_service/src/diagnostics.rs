@@ -464,7 +464,7 @@ pub struct SourceFileNotSupported {
 
 impl Diagnostic for SourceFileNotSupported {
     fn category(&self) -> Option<&'static Category> {
-        Some(category!("files/missingHandler"))
+        Some(category!("fs/missingHandler"))
     }
 
     fn severity(&self) -> Severity {
