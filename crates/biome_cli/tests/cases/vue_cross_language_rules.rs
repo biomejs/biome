@@ -226,3 +226,44 @@ withDefaults(
         result,
     ));
 }
+
+#[test]
+fn no_vue_negation_else_write_keeps_nested_branches() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        "biome.json".into(),
+        BIOME_CONFIG_HTML_FULL_SUPPORT.as_bytes(),
+    );
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<template>
+  <div v-if="!outer" class="outer-if">
+    <span v-if="!inner" class="inner-if">Inner if</span>
+    <p v-else class="inner-else">Inner else</p>
+  </div>
+  <section v-else class="outer-else">
+    <span v-if="!nested" class="nested-if">Nested if</span>
+    <p v-else class="nested-else">Nested else</p>
+  </section>
+  <div v-if="a !== b">Not equal</div>
+  <div v-else>Equal</div>
+</template>
+"#
+        .as_bytes(),
+    );
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--write", "--only=noVueNegationElse", file.as_str()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_vue_negation_else_write_keeps_nested_branches",
+        fs,
+        console,
+        result,
+    ));
+}
