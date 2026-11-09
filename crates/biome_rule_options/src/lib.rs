@@ -508,6 +508,7 @@ pub mod no_vue_watch_after_await;
 pub mod no_with;
 pub mod no_xor_as_exponentiation;
 pub mod no_yaml_boolean_keys;
+pub mod no_yaml_empty_map_keys;
 pub mod no_yaml_empty_map_values;
 pub mod no_yoda_expression;
 pub mod no_zero_fractions;

@@ -2357,6 +2357,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noYamlEmptyMapKeys",
+        TypeId::of::<biome_rule_options::no_yaml_empty_map_keys::NoYamlEmptyMapKeysOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noYamlEmptyMapValues",
         TypeId::of::<biome_rule_options::no_yaml_empty_map_values::NoYamlEmptyMapValuesOptions>(),
     ));
