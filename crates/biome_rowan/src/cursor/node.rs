@@ -206,13 +206,38 @@ impl SyntaxNode {
     }
 
     #[inline]
+    pub fn tree_top(&self) -> Self {
+        let mut top = self.clone();
+        while let Some(parent) = top.parent() {
+            top = parent;
+        }
+        top
+    }
+
+    #[inline]
     pub fn children(&self) -> SyntaxNodeChildren {
         SyntaxNodeChildren::new(self.clone())
     }
 
     #[inline]
+    pub fn children_of_kinds<L: Language>(
+        &self,
+        kinds: SyntaxKindSet<L>,
+    ) -> SyntaxNodeChildrenOfKinds<L> {
+        SyntaxNodeChildrenOfKinds::new(self.clone(), kinds)
+    }
+
+    #[inline]
     pub fn children_with_tokens(&self) -> SyntaxElementChildren {
         SyntaxElementChildren::new(self.clone())
+    }
+
+    #[inline]
+    pub fn children_with_tokens_of_kinds<L: Language>(
+        &self,
+        kinds: SyntaxKindSet<L>,
+    ) -> SyntaxElementChildrenOfKinds<L> {
+        SyntaxElementChildrenOfKinds::new(self.clone(), kinds)
     }
 
     #[inline]
@@ -242,6 +267,10 @@ impl SyntaxNode {
         })
     }
 
+    pub fn first_child_of_kinds<L: Language>(&self, kinds: SyntaxKindSet<L>) -> Option<Self> {
+        self.children_of_kinds(kinds).next()
+    }
+
     pub fn last_child(&self) -> Option<Self> {
         self.green().children().rev().find_map(|child| {
             child.element().into_node().map(|green| {
@@ -265,6 +294,14 @@ impl SyntaxNode {
             )
         })
     }
+
+    pub fn first_child_or_token_of_kinds<L: Language>(
+        &self,
+        kinds: SyntaxKindSet<L>,
+    ) -> Option<SyntaxElement> {
+        self.children_with_tokens_of_kinds(kinds).next()
+    }
+
     pub fn last_child_or_token(&self) -> Option<SyntaxElement> {
         self.green().children().next_back().map(|child| {
             SyntaxElement::new(
@@ -279,12 +316,40 @@ impl SyntaxNode {
     pub fn next_sibling(&self) -> Option<Self> {
         self.data().next_sibling()
     }
+
+    pub fn next_sibling_of_kinds<L: Language>(&self, kinds: SyntaxKindSet<L>) -> Option<Self> {
+        self.data().green_siblings()?.following().find_map(|child| {
+            let green = child.element().into_node()?;
+            if !kinds.matches_raw(green.kind()) {
+                return None;
+            }
+            let parent = self.parent()?;
+            let offset = parent.offset() + child.rel_offset();
+            Some(Self::new_child(green, parent, child.slot(), offset))
+        })
+    }
+
     pub fn prev_sibling(&self) -> Option<Self> {
         self.data().prev_sibling()
     }
 
     pub fn next_sibling_or_token(&self) -> Option<SyntaxElement> {
         self.data().next_sibling_or_token()
+    }
+
+    pub fn next_sibling_or_token_of_kinds<L: Language>(
+        &self,
+        kinds: SyntaxKindSet<L>,
+    ) -> Option<SyntaxElement> {
+        self.data().green_siblings()?.following().find_map(|child| {
+            let element = child.element();
+            if !kinds.matches_raw(element.kind()) {
+                return None;
+            }
+            let parent = self.parent()?;
+            let offset = parent.offset() + child.rel_offset();
+            Some(SyntaxElement::new(element, parent, child.slot(), offset))
+        })
     }
     pub fn prev_sibling_or_token(&self) -> Option<SyntaxElement> {
         self.data().prev_sibling_or_token()
@@ -296,6 +361,14 @@ impl SyntaxNode {
 
     pub fn last_token(&self) -> Option<SyntaxToken> {
         self.edge_token(Direction::Prev)
+    }
+
+    pub fn next_token(&self) -> Option<SyntaxToken> {
+        SyntaxElement::Node(self.clone()).next_token()
+    }
+
+    pub fn prev_token(&self) -> Option<SyntaxToken> {
+        SyntaxElement::Node(self.clone()).prev_token()
     }
 
     /// Starts at this node and searches its subtree left to right (`Next`) or
@@ -689,6 +762,51 @@ impl Iterator for SyntaxNodeChildren {
 
 impl FusedIterator for SyntaxNodeChildren {}
 
+#[derive(Clone, Debug)]
+pub(crate) struct SyntaxNodeChildrenOfKinds<L: Language> {
+    parent: SyntaxNode,
+    kinds: SyntaxKindSet<L>,
+    next_slot: usize,
+}
+
+impl<L: Language> SyntaxNodeChildrenOfKinds<L> {
+    fn new(parent: SyntaxNode, kinds: SyntaxKindSet<L>) -> Self {
+        Self {
+            parent,
+            kinds,
+            next_slot: 0,
+        }
+    }
+}
+
+impl<L: Language> Iterator for SyntaxNodeChildrenOfKinds<L> {
+    type Item = SyntaxNode;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            let index = self.next_slot;
+            let slot = self.parent.green().slice().get(index)?;
+            self.next_slot += 1;
+
+            let Slot::Node { node, rel_offset } = slot else {
+                continue;
+            };
+            if !self.kinds.matches_raw(node.kind()) {
+                continue;
+            }
+
+            return Some(SyntaxNode::new_child(
+                node,
+                self.parent.clone(),
+                index as u32,
+                self.parent.offset() + *rel_offset,
+            ));
+        }
+    }
+}
+
+impl<L: Language> FusedIterator for SyntaxNodeChildrenOfKinds<L> {}
+
 #[derive(Clone, Debug, Default)]
 pub(crate) struct SyntaxElementChildren {
     next: Option<SyntaxElement>,
@@ -713,6 +831,52 @@ impl Iterator for SyntaxElementChildren {
 
 impl FusedIterator for SyntaxElementChildren {}
 
+#[derive(Clone, Debug)]
+pub(crate) struct SyntaxElementChildrenOfKinds<L: Language> {
+    parent: SyntaxNode,
+    kinds: SyntaxKindSet<L>,
+    next_slot: usize,
+}
+
+impl<L: Language> SyntaxElementChildrenOfKinds<L> {
+    fn new(parent: SyntaxNode, kinds: SyntaxKindSet<L>) -> Self {
+        Self {
+            parent,
+            kinds,
+            next_slot: 0,
+        }
+    }
+}
+
+impl<L: Language> Iterator for SyntaxElementChildrenOfKinds<L> {
+    type Item = SyntaxElement;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            let index = self.next_slot;
+            let slot = self.parent.green().slice().get(index)?;
+            self.next_slot += 1;
+
+            let Some(element) = slot.as_ref() else {
+                continue;
+            };
+            if !self.kinds.matches_raw(element.kind()) {
+                continue;
+            }
+
+            return Some(SyntaxElement::new(
+                element,
+                self.parent.clone(),
+                index as u32,
+                self.parent.offset() + slot.rel_offset(),
+            ));
+        }
+    }
+}
+
+impl<L: Language> FusedIterator for SyntaxElementChildrenOfKinds<L> {}
+
+#[derive(Clone, Debug)]
 pub(crate) struct Preorder {
     start: SyntaxNode,
     next: Option<WalkEvent<SyntaxNode>>,
@@ -910,6 +1074,7 @@ impl<L: Language> Iterator for PreorderMatching<'_, L> {
 
 impl<L: Language> FusedIterator for PreorderMatching<'_, L> {}
 
+#[derive(Clone, Debug)]
 pub(crate) struct PreorderWithTokens {
     start: SyntaxElement,
     next: Option<WalkEvent<SyntaxElement>>,
