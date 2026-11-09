@@ -10968,6 +10968,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueConsistentVOnHandlerStyle": {
+					"description": "Enforce a consistent style for event handlers in Vue v-on directives.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-v-on-handler-style",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueConsistentVOnHandlerStyleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueConsistentVSlotStyle": {
 					"description": "Enforce a consistent style for v-slot in Vue templates.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-v-slot-style",
 					"anyOf": [
@@ -19764,6 +19771,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueConsistentVOnHandlerStyleOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueConsistentVOnHandlerStyleOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueConsistentVOnStyleOptions": {
 			"type": "object",
 			"properties": {
@@ -25801,6 +25821,25 @@
 			},
 			"additionalProperties": false
 		},
+		"UseVueConsistentVOnHandlerStyleConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueConsistentVOnHandlerStyleOptions" }
+			]
+		},
+		"UseVueConsistentVOnHandlerStyleOptions": {
+			"type": "object",
+			"properties": {
+				"style": {
+					"description": "The handler style to enforce in `v-on` directives.\nIf omitted, `\"methodOrInlineFunction\"` is used.",
+					"anyOf": [
+						{ "$ref": "#/$defs/VueVOnHandlerStyle" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseVueConsistentVOnStyleConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -26511,6 +26550,31 @@
 			]
 		},
 		"VueVForDelimiter": { "type": "string", "enum": ["in", "of"] },
+		"VueVOnHandlerStyle": {
+			"description": "A style of event handler in a `v-on` directive.",
+			"oneOf": [
+				{
+					"description": "Use the name of a method, as in `@click=\"handler\"`. Where a method name can't be used, use\nan inline function, as in `@click=\"() => handler(item)\"`.",
+					"type": "string",
+					"const": "methodOrInlineFunction"
+				},
+				{
+					"description": "Use the name of a method, as in `@click=\"handler\"`. Where a method name can't be used, use\nan inline handler, as in `@click=\"handler(item)\"`.",
+					"type": "string",
+					"const": "methodOrInline"
+				},
+				{
+					"description": "Use an inline function, as in `@click=\"() => handler()\"`.",
+					"type": "string",
+					"const": "inlineFunction"
+				},
+				{
+					"description": "Use an inline handler, as in `@click=\"handler()\"`.",
+					"type": "string",
+					"const": "inline"
+				}
+			]
+		},
 		"WhitespaceSensitivity": {
 			"description": "Controls how the formatter treats whitespace around text and child elements in HTML, Vue,\nSvelte, and Astro markup.\n\nThe following two cases won't produce the same output:\n\n|                |      html      |    output    |\n| -------------- | :------------: | :----------: |\n| with spaces    | `1<b> 2 </b>3` | 1<b> 2 </b>3 |\n| without spaces |  `1<b>2</b>3`  |  1<b>2</b>3  |\n\nThis happens because whitespace is significant in inline elements.\n\nAs a consequence of this, the formatter must format blocks that look like this (assume a small line width, <20):\n```html\n<span>really long content</span>\n```\nas this, where the content hugs the tags:\n```html\n<span\n   >really long content</span\n>\n```\n\nNote that this is only necessary for inline elements. Block elements do not have this restriction.",
 			"oneOf": [
