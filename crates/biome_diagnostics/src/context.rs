@@ -475,6 +475,10 @@ mod internal {
         fn tags(&self) -> DiagnosticTags {
             self.source.as_diagnostic().tags()
         }
+
+        fn source(&self) -> Option<&dyn Diagnostic> {
+            self.source.as_diagnostic().source()
+        }
     }
 
     /// Diagnostic type returned by [super::DiagnosticExt::with_file_span],
