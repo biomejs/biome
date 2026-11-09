@@ -318,6 +318,7 @@ define_categories! {
     "lint/nursery/noSubtractionComparison": "https://biomejs.dev/linter/rules/no-subtraction-comparison",
     "lint/nursery/noSinglePromiseInPromiseMethods": "https://biomejs.dev/linter/rules/no-single-promise-in-promise-methods",
     "lint/nursery/noSvelteAddEventListener": "https://biomejs.dev/linter/rules/no-svelte-add-event-listener",
+    "lint/nursery/noSvelteAsyncStore": "https://biomejs.dev/linter/rules/no-svelte-async-store",
     "lint/nursery/noSvelteAtDebugTags": "https://biomejs.dev/linter/rules/no-svelte-at-debug-tags",
     "lint/nursery/noSvelteAtHtmlTags": "https://biomejs.dev/linter/rules/no-svelte-at-html-tags",
     "lint/nursery/noSvelteBindValueOnCheckableInputs": "https://biomejs.dev/linter/rules/no-svelte-bind-value-on-checkable-inputs",

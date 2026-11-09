@@ -1,0 +1,210 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { derived, readable, writable } from "svelte/store";
+import { writable as createStore } from "svelte/store";
+import * as stores from "svelte/store";
+
+const a = writable(false, async () => {});
+const b = readable(false, async () => {});
+const c = derived(a, async ($a) => {});
+const d = writable(false, async function () {});
+const e = readable(false, async function* () {});
+const f = writable(false, (async () => {}));
+const g = createStore(false, async () => {});
+const h = stores.writable(false, async () => {});
+const i = stores["derived"](a, async ($a, set) => {});
+
+```
+
+# Diagnostics
+```
+invalid.js:6:27 lint/nursery/noSvelteAsyncStore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This async function is passed to writable().
+  
+    4 │ import * as stores from "svelte/store";
+    5 │ 
+  > 6 │ const a = writable(false, async () => {});
+      │                           ^^^^^
+    7 │ const b = readable(false, async () => {});
+    8 │ const c = derived(a, async ($a) => {});
+  
+  i Svelte calls the value this function returns when the store is no longer used. An async function returns a promise, and calling a promise throws an error.
+  
+  i Make the function synchronous, start the async work inside it, and call set() when the result is ready.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:27 lint/nursery/noSvelteAsyncStore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This async function is passed to readable().
+  
+    6 │ const a = writable(false, async () => {});
+  > 7 │ const b = readable(false, async () => {});
+      │                           ^^^^^
+    8 │ const c = derived(a, async ($a) => {});
+    9 │ const d = writable(false, async function () {});
+  
+  i Svelte calls the value this function returns when the store is no longer used. An async function returns a promise, and calling a promise throws an error.
+  
+  i Make the function synchronous, start the async work inside it, and call set() when the result is ready.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:22 lint/nursery/noSvelteAsyncStore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This async function is passed to derived().
+  
+     6 │ const a = writable(false, async () => {});
+     7 │ const b = readable(false, async () => {});
+   > 8 │ const c = derived(a, async ($a) => {});
+       │                      ^^^^^
+     9 │ const d = writable(false, async function () {});
+    10 │ const e = readable(false, async function* () {});
+  
+  i Svelte uses the value this function returns, either to clean up or as the value of the store. An async function returns a promise instead, so the cleanup never runs or the store holds the promise.
+  
+  i Make the function synchronous, start the async work inside it, and call set() when the result is ready.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:27 lint/nursery/noSvelteAsyncStore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This async function is passed to writable().
+  
+     7 │ const b = readable(false, async () => {});
+     8 │ const c = derived(a, async ($a) => {});
+   > 9 │ const d = writable(false, async function () {});
+       │                           ^^^^^
+    10 │ const e = readable(false, async function* () {});
+    11 │ const f = writable(false, (async () => {}));
+  
+  i Svelte calls the value this function returns when the store is no longer used. An async function returns a promise, and calling a promise throws an error.
+  
+  i Make the function synchronous, start the async work inside it, and call set() when the result is ready.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:27 lint/nursery/noSvelteAsyncStore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This async function is passed to readable().
+  
+     8 │ const c = derived(a, async ($a) => {});
+     9 │ const d = writable(false, async function () {});
+  > 10 │ const e = readable(false, async function* () {});
+       │                           ^^^^^
+    11 │ const f = writable(false, (async () => {}));
+    12 │ const g = createStore(false, async () => {});
+  
+  i Svelte calls the value this function returns when the store is no longer used. An async function returns a promise, and calling a promise throws an error.
+  
+  i Make the function synchronous, start the async work inside it, and call set() when the result is ready.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:28 lint/nursery/noSvelteAsyncStore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This async function is passed to writable().
+  
+     9 │ const d = writable(false, async function () {});
+    10 │ const e = readable(false, async function* () {});
+  > 11 │ const f = writable(false, (async () => {}));
+       │                            ^^^^^
+    12 │ const g = createStore(false, async () => {});
+    13 │ const h = stores.writable(false, async () => {});
+  
+  i Svelte calls the value this function returns when the store is no longer used. An async function returns a promise, and calling a promise throws an error.
+  
+  i Make the function synchronous, start the async work inside it, and call set() when the result is ready.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:30 lint/nursery/noSvelteAsyncStore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This async function is passed to writable().
+  
+    10 │ const e = readable(false, async function* () {});
+    11 │ const f = writable(false, (async () => {}));
+  > 12 │ const g = createStore(false, async () => {});
+       │                              ^^^^^
+    13 │ const h = stores.writable(false, async () => {});
+    14 │ const i = stores["derived"](a, async ($a, set) => {});
+  
+  i Svelte calls the value this function returns when the store is no longer used. An async function returns a promise, and calling a promise throws an error.
+  
+  i Make the function synchronous, start the async work inside it, and call set() when the result is ready.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:34 lint/nursery/noSvelteAsyncStore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This async function is passed to writable().
+  
+    11 │ const f = writable(false, (async () => {}));
+    12 │ const g = createStore(false, async () => {});
+  > 13 │ const h = stores.writable(false, async () => {});
+       │                                  ^^^^^
+    14 │ const i = stores["derived"](a, async ($a, set) => {});
+    15 │ 
+  
+  i Svelte calls the value this function returns when the store is no longer used. An async function returns a promise, and calling a promise throws an error.
+  
+  i Make the function synchronous, start the async work inside it, and call set() when the result is ready.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:32 lint/nursery/noSvelteAsyncStore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This async function is passed to derived().
+  
+    12 │ const g = createStore(false, async () => {});
+    13 │ const h = stores.writable(false, async () => {});
+  > 14 │ const i = stores["derived"](a, async ($a, set) => {});
+       │                                ^^^^^
+    15 │ 
+  
+  i Svelte uses the value this function returns, either to clean up or as the value of the store. An async function returns a promise instead, so the cleanup never runs or the store holds the promise.
+  
+  i Make the function synchronous, start the async work inside it, and call set() when the result is ready.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
