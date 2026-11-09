@@ -881,13 +881,28 @@ impl FormatMdInlineItemList {
             items.remove_spaces_after_soft_breaks();
         }
         let items = items.as_slice();
-
-        match prose_wrap {
+        let task_list_indent = if inside_list {
+            node.iter().next().and_then(|item| match item {
+                AnyMdInline::GfmTaskListItem(task_list_item) => {
+                    Some(usize::from(task_list_item.range().len()) + 1)
+                }
+                _ => None,
+            })
+        } else {
+            None
+        };
+        let prose = format_with(|f| match prose_wrap {
             ProseWrap::Preserve => {
-                self.fmt_prose_preserve(node, items, &indented_block_marker_lines, f, inside_list)?
+                self.fmt_prose_preserve(node, items, &indented_block_marker_lines, f, inside_list)
             }
-            ProseWrap::Always => self.fmt_prose_always(items, f)?,
-            ProseWrap::Never => self.fmt_prose_never(items, f)?,
+            ProseWrap::Always => self.fmt_prose_always(items, f),
+            ProseWrap::Never => self.fmt_prose_never(items, f),
+        });
+
+        if let Some(task_list_indent) = task_list_indent {
+            write!(f, [align(" ".repeat(task_list_indent), &prose)])?;
+        } else {
+            prose.fmt(f)?;
         }
 
         if !inside_list {
