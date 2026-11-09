@@ -4566,16 +4566,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"NoYamlEmptyMapValuesConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoYamlEmptyMapValuesOptions" }
-			]
-		},
-		"NoYamlEmptyMapValuesOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"NoEmptyObjectKeysConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8993,6 +8983,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoYamlEmptyMapValuesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoYamlEmptyMapValuesOptions" }
+			]
+		},
+		"NoYamlEmptyMapValuesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoYodaExpressionConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9219,13 +9219,6 @@
 					"description": "Disallow .map() and .filter() calls in the header of for...of loops.\nSee https://biomejs.dev/linter/rules/no-eager-array-methods-in-loops",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoEagerArrayMethodsInLoopsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noYamlEmptyMapValues": {
-					"description": "Disallow keys without a value in YAML maps.\nSee https://biomejs.dev/linter/rules/no-yaml-empty-map-values",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoYamlEmptyMapValuesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10363,6 +10356,13 @@
 					"description": "Disallow boolean values as keys in YAML.\nSee https://biomejs.dev/linter/rules/no-yaml-boolean-keys",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoYamlBooleanKeysConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noYamlEmptyMapValues": {
+					"description": "Disallow keys without a value in YAML maps.\nSee https://biomejs.dev/linter/rules/no-yaml-empty-map-values",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoYamlEmptyMapValuesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13129,15 +13129,6 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoEmptyInterfaceOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithNoYamlEmptyMapValuesOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoYamlEmptyMapValuesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -17132,6 +17123,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoYamlBooleanKeysOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoYamlEmptyMapValuesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoYamlEmptyMapValuesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

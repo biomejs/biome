@@ -3053,11 +3053,6 @@ export interface Nursery {
 	 */
 	noEagerArrayMethodsInLoops?: NoEagerArrayMethodsInLoopsConfiguration;
 	/**
-	 * Disallow keys without a value in YAML maps.
-	 * See https://biomejs.dev/linter/rules/no-yaml-empty-map-values
-	 */
-	noYamlEmptyMapValues?: NoYamlEmptyMapValuesConfiguration;
-	/**
 	 * Disallow operations with zero that always result in zero.
 	 * See https://biomejs.dev/linter/rules/no-erasing-operation
 	 */
@@ -3862,6 +3857,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/no-yaml-boolean-keys
 	 */
 	noYamlBooleanKeys?: NoYamlBooleanKeysConfiguration;
+	/**
+	 * Disallow keys without a value in YAML maps.
+	 * See https://biomejs.dev/linter/rules/no-yaml-empty-map-values
+	 */
+	noYamlEmptyMapValues?: NoYamlEmptyMapValuesConfiguration;
 	/**
 	 * Disallow number literals with zero fractions or dangling dots.
 	 * See https://biomejs.dev/linter/rules/no-zero-fractions
@@ -6681,9 +6681,6 @@ export type NoDynamicDeleteConfiguration =
 export type NoEagerArrayMethodsInLoopsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoEagerArrayMethodsInLoopsOptions;
-export type NoYamlEmptyMapValuesConfiguration =
-	| RulePlainConfiguration
-	| RuleWithNoYamlEmptyMapValuesOptions;
 export type NoErasingOperationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoErasingOperationOptions;
@@ -7167,6 +7164,9 @@ export type NoXorAsExponentiationConfiguration =
 export type NoYamlBooleanKeysConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoYamlBooleanKeysOptions;
+export type NoYamlEmptyMapValuesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoYamlEmptyMapValuesOptions;
 export type NoZeroFractionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoZeroFractionsOptions;
@@ -9717,10 +9717,6 @@ export interface RuleWithNoEagerArrayMethodsInLoopsOptions {
 	level: RulePlainConfiguration;
 	options?: NoEagerArrayMethodsInLoopsOptions;
 }
-export interface RuleWithNoYamlEmptyMapValuesOptions {
-	level: RulePlainConfiguration;
-	options?: NoYamlEmptyMapValuesOptions;
-}
 export interface RuleWithNoErasingOperationOptions {
 	level: RulePlainConfiguration;
 	options?: NoErasingOperationOptions;
@@ -10532,6 +10528,10 @@ export interface RuleWithNoXorAsExponentiationOptions {
 export interface RuleWithNoYamlBooleanKeysOptions {
 	level: RulePlainConfiguration;
 	options?: NoYamlBooleanKeysOptions;
+}
+export interface RuleWithNoYamlEmptyMapValuesOptions {
+	level: RulePlainConfiguration;
+	options?: NoYamlEmptyMapValuesOptions;
 }
 export interface RuleWithNoZeroFractionsOptions {
 	/**
@@ -13213,7 +13213,6 @@ export interface NoDuplicateTypeConstituentsOptions {
 }
 export type NoDynamicDeleteOptions = {};
 export type NoEagerArrayMethodsInLoopsOptions = {};
-export type NoYamlEmptyMapValuesOptions = {};
 export type NoErasingOperationOptions = {};
 export interface NoExcessiveNestedBlocksOptions {
 	/**
@@ -13647,6 +13646,7 @@ export type NoVueVTextVHtmlOnComponentOptions = {};
 export type NoVueWatchAfterAwaitOptions = {};
 export type NoXorAsExponentiationOptions = {};
 export type NoYamlBooleanKeysOptions = {};
+export type NoYamlEmptyMapValuesOptions = {};
 export type NoZeroFractionsOptions = {};
 export type NoZeroLengthUnitOptions = {};
 export type UseAccessorPairsOptions = {};
@@ -15581,7 +15581,6 @@ export type Category =
 	| "lint/nursery/noDuplicateTypeConstituents"
 	| "lint/nursery/noDynamicDelete"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
-	| "lint/nursery/noYamlEmptyMapValues"
 	| "lint/nursery/noEmptyObjectKeys"
 	| "lint/nursery/noErasingOperation"
 	| "lint/nursery/noExcessiveNestedBlocks"
@@ -15767,6 +15766,7 @@ export type Category =
 	| "lint/nursery/noVueWatchAfterAwait"
 	| "lint/nursery/noXorAsExponentiation"
 	| "lint/nursery/noYamlBooleanKeys"
+	| "lint/nursery/noYamlEmptyMapValues"
 	| "lint/nursery/noZeroFractions"
 	| "lint/nursery/noZeroLengthUnit"
 	| "lint/nursery/useAccessorPairs"
