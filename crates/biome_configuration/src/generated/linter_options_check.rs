@@ -1861,6 +1861,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("suspicious", "noUselessEscapeInString", TypeId::of::<biome_rule_options::no_useless_escape_in_string::NoUselessEscapeInStringOptions>()));
     result.push((
+        "nursery",
+        "noUselessFallbackInSpread",
+        TypeId::of::<
+            biome_rule_options::no_useless_fallback_in_spread::NoUselessFallbackInSpreadOptions,
+        >(),
+    ));
+    result.push((
         "complexity",
         "noUselessFragments",
         TypeId::of::<biome_rule_options::no_useless_fragments::NoUselessFragmentsOptions>(),
