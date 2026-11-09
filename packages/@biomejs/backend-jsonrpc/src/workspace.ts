@@ -3898,6 +3898,11 @@ export interface Nursery {
 	 */
 	useConsistentObjectKeys?: UseConsistentObjectKeysConfiguration;
 	/**
+	 * Require either all or none of the elements of a tuple type to have labels.
+	 * See https://biomejs.dev/linter/rules/use-consistent-tuple-labels
+	 */
+	useConsistentTupleLabels?: UseConsistentTupleLabelsConfiguration;
+	/**
 	 * Require or disallow a Unicode byte order mark at the beginning of a file.
 	 * See https://biomejs.dev/linter/rules/use-consistent-unicode-bom
 	 */
@@ -7123,6 +7128,9 @@ export type UseConsistentLightnessNotationConfiguration =
 export type UseConsistentObjectKeysConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentObjectKeysOptions;
+export type UseConsistentTupleLabelsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentTupleLabelsOptions;
 export type UseConsistentUnicodeBomConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentUnicodeBomOptions;
@@ -10481,6 +10489,10 @@ export interface RuleWithUseConsistentObjectKeysOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentObjectKeysOptions;
 }
+export interface RuleWithUseConsistentTupleLabelsOptions {
+	level: RulePlainConfiguration;
+	options?: UseConsistentTupleLabelsOptions;
+}
 export interface RuleWithUseConsistentUnicodeBomOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -13509,6 +13521,7 @@ export interface UseConsistentObjectKeysOptions {
 	 */
 	form?: NormalizationForm;
 }
+export type UseConsistentTupleLabelsOptions = {};
 export interface UseConsistentUnicodeBomOptions {
 	/**
 	 * Whether files must start with a Unicode byte order mark. Defaults to `"never"`.
@@ -15538,6 +15551,7 @@ export type Category =
 	| "lint/nursery/useConsistentLightnessNotation"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentObjectKeys"
+	| "lint/nursery/useConsistentTupleLabels"
 	| "lint/nursery/useConsistentUnicodeBom"
 	| "lint/nursery/useControlLabel"
 	| "lint/nursery/useDisposables"
