@@ -330,6 +330,46 @@ const props: Props = { title: "Hello" };
 }
 
 #[test]
+fn svelte_generics_are_parsed_and_formatted() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "formatter": { "enabled": true }, "linter": { "enabled": true }, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let path = Utf8Path::new("file.svelte");
+    fs.insert(
+        path.into(),
+        r#"<script lang="ts" generics="TData   extends   { selected?: boolean; name?: string },TRow">
+let { items, selected }: { items: TData[]; selected: TRow } = $props();
+</script>
+
+<p>{items.length}{selected}</p>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "svelte_generics_are_parsed_and_formatted",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn full_support_preserves_const_tag_assignments() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

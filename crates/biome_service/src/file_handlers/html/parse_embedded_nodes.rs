@@ -360,15 +360,31 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
 
             // Pass 1: elements via registry, collecting JS file sources
             let mut embedded_file_source = JsFileSource::js_module();
+            let mut generic_candidates = vec![];
             for element in elements {
                 if let Some(candidate) = build_html_candidate(&element)
                     && let Some(parsed) = ctx.detect_and_parse(&candidate, &doc_file_source, None)
                 {
                     if let Some(js_fs) = parsed.js_file_source {
                         embedded_file_source = merge_js_file_source(embedded_file_source, js_fs);
+
+                        if js_fs.is_typescript()
+                            && let Some(candidate) = build_svelte_generic_candidate(&element)
+                        {
+                            generic_candidates.push(candidate);
+                        }
                     }
                     nodes.push(parsed.node);
                 }
+            }
+
+            for candidate in generic_candidates {
+                ctx.parse_and_push(
+                    &candidate,
+                    &doc_file_source,
+                    Some(embedded_file_source),
+                    &mut nodes,
+                );
             }
 
             // Pass 2: text expressions via registry using merged embedded_file_source
@@ -837,15 +853,24 @@ fn build_vue_directive_candidate(
     })
 }
 
-/// Build an `EmbedCandidate::Directive` from the `generic` attribute of a Vue `<script setup>`,
-/// e.g. `<script setup lang="ts" generic="T extends Item">`.
-///
-/// The TypeScript content is the text inside the quotes.
+/// Builds a type-parameter candidate from the `generic` attribute of a Vue
+/// `<script setup>` element.
 fn build_vue_generic_candidate(element: &HtmlElement) -> Option<EmbedCandidate> {
-    if !element.is_script_tag() || element.find_attribute_by_name("setup").is_none() {
+    element.find_attribute_by_name("setup")?;
+    build_generic_candidate(element, "generic")
+}
+
+/// Builds a type-parameter candidate from the `generics` attribute of a Svelte
+/// `<script>` element.
+fn build_svelte_generic_candidate(element: &HtmlElement) -> Option<EmbedCandidate> {
+    build_generic_candidate(element, "generics")
+}
+
+fn build_generic_candidate(element: &HtmlElement, attribute_name: &str) -> Option<EmbedCandidate> {
+    if !element.is_script_tag() {
         return None;
     }
-    let attribute = element.find_attribute_by_name("generic")?;
+    let attribute = element.find_attribute_by_name(attribute_name)?;
     let initializer = attribute.as_html_attribute()?.initializer()?;
     let html_string = initializer.value().ok()?.as_html_string()?.clone();
     let content_token = html_string.value_token().ok()?;
@@ -1306,11 +1331,16 @@ fn parse_matched_embed(
                             });
                         }
                         HtmlVariant::Svelte => {
+                            let embedding_kind = if *is_generics_list {
+                                SvelteEmbeddingKind::Generics
+                            } else {
+                                SvelteEmbeddingKind::Expression
+                            };
                             js_source = js_source.with_embedding_kind(JsEmbeddingKind::Svelte {
                                 is_module_script: false,
                                 file_kind: SvelteFileKind::Component,
                                 is_class_attribute: *is_class_attribute,
-                                embedding_kind: SvelteEmbeddingKind::Expression,
+                                embedding_kind,
                             });
                         }
                         // TODO: Angular support

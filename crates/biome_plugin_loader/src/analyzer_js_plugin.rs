@@ -544,6 +544,15 @@ mod tests {
                 }),
                 r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"svelte","fileKind":"component","embeddingKind":"declaration"}]"#,
             ),
+            (
+                JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    is_module_script: false,
+                    is_class_attribute: false,
+                    file_kind: SvelteFileKind::Component,
+                    embedding_kind: SvelteEmbeddingKind::Generics,
+                }),
+                r#"[{"kind":"typescript","definitionFile":false},"standard","module","es2022",{"kind":"svelte","fileKind":"component","embeddingKind":"generics"}]"#,
+            ),
         ] {
             let parse = biome_js_parser::parse(
                 "",
