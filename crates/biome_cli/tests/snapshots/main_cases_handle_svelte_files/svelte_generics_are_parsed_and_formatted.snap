@@ -1,0 +1,41 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome check --write file.svelte
+```
+
+## `biome.json`
+
+```json
+{
+  "html": {
+    "formatter": { "enabled": true },
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.svelte`
+
+```svelte
+<script
+	lang="ts"
+	generics="TData extends { selected?: boolean; name?: string }, TRow"
+>
+let { items, selected }: { items: TData[]; selected: TRow } = $props();
+</script>
+
+<p>{items.length}{selected}</p>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

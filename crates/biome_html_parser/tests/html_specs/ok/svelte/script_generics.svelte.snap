@@ -1,0 +1,117 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<script lang="ts" generics="T extends { selected?: boolean; name?: string }">
+	let items: T[] = [];
+</script>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: SCRIPT_KW@1..8 "script" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@8..12 "lang" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@12..13 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@13..18 "\"ts\"" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@18..26 "generics" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@26..27 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@27..76 "\"T extends { selected?: boolean; name?: string }\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@76..77 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlEmbeddedContent {
+                    value_token: HTML_LITERAL@77..100 "\n\tlet items: T[] = [];\n" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@100..101 "<" [] [],
+                slash_token: SLASH@101..102 "/" [] [],
+                name: HtmlTagName {
+                    value_token: SCRIPT_KW@102..108 "script" [] [],
+                },
+                r_angle_token: R_ANGLE@108..109 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@109..110 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..110
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..109
+    0: HTML_ELEMENT@0..109
+      0: HTML_OPENING_ELEMENT@0..77
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..8
+          0: SCRIPT_KW@1..8 "script" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@8..76
+          0: HTML_ATTRIBUTE@8..18
+            0: HTML_ATTRIBUTE_NAME@8..12
+              0: HTML_LITERAL@8..12 "lang" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@12..18
+              0: EQ@12..13 "=" [] []
+              1: HTML_STRING@13..18
+                0: HTML_STRING_LITERAL@13..18 "\"ts\"" [] [Whitespace(" ")]
+          1: HTML_ATTRIBUTE@18..76
+            0: HTML_ATTRIBUTE_NAME@18..26
+              0: HTML_LITERAL@18..26 "generics" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@26..76
+              0: EQ@26..27 "=" [] []
+              1: HTML_STRING@27..76
+                0: HTML_STRING_LITERAL@27..76 "\"T extends { selected?: boolean; name?: string }\"" [] []
+        3: R_ANGLE@76..77 ">" [] []
+      1: HTML_ELEMENT_LIST@77..100
+        0: HTML_EMBEDDED_CONTENT@77..100
+          0: HTML_LITERAL@77..100 "\n\tlet items: T[] = [];\n" [] []
+      2: HTML_CLOSING_ELEMENT@100..109
+        0: L_ANGLE@100..101 "<" [] []
+        1: SLASH@101..102 "/" [] []
+        2: HTML_TAG_NAME@102..108
+          0: SCRIPT_KW@102..108 "script" [] []
+        3: R_ANGLE@108..109 ">" [] []
+  5: EOF@109..110 "" [Newline("\n")] []
+
+```

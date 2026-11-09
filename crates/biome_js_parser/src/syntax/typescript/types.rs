@@ -245,7 +245,7 @@ pub(crate) fn parse_ts_type_parameters(p: &mut JsParser, context: TypeContext) -
     Present(m.complete(p, TS_TYPE_PARAMETERS))
 }
 
-pub(crate) fn parse_vue_generic_type_parameters(p: &mut JsParser) -> CompletedMarker {
+pub(crate) fn parse_generic_type_parameters(p: &mut JsParser) -> CompletedMarker {
     let list =
         TsTypeParameterList(TypeContext::default().and_allow_const_modifier(true)).parse_list(p);
 
@@ -274,9 +274,9 @@ impl ParseSeparatedList for TsTypeParameterList {
     }
 
     fn is_at_list_end(&self, p: &mut JsParser) -> bool {
-        // A Vue `generic` attribute has no closing `>`, so its list ends at the end of the file,
-        // even after a trailing comma.
-        if p.source_type().is_vue_generics_list() && p.at(EOF) {
+        // Framework generic attributes have no closing `>`, so their lists end
+        // at the end of the file, even after a trailing comma.
+        if p.source_type().is_generics_list() && p.at(EOF) {
             return true;
         }
 

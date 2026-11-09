@@ -183,7 +183,7 @@ fn collect_embedded_bindings(
         builder.visit_vue_html_root(&html_root, snippets);
         builder.has_unknown_vue_directive_options |= has_external_script_element(&html_root);
     } else if host_file_source.is_svelte() {
-        builder.visit_svelte_html_root(&html_root);
+        builder.visit_svelte_html_root(&html_root, snippets);
     }
 
     for snippet in snippets {
@@ -286,7 +286,7 @@ fn collect_embedded_references(
         .is_some_and(|s| s.is_svelte());
 
     let mut builder = EmbeddedReferencesBuilder::new();
-    let generic_names: Vec<_> = vue_generic_parameter_names(snippets)
+    let generic_names: Vec<_> = generic_parameter_names(snippets)
         .map(|token| token.token_text_trimmed())
         .collect();
 
@@ -337,11 +337,9 @@ fn build_type_references(builder: &EmbeddedReferencesBuilder) -> Vec<EmbeddedTyp
         .collect()
 }
 
-/// Returns the name tokens of the type parameters declared by the `generic` attribute of a
-/// Vue `<script setup>`.
-///
-/// A `generic` attribute that fails to parse declares no names.
-fn vue_generic_parameter_names<'a>(
+/// Returns the names declared by Vue `generic` and Svelte `generics`
+/// attributes. An attribute that fails to parse declares no names.
+fn generic_parameter_names<'a>(
     snippets: &'a [EmbeddedSnippet],
 ) -> impl Iterator<Item = JsSyntaxToken> + 'a {
     snippets
@@ -350,7 +348,7 @@ fn vue_generic_parameter_names<'a>(
             snippet
                 .file_source
                 .to_js_file_source()
-                .is_some_and(|source| source.is_vue_generics_list())
+                .is_some_and(|source| source.is_generics_list())
         })
         .filter_map(|snippet| {
             let root = snippet.parse.tree::<AnyJsRoot>();
@@ -529,12 +527,12 @@ impl EmbeddedBindingsBuilder {
             }
         }
 
-        for token in vue_generic_parameter_names(snippets) {
+        for token in generic_parameter_names(snippets) {
             self.register_type_only_binding(token.text_trimmed_range(), token.token_text_trimmed());
         }
     }
 
-    fn visit_svelte_html_root(&mut self, root: &HtmlRoot) {
+    fn visit_svelte_html_root(&mut self, root: &HtmlRoot, snippets: &[EmbeddedSnippet]) {
         for node in root.syntax().descendants() {
             let Some(block) = AnySvelteBlock::cast_ref(&node) else {
                 continue;
@@ -571,6 +569,10 @@ impl EmbeddedBindingsBuilder {
                     }
                 }
             }
+        }
+
+        for token in generic_parameter_names(snippets) {
+            self.register_type_only_binding(token.text_trimmed_range(), token.token_text_trimmed());
         }
     }
 

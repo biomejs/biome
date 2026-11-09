@@ -232,6 +232,24 @@ fn vue_v_for_default_values_are_parsed_as_javascript() {
 }
 
 #[test]
+fn svelte_generics_are_parsed_as_type_parameters() {
+    const FILE_PATH: &str = "/project/file.svelte";
+
+    assert_no_diagnostics(
+        FILE_PATH,
+        r#"<script lang="ts" generics="T extends { selected?: boolean; name?: string }">
+let items: T[] = [];
+</script>"#,
+    );
+    assert_diagnostics(
+        FILE_PATH,
+        r#"<script lang="ts" generics="T extends">
+let items: T[] = [];
+</script>"#,
+    );
+}
+
+#[test]
 fn html_style_attribute_is_parsed_as_css() {
     assert_diagnostics("/project/file.html", r#"<div style="color: rgb("></div>"#);
 }
