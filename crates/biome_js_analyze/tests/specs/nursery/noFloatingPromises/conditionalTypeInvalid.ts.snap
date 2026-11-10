@@ -12,6 +12,15 @@ extracted;
 declare function wrap<T>(value: T): T extends string ? Promise<T> : T;
 wrap("a");
 
+type PromiseIfString<T> = T extends string ? Promise<T> : T;
+type AliasOfAlias<T> = PromiseIfString<T>;
+declare const aliased: AliasOfAlias<string>;
+aliased;
+
+declare function whenTrue<T>(value: T): T extends true ? Promise<void> : void;
+declare const flag: boolean;
+whenTrue(flag);
+
 ```
 
 # Diagnostics
@@ -42,6 +51,44 @@ conditionalTypeInvalid.ts:7:1 lint/nursery/noFloatingPromises ━━━━━━
   > 7 │ wrap("a");
       │ ^^^^^^^^^^
     8 │ 
+    9 │ type PromiseIfString<T> = T extends string ? Promise<T> : T;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditionalTypeInvalid.ts:12:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    10 │ type AliasOfAlias<T> = PromiseIfString<T>;
+    11 │ declare const aliased: AliasOfAlias<string>;
+  > 12 │ aliased;
+       │ ^^^^^^^^
+    13 │ 
+    14 │ declare function whenTrue<T>(value: T): T extends true ? Promise<void> : void;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditionalTypeInvalid.ts:16:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    14 │ declare function whenTrue<T>(value: T): T extends true ? Promise<void> : void;
+    15 │ declare const flag: boolean;
+  > 16 │ whenTrue(flag);
+       │ ^^^^^^^^^^^^^^^
+    17 │ 
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   

@@ -764,7 +764,9 @@ fn classify_expression(
                             members: state.members,
                             projection: Projection::Promise,
                         },
-                        Projection::PromiseTarget => return DoesNotReturnPromise,
+                        // An instance target is the declaration of a generic
+                        // alias, and only its normalized body can be classified.
+                        Projection::PromiseTarget => return Indeterminate,
                         Projection::ArrayPromise if state.members.is_empty() => {
                             let mut ctx = ResolutionCtx::new(
                                 db,

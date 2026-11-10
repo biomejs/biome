@@ -3772,6 +3772,7 @@ fn infer_types_declared_by(extends_type: &AnyTsType) -> Vec<TsInferType> {
 ///
 /// For example, `T` is naked in `T extends string ? 1 : 2`, but `[T]` is not.
 fn is_naked_type_parameter(ty: &AnyTsType) -> bool {
+    let ty = ty.clone().omit_parentheses();
     let Some(reference) = ty.as_ts_reference_type() else {
         return false;
     };

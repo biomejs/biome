@@ -625,8 +625,9 @@ const MAX_DISTRIBUTED_LOOKUP_MEMBERS: usize = 64;
 /// it reaches them. The selected branch is then looked up with the lookup's own
 /// substitutions, so neither branch is substituted or normalized up front.
 ///
-/// A distributive conditional whose check type becomes a union is looked up
-/// once for each member, with the member substituted for the check type.
+/// A distributive conditional whose check type becomes a union or `boolean` is
+/// looked up once for each member, with the member substituted for the check
+/// type.
 ///
 /// Returns `None` when no branch can be selected, for example because the check
 /// type still refers to a generic. The member's type is then unknown. Looking
@@ -645,48 +646,41 @@ fn conditional_lookup_states<'db>(
 
     if extends.distributive(db)
         && let Some(generic) = extends.check_type(db).as_generic_reference(db)
+        && let Some(members) = check_type.distributive_members(db)
     {
-        let members = if let InferredTypeData::Union(union) = check_type {
-            Some(union.types(db).to_vec())
-        } else if check_type == InferredTypeData::NeverKeyword {
-            Some(Vec::new())
-        } else {
-            None
-        };
-        if let Some(members) = members {
-            if members.len() > MAX_DISTRIBUTED_LOOKUP_MEMBERS
-                || !state.substitutions.iter().any(|substitution| {
-                    substitution.generic.as_generic_reference(db) == Some(generic)
-                })
-            {
-                return None;
-            }
-            return Some(
-                members
-                    .into_iter()
-                    .map(|member| {
-                        let substitutions = state
-                            .substitutions
-                            .iter()
-                            .map(|substitution| {
-                                if substitution.generic.as_generic_reference(db) == Some(generic) {
-                                    InferredTypeSubstitution {
-                                        replacement: member,
-                                        ..*substitution
-                                    }
-                                } else {
-                                    *substitution
-                                }
-                            })
-                            .collect::<Vec<_>>();
-                        MemberLookupState {
-                            substitutions: substitutions.into(),
-                            ..state.child(InferredTypeData::Extends(extends), true)
-                        }
-                    })
-                    .collect(),
-            );
+        if members.len() > MAX_DISTRIBUTED_LOOKUP_MEMBERS
+            || !state
+                .substitutions
+                .iter()
+                .any(|substitution| substitution.generic.as_generic_reference(db) == Some(generic))
+        {
+            return None;
         }
+        return Some(
+            members
+                .into_iter()
+                .map(|member| {
+                    let substitutions = state
+                        .substitutions
+                        .iter()
+                        .map(|substitution| {
+                            if substitution.generic.as_generic_reference(db) == Some(generic) {
+                                InferredTypeSubstitution {
+                                    replacement: member,
+                                    ..*substitution
+                                }
+                            } else {
+                                *substitution
+                            }
+                        })
+                        .collect::<Vec<_>>();
+                    MemberLookupState {
+                        substitutions: substitutions.into(),
+                        ..state.child(InferredTypeData::Extends(extends), true)
+                    }
+                })
+                .collect(),
+        );
     }
 
     let extends_type = apply_substitutions(db, extends.extends_type(db), &state.substitutions);

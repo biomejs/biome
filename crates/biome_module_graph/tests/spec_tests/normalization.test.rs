@@ -1012,3 +1012,321 @@ fn test_normalize_conditional_types() {
     );
     assert_function_query_was_not_run(&db, infer_module_types, module, &db.take_salsa_events());
 }
+
+/// Asserts the normalized type of each binding in `source`, and that each
+/// binding in `unevaluated` still contains a conditional type.
+///
+/// Every mismatch is reported at once, so one run shows all failing cases.
+fn assert_conditional_results(source: &str, expected: &[(&str, &str)], unevaluated: &[&str]) {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), source);
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+
+    let format_binding = |name| format_inferred_type(&db, projected_binding(&db, module, name));
+    let mut mismatches = Vec::new();
+    for (name, expected) in expected {
+        let actual = format_binding(name);
+        if actual != *expected {
+            mismatches.push(format!("{name}: expected `{expected}`, got `{actual}`"));
+        }
+    }
+    for name in unevaluated {
+        let actual = format_binding(name);
+        if !actual.contains("extends") {
+            mismatches.push(format!("{name}: expected unevaluated, got `{actual}`"));
+        }
+    }
+    assert!(mismatches.is_empty(), "\n{}", mismatches.join("\n"));
+}
+
+#[test]
+fn test_conditional_infer_candidates_follow_variance() {
+    assert_conditional_results(
+        r#"
+        type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
+        type Contra<T> = T extends { a: (x: infer U) => void; b: (x: infer U) => void } ? U : never;
+        type Co<T> = T extends { a: infer U; b: infer U } ? U : never;
+        type Mixed<T> = T extends { a: infer U; b: (x: infer U) => void } ? U : never;
+        type Callback<T> = T extends (cb: (x: infer U) => void) => void ? U : never;
+        type MethodParams<T> = T extends { a(x: infer U): void; b(x: infer U): void } ? U : never;
+        declare const intersected: UnionToIntersection<{ a: 1 } | { b: 2 }> extends { a: 1 } ? "yes" : "no";
+        declare const intersectedBoth: UnionToIntersection<{ a: 1 } | { b: 2 }> extends { b: 2 } ? "yes" : "no";
+        declare const contraPrimitives: Contra<{ a: (x: string) => void; b: (x: number) => void }>;
+        declare const contraSame: Contra<{ a: (x: string) => void; b: (x: string) => void }>;
+        declare const co: Co<{ a: string; b: number }>;
+        declare const mixed: Mixed<{ a: string; b: (x: number) => void }>;
+        declare const callback: Callback<(cb: (x: string) => void) => void>;
+        declare const method: MethodParams<{ a(x: string): void; b(x: number): void }>;
+        declare const inferUnion: (string | undefined) extends (infer U) | undefined ? U : never;
+        declare const inferUnionReordered: (string | undefined) extends undefined | (infer U) ? U : never;
+        "#,
+        &[
+            ("intersected", "string: yes"),
+            ("intersectedBoth", "string: yes"),
+            ("contraPrimitives", "never"),
+            ("contraSame", "string"),
+            ("co", "string | number"),
+            ("mixed", "never"),
+            ("callback", "string"),
+            ("method", "string | number"),
+            ("inferUnion", "string"),
+            ("inferUnionReordered", "string"),
+        ],
+        &[],
+    );
+}
+
+#[test]
+fn test_conditional_with_generic_extends_type() {
+    assert_conditional_results(
+        r#"
+        type IsAny<T> = 0 extends 1 & T ? true : false;
+        type IsUnknown<T> = unknown extends T ? true : false;
+        declare function pending<T>(value: IsAny<T>): void;
+        declare const isAnyAny: IsAny<any>;
+        declare const isAnyNumber: IsAny<number>;
+        declare const isAnyString: IsAny<string>;
+        declare const isAnyUnknown: IsAny<unknown>;
+        declare const isUnknownUnknown: IsUnknown<unknown>;
+        declare const isUnknownString: IsUnknown<string>;
+        declare const isUnknownAny: IsUnknown<any>;
+        "#,
+        &[
+            ("isAnyAny", "bool: true"),
+            ("isAnyNumber", "bool: false"),
+            ("isAnyString", "bool: false"),
+            ("isAnyUnknown", "bool: false"),
+            ("isUnknownUnknown", "bool: true"),
+            ("isUnknownString", "bool: false"),
+            ("isUnknownAny", "bool: true"),
+        ],
+        &["value"],
+    );
+}
+
+#[test]
+fn test_conditional_distribution_over_boolean_and_parentheses() {
+    assert_conditional_results(
+        r#"
+        type IsTrue<T> = T extends true ? "yes" : "no";
+        type Paren<T> = (T) extends string ? "y" : "n";
+        type DoubleParen<T> = ((T)) extends string ? "y" : "n";
+        declare const isTrueBoolean: IsTrue<boolean>;
+        declare const isTrueMixed: IsTrue<boolean | string>;
+        declare const isTrueTrue: IsTrue<true>;
+        declare const isTrueFalse: IsTrue<false>;
+        declare const extractBoolean: Extract<boolean, true>;
+        declare const excludeBoolean: Exclude<boolean, true>;
+        declare const paren: Paren<string | number>;
+        declare const doubleParen: DoubleParen<string | number>;
+        declare const nonDistributiveBoolean: [boolean] extends [true] ? "yes" : "no";
+        "#,
+        &[
+            ("isTrueBoolean", "string: yes | string: no"),
+            ("isTrueMixed", "string: yes | string: no"),
+            ("isTrueTrue", "string: yes"),
+            ("isTrueFalse", "string: no"),
+            ("extractBoolean", "bool: true"),
+            ("excludeBoolean", "bool: false"),
+            ("paren", "string: y | string: n"),
+            ("doubleParen", "string: y | string: n"),
+            ("nonDistributiveBoolean", "string: no"),
+        ],
+        &[],
+    );
+}
+
+#[test]
+fn test_conditional_compares_generics_and_methods_by_variance() {
+    assert_conditional_results(
+        r#"
+        interface Sink<T> { accept: (x: T) => void }
+        interface Producer<T> { read: () => T }
+        interface Invariant<T> { get: () => T; set: (x: T) => void }
+        interface MethodSink<T> { accept(x: T): void }
+        interface Phantom<T> { name: string }
+        interface MSource { handle(x: "a"): void }
+        interface MTarget { handle(x: string): void }
+        interface PSource { handle: (x: "a") => void }
+        interface PTarget { handle: (x: string) => void }
+        interface Pair<A, B> { first: () => A; second: () => B }
+        type ProducedBy<T> = T extends Producer<infer U> ? U : never;
+        type SecondOf<T> = T extends Pair<"a", infer U> ? U : never;
+        declare const contravariant: Sink<"a"> extends Sink<string> ? "yes" : "no";
+        declare const contravariantReverse: Sink<string> extends Sink<"a"> ? "yes" : "no";
+        declare const covariant: Producer<"a"> extends Producer<string> ? "yes" : "no";
+        declare const covariantReverse: Producer<string> extends Producer<"a"> ? "yes" : "no";
+        declare const invariant: Invariant<"a"> extends Invariant<string> ? "yes" : "no";
+        declare const methodSink: MethodSink<"a"> extends MethodSink<string> ? "yes" : "no";
+        declare const methodSinkReverse: MethodSink<string> extends MethodSink<"a"> ? "yes" : "no";
+        declare const methodSinkUnrelated: MethodSink<number> extends MethodSink<string> ? "yes" : "no";
+        declare const phantom: Phantom<1> extends Phantom<string> ? "yes" : "no";
+        declare const methodBivariance: MSource extends MTarget ? "yes" : "no";
+        declare const methodBivarianceReverse: MTarget extends MSource ? "yes" : "no";
+        declare const propertyContravariant: PSource extends PTarget ? "yes" : "no";
+        declare const produced: ProducedBy<Producer<number>>;
+        declare const secondOf: SecondOf<Pair<"a", number>>;
+        declare const secondOfMismatch: SecondOf<Pair<"b", number>>;
+        "#,
+        &[
+            ("contravariant", "string: no"),
+            ("contravariantReverse", "string: yes"),
+            ("covariant", "string: yes"),
+            ("covariantReverse", "string: no"),
+            ("invariant", "string: no"),
+            ("methodSink", "string: yes"),
+            ("methodSinkReverse", "string: yes"),
+            ("methodSinkUnrelated", "string: no"),
+            ("phantom", "string: yes"),
+            ("methodBivariance", "string: yes"),
+            ("methodBivarianceReverse", "string: yes"),
+            ("propertyContravariant", "string: no"),
+            ("produced", "number"),
+            ("secondOf", "number"),
+            ("secondOfMismatch", "never"),
+        ],
+        &[],
+    );
+}
+
+#[test]
+fn test_conditional_object_assignability_rules() {
+    assert_conditional_results(
+        r#"
+        interface Named { value: number }
+        class Private1 { private x = 1 }
+        class Private2 { private x = 1 }
+        class Base { v = 1 }
+        class Child extends Base {}
+        declare const weak: { a: number } extends { b?: string } ? "yes" : "no";
+        declare const weakCommon: { a: number; b: string } extends { b?: string } ? "yes" : "no";
+        declare const weakEmptySource: {} extends { b?: string } ? "yes" : "no";
+        declare const weakIntersection: { a: number } extends { a: number } & { b?: string } ? "yes" : "no";
+        declare const weakIntersectionInterface: { value: number } extends Named & { b?: string } ? "yes" : "no";
+        declare const notWeakRequired: { a: number } extends { a: number; b?: string } ? "yes" : "no";
+        declare const objectMember: { a: 1 } extends { toString(): string } ? "yes" : "no";
+        declare const interfaceObjectMember: Named extends { valueOf(): Object } ? "yes" : "no";
+        declare const objectMemberMismatch: { a: 1 } extends { toString(): number } ? "yes" : "no";
+        declare const unknownEmpty: unknown extends {} ? "yes" : "no";
+        declare const unknownString: unknown extends string ? "yes" : "no";
+        declare const unknownObject: unknown extends object ? "yes" : "no";
+        declare const unknownUnknown: unknown extends unknown ? "yes" : "no";
+        declare const unknownUnion: unknown extends string | unknown ? "yes" : "no";
+        declare const stringPromise: string extends Promise<any> ? "yes" : "no";
+        declare const numberPromise: number extends Promise<any> ? "yes" : "no";
+        declare const stringArray: string extends string[] ? "yes" : "no";
+        declare const stringIterable: string extends Iterable<string> ? "yes" : "no";
+        declare const stringArrayLike: string extends ArrayLike<string> ? "yes" : "no";
+        declare const stringObject: string extends Object ? "yes" : "no";
+        declare const stringWrapper: string extends String ? "yes" : "no";
+        declare const privateNominal: Private2 extends Private1 ? "yes" : "no";
+        declare const childOfBase: Child extends Base ? "yes" : "no";
+        declare const sameClass: Base extends Base ? "yes" : "no";
+        declare const builtinClass: Promise<"a"> extends Promise<string> ? "yes" : "no";
+        "#,
+        &[
+            ("weak", "string: no"),
+            ("weakCommon", "string: yes"),
+            ("weakEmptySource", "string: yes"),
+            ("weakIntersection", "string: yes"),
+            ("notWeakRequired", "string: yes"),
+            ("objectMember", "string: yes"),
+            ("interfaceObjectMember", "string: yes"),
+            ("objectMemberMismatch", "string: no"),
+            ("unknownEmpty", "string: no"),
+            ("unknownString", "string: no"),
+            ("unknownObject", "string: no"),
+            ("unknownUnknown", "string: yes"),
+            ("unknownUnion", "string: yes"),
+            ("stringPromise", "string: no"),
+            ("numberPromise", "string: no"),
+            ("stringArray", "string: no"),
+            ("stringObject", "string: yes"),
+            ("stringWrapper", "string: yes"),
+            ("childOfBase", "string: yes"),
+            ("sameClass", "string: yes"),
+            ("builtinClass", "string: yes"),
+        ],
+        &[
+            // A weak member is only checked against the whole intersection.
+            "weakIntersectionInterface",
+            // Symbol keys and index signatures can't be compared.
+            "stringIterable",
+            "stringArrayLike",
+            // Member accessibility isn't modeled.
+            "privateNominal",
+        ],
+    );
+}
+
+#[test]
+fn test_conditional_compares_constructor_parameters() {
+    assert_conditional_results(
+        r#"
+        class Foo { constructor(public x: string) {} }
+        class NoConstructor {}
+        class Derived extends Foo {}
+        declare const ctorMismatch: (new (x: string) => Foo) extends (new (x: number) => Foo) ? "yes" : "no";
+        declare const ctorMatch: (new (x: string) => Foo) extends (new (x: string) => Foo) ? "yes" : "no";
+        declare const ctorFewer: (new () => Foo) extends (new (x: string) => Foo) ? "yes" : "no";
+        declare const ctorMore: (new (x: string) => Foo) extends (new () => Foo) ? "yes" : "no";
+        declare const classMismatch: typeof Foo extends (new (x: number) => any) ? "yes" : "no";
+        declare const classMatch: typeof Foo extends (new (x: string) => any) ? "yes" : "no";
+        declare const classMore: typeof Foo extends (new () => any) ? "yes" : "no";
+        declare const classNoConstructor: typeof NoConstructor extends (new () => any) ? "yes" : "no";
+        declare const parameters: ConstructorParameters<typeof Foo>;
+        declare const parametersNone: ConstructorParameters<typeof NoConstructor>;
+        declare const parametersDerived: ConstructorParameters<typeof Derived>;
+        declare const instance: InstanceType<typeof Foo> extends Foo ? "yes" : "no";
+        "#,
+        &[
+            ("ctorMismatch", "string: no"),
+            ("ctorMatch", "string: yes"),
+            ("ctorFewer", "string: yes"),
+            ("ctorMore", "string: no"),
+            ("classMismatch", "string: no"),
+            ("classMatch", "string: yes"),
+            ("classMore", "string: no"),
+            ("classNoConstructor", "string: yes"),
+            ("parameters", "[x: string]"),
+            ("parametersNone", "[]"),
+            ("parametersDerived", "[x: string]"),
+            ("instance", "string: yes"),
+        ],
+        &[],
+    );
+}
+
+#[test]
+fn test_conditional_nested_in_generic_alias_body() {
+    assert_conditional_results(
+        r#"
+        type Inner<T> = T extends string ? "s" : "n";
+        type Outer<T> = Inner<T>;
+        type Outer2<T> = Outer<T>;
+        type InUnion<T> = (T extends string ? 1 : 2) | undefined;
+        type InTuple<T> = [T extends string ? 1 : 2];
+        type InPromise<T> = Promise<T extends string ? 1 : 2>;
+        type TwoArgs<A, B> = Inner<B> | A;
+        declare function pending<T>(value: Outer<T>): void;
+        declare const outer: Outer<string>;
+        declare const outer2: Outer2<number>;
+        declare const outerUnion: Outer<string | number>;
+        declare const inUnion: InUnion<string>;
+        declare const inTuple: InTuple<string>;
+        declare const inPromise: Awaited<InPromise<string>>;
+        declare const twoArgs: TwoArgs<1, string>;
+        "#,
+        &[
+            ("outer", "string: s"),
+            ("outer2", "string: n"),
+            ("outerUnion", "string: s | string: n"),
+            ("inUnion", "number: 1 | undefined"),
+            ("inTuple", "[number: 1]"),
+            ("inPromise", "number: 1"),
+            ("twoArgs", "string: s | number: 1"),
+        ],
+        &["value"],
+    );
+}

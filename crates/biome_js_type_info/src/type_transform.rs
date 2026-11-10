@@ -25,6 +25,10 @@ const MAX_CONDITIONAL_INSTANTIATIONS: usize = 64;
 /// Maximum number of union members a distributive conditional is split into.
 const MAX_DISTRIBUTED_MEMBERS: usize = 64;
 
+/// Maximum number of types inspected while looking for a conditional type in
+/// the body of an alias.
+const MAX_CONDITIONAL_SEARCH_STEPS: usize = 64;
+
 /// A generic type and the type that replaces its references.
 ///
 /// Substitution does not cross a declaration that shadows the same generic.
@@ -382,6 +386,8 @@ pub(crate) struct TypeSubstituter<'a, 'db> {
     /// a type truncates `shadowed` back to that length, which drops the
     /// parameters the type declared.
     scopes: Vec<usize>,
+    /// Target of the alias instance entered last. It is the next type visited.
+    alias_declaration: Option<TypeData<'db>>,
 }
 
 impl<'a, 'db> TypeSubstituter<'a, 'db> {
@@ -390,6 +396,7 @@ impl<'a, 'db> TypeSubstituter<'a, 'db> {
             substitutions,
             shadowed: Vec::new(),
             scopes: Vec::new(),
+            alias_declaration: None,
         }
     }
 
@@ -408,11 +415,12 @@ impl<'db> TypeSubstituter<'_, 'db> {
     ///
     /// For example, substituting `T` with `string | number` in
     /// `T extends string ? "yes" : "no"` produces the union of the conditional
-    /// substituted with `string` and with `number`. Substituting `never`
-    /// produces `never`. The other substitutions apply to every member.
+    /// substituted with `string` and with `number`. Substituting `boolean`
+    /// distributes over `true` and `false`, and substituting `never` produces
+    /// `never`. The other substitutions apply to every member.
     ///
     /// Returns `None` when no substitution replaces the check type of a
-    /// distributive conditional with a union or `never`.
+    /// distributive conditional with a union, `boolean`, or `never`.
     fn distribute(&self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> Option<TypeData<'db>> {
         let TypeData::Extends(extends) = ty else {
             return None;
@@ -429,15 +437,11 @@ impl<'db> TypeSubstituter<'_, 'db> {
             .partition(|substitution| {
                 referenced_generic(db, substitution.binder_generic(db)) == Some(generic)
             });
-        let members = match check_substitutions
+        let members = check_substitutions
             .first()?
             .replacement
             .expand_global_local(db)
-        {
-            TypeData::Union(union) => union.types(db).to_vec(),
-            TypeData::NeverKeyword => Vec::new(),
-            _ => return None,
-        };
+            .distributive_members(db)?;
         if members.len() > MAX_DISTRIBUTED_MEMBERS {
             return Some(TypeData::Unknown);
         }
@@ -466,6 +470,7 @@ impl<'db> TypeTransform<'db> for TypeSubstituter<'_, 'db> {
     fn enter(&mut self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeTransformAction<'db> {
         // A global's supporting type may mention the global's type parameters.
         let ty = ty.expand_global_local(db);
+        let is_alias_declaration = self.alias_declaration.take() == Some(ty);
         if let Some(substitution) = self.substitutions.iter().find(|substitution| {
             substitution.generic == ty && !self.shadowed.contains(&substitution.binder_generic(db))
         }) {
@@ -498,6 +503,24 @@ impl<'db> TypeTransform<'db> for TypeSubstituter<'_, 'db> {
                     .filter_map(|infer| referenced_generic(db, *infer))
                     .map(TypeData::Generic),
             );
+        }
+        if let TypeData::InstanceOf(instance) = ty {
+            // Generics with the same name and bounds are one interned value, so
+            // the `T` being substituted can also be the `T` an alias declares.
+            if is_alias_declaration {
+                self.shadowed.extend(
+                    instance
+                        .type_parameters(db)
+                        .iter()
+                        .filter_map(|parameter| referenced_generic(db, *parameter))
+                        .map(TypeData::Generic),
+                );
+            }
+            if let TypeData::InstanceOf(declaration) = instance.ty(db)
+                && !declaration.type_parameters(db).is_empty()
+            {
+                self.alias_declaration = Some(instance.ty(db));
+            }
         }
         TypeTransformAction::Descend(ty)
     }
@@ -598,7 +621,48 @@ where
         Some(self.normalize_instantiation(db, TypeData::union_from_types(db, members)))
     }
 
-    /// Instantiates a generic alias whose body is a conditional type.
+    /// Returns whether instantiating an alias body can evaluate a conditional.
+    ///
+    /// A conditional may be the body itself or be nested in union and
+    /// intersection members, tuple elements, type arguments, and the bodies of
+    /// other aliases. Object members aren't inspected: member lookup evaluates
+    /// conditionals there lazily, and following them through a recursive alias
+    /// would spend the instantiation budget.
+    fn contains_conditional(&mut self, db: &'db dyn TypeDb, body: TypeData<'db>) -> bool {
+        let mut pending = Vec::from([body]);
+        let mut seen = FxHashSet::default();
+        let mut remaining_steps = MAX_CONDITIONAL_SEARCH_STEPS;
+        while let Some(ty) = pending.pop() {
+            if !seen.insert(ty) {
+                continue;
+            }
+            if remaining_steps == 0 {
+                return false;
+            }
+            remaining_steps -= 1;
+
+            match (self.resolve)(ty) {
+                TypeData::Extends(_) => return true,
+                TypeData::Union(union) => pending.extend(union.types(db).iter().copied()),
+                TypeData::Intersection(intersection) => {
+                    pending.extend(intersection.types(db).iter().copied());
+                }
+                TypeData::Tuple(tuple) => {
+                    pending.extend(tuple.elements(db).iter().map(|element| element.ty));
+                }
+                TypeData::InstanceOf(instance) => {
+                    pending.extend(instance.type_parameters(db).iter().copied());
+                    if let TypeData::InstanceOf(alias) = (self.resolve)(instance.ty(db)) {
+                        pending.push(alias.ty(db));
+                    }
+                }
+                _ => {}
+            }
+        }
+        false
+    }
+
+    /// Instantiates a generic alias whose body contains a conditional type.
     ///
     /// Generic aliases are represented as instances of their declarations. For
     /// example, `IsString<"a">` below is an instance of `IsString` with the
@@ -608,6 +672,14 @@ where
     /// ```ts
     /// type IsString<T> = T extends string ? "yes" : "no";
     /// type Yes = IsString<"a">;
+    /// ```
+    ///
+    /// The conditional doesn't have to be the whole body. See
+    /// [`Self::contains_conditional`] for where it may be. Here, `Outer<"a">`
+    /// also produces `"yes"`:
+    ///
+    /// ```ts
+    /// type Outer<T> = IsString<T>;
     /// ```
     ///
     /// Aliases with other bodies are left as instances, so they keep their
@@ -627,10 +699,10 @@ where
         let body = (self.resolve)(alias.ty(db));
         // A conditional can't be evaluated while its arguments are generic,
         // and instantiating a recursive alias with them would never end.
-        if !matches!(body, TypeData::Extends(_))
+        if !self.contains_conditional(db, body)
             || type_arguments
                 .iter()
-                .any(|argument| may_refer_to_free_generic(db, *argument))
+                .any(|argument| may_refer_to_free_generic(db, *argument, &[]))
         {
             return None;
         }
@@ -669,7 +741,7 @@ where
         // large, so normalizing them now could exhaust the budget of the
         // enclosing type.
         if let TypeData::Extends(extends) = ty
-            && may_refer_to_free_generic(db, (self.resolve)(extends.check_type(db)))
+            && may_refer_to_free_generic(db, (self.resolve)(extends.check_type(db)), &[])
         {
             return TypeTransformAction::Replace(ty);
         }
@@ -697,8 +769,11 @@ where
             {
                 instance.ty(db)
             }
+            // An alias of a promise is only recognized as a promise once the
+            // arguments are normalized, so `Awaited` is checked here as well.
             TypeData::InstanceOf(instance) => self
-                .instantiate_conditional_alias(db, instance)
+                .instantiate_awaited(db, instance)
+                .or_else(|| self.instantiate_conditional_alias(db, instance))
                 .unwrap_or(ty),
             TypeData::Extends(extends) => match evaluate_extends(db, extends, self.resolve) {
                 Some(evaluated) if evaluated.needs_normalization => {
