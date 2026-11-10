@@ -31,7 +31,9 @@ use rustc_hash::{FxHashMap, FxHashSet};
 use scanner::SelectedRoot;
 
 /// Index of a node in [`RootFlow::nodes`].
-pub(crate) type FlowNodeId = usize;
+///
+/// Construction gives up on a root before its node count exceeds this type.
+pub(crate) type FlowNodeId = u32;
 
 /// Limits the graph steps spent deciding which reads a test can reach in one
 /// execution root. Like other construction limits, exceeding it leaves the
@@ -253,15 +255,17 @@ impl RootCollector<'_> {
         reads: &[builder::BuiltRead],
     ) -> Option<FxHashSet<(TextRange, FlowNodeId)>> {
         let mut successors = vec![Vec::new(); nodes.len()];
-        for (index, node) in nodes.iter().enumerate() {
+        for (index, node) in (0..).zip(nodes) {
             match node {
                 FlowNode::Start => {}
                 FlowNode::Join(predecessors) => {
                     for predecessor in predecessors {
-                        successors[*predecessor].push(index);
+                        successors[*predecessor as usize].push(index);
                     }
                 }
-                FlowNode::Condition { antecedent, .. } => successors[*antecedent].push(index),
+                FlowNode::Condition { antecedent, .. } => {
+                    successors[*antecedent as usize].push(index);
+                }
             }
         }
         let bindings: FxHashSet<TextRange> = reads.iter().map(|read| read.binding).collect();
@@ -276,11 +280,11 @@ impl RootCollector<'_> {
                 .collect();
             while let Some(node) = pending.pop() {
                 remaining = remaining.checked_sub(1)?;
-                if std::mem::replace(&mut seen[node], true) {
+                if std::mem::replace(&mut seen[node as usize], true) {
                     continue;
                 }
                 reachable.insert((binding, node));
-                pending.extend(&successors[node]);
+                pending.extend(&successors[node as usize]);
             }
         }
         Some(reachable)

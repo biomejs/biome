@@ -606,12 +606,13 @@ impl RootBuilder<'_> {
         if self.nodes.len() >= MAX_FLOW_NODES {
             return Err(Unsupported);
         }
+        let id = FlowNodeId::try_from(self.nodes.len()).map_err(|_| Unsupported)?;
         self.nodes.push(node);
-        Ok(self.nodes.len() - 1)
+        Ok(id)
     }
 
     fn add_predecessor(&mut self, join: FlowNodeId, predecessor: FlowNodeId) -> Build<()> {
-        let Some(FlowNode::Join(predecessors)) = self.nodes.get_mut(join) else {
+        let Some(FlowNode::Join(predecessors)) = self.nodes.get_mut(join as usize) else {
             return Err(Unsupported);
         };
         predecessors.push(predecessor);
@@ -619,7 +620,7 @@ impl RootBuilder<'_> {
     }
 
     fn has_predecessors(&self, join: FlowNodeId) -> bool {
-        matches!(self.nodes.get(join), Some(FlowNode::Join(predecessors)) if !predecessors.is_empty())
+        matches!(self.nodes.get(join as usize), Some(FlowNode::Join(predecessors)) if !predecessors.is_empty())
     }
 }
 
@@ -701,7 +702,7 @@ mod tests {
                 budget = budget
                     .checked_sub(1)
                     .expect("cyclic or excessive test graph");
-                match &root.nodes[node] {
+                match &root.nodes[node as usize] {
                     FlowNode::Start => result.push(facts),
                     FlowNode::Join(predecessors) => {
                         for predecessor in predecessors {
@@ -818,7 +819,7 @@ mod tests {
         ] {
             let built = function(source);
             assert!(
-                built.root().nodes.iter().enumerate().any(|(id, node)| {
+                (0..).zip(&built.root().nodes).any(|(id, node)| {
                     matches!(node, FlowNode::Join(predecessors) if predecessors.iter().any(|p| *p > id))
                 }),
                 "{source}"

@@ -5,6 +5,7 @@
 //! cached by interning.
 
 use crate::ModuleInfo;
+use crate::js_module_info::flow::FlowNodeId;
 use biome_js_type_info::interned_types::{
     CallArgumentType as InferredCallArgumentType, LocalTypeId as InferredLocalTypeId,
     TypeData as InferredTypeData, TypeSubstitution as InferredTypeSubstitution,
@@ -46,7 +47,7 @@ pub(crate) struct FlowBindingTypeInput<'db> {
     pub root: usize,
     /// Node index in that root's flow graph.
     #[returns(copy)]
-    pub point: usize,
+    pub point: FlowNodeId,
 }
 
 /// Interned input for [`super::infer_local_type`].

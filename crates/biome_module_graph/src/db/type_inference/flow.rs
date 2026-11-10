@@ -15,7 +15,9 @@ use biome_js_syntax::JsIdentifierExpression;
 use biome_js_type_info::interned_types::TypeData;
 use biome_js_type_info::{NarrowingPredicate, is_narrowing_invariant, narrow_type};
 use biome_rowan::{AstNode, TextRange};
+use rustc_hash::FxHashMap;
 use std::collections::VecDeque;
+use std::collections::hash_map::Entry;
 
 const MAX_FLOW_STEPS: usize = 16_384;
 /// Limits the types visited while flattening a flow baseline or checking the
@@ -60,31 +62,81 @@ pub(in crate::db) fn flow_binding_type<'db>(
 ) -> Option<TypeData<'db>> {
     let root = info.flow.root(input.root(db))?;
     let point = input.point(db);
-    if point >= root.nodes.len() {
+    if point as usize >= root.nodes.len() {
         return None;
     }
     let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
     ctx.narrow_binding_at_flow(root, point, input.binding(db))
 }
 
-/// Returns the nodes on some path from the root's start to `point`, or `None`
-/// when the walk exceeds its work limit.
-fn reaching_nodes(root: &RootFlow, point: FlowNodeId) -> Option<Vec<bool>> {
-    let mut pending = vec![point];
-    let mut reaching = vec![false; root.nodes.len()];
-    let mut remaining = MAX_FLOW_STEPS;
-    while let Some(node) = pending.pop() {
-        remaining = remaining.checked_sub(1)?;
-        if std::mem::replace(reaching.get_mut(node)?, true) {
-            continue;
+/// The nodes of a root's flow graph that lie on some path from its start to
+/// one point.
+///
+/// Reached nodes are numbered from zero in the order a backward walk from the
+/// point first visits them, so the point is node `0`. Solving a read over these
+/// numbers takes work and memory proportional to the reached nodes rather than
+/// to the whole root.
+struct ReachingFlow {
+    /// The root's id of each reached node.
+    nodes: Vec<FlowNodeId>,
+    /// The numbers of every reached node's predecessors, grouped by node.
+    predecessors: Vec<u32>,
+    /// The end of each reached node's group in `predecessors`; the group starts
+    /// where the previous node's group ends.
+    ends: Vec<u32>,
+}
+
+impl ReachingFlow {
+    /// Walks backward from `point` through the predecessors in `root`.
+    ///
+    /// Returns `None` when the walk exceeds its work limit or meets a node
+    /// that `root` does not contain.
+    fn new(root: &RootFlow, point: FlowNodeId) -> Option<Self> {
+        let mut nodes = Vec::new();
+        let mut numbers = FxHashMap::default();
+        let mut pending = vec![point];
+        let mut remaining = MAX_FLOW_STEPS;
+        while let Some(node) = pending.pop() {
+            remaining = remaining.checked_sub(1)?;
+            let Entry::Vacant(entry) = numbers.entry(node) else {
+                continue;
+            };
+            entry.insert(u32::try_from(nodes.len()).ok()?);
+            nodes.push(node);
+            pending.extend(predecessor_ids(root.nodes.get(node as usize)?));
         }
-        match &root.nodes[node] {
-            FlowNode::Start => {}
-            FlowNode::Join(predecessors) => pending.extend(predecessors),
-            FlowNode::Condition { antecedent, .. } => pending.push(*antecedent),
+        let mut predecessors = Vec::new();
+        let mut ends = Vec::with_capacity(nodes.len());
+        for node in &nodes {
+            for id in predecessor_ids(&root.nodes[*node as usize]) {
+                predecessors.push(*numbers.get(id)?);
+            }
+            ends.push(u32::try_from(predecessors.len()).ok()?);
         }
+        Some(Self {
+            nodes,
+            predecessors,
+            ends,
+        })
     }
-    Some(reaching)
+
+    /// Returns the numbers of the predecessors of the reached node `number`.
+    fn predecessors(&self, number: u32) -> &[u32] {
+        let number = number as usize;
+        let start = number
+            .checked_sub(1)
+            .map_or(0, |previous| self.ends[previous]);
+        &self.predecessors[start as usize..self.ends[number] as usize]
+    }
+}
+
+/// Returns the ids of the nodes that flow directly into `node`.
+fn predecessor_ids(node: &FlowNode) -> &[FlowNodeId] {
+    match node {
+        FlowNode::Start => &[],
+        FlowNode::Join(predecessors) => predecessors,
+        FlowNode::Condition { antecedent, .. } => std::slice::from_ref(antecedent),
+    }
 }
 
 impl<'db> ResolutionCtx<'db, '_> {
@@ -118,10 +170,10 @@ impl<'db> ResolutionCtx<'db, '_> {
         if baseline == TypeData::Unknown {
             return Some(TypeData::Unknown);
         }
-        let Some(reaching) = reaching_nodes(root, point) else {
+        let Some(reaching) = ReachingFlow::new(root, point) else {
             return Some(TypeData::Unknown);
         };
-        let narrowed = self.solve_flow(root, &reaching, point, binding.range(self.db), baseline);
+        let narrowed = self.solve_flow(root, &reaching, binding.range(self.db), baseline);
         if narrowed == TypeData::NeverKeyword {
             return Some(TypeData::Unknown);
         }
@@ -166,50 +218,48 @@ impl<'db> ResolutionCtx<'db, '_> {
         None
     }
 
+    /// Returns the type of `binding` at the point of `reaching`, given its
+    /// `baseline` type at the root's start.
     fn solve_flow(
         &mut self,
         root: &RootFlow,
-        reaching: &[bool],
-        point: FlowNodeId,
+        reaching: &ReachingFlow,
         binding: TextRange,
         baseline: TypeData<'db>,
     ) -> TypeData<'db> {
-        let mut successors = vec![Vec::new(); root.nodes.len()];
+        let count = reaching.nodes.len();
+        let mut successors = vec![Vec::new(); count];
         let mut queue = VecDeque::new();
-        for (index, node) in root.nodes.iter().enumerate() {
-            if !reaching[index] {
-                continue;
+        for (number, node) in (0..).zip(&reaching.nodes) {
+            if matches!(root.nodes[*node as usize], FlowNode::Start) {
+                queue.push_back(number);
             }
-            match node {
-                FlowNode::Start => queue.push_back(index),
-                FlowNode::Join(predecessors) => {
-                    for predecessor in predecessors {
-                        successors[*predecessor].push(index);
-                    }
-                }
-                FlowNode::Condition { antecedent, .. } => successors[*antecedent].push(index),
+            for &predecessor in reaching.predecessors(number) {
+                successors[predecessor as usize].push(number);
             }
         }
-        let mut states = vec![TypeData::NeverKeyword; root.nodes.len()];
-        let mut queued = vec![false; root.nodes.len()];
+        let mut states = vec![TypeData::NeverKeyword; count];
+        let mut queued = vec![false; count];
         let mut remaining = MAX_FLOW_STEPS;
-        while let Some(index) = queue.pop_front() {
+        while let Some(number) = queue.pop_front() {
+            let index = number as usize;
             queued[index] = false;
             let Some(next) = remaining.checked_sub(1) else {
                 return TypeData::Unknown;
             };
             remaining = next;
-            let ty = match &root.nodes[index] {
+            let predecessors = reaching.predecessors(number);
+            let ty = match &root.nodes[reaching.nodes[index] as usize] {
                 FlowNode::Start => baseline,
-                FlowNode::Join(predecessors) => TypeData::union_from_types(
+                FlowNode::Join(_) => TypeData::union_from_types(
                     self.db,
                     predecessors
                         .iter()
-                        .map(|predecessor| states[*predecessor])
+                        .map(|predecessor| states[*predecessor as usize])
                         .collect(),
                 ),
-                FlowNode::Condition { antecedent, guard } => {
-                    let incoming = states[*antecedent];
+                FlowNode::Condition { guard, .. } => {
+                    let incoming = states[predecessors[0] as usize];
                     if incoming == TypeData::NeverKeyword {
                         incoming
                     } else {
@@ -220,14 +270,14 @@ impl<'db> ResolutionCtx<'db, '_> {
             if states[index] != ty {
                 states[index] = ty;
                 for &successor in &successors[index] {
-                    if !queued[successor] {
-                        queued[successor] = true;
+                    if !queued[successor as usize] {
+                        queued[successor as usize] = true;
                         queue.push_back(successor);
                     }
                 }
             }
         }
-        states[point]
+        states[0]
     }
 
     /// Returns the type of `binding` after the guard at `guard` holds, given
@@ -297,5 +347,39 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             FlowTest::Undefined { strict: false } => NarrowingPredicate::Nullish,
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn reaching_flow_numbers_only_the_nodes_before_the_point() {
+        // 0: start, 1: loop header, 2: loop body, 3: back edge, 4: loop exit.
+        let root = RootFlow {
+            nodes: Box::from([
+                FlowNode::Start,
+                FlowNode::Join(vec![0, 3]),
+                FlowNode::Condition {
+                    antecedent: 1,
+                    guard: 0,
+                },
+                FlowNode::Condition {
+                    antecedent: 2,
+                    guard: 0,
+                },
+                FlowNode::Condition {
+                    antecedent: 1,
+                    guard: 0,
+                },
+            ]),
+            guards: Box::from([FlowGuard::Keep]),
+        };
+        let reaching = ReachingFlow::new(&root, 2).unwrap();
+        assert_eq!(reaching.nodes, [2, 1, 3, 0]);
+        let predecessors: Vec<_> = (0..4).map(|number| reaching.predecessors(number)).collect();
+        assert_eq!(predecessors, [&[1][..], &[3, 2], &[0], &[]]);
+        assert!(ReachingFlow::new(&root, 5).is_none());
     }
 }
