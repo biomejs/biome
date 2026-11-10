@@ -2013,10 +2013,10 @@ async fn pull_js_plugin_code_action_when_query_and_diagnostic_ranges_are_disjoin
             "rules": { "recommended": false }
         }
     }"#;
-    let plugin = br#"import { createMutation, defineRule, factory, registerDiagnostic, semantic } from "@biomejs/runtime/plugin";
+    let plugin = br#"import { ast, createMutation, defineRule, factory, registerDiagnostic } from "@biomejs/runtime/plugin";
 
 export const renameReference = defineRule({
-    query: semantic("JS_REFERENCE_IDENTIFIER"),
+    query: ast("JS_REFERENCE_IDENTIFIER", { semantic: true }),
     run(node, { model }) {
         const binding = model.binding(node);
         if (!binding) return;

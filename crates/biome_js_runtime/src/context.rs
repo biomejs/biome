@@ -160,8 +160,13 @@ impl JsExecContext {
 
             let query_type = query.get(js_string!("type"), ctx)?;
             let (requires_semantic, grit) = match query_type.as_string() {
-                Some(ty) if ty == "ast" => (false, None),
-                Some(ty) if ty == "semantic" => (true, None),
+                Some(ty) if ty == "ast" => (
+                    query
+                        .get(js_string!("requiresSemantic"), ctx)?
+                        .as_boolean()
+                        .unwrap_or(false),
+                    None,
+                ),
                 Some(ty) if ty == "grit" => {
                     let pattern = query.get(js_string!("pattern"), ctx)?;
                     let Some(pattern) = pattern.as_string() else {
@@ -177,11 +182,13 @@ impl JsExecContext {
                         .unwrap_or(false);
                     (requires_semantic, Some(pattern.to_std_string_lossy()))
                 }
-                _ => return Err(JsNativeError::typ()
-                    .with_message(format!(
-                        "Rule {name} has an unsupported query type. Use ast(...), semantic(...), or grit(...)."
-                    ))
-                    .into()),
+                _ => {
+                    return Err(JsNativeError::typ()
+                        .with_message(format!(
+                            "Rule {name} has an unsupported query type. Use ast(...) or grit(...)."
+                        ))
+                        .into());
+                }
             };
 
             let rule_kinds = if grit.is_some() {

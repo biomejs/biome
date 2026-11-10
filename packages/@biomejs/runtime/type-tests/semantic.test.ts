@@ -11,11 +11,10 @@ import {
 	type SemanticModel,
 	type SemanticRuleContext,
 	type TextRange,
-	semantic,
 } from "@biomejs/runtime/plugin";
 
 defineRule({
-	query: semantic("JS_REFERENCE_IDENTIFIER"),
+	query: ast("JS_REFERENCE_IDENTIFIER", { semantic: true }),
 	run(node, context) {
 		node satisfies JsReferenceIdentifier;
 		context satisfies SemanticRuleContext;
@@ -70,7 +69,7 @@ defineRule({
 });
 
 defineRule({
-	query: semantic("JS_IDENTIFIER_BINDING", "JS_REFERENCE_IDENTIFIER"),
+	query: ast("JS_IDENTIFIER_BINDING", "JS_REFERENCE_IDENTIFIER", { semantic: true }),
 	run(node, context) {
 		node satisfies JsIdentifierBinding | JsReferenceIdentifier;
 		if (node.kind === "JS_IDENTIFIER_BINDING") {
@@ -101,13 +100,13 @@ defineRule({
 });
 
 defineRule({
-	query: semantic("JS_REFERENCE_IDENTIFIER"),
+	query: ast("JS_REFERENCE_IDENTIFIER", { semantic: true }),
 	// @ts-expect-error A callback cannot override the queried node type.
 	run(_node: JsIdentifierBinding, _context: SemanticRuleContext) {},
 });
 
 defineRule({
-	query: semantic("JS_IDENTIFIER_BINDING"),
+	query: ast("JS_IDENTIFIER_BINDING", { semantic: true }),
 	run(node) {
 		node satisfies JsIdentifierBinding;
 	},
