@@ -1,4 +1,4 @@
-use std::fmt::Write;
+use std::iter::FusedIterator;
 
 use crate::services::module_graph::CssModuleGraph;
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
@@ -10,7 +10,7 @@ use biome_css_syntax::{
     ScssParentSelector,
 };
 use biome_module_graph::{SymbolFromModuleInfo, is_class_referenced_by_importers};
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, Text, declare_node_union};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, declare_node_union};
 use biome_rule_options::no_unused_classes::NoUnusedClassesOptions;
 
 declare_lint_rule! {
@@ -80,7 +80,7 @@ declare_node_union! {
 
 impl Rule for NoUnusedClasses {
     type Query = CssModuleGraph<AnyClassNameSelector>;
-    type State = Text;
+    type State = String;
     type Signals = Vec<Self::State>;
     type Options = NoUnusedClassesOptions;
 
@@ -103,14 +103,16 @@ impl Rule for NoUnusedClasses {
         match node {
             AnyClassNameSelector::CssClassSelector(selector) => selector
                 .name_text()
-                .filter(|class_name| is_unused(class_name.text()))
-                .map(Text::from)
+                .map(|class_name| class_name.text().to_string())
+                .filter(|class_name| is_unused(class_name))
                 .into_iter()
                 .collect(),
             AnyClassNameSelector::ScssParentSelector(selector) => {
-                let mut class_names = parent_suffix_class_names(selector).unwrap_or_default();
-                class_names.retain(|class_name| is_unused(class_name));
-                class_names
+                ParentSuffixClassNames::from_selector(selector)
+                    .into_iter()
+                    .flatten()
+                    .filter(|class_name| is_unused(class_name))
+                    .collect()
             }
         }
     }
@@ -122,7 +124,7 @@ impl Rule for NoUnusedClasses {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "The CSS class "<Emphasis>{class_name.text()}</Emphasis>" is not referenced in any HTML or JSX file."
+                    "The CSS class "<Emphasis>{class_name.as_str()}</Emphasis>" is not referenced in any HTML or JSX file."
                 },
             )
             .note(markup! {
@@ -135,41 +137,59 @@ impl Rule for NoUnusedClasses {
     }
 }
 
-/// Returns the class names Sass builds for a parent selector with a suffix, such as `block__element`
+/// Yields the class names Sass builds for a parent selector with a suffix, such as `block__element`
 /// for `&__element` in `.block { &__element {} }`, one for each parent selector that ends in a
 /// class.
-///
-/// Returns `None` if the suffix is interpolated or the parent selectors are unknown.
-fn parent_suffix_class_names(selector: &ScssParentSelector) -> Option<Vec<Text>> {
-    let suffix = selector.suffix().ok()?;
-    if suffix
-        .items()
-        .iter()
-        .any(|part| part.as_scss_interpolation().is_some())
-    {
-        return None;
-    }
-    let suffix = suffix.syntax().text_trimmed();
-    let suffix_len = u32::from(suffix.len()) as usize;
-    let mut class_names = Vec::new();
-    push_parent_class_names(selector.syntax(), &mut class_names)?;
-    class_names.sort_unstable();
-    class_names.dedup();
-    for class_name in &mut class_names {
-        let mut name = String::with_capacity(class_name.len() + suffix_len);
-        name.push_str(class_name);
-        let _ = write!(name, "{suffix}");
-        *class_name = name.into();
-    }
-    Some(class_names)
+struct ParentSuffixClassNames {
+    parents: std::vec::IntoIter<String>,
+    suffix: String,
 }
+
+impl ParentSuffixClassNames {
+    /// Returns `None` if the suffix is interpolated or the parent selectors are unknown.
+    fn from_selector(selector: &ScssParentSelector) -> Option<Self> {
+        let suffix = selector.suffix().ok()?;
+        if suffix
+            .items()
+            .iter()
+            .any(|part| part.as_scss_interpolation().is_some())
+        {
+            return None;
+        }
+        let mut parents = Vec::new();
+        push_parent_class_names(selector.syntax(), &mut parents)?;
+        parents.sort_unstable();
+        parents.dedup();
+        Some(Self {
+            parents: parents.into_iter(),
+            suffix: suffix.syntax().text_trimmed().to_string(),
+        })
+    }
+}
+
+impl Iterator for ParentSuffixClassNames {
+    type Item = String;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let mut class_name = self.parents.next()?;
+        class_name.push_str(&self.suffix);
+        Some(class_name)
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.parents.size_hint()
+    }
+}
+
+impl ExactSizeIterator for ParentSuffixClassNames {}
+impl FusedIterator for ParentSuffixClassNames {}
 
 /// Pushes to `class_names` the classes that end the selectors `&` refers to in the selector
 /// containing `node`. Parent selectors that don't end in a class are left out.
 ///
 /// Returns `None`, and pushes nothing, if the parent selectors are unknown: there is no style rule
 /// around the selector, or a mixin decides them, as in a mixin body or an `@include` content block.
-fn push_parent_class_names(node: &CssSyntaxNode, class_names: &mut Vec<Text>) -> Option<()> {
+fn push_parent_class_names(node: &CssSyntaxNode, class_names: &mut Vec<String>) -> Option<()> {
     let mut ancestors = node.ancestors().skip_while(|ancestor| {
         !matches!(
             ancestor.kind(),
@@ -223,7 +243,7 @@ fn push_parent_class_names(node: &CssSyntaxNode, class_names: &mut Vec<Text>) ->
 /// nothing, if one of `selectors` is `None`.
 fn push_trailing_class_names(
     selectors: impl Iterator<Item = Option<AnyCssSelector>>,
-    class_names: &mut Vec<Text>,
+    class_names: &mut Vec<String>,
 ) -> Option<()> {
     let len = class_names.len();
     for selector in selectors {
@@ -240,7 +260,7 @@ fn push_trailing_class_names(
 /// against the rule around it.
 fn push_trailing_class_name(
     mut selector: AnyCssSelector,
-    class_names: &mut Vec<Text>,
+    class_names: &mut Vec<String>,
 ) -> Option<()> {
     let compound = loop {
         match selector {
@@ -251,7 +271,13 @@ fn push_trailing_class_name(
     };
 
     if let Some(sub_selector) = compound.sub_selectors().last() {
-        class_names.push(sub_selector.as_css_class_selector()?.name_text()?.into());
+        class_names.push(
+            sub_selector
+                .as_css_class_selector()?
+                .name_text()?
+                .text()
+                .to_string(),
+        );
         return Some(());
     }
     if compound.simple_selector().is_some() {
@@ -262,7 +288,7 @@ fn push_trailing_class_name(
             push_parent_class_names(compound.syntax(), class_names)
         }
         AnyCssNestedSelector::ScssParentSelector(selector) => {
-            class_names.extend(parent_suffix_class_names(&selector)?);
+            class_names.extend(ParentSuffixClassNames::from_selector(&selector)?);
             Some(())
         }
     }
