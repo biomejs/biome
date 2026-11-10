@@ -20,7 +20,9 @@ use biome_rowan::{AstNode, TextRange};
 use std::collections::VecDeque;
 
 const MAX_FLOW_STEPS: usize = 16_384;
-const MAX_FLOW_TYPE_STEPS: usize = 1024;
+/// Limits the types visited while flattening a flow baseline or checking the
+/// members of a refined union.
+pub(super) const MAX_FLOW_TYPE_STEPS: usize = 1024;
 
 fn expression_at(root: &JsSyntaxNode, range: TextRange) -> Option<AnyJsExpression> {
     if range.is_empty() || !root.text_range_with_trivia().contains_range(range) {

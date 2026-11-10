@@ -2,6 +2,7 @@
 //! type resolution and its context-independent caches unchanged.
 
 use super::ResolutionCtx;
+use super::flow::MAX_FLOW_TYPE_STEPS;
 use crate::db::queries::{ExpressionTypeInput, infer_flow_expression_type};
 use crate::js_module_info::flow::AnyFlowExpression;
 use biome_js_syntax::{AnyJsCallArgument, AnyJsExpression, JsLogicalOperator};
@@ -194,28 +195,48 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
+    /// Returns whether `ty` is a primitive or a union of primitives, so adding
+    /// it cannot run a user-defined `valueOf` or `toString` method.
+    ///
+    /// Returns false for an empty union and when the union members, nested
+    /// unions included, exceed [`MAX_FLOW_TYPE_STEPS`].
     #[expect(
         clippy::wildcard_enum_match_arm,
         reason = "Only primitive addition coercions are modeled."
     )]
     fn primitive_addition_operand(&self, ty: TypeData<'db>) -> bool {
-        match ty {
-            TypeData::BigInt
-            | TypeData::Boolean
-            | TypeData::Null
-            | TypeData::Number
-            | TypeData::String
-            | TypeData::Undefined => true,
-            TypeData::Literal(literal) => matches!(
-                literal.literal(self.db),
-                Literal::BigInt(_)
-                    | Literal::Boolean(_)
-                    | Literal::Number(_)
-                    | Literal::String(_)
-                    | Literal::Template(_)
-            ),
-            _ => false,
+        let mut pending = vec![ty];
+        for _ in 0..MAX_FLOW_TYPE_STEPS {
+            let Some(ty) = pending.pop() else {
+                return true;
+            };
+            let primitive = match ty {
+                TypeData::Union(union) => {
+                    let types = union.types(self.db);
+                    pending.extend(types.iter().copied());
+                    !types.is_empty()
+                }
+                TypeData::BigInt
+                | TypeData::Boolean
+                | TypeData::Null
+                | TypeData::Number
+                | TypeData::String
+                | TypeData::Undefined => true,
+                TypeData::Literal(literal) => matches!(
+                    literal.literal(self.db),
+                    Literal::BigInt(_)
+                        | Literal::Boolean(_)
+                        | Literal::Number(_)
+                        | Literal::String(_)
+                        | Literal::Template(_)
+                ),
+                _ => false,
+            };
+            if !primitive {
+                return false;
+            }
         }
+        false
     }
 
     fn flow_operand(&self, expression: &AnyJsExpression) -> Option<TypeData<'db>> {

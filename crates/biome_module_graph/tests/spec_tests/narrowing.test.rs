@@ -716,6 +716,31 @@ fn narrowed_addition_keeps_object_coercion_unknown() {
 }
 
 #[test]
+fn narrowed_primitive_unions_keep_string_addition() {
+    const SOURCE: &str = r#"
+        function primitive(value: string | number | null) {
+            if (value === null) return;
+            /*primitive*/value + "";
+        }
+        function object(value: string | { valueOf(): number } | null) {
+            if (value === null) return;
+            /*object*/value + "";
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    for (marker, expected) in [
+        ("primitive", InferredTypeData::String),
+        ("object", InferredTypeData::Unknown),
+    ] {
+        assert_eq!(
+            normalized_type_at(&db, module, SOURCE, marker, r#"value + """#),
+            expected,
+            "{marker}"
+        );
+    }
+}
+
+#[test]
 fn narrowed_callable_shapes_preserve_classification_uncertainty() {
     use TypeInferenceClassification::{Indeterminate, Match, NoMatch};
     const SOURCE: &str = r#"
