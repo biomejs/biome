@@ -31,7 +31,8 @@ interface Query<N extends JsAstNode | JsAstToken, C> {
 	readonly [queryContext]?: C;
 }
 
-export interface AstQuery<N extends JsAstNode, C = RuleContext> extends Query<N, C> {
+export interface AstQuery<N extends JsAstNode, C = RuleContext>
+	extends Query<N, C> {
 	readonly type: "ast";
 	readonly kinds: readonly (keyof JsNodeByKind)[];
 }
@@ -185,14 +186,22 @@ export function ast<K extends readonly (keyof JsNodeByKind)[]>(
  * ```
  */
 export function grit(pattern: string): GritQuery;
-export function grit(pattern: string, options: { semantic: true }): SemanticGritQuery;
-export function grit(pattern: string, options?: { semantic?: false }): GritQuery;
+export function grit(
+	pattern: string,
+	options: { semantic: true },
+): SemanticGritQuery;
+export function grit(
+	pattern: string,
+	options?: { semantic?: false },
+): GritQuery;
 
 /**
  * Defines a lint rule. Export the returned rule with `export const` to
  * register it to the analyzer.
  */
-export function defineRule<N extends JsAstElement, C = RuleContext>(rule: Rule<N, C>): Rule<N, C>;
+export function defineRule<N extends JsAstElement, C = RuleContext>(
+	rule: Rule<N, C>,
+): Rule<N, C>;
 
 /**
  * Collects replacements and removals for one code fix without changing the
@@ -341,7 +350,9 @@ export const factory: {
  * kind set should be generic, as in
  * `function f<K extends keyof JsNodeByKind>(set: NodeKindSet<K>)`.
  */
-export interface NodeKindSet<in out K extends keyof JsNodeByKind = keyof JsNodeByKind> {
+export interface NodeKindSet<
+	in out K extends keyof JsNodeByKind = keyof JsNodeByKind,
+> {
 	readonly [nodeKindSet]: true;
 	/**
 	 * Returns whether `element` is a node whose kind is in this set.
@@ -374,7 +385,9 @@ export interface NodeKindSet<in out K extends keyof JsNodeByKind = keyof JsNodeB
 	 * @throws {TypeError} If `other` is not a set returned by {@link nodeKinds},
 	 * including when it is a token kind set.
 	 */
-	union<J extends keyof JsNodeByKind>(other: NodeKindSet<J>): NodeKindSet<K | J>;
+	union<J extends keyof JsNodeByKind>(
+		other: NodeKindSet<J>,
+	): NodeKindSet<K | J>;
 }
 
 /**
@@ -389,7 +402,9 @@ export interface NodeKindSet<in out K extends keyof JsNodeByKind = keyof JsNodeB
  * kind set should be generic, as in
  * `function f<K extends JsAstToken["kind"]>(set: TokenKindSet<K>)`.
  */
-export interface TokenKindSet<in out K extends JsAstToken["kind"] = JsAstToken["kind"]> {
+export interface TokenKindSet<
+	in out K extends JsAstToken["kind"] = JsAstToken["kind"],
+> {
 	readonly [tokenKindSet]: true;
 	/**
 	 * Returns whether `element` is a token whose kind is in this set.
@@ -410,7 +425,9 @@ export interface TokenKindSet<in out K extends JsAstToken["kind"] = JsAstToken["
 	 *
 	 * @throws {TypeError} If `element` is not a node, a token, or `undefined`.
 	 */
-	has(element: JsAstElement | undefined): element is JsAstToken & { readonly kind: K };
+	has(
+		element: JsAstElement | undefined,
+	): element is JsAstToken & { readonly kind: K };
 	/**
 	 * Returns a new set with the kinds of this set and `other`. Neither set
 	 * changes.
@@ -424,7 +441,9 @@ export interface TokenKindSet<in out K extends JsAstToken["kind"] = JsAstToken["
 	 * @throws {TypeError} If `other` is not a set returned by {@link tokenKinds},
 	 * including when it is a node kind set.
 	 */
-	union<J extends JsAstToken["kind"]>(other: TokenKindSet<J>): TokenKindSet<K | J>;
+	union<J extends JsAstToken["kind"]>(
+		other: TokenKindSet<J>,
+	): TokenKindSet<K | J>;
 }
 
 /**
@@ -481,7 +500,9 @@ declare module "./js_ast" {
 		 *
 		 * @throws {TypeError} If `kinds` is not a set created with {@link nodeKinds}.
 		 */
-		descendants<K extends keyof JsNodeByKind>(kinds: NodeKindSet<K>): readonly JsNodeByKind[K][];
+		descendants<K extends keyof JsNodeByKind>(
+			kinds: NodeKindSet<K>,
+		): readonly JsNodeByKind[K][];
 		/**
 		 * Visits the nodes inside this node whose kind is in `kinds`, in source
 		 * order. This node itself is never visited, even when its kind is in
