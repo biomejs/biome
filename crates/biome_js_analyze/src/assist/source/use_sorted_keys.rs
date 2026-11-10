@@ -1,7 +1,7 @@
 use std::{borrow::Cow, cmp::Ordering, ops::Not};
 
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, RuleSuppressions,
     context::RuleContext,
     declare_source_rule,
     utils::{is_separated_list_sorted_by, sorted_separated_list_by},
@@ -13,7 +13,7 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsObjectMember, JsLanguage, JsObjectExpression, JsObjectMemberList, T,
 };
-use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult, SyntaxToken};
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult, SyntaxToken, WalkEvent};
 use biome_rule_options::use_sorted_keys::{SortOrder, UseSortedKeysOptions};
 use biome_string_case::comparable_token::ComparableToken;
 
@@ -199,6 +199,23 @@ impl Rule for UseSortedKeys {
             .ok()?
             .not()
             .then_some(())
+        }
+    }
+
+    fn suppressed_nodes(
+        ctx: &RuleContext<Self>,
+        _state: &Self::State,
+        suppressions: &mut RuleSuppressions<JsLanguage>,
+    ) {
+        for event in ctx
+            .query()
+            .syntax()
+            .preorder_of_kinds(JsObjectMemberList::KIND_SET)
+            .skip(1)
+        {
+            if let WalkEvent::Enter(node) = event {
+                suppressions.suppress_node(node);
+            }
         }
     }
 

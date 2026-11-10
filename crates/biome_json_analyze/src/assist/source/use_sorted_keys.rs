@@ -2,15 +2,15 @@ use crate::JsonRuleAction;
 use crate::utils::is_package_json;
 use biome_analyze::utils::{is_separated_list_sorted_by, sorted_separated_list_by};
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
-    declare_source_rule,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, RuleSuppressions,
+    context::RuleContext, declare_source_rule,
 };
 use biome_console::markup;
 use biome_json_factory::make;
 use biome_json_syntax::{
     AnyJsonValue, JsonLanguage, JsonMemberList, JsonObjectValue, T, TextRange,
 };
-use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult, SyntaxToken};
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult, SyntaxToken, WalkEvent};
 use biome_rule_options::use_sorted_keys::{SortOrder, UseSortedKeysOptions};
 use biome_string_case::comparable_token::ComparableToken;
 use std::{cmp::Ordering, ops::Not};
@@ -211,6 +211,23 @@ impl Rule for UseSortedKeys {
             .ok()?
             .not()
             .then_some(())
+        }
+    }
+
+    fn suppressed_nodes(
+        ctx: &RuleContext<Self>,
+        _state: &Self::State,
+        suppressions: &mut RuleSuppressions<JsonLanguage>,
+    ) {
+        for event in ctx
+            .query()
+            .syntax()
+            .preorder_of_kinds(JsonMemberList::KIND_SET)
+            .skip(1)
+        {
+            if let WalkEvent::Enter(node) = event {
+                suppressions.suppress_node(node);
+            }
         }
     }
 
