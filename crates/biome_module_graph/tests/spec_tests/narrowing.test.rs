@@ -67,6 +67,7 @@ fn assert_no_flow_queries(db: &TestModuleDb, events: &[salsa::Event]) {
     for query in [
         "infer_flow_expression_type_impl",
         "infer_flow_binding_baseline",
+        "infer_flow_binding_states",
         "infer_flow_binding_type",
     ] {
         assert_eq!(
@@ -823,6 +824,11 @@ fn repeated_narrowed_reads_share_flow_states_and_agree_with_complete_tables() {
         "reads in each branch must share its incoming flow state"
     );
     assert_eq!(
+        function_query_will_execute_count_by_name(&db, "infer_flow_binding_states", &events),
+        1,
+        "reads at different flow points must share one solve of the binding"
+    );
+    assert_eq!(
         function_query_will_execute_count_by_name(&db, "infer_flow_binding_baseline", &events),
         1,
         "reads at different flow points must share the binding's baseline"
@@ -843,6 +849,30 @@ fn repeated_narrowed_reads_share_flow_states_and_agree_with_complete_tables() {
     let complete = infer_module_types(&db, module).unwrap();
     for (range, ty) in targeted {
         assert_eq!(complete.expressions[&range], ty);
+    }
+}
+
+#[test]
+fn reads_beyond_the_shared_flow_limit_are_solved_one_point_at_a_time() {
+    // Every `&&` adds two conditions and a join, so these branches cost more
+    // flow work per syntax node than `if` statements and stay within the
+    // syntax limit for collecting flow. One branch fits the flow work limit,
+    // but solving both reads together exceeds it.
+    let chain = ["flag"; 10].join(" && ");
+    let branch = format!("{chain};\n").repeat(60);
+    let source = format!(
+        "function inspect(value: string | null, flag: boolean, pick: boolean) {{\n\
+         if (value === null) return;\n\
+         if (pick) {{\n{branch}/*first*/value;\n}} else {{\n{branch}/*second*/value;\n}}\n\
+         }}\n"
+    );
+    let (db, module) = narrowing_db(&source);
+    for marker in ["first", "second"] {
+        assert_eq!(
+            normalized_type_at(&db, module, &source, marker, "value"),
+            InferredTypeData::String,
+            "{marker}"
+        );
     }
 }
 

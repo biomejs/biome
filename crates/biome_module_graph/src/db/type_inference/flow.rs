@@ -7,7 +7,8 @@
 
 use super::{ImportResolution, ResolutionCtx, resolve_local_type_on_demand};
 use crate::db::queries::{
-    BindingTypeInput, FlowBindingTypeInput, infer_flow_binding_baseline, infer_flow_binding_type,
+    BindingTypeInput, FlowBindingRootInput, FlowBindingTypeInput, infer_flow_binding_baseline,
+    infer_flow_binding_states, infer_flow_binding_type,
 };
 use crate::js_module_info::flow::{FlowGuard, FlowNode, FlowNodeId, FlowTest, RootFlow};
 use crate::{JsModuleInfo, ModuleDb, ModuleInfo};
@@ -52,31 +53,77 @@ pub(in crate::db) fn flow_binding_baseline<'db>(
     }
 }
 
+pub(in crate::db) fn flow_binding_states<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    info: &JsModuleInfo,
+    input: FlowBindingRootInput<'db>,
+) -> Option<Box<[(FlowNodeId, TypeData<'db>)]>> {
+    let root = info.flow.root(input.root(db))?;
+    let binding = input.binding(db);
+    let points = root.read_points(binding.range(db));
+    if points.is_empty() {
+        return None;
+    }
+    let baseline = infer_flow_binding_baseline(db, binding)?;
+    if baseline == TypeData::Unknown {
+        return None;
+    }
+    let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
+    let states = ctx.solve_binding(root, points, binding.range(db), baseline)?;
+    Some(points.iter().copied().zip(states).collect())
+}
+
 pub(in crate::db) fn flow_binding_type<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
     info: &JsModuleInfo,
     input: FlowBindingTypeInput<'db>,
 ) -> Option<TypeData<'db>> {
-    let root = info.flow.root(input.root(db))?;
+    let root_index = input.root(db);
+    let root = info.flow.root(root_index)?;
     let point = input.point(db);
     if point as usize >= root.nodes.len() {
         return None;
     }
-    let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
-    ctx.narrow_binding_at_flow(root, point, input.binding(db))
+    let binding = input.binding(db);
+    let baseline = infer_flow_binding_baseline(db, binding)?;
+    if baseline == TypeData::Unknown {
+        return Some(TypeData::Unknown);
+    }
+    let shared = infer_flow_binding_states(db, FlowBindingRootInput::new(db, binding, root_index))
+        .and_then(|states| {
+            let index = states
+                .binary_search_by_key(&point, |(point, _)| *point)
+                .ok()?;
+            Some(states[index].1)
+        });
+    let narrowed = match shared {
+        Some(narrowed) => narrowed,
+        None => {
+            let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
+            match ctx.solve_binding(root, &[point], binding.range(db), baseline) {
+                Some(states) => states[0],
+                None => return Some(TypeData::Unknown),
+            }
+        }
+    };
+    if narrowed == TypeData::NeverKeyword {
+        return Some(TypeData::Unknown);
+    }
+    (narrowed != baseline).then_some(narrowed)
 }
 
 /// Marks a root node that the walk in [`ReachingFlow::new`] has not reached.
 const UNREACHED: u32 = u32::MAX;
 
 /// The nodes of a root's flow graph that lie on some path from its start to
-/// one point.
+/// at least one of several points.
 ///
 /// Reached nodes are numbered from zero in the order a backward walk from the
-/// point first visits them, so the point is node `0`. The solver keeps its
-/// per-node state over these numbers, so that state grows with the reached
-/// nodes rather than with the whole root.
+/// points first visits them. The solver keeps its per-node state over these
+/// numbers, so that state grows with the reached nodes rather than with the
+/// whole root.
 struct ReachingFlow {
     /// The root's id of each reached node.
     nodes: Vec<FlowNodeId>,
@@ -85,17 +132,19 @@ struct ReachingFlow {
     /// The reached nodes that each reached node flows directly into, in
     /// ascending order.
     successors: NodeLists,
+    /// The number of each point the walk started from, in the order given.
+    points: Vec<u32>,
 }
 
 impl ReachingFlow {
-    /// Walks backward from `point` through the predecessors in `root`.
+    /// Walks backward from `points` through the predecessors in `root`.
     ///
     /// Returns `None` when the walk exceeds its work limit or meets a node
     /// that `root` does not contain.
-    fn new(root: &RootFlow, point: FlowNodeId) -> Option<Self> {
+    fn new(root: &RootFlow, points: &[FlowNodeId]) -> Option<Self> {
         let mut numbering = vec![UNREACHED; root.nodes.len()];
         let mut nodes = Vec::new();
-        let mut pending = vec![point];
+        let mut pending = points.to_vec();
         let mut remaining = MAX_FLOW_STEPS;
         while let Some(node) = pending.pop() {
             remaining = remaining.checked_sub(1)?;
@@ -121,10 +170,15 @@ impl ReachingFlow {
                 .push(u32::try_from(predecessors.numbers.len()).ok()?);
         }
         let successors = predecessors.inverted();
+        let points = points
+            .iter()
+            .map(|point| numbering[*point as usize])
+            .collect();
         Some(Self {
             nodes,
             predecessors,
             successors,
+            points,
         })
     }
 }
@@ -201,28 +255,25 @@ impl<'db> ResolutionCtx<'db, '_> {
         )
     }
 
-    /// Applies the guards on every path to `point` to the binding's baseline.
-    ///
-    /// Collection records only reads that a test of their binding can reach, so
-    /// the baseline is resolved without a separate relevance check.
-    fn narrow_binding_at_flow(
+    /// Returns the type of `binding` at each of `points`, given its `baseline`
+    /// type at the root's start, or `None` when the walk or the solve exceeds
+    /// the flow work limit.
+    fn solve_binding(
         &mut self,
         root: &RootFlow,
-        point: FlowNodeId,
-        binding: BindingTypeInput<'db>,
-    ) -> Option<TypeData<'db>> {
-        let baseline = infer_flow_binding_baseline(self.db, binding)?;
-        if baseline == TypeData::Unknown {
-            return Some(TypeData::Unknown);
-        }
-        let Some(reaching) = ReachingFlow::new(root, point) else {
-            return Some(TypeData::Unknown);
-        };
-        let narrowed = self.solve_flow(root, &reaching, binding.range(self.db), baseline);
-        if narrowed == TypeData::NeverKeyword {
-            return Some(TypeData::Unknown);
-        }
-        (narrowed != baseline).then_some(narrowed)
+        points: &[FlowNodeId],
+        binding: TextRange,
+        baseline: TypeData<'db>,
+    ) -> Option<Vec<TypeData<'db>>> {
+        let reaching = ReachingFlow::new(root, points)?;
+        let states = self.solve_flow(root, &reaching, binding, baseline)?;
+        Some(
+            reaching
+                .points
+                .iter()
+                .map(|number| states[*number as usize])
+                .collect(),
+        )
     }
 
     #[expect(
@@ -263,15 +314,16 @@ impl<'db> ResolutionCtx<'db, '_> {
         None
     }
 
-    /// Returns the type of `binding` at the point of `reaching`, given its
-    /// `baseline` type at the root's start.
+    /// Returns the type of `binding` at every node of `reaching`, given its
+    /// `baseline` type at the root's start, or `None` when the solve exceeds
+    /// the flow work limit.
     fn solve_flow(
         &mut self,
         root: &RootFlow,
         reaching: &ReachingFlow,
         binding: TextRange,
         baseline: TypeData<'db>,
-    ) -> TypeData<'db> {
+    ) -> Option<Vec<TypeData<'db>>> {
         let count = reaching.nodes.len();
         let mut queue = VecDeque::new();
         for (number, node) in (0..).zip(&reaching.nodes) {
@@ -285,10 +337,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         while let Some(number) = queue.pop_front() {
             let index = number as usize;
             queued[index] = false;
-            let Some(next) = remaining.checked_sub(1) else {
-                return TypeData::Unknown;
-            };
-            remaining = next;
+            remaining = remaining.checked_sub(1)?;
             let predecessors = reaching.predecessors.get(number);
             let ty = match &root.nodes[reaching.nodes[index] as usize] {
                 FlowNode::Start => baseline,
@@ -328,7 +377,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }
             }
         }
-        states[0]
+        Some(states)
     }
 
     /// Returns the type of `binding` after the guard at `guard` holds, given
@@ -406,7 +455,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn reaching_flow_numbers_only_the_nodes_before_the_point() {
+    fn reaching_flow_numbers_only_the_nodes_before_its_points() {
         // 0: start, 1: loop header, 2: loop body, 3: back edge, 4: loop exit.
         let root = RootFlow {
             nodes: Box::from([
@@ -426,9 +475,11 @@ mod tests {
                 },
             ]),
             guards: Box::from([FlowGuard::Keep]),
+            read_points: Default::default(),
         };
-        let reaching = ReachingFlow::new(&root, 2).unwrap();
+        let reaching = ReachingFlow::new(&root, &[2]).unwrap();
         assert_eq!(reaching.nodes, [2, 1, 3, 0]);
+        assert_eq!(reaching.points, [0]);
         let predecessors: Vec<_> = (0..4)
             .map(|number| reaching.predecessors.get(number))
             .collect();
@@ -437,6 +488,11 @@ mod tests {
             .map(|number| reaching.successors.get(number))
             .collect();
         assert_eq!(successors, [&[2][..], &[0], &[1], &[1]]);
-        assert!(ReachingFlow::new(&root, 5).is_none());
+        assert!(ReachingFlow::new(&root, &[5]).is_none());
+
+        // The loop exit and the loop body share the header and the back edge.
+        let both = ReachingFlow::new(&root, &[2, 4]).unwrap();
+        assert_eq!(both.nodes, [4, 1, 3, 2, 0]);
+        assert_eq!(both.points, [3, 0]);
     }
 }

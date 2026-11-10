@@ -60,6 +60,16 @@ pub(crate) enum FlowNode {
 pub(crate) struct RootFlow {
     pub(crate) nodes: Box<[FlowNode]>,
     pub(crate) guards: Box<[FlowGuard]>,
+    /// The points of each binding's reads, sorted and without duplicates.
+    pub(crate) read_points: FxHashMap<TextRange, Box<[FlowNodeId]>>,
+}
+
+impl RootFlow {
+    /// Returns the points where the root reads `binding`, sorted, or an empty
+    /// slice when it keeps no read of it.
+    pub(crate) fn read_points(&self, binding: TextRange) -> &[FlowNodeId] {
+        self.read_points.get(&binding).map_or(&[], |points| points)
+    }
 }
 
 /// A read whose type a test in its execution root may refine.
@@ -187,12 +197,15 @@ impl RootCollector<'_> {
             return;
         };
         let index = flow.roots.len();
-        let mut kept = false;
+        let mut read_points: FxHashMap<_, Vec<_>> = FxHashMap::default();
         for read in reads {
             if !reachable.contains(&(read.binding, read.point)) {
                 continue;
             }
-            kept = true;
+            read_points
+                .entry(read.binding)
+                .or_default()
+                .push(read.point);
             let identifier = AnyFlowExpression::JsIdentifierExpression(read.identifier);
             flow.candidates
                 .insert(identifier.range(), AstPtr::new(&identifier));
@@ -210,10 +223,18 @@ impl RootCollector<'_> {
                 },
             );
         }
-        if kept {
+        if !read_points.is_empty() {
             flow.roots.push(RootFlow {
                 nodes: nodes.into_boxed_slice(),
                 guards: guards.into_boxed_slice(),
+                read_points: read_points
+                    .into_iter()
+                    .map(|(binding, mut points)| {
+                        points.sort_unstable();
+                        points.dedup();
+                        (binding, points.into_boxed_slice())
+                    })
+                    .collect(),
             });
         }
     }

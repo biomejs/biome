@@ -6,15 +6,16 @@
 //! without resolving every type collected for the module.
 
 use super::{
-    BindingTypeInput, BindingTypeWithImportBudgetInput, ExpressionTypeInput, FlowBindingTypeInput,
-    LocalTypeInput, LocalTypeWithImportBudgetInput,
+    BindingTypeInput, BindingTypeWithImportBudgetInput, ExpressionTypeInput, FlowBindingRootInput,
+    FlowBindingTypeInput, LocalTypeInput, LocalTypeWithImportBudgetInput,
 };
 use crate::ModuleDb;
 use crate::db::type_inference::{
     ImportResolution, ResolutionCtx, find_member_type_on_demand as find_member_type_impl,
     find_value_member_type_on_demand as find_value_member_type_impl, flow_binding_baseline,
-    flow_binding_type, flow_expression_type, resolve_local_type_on_demand,
+    flow_binding_states, flow_binding_type, flow_expression_type, resolve_local_type_on_demand,
 };
+use crate::js_module_info::flow::FlowNodeId;
 use crate::module_graph::ModuleInfoKind;
 use crate::type_inference::profiling::{
     TypeInferenceProfileOrigin, TypeInferenceQueryKind, execute_query,
@@ -122,7 +123,45 @@ pub(crate) fn infer_flow_binding_baseline<'db>(
     )
 }
 
+/// Solves one binding at every point where an execution root reads it, so
+/// reads at different points share one walk over the root's flow.
+///
+/// Returns each read point that collection recorded for the binding, sorted
+/// by point, with the binding's type there. The type is `never` at a read
+/// that no path reaches.
+///
+/// Returns `None` for an unavailable root, a binding whose type no test can
+/// change or whose baseline is `Unknown`, and when the shared walk exceeds the
+/// flow work limit or passes through a query cycle. [`infer_flow_binding_type`]
+/// then solves each point on its own, so no read loses precision to the
+/// shared limit.
+#[salsa::tracked(returns(as_deref), cycle_result=infer_flow_binding_states_cycle_result)]
+pub(crate) fn infer_flow_binding_states<'db>(
+    db: &'db dyn ModuleDb,
+    input: FlowBindingRootInput<'db>,
+) -> Option<Box<[(FlowNodeId, InferredTypeData<'db>)]>> {
+    let binding = input.binding(db);
+    let module = binding.module(db);
+    execute_query(
+        TypeInferenceQueryKind::Lookups,
+        TypeInferenceProfileOrigin::exact(module, binding.range(db)),
+        "infer_flow_binding_states",
+        || {
+            let ModuleInfoKind::Js(info) = module.kind(db) else {
+                return None;
+            };
+            if !info.infer_types {
+                return None;
+            }
+            flow_binding_states(db, module, info, input)
+        },
+    )
+}
+
 /// Refines one binding at a collected flow point, shared by its reads there.
+///
+/// Takes the binding's type at the point from [`infer_flow_binding_states`],
+/// or solves the point on its own when that query has no result.
 ///
 /// Returns `None` for unavailable roots or points, a binding whose type no
 /// test can change, or an unchanged type. Cycles and incomplete flow evaluation
@@ -294,6 +333,14 @@ fn infer_flow_binding_baseline_cycle_result<'db>(
     _input: BindingTypeInput<'db>,
 ) -> Option<InferredTypeData<'db>> {
     Some(InferredTypeData::Unknown)
+}
+
+fn infer_flow_binding_states_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: FlowBindingRootInput<'db>,
+) -> Option<Box<[(FlowNodeId, InferredTypeData<'db>)]>> {
+    None
 }
 
 fn infer_flow_binding_type_cycle_result<'db>(

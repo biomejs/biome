@@ -82,9 +82,13 @@ reaches reads in the enclosing one, and an array or object literal ends the
 chain of enclosing candidates.
 
 Lookups skip flow for any expression that is not a candidate. For a candidate
-read, `infer_flow_binding_baseline` resolves the variable's type once, and
-`infer_flow_binding_type` applies the guards on every path to the read's
-incoming flow point. If decomposing a condition cannot finish within its work
+read, `infer_flow_binding_baseline` resolves the variable's type once.
+`infer_flow_binding_states` then applies the guards on every path to all reads
+of the variable in one root in a single solve, and `infer_flow_binding_type`
+takes the result at the read's incoming flow point. When that shared solve
+exceeds its work limit or meets a query cycle, `infer_flow_binding_type` solves
+the read's point on its own, so a read never loses precision because other
+reads share its root. If decomposing a condition cannot finish within its work
 limit, the guard makes the result unknown rather than assuming the expression is
 unaffected. The variable's ordinary type stays separate from the result at each
 read.
@@ -111,16 +115,17 @@ the top level of a script. Variables typed
 supported test can change them. Collection already drops reads of untyped and
 `any`-annotated variables, and builds no graph for a root that declares none
 of the variables that can narrow; other variable types are resolved only when a
-candidate read is queried, because resolving them can be costly. If flow
-solving exhausts its work limit or a query cycle occurs, the result is unknown.
+candidate read is queried, because resolving them can be costly. If solving a
+read's flow point on its own exhausts its work limit or a query cycle occurs,
+the result is unknown.
 Callers must respect that result rather than replace it with a more confident
 answer from raw type information.
 
 Collected flow belongs to the module input, so an edit replaces it together
 with the raw type tables, even when variable declarations and references stay
 the same. Salsa caches the type work: all reads of a variable share the type that
-narrowing starts from, and reads at the same flow point also share their
-narrowing calculation. These caches recompute when the module input changes; they
+narrowing starts from, its reads in one root share one narrowing calculation,
+and reads at the same flow point share their result. These caches recompute when the module input changes; they
 do not track edits separately for each function.
 
 ### Analyzer-facing requests
