@@ -1,8 +1,24 @@
 use crate::{
-    CssComplexSelector, CssCompoundSelector, CssPseudoClassFunctionSelector,
+    CssClassSelector, CssComplexSelector, CssCompoundSelector, CssPseudoClassFunctionSelector,
     CssPseudoClassFunctionSelectorList, decode_css_identifier,
 };
-use biome_rowan::declare_node_union;
+use biome_rowan::{TokenText, declare_node_union};
+
+impl CssClassSelector {
+    /// Returns the class name, such as `foo` for `.foo`.
+    ///
+    /// Returns `None` when the name is interpolated or otherwise not a plain identifier.
+    pub fn name_text(&self) -> Option<TokenText> {
+        Some(
+            self.name()
+                .ok()?
+                .as_css_custom_identifier()?
+                .value_token()
+                .ok()?
+                .token_text_trimmed(),
+        )
+    }
+}
 
 impl CssComplexSelector {
     ///
