@@ -1,0 +1,161 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+expect(method).toBeCalledTimes(0 as number);
+expect(method).not.toBeCalledTimes(<number>0);
+expect(method).toHaveBeenCalledTimes(0 satisfies number);
+expect(method as jest.Mock).toHaveBeenCalledTimes(0);
+expect<jest.Mock>(method).toHaveBeenCalledTimes(0);
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:16 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ expect(method).toBeCalledTimes(0 as number);
+      │                ^^^^^^^^^^^^^^^
+    3 │ expect(method).not.toBeCalledTimes(<number>0);
+    4 │ expect(method).toHaveBeenCalledTimes(0 satisfies number);
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use not.toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use not.toHaveBeenCalled() instead.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - expect(method).toBeCalledTimes(0·as·number);
+      2 │ + expect(method).not.toHaveBeenCalled();
+    3 3 │   expect(method).not.toBeCalledTimes(<number>0);
+    4 4 │   expect(method).toHaveBeenCalledTimes(0 satisfies number);
+  
+
+```
+
+```
+invalid.ts:3:20 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    1 │ /* should generate diagnostics */
+    2 │ expect(method).toBeCalledTimes(0 as number);
+  > 3 │ expect(method).not.toBeCalledTimes(<number>0);
+      │                    ^^^^^^^^^^^^^^^
+    4 │ expect(method).toHaveBeenCalledTimes(0 satisfies number);
+    5 │ expect(method as jest.Mock).toHaveBeenCalledTimes(0);
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toHaveBeenCalled() instead.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   expect(method).toBeCalledTimes(0 as number);
+    3   │ - expect(method).not.toBeCalledTimes(<number>0);
+      3 │ + expect(method).toHaveBeenCalled();
+    4 4 │   expect(method).toHaveBeenCalledTimes(0 satisfies number);
+    5 5 │   expect(method as jest.Mock).toHaveBeenCalledTimes(0);
+  
+
+```
+
+```
+invalid.ts:4:16 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    2 │ expect(method).toBeCalledTimes(0 as number);
+    3 │ expect(method).not.toBeCalledTimes(<number>0);
+  > 4 │ expect(method).toHaveBeenCalledTimes(0 satisfies number);
+      │                ^^^^^^^^^^^^^^^^^^^^^
+    5 │ expect(method as jest.Mock).toHaveBeenCalledTimes(0);
+    6 │ expect<jest.Mock>(method).toHaveBeenCalledTimes(0);
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use not.toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use not.toHaveBeenCalled() instead.
+  
+    2 2 │   expect(method).toBeCalledTimes(0 as number);
+    3 3 │   expect(method).not.toBeCalledTimes(<number>0);
+    4   │ - expect(method).toHaveBeenCalledTimes(0·satisfies·number);
+      4 │ + expect(method).not.toHaveBeenCalled();
+    5 5 │   expect(method as jest.Mock).toHaveBeenCalledTimes(0);
+    6 6 │   expect<jest.Mock>(method).toHaveBeenCalledTimes(0);
+  
+
+```
+
+```
+invalid.ts:5:29 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    3 │ expect(method).not.toBeCalledTimes(<number>0);
+    4 │ expect(method).toHaveBeenCalledTimes(0 satisfies number);
+  > 5 │ expect(method as jest.Mock).toHaveBeenCalledTimes(0);
+      │                             ^^^^^^^^^^^^^^^^^^^^^
+    6 │ expect<jest.Mock>(method).toHaveBeenCalledTimes(0);
+    7 │ 
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use not.toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use not.toHaveBeenCalled() instead.
+  
+    3 3 │   expect(method).not.toBeCalledTimes(<number>0);
+    4 4 │   expect(method).toHaveBeenCalledTimes(0 satisfies number);
+    5   │ - expect(method·as·jest.Mock).toHaveBeenCalledTimes(0);
+      5 │ + expect(method·as·jest.Mock).not.toHaveBeenCalled();
+    6 6 │   expect<jest.Mock>(method).toHaveBeenCalledTimes(0);
+    7 7 │   
+  
+
+```
+
+```
+invalid.ts:6:27 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    4 │ expect(method).toHaveBeenCalledTimes(0 satisfies number);
+    5 │ expect(method as jest.Mock).toHaveBeenCalledTimes(0);
+  > 6 │ expect<jest.Mock>(method).toHaveBeenCalledTimes(0);
+      │                           ^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use not.toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use not.toHaveBeenCalled() instead.
+  
+    4 4 │   expect(method).toHaveBeenCalledTimes(0 satisfies number);
+    5 5 │   expect(method as jest.Mock).toHaveBeenCalledTimes(0);
+    6   │ - expect<jest.Mock>(method).toHaveBeenCalledTimes(0);
+      6 │ + expect<jest.Mock>(method).not.toHaveBeenCalled();
+    7 7 │   
+  
+
+```
