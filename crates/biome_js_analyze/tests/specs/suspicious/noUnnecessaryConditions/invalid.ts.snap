@@ -167,7 +167,7 @@ if (!arrNotFalsy) {  // always false, should be flagged
 }
 
 const objNotFalsy = {};
-if (!objNotFalsy) {  // the type {} can also describe primitives, so not flagged
+if (!objNotFalsy) {  // always false, should be flagged
   console.log("never runs");
 }
 
@@ -1013,6 +1013,24 @@ invalid.ts:159:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
         │     ^^^^^^^^^^^^
     160 │   console.log("never runs");
     161 │ }
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
+
+```
+
+```
+invalid.ts:164:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    163 │ const objNotFalsy = {};
+  > 164 │ if (!objNotFalsy) {  // always false, should be flagged
+        │     ^^^^^^^^^^^^
+    165 │   console.log("never runs");
+    166 │ }
   
   i The value's type can never be truthy, so this check is redundant.
   

@@ -2156,10 +2156,18 @@ fn test_member_lookup_exhaustion_returns_unknown() {
     let fs = MemoryFileSystem::default();
     fs.insert("/src/index.ts".into(), "");
     let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
-    let mut ty = InferredTypeData::Object(InferredObject::new(&db, None, Box::default(), false));
+    let shape = biome_js_type_info::ObjectKind::Shape;
+    let mut ty =
+        InferredTypeData::Object(InferredObject::new(&db, None, Box::default(), false, shape));
 
     for _ in 0..1025 {
-        ty = InferredTypeData::Object(InferredObject::new(&db, Some(ty), Box::default(), false));
+        ty = InferredTypeData::Object(InferredObject::new(
+            &db,
+            Some(ty),
+            Box::default(),
+            false,
+            shape,
+        ));
     }
 
     assert_eq!(

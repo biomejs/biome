@@ -161,7 +161,7 @@ if (!arrNotFalsy) {  // always false, should be flagged
 }
 
 const objNotFalsy = {};
-if (!objNotFalsy) {  // the type {} can also describe primitives, so not flagged
+if (!objNotFalsy) {  // always false, should be flagged
   console.log("never runs");
 }
 

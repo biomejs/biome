@@ -1,11 +1,11 @@
 use std::hash::Hash;
 
-use crate::Path;
 use crate::interned_types::{
     InternedClass, InternedFunction, InternedInterface, InternedIntersection, InternedNamespace,
     InternedObject, InternedUnion, Literal, TypeData, TypeDb, TypeMember, TypeMemberKind,
 };
 use crate::type_relation::intersect_primitives;
+use crate::{ObjectKind, Path};
 use biome_rowan::Text;
 use rustc_hash::{FxHashMap, FxHashSet};
 
@@ -225,6 +225,7 @@ pub(crate) fn object_from_members<'db>(
         None,
         members.into_boxed_slice(),
         false,
+        ObjectKind::Shape,
     ))
 }
 
@@ -545,6 +546,7 @@ impl<'db> MergedType<'db> {
                 None,
                 members.into_boxed_slice(),
                 has_unknown_members,
+                ObjectKind::Shape,
             )),
             Self::Primitive(primitive) => primitive,
             Self::Unknown => TypeData::Unknown,

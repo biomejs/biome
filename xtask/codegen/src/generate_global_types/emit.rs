@@ -170,7 +170,7 @@ fn render_type_data(data: &LoweredTypeData) -> String {
         LoweredTypeData::NeverKeyword => "crate::TypeData::NeverKeyword".to_string(),
         LoweredTypeData::Null => "crate::TypeData::Null".to_string(),
         LoweredTypeData::Object(members) => format!(
-            "crate::TypeData::from(crate::Object {{ prototype: None, members: Box::new([{}]), has_unknown_members: false }})",
+            "crate::TypeData::from(crate::Object {{ prototype: None, members: Box::new([{}]), has_unknown_members: false, kind: crate::ObjectKind::Shape }})",
             render_members(members),
         ),
         LoweredTypeData::ObjectKeyword => "crate::TypeData::ObjectKeyword".to_string(),

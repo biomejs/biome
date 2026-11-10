@@ -10,7 +10,7 @@ use biome_rowan::Text;
 use crate::globals::{GLOBAL_ANY_KEYWORD_ID, GLOBAL_UNKNOWN_ID};
 use crate::interned_types::{InternedLiteral, Literal};
 use crate::resolved::InferredTypeData;
-use crate::{RawTypeData, RawTypeId, TypeDb, TypeReference};
+use crate::{ObjectKind, RawTypeData, RawTypeId, TypeDb, TypeReference};
 
 const MAX_NARROWING_STEPS: usize = 256;
 const MAX_LITERAL_BYTES: usize = 1024;
@@ -250,6 +250,7 @@ fn typeof_kind(db: &dyn TypeDb, ty: InferredTypeData<'_>) -> Option<TypeofKind> 
 fn is_non_primitive(db: &dyn TypeDb, ty: InferredTypeData<'_>) -> bool {
     match ty {
         InferredTypeData::ObjectKeyword => true,
+        InferredTypeData::Object(object) => object.kind(db) == ObjectKind::Expression,
         InferredTypeData::InstanceOf(instance) => {
             let target = instance.ty(db);
             target.is_builtin_object_class(db)
@@ -958,8 +959,13 @@ mod tests {
     #[test]
     fn structural_objects_are_non_nullish_but_may_be_primitive() {
         let db = TestDb::default();
-        let object =
-            InferredTypeData::Object(InternedObject::new(&db, None, Box::default(), false));
+        let object = InferredTypeData::Object(InternedObject::new(
+            &db,
+            None,
+            Box::default(),
+            false,
+            ObjectKind::Shape,
+        ));
         for ty in [
             object,
             InferredTypeData::instance_of(&db, object, Box::default()),
@@ -986,6 +992,29 @@ mod tests {
                     );
                 }
             }
+        }
+    }
+
+    #[test]
+    fn objects_from_object_expressions_are_never_primitive() {
+        let db = TestDb::default();
+        let object = InferredTypeData::Object(InternedObject::new(
+            &db,
+            None,
+            Box::default(),
+            false,
+            ObjectKind::Expression,
+        ));
+        for (predicate, positive) in [
+            (NarrowingPredicate::Nullish, true),
+            (NarrowingPredicate::Truthy, false),
+            (NarrowingPredicate::Typeof(TypeofKind::String), true),
+        ] {
+            assert_eq!(
+                narrow_type(&db, object, predicate, positive),
+                InferredTypeData::NeverKeyword
+            );
+            assert_eq!(narrow_type(&db, object, predicate, !positive), object);
         }
     }
 

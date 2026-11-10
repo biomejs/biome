@@ -132,7 +132,7 @@ switch (true) {
 
 // Object property access with constants
 const obj = {};
-if (obj) {  // the type {} can also describe primitives, so not flagged
+if (obj) {  // Object literal is always truthy
   console.log("always runs");
 }
 

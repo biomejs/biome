@@ -1,7 +1,7 @@
 use super::{InferredType, MAX_TYPE_VARIANT_STEPS, TypeTraversalError};
-use crate::TypeDb;
 use crate::interned_types::{ConditionalType, FunctionParameter, Literal, ReturnType, TypeData};
 use crate::type_traversal::{DepthFirstVisitor, TraversalOutcome, VisitContext};
+use crate::{ObjectKind, TypeDb};
 use std::ops::ControlFlow;
 
 /// Distinguishes unambiguous truthiness checks from checks that conflate nullish
@@ -159,10 +159,15 @@ impl<'db> DepthFirstVisitor<TypeData<'db>> for BooleanCoercionVisitor<'db> {
             | TypeData::MappedType(_)
             | TypeData::Extends(_)
             | TypeData::ThisKeyword
-            | TypeData::Object(_)
             | TypeData::Interface(_) => {
                 return ControlFlow::Break(TypeTraversalError::UnresolvedType);
             }
+            TypeData::Object(object) => match object.kind(self.db) {
+                ObjectKind::Expression => OBJECT,
+                ObjectKind::Shape => {
+                    return ControlFlow::Break(TypeTraversalError::UnresolvedType);
+                }
+            },
             TypeData::AnyKeyword | TypeData::UnknownKeyword => ANY,
             TypeData::NeverKeyword => 0,
             TypeData::Null | TypeData::Undefined | TypeData::VoidKeyword => NULLISH,
@@ -353,7 +358,13 @@ mod tests {
     #[test]
     fn structural_intersections_do_not_prove_truthiness() {
         let db = TestDb::default();
-        let object = TypeData::Object(InternedObject::new(&db, None, Box::default(), false));
+        let object = TypeData::Object(InternedObject::new(
+            &db,
+            None,
+            Box::default(),
+            false,
+            ObjectKind::Shape,
+        ));
         let interface = TypeData::Interface(InternedInterface::new(
             &db,
             Box::default(),

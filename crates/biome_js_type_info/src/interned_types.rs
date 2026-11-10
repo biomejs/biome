@@ -15,7 +15,7 @@ use rustc_hash::FxHashSet;
 use std::iter::FusedIterator;
 
 use crate::{
-    ScopeId,
+    ObjectKind, ScopeId,
     builders::{IntersectionBuilder, UnionBuilder},
     generated::global_types::ids::{
         ARRAY_ID_GLOBAL_TYPE_ID, ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID, DATE_ID_GLOBAL_TYPE_ID,
@@ -569,13 +569,17 @@ impl<'db> TypeData<'db> {
     ///
     /// Property shapes and class instance annotations can describe primitives.
     /// Unlike expression-evaluation categories, their structure alone does not
-    /// prove truthiness. `None` means further traversal is needed.
+    /// prove truthiness. The object that an object expression creates is always
+    /// truthy. `None` means further traversal is needed.
     pub(crate) fn value_conditional_type_shallow(
         self,
         db: &'db dyn TypeDb,
     ) -> Option<ConditionalType> {
         match self {
-            Self::Object(_) => Some(ConditionalType::NonNullish),
+            Self::Object(object) => Some(match object.kind(db) {
+                ObjectKind::Expression => ConditionalType::Truthy,
+                ObjectKind::Shape => ConditionalType::NonNullish,
+            }),
             Self::InstanceOf(instance) => {
                 let target = instance.ty(db);
                 if target.is_builtin_object_class(db) {
@@ -1186,6 +1190,7 @@ impl<'db> TypeData<'db> {
                 object.prototype.as_ref().map(&mut *resolve_reference),
                 convert_type_members(db, &object.members, resolve_reference, resolve_member),
                 object.has_unknown_members,
+                object.kind,
             )),
             raw::TypeData::Tuple(tuple) => Self::Tuple(InternedTuple::new(
                 db,
@@ -1719,6 +1724,7 @@ impl<'db> TypeDataSlotReplacements<'db> {
                 self.take_optional_type(object.prototype(db))?,
                 self.rebuild_type_members(object.members(db))?,
                 object.has_unknown_members(db),
+                object.kind(db),
             )),
             TypeData::Tuple(tuple) => TypeData::Tuple(InternedTuple::new(
                 db,
@@ -2700,6 +2706,10 @@ pub struct InternedObject<'db> {
     /// See [`crate::type_data::Object::has_unknown_members`].
     #[returns(copy)]
     pub has_unknown_members: bool,
+
+    /// See [`crate::type_data::Object::kind`].
+    #[returns(copy)]
+    pub kind: ObjectKind,
 }
 
 #[salsa::interned]
@@ -3823,6 +3833,7 @@ mod tests {
                 Some(s.next()),
                 boxed([named_member(s)]),
                 false,
+                ObjectKind::Shape,
             ))
         });
         assert_identity(&db, |s| {
@@ -3831,6 +3842,7 @@ mod tests {
                 Some(s.next()),
                 boxed([named_member(s)]),
                 true,
+                ObjectKind::Expression,
             ))
         });
         assert_identity(&db, |s| {
