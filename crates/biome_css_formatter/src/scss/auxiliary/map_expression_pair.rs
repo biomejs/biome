@@ -100,7 +100,6 @@ impl Format<CssFormatContext> for FormatScssMapPairLayout<'_> {
         // `/* c */ key: (nested: value)` keeps the nested map in the pair group.
         if is_self_breaking_value(&value)
             && !is_self_breaking_value(&key)
-            && f.comments().leading_comments(self.node.syntax()).is_empty()
             && !is_in_control_variable_map(self.node)
         {
             return write!(
