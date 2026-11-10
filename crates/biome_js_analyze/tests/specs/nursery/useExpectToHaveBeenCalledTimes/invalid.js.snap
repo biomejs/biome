@@ -1,0 +1,1167 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+expect(method.mock.calls).toHaveLength(1);
+expect(method.mock.calls).toHaveLength(0);
+expect(method.mock.calls).toHaveLength(count);
+expect(method.mock.calls).not.toHaveLength(0);
+expect(method.mock.calls).resolves.toHaveLength(count);
+expect(method.mock.calls).rejects.not.toHaveLength(count);
+expect(my.method.mock.calls).not.toHaveLength(0);
+expect(jest.mocked(method).mock.calls).toHaveLength(1);
+expect(vi.mocked(method).mock.calls).toHaveLength(1);
+expect(method.mock.calls, "custom message").toHaveLength(1);
+expect(method.mock.calls,).toHaveLength(1,);
+expect(method.mock.calls).toHaveLength();
+expect(method.mock.calls).toHaveLength(1, 2);
+expect(method.mock.calls)?.toHaveLength(1);
+
+// Properties written with brackets.
+expect(method["mock"].calls).toHaveLength(0);
+expect(method.mock["calls"]).toHaveLength(0);
+expect(method[`mock`][`calls`]).toHaveLength(0);
+expect(method.mock.calls)["toHaveLength"](1);
+expect(method.mock.calls)['toHaveLength'](1);
+expect(method.mock.calls)[`toHaveLength`](1);
+expect(method.mock.calls)["not"]["toHaveLength"](1);
+expect(method.mock.calls)?.[("toHaveLength")](1);
+
+// Parentheses.
+expect((method.mock.calls)).toHaveLength(1);
+expect((method.mock).calls).toHaveLength(1);
+expect((method).mock.calls).toHaveLength(1);
+expect((first, second).mock.calls).toHaveLength(1);
+(expect(method.mock.calls).toHaveLength)(1);
+(expect(method.mock.calls)).toHaveLength(1);
+(expect(method.mock.calls).not).toHaveLength(1);
+
+test("comments around the removed properties are kept", async () => {
+	// leading comment
+	expect(method.mock.calls).toHaveLength(1); // trailing comment
+	expect(/* before */ method.mock.calls /* after */).toHaveLength(/* count */ 1);
+	expect(method.mock.calls) /* matcher */.toHaveLength /* arguments */(1);
+	expect(method.mock.calls)[/* before */ "toHaveLength" /* after */](1);
+	await expect(method.mock.calls)
+		// why this is checked
+		.resolves.toHaveLength(1);
+});
+
+test("no fix when comments would be removed", () => {
+	expect(method /* mock */.mock.calls).toHaveLength(1);
+	expect(method.mock /* calls */.calls).toHaveLength(1);
+	expect(
+		method
+			// the recorded calls
+			.mock.calls,
+	).toHaveLength(1);
+	expect((/* mock */ method.mock.calls)).toHaveLength(1);
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:2:27 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ expect(method.mock.calls).toHaveLength(1);
+      │                           ^^^^^^^^^^^^
+    3 │ expect(method.mock.calls).toHaveLength(0);
+    4 │ expect(method.mock.calls).toHaveLength(count);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - expect(method.mock.calls).toHaveLength(1);
+        2 │ + expect(method).toHaveBeenCalledTimes(1);
+     3  3 │   expect(method.mock.calls).toHaveLength(0);
+     4  4 │   expect(method.mock.calls).toHaveLength(count);
+  
+
+```
+
+```
+invalid.js:3:27 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    1 │ /* should generate diagnostics */
+    2 │ expect(method.mock.calls).toHaveLength(1);
+  > 3 │ expect(method.mock.calls).toHaveLength(0);
+      │                           ^^^^^^^^^^^^
+    4 │ expect(method.mock.calls).toHaveLength(count);
+    5 │ expect(method.mock.calls).not.toHaveLength(0);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   expect(method.mock.calls).toHaveLength(1);
+     3    │ - expect(method.mock.calls).toHaveLength(0);
+        3 │ + expect(method).toHaveBeenCalledTimes(0);
+     4  4 │   expect(method.mock.calls).toHaveLength(count);
+     5  5 │   expect(method.mock.calls).not.toHaveLength(0);
+  
+
+```
+
+```
+invalid.js:4:27 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    2 │ expect(method.mock.calls).toHaveLength(1);
+    3 │ expect(method.mock.calls).toHaveLength(0);
+  > 4 │ expect(method.mock.calls).toHaveLength(count);
+      │                           ^^^^^^^^^^^^
+    5 │ expect(method.mock.calls).not.toHaveLength(0);
+    6 │ expect(method.mock.calls).resolves.toHaveLength(count);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+     2  2 │   expect(method.mock.calls).toHaveLength(1);
+     3  3 │   expect(method.mock.calls).toHaveLength(0);
+     4    │ - expect(method.mock.calls).toHaveLength(count);
+        4 │ + expect(method).toHaveBeenCalledTimes(count);
+     5  5 │   expect(method.mock.calls).not.toHaveLength(0);
+     6  6 │   expect(method.mock.calls).resolves.toHaveLength(count);
+  
+
+```
+
+```
+invalid.js:5:31 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    3 │ expect(method.mock.calls).toHaveLength(0);
+    4 │ expect(method.mock.calls).toHaveLength(count);
+  > 5 │ expect(method.mock.calls).not.toHaveLength(0);
+      │                               ^^^^^^^^^^^^
+    6 │ expect(method.mock.calls).resolves.toHaveLength(count);
+    7 │ expect(method.mock.calls).rejects.not.toHaveLength(count);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+     3  3 │   expect(method.mock.calls).toHaveLength(0);
+     4  4 │   expect(method.mock.calls).toHaveLength(count);
+     5    │ - expect(method.mock.calls).not.toHaveLength(0);
+        5 │ + expect(method).not.toHaveBeenCalledTimes(0);
+     6  6 │   expect(method.mock.calls).resolves.toHaveLength(count);
+     7  7 │   expect(method.mock.calls).rejects.not.toHaveLength(count);
+  
+
+```
+
+```
+invalid.js:6:36 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    4 │ expect(method.mock.calls).toHaveLength(count);
+    5 │ expect(method.mock.calls).not.toHaveLength(0);
+  > 6 │ expect(method.mock.calls).resolves.toHaveLength(count);
+      │                                    ^^^^^^^^^^^^
+    7 │ expect(method.mock.calls).rejects.not.toHaveLength(count);
+    8 │ expect(my.method.mock.calls).not.toHaveLength(0);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+     4  4 │   expect(method.mock.calls).toHaveLength(count);
+     5  5 │   expect(method.mock.calls).not.toHaveLength(0);
+     6    │ - expect(method.mock.calls).resolves.toHaveLength(count);
+        6 │ + expect(method).resolves.toHaveBeenCalledTimes(count);
+     7  7 │   expect(method.mock.calls).rejects.not.toHaveLength(count);
+     8  8 │   expect(my.method.mock.calls).not.toHaveLength(0);
+  
+
+```
+
+```
+invalid.js:7:39 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    5 │ expect(method.mock.calls).not.toHaveLength(0);
+    6 │ expect(method.mock.calls).resolves.toHaveLength(count);
+  > 7 │ expect(method.mock.calls).rejects.not.toHaveLength(count);
+      │                                       ^^^^^^^^^^^^
+    8 │ expect(my.method.mock.calls).not.toHaveLength(0);
+    9 │ expect(jest.mocked(method).mock.calls).toHaveLength(1);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+     5  5 │   expect(method.mock.calls).not.toHaveLength(0);
+     6  6 │   expect(method.mock.calls).resolves.toHaveLength(count);
+     7    │ - expect(method.mock.calls).rejects.not.toHaveLength(count);
+        7 │ + expect(method).rejects.not.toHaveBeenCalledTimes(count);
+     8  8 │   expect(my.method.mock.calls).not.toHaveLength(0);
+     9  9 │   expect(jest.mocked(method).mock.calls).toHaveLength(1);
+  
+
+```
+
+```
+invalid.js:8:34 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+     6 │ expect(method.mock.calls).resolves.toHaveLength(count);
+     7 │ expect(method.mock.calls).rejects.not.toHaveLength(count);
+   > 8 │ expect(my.method.mock.calls).not.toHaveLength(0);
+       │                                  ^^^^^^^^^^^^
+     9 │ expect(jest.mocked(method).mock.calls).toHaveLength(1);
+    10 │ expect(vi.mocked(method).mock.calls).toHaveLength(1);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+     6  6 │   expect(method.mock.calls).resolves.toHaveLength(count);
+     7  7 │   expect(method.mock.calls).rejects.not.toHaveLength(count);
+     8    │ - expect(my.method.mock.calls).not.toHaveLength(0);
+        8 │ + expect(my.method).not.toHaveBeenCalledTimes(0);
+     9  9 │   expect(jest.mocked(method).mock.calls).toHaveLength(1);
+    10 10 │   expect(vi.mocked(method).mock.calls).toHaveLength(1);
+  
+
+```
+
+```
+invalid.js:9:40 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+     7 │ expect(method.mock.calls).rejects.not.toHaveLength(count);
+     8 │ expect(my.method.mock.calls).not.toHaveLength(0);
+   > 9 │ expect(jest.mocked(method).mock.calls).toHaveLength(1);
+       │                                        ^^^^^^^^^^^^
+    10 │ expect(vi.mocked(method).mock.calls).toHaveLength(1);
+    11 │ expect(method.mock.calls, "custom message").toHaveLength(1);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+     7  7 │   expect(method.mock.calls).rejects.not.toHaveLength(count);
+     8  8 │   expect(my.method.mock.calls).not.toHaveLength(0);
+     9    │ - expect(jest.mocked(method).mock.calls).toHaveLength(1);
+        9 │ + expect(jest.mocked(method)).toHaveBeenCalledTimes(1);
+    10 10 │   expect(vi.mocked(method).mock.calls).toHaveLength(1);
+    11 11 │   expect(method.mock.calls, "custom message").toHaveLength(1);
+  
+
+```
+
+```
+invalid.js:10:38 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+     8 │ expect(my.method.mock.calls).not.toHaveLength(0);
+     9 │ expect(jest.mocked(method).mock.calls).toHaveLength(1);
+  > 10 │ expect(vi.mocked(method).mock.calls).toHaveLength(1);
+       │                                      ^^^^^^^^^^^^
+    11 │ expect(method.mock.calls, "custom message").toHaveLength(1);
+    12 │ expect(method.mock.calls,).toHaveLength(1,);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+     8  8 │   expect(my.method.mock.calls).not.toHaveLength(0);
+     9  9 │   expect(jest.mocked(method).mock.calls).toHaveLength(1);
+    10    │ - expect(vi.mocked(method).mock.calls).toHaveLength(1);
+       10 │ + expect(vi.mocked(method)).toHaveBeenCalledTimes(1);
+    11 11 │   expect(method.mock.calls, "custom message").toHaveLength(1);
+    12 12 │   expect(method.mock.calls,).toHaveLength(1,);
+  
+
+```
+
+```
+invalid.js:11:45 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+     9 │ expect(jest.mocked(method).mock.calls).toHaveLength(1);
+    10 │ expect(vi.mocked(method).mock.calls).toHaveLength(1);
+  > 11 │ expect(method.mock.calls, "custom message").toHaveLength(1);
+       │                                             ^^^^^^^^^^^^
+    12 │ expect(method.mock.calls,).toHaveLength(1,);
+    13 │ expect(method.mock.calls).toHaveLength();
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+     9  9 │   expect(jest.mocked(method).mock.calls).toHaveLength(1);
+    10 10 │   expect(vi.mocked(method).mock.calls).toHaveLength(1);
+    11    │ - expect(method.mock.calls,·"custom·message").toHaveLength(1);
+       11 │ + expect(method,·"custom·message").toHaveBeenCalledTimes(1);
+    12 12 │   expect(method.mock.calls,).toHaveLength(1,);
+    13 13 │   expect(method.mock.calls).toHaveLength();
+  
+
+```
+
+```
+invalid.js:12:28 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    10 │ expect(vi.mocked(method).mock.calls).toHaveLength(1);
+    11 │ expect(method.mock.calls, "custom message").toHaveLength(1);
+  > 12 │ expect(method.mock.calls,).toHaveLength(1,);
+       │                            ^^^^^^^^^^^^
+    13 │ expect(method.mock.calls).toHaveLength();
+    14 │ expect(method.mock.calls).toHaveLength(1, 2);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    10 10 │   expect(vi.mocked(method).mock.calls).toHaveLength(1);
+    11 11 │   expect(method.mock.calls, "custom message").toHaveLength(1);
+    12    │ - expect(method.mock.calls,).toHaveLength(1,);
+       12 │ + expect(method,).toHaveBeenCalledTimes(1,);
+    13 13 │   expect(method.mock.calls).toHaveLength();
+    14 14 │   expect(method.mock.calls).toHaveLength(1, 2);
+  
+
+```
+
+```
+invalid.js:13:27 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    11 │ expect(method.mock.calls, "custom message").toHaveLength(1);
+    12 │ expect(method.mock.calls,).toHaveLength(1,);
+  > 13 │ expect(method.mock.calls).toHaveLength();
+       │                           ^^^^^^^^^^^^
+    14 │ expect(method.mock.calls).toHaveLength(1, 2);
+    15 │ expect(method.mock.calls)?.toHaveLength(1);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    11 11 │   expect(method.mock.calls, "custom message").toHaveLength(1);
+    12 12 │   expect(method.mock.calls,).toHaveLength(1,);
+    13    │ - expect(method.mock.calls).toHaveLength();
+       13 │ + expect(method).toHaveBeenCalledTimes();
+    14 14 │   expect(method.mock.calls).toHaveLength(1, 2);
+    15 15 │   expect(method.mock.calls)?.toHaveLength(1);
+  
+
+```
+
+```
+invalid.js:14:27 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    12 │ expect(method.mock.calls,).toHaveLength(1,);
+    13 │ expect(method.mock.calls).toHaveLength();
+  > 14 │ expect(method.mock.calls).toHaveLength(1, 2);
+       │                           ^^^^^^^^^^^^
+    15 │ expect(method.mock.calls)?.toHaveLength(1);
+    16 │ 
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    12 12 │   expect(method.mock.calls,).toHaveLength(1,);
+    13 13 │   expect(method.mock.calls).toHaveLength();
+    14    │ - expect(method.mock.calls).toHaveLength(1,·2);
+       14 │ + expect(method).toHaveBeenCalledTimes(1,·2);
+    15 15 │   expect(method.mock.calls)?.toHaveLength(1);
+    16 16 │   
+  
+
+```
+
+```
+invalid.js:15:28 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    13 │ expect(method.mock.calls).toHaveLength();
+    14 │ expect(method.mock.calls).toHaveLength(1, 2);
+  > 15 │ expect(method.mock.calls)?.toHaveLength(1);
+       │                            ^^^^^^^^^^^^
+    16 │ 
+    17 │ // Properties written with brackets.
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    13 13 │   expect(method.mock.calls).toHaveLength();
+    14 14 │   expect(method.mock.calls).toHaveLength(1, 2);
+    15    │ - expect(method.mock.calls)?.toHaveLength(1);
+       15 │ + expect(method)?.toHaveBeenCalledTimes(1);
+    16 16 │   
+    17 17 │   // Properties written with brackets.
+  
+
+```
+
+```
+invalid.js:18:30 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    17 │ // Properties written with brackets.
+  > 18 │ expect(method["mock"].calls).toHaveLength(0);
+       │                              ^^^^^^^^^^^^
+    19 │ expect(method.mock["calls"]).toHaveLength(0);
+    20 │ expect(method[`mock`][`calls`]).toHaveLength(0);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    16 16 │   
+    17 17 │   // Properties written with brackets.
+    18    │ - expect(method["mock"].calls).toHaveLength(0);
+       18 │ + expect(method).toHaveBeenCalledTimes(0);
+    19 19 │   expect(method.mock["calls"]).toHaveLength(0);
+    20 20 │   expect(method[`mock`][`calls`]).toHaveLength(0);
+  
+
+```
+
+```
+invalid.js:19:30 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    17 │ // Properties written with brackets.
+    18 │ expect(method["mock"].calls).toHaveLength(0);
+  > 19 │ expect(method.mock["calls"]).toHaveLength(0);
+       │                              ^^^^^^^^^^^^
+    20 │ expect(method[`mock`][`calls`]).toHaveLength(0);
+    21 │ expect(method.mock.calls)["toHaveLength"](1);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    17 17 │   // Properties written with brackets.
+    18 18 │   expect(method["mock"].calls).toHaveLength(0);
+    19    │ - expect(method.mock["calls"]).toHaveLength(0);
+       19 │ + expect(method).toHaveBeenCalledTimes(0);
+    20 20 │   expect(method[`mock`][`calls`]).toHaveLength(0);
+    21 21 │   expect(method.mock.calls)["toHaveLength"](1);
+  
+
+```
+
+```
+invalid.js:20:33 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    18 │ expect(method["mock"].calls).toHaveLength(0);
+    19 │ expect(method.mock["calls"]).toHaveLength(0);
+  > 20 │ expect(method[`mock`][`calls`]).toHaveLength(0);
+       │                                 ^^^^^^^^^^^^
+    21 │ expect(method.mock.calls)["toHaveLength"](1);
+    22 │ expect(method.mock.calls)['toHaveLength'](1);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    18 18 │   expect(method["mock"].calls).toHaveLength(0);
+    19 19 │   expect(method.mock["calls"]).toHaveLength(0);
+    20    │ - expect(method[`mock`][`calls`]).toHaveLength(0);
+       20 │ + expect(method).toHaveBeenCalledTimes(0);
+    21 21 │   expect(method.mock.calls)["toHaveLength"](1);
+    22 22 │   expect(method.mock.calls)['toHaveLength'](1);
+  
+
+```
+
+```
+invalid.js:21:27 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    19 │ expect(method.mock["calls"]).toHaveLength(0);
+    20 │ expect(method[`mock`][`calls`]).toHaveLength(0);
+  > 21 │ expect(method.mock.calls)["toHaveLength"](1);
+       │                           ^^^^^^^^^^^^^^
+    22 │ expect(method.mock.calls)['toHaveLength'](1);
+    23 │ expect(method.mock.calls)[`toHaveLength`](1);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    19 19 │   expect(method.mock["calls"]).toHaveLength(0);
+    20 20 │   expect(method[`mock`][`calls`]).toHaveLength(0);
+    21    │ - expect(method.mock.calls)["toHaveLength"](1);
+       21 │ + expect(method)["toHaveBeenCalledTimes"](1);
+    22 22 │   expect(method.mock.calls)['toHaveLength'](1);
+    23 23 │   expect(method.mock.calls)[`toHaveLength`](1);
+  
+
+```
+
+```
+invalid.js:22:27 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    20 │ expect(method[`mock`][`calls`]).toHaveLength(0);
+    21 │ expect(method.mock.calls)["toHaveLength"](1);
+  > 22 │ expect(method.mock.calls)['toHaveLength'](1);
+       │                           ^^^^^^^^^^^^^^
+    23 │ expect(method.mock.calls)[`toHaveLength`](1);
+    24 │ expect(method.mock.calls)["not"]["toHaveLength"](1);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    20 20 │   expect(method[`mock`][`calls`]).toHaveLength(0);
+    21 21 │   expect(method.mock.calls)["toHaveLength"](1);
+    22    │ - expect(method.mock.calls)['toHaveLength'](1);
+       22 │ + expect(method)["toHaveBeenCalledTimes"](1);
+    23 23 │   expect(method.mock.calls)[`toHaveLength`](1);
+    24 24 │   expect(method.mock.calls)["not"]["toHaveLength"](1);
+  
+
+```
+
+```
+invalid.js:23:28 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    21 │ expect(method.mock.calls)["toHaveLength"](1);
+    22 │ expect(method.mock.calls)['toHaveLength'](1);
+  > 23 │ expect(method.mock.calls)[`toHaveLength`](1);
+       │                            ^^^^^^^^^^^^
+    24 │ expect(method.mock.calls)["not"]["toHaveLength"](1);
+    25 │ expect(method.mock.calls)?.[("toHaveLength")](1);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    21 21 │   expect(method.mock.calls)["toHaveLength"](1);
+    22 22 │   expect(method.mock.calls)['toHaveLength'](1);
+    23    │ - expect(method.mock.calls)[`toHaveLength`](1);
+       23 │ + expect(method)["toHaveBeenCalledTimes"](1);
+    24 24 │   expect(method.mock.calls)["not"]["toHaveLength"](1);
+    25 25 │   expect(method.mock.calls)?.[("toHaveLength")](1);
+  
+
+```
+
+```
+invalid.js:24:34 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    22 │ expect(method.mock.calls)['toHaveLength'](1);
+    23 │ expect(method.mock.calls)[`toHaveLength`](1);
+  > 24 │ expect(method.mock.calls)["not"]["toHaveLength"](1);
+       │                                  ^^^^^^^^^^^^^^
+    25 │ expect(method.mock.calls)?.[("toHaveLength")](1);
+    26 │ 
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    22 22 │   expect(method.mock.calls)['toHaveLength'](1);
+    23 23 │   expect(method.mock.calls)[`toHaveLength`](1);
+    24    │ - expect(method.mock.calls)["not"]["toHaveLength"](1);
+       24 │ + expect(method)["not"]["toHaveBeenCalledTimes"](1);
+    25 25 │   expect(method.mock.calls)?.[("toHaveLength")](1);
+    26 26 │   
+  
+
+```
+
+```
+invalid.js:25:30 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    23 │ expect(method.mock.calls)[`toHaveLength`](1);
+    24 │ expect(method.mock.calls)["not"]["toHaveLength"](1);
+  > 25 │ expect(method.mock.calls)?.[("toHaveLength")](1);
+       │                              ^^^^^^^^^^^^^^
+    26 │ 
+    27 │ // Parentheses.
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    23 23 │   expect(method.mock.calls)[`toHaveLength`](1);
+    24 24 │   expect(method.mock.calls)["not"]["toHaveLength"](1);
+    25    │ - expect(method.mock.calls)?.[("toHaveLength")](1);
+       25 │ + expect(method)?.[("toHaveBeenCalledTimes")](1);
+    26 26 │   
+    27 27 │   // Parentheses.
+  
+
+```
+
+```
+invalid.js:28:29 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    27 │ // Parentheses.
+  > 28 │ expect((method.mock.calls)).toHaveLength(1);
+       │                             ^^^^^^^^^^^^
+    29 │ expect((method.mock).calls).toHaveLength(1);
+    30 │ expect((method).mock.calls).toHaveLength(1);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    26 26 │   
+    27 27 │   // Parentheses.
+    28    │ - expect((method.mock.calls)).toHaveLength(1);
+       28 │ + expect(method).toHaveBeenCalledTimes(1);
+    29 29 │   expect((method.mock).calls).toHaveLength(1);
+    30 30 │   expect((method).mock.calls).toHaveLength(1);
+  
+
+```
+
+```
+invalid.js:29:29 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    27 │ // Parentheses.
+    28 │ expect((method.mock.calls)).toHaveLength(1);
+  > 29 │ expect((method.mock).calls).toHaveLength(1);
+       │                             ^^^^^^^^^^^^
+    30 │ expect((method).mock.calls).toHaveLength(1);
+    31 │ expect((first, second).mock.calls).toHaveLength(1);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    27 27 │   // Parentheses.
+    28 28 │   expect((method.mock.calls)).toHaveLength(1);
+    29    │ - expect((method.mock).calls).toHaveLength(1);
+       29 │ + expect(method).toHaveBeenCalledTimes(1);
+    30 30 │   expect((method).mock.calls).toHaveLength(1);
+    31 31 │   expect((first, second).mock.calls).toHaveLength(1);
+  
+
+```
+
+```
+invalid.js:30:29 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    28 │ expect((method.mock.calls)).toHaveLength(1);
+    29 │ expect((method.mock).calls).toHaveLength(1);
+  > 30 │ expect((method).mock.calls).toHaveLength(1);
+       │                             ^^^^^^^^^^^^
+    31 │ expect((first, second).mock.calls).toHaveLength(1);
+    32 │ (expect(method.mock.calls).toHaveLength)(1);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    28 28 │   expect((method.mock.calls)).toHaveLength(1);
+    29 29 │   expect((method.mock).calls).toHaveLength(1);
+    30    │ - expect((method).mock.calls).toHaveLength(1);
+       30 │ + expect((method)).toHaveBeenCalledTimes(1);
+    31 31 │   expect((first, second).mock.calls).toHaveLength(1);
+    32 32 │   (expect(method.mock.calls).toHaveLength)(1);
+  
+
+```
+
+```
+invalid.js:31:36 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    29 │ expect((method.mock).calls).toHaveLength(1);
+    30 │ expect((method).mock.calls).toHaveLength(1);
+  > 31 │ expect((first, second).mock.calls).toHaveLength(1);
+       │                                    ^^^^^^^^^^^^
+    32 │ (expect(method.mock.calls).toHaveLength)(1);
+    33 │ (expect(method.mock.calls)).toHaveLength(1);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    29 29 │   expect((method.mock).calls).toHaveLength(1);
+    30 30 │   expect((method).mock.calls).toHaveLength(1);
+    31    │ - expect((first,·second).mock.calls).toHaveLength(1);
+       31 │ + expect((first,·second)).toHaveBeenCalledTimes(1);
+    32 32 │   (expect(method.mock.calls).toHaveLength)(1);
+    33 33 │   (expect(method.mock.calls)).toHaveLength(1);
+  
+
+```
+
+```
+invalid.js:32:28 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    30 │ expect((method).mock.calls).toHaveLength(1);
+    31 │ expect((first, second).mock.calls).toHaveLength(1);
+  > 32 │ (expect(method.mock.calls).toHaveLength)(1);
+       │                            ^^^^^^^^^^^^
+    33 │ (expect(method.mock.calls)).toHaveLength(1);
+    34 │ (expect(method.mock.calls).not).toHaveLength(1);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    30 30 │   expect((method).mock.calls).toHaveLength(1);
+    31 31 │   expect((first, second).mock.calls).toHaveLength(1);
+    32    │ - (expect(method.mock.calls).toHaveLength)(1);
+       32 │ + (expect(method).toHaveBeenCalledTimes)(1);
+    33 33 │   (expect(method.mock.calls)).toHaveLength(1);
+    34 34 │   (expect(method.mock.calls).not).toHaveLength(1);
+  
+
+```
+
+```
+invalid.js:33:29 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    31 │ expect((first, second).mock.calls).toHaveLength(1);
+    32 │ (expect(method.mock.calls).toHaveLength)(1);
+  > 33 │ (expect(method.mock.calls)).toHaveLength(1);
+       │                             ^^^^^^^^^^^^
+    34 │ (expect(method.mock.calls).not).toHaveLength(1);
+    35 │ 
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    31 31 │   expect((first, second).mock.calls).toHaveLength(1);
+    32 32 │   (expect(method.mock.calls).toHaveLength)(1);
+    33    │ - (expect(method.mock.calls)).toHaveLength(1);
+       33 │ + (expect(method)).toHaveBeenCalledTimes(1);
+    34 34 │   (expect(method.mock.calls).not).toHaveLength(1);
+    35 35 │   
+  
+
+```
+
+```
+invalid.js:34:33 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    32 │ (expect(method.mock.calls).toHaveLength)(1);
+    33 │ (expect(method.mock.calls)).toHaveLength(1);
+  > 34 │ (expect(method.mock.calls).not).toHaveLength(1);
+       │                                 ^^^^^^^^^^^^
+    35 │ 
+    36 │ test("comments around the removed properties are kept", async () => {
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    32 32 │   (expect(method.mock.calls).toHaveLength)(1);
+    33 33 │   (expect(method.mock.calls)).toHaveLength(1);
+    34    │ - (expect(method.mock.calls).not).toHaveLength(1);
+       34 │ + (expect(method).not).toHaveBeenCalledTimes(1);
+    35 35 │   
+    36 36 │   test("comments around the removed properties are kept", async () => {
+  
+
+```
+
+```
+invalid.js:38:28 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    36 │ test("comments around the removed properties are kept", async () => {
+    37 │ 	// leading comment
+  > 38 │ 	expect(method.mock.calls).toHaveLength(1); // trailing comment
+       │ 	                          ^^^^^^^^^^^^
+    39 │ 	expect(/* before */ method.mock.calls /* after */).toHaveLength(/* count */ 1);
+    40 │ 	expect(method.mock.calls) /* matcher */.toHaveLength /* arguments */(1);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    36 36 │   test("comments around the removed properties are kept", async () => {
+    37 37 │     // leading comment
+    38    │ - → expect(method.mock.calls).toHaveLength(1);·//·trailing·comment
+       38 │ + → expect(method).toHaveBeenCalledTimes(1);·//·trailing·comment
+    39 39 │     expect(/* before */ method.mock.calls /* after */).toHaveLength(/* count */ 1);
+    40 40 │     expect(method.mock.calls) /* matcher */.toHaveLength /* arguments */(1);
+  
+
+```
+
+```
+invalid.js:39:53 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    37 │ 	// leading comment
+    38 │ 	expect(method.mock.calls).toHaveLength(1); // trailing comment
+  > 39 │ 	expect(/* before */ method.mock.calls /* after */).toHaveLength(/* count */ 1);
+       │ 	                                                   ^^^^^^^^^^^^
+    40 │ 	expect(method.mock.calls) /* matcher */.toHaveLength /* arguments */(1);
+    41 │ 	expect(method.mock.calls)[/* before */ "toHaveLength" /* after */](1);
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    37 37 │     // leading comment
+    38 38 │     expect(method.mock.calls).toHaveLength(1); // trailing comment
+    39    │ - → expect(/*·before·*/·method.mock.calls·/*·after·*/).toHaveLength(/*·count·*/·1);
+       39 │ + → expect(/*·before·*/·method·/*·after·*/).toHaveBeenCalledTimes(/*·count·*/·1);
+    40 40 │     expect(method.mock.calls) /* matcher */.toHaveLength /* arguments */(1);
+    41 41 │     expect(method.mock.calls)[/* before */ "toHaveLength" /* after */](1);
+  
+
+```
+
+```
+invalid.js:40:42 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    38 │ 	expect(method.mock.calls).toHaveLength(1); // trailing comment
+    39 │ 	expect(/* before */ method.mock.calls /* after */).toHaveLength(/* count */ 1);
+  > 40 │ 	expect(method.mock.calls) /* matcher */.toHaveLength /* arguments */(1);
+       │ 	                                        ^^^^^^^^^^^^
+    41 │ 	expect(method.mock.calls)[/* before */ "toHaveLength" /* after */](1);
+    42 │ 	await expect(method.mock.calls)
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    38 38 │     expect(method.mock.calls).toHaveLength(1); // trailing comment
+    39 39 │     expect(/* before */ method.mock.calls /* after */).toHaveLength(/* count */ 1);
+    40    │ - → expect(method.mock.calls)·/*·matcher·*/.toHaveLength·/*·arguments·*/(1);
+       40 │ + → expect(method)·/*·matcher·*/.toHaveBeenCalledTimes·/*·arguments·*/(1);
+    41 41 │     expect(method.mock.calls)[/* before */ "toHaveLength" /* after */](1);
+    42 42 │     await expect(method.mock.calls)
+  
+
+```
+
+```
+invalid.js:41:41 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    39 │ 	expect(/* before */ method.mock.calls /* after */).toHaveLength(/* count */ 1);
+    40 │ 	expect(method.mock.calls) /* matcher */.toHaveLength /* arguments */(1);
+  > 41 │ 	expect(method.mock.calls)[/* before */ "toHaveLength" /* after */](1);
+       │ 	                                       ^^^^^^^^^^^^^^
+    42 │ 	await expect(method.mock.calls)
+    43 │ 		// why this is checked
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    39 39 │     expect(/* before */ method.mock.calls /* after */).toHaveLength(/* count */ 1);
+    40 40 │     expect(method.mock.calls) /* matcher */.toHaveLength /* arguments */(1);
+    41    │ - → expect(method.mock.calls)[/*·before·*/·"toHaveLength"·/*·after·*/](1);
+       41 │ + → expect(method)[/*·before·*/·"toHaveBeenCalledTimes"·/*·after·*/](1);
+    42 42 │     await expect(method.mock.calls)
+    43 43 │       // why this is checked
+  
+
+```
+
+```
+invalid.js:44:13 lint/nursery/useExpectToHaveBeenCalledTimes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    42 │ 	await expect(method.mock.calls)
+    43 │ 		// why this is checked
+  > 44 │ 		.resolves.toHaveLength(1);
+       │ 		          ^^^^^^^^^^^^
+    45 │ });
+    46 │ 
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveBeenCalledTimes() instead.
+  
+    40 40 │     expect(method.mock.calls) /* matcher */.toHaveLength /* arguments */(1);
+    41 41 │     expect(method.mock.calls)[/* before */ "toHaveLength" /* after */](1);
+    42    │ - → await·expect(method.mock.calls)
+       42 │ + → await·expect(method)
+    43 43 │       // why this is checked
+    44    │ - → → .resolves.toHaveLength(1);
+       44 │ + → → .resolves.toHaveBeenCalledTimes(1);
+    45 45 │   });
+    46 46 │   
+  
+
+```
+
+```
+invalid.js:48:39 lint/nursery/useExpectToHaveBeenCalledTimes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    47 │ test("no fix when comments would be removed", () => {
+  > 48 │ 	expect(method /* mock */.mock.calls).toHaveLength(1);
+       │ 	                                     ^^^^^^^^^^^^
+    49 │ 	expect(method.mock /* calls */.calls).toHaveLength(1);
+    50 │ 	expect(
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:49:40 lint/nursery/useExpectToHaveBeenCalledTimes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    47 │ test("no fix when comments would be removed", () => {
+    48 │ 	expect(method /* mock */.mock.calls).toHaveLength(1);
+  > 49 │ 	expect(method.mock /* calls */.calls).toHaveLength(1);
+       │ 	                                      ^^^^^^^^^^^^
+    50 │ 	expect(
+    51 │ 		method
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:54:4 lint/nursery/useExpectToHaveBeenCalledTimes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    52 │ 			// the recorded calls
+    53 │ 			.mock.calls,
+  > 54 │ 	).toHaveLength(1);
+       │ 	  ^^^^^^^^^^^^
+    55 │ 	expect((/* mock */ method.mock.calls)).toHaveLength(1);
+    56 │ });
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:55:41 lint/nursery/useExpectToHaveBeenCalledTimes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveLength() is used to check how many times a mock function was called.
+  
+    53 │ 			.mock.calls,
+    54 │ 	).toHaveLength(1);
+  > 55 │ 	expect((/* mock */ method.mock.calls)).toHaveLength(1);
+       │ 	                                       ^^^^^^^^^^^^
+    56 │ });
+    57 │ 
+  
+  i When this check fails, the error message describes the length of an array instead of the number of calls.
+  
+  i Use toHaveBeenCalledTimes() to check the number of calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
