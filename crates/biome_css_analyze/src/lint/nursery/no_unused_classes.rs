@@ -1,3 +1,5 @@
+use std::fmt::Write;
+
 use crate::services::module_graph::CssModuleGraph;
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
@@ -8,7 +10,7 @@ use biome_css_syntax::{
     ScssParentSelector,
 };
 use biome_module_graph::{SymbolFromModuleInfo, is_class_referenced_by_importers};
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, Text, TokenText, declare_node_union};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, Text, declare_node_union};
 use biome_rule_options::no_unused_classes::NoUnusedClassesOptions;
 
 declare_lint_rule! {
@@ -99,7 +101,8 @@ impl Rule for NoUnusedClasses {
         };
 
         match node {
-            AnyClassNameSelector::CssClassSelector(selector) => class_selector_name(selector)
+            AnyClassNameSelector::CssClassSelector(selector) => selector
+                .name_text()
                 .filter(|class_name| is_unused(class_name.text()))
                 .map(Text::from)
                 .into_iter()
@@ -113,10 +116,11 @@ impl Rule for NoUnusedClasses {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, class_name: &Self::State) -> Option<RuleDiagnostic> {
+        let node = ctx.query();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                ctx.query().range(),
+                node.range(),
                 markup! {
                     "The CSS class "<Emphasis>{class_name.text()}</Emphasis>" is not referenced in any HTML or JSX file."
                 },
@@ -129,18 +133,6 @@ impl Rule for NoUnusedClasses {
             }),
         )
     }
-}
-
-fn class_selector_name(selector: &CssClassSelector) -> Option<TokenText> {
-    Some(
-        selector
-            .name()
-            .ok()?
-            .as_css_custom_identifier()?
-            .value_token()
-            .ok()?
-            .token_text_trimmed(),
-    )
 }
 
 /// Returns the class names Sass builds for a parent selector with a suffix, such as `block__element`
@@ -157,15 +149,16 @@ fn parent_suffix_class_names(selector: &ScssParentSelector) -> Option<Vec<Text>>
     {
         return None;
     }
-    let suffix = suffix.syntax().text_trimmed().into_text();
+    let suffix = suffix.syntax().text_trimmed();
+    let suffix_len = u32::from(suffix.len()) as usize;
     let mut class_names = Vec::new();
     push_parent_class_names(selector.syntax(), &mut class_names)?;
     class_names.sort_unstable();
     class_names.dedup();
     for class_name in &mut class_names {
-        let mut name = String::with_capacity(class_name.len() + suffix.len());
+        let mut name = String::with_capacity(class_name.len() + suffix_len);
         name.push_str(class_name);
-        name.push_str(&suffix);
+        let _ = write!(name, "{suffix}");
         *class_name = name.into();
     }
     Some(class_names)
@@ -258,7 +251,7 @@ fn push_trailing_class_name(
     };
 
     if let Some(sub_selector) = compound.sub_selectors().last() {
-        class_names.push(class_selector_name(sub_selector.as_css_class_selector()?)?.into());
+        class_names.push(sub_selector.as_css_class_selector()?.name_text()?.into());
         return Some(());
     }
     if compound.simple_selector().is_some() {
