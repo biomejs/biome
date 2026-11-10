@@ -116,13 +116,21 @@ fn is_precision_lost(node: &JsNumberLiteralExpression) -> Option<bool> {
 }
 
 fn is_precision_lost_in_base_10(num: &str) -> Option<bool> {
-    const MAX_SIGNIFICANT_DIGITS_BASE10: u32 = 17;
+    // The exact decimal expansion of a finite `f64` has at most 767 significant
+    // digits: the significand of a subnormal needs at most 751 decimal digits,
+    // and the 53-bit significand adds 16 more. Because trailing zeros are
+    // stripped during normalization, a literal with more significant digits than
+    // that always ends in a non-zero digit and can therefore never survive the
+    // round-trip below. Bailing out here also keeps the comparison cheap and
+    // stays clear of `{:.*e}`'s formatting limit of 65535 fractional digits.
+    const MAX_SIGNIFICANT_DIGITS_F64: usize = 767;
+
     let normalized = NormalizedNumber::new(num);
     let precision = normalized.precision();
     if precision == 0 {
         return Some(false);
     }
-    if precision > MAX_SIGNIFICANT_DIGITS_BASE10 as usize {
+    if precision > MAX_SIGNIFICANT_DIGITS_F64 {
         return Some(true);
     }
     let parsed = num.parse::<f64>().ok()?;
