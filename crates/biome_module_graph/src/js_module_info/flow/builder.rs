@@ -45,8 +45,7 @@ type Build<T> = Result<T, Unsupported>;
 /// Returns `None` for inputs exceeding construction limits. Like the statement
 /// control-flow graph, it also returns `None` when any statement, including
 /// unreachable code, lacks syntax that graph requires, such as a jump target or
-/// an `if` test. An unlabeled `break` or `continue` only targets an unlabeled
-/// loop.
+/// an `if` test.
 ///
 /// [`FlowRootScanner`]: super::FlowRootScanner
 pub(super) fn build_root(root: &AnyJsControlFlowRoot, model: &SemanticModel) -> Option<BuiltRoot> {
@@ -159,7 +158,10 @@ impl StatementCheck {
                 let label = statement
                     .label_token()
                     .map(|token| token.token_text_trimmed());
-                self.targets.iter().any(|target| target.label == label)
+                self.targets.iter().any(|target| match &label {
+                    Some(_) => target.label == label,
+                    None => target.is_loop,
+                })
             }
             AnyJsStatement::JsContinueStatement(statement) => {
                 let label = statement
@@ -167,7 +169,7 @@ impl StatementCheck {
                     .map(|token| token.token_text_trimmed());
                 self.targets
                     .iter()
-                    .any(|target| target.is_loop && target.label == label)
+                    .any(|target| target.is_loop && (label.is_none() || target.label == label))
             }
             AnyJsStatement::JsVariableStatement(statement) => {
                 statement.declaration().is_ok_and(|declaration| {
@@ -326,11 +328,16 @@ impl RootBuilder<'_> {
                 let label = statement
                     .label_token()
                     .map(|token| token.token_text_trimmed());
+                // An unlabeled `break` targets the innermost loop, whether or
+                // not it has a label; only a labeled `break` leaves a block.
                 let target = self
                     .jumps
                     .iter_mut()
                     .rev()
-                    .find(|target| target.label == label)
+                    .find(|target| match &label {
+                        Some(_) => target.label == label,
+                        None => target.continue_to.is_some(),
+                    })
                     .ok_or(Unsupported)?;
                 target.breaks.push(current);
                 self.current = None;
@@ -344,7 +351,7 @@ impl RootBuilder<'_> {
                     .jumps
                     .iter()
                     .rev()
-                    .filter(|target| target.label == label)
+                    .filter(|target| label.is_none() || target.label == label)
                     .find_map(|target| target.continue_to)
                     .ok_or(Unsupported)?;
                 self.add_predecessor(continue_to, current)?;
@@ -855,17 +862,29 @@ mod tests {
             "function f(x) { outer: while (x) { while (x) { continue outer; } } after(x); }",
         );
         assert!(built.point("x", 3).is_some());
+    }
 
-        // As in the statement control-flow graph, an unlabeled jump never
-        // targets a labeled loop, and jumps in unreachable code still need a
-        // target.
+    #[test]
+    fn unlabeled_jumps_target_the_innermost_loop_even_when_labeled() {
         for source in [
             "function f(x) { outer: while (x) { break; } }",
             "function f(x) { outer: while (x) { continue; } }",
-            "function f(x, flag) { if (x) read(x); outer: while (flag) { return; break; } }",
         ] {
-            assert!(function(source).root.is_none(), "{source}");
+            assert!(function(source).root.is_some(), "{source}");
         }
+
+        let built = function(
+            "function f(x) { while (true) { inner: while (x) { break; } read(x); return; } }",
+        );
+        let paths = built.paths("x", 2);
+        assert_eq!(paths.len(), 2);
+        assert!(paths.iter().any(|path| path == &["x:Truthy"]));
+        assert!(paths.iter().any(|path| path == &["!x:Truthy"]));
+
+        let built = function(
+            "function f(x) { while (true) { inner: do { continue; } while (x); read(x); return; } }",
+        );
+        assert!(built.point("x", 2).is_some());
     }
 
     #[test]

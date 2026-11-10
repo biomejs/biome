@@ -85,3 +85,21 @@ function nonNullClassShape(value: ValueClass | null) {
 function discardedReturn(value: string | void) {
 	if (typeof value !== "string") return value == null;
 }
+
+function unlabeledBreakInLabeledLoop(value: string | null) {
+	for (;;) {
+		inner: while (value === null) {
+			break;
+		}
+		return value?.length;
+	}
+}
+
+function unlabeledContinueInLabeledLoop(value: string | null, retry: boolean) {
+	for (;;) {
+		inner: do {
+			if (value === null) continue;
+		} while (retry);
+		return value?.length;
+	}
+}
