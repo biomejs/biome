@@ -246,6 +246,11 @@ let predicate; [typeNode.returnType, ...predicate] = foo();
 
 # Input
 ```cjs
+let predicate; [(typeNode.returnType), ...predicate] = foo();
+```
+
+# Input
+```cjs
 let predicate; [typeNode.returnType,, predicate] = foo();
 ```
 
@@ -287,6 +292,11 @@ let predicate; [, {foo:typeNode.returnType, ...predicate}] = foo();
 # Input
 ```cjs
 let a; const b = {}; ({ a, c: b.c } = func());
+```
+
+# Input
+```cjs
+let a; const b = {}; ({ a, c: ((b.c)) } = func());
 ```
 
 # Input

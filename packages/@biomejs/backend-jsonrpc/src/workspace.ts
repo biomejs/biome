@@ -4233,6 +4233,11 @@ export interface Nursery {
 	 */
 	useSingleTopLevelHeading?: UseSingleTopLevelHeadingConfiguration;
 	/**
+	 * Enforce using jest.spyOn() or vi.spyOn() instead of overwriting a property with a mock function.
+	 * See https://biomejs.dev/linter/rules/use-spy-on
+	 */
+	useSpyOn?: UseSpyOnConfiguration;
+	/**
 	 * Require unambiguous boolean expressions in conditions.
 	 * See https://biomejs.dev/linter/rules/use-strict-boolean-expressions
 	 */
@@ -7479,6 +7484,9 @@ export type UseSimplifiedBooleanReturnConfiguration =
 export type UseSingleTopLevelHeadingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSingleTopLevelHeadingOptions;
+export type UseSpyOnConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseSpyOnOptions;
 export type UseStrictBooleanExpressionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStrictBooleanExpressionsOptions;
@@ -11101,6 +11109,14 @@ export interface RuleWithUseSingleTopLevelHeadingOptions {
 	level: RulePlainConfiguration;
 	options?: UseSingleTopLevelHeadingOptions;
 }
+export interface RuleWithUseSpyOnOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseSpyOnOptions;
+}
 export interface RuleWithUseStrictBooleanExpressionsOptions {
 	level: RulePlainConfiguration;
 	options?: UseStrictBooleanExpressionsOptions;
@@ -14205,6 +14221,7 @@ export interface UseSingleTopLevelHeadingOptions {
 	 */
 	level?: number;
 }
+export type UseSpyOnOptions = {};
 export type UseStrictBooleanExpressionsOptions = {};
 export type UseStringStartsEndsWithOptions = {};
 export type UseSvelteEventDispatcherTypesOptions = {};
@@ -16207,6 +16224,7 @@ export type Category =
 	| "lint/nursery/useSetSize"
 	| "lint/nursery/useSimplifiedBooleanReturn"
 	| "lint/nursery/useSingleTopLevelHeading"
+	| "lint/nursery/useSpyOn"
 	| "lint/nursery/useStrictBooleanExpressions"
 	| "lint/nursery/useStringStartsEndsWith"
 	| "lint/nursery/useSvelteEventDispatcherTypes"

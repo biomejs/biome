@@ -519,6 +519,7 @@ define_categories! {
     "lint/nursery/useSetSize": "https://biomejs.dev/linter/rules/use-set-size",
     "lint/nursery/useSimplifiedBooleanReturn": "https://biomejs.dev/linter/rules/use-simplified-boolean-return",
     "lint/nursery/useSingleTopLevelHeading": "https://biomejs.dev/linter/rules/use-single-top-level-heading",
+    "lint/nursery/useSpyOn": "https://biomejs.dev/linter/rules/use-spy-on",
     "lint/nursery/useStrictBooleanExpressions": "https://biomejs.dev/linter/rules/use-strict-boolean-expressions",
     "lint/nursery/useStringStartsEndsWith": "https://biomejs.dev/linter/rules/use-string-starts-ends-with",
     "lint/nursery/useSvelteEventDispatcherTypes": "https://biomejs.dev/linter/rules/use-svelte-event-dispatcher-types",
