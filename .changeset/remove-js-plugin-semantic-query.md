@@ -1,5 +1,6 @@
 ---
 "@biomejs/biome": patch
+"@biomejs/runtime": patch
 ---
 
 Removed the `semantic()` query function from the JavaScript plugin API. Pass `{ semantic: true }` to `ast()` instead to provide the semantic model to a rule.
