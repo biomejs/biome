@@ -100,7 +100,12 @@ impl<'a> ScssListLayout<'a> {
         if is_statement_at_rule_value_list(self.node) {
             // Print `@return a b,
             //   c d, e f;`.
-            return write!(f, [indent(&format_filled_elements(&elements))]);
+            return write!(
+                f,
+                [indent(&FormatFilledElements {
+                    elements: &elements
+                })]
+            );
         }
 
         write!(
@@ -251,14 +256,17 @@ fn format_elements_with_source_breaks(
     })
 }
 
-fn format_filled_elements(
-    elements: &ScssListExpressionElementList,
-) -> impl Format<CssFormatContext> + '_ {
-    format_with(|f| {
+/// Fills comma-separated list items across indented continuation lines.
+struct FormatFilledElements<'a> {
+    elements: &'a ScssListExpressionElementList,
+}
+
+impl Format<CssFormatContext> for FormatFilledElements<'_> {
+    fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
         let separator = soft_line_break_or_space();
         let mut fill = f.fill();
-        let separated = elements.format_separated(",").with_trailing_separator(
-            if has_required_trailing_comma(elements) {
+        let separated = self.elements.format_separated(",").with_trailing_separator(
+            if has_required_trailing_comma(self.elements) {
                 TrailingSeparator::Mandatory
             } else {
                 TrailingSeparator::Omit
@@ -270,7 +278,7 @@ fn format_filled_elements(
         }
 
         fill.finish()
-    })
+    }
 }
 
 /// Checks that the list is the whole value of `@return`, `@debug`, `@warn` or
