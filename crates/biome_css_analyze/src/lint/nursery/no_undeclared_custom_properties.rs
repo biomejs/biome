@@ -18,11 +18,6 @@ declare_lint_rule! {
     /// Locally scoped styles in Vue, Svelte, and Astro are visible only within their component.
     /// Global styles can provide custom properties to imported child components.
     ///
-    /// In SCSS, custom properties declared in a mixin body or an `@include` block count as
-    /// declared. A declaration with an interpolated name, such as `--color-#{$name}`, declares every
-    /// custom property that starts with its static part, `--color-`, so `--#{$name}` declares every
-    /// custom property.
-    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -30,6 +25,18 @@ declare_lint_rule! {
     /// ```css,file=invalid.css
     /// a {
     ///   color: var(--link-color);
+    /// }
+    /// ```
+    ///
+    /// ```scss,file=invalid.scss
+    /// :root {
+    ///   @each $name in primary, secondary {
+    ///     --color-#{$name}: red;
+    ///   }
+    /// }
+    ///
+    /// a {
+    ///   color: var(--colour-primary);
     /// }
     /// ```
     ///
@@ -42,6 +49,25 @@ declare_lint_rule! {
     ///
     /// a {
     ///   color: var(--link-color);
+    /// }
+    /// ```
+    ///
+    /// ```scss,file=valid.scss
+    /// @mixin spacing {
+    ///   --spacing: 4px;
+    /// }
+    ///
+    /// :root {
+    ///   @include spacing;
+    ///
+    ///   @each $name in primary, secondary {
+    ///     --color-#{$name}: red;
+    ///   }
+    /// }
+    ///
+    /// a {
+    ///   margin: var(--spacing);
+    ///   color: var(--color-primary);
     /// }
     /// ```
     ///

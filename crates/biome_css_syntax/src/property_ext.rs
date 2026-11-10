@@ -1,5 +1,8 @@
-use crate::{AnyCssDashedIdentifier, AnyCssDeclarationName, CssSyntaxToken};
-use biome_rowan::{SyntaxError, SyntaxResult, TokenText};
+use crate::{
+    AnyCssDashedIdentifier, AnyCssDeclarationName, AnyScssInterpolatedIdentifierPart,
+    CssSyntaxToken, ScssInterpolatedDashedIdentifier,
+};
+use biome_rowan::{AstNodeList, SyntaxError, SyntaxResult, Text, TokenText};
 use biome_string_case::StrLikeExtension;
 
 impl AnyCssDeclarationName {
@@ -35,6 +38,30 @@ impl AnyCssDeclarationName {
             Self::ScssInterpolatedIdentifier(_) | Self::CssMetavariable(_) => {
                 Err(SyntaxError::MissingRequiredChild)
             }
+        }
+    }
+}
+
+impl ScssInterpolatedDashedIdentifier {
+    /// Returns the static part of the name before its first interpolation, such as `--color-` for
+    /// `--color-#{$name}` or `--` for `--#{$name}`.
+    pub fn custom_property_prefix(&self) -> Option<Text> {
+        let mut parts = self
+            .items()
+            .iter()
+            .take_while(|part| part.as_scss_interpolation().is_none());
+        match (parts.next()?, parts.next(), parts.next()) {
+            (AnyScssInterpolatedIdentifierPart::CssIdentifier(identifier), None, None) => {
+                let prefix = identifier.value_token().ok()?.token_text_trimmed();
+                prefix.starts_with("--").then(|| prefix.into())
+            }
+            // The parser splits `--#{$name}` into two `-` tokens.
+            (
+                AnyScssInterpolatedIdentifierPart::ScssInterpolatedIdentifierHyphen(_),
+                Some(AnyScssInterpolatedIdentifierPart::ScssInterpolatedIdentifierHyphen(_)),
+                None,
+            ) => Some(Text::new_static("--")),
+            _ => None,
         }
     }
 }

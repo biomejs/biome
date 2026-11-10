@@ -244,6 +244,7 @@ mod tests {
         let model = super::semantic_model(&root);
         let prefixes: Vec<_> = model
             .custom_property_prefixes()
+            .iter()
             .map(|(prefix, _)| prefix.text())
             .collect();
 
