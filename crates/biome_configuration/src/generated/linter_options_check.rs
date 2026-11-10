@@ -313,6 +313,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         ),
     ));
     result.push((
+        "nursery",
+        "noDisabledButton",
+        TypeId::of::<biome_rule_options::no_disabled_button::NoDisabledButtonOptions>(),
+    ));
+    result.push((
         "a11y",
         "noDistractingElements",
         TypeId::of::<biome_rule_options::no_distracting_elements::NoDistractingElementsOptions>(),
