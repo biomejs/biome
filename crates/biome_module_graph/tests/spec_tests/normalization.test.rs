@@ -1014,7 +1014,8 @@ fn test_normalize_conditional_types() {
 }
 
 /// Asserts the normalized type of each binding in `source`, and that each
-/// binding in `unevaluated` still contains a conditional type.
+/// binding in `unevaluated` still contains a conditional type. The bindings
+/// must be computed without inferring the types of the whole module.
 ///
 /// Every mismatch is reported at once, so one run shows all failing cases.
 fn assert_conditional_results(source: &str, expected: &[(&str, &str)], unevaluated: &[&str]) {
@@ -1022,6 +1023,7 @@ fn assert_conditional_results(source: &str, expected: &[(&str, &str)], unevaluat
     fs.insert("/src/index.ts".into(), source);
     let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
     let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    db.clear_salsa_events();
 
     let format_binding = |name| format_inferred_type(&db, projected_binding(&db, module, name));
     let mut mismatches = Vec::new();
@@ -1038,6 +1040,7 @@ fn assert_conditional_results(source: &str, expected: &[(&str, &str)], unevaluat
         }
     }
     assert!(mismatches.is_empty(), "\n{}", mismatches.join("\n"));
+    assert_function_query_was_not_run(&db, infer_module_types, module, &db.take_salsa_events());
 }
 
 #[test]
@@ -1574,5 +1577,46 @@ fn test_conditional_nested_in_generic_alias_body() {
             ("twoArgs", "string: s | number: 1"),
         ],
         &["value"],
+    );
+}
+
+#[test]
+fn test_expressions_select_the_branch_of_a_conditional_operand() {
+    assert_conditional_results(
+        r#"
+        declare const nullable: { p: number } | (true extends true ? null : null);
+        export const optional = nullable?.p;
+        declare const tuples: [string] | (true extends true ? [number] : [boolean]);
+        export const indexed = tuples[0];
+        declare const shape: true extends true ? { a: number; b: string } : { a: boolean };
+        export const { a, ...rest } = shape;
+        declare const big: true extends true ? bigint : number;
+        export const negated = -big;
+        export const inverted = ~big;
+        declare const plainBig: bigint;
+        export const negatedPlain = -plainBig;
+        declare const partial: Partial<string extends string ? { a: number } : { b: number }>;
+        declare const picked: Pick<{ a: number; b: string }, true extends true ? "a" : "b">;
+        "#,
+        &[
+            ("optional", "number | undefined"),
+            ("indexed", "string | number"),
+            (
+                "rest",
+                "Object {\n  prototype: No prototype\n  members: [\"b\": string]\n}",
+            ),
+            ("negated", "BigInt"),
+            ("inverted", "BigInt"),
+            ("negatedPlain", "BigInt"),
+            (
+                "partial",
+                "Object {\n  prototype: No prototype\n  members: [\"a\"?: number | undefined]\n}",
+            ),
+            (
+                "picked",
+                "Object {\n  prototype: No prototype\n  members: [\"a\": number]\n}",
+            ),
+        ],
+        &[],
     );
 }

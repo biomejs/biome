@@ -1562,14 +1562,15 @@ impl TypeData {
         scope_id: ScopeId,
         ty: &TsConditionalType,
     ) -> Self {
-        let reference = |collector: &mut dyn RawTypeCollector, ty: SyntaxResult<AnyTsType>| {
-            ty.map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
-                .unwrap_or_default()
-        };
         let check_type = ty.check_type();
         let distributive = check_type.as_ref().is_ok_and(is_naked_type_parameter);
-        let check_type = reference(collector, check_type);
-        let extends_type = reference(collector, ty.extends_type());
+        let check_type = check_type
+            .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
+            .unwrap_or_default();
+        let extends_type = ty
+            .extends_type()
+            .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
+            .unwrap_or_default();
         // Names declared by `infer` are scoped to the true branch.
         let true_type = ty
             .true_type()
@@ -1580,7 +1581,10 @@ impl TypeData {
                 TypeReference::from_any_ts_type(collector, scope_id, &true_type)
             })
             .unwrap_or_default();
-        let false_type = reference(collector, ty.false_type());
+        let false_type = ty
+            .false_type()
+            .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
+            .unwrap_or_default();
         let infer_types = ty
             .extends_type()
             .map(|extends_type| infer_types_declared_by(&extends_type))

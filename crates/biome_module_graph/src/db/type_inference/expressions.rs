@@ -38,6 +38,9 @@ use rustc_hash::FxHashSet;
 
 const MAX_CONDITIONAL_TYPE_STEPS: usize = 1024;
 const MAX_CONDITIONAL_FILTER_STEPS: usize = 1024;
+/// Maximum number of conditional types whose branch is followed to find the
+/// type of a unary operand.
+const MAX_CONDITIONAL_BRANCH_STEPS: usize = 64;
 const MAX_PROMISE_UNWRAP_STEPS: usize = 64;
 const MAX_REST_MEMBER_STEPS: usize = 1024;
 const MAX_AWAIT_EXPRESSION_STEPS: usize = 1024;
@@ -2168,6 +2171,12 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Union(union) => {
                     pending.extend(union.types(self.db).iter().copied());
                 }
+                InferredTypeData::Extends(extends) => match self.select_conditional_branch(extends)
+                {
+                    Some(branch) => pending.push(branch),
+                    // Either branch may be nullish.
+                    None => return true,
+                },
                 InferredTypeData::Unknown
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
@@ -2192,7 +2201,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredTypeData::TypeOperator(_)
                 | InferredTypeData::IndexedAccess(_)
                 | InferredTypeData::MappedType(_)
-                | InferredTypeData::Extends(_)
                 | InferredTypeData::Literal(_)
                 | InferredTypeData::InstanceOf(_)
                 | InferredTypeData::MergedReference(_)
@@ -2303,6 +2311,11 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Union(union) => {
                     pending.extend(union.types(self.db).iter().copied());
                 }
+                InferredTypeData::Extends(extends) => match self.select_conditional_branch(extends)
+                {
+                    Some(branch) => pending.push(branch),
+                    None => return Some(InferredTypeData::Unknown),
+                },
                 InferredTypeData::Unknown
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
@@ -2328,7 +2341,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredTypeData::TypeOperator(_)
                 | InferredTypeData::IndexedAccess(_)
                 | InferredTypeData::MappedType(_)
-                | InferredTypeData::Extends(_)
                 | InferredTypeData::Literal(_)
                 | InferredTypeData::InstanceOf(_)
                 | InferredTypeData::MergedReference(_)
@@ -2560,6 +2572,11 @@ impl<'db> ResolutionCtx<'db, '_> {
                         pending.push(prototype);
                     }
                 }
+                InferredTypeData::Extends(extends) => match self.select_conditional_branch(extends)
+                {
+                    Some(branch) => pending.push(branch),
+                    None => return InferredTypeData::Unknown,
+                },
                 InferredTypeData::Unknown
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
@@ -2582,7 +2599,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredTypeData::TypeOperator(_)
                 | InferredTypeData::IndexedAccess(_)
                 | InferredTypeData::MappedType(_)
-                | InferredTypeData::Extends(_)
                 | InferredTypeData::MergedReference(_)
                 | InferredTypeData::TypeofExpression(_)
                 | InferredTypeData::TypeofType(_)
@@ -2783,53 +2799,68 @@ impl<'db> ResolutionCtx<'db, '_> {
         &mut self,
         argument: InferredTypeData<'db>,
     ) -> InferredTypeData<'db> {
-        match self.resolve_inferred_type(argument) {
-            InferredTypeData::BigInt => InferredTypeData::BigInt,
-            InferredTypeData::Literal(literal)
-                if matches!(literal.literal(self.db), InferredLiteral::BigInt(_)) =>
-            {
-                InferredTypeData::BigInt
+        let mut argument = argument;
+        for _ in 0..MAX_CONDITIONAL_BRANCH_STEPS {
+            match self.resolve_inferred_type(argument) {
+                // Annotations such as `bigint` are instances of the keyword.
+                InferredTypeData::InstanceOf(instance)
+                    if instance.type_parameters(self.db).is_empty() =>
+                {
+                    argument = instance.ty(self.db);
+                }
+                InferredTypeData::Extends(extends) => {
+                    match self.select_conditional_branch(extends) {
+                        Some(branch) => argument = branch,
+                        None => return InferredTypeData::Unknown,
+                    }
+                }
+                InferredTypeData::BigInt => return InferredTypeData::BigInt,
+                InferredTypeData::Literal(literal)
+                    if matches!(literal.literal(self.db), InferredLiteral::BigInt(_)) =>
+                {
+                    return InferredTypeData::BigInt;
+                }
+                InferredTypeData::Unknown
+                | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
+                | InferredTypeData::GlobalLocal(_)
+                | InferredTypeData::Boolean
+                | InferredTypeData::Null
+                | InferredTypeData::Number
+                | InferredTypeData::String
+                | InferredTypeData::Symbol
+                | InferredTypeData::Undefined
+                | InferredTypeData::Conditional
+                | InferredTypeData::Class(_)
+                | InferredTypeData::Constructor(_)
+                | InferredTypeData::Function(_)
+                | InferredTypeData::Interface(_)
+                | InferredTypeData::Module(_)
+                | InferredTypeData::Namespace(_)
+                | InferredTypeData::Object(_)
+                | InferredTypeData::Tuple(_)
+                | InferredTypeData::Generic(_)
+                | InferredTypeData::Local(_)
+                | InferredTypeData::Intersection(_)
+                | InferredTypeData::Union(_)
+                | InferredTypeData::TypeOperator(_)
+                | InferredTypeData::IndexedAccess(_)
+                | InferredTypeData::MappedType(_)
+                | InferredTypeData::Literal(_)
+                | InferredTypeData::InstanceOf(_)
+                | InferredTypeData::MergedReference(_)
+                | InferredTypeData::TypeofExpression(_)
+                | InferredTypeData::TypeofType(_)
+                | InferredTypeData::TypeofValue(_)
+                | InferredTypeData::AnyKeyword
+                | InferredTypeData::NeverKeyword
+                | InferredTypeData::ObjectKeyword
+                | InferredTypeData::ThisKeyword
+                | InferredTypeData::UnknownKeyword
+                | InferredTypeData::VoidKeyword => return InferredTypeData::Number,
             }
-            InferredTypeData::Unknown
-            | InferredTypeData::Global
-            | InferredTypeData::GlobalType(_)
-            | InferredTypeData::GlobalLocal(_)
-            | InferredTypeData::Boolean
-            | InferredTypeData::Null
-            | InferredTypeData::Number
-            | InferredTypeData::String
-            | InferredTypeData::Symbol
-            | InferredTypeData::Undefined
-            | InferredTypeData::Conditional
-            | InferredTypeData::Class(_)
-            | InferredTypeData::Constructor(_)
-            | InferredTypeData::Function(_)
-            | InferredTypeData::Interface(_)
-            | InferredTypeData::Module(_)
-            | InferredTypeData::Namespace(_)
-            | InferredTypeData::Object(_)
-            | InferredTypeData::Tuple(_)
-            | InferredTypeData::Generic(_)
-            | InferredTypeData::Local(_)
-            | InferredTypeData::Intersection(_)
-            | InferredTypeData::Union(_)
-            | InferredTypeData::TypeOperator(_)
-            | InferredTypeData::IndexedAccess(_)
-            | InferredTypeData::MappedType(_)
-            | InferredTypeData::Extends(_)
-            | InferredTypeData::Literal(_)
-            | InferredTypeData::InstanceOf(_)
-            | InferredTypeData::MergedReference(_)
-            | InferredTypeData::TypeofExpression(_)
-            | InferredTypeData::TypeofType(_)
-            | InferredTypeData::TypeofValue(_)
-            | InferredTypeData::AnyKeyword
-            | InferredTypeData::NeverKeyword
-            | InferredTypeData::ObjectKeyword
-            | InferredTypeData::ThisKeyword
-            | InferredTypeData::UnknownKeyword
-            | InferredTypeData::VoidKeyword => InferredTypeData::Number,
         }
+        InferredTypeData::Unknown
     }
 
     fn resolve_typeof_operator(
