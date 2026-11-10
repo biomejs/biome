@@ -61,11 +61,8 @@ impl SemanticModel {
 
     /// Returns the static prefixes of interpolated custom property names, such as `--color-` for
     /// `--color-#{$name}`, with the range of each name.
-    pub fn custom_property_prefixes(&self) -> impl Iterator<Item = (&Text, TextRange)> {
-        self.data
-            .custom_property_prefixes
-            .iter()
-            .map(|(prefix, range)| (prefix, *range))
+    pub fn custom_property_prefixes(&self) -> &[(Text, TextRange)] {
+        &self.data.custom_property_prefixes
     }
 
     /// Returns declarations that assign values to custom properties.
