@@ -473,6 +473,37 @@ fn bench_repeated_binding_narrowing(bencher: Bencher) {
         });
 }
 
+/// Reads a narrowed variable after each of many `if` statements, so every read
+/// has its own flow point and is solved separately in one large function.
+#[divan::bench(name = "bench_large_root_narrowing")]
+fn bench_large_root_narrowing(bencher: Bencher) {
+    bencher
+        .with_inputs(|| {
+            let mut source = String::from(
+                "function inspect(value: string | number | null, flag: boolean) {\n\
+                 if (value === null) return;\n",
+            );
+            let ranges = (0..256)
+                .map(|_| {
+                    source.push_str("if (flag) {}\n");
+                    let start = source.len();
+                    source.push_str("value;\n");
+                    TextRange::at(start.try_into().unwrap(), 5.into())
+                })
+                .collect::<Vec<_>>();
+            source.push_str("}\n");
+            let (db, module) = build_source_db("large_root.ts", &source);
+            (db, module, ranges)
+        })
+        .bench_local_values(|(db, module, ranges)| {
+            for range in ranges {
+                let input = ExpressionTypeInput::new(&db, module, range);
+                divan::black_box(infer_expression_type(&db, input).expect("read must have a type"));
+            }
+            db
+        });
+}
+
 #[divan::bench(name = "bench_index_d_ts_salsa_invalidated", args = index_d_ts_cases())]
 fn bench_index_d_ts_salsa_invalidated(bencher: Bencher, name: &str) {
     bencher
