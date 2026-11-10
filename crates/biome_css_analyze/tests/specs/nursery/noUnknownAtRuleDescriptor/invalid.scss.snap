@@ -1,0 +1,35 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@font-face {
+	@include font-options;
+	font-famliy: "Example";
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:4:2 lint/nursery/noUnknownAtRuleDescriptor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown descriptor font-famliy in the @font-face at-rule.
+  
+    2 │ @font-face {
+    3 │ 	@include font-options;
+  > 4 │ 	font-famliy: "Example";
+      │ 	^^^^^^^^^^^
+    5 │ }
+    6 │ 
+  
+  i Browsers ignore descriptors that the at-rule does not define, so this declaration has no effect.
+  
+  i Fix the descriptor name if it is a typo, or remove the declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

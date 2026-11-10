@@ -349,6 +349,7 @@ define_categories! {
     "lint/nursery/noUndeclaredClasses": "https://biomejs.dev/linter/rules/no-undeclared-classes",
     "lint/nursery/noUndeclaredCustomProperties": "https://biomejs.dev/linter/rules/no-undeclared-custom-properties",
     "lint/nursery/noUninvokedArrayCallback": "https://biomejs.dev/linter/rules/no-uninvoked-array-callback",
+    "lint/nursery/noUnknownAtRuleDescriptor": "https://biomejs.dev/linter/rules/no-unknown-at-rule-descriptor",
     "lint/nursery/noUnmodifiedLoopCondition": "https://biomejs.dev/linter/rules/no-unmodified-loop-condition",
     "lint/nursery/noUnreadableForOfExpression": "https://biomejs.dev/linter/rules/no-unreadable-for-of-expression",
     "lint/nursery/noUnreadableIife": "https://biomejs.dev/linter/rules/no-unreadable-iife",

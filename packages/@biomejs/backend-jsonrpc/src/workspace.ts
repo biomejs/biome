@@ -3463,6 +3463,11 @@ export interface Nursery {
 	 */
 	noUninvokedArrayCallback?: NoUninvokedArrayCallbackConfiguration;
 	/**
+	 * Disallow unknown descriptors in at-rules.
+	 * See https://biomejs.dev/linter/rules/no-unknown-at-rule-descriptor
+	 */
+	noUnknownAtRuleDescriptor?: NoUnknownAtRuleDescriptorConfiguration;
+	/**
 	 * Disallow loop conditions whose variables are never modified in the loop.
 	 * See https://biomejs.dev/linter/rules/no-unmodified-loop-condition
 	 */
@@ -6922,6 +6927,9 @@ export type NoUndeclaredCustomPropertiesConfiguration =
 export type NoUninvokedArrayCallbackConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUninvokedArrayCallbackOptions;
+export type NoUnknownAtRuleDescriptorConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnknownAtRuleDescriptorOptions;
 export type NoUnmodifiedLoopConditionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnmodifiedLoopConditionOptions;
@@ -10128,6 +10136,10 @@ export interface RuleWithNoUndeclaredCustomPropertiesOptions {
 export interface RuleWithNoUninvokedArrayCallbackOptions {
 	level: RulePlainConfiguration;
 	options?: NoUninvokedArrayCallbackOptions;
+}
+export interface RuleWithNoUnknownAtRuleDescriptorOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnknownAtRuleDescriptorOptions;
 }
 export interface RuleWithNoUnmodifiedLoopConditionOptions {
 	level: RulePlainConfiguration;
@@ -13477,6 +13489,7 @@ export type NoThisOutsideOfClassOptions = {};
 export type NoUndeclaredClassesOptions = {};
 export type NoUndeclaredCustomPropertiesOptions = {};
 export type NoUninvokedArrayCallbackOptions = {};
+export type NoUnknownAtRuleDescriptorOptions = {};
 export type NoUnmodifiedLoopConditionOptions = {};
 export type NoUnnecessaryStringTrimOptions = {};
 export type NoUnreadableForOfExpressionOptions = {};
@@ -15669,6 +15682,7 @@ export type Category =
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUndeclaredCustomProperties"
 	| "lint/nursery/noUninvokedArrayCallback"
+	| "lint/nursery/noUnknownAtRuleDescriptor"
 	| "lint/nursery/noUnmodifiedLoopCondition"
 	| "lint/nursery/noUnreadableForOfExpression"
 	| "lint/nursery/noUnreadableIife"

@@ -1,0 +1,272 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+/* should generate diagnostics */
+@font-face {
+	font-famliy: "Example";
+}
+
+@FONT-FACE {
+	FONT-FAMLIY: "Example";
+}
+
+@counter-style foo {
+	bar: 0;
+}
+
+@property --foo {
+	bar: 0;
+	baz: 0;
+}
+
+@property --foo {
+	system: cyclic;
+}
+
+@color-profile --swop5c {
+	source: url("https://example.com/swop5c.icc");
+}
+
+@font-palette-values --identifier {
+	font-size: 1em;
+}
+
+@position-try --foo {
+	color: red;
+}
+
+@view-transition {
+	navigaton: auto;
+}
+
+@font-face {
+	--custom: 1;
+}
+
+```
+
+# Diagnostics
+```
+invalid.css:3:2 lint/nursery/noUnknownAtRuleDescriptor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown descriptor font-famliy in the @font-face at-rule.
+  
+    1 │ /* should generate diagnostics */
+    2 │ @font-face {
+  > 3 │ 	font-famliy: "Example";
+      │ 	^^^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i Browsers ignore descriptors that the at-rule does not define, so this declaration has no effect.
+  
+  i Fix the descriptor name if it is a typo, or remove the declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:7:2 lint/nursery/noUnknownAtRuleDescriptor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown descriptor FONT-FAMLIY in the @font-face at-rule.
+  
+    6 │ @FONT-FACE {
+  > 7 │ 	FONT-FAMLIY: "Example";
+      │ 	^^^^^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i Browsers ignore descriptors that the at-rule does not define, so this declaration has no effect.
+  
+  i Fix the descriptor name if it is a typo, or remove the declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:11:2 lint/nursery/noUnknownAtRuleDescriptor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown descriptor bar in the @counter-style at-rule.
+  
+    10 │ @counter-style foo {
+  > 11 │ 	bar: 0;
+       │ 	^^^
+    12 │ }
+    13 │ 
+  
+  i Browsers ignore descriptors that the at-rule does not define, so this declaration has no effect.
+  
+  i Fix the descriptor name if it is a typo, or remove the declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:15:2 lint/nursery/noUnknownAtRuleDescriptor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown descriptor bar in the @property at-rule.
+  
+    14 │ @property --foo {
+  > 15 │ 	bar: 0;
+       │ 	^^^
+    16 │ 	baz: 0;
+    17 │ }
+  
+  i Browsers ignore descriptors that the at-rule does not define, so this declaration has no effect.
+  
+  i Fix the descriptor name if it is a typo, or remove the declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:16:2 lint/nursery/noUnknownAtRuleDescriptor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown descriptor baz in the @property at-rule.
+  
+    14 │ @property --foo {
+    15 │ 	bar: 0;
+  > 16 │ 	baz: 0;
+       │ 	^^^
+    17 │ }
+    18 │ 
+  
+  i Browsers ignore descriptors that the at-rule does not define, so this declaration has no effect.
+  
+  i Fix the descriptor name if it is a typo, or remove the declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:20:2 lint/nursery/noUnknownAtRuleDescriptor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown descriptor system in the @property at-rule.
+  
+    19 │ @property --foo {
+  > 20 │ 	system: cyclic;
+       │ 	^^^^^^
+    21 │ }
+    22 │ 
+  
+  i Browsers ignore descriptors that the at-rule does not define, so this declaration has no effect.
+  
+  i Fix the descriptor name if it is a typo, or remove the declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:24:2 lint/nursery/noUnknownAtRuleDescriptor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown descriptor source in the @color-profile at-rule.
+  
+    23 │ @color-profile --swop5c {
+  > 24 │ 	source: url("https://example.com/swop5c.icc");
+       │ 	^^^^^^
+    25 │ }
+    26 │ 
+  
+  i Browsers ignore descriptors that the at-rule does not define, so this declaration has no effect.
+  
+  i Fix the descriptor name if it is a typo, or remove the declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:28:2 lint/nursery/noUnknownAtRuleDescriptor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown descriptor font-size in the @font-palette-values at-rule.
+  
+    27 │ @font-palette-values --identifier {
+  > 28 │ 	font-size: 1em;
+       │ 	^^^^^^^^^
+    29 │ }
+    30 │ 
+  
+  i Browsers ignore descriptors that the at-rule does not define, so this declaration has no effect.
+  
+  i Fix the descriptor name if it is a typo, or remove the declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:32:2 lint/nursery/noUnknownAtRuleDescriptor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown descriptor color in the @position-try at-rule.
+  
+    31 │ @position-try --foo {
+  > 32 │ 	color: red;
+       │ 	^^^^^
+    33 │ }
+    34 │ 
+  
+  i Browsers ignore descriptors that the at-rule does not define, so this declaration has no effect.
+  
+  i Fix the descriptor name if it is a typo, or remove the declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:36:2 lint/nursery/noUnknownAtRuleDescriptor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown descriptor navigaton in the @view-transition at-rule.
+  
+    35 │ @view-transition {
+  > 36 │ 	navigaton: auto;
+       │ 	^^^^^^^^^
+    37 │ }
+    38 │ 
+  
+  i Browsers ignore descriptors that the at-rule does not define, so this declaration has no effect.
+  
+  i Fix the descriptor name if it is a typo, or remove the declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:40:2 lint/nursery/noUnknownAtRuleDescriptor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown descriptor --custom in the @font-face at-rule.
+  
+    39 │ @font-face {
+  > 40 │ 	--custom: 1;
+       │ 	^^^^^^^^
+    41 │ }
+    42 │ 
+  
+  i Browsers ignore descriptors that the at-rule does not define, so this declaration has no effect.
+  
+  i Fix the descriptor name if it is a typo, or remove the declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
