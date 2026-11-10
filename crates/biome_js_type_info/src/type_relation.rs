@@ -10,19 +10,27 @@
 //! The operands must already be normalized, as with the operations in
 //! [`crate::type_operations`].
 
-use crate::TypeOperator;
 use crate::generated::global_types::ids::{
+    ARRAY_FILTER_ID_GLOBAL_TYPE_ID, ARRAY_FOREACH_ID_GLOBAL_TYPE_ID, ARRAY_MAP_ID_GLOBAL_TYPE_ID,
     BOOLEAN_ID_GLOBAL_TYPE_ID, NUMBER_ID_GLOBAL_TYPE_ID, OBJECT_ID_GLOBAL_TYPE_ID,
-    STRING_ID_GLOBAL_TYPE_ID, SYMBOL_ID_GLOBAL_TYPE_ID,
+    PROMISE_ALL_ID_GLOBAL_TYPE_ID, PROMISE_ALL_SETTLED_ID_GLOBAL_TYPE_ID,
+    PROMISE_ANY_ID_GLOBAL_TYPE_ID, PROMISE_CATCH_ID_GLOBAL_TYPE_ID,
+    PROMISE_CONSTRUCT_ID_GLOBAL_TYPE_ID, PROMISE_FINALLY_ID_GLOBAL_TYPE_ID,
+    PROMISE_RACE_ID_GLOBAL_TYPE_ID, PROMISE_REJECT_ID_GLOBAL_TYPE_ID,
+    PROMISE_RESOLVE_ID_GLOBAL_TYPE_ID, PROMISE_THEN_ID_GLOBAL_TYPE_ID,
+    PROMISE_TRY_ID_GLOBAL_TYPE_ID, STRING_ID_GLOBAL_TYPE_ID, SYMBOL_ID_GLOBAL_TYPE_ID,
 };
 use crate::interned_types::{
     FunctionParameter, InternedClass, InternedConstructor, InternedExtendsType, InternedFunction,
     InternedGenericTypeParameter, InternedIntersection, InternedLiteral, InternedTuple,
-    InternedTypeInstance, Literal, ReturnType, TupleElementType, TypeData, TypeDb, TypeMember,
-    TypeMemberKind,
+    InternedTypeInstance, InternedUnion, Literal, ReturnType, TupleElementType, TypeData, TypeDb,
+    TypeMember, TypeMemberKind,
 };
+use crate::literal::StringLiteral;
 use crate::type_operations::keyof;
 use crate::type_transform::TypeSubstitution;
+use crate::{GlobalTypeId, TypeOperator};
+use biome_js_syntax::numbers::canonicalize_js_bigint_literal;
 use rustc_hash::FxHashSet;
 
 /// Maximum number of type pairs compared while evaluating one conditional.
@@ -39,6 +47,27 @@ const MAX_UNDETERMINED_TYPE_STEPS: usize = 64;
 
 /// Maximum number of members compared structurally for one pair of types.
 const MAX_STRUCTURAL_MEMBERS: usize = 64;
+
+/// Built-in methods whose generated signatures are simplified stand-ins, such
+/// as `Promise.prototype.then`, which is declared without parameters.
+/// Comparing a stand-in with another signature would give wrong answers, so
+/// such comparisons stay undetermined.
+const SIMPLIFIED_SIGNATURES: [GlobalTypeId; 14] = [
+    ARRAY_FILTER_ID_GLOBAL_TYPE_ID,
+    ARRAY_FOREACH_ID_GLOBAL_TYPE_ID,
+    ARRAY_MAP_ID_GLOBAL_TYPE_ID,
+    PROMISE_CONSTRUCT_ID_GLOBAL_TYPE_ID,
+    PROMISE_CATCH_ID_GLOBAL_TYPE_ID,
+    PROMISE_FINALLY_ID_GLOBAL_TYPE_ID,
+    PROMISE_THEN_ID_GLOBAL_TYPE_ID,
+    PROMISE_ALL_ID_GLOBAL_TYPE_ID,
+    PROMISE_ALL_SETTLED_ID_GLOBAL_TYPE_ID,
+    PROMISE_ANY_ID_GLOBAL_TYPE_ID,
+    PROMISE_RACE_ID_GLOBAL_TYPE_ID,
+    PROMISE_REJECT_ID_GLOBAL_TYPE_ID,
+    PROMISE_RESOLVE_ID_GLOBAL_TYPE_ID,
+    PROMISE_TRY_ID_GLOBAL_TYPE_ID,
+];
 
 /// Resolves local handles and structural globals in a normalized type.
 pub(crate) type TypeResolver<'db, 'a> = dyn FnMut(TypeData<'db>) -> TypeData<'db> + 'a;
@@ -452,6 +481,22 @@ enum InferencePosition {
     Contravariant,
 }
 
+/// Whether a candidate of an `infer` generic counts when the generic has
+/// other candidates.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum InferencePriority {
+    /// A type that the generic matched.
+    Direct,
+    /// A type that a bare `infer` member of a union received although other
+    /// members matched it. Such candidates count only when the generic has no
+    /// direct candidates. Here `U` is inferred as `number`:
+    ///
+    /// ```ts
+    /// type Fallback = [string, number] extends [string | (infer U), infer U] ? U : never;
+    /// ```
+    Fallback,
+}
+
 /// How the parameters of two function signatures are compared.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum ParameterVariance {
@@ -466,6 +511,7 @@ struct InferenceCandidate<'db> {
     generic: InternedGenericTypeParameter<'db>,
     ty: TypeData<'db>,
     position: InferencePosition,
+    priority: InferencePriority,
 }
 
 /// Outcome of an assignability check.
@@ -586,6 +632,18 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         ty: TypeData<'db>,
         position: InferencePosition,
     ) -> Assignability {
+        self.bind_with_priority(generic, ty, position, InferencePriority::Direct)
+    }
+
+    /// Records a candidate of the `infer` generic, unless `ty` violates the
+    /// generic's constraint.
+    fn bind_with_priority(
+        &mut self,
+        generic: InternedGenericTypeParameter<'db>,
+        ty: TypeData<'db>,
+        position: InferencePosition,
+        priority: InferencePriority,
+    ) -> Assignability {
         if let Some(constraint) = generic.constraint(self.db) {
             match self.is_assignable(ty, constraint) {
                 Assignability::Assignable => {}
@@ -596,19 +654,33 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             generic,
             ty,
             position,
+            priority,
         });
         Assignability::Assignable
     }
 
     /// Returns the types the `infer` generic matched in the given position.
+    ///
+    /// [`InferencePriority::Fallback`] candidates are returned only when the
+    /// generic has no direct candidates in any position.
     fn candidate_types(
         &self,
         generic: InternedGenericTypeParameter<'db>,
         position: InferencePosition,
     ) -> Vec<TypeData<'db>> {
-        self.candidates
-            .iter()
-            .filter(|candidate| candidate.generic == generic && candidate.position == position)
+        let candidates = || {
+            self.candidates
+                .iter()
+                .filter(move |candidate| candidate.generic == generic)
+        };
+        let priority =
+            if candidates().any(|candidate| candidate.priority == InferencePriority::Direct) {
+                InferencePriority::Direct
+            } else {
+                InferencePriority::Fallback
+            };
+        candidates()
+            .filter(|candidate| candidate.position == position && candidate.priority == priority)
             .map(|candidate| candidate.ty)
             .collect()
     }
@@ -679,6 +751,8 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         }
         self.remaining_steps -= 1;
 
+        // Resolving a simplified signature loses the handle that identifies it.
+        let is_simplified = is_simplified_signature(source) || is_simplified_signature(target);
         let source = self.resolve(source);
         let target = self.resolve(target);
         if let Some(generic) = self.infer_type(target) {
@@ -692,6 +766,9 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         if source == target && !may_contain_undetermined_type(self.db, source) {
             return Assignability::Assignable;
         }
+        if is_simplified && !matches!(target, TypeData::AnyKeyword | TypeData::UnknownKeyword) {
+            return Assignability::Undetermined;
+        }
 
         match (source, target) {
             (_, TypeData::AnyKeyword | TypeData::UnknownKeyword) | (TypeData::NeverKeyword, _) => {
@@ -700,6 +777,11 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             (TypeData::AnyKeyword, _) => {
                 return Assignability::from(target != TypeData::NeverKeyword);
             }
+            // A bare `infer` member is inferred from the whole source, so a
+            // union source isn't split here.
+            (_, TypeData::Union(union)) if self.has_bare_infer_member(union) => {
+                return self.is_assignable_to_union(source, union);
+            }
             (TypeData::Union(union), _) => {
                 return self.all_assignable(union.types(self.db).iter().map(|ty| (*ty, target)));
             }
@@ -707,12 +789,13 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 let literals = boolean_literals(self.db);
                 return self.all_assignable(literals.map(|literal| (literal, target)));
             }
+            (TypeData::UnknownKeyword, TypeData::Union(union))
+                if self.accepts_every_value(union) =>
+            {
+                return Assignability::Assignable;
+            }
             (_, TypeData::Union(union)) => {
-                // A bare `infer` generic accepts anything, so it must only
-                // receive what the other members reject.
-                let mut members = union.types(self.db).to_vec();
-                members.sort_by_key(|member| self.infer_type(*member).is_some());
-                return self.any_assignable(members.into_iter().map(|member| (source, member)));
+                return self.is_assignable_to_union(source, union);
             }
             (_, TypeData::Intersection(intersection)) => {
                 return self.is_assignable_to_intersection(source, intersection);
@@ -764,7 +847,8 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             primitive_kind(self.db, target),
         ) {
             (Some(source_kind), Some(target_kind)) => {
-                return source_kind.is_assignable_to(target_kind);
+                return compare_literal_values(self.db, source, target)
+                    .unwrap_or_else(|| source_kind.is_assignable_to(target_kind));
             }
             (Some(source_kind), None) => {
                 return self.is_primitive_assignable_to_object(source_kind, target);
@@ -953,6 +1037,235 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             self.candidates.truncate(candidates);
         }
         result
+    }
+
+    /// Returns whether a member of the union is a bare `infer` generic.
+    fn has_bare_infer_member(&self, union: InternedUnion<'db>) -> bool {
+        !self.infer_types.is_empty()
+            && union
+                .types(self.db)
+                .iter()
+                .any(|member| self.infer_type(*member).is_some())
+    }
+
+    /// Checks whether `source` is assignable to a member of a union.
+    ///
+    /// See [`Self::is_assignable_to_any_member`], and
+    /// [`Self::is_assignable_with_bare_infer`] for a union with bare `infer`
+    /// members.
+    fn is_assignable_to_union(
+        &mut self,
+        source: TypeData<'db>,
+        union: InternedUnion<'db>,
+    ) -> Assignability {
+        let (bare, members): (Vec<_>, Vec<_>) = union
+            .types(self.db)
+            .iter()
+            .copied()
+            .partition(|member| self.infer_type(*member).is_some());
+        if bare.is_empty() {
+            self.is_assignable_to_any_member(source, &members)
+        } else {
+            self.is_assignable_with_bare_infer(source, &bare, &members)
+        }
+    }
+
+    /// Checks whether `source` is assignable to one of `members`.
+    ///
+    /// Like TypeScript, `infer` generics take their candidates from every
+    /// member that `source` is assignable to. Here `P` is inferred as
+    /// `string | number`:
+    ///
+    /// ```ts
+    /// type Payload<T> = T extends { data: infer P } | { error: infer P } ? P : never;
+    /// type Both = Payload<{ data: string; error: number }>;
+    /// ```
+    ///
+    /// A member that may refer to an `infer` generic but remains undetermined
+    /// might add candidates, so the outcome is then undetermined.
+    fn is_assignable_to_any_member(
+        &mut self,
+        source: TypeData<'db>,
+        members: &[TypeData<'db>],
+    ) -> Assignability {
+        let mut result = Assignability::NotAssignable;
+        let mut may_miss_candidates = false;
+        for &member in members {
+            let may_infer =
+                !self.infer_types.is_empty() && may_refer_to_free_generic(self.db, member, &[]);
+            if result == Assignability::Assignable && !may_infer {
+                continue;
+            }
+            let candidates = self.candidates.len();
+            match self.is_assignable(source, member) {
+                Assignability::Assignable => {
+                    result = Assignability::Assignable;
+                    continue;
+                }
+                Assignability::NotAssignable => {}
+                Assignability::Undetermined => {
+                    may_miss_candidates |= may_infer;
+                    if result == Assignability::NotAssignable {
+                        result = Assignability::Undetermined;
+                    }
+                }
+            }
+            self.candidates.truncate(candidates);
+        }
+        match result {
+            Assignability::Assignable if may_miss_candidates => Assignability::Undetermined,
+            result => result,
+        }
+    }
+
+    /// Checks whether `source` is assignable to a union whose `bare` members
+    /// are `infer` generics, and infers those generics as TypeScript does.
+    ///
+    /// A bare generic accepts anything, so the outcome only depends on its
+    /// constraint. Each member of a union `source` is considered separately:
+    ///
+    /// - A source member identical to one of the other `members` gives the
+    ///   bare generics nothing. Neither does a string or number literal when
+    ///   `members` include its primitive.
+    /// - A sole bare generic receives the remaining source members that no
+    ///   other member infers anything from. Here `U` is inferred as `number`:
+    ///
+    ///   ```ts
+    ///   type Rest = ("a" | number) extends string | (infer U) ? U : never;
+    ///   ```
+    ///
+    /// - Otherwise the bare generics receive the remaining source members, or
+    ///   the whole source if none remain, as an
+    ///   [`InferencePriority::Fallback`] candidate. Here `U` is inferred as
+    ///   `string`:
+    ///
+    ///   ```ts
+    ///   type Whole = string extends string | (infer U) ? U : never;
+    ///   ```
+    ///
+    /// Whether two object types are identical isn't modeled, so an object
+    /// source member that other members accept without inferring anything
+    /// leaves the outcome undetermined.
+    fn is_assignable_with_bare_infer(
+        &mut self,
+        source: TypeData<'db>,
+        bare: &[TypeData<'db>],
+        members: &[TypeData<'db>],
+    ) -> Assignability {
+        let sources = source
+            .distributive_members(self.db)
+            .filter(|sources| !sources.is_empty())
+            .unwrap_or_else(|| vec![source]);
+        let mut remaining = Vec::new();
+        let mut unmatched = Vec::new();
+        // Source members that no other member accepts.
+        let mut rejected = Vec::new();
+        for member in sources {
+            if members
+                .iter()
+                .any(|target| self.is_identical_member(member, *target))
+            {
+                continue;
+            }
+            remaining.push(member);
+            let candidates = self.candidates.len();
+            match self.is_assignable_to_any_member(member, members) {
+                Assignability::Assignable if self.candidates.len() > candidates => {}
+                Assignability::Assignable
+                    if primitive_kind(self.db, self.resolve(member)).is_some() =>
+                {
+                    unmatched.push(member);
+                }
+                Assignability::NotAssignable => {
+                    unmatched.push(member);
+                    rejected.push(member);
+                }
+                _ => return Assignability::Undetermined,
+            }
+        }
+
+        let generics: Vec<_> = bare
+            .iter()
+            .filter_map(|member| self.infer_type(*member))
+            .collect();
+        if let [generic] = generics.as_slice() {
+            let (ty, priority) = if !unmatched.is_empty() {
+                let ty = TypeData::union_from_types(self.db, unmatched);
+                (ty, InferencePriority::Direct)
+            } else if remaining.is_empty() {
+                (source, InferencePriority::Fallback)
+            } else {
+                let ty = TypeData::union_from_types(self.db, remaining);
+                (ty, InferencePriority::Fallback)
+            };
+            let position = InferencePosition::Covariant;
+            return match self.bind_with_priority(*generic, ty, position, priority) {
+                // TypeScript replaces a candidate that violates the constraint
+                // with the constraint, which must then accept the source
+                // members that no other member accepts.
+                Assignability::NotAssignable => match generic.constraint(self.db) {
+                    Some(constraint) => {
+                        self.all_assignable(rejected.into_iter().map(|member| (member, constraint)))
+                    }
+                    None => Assignability::NotAssignable,
+                },
+                result => result,
+            };
+        }
+
+        let ty = if remaining.is_empty() {
+            source
+        } else {
+            TypeData::union_from_types(self.db, remaining)
+        };
+        let mut result = Assignability::Assignable;
+        for generic in generics {
+            let position = InferencePosition::Covariant;
+            match self.bind_with_priority(generic, ty, position, InferencePriority::Fallback) {
+                Assignability::Assignable => {}
+                _ => result = Assignability::Undetermined,
+            }
+        }
+        result
+    }
+
+    /// Returns whether TypeScript matches the source member `source` with the
+    /// target member `target` before inferring bare `infer` members: when
+    /// both are the same type, or when `source` is a string or number literal
+    /// of the primitive `target`.
+    fn is_identical_member(&mut self, source: TypeData<'db>, target: TypeData<'db>) -> bool {
+        let source = self.resolve(source);
+        let target = self.resolve(target);
+        if source == target {
+            return true;
+        }
+        let (Some(source_kind), Some(target_kind)) = (
+            primitive_kind(self.db, source),
+            primitive_kind(self.db, target),
+        ) else {
+            return false;
+        };
+        let is_literal_of_target = source_kind.is_literal
+            && !source_kind.is_template
+            && !target_kind.is_literal
+            && source_kind.primitive == target_kind.primitive
+            && matches!(source_kind.primitive, Primitive::Number | Primitive::String);
+        is_literal_of_target
+            || compare_literal_values(self.db, source, target) == Some(Assignability::Assignable)
+    }
+
+    /// Returns whether a union includes `{}`, `null`, and `undefined`, which
+    /// together accept every value, so even `unknown` is assignable to it.
+    fn accepts_every_value(&mut self, union: InternedUnion<'db>) -> bool {
+        let (mut has_empty_object, mut has_null, mut has_undefined) = (false, false, false);
+        for member in union.types(self.db) {
+            match self.resolve(*member) {
+                TypeData::Null => has_null = true,
+                TypeData::Undefined => has_undefined = true,
+                member => has_empty_object |= self.is_empty_object(member),
+            }
+        }
+        has_empty_object && has_null && has_undefined
     }
 
     fn is_primitive_assignable_to_object(
@@ -1149,12 +1462,16 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             return Assignability::NotAssignable;
         }
 
-        let mut result = self.all_assignable(
-            source_elements
-                .iter()
-                .zip(fixed)
-                .map(|(source, target)| (source.ty, target.ty)),
-        );
+        let db = self.db;
+        let mut result =
+            self.all_assignable(source_elements.iter().zip(fixed).map(|(source, target)| {
+                let target_ty = if target.is_optional {
+                    with_undefined(db, target.ty)
+                } else {
+                    target.ty
+                };
+                (source.ty, target_ty)
+            }));
         if result == Assignability::NotAssignable {
             return result;
         }
@@ -1184,6 +1501,16 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
     ///
     /// Return types are compared covariantly, and parameters as `variance`
     /// says. See [`Self::are_parameters_assignable`] for parameter lists.
+    ///
+    /// A generic source is compared with its type parameters replaced by
+    /// their constraints. TypeScript instead infers them from the target, and
+    /// may infer narrower types, so only a match is conclusive. Here `T` is
+    /// inferred as `"a"`, which this comparison can't conclude:
+    ///
+    /// ```ts
+    /// declare function id<T extends string>(x: T): T;
+    /// type Narrowed = typeof id extends (x: "a") => "a" ? "yes" : "no";
+    /// ```
     fn is_function_assignable(
         &mut self,
         source: InternedFunction<'db>,
@@ -1193,10 +1520,25 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         if !target.type_parameters(self.db).is_empty() {
             return Assignability::Undetermined;
         }
+        if source.type_parameters(self.db).is_empty() {
+            return self.is_signature_assignable(source, target, variance);
+        }
         let Some(source) = self.erase_type_parameters(source) else {
             return Assignability::Undetermined;
         };
+        match self.is_signature_assignable(source, target, variance) {
+            Assignability::NotAssignable => Assignability::Undetermined,
+            result => result,
+        }
+    }
 
+    /// Compares function signatures that declare no type parameters.
+    fn is_signature_assignable(
+        &mut self,
+        source: InternedFunction<'db>,
+        target: InternedFunction<'db>,
+        variance: ParameterVariance,
+    ) -> Assignability {
         let return_result = match (source.return_type(self.db), target.return_type(self.db)) {
             (_, ReturnType::Type(TypeData::VoidKeyword)) => Assignability::Assignable,
             (ReturnType::Type(source), ReturnType::Type(target)) => {
@@ -1495,6 +1837,8 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         for (name, source_ty, source_is_optional, target_ty, target_is_optional) in found {
             let member_result = if source_is_optional && !target_is_optional {
                 Assignability::NotAssignable
+            } else if target_is_optional {
+                self.is_member_assignable(source_ty, with_undefined(self.db, target_ty), &name)
             } else {
                 self.is_member_assignable(source_ty, target_ty, &name)
             };
@@ -1580,6 +1924,9 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         target: TypeData<'db>,
         name: &str,
     ) -> Assignability {
+        if is_simplified_signature(source) || is_simplified_signature(target) {
+            return self.is_assignable(source, target);
+        }
         let source = self.resolve(source);
         let target = self.resolve(target);
         if let Some(target_method) = self.optional_function(target).filter(|function| {
@@ -1691,25 +2038,39 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
     /// Looks up a member the way property access does, so a member that `ty`
     /// lacks is also looked for on `Object`.
     fn find_apparent_member(&mut self, ty: TypeData<'db>, name: &str) -> MemberLookup<'db> {
-        match self.find_member(ty, name, 0) {
+        match self.find_member(ty, name, 0, &mut FxHashSet::default()) {
             MemberLookup::Missing => {
                 let object = TypeData::instance_of(
                     self.db,
                     TypeData::GlobalType(OBJECT_ID_GLOBAL_TYPE_ID),
                     Box::default(),
                 );
-                self.find_member(object, name, 0)
+                self.find_member(object, name, 0, &mut FxHashSet::default())
             }
             result => result,
         }
     }
 
     /// Looks up an instance member of `ty` by name, following inheritance.
-    fn find_member(&mut self, ty: TypeData<'db>, name: &str, depth: usize) -> MemberLookup<'db> {
+    ///
+    /// `visited` holds the types already searched. A type reached again
+    /// through another parent, as in a diamond-shaped hierarchy, is reported
+    /// as missing the member, since its first search already decided the
+    /// outcome.
+    fn find_member(
+        &mut self,
+        ty: TypeData<'db>,
+        name: &str,
+        depth: usize,
+        visited: &mut FxHashSet<TypeData<'db>>,
+    ) -> MemberLookup<'db> {
         if depth > MAX_MEMBER_LOOKUP_DEPTH {
             return MemberLookup::Unknown;
         }
         let ty = self.resolve(ty);
+        if !visited.insert(ty) {
+            return MemberLookup::Missing;
+        }
         let (target, type_arguments) = match ty {
             TypeData::InstanceOf(instance) => (
                 self.resolve(instance.ty(self.db))
@@ -1792,7 +2153,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 class @ TypeData::Class(_) => TypeData::instance_of(self.db, class, Box::default()),
                 parent => parent,
             };
-            match self.find_member(parent, name, depth + 1) {
+            match self.find_member(parent, name, depth + 1, visited) {
                 found @ MemberLookup::Found { .. } => return found,
                 MemberLookup::Missing => {}
                 MemberLookup::Unknown => result = MemberLookup::Unknown,
@@ -1973,7 +2334,8 @@ impl PrimitiveKind {
     /// Checks whether a value of this kind is assignable to `target`.
     ///
     /// Two different types are compared here, since identical types were
-    /// already accepted. So a literal is assignable only to its primitive.
+    /// already accepted, and literals of one primitive were already compared
+    /// by value. So a literal is assignable only to its primitive.
     /// Whether a string matches a template literal type such as `` `a${string}` ``
     /// is not evaluated.
     fn is_assignable_to(self, target: Self) -> Assignability {
@@ -1992,6 +2354,84 @@ impl PrimitiveKind {
                 || self.primitive == Primitive::Undefined && target.primitive == Primitive::Void,
         )
     }
+}
+
+/// Compares two literal types of the same primitive by value.
+///
+/// Different spellings can denote the same value, such as `1` and `1.0`, or
+/// `16n` and `0x10n`. Escape sequences in string literals aren't decoded, so
+/// a string literal that contains one leaves the outcome undetermined.
+///
+/// Returns `None` for types that aren't number, bigint, or string literals of
+/// the same primitive.
+fn compare_literal_values<'db>(
+    db: &'db dyn TypeDb,
+    source: TypeData<'db>,
+    target: TypeData<'db>,
+) -> Option<Assignability> {
+    let (TypeData::Literal(source), TypeData::Literal(target)) = (source, target) else {
+        return None;
+    };
+    let is_equal = match (source.literal(db), target.literal(db)) {
+        (Literal::Number(source), Literal::Number(target)) => source
+            .to_f64()
+            .zip(target.to_f64())
+            .map(|(source, target)| source == target),
+        (Literal::BigInt(source), Literal::BigInt(target)) => {
+            canonicalize_js_bigint_literal(source.text())
+                .zip(canonicalize_js_bigint_literal(target.text()))
+                .map(|(source, target)| source == target)
+        }
+        (Literal::String(source), Literal::String(target)) => {
+            let is_escaped = |literal: &StringLiteral| literal.as_str().contains('\\');
+            (!is_escaped(source) && !is_escaped(target)).then(|| source == target)
+        }
+        _ => return None,
+    };
+    Some(match is_equal {
+        Some(true) => Assignability::Assignable,
+        Some(false) => Assignability::NotAssignable,
+        None => Assignability::Undetermined,
+    })
+}
+
+/// Returns the intersection of two different primitive types.
+///
+/// The intersection is the narrower type when one includes the other, such as
+/// `"a"` for `string & "a"`, and `never` when no value belongs to both, such
+/// as for `"a" & "b"`. Returns `None` when this can't be decided, such as for
+/// a template literal type and a string literal, or for types that aren't
+/// primitives.
+pub(crate) fn intersect_primitives<'db>(
+    db: &'db dyn TypeDb,
+    left: TypeData<'db>,
+    right: TypeData<'db>,
+) -> Option<TypeData<'db>> {
+    let left_kind = primitive_kind(db, left)?;
+    let right_kind = primitive_kind(db, right)?;
+    let is_left_in_right = compare_literal_values(db, left, right)
+        .unwrap_or_else(|| left_kind.is_assignable_to(right_kind));
+    let is_right_in_left = compare_literal_values(db, right, left)
+        .unwrap_or_else(|| right_kind.is_assignable_to(left_kind));
+    match (is_left_in_right, is_right_in_left) {
+        (Assignability::Assignable, _) => Some(left),
+        (_, Assignability::Assignable) => Some(right),
+        (Assignability::NotAssignable, Assignability::NotAssignable) => {
+            Some(TypeData::NeverKeyword)
+        }
+        _ => None,
+    }
+}
+
+/// Returns `ty` together with `undefined`, which an optional element or
+/// member also accepts.
+fn with_undefined<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeData<'db> {
+    TypeData::union_from_types(db, vec![ty, TypeData::Undefined])
+}
+
+/// Returns whether `ty` is a handle to one of the [`SIMPLIFIED_SIGNATURES`].
+fn is_simplified_signature(ty: TypeData) -> bool {
+    matches!(ty, TypeData::GlobalType(id) if SIMPLIFIED_SIGNATURES.contains(&id))
 }
 
 fn primitive_kind<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> Option<PrimitiveKind> {

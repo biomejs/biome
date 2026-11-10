@@ -1078,6 +1078,244 @@ fn test_conditional_infer_candidates_follow_variance() {
 }
 
 #[test]
+fn test_conditional_infers_from_every_assignable_union_member() {
+    assert_conditional_results(
+        r#"
+        type Payload<T> = T extends { data: infer P } | { error: infer P } ? P : never;
+        type Checked<T> = T extends { c: infer U; b: 2 } | { a: infer U } ? U : "none";
+        type OptionalB<T> = T extends { c: infer U; b?: 2 } | { a: infer U } ? U : "none";
+        declare const both: Payload<{ data: string; error: Promise<void> }>;
+        declare const dataOnly: Payload<{ data: string }>;
+        declare const missingMember: Checked<{ a: 1; c: "x" }>;
+        declare const mismatchedMember: Checked<{ a: 1; c: "x"; b: 3 }>;
+        declare const optionalMember: OptionalB<{ a: 1; c: "x" }>;
+        "#,
+        &[
+            ("both", "string | instanceof Promise<void>"),
+            ("dataOnly", "string"),
+            ("missingMember", "number: 1"),
+            ("mismatchedMember", "number: 1"),
+            ("optionalMember", "string: x | number: 1"),
+        ],
+        &[],
+    );
+}
+
+#[test]
+fn test_conditional_infers_bare_union_member_from_unmatched_sources() {
+    assert_conditional_results(
+        r#"
+        type Strip<T> = T extends (infer U) | undefined ? U : never;
+        declare const identicalSource: string extends string | (infer U) ? U : never;
+        declare const literalOfPrimitive: "a" extends string | (infer U) ? U : never;
+        declare const unionWithIdentical: (string | number) extends string | (infer U) ? U : never;
+        declare const unionWithLiteral: ("a" | number) extends string | (infer U) ? U : never;
+        declare const unionOfLiterals: ("a" | "b") extends "a" | (infer U) ? U : never;
+        declare const booleanSource: boolean extends true | (infer U) ? U : never;
+        declare const allIdentical: (string | undefined) extends string | undefined | (infer U) ? U : never;
+        declare const bigintLiteral: (1n | string) extends bigint | (infer U) ? U : never;
+        declare const lowPriority: [string, number] extends [string | (infer U), infer U] ? U : never;
+        declare const normalPriority: [number, string] extends [string | (infer U), infer U] ? U : never;
+        declare const inferredElsewhere: Promise<number> extends Promise<infer U> | (infer U) ? U : never;
+        declare const inferredMember: { a: 1 } extends { a: infer V } | (infer U) ? V : never;
+        declare const constraintRejects: string extends undefined | (infer U extends number) ? U : "no";
+        declare const constraintFallback: string extends string | (infer U extends number) ? U : "no";
+        declare const distributive: Strip<string | undefined>;
+        declare const objectSubtype: ({ a: 1; b: 2 } | number) extends { a: 1 } | (infer U) ? U : never;
+        declare const severalBare: string extends (infer A) | (infer B) ? A : never;
+        "#,
+        &[
+            ("identicalSource", "string"),
+            ("literalOfPrimitive", "string: a"),
+            ("unionWithIdentical", "number"),
+            ("unionWithLiteral", "number"),
+            ("unionOfLiterals", "string: b"),
+            ("booleanSource", "bool: false"),
+            ("allIdentical", "string | undefined"),
+            ("bigintLiteral", "bigint: 1n | string"),
+            ("lowPriority", "number"),
+            ("normalPriority", "number | string"),
+            ("inferredElsewhere", "number"),
+            ("inferredMember", "number: 1"),
+            ("constraintRejects", "string: no"),
+            ("constraintFallback", "number"),
+            ("distributive", "string | undefined"),
+            ("severalBare", "string"),
+        ],
+        // Whether TypeScript treats two object types as identical isn't
+        // modeled, and the identical ones don't take part in inference.
+        &["objectSubtype"],
+    );
+}
+
+#[test]
+fn test_intersection_of_primitives_keeps_the_narrower_type() {
+    assert_conditional_results(
+        r#"
+        declare const stringLiteral: string & "a";
+        declare const literalString: "a" & string;
+        declare const booleanLiteral: boolean & true;
+        declare const sameValue: 1 & 1.0;
+        declare const twoLiterals: "a" & "b";
+        declare const crossKind: "a" & number;
+        declare const twoPrimitives: string & number;
+        declare const wrapped: [string & "a"] extends [never] ? 1 : 2;
+        declare const wrappedNever: ["a" & "b"] extends [never] ? 1 : 2;
+        declare const templateLiteral: [`a${string}` & "ab"] extends [never] ? 1 : 2;
+        "#,
+        &[
+            ("stringLiteral", "string: a"),
+            ("literalString", "string: a"),
+            ("booleanLiteral", "bool: true"),
+            ("sameValue", "number: 1"),
+            ("twoLiterals", "never"),
+            ("crossKind", "never"),
+            ("twoPrimitives", "never"),
+            ("wrapped", "number: 2"),
+            ("wrappedNever", "number: 1"),
+        ],
+        // Whether a string matches a template literal type isn't evaluated.
+        &["templateLiteral"],
+    );
+}
+
+#[test]
+fn test_conditional_compares_literal_values() {
+    assert_conditional_results(
+        r#"
+        declare const numberSpelling: 1 extends 1.0 ? "yes" : "no";
+        declare const hexNumber: 0x10 extends 16 ? "yes" : "no";
+        declare const exponent: 1e3 extends 1000 ? "yes" : "no";
+        declare const separators: 1_000 extends 1000 ? "yes" : "no";
+        declare const negativeZero: -0 extends 0 ? "yes" : "no";
+        declare const differentNumbers: 1 extends 2 ? "yes" : "no";
+        declare const hexBigInt: 0x10n extends 16n ? "yes" : "no";
+        declare const differentBigInts: 1n extends 2n ? "yes" : "no";
+        declare const differentStrings: "a" extends "b" ? "yes" : "no";
+        declare const escapedString: "\u0061" extends "a" ? "yes" : "no";
+        "#,
+        &[
+            ("numberSpelling", "string: yes"),
+            ("hexNumber", "string: yes"),
+            ("exponent", "string: yes"),
+            ("separators", "string: yes"),
+            ("negativeZero", "string: yes"),
+            ("differentNumbers", "string: no"),
+            ("hexBigInt", "string: yes"),
+            ("differentBigInts", "string: no"),
+            ("differentStrings", "string: no"),
+        ],
+        // Escape sequences in string literal types aren't decoded.
+        &["escapedString"],
+    );
+}
+
+#[test]
+fn test_conditional_optional_targets_accept_undefined() {
+    assert_conditional_results(
+        r#"
+        declare const optionalElement: [undefined] extends [string?] ? "yes" : "no";
+        declare const optionalNamedElement: [undefined] extends [x?: string] ? "yes" : "no";
+        declare const optionalElementNull: [null] extends [string?] ? "yes" : "no";
+        declare const optionalMember: { a: undefined } extends { a?: string } ? "yes" : "no";
+        declare const optionalBuiltinMember: { value: undefined } extends TypedPropertyDescriptor<string> ? "yes" : "no";
+        declare const inferOptionalMember: { a?: string } extends { a?: infer U } ? U : never;
+        declare const inferOptionalElement: [string?] extends [(infer U)?] ? U : never;
+        "#,
+        &[
+            ("optionalElement", "string: yes"),
+            ("optionalNamedElement", "string: yes"),
+            ("optionalElementNull", "string: no"),
+            ("optionalMember", "string: yes"),
+            ("optionalBuiltinMember", "string: yes"),
+            ("inferOptionalMember", "string"),
+            ("inferOptionalElement", "string"),
+        ],
+        &[],
+    );
+}
+
+#[test]
+fn test_conditional_with_generic_source_function() {
+    assert_conditional_results(
+        r#"
+        declare function id<T extends string>(x: T): T;
+        declare function wrap<T extends string>(cb: (x: T) => void): void;
+        declare const erasedMatch: typeof id extends (x: string) => string ? "yes" : "no";
+        declare const erasedReturnType: ReturnType<typeof id>;
+        declare const erasedReturn: typeof id extends (x: "a") => "a" ? "yes" : "no";
+        declare const erasedCallback: typeof wrap extends (cb: (x: "a") => void) => void ? "yes" : "no";
+        "#,
+        &[
+            ("erasedMatch", "string: yes"),
+            ("erasedReturnType", "string"),
+        ],
+        // TypeScript instantiates the source's type parameters from the
+        // target, which replacing them with their constraints can't match.
+        &["erasedReturn", "erasedCallback"],
+    );
+}
+
+#[test]
+fn test_conditional_compares_builtin_members() {
+    assert_conditional_results(
+        r#"
+        declare const builtinInvariant: TypedPropertyDescriptor<"a"> extends TypedPropertyDescriptor<string> ? "yes" : "no";
+        declare const builtinInvariantInfer: TypedPropertyDescriptor<"a"> extends TypedPropertyDescriptor<infer U> ? U : never;
+        declare const mapCovariant: Map<"a", 1> extends Map<string, number> ? "yes" : "no";
+        declare const mapCovariantReverse: Map<string, number> extends Map<"a", number> ? "yes" : "no";
+        declare const setCovariant: Set<"a"> extends Set<string> ? "yes" : "no";
+        declare const mapInfer: Map<string, number> extends Map<string, infer V> ? V : never;
+        declare const promiseThenUnknown: Promise<number> extends { then: unknown } ? "yes" : "no";
+        declare const defaultedArguments: IteratorObject<1> extends IteratorObject<1, string> ? "yes" : "no";
+        declare const promiseThenMismatch: Promise<number> extends { then(cb: (v: string) => void): any } ? "yes" : "no";
+        declare const promiseThenParameters: Parameters<Promise<number>["then"]>;
+        "#,
+        &[
+            ("builtinInvariant", "string: no"),
+            ("builtinInvariantInfer", "string: a"),
+            ("mapCovariant", "string: yes"),
+            ("mapCovariantReverse", "string: no"),
+            ("setCovariant", "string: yes"),
+            ("mapInfer", "number"),
+            ("promiseThenUnknown", "string: yes"),
+        ],
+        &[
+            // Iterator members use symbol keys, which can't be compared.
+            "defaultedArguments",
+            // The generated signatures of `Promise` methods are simplified.
+            "promiseThenMismatch",
+            "promiseThenParameters",
+        ],
+    );
+}
+
+#[test]
+fn test_conditional_member_lookup_through_diamond_inheritance() {
+    // Every level extends two interfaces that both extend the next level.
+    let mut source = String::from("interface L6 { shared: 1 }\n");
+    for level in (0..6).rev() {
+        let next = level + 1;
+        source.push_str(&format!(
+            "interface L{level}A extends L{next} {{}}\n\
+             interface L{level}B extends L{next} {{}}\n\
+             interface L{level} extends L{level}A, L{level}B {{}}\n"
+        ));
+    }
+    source.push_str(
+        r#"
+        declare const inherited: L0 extends { shared: 1 } ? "yes" : "no";
+        declare const missing: L0 extends { missing: 1 } ? "yes" : "no";
+        "#,
+    );
+    assert_conditional_results(
+        &source,
+        &[("inherited", "string: yes"), ("missing", "string: no")],
+        &[],
+    );
+}
+
+#[test]
 fn test_conditional_with_generic_extends_type() {
     assert_conditional_results(
         r#"
@@ -1213,6 +1451,10 @@ fn test_conditional_object_assignability_rules() {
         declare const unknownObject: unknown extends object ? "yes" : "no";
         declare const unknownUnknown: unknown extends unknown ? "yes" : "no";
         declare const unknownUnion: unknown extends string | unknown ? "yes" : "no";
+        declare const unknownNullable: unknown extends {} | null | undefined ? "yes" : "no";
+        declare const unknownNullableWider: unknown extends string | {} | null | undefined ? "yes" : "no";
+        declare const unknownNullableVoid: unknown extends {} | null | void ? "yes" : "no";
+        declare const unknownObjectNullable: unknown extends Object | null | undefined ? "yes" : "no";
         declare const stringPromise: string extends Promise<any> ? "yes" : "no";
         declare const numberPromise: number extends Promise<any> ? "yes" : "no";
         declare const stringArray: string extends string[] ? "yes" : "no";
@@ -1239,6 +1481,10 @@ fn test_conditional_object_assignability_rules() {
             ("unknownObject", "string: no"),
             ("unknownUnknown", "string: yes"),
             ("unknownUnion", "string: yes"),
+            ("unknownNullable", "string: yes"),
+            ("unknownNullableWider", "string: yes"),
+            ("unknownNullableVoid", "string: no"),
+            ("unknownObjectNullable", "string: no"),
             ("stringPromise", "string: no"),
             ("numberPromise", "string: no"),
             ("stringArray", "string: no"),

@@ -21,6 +21,28 @@ declare function whenTrue<T>(value: T): T extends true ? Promise<void> : void;
 declare const flag: boolean;
 whenTrue(flag);
 
+type Payload<T> = T extends { data: infer P } | { error: infer P } ? P : never;
+declare const payload: Payload<{ data: string; error: Promise<void> }>;
+payload;
+
+type PromiseIfOne<T> = T extends 1 ? Promise<void> : void;
+declare const spelledOne: PromiseIfOne<1.0>;
+spelledOne;
+
+declare const fromUnknown: unknown extends {} | null | undefined ? Promise<void> : void;
+fromUnknown;
+
+declare const fromOptional: [undefined] extends [string?] ? Promise<void> : void;
+fromOptional;
+
+type Self<T> = T extends Promise<void> | (infer U) ? U : never;
+declare const self: Self<Promise<void>>;
+self;
+
+type PromiseUnlessNever<T> = [T] extends [never] ? void : Promise<void>;
+declare const narrowed: PromiseUnlessNever<string & "a">;
+narrowed;
+
 ```
 
 # Diagnostics
@@ -89,6 +111,118 @@ conditionalTypeInvalid.ts:16:1 lint/nursery/noFloatingPromises ━━━━━�
   > 16 │ whenTrue(flag);
        │ ^^^^^^^^^^^^^^^
     17 │ 
+    18 │ type Payload<T> = T extends { data: infer P } | { error: infer P } ? P : never;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditionalTypeInvalid.ts:20:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    18 │ type Payload<T> = T extends { data: infer P } | { error: infer P } ? P : never;
+    19 │ declare const payload: Payload<{ data: string; error: Promise<void> }>;
+  > 20 │ payload;
+       │ ^^^^^^^^
+    21 │ 
+    22 │ type PromiseIfOne<T> = T extends 1 ? Promise<void> : void;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditionalTypeInvalid.ts:24:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    22 │ type PromiseIfOne<T> = T extends 1 ? Promise<void> : void;
+    23 │ declare const spelledOne: PromiseIfOne<1.0>;
+  > 24 │ spelledOne;
+       │ ^^^^^^^^^^^
+    25 │ 
+    26 │ declare const fromUnknown: unknown extends {} | null | undefined ? Promise<void> : void;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditionalTypeInvalid.ts:27:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    26 │ declare const fromUnknown: unknown extends {} | null | undefined ? Promise<void> : void;
+  > 27 │ fromUnknown;
+       │ ^^^^^^^^^^^^
+    28 │ 
+    29 │ declare const fromOptional: [undefined] extends [string?] ? Promise<void> : void;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditionalTypeInvalid.ts:30:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    29 │ declare const fromOptional: [undefined] extends [string?] ? Promise<void> : void;
+  > 30 │ fromOptional;
+       │ ^^^^^^^^^^^^^
+    31 │ 
+    32 │ type Self<T> = T extends Promise<void> | (infer U) ? U : never;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditionalTypeInvalid.ts:34:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    32 │ type Self<T> = T extends Promise<void> | (infer U) ? U : never;
+    33 │ declare const self: Self<Promise<void>>;
+  > 34 │ self;
+       │ ^^^^^
+    35 │ 
+    36 │ type PromiseUnlessNever<T> = [T] extends [never] ? void : Promise<void>;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditionalTypeInvalid.ts:38:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    36 │ type PromiseUnlessNever<T> = [T] extends [never] ? void : Promise<void>;
+    37 │ declare const narrowed: PromiseUnlessNever<string & "a">;
+  > 38 │ narrowed;
+       │ ^^^^^^^^^
+    39 │ 
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   

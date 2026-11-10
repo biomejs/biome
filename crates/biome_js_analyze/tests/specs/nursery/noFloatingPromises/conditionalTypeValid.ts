@@ -16,3 +16,16 @@ excluded;
 
 declare function unwrap<T>(value: T): Unwrap<T>;
 unwrap(Promise.resolve(1));
+
+declare function identity<T extends string>(value: T): T;
+declare const fromGeneric: typeof identity extends (value: "a") => "a" ? void : Promise<void>;
+fromGeneric;
+
+declare const fromThen: Promise<number> extends { then(cb: (value: string) => void): any }
+	? Promise<void>
+	: void;
+fromThen;
+
+type Payload<T> = T extends { data: infer P } | { error: infer P } ? P : never;
+declare const dataOnly: Payload<{ data: string }>;
+dataOnly;
