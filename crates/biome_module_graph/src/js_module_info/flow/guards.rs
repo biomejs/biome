@@ -360,12 +360,13 @@ impl<'a> GuardFunctions<'a> {
     /// A name continues with the type that a local type alias names. An
     /// imported name can name an alias in another module, so it returns true.
     /// Other names, such as interfaces, classes, enums, and global types, and
-    /// names qualified by a namespace return false.
+    /// names qualified by a namespace return false. A `typeof` query returns
+    /// true, because only inference tells the type of the value it names.
     fn may_resolve_to_primitive(&self, target: &TypeReference, model: &SemanticModel) -> bool {
         let mut target = target;
         for _ in 0..MAX_ALIAS_STEPS {
             let qualifier = match raw_primitive_target(target, self.raw_types) {
-                RawPrimitiveTarget::Primitive => return true,
+                RawPrimitiveTarget::Primitive | RawPrimitiveTarget::Typeof => return true,
                 RawPrimitiveTarget::Other => return false,
                 RawPrimitiveTarget::Named(qualifier) => qualifier,
             };

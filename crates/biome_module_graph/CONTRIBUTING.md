@@ -102,7 +102,8 @@ variable. It is declared in the same module, nothing reassigns it, and it has
 one signature that is not generic, async, or a generator. Collection selects
 the tested argument from the guard's collected signature. Inference resolves
 only the predicate's target, which must be a primitive type or a primitive
-literal, directly or through type aliases. Neither step infers the guard's body.
+literal, directly, through type aliases, or through a `typeof` query of a value.
+Neither step infers the guard's body.
 
 Only identifier arguments can be narrowed by these guards. Imported or aliased
 guards, default-exported functions, `var` declarations, variables with a type

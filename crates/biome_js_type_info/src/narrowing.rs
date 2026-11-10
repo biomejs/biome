@@ -87,6 +87,10 @@ pub enum RawPrimitiveTarget<'a> {
     /// The reference names a type without type arguments. Only the scope that
     /// declares the name tells whether it is a type alias for a primitive.
     Named(&'a TypeReferenceQualifier),
+    /// The reference queries the type of a value, as in `typeof READY`. Only
+    /// inference tells whether the value has a primitive type or a primitive
+    /// literal type.
+    Typeof,
 }
 
 /// Classifies whether a collected type reference can resolve to a primitive
@@ -151,6 +155,7 @@ pub fn raw_primitive_target<'a>(
                 reference = &instance.ty;
                 continue;
             }
+            Some(RawTypeData::TypeofType(_)) => return RawPrimitiveTarget::Typeof,
             _ => false,
         };
         return if primitive {
