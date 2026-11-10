@@ -98,13 +98,25 @@ impl<'a> ScssListLayout<'a> {
         }
 
         if is_statement_at_rule_value_list(self.node) {
-            // Print `@return a b,
-            //   c d, e f;`.
+            // Fill `@return a b,
+            //   c d, e f;` across indented continuation lines.
+            let trailing = if has_required_trailing_comma(&elements) {
+                TrailingSeparator::Mandatory
+            } else {
+                TrailingSeparator::Omit
+            };
             return write!(
                 f,
-                [indent(&FormatFilledElements {
-                    elements: &elements
-                })]
+                [indent(&format_with(|f| {
+                    let mut fill = f.fill();
+                    for formatted in elements
+                        .format_separated(",")
+                        .with_trailing_separator(trailing)
+                    {
+                        fill.entry(&soft_line_break_or_space(), &formatted);
+                    }
+                    fill.finish()
+                }))]
             );
         }
 
@@ -254,31 +266,6 @@ fn format_elements_with_source_breaks(
 
         Ok(())
     })
-}
-
-/// Fills comma-separated list items across indented continuation lines.
-struct FormatFilledElements<'a> {
-    elements: &'a ScssListExpressionElementList,
-}
-
-impl Format<CssFormatContext> for FormatFilledElements<'_> {
-    fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
-        let separator = soft_line_break_or_space();
-        let mut fill = f.fill();
-        let separated = self.elements.format_separated(",").with_trailing_separator(
-            if has_required_trailing_comma(self.elements) {
-                TrailingSeparator::Mandatory
-            } else {
-                TrailingSeparator::Omit
-            },
-        );
-
-        for formatted in separated {
-            fill.entry(&separator, &formatted);
-        }
-
-        fill.finish()
-    }
 }
 
 /// Checks that the list is the whole value of `@return`, `@debug`, `@warn` or
