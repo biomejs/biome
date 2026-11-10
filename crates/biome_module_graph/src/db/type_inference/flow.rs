@@ -9,11 +9,9 @@ use super::{ImportResolution, ResolutionCtx, resolve_local_type_on_demand};
 use crate::db::queries::{
     BindingTypeInput, FlowBindingTypeInput, infer_flow_binding_baseline, infer_flow_binding_type,
 };
-use crate::js_module_info::flow::{
-    AnyFlowExpression, FlowGuard, FlowNode, FlowNodeId, FlowTest, RootFlow,
-};
+use crate::js_module_info::flow::{FlowGuard, FlowNode, FlowNodeId, FlowTest, RootFlow};
 use crate::{JsModuleInfo, ModuleDb, ModuleInfo};
-use biome_js_syntax::{AnyJsExpression, JsIdentifierExpression, JsSyntaxNode};
+use biome_js_syntax::JsIdentifierExpression;
 use biome_js_type_info::interned_types::TypeData;
 use biome_js_type_info::{NarrowingPredicate, is_narrowing_invariant, narrow_type};
 use biome_rowan::{AstNode, TextRange};
@@ -24,17 +22,6 @@ const MAX_FLOW_STEPS: usize = 16_384;
 /// members of a refined union.
 pub(super) const MAX_FLOW_TYPE_STEPS: usize = 1024;
 
-fn expression_at(root: &JsSyntaxNode, range: TextRange) -> Option<AnyJsExpression> {
-    if range.is_empty() || !root.text_range_with_trivia().contains_range(range) {
-        return None;
-    }
-    root.covering_element(range).ancestors().find_map(|node| {
-        (node.text_trimmed_range() == range)
-            .then(|| AnyJsExpression::cast(node))
-            .flatten()
-    })
-}
-
 pub(in crate::db) fn flow_expression_type<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
@@ -42,7 +29,7 @@ pub(in crate::db) fn flow_expression_type<'db>(
     range: TextRange,
 ) -> Option<TypeData<'db>> {
     let tree = info.semantic_model.root();
-    let expression = AnyFlowExpression::cast(expression_at(tree.syntax(), range)?.into_syntax())?;
+    let expression = info.flow.candidate(range)?.try_to_node(tree.syntax())?;
     let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
     ctx.resolve_flow_expression(&expression)
 }

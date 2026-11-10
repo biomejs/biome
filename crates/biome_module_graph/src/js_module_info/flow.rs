@@ -25,7 +25,7 @@ pub(crate) use scanner::FlowRootScanner;
 use biome_js_semantic::{JsDeclarationKind, SemanticModel};
 use biome_js_syntax::JsIdentifierBinding;
 use biome_js_type_info::{RawTypeData, TypeReference, is_raw_narrowing_invariant};
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, AstPtr, TextRange};
 use builder::{BuiltRoot, build_root};
 use rustc_hash::{FxHashMap, FxHashSet};
 use scanner::SelectedRoot;
@@ -76,7 +76,8 @@ pub(crate) struct FlowRead {
 pub(crate) struct ModuleFlow {
     roots: Vec<RootFlow>,
     reads: FxHashMap<TextRange, FlowRead>,
-    candidates: FxHashSet<TextRange>,
+    /// Points to each candidate expression, keyed by its trimmed range.
+    candidates: FxHashMap<TextRange, AstPtr<AnyFlowExpression>>,
 }
 
 impl ModuleFlow {
@@ -124,7 +125,13 @@ impl ModuleFlow {
 
     /// Returns whether the expression at `range` may have a flow-sensitive type.
     pub(crate) fn is_candidate(&self, range: TextRange) -> bool {
-        self.candidates.contains(&range)
+        self.candidates.contains_key(&range)
+    }
+
+    /// Returns a pointer to the candidate expression at `range`, which
+    /// resolves in the module's syntax tree without searching by range.
+    pub(crate) fn candidate(&self, range: TextRange) -> Option<&AstPtr<AnyFlowExpression>> {
+        self.candidates.get(&range)
     }
 
     /// Returns the flow of the identifier read at `range`.
@@ -185,11 +192,12 @@ impl RootCollector<'_> {
             }
             kept = true;
             let identifier = AnyFlowExpression::JsIdentifierExpression(read.identifier);
-            flow.candidates.insert(identifier.range());
+            flow.candidates
+                .insert(identifier.range(), AstPtr::new(&identifier));
             flow.candidates.extend(
                 identifier
                     .evaluated_ancestors()
-                    .map(|ancestor| ancestor.range()),
+                    .map(|ancestor| (ancestor.range(), AstPtr::new(&ancestor))),
             );
             flow.reads.insert(
                 identifier.range(),
@@ -423,9 +431,19 @@ mod tests {
             ("array", "[value]", false),
             ("loose", "loose", false),
         ] {
+            let range = marked(SOURCE, marker, expression);
             assert_eq!(
-                info.flow.is_candidate(marked(SOURCE, marker, expression)),
+                info.flow.is_candidate(range),
                 expected,
+                "{marker}: {expression}"
+            );
+            let resolved = info
+                .flow
+                .candidate(range)
+                .and_then(|pointer| pointer.try_to_node(info.semantic_model.root().syntax()));
+            assert_eq!(
+                resolved.map(|expression| expression.range()),
+                expected.then_some(range),
                 "{marker}: {expression}"
             );
         }
