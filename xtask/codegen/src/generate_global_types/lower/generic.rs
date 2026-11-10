@@ -8,9 +8,9 @@
 use std::collections::BTreeMap;
 
 use biome_js_syntax::{
-    AnyJsObjectMemberName, AnyTsTupleTypeElement, AnyTsTypePredicateParameterName, TsConditionalType,
-    JsComputedMemberName, TsDeclareFunctionDeclaration, TsInferType, TsReferenceType, TsTypeAliasDeclaration,
-    TsTypeofType,
+    AnyJsObjectMemberName, AnyTsTupleTypeElement, AnyTsTypePredicateParameterName,
+    JsComputedMemberName, TsConditionalType, TsDeclareFunctionDeclaration, TsInferType,
+    TsReferenceType, TsTypeAliasDeclaration, TsTypeofType,
 };
 
 use super::ids::{GlobalIds, GlobalSlot, GlobalSlotKind, join_path, scope_for};
