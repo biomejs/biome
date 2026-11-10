@@ -11,7 +11,6 @@
 //! [`crate::type_operations`].
 
 use crate::generated::global_types::ids::{
-    ARRAY_FILTER_ID_GLOBAL_TYPE_ID, ARRAY_FOREACH_ID_GLOBAL_TYPE_ID, ARRAY_MAP_ID_GLOBAL_TYPE_ID,
     BOOLEAN_ID_GLOBAL_TYPE_ID, NUMBER_ID_GLOBAL_TYPE_ID, OBJECT_ID_GLOBAL_TYPE_ID,
     PROMISE_ALL_ID_GLOBAL_TYPE_ID, PROMISE_ALL_SETTLED_ID_GLOBAL_TYPE_ID,
     PROMISE_ANY_ID_GLOBAL_TYPE_ID, PROMISE_CATCH_ID_GLOBAL_TYPE_ID,
@@ -52,10 +51,7 @@ const MAX_STRUCTURAL_MEMBERS: usize = 64;
 /// as `Promise.prototype.then`, which is declared without parameters.
 /// Comparing a stand-in with another signature would give wrong answers, so
 /// such comparisons stay undetermined.
-const SIMPLIFIED_SIGNATURES: [GlobalTypeId; 14] = [
-    ARRAY_FILTER_ID_GLOBAL_TYPE_ID,
-    ARRAY_FOREACH_ID_GLOBAL_TYPE_ID,
-    ARRAY_MAP_ID_GLOBAL_TYPE_ID,
+const SIMPLIFIED_SIGNATURES: [GlobalTypeId; 11] = [
     PROMISE_CONSTRUCT_ID_GLOBAL_TYPE_ID,
     PROMISE_CATCH_ID_GLOBAL_TYPE_ID,
     PROMISE_FINALLY_ID_GLOBAL_TYPE_ID,
