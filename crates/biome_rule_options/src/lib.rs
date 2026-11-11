@@ -66,7 +66,7 @@ pub mod no_delete;
 pub mod no_deprecated_imports;
 pub mod no_deprecated_media_type;
 pub mod no_descending_specificity;
-pub mod no_disabled_button;
+pub mod no_disabled_attribute;
 pub mod no_distracting_elements;
 pub mod no_div_regex;
 pub mod no_document_cookie;

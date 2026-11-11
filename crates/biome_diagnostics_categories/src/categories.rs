@@ -239,7 +239,7 @@ define_categories! {
     "lint/nursery/noConsoleSpaces": "https://biomejs.dev/linter/rules/no-console-spaces",
     "lint/nursery/noConstantComparisons": "https://biomejs.dev/linter/rules/no-constant-comparisons",
     "lint/nursery/noDanglingUnderscore": "https://biomejs.dev/linter/rules/no-dangling-underscore",
-    "lint/nursery/noDisabledButton": "https://biomejs.dev/linter/rules/no-disabled-button",
+    "lint/nursery/noDisabledAttribute": "https://biomejs.dev/linter/rules/no-disabled-attribute",
     "lint/nursery/noDoubleComparison": "https://biomejs.dev/linter/rules/no-double-comparison",
     "lint/nursery/noDrizzleDeleteWithoutWhere": "https://biomejs.dev/linter/rules/no-drizzle-delete-without-where",
     "lint/nursery/noDrizzleUpdateWithoutWhere": "https://biomejs.dev/linter/rules/no-drizzle-update-without-where",
