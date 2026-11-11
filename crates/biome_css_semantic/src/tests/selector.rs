@@ -1,7 +1,7 @@
 use biome_css_parser::{CssParserOptions, parse_css};
 use biome_languages::CssFileSource;
 
-use crate::model::Selector;
+use crate::model::{ResolvedSelector, Selector};
 use crate::semantic_model;
 
 #[test]
@@ -734,13 +734,23 @@ fn test_compounds_classify_scss_selectors() {
 #[test]
 fn test_subject_is_last_compound() {
     let selector = deepest_scss_selector(".a { ul li:hover {} }", 1);
-    let subject = selector.resolved().subject();
+    let subject = selector
+        .resolved()
+        .subject()
+        .expect("expected a non-empty selector");
     assert_eq!(subject.combinator().map(|(_, text)| text.text()), Some(" "));
     let names: Vec<_> = subject
         .simple_selectors()
         .map(|simple| simple.name())
         .collect();
     assert_eq!(names, [Some("li"), Some("hover")]);
+}
+
+#[test]
+fn test_empty_selector_has_no_subject() {
+    let selector = ResolvedSelector(Vec::new());
+    assert_eq!(selector.compounds().count(), 0);
+    assert!(selector.subject().is_none());
 }
 
 #[test]
