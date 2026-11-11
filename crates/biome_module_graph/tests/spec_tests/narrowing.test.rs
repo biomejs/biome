@@ -1497,6 +1497,55 @@ fn narrowing_requests_reuse_warm_and_unrelated_inputs_and_invalidate_changed_gua
 }
 
 #[test]
+fn imported_type_edits_rerun_only_the_reads_whose_type_changes() {
+    use InferredTypeData::{Null, Number, String};
+    const SOURCE: &str = r#"
+        import type { Imported } from "./imported.ts";
+        function inspect(value: Imported | null) {
+            if (value === null) {
+                /*null*/value;
+            } else {
+                /*imported*/value;
+            }
+        }
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+    fs.insert("/src/imported.ts".into(), "export type Imported = string;");
+    let mut db = build_js_test_module_db(&fs, &["/src/index.ts", "/src/imported.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let imported = db
+        .module_for_path(Utf8Path::new("/src/imported.ts"))
+        .unwrap();
+    let null_read = marked_range(SOURCE, "null", "value");
+    let imported_read = marked_range(SOURCE, "imported", "value");
+    fn type_at(db: &TestModuleDb, module: ModuleInfo, range: TextRange) -> InferredTypeData<'_> {
+        infer_expression_type(db, ExpressionTypeInput::new(db, module, range)).unwrap()
+    }
+    assert_eq!(type_at(&db, module, null_read), Null);
+    assert_eq!(type_at(&db, module, imported_read), String);
+
+    // Only the imported module changes, so the reading module keeps its flow
+    // and only reads whose refined type changes recompute.
+    fs.insert("/src/imported.ts".into(), "export type Imported = number;");
+    let kind = resolve_js_module_kind_for_test(&fs, "/src/imported.ts", true);
+    salsa::Setter::to(imported.set_kind(&mut db), kind);
+    db.clear_salsa_events();
+    assert_eq!(type_at(&db, module, null_read), Null);
+    assert_eq!(type_at(&db, module, imported_read), Number);
+    let events = db.take_salsa_events();
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, "infer_flow_binding_states", &events),
+        1,
+        "the shared solve must recompute after the baseline changes"
+    );
+    let input = ExpressionTypeInput::new(&db, module, null_read);
+    assert_function_query_was_not_run(&db, infer_expression_type, input, &events);
+    let input = ExpressionTypeInput::new(&db, module, imported_read);
+    assert_function_query_was_run(&db, infer_expression_type, input, &events);
+}
+
+#[test]
 fn flow_candidates_include_nested_expression_and_loop_conditions() {
     use InferredTypeData::{Null, Number, String};
     for (body, expected) in [
