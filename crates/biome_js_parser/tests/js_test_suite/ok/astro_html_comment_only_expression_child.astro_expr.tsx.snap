@@ -1,0 +1,76 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```tsx
+<span>{<!-- x -->}</span>
+
+```
+
+
+## AST
+
+```
+JsExpressionTemplateRoot {
+    expression: JsxTagExpression {
+        tag: JsxElement {
+            opening_element: JsxOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: JsxName {
+                    value_token: JSX_IDENT@1..5 "span" [] [],
+                },
+                type_arguments: missing (optional),
+                attributes: JsxAttributeList [],
+                r_angle_token: R_ANGLE@5..6 ">" [] [],
+            },
+            elements: JsxChildList [
+                JsxExpressionChild {
+                    l_curly_token: L_CURLY@6..17 "{" [] [Comments("<!-- x -->")],
+                    expression: missing (optional),
+                    r_curly_token: R_CURLY@17..18 "}" [] [],
+                },
+            ],
+            closing_element: JsxClosingElement {
+                l_angle_token: L_ANGLE@18..19 "<" [] [],
+                slash_token: SLASH@19..20 "/" [] [],
+                name: JsxName {
+                    value_token: JSX_IDENT@20..24 "span" [] [],
+                },
+                r_angle_token: R_ANGLE@24..25 ">" [] [],
+            },
+        },
+    },
+    eof_token: EOF@25..26 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_EXPRESSION_TEMPLATE_ROOT@0..26
+  0: JSX_TAG_EXPRESSION@0..25
+    0: JSX_ELEMENT@0..25
+      0: JSX_OPENING_ELEMENT@0..6
+        0: L_ANGLE@0..1 "<" [] []
+        1: JSX_NAME@1..5
+          0: JSX_IDENT@1..5 "span" [] []
+        2: (empty)
+        3: JSX_ATTRIBUTE_LIST@5..5
+        4: R_ANGLE@5..6 ">" [] []
+      1: JSX_CHILD_LIST@6..18
+        0: JSX_EXPRESSION_CHILD@6..18
+          0: L_CURLY@6..17 "{" [] [Comments("<!-- x -->")]
+          1: (empty)
+          2: R_CURLY@17..18 "}" [] []
+      2: JSX_CLOSING_ELEMENT@18..25
+        0: L_ANGLE@18..19 "<" [] []
+        1: SLASH@19..20 "/" [] []
+        2: JSX_NAME@20..24
+          0: JSX_IDENT@20..24 "span" [] []
+        3: R_ANGLE@24..25 ">" [] []
+  1: EOF@25..26 "" [Newline("\n")] []
+
+```

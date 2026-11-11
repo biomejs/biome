@@ -685,17 +685,17 @@ fn run_if_statement(
         return None;
     }
 
-    // The fix to `??=` is only safe when the test catches exactly `null`/`undefined`.
-    // A `!x` truthiness test also catches other falsy values (`0`, `''`, `false`), so it
-    // is only safe when the non-nullish part of the type cannot itself be falsy. A single
-    // strict check (`x === null`) misses the other nullish value, mirroring the ternary path.
+    if let IfTestKind::Nullish(NullishCheckKind::StrictSingle(literal)) = test_kind
+        && !literal.covers_nullish_variants_of(subject_ty)?
+    {
+        return None;
+    }
+
+    // A `!x` truthiness test also catches other falsy values (`0`, `''`, `false`), so the
+    // fix to `??=` is only safe when the non-nullish part of the type cannot itself be falsy.
     let type_allows_fix = match test_kind {
         IfTestKind::Truthiness => subject_ty.is_safe_for_nullish_coalescing()?,
-        IfTestKind::Nullish(NullishCheckKind::Loose | NullishCheckKind::Compound) => true,
-        IfTestKind::Nullish(NullishCheckKind::StrictSingle(lit)) => match lit {
-            NullishLiteral::Null => !subject_ty.has_undefined_variant()?,
-            NullishLiteral::Undefined => !subject_ty.has_null_variant()?,
-        },
+        IfTestKind::Nullish(_) => true,
     };
 
     // The original `if` evaluates the subject twice (test + assignment) while `??=`
@@ -1147,24 +1147,14 @@ fn run_ternary(
         return None;
     }
 
-    // The fix is unsafe when the checked expression contains calls or `new`, because
-    // the ternary evaluates it twice (test + branch) while `??` evaluates it once.
-    let has_side_effects = contains_call_or_new_expression(&checked_expr);
+    if let NullishCheckKind::StrictSingle(literal) = check_kind
+        && !literal.covers_nullish_variants_of(ctx.type_of_expression(&checked_expr)?)?
+    {
+        return None;
+    }
 
-    let can_fix = !has_side_effects
-        && match check_kind {
-            // Loose equality and compound strict checks cover both null and undefined
-            NullishCheckKind::Loose | NullishCheckKind::Compound => true,
-            // A single strict check only covers one nullish variant. The fix to `??`
-            // is safe only if the type cannot be the opposite variant.
-            NullishCheckKind::StrictSingle(lit) => {
-                let ty = ctx.type_of_expression(&checked_expr)?;
-                match lit {
-                    NullishLiteral::Null => !ty.has_undefined_variant()?,
-                    NullishLiteral::Undefined => !ty.has_null_variant()?,
-                }
-            }
-        };
+    // The ternary evaluates a subject containing a call or `new` twice (test + branch) while `??` evaluates it once.
+    let can_fix = !contains_call_or_new_expression(&checked_expr);
 
     Some(UseNullishCoalescingState::Ternary {
         test_range: test.syntax().text_trimmed_range(),
@@ -1262,11 +1252,24 @@ enum NullishLiteral {
     Undefined,
 }
 
+impl NullishLiteral {
+    /// Whether a strict comparison against this literal catches every nullish
+    /// variant of `ty`. Returns `None` when the type cannot be resolved.
+    fn covers_nullish_variants_of(self, ty: InferredType) -> Option<bool> {
+        let misses_a_variant = match self {
+            Self::Null => ty.has_undefined_variant()?,
+            Self::Undefined => ty.has_null_variant()?,
+        };
+        Some(!misses_a_variant)
+    }
+}
+
 #[derive(Clone, Copy)]
 enum NullishCheckKind {
     /// Loose equality: `!= null` or `== null` (covers both null and undefined)
     Loose,
-    /// Single strict equality: `!== null` or `=== undefined` (covers only one)
+    /// Single strict equality: `!== null` or `=== undefined`. It covers only one nullish
+    /// value, so the rule reports it only when the type cannot hold the other one.
     StrictSingle(NullishLiteral),
     /// Compound strict: `!== null && !== undefined` (covers both)
     Compound,

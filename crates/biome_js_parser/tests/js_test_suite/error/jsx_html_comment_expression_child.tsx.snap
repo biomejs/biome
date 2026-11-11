@@ -1,0 +1,163 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```tsx
+<span>{<!-- x -->}</span>;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxElement {
+                    opening_element: JsxOpeningElement {
+                        l_angle_token: L_ANGLE@0..1 "<" [] [],
+                        name: JsxName {
+                            value_token: JSX_IDENT@1..5 "span" [] [],
+                        },
+                        type_arguments: missing (optional),
+                        attributes: JsxAttributeList [],
+                        r_angle_token: R_ANGLE@5..6 ">" [] [],
+                    },
+                    elements: JsxChildList [
+                        JsxExpressionChild {
+                            l_curly_token: L_CURLY@6..7 "{" [] [],
+                            expression: JsBinaryExpression {
+                                left: JsBinaryExpression {
+                                    left: missing (required),
+                                    operator_token: L_ANGLE@7..8 "<" [] [],
+                                    right: JsUnaryExpression {
+                                        operator_token: BANG@8..9 "!" [] [],
+                                        argument: JsPreUpdateExpression {
+                                            operator_token: MINUS2@9..12 "--" [] [Whitespace(" ")],
+                                            operand: JsBogusAssignment {
+                                                items: [
+                                                    JsIdentifierAssignment {
+                                                        name_token: IDENT@12..14 "x" [] [Whitespace(" ")],
+                                                    },
+                                                    MINUS2@14..16 "--" [] [],
+                                                ],
+                                            },
+                                        },
+                                    },
+                                },
+                                operator_token: R_ANGLE@16..17 ">" [] [],
+                                right: missing (required),
+                            },
+                            r_curly_token: R_CURLY@17..18 "}" [] [],
+                        },
+                    ],
+                    closing_element: JsxClosingElement {
+                        l_angle_token: L_ANGLE@18..19 "<" [] [],
+                        slash_token: SLASH@19..20 "/" [] [],
+                        name: JsxName {
+                            value_token: JSX_IDENT@20..24 "span" [] [],
+                        },
+                        r_angle_token: R_ANGLE@24..25 ">" [] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@25..26 ";" [] [],
+        },
+    ],
+    eof_token: EOF@26..27 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..27
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..26
+    0: JS_EXPRESSION_STATEMENT@0..26
+      0: JSX_TAG_EXPRESSION@0..25
+        0: JSX_ELEMENT@0..25
+          0: JSX_OPENING_ELEMENT@0..6
+            0: L_ANGLE@0..1 "<" [] []
+            1: JSX_NAME@1..5
+              0: JSX_IDENT@1..5 "span" [] []
+            2: (empty)
+            3: JSX_ATTRIBUTE_LIST@5..5
+            4: R_ANGLE@5..6 ">" [] []
+          1: JSX_CHILD_LIST@6..18
+            0: JSX_EXPRESSION_CHILD@6..18
+              0: L_CURLY@6..7 "{" [] []
+              1: JS_BINARY_EXPRESSION@7..17
+                0: JS_BINARY_EXPRESSION@7..16
+                  0: (empty)
+                  1: L_ANGLE@7..8 "<" [] []
+                  2: JS_UNARY_EXPRESSION@8..16
+                    0: BANG@8..9 "!" [] []
+                    1: JS_PRE_UPDATE_EXPRESSION@9..16
+                      0: MINUS2@9..12 "--" [] [Whitespace(" ")]
+                      1: JS_BOGUS_ASSIGNMENT@12..16
+                        0: JS_IDENTIFIER_ASSIGNMENT@12..14
+                          0: IDENT@12..14 "x" [] [Whitespace(" ")]
+                        1: MINUS2@14..16 "--" [] []
+                1: R_ANGLE@16..17 ">" [] []
+                2: (empty)
+              2: R_CURLY@17..18 "}" [] []
+          2: JSX_CLOSING_ELEMENT@18..25
+            0: L_ANGLE@18..19 "<" [] []
+            1: SLASH@19..20 "/" [] []
+            2: JSX_NAME@20..24
+              0: JSX_IDENT@20..24 "span" [] []
+            3: R_ANGLE@24..25 ">" [] []
+      1: SEMICOLON@25..26 ";" [] []
+  4: EOF@26..27 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+jsx_html_comment_expression_child.tsx:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression for the left hand side of the `<` operator.
+  
+  > 1 │ <span>{<!-- x -->}</span>;
+      │        ^
+    2 │ 
+  
+  i This operator requires a left hand side value
+  
+jsx_html_comment_expression_child.tsx:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid assignment to `x --`
+  
+  > 1 │ <span>{<!-- x -->}</span>;
+      │             ^^^^
+    2 │ 
+  
+  i This expression cannot be assigned to
+  
+jsx_html_comment_expression_child.tsx:1:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found '}'.
+  
+  > 1 │ <span>{<!-- x -->}</span>;
+      │                  ^
+    2 │ 
+  
+  i Expected an expression here.
+  
+  > 1 │ <span>{<!-- x -->}</span>;
+      │                  ^
+    2 │ 
+  
+```
