@@ -14,7 +14,7 @@ use biome_css_semantic::{
 use biome_css_syntax::{AnyCssRoot, decode_css_identifier};
 use biome_fs::normalize_path;
 use biome_parser::db::{SourceExt, TrackedSnippet};
-use biome_rowan::{TextRange, TextSize, TokenText};
+use biome_rowan::{Text, TextRange, TextSize};
 use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexMap;
 use rustc_hash::FxHashSet;
@@ -62,8 +62,9 @@ fn css_property_definitions_from_embedded_snippet<'db>(
 pub struct CssClassStep {
     /// The path of the CSS file discovered in this step
     pub css_path: Utf8PathBuf,
-    /// The CSS class names and their selector ranges found in this CSS file
-    pub css_classes: IndexMap<TextRange, TokenText>,
+    /// The CSS class names, with escapes decoded, keyed by their name token
+    /// ranges in this CSS file
+    pub css_classes: IndexMap<TextRange, Text>,
 }
 
 /// Rich diagnostic information including component chain.

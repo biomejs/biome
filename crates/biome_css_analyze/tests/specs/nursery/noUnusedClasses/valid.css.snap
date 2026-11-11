@@ -101,5 +101,13 @@ div.container {
 	text-decoration: underline;
 }
 
+/* Escaped class names match their decoded form: foo+bar, md:flex, 10col */
+
+.foo\+bar,
+.md\:flex,
+.\31 0col {
+	color: blue;
+}
+
 
 ```

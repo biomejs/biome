@@ -13,6 +13,7 @@ expression: valid.html
 <body>
 	<div class="card">Defined in linked stylesheet</div>
 	<div class="header btn">Multiple classes from linked stylesheet</div>
+	<div class="foo+bar md:flex 10col">Escaped class names</div>
 </body>
 </html>
 

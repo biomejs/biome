@@ -68,3 +68,9 @@
 :where(.subtle) {
 	opacity: 0.5;
 }
+
+/* Escaped: .unused\:x is never referenced, reported with its source spelling */
+
+.unused\:x {
+	color: red;
+}

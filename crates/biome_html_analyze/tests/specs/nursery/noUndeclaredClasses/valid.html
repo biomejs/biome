@@ -16,6 +16,7 @@
 	.active.highlighted { background: yellow; }
 	.alpha + .beta { margin-top: 8px; }
 	.any-class { display: block; }
+	.foo\+bar, .md\:flex, .\31 0col { color: blue; }
 </style>
 </head>
 <body>
@@ -42,5 +43,6 @@
 	<div class="   ">Only whitespace</div>
 	<div class>No value</div>
 	<div class="any-class">Unstyled section</div>
+	<div class="foo+bar md:flex 10col">Escaped class names</div>
 </body>
 </html>
