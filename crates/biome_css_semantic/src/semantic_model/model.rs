@@ -599,26 +599,29 @@ impl<'a> Iterator for SimpleSelectorIterator<'a> {
     }
 }
 
-/// A run of simple selectors between two top-level combinators, such as `li:hover` in
-/// `ul > li:hover`.
+/// The simple selectors between two top-level combinators, such as `li:hover` in `ul > li:hover`.
 #[derive(Debug, Clone, Copy)]
 pub struct CompoundSelector<'a> {
+    /// The combinator that joins this compound selector to the previous one, such as `>` in
+    /// `ul > li:hover`. `None` for the first compound selector, unless the selector starts with a
+    /// combinator, as `> .a` can in a nested rule.
     combinator: Option<&'a (CssSyntaxKind, TokenText)>,
+    /// The tokens of the simple selectors, without the combinator.
     tokens: &'a [(CssSyntaxKind, TokenText)],
 }
 
 impl<'a> CompoundSelector<'a> {
-    /// Returns the combinator that precedes this compound. The first compound has none, unless
-    /// the selector starts with a combinator.
+    /// Returns the combinator that joins this compound selector to the previous one.
     pub fn combinator(&self) -> Option<&'a (CssSyntaxKind, TokenText)> {
         self.combinator
     }
 
+    /// Returns the tokens of the simple selectors, without the combinator.
     pub fn tokens(&self) -> &'a [(CssSyntaxKind, TokenText)] {
         self.tokens
     }
 
-    /// Returns the simple selectors in source order.
+    /// Returns the tokens of the simple selectors, without the combinator.
     pub fn simple_selectors(&self) -> SimpleSelectorIterator<'a> {
         SimpleSelectorIterator {
             tokens: self.tokens,
