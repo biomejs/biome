@@ -1,0 +1,19 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
+expression: scss-top-level-mixin.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+@mixin theme {
+  --accent: red;
+  --accent: blue;
+}
+
+@include theme {
+  --gap: 0;
+  --gap: 1px;
+}
+
+```

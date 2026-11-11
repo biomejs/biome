@@ -5,8 +5,7 @@ use biome_css_syntax::{
     CssPropertyAtRule, CssQualifiedRule, CssRelativeSelectorList, CssSelectorList, CssString,
     CssSyntaxKind::*,
     CssSyntaxToken, ScssAtRootSelector, ScssBinaryExpression, ScssExpression, ScssFunctionAtRule,
-    ScssInterpolation, ScssUnaryExpression, ScssVariable,
-    decode_css_identifier,
+    ScssInterpolation, ScssUnaryExpression, ScssVariable, decode_css_identifier,
     property_syntax::{
         PropertySyntaxErrorKind, PropertySyntaxParseDiagnostic, PropertySyntaxResult, encode,
     },

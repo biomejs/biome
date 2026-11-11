@@ -70,6 +70,7 @@ impl SemanticModel {
         self.data
             .root_declarations
             .iter()
+            .chain(&self.data.scss_mixin_declarations)
             .filter(|declaration| {
                 decode_css_identifier(declaration.property_name.text()).starts_with("--")
             })
@@ -187,9 +188,12 @@ pub(crate) struct SemanticModelData {
     pub(crate) all_rules: Vec<RuleData>,
     /// IDs of top-level rules only
     pub(crate) top_level_rule_ids: Vec<RuleId>,
-    /// Declarations parsed outside a rule, such as declarations in a `style` attribute, at the top
-    /// level of a CSS-in-JS template, an SCSS mixin body, or an SCSS `@include` block.
+    /// Declarations parsed outside a rule, such as declarations in a `style` attribute or at the
+    /// top level of a CSS-in-JS template.
     pub(crate) root_declarations: Vec<CssModelDeclarationData>,
+    /// Declarations in an SCSS mixin body or `@include` block outside a rule. Where they apply
+    /// depends on the `@include` site, so only custom property lookups read them.
+    pub(crate) scss_mixin_declarations: Vec<CssModelDeclarationData>,
     /// The static prefixes of interpolated custom property names, such as `--color-` for
     /// `--color-#{$name}`, with the range of each name.
     pub(crate) custom_property_prefixes: Vec<(Text, TextRange)>,
@@ -240,6 +244,13 @@ impl PartialEq for SemanticModel {
                 .root_declarations
                 .iter()
                 .zip(&other.data.root_declarations)
+                .all(|(this, other)| this.semantic_eq(other, &self_root, &other_root))
+            && self.data.scss_mixin_declarations.len() == other.data.scss_mixin_declarations.len()
+            && self
+                .data
+                .scss_mixin_declarations
+                .iter()
+                .zip(&other.data.scss_mixin_declarations)
                 .all(|(this, other)| this.semantic_eq(other, &self_root, &other_root))
             && self
                 .data

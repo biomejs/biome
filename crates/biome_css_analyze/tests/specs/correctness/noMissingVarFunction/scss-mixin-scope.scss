@@ -1,0 +1,13 @@
+/* should not generate diagnostics */
+@mixin card {
+  --gap: 4px;
+}
+
+@include card {
+  --accent: blue;
+}
+
+.unrelated {
+  margin: --gap;
+  color: --accent;
+}
