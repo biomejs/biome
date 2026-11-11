@@ -543,6 +543,7 @@ define_categories! {
     "lint/nursery/useTailwindVariablesShorthand": "https://biomejs.dev/linter/rules/use-tailwind-variables-shorthand",
     "lint/nursery/useTanstackQueryInfiniteQueryPropertyOrder": "https://biomejs.dev/linter/rules/use-tanstack-query-infinite-query-property-order",
     "lint/nursery/useTanstackQueryStableQueryClient": "https://biomejs.dev/linter/rules/use-tanstack-query-stable-query-client",
+    "lint/nursery/useTopLevelDescribe": "https://biomejs.dev/linter/rules/use-top-level-describe",
     "lint/nursery/useTopLevelHeading": "https://biomejs.dev/linter/rules/use-top-level-heading",
     "lint/nursery/useTopLevelRequire": "https://biomejs.dev/linter/rules/use-top-level-require",
     "lint/nursery/useUnaryMinus": "https://biomejs.dev/linter/rules/use-unary-minus",
