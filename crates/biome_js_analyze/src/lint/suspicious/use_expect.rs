@@ -3,7 +3,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::JsCallExpression;
+use biome_js_syntax::{AnyJsExpression, JsCallExpression};
 use biome_rowan::AstNode;
 use biome_rule_options::use_expect::UseExpectOptions;
 
@@ -68,6 +68,49 @@ declare_lint_rule! {
     /// ```
     /// (This replicates the rule's behavior in eslint-plugin-vitest with `typecheck` set to `true`.)
     ///
+    /// ## Options
+    ///
+    /// ### `assertFunctionNames`
+    ///
+    /// A list of additional function names that count as assertions.
+    /// Use it for helpers that wrap `expect()`, or for assertion libraries
+    /// that the rule doesn't know.
+    ///
+    /// A name is either a function name, like `expectSaga`, or a dotted path
+    /// to a method, like `utils.assertValid`. Names are matched exactly.
+    ///
+    /// Default: `[]`
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "assertFunctionNames": ["expectSaga", "utils.assertValid"]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// #### Invalid
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// test("helper is not listed", () => {
+    ///     checkResult(compute());
+    /// });
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```js,use_options
+    /// test("runs the saga", () => {
+    ///     expectSaga(saga).put({ type: "DONE" }).run();
+    /// });
+    /// ```
+    ///
+    /// ```js,use_options
+    /// test("is valid", () => {
+    ///     utils.assertValid(compute());
+    /// });
+    /// ```
+    ///
     pub UseExpect {
         version: "2.4.2",
         name: "useExpect",
@@ -107,6 +150,12 @@ impl Rule for UseExpect {
             return None;
         }
 
+        if let Some(names) = &ctx.options().assert_function_names
+            && contains_named_call(&callback, names)
+        {
+            return None;
+        }
+
         Some(())
     }
 
@@ -130,3 +179,39 @@ impl Rule for UseExpect {
     }
 }
 
+
+/// Checks if the callback calls one of the given function names.
+fn contains_named_call(callback: &AnyJsExpression, names: &[Box<str>]) -> bool {
+    callback
+        .syntax()
+        .descendants()
+        .filter_map(JsCallExpression::cast)
+        .filter_map(|call| call.callee().ok())
+        .any(|callee| names.iter().any(|name| is_named(&callee, name)))
+}
+
+/// Checks if an expression is the identifier or the dotted path `name`,
+/// e.g. `expectSaga` or `utils.assertValid`.
+fn is_named(expr: &AnyJsExpression, name: &str) -> bool {
+    match expr {
+        AnyJsExpression::JsIdentifierExpression(id) => id
+            .name()
+            .ok()
+            .and_then(|reference| reference.value_token().ok())
+            .is_some_and(|token| token.text_trimmed() == name),
+        AnyJsExpression::JsStaticMemberExpression(member) => {
+            let Some((object_name, member_name)) = name.rsplit_once('.') else {
+                return false;
+            };
+            member
+                .member()
+                .ok()
+                .and_then(|member| member.as_js_name()?.value_token().ok())
+                .is_some_and(|token| token.text_trimmed() == member_name)
+                && member
+                    .object()
+                    .is_ok_and(|object| is_named(&object, object_name))
+        }
+        _ => false,
+    }
+}

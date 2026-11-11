@@ -1,0 +1,113 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: assert-function-names.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+test("function that is not listed", () => {
+    checkResult(compute());
+});
+
+test("method name without its object", () => {
+    assertValid(compute());
+});
+
+test("method on another object", () => {
+    helpers.assertValid(compute());
+});
+
+test("listed function that is not called", () => {
+    const check = expectSaga;
+});
+
+```
+
+# Diagnostics
+```
+assert-function-names.js:3:1 lint/suspicious/useExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Test callback is missing an expect() assertion.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ test("function that is not listed", () => {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 4 │     checkResult(compute());
+  > 5 │ });
+      │ ^^
+    6 │ 
+    7 │ test("method name without its object", () => {
+  
+  i Tests without assertions may pass even when the behavior is broken.
+  
+  i Add an assertion using expect() to verify the expected behavior.
+  
+
+```
+
+```
+assert-function-names.js:7:1 lint/suspicious/useExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Test callback is missing an expect() assertion.
+  
+     5 │ });
+     6 │ 
+   > 7 │ test("method name without its object", () => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 8 │     assertValid(compute());
+   > 9 │ });
+       │ ^^
+    10 │ 
+    11 │ test("method on another object", () => {
+  
+  i Tests without assertions may pass even when the behavior is broken.
+  
+  i Add an assertion using expect() to verify the expected behavior.
+  
+
+```
+
+```
+assert-function-names.js:11:1 lint/suspicious/useExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Test callback is missing an expect() assertion.
+  
+     9 │ });
+    10 │ 
+  > 11 │ test("method on another object", () => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 12 │     helpers.assertValid(compute());
+  > 13 │ });
+       │ ^^
+    14 │ 
+    15 │ test("listed function that is not called", () => {
+  
+  i Tests without assertions may pass even when the behavior is broken.
+  
+  i Add an assertion using expect() to verify the expected behavior.
+  
+
+```
+
+```
+assert-function-names.js:15:1 lint/suspicious/useExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Test callback is missing an expect() assertion.
+  
+    13 │ });
+    14 │ 
+  > 15 │ test("listed function that is not called", () => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 16 │     const check = expectSaga;
+  > 17 │ });
+       │ ^^
+    18 │ 
+  
+  i Tests without assertions may pass even when the behavior is broken.
+  
+  i Add an assertion using expect() to verify the expected behavior.
+  
+
+```
