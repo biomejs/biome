@@ -571,6 +571,7 @@ pub mod use_exhaustive_dependencies;
 pub mod use_exhaustive_switch_cases;
 pub mod use_expect;
 pub mod use_expect_to_contain;
+pub mod use_expect_to_have_length;
 pub mod use_explicit_length_check;
 pub mod use_explicit_return_type;
 pub mod use_explicit_type;

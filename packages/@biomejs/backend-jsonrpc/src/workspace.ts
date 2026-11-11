@@ -3983,6 +3983,11 @@ export interface Nursery {
 	 */
 	useExpectToContain?: UseExpectToContainConfiguration;
 	/**
+	 * Enforce using toHaveLength() to check the length of an array or string.
+	 * See https://biomejs.dev/linter/rules/use-expect-to-have-length
+	 */
+	useExpectToHaveLength?: UseExpectToHaveLengthConfiguration;
+	/**
 	 * Require explicit return types on functions and class methods.
 	 * See https://biomejs.dev/linter/rules/use-explicit-return-type
 	 */
@@ -7234,6 +7239,9 @@ export type UseExhaustiveSwitchCasesConfiguration =
 export type UseExpectToContainConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExpectToContainOptions;
+export type UseExpectToHaveLengthConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseExpectToHaveLengthOptions;
 export type UseExplicitReturnTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExplicitReturnTypeOptions;
@@ -10681,6 +10689,14 @@ export interface RuleWithUseExpectToContainOptions {
 	level: RulePlainConfiguration;
 	options?: UseExpectToContainOptions;
 }
+export interface RuleWithUseExpectToHaveLengthOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseExpectToHaveLengthOptions;
+}
 export interface RuleWithUseExplicitReturnTypeOptions {
 	level: RulePlainConfiguration;
 	options?: UseExplicitReturnTypeOptions;
@@ -13752,6 +13768,7 @@ export interface UseExhaustiveSwitchCasesOptions {
 	requireExplicitCase?: boolean;
 }
 export type UseExpectToContainOptions = {};
+export type UseExpectToHaveLengthOptions = {};
 /**
  * Options for the `useExplicitReturnType` rule.
  */
@@ -15780,6 +15797,7 @@ export type Category =
 	| "lint/nursery/useDisposables"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExpectToContain"
+	| "lint/nursery/useExpectToHaveLength"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitReturnType"
 	| "lint/nursery/useExplicitType"

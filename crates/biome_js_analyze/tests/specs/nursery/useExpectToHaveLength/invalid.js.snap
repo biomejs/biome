@@ -1,0 +1,1152 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+expect(files.length).toBe(1);
+expect(files.length).toEqual(1);
+expect(files.length).toStrictEqual(1);
+expect(files.length).not.toBe(1);
+expect(files.length).not.toStrictEqual(1);
+expect(files["length"]).toBe(1);
+expect(files["length"]).toBe(1,);
+expect(files["length"])["not"].toBe(1);
+expect(files["length"])["toBe"](1);
+expect(files["length"]).not["toBe"](1);
+expect(files["length"])["not"]["toBe"](1);
+expect(files.length)['toEqual'](1);
+expect(files.length)[`toEqual`](1);
+expect(files[`length`]).toBe(1);
+expect(files.length).toBe(expected.length);
+expect(files.length, "custom message").toBe(1);
+expect(foo.bar.length).toBe(3);
+expect(getFiles().length).toBe(3);
+expect("text".length).toBe(4);
+expect([1, 2].length).toBe(2);
+expect(this.length).toBe(1);
+
+// Playwright and Vitest soft assertions.
+expect.soft(files.length).toBe(1);
+expect.soft(files["length"]).not.toBe(1);
+
+// Parentheses around the argument are removed, parentheses around the value are kept.
+expect((files.length)).toBe(1);
+expect(((files).length)).toBe(1);
+expect((await table.rows.all()).length).toBe(5);
+expect((first, second).length).toBe(5);
+
+test("comments around the assertion are kept", () => {
+	// leading comment
+	expect(files.length).toBe(1); // trailing comment
+	expect(/* before */ files /* after */.length).toBe(1);
+	expect(files.length)
+		// why this is checked
+		.toBe(/* expected */ 1);
+	expect(files.length) /* modifier */.not /* matcher */
+		.toBe(1);
+	expect(/* before */ (files.length)).toBe(1);
+});
+
+test("no fix when comments would be removed", () => {
+	expect(files./* property */ length).toBe(1);
+	expect(files.length /* after */).toBe(1);
+	expect(files[/* property */ "length"]).toBe(1);
+	expect(
+		files
+			// property
+			.length,
+	).toBe(1);
+	expect((/* inside */ files.length)).toBe(1);
+	expect((files.length) /* after */).toBe(1);
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:2:22 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ expect(files.length).toBe(1);
+      │                      ^^^^
+    3 │ expect(files.length).toEqual(1);
+    4 │ expect(files.length).toStrictEqual(1);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - expect(files.length).toBe(1);
+        2 │ + expect(files).toHaveLength(1);
+     3  3 │   expect(files.length).toEqual(1);
+     4  4 │   expect(files.length).toStrictEqual(1);
+  
+
+```
+
+```
+invalid.js:3:22 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toEqual().
+  
+    1 │ /* should generate diagnostics */
+    2 │ expect(files.length).toBe(1);
+  > 3 │ expect(files.length).toEqual(1);
+      │                      ^^^^^^^
+    4 │ expect(files.length).toStrictEqual(1);
+    5 │ expect(files.length).not.toBe(1);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   expect(files.length).toBe(1);
+     3    │ - expect(files.length).toEqual(1);
+        3 │ + expect(files).toHaveLength(1);
+     4  4 │   expect(files.length).toStrictEqual(1);
+     5  5 │   expect(files.length).not.toBe(1);
+  
+
+```
+
+```
+invalid.js:4:22 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toStrictEqual().
+  
+    2 │ expect(files.length).toBe(1);
+    3 │ expect(files.length).toEqual(1);
+  > 4 │ expect(files.length).toStrictEqual(1);
+      │                      ^^^^^^^^^^^^^
+    5 │ expect(files.length).not.toBe(1);
+    6 │ expect(files.length).not.toStrictEqual(1);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+     2  2 │   expect(files.length).toBe(1);
+     3  3 │   expect(files.length).toEqual(1);
+     4    │ - expect(files.length).toStrictEqual(1);
+        4 │ + expect(files).toHaveLength(1);
+     5  5 │   expect(files.length).not.toBe(1);
+     6  6 │   expect(files.length).not.toStrictEqual(1);
+  
+
+```
+
+```
+invalid.js:5:26 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    3 │ expect(files.length).toEqual(1);
+    4 │ expect(files.length).toStrictEqual(1);
+  > 5 │ expect(files.length).not.toBe(1);
+      │                          ^^^^
+    6 │ expect(files.length).not.toStrictEqual(1);
+    7 │ expect(files["length"]).toBe(1);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+     3  3 │   expect(files.length).toEqual(1);
+     4  4 │   expect(files.length).toStrictEqual(1);
+     5    │ - expect(files.length).not.toBe(1);
+        5 │ + expect(files).not.toHaveLength(1);
+     6  6 │   expect(files.length).not.toStrictEqual(1);
+     7  7 │   expect(files["length"]).toBe(1);
+  
+
+```
+
+```
+invalid.js:6:26 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toStrictEqual().
+  
+    4 │ expect(files.length).toStrictEqual(1);
+    5 │ expect(files.length).not.toBe(1);
+  > 6 │ expect(files.length).not.toStrictEqual(1);
+      │                          ^^^^^^^^^^^^^
+    7 │ expect(files["length"]).toBe(1);
+    8 │ expect(files["length"]).toBe(1,);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+     4  4 │   expect(files.length).toStrictEqual(1);
+     5  5 │   expect(files.length).not.toBe(1);
+     6    │ - expect(files.length).not.toStrictEqual(1);
+        6 │ + expect(files).not.toHaveLength(1);
+     7  7 │   expect(files["length"]).toBe(1);
+     8  8 │   expect(files["length"]).toBe(1,);
+  
+
+```
+
+```
+invalid.js:7:25 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    5 │ expect(files.length).not.toBe(1);
+    6 │ expect(files.length).not.toStrictEqual(1);
+  > 7 │ expect(files["length"]).toBe(1);
+      │                         ^^^^
+    8 │ expect(files["length"]).toBe(1,);
+    9 │ expect(files["length"])["not"].toBe(1);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+     5  5 │   expect(files.length).not.toBe(1);
+     6  6 │   expect(files.length).not.toStrictEqual(1);
+     7    │ - expect(files["length"]).toBe(1);
+        7 │ + expect(files).toHaveLength(1);
+     8  8 │   expect(files["length"]).toBe(1,);
+     9  9 │   expect(files["length"])["not"].toBe(1);
+  
+
+```
+
+```
+invalid.js:8:25 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+     6 │ expect(files.length).not.toStrictEqual(1);
+     7 │ expect(files["length"]).toBe(1);
+   > 8 │ expect(files["length"]).toBe(1,);
+       │                         ^^^^
+     9 │ expect(files["length"])["not"].toBe(1);
+    10 │ expect(files["length"])["toBe"](1);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+     6  6 │   expect(files.length).not.toStrictEqual(1);
+     7  7 │   expect(files["length"]).toBe(1);
+     8    │ - expect(files["length"]).toBe(1,);
+        8 │ + expect(files).toHaveLength(1,);
+     9  9 │   expect(files["length"])["not"].toBe(1);
+    10 10 │   expect(files["length"])["toBe"](1);
+  
+
+```
+
+```
+invalid.js:9:32 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+     7 │ expect(files["length"]).toBe(1);
+     8 │ expect(files["length"]).toBe(1,);
+   > 9 │ expect(files["length"])["not"].toBe(1);
+       │                                ^^^^
+    10 │ expect(files["length"])["toBe"](1);
+    11 │ expect(files["length"]).not["toBe"](1);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+     7  7 │   expect(files["length"]).toBe(1);
+     8  8 │   expect(files["length"]).toBe(1,);
+     9    │ - expect(files["length"])["not"].toBe(1);
+        9 │ + expect(files)["not"].toHaveLength(1);
+    10 10 │   expect(files["length"])["toBe"](1);
+    11 11 │   expect(files["length"]).not["toBe"](1);
+  
+
+```
+
+```
+invalid.js:10:25 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+     8 │ expect(files["length"]).toBe(1,);
+     9 │ expect(files["length"])["not"].toBe(1);
+  > 10 │ expect(files["length"])["toBe"](1);
+       │                         ^^^^^^
+    11 │ expect(files["length"]).not["toBe"](1);
+    12 │ expect(files["length"])["not"]["toBe"](1);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+     8  8 │   expect(files["length"]).toBe(1,);
+     9  9 │   expect(files["length"])["not"].toBe(1);
+    10    │ - expect(files["length"])["toBe"](1);
+       10 │ + expect(files)["toHaveLength"](1);
+    11 11 │   expect(files["length"]).not["toBe"](1);
+    12 12 │   expect(files["length"])["not"]["toBe"](1);
+  
+
+```
+
+```
+invalid.js:11:29 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+     9 │ expect(files["length"])["not"].toBe(1);
+    10 │ expect(files["length"])["toBe"](1);
+  > 11 │ expect(files["length"]).not["toBe"](1);
+       │                             ^^^^^^
+    12 │ expect(files["length"])["not"]["toBe"](1);
+    13 │ expect(files.length)['toEqual'](1);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+     9  9 │   expect(files["length"])["not"].toBe(1);
+    10 10 │   expect(files["length"])["toBe"](1);
+    11    │ - expect(files["length"]).not["toBe"](1);
+       11 │ + expect(files).not["toHaveLength"](1);
+    12 12 │   expect(files["length"])["not"]["toBe"](1);
+    13 13 │   expect(files.length)['toEqual'](1);
+  
+
+```
+
+```
+invalid.js:12:32 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    10 │ expect(files["length"])["toBe"](1);
+    11 │ expect(files["length"]).not["toBe"](1);
+  > 12 │ expect(files["length"])["not"]["toBe"](1);
+       │                                ^^^^^^
+    13 │ expect(files.length)['toEqual'](1);
+    14 │ expect(files.length)[`toEqual`](1);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+    10 10 │   expect(files["length"])["toBe"](1);
+    11 11 │   expect(files["length"]).not["toBe"](1);
+    12    │ - expect(files["length"])["not"]["toBe"](1);
+       12 │ + expect(files)["not"]["toHaveLength"](1);
+    13 13 │   expect(files.length)['toEqual'](1);
+    14 14 │   expect(files.length)[`toEqual`](1);
+  
+
+```
+
+```
+invalid.js:13:22 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toEqual().
+  
+    11 │ expect(files["length"]).not["toBe"](1);
+    12 │ expect(files["length"])["not"]["toBe"](1);
+  > 13 │ expect(files.length)['toEqual'](1);
+       │                      ^^^^^^^^^
+    14 │ expect(files.length)[`toEqual`](1);
+    15 │ expect(files[`length`]).toBe(1);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+    11 11 │   expect(files["length"]).not["toBe"](1);
+    12 12 │   expect(files["length"])["not"]["toBe"](1);
+    13    │ - expect(files.length)['toEqual'](1);
+       13 │ + expect(files)["toHaveLength"](1);
+    14 14 │   expect(files.length)[`toEqual`](1);
+    15 15 │   expect(files[`length`]).toBe(1);
+  
+
+```
+
+```
+invalid.js:14:23 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toEqual().
+  
+    12 │ expect(files["length"])["not"]["toBe"](1);
+    13 │ expect(files.length)['toEqual'](1);
+  > 14 │ expect(files.length)[`toEqual`](1);
+       │                       ^^^^^^^
+    15 │ expect(files[`length`]).toBe(1);
+    16 │ expect(files.length).toBe(expected.length);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+    12 12 │   expect(files["length"])["not"]["toBe"](1);
+    13 13 │   expect(files.length)['toEqual'](1);
+    14    │ - expect(files.length)[`toEqual`](1);
+       14 │ + expect(files)["toHaveLength"](1);
+    15 15 │   expect(files[`length`]).toBe(1);
+    16 16 │   expect(files.length).toBe(expected.length);
+  
+
+```
+
+```
+invalid.js:15:25 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    13 │ expect(files.length)['toEqual'](1);
+    14 │ expect(files.length)[`toEqual`](1);
+  > 15 │ expect(files[`length`]).toBe(1);
+       │                         ^^^^
+    16 │ expect(files.length).toBe(expected.length);
+    17 │ expect(files.length, "custom message").toBe(1);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+    13 13 │   expect(files.length)['toEqual'](1);
+    14 14 │   expect(files.length)[`toEqual`](1);
+    15    │ - expect(files[`length`]).toBe(1);
+       15 │ + expect(files).toHaveLength(1);
+    16 16 │   expect(files.length).toBe(expected.length);
+    17 17 │   expect(files.length, "custom message").toBe(1);
+  
+
+```
+
+```
+invalid.js:16:22 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    14 │ expect(files.length)[`toEqual`](1);
+    15 │ expect(files[`length`]).toBe(1);
+  > 16 │ expect(files.length).toBe(expected.length);
+       │                      ^^^^
+    17 │ expect(files.length, "custom message").toBe(1);
+    18 │ expect(foo.bar.length).toBe(3);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+    14 14 │   expect(files.length)[`toEqual`](1);
+    15 15 │   expect(files[`length`]).toBe(1);
+    16    │ - expect(files.length).toBe(expected.length);
+       16 │ + expect(files).toHaveLength(expected.length);
+    17 17 │   expect(files.length, "custom message").toBe(1);
+    18 18 │   expect(foo.bar.length).toBe(3);
+  
+
+```
+
+```
+invalid.js:17:40 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    15 │ expect(files[`length`]).toBe(1);
+    16 │ expect(files.length).toBe(expected.length);
+  > 17 │ expect(files.length, "custom message").toBe(1);
+       │                                        ^^^^
+    18 │ expect(foo.bar.length).toBe(3);
+    19 │ expect(getFiles().length).toBe(3);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+    15 15 │   expect(files[`length`]).toBe(1);
+    16 16 │   expect(files.length).toBe(expected.length);
+    17    │ - expect(files.length,·"custom·message").toBe(1);
+       17 │ + expect(files,·"custom·message").toHaveLength(1);
+    18 18 │   expect(foo.bar.length).toBe(3);
+    19 19 │   expect(getFiles().length).toBe(3);
+  
+
+```
+
+```
+invalid.js:18:24 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    16 │ expect(files.length).toBe(expected.length);
+    17 │ expect(files.length, "custom message").toBe(1);
+  > 18 │ expect(foo.bar.length).toBe(3);
+       │                        ^^^^
+    19 │ expect(getFiles().length).toBe(3);
+    20 │ expect("text".length).toBe(4);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+    16 16 │   expect(files.length).toBe(expected.length);
+    17 17 │   expect(files.length, "custom message").toBe(1);
+    18    │ - expect(foo.bar.length).toBe(3);
+       18 │ + expect(foo.bar).toHaveLength(3);
+    19 19 │   expect(getFiles().length).toBe(3);
+    20 20 │   expect("text".length).toBe(4);
+  
+
+```
+
+```
+invalid.js:19:27 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    17 │ expect(files.length, "custom message").toBe(1);
+    18 │ expect(foo.bar.length).toBe(3);
+  > 19 │ expect(getFiles().length).toBe(3);
+       │                           ^^^^
+    20 │ expect("text".length).toBe(4);
+    21 │ expect([1, 2].length).toBe(2);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+    17 17 │   expect(files.length, "custom message").toBe(1);
+    18 18 │   expect(foo.bar.length).toBe(3);
+    19    │ - expect(getFiles().length).toBe(3);
+       19 │ + expect(getFiles()).toHaveLength(3);
+    20 20 │   expect("text".length).toBe(4);
+    21 21 │   expect([1, 2].length).toBe(2);
+  
+
+```
+
+```
+invalid.js:20:23 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    18 │ expect(foo.bar.length).toBe(3);
+    19 │ expect(getFiles().length).toBe(3);
+  > 20 │ expect("text".length).toBe(4);
+       │                       ^^^^
+    21 │ expect([1, 2].length).toBe(2);
+    22 │ expect(this.length).toBe(1);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+    18 18 │   expect(foo.bar.length).toBe(3);
+    19 19 │   expect(getFiles().length).toBe(3);
+    20    │ - expect("text".length).toBe(4);
+       20 │ + expect("text").toHaveLength(4);
+    21 21 │   expect([1, 2].length).toBe(2);
+    22 22 │   expect(this.length).toBe(1);
+  
+
+```
+
+```
+invalid.js:21:23 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    19 │ expect(getFiles().length).toBe(3);
+    20 │ expect("text".length).toBe(4);
+  > 21 │ expect([1, 2].length).toBe(2);
+       │                       ^^^^
+    22 │ expect(this.length).toBe(1);
+    23 │ 
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+    19 19 │   expect(getFiles().length).toBe(3);
+    20 20 │   expect("text".length).toBe(4);
+    21    │ - expect([1,·2].length).toBe(2);
+       21 │ + expect([1,·2]).toHaveLength(2);
+    22 22 │   expect(this.length).toBe(1);
+    23 23 │   
+  
+
+```
+
+```
+invalid.js:22:21 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    20 │ expect("text".length).toBe(4);
+    21 │ expect([1, 2].length).toBe(2);
+  > 22 │ expect(this.length).toBe(1);
+       │                     ^^^^
+    23 │ 
+    24 │ // Playwright and Vitest soft assertions.
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+    20 20 │   expect("text".length).toBe(4);
+    21 21 │   expect([1, 2].length).toBe(2);
+    22    │ - expect(this.length).toBe(1);
+       22 │ + expect(this).toHaveLength(1);
+    23 23 │   
+    24 24 │   // Playwright and Vitest soft assertions.
+  
+
+```
+
+```
+invalid.js:25:27 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    24 │ // Playwright and Vitest soft assertions.
+  > 25 │ expect.soft(files.length).toBe(1);
+       │                           ^^^^
+    26 │ expect.soft(files["length"]).not.toBe(1);
+    27 │ 
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+    23 23 │   
+    24 24 │   // Playwright and Vitest soft assertions.
+    25    │ - expect.soft(files.length).toBe(1);
+       25 │ + expect.soft(files).toHaveLength(1);
+    26 26 │   expect.soft(files["length"]).not.toBe(1);
+    27 27 │   
+  
+
+```
+
+```
+invalid.js:26:34 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    24 │ // Playwright and Vitest soft assertions.
+    25 │ expect.soft(files.length).toBe(1);
+  > 26 │ expect.soft(files["length"]).not.toBe(1);
+       │                                  ^^^^
+    27 │ 
+    28 │ // Parentheses around the argument are removed, parentheses around the value are kept.
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+    24 24 │   // Playwright and Vitest soft assertions.
+    25 25 │   expect.soft(files.length).toBe(1);
+    26    │ - expect.soft(files["length"]).not.toBe(1);
+       26 │ + expect.soft(files).not.toHaveLength(1);
+    27 27 │   
+    28 28 │   // Parentheses around the argument are removed, parentheses around the value are kept.
+  
+
+```
+
+```
+invalid.js:29:24 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    28 │ // Parentheses around the argument are removed, parentheses around the value are kept.
+  > 29 │ expect((files.length)).toBe(1);
+       │                        ^^^^
+    30 │ expect(((files).length)).toBe(1);
+    31 │ expect((await table.rows.all()).length).toBe(5);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+    27 27 │   
+    28 28 │   // Parentheses around the argument are removed, parentheses around the value are kept.
+    29    │ - expect((files.length)).toBe(1);
+       29 │ + expect(files).toHaveLength(1);
+    30 30 │   expect(((files).length)).toBe(1);
+    31 31 │   expect((await table.rows.all()).length).toBe(5);
+  
+
+```
+
+```
+invalid.js:30:26 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    28 │ // Parentheses around the argument are removed, parentheses around the value are kept.
+    29 │ expect((files.length)).toBe(1);
+  > 30 │ expect(((files).length)).toBe(1);
+       │                          ^^^^
+    31 │ expect((await table.rows.all()).length).toBe(5);
+    32 │ expect((first, second).length).toBe(5);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+    28 28 │   // Parentheses around the argument are removed, parentheses around the value are kept.
+    29 29 │   expect((files.length)).toBe(1);
+    30    │ - expect(((files).length)).toBe(1);
+       30 │ + expect((files)).toHaveLength(1);
+    31 31 │   expect((await table.rows.all()).length).toBe(5);
+    32 32 │   expect((first, second).length).toBe(5);
+  
+
+```
+
+```
+invalid.js:31:41 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    29 │ expect((files.length)).toBe(1);
+    30 │ expect(((files).length)).toBe(1);
+  > 31 │ expect((await table.rows.all()).length).toBe(5);
+       │                                         ^^^^
+    32 │ expect((first, second).length).toBe(5);
+    33 │ 
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+    29 29 │   expect((files.length)).toBe(1);
+    30 30 │   expect(((files).length)).toBe(1);
+    31    │ - expect((await·table.rows.all()).length).toBe(5);
+       31 │ + expect((await·table.rows.all())).toHaveLength(5);
+    32 32 │   expect((first, second).length).toBe(5);
+    33 33 │   
+  
+
+```
+
+```
+invalid.js:32:32 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    30 │ expect(((files).length)).toBe(1);
+    31 │ expect((await table.rows.all()).length).toBe(5);
+  > 32 │ expect((first, second).length).toBe(5);
+       │                                ^^^^
+    33 │ 
+    34 │ test("comments around the assertion are kept", () => {
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+    30 30 │   expect(((files).length)).toBe(1);
+    31 31 │   expect((await table.rows.all()).length).toBe(5);
+    32    │ - expect((first,·second).length).toBe(5);
+       32 │ + expect((first,·second)).toHaveLength(5);
+    33 33 │   
+    34 34 │   test("comments around the assertion are kept", () => {
+  
+
+```
+
+```
+invalid.js:36:23 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    34 │ test("comments around the assertion are kept", () => {
+    35 │ 	// leading comment
+  > 36 │ 	expect(files.length).toBe(1); // trailing comment
+       │ 	                     ^^^^
+    37 │ 	expect(/* before */ files /* after */.length).toBe(1);
+    38 │ 	expect(files.length)
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+    34 34 │   test("comments around the assertion are kept", () => {
+    35 35 │     // leading comment
+    36    │ - → expect(files.length).toBe(1);·//·trailing·comment
+       36 │ + → expect(files).toHaveLength(1);·//·trailing·comment
+    37 37 │     expect(/* before */ files /* after */.length).toBe(1);
+    38 38 │     expect(files.length)
+  
+
+```
+
+```
+invalid.js:37:48 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    35 │ 	// leading comment
+    36 │ 	expect(files.length).toBe(1); // trailing comment
+  > 37 │ 	expect(/* before */ files /* after */.length).toBe(1);
+       │ 	                                              ^^^^
+    38 │ 	expect(files.length)
+    39 │ 		// why this is checked
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+    35 35 │     // leading comment
+    36 36 │     expect(files.length).toBe(1); // trailing comment
+    37    │ - → expect(/*·before·*/·files·/*·after·*/.length).toBe(1);
+       37 │ + → expect(/*·before·*/·files·/*·after·*/).toHaveLength(1);
+    38 38 │     expect(files.length)
+    39 39 │       // why this is checked
+  
+
+```
+
+```
+invalid.js:40:4 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    38 │ 	expect(files.length)
+    39 │ 		// why this is checked
+  > 40 │ 		.toBe(/* expected */ 1);
+       │ 		 ^^^^
+    41 │ 	expect(files.length) /* modifier */.not /* matcher */
+    42 │ 		.toBe(1);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+    36 36 │     expect(files.length).toBe(1); // trailing comment
+    37 37 │     expect(/* before */ files /* after */.length).toBe(1);
+    38    │ - → expect(files.length)
+       38 │ + → expect(files)
+    39 39 │       // why this is checked
+    40    │ - → → .toBe(/*·expected·*/·1);
+       40 │ + → → .toHaveLength(/*·expected·*/·1);
+    41 41 │     expect(files.length) /* modifier */.not /* matcher */
+    42 42 │       .toBe(1);
+  
+
+```
+
+```
+invalid.js:42:4 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    40 │ 		.toBe(/* expected */ 1);
+    41 │ 	expect(files.length) /* modifier */.not /* matcher */
+  > 42 │ 		.toBe(1);
+       │ 		 ^^^^
+    43 │ 	expect(/* before */ (files.length)).toBe(1);
+    44 │ });
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+    39 39 │       // why this is checked
+    40 40 │       .toBe(/* expected */ 1);
+    41    │ - → expect(files.length)·/*·modifier·*/.not·/*·matcher·*/
+    42    │ - → → .toBe(1);
+       41 │ + → expect(files)·/*·modifier·*/.not·/*·matcher·*/
+       42 │ + → → .toHaveLength(1);
+    43 43 │     expect(/* before */ (files.length)).toBe(1);
+    44 44 │   });
+  
+
+```
+
+```
+invalid.js:43:38 lint/nursery/useExpectToHaveLength  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    41 │ 	expect(files.length) /* modifier */.not /* matcher */
+    42 │ 		.toBe(1);
+  > 43 │ 	expect(/* before */ (files.length)).toBe(1);
+       │ 	                                    ^^^^
+    44 │ });
+    45 │ 
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toHaveLength() instead.
+  
+    41 41 │     expect(files.length) /* modifier */.not /* matcher */
+    42 42 │       .toBe(1);
+    43    │ - → expect(/*·before·*/·(files.length)).toBe(1);
+       43 │ + → expect(/*·before·*/·files).toHaveLength(1);
+    44 44 │   });
+    45 45 │   
+  
+
+```
+
+```
+invalid.js:47:38 lint/nursery/useExpectToHaveLength ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    46 │ test("no fix when comments would be removed", () => {
+  > 47 │ 	expect(files./* property */ length).toBe(1);
+       │ 	                                    ^^^^
+    48 │ 	expect(files.length /* after */).toBe(1);
+    49 │ 	expect(files[/* property */ "length"]).toBe(1);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:48:35 lint/nursery/useExpectToHaveLength ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    46 │ test("no fix when comments would be removed", () => {
+    47 │ 	expect(files./* property */ length).toBe(1);
+  > 48 │ 	expect(files.length /* after */).toBe(1);
+       │ 	                                 ^^^^
+    49 │ 	expect(files[/* property */ "length"]).toBe(1);
+    50 │ 	expect(
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:49:41 lint/nursery/useExpectToHaveLength ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    47 │ 	expect(files./* property */ length).toBe(1);
+    48 │ 	expect(files.length /* after */).toBe(1);
+  > 49 │ 	expect(files[/* property */ "length"]).toBe(1);
+       │ 	                                       ^^^^
+    50 │ 	expect(
+    51 │ 		files
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:54:4 lint/nursery/useExpectToHaveLength ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    52 │ 			// property
+    53 │ 			.length,
+  > 54 │ 	).toBe(1);
+       │ 	  ^^^^
+    55 │ 	expect((/* inside */ files.length)).toBe(1);
+    56 │ 	expect((files.length) /* after */).toBe(1);
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:55:38 lint/nursery/useExpectToHaveLength ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    53 │ 			.length,
+    54 │ 	).toBe(1);
+  > 55 │ 	expect((/* inside */ files.length)).toBe(1);
+       │ 	                                    ^^^^
+    56 │ 	expect((files.length) /* after */).toBe(1);
+    57 │ });
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:56:37 lint/nursery/useExpectToHaveLength ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The length property is checked with toBe().
+  
+    54 │ 	).toBe(1);
+    55 │ 	expect((/* inside */ files.length)).toBe(1);
+  > 56 │ 	expect((files.length) /* after */).toBe(1);
+       │ 	                                   ^^^^
+    57 │ });
+    58 │ 
+  
+  i When this check fails, the error message only shows the two numbers that didn't match, not the value whose length was checked.
+  
+  i Use toHaveLength() to check the length of a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
