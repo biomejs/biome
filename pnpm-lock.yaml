@@ -176,8 +176,8 @@ importers:
         specifier: 3.0.3
         version: 3.0.3
       '@types/node':
-        specifier: 24.13.6
-        version: 24.13.6
+        specifier: 24.19.2
+        version: 24.19.2
       commonmark:
         specifier: 0.31.2
         version: 0.31.2
@@ -300,10 +300,10 @@ importers:
         version: 5.9.3
       vite:
         specifier: 7.3.7
-        version: 7.3.7(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0)
+        version: 7.3.7(@types/node@24.19.2)(tsx@4.21.0)(yaml@2.9.0)
       vitest:
         specifier: 4.1.11
-        version: 4.1.11(@types/node@24.13.6)(happy-dom@20.9.0)(vite@7.3.7(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0))
+        version: 4.1.11(@types/node@24.19.2)(happy-dom@20.9.0)(vite@7.3.7(@types/node@24.19.2)(tsx@4.21.0)(yaml@2.9.0))
 
   packages/@biomejs/runtime:
     dependencies:
@@ -1064,6 +1064,9 @@ packages:
   '@types/node@24.13.6':
     resolution: {integrity: sha512-SGrw/h3KPFshy3OE6ZL53LMBG5vGQQ8/gIpiqz/kRZhPJ7HgwCEs8LBuNtWLa8dvGZVpSF7+Bf+c11HUrCb/yg==}
 
+  '@types/node@24.19.2':
+    resolution: {integrity: sha512-93d49wCWJkCyN87MxLpNN6KXPCwFw7bVUg79mGUV1OS40JGWwVCr8n61DXCSqz7CV6/VfPkb7xec7uP2M+QHWQ==}
+
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
 
@@ -1634,6 +1637,9 @@ packages:
 
   undici-types@7.18.2:
     resolution: {integrity: sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==}
+
+  undici-types@7.24.6:
+    resolution: {integrity: sha512-WRNW+sJgj5OBN4/0JpHFqtqzhpbnV0GuB+OozA9gCL7a993SmU+1JBZCzLNxYsbMfIeDL+lTsphD5jN5N+n0zg==}
 
   unicorn-magic@0.3.0:
     resolution: {integrity: sha512-+QBBXBCvifc56fsbuxZQ6Sic3wqqc3WWaqxs58gvJrcOuN83HGTCwz3oS5phzU9LthRNE9VrJCFCLUgHeeFnfA==}
@@ -2268,6 +2274,10 @@ snapshots:
     dependencies:
       undici-types: 7.18.2
 
+  '@types/node@24.19.2':
+    dependencies:
+      undici-types: 7.24.6
+
   '@types/normalize-package-data@2.4.4': {}
 
   '@types/react@19.3.0':
@@ -2358,6 +2368,14 @@ snapshots:
       magic-string: 0.30.21
     optionalDependencies:
       vite: 7.3.7(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0)
+
+  '@vitest/mocker@4.1.11(vite@7.3.7(@types/node@24.19.2)(tsx@4.21.0)(yaml@2.9.0))':
+    dependencies:
+      '@vitest/spy': 4.1.11
+      estree-walker: 3.0.3
+      magic-string: 0.30.21
+    optionalDependencies:
+      vite: 7.3.7(@types/node@24.19.2)(tsx@4.21.0)(yaml@2.9.0)
 
   '@vitest/pretty-format@4.1.11':
     dependencies:
@@ -2849,6 +2867,8 @@ snapshots:
 
   undici-types@7.18.2: {}
 
+  undici-types@7.24.6: {}
+
   unicorn-magic@0.3.0: {}
 
   validate-npm-package-license@3.0.4:
@@ -2866,6 +2886,20 @@ snapshots:
       tinyglobby: 0.2.15
     optionalDependencies:
       '@types/node': 24.13.6
+      fsevents: 2.3.3
+      tsx: 4.21.0
+      yaml: 2.9.0
+
+  vite@7.3.7(@types/node@24.19.2)(tsx@4.21.0)(yaml@2.9.0):
+    dependencies:
+      esbuild: 0.28.2
+      fdir: 6.5.0(picomatch@4.0.7)
+      picomatch: 4.0.7
+      postcss: 8.5.6
+      rollup: 4.46.2
+      tinyglobby: 0.2.15
+    optionalDependencies:
+      '@types/node': 24.19.2
       fsevents: 2.3.3
       tsx: 4.21.0
       yaml: 2.9.0
@@ -2894,6 +2928,34 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 24.13.6
+      happy-dom: 20.9.0
+    transitivePeerDependencies:
+      - msw
+
+  vitest@4.1.11(@types/node@24.19.2)(happy-dom@20.9.0)(vite@7.3.7(@types/node@24.19.2)(tsx@4.21.0)(yaml@2.9.0)):
+    dependencies:
+      '@vitest/expect': 4.1.11
+      '@vitest/mocker': 4.1.11(vite@7.3.7(@types/node@24.19.2)(tsx@4.21.0)(yaml@2.9.0))
+      '@vitest/pretty-format': 4.1.11
+      '@vitest/runner': 4.1.11
+      '@vitest/snapshot': 4.1.11
+      '@vitest/spy': 4.1.11
+      '@vitest/utils': 4.1.11
+      es-module-lexer: 2.0.0
+      expect-type: 1.3.0
+      magic-string: 0.30.21
+      obug: 2.1.1
+      pathe: 2.0.3
+      picomatch: 4.0.4
+      std-env: 4.0.0
+      tinybench: 2.9.0
+      tinyexec: 1.3.0
+      tinyglobby: 0.2.15
+      tinyrainbow: 3.1.0
+      vite: 7.3.7(@types/node@24.19.2)(tsx@4.21.0)(yaml@2.9.0)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@types/node': 24.19.2
       happy-dom: 20.9.0
     transitivePeerDependencies:
       - msw
