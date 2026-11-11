@@ -416,6 +416,7 @@ pub mod no_useless_fragments;
 pub mod no_useless_label;
 pub mod no_useless_length_check;
 pub mod no_useless_lone_block_statements;
+pub mod no_useless_nested_ternary;
 pub mod no_useless_parameter_property_assignment;
 pub mod no_useless_qualifier;
 pub mod no_useless_recursion;
