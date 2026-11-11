@@ -193,7 +193,7 @@ fn contains_named_call(callback: &AnyJsExpression, names: &[Box<str>]) -> bool {
 /// Checks if an expression is the identifier or the dotted path `name`,
 /// e.g. `expectSaga` or `utils.assertValid`.
 fn is_named(expr: &AnyJsExpression, name: &str) -> bool {
-    match expr {
+    match expr.clone().omit_parentheses() {
         AnyJsExpression::JsIdentifierExpression(id) => id
             .name()
             .ok()

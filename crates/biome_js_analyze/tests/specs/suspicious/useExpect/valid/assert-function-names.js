@@ -14,6 +14,11 @@ test("nested in a callback", () => {
     });
 });
 
+test("parenthesized callee", () => {
+    (utils.assertValid)(compute());
+    ((utils).assertValid)(compute());
+});
+
 test("built-in assertions still count", () => {
     expect(compute()).toBe(1);
 });
