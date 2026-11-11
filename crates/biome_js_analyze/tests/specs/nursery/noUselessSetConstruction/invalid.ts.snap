@@ -1,0 +1,1130 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+function argumentReadonlySet(selected: Set<number>, other: ReadonlySet<number>) {
+	return selected.union(new Set(other));
+}
+function argumentReadonlyMap(selected: Set<number>, records: ReadonlyMap<number, string>) {
+	return selected.union(new Set(records.keys()));
+}
+function argumentMap(selected: Set<number>, records: Map<number, string>) {
+	return selected.intersection(new Set(records.keys()));
+}
+function receiver(selected: ReadonlySet<number>, other: Set<number>) {
+	return new Set(selected).union(other);
+}
+function result(selected: Set<number>, other: Set<number>) {
+	return new Set(selected.union(other));
+}
+function argumentAs(selected: Set<number>, other: unknown) {
+	return selected.union(new Set(other as Set<number>));
+}
+function receiverAs(selected: Set<number>, other: unknown) {
+	return new Set(other as Set<number>).union(selected);
+}
+function receiverSatisfies(selected: Set<number>, other: Set<number>) {
+	return new Set(other satisfies Set<number>).union(selected);
+}
+function receiverTypeAssertion(selected: Set<number>, other: unknown) {
+	return new Set(<Set<number>>other).union(selected);
+}
+function receiverNonNull(selected: Set<number>, other: Set<number>) {
+	return new Set(other!).union(selected);
+}
+function nonNullReceiver(selected: Set<number>, other: Set<number>) {
+	return selected!.union(new Set(other));
+}
+function argumentSatisfies(selected: Set<number>, other: Set<number>) {
+	return selected.union(new Set(other satisfies Set<number>));
+}
+function argumentAsTwice(selected: Set<number>, other: number[]) {
+	return selected.union(new Set(other as unknown as Set<number>));
+}
+function resultAs(selected: Set<number>, other: Set<number>) {
+	return new Set(selected.union(other)) as Set<number>;
+}
+function resultSatisfies(selected: Set<number>, other: Set<number>) {
+	return new Set(selected.union(other)) satisfies Set<number>;
+}
+function defaultValue(selected: Set<number>, other: Set<number> = new Set()) {
+	return selected.union(new Set(other));
+}
+function newCalleeNonNullCall(selected: Set<number>, other: Set<number>) {
+	return new new Set(selected.union(other))!();
+}
+function newCalleeNonNull(selected: Set<number>, other: Set<number>) {
+	return new new Set(selected.union(other))!.constructor();
+}
+function unionType(selected: Set<string> | (ReadonlySet<number>), other: Set<number>) {
+	return selected.union(new Set(other));
+}
+function parenthesizedType(selected: (Set<number>), other: Set<number>) {
+	return selected.union(new Set(other));
+}
+function readonlyType(selected: readonly Set<number>, other: Set<number>) {
+	return selected.union(new Set(other));
+}
+function typedVariables() {
+	let selected: Set<number> = getValues();
+	const other: ReadonlySet<number> = getValues();
+	selected.union(new Set(other));
+}
+const arrow = (selected: Set<number>, other: Set<number>) => selected.union(new Set(other));
+class ParameterProperties {
+	constructor(private selected: Set<number>, readonly other?: ReadonlySet<number>) {
+		selected.union(new Set(other));
+	}
+}
+
+// Optional parameters
+function optionalParameter(selected: Set<number>, other?: Set<number>) {
+	selected.union(new Set(other));
+	new Set(other).union(selected);
+	new Set(other.union(selected));
+	new Set(other!).union(selected);
+}
+
+// A `const` variable or an asserted value with another type is a `Set` if its value is one
+function otherTypes(selected: Set<number>, other: Set<number>, values: number[]) {
+	const widened: Iterable<number> = new Set(values);
+	selected.union(new Set(widened));
+	selected.union(new Set(other as Iterable<number>));
+	selected.union(new Set(<Iterable<number>>other));
+	selected.union(new Set(other satisfies Iterable<number>));
+	selected.union(new Set(other as any));
+	selected.union(new Set(other as const));
+	selected.union(new Set(values as Set<number> as Iterable<number>));
+	new Set(widened).union(other);
+	new Set(selected).union(other as Iterable<number>);
+}
+function otherTypesInUnion(selected: Set<number>) {
+	const optional: Set<number> | undefined = new Set();
+	selected.union(new Set(optional));
+}
+function userDefinedTypeWithSetValue(selected: Set<number>) {
+	type ReadonlySet<T> = T[];
+	const other: ReadonlySet<number> = new Set([1]);
+	selected.union(new Set(other));
+}
+
+// A function that is only created can't change the `Set`
+function createdFunction(selected: Set<number>) {
+	new Set(selected).union((() => selected.clear()) as unknown as Set<number>);
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:24 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+    2 │ function argumentReadonlySet(selected: Set<number>, other: ReadonlySet<number>) {
+  > 3 │ 	return selected.union(new Set(other));
+      │ 	                      ^^^^^^^^^^^^^^
+    4 │ }
+    5 │ function argumentReadonlyMap(selected: Set<number>, records: ReadonlyMap<number, string>) {
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    3 │ → return·selected.union(new·Set(other));
+      │                         --------     -  
+
+```
+
+```
+invalid.ts:6:24 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    4 │ }
+    5 │ function argumentReadonlyMap(selected: Set<number>, records: ReadonlyMap<number, string>) {
+  > 6 │ 	return selected.union(new Set(records.keys()));
+      │ 	                      ^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ }
+    8 │ function argumentMap(selected: Set<number>, records: Map<number, string>) {
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+      4   4 │   }
+      5   5 │   function argumentReadonlyMap(selected: Set<number>, records: ReadonlyMap<number, string>) {
+      6     │ - → return·selected.union(new·Set(records.keys()));
+          6 │ + → return·selected.union(records);
+      7   7 │   }
+      8   8 │   function argumentMap(selected: Set<number>, records: Map<number, string>) {
+  
+
+```
+
+```
+invalid.ts:9:31 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use intersection().
+  
+     7 │ }
+     8 │ function argumentMap(selected: Set<number>, records: Map<number, string>) {
+   > 9 │ 	return selected.intersection(new Set(records.keys()));
+       │ 	                             ^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ }
+    11 │ function receiver(selected: ReadonlySet<number>, other: Set<number>) {
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+      7   7 │   }
+      8   8 │   function argumentMap(selected: Set<number>, records: Map<number, string>) {
+      9     │ - → return·selected.intersection(new·Set(records.keys()));
+          9 │ + → return·selected.intersection(records);
+     10  10 │   }
+     11  11 │   function receiver(selected: ReadonlySet<number>, other: Set<number>) {
+  
+
+```
+
+```
+invalid.ts:12:9 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    10 │ }
+    11 │ function receiver(selected: ReadonlySet<number>, other: Set<number>) {
+  > 12 │ 	return new Set(selected).union(other);
+       │ 	       ^^^^^^^^^^^^^^^^^
+    13 │ }
+    14 │ function result(selected: Set<number>, other: Set<number>) {
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    12 │ → return·new·Set(selected).union(other);
+       │          --------        -              
+
+```
+
+```
+invalid.ts:15:9 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    13 │ }
+    14 │ function result(selected: Set<number>, other: Set<number>) {
+  > 15 │ 	return new Set(selected.union(other));
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ }
+    17 │ function argumentAs(selected: Set<number>, other: unknown) {
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    15 │ → return·new·Set(selected.union(other));
+       │          --------                    -  
+
+```
+
+```
+invalid.ts:18:24 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    16 │ }
+    17 │ function argumentAs(selected: Set<number>, other: unknown) {
+  > 18 │ 	return selected.union(new Set(other as Set<number>));
+       │ 	                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ }
+    20 │ function receiverAs(selected: Set<number>, other: unknown) {
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    18 │ → return·selected.union(new·Set(other·as·Set<number>));
+       │                         --------                    -  
+
+```
+
+```
+invalid.ts:21:9 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    19 │ }
+    20 │ function receiverAs(selected: Set<number>, other: unknown) {
+  > 21 │ 	return new Set(other as Set<number>).union(selected);
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ }
+    23 │ function receiverSatisfies(selected: Set<number>, other: Set<number>) {
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    21 │ → return·new·Set(other·as·Set<number>).union(selected);
+       │          -------                                       
+
+```
+
+```
+invalid.ts:24:9 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    22 │ }
+    23 │ function receiverSatisfies(selected: Set<number>, other: Set<number>) {
+  > 24 │ 	return new Set(other satisfies Set<number>).union(selected);
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ }
+    26 │ function receiverTypeAssertion(selected: Set<number>, other: unknown) {
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    24 │ → return·new·Set(other·satisfies·Set<number>).union(selected);
+       │          -------                                              
+
+```
+
+```
+invalid.ts:27:9 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    25 │ }
+    26 │ function receiverTypeAssertion(selected: Set<number>, other: unknown) {
+  > 27 │ 	return new Set(<Set<number>>other).union(selected);
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ }
+    29 │ function receiverNonNull(selected: Set<number>, other: Set<number>) {
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    27 │ → return·new·Set(<Set<number>>other).union(selected);
+       │          -------                                     
+
+```
+
+```
+invalid.ts:30:9 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    28 │ }
+    29 │ function receiverNonNull(selected: Set<number>, other: Set<number>) {
+  > 30 │ 	return new Set(other!).union(selected);
+       │ 	       ^^^^^^^^^^^^^^^
+    31 │ }
+    32 │ function nonNullReceiver(selected: Set<number>, other: Set<number>) {
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    30 │ → return·new·Set(other!).union(selected);
+       │          --------      -                 
+
+```
+
+```
+invalid.ts:33:25 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    31 │ }
+    32 │ function nonNullReceiver(selected: Set<number>, other: Set<number>) {
+  > 33 │ 	return selected!.union(new Set(other));
+       │ 	                       ^^^^^^^^^^^^^^
+    34 │ }
+    35 │ function argumentSatisfies(selected: Set<number>, other: Set<number>) {
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    33 │ → return·selected!.union(new·Set(other));
+       │                          --------     -  
+
+```
+
+```
+invalid.ts:36:24 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    34 │ }
+    35 │ function argumentSatisfies(selected: Set<number>, other: Set<number>) {
+  > 36 │ 	return selected.union(new Set(other satisfies Set<number>));
+       │ 	                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ }
+    38 │ function argumentAsTwice(selected: Set<number>, other: number[]) {
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    36 │ → return·selected.union(new·Set(other·satisfies·Set<number>));
+       │                         --------                           -  
+
+```
+
+```
+invalid.ts:39:24 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    37 │ }
+    38 │ function argumentAsTwice(selected: Set<number>, other: number[]) {
+  > 39 │ 	return selected.union(new Set(other as unknown as Set<number>));
+       │ 	                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ }
+    41 │ function resultAs(selected: Set<number>, other: Set<number>) {
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    39 │ → return·selected.union(new·Set(other·as·unknown·as·Set<number>));
+       │                         --------                               -  
+
+```
+
+```
+invalid.ts:42:9 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    40 │ }
+    41 │ function resultAs(selected: Set<number>, other: Set<number>) {
+  > 42 │ 	return new Set(selected.union(other)) as Set<number>;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ }
+    44 │ function resultSatisfies(selected: Set<number>, other: Set<number>) {
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    42 │ → return·new·Set(selected.union(other))·as·Set<number>;
+       │          --------                    -                 
+
+```
+
+```
+invalid.ts:45:9 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    43 │ }
+    44 │ function resultSatisfies(selected: Set<number>, other: Set<number>) {
+  > 45 │ 	return new Set(selected.union(other)) satisfies Set<number>;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    46 │ }
+    47 │ function defaultValue(selected: Set<number>, other: Set<number> = new Set()) {
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    45 │ → return·new·Set(selected.union(other))·satisfies·Set<number>;
+       │          --------                    -                        
+
+```
+
+```
+invalid.ts:48:24 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    46 │ }
+    47 │ function defaultValue(selected: Set<number>, other: Set<number> = new Set()) {
+  > 48 │ 	return selected.union(new Set(other));
+       │ 	                      ^^^^^^^^^^^^^^
+    49 │ }
+    50 │ function newCalleeNonNullCall(selected: Set<number>, other: Set<number>) {
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    48 │ → return·selected.union(new·Set(other));
+       │                         --------     -  
+
+```
+
+```
+invalid.ts:51:13 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    49 │ }
+    50 │ function newCalleeNonNullCall(selected: Set<number>, other: Set<number>) {
+  > 51 │ 	return new new Set(selected.union(other))!();
+       │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    52 │ }
+    53 │ function newCalleeNonNull(selected: Set<number>, other: Set<number>) {
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    51 │ → return·new·new·Set(selected.union(other))!();
+       │              -------                           
+
+```
+
+```
+invalid.ts:54:13 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    52 │ }
+    53 │ function newCalleeNonNull(selected: Set<number>, other: Set<number>) {
+  > 54 │ 	return new new Set(selected.union(other))!.constructor();
+       │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    55 │ }
+    56 │ function unionType(selected: Set<string> | (ReadonlySet<number>), other: Set<number>) {
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    54 │ → return·new·new·Set(selected.union(other))!.constructor();
+       │              -------                                       
+
+```
+
+```
+invalid.ts:57:24 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    55 │ }
+    56 │ function unionType(selected: Set<string> | (ReadonlySet<number>), other: Set<number>) {
+  > 57 │ 	return selected.union(new Set(other));
+       │ 	                      ^^^^^^^^^^^^^^
+    58 │ }
+    59 │ function parenthesizedType(selected: (Set<number>), other: Set<number>) {
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    57 │ → return·selected.union(new·Set(other));
+       │                         --------     -  
+
+```
+
+```
+invalid.ts:60:24 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    58 │ }
+    59 │ function parenthesizedType(selected: (Set<number>), other: Set<number>) {
+  > 60 │ 	return selected.union(new Set(other));
+       │ 	                      ^^^^^^^^^^^^^^
+    61 │ }
+    62 │ function readonlyType(selected: readonly Set<number>, other: Set<number>) {
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    60 │ → return·selected.union(new·Set(other));
+       │                         --------     -  
+
+```
+
+```
+invalid.ts:63:24 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    61 │ }
+    62 │ function readonlyType(selected: readonly Set<number>, other: Set<number>) {
+  > 63 │ 	return selected.union(new Set(other));
+       │ 	                      ^^^^^^^^^^^^^^
+    64 │ }
+    65 │ function typedVariables() {
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    63 │ → return·selected.union(new·Set(other));
+       │                         --------     -  
+
+```
+
+```
+invalid.ts:68:17 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    66 │ 	let selected: Set<number> = getValues();
+    67 │ 	const other: ReadonlySet<number> = getValues();
+  > 68 │ 	selected.union(new Set(other));
+       │ 	               ^^^^^^^^^^^^^^
+    69 │ }
+    70 │ const arrow = (selected: Set<number>, other: Set<number>) => selected.union(new Set(other));
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    68 │ → selected.union(new·Set(other));
+       │                  --------     -  
+
+```
+
+```
+invalid.ts:70:77 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    68 │ 	selected.union(new Set(other));
+    69 │ }
+  > 70 │ const arrow = (selected: Set<number>, other: Set<number>) => selected.union(new Set(other));
+       │                                                                             ^^^^^^^^^^^^^^
+    71 │ class ParameterProperties {
+    72 │ 	constructor(private selected: Set<number>, readonly other?: ReadonlySet<number>) {
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    70 │ const·arrow·=·(selected:·Set<number>,·other:·Set<number>)·=>·selected.union(new·Set(other));
+       │                                                                             --------     -  
+
+```
+
+```
+invalid.ts:73:18 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    71 │ class ParameterProperties {
+    72 │ 	constructor(private selected: Set<number>, readonly other?: ReadonlySet<number>) {
+  > 73 │ 		selected.union(new Set(other));
+       │ 		               ^^^^^^^^^^^^^^
+    74 │ 	}
+    75 │ }
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    73 │ → → selected.union(new·Set(other));
+       │                    --------     -  
+
+```
+
+```
+invalid.ts:79:17 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    77 │ // Optional parameters
+    78 │ function optionalParameter(selected: Set<number>, other?: Set<number>) {
+  > 79 │ 	selected.union(new Set(other));
+       │ 	               ^^^^^^^^^^^^^^
+    80 │ 	new Set(other).union(selected);
+    81 │ 	new Set(other.union(selected));
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    79 │ → selected.union(new·Set(other));
+       │                  --------     -  
+
+```
+
+```
+invalid.ts:80:2 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    78 │ function optionalParameter(selected: Set<number>, other?: Set<number>) {
+    79 │ 	selected.union(new Set(other));
+  > 80 │ 	new Set(other).union(selected);
+       │ 	^^^^^^^^^^^^^^
+    81 │ 	new Set(other.union(selected));
+    82 │ 	new Set(other!).union(selected);
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    80 │ → new·Set(other).union(selected);
+       │   --------     -                 
+
+```
+
+```
+invalid.ts:81:2 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    79 │ 	selected.union(new Set(other));
+    80 │ 	new Set(other).union(selected);
+  > 81 │ 	new Set(other.union(selected));
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    82 │ 	new Set(other!).union(selected);
+    83 │ }
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    81 │ → new·Set(other.union(selected));
+       │   --------                    -  
+
+```
+
+```
+invalid.ts:82:2 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    80 │ 	new Set(other).union(selected);
+    81 │ 	new Set(other.union(selected));
+  > 82 │ 	new Set(other!).union(selected);
+       │ 	^^^^^^^^^^^^^^^
+    83 │ }
+    84 │ 
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    82 │ → new·Set(other!).union(selected);
+       │   --------      -                 
+
+```
+
+```
+invalid.ts:88:17 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    86 │ function otherTypes(selected: Set<number>, other: Set<number>, values: number[]) {
+    87 │ 	const widened: Iterable<number> = new Set(values);
+  > 88 │ 	selected.union(new Set(widened));
+       │ 	               ^^^^^^^^^^^^^^^^
+    89 │ 	selected.union(new Set(other as Iterable<number>));
+    90 │ 	selected.union(new Set(<Iterable<number>>other));
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    88 │ → selected.union(new·Set(widened));
+       │                  --------       -  
+
+```
+
+```
+invalid.ts:89:17 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    87 │ 	const widened: Iterable<number> = new Set(values);
+    88 │ 	selected.union(new Set(widened));
+  > 89 │ 	selected.union(new Set(other as Iterable<number>));
+       │ 	               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    90 │ 	selected.union(new Set(<Iterable<number>>other));
+    91 │ 	selected.union(new Set(other satisfies Iterable<number>));
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    89 │ → selected.union(new·Set(other·as·Iterable<number>));
+       │                  --------                         -  
+
+```
+
+```
+invalid.ts:90:17 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    88 │ 	selected.union(new Set(widened));
+    89 │ 	selected.union(new Set(other as Iterable<number>));
+  > 90 │ 	selected.union(new Set(<Iterable<number>>other));
+       │ 	               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    91 │ 	selected.union(new Set(other satisfies Iterable<number>));
+    92 │ 	selected.union(new Set(other as any));
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    90 │ → selected.union(new·Set(<Iterable<number>>other));
+       │                  --------                       -  
+
+```
+
+```
+invalid.ts:91:17 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    89 │ 	selected.union(new Set(other as Iterable<number>));
+    90 │ 	selected.union(new Set(<Iterable<number>>other));
+  > 91 │ 	selected.union(new Set(other satisfies Iterable<number>));
+       │ 	               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    92 │ 	selected.union(new Set(other as any));
+    93 │ 	selected.union(new Set(other as const));
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    91 │ → selected.union(new·Set(other·satisfies·Iterable<number>));
+       │                  --------                                -  
+
+```
+
+```
+invalid.ts:92:17 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    90 │ 	selected.union(new Set(<Iterable<number>>other));
+    91 │ 	selected.union(new Set(other satisfies Iterable<number>));
+  > 92 │ 	selected.union(new Set(other as any));
+       │ 	               ^^^^^^^^^^^^^^^^^^^^^
+    93 │ 	selected.union(new Set(other as const));
+    94 │ 	selected.union(new Set(values as Set<number> as Iterable<number>));
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    92 │ → selected.union(new·Set(other·as·any));
+       │                  --------            -  
+
+```
+
+```
+invalid.ts:93:17 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    91 │ 	selected.union(new Set(other satisfies Iterable<number>));
+    92 │ 	selected.union(new Set(other as any));
+  > 93 │ 	selected.union(new Set(other as const));
+       │ 	               ^^^^^^^^^^^^^^^^^^^^^^^
+    94 │ 	selected.union(new Set(values as Set<number> as Iterable<number>));
+    95 │ 	new Set(widened).union(other);
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    93 │ → selected.union(new·Set(other·as·const));
+       │                  --------              -  
+
+```
+
+```
+invalid.ts:94:17 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    92 │ 	selected.union(new Set(other as any));
+    93 │ 	selected.union(new Set(other as const));
+  > 94 │ 	selected.union(new Set(values as Set<number> as Iterable<number>));
+       │ 	               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    95 │ 	new Set(widened).union(other);
+    96 │ 	new Set(selected).union(other as Iterable<number>);
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    94 │ → selected.union(new·Set(values·as·Set<number>·as·Iterable<number>));
+       │                  --------                                         -  
+
+```
+
+```
+invalid.ts:95:2 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    93 │ 	selected.union(new Set(other as const));
+    94 │ 	selected.union(new Set(values as Set<number> as Iterable<number>));
+  > 95 │ 	new Set(widened).union(other);
+       │ 	^^^^^^^^^^^^^^^^
+    96 │ 	new Set(selected).union(other as Iterable<number>);
+    97 │ }
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    95 │ → new·Set(widened).union(other);
+       │   --------       -              
+
+```
+
+```
+invalid.ts:96:2 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    94 │ 	selected.union(new Set(values as Set<number> as Iterable<number>));
+    95 │ 	new Set(widened).union(other);
+  > 96 │ 	new Set(selected).union(other as Iterable<number>);
+       │ 	^^^^^^^^^^^^^^^^^
+    97 │ }
+    98 │ function otherTypesInUnion(selected: Set<number>) {
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    96 │ → new·Set(selected).union(other·as·Iterable<number>);
+       │   --------        -                                  
+
+```
+
+```
+invalid.ts:100:17 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+     98 │ function otherTypesInUnion(selected: Set<number>) {
+     99 │ 	const optional: Set<number> | undefined = new Set();
+  > 100 │ 	selected.union(new Set(optional));
+        │ 	               ^^^^^^^^^^^^^^^^^
+    101 │ }
+    102 │ function userDefinedTypeWithSetValue(selected: Set<number>) {
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    100 │ → selected.union(new·Set(optional));
+        │                  --------        -  
+
+```
+
+```
+invalid.ts:105:17 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    103 │ 	type ReadonlySet<T> = T[];
+    104 │ 	const other: ReadonlySet<number> = new Set([1]);
+  > 105 │ 	selected.union(new Set(other));
+        │ 	               ^^^^^^^^^^^^^^
+    106 │ }
+    107 │ 
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    105 │ → selected.union(new·Set(other));
+        │                  --------     -  
+
+```
+
+```
+invalid.ts:110:2 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    108 │ // A function that is only created can't change the `Set`
+    109 │ function createdFunction(selected: Set<number>) {
+  > 110 │ 	new Set(selected).union((() => selected.clear()) as unknown as Set<number>);
+        │ 	^^^^^^^^^^^^^^^^^
+    111 │ }
+    112 │ 
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    110 │ → new·Set(selected).union((()·=>·selected.clear())·as·unknown·as·Set<number>);
+        │   --------        -                                                           
+
+```
