@@ -1,0 +1,46 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid_crlf.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+<p>日本語</p>
+<script
+  define:vars={{ message: "こんにちは" }}
+>
+  import { greet } from "./greet.js";
+</script>
+
+```
+
+# Diagnostics
+```
+invalid_crlf.astro:6:3 lint/nursery/noAstroUnbundledImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This static import is in an unbundled, non-module script.
+  
+    4 │   define:vars={{ message: "こんにちは" }}
+    5 │ >
+  > 6 │   import { greet } from "./greet.js";
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ </script>
+    8 │ 
+  
+  i This attribute prevents Astro from bundling the script.
+  
+    2 │ <p>日本語</p>
+    3 │ <script
+  > 4 │   define:vars={{ message: "こんにちは" }}
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ >
+    6 │   import { greet } from "./greet.js";
+  
+  i Browsers cannot use static imports in classic scripts. Astro leaves this script uncompiled.
+  
+  i Move the import and the code that uses it to a <script> with no attributes so Astro can bundle it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

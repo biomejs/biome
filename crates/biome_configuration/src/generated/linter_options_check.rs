@@ -72,10 +72,34 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noAssignInExpressions",
         TypeId::of::<biome_rule_options::no_assign_in_expressions::NoAssignInExpressionsOptions>(),
     ));
+    result.push(("nursery", "noAstroClientDirectiveOnAstroComponent", TypeId::of::<biome_rule_options::no_astro_client_directive_on_astro_component::NoAstroClientDirectiveOnAstroComponentOptions>()));
+    result.push((
+        "nursery",
+        "noAstroComponentInFramework",
+        TypeId::of::<
+            biome_rule_options::no_astro_component_in_framework::NoAstroComponentInFrameworkOptions,
+        >(),
+    ));
     result.push(("nursery", "noAstroConflictingSetDirectives", TypeId::of::<biome_rule_options::no_astro_conflicting_set_directives::NoAstroConflictingSetDirectivesOptions>()));
     result.push(("nursery", "noAstroExportsFromComponents", TypeId::of::<biome_rule_options::no_astro_exports_from_components::NoAstroExportsFromComponentsOptions>()));
+    result.push(("nursery", "noAstroInvalidGetStaticPathsReference", TypeId::of::<biome_rule_options::no_astro_invalid_get_static_paths_reference::NoAstroInvalidGetStaticPathsReferenceOptions>()));
     result.push(("nursery", "noAstroPrerenderExportOutsidePages", TypeId::of::<biome_rule_options::no_astro_prerender_export_outside_pages::NoAstroPrerenderExportOutsidePagesOptions>()));
+    result.push((
+        "nursery",
+        "noAstroRedirectInComponents",
+        TypeId::of::<
+            biome_rule_options::no_astro_redirect_in_components::NoAstroRedirectInComponentsOptions,
+        >(),
+    ));
     result.push(("nursery", "noAstroSetHtmlDirective", TypeId::of::<biome_rule_options::no_astro_set_html_directive::NoAstroSetHtmlDirectiveOptions>()));
+    result.push((
+        "nursery",
+        "noAstroUnappliedStyleVars",
+        TypeId::of::<
+            biome_rule_options::no_astro_unapplied_style_vars::NoAstroUnappliedStyleVarsOptions,
+        >(),
+    ));
+    result.push(("nursery", "noAstroUnbundledImports", TypeId::of::<biome_rule_options::no_astro_unbundled_imports::NoAstroUnbundledImportsOptions>()));
     result.push((
         "nursery",
         "noAstroUnsafeInlineScripts",
@@ -83,6 +107,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::no_astro_unsafe_inline_scripts::NoAstroUnsafeInlineScriptsOptions,
         >(),
     ));
+    result.push(("nursery", "noAstroUnserializableClientProps", TypeId::of::<biome_rule_options::no_astro_unserializable_client_props::NoAstroUnserializableClientPropsOptions>()));
     result.push((
         "nursery",
         "noAstroUnusedCssSelector",

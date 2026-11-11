@@ -1,8 +1,11 @@
 use biome_embeds::{
     EmbeddedData, VueDirectiveResolution,
+    astro::{AstroData, astro_data},
+    imports::static_imports,
     vue_directives::{InternedVueDirective, resolve_vue_directive},
 };
 use biome_languages::LanguageDb;
+use biome_rowan::TextRange;
 use camino::Utf8PathBuf;
 use std::rc::Rc;
 use std::sync::Arc;
@@ -41,6 +44,20 @@ impl EmbeddedService {
                 InternedVueDirective::new(db.as_ref(), path.clone(), name.to_string()),
             ),
             EmbeddedSource::Interned(data) => data.resolve_vue_directive(name),
+        }
+    }
+
+    pub(crate) fn astro(&self) -> Option<&AstroData> {
+        match &self.source {
+            EmbeddedSource::Workspace { db, path } => astro_data(db.as_ref(), path),
+            EmbeddedSource::Interned(data) => Some(data.astro()),
+        }
+    }
+
+    pub(crate) fn static_imports(&self, range: TextRange) -> &[TextRange] {
+        match &self.source {
+            EmbeddedSource::Workspace { db, path } => static_imports(db.as_ref(), path, range),
+            EmbeddedSource::Interned(data) => data.static_imports(range),
         }
     }
 }

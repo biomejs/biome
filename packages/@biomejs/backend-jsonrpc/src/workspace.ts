@@ -2963,6 +2963,16 @@ export interface Nursery {
 	 */
 	noArraySortForMinMax?: NoArraySortForMinMaxConfiguration;
 	/**
+	 * Disallow client directives on imported Astro components.
+	 * See https://biomejs.dev/linter/rules/no-astro-client-directive-on-astro-component
+	 */
+	noAstroClientDirectiveOnAstroComponent?: NoAstroClientDirectiveOnAstroComponentConfiguration;
+	/**
+	 * Disallow importing Astro components into framework component files.
+	 * See https://biomejs.dev/linter/rules/no-astro-component-in-framework
+	 */
+	noAstroComponentInFramework?: NoAstroComponentInFrameworkConfiguration;
+	/**
 	 * Disallow conflicting content sources on Astro elements.
 	 * See https://biomejs.dev/linter/rules/no-astro-conflicting-set-directives
 	 */
@@ -2973,20 +2983,45 @@ export interface Nursery {
 	 */
 	noAstroExportsFromComponents?: NoAstroExportsFromComponentsConfiguration;
 	/**
+	 * Disallow references to frontmatter-local values from Astro's getStaticPaths.
+	 * See https://biomejs.dev/linter/rules/no-astro-invalid-get-static-paths-reference
+	 */
+	noAstroInvalidGetStaticPathsReference?: NoAstroInvalidGetStaticPathsReferenceConfiguration;
+	/**
 	 * Reports prerender exports in Astro files outside a pages directory.
 	 * See https://biomejs.dev/linter/rules/no-astro-prerender-export-outside-pages
 	 */
 	noAstroPrerenderExportOutsidePages?: NoAstroPrerenderExportOutsidePagesConfiguration;
+	/**
+	 * Disallow Astro redirects in component frontmatter outside a pages directory.
+	 * See https://biomejs.dev/linter/rules/no-astro-redirect-in-components
+	 */
+	noAstroRedirectInComponents?: NoAstroRedirectInComponentsConfiguration;
 	/**
 	 * Disallow the use of Astro's set:html directive.
 	 * See https://biomejs.dev/linter/rules/no-astro-set-html-directive
 	 */
 	noAstroSetHtmlDirective?: NoAstroSetHtmlDirectiveConfiguration;
 	/**
+	 * Disallow style variables in Astro files with no element to receive them.
+	 * See https://biomejs.dev/linter/rules/no-astro-unapplied-style-vars
+	 */
+	noAstroUnappliedStyleVars?: NoAstroUnappliedStyleVarsConfiguration;
+	/**
+	 * Disallow static imports in Astro scripts that are neither bundled nor modules.
+	 * See https://biomejs.dev/linter/rules/no-astro-unbundled-imports
+	 */
+	noAstroUnbundledImports?: NoAstroUnbundledImportsConfiguration;
+	/**
 	 * Disallows inline Astro scripts unless an explicitly allowed safety condition applies.
 	 * See https://biomejs.dev/linter/rules/no-astro-unsafe-inline-scripts
 	 */
 	noAstroUnsafeInlineScripts?: NoAstroUnsafeInlineScriptsConfiguration;
+	/**
+	 * Disallow function props on client-hydrated components in Astro.
+	 * See https://biomejs.dev/linter/rules/no-astro-unserializable-client-props
+	 */
+	noAstroUnserializableClientProps?: NoAstroUnserializableClientPropsConfiguration;
 	/**
 	 * Disallows unused standalone class selectors in local Astro styles.
 	 * See https://biomejs.dev/linter/rules/no-astro-unused-css-selector
@@ -5947,21 +5982,42 @@ export type NoArgumentsCallerOrCalleeConfiguration =
 export type NoArraySortForMinMaxConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoArraySortForMinMaxOptions;
+export type NoAstroClientDirectiveOnAstroComponentConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAstroClientDirectiveOnAstroComponentOptions;
+export type NoAstroComponentInFrameworkConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAstroComponentInFrameworkOptions;
 export type NoAstroConflictingSetDirectivesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAstroConflictingSetDirectivesOptions;
 export type NoAstroExportsFromComponentsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAstroExportsFromComponentsOptions;
+export type NoAstroInvalidGetStaticPathsReferenceConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAstroInvalidGetStaticPathsReferenceOptions;
 export type NoAstroPrerenderExportOutsidePagesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAstroPrerenderExportOutsidePagesOptions;
+export type NoAstroRedirectInComponentsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAstroRedirectInComponentsOptions;
 export type NoAstroSetHtmlDirectiveConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAstroSetHtmlDirectiveOptions;
+export type NoAstroUnappliedStyleVarsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAstroUnappliedStyleVarsOptions;
+export type NoAstroUnbundledImportsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAstroUnbundledImportsOptions;
 export type NoAstroUnsafeInlineScriptsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAstroUnsafeInlineScriptsOptions;
+export type NoAstroUnserializableClientPropsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAstroUnserializableClientPropsOptions;
 export type NoAstroUnusedCssSelectorConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAstroUnusedCssSelectorOptions;
@@ -8537,6 +8593,14 @@ export interface RuleWithNoArraySortForMinMaxOptions {
 	level: RulePlainConfiguration;
 	options?: NoArraySortForMinMaxOptions;
 }
+export interface RuleWithNoAstroClientDirectiveOnAstroComponentOptions {
+	level: RulePlainConfiguration;
+	options?: NoAstroClientDirectiveOnAstroComponentOptions;
+}
+export interface RuleWithNoAstroComponentInFrameworkOptions {
+	level: RulePlainConfiguration;
+	options?: NoAstroComponentInFrameworkOptions;
+}
 export interface RuleWithNoAstroConflictingSetDirectivesOptions {
 	level: RulePlainConfiguration;
 	options?: NoAstroConflictingSetDirectivesOptions;
@@ -8545,17 +8609,37 @@ export interface RuleWithNoAstroExportsFromComponentsOptions {
 	level: RulePlainConfiguration;
 	options?: NoAstroExportsFromComponentsOptions;
 }
+export interface RuleWithNoAstroInvalidGetStaticPathsReferenceOptions {
+	level: RulePlainConfiguration;
+	options?: NoAstroInvalidGetStaticPathsReferenceOptions;
+}
 export interface RuleWithNoAstroPrerenderExportOutsidePagesOptions {
 	level: RulePlainConfiguration;
 	options?: NoAstroPrerenderExportOutsidePagesOptions;
+}
+export interface RuleWithNoAstroRedirectInComponentsOptions {
+	level: RulePlainConfiguration;
+	options?: NoAstroRedirectInComponentsOptions;
 }
 export interface RuleWithNoAstroSetHtmlDirectiveOptions {
 	level: RulePlainConfiguration;
 	options?: NoAstroSetHtmlDirectiveOptions;
 }
+export interface RuleWithNoAstroUnappliedStyleVarsOptions {
+	level: RulePlainConfiguration;
+	options?: NoAstroUnappliedStyleVarsOptions;
+}
+export interface RuleWithNoAstroUnbundledImportsOptions {
+	level: RulePlainConfiguration;
+	options?: NoAstroUnbundledImportsOptions;
+}
 export interface RuleWithNoAstroUnsafeInlineScriptsOptions {
 	level: RulePlainConfiguration;
 	options?: NoAstroUnsafeInlineScriptsOptions;
+}
+export interface RuleWithNoAstroUnserializableClientPropsOptions {
+	level: RulePlainConfiguration;
+	options?: NoAstroUnserializableClientPropsOptions;
 }
 export interface RuleWithNoAstroUnusedCssSelectorOptions {
 	level: RulePlainConfiguration;
@@ -11391,16 +11475,23 @@ export type UseYieldOptions = {};
 export type NoAccidentalBitwiseOperatorsOptions = {};
 export type NoArgumentsCallerOrCalleeOptions = {};
 export type NoArraySortForMinMaxOptions = {};
+export type NoAstroClientDirectiveOnAstroComponentOptions = {};
+export type NoAstroComponentInFrameworkOptions = {};
 export type NoAstroConflictingSetDirectivesOptions = {};
 export type NoAstroExportsFromComponentsOptions = {};
+export type NoAstroInvalidGetStaticPathsReferenceOptions = {};
 export type NoAstroPrerenderExportOutsidePagesOptions = {};
+export type NoAstroRedirectInComponentsOptions = {};
 export type NoAstroSetHtmlDirectiveOptions = {};
+export type NoAstroUnappliedStyleVarsOptions = {};
+export type NoAstroUnbundledImportsOptions = {};
 export interface NoAstroUnsafeInlineScriptsOptions {
 	allowDefineVars?: boolean;
 	allowModuleScripts?: boolean;
 	allowNonExecutingTypes?: string[];
 	allowNonce?: boolean;
 }
+export type NoAstroUnserializableClientPropsOptions = {};
 export type NoAstroUnusedCssSelectorOptions = {};
 export type NoAstroUnusedDefineVarsInStyleOptions = {};
 export interface NoBaseToStringOptions {
@@ -13227,11 +13318,17 @@ export type Category =
 	| "lint/nursery/noAccidentalBitwiseOperators"
 	| "lint/nursery/noArgumentsCallerOrCallee"
 	| "lint/nursery/noArraySortForMinMax"
+	| "lint/nursery/noAstroClientDirectiveOnAstroComponent"
+	| "lint/nursery/noAstroComponentInFramework"
 	| "lint/nursery/noAstroConflictingSetDirectives"
-	| "lint/nursery/noAstroExportsFromComponents"
+	| "lint/nursery/noAstroInvalidGetStaticPathsReference"
 	| "lint/nursery/noAstroPrerenderExportOutsidePages"
+	| "lint/nursery/noAstroRedirectInComponents"
 	| "lint/nursery/noAstroSetHtmlDirective"
+	| "lint/nursery/noAstroUnappliedStyleVars"
+	| "lint/nursery/noAstroUnbundledImports"
 	| "lint/nursery/noAstroUnsafeInlineScripts"
+	| "lint/nursery/noAstroUnserializableClientProps"
 	| "lint/nursery/noAstroUnusedCssSelector"
 	| "lint/nursery/noAstroUnusedDefineVarsInStyle"
 	| "lint/nursery/noBaseToString"
@@ -13724,6 +13821,7 @@ export type Category =
 	| "lint/suspicious/useScopedStyles"
 	| "lint/suspicious/useStaticResponseMethods"
 	| "lint/suspicious/useStrictMode"
+	| "lint/nursery/noAstroExportsFromComponents"
 	| "assist/source/noDuplicateClasses"
 	| "assist/source/organizeImports"
 	| "assist/source/useGraphqlSortedArguments"

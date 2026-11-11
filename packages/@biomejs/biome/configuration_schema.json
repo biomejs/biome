@@ -3493,6 +3493,28 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoAstroClientDirectiveOnAstroComponentConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{
+					"$ref": "#/$defs/RuleWithNoAstroClientDirectiveOnAstroComponentOptions"
+				}
+			]
+		},
+		"NoAstroClientDirectiveOnAstroComponentOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoAstroComponentInFrameworkConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAstroComponentInFrameworkOptions" }
+			]
+		},
+		"NoAstroComponentInFrameworkOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoAstroConflictingSetDirectivesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3513,6 +3535,18 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoAstroInvalidGetStaticPathsReferenceConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{
+					"$ref": "#/$defs/RuleWithNoAstroInvalidGetStaticPathsReferenceOptions"
+				}
+			]
+		},
+		"NoAstroInvalidGetStaticPathsReferenceOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoAstroPrerenderExportOutsidePagesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3523,6 +3557,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoAstroRedirectInComponentsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAstroRedirectInComponentsOptions" }
+			]
+		},
+		"NoAstroRedirectInComponentsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoAstroSetHtmlDirectiveConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3530,6 +3574,26 @@
 			]
 		},
 		"NoAstroSetHtmlDirectiveOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoAstroUnappliedStyleVarsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAstroUnappliedStyleVarsOptions" }
+			]
+		},
+		"NoAstroUnappliedStyleVarsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoAstroUnbundledImportsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAstroUnbundledImportsOptions" }
+			]
+		},
+		"NoAstroUnbundledImportsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -3550,6 +3614,16 @@
 				},
 				"allowNonce": { "type": ["boolean", "null"] }
 			},
+			"additionalProperties": false
+		},
+		"NoAstroUnserializableClientPropsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAstroUnserializableClientPropsOptions" }
+			]
+		},
+		"NoAstroUnserializableClientPropsOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"NoAstroUnusedCssSelectorConfiguration": {
@@ -7966,6 +8040,22 @@
 						{ "type": "null" }
 					]
 				},
+				"noAstroClientDirectiveOnAstroComponent": {
+					"description": "Disallow client directives on imported Astro components.\nSee https://biomejs.dev/linter/rules/no-astro-client-directive-on-astro-component",
+					"anyOf": [
+						{
+							"$ref": "#/$defs/NoAstroClientDirectiveOnAstroComponentConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
+				"noAstroComponentInFramework": {
+					"description": "Disallow importing Astro components into framework component files.\nSee https://biomejs.dev/linter/rules/no-astro-component-in-framework",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAstroComponentInFrameworkConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noAstroConflictingSetDirectives": {
 					"description": "Disallow conflicting content sources on Astro elements.\nSee https://biomejs.dev/linter/rules/no-astro-conflicting-set-directives",
 					"anyOf": [
@@ -7980,12 +8070,28 @@
 						{ "type": "null" }
 					]
 				},
+				"noAstroInvalidGetStaticPathsReference": {
+					"description": "Disallow references to frontmatter-local values from Astro's getStaticPaths.\nSee https://biomejs.dev/linter/rules/no-astro-invalid-get-static-paths-reference",
+					"anyOf": [
+						{
+							"$ref": "#/$defs/NoAstroInvalidGetStaticPathsReferenceConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"noAstroPrerenderExportOutsidePages": {
 					"description": "Reports prerender exports in Astro files outside a pages directory.\nSee https://biomejs.dev/linter/rules/no-astro-prerender-export-outside-pages",
 					"anyOf": [
 						{
 							"$ref": "#/$defs/NoAstroPrerenderExportOutsidePagesConfiguration"
 						},
+						{ "type": "null" }
+					]
+				},
+				"noAstroRedirectInComponents": {
+					"description": "Disallow Astro redirects in component frontmatter outside a pages directory.\nSee https://biomejs.dev/linter/rules/no-astro-redirect-in-components",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAstroRedirectInComponentsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7996,10 +8102,31 @@
 						{ "type": "null" }
 					]
 				},
+				"noAstroUnappliedStyleVars": {
+					"description": "Disallow style variables in Astro files with no element to receive them.\nSee https://biomejs.dev/linter/rules/no-astro-unapplied-style-vars",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAstroUnappliedStyleVarsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noAstroUnbundledImports": {
+					"description": "Disallow static imports in Astro scripts that are neither bundled nor modules.\nSee https://biomejs.dev/linter/rules/no-astro-unbundled-imports",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAstroUnbundledImportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noAstroUnsafeInlineScripts": {
 					"description": "Disallows inline Astro scripts unless an explicitly allowed safety condition applies.\nSee https://biomejs.dev/linter/rules/no-astro-unsafe-inline-scripts",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoAstroUnsafeInlineScriptsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noAstroUnserializableClientProps": {
+					"description": "Disallow function props on client-hydrated components in Astro.\nSee https://biomejs.dev/linter/rules/no-astro-unserializable-client-props",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAstroUnserializableClientPropsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10053,6 +10180,26 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoAstroClientDirectiveOnAstroComponentOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": {
+					"$ref": "#/$defs/NoAstroClientDirectiveOnAstroComponentOptions"
+				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAstroComponentInFrameworkOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAstroComponentInFrameworkOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoAstroConflictingSetDirectivesOptions": {
 			"type": "object",
 			"properties": {
@@ -10071,6 +10218,17 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoAstroInvalidGetStaticPathsReferenceOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": {
+					"$ref": "#/$defs/NoAstroInvalidGetStaticPathsReferenceOptions"
+				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoAstroPrerenderExportOutsidePagesOptions": {
 			"type": "object",
 			"properties": {
@@ -10078,6 +10236,15 @@
 				"options": {
 					"$ref": "#/$defs/NoAstroPrerenderExportOutsidePagesOptions"
 				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAstroRedirectInComponentsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAstroRedirectInComponentsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -10091,11 +10258,38 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoAstroUnappliedStyleVarsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAstroUnappliedStyleVarsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAstroUnbundledImportsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAstroUnbundledImportsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoAstroUnsafeInlineScriptsOptions": {
 			"type": "object",
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoAstroUnsafeInlineScriptsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAstroUnserializableClientPropsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAstroUnserializableClientPropsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

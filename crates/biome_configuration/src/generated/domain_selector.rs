@@ -5,11 +5,18 @@ use biome_analyze::{Rule, RuleFilter, RuleGroup};
 use std::sync::LazyLock;
 static ASTRO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
+        RuleFilter::Rule("nursery", "noAstroClientDirectiveOnAstroComponent"),
+        RuleFilter::Rule("nursery", "noAstroComponentInFramework"),
         RuleFilter::Rule("nursery", "noAstroConflictingSetDirectives"),
         RuleFilter::Rule("nursery", "noAstroExportsFromComponents"),
+        RuleFilter::Rule("nursery", "noAstroInvalidGetStaticPathsReference"),
         RuleFilter::Rule("nursery", "noAstroPrerenderExportOutsidePages"),
+        RuleFilter::Rule("nursery", "noAstroRedirectInComponents"),
         RuleFilter::Rule("nursery", "noAstroSetHtmlDirective"),
+        RuleFilter::Rule("nursery", "noAstroUnappliedStyleVars"),
+        RuleFilter::Rule("nursery", "noAstroUnbundledImports"),
         RuleFilter::Rule("nursery", "noAstroUnsafeInlineScripts"),
+        RuleFilter::Rule("nursery", "noAstroUnserializableClientProps"),
         RuleFilter::Rule("nursery", "noAstroUnusedCssSelector"),
         RuleFilter::Rule("nursery", "noAstroUnusedDefineVarsInStyle"),
         RuleFilter::Rule("nursery", "useAstroClassListDirective"),

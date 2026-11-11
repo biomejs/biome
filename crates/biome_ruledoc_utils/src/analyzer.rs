@@ -334,11 +334,41 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
                 }
             } else {
                 let root = parse.tree();
-                let services = services_builder.build_for_html_parse(
-                    Utf8PathBuf::from(&file_path),
-                    parse,
-                    file_source,
+                let snippets = extract_html_embedded_js(code, &root, &file_source);
+                let parsed_snippets: Vec<AnyParse> = snippets
+                    .iter()
+                    .map(|snippet| {
+                        biome_js_parser::parse_js_with_offset(
+                            snippet.text,
+                            snippet.offset,
+                            snippet.file_source,
+                            JsParserOptions::default(),
+                        )
+                        .into()
+                    })
+                    .collect();
+                let embedded_data = collect_embedded_data(
+                    file_source.into(),
+                    &biome_html_parser::HtmlParse::new(
+                        parse.syntax(),
+                        parse.diagnostics().to_vec(),
+                    )
+                    .into(),
+                    parsed_snippets
+                        .iter()
+                        .zip(&snippets)
+                        .map(|(parse, snippet)| {
+                            EmbeddedSnippet::new(
+                                parse,
+                                TextRange::at(snippet.offset, TextSize::of(snippet.text)),
+                                snippet.file_source.into(),
+                            )
+                        })
+                        .collect(),
                 );
+                let services = services_builder
+                    .build_for_html_parse(Utf8PathBuf::from(&file_path), parse, file_source)
+                    .with_embedded_data(Some(Arc::new(embedded_data)));
                 let options = code_block.create_analyzer_options::<HtmlLanguage>(configuration)?;
                 let result = biome_html_analyze::analyze(
                     &root,
@@ -663,6 +693,42 @@ mod tests {
     use super::*;
     use crate::DiagnosticConsoleWriter;
     use std::{collections::HashMap, str::FromStr};
+
+    #[test]
+    fn analyzes_static_imports_for_html_rule() {
+        let mut services_builder = AnalyzerServicesBuilder::from_files(HashMap::new(), false);
+        let code_block = CodeBlock::from_str("astro").expect("valid code block");
+        let code = "---\nimport './frontmatter.js';\n---\n<p>日本語</p>\r\n<script define:vars={{ message: 'Hello' }}>\r\nimport { greet } from './greet.js';\r\nimport './greet.js';\r\n</script>\n<script>import './bundled.js';</script>\n<script type=\"module\">import './module.js';</script>\n<script is:inline>import('./dynamic.js');</script>";
+        let mut writer = DiagnosticConsoleWriter::default();
+
+        RuleCodeAnalyzer {
+            group: "nursery",
+            rule: "noAstroUnbundledImports",
+            rule_language: "html",
+            code_block: &code_block,
+            code,
+            configuration: None,
+            services_builder: &mut services_builder,
+            writer: &mut writer,
+        }
+        .analyze()
+        .unwrap();
+
+        assert!(!writer.has_parse_error);
+        assert_eq!(writer.action_count, 0);
+        assert_eq!(writer.all_diagnostics.len(), 2);
+        for (diagnostic, import) in writer.all_diagnostics.iter().zip([
+            "import { greet } from './greet.js';",
+            "import './greet.js';",
+        ]) {
+            assert_eq!(
+                diagnostic.category().unwrap().name(),
+                "lint/nursery/noAstroUnbundledImports"
+            );
+            let span = diagnostic.location().span.unwrap();
+            assert_eq!(&code[span], import);
+        }
+    }
 
     #[test]
     fn resolves_relative_context_files_from_absolute_code_blocks() {

@@ -1,0 +1,22 @@
+---
+// should not generate diagnostics
+import Button from "./Button.svelte";
+import imported from "./handler";
+const handler = () => {};
+let mutable = () => {};
+mutable = "text";
+function reassigned() {}
+reassigned = "text";
+function scope() { const nested = () => {}; }
+const factory = callback => callback();
+---
+<Button onClick={handler} />
+<button client:load onclick={() => {}}></button>
+<Button client:load onClick={imported} />
+<Button client:load onClick={mutable} />
+<Button client:load onClick={reassigned} />
+<Button client:load onClick={nested} />
+<Button client:load label={factory(() => "text")} />
+<Button client:load data={{ handler }} />
+<Button client:load onClick={handler} {...props} />
+<Button client:load label="text" count={1} data={new Map()} />

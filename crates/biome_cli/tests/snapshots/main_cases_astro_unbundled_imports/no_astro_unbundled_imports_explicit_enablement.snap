@@ -1,0 +1,118 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint file.astro
+biome lint --only=noAstroUnbundledImports file.astro
+```
+
+## `biome.json`
+
+```json
+{
+  "html": { "experimentalFullSupportEnabled": true },
+  "linter": { "rules": { "preset": "none" } }
+}
+```
+
+## `file.astro`
+
+```astro
+---
+import frontmatter from "./frontmatter.js";
+---
+<script define:vars={{ message: "Hello" }}>
+    import { greet } from "./greet.js";
+    import "./greet.js";
+    greet(message);
+</script>
+<script>import "./bundled.js";</script>
+<script is:inline type="module">import "/module.js";</script>
+<script is:inline>import("/dynamic.js");</script>
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```
+
+```block
+file.astro:5:5 lint/nursery/noAstroUnbundledImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This static import is in an unbundled, non-module script.
+  
+    3 │ ---
+    4 │ <script define:vars={{ message: "Hello" }}>
+  > 5 │     import { greet } from "./greet.js";
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │     import "./greet.js";
+    7 │     greet(message);
+  
+  i This attribute prevents Astro from bundling the script.
+  
+    2 │ import frontmatter from "./frontmatter.js";
+    3 │ ---
+  > 4 │ <script define:vars={{ message: "Hello" }}>
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │     import { greet } from "./greet.js";
+    6 │     import "./greet.js";
+  
+  i Browsers cannot use static imports in classic scripts. Astro leaves this script uncompiled.
+  
+  i Move the import and the code that uses it to a <script> with no attributes so Astro can bundle it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+file.astro:6:5 lint/nursery/noAstroUnbundledImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This static import is in an unbundled, non-module script.
+  
+    4 │ <script define:vars={{ message: "Hello" }}>
+    5 │     import { greet } from "./greet.js";
+  > 6 │     import "./greet.js";
+      │     ^^^^^^^^^^^^^^^^^^^^
+    7 │     greet(message);
+    8 │ </script>
+  
+  i This attribute prevents Astro from bundling the script.
+  
+    2 │ import frontmatter from "./frontmatter.js";
+    3 │ ---
+  > 4 │ <script define:vars={{ message: "Hello" }}>
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │     import { greet } from "./greet.js";
+    6 │     import "./greet.js";
+  
+  i Browsers cannot use static imports in classic scripts. Astro leaves this script uncompiled.
+  
+  i Move the import and the code that uses it to a <script> with no attributes so Astro can bundle it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 errors.
+```

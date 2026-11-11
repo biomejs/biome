@@ -1,0 +1,324 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+---
+// should generate diagnostics
+import Button from "./Button.svelte";
+const onClick = () => console.log("日本語");
+const named = function handler() {};
+function handleClick() {}
+const \u0065scapedFunction = () => {};
+---
+<Button client:load onClick={onClick} />
+<Button client:idle onClick={named} />
+<Button client:visible onClick={handleClick}></Button>
+<Button client:only="svelte" onClick={() => console.log("inline")} />
+<Button client:load onClick={function () {}} />
+
+<Button client:load onClick={onClick as () => void} />
+<Button client:idle onClick={(() => {}) satisfies (() => void)} />
+<Button client:load {onClick} />
+<Button client:load onClick={escapedFunction} />
+<Button client:load onClick={\u006fnClick} />
+
+```
+
+# Diagnostics
+```
+invalid.astro:9:30 lint/nursery/noAstroUnserializableClientProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This function cannot be serialized as a client prop.
+  
+     7 │ const \u0065scapedFunction = () => {};
+     8 │ ---
+   > 9 │ <Button client:load onClick={onClick} />
+       │                              ^^^^^^^
+    10 │ <Button client:idle onClick={named} />
+    11 │ <Button client:visible onClick={handleClick}></Button>
+  
+  i This directive sends the component's props to the browser.
+  
+     7 │ const \u0065scapedFunction = () => {};
+     8 │ ---
+   > 9 │ <Button client:load onClick={onClick} />
+       │         ^^^^^^^^^^^
+    10 │ <Button client:idle onClick={named} />
+    11 │ <Button client:visible onClick={handleClick}></Button>
+  
+  i Functions passed from the server cannot run as browser event handlers.
+  
+  i Define the handler inside the framework component and pass serializable data instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:10:30 lint/nursery/noAstroUnserializableClientProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This function cannot be serialized as a client prop.
+  
+     8 │ ---
+     9 │ <Button client:load onClick={onClick} />
+  > 10 │ <Button client:idle onClick={named} />
+       │                              ^^^^^
+    11 │ <Button client:visible onClick={handleClick}></Button>
+    12 │ <Button client:only="svelte" onClick={() => console.log("inline")} />
+  
+  i This directive sends the component's props to the browser.
+  
+     8 │ ---
+     9 │ <Button client:load onClick={onClick} />
+  > 10 │ <Button client:idle onClick={named} />
+       │         ^^^^^^^^^^^
+    11 │ <Button client:visible onClick={handleClick}></Button>
+    12 │ <Button client:only="svelte" onClick={() => console.log("inline")} />
+  
+  i Functions passed from the server cannot run as browser event handlers.
+  
+  i Define the handler inside the framework component and pass serializable data instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:11:33 lint/nursery/noAstroUnserializableClientProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This function cannot be serialized as a client prop.
+  
+     9 │ <Button client:load onClick={onClick} />
+    10 │ <Button client:idle onClick={named} />
+  > 11 │ <Button client:visible onClick={handleClick}></Button>
+       │                                 ^^^^^^^^^^^
+    12 │ <Button client:only="svelte" onClick={() => console.log("inline")} />
+    13 │ <Button client:load onClick={function () {}} />
+  
+  i This directive sends the component's props to the browser.
+  
+     9 │ <Button client:load onClick={onClick} />
+    10 │ <Button client:idle onClick={named} />
+  > 11 │ <Button client:visible onClick={handleClick}></Button>
+       │         ^^^^^^^^^^^^^^
+    12 │ <Button client:only="svelte" onClick={() => console.log("inline")} />
+    13 │ <Button client:load onClick={function () {}} />
+  
+  i Functions passed from the server cannot run as browser event handlers.
+  
+  i Define the handler inside the framework component and pass serializable data instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:12:39 lint/nursery/noAstroUnserializableClientProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This function cannot be serialized as a client prop.
+  
+    10 │ <Button client:idle onClick={named} />
+    11 │ <Button client:visible onClick={handleClick}></Button>
+  > 12 │ <Button client:only="svelte" onClick={() => console.log("inline")} />
+       │                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ <Button client:load onClick={function () {}} />
+    14 │ 
+  
+  i This directive sends the component's props to the browser.
+  
+    10 │ <Button client:idle onClick={named} />
+    11 │ <Button client:visible onClick={handleClick}></Button>
+  > 12 │ <Button client:only="svelte" onClick={() => console.log("inline")} />
+       │         ^^^^^^^^^^^^^^^^^^^^
+    13 │ <Button client:load onClick={function () {}} />
+    14 │ 
+  
+  i Functions passed from the server cannot run as browser event handlers.
+  
+  i Define the handler inside the framework component and pass serializable data instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:13:30 lint/nursery/noAstroUnserializableClientProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This function cannot be serialized as a client prop.
+  
+    11 │ <Button client:visible onClick={handleClick}></Button>
+    12 │ <Button client:only="svelte" onClick={() => console.log("inline")} />
+  > 13 │ <Button client:load onClick={function () {}} />
+       │                              ^^^^^^^^^^^^^^
+    14 │ 
+    15 │ <Button client:load onClick={onClick as () => void} />
+  
+  i This directive sends the component's props to the browser.
+  
+    11 │ <Button client:visible onClick={handleClick}></Button>
+    12 │ <Button client:only="svelte" onClick={() => console.log("inline")} />
+  > 13 │ <Button client:load onClick={function () {}} />
+       │         ^^^^^^^^^^^
+    14 │ 
+    15 │ <Button client:load onClick={onClick as () => void} />
+  
+  i Functions passed from the server cannot run as browser event handlers.
+  
+  i Define the handler inside the framework component and pass serializable data instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:15:30 lint/nursery/noAstroUnserializableClientProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This function cannot be serialized as a client prop.
+  
+    13 │ <Button client:load onClick={function () {}} />
+    14 │ 
+  > 15 │ <Button client:load onClick={onClick as () => void} />
+       │                              ^^^^^^^
+    16 │ <Button client:idle onClick={(() => {}) satisfies (() => void)} />
+    17 │ <Button client:load {onClick} />
+  
+  i This directive sends the component's props to the browser.
+  
+    13 │ <Button client:load onClick={function () {}} />
+    14 │ 
+  > 15 │ <Button client:load onClick={onClick as () => void} />
+       │         ^^^^^^^^^^^
+    16 │ <Button client:idle onClick={(() => {}) satisfies (() => void)} />
+    17 │ <Button client:load {onClick} />
+  
+  i Functions passed from the server cannot run as browser event handlers.
+  
+  i Define the handler inside the framework component and pass serializable data instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:16:31 lint/nursery/noAstroUnserializableClientProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This function cannot be serialized as a client prop.
+  
+    15 │ <Button client:load onClick={onClick as () => void} />
+  > 16 │ <Button client:idle onClick={(() => {}) satisfies (() => void)} />
+       │                               ^^^^^^^^
+    17 │ <Button client:load {onClick} />
+    18 │ <Button client:load onClick={escapedFunction} />
+  
+  i This directive sends the component's props to the browser.
+  
+    15 │ <Button client:load onClick={onClick as () => void} />
+  > 16 │ <Button client:idle onClick={(() => {}) satisfies (() => void)} />
+       │         ^^^^^^^^^^^
+    17 │ <Button client:load {onClick} />
+    18 │ <Button client:load onClick={escapedFunction} />
+  
+  i Functions passed from the server cannot run as browser event handlers.
+  
+  i Define the handler inside the framework component and pass serializable data instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:17:22 lint/nursery/noAstroUnserializableClientProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This function cannot be serialized as a client prop.
+  
+    15 │ <Button client:load onClick={onClick as () => void} />
+    16 │ <Button client:idle onClick={(() => {}) satisfies (() => void)} />
+  > 17 │ <Button client:load {onClick} />
+       │                      ^^^^^^^
+    18 │ <Button client:load onClick={escapedFunction} />
+    19 │ <Button client:load onClick={\u006fnClick} />
+  
+  i This directive sends the component's props to the browser.
+  
+    15 │ <Button client:load onClick={onClick as () => void} />
+    16 │ <Button client:idle onClick={(() => {}) satisfies (() => void)} />
+  > 17 │ <Button client:load {onClick} />
+       │         ^^^^^^^^^^^
+    18 │ <Button client:load onClick={escapedFunction} />
+    19 │ <Button client:load onClick={\u006fnClick} />
+  
+  i Functions passed from the server cannot run as browser event handlers.
+  
+  i Define the handler inside the framework component and pass serializable data instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:18:30 lint/nursery/noAstroUnserializableClientProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This function cannot be serialized as a client prop.
+  
+    16 │ <Button client:idle onClick={(() => {}) satisfies (() => void)} />
+    17 │ <Button client:load {onClick} />
+  > 18 │ <Button client:load onClick={escapedFunction} />
+       │                              ^^^^^^^^^^^^^^^
+    19 │ <Button client:load onClick={\u006fnClick} />
+    20 │ 
+  
+  i This directive sends the component's props to the browser.
+  
+    16 │ <Button client:idle onClick={(() => {}) satisfies (() => void)} />
+    17 │ <Button client:load {onClick} />
+  > 18 │ <Button client:load onClick={escapedFunction} />
+       │         ^^^^^^^^^^^
+    19 │ <Button client:load onClick={\u006fnClick} />
+    20 │ 
+  
+  i Functions passed from the server cannot run as browser event handlers.
+  
+  i Define the handler inside the framework component and pass serializable data instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:19:30 lint/nursery/noAstroUnserializableClientProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This function cannot be serialized as a client prop.
+  
+    17 │ <Button client:load {onClick} />
+    18 │ <Button client:load onClick={escapedFunction} />
+  > 19 │ <Button client:load onClick={\u006fnClick} />
+       │                              ^^^^^^^^^^^^
+    20 │ 
+  
+  i This directive sends the component's props to the browser.
+  
+    17 │ <Button client:load {onClick} />
+    18 │ <Button client:load onClick={escapedFunction} />
+  > 19 │ <Button client:load onClick={\u006fnClick} />
+       │         ^^^^^^^^^^^
+    20 │ 
+  
+  i Functions passed from the server cannot run as browser event handlers.
+  
+  i Define the handler inside the framework component and pass serializable data instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

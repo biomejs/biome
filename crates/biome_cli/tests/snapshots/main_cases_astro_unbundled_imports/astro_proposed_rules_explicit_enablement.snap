@@ -1,0 +1,259 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint .
+biome lint --only=noAstroInvalidGetStaticPathsReference --only=noAstroUnserializableClientProps --only=noAstroRedirectInComponents --only=noAstroClientDirectiveOnAstroComponent --only=noAstroComponentInFramework --only=noAstroDuplicatePageInitialization --only=noAstroUnappliedStyleVars .
+```
+
+## `biome.json`
+
+```json
+{
+  "html": { "experimentalFullSupportEnabled": true },
+  "linter": { "rules": { "preset": "none" } }
+}
+```
+
+## `Button.svelte`
+
+```svelte
+<script>import { Picture } from "astro:assets";</script><Picture />
+```
+
+## `Component.astro`
+
+```astro
+---
+import Card from "./Card.astro";
+import Button from "./Button.svelte";
+const posts = ["first"];
+const click = () => {};
+export function getStaticPaths() { return posts; }
+if (!Astro.locals.user) return Astro.redirect("/login");
+---
+<Card client:visible />
+<Button client:load onClick={click} />
+<script>
+function initialize() {}
+document.addEventListener("DOMContentLoaded", initialize);
+document.addEventListener("astro:page-load", initialize);
+</script>
+
+```
+
+## `Styles.astro`
+
+```astro
+<style define:vars={{ color: "red" }}>p { color: var(--color); }</style>
+```
+
+## `src/pages/index.astro`
+
+```astro
+---
+return Astro.redirect('/login');
+---
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+Checked 5 files in <TIME>. No fixes applied.
+```
+
+```block
+Styles.astro:1:8 lint/nursery/noAstroUnappliedStyleVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These style variables have no element to receive them.
+  
+  > 1 │ <style define:vars={{ color: "red" }}>p { color: var(--color); }</style>
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Astro defines CSS variables on elements rendered by this component, not on its parent's elements.
+  
+  i Add an element around the styled content, or define the variables in the component that renders it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+Component.astro:14:1 lint/nursery/noAstroDuplicatePageInitialization ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This callback is registered for overlapping page lifecycle events.
+  
+    12 │ function initialize() {}
+    13 │ document.addEventListener("DOMContentLoaded", initialize);
+  > 14 │ document.addEventListener("astro:page-load", initialize);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ </script>
+    16 │ 
+  
+  i The same callback is also registered here.
+  
+    11 │ <script>
+    12 │ function initialize() {}
+  > 13 │ document.addEventListener("DOMContentLoaded", initialize);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ document.addEventListener("astro:page-load", initialize);
+    15 │ </script>
+  
+  i With Astro's client router, these events can initialize the same page twice.
+  
+  i Use a single lifecycle event, such as astro:page-load, for this initialization.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+Button.svelte:1:18 lint/nursery/noAstroComponentInFramework ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Astro component is imported into a framework component file.
+  
+  > 1 │ <script>import { Picture } from "astro:assets";</script><Picture />
+      │                  ^^^^^^^
+  
+  i UI frameworks cannot render Astro components directly.
+  
+  i Import the component in an .astro file and pass its rendered content through a slot or children.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+Component.astro:9:7 lint/nursery/noAstroClientDirectiveOnAstroComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This client directive is applied to an Astro component.
+  
+     7 │ if (!Astro.locals.user) return Astro.redirect("/login");
+     8 │ ---
+   > 9 │ <Card client:visible />
+       │       ^^^^^^^^^^^^^^
+    10 │ <Button client:load onClick={click} />
+    11 │ <script>
+  
+  i This import is an Astro component.
+  
+    1 │ ---
+  > 2 │ import Card from "./Card.astro";
+      │        ^^^^
+    3 │ import Button from "./Button.svelte";
+    4 │ const posts = ["first"];
+  
+  i Astro components render on the server and cannot be hydrated in the browser.
+  
+  i Remove the directive. Use a framework component or a bundled script for browser interactivity.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+Component.astro:10:30 lint/nursery/noAstroUnserializableClientProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This function cannot be serialized as a client prop.
+  
+     8 │ ---
+     9 │ <Card client:visible />
+  > 10 │ <Button client:load onClick={click} />
+       │                              ^^^^^
+    11 │ <script>
+    12 │ function initialize() {}
+  
+  i This directive sends the component's props to the browser.
+  
+     8 │ ---
+     9 │ <Card client:visible />
+  > 10 │ <Button client:load onClick={click} />
+       │         ^^^^^^^^^^^
+    11 │ <script>
+    12 │ function initialize() {}
+  
+  i Functions passed from the server cannot run as browser event handlers.
+  
+  i Define the handler inside the framework component and pass serializable data instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+Component.astro:6:43 lint/nursery/noAstroInvalidGetStaticPathsReference ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This frontmatter value is unavailable inside getStaticPaths.
+  
+    4 │ const posts = ["first"];
+    5 │ const click = () => {};
+  > 6 │ export function getStaticPaths() { return posts; }
+      │                                           ^^^^^
+    7 │ if (!Astro.locals.user) return Astro.redirect("/login");
+    8 │ ---
+  
+  i This value is declared outside the function.
+  
+    2 │ import Card from "./Card.astro";
+    3 │ import Button from "./Button.svelte";
+  > 4 │ const posts = ["first"];
+      │       ^^^^^
+    5 │ const click = () => {};
+    6 │ export function getStaticPaths() { return posts; }
+  
+  i Astro executes getStaticPaths in a separate scope before rendering the component.
+  
+  i Move the declaration inside getStaticPaths or import the value from another module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+Component.astro:7:32 lint/nursery/noAstroRedirectInComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Astro redirect is outside a pages directory.
+  
+    5 │ const click = () => {};
+    6 │ export function getStaticPaths() { return posts; }
+  > 7 │ if (!Astro.locals.user) return Astro.redirect("/login");
+      │                                ^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ ---
+    9 │ <Card client:visible />
+  
+  i A child component cannot redirect the page response.
+  
+  i Move the redirect to the page frontmatter or middleware and return its result there.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+Checked 5 files in <TIME>. No fixes applied.
+Found 5 errors.
+Found 1 warning.
+Found 1 info.
+```
