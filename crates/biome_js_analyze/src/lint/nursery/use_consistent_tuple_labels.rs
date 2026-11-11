@@ -39,7 +39,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseConsistentTupleLabels {
-        version: "next",
+        version: "2.6.7",
         name: "useConsistentTupleLabels",
         language: "ts",
         sources: &[RuleSource::EslintUnicorn("consistent-tuple-labels").same()],

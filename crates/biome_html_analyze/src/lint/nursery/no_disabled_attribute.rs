@@ -97,7 +97,7 @@ declare_lint_rule! {
     /// - [MDN: `readonly`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/readonly)
     /// - [Making Disabled Buttons More Inclusive](https://css-tricks.com/making-disabled-buttons-more-inclusive/)
     pub NoDisabledAttribute {
-        version: "next",
+        version: "2.6.7",
         name: "noDisabledAttribute",
         language: "html",
         recommended: false,

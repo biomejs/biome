@@ -120,7 +120,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseConsistentFontWeightNotation {
-        version: "next",
+        version: "2.6.7",
         name: "useConsistentFontWeightNotation",
         language: "css",
         recommended: false,

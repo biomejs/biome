@@ -61,7 +61,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoReactDirectStateMutation {
-        version: "next",
+        version: "2.6.7",
         name: "noReactDirectStateMutation",
         language: "js",
         sources: &[RuleSource::EslintReact("no-direct-mutation-state").inspired(), RuleSource::EslintReactX("no-direct-mutation-state").inspired(), RuleSource::EslintReactXyz("no-direct-mutation-state").inspired()],

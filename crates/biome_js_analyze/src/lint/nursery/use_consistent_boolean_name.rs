@@ -158,7 +158,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseConsistentBooleanName {
-        version: "next",
+        version: "2.6.7",
         name: "useConsistentBooleanName",
         language: "js",
         recommended: false,

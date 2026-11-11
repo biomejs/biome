@@ -400,7 +400,7 @@ declare_lint_rule! {
     /// - To limit the number of classes in a selector, see [`noExcessiveSelectorClasses`](https://biomejs.dev/linter/rules/no-excessive-selector-classes/).
     ///
     pub NoExcessiveSelectorComplexity {
-        version: "next",
+        version: "2.6.7",
         name: "noExcessiveSelectorComplexity",
         language: "css",
         recommended: false,

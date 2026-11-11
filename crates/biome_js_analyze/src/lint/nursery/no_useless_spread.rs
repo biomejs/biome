@@ -104,7 +104,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUselessSpread {
-        version: "next",
+        version: "2.6.7",
         name: "noUselessSpread",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-useless-spread").same()],

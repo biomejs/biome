@@ -55,7 +55,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoScssNullComparison {
-        version: "next",
+        version: "2.6.7",
         name: "noScssNullComparison",
         language: "css",
         recommended: true,

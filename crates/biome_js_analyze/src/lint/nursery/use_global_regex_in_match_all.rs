@@ -49,7 +49,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseGlobalRegexInMatchAll {
-        version: "next",
+        version: "2.6.7",
         name: "useGlobalRegexInMatchAll",
         language: "js",
         recommended: true,
