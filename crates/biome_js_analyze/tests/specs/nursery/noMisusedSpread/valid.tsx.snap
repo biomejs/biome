@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.tsx
+---
+# Input
+```tsx
+/* should not generate diagnostics */
+const props = { a: 1, b: 2 };
+const fromObject = <div {...props} />;
+
+declare const objectOrAny: { a: number; b: number } | any;
+const fromObjectOrAny = <div {...objectOrAny} />;
+
+```

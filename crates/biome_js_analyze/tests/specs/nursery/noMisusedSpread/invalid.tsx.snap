@@ -1,0 +1,122 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.tsx
+---
+# Input
+```tsx
+/* should generate diagnostics */
+const fromArray = <div {...[1, 2, 3]} />;
+
+class Component {}
+const fromClass = <div {...Component} />;
+
+declare const map: Map<string, number>;
+const fromMap = <div {...map} />;
+
+const promise = new Promise(() => {});
+const fromPromise = <div {...promise} />;
+
+const fromDate = <div {...new Date()} />;
+
+```
+
+# Diagnostics
+```
+invalid.tsx:2:28 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array into an object creates properties named after its indexes.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const fromArray = <div {...[1, 2, 3]} />;
+      │                            ^^^^^^^^^
+    3 │ 
+    4 │ class Component {}
+  
+  i Each element becomes a property such as 0 or 1.
+  
+  i To copy the elements, spread the array into another array instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:5:28 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a class into an object only copies its static properties.
+  
+    4 │ class Component {}
+  > 5 │ const fromClass = <div {...Component} />;
+      │                            ^^^^^^^^^
+    6 │ 
+    7 │ declare const map: Map<string, number>;
+  
+  i The new object is a plain object: it can't create instances and has none of the methods of the class.
+  
+  i Did you mean to spread an instance of the class?
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:8:26 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a map into an object creates an empty object.
+  
+     7 │ declare const map: Map<string, number>;
+   > 8 │ const fromMap = <div {...map} />;
+       │                          ^^^
+     9 │ 
+    10 │ const promise = new Promise(() => {});
+  
+  i The entries of a map aren't properties, so they aren't copied.
+  
+  i To turn the entries of a Map into properties, use Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:11:30 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a Promise into an object copies nothing.
+  
+    10 │ const promise = new Promise(() => {});
+  > 11 │ const fromPromise = <div {...promise} />;
+       │                              ^^^^^^^
+    12 │ 
+    13 │ const fromDate = <div {...new Date()} />;
+  
+  i The value of a Promise is only available after it resolves.
+  
+  i Did you forget to await it?
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:13:27 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a class instance into an object loses the methods of its class.
+  
+    11 │ const fromPromise = <div {...promise} />;
+    12 │ 
+  > 13 │ const fromDate = <div {...new Date()} />;
+       │                           ^^^^^^^^^^
+    14 │ 
+  
+  i Only the own properties of the instance are copied into a plain object. Methods and getters of the class aren't.
+  
+  i Keep using the instance, or create a new one with the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
