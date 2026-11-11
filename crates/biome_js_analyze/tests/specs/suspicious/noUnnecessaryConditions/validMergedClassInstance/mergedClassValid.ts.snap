@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: mergedClassValid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+export class Settings {
+	theme = "dark";
+}
+
+export namespace Settings {
+	export const defaults = new Settings();
+}
+
+```

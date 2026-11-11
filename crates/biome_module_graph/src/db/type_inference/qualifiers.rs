@@ -125,20 +125,11 @@ impl<'db> ResolutionCtx<'db, '_> {
                 } else if binding_is_imported
                     && let Some(import) = self.js_info.static_imports.get(identifier.text())
                 {
-                    let imported = self.resolve_import(&TypeImportQualifier {
+                    self.resolve_import(&TypeImportQualifier {
                         symbol: import.symbol.clone(),
                         specifier: Arc::new(import.specifier.clone()),
                         type_only: qualifier.type_only,
-                    });
-                    if qualifier.type_only
-                        && members.is_empty()
-                        && let InferredTypeData::MergedReference(reference) = imported
-                        && let Some(ty) = reference.ty(self.db)
-                    {
-                        ty
-                    } else {
-                        imported
-                    }
+                    })
                 } else if resolves_declarations_directly {
                     self.resolve_local_binding(binding.range())
                 } else {
@@ -158,6 +149,16 @@ impl<'db> ResolutionCtx<'db, '_> {
                         return InferredTypeData::Unknown;
                     };
                     target = member_ty;
+                }
+                // A type position names only the type meaning of a declaration
+                // merged with a value or a namespace, such as a class that a
+                // namespace extends. Earlier path segments name namespaces, so
+                // they are looked up with every meaning of the merged name.
+                if qualifier.type_only
+                    && let InferredTypeData::MergedReference(reference) = target
+                    && let Some(ty) = reference.ty(self.db)
+                {
+                    target = ty;
                 }
 
                 return self.apply_qualifier_type_parameters(target, qualifier);
