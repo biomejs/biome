@@ -232,7 +232,7 @@ pub fn traverse_import_tree_for_html_classes(
             let all_inline_classes: IndexMap<_, _> = html_info
                 .style_classes
                 .iter()
-                .map(|c| (c.range, c.name.clone()))
+                .map(|c| (c.document_range(), c.name.clone()))
                 .collect();
             if !all_inline_classes.is_empty() {
                 inline_steps.push(CssClassStep {

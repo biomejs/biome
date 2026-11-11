@@ -56,6 +56,14 @@ pub struct CssClassDefinition {
     pub applicability: EmbeddingStyleApplicability,
 }
 
+impl CssClassDefinition {
+    /// The range of the class name token in the parent document, which stays
+    /// unique across `<style>` blocks whose snippet-local ranges coincide.
+    pub(crate) fn document_range(&self) -> TextRange {
+        self.range + self.content_offset.unwrap_or_default()
+    }
+}
+
 impl PartialEq for CssClassDefinition {
     fn eq(&self, other: &Self) -> bool {
         self.name.text() == other.name.text() && self.applicability == other.applicability
