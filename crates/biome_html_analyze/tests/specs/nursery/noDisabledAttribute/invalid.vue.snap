@@ -1,0 +1,667 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+const undefined = true;
+</script>
+<template>
+	<button :disabled="condition">Save</button>
+	<button :disabled>Save</button>
+	<button v-bind:disabled="condition">Save</button>
+	<button v-bind:disabled>Save</button>
+	<button :disabled="true">Save</button>
+	<button :disabled="undefined">Save</button>
+	<button disabled="false">Save</button>
+	<button :disabled.prop="condition">Save</button>
+	<input :type="'submit'" :disabled="condition" />
+	<input :type="`submit`" disabled />
+	<div role="button" :disabled="condition">Save</div>
+	<div :role="'button'" disabled>Save</div>
+	<div :role="`button`" disabled>Save</div>
+
+	<input :disabled="condition" />
+	<input type="text" :disabled="condition" />
+	<input :type="'email'" disabled />
+	<textarea v-bind:disabled="condition" />
+	<textarea role="button" disabled />
+	<select :disabled="condition" />
+	<select role="button" disabled />
+	<input type="checkbox" :disabled="condition" />
+	<input :type="'radio'" disabled />
+	<fieldset :disabled="condition" />
+	<fieldset role="button" disabled />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:6:10 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+    4 │ </script>
+    5 │ <template>
+  > 6 │ 	<button :disabled="condition">Save</button>
+      │ 	        ^^^^^^^^^^^^^^^^^^^^^
+    7 │ 	<button :disabled>Save</button>
+    8 │ 	<button v-bind:disabled="condition">Save</button>
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    6 │ → <button·:aria-disabled="condition">Save</button>
+      │            +++++                                  
+
+```
+
+```
+invalid.vue:7:10 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+    5 │ <template>
+    6 │ 	<button :disabled="condition">Save</button>
+  > 7 │ 	<button :disabled>Save</button>
+      │ 	        ^^^^^^^^^
+    8 │ 	<button v-bind:disabled="condition">Save</button>
+    9 │ 	<button v-bind:disabled>Save</button>
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    7 │ → <button·:aria-disabled="disabled">Save</button>
+      │            +++++++++++++++        +              
+
+```
+
+```
+invalid.vue:8:10 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+     6 │ 	<button :disabled="condition">Save</button>
+     7 │ 	<button :disabled>Save</button>
+   > 8 │ 	<button v-bind:disabled="condition">Save</button>
+       │ 	        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 	<button v-bind:disabled>Save</button>
+    10 │ 	<button :disabled="true">Save</button>
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    8 │ → <button·v-bind:aria-disabled="condition">Save</button>
+      │                  +++++                                  
+
+```
+
+```
+invalid.vue:9:10 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+     7 │ 	<button :disabled>Save</button>
+     8 │ 	<button v-bind:disabled="condition">Save</button>
+   > 9 │ 	<button v-bind:disabled>Save</button>
+       │ 	        ^^^^^^^^^^^^^^^
+    10 │ 	<button :disabled="true">Save</button>
+    11 │ 	<button :disabled="undefined">Save</button>
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+     7  7 │     <button :disabled>Save</button>
+     8  8 │     <button v-bind:disabled="condition">Save</button>
+     9    │ - → <button·v-bind:disabled>Save</button>
+        9 │ + → <button·v-bind:aria-disabled="disabled">Save</button>
+    10 10 │     <button :disabled="true">Save</button>
+    11 11 │     <button :disabled="undefined">Save</button>
+  
+
+```
+
+```
+invalid.vue:10:10 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+     8 │ 	<button v-bind:disabled="condition">Save</button>
+     9 │ 	<button v-bind:disabled>Save</button>
+  > 10 │ 	<button :disabled="true">Save</button>
+       │ 	        ^^^^^^^^^^^^^^^^
+    11 │ 	<button :disabled="undefined">Save</button>
+    12 │ 	<button disabled="false">Save</button>
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+     8  8 │     <button v-bind:disabled="condition">Save</button>
+     9  9 │     <button v-bind:disabled>Save</button>
+    10    │ - → <button·:disabled="true">Save</button>
+       10 │ + → <button·aria-disabled="true">Save</button>
+    11 11 │     <button :disabled="undefined">Save</button>
+    12 12 │     <button disabled="false">Save</button>
+  
+
+```
+
+```
+invalid.vue:11:10 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+     9 │ 	<button v-bind:disabled>Save</button>
+    10 │ 	<button :disabled="true">Save</button>
+  > 11 │ 	<button :disabled="undefined">Save</button>
+       │ 	        ^^^^^^^^^^^^^^^^^^^^^
+    12 │ 	<button disabled="false">Save</button>
+    13 │ 	<button :disabled.prop="condition">Save</button>
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    11 │ → <button·:aria-disabled="undefined">Save</button>
+       │            +++++                                  
+
+```
+
+```
+invalid.vue:12:10 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+    10 │ 	<button :disabled="true">Save</button>
+    11 │ 	<button :disabled="undefined">Save</button>
+  > 12 │ 	<button disabled="false">Save</button>
+       │ 	        ^^^^^^^^^^^^^^^^
+    13 │ 	<button :disabled.prop="condition">Save</button>
+    14 │ 	<input :type="'submit'" :disabled="condition" />
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    10 10 │     <button :disabled="true">Save</button>
+    11 11 │     <button :disabled="undefined">Save</button>
+    12    │ - → <button·disabled="false">Save</button>
+       12 │ + → <button·aria-disabled="true">Save</button>
+    13 13 │     <button :disabled.prop="condition">Save</button>
+    14 14 │     <input :type="'submit'" :disabled="condition" />
+  
+
+```
+
+```
+invalid.vue:13:10 lint/nursery/noDisabledAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+    11 │ 	<button :disabled="undefined">Save</button>
+    12 │ 	<button disabled="false">Save</button>
+  > 13 │ 	<button :disabled.prop="condition">Save</button>
+       │ 	        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 	<input :type="'submit'" :disabled="condition" />
+    15 │ 	<input :type="`submit`" disabled />
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:14:26 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+    12 │ 	<button disabled="false">Save</button>
+    13 │ 	<button :disabled.prop="condition">Save</button>
+  > 14 │ 	<input :type="'submit'" :disabled="condition" />
+       │ 	                        ^^^^^^^^^^^^^^^^^^^^^
+    15 │ 	<input :type="`submit`" disabled />
+    16 │ 	<div role="button" :disabled="condition">Save</div>
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    14 │ → <input·:type="'submit'"·:aria-disabled="condition"·/>
+       │                            +++++                       
+
+```
+
+```
+invalid.vue:15:26 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+    13 │ 	<button :disabled.prop="condition">Save</button>
+    14 │ 	<input :type="'submit'" :disabled="condition" />
+  > 15 │ 	<input :type="`submit`" disabled />
+       │ 	                        ^^^^^^^^
+    16 │ 	<div role="button" :disabled="condition">Save</div>
+    17 │ 	<div :role="'button'" disabled>Save</div>
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    15 │ → <input·:type="`submit`"·aria-disabled="true"·/>
+       │                           +++++        +++++++   
+
+```
+
+```
+invalid.vue:16:21 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The disabled attribute has no effect on this element.
+  
+    14 │ 	<input :type="'submit'" :disabled="condition" />
+    15 │ 	<input :type="`submit`" disabled />
+  > 16 │ 	<div role="button" :disabled="condition">Save</div>
+       │ 	                   ^^^^^^^^^^^^^^^^^^^^^
+    17 │ 	<div :role="'button'" disabled>Save</div>
+    18 │ 	<div :role="`button`" disabled>Save</div>
+  
+  i The button role changes accessibility semantics but does not add native button behavior.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    16 │ → <div·role="button"·:aria-disabled="condition">Save</div>
+       │                       +++++                               
+
+```
+
+```
+invalid.vue:17:24 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The disabled attribute has no effect on this element.
+  
+    15 │ 	<input :type="`submit`" disabled />
+    16 │ 	<div role="button" :disabled="condition">Save</div>
+  > 17 │ 	<div :role="'button'" disabled>Save</div>
+       │ 	                      ^^^^^^^^
+    18 │ 	<div :role="`button`" disabled>Save</div>
+    19 │ 
+  
+  i The button role changes accessibility semantics but does not add native button behavior.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    17 │ → <div·:role="'button'"·aria-disabled="true">Save</div>
+       │                         +++++        +++++++           
+
+```
+
+```
+invalid.vue:18:24 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The disabled attribute has no effect on this element.
+  
+    16 │ 	<div role="button" :disabled="condition">Save</div>
+    17 │ 	<div :role="'button'" disabled>Save</div>
+  > 18 │ 	<div :role="`button`" disabled>Save</div>
+       │ 	                      ^^^^^^^^
+    19 │ 
+    20 │ 	<input :disabled="condition" />
+  
+  i The button role changes accessibility semantics but does not add native button behavior.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    18 │ → <div·:role="`button`"·aria-disabled="true">Save</div>
+       │                         +++++        +++++++           
+
+```
+
+```
+invalid.vue:20:9 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this field.
+  
+    18 │ 	<div :role="`button`" disabled>Save</div>
+    19 │ 
+  > 20 │ 	<input :disabled="condition" />
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^
+    21 │ 	<input type="text" :disabled="condition" />
+    22 │ 	<input :type="'email'" disabled />
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with readonly, which keeps the field focusable and prevents edits. Unlike a disabled field, a read-only field is still submitted with its form and doesn't get disabled styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use readonly instead.
+  
+    18 18 │     <div :role="`button`" disabled>Save</div>
+    19 19 │   
+    20    │ - → <input·:disabled="condition"·/>
+       20 │ + → <input·:readonly="condition"·/>
+    21 21 │     <input type="text" :disabled="condition" />
+    22 22 │     <input :type="'email'" disabled />
+  
+
+```
+
+```
+invalid.vue:21:21 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this field.
+  
+    20 │ 	<input :disabled="condition" />
+  > 21 │ 	<input type="text" :disabled="condition" />
+       │ 	                   ^^^^^^^^^^^^^^^^^^^^^
+    22 │ 	<input :type="'email'" disabled />
+    23 │ 	<textarea v-bind:disabled="condition" />
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with readonly, which keeps the field focusable and prevents edits. Unlike a disabled field, a read-only field is still submitted with its form and doesn't get disabled styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use readonly instead.
+  
+    19 19 │   
+    20 20 │     <input :disabled="condition" />
+    21    │ - → <input·type="text"·:disabled="condition"·/>
+       21 │ + → <input·type="text"·:readonly="condition"·/>
+    22 22 │     <input :type="'email'" disabled />
+    23 23 │     <textarea v-bind:disabled="condition" />
+  
+
+```
+
+```
+invalid.vue:22:25 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this field.
+  
+    20 │ 	<input :disabled="condition" />
+    21 │ 	<input type="text" :disabled="condition" />
+  > 22 │ 	<input :type="'email'" disabled />
+       │ 	                       ^^^^^^^^
+    23 │ 	<textarea v-bind:disabled="condition" />
+    24 │ 	<textarea role="button" disabled />
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with readonly, which keeps the field focusable and prevents edits. Unlike a disabled field, a read-only field is still submitted with its form and doesn't get disabled styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use readonly instead.
+  
+    20 20 │     <input :disabled="condition" />
+    21 21 │     <input type="text" :disabled="condition" />
+    22    │ - → <input·:type="'email'"·disabled·/>
+       22 │ + → <input·:type="'email'"·readonly·/>
+    23 23 │     <textarea v-bind:disabled="condition" />
+    24 24 │     <textarea role="button" disabled />
+  
+
+```
+
+```
+invalid.vue:23:12 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this field.
+  
+    21 │ 	<input type="text" :disabled="condition" />
+    22 │ 	<input :type="'email'" disabled />
+  > 23 │ 	<textarea v-bind:disabled="condition" />
+       │ 	          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 	<textarea role="button" disabled />
+    25 │ 	<select :disabled="condition" />
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with readonly, which keeps the field focusable and prevents edits. Unlike a disabled field, a read-only field is still submitted with its form and doesn't get disabled styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use readonly instead.
+  
+    21 21 │     <input type="text" :disabled="condition" />
+    22 22 │     <input :type="'email'" disabled />
+    23    │ - → <textarea·v-bind:disabled="condition"·/>
+       23 │ + → <textarea·v-bind:readonly="condition"·/>
+    24 24 │     <textarea role="button" disabled />
+    25 25 │     <select :disabled="condition" />
+  
+
+```
+
+```
+invalid.vue:24:26 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this field.
+  
+    22 │ 	<input :type="'email'" disabled />
+    23 │ 	<textarea v-bind:disabled="condition" />
+  > 24 │ 	<textarea role="button" disabled />
+       │ 	                        ^^^^^^^^
+    25 │ 	<select :disabled="condition" />
+    26 │ 	<select role="button" disabled />
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with readonly, which keeps the field focusable and prevents edits. Unlike a disabled field, a read-only field is still submitted with its form and doesn't get disabled styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use readonly instead.
+  
+    22 22 │     <input :type="'email'" disabled />
+    23 23 │     <textarea v-bind:disabled="condition" />
+    24    │ - → <textarea·role="button"·disabled·/>
+       24 │ + → <textarea·role="button"·readonly·/>
+    25 25 │     <select :disabled="condition" />
+    26 26 │     <select role="button" disabled />
+  
+
+```
+
+```
+invalid.vue:25:10 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this form control.
+  
+    23 │ 	<textarea v-bind:disabled="condition" />
+    24 │ 	<textarea role="button" disabled />
+  > 25 │ 	<select :disabled="condition" />
+       │ 	        ^^^^^^^^^^^^^^^^^^^^^
+    26 │ 	<select role="button" disabled />
+    27 │ 	<input type="checkbox" :disabled="condition" />
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    25 │ → <select·:aria-disabled="condition"·/>
+       │            +++++                       
+
+```
+
+```
+invalid.vue:26:24 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this form control.
+  
+    24 │ 	<textarea role="button" disabled />
+    25 │ 	<select :disabled="condition" />
+  > 26 │ 	<select role="button" disabled />
+       │ 	                      ^^^^^^^^
+    27 │ 	<input type="checkbox" :disabled="condition" />
+    28 │ 	<input :type="'radio'" disabled />
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    26 │ → <select·role="button"·aria-disabled="true"·/>
+       │                         +++++        +++++++   
+
+```
+
+```
+invalid.vue:27:25 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this form control.
+  
+    25 │ 	<select :disabled="condition" />
+    26 │ 	<select role="button" disabled />
+  > 27 │ 	<input type="checkbox" :disabled="condition" />
+       │ 	                       ^^^^^^^^^^^^^^^^^^^^^
+    28 │ 	<input :type="'radio'" disabled />
+    29 │ 	<fieldset :disabled="condition" />
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    27 │ → <input·type="checkbox"·:aria-disabled="condition"·/>
+       │                           +++++                       
+
+```
+
+```
+invalid.vue:28:25 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this form control.
+  
+    26 │ 	<select role="button" disabled />
+    27 │ 	<input type="checkbox" :disabled="condition" />
+  > 28 │ 	<input :type="'radio'" disabled />
+       │ 	                       ^^^^^^^^
+    29 │ 	<fieldset :disabled="condition" />
+    30 │ 	<fieldset role="button" disabled />
+  
+  i A disabled form control can't receive keyboard focus, so it can't be reached with the Tab key.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    28 │ → <input·:type="'radio'"·aria-disabled="true"·/>
+       │                          +++++        +++++++   
+
+```
+
+```
+invalid.vue:29:12 lint/nursery/noDisabledAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this fieldset.
+  
+    27 │ 	<input type="checkbox" :disabled="condition" />
+    28 │ 	<input :type="'radio'" disabled />
+  > 29 │ 	<fieldset :disabled="condition" />
+       │ 	          ^^^^^^^^^^^^^^^^^^^^^
+    30 │ 	<fieldset role="button" disabled />
+    31 │ </template>
+  
+  i A disabled fieldset disables every form control inside it, so none of them can be reached with the Tab key.
+  
+  i Mark each form control inside the fieldset instead: use readonly on fields that support it and aria-disabled on other controls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:30:26 lint/nursery/noDisabledAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this fieldset.
+  
+    28 │ 	<input :type="'radio'" disabled />
+    29 │ 	<fieldset :disabled="condition" />
+  > 30 │ 	<fieldset role="button" disabled />
+       │ 	                        ^^^^^^^^
+    31 │ </template>
+    32 │ 
+  
+  i A disabled fieldset disables every form control inside it, so none of them can be reached with the Tab key.
+  
+  i Mark each form control inside the fieldset instead: use readonly on fields that support it and aria-disabled on other controls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
