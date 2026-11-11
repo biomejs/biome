@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsClass, AnyJsClassMemberName, ClassMemberName, JsArrowFunctionExpression,
+    AnyJsClass, AnyJsClassMemberName, ClassMemberName, JsArrowFunctionExpression, JsDecorator,
     JsGetterClassMember, JsMethodClassMember, JsPropertyClassMember, JsSetterClassMember,
     JsStaticInitializationBlockClassMember, JsSuperExpression, JsSyntaxNode, JsThisExpression,
     TsAccessibilityModifier,
@@ -325,7 +325,7 @@ fn is_ignored_method(name: &AnyJsClassMemberName, ignore_methods: &[Box<str>]) -
 /// Returns `true` if a member's parameters or body use the surrounding lexical `this`.
 ///
 /// Nested arrow functions count because they inherit `this`. Nested non-arrow
-/// functions, nested classes, and static blocks do not count.
+/// functions, nested classes, static blocks, and decorators do not count.
 ///
 /// ## Examples
 ///
@@ -350,6 +350,7 @@ fn uses_lexical_this(node: &JsSyntaxNode) -> bool {
             .union(JsSuperExpression::KIND_SET)
             .union(AnyJsClass::KIND_SET)
             .union(JsStaticInitializationBlockClassMember::KIND_SET)
+            .union(JsDecorator::KIND_SET)
             .union(AnyJsControlFlowRoot::KIND_SET),
     );
 
@@ -364,6 +365,8 @@ fn uses_lexical_this(node: &JsSyntaxNode) -> bool {
 
         if AnyJsClass::can_cast(node.kind())
             || JsStaticInitializationBlockClassMember::can_cast(node.kind())
+            // A parameter decorator runs when the class is defined, not with the member's `this`.
+            || JsDecorator::can_cast(node.kind())
             || (AnyJsControlFlowRoot::can_cast(node.kind())
                 && !JsArrowFunctionExpression::can_cast(node.kind()))
         {
