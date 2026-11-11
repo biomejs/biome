@@ -139,7 +139,7 @@ impl HtmlModuleInfoInner {
         self.style_classes
             .iter()
             .filter(|declaration| declaration.applicability.is_global())
-            .map(|c| (c.range, c.name.clone()))
+            .map(|c| (c.document_range(), c.name.clone()))
             .collect()
     }
 }
