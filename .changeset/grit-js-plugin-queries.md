@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Added `grit()` queries to JavaScript plugins. A rule can now use a GritQL pattern to select the nodes passed to `run()` instead of listing syntax kinds with `ast()` or `semantic()`.
+Added `grit()` queries to JavaScript plugins. A rule can now use a GritQL pattern to select the nodes passed to `run()` instead of listing syntax kinds with `ast()`.
 
 For example:
 
@@ -26,7 +26,7 @@ Plugins using Grit queries can still request the semantic model as well:
 export const rule = defineRule({
   query: grit("function $fn($args) { $body }", { semantic: true }),
   run(node, { model }) {
-    // You can use `model` here similar to a query specified using `semantic()`.
+    // You can use `model` here similar to a query specified using `ast(..., { semantic: true })`.
   },
 });
 ```

@@ -67,7 +67,7 @@ export interface TextRange {
 
 /**
  * Bindings and references in one analyzed source snapshot.
- * Access it through `context.model` in a rule using `semantic(...)`.
+ * Access it through `context.model` in a rule using `ast(..., { semantic: true })`.
  *
  * Node arguments must belong to this model's source. Saved models and handles
  * retain their original source; prepared code fixes do not update the model.
@@ -79,7 +79,7 @@ export interface SemanticModel {
 	 * Resolves an identifier use to the binding it refers to, respecting shadowing.
 	 * Returns `undefined` for configured globals and unresolved references.
 	 *
-	 * In a rule querying `semantic("JS_REFERENCE_IDENTIFIER")`, highlight the
+	 * In a rule querying `ast("JS_REFERENCE_IDENTIFIER", { semantic: true })`, highlight the
 	 * declaration of the referenced name:
 	 * ```ts
 	 * const binding = context.model.binding(node);
@@ -93,7 +93,7 @@ export interface SemanticModel {
 	 * Looks up the binding introduced by a declaration's identifier node.
 	 * Returns `undefined` when the model does not track that declaration.
 	 *
-	 * In a rule querying `semantic("JS_IDENTIFIER_BINDING")`, report how many
+	 * In a rule querying `ast("JS_IDENTIFIER_BINDING", { semantic: true })`, report how many
 	 * references resolve to the declaration:
 	 * ```ts
 	 * const binding = context.model.asBinding(node);
@@ -185,7 +185,7 @@ export interface SemanticModel {
 	 * Returns the scope a declaration's identifier was hoisted to, if the model
 	 * records one. This can differ from the scope containing its source text.
 	 *
-	 * In a rule querying `semantic("JS_IDENTIFIER_BINDING")`, inspect hoisting:
+	 * In a rule querying `ast("JS_IDENTIFIER_BINDING", { semantic: true })`, inspect hoisting:
 	 * ```ts
 	 * const scope = context.model.scopeHoistedTo(node);
 	 * if (scope) {
@@ -222,7 +222,7 @@ export interface SemanticModel {
 	 * Returns whether an identifier use resolves to a configured global.
 	 * Returns `false` for local bindings and unresolved references.
 	 *
-	 * In a rule querying `semantic("JS_REFERENCE_IDENTIFIER")`, distinguish
+	 * In a rule querying `ast("JS_REFERENCE_IDENTIFIER", { semantic: true })`, distinguish
 	 * configured globals from other identifier uses:
 	 * ```ts
 	 * if (context.model.isGlobalReference(node)) {
@@ -235,7 +235,7 @@ export interface SemanticModel {
 	 * Returns whether an identifier use has no local binding or configured global.
 	 * A reference to a declaration later in the source can still resolve.
 	 *
-	 * In a rule querying `semantic("JS_REFERENCE_IDENTIFIER")`, report names the
+	 * In a rule querying `ast("JS_REFERENCE_IDENTIFIER", { semantic: true })`, report names the
 	 * model cannot resolve:
 	 * ```ts
 	 * if (context.model.isUnresolvedReference(node)) {
@@ -248,7 +248,7 @@ export interface SemanticModel {
 	 * Returns whether a declaration is imported, or a reference resolves to an
 	 * imported declaration. Returns `false` when a reference has no local binding.
 	 *
-	 * In a rule querying `semantic("JS_REFERENCE_IDENTIFIER")`, highlight uses
+	 * In a rule querying `ast("JS_REFERENCE_IDENTIFIER", { semantic: true })`, highlight uses
 	 * of imported names:
 	 * ```ts
 	 * if (context.model.isImported(node)) {
@@ -261,7 +261,7 @@ export interface SemanticModel {
 	 * Returns whether a declaration is exported, or a reference resolves to an
 	 * exported declaration. Returns `false` when a reference has no local binding.
 	 *
-	 * In a rule querying `semantic("JS_IDENTIFIER_BINDING")`, highlight exported
+	 * In a rule querying `ast("JS_IDENTIFIER_BINDING", { semantic: true })`, highlight exported
 	 * declarations:
 	 * ```ts
 	 * if (context.model.isExported(node)) {

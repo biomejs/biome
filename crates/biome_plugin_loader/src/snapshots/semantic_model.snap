@@ -7,13 +7,9 @@ expression: content
 ## `/plugin.js`
 
 ```js
-import {
-	defineRule,
-	semantic,
-	registerDiagnostic,
-} from "@biomejs/runtime/plugin";
+import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
 export const inspect = defineRule({
-	query: semantic("JS_MODULE", "TS_DECLARATION_MODULE"),
+	query: ast("JS_MODULE", "TS_DECLARATION_MODULE", { semantic: true }),
 	run(root, { model }) {
 		const reference = (ref) => [
 			ref.syntax().kind,
