@@ -8,7 +8,7 @@ use biome_css_semantic::db::{
 };
 use biome_fs::normalize_path;
 use biome_parser::db::SourceExt;
-use biome_rowan::{TextRange, TextSize, TokenText};
+use biome_rowan::{Text, TextRange, TextSize};
 use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexMap;
 use rustc_hash::FxHashSet;
@@ -20,8 +20,9 @@ use std::rc::Rc;
 pub struct CssClassStep {
     /// The path of the CSS file discovered in this step
     pub css_path: Utf8PathBuf,
-    /// The CSS class names and their selector ranges found in this CSS file
-    pub css_classes: IndexMap<TextRange, TokenText>,
+    /// The CSS class names, with escapes decoded, keyed by their name token
+    /// ranges in this CSS file
+    pub css_classes: IndexMap<TextRange, Text>,
 }
 
 /// Rich diagnostic information including component chain.
