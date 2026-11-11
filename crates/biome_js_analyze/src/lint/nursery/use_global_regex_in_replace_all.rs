@@ -48,7 +48,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseGlobalRegexInReplaceAll {
-        version: "next",
+        version: "2.6.7",
         name: "useGlobalRegexInReplaceAll",
         language: "js",
         sources: &[RuleSource::Oxc("bad-replace-all-arg").same()],

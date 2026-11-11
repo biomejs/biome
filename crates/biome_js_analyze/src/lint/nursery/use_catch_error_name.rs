@@ -127,7 +127,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseCatchErrorName {
-        version: "next",
+        version: "2.6.7",
         name: "useCatchErrorName",
         language: "js",
         recommended: false,
