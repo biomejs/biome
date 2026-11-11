@@ -11,9 +11,9 @@ use biome_css_semantic::model::{
 use biome_css_syntax::{
     AnyCssRoot, CssContainerAtRule, CssDeclaration, CssLanguage, CssLayerAtRule, CssMediaAtRule,
     CssRelativeSelectorList, CssScopeAtRule, CssSelectorList, CssStartingStyleAtRule,
-    CssSupportsAtRule, CssSupportsFeatureDeclaration, CssSyntaxNode, ScssAtRootAtRule,
-    ScssEachAtRule, ScssElseClause, ScssForAtRule, ScssFunctionAtRule, ScssIfAtRule,
-    ScssIncludeAtRule, ScssMixinAtRule, ScssWhileAtRule,
+    CssSupportsAtRule, CssSupportsFeatureDeclaration, ScssAtRootAtRule, ScssEachAtRule,
+    ScssElseClause, ScssForAtRule, ScssFunctionAtRule, ScssIfAtRule, ScssIncludeAtRule,
+    ScssMixinAtRule, ScssWhileAtRule,
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, SyntaxKindSet, TextRange, WalkEvent};
@@ -206,7 +206,7 @@ impl Rule for NoDescendingSpecificity {
                 }
             }
 
-            if rule.selectors().is_empty() || !has_declarations(&rule, rule_node.syntax()) {
+            if rule.selectors().is_empty() || !has_declarations(&rule, &rule_node) {
                 continue;
             }
             find_descending_selector(
@@ -287,9 +287,10 @@ fn subject_key<'a>(
     parts: &mut Vec<SimpleSelector<'a>>,
     key: &mut String,
 ) -> bool {
-    key.clear();
-    parts.clear();
-    parts.extend(selector.subject().simple_selectors().filter(|part| {
+    let Some(subject) = selector.subject() else {
+        return false;
+    };
+    parts.extend(subject.simple_selectors().filter(|part| {
         part.kind() != SimpleSelectorKind::PseudoClass
             || part.name().is_some_and(is_pseudo_elements)
     }));
@@ -304,10 +305,11 @@ fn subject_key<'a>(
 /// nested at-rule such as `@media`, but not inside a nested rule. An SCSS `@include` counts as a
 /// declaration, because the mixin usually emits some. A rule without declarations can't lose to a
 /// higher specificity selector.
-fn has_declarations(rule: &CssSemanticRule, node: &CssSyntaxNode) -> bool {
+fn has_declarations(rule: &CssSemanticRule, rule_node: &AnyRuleStart) -> bool {
     if !rule.declarations().is_empty() {
         return true;
     }
+    let node = rule_node.syntax();
     let mut events = node.preorder();
     while let Some(event) = events.next() {
         let WalkEvent::Enter(child) = event else {
@@ -350,6 +352,8 @@ fn find_descending_selector(
         if resolved_selector.requires_scss_evaluation() {
             continue;
         }
+        key.clear();
+        parts.clear();
         if !subject_key(resolved_selector, &mut parts, key) {
             continue;
         }

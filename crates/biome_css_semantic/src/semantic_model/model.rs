@@ -442,20 +442,8 @@ impl ResolvedSelector {
     }
 
     /// Returns the compound selectors, split at top-level combinators.
-    ///
-    /// Combinators inside functional pseudo-classes, such as `>` in `:has(.a > .b)`, don't split.
-    /// In a selector that starts with a combinator, such as `> .a`, the first compound carries it.
-    pub fn compounds(&self) -> impl Iterator<Item = CompoundSelector<'_>> {
-        split_top_level(&self.0, Self::is_combinator).map(|tokens| match tokens {
-            [first, rest @ ..] if Self::is_combinator(first.0) => CompoundSelector {
-                combinator: Some(first),
-                tokens: rest,
-            },
-            _ => CompoundSelector {
-                combinator: None,
-                tokens,
-            },
-        })
+    pub fn compounds(&self) -> CompoundSelectorIterator<'_> {
+        CompoundSelectorIterator { tokens: &self.0 }
     }
 
     /// Returns whether the selector contains an SCSS placeholder (`%name`) or interpolation
@@ -473,14 +461,15 @@ impl ResolvedSelector {
             })
     }
 
-    /// Returns the last compound selector, which holds the element the selector styles.
+    /// Returns the last compound selector, which holds the element the selector styles, or `None`
+    /// for an empty selector.
     ///
     /// ```css
     /// .a ul li:hover {}
     ///       ^^^^^^^^
     /// ```
-    pub fn subject(&self) -> CompoundSelector<'_> {
-        self.compounds().last().unwrap_or_default()
+    pub fn subject(&self) -> Option<CompoundSelector<'_>> {
+        self.compounds().last()
     }
 
     /// Produces a normalized string representation of this selector for use in
@@ -521,41 +510,98 @@ impl ResolvedSelector {
     }
 }
 
-/// Splits `tokens` before each token for which `starts` returns `true`, ignoring tokens inside
-/// parentheses, brackets and braces.
-fn split_top_level(
+/// Returns where the first selector in `tokens` ends: the index of the next token after the first
+/// for which `starts` returns `true`, or the length of `tokens`. Tokens inside parentheses,
+/// brackets and braces are skipped.
+fn first_selector_end(
     tokens: &[(CssSyntaxKind, TokenText)],
     starts: fn(CssSyntaxKind) -> bool,
-) -> impl Iterator<Item = &[(CssSyntaxKind, TokenText)]> {
-    let mut remaining = Some(tokens);
-    std::iter::from_fn(move || {
-        let tokens = remaining?;
-        let mut depth = 0u32;
-        let mut end = tokens.len();
-        for (index, (kind, _)) in tokens.iter().enumerate() {
-            if index > 0 && depth == 0 && starts(*kind) {
-                end = index;
-                break;
-            }
-            match kind {
-                CssSyntaxKind::L_PAREN | CssSyntaxKind::L_BRACK | CssSyntaxKind::L_CURLY => {
-                    depth += 1;
-                }
-                CssSyntaxKind::R_PAREN | CssSyntaxKind::R_BRACK | CssSyntaxKind::R_CURLY => {
-                    depth = depth.saturating_sub(1);
-                }
-                _ => {}
-            }
+) -> usize {
+    let mut depth = 0u32;
+    for (index, (kind, _)) in tokens.iter().enumerate() {
+        if index > 0 && depth == 0 && starts(*kind) {
+            return index;
         }
-        let (piece, rest) = tokens.split_at(end);
-        remaining = (!rest.is_empty()).then_some(rest);
-        Some(piece)
-    })
+        match kind {
+            CssSyntaxKind::L_PAREN | CssSyntaxKind::L_BRACK | CssSyntaxKind::L_CURLY => {
+                depth += 1;
+            }
+            CssSyntaxKind::R_PAREN | CssSyntaxKind::R_BRACK | CssSyntaxKind::R_CURLY => {
+                depth = depth.saturating_sub(1);
+            }
+            _ => {}
+        }
+    }
+    tokens.len()
+}
+
+/// Returned by [ResolvedSelector::compounds].
+///
+/// Combinators inside functional pseudo-classes, such as `>` in `:has(.a > .b)`, don't split.
+/// In a selector that starts with a combinator, such as `> .a`, the first compound carries it.
+pub struct CompoundSelectorIterator<'a> {
+    tokens: &'a [(CssSyntaxKind, TokenText)],
+}
+
+impl<'a> Iterator for CompoundSelectorIterator<'a> {
+    type Item = CompoundSelector<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.tokens.is_empty() {
+            return None;
+        }
+        let end = first_selector_end(self.tokens, ResolvedSelector::is_combinator);
+        let (compound, rest) = self.tokens.split_at(end);
+        self.tokens = rest;
+        Some(match compound {
+            [first, tokens @ ..] if ResolvedSelector::is_combinator(first.0) => CompoundSelector {
+                combinator: Some(first),
+                tokens,
+            },
+            tokens => CompoundSelector {
+                combinator: None,
+                tokens,
+            },
+        })
+    }
+}
+
+/// Returned by [CompoundSelector::simple_selectors].
+///
+/// A suffix added through SCSS nesting stays part of the selector it extends, so `&--x`
+/// under `.a` yields the single class selector `.a--x`.
+pub struct SimpleSelectorIterator<'a> {
+    tokens: &'a [(CssSyntaxKind, TokenText)],
+}
+
+impl<'a> Iterator for SimpleSelectorIterator<'a> {
+    type Item = SimpleSelector<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.tokens.is_empty() {
+            return None;
+        }
+        let end = first_selector_end(self.tokens, |kind| {
+            matches!(
+                kind,
+                CssSyntaxKind::DOT
+                    | CssSyntaxKind::HASH
+                    | CssSyntaxKind::L_BRACK
+                    | CssSyntaxKind::COLON
+                    | CssSyntaxKind::COLON2
+                    | CssSyntaxKind::AMP
+                    | CssSyntaxKind::PERCENT
+            )
+        });
+        let (simple, rest) = self.tokens.split_at(end);
+        self.tokens = rest;
+        Some(SimpleSelector::from_tokens(simple))
+    }
 }
 
 /// A run of simple selectors between two top-level combinators, such as `li:hover` in
 /// `ul > li:hover`.
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Debug, Clone, Copy)]
 pub struct CompoundSelector<'a> {
     combinator: Option<&'a (CssSyntaxKind, TokenText)>,
     tokens: &'a [(CssSyntaxKind, TokenText)],
@@ -573,24 +619,10 @@ impl<'a> CompoundSelector<'a> {
     }
 
     /// Returns the simple selectors in source order.
-    ///
-    /// A suffix added through SCSS nesting stays part of the selector it extends, so `&--x`
-    /// under `.a` yields the single class selector `.a--x`.
-    pub fn simple_selectors(&self) -> impl Iterator<Item = SimpleSelector<'a>> {
-        split_top_level(self.tokens, |kind| {
-            matches!(
-                kind,
-                CssSyntaxKind::DOT
-                    | CssSyntaxKind::HASH
-                    | CssSyntaxKind::L_BRACK
-                    | CssSyntaxKind::COLON
-                    | CssSyntaxKind::COLON2
-                    | CssSyntaxKind::AMP
-                    | CssSyntaxKind::PERCENT
-            )
-        })
-        .filter(|tokens| !tokens.is_empty())
-        .map(SimpleSelector::from_tokens)
+    pub fn simple_selectors(&self) -> SimpleSelectorIterator<'a> {
+        SimpleSelectorIterator {
+            tokens: self.tokens,
+        }
     }
 }
 
