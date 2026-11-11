@@ -6,10 +6,12 @@ use biome_console::markup;
 
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike};
-use biome_resolver::{is_builtin_bun_module, is_builtin_node_module};
+use biome_module_graph::{ModuleDb, ModuleInfoKind, ResolutionMode, resolve_module_import};
+use biome_resolver::{ResolutionKind, is_builtin_bun_module, is_builtin_node_module};
 use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_undeclared_dependencies::NoUndeclaredDependenciesOptions;
 use camino::Utf8PathBuf;
+use std::rc::Rc;
 
 declare_lint_rule! {
     /// Disallow the use of dependencies that aren't specified in the `package.json`.
@@ -192,6 +194,7 @@ impl Rule for NoUndeclaredDependencies {
             || is_builtin_node_module(package_name)
             // ignore Bun builtin modules
             || is_builtin_bun_module(package_name)
+            || is_tsconfig_path_mapping(ctx, import_text.text())
         {
             return None;
         }
@@ -281,6 +284,28 @@ impl Rule for NoUndeclaredDependencies {
                     .note(markup! { "Add the dependency in your manifest." }),
             )
         }
+    }
+}
+
+fn is_tsconfig_path_mapping(
+    ctx: &RuleContext<NoUndeclaredDependencies>,
+    specifier: &str,
+) -> bool {
+    if let Some(db) = ctx.get_service::<Rc<dyn ModuleDb>>()
+        && let Some(owner) = db.module_for_path(ctx.file_path())
+    {
+        let mode = match owner.kind(db.as_ref()) {
+            ModuleInfoKind::Js(_) => ResolutionMode::JavaScript,
+            ModuleInfoKind::Html(_) => ResolutionMode::HtmlScript,
+            ModuleInfoKind::Css(_) => return false,
+        };
+
+        matches!(
+            resolve_module_import(db.as_ref(), owner, specifier, mode).kind(),
+            ResolutionKind::TsConfigPathMapping { .. }
+        )
+    } else {
+        false
     }
 }
 
