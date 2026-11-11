@@ -7856,6 +7856,77 @@ fn css_globals_of_the_root_configuration_apply_to_nested_configurations() {
 
 #[cfg(all(feature = "module_graph", feature = "lang_css"))]
 #[test]
+fn css_globals_of_a_nested_configuration_apply_to_its_package() {
+    const STYLESHEET: &str = "/project/site/src/theme.css";
+    let fs = Arc::new(MemoryFileSystem::default());
+    for (path, content) in [
+        ("/project/package.json", "{}"),
+        ("/project/site/package.json", "{}"),
+        (
+            "/project/site/biome.json",
+            r#"{ "root": false, "css": { "globals": ["src/theme.css"] } }"#,
+        ),
+        (STYLESHEET, ".theme {}"),
+    ] {
+        fs.insert(path.into(), content);
+    }
+    let (workspace, _) = scanned_lsp_workspace(&fs, "/project");
+    let scope = workspace
+        .get_db()
+        .framework_scope(Utf8Path::new(STYLESHEET))
+        .unwrap();
+    assert_eq!(scope.package_path, "/project/site");
+    assert_eq!(scope.stylesheets, [Utf8PathBuf::from(STYLESHEET)]);
+}
+
+#[cfg(all(feature = "module_graph", feature = "lang_css"))]
+#[test]
+fn css_globals_of_root_and_nested_configurations_are_combined() {
+    const ROOT_STYLESHEET: &str = "/project/src/root.css";
+    const NESTED_STYLESHEET: &str = "/project/site/src/nested.css";
+    let fs = Arc::new(MemoryFileSystem::default());
+    for (path, content) in [
+        ("/project/package.json", "{}"),
+        ("/project/site/package.json", "{}"),
+        (
+            "/project/site/biome.json",
+            r#"{ "root": false, "extends": "//", "css": { "globals": ["src/nested.css"] } }"#,
+        ),
+        (ROOT_STYLESHEET, ".root {}"),
+        (NESTED_STYLESHEET, ".nested {}"),
+    ] {
+        fs.insert(path.into(), content);
+    }
+    let configuration = Configuration {
+        css: Some(biome_configuration::CssConfiguration {
+            globals: Some(["src/root.css".into()].into_iter().collect()),
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
+    let (workspace, _) = scanned_lsp_workspace_with_configuration(&fs, "/project", configuration);
+    let db = workspace.get_db();
+    let root_scope = db.framework_scope(Utf8Path::new(ROOT_STYLESHEET)).unwrap();
+    assert_eq!(root_scope.package_path, "/project");
+    assert_eq!(root_scope.stylesheets, [Utf8PathBuf::from(ROOT_STYLESHEET)]);
+
+    let nested_scope = db
+        .framework_scope(Utf8Path::new(NESTED_STYLESHEET))
+        .unwrap();
+    assert_eq!(nested_scope.package_path, "/project/site");
+    let mut stylesheets = nested_scope.stylesheets.clone();
+    stylesheets.sort();
+    assert_eq!(
+        stylesheets,
+        [
+            Utf8PathBuf::from(NESTED_STYLESHEET),
+            Utf8PathBuf::from(ROOT_STYLESHEET),
+        ]
+    );
+}
+
+#[cfg(all(feature = "module_graph", feature = "lang_css"))]
+#[test]
 fn css_globals_globs_match_stylesheets_outside_node_modules() {
     const NEW_STYLESHEET: &str = "/project/src/new.css";
     let fs = Arc::new(MemoryFileSystem::default());

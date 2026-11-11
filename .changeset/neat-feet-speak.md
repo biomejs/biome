@@ -2,4 +2,18 @@
 "@biomejs/biome": minor
 ---
 
-Added the `css.globals` option, which lists the stylesheets that apply to every page without an import, such as the ones that a framework or a build tool adds, for example `"css": { "globals": ["src/styles/theme.css"] }`. The rules [`noUndeclaredClasses`](https://biomejs.dev/linter/rules/no-undeclared-classes/), [`noUndeclaredCustomProperties`](https://biomejs.dev/linter/rules/no-undeclared-custom-properties/), and [`noUnusedClasses`](https://biomejs.dev/linter/rules/no-unused-classes/) treat their classes and custom properties as available to every file, and they report again in packages where Biome can't find all the stylesheets that a framework adds. Biome now also shows an information diagnostic when it can't find these stylesheets, or the modules that a framework provides.
+Added the `css.globals` option for stylesheets that a framework or build tool loads on every page without an import. Each entry is either a stylesheet path or a glob pattern relative to the configuration file that declares it. Glob patterns match only stylesheets and don't search `node_modules`; list files under `node_modules` with an explicit path. Biome warns when an entry is invalid, negated, unmatched, or names an unreadable stylesheet.
+
+```json
+{
+  "css": {
+    "globals": [
+      "src/styles/reset.css",
+      "src/styles/themes/**/*.css",
+      "node_modules/@fontsource/roboto/index.css"
+    ]
+  }
+}
+```
+
+The rules [`noUndeclaredClasses`](https://biomejs.dev/linter/rules/no-undeclared-classes/) and [`noUndeclaredCustomProperties`](https://biomejs.dev/linter/rules/no-undeclared-custom-properties/) treat declarations from matching stylesheets as available to every file in each package, while [`noUnusedClasses`](https://biomejs.dev/linter/rules/no-unused-classes/) checks their classes against references throughout the package. Configuring this option also enables these rules to report when Biome can't infer every global stylesheet loaded by a framework.

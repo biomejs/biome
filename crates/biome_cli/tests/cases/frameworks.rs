@@ -1,8 +1,8 @@
 use crate::TestArgs as Args;
-use crate::run_cli_with_server_workspace;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
+use crate::{run_cli_with_dyn_fs, run_cli_with_server_workspace};
 use biome_console::BufferConsole;
-use biome_fs::MemoryFileSystem;
+use biome_fs::{MemoryFileSystem, TemporaryFs};
 use camino::Utf8Path;
 
 const NO_UNRESOLVED_IMPORTS: &[u8] = br#"{
@@ -572,6 +572,88 @@ fn css_globals_are_not_supported_in_overrides() {
         module_path!(),
         "css_globals_are_not_supported_in_overrides",
         fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn css_globals_follow_nested_configurations() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("css_globals_follow_nested_configurations");
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "css": { "globals": ["src/root.css"] },
+    "linter": {
+        "rules": { "nursery": { "noUndeclaredClasses": "error" } }
+    }
+}
+"#,
+    );
+    fs.create_file("package.json", "{}");
+    fs.create_file("src/root.css", ".root { color: red; }\n");
+    fs.create_file("src/local.css", ".local { display: block; }\n");
+    let root = fs.create_file(
+        "src/Root.jsx",
+        r#"import "./local.css";
+
+export const Root = () => <div className="local root nested" />;
+"#,
+    );
+    fs.create_file("nested/package.json", "{}");
+    fs.create_file(
+        "nested/biome.json",
+        r#"{
+    "root": false,
+    "css": { "globals": ["src/nested.css"] },
+    "linter": {
+        "rules": { "nursery": { "noUndeclaredClasses": "error" } }
+    }
+}
+"#,
+    );
+    fs.create_file("nested/src/nested.css", ".nested { color: blue; }\n");
+    fs.create_file("nested/src/local.css", ".local { display: block; }\n");
+    let nested = fs.create_file(
+        "nested/src/Nested.jsx",
+        r#"import "./local.css";
+
+export const Nested = () => <div className="local nested root missing" />;
+"#,
+    );
+    fs.create_file("combined/package.json", "{}");
+    fs.create_file(
+        "combined/biome.json",
+        r#"{
+    "root": false,
+    "extends": "//",
+    "css": { "globals": ["src/combined.css"] }
+}
+"#,
+    );
+    fs.create_file("combined/src/combined.css", ".combined { color: green; }\n");
+    fs.create_file("combined/src/local.css", ".local { display: block; }\n");
+    let combined = fs.create_file(
+        "combined/src/Combined.jsx",
+        r#"import "./local.css";
+
+export const Combined = () => <div className="local root combined missing" />;
+"#,
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", root.as_str(), nested.as_str(), combined.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "css_globals_follow_nested_configurations",
+        fs.create_mem(),
         console,
         result,
     ));
