@@ -3,11 +3,13 @@ pub(crate) mod traverse;
 mod visitor;
 
 use crate::{ImportPathMap, ModuleDb, ModuleInfo, ResolutionMode, resolve_module_import};
+use biome_css_syntax::{CssSyntaxToken, decode_css_identifier};
 use biome_languages::css::EmbeddingStyleApplicability;
 use biome_resolver::ResolvedSpecifier;
 use biome_rowan::{Text, TextRange, TextSize, TokenText};
 use camino::Utf8PathBuf;
 use indexmap::IndexMap;
+use std::borrow::Cow;
 use std::collections::BTreeSet;
 use std::hash::{Hash, Hasher};
 use std::ops::Deref;
@@ -20,6 +22,18 @@ pub(crate) use tailwind::{TailwindImport, TailwindPosition};
 pub use traverse::{CssClassStep, CssTraversalStep, ImportTreeDisplay, ImportTreeNode};
 pub(crate) use visitor::CssModuleVisitor;
 
+/// Returns the class name that a class selector's identifier token matches,
+/// with CSS escapes decoded, so `.foo\+bar` yields `foo+bar`.
+///
+/// Only allocates when the token contains an escape.
+pub(crate) fn decoded_class_name(token: &CssSyntaxToken) -> Text {
+    let text = token.token_text_trimmed();
+    match decode_css_identifier(text.text()) {
+        Cow::Borrowed(_) => text.into(),
+        Cow::Owned(name) => name.into(),
+    }
+}
+
 /// Represents a CSS class definition.
 ///
 /// Two definitions are considered equal (and hash to the same value) when they
@@ -28,8 +42,8 @@ pub(crate) use visitor::CssModuleVisitor;
 /// scoped `<style scoped>` block are distinct entries in an [`IndexSet`].
 #[derive(Clone, Debug)]
 pub struct CssClassDefinition {
-    /// The name of the class.
-    pub name: TokenText,
+    /// The name of the class, with CSS escapes decoded.
+    pub name: Text,
 
     /// The text range of the class name token (snippet-local for embedded styles).
     pub range: TextRange,
@@ -133,7 +147,7 @@ impl Deref for CssModuleInfo {
 impl CssModuleInfo {
     pub(crate) fn new(
         imports: CssImports,
-        classes: IndexMap<TextRange, TokenText>,
+        classes: IndexMap<TextRange, Text>,
         tailwind: TailwindStylesheet,
         tailwind_imports: Box<[TailwindImport]>,
     ) -> Self {
@@ -177,9 +191,10 @@ pub struct CssModuleInfoInner {
     /// those inside nested rules and at-rules. Does not include classes inside
     /// `:global(...)` pseudo-class selectors.
     ///
-    /// Keys are class names (e.g., "header" from `.header`), values are the
-    /// `TextRange` of the class selector in the source file.
-    pub classes: IndexMap<TextRange, TokenText>,
+    /// Keys are the `TextRange` of the class name token in the source file,
+    /// values are class names with CSS escapes decoded (e.g., "header" from
+    /// `.header`, "foo+bar" from `.foo\+bar`).
+    pub classes: IndexMap<TextRange, Text>,
 
     /// The Tailwind CSS configuration this file declares, without the files it
     /// imports.

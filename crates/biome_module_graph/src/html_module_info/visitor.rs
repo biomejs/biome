@@ -1,5 +1,7 @@
 use crate::ImportPathMap;
-use crate::css_module_info::{CssClassDefinition, CssClassReference, CssModuleVisitor};
+use crate::css_module_info::{
+    CssClassDefinition, CssClassReference, CssModuleVisitor, decoded_class_name,
+};
 use crate::html_module_info::{HtmlImport, HtmlModuleInfo};
 use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
 use biome_css_syntax::{AnyCssRoot, CssClassSelector};
@@ -346,7 +348,7 @@ pub(crate) fn collect_css_classes(
                         base_applicability
                     };
                     classes.insert(CssClassDefinition {
-                        name: token.token_text_trimmed(),
+                        name: decoded_class_name(&token),
                         range: token.text_trimmed_range(),
                         content_offset: Some(content_offset),
                         applicability,

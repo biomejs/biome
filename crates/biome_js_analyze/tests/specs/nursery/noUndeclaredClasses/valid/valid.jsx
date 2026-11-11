@@ -54,3 +54,8 @@ function Component8() {
 function Component9() {
 	return <button class="btn primary">Valid</button>;
 }
+
+// 10. Escaped CSS class names match their decoded form
+function Component10() {
+	return <div className="foo+bar md:flex 10col">Valid</div>;
+}
