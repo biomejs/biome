@@ -6,12 +6,10 @@ use biome_console::{MarkupBuf, markup};
 use biome_css_syntax::keywords::COLOR_KEYWORDS;
 use biome_css_syntax::{
     AnyCssAtRule, AnyCssGenericComponentValue, CssAtRule, CssFunction, CssGenericProperty,
-    CssPseudoClassIdentifier, CssPseudoElementIdentifier, CssQueryFeaturePlain,
-    CssRegularDimension, CssSupportsAtRule, CssSupportsNotCondition, CssSyntaxKind, CssSyntaxNode,
-    ScssBinaryExpression, T,
+    CssPseudoClassIdentifier, CssPseudoElementIdentifier, CssQueryFeaturePlain, CssSupportsAtRule,
+    CssSupportsNotCondition,
 };
-use biome_languages::CssFileSource;
-use biome_rowan::{AstNode, Text, TextRange, TokenText, declare_node_union};
+use biome_rowan::{AstNode, TextRange, TokenText, declare_node_union};
 use biome_rule_options::use_baseline::{AvailabilityNamed, AvailabilityTarget, UseBaselineOptions};
 use biome_string_case::StrLikeExtension;
 use std::collections::HashMap;
@@ -44,13 +42,9 @@ declare_lint_rule! {
     /// interpolation or function evaluation may not be reported. Static syntax inside mixin
     /// definitions is checked even when the mixin is not included.
     ///
-    /// Sass evaluates CSS math functions such as `round()` and `abs()` at compile time when it can,
-    /// so in SCSS they are reported only when the source shows that Sass emits them as written: an
-    /// argument is interpolated, calls `var()` or a CSS function such as `env()`, or uses units that
-    /// Sass can't convert into each other, such as `%` and `px`. They aren't reported when that
-    /// depends on the value of a Sass variable, on a product or quotient of units, on a nested math
-    /// function such as `calc(20% - 1px)`, or on a function that is missing from the Baseline data,
-    /// such as `anchor-size()`, because the rule can't tell it apart from a Sass `@function`.
+    /// Functions that Sass calculates while compiling are still reported. For example,
+    /// `round(1.6px, 1px)` is reported even though Sass replaces it with `2px` in the
+    /// compiled CSS.
     ///
     /// ## Examples
     ///
@@ -252,9 +246,7 @@ impl Rule for UseBaseline {
 
         match node {
             AnyBaselineCheckable::CssGenericProperty(prop) => check_property(prop, options),
-            AnyBaselineCheckable::CssFunction(func) => {
-                check_function(func, options, ctx.source_type::<CssFileSource>().is_scss())
-            }
+            AnyBaselineCheckable::CssFunction(func) => check_function(func, options),
             AnyBaselineCheckable::CssPseudoClassIdentifier(pseudo) => check_pseudo(
                 // `:foo-#{$name}` cannot be checked until SCSS resolves the name.
                 pseudo
@@ -536,11 +528,7 @@ fn check_property(
     None
 }
 
-fn check_function(
-    func: &CssFunction,
-    options: &UseBaselineOptions,
-    is_scss: bool,
-) -> Option<UseBaselineState> {
+fn check_function(func: &CssFunction, options: &UseBaselineOptions) -> Option<UseBaselineState> {
     let name_node = func.name().ok()?;
     let name_ident = name_node.as_css_identifier()?;
     let name_token = name_ident.value_token().ok()?;
@@ -555,15 +543,8 @@ fn check_function(
         return None;
     }
 
-    let lowercase_name = name.to_ascii_lowercase_cow();
-
-    if let Some(status) = find_baseline(&BASELINE_FUNCTIONS, &lowercase_name)
+    if let Some(status) = find_baseline(&BASELINE_FUNCTIONS, &name.to_ascii_lowercase_cow())
         && !is_acceptable(options, status.tier, status.year)
-        && !(is_scss
-            && SASS_CALCULATION_FUNCTIONS
-                .binary_search(&lowercase_name.as_ref())
-                .is_ok()
-            && !is_emitted_by_sass(func))
     {
         return Some(UseBaselineState {
             feature_name: name.into(),
@@ -572,114 +553,6 @@ fn check_function(
         });
     }
     None
-}
-
-/// CSS math functions that Sass evaluates at compile time when it knows every argument, sorted.
-const SASS_CALCULATION_FUNCTIONS: &[&str] = &[
-    "abs", "acos", "asin", "atan", "atan2", "calc", "clamp", "cos", "exp", "hypot", "log", "max",
-    "min", "mod", "pow", "rem", "round", "sign", "sin", "sqrt", "tan",
-];
-
-/// Returns `true` if Sass emits the math function `func` as written instead of evaluating it.
-///
-/// That's the case when an argument is interpolated, calls `var()` or a CSS function that Sass
-/// doesn't evaluate, or uses literal units that Sass can't convert into each other, such as `%`
-/// and `px`. The arguments of other functions, which may be Sass `@function`s or math functions
-/// Sass evaluates, and products and quotients, which can cancel units, aren't checked.
-fn is_emitted_by_sass(func: &CssFunction) -> bool {
-    let mut first_unit: Option<Text> = None;
-    let mut has_mixed_units = false;
-    let mut has_product = false;
-    for node in func
-        .items()
-        .syntax()
-        .pruned_descendents(|node| match node.kind() {
-            CssSyntaxKind::CSS_FUNCTION => is_css_only_function(node),
-            CssSyntaxKind::SCSS_LEGACY_IF_FUNCTION => false,
-            _ => true,
-        })
-    {
-        let unit = match node.kind() {
-            CssSyntaxKind::SCSS_INTERPOLATION
-            | CssSyntaxKind::CSS_ATTR_FUNCTION
-            | CssSyntaxKind::CSS_IF_FUNCTION
-            | CssSyntaxKind::CSS_FUNCTION => return true,
-            CssSyntaxKind::SCSS_BINARY_EXPRESSION => {
-                has_product |= ScssBinaryExpression::cast(node)
-                    .and_then(|expression| expression.operator().ok())
-                    .is_some_and(|operator| matches!(operator.kind(), T![*] | T![/]));
-                continue;
-            }
-            CssSyntaxKind::CSS_PERCENTAGE => Text::from("%"),
-            CssSyntaxKind::CSS_REGULAR_DIMENSION => {
-                let Some(unit) = CssRegularDimension::cast(node)
-                    .and_then(|dimension| dimension.unit_token().ok())
-                else {
-                    continue;
-                };
-                unit.token_text_trimmed().into()
-            }
-            _ => continue,
-        };
-        match &first_unit {
-            None => first_unit = Some(unit),
-            Some(first_unit) => has_mixed_units |= !are_convertible_units(first_unit, &unit),
-        }
-    }
-    has_mixed_units && !has_product
-}
-
-/// Returns `true` if `node` calls `var()` or a CSS function from the Baseline data that Sass
-/// doesn't evaluate. Sass global functions that share a CSS function's name, such as `opacity()`,
-/// don't count.
-fn is_css_only_function(node: &CssSyntaxNode) -> bool {
-    let Some(name) = CssFunction::cast_ref(node).and_then(|function| {
-        function
-            .name()
-            .ok()?
-            .as_css_identifier()?
-            .value_token()
-            .ok()
-    }) else {
-        return false;
-    };
-    let name = name.text_trimmed().to_ascii_lowercase_cow();
-    name == "var"
-        || (BASELINE_FUNCTIONS.contains_key(name.as_ref())
-            && SASS_CALCULATION_FUNCTIONS
-                .binary_search(&name.as_ref())
-                .is_err()
-            && SASS_GLOBAL_CSS_FUNCTIONS
-                .binary_search(&name.as_ref())
-                .is_err())
-}
-
-/// Sass global functions that share their name with a CSS function, sorted.
-const SASS_GLOBAL_CSS_FUNCTIONS: &[&str] = &[
-    "grayscale",
-    "hsl",
-    "hsla",
-    "invert",
-    "opacity",
-    "rgb",
-    "rgba",
-    "saturate",
-];
-
-/// Groups of units that Sass converts into each other, spelled as Sass matches them.
-const SASS_CONVERTIBLE_UNITS: &[&[&str]] = &[
-    &["cm", "in", "mm", "pc", "pt", "px", "q"],
-    &["deg", "grad", "rad", "turn"],
-    &["ms", "s"],
-    &["Hz", "kHz"],
-    &["dpcm", "dpi", "dppx"],
-];
-
-fn are_convertible_units(first: &str, second: &str) -> bool {
-    first == second
-        || SASS_CONVERTIBLE_UNITS
-            .iter()
-            .any(|units| units.contains(&first) && units.contains(&second))
 }
 
 fn check_pseudo(
