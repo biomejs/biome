@@ -1,0 +1,153 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+foo ? (bar ? baz as string : fallback) : fallback;
+foo ? (bar ? baz : object?.property!) : object?.property!;
+foo ? (bar as boolean ? fallback : value) : fallback;
+outer ? (inner ? (value as /* keep */ string) : fallback) : fallback;
+x === 1 ? a : ((x as number) === 2 ? b : (x! === 3 ? a : c));
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:1 lint/nursery/noUselessNestedTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This nested ternary expression is unnecessary.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ foo ? (bar ? baz as string : fallback) : fallback;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ foo ? (bar ? baz : object?.property!) : object?.property!;
+    5 │ foo ? (bar as boolean ? fallback : value) : fallback;
+  
+  i The nested expression repeats a result of the expression around it. Combining both conditions with && gives the same results without the nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine the conditions with &&.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   
+    3   │ - foo·?·(bar·?·baz·as·string·:·fallback)·:·fallback;
+      3 │ + foo·&&·bar·?·baz·as·string·:·fallback;
+    4 4 │   foo ? (bar ? baz : object?.property!) : object?.property!;
+    5 5 │   foo ? (bar as boolean ? fallback : value) : fallback;
+  
+
+```
+
+```
+invalid.ts:4:1 lint/nursery/noUselessNestedTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This nested ternary expression is unnecessary.
+  
+    3 │ foo ? (bar ? baz as string : fallback) : fallback;
+  > 4 │ foo ? (bar ? baz : object?.property!) : object?.property!;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ foo ? (bar as boolean ? fallback : value) : fallback;
+    6 │ outer ? (inner ? (value as /* keep */ string) : fallback) : fallback;
+  
+  i The nested expression repeats a result of the expression around it. Combining both conditions with && gives the same results without the nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine the conditions with &&.
+  
+    2 2 │   
+    3 3 │   foo ? (bar ? baz as string : fallback) : fallback;
+    4   │ - foo·?·(bar·?·baz·:·object?.property!)·:·object?.property!;
+      4 │ + foo·&&·bar·?·baz·:·object?.property!;
+    5 5 │   foo ? (bar as boolean ? fallback : value) : fallback;
+    6 6 │   outer ? (inner ? (value as /* keep */ string) : fallback) : fallback;
+  
+
+```
+
+```
+invalid.ts:5:1 lint/nursery/noUselessNestedTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This nested ternary expression is unnecessary.
+  
+    3 │ foo ? (bar ? baz as string : fallback) : fallback;
+    4 │ foo ? (bar ? baz : object?.property!) : object?.property!;
+  > 5 │ foo ? (bar as boolean ? fallback : value) : fallback;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ outer ? (inner ? (value as /* keep */ string) : fallback) : fallback;
+    7 │ x === 1 ? a : ((x as number) === 2 ? b : (x! === 3 ? a : c));
+  
+  i The nested expression repeats a result of the expression around it. Combining both conditions with && gives the same results without the nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine the conditions with &&.
+  
+    3 3 │   foo ? (bar ? baz as string : fallback) : fallback;
+    4 4 │   foo ? (bar ? baz : object?.property!) : object?.property!;
+    5   │ - foo·?·(bar·as·boolean·?·fallback·:·value)·:·fallback;
+      5 │ + foo·&&·!(bar·as·boolean)·?·value·:·fallback;
+    6 6 │   outer ? (inner ? (value as /* keep */ string) : fallback) : fallback;
+    7 7 │   x === 1 ? a : ((x as number) === 2 ? b : (x! === 3 ? a : c));
+  
+
+```
+
+```
+invalid.ts:6:1 lint/nursery/noUselessNestedTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This nested ternary expression is unnecessary.
+  
+    4 │ foo ? (bar ? baz : object?.property!) : object?.property!;
+    5 │ foo ? (bar as boolean ? fallback : value) : fallback;
+  > 6 │ outer ? (inner ? (value as /* keep */ string) : fallback) : fallback;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ x === 1 ? a : ((x as number) === 2 ? b : (x! === 3 ? a : c));
+    8 │ 
+  
+  i The nested expression repeats a result of the expression around it. Combining both conditions with && gives the same results without the nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine the conditions with &&.
+  
+    4 4 │   foo ? (bar ? baz : object?.property!) : object?.property!;
+    5 5 │   foo ? (bar as boolean ? fallback : value) : fallback;
+    6   │ - outer·?·(inner·?·(value·as·/*·keep·*/·string)·:·fallback)·:·fallback;
+      6 │ + outer·&&·inner·?·(value·as·/*·keep·*/·string)·:·fallback;
+    7 7 │   x === 1 ? a : ((x as number) === 2 ? b : (x! === 3 ? a : c));
+    8 8 │   
+  
+
+```
+
+```
+invalid.ts:7:1 lint/nursery/noUselessNestedTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The first condition of this chain of ternary expressions has the same result as a later condition.
+  
+    5 │ foo ? (bar as boolean ? fallback : value) : fallback;
+    6 │ outer ? (inner ? (value as /* keep */ string) : fallback) : fallback;
+  > 7 │ x === 1 ? a : ((x as number) === 2 ? b : (x! === 3 ? a : c));
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i Combining both conditions with || gives the same results with one ternary expression less.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine the conditions with ||.
+  
+    5 5 │   foo ? (bar as boolean ? fallback : value) : fallback;
+    6 6 │   outer ? (inner ? (value as /* keep */ string) : fallback) : fallback;
+    7   │ - x·===·1·?·a·:·((x·as·number)·===·2·?·b·:·(x!·===·3·?·a·:·c));
+      7 │ + x·===·1·||·x!·===·3·?·a·:·((x·as·number)·===·2·?·b·:·c);
+    8 8 │   
+  
+
+```

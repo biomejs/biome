@@ -3548,6 +3548,11 @@ export interface Nursery {
 	 */
 	noUselessLengthCheck?: NoUselessLengthCheckConfiguration;
 	/**
+	 * Disallow nested ternary expressions that can be merged into one.
+	 * See https://biomejs.dev/linter/rules/no-useless-nested-ternary
+	 */
+	noUselessNestedTernary?: NoUselessNestedTernaryConfiguration;
+	/**
 	 * Disallow assigning a parameter property to itself in the constructor.
 	 * See https://biomejs.dev/linter/rules/no-useless-parameter-property-assignment
 	 */
@@ -6973,6 +6978,9 @@ export type NoUselessFallbackInSpreadConfiguration =
 export type NoUselessLengthCheckConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessLengthCheckOptions;
+export type NoUselessNestedTernaryConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessNestedTernaryOptions;
 export type NoUselessParameterPropertyAssignmentConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessParameterPropertyAssignmentOptions;
@@ -10220,6 +10228,14 @@ export interface RuleWithNoUselessLengthCheckOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoUselessLengthCheckOptions;
+}
+export interface RuleWithNoUselessNestedTernaryOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoUselessNestedTernaryOptions;
 }
 export interface RuleWithNoUselessParameterPropertyAssignmentOptions {
 	level: RulePlainConfiguration;
@@ -13494,6 +13510,7 @@ export type NoUselessCallOptions = {};
 export type NoUselessDateGetTimeOptions = {};
 export type NoUselessFallbackInSpreadOptions = {};
 export type NoUselessLengthCheckOptions = {};
+export type NoUselessNestedTernaryOptions = {};
 export type NoUselessParameterPropertyAssignmentOptions = {};
 export type NoUselessQualifierOptions = {};
 export type NoUselessRecursionOptions = {};
@@ -15688,6 +15705,7 @@ export type Category =
 	| "lint/nursery/noUselessDateGetTime"
 	| "lint/nursery/noUselessFallbackInSpread"
 	| "lint/nursery/noUselessLengthCheck"
+	| "lint/nursery/noUselessNestedTernary"
 	| "lint/nursery/noUselessParameterPropertyAssignment"
 	| "lint/nursery/noUselessQualifier"
 	| "lint/nursery/noUselessRecursion"
