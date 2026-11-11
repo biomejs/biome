@@ -877,6 +877,33 @@ fn reads_beyond_the_shared_flow_limit_are_solved_one_point_at_a_time() {
 }
 
 #[test]
+fn shared_solves_that_run_out_at_their_last_read_fall_back_to_that_read() {
+    // The second read is the last node the shared solve evaluates, and its
+    // condition's guard alone costs 65 steps. The filler statements cost 5
+    // steps each and place the end of the flow work limit inside that guard:
+    // 31 to 43 of them do, and 37 sits in the middle. Solving the second read
+    // on its own skips the first branch and fits the limit.
+    let chain = ["flag"; 10].join(" && ");
+    let first = format!("{chain};\n").repeat(13);
+    let second = format!("{chain};\n").repeat(14) + &"if (flag) {}\n".repeat(37);
+    let condition = ["flag"; 100].join(" && ");
+    let source = format!(
+        "function inspect(value: string | null, flag: boolean, pick: boolean) {{\n\
+         if (value === null) return;\n\
+         if (pick) {{\n{first}/*first*/value;\n}} else {{\n{second}if ({condition}) {{ /*second*/value; }}\n}}\n\
+         }}\n"
+    );
+    let (db, module) = narrowing_db(&source);
+    for marker in ["first", "second"] {
+        assert_eq!(
+            normalized_type_at(&db, module, &source, marker, "value"),
+            InferredTypeData::String,
+            "{marker}"
+        );
+    }
+}
+
+#[test]
 fn shared_flow_points_keep_different_bindings_separate() {
     const SOURCE: &str = r#"
         function inspect(left: string | number, right: string | number) {

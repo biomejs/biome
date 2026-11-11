@@ -363,7 +363,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     if incoming == TypeData::NeverKeyword {
                         incoming
                     } else {
-                        self.apply_guard(root, *guard, binding, incoming, &mut remaining)
+                        self.apply_guard(root, *guard, binding, incoming, &mut remaining)?
                     }
                 }
             };
@@ -381,7 +381,7 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns the type of `binding` after the guard at `guard` holds, given
-    /// its incoming type `ty`.
+    /// its incoming type `ty`, or `None` when the flow work limit runs out.
     fn apply_guard(
         &mut self,
         root: &RootFlow,
@@ -389,12 +389,12 @@ impl<'db> ResolutionCtx<'db, '_> {
         binding: TextRange,
         ty: TypeData<'db>,
         remaining: &mut usize,
-    ) -> TypeData<'db> {
-        let (Some(next), Some(guard)) = (remaining.checked_sub(1), root.guards.get(guard)) else {
-            return TypeData::Unknown;
+    ) -> Option<TypeData<'db>> {
+        *remaining = remaining.checked_sub(1)?;
+        let Some(guard) = root.guards.get(guard) else {
+            return Some(TypeData::Unknown);
         };
-        *remaining = next;
-        match guard {
+        Some(match guard {
             FlowGuard::Keep => ty,
             FlowGuard::Incomplete => TypeData::Unknown,
             FlowGuard::Test {
@@ -403,7 +403,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 positive,
             } => {
                 if *tested != binding {
-                    return ty;
+                    return Some(ty);
                 }
                 match self.test_predicate(*test) {
                     Some(predicate) => narrow_type(self.db, ty, predicate, *positive),
@@ -415,21 +415,21 @@ impl<'db> ResolutionCtx<'db, '_> {
                 right,
                 sequential,
             } => {
-                let left = self.apply_guard(root, *left, binding, ty, remaining);
+                let left = self.apply_guard(root, *left, binding, ty, remaining)?;
                 let right = self.apply_guard(
                     root,
                     *right,
                     binding,
                     if *sequential { left } else { ty },
                     remaining,
-                );
+                )?;
                 if *sequential {
                     right
                 } else {
                     TypeData::union_from_types(self.db, vec![left, right])
                 }
             }
-        }
+        })
     }
 
     fn test_predicate(&mut self, test: FlowTest) -> Option<NarrowingPredicate<'db>> {
