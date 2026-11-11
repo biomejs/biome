@@ -44,7 +44,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUselessFallbackInSpread {
-        version: "next",
+        version: "2.6.7",
         name: "noUselessFallbackInSpread",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-useless-fallback-in-spread").same()],

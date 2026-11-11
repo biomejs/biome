@@ -106,7 +106,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoRedundantTypeConstituents {
-        version: "next",
+        version: "2.6.7",
         name: "noRedundantTypeConstituents",
         language: "ts",
         recommended: true,

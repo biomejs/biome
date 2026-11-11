@@ -60,7 +60,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseValidCharacterComparison {
-        version: "next",
+        version: "2.6.7",
         name: "useValidCharacterComparison",
         language: "js",
         sources: &[RuleSource::Oxc("bad-char-at-comparison").same()],

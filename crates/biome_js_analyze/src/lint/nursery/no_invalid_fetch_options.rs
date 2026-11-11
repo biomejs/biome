@@ -54,7 +54,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoInvalidFetchOptions {
-        version: "next",
+        version: "2.6.7",
         name: "noInvalidFetchOptions",
         language: "js",
         recommended: true,

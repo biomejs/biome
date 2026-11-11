@@ -122,7 +122,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDuplicateTypeConstituents {
-        version: "next",
+        version: "2.6.7",
         name: "noDuplicateTypeConstituents",
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-duplicate-type-constituents").inspired()],

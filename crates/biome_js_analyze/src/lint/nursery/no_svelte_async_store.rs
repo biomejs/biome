@@ -64,7 +64,7 @@ declare_lint_rule! {
     ///
     /// - [`svelte/store`](https://svelte.dev/docs/svelte/svelte-store)
     pub NoSvelteAsyncStore {
-        version: "next",
+        version: "2.6.7",
         name: "noSvelteAsyncStore",
         language: "js",
         domains: &[RuleDomain::Svelte],

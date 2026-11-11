@@ -81,7 +81,7 @@ declare_lint_rule! {
     /// - If you want to disallow parameter properties entirely, see [`noParameterProperties`](https://biomejs.dev/linter/rules/no-parameter-properties/).
     ///
     pub NoUselessParameterPropertyAssignment {
-        version: "next",
+        version: "2.6.7",
         name: "noUselessParameterPropertyAssignment",
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-unnecessary-parameter-property-assignment").same()],

@@ -110,7 +110,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseAtomicUpdates {
-        version: "next",
+        version: "2.6.7",
         name: "useAtomicUpdates",
         language: "js",
         sources: &[RuleSource::Eslint("require-atomic-updates").inspired()],

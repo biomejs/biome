@@ -61,7 +61,7 @@ declare_lint_rule! {
     /// - To use array literals instead of `Array()` with no arguments, several arguments, or a spread argument such as `new Array(...items)`, see [`useArrayLiterals`](https://biomejs.dev/linter/rules/use-array-literals/).
     ///
     pub NoNewArray {
-        version: "next",
+        version: "2.6.7",
         name: "noNewArray",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-new-array").inspired()],
