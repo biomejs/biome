@@ -1,0 +1,291 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidOptionsApi.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-for="count in 5"></div>
+  <div v-for="label in 5"></div>
+  <div v-for="total in 5"></div>
+  <div v-for="reset in 5"></div>
+  <div v-for="fetched in 5"></div>
+  <div v-for="title in 5"></div>
+  <div v-for="exposed in 5"></div>
+  <div v-for="theme in 5"></div>
+</template>
+
+<script>
+export default {
+  props: ["title"],
+  inject: ["theme"],
+  data() {
+    return {
+      count: 0,
+      label: "",
+    };
+  },
+  asyncData() {
+    return {
+      fetched: true,
+    };
+  },
+  computed: {
+    total() {
+      return this.count;
+    },
+  },
+  methods: {
+    reset() {},
+  },
+  setup() {
+    return {
+      exposed: 42,
+    };
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalidOptionsApi.vue:3:15 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable count hides a variable with the same name.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-for="count in 5"></div>
+      │               ^^^^^
+    4 │   <div v-for="label in 5"></div>
+    5 │   <div v-for="total in 5"></div>
+  
+  i The hidden count is declared here.
+  
+    17 │   data() {
+    18 │     return {
+  > 19 │       count: 0,
+       │       ^^^^^
+    20 │       label: "",
+    21 │     };
+  
+  i Inside this element, count refers to the template variable, so the other count can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidOptionsApi.vue:4:15 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable label hides a variable with the same name.
+  
+    2 │ <template>
+    3 │   <div v-for="count in 5"></div>
+  > 4 │   <div v-for="label in 5"></div>
+      │               ^^^^^
+    5 │   <div v-for="total in 5"></div>
+    6 │   <div v-for="reset in 5"></div>
+  
+  i The hidden label is declared here.
+  
+    18 │     return {
+    19 │       count: 0,
+  > 20 │       label: "",
+       │       ^^^^^
+    21 │     };
+    22 │   },
+  
+  i Inside this element, label refers to the template variable, so the other label can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidOptionsApi.vue:5:15 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable total hides a variable with the same name.
+  
+    3 │   <div v-for="count in 5"></div>
+    4 │   <div v-for="label in 5"></div>
+  > 5 │   <div v-for="total in 5"></div>
+      │               ^^^^^
+    6 │   <div v-for="reset in 5"></div>
+    7 │   <div v-for="fetched in 5"></div>
+  
+  i The hidden total is declared here.
+  
+    27 │   },
+    28 │   computed: {
+  > 29 │     total() {
+       │     ^^^^^
+    30 │       return this.count;
+    31 │     },
+  
+  i Inside this element, total refers to the template variable, so the other total can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidOptionsApi.vue:6:15 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable reset hides a variable with the same name.
+  
+    4 │   <div v-for="label in 5"></div>
+    5 │   <div v-for="total in 5"></div>
+  > 6 │   <div v-for="reset in 5"></div>
+      │               ^^^^^
+    7 │   <div v-for="fetched in 5"></div>
+    8 │   <div v-for="title in 5"></div>
+  
+  i The hidden reset is declared here.
+  
+    32 │   },
+    33 │   methods: {
+  > 34 │     reset() {},
+       │     ^^^^^
+    35 │   },
+    36 │   setup() {
+  
+  i Inside this element, reset refers to the template variable, so the other reset can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidOptionsApi.vue:7:15 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable fetched hides a variable with the same name.
+  
+    5 │   <div v-for="total in 5"></div>
+    6 │   <div v-for="reset in 5"></div>
+  > 7 │   <div v-for="fetched in 5"></div>
+      │               ^^^^^^^
+    8 │   <div v-for="title in 5"></div>
+    9 │   <div v-for="exposed in 5"></div>
+  
+  i The hidden fetched is declared here.
+  
+    23 │   asyncData() {
+    24 │     return {
+  > 25 │       fetched: true,
+       │       ^^^^^^^
+    26 │     };
+    27 │   },
+  
+  i Inside this element, fetched refers to the template variable, so the other fetched can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidOptionsApi.vue:8:15 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable title hides a variable with the same name.
+  
+     6 │   <div v-for="reset in 5"></div>
+     7 │   <div v-for="fetched in 5"></div>
+   > 8 │   <div v-for="title in 5"></div>
+       │               ^^^^^
+     9 │   <div v-for="exposed in 5"></div>
+    10 │   <div v-for="theme in 5"></div>
+  
+  i The hidden title is declared here.
+  
+    13 │ <script>
+    14 │ export default {
+  > 15 │   props: ["title"],
+       │           ^^^^^^^
+    16 │   inject: ["theme"],
+    17 │   data() {
+  
+  i Inside this element, title refers to the template variable, so the other title can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidOptionsApi.vue:9:15 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable exposed hides a variable with the same name.
+  
+     7 │   <div v-for="fetched in 5"></div>
+     8 │   <div v-for="title in 5"></div>
+   > 9 │   <div v-for="exposed in 5"></div>
+       │               ^^^^^^^
+    10 │   <div v-for="theme in 5"></div>
+    11 │ </template>
+  
+  i The hidden exposed is declared here.
+  
+    36 │   setup() {
+    37 │     return {
+  > 38 │       exposed: 42,
+       │       ^^^^^^^
+    39 │     };
+    40 │   },
+  
+  i Inside this element, exposed refers to the template variable, so the other exposed can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidOptionsApi.vue:10:15 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable theme hides a variable with the same name.
+  
+     8 │   <div v-for="title in 5"></div>
+     9 │   <div v-for="exposed in 5"></div>
+  > 10 │   <div v-for="theme in 5"></div>
+       │               ^^^^^
+    11 │ </template>
+    12 │ 
+  
+  i The hidden theme is declared here.
+  
+    14 │ export default {
+    15 │   props: ["title"],
+  > 16 │   inject: ["theme"],
+       │            ^^^^^^^
+    17 │   data() {
+    18 │     return {
+  
+  i Inside this element, theme refers to the template variable, so the other theme can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

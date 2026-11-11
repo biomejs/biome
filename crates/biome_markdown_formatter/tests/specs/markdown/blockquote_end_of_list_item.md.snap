@@ -1,0 +1,226 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/blockquote_end_of_list_item.md
+---
+
+# Input
+
+```md
+- a
+  > b
+
+#### Heading after a quote
+
+- a
+
+  > - b
+
+#### Heading after a list inside a quote
+
+- a
+  > b
+
+Paragraph after a quote.
+
+- a
+  > b
+
+```
+fenced code after a quote
+```
+
+- a
+  > b
+
+| table |
+| ----- |
+| after |
+
+- a
+  > b
+
+<div>HTML after a quote</div>
+
+- a
+  > b
+
+> Quote after a quote.
+
+- a
+  > b
+
+
+
+#### Several blank lines
+
+- a
+  - b
+    > c
+
+#### Nested list
+
+1. a
+   > b
+
+#### Ordered list
+
+- > b
+
+#### Quote as the first block
+
+- a
+  > # heading
+
+#### Quote ending with a heading
+
+- a
+  > ```
+  > code
+  > ```
+
+#### Quote ending with a fenced code block
+
+- a
+  > b
+  >
+
+#### Quote ending with an empty line
+
+- a
+  > b  
+
+#### Quote ending with a hard line break
+
+<!-- biome-ignore format: keep the list as is -->
+-    a
+     > b
+
+#### Suppressed list
+
+> - a
+>   > b
+
+Paragraph after a top-level quote ending with a list item.
+
+> - a
+>   > b
+
+
+
+Paragraph after several blank lines.
+
+- a
+  > - b  
+
+Paragraph after a quote ending with a list and a hard line break.
+
+```
+
+
+# Formatted
+
+```md
+- a
+  > b
+
+#### Heading after a quote
+
+- a
+
+  > - b
+
+#### Heading after a list inside a quote
+
+- a
+  > b
+
+Paragraph after a quote.
+
+- a
+  > b
+
+```
+fenced code after a quote
+```
+
+- a
+  > b
+
+| table |
+| ----- |
+| after |
+
+- a
+  > b
+
+<div>HTML after a quote</div>
+
+- a
+  > b
+
+> Quote after a quote.
+
+- a
+  > b
+
+#### Several blank lines
+
+- a
+  - b
+    > c
+
+#### Nested list
+
+1. a
+   > b
+
+#### Ordered list
+
+- > b
+
+#### Quote as the first block
+
+- a
+  > # heading
+
+#### Quote ending with a heading
+
+- a
+  > ```
+  > code
+  > ```
+
+#### Quote ending with a fenced code block
+
+- a
+  > b
+
+#### Quote ending with an empty line
+
+- a
+  > b  
+
+#### Quote ending with a hard line break
+
+<!-- biome-ignore format: keep the list as is -->
+-    a
+     > b
+
+#### Suppressed list
+
+> - a
+>   > b
+
+Paragraph after a top-level quote ending with a list item.
+
+> - a
+>   > b
+
+Paragraph after several blank lines.
+
+- a
+  > - b
+
+Paragraph after a quote ending with a list and a hard line break.
+
+```

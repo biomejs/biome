@@ -1,6 +1,6 @@
 use crate::JsRuleAction;
-use crate::frameworks::vue::vue_component::{
-    AnyPotentialVueComponent, AnyVueComponent, VueComponent, VueOptionsApiBasedComponent,
+use crate::frameworks::vue::vue_instance::{
+    component_instance_property_member, template_instance_property_reference,
 };
 use crate::services::embedded::EmbeddedService;
 use crate::services::semantic::Semantic;
@@ -9,14 +9,11 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_factory::make;
-use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsIdentifierReference, AnyJsName, JsIdentifierExpression,
-    JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxToken, JsThisExpression,
-    JsVariableDeclaration, JsVariableDeclarator,
+    AnyJsIdentifierReference, JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxToken,
 };
 use biome_languages::JsFileSource;
-use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
+use biome_rowan::{BatchMutationExt, declare_node_union};
 use biome_rule_options::no_vue_deprecated_scoped_slots::NoVueDeprecatedScopedSlotsOptions;
 
 declare_lint_rule! {
@@ -73,17 +70,33 @@ impl Rule for NoVueDeprecatedScopedSlots {
     type Options = NoVueDeprecatedScopedSlotsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        match ctx.query() {
+        let model = ctx.model();
+        let source = ctx.source_type::<JsFileSource>();
+        let (object, member) = match ctx.query() {
             AnyScopedSlotsReference::AnyJsIdentifierReference(reference) => {
-                template_reference(ctx, reference)
+                return template_instance_property_reference(
+                    reference,
+                    "$scopedSlots",
+                    model,
+                    source,
+                    ctx.get_service::<EmbeddedService>(),
+                );
             }
             AnyScopedSlotsReference::JsStaticMemberExpression(member) => {
-                component_member_reference(ctx, member.object().ok()?, &member.member().ok()?)
+                (member.object().ok()?, member.member().ok()?)
             }
             AnyScopedSlotsReference::JsStaticMemberAssignment(member) => {
-                component_member_reference(ctx, member.object().ok()?, &member.member().ok()?)
+                (member.object().ok()?, member.member().ok()?)
             }
-        }
+        };
+        component_instance_property_member(
+            object,
+            member.as_js_name()?,
+            "$scopedSlots",
+            model,
+            source,
+            ctx.file_path(),
+        )
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, token: &Self::State) -> Option<RuleDiagnostic> {
@@ -112,125 +125,4 @@ impl Rule for NoVueDeprecatedScopedSlots {
             mutation,
         ))
     }
-}
-
-/// Handle usages in embedded snippets (the `<template>` section)
-fn template_reference(
-    ctx: &RuleContext<NoVueDeprecatedScopedSlots>,
-    reference: &AnyJsIdentifierReference,
-) -> Option<JsSyntaxToken> {
-    let source = ctx.source_type::<JsFileSource>();
-    if !source.as_embedding_kind().is_vue() || source.is_embedded_source() {
-        return None;
-    }
-
-    let token = reference.value_token().ok()?;
-    if token.text_trimmed() != "$scopedSlots"
-        || !ctx.model().is_unresolved_reference(reference)
-    {
-        return None;
-    }
-
-    let embedded = ctx.get_service::<EmbeddedService>()?;
-    if embedded.contains_binding(token.token_text_trimmed()) {
-        return None;
-    }
-
-    Some(token)
-}
-
-fn component_member_reference(
-    ctx: &RuleContext<NoVueDeprecatedScopedSlots>,
-    object: AnyJsExpression,
-    member: &AnyJsName,
-) -> Option<JsSyntaxToken> {
-    let member = member.as_js_name()?.value_token().ok()?;
-    if member.text_trimmed() != "$scopedSlots"
-        || !is_this_or_direct_const_alias(object, ctx.model())
-        || !is_in_recognized_component_object(ctx, &member)
-    {
-        return None;
-    }
-
-    Some(member)
-}
-
-fn is_this_or_direct_const_alias(object: AnyJsExpression, model: &SemanticModel) -> bool {
-    let object = object.omit_parentheses();
-    if JsThisExpression::can_cast(object.syntax().kind()) {
-        return true;
-    }
-
-    let Some(identifier) = object.as_js_identifier_expression() else {
-        return false;
-    };
-    is_direct_const_this_alias(identifier, model)
-}
-
-fn is_direct_const_this_alias(identifier: &JsIdentifierExpression, model: &SemanticModel) -> bool {
-    let Ok(reference) = identifier.name() else {
-        return false;
-    };
-    let Some(binding) = model.binding(&reference) else {
-        return false;
-    };
-    let binding = binding.tree();
-    let Some(declarator) = binding.syntax().parent().and_then(JsVariableDeclarator::cast) else {
-        return false;
-    };
-    let Some(declaration) = declarator
-        .syntax()
-        .ancestors()
-        .skip(1)
-        .find_map(JsVariableDeclaration::cast)
-    else {
-        return false;
-    };
-    if !declaration.is_const() {
-        return false;
-    }
-
-    declarator
-        .initializer()
-        .and_then(|initializer| initializer.expression().ok())
-        .map(AnyJsExpression::omit_parentheses)
-        .is_some_and(|initializer| JsThisExpression::can_cast(initializer.syntax().kind()))
-}
-
-fn is_in_recognized_component_object(
-    ctx: &RuleContext<NoVueDeprecatedScopedSlots>,
-    token: &JsSyntaxToken,
-) -> bool {
-    let Some(parent) = token.parent() else {
-        return false;
-    };
-
-    parent.ancestors().skip(1).any(|ancestor| {
-        let Some(potential_component) = AnyPotentialVueComponent::cast(ancestor) else {
-            return false;
-        };
-        let Some(component) = VueComponent::from_potential_component(
-            &potential_component,
-            ctx.model(),
-            ctx.source_type::<JsFileSource>(),
-            ctx.file_path(),
-        ) else {
-            return false;
-        };
-
-        let definition = match component.kind() {
-            AnyVueComponent::OptionsApi(component) => component.definition_expression(),
-            AnyVueComponent::CreateApp(component) => component.definition_expression(),
-            AnyVueComponent::DefineComponent(component) => component.definition_expression(),
-            AnyVueComponent::Setup(_) => None,
-        };
-        definition
-            .and_then(|definition| definition.inner_expression())
-            .and_then(|definition| definition.as_js_object_expression().cloned())
-            .is_some_and(|definition| {
-                parent
-                    .ancestors()
-                    .any(|ancestor| ancestor == *definition.syntax())
-            })
-    })
 }

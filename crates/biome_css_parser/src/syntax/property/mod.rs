@@ -31,7 +31,8 @@ use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{CompletedMarker, Parser, SyntaxFeature, TokenSet, token_set};
 pub(crate) use custom::{
-    parse_custom_property_value, parse_legacy_filter_value, parse_supports_custom_property_value,
+    parse_custom_property_value, parse_custom_property_value_with_mode, parse_legacy_filter_value,
+    parse_supports_custom_property_value,
 };
 
 #[inline]
@@ -184,6 +185,15 @@ fn parse_composes_property_value(
 
     if classes.range(p).is_empty() {
         p.error(expected_classes_list(p, p.cur_range()));
+
+        // Skip unexpected tokens (e.g. `composes: 1px`) so the enclosing list makes progress.
+        if !p.at_ts(class_list_end_set) && !p.at(EOF) {
+            let bogus = p.start();
+            while !p.at_ts(class_list_end_set) && !p.at(EOF) {
+                p.bump_any();
+            }
+            bogus.complete(p, CSS_BOGUS_PROPERTY_VALUE);
+        }
     }
 
     if p.at(T![from]) {

@@ -1,10 +1,12 @@
-use crate::rule::RuleDiagnostic;
+use crate::{RuleCategory, RuleKey, rule::RuleDiagnostic};
 use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticExt, DiagnosticTags, Error, Location, LogCategory,
     MessageAndDescription, Severity, Visit, advice::CodeSuggestionAdvice, category,
+    panic::PanicError,
 };
 use biome_rowan::{TextRange, TextSize};
+use std::backtrace::BacktraceStatus;
 use std::borrow::Cow;
 use std::fmt::{Debug, Formatter};
 use std::ops::Add;
@@ -196,6 +198,119 @@ impl AnalyzerDiagnostic {
 
     pub const fn is_raw(&self) -> bool {
         matches!(self.kind, DiagnosticKind::Raw(_))
+    }
+}
+
+#[derive(Debug, Diagnostic, Clone)]
+#[diagnostic(category = "internalError/panic", severity = Error, tags(INTERNAL))]
+pub(crate) struct AnalyzerPanicDiagnostic {
+    #[location(span)]
+    range: TextRange,
+    #[message]
+    #[description]
+    message: MessageAndDescription,
+    #[advice]
+    advice: AnalyzerPanicAdvice,
+    #[verbose_advice]
+    verbose_advice: AnalyzerPanicVerboseAdvice,
+}
+
+impl AnalyzerPanicDiagnostic {
+    pub(crate) fn new(
+        rule: RuleKey,
+        rule_category: RuleCategory,
+        range: TextRange,
+        panic: PanicError,
+        thread_name: Option<String>,
+    ) -> Self {
+        let rule_kind = match rule_category {
+            RuleCategory::Syntax => "syntax rule",
+            RuleCategory::Lint => "lint rule",
+            RuleCategory::Action => "assist action",
+            RuleCategory::Transformation => "transformation",
+        };
+        let PanicError { info, backtrace } = panic;
+        let panic_info = if info.is_empty() {
+            "panic with no additional information".to_string()
+        } else {
+            info
+        };
+        let mut message = MessageAndDescription::from(
+            markup! {
+                "Biome encountered an internal error while running the "{rule_kind}" "<Emphasis>{rule}</Emphasis>"."
+            }
+            .to_owned(),
+        );
+        message.set_description(format!(
+            "Biome encountered an internal error while running the {rule_kind} {rule}. {panic_info}"
+        ));
+        let backtrace = backtrace.and_then(|backtrace| {
+            (backtrace.status() == BacktraceStatus::Captured).then(|| backtrace.to_string())
+        });
+
+        Self {
+            range,
+            message,
+            advice: AnalyzerPanicAdvice {
+                rule,
+                rule_category,
+                panic_info,
+                thread_name,
+            },
+            verbose_advice: AnalyzerPanicVerboseAdvice { backtrace },
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+struct AnalyzerPanicAdvice {
+    rule: RuleKey,
+    rule_category: RuleCategory,
+    panic_info: String,
+    thread_name: Option<String>,
+}
+
+impl Advices for AnalyzerPanicAdvice {
+    fn record(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+        visitor.record_log(
+            LogCategory::Info,
+            &markup! { "Panic information: "{self.panic_info} },
+        )?;
+
+        if let Some(thread_name) = &self.thread_name {
+            visitor.record_log(
+                LogCategory::Info,
+                &markup! { "Thread: "<Emphasis>{thread_name}</Emphasis> },
+            )?;
+        }
+
+        if matches!(
+            self.rule_category,
+            RuleCategory::Lint | RuleCategory::Action
+        ) {
+            visitor.record_log(
+                LogCategory::Info,
+                &markup! {
+                    "As a workaround, disable "<Emphasis>{self.rule}</Emphasis>" or ignore this file."
+                },
+            )?;
+        }
+
+        Ok(())
+    }
+}
+
+#[derive(Debug, Default, Clone)]
+struct AnalyzerPanicVerboseAdvice {
+    backtrace: Option<String>,
+}
+
+impl Advices for AnalyzerPanicVerboseAdvice {
+    fn record(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+        if let Some(backtrace) = &self.backtrace {
+            visitor.record_log(LogCategory::Info, &markup! { "Stack trace:\n"{backtrace} })?;
+        }
+        Ok(())
     }
 }
 
@@ -409,3 +524,31 @@ impl biome_console::fmt::Display for RuleError {
 }
 
 impl std::error::Error for RuleError {}
+
+#[cfg(test)]
+mod tests {
+    use super::AnalyzerPanicDiagnostic;
+    use crate::{RuleCategory, RuleKey};
+    use biome_diagnostics::{DiagnosticExt, Error, panic::PanicError, print_diagnostic_to_string};
+    use biome_rowan::{TextRange, TextSize};
+
+    #[test]
+    fn analyzer_panic_diagnostic() {
+        let diagnostic = AnalyzerPanicDiagnostic::new(
+            RuleKey::new("suspicious", "noRedeclare"),
+            RuleCategory::Lint,
+            TextRange::new(TextSize::from(6), TextSize::from(11)),
+            PanicError {
+                info: "panicked at crates/biome_js_semantic/src/scope.rs:10:20:\nmissing scope"
+                    .to_string(),
+                backtrace: None,
+            },
+            Some("biome::worker_0".to_string()),
+        );
+        let diagnostic = Error::from(diagnostic)
+            .with_file_path("example.ts")
+            .with_file_source_code("const value = 1;");
+
+        insta::assert_snapshot!(print_diagnostic_to_string(&diagnostic));
+    }
+}

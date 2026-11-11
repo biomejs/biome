@@ -1,0 +1,65 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-setup-template.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+const props = defineProps(["name", "def"]);
+let count = 0;
+</script>
+
+<template>
+  <div>{{ name }}: {{ count }}</div>
+  <div>{{ label }}: {{ cnt }}</div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-setup-template.vue:9:11 lint/nursery/noVueUndeclaredProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × label isn't declared by this component.
+  
+     7 │ <template>
+     8 │   <div>{{ name }}: {{ count }}</div>
+   > 9 │   <div>{{ label }}: {{ cnt }}</div>
+       │           ^^^^^
+    10 │ </template>
+    11 │ 
+  
+  i Its value is always undefined.
+  
+  i This often means the name has a typo, or its declaration is missing.
+  
+  i Fix the name, or declare it in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup-template.vue:9:24 lint/nursery/noVueUndeclaredProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × cnt isn't declared by this component.
+  
+     7 │ <template>
+     8 │   <div>{{ name }}: {{ count }}</div>
+   > 9 │   <div>{{ label }}: {{ cnt }}</div>
+       │                        ^^^
+    10 │ </template>
+    11 │ 
+  
+  i Its value is always undefined.
+  
+  i This often means the name has a typo, or its declaration is missing.
+  
+  i Fix the name, or declare it in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

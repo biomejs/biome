@@ -1,0 +1,1215 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+map.has(key) ? map.get(anotherKey) : value;
+map.has(key) ? map.set(anotherKey, value) : value;
+map.has(key) ? value : map.get(anotherKey);
+!map.has(key) ? value : map.get(anotherKey);
+if (weakMap.has(key)) { weakMap.get(anotherKey); }
+if (map.has(key)) { const value = map.get(anotherKey); }
+if (map.has(key)) { map.set(anotherKey, value); }
+if (!map.has(key)) { const value = map.get(anotherKey); }
+if (!map.has(key)) { map.set(anotherKey, value); }
+if (map.has(key)) {} else { map.get(anotherKey); }
+if (!map.has(key)) {} else { map.get(anotherKey); }
+if (map.has(key)) map.get(anotherKey);
+if ((map.has(key))) { (map).get(anotherKey); }
+
+// Nested code that still runs because of the check
+if (map.has(key)) { for (const item of items) { map.get(anotherKey); } }
+map.has(key) ? (map.has(key) ? map.get(anotherKey) : value) : value;
+if (map.has(key)) { if (condition) { map.get(anotherKey); } }
+if (map.has(key)) { condition ? map.get(anotherKey) : value; }
+if (map.has(key)) { if (check(() => map.has(anotherKey))) { map.get(anotherKey); } }
+if (map.has(key)) { map.get(map.get(anotherKey)); }
+
+// Different keys
+if (map.has(key)) { const key = anotherKey, value = map.get(key); }
+if (map.has(object.key)) { const object = other, value = map.get(object.key); }
+if (map.has("key")) { map.get("anotherKey"); }
+if (map.has(1)) { map.get(2); }
+if (map.has(1)) { map.get("1"); }
+if (map.has(object.key)) { map.get(object.anotherKey); }
+if (map.has(items[0])) { map.get(items[1]); }
+if (this.map.has(this.key)) { this.map.get(this.anotherKey); }
+
+// Checks with other conditions
+if (condition && map.has(key)) { map.get(anotherKey); }
+while (map.has(key)) { map.get(anotherKey); }
+while (!map.has(key)) { map.set(anotherKey, value); }
+while (map.has(key)) { const x = map.get(anotherKey); }
+const a = map.has(key) && map.get(otherKey);
+if (!map.has(key) && map.get(otherKey)) {}
+const b = map.has(key) || map.get(otherKey);
+if (map.has(key)) { map.has(otherKey) || map.get(anotherKey); }
+
+// Assignments that don't replace the map
+if (map.has(key)) { use([object.value] = values, map.get(anotherKey)); }
+if (map.has(key)) { (count = 1, map.get(anotherKey)); }
+if (map.has(key)) { (count++, map.get(anotherKey)); }
+if (map.has(key)) { (map.size = 1, map.get(anotherKey)); }
+
+```
+
+# Diagnostics
+```
+invalid.js:2:24 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ map.has(key) ? map.get(anotherKey) : value;
+      │                        ^^^^^^^^^^
+    3 │ map.has(key) ? map.set(anotherKey, value) : value;
+    4 │ map.has(key) ? value : map.get(anotherKey);
+  
+  i The map is checked for this key.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ map.has(key) ? map.get(anotherKey) : value;
+      │         ^^^
+    3 │ map.has(key) ? map.set(anotherKey, value) : value;
+    4 │ map.has(key) ? value : map.get(anotherKey);
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:24 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This set() call uses a different key than the has() check before it.
+  
+    1 │ /* should generate diagnostics */
+    2 │ map.has(key) ? map.get(anotherKey) : value;
+  > 3 │ map.has(key) ? map.set(anotherKey, value) : value;
+      │                        ^^^^^^^^^^
+    4 │ map.has(key) ? value : map.get(anotherKey);
+    5 │ !map.has(key) ? value : map.get(anotherKey);
+  
+  i The map is checked for this key.
+  
+    1 │ /* should generate diagnostics */
+    2 │ map.has(key) ? map.get(anotherKey) : value;
+  > 3 │ map.has(key) ? map.set(anotherKey, value) : value;
+      │         ^^^
+    4 │ map.has(key) ? value : map.get(anotherKey);
+    5 │ !map.has(key) ? value : map.get(anotherKey);
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:32 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    2 │ map.has(key) ? map.get(anotherKey) : value;
+    3 │ map.has(key) ? map.set(anotherKey, value) : value;
+  > 4 │ map.has(key) ? value : map.get(anotherKey);
+      │                                ^^^^^^^^^^
+    5 │ !map.has(key) ? value : map.get(anotherKey);
+    6 │ if (weakMap.has(key)) { weakMap.get(anotherKey); }
+  
+  i The map is checked for this key.
+  
+    2 │ map.has(key) ? map.get(anotherKey) : value;
+    3 │ map.has(key) ? map.set(anotherKey, value) : value;
+  > 4 │ map.has(key) ? value : map.get(anotherKey);
+      │         ^^^
+    5 │ !map.has(key) ? value : map.get(anotherKey);
+    6 │ if (weakMap.has(key)) { weakMap.get(anotherKey); }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:33 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    3 │ map.has(key) ? map.set(anotherKey, value) : value;
+    4 │ map.has(key) ? value : map.get(anotherKey);
+  > 5 │ !map.has(key) ? value : map.get(anotherKey);
+      │                                 ^^^^^^^^^^
+    6 │ if (weakMap.has(key)) { weakMap.get(anotherKey); }
+    7 │ if (map.has(key)) { const value = map.get(anotherKey); }
+  
+  i The map is checked for this key.
+  
+    3 │ map.has(key) ? map.set(anotherKey, value) : value;
+    4 │ map.has(key) ? value : map.get(anotherKey);
+  > 5 │ !map.has(key) ? value : map.get(anotherKey);
+      │          ^^^
+    6 │ if (weakMap.has(key)) { weakMap.get(anotherKey); }
+    7 │ if (map.has(key)) { const value = map.get(anotherKey); }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:37 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    4 │ map.has(key) ? value : map.get(anotherKey);
+    5 │ !map.has(key) ? value : map.get(anotherKey);
+  > 6 │ if (weakMap.has(key)) { weakMap.get(anotherKey); }
+      │                                     ^^^^^^^^^^
+    7 │ if (map.has(key)) { const value = map.get(anotherKey); }
+    8 │ if (map.has(key)) { map.set(anotherKey, value); }
+  
+  i The map is checked for this key.
+  
+    4 │ map.has(key) ? value : map.get(anotherKey);
+    5 │ !map.has(key) ? value : map.get(anotherKey);
+  > 6 │ if (weakMap.has(key)) { weakMap.get(anotherKey); }
+      │                 ^^^
+    7 │ if (map.has(key)) { const value = map.get(anotherKey); }
+    8 │ if (map.has(key)) { map.set(anotherKey, value); }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:43 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    5 │ !map.has(key) ? value : map.get(anotherKey);
+    6 │ if (weakMap.has(key)) { weakMap.get(anotherKey); }
+  > 7 │ if (map.has(key)) { const value = map.get(anotherKey); }
+      │                                           ^^^^^^^^^^
+    8 │ if (map.has(key)) { map.set(anotherKey, value); }
+    9 │ if (!map.has(key)) { const value = map.get(anotherKey); }
+  
+  i The map is checked for this key.
+  
+    5 │ !map.has(key) ? value : map.get(anotherKey);
+    6 │ if (weakMap.has(key)) { weakMap.get(anotherKey); }
+  > 7 │ if (map.has(key)) { const value = map.get(anotherKey); }
+      │             ^^^
+    8 │ if (map.has(key)) { map.set(anotherKey, value); }
+    9 │ if (!map.has(key)) { const value = map.get(anotherKey); }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:29 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This set() call uses a different key than the has() check before it.
+  
+     6 │ if (weakMap.has(key)) { weakMap.get(anotherKey); }
+     7 │ if (map.has(key)) { const value = map.get(anotherKey); }
+   > 8 │ if (map.has(key)) { map.set(anotherKey, value); }
+       │                             ^^^^^^^^^^
+     9 │ if (!map.has(key)) { const value = map.get(anotherKey); }
+    10 │ if (!map.has(key)) { map.set(anotherKey, value); }
+  
+  i The map is checked for this key.
+  
+     6 │ if (weakMap.has(key)) { weakMap.get(anotherKey); }
+     7 │ if (map.has(key)) { const value = map.get(anotherKey); }
+   > 8 │ if (map.has(key)) { map.set(anotherKey, value); }
+       │             ^^^
+     9 │ if (!map.has(key)) { const value = map.get(anotherKey); }
+    10 │ if (!map.has(key)) { map.set(anotherKey, value); }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:44 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+     7 │ if (map.has(key)) { const value = map.get(anotherKey); }
+     8 │ if (map.has(key)) { map.set(anotherKey, value); }
+   > 9 │ if (!map.has(key)) { const value = map.get(anotherKey); }
+       │                                            ^^^^^^^^^^
+    10 │ if (!map.has(key)) { map.set(anotherKey, value); }
+    11 │ if (map.has(key)) {} else { map.get(anotherKey); }
+  
+  i The map is checked for this key.
+  
+     7 │ if (map.has(key)) { const value = map.get(anotherKey); }
+     8 │ if (map.has(key)) { map.set(anotherKey, value); }
+   > 9 │ if (!map.has(key)) { const value = map.get(anotherKey); }
+       │              ^^^
+    10 │ if (!map.has(key)) { map.set(anotherKey, value); }
+    11 │ if (map.has(key)) {} else { map.get(anotherKey); }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:30 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This set() call uses a different key than the has() check before it.
+  
+     8 │ if (map.has(key)) { map.set(anotherKey, value); }
+     9 │ if (!map.has(key)) { const value = map.get(anotherKey); }
+  > 10 │ if (!map.has(key)) { map.set(anotherKey, value); }
+       │                              ^^^^^^^^^^
+    11 │ if (map.has(key)) {} else { map.get(anotherKey); }
+    12 │ if (!map.has(key)) {} else { map.get(anotherKey); }
+  
+  i The map is checked for this key.
+  
+     8 │ if (map.has(key)) { map.set(anotherKey, value); }
+     9 │ if (!map.has(key)) { const value = map.get(anotherKey); }
+  > 10 │ if (!map.has(key)) { map.set(anotherKey, value); }
+       │              ^^^
+    11 │ if (map.has(key)) {} else { map.get(anotherKey); }
+    12 │ if (!map.has(key)) {} else { map.get(anotherKey); }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:37 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+     9 │ if (!map.has(key)) { const value = map.get(anotherKey); }
+    10 │ if (!map.has(key)) { map.set(anotherKey, value); }
+  > 11 │ if (map.has(key)) {} else { map.get(anotherKey); }
+       │                                     ^^^^^^^^^^
+    12 │ if (!map.has(key)) {} else { map.get(anotherKey); }
+    13 │ if (map.has(key)) map.get(anotherKey);
+  
+  i The map is checked for this key.
+  
+     9 │ if (!map.has(key)) { const value = map.get(anotherKey); }
+    10 │ if (!map.has(key)) { map.set(anotherKey, value); }
+  > 11 │ if (map.has(key)) {} else { map.get(anotherKey); }
+       │             ^^^
+    12 │ if (!map.has(key)) {} else { map.get(anotherKey); }
+    13 │ if (map.has(key)) map.get(anotherKey);
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:38 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    10 │ if (!map.has(key)) { map.set(anotherKey, value); }
+    11 │ if (map.has(key)) {} else { map.get(anotherKey); }
+  > 12 │ if (!map.has(key)) {} else { map.get(anotherKey); }
+       │                                      ^^^^^^^^^^
+    13 │ if (map.has(key)) map.get(anotherKey);
+    14 │ if ((map.has(key))) { (map).get(anotherKey); }
+  
+  i The map is checked for this key.
+  
+    10 │ if (!map.has(key)) { map.set(anotherKey, value); }
+    11 │ if (map.has(key)) {} else { map.get(anotherKey); }
+  > 12 │ if (!map.has(key)) {} else { map.get(anotherKey); }
+       │              ^^^
+    13 │ if (map.has(key)) map.get(anotherKey);
+    14 │ if ((map.has(key))) { (map).get(anotherKey); }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:27 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    11 │ if (map.has(key)) {} else { map.get(anotherKey); }
+    12 │ if (!map.has(key)) {} else { map.get(anotherKey); }
+  > 13 │ if (map.has(key)) map.get(anotherKey);
+       │                           ^^^^^^^^^^
+    14 │ if ((map.has(key))) { (map).get(anotherKey); }
+    15 │ 
+  
+  i The map is checked for this key.
+  
+    11 │ if (map.has(key)) {} else { map.get(anotherKey); }
+    12 │ if (!map.has(key)) {} else { map.get(anotherKey); }
+  > 13 │ if (map.has(key)) map.get(anotherKey);
+       │             ^^^
+    14 │ if ((map.has(key))) { (map).get(anotherKey); }
+    15 │ 
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:33 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    12 │ if (!map.has(key)) {} else { map.get(anotherKey); }
+    13 │ if (map.has(key)) map.get(anotherKey);
+  > 14 │ if ((map.has(key))) { (map).get(anotherKey); }
+       │                                 ^^^^^^^^^^
+    15 │ 
+    16 │ // Nested code that still runs because of the check
+  
+  i The map is checked for this key.
+  
+    12 │ if (!map.has(key)) {} else { map.get(anotherKey); }
+    13 │ if (map.has(key)) map.get(anotherKey);
+  > 14 │ if ((map.has(key))) { (map).get(anotherKey); }
+       │              ^^^
+    15 │ 
+    16 │ // Nested code that still runs because of the check
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:57 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    16 │ // Nested code that still runs because of the check
+  > 17 │ if (map.has(key)) { for (const item of items) { map.get(anotherKey); } }
+       │                                                         ^^^^^^^^^^
+    18 │ map.has(key) ? (map.has(key) ? map.get(anotherKey) : value) : value;
+    19 │ if (map.has(key)) { if (condition) { map.get(anotherKey); } }
+  
+  i The map is checked for this key.
+  
+    16 │ // Nested code that still runs because of the check
+  > 17 │ if (map.has(key)) { for (const item of items) { map.get(anotherKey); } }
+       │             ^^^
+    18 │ map.has(key) ? (map.has(key) ? map.get(anotherKey) : value) : value;
+    19 │ if (map.has(key)) { if (condition) { map.get(anotherKey); } }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:40 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    16 │ // Nested code that still runs because of the check
+    17 │ if (map.has(key)) { for (const item of items) { map.get(anotherKey); } }
+  > 18 │ map.has(key) ? (map.has(key) ? map.get(anotherKey) : value) : value;
+       │                                        ^^^^^^^^^^
+    19 │ if (map.has(key)) { if (condition) { map.get(anotherKey); } }
+    20 │ if (map.has(key)) { condition ? map.get(anotherKey) : value; }
+  
+  i The map is checked for this key.
+  
+    16 │ // Nested code that still runs because of the check
+    17 │ if (map.has(key)) { for (const item of items) { map.get(anotherKey); } }
+  > 18 │ map.has(key) ? (map.has(key) ? map.get(anotherKey) : value) : value;
+       │                         ^^^
+    19 │ if (map.has(key)) { if (condition) { map.get(anotherKey); } }
+    20 │ if (map.has(key)) { condition ? map.get(anotherKey) : value; }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:46 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    17 │ if (map.has(key)) { for (const item of items) { map.get(anotherKey); } }
+    18 │ map.has(key) ? (map.has(key) ? map.get(anotherKey) : value) : value;
+  > 19 │ if (map.has(key)) { if (condition) { map.get(anotherKey); } }
+       │                                              ^^^^^^^^^^
+    20 │ if (map.has(key)) { condition ? map.get(anotherKey) : value; }
+    21 │ if (map.has(key)) { if (check(() => map.has(anotherKey))) { map.get(anotherKey); } }
+  
+  i The map is checked for this key.
+  
+    17 │ if (map.has(key)) { for (const item of items) { map.get(anotherKey); } }
+    18 │ map.has(key) ? (map.has(key) ? map.get(anotherKey) : value) : value;
+  > 19 │ if (map.has(key)) { if (condition) { map.get(anotherKey); } }
+       │             ^^^
+    20 │ if (map.has(key)) { condition ? map.get(anotherKey) : value; }
+    21 │ if (map.has(key)) { if (check(() => map.has(anotherKey))) { map.get(anotherKey); } }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:41 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    18 │ map.has(key) ? (map.has(key) ? map.get(anotherKey) : value) : value;
+    19 │ if (map.has(key)) { if (condition) { map.get(anotherKey); } }
+  > 20 │ if (map.has(key)) { condition ? map.get(anotherKey) : value; }
+       │                                         ^^^^^^^^^^
+    21 │ if (map.has(key)) { if (check(() => map.has(anotherKey))) { map.get(anotherKey); } }
+    22 │ if (map.has(key)) { map.get(map.get(anotherKey)); }
+  
+  i The map is checked for this key.
+  
+    18 │ map.has(key) ? (map.has(key) ? map.get(anotherKey) : value) : value;
+    19 │ if (map.has(key)) { if (condition) { map.get(anotherKey); } }
+  > 20 │ if (map.has(key)) { condition ? map.get(anotherKey) : value; }
+       │             ^^^
+    21 │ if (map.has(key)) { if (check(() => map.has(anotherKey))) { map.get(anotherKey); } }
+    22 │ if (map.has(key)) { map.get(map.get(anotherKey)); }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:69 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    19 │ if (map.has(key)) { if (condition) { map.get(anotherKey); } }
+    20 │ if (map.has(key)) { condition ? map.get(anotherKey) : value; }
+  > 21 │ if (map.has(key)) { if (check(() => map.has(anotherKey))) { map.get(anotherKey); } }
+       │                                                                     ^^^^^^^^^^
+    22 │ if (map.has(key)) { map.get(map.get(anotherKey)); }
+    23 │ 
+  
+  i The map is checked for this key.
+  
+    19 │ if (map.has(key)) { if (condition) { map.get(anotherKey); } }
+    20 │ if (map.has(key)) { condition ? map.get(anotherKey) : value; }
+  > 21 │ if (map.has(key)) { if (check(() => map.has(anotherKey))) { map.get(anotherKey); } }
+       │             ^^^
+    22 │ if (map.has(key)) { map.get(map.get(anotherKey)); }
+    23 │ 
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:37 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    20 │ if (map.has(key)) { condition ? map.get(anotherKey) : value; }
+    21 │ if (map.has(key)) { if (check(() => map.has(anotherKey))) { map.get(anotherKey); } }
+  > 22 │ if (map.has(key)) { map.get(map.get(anotherKey)); }
+       │                                     ^^^^^^^^^^
+    23 │ 
+    24 │ // Different keys
+  
+  i The map is checked for this key.
+  
+    20 │ if (map.has(key)) { condition ? map.get(anotherKey) : value; }
+    21 │ if (map.has(key)) { if (check(() => map.has(anotherKey))) { map.get(anotherKey); } }
+  > 22 │ if (map.has(key)) { map.get(map.get(anotherKey)); }
+       │             ^^^
+    23 │ 
+    24 │ // Different keys
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:61 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    24 │ // Different keys
+  > 25 │ if (map.has(key)) { const key = anotherKey, value = map.get(key); }
+       │                                                             ^^^
+    26 │ if (map.has(object.key)) { const object = other, value = map.get(object.key); }
+    27 │ if (map.has("key")) { map.get("anotherKey"); }
+  
+  i The map is checked for this key.
+  
+    24 │ // Different keys
+  > 25 │ if (map.has(key)) { const key = anotherKey, value = map.get(key); }
+       │             ^^^
+    26 │ if (map.has(object.key)) { const object = other, value = map.get(object.key); }
+    27 │ if (map.has("key")) { map.get("anotherKey"); }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:66 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    24 │ // Different keys
+    25 │ if (map.has(key)) { const key = anotherKey, value = map.get(key); }
+  > 26 │ if (map.has(object.key)) { const object = other, value = map.get(object.key); }
+       │                                                                  ^^^^^^^^^^
+    27 │ if (map.has("key")) { map.get("anotherKey"); }
+    28 │ if (map.has(1)) { map.get(2); }
+  
+  i The map is checked for this key.
+  
+    24 │ // Different keys
+    25 │ if (map.has(key)) { const key = anotherKey, value = map.get(key); }
+  > 26 │ if (map.has(object.key)) { const object = other, value = map.get(object.key); }
+       │             ^^^^^^^^^^
+    27 │ if (map.has("key")) { map.get("anotherKey"); }
+    28 │ if (map.has(1)) { map.get(2); }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:31 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    25 │ if (map.has(key)) { const key = anotherKey, value = map.get(key); }
+    26 │ if (map.has(object.key)) { const object = other, value = map.get(object.key); }
+  > 27 │ if (map.has("key")) { map.get("anotherKey"); }
+       │                               ^^^^^^^^^^^^
+    28 │ if (map.has(1)) { map.get(2); }
+    29 │ if (map.has(1)) { map.get("1"); }
+  
+  i The map is checked for this key.
+  
+    25 │ if (map.has(key)) { const key = anotherKey, value = map.get(key); }
+    26 │ if (map.has(object.key)) { const object = other, value = map.get(object.key); }
+  > 27 │ if (map.has("key")) { map.get("anotherKey"); }
+       │             ^^^^^
+    28 │ if (map.has(1)) { map.get(2); }
+    29 │ if (map.has(1)) { map.get("1"); }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:27 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    26 │ if (map.has(object.key)) { const object = other, value = map.get(object.key); }
+    27 │ if (map.has("key")) { map.get("anotherKey"); }
+  > 28 │ if (map.has(1)) { map.get(2); }
+       │                           ^
+    29 │ if (map.has(1)) { map.get("1"); }
+    30 │ if (map.has(object.key)) { map.get(object.anotherKey); }
+  
+  i The map is checked for this key.
+  
+    26 │ if (map.has(object.key)) { const object = other, value = map.get(object.key); }
+    27 │ if (map.has("key")) { map.get("anotherKey"); }
+  > 28 │ if (map.has(1)) { map.get(2); }
+       │             ^
+    29 │ if (map.has(1)) { map.get("1"); }
+    30 │ if (map.has(object.key)) { map.get(object.anotherKey); }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:27 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    27 │ if (map.has("key")) { map.get("anotherKey"); }
+    28 │ if (map.has(1)) { map.get(2); }
+  > 29 │ if (map.has(1)) { map.get("1"); }
+       │                           ^^^
+    30 │ if (map.has(object.key)) { map.get(object.anotherKey); }
+    31 │ if (map.has(items[0])) { map.get(items[1]); }
+  
+  i The map is checked for this key.
+  
+    27 │ if (map.has("key")) { map.get("anotherKey"); }
+    28 │ if (map.has(1)) { map.get(2); }
+  > 29 │ if (map.has(1)) { map.get("1"); }
+       │             ^
+    30 │ if (map.has(object.key)) { map.get(object.anotherKey); }
+    31 │ if (map.has(items[0])) { map.get(items[1]); }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:30:36 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    28 │ if (map.has(1)) { map.get(2); }
+    29 │ if (map.has(1)) { map.get("1"); }
+  > 30 │ if (map.has(object.key)) { map.get(object.anotherKey); }
+       │                                    ^^^^^^^^^^^^^^^^^
+    31 │ if (map.has(items[0])) { map.get(items[1]); }
+    32 │ if (this.map.has(this.key)) { this.map.get(this.anotherKey); }
+  
+  i The map is checked for this key.
+  
+    28 │ if (map.has(1)) { map.get(2); }
+    29 │ if (map.has(1)) { map.get("1"); }
+  > 30 │ if (map.has(object.key)) { map.get(object.anotherKey); }
+       │             ^^^^^^^^^^
+    31 │ if (map.has(items[0])) { map.get(items[1]); }
+    32 │ if (this.map.has(this.key)) { this.map.get(this.anotherKey); }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:34 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    29 │ if (map.has(1)) { map.get("1"); }
+    30 │ if (map.has(object.key)) { map.get(object.anotherKey); }
+  > 31 │ if (map.has(items[0])) { map.get(items[1]); }
+       │                                  ^^^^^^^^
+    32 │ if (this.map.has(this.key)) { this.map.get(this.anotherKey); }
+    33 │ 
+  
+  i The map is checked for this key.
+  
+    29 │ if (map.has(1)) { map.get("1"); }
+    30 │ if (map.has(object.key)) { map.get(object.anotherKey); }
+  > 31 │ if (map.has(items[0])) { map.get(items[1]); }
+       │             ^^^^^^^^
+    32 │ if (this.map.has(this.key)) { this.map.get(this.anotherKey); }
+    33 │ 
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:44 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    30 │ if (map.has(object.key)) { map.get(object.anotherKey); }
+    31 │ if (map.has(items[0])) { map.get(items[1]); }
+  > 32 │ if (this.map.has(this.key)) { this.map.get(this.anotherKey); }
+       │                                            ^^^^^^^^^^^^^^^
+    33 │ 
+    34 │ // Checks with other conditions
+  
+  i The map is checked for this key.
+  
+    30 │ if (map.has(object.key)) { map.get(object.anotherKey); }
+    31 │ if (map.has(items[0])) { map.get(items[1]); }
+  > 32 │ if (this.map.has(this.key)) { this.map.get(this.anotherKey); }
+       │                  ^^^^^^^^
+    33 │ 
+    34 │ // Checks with other conditions
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:42 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    34 │ // Checks with other conditions
+  > 35 │ if (condition && map.has(key)) { map.get(anotherKey); }
+       │                                          ^^^^^^^^^^
+    36 │ while (map.has(key)) { map.get(anotherKey); }
+    37 │ while (!map.has(key)) { map.set(anotherKey, value); }
+  
+  i The map is checked for this key.
+  
+    34 │ // Checks with other conditions
+  > 35 │ if (condition && map.has(key)) { map.get(anotherKey); }
+       │                          ^^^
+    36 │ while (map.has(key)) { map.get(anotherKey); }
+    37 │ while (!map.has(key)) { map.set(anotherKey, value); }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:36:32 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    34 │ // Checks with other conditions
+    35 │ if (condition && map.has(key)) { map.get(anotherKey); }
+  > 36 │ while (map.has(key)) { map.get(anotherKey); }
+       │                                ^^^^^^^^^^
+    37 │ while (!map.has(key)) { map.set(anotherKey, value); }
+    38 │ while (map.has(key)) { const x = map.get(anotherKey); }
+  
+  i The map is checked for this key.
+  
+    34 │ // Checks with other conditions
+    35 │ if (condition && map.has(key)) { map.get(anotherKey); }
+  > 36 │ while (map.has(key)) { map.get(anotherKey); }
+       │                ^^^
+    37 │ while (!map.has(key)) { map.set(anotherKey, value); }
+    38 │ while (map.has(key)) { const x = map.get(anotherKey); }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:37:33 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This set() call uses a different key than the has() check before it.
+  
+    35 │ if (condition && map.has(key)) { map.get(anotherKey); }
+    36 │ while (map.has(key)) { map.get(anotherKey); }
+  > 37 │ while (!map.has(key)) { map.set(anotherKey, value); }
+       │                                 ^^^^^^^^^^
+    38 │ while (map.has(key)) { const x = map.get(anotherKey); }
+    39 │ const a = map.has(key) && map.get(otherKey);
+  
+  i The map is checked for this key.
+  
+    35 │ if (condition && map.has(key)) { map.get(anotherKey); }
+    36 │ while (map.has(key)) { map.get(anotherKey); }
+  > 37 │ while (!map.has(key)) { map.set(anotherKey, value); }
+       │                 ^^^
+    38 │ while (map.has(key)) { const x = map.get(anotherKey); }
+    39 │ const a = map.has(key) && map.get(otherKey);
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:38:42 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    36 │ while (map.has(key)) { map.get(anotherKey); }
+    37 │ while (!map.has(key)) { map.set(anotherKey, value); }
+  > 38 │ while (map.has(key)) { const x = map.get(anotherKey); }
+       │                                          ^^^^^^^^^^
+    39 │ const a = map.has(key) && map.get(otherKey);
+    40 │ if (!map.has(key) && map.get(otherKey)) {}
+  
+  i The map is checked for this key.
+  
+    36 │ while (map.has(key)) { map.get(anotherKey); }
+    37 │ while (!map.has(key)) { map.set(anotherKey, value); }
+  > 38 │ while (map.has(key)) { const x = map.get(anotherKey); }
+       │                ^^^
+    39 │ const a = map.has(key) && map.get(otherKey);
+    40 │ if (!map.has(key) && map.get(otherKey)) {}
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:35 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    37 │ while (!map.has(key)) { map.set(anotherKey, value); }
+    38 │ while (map.has(key)) { const x = map.get(anotherKey); }
+  > 39 │ const a = map.has(key) && map.get(otherKey);
+       │                                   ^^^^^^^^
+    40 │ if (!map.has(key) && map.get(otherKey)) {}
+    41 │ const b = map.has(key) || map.get(otherKey);
+  
+  i The map is checked for this key.
+  
+    37 │ while (!map.has(key)) { map.set(anotherKey, value); }
+    38 │ while (map.has(key)) { const x = map.get(anotherKey); }
+  > 39 │ const a = map.has(key) && map.get(otherKey);
+       │                   ^^^
+    40 │ if (!map.has(key) && map.get(otherKey)) {}
+    41 │ const b = map.has(key) || map.get(otherKey);
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:40:30 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    38 │ while (map.has(key)) { const x = map.get(anotherKey); }
+    39 │ const a = map.has(key) && map.get(otherKey);
+  > 40 │ if (!map.has(key) && map.get(otherKey)) {}
+       │                              ^^^^^^^^
+    41 │ const b = map.has(key) || map.get(otherKey);
+    42 │ if (map.has(key)) { map.has(otherKey) || map.get(anotherKey); }
+  
+  i The map is checked for this key.
+  
+    38 │ while (map.has(key)) { const x = map.get(anotherKey); }
+    39 │ const a = map.has(key) && map.get(otherKey);
+  > 40 │ if (!map.has(key) && map.get(otherKey)) {}
+       │              ^^^
+    41 │ const b = map.has(key) || map.get(otherKey);
+    42 │ if (map.has(key)) { map.has(otherKey) || map.get(anotherKey); }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:35 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    39 │ const a = map.has(key) && map.get(otherKey);
+    40 │ if (!map.has(key) && map.get(otherKey)) {}
+  > 41 │ const b = map.has(key) || map.get(otherKey);
+       │                                   ^^^^^^^^
+    42 │ if (map.has(key)) { map.has(otherKey) || map.get(anotherKey); }
+    43 │ 
+  
+  i The map is checked for this key.
+  
+    39 │ const a = map.has(key) && map.get(otherKey);
+    40 │ if (!map.has(key) && map.get(otherKey)) {}
+  > 41 │ const b = map.has(key) || map.get(otherKey);
+       │                   ^^^
+    42 │ if (map.has(key)) { map.has(otherKey) || map.get(anotherKey); }
+    43 │ 
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:42:50 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    40 │ if (!map.has(key) && map.get(otherKey)) {}
+    41 │ const b = map.has(key) || map.get(otherKey);
+  > 42 │ if (map.has(key)) { map.has(otherKey) || map.get(anotherKey); }
+       │                                                  ^^^^^^^^^^
+    43 │ 
+    44 │ // Assignments that don't replace the map
+  
+  i The map is checked for this key.
+  
+    40 │ if (!map.has(key) && map.get(otherKey)) {}
+    41 │ const b = map.has(key) || map.get(otherKey);
+  > 42 │ if (map.has(key)) { map.has(otherKey) || map.get(anotherKey); }
+       │                             ^^^^^^^^
+    43 │ 
+    44 │ // Assignments that don't replace the map
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:45:58 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    44 │ // Assignments that don't replace the map
+  > 45 │ if (map.has(key)) { use([object.value] = values, map.get(anotherKey)); }
+       │                                                          ^^^^^^^^^^
+    46 │ if (map.has(key)) { (count = 1, map.get(anotherKey)); }
+    47 │ if (map.has(key)) { (count++, map.get(anotherKey)); }
+  
+  i The map is checked for this key.
+  
+    44 │ // Assignments that don't replace the map
+  > 45 │ if (map.has(key)) { use([object.value] = values, map.get(anotherKey)); }
+       │             ^^^
+    46 │ if (map.has(key)) { (count = 1, map.get(anotherKey)); }
+    47 │ if (map.has(key)) { (count++, map.get(anotherKey)); }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:46:41 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    44 │ // Assignments that don't replace the map
+    45 │ if (map.has(key)) { use([object.value] = values, map.get(anotherKey)); }
+  > 46 │ if (map.has(key)) { (count = 1, map.get(anotherKey)); }
+       │                                         ^^^^^^^^^^
+    47 │ if (map.has(key)) { (count++, map.get(anotherKey)); }
+    48 │ if (map.has(key)) { (map.size = 1, map.get(anotherKey)); }
+  
+  i The map is checked for this key.
+  
+    44 │ // Assignments that don't replace the map
+    45 │ if (map.has(key)) { use([object.value] = values, map.get(anotherKey)); }
+  > 46 │ if (map.has(key)) { (count = 1, map.get(anotherKey)); }
+       │             ^^^
+    47 │ if (map.has(key)) { (count++, map.get(anotherKey)); }
+    48 │ if (map.has(key)) { (map.size = 1, map.get(anotherKey)); }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:47:39 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    45 │ if (map.has(key)) { use([object.value] = values, map.get(anotherKey)); }
+    46 │ if (map.has(key)) { (count = 1, map.get(anotherKey)); }
+  > 47 │ if (map.has(key)) { (count++, map.get(anotherKey)); }
+       │                                       ^^^^^^^^^^
+    48 │ if (map.has(key)) { (map.size = 1, map.get(anotherKey)); }
+    49 │ 
+  
+  i The map is checked for this key.
+  
+    45 │ if (map.has(key)) { use([object.value] = values, map.get(anotherKey)); }
+    46 │ if (map.has(key)) { (count = 1, map.get(anotherKey)); }
+  > 47 │ if (map.has(key)) { (count++, map.get(anotherKey)); }
+       │             ^^^
+    48 │ if (map.has(key)) { (map.size = 1, map.get(anotherKey)); }
+    49 │ 
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:48:44 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    46 │ if (map.has(key)) { (count = 1, map.get(anotherKey)); }
+    47 │ if (map.has(key)) { (count++, map.get(anotherKey)); }
+  > 48 │ if (map.has(key)) { (map.size = 1, map.get(anotherKey)); }
+       │                                            ^^^^^^^^^^
+    49 │ 
+  
+  i The map is checked for this key.
+  
+    46 │ if (map.has(key)) { (count = 1, map.get(anotherKey)); }
+    47 │ if (map.has(key)) { (count++, map.get(anotherKey)); }
+  > 48 │ if (map.has(key)) { (map.size = 1, map.get(anotherKey)); }
+       │             ^^^
+    49 │ 
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

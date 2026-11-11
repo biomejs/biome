@@ -1,5 +1,6 @@
 use crate::bindings::EmbeddedBinding;
-use biome_db::ParsedSource;
+use biome_db::Source;
+use biome_parser::db::SourceExt;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsModuleItem, AnyJsRoot, JsFunctionDeclaration, JsIdentifierAssignment,
     JsIdentifierBinding, JsImport, JsSyntaxKind, JsVariableDeclarator, inner_string_text,
@@ -275,7 +276,7 @@ fn host_offset(parse: &AnyParse, content_offset: TextSize) -> TextSize {
 }
 
 #[salsa::tracked(returns(ref))]
-fn astro_data_from_source(db: &dyn LanguageDb, file: ParsedSource) -> AstroData {
+fn astro_data_from_source(db: &dyn LanguageDb, file: Source) -> AstroData {
     collect_astro_data(file.snippets(db).iter().filter_map(|snippet| {
         Some((
             snippet.parsed(db),

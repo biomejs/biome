@@ -1,0 +1,88 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```js
+doubled: number = item * 2
+
+```
+
+
+## AST
+
+```
+JsSvelteLegacyConstRoot {
+    declarator: JsBogus {
+        items: [
+            JsIdentifierBinding {
+                name_token: IDENT@0..7 "doubled" [] [],
+            },
+            JsBogus {
+                items: [
+                    COLON@7..9 ":" [] [Whitespace(" ")],
+                    TsNumberType {
+                        number_token: NUMBER_KW@9..16 "number" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            JsInitializerClause {
+                eq_token: EQ@16..18 "=" [] [Whitespace(" ")],
+                expression: JsBinaryExpression {
+                    left: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@18..23 "item" [] [Whitespace(" ")],
+                        },
+                    },
+                    operator_token: STAR@23..25 "*" [] [Whitespace(" ")],
+                    right: JsNumberLiteralExpression {
+                        value_token: JS_NUMBER_LITERAL@25..26 "2" [] [],
+                    },
+                },
+            },
+        ],
+    },
+    eof_token: EOF@26..27 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SVELTE_LEGACY_CONST_ROOT@0..27
+  0: JS_BOGUS@0..26
+    0: JS_IDENTIFIER_BINDING@0..7
+      0: IDENT@0..7 "doubled" [] []
+    1: JS_BOGUS@7..16
+      0: COLON@7..9 ":" [] [Whitespace(" ")]
+      1: TS_NUMBER_TYPE@9..16
+        0: NUMBER_KW@9..16 "number" [] [Whitespace(" ")]
+    2: JS_INITIALIZER_CLAUSE@16..26
+      0: EQ@16..18 "=" [] [Whitespace(" ")]
+      1: JS_BINARY_EXPRESSION@18..26
+        0: JS_IDENTIFIER_EXPRESSION@18..23
+          0: JS_REFERENCE_IDENTIFIER@18..23
+            0: IDENT@18..23 "item" [] [Whitespace(" ")]
+        1: STAR@23..25 "*" [] [Whitespace(" ")]
+        2: JS_NUMBER_LITERAL_EXPRESSION@25..26
+          0: JS_NUMBER_LITERAL@25..26 "2" [] []
+  1: EOF@26..27 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+typed.svelte_const.js:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × type annotation are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.
+  
+  > 1 │ doubled: number = item * 2
+      │        ^^^^^^^^
+    2 │ 
+  
+  i TypeScript only syntax
+  
+```

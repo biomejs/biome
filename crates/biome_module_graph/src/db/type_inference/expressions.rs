@@ -1581,6 +1581,9 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredLiteral::Template(_) => {}
             }
         }
+        if member == InferredTypeData::Number {
+            return self.resolve_element_type_at_unknown_index(object);
+        }
         None
     }
 
@@ -2197,6 +2200,28 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     /// Resolves the type held at a fixed index of `subject`.
     ///
+    /// See [`Self::resolve_element_type`] for how unions contribute.
+    fn resolve_element_type_at_index(
+        &mut self,
+        subject: InferredTypeData<'db>,
+        index: usize,
+    ) -> Option<InferredTypeData<'db>> {
+        self.resolve_element_type(subject, Some(index))
+    }
+
+    /// Resolves the type read by indexing `subject` with a `number` whose value
+    /// is not known, such as `items[i]`. Every element of a tuple can be read,
+    /// and the index may be out of bounds, so the result includes `undefined`.
+    fn resolve_element_type_at_unknown_index(
+        &mut self,
+        subject: InferredTypeData<'db>,
+    ) -> Option<InferredTypeData<'db>> {
+        self.resolve_element_type(subject, None)
+    }
+
+    /// Resolves the type held at `index` of `subject`, or at any index when
+    /// `index` is `None`.
+    ///
     /// Each member of a union contributes the type it holds at that index, and
     /// the contributions are collected into a union. A member that holds
     /// nothing there, which includes `null` and `undefined`, contributes
@@ -2211,10 +2236,10 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// The result is `None` when nothing contributes. Nesting deeper than the
     /// work limit yields `Unknown`, because the unvisited members may hold any
     /// type.
-    fn resolve_element_type_at_index(
+    fn resolve_element_type(
         &mut self,
         subject: InferredTypeData<'db>,
-        index: usize,
+        index: Option<usize>,
     ) -> Option<InferredTypeData<'db>> {
         let mut seen = FxHashSet::default();
         let mut pending = Vec::from([subject]);
@@ -2236,15 +2261,23 @@ impl<'db> ResolutionCtx<'db, '_> {
             remaining_steps -= 1;
 
             match subject {
-                InferredTypeData::Tuple(tuple) => {
-                    if let Some(element) = tuple.elements(self.db).get(index) {
-                        let element_ty = self.optional_element_type(
-                            element.ty,
-                            element.is_optional || element.is_rest,
-                        );
-                        types.push(element_ty);
+                InferredTypeData::Tuple(tuple) => match index {
+                    Some(index) => {
+                        if let Some(element) = tuple.elements(self.db).get(index) {
+                            let element_ty = self.optional_element_type(
+                                element.ty,
+                                element.is_optional || element.is_rest,
+                            );
+                            types.push(element_ty);
+                        }
                     }
-                }
+                    None => {
+                        for element in tuple.elements(self.db) {
+                            let element_ty = self.optional_element_type(element.ty, true);
+                            types.push(element_ty);
+                        }
+                    }
+                },
                 InferredTypeData::InstanceOf(instance)
                     if self
                         .resolve_inferred_type(instance.ty(self.db))
@@ -2550,18 +2583,86 @@ impl<'db> ResolutionCtx<'db, '_> {
         InferredTypeData::object_from_members(self.db, members)
     }
 
+    /// Returns the type of the values that `for...of` produces from `subject`.
     fn resolve_iterable_value_type(
         &mut self,
         subject: InferredTypeData<'db>,
     ) -> Option<InferredTypeData<'db>> {
         let subject = self.resolve_inferred_type(subject);
-        let InferredTypeData::InstanceOf(instance) = subject else {
-            return None;
+        if let InferredTypeData::InstanceOf(instance) = subject
+            && self
+                .resolve_inferred_type(instance.ty(self.db))
+                .is_array_class(self.db)
+        {
+            return instance.type_parameters(self.db).first().copied();
+        }
+        self.resolve_iterator_protocol_value_type(subject)
+    }
+
+    /// Follows the iteration protocol, `subject[Symbol.iterator]().next()`, and
+    /// returns the `value` of the results that are not marked `done: true`.
+    fn resolve_iterator_protocol_value_type(
+        &mut self,
+        subject: InferredTypeData<'db>,
+    ) -> Option<InferredTypeData<'db>> {
+        let symbol = biome_js_type_info::interned_types::well_known_symbol_type("iterator")?;
+        let iterator_method = self.resolve_computed_member_expression(subject, symbol)?;
+        let iterator = self.resolve_inferred_call_expression(iterator_method, &[]);
+        let next = self.resolve_static_member_expression(iterator, "next")?;
+        let result = self.resolve_inferred_call_expression(next, &[]);
+        let result = self.expand_generic_alias_instance(result);
+        let results = if let InferredTypeData::Union(union) = result {
+            union.types(self.db).to_vec()
+        } else {
+            Vec::from([result])
         };
-        self.resolve_inferred_type(instance.ty(self.db))
-            .is_array_class(self.db)
-            .then(|| instance.type_parameters(self.db).first().copied())
-            .flatten()
+
+        let mut values = Vec::new();
+        for result in results {
+            let done = self
+                .resolve_static_member_expression(result, "done")
+                .map(|done| self.resolve_inferred_type(done));
+            if let Some(InferredTypeData::Literal(literal)) = done
+                && matches!(literal.literal(self.db), InferredLiteral::Boolean(done) if done.as_bool())
+            {
+                continue;
+            }
+            values.push(self.resolve_static_member_expression(result, "value")?);
+        }
+        match <[_; 1]>::try_from(values) {
+            Ok([value]) => Some(value),
+            Err(values) if values.is_empty() => None,
+            Err(values) => Some(InferredTypeData::union_from_types(self.db, values)),
+        }
+    }
+
+    /// Expands an instance of a generic type alias, such as
+    /// `IteratorResult<T, TReturn>`, into the aliased type with the instance's
+    /// type arguments substituted. Other types are returned resolved.
+    fn expand_generic_alias_instance(
+        &mut self,
+        ty: InferredTypeData<'db>,
+    ) -> InferredTypeData<'db> {
+        let ty = self.resolve_inferred_type(ty);
+        let InferredTypeData::InstanceOf(instance) = ty else {
+            return ty;
+        };
+        let alias = self.resolve_inferred_type(instance.ty(self.db));
+        let InferredTypeData::InstanceOf(alias_instance) = alias else {
+            return ty;
+        };
+        if alias_instance.type_parameters(self.db).is_empty() {
+            return ty;
+        }
+        let substitutions = super::lookup::substitutions_for_instance(
+            self.db,
+            alias,
+            instance.type_parameters(self.db),
+            &[],
+        );
+        let expanded =
+            super::lookup::apply_substitutions(self.db, alias_instance.ty(self.db), &substitutions);
+        self.resolve_inferred_type(expanded)
     }
 
     fn optional_element_type(

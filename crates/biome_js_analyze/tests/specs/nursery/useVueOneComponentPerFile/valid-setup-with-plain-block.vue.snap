@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: valid-setup-with-plain-block.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+export default { inheritAttrs: false };
+</script>
+
+<script setup>
+import { ref } from "vue";
+const count = ref(0);
+</script>
+
+```

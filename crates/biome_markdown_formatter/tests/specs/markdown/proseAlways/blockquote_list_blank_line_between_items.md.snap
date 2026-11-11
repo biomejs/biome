@@ -1,0 +1,47 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/proseAlways/blockquote_list_blank_line_between_items.md
+---
+
+# Input
+
+```md
+> - one
+> - two
+>
+> - three
+
+> > - one
+> >
+> > - two
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "formatter": {
+      "proseWrap": "always",
+      "lineWidth": 40,
+      "indentStyle": "space"
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+> - one
+> - two
+>
+> - three
+
+> > - one
+> >
+> > - two
+
+```

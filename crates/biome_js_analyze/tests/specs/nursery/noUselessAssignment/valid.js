@@ -416,11 +416,3 @@ function nestedAssignment() {
 	x = (x = 1) + 1;
 	f(x);
 }
-
-// The graph doesn't evaluate destructuring patterns of declarations, so their variables are ignored.
-function destructuringDefaultWrite() {
-	const obj = { a: 1 };
-	let { a, b = (a = 2) } = obj;
-	a = 3;
-	console.log(a, b);
-}

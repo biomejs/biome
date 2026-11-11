@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-template-scopes.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <div v-on="() => {
+    function click ($listeners) {
+      fn(foo.$listeners)
+      fn($listeners)
+    }
+  }" />
+  <VueComp>
+    <template v-slot="{ $listeners }">
+      <div v-on="$listeners" />
+    </template>
+  </VueComp>
+</template>
+
+```

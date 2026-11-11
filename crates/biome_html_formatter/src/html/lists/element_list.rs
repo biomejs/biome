@@ -207,7 +207,7 @@ use biome_html_syntax::{
     HtmlClosingElementFields, HtmlElement, HtmlElementList, HtmlRoot, HtmlSyntaxKind,
     HtmlSyntaxToken,
 };
-use biome_rowan::{AstNode, NodeOrToken};
+use biome_rowan::AstNode;
 use biome_suppression::SuppressionKind;
 
 #[derive(Debug, Clone, Default)]
@@ -1221,16 +1221,12 @@ impl SvelteBlockBoundary {
             return None;
         }
 
-        let (token, empty_list_preceding_token) = match list.syntax().last_token() {
-            Some(last_token) => (last_token.next_token()?, None),
-            None => {
-                let preceding_token = match list.syntax().prev_sibling_or_token()? {
-                    NodeOrToken::Node(node) => node.last_token()?,
-                    NodeOrToken::Token(token) => token,
-                };
-                (preceding_token.next_token()?, Some(preceding_token))
-            }
+        let empty_list_preceding_token = if list.syntax().first_token().is_none() {
+            list.syntax().prev_token()
+        } else {
+            None
         };
+        let token = list.syntax().next_token()?;
 
         matches!(
             token.kind(),

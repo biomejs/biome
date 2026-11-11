@@ -2,7 +2,7 @@ use std::fmt::{Debug, Formatter};
 use std::ops::DerefMut;
 use std::sync::Arc;
 
-use boa_engine::{JsNativeError, JsResult};
+use boa_engine::{JsError, JsNativeError, JsResult, JsValue};
 use camino::{Utf8Path, Utf8PathBuf};
 
 use biome_analyze::{
@@ -10,10 +10,15 @@ use biome_analyze::{
     ServiceBag,
 };
 use biome_console::markup;
-use biome_diagnostics::category;
+use biome_diagnostics::{Severity, category};
+use biome_grit_patterns::{
+    CompilePatternOptions, GritQuery, GritTargetFile, GritTargetLanguage, GritTargetLanguageNode,
+    compile_pattern_with_options,
+};
 use biome_js_runtime::{JsExecContext, JsPluginRule};
-use biome_js_syntax::JsSyntaxNode;
+use biome_js_syntax::{JsSyntaxElement, JsSyntaxNode};
 use biome_languages::JsFileSource;
+use biome_parser::{AnyParse, NodeParse};
 use biome_resolver::FsWithResolverProxy;
 use biome_rowan::{AnySyntaxNode, RawSyntaxKind, SyntaxKind};
 use biome_text_size::TextRange;
@@ -26,21 +31,83 @@ use crate::thread_local::ThreadLocalCell;
 /// These values can't be shared with another threads.
 struct LoadedPlugin {
     ctx: JsExecContext,
-    rules: Vec<JsPluginRule>,
+    rules: Vec<LoadedRule>,
 }
 
-fn load_plugin(fs: Arc<dyn FsWithResolverProxy>, path: &Utf8Path) -> JsResult<LoadedPlugin> {
+struct LoadedRule {
+    rule: JsPluginRule,
+    grit: Option<GritQuery>,
+}
+
+fn load_plugin(
+    fs: Arc<dyn FsWithResolverProxy>,
+    path: &Utf8Path,
+) -> Result<LoadedPlugin, PluginDiagnostic> {
     let mut ctx = JsExecContext::new(fs)?;
     let module = ctx.import_module(path)?;
     let rules = ctx.load_rules(&module)?;
 
     if rules.is_empty() {
-        return Err(JsNativeError::typ()
-            .with_message("The plugin must export at least one rule created with defineRule()")
-            .into());
+        return Err(JsError::from(
+            JsNativeError::typ()
+                .with_message("The plugin must export at least one rule created with defineRule()"),
+        )
+        .into());
     }
 
-    Ok(LoadedPlugin { ctx, rules })
+    let mut loaded_rules = Vec::with_capacity(rules.len());
+    for rule in rules {
+        let grit = match &rule.grit {
+            Some(pattern) => {
+                let options = CompilePatternOptions::default()
+                    .as_node_selector()
+                    .with_path(path);
+                let query = compile_pattern_with_options(pattern, options)?;
+                if !matches!(query.language, GritTargetLanguage::JsTargetLanguage(_)) {
+                    return Err(PluginDiagnostic::unsupported_rule_format(markup! {
+                        "The Grit query of rule "<Emphasis>{&rule.name}</Emphasis>" targets a language other than JavaScript."
+                    }));
+                }
+                Some(query)
+            }
+            None => None,
+        };
+
+        loaded_rules.push(LoadedRule { rule, grit });
+    }
+
+    Ok(LoadedPlugin {
+        ctx,
+        rules: loaded_rules,
+    })
+}
+
+fn collect_rule_entries(
+    ctx: &mut JsExecContext,
+    name: &str,
+    result: JsResult<JsValue>,
+    entries: &mut Vec<PluginDiagnosticEntry>,
+) {
+    // Drain the diagnostics even on errors, so a failed rule can't leak its
+    // diagnostics into the next one.
+    let mut diagnostics = ctx.pull_diagnostics();
+
+    if let Err(err) = result {
+        diagnostics.push(PluginDiagnosticEntry {
+            diagnostic: RuleDiagnostic::new(
+                category!("plugin"),
+                None::<TextRange>,
+                markup!("Rule "<Emphasis>{name}</Emphasis>" errored: "<Error>{err.to_string()}</Error>),
+            )
+            .with_severity(Severity::Error),
+            action: None,
+        });
+    }
+
+    entries.extend(diagnostics.into_iter().map(|entry| PluginDiagnosticEntry {
+        diagnostic: entry.diagnostic.subcategory(name.to_string()),
+        action: entry.action,
+    }));
 }
 
 /// A JS analyzer plugin.
@@ -84,7 +151,7 @@ impl AnalyzerJsPlugin {
         let mut kinds: Vec<RawSyntaxKind> = plugin
             .rules
             .iter()
-            .flat_map(|rule| &rule.kinds)
+            .flat_map(|rule| &rule.rule.kinds)
             .map(|kind| kind.to_raw())
             .collect();
         kinds.sort_unstable_by_key(|kind| kind.0);
@@ -96,7 +163,7 @@ impl AnalyzerJsPlugin {
             name: None,
             loaded: ThreadLocalCell::new(),
             kinds,
-            requires_semantic_model: plugin.rules.iter().any(|rule| rule.requires_semantic),
+            requires_semantic_model: plugin.rules.iter().any(|rule| rule.rule.requires_semantic),
             includes,
         })
     }
@@ -148,7 +215,8 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
                         markup!(
                             "Could not run the plugin because the analyzed file's source type is unavailable."
                         ),
-                    ),
+                    )
+                    .with_severity(Severity::Error),
                     action: None,
                 }],
             };
@@ -165,7 +233,8 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
                             category!("plugin"),
                             None::<TextRange>,
                             markup!("Could not load the plugin: "<Error>{err.to_string()}</Error>),
-                        ),
+                        )
+                        .with_severity(Severity::Error),
                         action: None,
                     }],
                 };
@@ -181,7 +250,8 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
                         category!("plugin"),
                         None::<TextRange>,
                         markup!("Could not pass the AST to the plugin"),
-                    ),
+                    )
+                    .with_severity(Severity::Error),
                     action: None,
                 }],
             };
@@ -190,29 +260,57 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
         let kind = node.kind();
         let mut entries = Vec::new();
 
-        for rule in rules.iter().filter(|rule| rule.kinds.contains(&kind)) {
-            let name = self.name.as_deref().unwrap_or(&rule.name);
-            let result = ctx.call_rule(rule, node.clone(), &path, *source_type, services);
+        for loaded_rule in rules.iter().filter(|rule| rule.rule.kinds.contains(&kind)) {
+            let name = self.name.as_deref().unwrap_or(&loaded_rule.rule.name);
 
-            // Drain the diagnostics even on errors, so a failed rule can't leak
-            // its diagnostics into the next one.
-            let mut diagnostics = ctx.pull_diagnostics();
-
-            if let Err(err) = result {
-                diagnostics.push(PluginDiagnosticEntry {
-                    diagnostic: RuleDiagnostic::new(
-                        category!("plugin"),
-                        None::<TextRange>,
-                        markup!("Rule "<Emphasis>{name}</Emphasis>" errored: "<Error>{err.to_string()}</Error>),
-                    ),
-                    action: None,
-                });
+            if let Some(query) = &loaded_rule.grit {
+                // Grit rules query the file root because the pattern searches the
+                // whole tree, and the analyzer invokes us once per root kind.
+                let Some(root) = node.as_send() else {
+                    continue;
+                };
+                let file = GritTargetFile::new(
+                    path.clone(),
+                    AnyParse::Node(NodeParse::new(root, Vec::new())),
+                );
+                match query.find_matches(file) {
+                    Ok(matches) => {
+                        for matched in matches {
+                            let GritTargetLanguageNode::JsLanguage(element) = matched else {
+                                continue;
+                            };
+                            let result = ctx.call_rule(
+                                &loaded_rule.rule,
+                                element,
+                                &path,
+                                *source_type,
+                                services,
+                            );
+                            collect_rule_entries(ctx, name, result, &mut entries);
+                        }
+                    }
+                    Err(err) => entries.push(PluginDiagnosticEntry {
+                        diagnostic: RuleDiagnostic::new(
+                            category!("plugin"),
+                            None::<TextRange>,
+                            markup!(
+                                "The Grit query of rule "<Emphasis>{name}</Emphasis>" failed: "<Error>{err.to_string()}</Error>
+                            ),
+                        )
+                        .with_severity(Severity::Error),
+                        action: None,
+                    }),
+                }
+            } else {
+                let result = ctx.call_rule(
+                    &loaded_rule.rule,
+                    JsSyntaxElement::Node(node.clone()),
+                    &path,
+                    *source_type,
+                    services,
+                );
+                collect_rule_entries(ctx, name, result, &mut entries);
             }
-
-            entries.extend(diagnostics.into_iter().map(|entry| PluginDiagnosticEntry {
-                diagnostic: entry.diagnostic.subcategory(name.to_string()),
-                action: entry.action,
-            }));
         }
 
         PluginEvalResult { entries }
@@ -224,7 +322,9 @@ mod tests {
     use super::*;
     use crate::test_utils::snapshot_content;
     use biome_diagnostics::advice::CodeSuggestionAdvice;
-    use biome_diagnostics::{DiagnosticExt, Error, PrintDescription, print_diagnostic_to_string};
+    use biome_diagnostics::{
+        Diagnostic, DiagnosticExt, Error, PrintDescription, print_diagnostic_to_string,
+    };
     use biome_fs::MemoryFileSystem;
     use biome_glob::NormalizedGlob;
     use biome_js_parser::JsParserOptions;
@@ -235,6 +335,67 @@ mod tests {
         let mut services = ServiceBag::default();
         services.insert_service(source_type);
         services
+    }
+
+    #[test]
+    fn throwing_rule_reports_error_severity() {
+        let plugin = load_test_plugin_from_source(
+            "/plugin.js",
+            r#"import { ast, defineRule } from "@biomejs/runtime/plugin";
+            export const boom = defineRule({
+                query: ast("JS_MODULE"),
+                run() {
+                    throw new Error("boom");
+                },
+            });"#,
+            None,
+        );
+        let parse = biome_js_parser::parse(
+            "console.log('hello');",
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        let result = plugin.evaluate(
+            parse.syntax().into(),
+            "/file.js".into(),
+            &services(JsFileSource::js_module()),
+        );
+        let [entry] = result.entries.as_slice() else {
+            panic!("{result:?}");
+        };
+        assert!(
+            PrintDescription(&entry.diagnostic)
+                .to_string()
+                .contains("Rule boom errored: Error: boom")
+        );
+        assert_eq!(entry.diagnostic.severity(), Severity::Error);
+    }
+
+    #[test]
+    fn missing_source_type_reports_error_severity() {
+        let plugin = load_test_plugin_from_source(
+            "/plugin.js",
+            r#"import { ast, defineRule } from "@biomejs/runtime/plugin";
+            export const noop = defineRule({
+                query: ast("JS_MODULE"),
+                run() {},
+            });"#,
+            None,
+        );
+        let parse = biome_js_parser::parse(
+            "console.log('hello');",
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        let result = plugin.evaluate(
+            parse.syntax().into(),
+            "/file.js".into(),
+            &ServiceBag::default(),
+        );
+        let [entry] = result.entries.as_slice() else {
+            panic!("{result:?}");
+        };
+        assert_eq!(entry.diagnostic.severity(), Severity::Error);
     }
 
     #[test]
@@ -386,6 +547,15 @@ mod tests {
                     embedding_kind: SvelteEmbeddingKind::Declaration,
                 }),
                 r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"svelte","fileKind":"component","embeddingKind":"declaration"}]"#,
+            ),
+            (
+                JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    is_module_script: false,
+                    is_class_attribute: false,
+                    file_kind: SvelteFileKind::Component,
+                    embedding_kind: SvelteEmbeddingKind::Generics,
+                }),
+                r#"[{"kind":"typescript","definitionFile":false},"standard","module","es2022",{"kind":"svelte","fileKind":"component","embeddingKind":"generics"}]"#,
             ),
         ] {
             let parse = biome_js_parser::parse(
@@ -2089,7 +2259,7 @@ mod tests {
                 load_plugin(Arc::new(fs), "/plugin.js".into()).unwrap();
             let ast = ctx.create_js_ast(parse.syntax());
             ctx.call_function(
-                &rules[0].run,
+                &rules[0].rule.run,
                 &JsValue::undefined(),
                 std::slice::from_ref(&ast),
             )
@@ -2097,7 +2267,7 @@ mod tests {
             assert!(ctx.pull_diagnostics().is_empty());
             let _current = ctx.create_js_ast(parse.syntax());
             ctx.call_function(
-                &rules[0].run,
+                &rules[0].rule.run,
                 &JsValue::undefined(),
                 std::slice::from_ref(&ast),
             )
@@ -2107,7 +2277,7 @@ mod tests {
             assert_action(&entries[0], source, "call(9,2)", Applicability::Always);
             assert_action(&entries[1], source, "call(9,2);", Applicability::Always);
             assert!(
-                ctx.call_function(&rules[0].run, &JsValue::undefined(), &[ast])
+                ctx.call_function(&rules[0].rule.run, &JsValue::undefined(), &[ast])
                     .is_err()
             );
             assert!(ctx.pull_diagnostics().is_empty());
@@ -2281,3 +2451,15 @@ mod tests {
 #[cfg(test)]
 #[path = "semantic.tests.rs"]
 mod semantic_tests;
+
+#[cfg(test)]
+#[path = "grit.tests.rs"]
+mod grit_tests;
+
+#[cfg(test)]
+#[path = "kind_sets.tests.rs"]
+mod kind_sets_tests;
+
+#[cfg(test)]
+#[path = "traversal.tests.rs"]
+mod traversal_tests;

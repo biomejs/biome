@@ -14,6 +14,10 @@ info: markdown/reference_link.md
 
 [  spaced  ][  label  ]
 
+[    ]
+
+- [x] dev done (2026-06-22) / [ ] prod pending
+
 [*foo* bar][]
 
 [foo][BaR]
@@ -45,7 +49,11 @@ text with [inline][ref] in the middle
 
 [hello]
 
-[  spaced  ][  label  ]
+[ spaced ][  label  ]
+
+[ ]
+
+- [x] dev done (2026-06-22) / [ ] prod pending
 
 [*foo* bar][]
 

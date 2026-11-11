@@ -1,0 +1,26 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid-slots-option-with-setup.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script lang="ts">
+import type { SlotsType } from "vue";
+
+export default {
+    slots: Object as SlotsType<{
+        default: { msg: string };
+    }>,
+};
+</script>
+
+<script setup lang="ts">
+const message = "hello";
+</script>
+
+<template>
+    <slot :msg="message" />
+</template>
+
+```

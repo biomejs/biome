@@ -81,13 +81,13 @@ MdRoot {
                             prefix: MdQuotePrefix {
                                 pre_marker_indent: MdQuoteIndentList [],
                                 marker_token: R_ANGLE@47..48 ">" [] [],
-                                post_marker_space_token: missing (optional),
+                                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@48..49 " " [] [],
                             },
                             content: MdBlockList [
                                 MdParagraph {
                                     list: MdInlineItemList [
                                         MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@48..60 " quoted line" [] [],
+                                            value_token: MD_TEXTUAL_LITERAL@49..60 "quoted line" [] [],
                                         },
                                         MdTextual {
                                             value_token: MD_TEXTUAL_LITERAL@60..61 "\n" [] [],
@@ -444,15 +444,15 @@ MdRoot {
             3: MD_INDENT_TOKEN_LIST@47..47
           1: MD_BLOCK_LIST@47..91
             0: MD_QUOTE@47..90
-              0: MD_QUOTE_PREFIX@47..48
+              0: MD_QUOTE_PREFIX@47..49
                 0: MD_QUOTE_INDENT_LIST@47..47
                 1: R_ANGLE@47..48 ">" [] []
-                2: (empty)
-              1: MD_BLOCK_LIST@48..90
-                0: MD_PARAGRAPH@48..61
-                  0: MD_INLINE_ITEM_LIST@48..61
-                    0: MD_TEXTUAL@48..60
-                      0: MD_TEXTUAL_LITERAL@48..60 " quoted line" [] []
+                2: MD_QUOTE_POST_MARKER_SPACE@48..49 " " [] []
+              1: MD_BLOCK_LIST@49..90
+                0: MD_PARAGRAPH@49..61
+                  0: MD_INLINE_ITEM_LIST@49..61
+                    0: MD_TEXTUAL@49..60
+                      0: MD_TEXTUAL_LITERAL@49..60 "quoted line" [] []
                     1: MD_TEXTUAL@60..61
                       0: MD_TEXTUAL_LITERAL@60..61 "\n" [] []
                 1: MD_QUOTE_PREFIX@61..64

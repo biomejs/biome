@@ -122,13 +122,13 @@ MdRoot {
                             },
                         ],
                         marker_token: R_ANGLE@72..73 ">" [] [],
-                        post_marker_space_token: missing (optional),
+                        post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@73..74 " " [] [],
                     },
                     content: MdBlockList [
                         MdParagraph {
                             list: MdInlineItemList [
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@73..98 " nested with outer indent" [] [],
+                                    value_token: MD_TEXTUAL_LITERAL@74..98 "nested with outer indent" [] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@98..99 "\n" [] [],
@@ -221,17 +221,17 @@ MdRoot {
         2: MD_QUOTE_POST_MARKER_SPACE@70..71 " " [] []
       1: MD_BLOCK_LIST@71..99
         0: MD_QUOTE@71..99
-          0: MD_QUOTE_PREFIX@71..73
+          0: MD_QUOTE_PREFIX@71..74
             0: MD_QUOTE_INDENT_LIST@71..72
               0: MD_QUOTE_INDENT@71..72
                 0: MD_QUOTE_PRE_MARKER_INDENT@71..72 " " [] []
             1: R_ANGLE@72..73 ">" [] []
-            2: (empty)
-          1: MD_BLOCK_LIST@73..99
-            0: MD_PARAGRAPH@73..99
-              0: MD_INLINE_ITEM_LIST@73..99
-                0: MD_TEXTUAL@73..98
-                  0: MD_TEXTUAL_LITERAL@73..98 " nested with outer indent" [] []
+            2: MD_QUOTE_POST_MARKER_SPACE@73..74 " " [] []
+          1: MD_BLOCK_LIST@74..99
+            0: MD_PARAGRAPH@74..99
+              0: MD_INLINE_ITEM_LIST@74..99
+                0: MD_TEXTUAL@74..98
+                  0: MD_TEXTUAL_LITERAL@74..98 "nested with outer indent" [] []
                 1: MD_TEXTUAL@98..99
                   0: MD_TEXTUAL_LITERAL@98..99 "\n" [] []
     7: MD_NEWLINE@99..100

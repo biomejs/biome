@@ -1,0 +1,10 @@
+$s: 8px;
+
+.a {
+  margin: -#{$s} -#{$s} -#{$s} auto;
+  padding: 1px -#{$s};
+  width: $a - #{$s};
+  height: 1 -$s;
+  inset: -#{$s}
+    -#{$s};
+}

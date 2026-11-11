@@ -1,0 +1,13 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+<div class="bg-(--brand)"></div>
+<div :class="['w-(--width)', { '[color:var(--ink)]': active }]"></div>
+</template>
+
+```

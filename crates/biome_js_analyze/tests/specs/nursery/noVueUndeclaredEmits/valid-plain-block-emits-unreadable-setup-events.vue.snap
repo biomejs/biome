@@ -1,0 +1,25 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: valid-plain-block-emits-unreadable-setup-events.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script lang="ts">
+export default {
+  methods: {
+    notify() {
+      this.$emit("change");
+    },
+  },
+};
+</script>
+
+<script setup lang="ts">
+import type { Events } from "./events";
+
+defineEmits<Events>();
+</script>
+
+```

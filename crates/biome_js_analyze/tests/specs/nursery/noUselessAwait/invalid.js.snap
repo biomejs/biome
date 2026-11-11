@@ -1,0 +1,716 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+async function values() {
+	await [];
+	await [Promise.resolve()];
+	await (() => {});
+	await (() => Promise.resolve());
+	await (a === b);
+	await (a instanceof Promise);
+	await ("a" in b);
+	await (a > b);
+	await class {};
+	await class extends Promise {};
+	await function () {};
+	await function name() {};
+	await function () { return Promise.resolve() };
+	await 0;
+	await "";
+	await true;
+	await null;
+	await 1n;
+	await /regex/;
+	await `${Promise.resolve()}`;
+	await !Promise.resolve();
+	await void Promise.resolve();
+	await typeof foo;
+	await +Promise.resolve();
+	await ~1;
+	await ++foo;
+	await foo--;
+	await (Promise.resolve(), 1);
+	await await foo;
+	+await +1;
+	-await --bar;
+	const a = +await ++b;
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:3:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    1 │ /* should generate diagnostics */
+    2 │ async function values() {
+  > 3 │ 	await [];
+      │ 	^^^^^
+    4 │ 	await [Promise.resolve()];
+    5 │ 	await (() => {});
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    2 │ async function values() {
+    3 │ 	await [];
+  > 4 │ 	await [Promise.resolve()];
+      │ 	^^^^^
+    5 │ 	await (() => {});
+    6 │ 	await (() => Promise.resolve());
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    3 │ 	await [];
+    4 │ 	await [Promise.resolve()];
+  > 5 │ 	await (() => {});
+      │ 	^^^^^
+    6 │ 	await (() => Promise.resolve());
+    7 │ 	await (a === b);
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    4 │ 	await [Promise.resolve()];
+    5 │ 	await (() => {});
+  > 6 │ 	await (() => Promise.resolve());
+      │ 	^^^^^
+    7 │ 	await (a === b);
+    8 │ 	await (a instanceof Promise);
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    5 │ 	await (() => {});
+    6 │ 	await (() => Promise.resolve());
+  > 7 │ 	await (a === b);
+      │ 	^^^^^
+    8 │ 	await (a instanceof Promise);
+    9 │ 	await ("a" in b);
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+     6 │ 	await (() => Promise.resolve());
+     7 │ 	await (a === b);
+   > 8 │ 	await (a instanceof Promise);
+       │ 	^^^^^
+     9 │ 	await ("a" in b);
+    10 │ 	await (a > b);
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+     7 │ 	await (a === b);
+     8 │ 	await (a instanceof Promise);
+   > 9 │ 	await ("a" in b);
+       │ 	^^^^^
+    10 │ 	await (a > b);
+    11 │ 	await class {};
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+     8 │ 	await (a instanceof Promise);
+     9 │ 	await ("a" in b);
+  > 10 │ 	await (a > b);
+       │ 	^^^^^
+    11 │ 	await class {};
+    12 │ 	await class extends Promise {};
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+     9 │ 	await ("a" in b);
+    10 │ 	await (a > b);
+  > 11 │ 	await class {};
+       │ 	^^^^^
+    12 │ 	await class extends Promise {};
+    13 │ 	await function () {};
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    10 │ 	await (a > b);
+    11 │ 	await class {};
+  > 12 │ 	await class extends Promise {};
+       │ 	^^^^^
+    13 │ 	await function () {};
+    14 │ 	await function name() {};
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    11 │ 	await class {};
+    12 │ 	await class extends Promise {};
+  > 13 │ 	await function () {};
+       │ 	^^^^^
+    14 │ 	await function name() {};
+    15 │ 	await function () { return Promise.resolve() };
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    12 │ 	await class extends Promise {};
+    13 │ 	await function () {};
+  > 14 │ 	await function name() {};
+       │ 	^^^^^
+    15 │ 	await function () { return Promise.resolve() };
+    16 │ 	await 0;
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    13 │ 	await function () {};
+    14 │ 	await function name() {};
+  > 15 │ 	await function () { return Promise.resolve() };
+       │ 	^^^^^
+    16 │ 	await 0;
+    17 │ 	await "";
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    14 │ 	await function name() {};
+    15 │ 	await function () { return Promise.resolve() };
+  > 16 │ 	await 0;
+       │ 	^^^^^
+    17 │ 	await "";
+    18 │ 	await true;
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    15 │ 	await function () { return Promise.resolve() };
+    16 │ 	await 0;
+  > 17 │ 	await "";
+       │ 	^^^^^
+    18 │ 	await true;
+    19 │ 	await null;
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    16 │ 	await 0;
+    17 │ 	await "";
+  > 18 │ 	await true;
+       │ 	^^^^^
+    19 │ 	await null;
+    20 │ 	await 1n;
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    17 │ 	await "";
+    18 │ 	await true;
+  > 19 │ 	await null;
+       │ 	^^^^^
+    20 │ 	await 1n;
+    21 │ 	await /regex/;
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    18 │ 	await true;
+    19 │ 	await null;
+  > 20 │ 	await 1n;
+       │ 	^^^^^
+    21 │ 	await /regex/;
+    22 │ 	await `${Promise.resolve()}`;
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    19 │ 	await null;
+    20 │ 	await 1n;
+  > 21 │ 	await /regex/;
+       │ 	^^^^^
+    22 │ 	await `${Promise.resolve()}`;
+    23 │ 	await !Promise.resolve();
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    20 │ 	await 1n;
+    21 │ 	await /regex/;
+  > 22 │ 	await `${Promise.resolve()}`;
+       │ 	^^^^^
+    23 │ 	await !Promise.resolve();
+    24 │ 	await void Promise.resolve();
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    21 │ 	await /regex/;
+    22 │ 	await `${Promise.resolve()}`;
+  > 23 │ 	await !Promise.resolve();
+       │ 	^^^^^
+    24 │ 	await void Promise.resolve();
+    25 │ 	await typeof foo;
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    22 │ 	await `${Promise.resolve()}`;
+    23 │ 	await !Promise.resolve();
+  > 24 │ 	await void Promise.resolve();
+       │ 	^^^^^
+    25 │ 	await typeof foo;
+    26 │ 	await +Promise.resolve();
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    23 │ 	await !Promise.resolve();
+    24 │ 	await void Promise.resolve();
+  > 25 │ 	await typeof foo;
+       │ 	^^^^^
+    26 │ 	await +Promise.resolve();
+    27 │ 	await ~1;
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    24 │ 	await void Promise.resolve();
+    25 │ 	await typeof foo;
+  > 26 │ 	await +Promise.resolve();
+       │ 	^^^^^
+    27 │ 	await ~1;
+    28 │ 	await ++foo;
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    25 │ 	await typeof foo;
+    26 │ 	await +Promise.resolve();
+  > 27 │ 	await ~1;
+       │ 	^^^^^
+    28 │ 	await ++foo;
+    29 │ 	await foo--;
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    26 │ 	await +Promise.resolve();
+    27 │ 	await ~1;
+  > 28 │ 	await ++foo;
+       │ 	^^^^^
+    29 │ 	await foo--;
+    30 │ 	await (Promise.resolve(), 1);
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    27 │ 	await ~1;
+    28 │ 	await ++foo;
+  > 29 │ 	await foo--;
+       │ 	^^^^^
+    30 │ 	await (Promise.resolve(), 1);
+    31 │ 	await await foo;
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:30:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    28 │ 	await ++foo;
+    29 │ 	await foo--;
+  > 30 │ 	await (Promise.resolve(), 1);
+       │ 	^^^^^
+    31 │ 	await await foo;
+    32 │ 	+await +1;
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:2 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    29 │ 	await foo--;
+    30 │ 	await (Promise.resolve(), 1);
+  > 31 │ 	await await foo;
+       │ 	^^^^^
+    32 │ 	+await +1;
+    33 │ 	-await --bar;
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:3 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    30 │ 	await (Promise.resolve(), 1);
+    31 │ 	await await foo;
+  > 32 │ 	+await +1;
+       │ 	 ^^^^^
+    33 │ 	-await --bar;
+    34 │ 	const a = +await ++b;
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:33:3 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    31 │ 	await await foo;
+    32 │ 	+await +1;
+  > 33 │ 	-await --bar;
+       │ 	 ^^^^^
+    34 │ 	const a = +await ++b;
+    35 │ }
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:34:13 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    32 │ 	+await +1;
+    33 │ 	-await --bar;
+  > 34 │ 	const a = +await ++b;
+       │ 	           ^^^^^
+    35 │ }
+    36 │ 
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

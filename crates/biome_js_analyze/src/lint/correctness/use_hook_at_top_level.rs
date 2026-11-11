@@ -21,6 +21,7 @@ use biome_rowan::{
 };
 use rustc_hash::FxHashMap;
 use std::ops::{Deref, DerefMut};
+use std::rc::Rc;
 
 use crate::react::components::ReactComponentInfo;
 use biome_diagnostics::Severity;
@@ -504,7 +505,7 @@ fn is_top_level_call(call: &JsCallExpression) -> bool {
 /// early returns are not included in the model. For call sites that are
 /// preceded by multiple early returns, the return statement that we map to is
 /// implementation-defined.
-#[derive(Clone, Default)]
+#[derive(Default)]
 struct EarlyReturnsModel(FxHashMap<JsCallExpression, TextRange>);
 
 impl Deref for EarlyReturnsModel {
@@ -583,7 +584,7 @@ impl Visitor for EarlyReturnDetectionVisitor {
     }
 
     fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
-        ctx.services.insert_service(self.early_returns);
+        ctx.services.insert_service(Rc::new(self.early_returns));
     }
 }
 
@@ -625,7 +626,7 @@ impl Visitor for FunctionCallVisitor {
 }
 
 pub struct FunctionCallServices {
-    early_returns: EarlyReturnsModel,
+    early_returns: Rc<EarlyReturnsModel>,
     semantic_services: SemanticServices,
 }
 
@@ -645,7 +646,7 @@ impl FromServices for FunctionCallServices {
         rule_metadata: &RuleMetadata,
         services: &ServiceBag,
     ) -> Result<Self, ServicesDiagnostic> {
-        let early_returns: &EarlyReturnsModel = services
+        let early_returns: &Rc<EarlyReturnsModel> = services
             .get_service()
             .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["EarlyReturnsModel"]))?;
 

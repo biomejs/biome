@@ -96,7 +96,10 @@ impl Rule for NoSwitchDeclarations {
             .children()
             .filter_map(|node| {
                 if JsVariableStatement::can_cast(node.kind()) {
-                    Some(JsVariableStatement::cast(node)?.declaration().ok()?.range())
+                    let declaration = JsVariableStatement::cast(node)?.declaration().ok()?;
+                    // `var` is function-scoped and hoisted with `undefined`, so other clauses
+                    // cannot hit a temporal dead zone.
+                    (!declaration.is_var()).then(|| declaration.range())
                 } else if AnyJsDeclaration::can_cast(node.kind()) {
                     Some(node.text_trimmed_range())
                 } else {

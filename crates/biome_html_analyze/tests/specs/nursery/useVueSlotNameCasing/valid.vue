@@ -1,0 +1,18 @@
+<!-- should not generate diagnostics -->
+<template>
+  <slot />
+  <slot key="foo-bar" />
+  <slot name />
+  <slot name="" />
+  <slot name="foo" />
+  <slot name="fooBar" />
+  <slot name="fooBAR" />
+  <slot name="header2" />
+  <slot name="見出し" />
+  <slot :name="fooBar" />
+  <slot v-bind:name="'foo-bar'" />
+  <slot name="fooBar"></slot>
+  <div name="foo-bar"></div>
+  <MyComponent name="foo-bar" />
+  <template #foo-bar>content</template>
+</template>

@@ -19,18 +19,14 @@ use biome_css_syntax::{
 use biome_rowan::{AstNode, BatchMutationExt, TokenText, declare_node_union};
 use biome_rule_options::use_sorted_properties::UseSortedPropertiesOptions;
 use biome_string_case::StrOnlyExtension;
-use std::{
-    borrow::Cow,
-    cmp::Ordering,
-    collections::{BTreeSet, HashSet},
-};
+use std::{borrow::Cow, cmp::Ordering, collections::HashMap};
 
 declare_source_rule! {
-    /// Sort CSS properties and nested rules into a consistent order.
+    /// Sort CSS properties into a consistent order.
     ///
     /// The action uses a predefined order that groups related properties by purpose.
-    /// Custom properties come first, and nested rules or at-rules such as `@media` come after
-    /// declarations.
+    /// Custom properties come first within each group. Nested rules, at-rules, Sass variable
+    /// declarations, and other non-property items stay in place and separate the groups.
     ///
     /// Properties inside CSS and SCSS keyframe steps use the same order.
     ///
@@ -43,7 +39,6 @@ declare_source_rule! {
     /// 5. Interaction properties, including `pointer-events`.
     /// 6. Background and border properties.
     /// 7. Transition and animation properties.
-    /// 8. Nested rules, media queries, and other at-rules.
     ///
     /// Biome skips blocks containing unknown properties because their correct position is not
     /// known. If sorting could change the result of a shorthand and longhand combination, Biome
@@ -69,6 +64,7 @@ declare_source_rule! {
     /// p {
     ///   span { color: blue; }
     ///   color: red;
+    ///   display: block;
     /// }
     /// ```
     ///
@@ -97,8 +93,9 @@ declare_source_rule! {
     ///
     /// ```css
     /// p {
-    ///   color: red;
     ///   span { color: blue; }
+    ///   display: block;
+    ///   color: red;
     /// }
     /// ```
     ///
@@ -155,18 +152,7 @@ impl Rule for UseSortedProperties {
                 .collect::<Option<Vec<_>>>()?,
         };
 
-        // Template steps can depend on declarations before enclosing controls or content blocks.
-        // Native keyframe lists do not use the declaration-or-rule list alternative.
-        if node.syntax().descendants().any(|descendant| {
-            descendant.kind() == CssSyntaxKind::CSS_KEYFRAMES_ITEM
-                && descendant.parent().is_some_and(|parent| {
-                    parent.kind() == CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST
-                })
-        }) {
-            return None;
-        }
-
-        if contains_shorthand_after_longhand(&original_properties) {
+        if contains_property_conflicts(&original_properties) {
             // This would be unsafe to sort
             return Some(UseSortedPropertiesState {
                 block: node.clone(),
@@ -264,7 +250,7 @@ fn with_terminated_line_comment(
 
     let next_token = match next_item {
         Some(next) => next.syntax().first_token()?,
-        None => item.syntax().parent()?.last_token()?.next_token()?,
+        None => item.syntax().parent()?.next_token()?,
     };
     if next_token
         .leading_trivia()
@@ -307,16 +293,21 @@ fn with_semicolon(item: AnyCssDeclarationOrRule) -> Option<AnyCssDeclarationOrRu
 /// "Recess order" is a semantic ordering that mimics the behavior of [stylelint-config-recess-order](https://github.com/stormwarning/stylelint-config-recess-order).
 ///
 /// Which in turn mimics the behavior of twitter's [RECESS](https://github.com/twitter-archive/recess/blob/29bccc870b7b4ccaa0a138e504caf608a6606b59/lib/lint/strict-property-order.js).
-pub struct RecessOrderProperties(pub BTreeSet<RecessOrderMember>);
+pub struct RecessOrderProperties(pub Vec<RecessOrderMember>);
 
 impl RecessOrderProperties {
     pub fn new(items: &[AnyCssDeclarationOrRule]) -> Self {
-        Self(
-            items
-                .iter()
-                .map(|item| RecessOrderMember(item.clone()))
-                .collect::<BTreeSet<RecessOrderMember>>(),
-        )
+        let mut members: Vec<_> = items
+            .iter()
+            .map(|item| RecessOrderMember(item.clone()))
+            .collect();
+        for group in members.chunk_by_mut(|a, b| {
+            a.0.as_css_declaration_with_semicolon().is_some()
+                && b.0.as_css_declaration_with_semicolon().is_some()
+        }) {
+            group.sort_unstable();
+        }
+        Self(members)
     }
 
     /// Checks if self's order matches the provided list's order.
@@ -530,14 +521,23 @@ fn prop_text_to_unprefixed(tok_text: &TokenText) -> Cow<'_, str> {
     unprefixed.unwrap_or(prop_lowercase)
 }
 
-/// Check if any shortand property (e.g. margin) appears after any of its longhand sub properties (e.g. margin-top).
-/// Sorting such properties would be unsafe, so we need to bail out. The noShorthandPropertyOverrides rule will catch that case instead.
-fn contains_shorthand_after_longhand(nodes: &[AnyCssDeclarationOrRule]) -> bool {
-    let mut disallowed_longhand_properties = HashSet::<(Option<&str>, &str)>::new();
+/// Returns whether sorting would reverse declarations that can affect the same property.
+/// For example, moving `margin` before an earlier `margin-top` would change which value wins.
+/// Such conflicts must prevent the sorting action; `noShorthandPropertyOverrides` reports
+/// shorthands that override earlier longhands, but does not cover every conflict checked here.
+fn contains_property_conflicts(nodes: &[AnyCssDeclarationOrRule]) -> bool {
+    let mut later_properties = HashMap::new();
 
-    // We have a mapping of shorthand to longhand sub properties, and to make use of that we need to iterate backwards.
-    // Starting from the bottom, when we see a shorthand property, record the set of longhand properties that are no longer allowed to appear above it.
+    // Scan backwards so later declarations contribute their affected longhands and alias groups
+    // before earlier declarations are checked. Keep the lowest sort index for each affected
+    // property and vendor prefix: a larger index on an earlier declaration would reverse their
+    // relative order when sorted, potentially changing the cascade.
     for node in nodes.iter().rev() {
+        if node.as_css_declaration_with_semicolon().is_none() {
+            later_properties.clear();
+            continue;
+        }
+
         let Some(prop_text) = &node
             .as_css_declaration_with_semicolon()
             .and_then(css_declaration_to_prop_text)
@@ -547,24 +547,83 @@ fn contains_shorthand_after_longhand(nodes: &[AnyCssDeclarationOrRule]) -> bool 
 
         let prefix = prop_text_to_prefix(prop_text);
         let unprefixed = prop_text_to_unprefixed(prop_text);
+        let Some((&property, &index)) = PROPERTY_ORDER_MAP.get_key_value(unprefixed.as_ref()) else {
+            continue;
+        };
 
-        // Check for disallowed properties
-        for disallowed_property in disallowed_longhand_properties.iter() {
-            if (prefix, unprefixed.as_ref()) == *disallowed_property {
+        if !matches!(property, "all" | "direction" | "unicode-bidi")
+            && later_properties.contains_key(&(None, "all"))
+        {
+            return true;
+        }
+
+        for affected in std::iter::once(property)
+            .chain(get_longhand_sub_properties(property).iter().copied())
+            .chain(get_reset_to_initial_properties(property).iter().copied())
+        {
+            if later_properties
+                .get(&(prefix, affected))
+                .is_some_and(|later_index| index > *later_index)
+            {
                 return true;
             }
-        }
 
-        // Disallow sub properties to appear above this property
-        for longhand_child_property in get_longhand_sub_properties(&unprefixed) {
-            disallowed_longhand_properties.insert((prefix, longhand_child_property));
-        }
-        for longhand_child_property in get_reset_to_initial_properties(&unprefixed) {
-            disallowed_longhand_properties.insert((prefix, longhand_child_property));
+            if let Some((own_group, opposite_group)) = property_alias_groups(affected) {
+                if later_properties
+                    .get(&(prefix, opposite_group))
+                    .is_some_and(|later_index| index > *later_index)
+                {
+                    return true;
+                }
+                later_properties
+                    .entry((prefix, own_group))
+                    .and_modify(|later_index| *later_index = index.min(*later_index))
+                    .or_insert(index);
+            }
+
+            later_properties
+                .entry((prefix, affected))
+                .and_modify(|later_index| *later_index = index.min(*later_index))
+                .or_insert(index);
         }
     }
 
     false
+}
+
+// Physical and logical declarations can overlap under a writing mode inherited from another rule.
+fn property_alias_groups(property: &str) -> Option<(&'static str, &'static str)> {
+    let (logical_group, physical_group) = if property.starts_with("corner-") {
+        (":logical-corner-shape", ":physical-corner-shape")
+    } else if property.starts_with("border-") {
+        if property.ends_with("-color") {
+            (":logical-border-color", ":physical-border-color")
+        } else if property.ends_with("-style") {
+            (":logical-border-style", ":physical-border-style")
+        } else if property.ends_with("-width") {
+            (":logical-border-width", ":physical-border-width")
+        } else {
+            return None;
+        }
+    } else {
+        return None;
+    };
+
+    if property.contains("-block-")
+        || property.contains("-inline-")
+        || property.starts_with("corner-start-")
+        || property.starts_with("corner-end-")
+    {
+        Some((logical_group, physical_group))
+    } else if property.contains("-top-")
+        || property.contains("-right-")
+        || property.contains("-bottom-")
+        || property.contains("-left-")
+    {
+        Some((physical_group, logical_group))
+    } else {
+        None
+    }
 }
 
 /// Check for properties that don't appear in [PROPERTY_ORDER_MAP]. They are likely a mistake.

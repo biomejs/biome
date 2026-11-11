@@ -1,0 +1,59 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/list_item_hard_break_end.md
+---
+
+# Input
+
+```md
+- a  
+
+Paragraph after a trailing-space hard line break.
+
+- a\
+
+Paragraph after a backslash hard line break.
+
+- a
+  - b  
+
+Paragraph after a nested list ending with a hard line break.
+
+- a  
+
+#### Heading after a hard line break
+
+- a  
+- b  
+
+Paragraph after a list whose last item ends with a hard line break.
+
+```
+
+
+# Formatted
+
+```md
+- a
+
+Paragraph after a trailing-space hard line break.
+
+- a\
+
+Paragraph after a backslash hard line break.
+
+- a
+  - b
+
+Paragraph after a nested list ending with a hard line break.
+
+- a
+
+#### Heading after a hard line break
+
+- a
+- b
+
+Paragraph after a list whose last item ends with a hard line break.
+
+```

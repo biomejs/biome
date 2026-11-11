@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-define-options-shadowed.vue
+---
+# Input
+```vue
+<script setup>
+/* should not generate diagnostics */
+import { defineOptions } from "./local-helpers";
+
+defineOptions({
+  beforeRouteEnter() {
+    this.load();
+  },
+});
+</script>
+
+```

@@ -35,9 +35,9 @@
 
 **Biome** to wydajny łańcuch narzędzi dla projektów webowych, którego celem jest dostarczenie narzędzi deweloperskich do utrzymania zdrowia tych projektów.
 
-**Biome to [szybki formater](https://github.com/biomejs/benchmark#formatting)** dla _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_, _GraphQL_, _Markdown_, _YAML_ i _SCSS_, który osiąga **[97% kompatybilności z _Prettier_](https://algora.io/challenges/prettier)**.
+**Biome to [szybki formater](https://github.com/biomejs/benchmark#formatting)** dla _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_, _GraphQL_, _HTML_, _Markdown_, _YAML_ i _SCSS_, który osiąga **[97% kompatybilności z _Prettier_](https://algora.io/challenges/prettier)**.
 
-**Biome to [wydajny linter](https://github.com/biomejs/benchmark#linting)** dla _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_, _GraphQL_, _Markdown_, _YAML_ i _SCSS_, który zawiera **[ponad 500 reguł](https://biomejs.dev/linter/javascript/rules/)** z ESLint, typescript-eslint i [innych źródeł](https://github.com/biomejs/biome/discussions/3).
+**Biome to [wydajny linter](https://github.com/biomejs/benchmark#linting)** dla _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_, _GraphQL_, _HTML_, _Markdown_, _YAML_ i _SCSS_, który zawiera **[ponad 750 reguł](https://biomejs.dev/linter/javascript/rules/)** z ESLint, typescript-eslint i [innych źródeł](https://github.com/biomejs/biome/discussions/3).
 **Wyprowadza szczegółowe i skontekstualizowane diagnostyki**, które pomagają Ci ulepszyć kod i zostać lepszym programistą!
 
 **Biome** jest zaprojektowany od początku do używania [interaktywnie w edytorze](https://biomejs.dev/pl/editors/first-party-extensions/).
@@ -177,9 +177,6 @@ Biome oferuje [wsparcie enterprise](https://biomejs.dev/enterprise), gdzie Core 
       </td>
       <td align="center" valign="middle">
         <a href="https://www.convex.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/81530787?s=200&v=4" width="80" alt="Convex logo"></a>
-      </td>
-      <td align="center" valign="middle">
-        <a href="https://graphite.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/61942612?s=200&v=4" width="80" alt="Graphite logo"></a>
       </td>
       <td align="center" valign="middle">
         <a href="https://kraken.tech/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/105941848?s=200&v=4" width="80" alt="Kraken Tech logo"></a>

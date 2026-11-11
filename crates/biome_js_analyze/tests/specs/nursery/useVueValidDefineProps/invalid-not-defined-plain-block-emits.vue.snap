@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-not-defined-plain-block-emits.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  emits: ["change"],
+};
+</script>
+<script setup>
+defineProps();
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-not-defined-plain-block-emits.vue:8:1 lint/nursery/useVueValidDefineProps ━━━━━━━━━━━━━━━━━━
+
+  × defineProps() is called without declaring any props.
+  
+     6 │ </script>
+     7 │ <script setup>
+   > 8 │ defineProps();
+       │ ^^^^^^^^^^^^^
+     9 │ </script>
+    10 │ 
+  
+  i Without a type between <> or an argument between (), the component accepts no props.
+  
+  i Declare the props with a type or an argument, or remove the call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

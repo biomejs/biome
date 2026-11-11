@@ -1,0 +1,816 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-model="foo"></div>
+  <svg v-model="foo"></svg>
+  <keep-alive v-model="foo"></keep-alive>
+  <KeepAlive v-model="foo"></KeepAlive>
+  <transition v-model="foo"></transition>
+  <TransitionGroup v-model="foo"></TransitionGroup>
+  <slot v-model="foo"></slot>
+  <input type="file" v-model="foo">
+  <input v-model:aaa="foo">
+  <select v-model:[name]="foo"></select>
+  <input v-model.aaa="foo">
+  <textarea v-model.lazy.aaa.bbb="foo"></textarea>
+  <input v-model>
+  <MyComponent v-model="" />
+  <MyComponent v-model="   " />
+  <input v-model="a + b">
+  <input v-model=" a + b ">
+  <input v-model="foo()">
+  <input v-model="'foo'">
+  <input v-model="foo?.()">
+  <input v-model="foo?.bar">
+  <input v-model="foo?.bar.baz">
+  <input v-model="(a?.b)?.c">
+  <input v-model="(a?.b).c">
+  <input v-model="(null).foo">
+  <input v-model="(a?.b).c.d">
+  <div v-for="x in list"><input v-model="x"></div>
+  <div v-for="x in list"><input v-model="(x)"></div>
+  <div v-for="x in list"><input v-model="(((x)))"></div>
+  <div v-for="(item, index) in list"><input v-model="index"></div>
+  <div v-for="{ name } in list"><input v-model="name"></div>
+  <input v-for="x in list" v-model="x">
+  <MyComponent v-slot="{ item }"><input v-model="item"></MyComponent>
+  <MyComponent><template #default="{ item }"><input v-model="item"></template></MyComponent>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:8 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-model directive can't be used on <div> elements.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-model="foo"></div>
+      │        ^^^^^^^^^^^^^
+    4 │   <svg v-model="foo"></svg>
+    5 │   <keep-alive v-model="foo"></keep-alive>
+  
+  i Vue can only keep <input>, <select>, <textarea>, and components in sync with a variable.
+  
+  i Move the directive to a form field or a component, or bind the value with v-bind and listen for changes with v-on.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:8 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-model directive can't be used on <svg> elements.
+  
+    2 │ <template>
+    3 │   <div v-model="foo"></div>
+  > 4 │   <svg v-model="foo"></svg>
+      │        ^^^^^^^^^^^^^
+    5 │   <keep-alive v-model="foo"></keep-alive>
+    6 │   <KeepAlive v-model="foo"></KeepAlive>
+  
+  i Vue can only keep <input>, <select>, <textarea>, and components in sync with a variable.
+  
+  i Move the directive to a form field or a component, or bind the value with v-bind and listen for changes with v-on.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:15 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-model directive can't be used on <keep-alive> elements.
+  
+    3 │   <div v-model="foo"></div>
+    4 │   <svg v-model="foo"></svg>
+  > 5 │   <keep-alive v-model="foo"></keep-alive>
+      │               ^^^^^^^^^^^^^
+    6 │   <KeepAlive v-model="foo"></KeepAlive>
+    7 │   <transition v-model="foo"></transition>
+  
+  i Vue can only keep <input>, <select>, <textarea>, and components in sync with a variable.
+  
+  i Move the directive to a form field or a component, or bind the value with v-bind and listen for changes with v-on.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:14 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-model directive can't be used on <KeepAlive> elements.
+  
+    4 │   <svg v-model="foo"></svg>
+    5 │   <keep-alive v-model="foo"></keep-alive>
+  > 6 │   <KeepAlive v-model="foo"></KeepAlive>
+      │              ^^^^^^^^^^^^^
+    7 │   <transition v-model="foo"></transition>
+    8 │   <TransitionGroup v-model="foo"></TransitionGroup>
+  
+  i Vue can only keep <input>, <select>, <textarea>, and components in sync with a variable.
+  
+  i Move the directive to a form field or a component, or bind the value with v-bind and listen for changes with v-on.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:15 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-model directive can't be used on <transition> elements.
+  
+    5 │   <keep-alive v-model="foo"></keep-alive>
+    6 │   <KeepAlive v-model="foo"></KeepAlive>
+  > 7 │   <transition v-model="foo"></transition>
+      │               ^^^^^^^^^^^^^
+    8 │   <TransitionGroup v-model="foo"></TransitionGroup>
+    9 │   <slot v-model="foo"></slot>
+  
+  i Vue can only keep <input>, <select>, <textarea>, and components in sync with a variable.
+  
+  i Move the directive to a form field or a component, or bind the value with v-bind and listen for changes with v-on.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:20 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-model directive can't be used on <TransitionGroup> elements.
+  
+     6 │   <KeepAlive v-model="foo"></KeepAlive>
+     7 │   <transition v-model="foo"></transition>
+   > 8 │   <TransitionGroup v-model="foo"></TransitionGroup>
+       │                    ^^^^^^^^^^^^^
+     9 │   <slot v-model="foo"></slot>
+    10 │   <input type="file" v-model="foo">
+  
+  i Vue can only keep <input>, <select>, <textarea>, and components in sync with a variable.
+  
+  i Move the directive to a form field or a component, or bind the value with v-bind and listen for changes with v-on.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:9 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-model directive can't be used on <slot> elements.
+  
+     7 │   <transition v-model="foo"></transition>
+     8 │   <TransitionGroup v-model="foo"></TransitionGroup>
+   > 9 │   <slot v-model="foo"></slot>
+       │         ^^^^^^^^^^^^^
+    10 │   <input type="file" v-model="foo">
+    11 │   <input v-model:aaa="foo">
+  
+  i Vue can only keep <input>, <select>, <textarea>, and components in sync with a variable.
+  
+  i Move the directive to a form field or a component, or bind the value with v-bind and listen for changes with v-on.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:22 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-model directive can't be used on file inputs.
+  
+     8 │   <TransitionGroup v-model="foo"></TransitionGroup>
+     9 │   <slot v-model="foo"></slot>
+  > 10 │   <input type="file" v-model="foo">
+       │                      ^^^^^^^^^^^^^
+    11 │   <input v-model:aaa="foo">
+    12 │   <select v-model:[name]="foo"></select>
+  
+  i Browsers don't let code set the file of a file input, so Vue can't keep it in sync with a variable.
+  
+  i Read the selected files in a change event listener instead, e.g. @change="onFileChange".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:17 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-model directive doesn't accept an argument on native elements.
+  
+     9 │   <slot v-model="foo"></slot>
+    10 │   <input type="file" v-model="foo">
+  > 11 │   <input v-model:aaa="foo">
+       │                 ^^^^
+    12 │   <select v-model:[name]="foo"></select>
+    13 │   <input v-model.aaa="foo">
+  
+  i Only components accept an argument, which names the prop to keep in sync.
+  
+  i Remove the argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:12:18 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-model directive doesn't accept an argument on native elements.
+  
+    10 │   <input type="file" v-model="foo">
+    11 │   <input v-model:aaa="foo">
+  > 12 │   <select v-model:[name]="foo"></select>
+       │                  ^^^^^^^
+    13 │   <input v-model.aaa="foo">
+    14 │   <textarea v-model.lazy.aaa.bbb="foo"></textarea>
+  
+  i Only components accept an argument, which names the prop to keep in sync.
+  
+  i Remove the argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:17 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-model directive doesn't support this modifier on native elements.
+  
+    11 │   <input v-model:aaa="foo">
+    12 │   <select v-model:[name]="foo"></select>
+  > 13 │   <input v-model.aaa="foo">
+       │                 ^^^^
+    14 │   <textarea v-model.lazy.aaa.bbb="foo"></textarea>
+    15 │   <input v-model>
+  
+  i On native elements, v-model only supports the lazy, number, and trim modifiers.
+  
+  i Remove or correct the modifier.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:14:25 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-model directive doesn't support this modifier on native elements.
+  
+    12 │   <select v-model:[name]="foo"></select>
+    13 │   <input v-model.aaa="foo">
+  > 14 │   <textarea v-model.lazy.aaa.bbb="foo"></textarea>
+       │                         ^^^^
+    15 │   <input v-model>
+    16 │   <MyComponent v-model="" />
+  
+  i On native elements, v-model only supports the lazy, number, and trim modifiers.
+  
+  i Remove or correct the modifier.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:14:29 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-model directive doesn't support this modifier on native elements.
+  
+    12 │   <select v-model:[name]="foo"></select>
+    13 │   <input v-model.aaa="foo">
+  > 14 │   <textarea v-model.lazy.aaa.bbb="foo"></textarea>
+       │                             ^^^^
+    15 │   <input v-model>
+    16 │   <MyComponent v-model="" />
+  
+  i On native elements, v-model only supports the lazy, number, and trim modifiers.
+  
+  i Remove or correct the modifier.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:15:10 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-model directive is missing a value.
+  
+    13 │   <input v-model.aaa="foo">
+    14 │   <textarea v-model.lazy.aaa.bbb="foo"></textarea>
+  > 15 │   <input v-model>
+       │          ^^^^^^^
+    16 │   <MyComponent v-model="" />
+    17 │   <MyComponent v-model="   " />
+  
+  i The value names the variable that Vue keeps in sync with the field.
+  
+  i Add a value to the directive, e.g. v-model="message".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:16:16 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-model directive is missing a value.
+  
+    14 │   <textarea v-model.lazy.aaa.bbb="foo"></textarea>
+    15 │   <input v-model>
+  > 16 │   <MyComponent v-model="" />
+       │                ^^^^^^^^^^
+    17 │   <MyComponent v-model="   " />
+    18 │   <input v-model="a + b">
+  
+  i The value names the variable that Vue keeps in sync with the field.
+  
+  i Add a value to the directive, e.g. v-model="message".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:17:16 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-model directive is missing a value.
+  
+    15 │   <input v-model>
+    16 │   <MyComponent v-model="" />
+  > 17 │   <MyComponent v-model="   " />
+       │                ^^^^^^^^^^^^^
+    18 │   <input v-model="a + b">
+    19 │   <input v-model=" a + b ">
+  
+  i The value names the variable that Vue keeps in sync with the field.
+  
+  i Add a value to the directive, e.g. v-model="message".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:18:19 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of this v-model directive can't be assigned to.
+  
+    16 │   <MyComponent v-model="" />
+    17 │   <MyComponent v-model="   " />
+  > 18 │   <input v-model="a + b">
+       │                   ^^^^^
+    19 │   <input v-model=" a + b ">
+    20 │   <input v-model="foo()">
+  
+  i Vue writes the new value of the field back to this expression, so it must be a variable or a property, such as foo or foo.bar.
+  
+  i Replace the expression with the variable or property to keep in sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:19:20 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of this v-model directive can't be assigned to.
+  
+    17 │   <MyComponent v-model="   " />
+    18 │   <input v-model="a + b">
+  > 19 │   <input v-model=" a + b ">
+       │                    ^^^^^
+    20 │   <input v-model="foo()">
+    21 │   <input v-model="'foo'">
+  
+  i Vue writes the new value of the field back to this expression, so it must be a variable or a property, such as foo or foo.bar.
+  
+  i Replace the expression with the variable or property to keep in sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:20:19 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of this v-model directive can't be assigned to.
+  
+    18 │   <input v-model="a + b">
+    19 │   <input v-model=" a + b ">
+  > 20 │   <input v-model="foo()">
+       │                   ^^^^^
+    21 │   <input v-model="'foo'">
+    22 │   <input v-model="foo?.()">
+  
+  i Vue writes the new value of the field back to this expression, so it must be a variable or a property, such as foo or foo.bar.
+  
+  i Replace the expression with the variable or property to keep in sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:21:19 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of this v-model directive can't be assigned to.
+  
+    19 │   <input v-model=" a + b ">
+    20 │   <input v-model="foo()">
+  > 21 │   <input v-model="'foo'">
+       │                   ^^^^^
+    22 │   <input v-model="foo?.()">
+    23 │   <input v-model="foo?.bar">
+  
+  i Vue writes the new value of the field back to this expression, so it must be a variable or a property, such as foo or foo.bar.
+  
+  i Replace the expression with the variable or property to keep in sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:22:19 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of this v-model directive can't be assigned to.
+  
+    20 │   <input v-model="foo()">
+    21 │   <input v-model="'foo'">
+  > 22 │   <input v-model="foo?.()">
+       │                   ^^^^^^^
+    23 │   <input v-model="foo?.bar">
+    24 │   <input v-model="foo?.bar.baz">
+  
+  i Vue writes the new value of the field back to this expression, so it must be a variable or a property, such as foo or foo.bar.
+  
+  i Replace the expression with the variable or property to keep in sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:23:19 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of this v-model directive uses optional chaining.
+  
+    21 │   <input v-model="'foo'">
+    22 │   <input v-model="foo?.()">
+  > 23 │   <input v-model="foo?.bar">
+       │                   ^^^^^^^^
+    24 │   <input v-model="foo?.bar.baz">
+    25 │   <input v-model="(a?.b)?.c">
+  
+  i Vue writes the new value of the field back to this expression, and a property read with ?. can't be assigned to.
+  
+  i Replace ?. with ., and make sure the object exists before the field is shown, e.g. with v-if.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:24:19 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of this v-model directive uses optional chaining.
+  
+    22 │   <input v-model="foo?.()">
+    23 │   <input v-model="foo?.bar">
+  > 24 │   <input v-model="foo?.bar.baz">
+       │                   ^^^^^^^^^^^^
+    25 │   <input v-model="(a?.b)?.c">
+    26 │   <input v-model="(a?.b).c">
+  
+  i Vue writes the new value of the field back to this expression, and a property read with ?. can't be assigned to.
+  
+  i Replace ?. with ., and make sure the object exists before the field is shown, e.g. with v-if.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:25:19 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of this v-model directive uses optional chaining.
+  
+    23 │   <input v-model="foo?.bar">
+    24 │   <input v-model="foo?.bar.baz">
+  > 25 │   <input v-model="(a?.b)?.c">
+       │                   ^^^^^^^^^
+    26 │   <input v-model="(a?.b).c">
+    27 │   <input v-model="(null).foo">
+  
+  i Vue writes the new value of the field back to this expression, and a property read with ?. can't be assigned to.
+  
+  i Replace ?. with ., and make sure the object exists before the field is shown, e.g. with v-if.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:26:19 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of this v-model directive sets a property of a value that may be null or undefined.
+  
+    24 │   <input v-model="foo?.bar.baz">
+    25 │   <input v-model="(a?.b)?.c">
+  > 26 │   <input v-model="(a?.b).c">
+       │                   ^^^^^^^^
+    27 │   <input v-model="(null).foo">
+    28 │   <input v-model="(a?.b).c.d">
+  
+  i Setting a property of null or undefined throws an error when the field changes.
+  
+  i Bind to a property of an object that always exists, and make sure it exists before the field is shown, e.g. with v-if.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:27:19 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of this v-model directive sets a property of a value that may be null or undefined.
+  
+    25 │   <input v-model="(a?.b)?.c">
+    26 │   <input v-model="(a?.b).c">
+  > 27 │   <input v-model="(null).foo">
+       │                   ^^^^^^^^^^
+    28 │   <input v-model="(a?.b).c.d">
+    29 │   <div v-for="x in list"><input v-model="x"></div>
+  
+  i Setting a property of null or undefined throws an error when the field changes.
+  
+  i Bind to a property of an object that always exists, and make sure it exists before the field is shown, e.g. with v-if.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:28:19 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of this v-model directive sets a property of a value that may be null or undefined.
+  
+    26 │   <input v-model="(a?.b).c">
+    27 │   <input v-model="(null).foo">
+  > 28 │   <input v-model="(a?.b).c.d">
+       │                   ^^^^^^^^^^
+    29 │   <div v-for="x in list"><input v-model="x"></div>
+    30 │   <div v-for="x in list"><input v-model="(x)"></div>
+  
+  i Setting a property of null or undefined throws an error when the field changes.
+  
+  i Bind to a property of an object that always exists, and make sure it exists before the field is shown, e.g. with v-if.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:29:42 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-model directive writes to x, a variable of v-for.
+  
+    27 │   <input v-model="(null).foo">
+    28 │   <input v-model="(a?.b).c.d">
+  > 29 │   <div v-for="x in list"><input v-model="x"></div>
+       │                                          ^
+    30 │   <div v-for="x in list"><input v-model="(x)"></div>
+    31 │   <div v-for="x in list"><input v-model="(((x)))"></div>
+  
+  i Vue doesn't allow assigning to the variables of v-for, because the new value wouldn't reach the data they were read from.
+  
+  i Bind to a property of the variable instead, e.g. x.name, or to the original data.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:30:43 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-model directive writes to x, a variable of v-for.
+  
+    28 │   <input v-model="(a?.b).c.d">
+    29 │   <div v-for="x in list"><input v-model="x"></div>
+  > 30 │   <div v-for="x in list"><input v-model="(x)"></div>
+       │                                           ^
+    31 │   <div v-for="x in list"><input v-model="(((x)))"></div>
+    32 │   <div v-for="(item, index) in list"><input v-model="index"></div>
+  
+  i Vue doesn't allow assigning to the variables of v-for, because the new value wouldn't reach the data they were read from.
+  
+  i Bind to a property of the variable instead, e.g. x.name, or to the original data.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:31:45 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-model directive writes to x, a variable of v-for.
+  
+    29 │   <div v-for="x in list"><input v-model="x"></div>
+    30 │   <div v-for="x in list"><input v-model="(x)"></div>
+  > 31 │   <div v-for="x in list"><input v-model="(((x)))"></div>
+       │                                             ^
+    32 │   <div v-for="(item, index) in list"><input v-model="index"></div>
+    33 │   <div v-for="{ name } in list"><input v-model="name"></div>
+  
+  i Vue doesn't allow assigning to the variables of v-for, because the new value wouldn't reach the data they were read from.
+  
+  i Bind to a property of the variable instead, e.g. x.name, or to the original data.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:32:54 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-model directive writes to index, a variable of v-for.
+  
+    30 │   <div v-for="x in list"><input v-model="(x)"></div>
+    31 │   <div v-for="x in list"><input v-model="(((x)))"></div>
+  > 32 │   <div v-for="(item, index) in list"><input v-model="index"></div>
+       │                                                      ^^^^^
+    33 │   <div v-for="{ name } in list"><input v-model="name"></div>
+    34 │   <input v-for="x in list" v-model="x">
+  
+  i Vue doesn't allow assigning to the variables of v-for, because the new value wouldn't reach the data they were read from.
+  
+  i Bind to a property of the variable instead, e.g. index.name, or to the original data.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:33:49 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-model directive writes to name, a variable of v-for.
+  
+    31 │   <div v-for="x in list"><input v-model="(((x)))"></div>
+    32 │   <div v-for="(item, index) in list"><input v-model="index"></div>
+  > 33 │   <div v-for="{ name } in list"><input v-model="name"></div>
+       │                                                 ^^^^
+    34 │   <input v-for="x in list" v-model="x">
+    35 │   <MyComponent v-slot="{ item }"><input v-model="item"></MyComponent>
+  
+  i Vue doesn't allow assigning to the variables of v-for, because the new value wouldn't reach the data they were read from.
+  
+  i Bind to a property of the variable instead, e.g. name.name, or to the original data.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:34:37 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-model directive writes to x, a variable of v-for.
+  
+    32 │   <div v-for="(item, index) in list"><input v-model="index"></div>
+    33 │   <div v-for="{ name } in list"><input v-model="name"></div>
+  > 34 │   <input v-for="x in list" v-model="x">
+       │                                     ^
+    35 │   <MyComponent v-slot="{ item }"><input v-model="item"></MyComponent>
+    36 │   <MyComponent><template #default="{ item }"><input v-model="item"></template></MyComponent>
+  
+  i Vue doesn't allow assigning to the variables of v-for, because the new value wouldn't reach the data they were read from.
+  
+  i Bind to a property of the variable instead, e.g. x.name, or to the original data.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:35:50 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-model directive writes to item, a variable of v-slot.
+  
+    33 │   <div v-for="{ name } in list"><input v-model="name"></div>
+    34 │   <input v-for="x in list" v-model="x">
+  > 35 │   <MyComponent v-slot="{ item }"><input v-model="item"></MyComponent>
+       │                                                  ^^^^
+    36 │   <MyComponent><template #default="{ item }"><input v-model="item"></template></MyComponent>
+    37 │ </template>
+  
+  i Vue doesn't allow assigning to the variables of v-slot, because the new value wouldn't reach the data they were read from.
+  
+  i Bind to a property of the variable instead, e.g. item.name, or to the original data.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:36:62 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-model directive writes to item, a variable of v-slot.
+  
+    34 │   <input v-for="x in list" v-model="x">
+    35 │   <MyComponent v-slot="{ item }"><input v-model="item"></MyComponent>
+  > 36 │   <MyComponent><template #default="{ item }"><input v-model="item"></template></MyComponent>
+       │                                                              ^^^^
+    37 │ </template>
+    38 │ 
+  
+  i Vue doesn't allow assigning to the variables of v-slot, because the new value wouldn't reach the data they were read from.
+  
+  i Bind to a property of the variable instead, e.g. item.name, or to the original data.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:16:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a valid expression in template syntax
+  
+    14 │   <textarea v-model.lazy.aaa.bbb="foo"></textarea>
+    15 │   <input v-model>
+  > 16 │   <MyComponent v-model="" />
+       │                         
+    17 │   <MyComponent v-model="   " />
+    18 │   <input v-model="a + b">
+  
+  i Template expressions can only contain JavaScript expressions, not statements like 'let', 'if', or 'function'.
+  
+
+```
+
+```
+invalid.vue:17:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a valid expression in template syntax
+  
+    15 │   <input v-model>
+    16 │   <MyComponent v-model="" />
+  > 17 │   <MyComponent v-model="   " />
+       │                            
+    18 │   <input v-model="a + b">
+    19 │   <input v-model=" a + b ">
+  
+  i Template expressions can only contain JavaScript expressions, not statements like 'let', 'if', or 'function'.
+  
+
+```

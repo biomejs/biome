@@ -5211,19 +5211,25 @@ pub const MEDIA_FEATURE_NAMES: [&str; 60] = [
     "width",
 ];
 
-pub const SHORTHAND_PROPERTIES: [&str; 57] = [
+pub const SHORTHAND_PROPERTIES: [&str; 74] = [
     "animation",
     "background",
     "border",
     "border-block",
+    "border-block-color",
     "border-block-end",
     "border-block-start",
+    "border-block-style",
+    "border-block-width",
     "border-bottom",
     "border-color",
     "border-image",
     "border-inline",
+    "border-inline-color",
     "border-inline-end",
     "border-inline-start",
+    "border-inline-style",
+    "border-inline-width",
     "border-left",
     "border-radius",
     "border-right",
@@ -5232,6 +5238,15 @@ pub const SHORTHAND_PROPERTIES: [&str; 57] = [
     "border-width",
     "column-rule",
     "columns",
+    "corner-block-end-shape",
+    "corner-block-start-shape",
+    "corner-bottom-shape",
+    "corner-inline-end-shape",
+    "corner-inline-start-shape",
+    "corner-left-shape",
+    "corner-right-shape",
+    "corner-shape",
+    "corner-top-shape",
     "flex",
     "flex-flow",
     "font",
@@ -5260,18 +5275,20 @@ pub const SHORTHAND_PROPERTIES: [&str; 57] = [
     "place-content",
     "place-items",
     "place-self",
+    "position-try",
     "scroll-margin",
     "scroll-margin-block",
     "scroll-margin-inline",
     "scroll-padding",
     "scroll-padding-block",
     "scroll-padding-inline",
+    "text-box",
     "text-decoration",
     "text-emphasis",
     "transition",
 ];
 
-pub const LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES: [&[&str]; 57] = [
+pub const LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES: [&[&str]; 74] = [
     &[
         "animation-delay",
         "animation-direction",
@@ -5311,9 +5328,16 @@ pub const LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES: [&[&str]; 57] = [
     ],
     &[
         "border-block-color",
+        "border-block-end-color",
+        "border-block-end-style",
+        "border-block-end-width",
+        "border-block-start-color",
+        "border-block-start-style",
+        "border-block-start-width",
         "border-block-style",
         "border-block-width",
     ],
+    &["border-block-end-color", "border-block-start-color"],
     &[
         "border-block-end-color",
         "border-block-end-style",
@@ -5324,6 +5348,8 @@ pub const LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES: [&[&str]; 57] = [
         "border-block-start-style",
         "border-block-start-width",
     ],
+    &["border-block-end-style", "border-block-start-style"],
+    &["border-block-end-width", "border-block-start-width"],
     &[
         "border-bottom-color",
         "border-bottom-style",
@@ -5344,9 +5370,16 @@ pub const LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES: [&[&str]; 57] = [
     ],
     &[
         "border-inline-color",
+        "border-inline-end-color",
+        "border-inline-end-style",
+        "border-inline-end-width",
+        "border-inline-start-color",
+        "border-inline-start-style",
+        "border-inline-start-width",
         "border-inline-style",
         "border-inline-width",
     ],
+    &["border-inline-end-color", "border-inline-start-color"],
     &[
         "border-inline-end-color",
         "border-inline-end-style",
@@ -5357,6 +5390,8 @@ pub const LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES: [&[&str]; 57] = [
         "border-inline-start-style",
         "border-inline-start-width",
     ],
+    &["border-inline-end-style", "border-inline-start-style"],
+    &["border-inline-end-width", "border-inline-start-width"],
     &[
         "border-left-color",
         "border-left-style",
@@ -5392,6 +5427,32 @@ pub const LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES: [&[&str]; 57] = [
         "column-rule-width",
     ],
     &["column-count", "column-width"],
+    &["corner-end-end-shape", "corner-end-start-shape"],
+    &["corner-start-end-shape", "corner-start-start-shape"],
+    &["corner-bottom-left-shape", "corner-bottom-right-shape"],
+    &["corner-end-end-shape", "corner-start-end-shape"],
+    &["corner-end-start-shape", "corner-start-start-shape"],
+    &["corner-bottom-left-shape", "corner-top-left-shape"],
+    &["corner-bottom-right-shape", "corner-top-right-shape"],
+    &[
+        "corner-block-end-shape",
+        "corner-block-start-shape",
+        "corner-bottom-left-shape",
+        "corner-bottom-right-shape",
+        "corner-bottom-shape",
+        "corner-end-end-shape",
+        "corner-end-start-shape",
+        "corner-inline-end-shape",
+        "corner-inline-start-shape",
+        "corner-left-shape",
+        "corner-right-shape",
+        "corner-start-end-shape",
+        "corner-start-start-shape",
+        "corner-top-left-shape",
+        "corner-top-right-shape",
+        "corner-top-shape",
+    ],
+    &["corner-top-left-shape", "corner-top-right-shape"],
     &["flex-basis", "flex-grow", "flex-shrink"],
     &["flex-direction", "flex-wrap"],
     &[
@@ -5464,6 +5525,7 @@ pub const LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES: [&[&str]; 57] = [
     &["align-content", "justify-content"],
     &["align-items", "justify-items"],
     &["align-self", "justify-self"],
+    &["position-try-fallbacks", "position-try-order"],
     &[
         "scroll-margin-bottom",
         "scroll-margin-left",
@@ -5480,6 +5542,7 @@ pub const LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES: [&[&str]; 57] = [
     ],
     &["scroll-padding-block-end", "scroll-padding-block-start"],
     &["scroll-padding-inline-end", "scroll-padding-inline-start"],
+    &["text-box-edge", "text-box-trim"],
     &[
         "text-decoration-color",
         "text-decoration-line",
@@ -5488,6 +5551,7 @@ pub const LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES: [&[&str]; 57] = [
     ],
     &["text-emphasis-color", "text-emphasis-style"],
     &[
+        "transition-behavior",
         "transition-delay",
         "transition-duration",
         "transition-property",
@@ -6217,9 +6281,7 @@ mod tests {
 
     #[test]
     fn test_shorthand_properties_sorted() {
-        let sorted = SHORTHAND_PROPERTIES.to_vec();
-        let _ = sorted.is_sorted();
-        assert_eq!(SHORTHAND_PROPERTIES, sorted.as_slice());
+        assert_strictly_ordered(&SHORTHAND_PROPERTIES);
     }
 
     #[test]
@@ -6232,9 +6294,7 @@ mod tests {
     #[test]
     fn test_longhand_sub_properties_of_shorthand_properties_sorted() {
         for longhand_sub_properties in LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES.iter() {
-            let sorted = longhand_sub_properties.to_vec();
-            let _ = sorted.is_sorted();
-            assert_eq!(*longhand_sub_properties, sorted.as_slice());
+            assert_strictly_ordered(longhand_sub_properties);
         }
     }
 
@@ -6255,6 +6315,12 @@ mod tests {
         {
             for longhand_sub_property in longhand_sub_properties.iter() {
                 if [
+                    "border-block-color",
+                    "border-block-style",
+                    "border-block-width",
+                    "border-inline-color",
+                    "border-inline-style",
+                    "border-inline-width",
                     "border-color",
                     "border-radius",
                     "border-style",
@@ -6262,9 +6328,12 @@ mod tests {
                 ]
                 .contains(shorthand_property)
                 {
-                    let (start, end) = shorthand_property.split_at(6);
+                    let (start, end) = shorthand_property.rsplit_once('-').unwrap();
                     assert!(longhand_sub_property.starts_with(start));
                     assert!(longhand_sub_property.ends_with(end));
+                } else if shorthand_property.starts_with("corner-") {
+                    assert!(longhand_sub_property.starts_with("corner-"));
+                    assert!(longhand_sub_property.ends_with("-shape"));
                 } else if *shorthand_property == "columns" {
                     assert!(longhand_sub_property.starts_with("column"));
                 } else if *shorthand_property == "flex-flow" {

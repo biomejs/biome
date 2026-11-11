@@ -1,0 +1,580 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-options-api.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+export default {
+  props: {
+    myProp: 'Number',
+    anotherType: ['Number', 'String'],
+    extraProp: {
+      type: 'Number',
+      default: 10,
+    },
+    lastProp: {
+      type: ['Boolean'],
+    },
+    nullProp: 'null',
+    keyword: 'class',
+    awaitKeyword: 'await',
+    template: `String`,
+    binary: Foo + '',
+    number: 1000,
+    bigInt: 10n,
+    boolean: true,
+    regex: /a/,
+    emptyStr: '',
+    emptyTemplate: ``,
+    notIdentifier: 'a b',
+    withSubstitution: `${Foo}`,
+    parenthesized: ('String'),
+    update: i++,
+    preUpdate: --i,
+    inOperator: 'a' in b,
+    instanceofOperator: a instanceof B,
+    withHoles: ['String',,],
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-options-api.vue:5:13 lint/nursery/useVuePropTypeConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop myProp is not a constructor.
+  
+    3 │ export default {
+    4 │   props: {
+  > 5 │     myProp: 'Number',
+      │             ^^^^^^^^
+    6 │     anotherType: ['Number', 'String'],
+    7 │     extraProp: {
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the constructor Number instead.
+  
+    5 │ ····myProp:·'Number',
+      │             -      - 
+
+```
+
+```
+invalid-options-api.vue:6:19 lint/nursery/useVuePropTypeConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop anotherType is not a constructor.
+  
+    4 │   props: {
+    5 │     myProp: 'Number',
+  > 6 │     anotherType: ['Number', 'String'],
+      │                   ^^^^^^^^
+    7 │     extraProp: {
+    8 │       type: 'Number',
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the constructor Number instead.
+  
+    6 │ ····anotherType:·['Number',·'String'],
+      │                   -      -            
+
+```
+
+```
+invalid-options-api.vue:6:29 lint/nursery/useVuePropTypeConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop anotherType is not a constructor.
+  
+    4 │   props: {
+    5 │     myProp: 'Number',
+  > 6 │     anotherType: ['Number', 'String'],
+      │                             ^^^^^^^^
+    7 │     extraProp: {
+    8 │       type: 'Number',
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the constructor String instead.
+  
+    6 │ ····anotherType:·['Number',·'String'],
+      │                             -      -  
+
+```
+
+```
+invalid-options-api.vue:8:13 lint/nursery/useVuePropTypeConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop extraProp is not a constructor.
+  
+     6 │     anotherType: ['Number', 'String'],
+     7 │     extraProp: {
+   > 8 │       type: 'Number',
+       │             ^^^^^^^^
+     9 │       default: 10,
+    10 │     },
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the constructor Number instead.
+  
+    8 │ ······type:·'Number',
+      │             -      - 
+
+```
+
+```
+invalid-options-api.vue:12:14 lint/nursery/useVuePropTypeConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop lastProp is not a constructor.
+  
+    10 │     },
+    11 │     lastProp: {
+  > 12 │       type: ['Boolean'],
+       │              ^^^^^^^^^
+    13 │     },
+    14 │     nullProp: 'null',
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the constructor Boolean instead.
+  
+    12 │ ······type:·['Boolean'],
+       │              -       -  
+
+```
+
+```
+invalid-options-api.vue:14:15 lint/nursery/useVuePropTypeConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop nullProp is not a constructor.
+  
+    12 │       type: ['Boolean'],
+    13 │     },
+  > 14 │     nullProp: 'null',
+       │               ^^^^^^
+    15 │     keyword: 'class',
+    16 │     awaitKeyword: 'await',
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:15:14 lint/nursery/useVuePropTypeConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop keyword is not a constructor.
+  
+    13 │     },
+    14 │     nullProp: 'null',
+  > 15 │     keyword: 'class',
+       │              ^^^^^^^
+    16 │     awaitKeyword: 'await',
+    17 │     template: `String`,
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:16:19 lint/nursery/useVuePropTypeConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop awaitKeyword is not a constructor.
+  
+    14 │     nullProp: 'null',
+    15 │     keyword: 'class',
+  > 16 │     awaitKeyword: 'await',
+       │                   ^^^^^^^
+    17 │     template: `String`,
+    18 │     binary: Foo + '',
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:17:15 lint/nursery/useVuePropTypeConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop template is not a constructor.
+  
+    15 │     keyword: 'class',
+    16 │     awaitKeyword: 'await',
+  > 17 │     template: `String`,
+       │               ^^^^^^^^
+    18 │     binary: Foo + '',
+    19 │     number: 1000,
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the constructor String instead.
+  
+    17 │ ····template:·`String`,
+       │               -      - 
+
+```
+
+```
+invalid-options-api.vue:18:13 lint/nursery/useVuePropTypeConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop binary is not a constructor.
+  
+    16 │     awaitKeyword: 'await',
+    17 │     template: `String`,
+  > 18 │     binary: Foo + '',
+       │             ^^^^^^^^
+    19 │     number: 1000,
+    20 │     bigInt: 10n,
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:19:13 lint/nursery/useVuePropTypeConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop number is not a constructor.
+  
+    17 │     template: `String`,
+    18 │     binary: Foo + '',
+  > 19 │     number: 1000,
+       │             ^^^^
+    20 │     bigInt: 10n,
+    21 │     boolean: true,
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:20:13 lint/nursery/useVuePropTypeConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop bigInt is not a constructor.
+  
+    18 │     binary: Foo + '',
+    19 │     number: 1000,
+  > 20 │     bigInt: 10n,
+       │             ^^^
+    21 │     boolean: true,
+    22 │     regex: /a/,
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:21:14 lint/nursery/useVuePropTypeConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop boolean is not a constructor.
+  
+    19 │     number: 1000,
+    20 │     bigInt: 10n,
+  > 21 │     boolean: true,
+       │              ^^^^
+    22 │     regex: /a/,
+    23 │     emptyStr: '',
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:22:12 lint/nursery/useVuePropTypeConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop regex is not a constructor.
+  
+    20 │     bigInt: 10n,
+    21 │     boolean: true,
+  > 22 │     regex: /a/,
+       │            ^^^
+    23 │     emptyStr: '',
+    24 │     emptyTemplate: ``,
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:23:15 lint/nursery/useVuePropTypeConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop emptyStr is not a constructor.
+  
+    21 │     boolean: true,
+    22 │     regex: /a/,
+  > 23 │     emptyStr: '',
+       │               ^^
+    24 │     emptyTemplate: ``,
+    25 │     notIdentifier: 'a b',
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:24:20 lint/nursery/useVuePropTypeConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop emptyTemplate is not a constructor.
+  
+    22 │     regex: /a/,
+    23 │     emptyStr: '',
+  > 24 │     emptyTemplate: ``,
+       │                    ^^
+    25 │     notIdentifier: 'a b',
+    26 │     withSubstitution: `${Foo}`,
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:25:20 lint/nursery/useVuePropTypeConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop notIdentifier is not a constructor.
+  
+    23 │     emptyStr: '',
+    24 │     emptyTemplate: ``,
+  > 25 │     notIdentifier: 'a b',
+       │                    ^^^^^
+    26 │     withSubstitution: `${Foo}`,
+    27 │     parenthesized: ('String'),
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:26:23 lint/nursery/useVuePropTypeConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop withSubstitution is not a constructor.
+  
+    24 │     emptyTemplate: ``,
+    25 │     notIdentifier: 'a b',
+  > 26 │     withSubstitution: `${Foo}`,
+       │                       ^^^^^^^^
+    27 │     parenthesized: ('String'),
+    28 │     update: i++,
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:27:21 lint/nursery/useVuePropTypeConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop parenthesized is not a constructor.
+  
+    25 │     notIdentifier: 'a b',
+    26 │     withSubstitution: `${Foo}`,
+  > 27 │     parenthesized: ('String'),
+       │                     ^^^^^^^^
+    28 │     update: i++,
+    29 │     preUpdate: --i,
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the constructor String instead.
+  
+    27 │ ····parenthesized:·('String'),
+       │                     -      -  
+
+```
+
+```
+invalid-options-api.vue:28:13 lint/nursery/useVuePropTypeConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop update is not a constructor.
+  
+    26 │     withSubstitution: `${Foo}`,
+    27 │     parenthesized: ('String'),
+  > 28 │     update: i++,
+       │             ^^^
+    29 │     preUpdate: --i,
+    30 │     inOperator: 'a' in b,
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:29:16 lint/nursery/useVuePropTypeConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop preUpdate is not a constructor.
+  
+    27 │     parenthesized: ('String'),
+    28 │     update: i++,
+  > 29 │     preUpdate: --i,
+       │                ^^^
+    30 │     inOperator: 'a' in b,
+    31 │     instanceofOperator: a instanceof B,
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:30:17 lint/nursery/useVuePropTypeConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop inOperator is not a constructor.
+  
+    28 │     update: i++,
+    29 │     preUpdate: --i,
+  > 30 │     inOperator: 'a' in b,
+       │                 ^^^^^^^^
+    31 │     instanceofOperator: a instanceof B,
+    32 │     withHoles: ['String',,],
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:31:25 lint/nursery/useVuePropTypeConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop instanceofOperator is not a constructor.
+  
+    29 │     preUpdate: --i,
+    30 │     inOperator: 'a' in b,
+  > 31 │     instanceofOperator: a instanceof B,
+       │                         ^^^^^^^^^^^^^^
+    32 │     withHoles: ['String',,],
+    33 │   },
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:32:17 lint/nursery/useVuePropTypeConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop withHoles is not a constructor.
+  
+    30 │     inOperator: 'a' in b,
+    31 │     instanceofOperator: a instanceof B,
+  > 32 │     withHoles: ['String',,],
+       │                 ^^^^^^^^
+    33 │   },
+    34 │ };
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the constructor String instead.
+  
+    32 │ ····withHoles:·['String',,],
+       │                 -      -    
+
+```

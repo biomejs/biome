@@ -70,7 +70,7 @@ declare_lint_rule! {
     /// - To remove `undefined` that is assigned to a variable when it is declared, see [`noUselessUndefinedInitialization`](https://biomejs.dev/linter/rules/no-useless-undefined-initialization/).
     ///
     pub NoNull {
-        version: "next",
+        version: "2.6.4",
         name: "noNull",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-null").same()],

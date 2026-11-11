@@ -1,0 +1,64 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalidIgnoreRelative.css
+---
+# Input
+```css
+/* should generate diagnostics */
+a { font-weight: normal; }
+a { font: italic bold 16px/3 cursive; }
+
+```
+
+# Diagnostics
+```
+invalidIgnoreRelative.css:2:18 lint/nursery/useConsistentFontWeightNotation  FIXABLE  ━━━━━━━━━━━━━━
+
+  i This font weight is written as the keyword normal instead of a number.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ a { font-weight: normal; }
+      │                  ^^^^^^
+    3 │ a { font: italic bold 16px/3 cursive; }
+    4 │ 
+  
+  i Writing font weights the same way everywhere makes styles easier to read and compare.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use 400 instead.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - a·{·font-weight:·normal;·}
+      2 │ + a·{·font-weight:·400;·}
+    3 3 │   a { font: italic bold 16px/3 cursive; }
+    4 4 │   
+  
+
+```
+
+```
+invalidIgnoreRelative.css:3:18 lint/nursery/useConsistentFontWeightNotation  FIXABLE  ━━━━━━━━━━━━━━
+
+  i This font weight is written as the keyword bold instead of a number.
+  
+    1 │ /* should generate diagnostics */
+    2 │ a { font-weight: normal; }
+  > 3 │ a { font: italic bold 16px/3 cursive; }
+      │                  ^^^^
+    4 │ 
+  
+  i Writing font weights the same way everywhere makes styles easier to read and compare.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use 700 instead.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   a { font-weight: normal; }
+    3   │ - a·{·font:·italic·bold·16px/3·cursive;·}
+      3 │ + a·{·font:·italic·700·16px/3·cursive;·}
+    4 4 │   
+  
+
+```

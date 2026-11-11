@@ -361,13 +361,13 @@ MdRoot {
                             prefix: MdQuotePrefix {
                                 pre_marker_indent: MdQuoteIndentList [],
                                 marker_token: R_ANGLE@193..194 ">" [] [],
-                                post_marker_space_token: missing (optional),
+                                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@194..195 " " [] [],
                             },
                             content: MdBlockList [
                                 MdParagraph {
                                     list: MdInlineItemList [
                                         MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@194..205 " list quote" [] [],
+                                            value_token: MD_TEXTUAL_LITERAL@195..205 "list quote" [] [],
                                         },
                                         MdTextual {
                                             value_token: MD_TEXTUAL_LITERAL@205..206 "\n" [] [],
@@ -859,15 +859,15 @@ MdRoot {
             3: MD_INDENT_TOKEN_LIST@193..193
           1: MD_BLOCK_LIST@193..207
             0: MD_QUOTE@193..206
-              0: MD_QUOTE_PREFIX@193..194
+              0: MD_QUOTE_PREFIX@193..195
                 0: MD_QUOTE_INDENT_LIST@193..193
                 1: R_ANGLE@193..194 ">" [] []
-                2: (empty)
-              1: MD_BLOCK_LIST@194..206
-                0: MD_PARAGRAPH@194..206
-                  0: MD_INLINE_ITEM_LIST@194..206
-                    0: MD_TEXTUAL@194..205
-                      0: MD_TEXTUAL_LITERAL@194..205 " list quote" [] []
+                2: MD_QUOTE_POST_MARKER_SPACE@194..195 " " [] []
+              1: MD_BLOCK_LIST@195..206
+                0: MD_PARAGRAPH@195..206
+                  0: MD_INLINE_ITEM_LIST@195..206
+                    0: MD_TEXTUAL@195..205
+                      0: MD_TEXTUAL_LITERAL@195..205 "list quote" [] []
                     1: MD_TEXTUAL@205..206
                       0: MD_TEXTUAL_LITERAL@205..206 "\n" [] []
             1: MD_NEWLINE@206..207

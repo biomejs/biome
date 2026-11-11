@@ -1,0 +1,145 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div><textarea>{{ text }}</textarea></div>
+  <textarea v-model="text">{{ text }}</textarea>
+  <textarea>{{ first }} and {{ second }}</textarea>
+  <textarea>
+    Hello, {{ name }}!
+  </textarea>
+  <textarea>{{ unclosed }} and {{ never closed</textarea>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:18 lint/nursery/noVueTextareaMustache ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × {{ }} can't be used inside a <textarea>.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div><textarea>{{ text }}</textarea></div>
+      │                  ^^^^^^^^^^
+    4 │   <textarea v-model="text">{{ text }}</textarea>
+    5 │   <textarea>{{ first }} and {{ second }}</textarea>
+  
+  i Vue doesn't support text interpolation inside a textarea.
+  
+  i Bind the value of the textarea with v-model instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:28 lint/nursery/noVueTextareaMustache ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × {{ }} can't be used inside a <textarea>.
+  
+    2 │ <template>
+    3 │   <div><textarea>{{ text }}</textarea></div>
+  > 4 │   <textarea v-model="text">{{ text }}</textarea>
+      │                            ^^^^^^^^^^
+    5 │   <textarea>{{ first }} and {{ second }}</textarea>
+    6 │   <textarea>
+  
+  i Vue doesn't support text interpolation inside a textarea.
+  
+  i Bind the value of the textarea with v-model instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:13 lint/nursery/noVueTextareaMustache ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × {{ }} can't be used inside a <textarea>.
+  
+    3 │   <div><textarea>{{ text }}</textarea></div>
+    4 │   <textarea v-model="text">{{ text }}</textarea>
+  > 5 │   <textarea>{{ first }} and {{ second }}</textarea>
+      │             ^^^^^^^^^^^
+    6 │   <textarea>
+    7 │     Hello, {{ name }}!
+  
+  i Vue doesn't support text interpolation inside a textarea.
+  
+  i Bind the value of the textarea with v-model instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:29 lint/nursery/noVueTextareaMustache ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × {{ }} can't be used inside a <textarea>.
+  
+    3 │   <div><textarea>{{ text }}</textarea></div>
+    4 │   <textarea v-model="text">{{ text }}</textarea>
+  > 5 │   <textarea>{{ first }} and {{ second }}</textarea>
+      │                             ^^^^^^^^^^^^
+    6 │   <textarea>
+    7 │     Hello, {{ name }}!
+  
+  i Vue doesn't support text interpolation inside a textarea.
+  
+  i Bind the value of the textarea with v-model instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:12 lint/nursery/noVueTextareaMustache ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × {{ }} can't be used inside a <textarea>.
+  
+    5 │   <textarea>{{ first }} and {{ second }}</textarea>
+    6 │   <textarea>
+  > 7 │     Hello, {{ name }}!
+      │            ^^^^^^^^^^
+    8 │   </textarea>
+    9 │   <textarea>{{ unclosed }} and {{ never closed</textarea>
+  
+  i Vue doesn't support text interpolation inside a textarea.
+  
+  i Bind the value of the textarea with v-model instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:13 lint/nursery/noVueTextareaMustache ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × {{ }} can't be used inside a <textarea>.
+  
+     7 │     Hello, {{ name }}!
+     8 │   </textarea>
+   > 9 │   <textarea>{{ unclosed }} and {{ never closed</textarea>
+       │             ^^^^^^^^^^^^^^
+    10 │ </template>
+    11 │ 
+  
+  i Vue doesn't support text interpolation inside a textarea.
+  
+  i Bind the value of the textarea with v-model instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

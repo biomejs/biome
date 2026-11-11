@@ -1,18 +1,20 @@
 use crate::{
-    AddVisitor, AnalysisFilter, GroupCategory, QueryMatcher, Rule, RuleGroup, RuleKey,
-    RuleMetadata, ServiceBag, SignalEntry, Visitor,
+    AddVisitor, AnalysisFilter, GroupCategory, QueryMatcher, Rule, RuleCategory, RuleGroup,
+    RuleKey, RuleMetadata, ServiceBag, SignalEntry, SignalRuleKey, Visitor,
     context::RuleContext,
+    diagnostics::AnalyzerPanicDiagnostic,
     matcher::{GroupKey, MatchQueryParams},
     query::{QueryKey, Queryable},
-    signals::RuleSignal,
+    signals::{DiagnosticSignal, RuleSignal},
 };
-use biome_diagnostics::Error;
+use biome_diagnostics::{Error, panic::catch_unwind};
 use biome_rowan::{AstNode, Language, RawSyntaxKind, SyntaxKind, SyntaxKindSet, SyntaxNode};
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::{
     any::TypeId,
     borrow,
     collections::{BTreeMap, BTreeSet},
+    panic::AssertUnwindSafe,
 };
 
 /// Defines all the phases that the [RuleRegistry] supports.
@@ -104,6 +106,7 @@ impl<L: Language> RegistryVisitor<L> for MetadataRegistry {
 pub struct RuleRegistry<L: Language> {
     /// Holds a collection of rules for each phase.
     phase_rules: [PhaseRules<L>; 2],
+    panicked: bool,
 }
 
 impl<L: Language + Default> RuleRegistry<L> {
@@ -116,6 +119,7 @@ impl<L: Language + Default> RuleRegistry<L> {
             root,
             registry: Self {
                 phase_rules: Default::default(),
+                panicked: false,
             },
             visitors: BTreeMap::default(),
             services: ServiceBag::default(),
@@ -270,6 +274,10 @@ impl<L: Language> RuleRegistryBuilder<'_, L> {
 
 impl<L: Language + 'static> QueryMatcher<L> for RuleRegistry<L> {
     fn match_query(&mut self, mut params: MatchQueryParams<L>) {
+        if self.panicked {
+            return;
+        }
+
         let phase = &mut self.phase_rules[params.phase as usize];
 
         let query_type = params.query.type_id();
@@ -295,16 +303,50 @@ impl<L: Language + 'static> QueryMatcher<L> for RuleRegistry<L> {
             TypeRules::TypeRules { rules } => rules,
         };
 
+        let query_range = params.query.text_range();
+        let mut panicked = false;
+
         // Run all the rules registered to this QueryMatch
         for rule in rules {
             let state = &mut phase.rule_states[rule.state_index];
-            // TODO: #3394 track error in the signal queue
-            let _ = (rule.run)(&mut params, state);
+            match catch_unwind(AssertUnwindSafe(|| (rule.run)(&mut params, state))) {
+                Ok(result) => {
+                    // TODO: #3394 track error in the signal queue
+                    let _ = result;
+                }
+                Err(panic) => {
+                    let thread_name = std::thread::current().name().map(str::to_owned);
+                    let diagnostic = AnalyzerPanicDiagnostic::new(
+                        rule.key,
+                        rule.category,
+                        query_range,
+                        panic,
+                        thread_name,
+                    );
+                    params.signal_queue.push(SignalEntry {
+                        signal: Box::new(DiagnosticSignal::new(move || diagnostic.clone())),
+                        rule: SignalRuleKey::Internal,
+                        instances: Default::default(),
+                        text_range: query_range,
+                        category: rule.category,
+                    });
+                    panicked = true;
+                    break;
+                }
+            }
+        }
+
+        if panicked {
+            self.panicked = true;
         }
     }
 
     fn syntax_query_kinds(&self, phase: Phases) -> Option<SyntaxKindSet<L>> {
         Some(self.phase_rules[phase as usize].syntax_kinds)
+    }
+
+    fn has_panicked(&self) -> bool {
+        self.panicked
     }
 }
 
@@ -373,6 +415,8 @@ impl RegistryRuleMetadata {
 pub struct RegistryRule<L: Language> {
     run: RuleExecutor<L>,
     state_index: usize,
+    key: RuleKey,
+    category: RuleCategory,
 }
 
 /// Internal state for a given rule
@@ -480,6 +524,156 @@ impl<L: Language + Default> RegistryRule<L> {
         Self {
             run: run::<R>,
             state_index,
+            key: RuleKey::rule::<R>(),
+            category: <R::Group as RuleGroup>::Category::CATEGORY,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{
+        AnalysisFilter, AnalyzerOptions, ApplySuppression, Ast, GroupCategory, RuleMeta,
+        SuppressionAction, context::RuleContext, matcher::Query,
+    };
+    use biome_diagnostics::{
+        Diagnostic, DiagnosticExt, Error, category, print_diagnostic_to_string,
+    };
+    use biome_rowan::{
+        AstNode, BatchMutation, SyntaxToken, TextRange,
+        raw_language::{RawLanguage, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
+    };
+    use std::collections::BinaryHeap;
+
+    enum TestCategory {}
+
+    impl GroupCategory for TestCategory {
+        type Language = RawLanguage;
+        const CATEGORY: RuleCategory = RuleCategory::Lint;
+
+        fn record_groups<V: RegistryVisitor<Self::Language> + ?Sized>(_: &mut V) {}
+    }
+
+    enum TestGroup {}
+
+    impl RuleGroup for TestGroup {
+        type Language = RawLanguage;
+        type Category = TestCategory;
+        const NAME: &'static str = "test";
+
+        fn record_rules<V: RegistryVisitor<Self::Language> + ?Sized>(_: &mut V) {}
+    }
+
+    enum PanicRule {}
+
+    impl RuleMeta for PanicRule {
+        type Group = TestGroup;
+        const METADATA: RuleMetadata = RuleMetadata::new("next", "panicRule", "Test rule.", "raw");
+    }
+
+    impl Rule for PanicRule {
+        type Query = Ast<RawLanguageRoot>;
+        type State = ();
+        type Signals = Option<Self::State>;
+        type Options = ();
+
+        fn run(_: &RuleContext<Self>) -> Self::Signals {
+            panic!("intentional analyzer panic");
+        }
+    }
+
+    struct TestSuppressionAction;
+
+    impl SuppressionAction for TestSuppressionAction {
+        type Language = RawLanguage;
+
+        fn find_token_for_inline_suppression(
+            &self,
+            _: SyntaxToken<Self::Language>,
+        ) -> Option<ApplySuppression<Self::Language>> {
+            None
+        }
+
+        fn apply_inline_suppression(
+            &self,
+            _: &mut BatchMutation<Self::Language>,
+            _: ApplySuppression<Self::Language>,
+            _: &str,
+            _: &str,
+            _: &TextRange,
+        ) {
+        }
+
+        fn apply_top_level_suppression(
+            &self,
+            _: &mut BatchMutation<Self::Language>,
+            _: SyntaxToken<Self::Language>,
+            _: &str,
+        ) {
+        }
+
+        fn suppression_top_level_comment(&self, _: &str) -> String {
+            String::new()
+        }
+    }
+
+    #[test]
+    fn reports_rule_panics_as_diagnostics() {
+        let root = RawLanguageRoot::unwrap_cast(RawSyntaxTreeBuilder::wrap_with_node(
+            RawLanguageKind::ROOT,
+            |builder| {
+                builder.token(RawLanguageKind::NUMBER_TOKEN, "1");
+            },
+        ));
+        let filter = AnalysisFilter::default();
+        let mut builder = RuleRegistry::builder(&filter, &root);
+        builder.record_rule::<PanicRule>();
+        let (mut registry, services, diagnostics, _) = builder.build();
+        assert!(diagnostics.is_empty());
+
+        let options = AnalyzerOptions::default();
+        let suppression_action = TestSuppressionAction;
+        let mut signal_queue = BinaryHeap::new();
+        registry.match_query(MatchQueryParams {
+            phase: Phases::Syntax,
+            root: &root,
+            query: Query::new(root.syntax().clone()),
+            services: &services,
+            signal_queue: &mut signal_queue,
+            suppression_action: &suppression_action,
+            options: &options,
+        });
+
+        assert!(registry.has_panicked());
+        let entry = signal_queue.pop().expect("panic diagnostic");
+        assert!(matches!(entry.rule, SignalRuleKey::Internal));
+
+        let diagnostic = entry.signal.diagnostic().expect("panic diagnostic");
+        assert_eq!(
+            diagnostic.category(),
+            Some(category!("internalError/panic"))
+        );
+        assert_eq!(
+            diagnostic.get_span(),
+            Some(root.syntax().text_trimmed_range())
+        );
+        let diagnostic = Error::from(diagnostic)
+            .with_file_path("example.raw")
+            .with_file_source_code("1");
+        let output = print_diagnostic_to_string(&diagnostic);
+        assert!(output.contains("test/panicRule"), "{output}");
+        assert!(output.contains("intentional analyzer panic"), "{output}");
+
+        registry.match_query(MatchQueryParams {
+            phase: Phases::Syntax,
+            root: &root,
+            query: Query::new(root.syntax().clone()),
+            services: &services,
+            signal_queue: &mut signal_queue,
+            suppression_action: &suppression_action,
+            options: &options,
+        });
+        assert!(signal_queue.is_empty());
     }
 }

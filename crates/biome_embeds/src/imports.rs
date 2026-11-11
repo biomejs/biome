@@ -1,7 +1,8 @@
-use biome_db::ParsedSource;
+use biome_db::Source;
 use biome_js_syntax::{AnyJsModuleItem, AnyJsRoot};
 use biome_languages::{DocumentFileSource, LanguageDb};
 use biome_parser::AnyParse;
+use biome_parser::db::SourceExt;
 use biome_rowan::{AstNode, TextRange, TextSize};
 use camino::Utf8Path;
 
@@ -39,7 +40,7 @@ pub(crate) fn imports_in_range(imports: &[TextRange], range: TextRange) -> &[Tex
 }
 
 #[salsa::tracked(returns(ref))]
-fn static_imports_from_source(db: &dyn LanguageDb, file: ParsedSource) -> Vec<TextRange> {
+fn static_imports_from_source(db: &dyn LanguageDb, file: Source) -> Vec<TextRange> {
     collect_static_imports(file.snippets(db).iter().filter_map(|snippet| {
         Some((
             snippet.parsed(db),
@@ -65,44 +66,47 @@ pub fn static_imports<'db>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::testing::TestDb;
+    use crate::testing::{TestDb, TestSnippet};
     use crate::{EmbeddedSnippet, collect_embedded_data};
-    use biome_db::ParsedSnippet;
     use biome_db::testing::assert_function_query_was_not_run;
     use biome_html_parser::parse_html;
     use biome_js_parser::{JsParserOptions, parse_js_with_offset};
     use biome_languages::{HtmlFileSource, JsFileSource};
     use camino::Utf8PathBuf;
-    use salsa::Setter;
 
     #[test]
     fn static_imports_preserve_declarations_and_host_ranges() {
-        let mut db = TestDb::new();
+        let db = TestDb::new();
         let first = "\nimport first from './shared.js';\nimport { second } from './shared.js';";
         let second = "\nimport type { Shape } from './types.js';\nimport './setup.js';\nimport('./dynamic.js');\nconst text = 'import fake from \"fake\"';\n// import './comment.js';\n";
         let host =
             format!("<p>日本語</p>\r\n<script>{first}</script>\r\n<script>{second}</script>");
         let path = Utf8PathBuf::from("src/file.astro");
         let host_parse: AnyParse = parse_html(&host, (&HtmlFileSource::astro()).into()).into();
-        let snippets: Vec<_> = [first, second]
+        let ranges: Vec<_> = [first, second]
             .into_iter()
             .map(|text| {
                 let start = TextSize::from(host.find(text).unwrap() as u32);
-                let range = TextRange::at(start, TextSize::of(text));
-                let parse = parse_js_with_offset(
-                    text,
-                    start,
-                    JsFileSource::ts(),
-                    JsParserOptions::default(),
-                );
-                assert!(!parse.has_errors());
-                ParsedSnippet::new(&db, parse.into(), range, range, start, 5)
+                TextRange::at(start, TextSize::of(text))
             })
             .collect();
-        let file = ParsedSource::new(&db, path.clone(), host_parse.clone(), 2, snippets.clone());
-        db.insert_file(path.clone(), file);
+        db.insert_document(
+            &path,
+            &host,
+            2,
+            [first, second]
+                .into_iter()
+                .zip(&ranges)
+                .map(|(text, range)| TestSnippet {
+                    text: text.to_string(),
+                    element_range: *range,
+                    content_range: *range,
+                    content_offset: range.start(),
+                    source_index: 5,
+                })
+                .collect(),
+        );
         let whole = TextRange::up_to(TextSize::of(&host));
-        let imports = static_imports(&db, &path, whole);
         let expected: Vec<_> = [
             "import first from './shared.js';",
             "import { second } from './shared.js';",
@@ -117,36 +121,35 @@ mod tests {
             )
         })
         .collect();
-        assert_eq!(imports, expected);
-        assert_eq!(
-            static_imports(&db, &path, snippets[0].content_range(&db)),
-            &expected[..2]
-        );
-        assert_eq!(
-            static_imports(&db, &path, snippets[1].content_range(&db)),
-            &expected[2..]
-        );
+        assert_eq!(static_imports(&db, &path, whole), expected);
+        assert_eq!(static_imports(&db, &path, ranges[0]), &expected[..2]);
+        assert_eq!(static_imports(&db, &path, ranges[1]), &expected[2..]);
         assert!(static_imports(&db, Utf8Path::new("missing.astro"), whole).is_empty());
 
+        let parses: Vec<AnyParse> = [first, second]
+            .into_iter()
+            .zip(&ranges)
+            .map(|(text, range)| {
+                parse_js_with_offset(
+                    text,
+                    range.start(),
+                    JsFileSource::ts(),
+                    JsParserOptions::default(),
+                )
+                .into()
+            })
+            .collect();
         let data = collect_embedded_data(
             HtmlFileSource::astro().into(),
             &host_parse,
-            snippets
+            parses
                 .iter()
-                .map(|snippet| {
-                    EmbeddedSnippet::new(
-                        snippet.parsed(&db),
-                        snippet.content_range(&db),
-                        JsFileSource::ts().into(),
-                    )
-                })
+                .zip(&ranges)
+                .map(|(parse, range)| EmbeddedSnippet::new(parse, *range, JsFileSource::ts().into()))
                 .collect(),
         );
         assert_eq!(data.static_imports(whole), expected);
-        assert_eq!(
-            data.static_imports(snippets[1].content_range(&db)),
-            &expected[2..]
-        );
+        assert_eq!(data.static_imports(ranges[1]), &expected[2..]);
 
         let local_parse =
             biome_js_parser::parse(first, JsFileSource::ts(), JsParserOptions::default()).into();
@@ -155,12 +158,13 @@ mod tests {
             &host_parse,
             vec![EmbeddedSnippet::new(
                 &local_parse,
-                snippets[0].content_range(&db),
+                ranges[0],
                 JsFileSource::ts().into(),
             )],
         );
         assert_eq!(data.static_imports(whole), &expected[..2]);
 
+        let file = biome_db::Db::parsed_source_for_path(&db, &path).unwrap();
         db.clear_salsa_events();
         assert_eq!(static_imports(&db, &path, whole), expected);
         assert_function_query_was_not_run(
@@ -169,17 +173,5 @@ mod tests {
             file,
             &db.take_salsa_events(),
         );
-
-        let replacement = parse_js_with_offset(
-            "import('./dynamic.js');",
-            snippets[0].content_offset(&db),
-            JsFileSource::ts(),
-            JsParserOptions::default(),
-        )
-        .into();
-        snippets[0].set_parsed(&mut db).to(replacement);
-        assert_eq!(static_imports(&db, &path, whole), &expected[2..]);
-        file.set_snippets(&mut db).to(Vec::new());
-        assert!(static_imports(&db, &path, whole).is_empty());
     }
 }

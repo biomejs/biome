@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-with-defaults-variable.vue
+---
+# Input
+```vue
+<script setup lang="ts">
+/* should not generate diagnostics */
+import { defaults } from "./defaults";
+
+withDefaults(defineProps<{ foo?: string }>(), defaults);
+</script>
+
+```

@@ -1,0 +1,133 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+namespace X {
+	export type T = number;
+}
+
+namespace Y {
+	export const x: X.T = 3;
+}
+
+namespace A {}
+namespace A.B {
+	export type Z = 1;
+}
+
+enum EnumA {
+	X,
+	Y,
+}
+
+enum EnumB {
+	Z = EnumA.X,
+}
+
+namespace Shadowed {
+	export type T = number;
+	namespace Inner {
+		type T = string;
+		const x: Shadowed.T = 0;
+	}
+}
+
+const unresolved: Unknown.B = 3;
+
+namespace MissingMember {
+	const z = MissingMember.y;
+}
+
+enum Merged {
+	One,
+}
+
+namespace Merged {
+	export function bar() {
+		return Merged.One;
+	}
+}
+
+namespace MergedFoo {
+	export enum MergedFoo {
+		One,
+	}
+}
+
+namespace MergedFoo {
+	export function bar() {
+		return MergedFoo.One;
+	}
+}
+
+// Members that aren't exported can't be accessed through the namespace.
+namespace NotExported {
+	const value = 1;
+	const a = NotExported.value;
+}
+
+// The member is shadowed by a local variable or a parameter.
+namespace LocalShadow {
+	export const value = 1;
+	function f(value: string) {
+		return LocalShadow.value;
+	}
+	function g() {
+		const value = "";
+		return LocalShadow.value;
+	}
+}
+
+// An enum member with the same name shadows the namespace member.
+namespace EnumShadow {
+	export const a = 1;
+	enum E {
+		a = EnumShadow.a,
+	}
+}
+
+// Keywords can be enum member names, but can't be used alone.
+enum Keyword {
+	class,
+	delete,
+	await,
+	other = Keyword.class,
+	another = Keyword.await,
+}
+
+// `delete` doesn't accept a plain variable name.
+namespace Delete {
+	export let value: number | undefined;
+	delete Delete.value;
+	delete (Delete.value);
+	delete Delete.value!;
+	delete (Delete.value as any);
+}
+
+// The nested namespace isn't exported, so it can't be reached through `NotExportedNested`.
+namespace NotExportedNested {
+	namespace Inner {
+		export type T = number;
+		const x: NotExportedNested.Inner.T = 0;
+	}
+}
+
+// Computed access isn't checked.
+enum Computed {
+	A,
+	B = Computed["A"],
+}
+
+class Klass {
+	static value = 1;
+	static other = Klass.value;
+}
+
+const object = { value: 1 };
+const fromObject = object.value;
+
+```

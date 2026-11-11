@@ -1,0 +1,68 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-shorthand.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+const beforeDestroy = () => {};
+const destroyed = () => {};
+
+export default {
+  beforeDestroy,
+  destroyed,
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-shorthand.vue:7:3 lint/nursery/noVueDeprecatedDestroyedLifecycle  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  × The beforeDestroy hook was renamed to beforeUnmount in Vue 3.
+  
+    6 │ export default {
+  > 7 │   beforeDestroy,
+      │   ^^^^^^^^^^^^^
+    8 │   destroyed,
+    9 │ };
+  
+  i Vue 3 doesn't call the beforeDestroy hook, so the code inside it never runs.
+  
+  i Rename the hook to beforeUnmount.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the hook to beforeUnmount.
+  
+    6 │ ··beforeUnmount:·beforeDestroy,
+      │   +++++++++++++++              
+
+```
+
+```
+invalid-shorthand.vue:8:3 lint/nursery/noVueDeprecatedDestroyedLifecycle  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  × The destroyed hook was renamed to unmounted in Vue 3.
+  
+     6 │ export default {
+     7 │   beforeDestroy,
+   > 8 │   destroyed,
+       │   ^^^^^^^^^
+     9 │ };
+    10 │ </script>
+  
+  i Vue 3 doesn't call the destroyed hook, so the code inside it never runs.
+  
+  i Rename the hook to unmounted.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the hook to unmounted.
+  
+    7 │ ··unmounted:·destroyed,
+      │   +++++++++++          
+
+```

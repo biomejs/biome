@@ -1,0 +1,167 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { createApp, defineComponent } from "vue";
+
+createApp({});
+createApp({});
+
+defineComponent({});
+defineComponent(() => () => null);
+defineComponent((props) => () => null, { props: ["title"] });
+
+Vue.defineComponent({ name: "FromGlobal" });
+
+defineComponent((props) => () => null, sharedOptions);
+
+```
+
+# Diagnostics
+```
+invalid.js:4:1 lint/nursery/useVueOneComponentPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file defines more than one component.
+  
+    2 │ import { createApp, defineComponent } from "vue";
+    3 │ 
+  > 4 │ createApp({});
+      │ ^^^^^^^^^^^^^
+    5 │ createApp({});
+    6 │ 
+  
+  i Components that share a file are harder to find, and the file grows harder to read and change.
+  
+  i Move this component to its own file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/useVueOneComponentPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file defines more than one component.
+  
+    4 │ createApp({});
+  > 5 │ createApp({});
+      │ ^^^^^^^^^^^^^
+    6 │ 
+    7 │ defineComponent({});
+  
+  i Components that share a file are harder to find, and the file grows harder to read and change.
+  
+  i Move this component to its own file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/useVueOneComponentPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file defines more than one component.
+  
+    5 │ createApp({});
+    6 │ 
+  > 7 │ defineComponent({});
+      │ ^^^^^^^^^^^^^^^^^^^
+    8 │ defineComponent(() => () => null);
+    9 │ defineComponent((props) => () => null, { props: ["title"] });
+  
+  i Components that share a file are harder to find, and the file grows harder to read and change.
+  
+  i Move this component to its own file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/useVueOneComponentPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file defines more than one component.
+  
+     7 │ defineComponent({});
+   > 8 │ defineComponent(() => () => null);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ defineComponent((props) => () => null, { props: ["title"] });
+    10 │ 
+  
+  i Components that share a file are harder to find, and the file grows harder to read and change.
+  
+  i Move this component to its own file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/useVueOneComponentPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file defines more than one component.
+  
+     7 │ defineComponent({});
+     8 │ defineComponent(() => () => null);
+   > 9 │ defineComponent((props) => () => null, { props: ["title"] });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ Vue.defineComponent({ name: "FromGlobal" });
+  
+  i Components that share a file are harder to find, and the file grows harder to read and change.
+  
+  i Move this component to its own file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/useVueOneComponentPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file defines more than one component.
+  
+     9 │ defineComponent((props) => () => null, { props: ["title"] });
+    10 │ 
+  > 11 │ Vue.defineComponent({ name: "FromGlobal" });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ defineComponent((props) => () => null, sharedOptions);
+  
+  i Components that share a file are harder to find, and the file grows harder to read and change.
+  
+  i Move this component to its own file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/useVueOneComponentPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file defines more than one component.
+  
+    11 │ Vue.defineComponent({ name: "FromGlobal" });
+    12 │ 
+  > 13 │ defineComponent((props) => () => null, sharedOptions);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+  
+  i Components that share a file are harder to find, and the file grows harder to read and change.
+  
+  i Move this component to its own file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

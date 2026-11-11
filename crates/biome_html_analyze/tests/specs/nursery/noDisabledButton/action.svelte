@@ -1,0 +1,7 @@
+<!-- should generate diagnostics -->
+<button disabled={condition}>Save</button>
+<button {disabled}>Save</button>
+<button disabled={true}>Save</button>
+<button disabled="false">Save</button>
+<div role="button" disabled={condition}>Save</div>
+<button disabled aria-disabled="true">Save</button>

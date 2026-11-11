@@ -1,0 +1,296 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+(array as any[]).length === 0 || (array as any[]).every(Boolean);
+(array as any[]).length > 0 && (array as any[]).some(Boolean);
+array!.length === 0 || array!.every(Boolean);
+array!.length > 0 && array!.some(Boolean);
+(array satisfies number[]).length > 0 && (array satisfies number[]).some((value) => value > 0);
+(<number[]>array).every((value) => value > 0) || (<number[]>array).length === 0;
+function f(array: Int8Array) {
+	return array.length === 0 || array.every(Boolean);
+}
+if ((array as any[]).length > 0) { for (const element of (array as any[])) { use(element); } }
+if ((<any[]>array).length > 0) { for (const element of (<any[]>array)) { use(element); } }
+if (array!.length !== 0) { for (const element of array!) { use(element); } }
+if ((array satisfies any[]).length > 0) { for (const element of (array satisfies any[])) { use(element); } }
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:1 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This check for an empty array is unnecessary.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ (array as any[]).length === 0 || (array as any[]).every(Boolean);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ (array as any[]).length > 0 && (array as any[]).some(Boolean);
+    4 │ array!.length === 0 || array!.every(Boolean);
+  
+  i every() returns true for an empty array, so the result is the same without the check.
+  
+  i Remove the length check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the length check.
+  
+    2 │ (array·as·any[]).length·===·0·||·(array·as·any[]).every(Boolean);
+      │                  ---------------------------------               
+
+```
+
+```
+invalid.ts:3:1 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This check for a non-empty array is unnecessary.
+  
+    1 │ /* should generate diagnostics */
+    2 │ (array as any[]).length === 0 || (array as any[]).every(Boolean);
+  > 3 │ (array as any[]).length > 0 && (array as any[]).some(Boolean);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ array!.length === 0 || array!.every(Boolean);
+    5 │ array!.length > 0 && array!.some(Boolean);
+  
+  i some() returns false for an empty array, so the result is the same without the check.
+  
+  i Remove the length check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the length check.
+  
+    3 │ (array·as·any[]).length·>·0·&&·(array·as·any[]).some(Boolean);
+      │                  -------------------------------              
+
+```
+
+```
+invalid.ts:4:1 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This check for an empty array is unnecessary.
+  
+    2 │ (array as any[]).length === 0 || (array as any[]).every(Boolean);
+    3 │ (array as any[]).length > 0 && (array as any[]).some(Boolean);
+  > 4 │ array!.length === 0 || array!.every(Boolean);
+      │ ^^^^^^^^^^^^^^^^^^^
+    5 │ array!.length > 0 && array!.some(Boolean);
+    6 │ (array satisfies number[]).length > 0 && (array satisfies number[]).some((value) => value > 0);
+  
+  i every() returns true for an empty array, so the result is the same without the check.
+  
+  i Remove the length check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the length check.
+  
+    4 │ array!.length·===·0·||·array!.every(Boolean);
+      │        -----------------------               
+
+```
+
+```
+invalid.ts:5:1 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This check for a non-empty array is unnecessary.
+  
+    3 │ (array as any[]).length > 0 && (array as any[]).some(Boolean);
+    4 │ array!.length === 0 || array!.every(Boolean);
+  > 5 │ array!.length > 0 && array!.some(Boolean);
+      │ ^^^^^^^^^^^^^^^^^
+    6 │ (array satisfies number[]).length > 0 && (array satisfies number[]).some((value) => value > 0);
+    7 │ (<number[]>array).every((value) => value > 0) || (<number[]>array).length === 0;
+  
+  i some() returns false for an empty array, so the result is the same without the check.
+  
+  i Remove the length check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the length check.
+  
+    5 │ array!.length·>·0·&&·array!.some(Boolean);
+      │        ---------------------              
+
+```
+
+```
+invalid.ts:6:1 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This check for a non-empty array is unnecessary.
+  
+    4 │ array!.length === 0 || array!.every(Boolean);
+    5 │ array!.length > 0 && array!.some(Boolean);
+  > 6 │ (array satisfies number[]).length > 0 && (array satisfies number[]).some((value) => value > 0);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ (<number[]>array).every((value) => value > 0) || (<number[]>array).length === 0;
+    8 │ function f(array: Int8Array) {
+  
+  i some() returns false for an empty array, so the result is the same without the check.
+  
+  i Remove the length check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the length check.
+  
+    6 │ (array·satisfies·number[]).length·>·0·&&·(array·satisfies·number[]).some((value)·=>·value·>·0);
+      │                            -----------------------------------------                           
+
+```
+
+```
+invalid.ts:7:50 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This check for an empty array is unnecessary.
+  
+    5 │ array!.length > 0 && array!.some(Boolean);
+    6 │ (array satisfies number[]).length > 0 && (array satisfies number[]).some((value) => value > 0);
+  > 7 │ (<number[]>array).every((value) => value > 0) || (<number[]>array).length === 0;
+      │                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ function f(array: Int8Array) {
+    9 │ 	return array.length === 0 || array.every(Boolean);
+  
+  i every() returns true for an empty array, so the result is the same without the check.
+  
+  i Remove the length check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the length check.
+  
+    7 │ (<number[]>array).every((value)·=>·value·>·0)·||·(<number[]>array).length·===·0;
+      │                                              ---------------------------------- 
+
+```
+
+```
+invalid.ts:9:9 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This check for an empty array is unnecessary.
+  
+     7 │ (<number[]>array).every((value) => value > 0) || (<number[]>array).length === 0;
+     8 │ function f(array: Int8Array) {
+   > 9 │ 	return array.length === 0 || array.every(Boolean);
+       │ 	       ^^^^^^^^^^^^^^^^^^
+    10 │ }
+    11 │ if ((array as any[]).length > 0) { for (const element of (array as any[])) { use(element); } }
+  
+  i every() returns true for an empty array, so the result is the same without the check.
+  
+  i Remove the length check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the length check.
+  
+    9 │ → return·array.length·===·0·||·array.every(Boolean);
+      │          ----------------------                     
+
+```
+
+```
+invalid.ts:11:5 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This check for a non-empty array is unnecessary.
+  
+     9 │ 	return array.length === 0 || array.every(Boolean);
+    10 │ }
+  > 11 │ if ((array as any[]).length > 0) { for (const element of (array as any[])) { use(element); } }
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ if ((<any[]>array).length > 0) { for (const element of (<any[]>array)) { use(element); } }
+    13 │ if (array!.length !== 0) { for (const element of array!) { use(element); } }
+  
+  i A for...of loop doesn't run its body for an empty array, so the code behaves the same without the check.
+  
+  i Remove the length check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the length check.
+  
+    11 │ if·((array·as·any[]).length·>·0)·{·for·(const·element·of·(array·as·any[]))·{·use(element);·}·}
+       │ -----------------------------------                                                       --  
+
+```
+
+```
+invalid.ts:12:5 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This check for a non-empty array is unnecessary.
+  
+    10 │ }
+    11 │ if ((array as any[]).length > 0) { for (const element of (array as any[])) { use(element); } }
+  > 12 │ if ((<any[]>array).length > 0) { for (const element of (<any[]>array)) { use(element); } }
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ if (array!.length !== 0) { for (const element of array!) { use(element); } }
+    14 │ if ((array satisfies any[]).length > 0) { for (const element of (array satisfies any[])) { use(element); } }
+  
+  i A for...of loop doesn't run its body for an empty array, so the code behaves the same without the check.
+  
+  i Remove the length check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the length check.
+  
+    12 │ if·((<any[]>array).length·>·0)·{·for·(const·element·of·(<any[]>array))·{·use(element);·}·}
+       │ ---------------------------------                                                     --  
+
+```
+
+```
+invalid.ts:13:5 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This check for a non-empty array is unnecessary.
+  
+    11 │ if ((array as any[]).length > 0) { for (const element of (array as any[])) { use(element); } }
+    12 │ if ((<any[]>array).length > 0) { for (const element of (<any[]>array)) { use(element); } }
+  > 13 │ if (array!.length !== 0) { for (const element of array!) { use(element); } }
+       │     ^^^^^^^^^^^^^^^^^^^
+    14 │ if ((array satisfies any[]).length > 0) { for (const element of (array satisfies any[])) { use(element); } }
+    15 │ 
+  
+  i A for...of loop doesn't run its body for an empty array, so the code behaves the same without the check.
+  
+  i Remove the length check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the length check.
+  
+    13 │ if·(array!.length·!==·0)·{·for·(const·element·of·array!)·{·use(element);·}·}
+       │ ---------------------------                                             --  
+
+```
+
+```
+invalid.ts:14:5 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This check for a non-empty array is unnecessary.
+  
+    12 │ if ((<any[]>array).length > 0) { for (const element of (<any[]>array)) { use(element); } }
+    13 │ if (array!.length !== 0) { for (const element of array!) { use(element); } }
+  > 14 │ if ((array satisfies any[]).length > 0) { for (const element of (array satisfies any[])) { use(element); } }
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+  
+  i A for...of loop doesn't run its body for an empty array, so the code behaves the same without the check.
+  
+  i Remove the length check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the length check.
+  
+    14 │ if·((array·satisfies·any[]).length·>·0)·{·for·(const·element·of·(array·satisfies·any[]))·{·use(element);·}·}
+       │ ------------------------------------------                                                              --  
+
+```

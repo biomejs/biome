@@ -53,48 +53,61 @@ impl ControlFlowModel {
 
     /// Iterates over all constructible execution-root graphs in unspecified order.
     pub fn graphs(&self) -> impl Iterator<Item = JsControlFlowGraph> + '_ {
-        let root = self
+        // Graphs come in arbitrary order, but two roots of the same file
+        // usually share several ancestors (a class body, a statement list),
+        // so resolving near the previous root creates fewer nodes than
+        // resolving from the tree's root.
+        let mut near = self
             .0
             .root
             .clone()
             .and_then(SendNode::into_node::<JsLanguage>);
-        self.0
-            .graphs
-            .iter()
-            .filter_map(move |(pointer, blocks)| restore_graph(*pointer, blocks, root.as_ref()?))
+        self.0.graphs.iter().filter_map(move |(pointer, blocks)| {
+            let graph = restore_graph(*pointer, blocks, near.as_ref()?)?;
+            near = Some(graph.node.clone());
+            Some(graph)
+        })
     }
 }
 
+/// Restores a graph from its stored locations, resolving them in the tree of
+/// `near` (see [JsSyntaxNodePtr::as_node_near]).
 fn restore_graph(
     pointer: JsSyntaxNodePtr,
     blocks: &[BlockData],
-    root: &JsSyntaxNode,
+    near: &JsSyntaxNode,
 ) -> Option<JsControlFlowGraph> {
-    Some(JsControlFlowGraph {
-        node: pointer.try_to_node(root)?,
-        blocks: blocks
-            .iter()
-            .map(|block| {
-                Some(BasicBlock {
-                    instructions: block
-                        .instructions
-                        .iter()
-                        .map(|instruction| {
-                            Some(Instruction {
-                                kind: instruction.kind,
-                                node: match &instruction.node {
-                                    Some(node) => Some(node.to_element(root)?),
-                                    None => None,
-                                },
-                            })
+    let node = pointer.as_node_near(near)?;
+    // Consecutive instructions are usually close in the tree, so each one is
+    // resolved near the node of the previous one instead of from the root.
+    let mut near = node.clone();
+    let blocks = blocks
+        .iter()
+        .map(|block| {
+            Some(BasicBlock {
+                instructions: block
+                    .instructions
+                    .iter()
+                    .map(|instruction| {
+                        Some(Instruction {
+                            kind: instruction.kind,
+                            node: match &instruction.node {
+                                Some(node) => {
+                                    let (element, parent) = node.to_element_near(&near)?;
+                                    near = parent;
+                                    Some(element)
+                                }
+                                None => None,
+                            },
                         })
-                        .collect::<Option<_>>()?,
-                    exception_handlers: block.exception_handlers.clone(),
-                    cleanup_handlers: block.cleanup_handlers.clone(),
-                })
+                    })
+                    .collect::<Option<_>>()?,
+                exception_handlers: block.exception_handlers.clone(),
+                cleanup_handlers: block.cleanup_handlers.clone(),
             })
-            .collect::<Option<_>>()?,
-    })
+        })
+        .collect::<Option<_>>()?;
+    Some(JsControlFlowGraph { node, blocks })
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -152,15 +165,22 @@ impl ElementPtr {
         })
     }
 
-    fn to_element(&self, root: &JsSyntaxNode) -> Option<JsSyntaxElement> {
+    /// Resolves the element in the tree of `near` with
+    /// [JsSyntaxNodePtr::as_node_near].
+    ///
+    /// Returns the element together with the node it was resolved from: the
+    /// node itself, or the parent of the token.
+    fn to_element_near(&self, near: &JsSyntaxNode) -> Option<(JsSyntaxElement, JsSyntaxNode)> {
         Some(match self {
-            Self::Node(pointer) => pointer.try_to_node(root)?.into(),
-            Self::Token { parent, index } => parent
-                .try_to_node(root)?
-                .slots()
-                .nth(*index)?
-                .into_token()?
-                .into(),
+            Self::Node(pointer) => {
+                let node = pointer.as_node_near(near)?;
+                (node.clone().into(), node)
+            }
+            Self::Token { parent, index } => {
+                let parent = parent.as_node_near(near)?;
+                let token = parent.slots().nth(*index)?.into_token()?;
+                (token.into(), parent)
+            }
         })
     }
 }

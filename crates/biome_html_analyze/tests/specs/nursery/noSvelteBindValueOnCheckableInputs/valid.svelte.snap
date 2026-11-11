@@ -1,0 +1,29 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+
+<script>
+	let checked = $state(false);
+	let selected = $state("a");
+	let toppings = $state([]);
+	let name = $state("");
+	let type = $state("checkbox");
+</script>
+
+<input type="checkbox" bind:checked={checked} />
+<input type="checkbox" value="cheese" bind:group={toppings} />
+<input type="radio" value="a" bind:group={selected} />
+<input type="text" bind:value={name} />
+<input bind:value={name} />
+<input type="checkbox" value="static" />
+<input type={type} bind:value={name} />
+<input {type} bind:value={name} />
+<input type="checkbox" bind:checked />
+<textarea bind:value={name}></textarea>
+<Input type="checkbox" bind:value={checked} />
+
+```

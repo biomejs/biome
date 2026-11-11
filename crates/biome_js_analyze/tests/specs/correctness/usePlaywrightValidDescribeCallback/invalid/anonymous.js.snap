@@ -1,0 +1,68 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: anonymous.js
+---
+# Input
+```js
+/* should generate diagnostics */
+test.describe(async () => {});
+test.describe((done) => {});
+test.describe(123);
+
+```
+
+# Diagnostics
+```
+anonymous.js:2:1 lint/correctness/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Describe callback should not be async.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ test.describe(async () => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ test.describe((done) => {});
+    4 │ test.describe(123);
+  
+  i Describe blocks are meant to organize tests, not contain asynchronous logic. Async operations should be placed within individual test callbacks.
+  
+  i Remove the async keyword from the describe callback.
+  
+
+```
+
+```
+anonymous.js:3:1 lint/correctness/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Describe callback should not have parameters.
+  
+    1 │ /* should generate diagnostics */
+    2 │ test.describe(async () => {});
+  > 3 │ test.describe((done) => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ test.describe(123);
+    5 │ 
+  
+  i Describe callbacks are invoked without arguments by the test framework.
+  
+  i Remove parameters from the describe callback.
+  
+
+```
+
+```
+anonymous.js:4:1 lint/correctness/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Describe requires a callback function.
+  
+    2 │ test.describe(async () => {});
+    3 │ test.describe((done) => {});
+  > 4 │ test.describe(123);
+      │ ^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i Describe must be passed a function that contains the test definitions.
+  
+  i Pass a callback function to describe, after the title if there is one.
+  
+
+```

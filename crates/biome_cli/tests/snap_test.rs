@@ -30,6 +30,8 @@ static DURATION_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new("\"duration\":\\s*[0-9]+").unwrap());
 static SCANNER_DURATION_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new("\"scannerDuration\":\\s*[0-9]+").unwrap());
+static OS_ERROR_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?m)(?P<prefix>Caused by:\n\s+).+ \(os error \d+\)").unwrap());
 
 pub struct TestArgs(Vec<String>);
 
@@ -334,6 +336,14 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
             .unwrap_or_default();
         let replacement = format!("\"scannerDuration\":{whitespace}\"<TIME>\"");
         output.to_mut().replace_range(found, &replacement);
+    }
+
+    if OS_ERROR_REGEX.is_match(&output) {
+        output = Cow::Owned(
+            OS_ERROR_REGEX
+                .replace_all(&output, "${prefix}<OS_ERROR>")
+                .into_owned(),
+        );
     }
 
     // Normalize the name of the current executable to "biome"
@@ -772,6 +782,18 @@ mod tests {
         assert_eq!(
             replace_temp_dir_with_separator(input, "/", '/'),
             r#"{"path": "<TEMP_DIR>build/file.js", "includes": ["**/build"]}"#
+        );
+    }
+
+    #[test]
+    fn os_error_redaction_preserves_cause_chain() {
+        let input = "Cannot read file.\n\nCaused by:\n  No such file or directory (os error 2)";
+
+        assert_eq!(
+            redact_snapshot(input),
+            Some(Cow::Borrowed(
+                "Cannot read file.\n\nCaused by:\n  <OS_ERROR>"
+            ))
         );
     }
 

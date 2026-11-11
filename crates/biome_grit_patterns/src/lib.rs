@@ -71,12 +71,21 @@ pub fn compile_pattern_with_options(
         .and_then(GritTargetLanguage::from_declaration)
         .unwrap_or(options.default_language);
 
-    GritQuery::from_node(
-        parsed.tree(),
-        options.path,
-        language,
-        options.extra_built_ins,
-    )
+    if options.node_selector {
+        GritQuery::from_node_selector(
+            parsed.tree(),
+            options.path,
+            language,
+            options.extra_built_ins,
+        )
+    } else {
+        GritQuery::from_node(
+            parsed.tree(),
+            options.path,
+            language,
+            options.extra_built_ins,
+        )
+    }
 }
 
 #[derive(Default)]
@@ -84,6 +93,7 @@ pub struct CompilePatternOptions<'a> {
     default_language: GritTargetLanguage,
     extra_built_ins: Vec<BuiltInFunction>,
     path: Option<&'a Utf8Path>,
+    node_selector: bool,
 }
 
 impl<'a> CompilePatternOptions<'a> {
@@ -99,6 +109,17 @@ impl<'a> CompilePatternOptions<'a> {
 
     pub fn with_path(mut self, path: &'a Utf8Path) -> Self {
         self.path = Some(path);
+        self
+    }
+
+    /// Compiles the pattern as a node selector.
+    ///
+    /// Selectors keep the pattern before its automatic `contains` wrapping, so
+    /// callers can execute it against individual nodes. They reject rewrites,
+    /// because a selector only decides which nodes to visit and does not edit
+    /// the source.
+    pub fn as_node_selector(mut self) -> Self {
+        self.node_selector = true;
         self
     }
 }

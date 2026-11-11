@@ -1,0 +1,114 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <LinkList>
+    <template scope="{ a }">
+      <a />
+    </template>
+  </LinkList>
+  <LinkList>
+    <template slot="name" scope="props">
+      {{ props.title }}
+    </template>
+  </LinkList>
+  <LinkList>
+    <template scope>
+      <a />
+    </template>
+  </LinkList>
+  <LinkList>
+    <template v-if="show" scope='props' />
+  </LinkList>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:4:15 lint/nursery/noVueDeprecatedScopeAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected scope attribute on a <template> element.
+  
+    2 │ <template>
+    3 │   <LinkList>
+  > 4 │     <template scope="{ a }">
+      │               ^^^^^
+    5 │       <a />
+    6 │     </template>
+  
+  i Vue no longer supports the scope attribute, so the slot props it names are never defined.
+  
+  i Use the v-slot directive instead, like <template v-slot="props">.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:27 lint/nursery/noVueDeprecatedScopeAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected scope attribute on a <template> element.
+  
+     7 │   </LinkList>
+     8 │   <LinkList>
+   > 9 │     <template slot="name" scope="props">
+       │                           ^^^^^
+    10 │       {{ props.title }}
+    11 │     </template>
+  
+  i Vue no longer supports the scope attribute, so the slot props it names are never defined.
+  
+  i Use the v-slot directive instead, like <template v-slot="props">.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:14:15 lint/nursery/noVueDeprecatedScopeAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected scope attribute on a <template> element.
+  
+    12 │   </LinkList>
+    13 │   <LinkList>
+  > 14 │     <template scope>
+       │               ^^^^^
+    15 │       <a />
+    16 │     </template>
+  
+  i Vue no longer supports the scope attribute, so the slot props it names are never defined.
+  
+  i Use the v-slot directive instead, like <template v-slot="props">.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:19:27 lint/nursery/noVueDeprecatedScopeAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected scope attribute on a <template> element.
+  
+    17 │   </LinkList>
+    18 │   <LinkList>
+  > 19 │     <template v-if="show" scope='props' />
+       │                           ^^^^^
+    20 │   </LinkList>
+    21 │ </template>
+  
+  i Vue no longer supports the scope attribute, so the slot props it names are never defined.
+  
+  i Use the v-slot directive instead, like <template v-slot="props">.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

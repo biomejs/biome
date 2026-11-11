@@ -184,6 +184,18 @@ pub(crate) fn expected_vue_v_for_expression(p: &HtmlParser, range: TextRange) ->
     .with_hint(markup!("Add the collection or expression to iterate over."))
 }
 
+pub(crate) fn expected_vue_v_for_default(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("default value", range, p).into_diagnostic(p)
+}
+
+pub(crate) fn unexpected_vue_v_for_rest_default(
+    p: &HtmlParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    p.err_builder("A rest binding can't have a default value.", range)
+        .with_hint(markup!("Remove the default value."))
+}
+
 pub(crate) fn expected_vue_v_for_binding(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
     expected_node("v-for binding", range, p).into_diagnostic(p)
 }

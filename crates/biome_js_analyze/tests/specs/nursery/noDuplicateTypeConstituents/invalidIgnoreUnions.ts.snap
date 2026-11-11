@@ -1,0 +1,108 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidIgnoreUnions.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+type I1 = A & A;
+type I2 = (A & A) | (A & A);
+
+```
+
+# Diagnostics
+```
+invalidIgnoreUnions.ts:2:15 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the intersection type.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ type I1 = A & A;
+      │               ^
+    3 │ type I2 = (A & A) | (A & A);
+    4 │ 
+  
+  i It is first listed here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ type I1 = A & A;
+      │           ^
+    3 │ type I2 = (A & A) | (A & A);
+    4 │ 
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    2 │ type·I1·=·A·&·A;
+      │             --- 
+
+```
+
+```
+invalidIgnoreUnions.ts:3:16 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the intersection type.
+  
+    1 │ /* should generate diagnostics */
+    2 │ type I1 = A & A;
+  > 3 │ type I2 = (A & A) | (A & A);
+      │                ^
+    4 │ 
+  
+  i It is first listed here.
+  
+    1 │ /* should generate diagnostics */
+    2 │ type I1 = A & A;
+  > 3 │ type I2 = (A & A) | (A & A);
+      │            ^
+    4 │ 
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    3 │ type·I2·=·(A·&·A)·|·(A·&·A);
+      │              ---            
+
+```
+
+```
+invalidIgnoreUnions.ts:3:26 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the intersection type.
+  
+    1 │ /* should generate diagnostics */
+    2 │ type I1 = A & A;
+  > 3 │ type I2 = (A & A) | (A & A);
+      │                          ^
+    4 │ 
+  
+  i It is first listed here.
+  
+    1 │ /* should generate diagnostics */
+    2 │ type I1 = A & A;
+  > 3 │ type I2 = (A & A) | (A & A);
+      │                      ^
+    4 │ 
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    3 │ type·I2·=·(A·&·A)·|·(A·&·A);
+      │                        ---  
+
+```

@@ -323,8 +323,7 @@ pub(crate) fn has_leading_selector_comment(
 fn is_trailing_separator_followed_by_line_comment(node: &CssComplexSelector) -> bool {
     let Some(comma_token) = node
         .syntax()
-        .last_token()
-        .and_then(|token| token.next_token())
+        .next_token()
         .filter(|token| token.kind() == CssSyntaxKind::COMMA)
     else {
         return false;

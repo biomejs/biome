@@ -1,0 +1,14 @@
+language js
+
+`foo($x)` as $c where {
+  register_diagnostic(span=$c, message=join(list=["aaaaaaaaaaaaaaaaaaaa", $x, "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], separator=""))
+}
+
+`bar($x)` where {
+  $x <: [
+    `1`,
+    `2`,
+
+    `3`
+  ]
+}

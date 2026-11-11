@@ -1265,7 +1265,7 @@ fn ignore_file_in_subdir_in_symlinked_dir() {
     let result = run_cli_with_dyn_fs(
         Box::new(OsFileSystem::new(subroot_path.clone())),
         &mut console,
-        Args::from(["lint", root_path.as_ref()].as_slice()),
+        Args::from(["lint", subroot_path.as_ref()].as_slice()),
     );
 
     remove_dir_all(root_path).unwrap();

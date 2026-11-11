@@ -1,11 +1,9 @@
-use crate::{frameworks::vue::vue_call::is_vue_api_reference, services::semantic::Semantic};
+use crate::{frameworks::vue::vue_call::is_vue_next_tick_reference, services::semantic::Semantic};
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, JsCallExpression,
-};
+use biome_js_syntax::{AnyJsCallArgument, AnyJsExpression, JsCallExpression};
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_vue_next_tick_promise::UseVueNextTickPromiseOptions;
 
@@ -68,10 +66,8 @@ impl Rule for UseVueNextTickPromise {
             return None;
         }
 
-        let callee = call.callee().ok()?.inner_expression()?;
-        if is_vue_api_reference(&callee, ctx.model(), "nextTick")
-            || is_vue_instance_next_tick(&callee).unwrap_or_default()
-        {
+        let callee = call.callee().ok()?;
+        if is_vue_next_tick_reference(&callee, ctx.model()) {
             return Some(call.syntax().text_trimmed_range());
         }
 
@@ -102,17 +98,4 @@ fn is_function_expression(expression: &AnyJsExpression) -> bool {
         expression.clone().omit_parentheses(),
         AnyJsExpression::JsArrowFunctionExpression(_) | AnyJsExpression::JsFunctionExpression(_)
     )
-}
-
-fn is_vue_instance_next_tick(expression: &AnyJsExpression) -> Option<bool> {
-    let member_expression = AnyJsMemberExpression::cast_ref(expression.syntax())?;
-    let member_name = member_expression.member_name()?;
-    if member_name.text() != "$nextTick" {
-        return Some(false);
-    }
-    let object = member_expression.object().ok()?;
-    Some(matches!(
-        object.omit_parentheses(),
-        AnyJsExpression::JsThisExpression(_)
-    ))
 }

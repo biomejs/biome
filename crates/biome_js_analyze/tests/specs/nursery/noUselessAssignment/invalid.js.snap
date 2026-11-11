@@ -260,6 +260,37 @@ function conditionalExpressionWrite() {
 	condition ? (v = "unused") : (v = "unused too");
 }
 
+function destructuringDefaultWrite() {
+	const obj = { a: 1 };
+	let { a, b = (a = 2) } = obj;
+	a = 3;
+	console.log(a, b);
+}
+
+function forOfIterableRead(first, second) {
+	let list = first;
+	list = second;
+	for (const item of list) {
+		f(item);
+	}
+}
+
+function forInIterableRead(first, second) {
+	let object = first;
+	object = second;
+	for (const key in object) {
+		f(key);
+	}
+}
+
+function parameterDefaultRead(a, b = a) {
+	a = 1;
+	a = 2;
+	f(a, b);
+}
+
+const expressionBodyWrite = (a, b = a) => (a = 1);
+
 ```
 
 # Diagnostics
@@ -1042,6 +1073,128 @@ invalid.js:254:32 lint/nursery/noUselessAssignment ━━━━━━━━━�
         │ 	                              ^
     255 │ }
     256 │ 
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:259:8 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to a is never read.
+  
+    257 │ function destructuringDefaultWrite() {
+    258 │ 	const obj = { a: 1 };
+  > 259 │ 	let { a, b = (a = 2) } = obj;
+        │ 	      ^
+    260 │ 	a = 3;
+    261 │ 	console.log(a, b);
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:259:16 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to a is never read.
+  
+    257 │ function destructuringDefaultWrite() {
+    258 │ 	const obj = { a: 1 };
+  > 259 │ 	let { a, b = (a = 2) } = obj;
+        │ 	              ^
+    260 │ 	a = 3;
+    261 │ 	console.log(a, b);
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:265:6 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to list is never read.
+  
+    264 │ function forOfIterableRead(first, second) {
+  > 265 │ 	let list = first;
+        │ 	    ^^^^
+    266 │ 	list = second;
+    267 │ 	for (const item of list) {
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:273:6 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to object is never read.
+  
+    272 │ function forInIterableRead(first, second) {
+  > 273 │ 	let object = first;
+        │ 	    ^^^^^^
+    274 │ 	object = second;
+    275 │ 	for (const key in object) {
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:281:2 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to a is never read.
+  
+    280 │ function parameterDefaultRead(a, b = a) {
+  > 281 │ 	a = 1;
+        │ 	^
+    282 │ 	a = 2;
+    283 │ 	f(a, b);
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:286:44 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to a is never read.
+  
+    284 │ }
+    285 │ 
+  > 286 │ const expressionBodyWrite = (a, b = a) => (a = 1);
+        │                                            ^
+    287 │ 
   
   i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
   

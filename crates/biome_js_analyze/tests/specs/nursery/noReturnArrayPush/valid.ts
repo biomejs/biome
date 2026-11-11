@@ -1,0 +1,11 @@
+/* should not generate diagnostics */
+array.push(value) as number;
+array.unshift(value) as number;
+<number>array.push(value);
+array.push(value)!;
+array.unshift(value) satisfies number;
+void (array.push(value) as number);
+const onClick = () => router.push(`/${region}/customers/${String(result.data)}` as Route);
+function f1() {
+	return (array.push(value) as Foo).bar;
+}

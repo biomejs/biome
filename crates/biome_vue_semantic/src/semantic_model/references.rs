@@ -17,10 +17,12 @@ use super::model::*;
 use super::snippets::SfcSnippet;
 use biome_js_semantic::SemanticModel as JsSemanticModel;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, AnyJsRoot, JsCallExpression,
+    AnyJsCallArgument, AnyJsExpression, AnyJsIdentifierReference, AnyJsLiteralExpression,
+    AnyJsMemberExpression, AnyJsRoot, JsCallArgumentList, JsCallArguments, JsCallExpression,
     JsComputedMemberAssignment, JsComputedMemberExpression, JsIdentifierAssignment,
     JsIdentifierBinding, JsReferenceIdentifier, JsStaticMemberAssignment, JsStaticMemberExpression,
     JsSyntaxKind, JsSyntaxNode, JsThisExpression, JsUnaryExpression, JsUnaryOperator,
+    inner_string_text, static_value::StaticValue,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextLen, TextRange, TextSize, TokenText};
 use biome_string_case::Case;
@@ -73,6 +75,13 @@ const TEMPLATE_GLOBALS: &[&str] = &[
     "parseInt",
     "undefined",
 ];
+
+/// Returns `true` when `name` is a JavaScript global that a template
+/// expression may use, such as `Math`. Vue reads such a name from the global
+/// scope instead of from the component instance.
+pub fn is_template_global(name: &str) -> bool {
+    TEMPLATE_GLOBALS.binary_search(&name).is_ok()
+}
 
 /// Tags Vue resolves itself.
 const BUILTIN_COMPONENTS: &[&str] = &[
@@ -129,6 +138,7 @@ pub(crate) fn add_builtins_scope(builder: &mut ModelBuilder) -> ScopeId {
             namespace: Namespace::Binding,
             kind: SymbolKind::Builtin,
             component: None,
+            node: None,
         });
     }
     scope
@@ -155,6 +165,7 @@ pub(crate) fn collect_template_symbols(
                 namespace: Namespace::Binding,
                 kind: SymbolKind::VForAlias,
                 component: None,
+                node: None,
             });
         }
     }
@@ -177,6 +188,7 @@ pub(crate) fn collect_template_symbols(
                 continue;
             };
             let range = token.text_trimmed_range() + snippet.content_offset;
+            let node = builder.add_js_node(Some(*id), binding.syntax());
             builder.add_symbol(NewSymbol {
                 name: token.token_text_trimmed(),
                 range,
@@ -186,6 +198,7 @@ pub(crate) fn collect_template_symbols(
                 namespace: Namespace::Binding,
                 kind: SymbolKind::SlotParam,
                 component: None,
+                node: Some(node),
             });
         }
     }
@@ -200,6 +213,7 @@ pub(crate) fn collect_template_symbols(
             namespace: Namespace::TemplateRef,
             kind: SymbolKind::TemplateRef,
             component: scopes.component,
+            node: None,
         });
     }
 }
@@ -212,16 +226,28 @@ struct Usage {
     call_args: Option<u8>,
     /// The call the value is the callee of.
     call: Option<JsCallExpression>,
-    /// The outermost expression of the member chain that starts at the use.
+    /// The outermost expression of the member chain that [`Self::path`]
+    /// describes.
     top: JsSyntaxNode,
+    /// The outermost expression of the whole member chain, including members
+    /// after the end of the path.
+    end: JsSyntaxNode,
 }
 
 /// Follows the member chain that starts at `start` and classifies what
 /// happens to the value at its end.
+///
+/// The path stops at the first member whose name the model cannot read, as in
+/// `list[index]`. The members after it are still followed, so that
+/// `list[index].done = true` is a write to `list`.
 fn usage_of(start: &JsSyntaxNode) -> Usage {
     let mut current = start.clone();
     let mut path = Vec::new();
-    let mut path_open = false;
+    // The end of the chain that `path` describes, once a member the model
+    // cannot read has ended it.
+    let mut path_end = None;
+    // The name of the member `current` reads, when it is static.
+    let mut member_name = None;
     let mut written = matches!(current.kind(), JsSyntaxKind::JS_IDENTIFIER_ASSIGNMENT);
 
     while let Some(parent) = current.parent() {
@@ -243,7 +269,10 @@ fn usage_of(start: &JsSyntaxNode) -> Usage {
                 else {
                     break;
                 };
-                path.push(name.token_text_trimmed());
+                member_name = Some(name.token_text_trimmed());
+                if path_end.is_none() {
+                    path.extend(member_name.clone());
+                }
                 current = parent;
             }
             JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT => {
@@ -252,10 +281,11 @@ fn usage_of(start: &JsSyntaxNode) -> Usage {
                 {
                     break;
                 }
-                if let Some(name) = member
-                    .member()
-                    .ok()
-                    .and_then(|name| name.value_token().ok())
+                if path_end.is_none()
+                    && let Some(name) = member
+                        .member()
+                        .ok()
+                        .and_then(|name| name.value_token().ok())
                 {
                     path.push(name.token_text_trimmed());
                 }
@@ -269,22 +299,15 @@ fn usage_of(start: &JsSyntaxNode) -> Usage {
                 {
                     break;
                 }
-                current = parent;
-                match member.member().ok().map(AnyJsExpression::omit_parentheses) {
-                    Some(AnyJsExpression::AnyJsLiteralExpression(
-                        AnyJsLiteralExpression::JsStringLiteralExpression(literal),
-                    )) => match literal.inner_string_text() {
-                        Ok(name) => path.push(name),
-                        Err(_) => {
-                            path_open = true;
-                            break;
-                        }
-                    },
-                    _ => {
-                        path_open = true;
-                        break;
+                member_name = member.member().ok().and_then(static_key);
+                match &member_name {
+                    Some(name) if path_end.is_none() => path.push(name.clone()),
+                    Some(_) => {}
+                    None => {
+                        path_end.get_or_insert_with(|| current.clone());
                     }
                 }
+                current = parent;
             }
             JsSyntaxKind::JS_COMPUTED_MEMBER_ASSIGNMENT => {
                 let member = JsComputedMemberAssignment::unwrap_cast(parent.clone());
@@ -292,7 +315,13 @@ fn usage_of(start: &JsSyntaxNode) -> Usage {
                 {
                     break;
                 }
-                path_open = true;
+                match member.member().ok().and_then(static_key) {
+                    Some(name) if path_end.is_none() => path.push(name),
+                    Some(_) => {}
+                    None => {
+                        path_end.get_or_insert_with(|| current.clone());
+                    }
+                }
                 written = true;
                 current = parent;
                 break;
@@ -301,13 +330,15 @@ fn usage_of(start: &JsSyntaxNode) -> Usage {
         }
     }
 
+    let path_open = path_end.is_some();
     let mut usage = Usage {
         path,
         path_open,
         access: Access::Read,
         call_args: None,
         call: None,
-        top: current.clone(),
+        top: path_end.unwrap_or_else(|| current.clone()),
+        end: current.clone(),
     };
     if written {
         usage.access = Access::Write;
@@ -323,14 +354,21 @@ fn usage_of(start: &JsSyntaxNode) -> Usage {
                 let args = call
                     .arguments()
                     .map_or(0, |arguments| arguments.args().len() as u8);
-                if !usage.path_open
-                    && usage
-                        .path
-                        .last()
-                        .is_some_and(|name| MUTATING_METHODS.contains(&name.text()))
+                if member_name
+                    .as_ref()
+                    .is_some_and(|name| MUTATING_METHODS.contains(&name.text()))
                 {
-                    usage.path.pop();
                     usage.access = Access::Mutate;
+                    // The method is not part of the path, so the chain ends at
+                    // the object it is called on.
+                    if !usage.path_open {
+                        usage.path.pop();
+                        if let Some(object) = AnyJsMemberExpression::cast_ref(&usage.top)
+                            .and_then(|member| member.object().ok()?.omit_type_wrappers())
+                        {
+                            usage.top = object.into_syntax();
+                        }
+                    }
                 } else {
                     usage.access = Access::Call;
                     usage.call_args = Some(args);
@@ -346,7 +384,11 @@ fn usage_of(start: &JsSyntaxNode) -> Usage {
                 usage.access = Access::Write;
             }
         }
+        JsSyntaxKind::JS_CALL_ARGUMENT_LIST if is_object_assign_target(&current) => {
+            usage.access = Access::Mutate;
+        }
         JsSyntaxKind::JS_CALL_ARGUMENT_LIST
+        | JsSyntaxKind::JS_FOR_IN_STATEMENT
         | JsSyntaxKind::JS_SPREAD
         | JsSyntaxKind::JS_RETURN_STATEMENT
         | JsSyntaxKind::JS_INITIALIZER_CLAUSE
@@ -357,6 +399,56 @@ fn usage_of(start: &JsSyntaxNode) -> Usage {
         _ => {}
     }
     usage
+}
+
+/// Returns `true` when `node` is the first argument of `Object.assign()`, the
+/// object that the call writes to.
+///
+/// `Object` is matched by name: the model doesn't check that it is the global.
+fn is_object_assign_target(node: &JsSyntaxNode) -> bool {
+    let Some(list) = node.parent().and_then(JsCallArgumentList::cast) else {
+        return false;
+    };
+    let is_first = list
+        .first()
+        .and_then(|argument| argument.ok())
+        .is_some_and(|argument| argument.syntax() == node);
+    if !is_first {
+        return false;
+    }
+    let Some(member) = list
+        .parent::<JsCallArguments>()
+        .and_then(|arguments| arguments.parent::<JsCallExpression>())
+        .and_then(|call| call.callee().ok())
+        .and_then(|callee| {
+            callee
+                .omit_parentheses()
+                .as_js_static_member_expression()
+                .cloned()
+        })
+    else {
+        return false;
+    };
+    member
+        .member()
+        .ok()
+        .and_then(|name| name.value_token().ok())
+        .is_some_and(|name| name.text_trimmed() == "assign")
+        && member
+            .object()
+            .ok()
+            .and_then(|object| object.omit_parentheses().as_js_reference_identifier())
+            .is_some_and(|object| object.has_name("Object"))
+}
+
+/// Returns the name a computed member key spells out, as in `list["push"]`.
+fn static_key(key: AnyJsExpression) -> Option<TokenText> {
+    match key.omit_parentheses() {
+        AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsStringLiteralExpression(literal),
+        ) => literal.inner_string_text().ok(),
+        _ => None,
+    }
 }
 
 /// Returns the node a member chain starts at for a reference node: the
@@ -397,8 +489,12 @@ impl Walker<'_> {
     fn mark_uses_open(&mut self, component: Option<ComponentId>, namespace: Namespace) {
         // The use may also reach what the component Vue combines with this
         // one declares.
-        if let Some(component) = component {
-            self.builder.open_uses(component, namespace);
+        match component {
+            Some(component) => self.builder.open_uses(component, namespace),
+            None if namespace == Namespace::TemplateRef => {
+                self.builder.data.template_ref_uses_open = true;
+            }
+            None => {}
         }
     }
 
@@ -471,15 +567,24 @@ impl Walker<'_> {
         };
         let mut resolution =
             self.resolve_in_component(component, Namespace::Emit, name.text(), &[]);
-        // `defineModel('value')` declares the event `update:value`.
+        // `defineModel('value')` declares the event `update:value`. Like any
+        // event, it is declared for both script blocks of a file.
         if !matches!(resolution, Resolution::Symbol(_))
             && let Some(model) = name.text().strip_prefix("update:")
-            && let Resolution::Symbol(symbol) = self.resolve_in_component(
-                component,
-                Namespace::Binding,
-                model,
-                &[SymbolKind::Model],
-            )
+            && let Some(symbol) = component
+                .into_iter()
+                .chain(component.and_then(|component| self.builder.paired(component)))
+                .find_map(|id| {
+                    match self.resolve_in_component(
+                        Some(id),
+                        Namespace::Binding,
+                        model,
+                        &[SymbolKind::Model],
+                    ) {
+                        Resolution::Symbol(symbol) => Some(symbol),
+                        _ => None,
+                    }
+                })
         {
             resolution = Resolution::Symbol(symbol);
         }
@@ -761,10 +866,23 @@ pub(crate) fn collect_template_references(
                 let scope = builder.data.elements[element.index()].scope;
                 builder.data.scopes[scope.index()].parent.unwrap_or(scope)
             }
+            // A default value sees the variables of its `v-for`, like the
+            // default value of a function parameter sees the parameters, but
+            // not the `v-slot` parameters of its element.
+            SnippetHost::VForDefault(attr) => {
+                let element = builder.data.attrs[attr.index()].element;
+                let scope = builder.data.elements[element.index()].scope;
+                slot_owner = Some(scope);
+                scope
+            }
             SnippetHost::StyleVBind(_)
             | SnippetHost::Interpolation(None)
             | SnippetHost::Unknown => scopes.head,
         };
+        builder.data.snippets[id.index()].name_scope = Some(NameScope {
+            scope,
+            hidden_slot_params: slot_owner,
+        });
 
         let root_expression = match snippet.root {
             AnyJsRoot::JsExpressionTemplateRoot(root) => root
@@ -785,14 +903,22 @@ pub(crate) fn collect_template_references(
             let name = token.token_text_trimmed();
             let mut usage = usage_of(&chain_start(&node));
             // `v-model="value"` assigns to its value.
-            if is_model_value && Some(&usage.top) == root_expression.as_ref() {
+            if is_model_value && Some(&usage.end) == root_expression.as_ref() {
                 usage.access = Access::Write;
             }
 
             let found = lookup(&walker.builder.data, scope, name.text(), slot_owner);
             let resolution = match found {
                 Some(symbol) => Resolution::Symbol(symbol),
-                None if TEMPLATE_GLOBALS.contains(&name.text()) => Resolution::Global,
+                None if is_template_global(name.text()) => Resolution::Global,
+                // A type, as in `$event.target as HTMLInputElement`, can be
+                // declared by the TypeScript libraries, which the model does
+                // not read.
+                None if AnyJsIdentifierReference::cast_ref(&node)
+                    .is_some_and(|reference| reference.is_only_type()) =>
+                {
+                    Resolution::Unknowable
+                }
                 None if walker.builder.is_open(scopes.component, Namespace::Binding) => {
                     Resolution::Unknowable
                 }
@@ -852,7 +978,7 @@ pub(crate) fn collect_template_references(
 ///
 /// The slot parameters declared in `slot_owner` are skipped: they are not
 /// visible to the directives of the element that declares them.
-fn lookup(
+pub(crate) fn lookup(
     data: &SemanticModelData,
     scope: ScopeId,
     name: &str,
@@ -927,7 +1053,12 @@ pub(crate) fn collect_script_references(
             let node = reference.syntax();
             let usage = usage_of(&chain_start(&node));
             match (role.origin, role.prop) {
-                (Origin::PropsDestructure, Some(prop)) => {
+                (Origin::PropsDestructure, prop) => {
+                    // When the props can't be read, the use resolves to the
+                    // variable, as it does in the template.
+                    let Some(target) = prop.or(symbol) else {
+                        continue;
+                    };
                     let Some(token) = node.first_token() else {
                         continue;
                     };
@@ -943,7 +1074,7 @@ pub(crate) fn collect_script_references(
                         path_open: usage.path_open,
                         access: usage.access,
                         call_args: usage.call_args,
-                        resolution: Resolution::Symbol(prop),
+                        resolution: Resolution::Symbol(target),
                     });
                 }
                 _ => {
@@ -985,6 +1116,34 @@ pub(crate) fn collect_script_references(
             collect_use_template_ref(&mut walker, input, &call, components);
         }
     }
+
+    // Names written as strings in the options, such as the keys of `watch`.
+    let (names, others): (Vec<_>, Vec<_>) = std::mem::take(&mut walker.builder.option_names)
+        .into_iter()
+        .partition(|name| components.contains(&name.component));
+    walker.builder.option_names = others;
+    for option_name in names {
+        let resolution = walker.resolve_in_component(
+            Some(option_name.component),
+            Namespace::Binding,
+            option_name.name.text(),
+            &[],
+        );
+        walker.builder.add_reference(ReferenceData {
+            range: option_name.range,
+            name: option_name.name,
+            snippet: input.snippet,
+            site: RefSite::OptionName,
+            namespace: Namespace::Binding,
+            scope: None,
+            base: RefBase::This,
+            path: option_name.path,
+            path_open: false,
+            access: option_name.access,
+            call_args: None,
+            resolution,
+        });
+    }
 }
 
 /// Records the template ref a `useTemplateRef('name')` call names.
@@ -1009,9 +1168,13 @@ fn collect_use_template_ref(
     {
         return;
     }
-    let Some(AnyJsExpression::AnyJsLiteralExpression(
-        AnyJsLiteralExpression::JsStringLiteralExpression(literal),
-    )) = call
+    let call_range = walker.host(call.syntax().text_trimmed_range());
+    let component = components.iter().copied().find(|id| {
+        walker.builder.data.components[id.index()]
+            .definition
+            .contains_range(call_range)
+    });
+    let Some(argument) = call
         .arguments()
         .ok()
         .and_then(|arguments| arguments.args().iter().next()?.ok())
@@ -1020,15 +1183,24 @@ fn collect_use_template_ref(
     else {
         return;
     };
-    let Ok(name) = literal.inner_string_text() else {
-        return;
+    // A string, or a template literal without substitutions. A tagged
+    // template calls its tag, so its value is unknown.
+    let token = match argument.as_static_value() {
+        Some(StaticValue::String(token))
+            if argument
+                .as_js_template_expression()
+                .is_none_or(|template| template.tag().is_none()) =>
+        {
+            token
+        }
+        // Any template ref may be the one named.
+        _ => {
+            walker.mark_uses_open(component, Namespace::TemplateRef);
+            return;
+        }
     };
-    let range = walker.host(literal.syntax().text_trimmed_range());
-    let component = components.iter().copied().find(|id| {
-        walker.builder.data.components[id.index()]
-            .definition
-            .contains_range(range)
-    });
+    let name = inner_string_text(&token);
+    let range = walker.host(argument.syntax().text_trimmed_range());
     walker.add_template_ref_reference(component, name, range, None);
 }
 
@@ -1387,5 +1559,22 @@ fn resolve_directive(
         Resolution::Unknowable
     } else {
         Resolution::Unresolved
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::TEMPLATE_GLOBALS;
+
+    #[test]
+    fn template_globals_are_sorted() {
+        for pair in TEMPLATE_GLOBALS.windows(2) {
+            assert!(
+                pair[0] < pair[1],
+                "`{}` must come after `{}` in TEMPLATE_GLOBALS",
+                pair[0],
+                pair[1]
+            );
+        }
     }
 }

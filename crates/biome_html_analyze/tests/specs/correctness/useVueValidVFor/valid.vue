@@ -4,6 +4,8 @@
 
 <div v-for="({ id }, index) in items" :key="id"></div>
 
+<div v-for="({ id = 0 }, index) in items" :key="id"></div>
+
 <MyItem v-for="item in items" :key="item.id" />
 
 <div :is="componentName" v-for="item in items" :key="item.id"></div>

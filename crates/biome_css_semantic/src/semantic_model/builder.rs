@@ -1,5 +1,5 @@
 use biome_css_syntax::{
-    AnyCssRoot, CssContainerAtRule, CssLanguage, CssMediaAtRule, CssScopeAtRule,
+    AnyCssRoot, CssContainerAtRule, CssDeclaration, CssLanguage, CssMediaAtRule, CssScopeAtRule,
     CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxKind, CssSyntaxToken, ScssAtRootAtRule, T,
     single_expression_item,
 };
@@ -111,13 +111,29 @@ impl SemanticModelBuilder {
         let Some(parent_rule) = self.get_last_parent_selector_rule() else {
             return false;
         };
-        let parent_range = parent_rule.range(&self.root);
+        let parent_range = parent_rule.range;
 
         node.syntax()
             .ancestors()
             .take_while(|ancestor| ancestor.text_trimmed_range() != parent_range)
             .filter_map(ScssAtRootAtRule::cast)
             .any(|at_root| at_root_excludes_style_rules(&at_root))
+    }
+
+    /// Returns whether `node`, which is outside every rule, belongs to the root's own declaration
+    /// block, such as a `style` attribute or the top level of a CSS-in-JS template.
+    fn is_root_declaration(&self, node: &CssDeclaration) -> bool {
+        match &self.root {
+            AnyCssRoot::CssRoot(_) => false,
+            AnyCssRoot::CssDeclarationSnippetRoot(_) => true,
+            // Declarations inside at-rules that don't start a rule, such as `@font-face`, belong
+            // to that at-rule instead of the root.
+            AnyCssRoot::CssSnippetRoot(_) => node
+                .syntax()
+                .grand_parent()
+                .and_then(|list| list.parent())
+                .is_some_and(|parent| &parent == self.root.syntax()),
+        }
     }
 
     pub fn build(mut self) -> SemanticModel {
@@ -149,6 +165,7 @@ impl SemanticModelBuilder {
                 let new_rule = RuleData {
                     id: new_rule_id,
                     node: AstPtr::new(&node),
+                    range: node.text_trimmed_range(),
                     selectors: Vec::new(),
                     declarations: Vec::new(),
                     parent_id,
@@ -167,7 +184,7 @@ impl SemanticModelBuilder {
             }
             SemanticEvent::RuleEnd => {
                 if let Some(completed_rule_id) = self.current_rule_stack.pop() {
-                    let range = self.all_rules[completed_rule_id.index()].range(&self.root);
+                    let range = self.all_rules[completed_rule_id.index()].range;
                     self.range_to_rule_id.insert(range, completed_rule_id);
 
                     if self.current_rule_stack.is_empty() {
@@ -215,10 +232,12 @@ impl SemanticModelBuilder {
 
                     let current_rule = &mut self.all_rules[current_rule_id.index()];
                     let combined = parent_specificity + specificity;
+                    let range = node.syntax().text_trimmed_range();
 
                     for resolved in resolved_selectors {
                         current_rule.selectors.push(SelectorData {
                             node: AstPtr::new(&node),
+                            range,
                             resolved,
                             specificity: combined,
                         });
@@ -255,7 +274,7 @@ impl SemanticModelBuilder {
                         self.all_rules[current_rule_id.index()]
                             .declarations
                             .push(declaration);
-                    } else if self.root.as_css_declaration_snippet_root().is_some() {
+                    } else if self.is_root_declaration(&node) {
                         self.root_declarations.push(declaration);
                     }
                 }

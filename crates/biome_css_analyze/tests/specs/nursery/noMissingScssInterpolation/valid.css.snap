@@ -1,0 +1,16 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
+expression: valid.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+:root {
+	--gap: $gap;
+	--muted: darken(#fff, 10%);
+}
+
+```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._

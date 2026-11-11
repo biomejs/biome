@@ -1,0 +1,120 @@
+/* should generate diagnostics */
+.six-rules {
+    .b {
+        .c {
+            .d {
+                .e {
+                    .f {
+                        color: red;
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* Only the outermost block exceeding the limit is reported. */
+.eight-rules {
+    .b {
+        .c {
+            .d {
+                .e {
+                    .f {
+                        .g {
+                            .h {
+                                color: red;
+                            }
+                        }
+
+                        @media print {
+                            color: blue;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* Sibling blocks that exceed the limit are reported separately. */
+.siblings {
+    .b {
+        .c {
+            .d {
+                .e {
+                    .f {
+                        color: red;
+                    }
+
+                    .g {
+                        color: blue;
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* Nested at-rules add a level like nested rules do. */
+.nested-at-rules {
+    .b {
+        @media print {
+            .c {
+                @supports (display: grid) {
+                    .d {
+                        color: red;
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* The reported block can belong to an at-rule. */
+.reported-at-rule {
+    .b {
+        .c {
+            .d {
+                .e {
+                    @media print {
+                        color: red;
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* A top-level at-rule doesn't add a level, but the blocks inside it still count. */
+@media print {
+    .a {
+        .b {
+            .c {
+                .d {
+                    .e {
+                        .f {
+                            color: red;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* Only the top-level at-rule is free: an at-rule nested inside it adds a level. */
+@layer components {
+    @media print {
+        .a {
+            .b {
+                .c {
+                    .d {
+                        .e {
+                            color: red;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

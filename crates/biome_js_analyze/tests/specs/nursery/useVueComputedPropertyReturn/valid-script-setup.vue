@@ -1,0 +1,40 @@
+<script setup>
+/* should not generate diagnostics */
+import { computed, ref } from "vue";
+
+const count = ref(0);
+const expressionBody = computed(() => count.value * 2);
+const functionExpression = computed(function () {
+  return count.value;
+});
+const accessors = computed({
+  set: (value) => {
+    count.value = value;
+  },
+  get: () => count.value,
+});
+const methodAccessors = computed({
+  get() {
+    return count.value;
+  },
+  set(value) {
+    count.value = value;
+  },
+});
+const branches = computed(() => {
+  if (count.value > 0) {
+    return "positive";
+  }
+  return "other";
+});
+const callbacks = computed(() => {
+  const options = [];
+  [1, 2].forEach((value) => {
+    options.push(value);
+  });
+  return options;
+});
+const getter = () => count.value;
+const fromVariable = computed(getter);
+const notComputed = ref(() => {});
+</script>

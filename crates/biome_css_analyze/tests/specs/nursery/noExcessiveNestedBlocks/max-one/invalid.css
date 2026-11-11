@@ -1,0 +1,62 @@
+/* should generate diagnostics */
+.a {
+    .b {
+        .c {
+            color: red;
+        }
+    }
+}
+
+.a {
+    .b {
+        @media print {
+            color: red;
+        }
+    }
+}
+
+.a {
+    @media print {
+        .b {
+            color: red;
+        }
+    }
+}
+
+.a {
+    @keyframes fade {
+        from {
+            opacity: 0;
+        }
+    }
+}
+
+@media print {
+    .a {
+        .b {
+            .c {
+                color: red;
+            }
+        }
+    }
+}
+
+@layer base {
+    @layer theme {
+        .a {
+            .b {
+                color: red;
+            }
+        }
+    }
+}
+
+@page :first {
+    @top-left {
+        @media print {
+            @supports (display: grid) {
+                color: red;
+            }
+        }
+    }
+}

@@ -1,0 +1,55 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid-define-component.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  data() {
+    return {
+      copy: this.foo,
+    };
+  },
+  computed: {
+    foo() {
+      return 1;
+    },
+  },
+});
+
+```
+
+# Diagnostics
+```
+invalid-define-component.js:7:13 lint/nursery/noVueComputedPropertiesInData ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property foo is used inside the data function.
+  
+    5 │   data() {
+    6 │     return {
+  > 7 │       copy: this.foo,
+      │             ^^^^^^^^
+    8 │     };
+    9 │   },
+  
+  i The computed property is declared here.
+  
+     9 │   },
+    10 │   computed: {
+  > 11 │     foo() {
+       │     ^^^
+    12 │       return 1;
+    13 │     },
+  
+  i Vue runs the data function before it sets up computed properties, so this value is undefined.
+  
+  i Compute the value from props or other data instead, or turn this data property into a computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

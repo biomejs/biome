@@ -1,0 +1,96 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.combinators.css
+---
+# Input
+```css
+/* should generate diagnostics */
+h1 + p {}
+h1 ~ p {}
+col || td {}
+:has(+ img) {}
+
+```
+
+# Diagnostics
+```
+invalid.combinators.css:2:4 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The combinator + isn't allowed.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ h1 + p {}
+      │    ^
+    3 │ h1 ~ p {}
+    4 │ col || td {}
+  
+  i The rule's configuration disallows this combinator in selectors.
+  
+  i Rewrite the selector without it, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.combinators.css:3:4 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The combinator ~ isn't allowed.
+  
+    1 │ /* should generate diagnostics */
+    2 │ h1 + p {}
+  > 3 │ h1 ~ p {}
+      │    ^
+    4 │ col || td {}
+    5 │ :has(+ img) {}
+  
+  i The rule's configuration disallows this combinator in selectors.
+  
+  i Rewrite the selector without it, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.combinators.css:4:5 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The combinator || isn't allowed.
+  
+    2 │ h1 + p {}
+    3 │ h1 ~ p {}
+  > 4 │ col || td {}
+      │     ^^
+    5 │ :has(+ img) {}
+    6 │ 
+  
+  i The rule's configuration disallows this combinator in selectors.
+  
+  i Rewrite the selector without it, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.combinators.css:5:6 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The combinator + isn't allowed.
+  
+    3 │ h1 ~ p {}
+    4 │ col || td {}
+  > 5 │ :has(+ img) {}
+      │      ^
+    6 │ 
+  
+  i The rule's configuration disallows this combinator in selectors.
+  
+  i Rewrite the selector without it, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -3,11 +3,16 @@ mod component;
 mod db;
 mod layout;
 mod model;
+mod nodes;
 mod references;
 mod snippets;
 
 pub use db::vue_model_from_source;
 pub use model::*;
+pub use nodes::{
+    AnalyzedVueModel, AnyVueElementNode, AnyVuePropNode, HtmlNodeId, JsNodeId, NodeId, VueRow,
+};
+pub use references::is_template_global;
 pub use snippets::SfcSnippet;
 
 use biome_html_syntax::HtmlRoot;
@@ -142,6 +147,13 @@ pub fn sfc_model(host: &HtmlRoot, snippets: &[SfcSnippet]) -> VueSemanticModel {
             }
         }
         None => builder.has_unread_script = has_external_script,
+    }
+    // A script kept in another file may use any template ref.
+    if has_external_script {
+        match template_component {
+            Some(component) => builder.open_uses(component, Namespace::TemplateRef),
+            None => builder.data.template_ref_uses_open = true,
+        }
     }
     // A template kept in another file, or written in a language other than
     // HTML, is not read, and it may use any declaration.

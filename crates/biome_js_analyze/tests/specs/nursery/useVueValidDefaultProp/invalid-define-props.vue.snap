@@ -1,0 +1,76 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-props.vue
+---
+# Input
+```vue
+<script setup lang="ts">
+/* should generate diagnostics */
+defineProps({
+  a: { type: String, default: () => 123 },
+  b: { type: Array, default: [] },
+  c: { type: Number, default: "1" },
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-define-props.vue:4:37 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function returns a default value for the prop a that doesn't match the type of the prop.
+  
+    2 │ /* should generate diagnostics */
+    3 │ defineProps({
+  > 4 │   a: { type: String, default: () => 123 },
+      │                                     ^^^
+    5 │   b: { type: Array, default: [] },
+    6 │   c: { type: Number, default: "1" },
+  
+  i The prop accepts String.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-props.vue:5:30 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop b isn't returned from a function.
+  
+    3 │ defineProps({
+    4 │   a: { type: String, default: () => 123 },
+  > 5 │   b: { type: Array, default: [] },
+      │                              ^^
+    6 │   c: { type: Number, default: "1" },
+    7 │ });
+  
+  i An object or array written directly as a default value is shared by every instance of the component. Changing it in one instance changes it in all of them.
+  
+  i Return the value from a function instead, such as () => [] or () => ({}).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-props.vue:6:31 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop c doesn't match the type of the prop.
+  
+    4 │   a: { type: String, default: () => 123 },
+    5 │   b: { type: Array, default: [] },
+  > 6 │   c: { type: Number, default: "1" },
+      │                               ^^^
+    7 │ });
+    8 │ </script>
+  
+  i The prop accepts Number.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

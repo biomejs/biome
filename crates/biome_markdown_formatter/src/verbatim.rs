@@ -6,19 +6,34 @@ use biome_formatter::{
     trivia::format_trailing_comments_from_slice,
 };
 use biome_markdown_syntax::MarkdownSyntaxNode;
-use biome_rowan::{Direction, SyntaxElement};
+use biome_rowan::{Direction, SyntaxElement, TextRange, TextSize};
 
 pub fn format_verbatim_node(node: &MarkdownSyntaxNode) -> FormatMarkdownVerbatimNode<'_> {
-    FormatMarkdownVerbatimNode { node }
+    FormatMarkdownVerbatimNode { node, end: None }
 }
 
 pub fn format_suppressed_node(node: &MarkdownSyntaxNode) -> FormatMarkdownVerbatimNode<'_> {
-    FormatMarkdownVerbatimNode { node }
+    FormatMarkdownVerbatimNode { node, end: None }
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub struct FormatMarkdownVerbatimNode<'node> {
     node: &'node MarkdownSyntaxNode,
+    /// Where the printed source text ends, or `None` to print the whole node.
+    end: Option<TextSize>,
+}
+
+impl FormatMarkdownVerbatimNode<'_> {
+    /// Prints the node's source text only up to the offset `end`.
+    ///
+    /// The tokens after `end` still count as formatted, so the caller must
+    /// print what they stand for.
+    pub(crate) fn until(self, end: TextSize) -> Self {
+        Self {
+            end: Some(end),
+            ..self
+        }
+    }
 }
 
 impl Format<MarkdownFormatContext> for FormatMarkdownVerbatimNode<'_> {
@@ -34,6 +49,13 @@ impl Format<MarkdownFormatContext> for FormatMarkdownVerbatimNode<'_> {
             } else {
                 (self.node.text_trimmed(), self.node.text_trimmed_range())
             };
+        let (source, source_range) = match self.end {
+            Some(end) if source_range.contains(end) => (
+                source.slice(..end - source_range.start()),
+                TextRange::new(source_range.start(), end),
+            ),
+            _ => (source, source_range),
+        };
         let leading_comments = comments.leading_comments(self.node);
         let outside_leading = leading_comments
             .partition_point(|comment| comment.piece().text_range().end() <= source_range.start());
@@ -85,5 +107,5 @@ impl Format<MarkdownFormatContext> for FormatMarkdownVerbatimNode<'_> {
 pub fn format_bogus_node(
     node: &biome_rowan::SyntaxNode<biome_markdown_syntax::MarkdownLanguage>,
 ) -> FormatMarkdownVerbatimNode<'_> {
-    FormatMarkdownVerbatimNode { node }
+    FormatMarkdownVerbatimNode { node, end: None }
 }

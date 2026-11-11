@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-setup-types.vue
+---
+# Input
+```vue
+<script setup lang="ts">
+/* should not generate diagnostics */
+const emit = defineEmits<{
+  (e: "foo", id: number): void;
+  bar: [value: string];
+}>();
+</script>
+
+```

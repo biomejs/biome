@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-open-declarations.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+import { mapState } from "vuex";
+import shared from "./shared";
+
+export default {
+  mixins: [shared],
+  computed: {
+    ...mapState(["user"]),
+  },
+  methods: {
+    greet() {
+      return this.user.name + this.fromMixin;
+    },
+  },
+};
+</script>
+
+<template>
+  <p>{{ user }} {{ fromMixin }}</p>
+</template>
+
+```

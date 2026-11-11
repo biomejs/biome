@@ -1,0 +1,14 @@
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noVueDeprecatedRouterLinkTagProp": {
+          "level": "error",
+          "options": {
+            "components": ["RouterLink", "nuxt-link", "UILink"]
+          }
+        }
+      }
+    }
+  }
+}

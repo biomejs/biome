@@ -1,0 +1,774 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+import {Chart} from "./chart.js"
+# Title
+
+import a from "a";
+Some text
+
+export const meta = {title: "x"} // metadata
+{meta.title}
+
+import b from "b"
+- A list item
+
+import e from "e";
+- Another list item
+
+export const year = 2024
+{year}
+
+export const data = getData()
+{data.title}
+
+export const banner = <Banner />
+# Banner
+
+import c from "c"
+/* a note */
+> A quote
+
+import d from "d"
+See the [guide] first.
+
+A valid paragraph.
+
+[guide]: ./guide.md
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdxEsmBlock {
+            content_token: MDX_ESM_LITERAL@0..32 "import {Chart} from \"./chart.js\"" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@32..33 "\n" [] [],
+        },
+        MdHeader {
+            indent: MdIndentTokenList [],
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@33..34 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@34..40 " Title" [] [],
+                    },
+                ],
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@40..41 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@41..42 "\n" [] [],
+        },
+        MdxEsmBlock {
+            content_token: MDX_ESM_LITERAL@42..60 "import a from \"a\";" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@60..61 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@61..70 "Some text" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@70..71 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@71..72 "\n" [] [],
+        },
+        MdxEsmBlock {
+            content_token: MDX_ESM_LITERAL@72..116 "export const meta = {title: \"x\"} // metadata" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@116..117 "\n" [] [],
+        },
+        MdxBlockExpression {
+            l_curly_token: L_CURLY@117..118 "{" [] [],
+            content: MdxExpressionContent {
+                value_token: MDX_EXPRESSION_LITERAL@118..128 "meta.title" [] [],
+            },
+            r_curly_token: R_CURLY@128..129 "}" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@129..130 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@130..131 "\n" [] [],
+        },
+        MdxEsmBlock {
+            content_token: MDX_ESM_LITERAL@131..148 "import b from \"b\"" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@148..149 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@149..150 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@150..151 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@151..162 "A list item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@162..163 "\n" [] [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@163..164 "\n" [] [],
+        },
+        MdxEsmBlock {
+            content_token: MDX_ESM_LITERAL@164..182 "import e from \"e\";" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@182..183 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@183..184 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@184..185 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@185..202 "Another list item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@202..203 "\n" [] [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@203..204 "\n" [] [],
+        },
+        MdxEsmBlock {
+            content_token: MDX_ESM_LITERAL@204..228 "export const year = 2024" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@228..229 "\n" [] [],
+        },
+        MdxBlockExpression {
+            l_curly_token: L_CURLY@229..230 "{" [] [],
+            content: MdxExpressionContent {
+                value_token: MDX_EXPRESSION_LITERAL@230..234 "year" [] [],
+            },
+            r_curly_token: R_CURLY@234..235 "}" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@235..236 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@236..237 "\n" [] [],
+        },
+        MdxEsmBlock {
+            content_token: MDX_ESM_LITERAL@237..266 "export const data = getData()" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@266..267 "\n" [] [],
+        },
+        MdxBlockExpression {
+            l_curly_token: L_CURLY@267..268 "{" [] [],
+            content: MdxExpressionContent {
+                value_token: MDX_EXPRESSION_LITERAL@268..278 "data.title" [] [],
+            },
+            r_curly_token: R_CURLY@278..279 "}" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@279..280 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@280..281 "\n" [] [],
+        },
+        MdxEsmBlock {
+            content_token: MDX_ESM_LITERAL@281..313 "export const banner = <Banner />" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@313..314 "\n" [] [],
+        },
+        MdHeader {
+            indent: MdIndentTokenList [],
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@314..315 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@315..322 " Banner" [] [],
+                    },
+                ],
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@322..323 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@323..324 "\n" [] [],
+        },
+        MdxEsmBlock {
+            content_token: MDX_ESM_LITERAL@324..354 "import c from \"c\"\n/* a note */" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@354..355 "\n" [] [],
+        },
+        MdQuote {
+            prefix: MdQuotePrefix {
+                pre_marker_indent: MdQuoteIndentList [],
+                marker_token: R_ANGLE@355..356 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@356..357 " " [] [],
+            },
+            content: MdBlockList [
+                MdParagraph {
+                    list: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@357..364 "A quote" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@364..365 "\n" [] [],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@365..366 "\n" [] [],
+        },
+        MdxEsmBlock {
+            content_token: MDX_ESM_LITERAL@366..383 "import d from \"d\"" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@383..384 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@384..392 "See the " [] [],
+                },
+                MdReferenceLink {
+                    l_brack_token: L_BRACK@392..393 "[" [] [],
+                    text: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@393..398 "guide" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@398..399 "]" [] [],
+                    label: missing (optional),
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@399..406 " first." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@406..407 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@407..408 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@408..426 "A valid paragraph." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@426..427 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@427..428 "\n" [] [],
+        },
+        MdLinkReferenceDefinition {
+            indent: MdIndentTokenList [],
+            l_brack_token: L_BRACK@428..429 "[" [] [],
+            label: MdLinkLabel {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@429..434 "guide" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@434..435 "]" [] [],
+            colon_token: COLON@435..436 ":" [] [],
+            destination: MdLinkDestination {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@436..437 " " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@437..447 "./guide.md" [] [],
+                    },
+                ],
+            },
+            title: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@447..448 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@448..448 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..448
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..448
+    0: MDX_ESM_BLOCK@0..32
+      0: MDX_ESM_LITERAL@0..32 "import {Chart} from \"./chart.js\"" [] []
+    1: MD_NEWLINE@32..33
+      0: NEWLINE@32..33 "\n" [] []
+    2: MD_HEADER@33..40
+      0: MD_INDENT_TOKEN_LIST@33..33
+      1: MD_HASH_LIST@33..34
+        0: MD_HASH@33..34
+          0: HASH@33..34 "#" [] []
+      2: MD_PARAGRAPH@34..40
+        0: MD_INLINE_ITEM_LIST@34..40
+          0: MD_TEXTUAL@34..40
+            0: MD_TEXTUAL_LITERAL@34..40 " Title" [] []
+      3: MD_HASH_LIST@40..40
+    3: MD_NEWLINE@40..41
+      0: NEWLINE@40..41 "\n" [] []
+    4: MD_NEWLINE@41..42
+      0: NEWLINE@41..42 "\n" [] []
+    5: MDX_ESM_BLOCK@42..60
+      0: MDX_ESM_LITERAL@42..60 "import a from \"a\";" [] []
+    6: MD_NEWLINE@60..61
+      0: NEWLINE@60..61 "\n" [] []
+    7: MD_PARAGRAPH@61..71
+      0: MD_INLINE_ITEM_LIST@61..71
+        0: MD_TEXTUAL@61..70
+          0: MD_TEXTUAL_LITERAL@61..70 "Some text" [] []
+        1: MD_TEXTUAL@70..71
+          0: MD_TEXTUAL_LITERAL@70..71 "\n" [] []
+    8: MD_NEWLINE@71..72
+      0: NEWLINE@71..72 "\n" [] []
+    9: MDX_ESM_BLOCK@72..116
+      0: MDX_ESM_LITERAL@72..116 "export const meta = {title: \"x\"} // metadata" [] []
+    10: MD_NEWLINE@116..117
+      0: NEWLINE@116..117 "\n" [] []
+    11: MDX_BLOCK_EXPRESSION@117..129
+      0: L_CURLY@117..118 "{" [] []
+      1: MDX_EXPRESSION_CONTENT@118..128
+        0: MDX_EXPRESSION_LITERAL@118..128 "meta.title" [] []
+      2: R_CURLY@128..129 "}" [] []
+    12: MD_NEWLINE@129..130
+      0: NEWLINE@129..130 "\n" [] []
+    13: MD_NEWLINE@130..131
+      0: NEWLINE@130..131 "\n" [] []
+    14: MDX_ESM_BLOCK@131..148
+      0: MDX_ESM_LITERAL@131..148 "import b from \"b\"" [] []
+    15: MD_NEWLINE@148..149
+      0: NEWLINE@148..149 "\n" [] []
+    16: MD_BULLET_LIST_ITEM@149..163
+      0: MD_BULLET_LIST@149..163
+        0: MD_BULLET@149..163
+          0: MD_LIST_MARKER_PREFIX@149..151
+            0: MD_INDENT_TOKEN_LIST@149..149
+            1: MINUS@149..150 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@150..151 " " [] []
+            3: MD_INDENT_TOKEN_LIST@151..151
+          1: MD_BLOCK_LIST@151..163
+            0: MD_PARAGRAPH@151..163
+              0: MD_INLINE_ITEM_LIST@151..163
+                0: MD_TEXTUAL@151..162
+                  0: MD_TEXTUAL_LITERAL@151..162 "A list item" [] []
+                1: MD_TEXTUAL@162..163
+                  0: MD_TEXTUAL_LITERAL@162..163 "\n" [] []
+    17: MD_NEWLINE@163..164
+      0: NEWLINE@163..164 "\n" [] []
+    18: MDX_ESM_BLOCK@164..182
+      0: MDX_ESM_LITERAL@164..182 "import e from \"e\";" [] []
+    19: MD_NEWLINE@182..183
+      0: NEWLINE@182..183 "\n" [] []
+    20: MD_BULLET_LIST_ITEM@183..203
+      0: MD_BULLET_LIST@183..203
+        0: MD_BULLET@183..203
+          0: MD_LIST_MARKER_PREFIX@183..185
+            0: MD_INDENT_TOKEN_LIST@183..183
+            1: MINUS@183..184 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@184..185 " " [] []
+            3: MD_INDENT_TOKEN_LIST@185..185
+          1: MD_BLOCK_LIST@185..203
+            0: MD_PARAGRAPH@185..203
+              0: MD_INLINE_ITEM_LIST@185..203
+                0: MD_TEXTUAL@185..202
+                  0: MD_TEXTUAL_LITERAL@185..202 "Another list item" [] []
+                1: MD_TEXTUAL@202..203
+                  0: MD_TEXTUAL_LITERAL@202..203 "\n" [] []
+    21: MD_NEWLINE@203..204
+      0: NEWLINE@203..204 "\n" [] []
+    22: MDX_ESM_BLOCK@204..228
+      0: MDX_ESM_LITERAL@204..228 "export const year = 2024" [] []
+    23: MD_NEWLINE@228..229
+      0: NEWLINE@228..229 "\n" [] []
+    24: MDX_BLOCK_EXPRESSION@229..235
+      0: L_CURLY@229..230 "{" [] []
+      1: MDX_EXPRESSION_CONTENT@230..234
+        0: MDX_EXPRESSION_LITERAL@230..234 "year" [] []
+      2: R_CURLY@234..235 "}" [] []
+    25: MD_NEWLINE@235..236
+      0: NEWLINE@235..236 "\n" [] []
+    26: MD_NEWLINE@236..237
+      0: NEWLINE@236..237 "\n" [] []
+    27: MDX_ESM_BLOCK@237..266
+      0: MDX_ESM_LITERAL@237..266 "export const data = getData()" [] []
+    28: MD_NEWLINE@266..267
+      0: NEWLINE@266..267 "\n" [] []
+    29: MDX_BLOCK_EXPRESSION@267..279
+      0: L_CURLY@267..268 "{" [] []
+      1: MDX_EXPRESSION_CONTENT@268..278
+        0: MDX_EXPRESSION_LITERAL@268..278 "data.title" [] []
+      2: R_CURLY@278..279 "}" [] []
+    30: MD_NEWLINE@279..280
+      0: NEWLINE@279..280 "\n" [] []
+    31: MD_NEWLINE@280..281
+      0: NEWLINE@280..281 "\n" [] []
+    32: MDX_ESM_BLOCK@281..313
+      0: MDX_ESM_LITERAL@281..313 "export const banner = <Banner />" [] []
+    33: MD_NEWLINE@313..314
+      0: NEWLINE@313..314 "\n" [] []
+    34: MD_HEADER@314..322
+      0: MD_INDENT_TOKEN_LIST@314..314
+      1: MD_HASH_LIST@314..315
+        0: MD_HASH@314..315
+          0: HASH@314..315 "#" [] []
+      2: MD_PARAGRAPH@315..322
+        0: MD_INLINE_ITEM_LIST@315..322
+          0: MD_TEXTUAL@315..322
+            0: MD_TEXTUAL_LITERAL@315..322 " Banner" [] []
+      3: MD_HASH_LIST@322..322
+    35: MD_NEWLINE@322..323
+      0: NEWLINE@322..323 "\n" [] []
+    36: MD_NEWLINE@323..324
+      0: NEWLINE@323..324 "\n" [] []
+    37: MDX_ESM_BLOCK@324..354
+      0: MDX_ESM_LITERAL@324..354 "import c from \"c\"\n/* a note */" [] []
+    38: MD_NEWLINE@354..355
+      0: NEWLINE@354..355 "\n" [] []
+    39: MD_QUOTE@355..365
+      0: MD_QUOTE_PREFIX@355..357
+        0: MD_QUOTE_INDENT_LIST@355..355
+        1: R_ANGLE@355..356 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@356..357 " " [] []
+      1: MD_BLOCK_LIST@357..365
+        0: MD_PARAGRAPH@357..365
+          0: MD_INLINE_ITEM_LIST@357..365
+            0: MD_TEXTUAL@357..364
+              0: MD_TEXTUAL_LITERAL@357..364 "A quote" [] []
+            1: MD_TEXTUAL@364..365
+              0: MD_TEXTUAL_LITERAL@364..365 "\n" [] []
+    40: MD_NEWLINE@365..366
+      0: NEWLINE@365..366 "\n" [] []
+    41: MDX_ESM_BLOCK@366..383
+      0: MDX_ESM_LITERAL@366..383 "import d from \"d\"" [] []
+    42: MD_NEWLINE@383..384
+      0: NEWLINE@383..384 "\n" [] []
+    43: MD_PARAGRAPH@384..407
+      0: MD_INLINE_ITEM_LIST@384..407
+        0: MD_TEXTUAL@384..392
+          0: MD_TEXTUAL_LITERAL@384..392 "See the " [] []
+        1: MD_REFERENCE_LINK@392..399
+          0: L_BRACK@392..393 "[" [] []
+          1: MD_INLINE_ITEM_LIST@393..398
+            0: MD_TEXTUAL@393..398
+              0: MD_TEXTUAL_LITERAL@393..398 "guide" [] []
+          2: R_BRACK@398..399 "]" [] []
+          3: (empty)
+        2: MD_TEXTUAL@399..406
+          0: MD_TEXTUAL_LITERAL@399..406 " first." [] []
+        3: MD_TEXTUAL@406..407
+          0: MD_TEXTUAL_LITERAL@406..407 "\n" [] []
+    44: MD_NEWLINE@407..408
+      0: NEWLINE@407..408 "\n" [] []
+    45: MD_PARAGRAPH@408..427
+      0: MD_INLINE_ITEM_LIST@408..427
+        0: MD_TEXTUAL@408..426
+          0: MD_TEXTUAL_LITERAL@408..426 "A valid paragraph." [] []
+        1: MD_TEXTUAL@426..427
+          0: MD_TEXTUAL_LITERAL@426..427 "\n" [] []
+    46: MD_NEWLINE@427..428
+      0: NEWLINE@427..428 "\n" [] []
+    47: MD_LINK_REFERENCE_DEFINITION@428..447
+      0: MD_INDENT_TOKEN_LIST@428..428
+      1: L_BRACK@428..429 "[" [] []
+      2: MD_LINK_LABEL@429..434
+        0: MD_INLINE_ITEM_LIST@429..434
+          0: MD_TEXTUAL@429..434
+            0: MD_TEXTUAL_LITERAL@429..434 "guide" [] []
+      3: R_BRACK@434..435 "]" [] []
+      4: COLON@435..436 ":" [] []
+      5: MD_LINK_DESTINATION@436..447
+        0: MD_INLINE_ITEM_LIST@436..447
+          0: MD_TEXTUAL@436..437
+            0: MD_TEXTUAL_LITERAL@436..437 " " [] []
+          1: MD_TEXTUAL@437..447
+            0: MD_TEXTUAL_LITERAL@437..447 "./guide.md" [] []
+      6: (empty)
+    48: MD_NEWLINE@447..448
+      0: NEWLINE@447..448 "\n" [] []
+  3: EOF@448..448 "" [] []
+
+```
+
+## Diagnostics
+
+```
+esm_followed_by_markdown.mdx:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a blank line after the `import` and `export` statements.
+  
+  > 1 │ import {Chart} from "./chart.js"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ # Title
+    3 │ 
+  
+  i this line isn't part of an `import` or `export` statement
+  
+    1 │ import {Chart} from "./chart.js"
+  > 2 │ # Title
+      │ ^^^^^^^
+    3 │ 
+    4 │ import a from "a";
+  
+  i MDX reads the lines after `import` and `export` as JavaScript up to the next blank line. Add a blank line before this line.
+  
+esm_followed_by_markdown.mdx:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a blank line after the `import` and `export` statements.
+  
+    2 │ # Title
+    3 │ 
+  > 4 │ import a from "a";
+      │ ^^^^^^^^^^^^^^^^^^
+    5 │ Some text
+    6 │ 
+  
+  i this line isn't part of an `import` or `export` statement
+  
+    4 │ import a from "a";
+  > 5 │ Some text
+      │ ^^^^^^^^^
+    6 │ 
+    7 │ export const meta = {title: "x"} // metadata
+  
+  i MDX reads the lines after `import` and `export` as JavaScript up to the next blank line. Add a blank line before this line.
+  
+esm_followed_by_markdown.mdx:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a blank line after the `import` and `export` statements.
+  
+    5 │ Some text
+    6 │ 
+  > 7 │ export const meta = {title: "x"} // metadata
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ {meta.title}
+    9 │ 
+  
+  i this line isn't part of an `import` or `export` statement
+  
+     7 │ export const meta = {title: "x"} // metadata
+   > 8 │ {meta.title}
+       │ ^^^^^^^^^^^^
+     9 │ 
+    10 │ import b from "b"
+  
+  i MDX reads the lines after `import` and `export` as JavaScript up to the next blank line. Add a blank line before this line.
+  
+esm_followed_by_markdown.mdx:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a blank line after the `import` and `export` statements.
+  
+     8 │ {meta.title}
+     9 │ 
+  > 10 │ import b from "b"
+       │ ^^^^^^^^^^^^^^^^^
+    11 │ - A list item
+    12 │ 
+  
+  i this line isn't part of an `import` or `export` statement
+  
+    10 │ import b from "b"
+  > 11 │ - A list item
+       │ ^^^^^^^^^^^^^
+    12 │ 
+    13 │ import e from "e";
+  
+  i MDX reads the lines after `import` and `export` as JavaScript up to the next blank line. Add a blank line before this line.
+  
+esm_followed_by_markdown.mdx:13:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a blank line after the `import` and `export` statements.
+  
+    11 │ - A list item
+    12 │ 
+  > 13 │ import e from "e";
+       │ ^^^^^^^^^^^^^^^^^^
+    14 │ - Another list item
+    15 │ 
+  
+  i this line isn't part of an `import` or `export` statement
+  
+    13 │ import e from "e";
+  > 14 │ - Another list item
+       │ ^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ export const year = 2024
+  
+  i MDX reads the lines after `import` and `export` as JavaScript up to the next blank line. Add a blank line before this line.
+  
+esm_followed_by_markdown.mdx:16:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a blank line after the `import` and `export` statements.
+  
+    14 │ - Another list item
+    15 │ 
+  > 16 │ export const year = 2024
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ {year}
+    18 │ 
+  
+  i this line isn't part of an `import` or `export` statement
+  
+    16 │ export const year = 2024
+  > 17 │ {year}
+       │ ^^^^^^
+    18 │ 
+    19 │ export const data = getData()
+  
+  i MDX reads the lines after `import` and `export` as JavaScript up to the next blank line. Add a blank line before this line.
+  
+esm_followed_by_markdown.mdx:19:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a blank line after the `import` and `export` statements.
+  
+    17 │ {year}
+    18 │ 
+  > 19 │ export const data = getData()
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ {data.title}
+    21 │ 
+  
+  i this line isn't part of an `import` or `export` statement
+  
+    19 │ export const data = getData()
+  > 20 │ {data.title}
+       │ ^^^^^^^^^^^^
+    21 │ 
+    22 │ export const banner = <Banner />
+  
+  i MDX reads the lines after `import` and `export` as JavaScript up to the next blank line. Add a blank line before this line.
+  
+esm_followed_by_markdown.mdx:22:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a blank line after the `import` and `export` statements.
+  
+    20 │ {data.title}
+    21 │ 
+  > 22 │ export const banner = <Banner />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ # Banner
+    24 │ 
+  
+  i this line isn't part of an `import` or `export` statement
+  
+    22 │ export const banner = <Banner />
+  > 23 │ # Banner
+       │ ^^^^^^^^
+    24 │ 
+    25 │ import c from "c"
+  
+  i MDX reads the lines after `import` and `export` as JavaScript up to the next blank line. Add a blank line before this line.
+  
+esm_followed_by_markdown.mdx:26:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a blank line after the `import` and `export` statements.
+  
+    25 │ import c from "c"
+  > 26 │ /* a note */
+       │ ^^^^^^^^^^^^
+    27 │ > A quote
+    28 │ 
+  
+  i this line isn't part of an `import` or `export` statement
+  
+    25 │ import c from "c"
+    26 │ /* a note */
+  > 27 │ > A quote
+       │ ^^^^^^^^^
+    28 │ 
+    29 │ import d from "d"
+  
+  i MDX reads the lines after `import` and `export` as JavaScript up to the next blank line. Add a blank line before this line.
+  
+esm_followed_by_markdown.mdx:29:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a blank line after the `import` and `export` statements.
+  
+    27 │ > A quote
+    28 │ 
+  > 29 │ import d from "d"
+       │ ^^^^^^^^^^^^^^^^^
+    30 │ See the [guide] first.
+    31 │ 
+  
+  i this line isn't part of an `import` or `export` statement
+  
+    29 │ import d from "d"
+  > 30 │ See the [guide] first.
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    31 │ 
+    32 │ A valid paragraph.
+  
+  i MDX reads the lines after `import` and `export` as JavaScript up to the next blank line. Add a blank line before this line.
+  
+```

@@ -1,0 +1,315 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: action.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+	<button :disabled="condition">Save</button>
+	<button :disabled>Save</button>
+	<button v-bind:disabled="condition">Save</button>
+	<button v-bind:disabled>Save</button>
+	<button :disabled="true">Save</button>
+	<button :disabled="(true)">Save</button>
+	<button :disabled="`enabled`">Save</button>
+	<button :disabled="'false'">Save</button>
+	<div role="button" :disabled="condition">Save</div>
+	<button :disabled.prop="condition">Save</button>
+	<button :disabled="condition" :aria-disabled="existing">Save</button>
+</template>
+
+```
+
+# Diagnostics
+```
+action.vue:3:10 lint/nursery/noDisabledButton  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │ 	<button :disabled="condition">Save</button>
+      │ 	        ^^^^^^^^^^^^^^^^^^^^^
+    4 │ 	<button :disabled>Save</button>
+    5 │ 	<button v-bind:disabled="condition">Save</button>
+  
+  i The native disabled state removes the button from sequential focus navigation, suppresses activation, and changes form behavior.
+  
+  i aria-disabled only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    3 │ → <button·:aria-disabled="condition">Save</button>
+      │            +++++                                  
+
+```
+
+```
+action.vue:4:10 lint/nursery/noDisabledButton  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+    2 │ <template>
+    3 │ 	<button :disabled="condition">Save</button>
+  > 4 │ 	<button :disabled>Save</button>
+      │ 	        ^^^^^^^^^
+    5 │ 	<button v-bind:disabled="condition">Save</button>
+    6 │ 	<button v-bind:disabled>Save</button>
+  
+  i The native disabled state removes the button from sequential focus navigation, suppresses activation, and changes form behavior.
+  
+  i aria-disabled only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    4 │ → <button·:aria-disabled="disabled">Save</button>
+      │            +++++++++++++++        +              
+
+```
+
+```
+action.vue:5:10 lint/nursery/noDisabledButton  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+    3 │ 	<button :disabled="condition">Save</button>
+    4 │ 	<button :disabled>Save</button>
+  > 5 │ 	<button v-bind:disabled="condition">Save</button>
+      │ 	        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 	<button v-bind:disabled>Save</button>
+    7 │ 	<button :disabled="true">Save</button>
+  
+  i The native disabled state removes the button from sequential focus navigation, suppresses activation, and changes form behavior.
+  
+  i aria-disabled only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    5 │ → <button·v-bind:aria-disabled="condition">Save</button>
+      │                  +++++                                  
+
+```
+
+```
+action.vue:6:10 lint/nursery/noDisabledButton  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+    4 │ 	<button :disabled>Save</button>
+    5 │ 	<button v-bind:disabled="condition">Save</button>
+  > 6 │ 	<button v-bind:disabled>Save</button>
+      │ 	        ^^^^^^^^^^^^^^^
+    7 │ 	<button :disabled="true">Save</button>
+    8 │ 	<button :disabled="(true)">Save</button>
+  
+  i The native disabled state removes the button from sequential focus navigation, suppresses activation, and changes form behavior.
+  
+  i aria-disabled only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+     4  4 │     <button :disabled>Save</button>
+     5  5 │     <button v-bind:disabled="condition">Save</button>
+     6    │ - → <button·v-bind:disabled>Save</button>
+        6 │ + → <button·v-bind:aria-disabled="disabled">Save</button>
+     7  7 │     <button :disabled="true">Save</button>
+     8  8 │     <button :disabled="(true)">Save</button>
+  
+
+```
+
+```
+action.vue:7:10 lint/nursery/noDisabledButton  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+    5 │ 	<button v-bind:disabled="condition">Save</button>
+    6 │ 	<button v-bind:disabled>Save</button>
+  > 7 │ 	<button :disabled="true">Save</button>
+      │ 	        ^^^^^^^^^^^^^^^^
+    8 │ 	<button :disabled="(true)">Save</button>
+    9 │ 	<button :disabled="`enabled`">Save</button>
+  
+  i The native disabled state removes the button from sequential focus navigation, suppresses activation, and changes form behavior.
+  
+  i aria-disabled only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+     5  5 │     <button v-bind:disabled="condition">Save</button>
+     6  6 │     <button v-bind:disabled>Save</button>
+     7    │ - → <button·:disabled="true">Save</button>
+        7 │ + → <button·aria-disabled="true">Save</button>
+     8  8 │     <button :disabled="(true)">Save</button>
+     9  9 │     <button :disabled="`enabled`">Save</button>
+  
+
+```
+
+```
+action.vue:8:10 lint/nursery/noDisabledButton  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+     6 │ 	<button v-bind:disabled>Save</button>
+     7 │ 	<button :disabled="true">Save</button>
+   > 8 │ 	<button :disabled="(true)">Save</button>
+       │ 	        ^^^^^^^^^^^^^^^^^^
+     9 │ 	<button :disabled="`enabled`">Save</button>
+    10 │ 	<button :disabled="'false'">Save</button>
+  
+  i The native disabled state removes the button from sequential focus navigation, suppresses activation, and changes form behavior.
+  
+  i aria-disabled only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+     6  6 │     <button v-bind:disabled>Save</button>
+     7  7 │     <button :disabled="true">Save</button>
+     8    │ - → <button·:disabled="(true)">Save</button>
+        8 │ + → <button·aria-disabled="true">Save</button>
+     9  9 │     <button :disabled="`enabled`">Save</button>
+    10 10 │     <button :disabled="'false'">Save</button>
+  
+
+```
+
+```
+action.vue:9:10 lint/nursery/noDisabledButton  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+     7 │ 	<button :disabled="true">Save</button>
+     8 │ 	<button :disabled="(true)">Save</button>
+   > 9 │ 	<button :disabled="`enabled`">Save</button>
+       │ 	        ^^^^^^^^^^^^^^^^^^^^^
+    10 │ 	<button :disabled="'false'">Save</button>
+    11 │ 	<div role="button" :disabled="condition">Save</div>
+  
+  i The native disabled state removes the button from sequential focus navigation, suppresses activation, and changes form behavior.
+  
+  i aria-disabled only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+     7  7 │     <button :disabled="true">Save</button>
+     8  8 │     <button :disabled="(true)">Save</button>
+     9    │ - → <button·:disabled="`enabled`">Save</button>
+        9 │ + → <button·aria-disabled="true">Save</button>
+    10 10 │     <button :disabled="'false'">Save</button>
+    11 11 │     <div role="button" :disabled="condition">Save</div>
+  
+
+```
+
+```
+action.vue:10:10 lint/nursery/noDisabledButton  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+     8 │ 	<button :disabled="(true)">Save</button>
+     9 │ 	<button :disabled="`enabled`">Save</button>
+  > 10 │ 	<button :disabled="'false'">Save</button>
+       │ 	        ^^^^^^^^^^^^^^^^^^^
+    11 │ 	<div role="button" :disabled="condition">Save</div>
+    12 │ 	<button :disabled.prop="condition">Save</button>
+  
+  i The native disabled state removes the button from sequential focus navigation, suppresses activation, and changes form behavior.
+  
+  i aria-disabled only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+     8  8 │     <button :disabled="(true)">Save</button>
+     9  9 │     <button :disabled="`enabled`">Save</button>
+    10    │ - → <button·:disabled="'false'">Save</button>
+       10 │ + → <button·aria-disabled="true">Save</button>
+    11 11 │     <div role="button" :disabled="condition">Save</div>
+    12 12 │     <button :disabled.prop="condition">Save</button>
+  
+
+```
+
+```
+action.vue:11:21 lint/nursery/noDisabledButton  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The disabled attribute has no effect on this element.
+  
+     9 │ 	<button :disabled="`enabled`">Save</button>
+    10 │ 	<button :disabled="'false'">Save</button>
+  > 11 │ 	<div role="button" :disabled="condition">Save</div>
+       │ 	                   ^^^^^^^^^^^^^^^^^^^^^
+    12 │ 	<button :disabled.prop="condition">Save</button>
+    13 │ 	<button :disabled="condition" :aria-disabled="existing">Save</button>
+  
+  i The button role changes accessibility semantics but does not add native button behavior.
+  
+  i aria-disabled only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    11 │ → <div·role="button"·:aria-disabled="condition">Save</div>
+       │                       +++++                               
+
+```
+
+```
+action.vue:12:10 lint/nursery/noDisabledButton ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+    10 │ 	<button :disabled="'false'">Save</button>
+    11 │ 	<div role="button" :disabled="condition">Save</div>
+  > 12 │ 	<button :disabled.prop="condition">Save</button>
+       │ 	        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 	<button :disabled="condition" :aria-disabled="existing">Save</button>
+    14 │ </template>
+  
+  i The native disabled state removes the button from sequential focus navigation, suppresses activation, and changes form behavior.
+  
+  i aria-disabled only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+action.vue:13:10 lint/nursery/noDisabledButton ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the native disabled attribute on this button.
+  
+    11 │ 	<div role="button" :disabled="condition">Save</div>
+    12 │ 	<button :disabled.prop="condition">Save</button>
+  > 13 │ 	<button :disabled="condition" :aria-disabled="existing">Save</button>
+       │ 	        ^^^^^^^^^^^^^^^^^^^^^
+    14 │ </template>
+    15 │ 
+  
+  i The native disabled state removes the button from sequential focus navigation, suppresses activation, and changes form behavior.
+  
+  i aria-disabled only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

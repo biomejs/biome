@@ -1,0 +1,193 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-template.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  props: ["value", "list", "user", "count"],
+};
+</script>
+
+<template>
+  <input v-model="value" />
+  <input v-model="user.name" />
+  <button @click="value = 'test'">Assign</button>
+  <button @click="list.push(1)">Push</button>
+  <button @click="user.id++">Increment member</button>
+  <button @click="count++">Increment</button>
+  <button @click="Object.assign(user, { id: 1 })">Assign object</button>
+  <button @click="$props.value = 'test'">Assign through $props</button>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-template.vue:9:19 lint/nursery/noVueMutatingProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes the prop value.
+  
+     8 │ <template>
+   > 9 │   <input v-model="value" />
+       │                   ^^^^^
+    10 │   <input v-model="user.name" />
+    11 │   <button @click="value = 'test'">Assign</button>
+  
+  i A prop belongs to the parent component. Changing it from the child either fails, or changes the parent's data without the parent knowing.
+  
+  i Emit an event so the parent can change the value, or copy the prop into a local ref() or computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-template.vue:10:19 lint/nursery/noVueMutatingProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes the prop user.
+  
+     8 │ <template>
+     9 │   <input v-model="value" />
+  > 10 │   <input v-model="user.name" />
+       │                   ^^^^
+    11 │   <button @click="value = 'test'">Assign</button>
+    12 │   <button @click="list.push(1)">Push</button>
+  
+  i A prop belongs to the parent component. Changing it from the child either fails, or changes the parent's data without the parent knowing.
+  
+  i Emit an event so the parent can change the value, or copy the prop into a local ref() or computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-template.vue:11:19 lint/nursery/noVueMutatingProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes the prop value.
+  
+     9 │   <input v-model="value" />
+    10 │   <input v-model="user.name" />
+  > 11 │   <button @click="value = 'test'">Assign</button>
+       │                   ^^^^^
+    12 │   <button @click="list.push(1)">Push</button>
+    13 │   <button @click="user.id++">Increment member</button>
+  
+  i A prop belongs to the parent component. Changing it from the child either fails, or changes the parent's data without the parent knowing.
+  
+  i Emit an event so the parent can change the value, or copy the prop into a local ref() or computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-template.vue:12:19 lint/nursery/noVueMutatingProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes the prop list.
+  
+    10 │   <input v-model="user.name" />
+    11 │   <button @click="value = 'test'">Assign</button>
+  > 12 │   <button @click="list.push(1)">Push</button>
+       │                   ^^^^
+    13 │   <button @click="user.id++">Increment member</button>
+    14 │   <button @click="count++">Increment</button>
+  
+  i A prop belongs to the parent component. Changing it from the child either fails, or changes the parent's data without the parent knowing.
+  
+  i Emit an event so the parent can change the value, or copy the prop into a local ref() or computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-template.vue:13:19 lint/nursery/noVueMutatingProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes the prop user.
+  
+    11 │   <button @click="value = 'test'">Assign</button>
+    12 │   <button @click="list.push(1)">Push</button>
+  > 13 │   <button @click="user.id++">Increment member</button>
+       │                   ^^^^
+    14 │   <button @click="count++">Increment</button>
+    15 │   <button @click="Object.assign(user, { id: 1 })">Assign object</button>
+  
+  i A prop belongs to the parent component. Changing it from the child either fails, or changes the parent's data without the parent knowing.
+  
+  i Emit an event so the parent can change the value, or copy the prop into a local ref() or computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-template.vue:14:19 lint/nursery/noVueMutatingProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes the prop count.
+  
+    12 │   <button @click="list.push(1)">Push</button>
+    13 │   <button @click="user.id++">Increment member</button>
+  > 14 │   <button @click="count++">Increment</button>
+       │                   ^^^^^
+    15 │   <button @click="Object.assign(user, { id: 1 })">Assign object</button>
+    16 │   <button @click="$props.value = 'test'">Assign through $props</button>
+  
+  i A prop belongs to the parent component. Changing it from the child either fails, or changes the parent's data without the parent knowing.
+  
+  i Emit an event so the parent can change the value, or copy the prop into a local ref() or computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-template.vue:15:33 lint/nursery/noVueMutatingProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes the prop user.
+  
+    13 │   <button @click="user.id++">Increment member</button>
+    14 │   <button @click="count++">Increment</button>
+  > 15 │   <button @click="Object.assign(user, { id: 1 })">Assign object</button>
+       │                                 ^^^^
+    16 │   <button @click="$props.value = 'test'">Assign through $props</button>
+    17 │ </template>
+  
+  i A prop belongs to the parent component. Changing it from the child either fails, or changes the parent's data without the parent knowing.
+  
+  i Emit an event so the parent can change the value, or copy the prop into a local ref() or computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-template.vue:16:26 lint/nursery/noVueMutatingProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes the prop value.
+  
+    14 │   <button @click="count++">Increment</button>
+    15 │   <button @click="Object.assign(user, { id: 1 })">Assign object</button>
+  > 16 │   <button @click="$props.value = 'test'">Assign through $props</button>
+       │                          ^^^^^
+    17 │ </template>
+    18 │ 
+  
+  i A prop belongs to the parent component. Changing it from the child either fails, or changes the parent's data without the parent knowing.
+  
+  i Emit an event so the parent can change the value, or copy the prop into a local ref() or computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

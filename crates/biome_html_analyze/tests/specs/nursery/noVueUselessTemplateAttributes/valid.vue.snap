@@ -1,0 +1,36 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <template v-if="foo">...</template>
+  <template v-else-if="bar">...</template>
+  <template v-else>...</template>
+  <template v-for="e in list">...</template>
+  <template v-for="i in foo" :key="i">...</template>
+  <template v-for="i in foo" v-bind:key="i">...</template>
+  <template v-for="i in foo" key="static">...</template>
+  <template v-for="i in foo" :key="i.id" v-memo="[i.name]">...</template>
+  <template v-if="foo" v-once>...</template>
+  <template v-else-if="bar" v-once>...</template>
+  <template v-else v-once>...</template>
+  <template v-for="i in foo" :key="i" v-once>...</template>
+  <template v-slot>...</template>
+  <MyList>
+    <template v-slot:foo>...</template>
+    <template #item="{ name }">{{ name }}</template>
+  </MyList>
+  <template foo="a">...</template>
+  <template :foo="a">...</template>
+  <template v-unknown="a">...</template>
+  <template class="heading" ref="input" @click="click">...</template>
+  <div v-if="foo" class="heading">...</div>
+  <div v-for="i in foo" :bar="i">...</div>
+  <MyList v-slot:foo="foo" ref="input">...</MyList>
+  <div v-if="foo" @click="click">...</div>
+</template>
+
+```

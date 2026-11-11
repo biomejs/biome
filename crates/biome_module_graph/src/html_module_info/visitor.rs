@@ -3,7 +3,7 @@ use crate::css_module_info::{CssClassDefinition, CssClassReference, CssModuleVis
 use crate::html_module_info::{AstroStyleInfo, AstroStyleVariable, HtmlImport, HtmlModuleInfo};
 use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
 use biome_css_syntax::{AnyCssRoot, CssClassSelector, CssDashedIdentifier, CssFunction};
-use biome_db::ParsedSource;
+use biome_db::Source;
 use biome_html_syntax::{
     AnyAstroDirective, AnyHtmlAttribute, AnyHtmlAttributeInitializer, HtmlAttributeList,
     HtmlElement, HtmlRoot, HtmlSelfClosingElement, T, element_ext::AnyHtmlTagElement,
@@ -14,6 +14,7 @@ use biome_js_syntax::{
 };
 use biome_languages::css::EmbeddingStyleApplicability;
 use biome_languages::{CssFileSource, JsFileSource, LanguageDb};
+use biome_parser::db::SourceExt;
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, Text, TextRange, TextSize, TokenText, WalkEvent,
 };
@@ -44,7 +45,7 @@ enum PreparedHtmlSnippet {
 }
 
 /// Collects the parsed roots needed for HTML module resolution.
-pub fn prepare_html_module(db: &dyn LanguageDb, parsed_source: ParsedSource) -> PreparedHtmlModule {
+pub fn prepare_html_module(db: &dyn LanguageDb, parsed_source: Source) -> PreparedHtmlModule {
     let html_root = parsed_source.parsed(db).tree::<HtmlRoot>();
     let snippets = parsed_source
         .snippets(db)

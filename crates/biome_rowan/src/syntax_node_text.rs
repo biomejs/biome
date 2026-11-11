@@ -1,10 +1,11 @@
 use crate::{
     Text, TextRange, TextSize, TokenAtOffset,
     cursor::{SyntaxNode, SyntaxToken},
+    green::{GreenNodeData, Slot},
 };
 use biome_text_size::TextLen;
 use std::iter::FusedIterator;
-use std::{cmp::Ordering, fmt};
+use std::{cmp::Ordering, fmt, slice};
 
 #[derive(Clone)]
 pub struct SyntaxNodeText {
@@ -88,36 +89,63 @@ impl SyntaxNodeText {
         }
     }
 
-    pub fn starts_with(&self, mut prefix: &str) -> bool {
-        for (token, range) in self.tokens_with_ranges() {
-            if prefix.is_empty() {
-                return true;
-            }
-
-            let text = &token.text()[range];
-            match text.len().cmp(&prefix.len()) {
-                Ordering::Equal => return text == prefix,
-                Ordering::Greater => return text.starts_with(prefix),
-                Ordering::Less => {
-                    if text == &prefix[..text.len()] {
-                        prefix = &prefix[text.len()..];
-                    } else {
-                        return false;
-                    }
-                }
-            }
+    pub fn starts_with(&self, prefix: &str) -> bool {
+        if prefix.is_empty() {
+            return true;
         }
 
-        prefix.is_empty()
+        let result =
+            self.try_fold_chunks(prefix, |prefix, text| match text.len().cmp(&prefix.len()) {
+                Ordering::Equal => Err(text == prefix),
+                Ordering::Greater => Err(text.starts_with(prefix)),
+                Ordering::Less => {
+                    if text == &prefix[..text.len()] {
+                        Ok(&prefix[text.len()..])
+                    } else {
+                        Err(false)
+                    }
+                }
+            });
+
+        match result {
+            Ok(_) => false,
+            Err(starts_with) => starts_with,
+        }
     }
 
-    pub fn try_fold_chunks<T, F, E>(&self, init: T, mut f: F) -> Result<T, E>
+    /// Folds `f` over the text in source order, one chunk per token that the
+    /// text's range overlaps. Chunks are never empty.
+    ///
+    /// # Panics
+    ///
+    /// When the range starts or ends inside a character, once the fold reaches
+    /// that character's token.
+    pub fn try_fold_chunks<T, F, E>(&self, init: T, f: F) -> Result<T, E>
+    where
+        F: FnMut(T, &str) -> Result<T, E>,
+    {
+        match self.green_chunks() {
+            Some(mut chunks) => chunks.try_fold(init, f),
+            None => self.try_fold_chunks_by_tokens(init, f),
+        }
+    }
+
+    /// [Self::try_fold_chunks] for a range that extends past the node, which
+    /// only red tokens can reach. A trimmed range does that when every token
+    /// of the node is empty without its trivia.
+    #[cold]
+    fn try_fold_chunks_by_tokens<T, F, E>(&self, init: T, mut f: F) -> Result<T, E>
     where
         F: FnMut(T, &str) -> Result<T, E>,
     {
         self.tokens_with_ranges()
             .try_fold(init, move |acc, (token, range)| {
-                f(acc, &token.text()[range])
+                let text = &token.text()[range];
+                if text.is_empty() {
+                    Ok(acc)
+                } else {
+                    f(acc, text)
+                }
             })
     }
 
@@ -138,6 +166,15 @@ impl SyntaxNodeText {
             Ok(()) => (),
             Err(void) => match void {},
         }
+    }
+
+    /// Returns the chunks of the text, read from the green tree, or `None` if
+    /// the range extends past the node.
+    fn green_chunks(&self) -> Option<GreenChunks<'_>> {
+        let node_range = self.node.text_range();
+        node_range
+            .contains_range(self.range)
+            .then(|| GreenChunks::new(self.node.green(), node_range.start(), self.range))
     }
 
     fn tokens_with_ranges(&self) -> impl FusedIterator<Item = (SyntaxToken, TextRange)> + use<> {
@@ -172,6 +209,72 @@ impl SyntaxNodeText {
         self.to_string().into()
     }
 }
+
+/// Iterator over the chunks of a range of a green node's text: the non-empty
+/// part of the range that each token covers, in source order.
+///
+/// Unlike [SyntaxNodeTokenWithRanges], it allocates no red node or token per
+/// token, and it skips subtrees that end before the range starts.
+struct GreenChunks<'a> {
+    range: TextRange,
+    /// For each node the walk has entered, outermost first: its children that
+    /// haven't been visited yet, and the offset where the node starts.
+    pending_children: Vec<(slice::Iter<'a, Slot>, TextSize)>,
+}
+
+impl<'a> GreenChunks<'a> {
+    /// Creates the iterator for `range` of `node`, whose text starts at
+    /// `offset`. `range` must lie inside the node's text.
+    fn new(node: &'a GreenNodeData, offset: TextSize, range: TextRange) -> Self {
+        Self {
+            range,
+            pending_children: vec![(node.slice().iter(), offset)],
+        }
+    }
+}
+
+impl<'a> Iterator for GreenChunks<'a> {
+    type Item = &'a str;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            let (slots, node_offset) = self.pending_children.last_mut()?;
+            let Some(slot) = slots.next() else {
+                self.pending_children.pop();
+                continue;
+            };
+
+            let start = *node_offset + slot.rel_offset();
+            if start >= self.range.end() {
+                self.pending_children.clear();
+                return None;
+            }
+
+            match slot {
+                Slot::Token { token, .. } => {
+                    let token_range = TextRange::at(start, token.text_len());
+                    if let Some(range) = token_range.intersect(self.range) {
+                        // Slicing before the emptiness check panics on an
+                        // empty range inside a character, as the red token
+                        // walk does.
+                        let text = &token.text()[range - start];
+                        if !text.is_empty() {
+                            return Some(text);
+                        }
+                    }
+                }
+                Slot::Node { node, .. } => {
+                    if start + node.text_len() > self.range.start() {
+                        self.pending_children.push((node.slice().iter(), start));
+                    }
+                }
+                Slot::Empty { .. } => {}
+            }
+        }
+    }
+}
+
+impl FusedIterator for GreenChunks<'_> {}
 
 #[derive(Clone)]
 struct SyntaxNodeTokenWithRanges {
@@ -222,6 +325,10 @@ impl Iterator for SyntaxNodeTokenWithRanges {
 
 impl FusedIterator for SyntaxNodeTokenWithRanges {}
 
+/// Iterator over the characters of a [SyntaxNodeText].
+///
+/// It walks red tokens: unlike [GreenChunks], it owns its state, so it can't
+/// borrow the green tree.
 #[derive(Clone)]
 struct SyntaxNodeTextChars {
     head: Option<(SyntaxToken, TextRange)>,
@@ -325,11 +432,51 @@ impl PartialEq for SyntaxNodeText {
         if self.range.len() != other.range.len() {
             return false;
         }
-        let mut lhs = self.tokens_with_ranges();
-        let mut rhs = other.tokens_with_ranges();
-        zip_texts(&mut lhs, &mut rhs).is_none()
-            && lhs.all(|it| it.1.is_empty())
-            && rhs.all(|it| it.1.is_empty())
+        // Equal without reading the tokens, which the chunk walks would slice
+        // and which panic on an empty range inside a character.
+        if self.range.is_empty() {
+            return true;
+        }
+
+        match (self.green_chunks(), other.green_chunks()) {
+            (Some(lhs), Some(rhs)) => chunks_eq(lhs, rhs),
+            _ => {
+                let mut lhs = self.tokens_with_ranges();
+                let mut rhs = other.tokens_with_ranges();
+                zip_texts(&mut lhs, &mut rhs).is_none()
+                    && lhs.all(|it| it.1.is_empty())
+                    && rhs.all(|it| it.1.is_empty())
+            }
+        }
+    }
+}
+
+/// Returns `true` if the concatenated chunks of `lhs` and `rhs` are equal.
+fn chunks_eq<'a, 'b>(
+    mut lhs: impl Iterator<Item = &'a str>,
+    mut rhs: impl Iterator<Item = &'b str>,
+) -> bool {
+    let mut x: &[u8] = &[];
+    let mut y: &[u8] = &[];
+    loop {
+        if x.is_empty() {
+            match lhs.next() {
+                Some(chunk) => x = chunk.as_bytes(),
+                None => return y.is_empty() && rhs.next().is_none(),
+            }
+        }
+        if y.is_empty() {
+            match rhs.next() {
+                Some(chunk) => y = chunk.as_bytes(),
+                None => return false,
+            }
+        }
+        let len = x.len().min(y.len());
+        if x[..len] != y[..len] {
+            return false;
+        }
+        x = &x[len..];
+        y = &y[len..];
     }
 }
 
@@ -414,9 +561,13 @@ mod private {
 
 #[cfg(test)]
 mod tests {
+    use super::{SyntaxNodeText, zip_texts};
     use crate::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
-    use crate::{SyntaxNode, TextRange, TriviaPiece};
+    use crate::{SyntaxNode, TextRange, TextSize, TriviaPiece};
+    use std::cell::Cell;
+    use std::cmp::Ordering;
     use std::panic::{AssertUnwindSafe, catch_unwind};
+    use std::sync::Once;
 
     fn build_tree(chunks: &[&str]) -> SyntaxNode<RawLanguage> {
         let mut builder = RawSyntaxTreeBuilder::new();
@@ -598,6 +749,314 @@ mod tests {
                 .into_text();
             assert_eq!(text, expected);
             assert!(!text.is_string());
+        }
+    }
+
+    /// Text of the tree that [build_edge_case_tree] returns.
+    const EDGE_CASE_TEXT: &str = "  é界ab é界😀xy ";
+
+    /// Builds a tree with zero-width tokens and nodes, trivia, characters of
+    /// two to four bytes, a node whose only token is trivia, and the same
+    /// subtree at two offsets, which the node cache stores once.
+    fn build_edge_case_tree() -> SyntaxNode<RawLanguage> {
+        let whitespace = [TriviaPiece::whitespace(1)];
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.token(RawLanguageKind::STRING_TOKEN, "");
+
+        builder.start_node(RawLanguageKind::BOGUS);
+        builder.token_with_trivia(RawLanguageKind::STRING_TOKEN, " ", &whitespace, &[]);
+        builder.finish_node();
+
+        let shared_subtree = |builder: &mut RawSyntaxTreeBuilder| {
+            builder.start_node(RawLanguageKind::BOGUS);
+            builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+            builder.token_with_trivia(RawLanguageKind::STRING_TOKEN, " é界", &whitespace, &[]);
+            builder.finish_node();
+            builder.finish_node();
+        };
+        shared_subtree(&mut builder);
+
+        builder.token(RawLanguageKind::STRING_TOKEN, "ab");
+        builder.start_node(RawLanguageKind::BOGUS);
+        builder.finish_node();
+        shared_subtree(&mut builder);
+
+        builder.start_node(RawLanguageKind::BOGUS);
+        builder.token(RawLanguageKind::STRING_TOKEN, "😀x");
+        builder.token(RawLanguageKind::STRING_TOKEN, "");
+        builder.token_with_trivia(RawLanguageKind::STRING_TOKEN, "y ", &[], &whitespace);
+        builder.finish_node();
+
+        builder.token(RawLanguageKind::STRING_TOKEN, "");
+        builder.finish_node();
+        builder.finish()
+    }
+
+    thread_local! {
+        static SILENCE_PANICS: Cell<bool> = const { Cell::new(false) };
+    }
+
+    /// Runs `f`, returning `None` if it panics, without printing the panic
+    /// message.
+    fn catch<T>(f: impl FnOnce() -> T) -> Option<T> {
+        static INSTALL_HOOK: Once = Once::new();
+        INSTALL_HOOK.call_once(|| {
+            let default_hook = std::panic::take_hook();
+            std::panic::set_hook(Box::new(move |info| {
+                if !SILENCE_PANICS.get() {
+                    default_hook(info);
+                }
+            }));
+        });
+
+        SILENCE_PANICS.set(true);
+        let result = catch_unwind(AssertUnwindSafe(f));
+        SILENCE_PANICS.set(false);
+        result.ok()
+    }
+
+    /// Every slice of `text`, with the expected string, or `None` for a slice
+    /// that splits a character.
+    fn slices<'a>(
+        text: &SyntaxNodeText,
+        expected: &'a str,
+    ) -> Vec<(SyntaxNodeText, Option<&'a str>)> {
+        let mut slices = Vec::new();
+        for start in 0..=expected.len() {
+            for end in start..=expected.len() {
+                let range = TextRange::new((start as u32).into(), (end as u32).into());
+                slices.push((text.slice(range), expected.get(start..end)));
+            }
+        }
+        slices
+    }
+
+    /// Collects the first `limit` non-empty chunks of `text`. Stops at the
+    /// chunk after them, so the walk reaches one more chunk than it returns.
+    fn first_chunks(text: &SyntaxNodeText, limit: usize) -> Vec<String> {
+        let mut chunks = Vec::new();
+        let _ = text.try_for_each_chunk(|chunk| {
+            if chunk.is_empty() {
+                return Ok(());
+            }
+            if chunks.len() == limit {
+                return Err(());
+            }
+            chunks.push(chunk.to_string());
+            Ok(())
+        });
+        chunks
+    }
+
+    /// [first_chunks] by walking red tokens, the reference for the chunks and
+    /// the panics of every method that folds over chunks.
+    fn first_chunks_by_tokens(text: &SyntaxNodeText, limit: usize) -> Vec<String> {
+        let mut chunks = Vec::new();
+        for (token, range) in text.tokens_with_ranges() {
+            let chunk = &token.text()[range];
+            if chunk.is_empty() {
+                continue;
+            }
+            if chunks.len() == limit {
+                break;
+            }
+            chunks.push(chunk.to_string());
+        }
+        chunks
+    }
+
+    /// [SyntaxNodeText::starts_with] by walking red tokens, the reference for
+    /// its results and panics.
+    fn starts_with_by_tokens(text: &SyntaxNodeText, mut prefix: &str) -> bool {
+        for (token, range) in text.tokens_with_ranges() {
+            if prefix.is_empty() {
+                return true;
+            }
+
+            let text = &token.text()[range];
+            match text.len().cmp(&prefix.len()) {
+                Ordering::Equal => return text == prefix,
+                Ordering::Greater => return text.starts_with(prefix),
+                Ordering::Less => {
+                    if text == &prefix[..text.len()] {
+                        prefix = &prefix[text.len()..];
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        prefix.is_empty()
+    }
+
+    /// `lhs == rhs` by walking red tokens, the reference for its results and
+    /// panics.
+    fn eq_by_tokens(lhs: &SyntaxNodeText, rhs: &SyntaxNodeText) -> bool {
+        if lhs.len() != rhs.len() {
+            return false;
+        }
+        let mut lhs = lhs.tokens_with_ranges();
+        let mut rhs = rhs.tokens_with_ranges();
+        zip_texts(&mut lhs, &mut rhs).is_none()
+            && lhs.all(|it| it.1.is_empty())
+            && rhs.all(|it| it.1.is_empty())
+    }
+
+    /// Checks every method of `text` against `expected`, the same text as a
+    /// string.
+    fn check_methods(text: &SyntaxNodeText, expected: &str) {
+        assert_eq!(text.to_string(), expected);
+        assert_eq!(format!("{text:?}"), format!("{expected:?}"));
+        assert_eq!(String::from(text.clone()), expected);
+        assert_eq!(text.clone().into_text(), expected);
+        assert_eq!(text.len(), TextSize::of(expected));
+        assert_eq!(text.is_empty(), expected.is_empty());
+        // `chars` isn't checked: on a range that starts inside a token, it
+        // starts at the beginning of that token.
+
+        let mut chunks = Vec::new();
+        text.for_each_chunk(|chunk| chunks.push(chunk.to_string()));
+        assert_eq!(chunks.concat(), expected);
+        assert!(chunks.iter().all(|chunk| !chunk.is_empty()), "{chunks:?}");
+        let folded = text.try_fold_chunks(String::new(), |mut acc, chunk| {
+            acc.push_str(chunk);
+            Ok::<_, ()>(acc)
+        });
+        assert_eq!(folded.as_deref(), Ok(expected));
+
+        for c in ['a', 'b', 'é', '界', '😀', ' ', 'y', 'q'] {
+            assert_eq!(text.contains_char(c), expected.contains(c), "{c:?}");
+            assert_eq!(
+                text.find_char(c),
+                expected.find(c).map(|pos| TextSize::from(pos as u32)),
+                "{c:?}"
+            );
+        }
+
+        for offset in 0..=expected.len() + 1 {
+            let actual = catch(|| text.char_at(TextSize::from(offset as u32)));
+            let char_at = if offset >= expected.len() {
+                Some(None)
+            } else if expected.is_char_boundary(offset) {
+                Some(expected[offset..].chars().next())
+            } else {
+                // Slicing a chunk in the middle of a character panics.
+                None
+            };
+            assert_eq!(actual, char_at, "char_at({offset})");
+        }
+
+        for end in (0..=expected.len()).filter(|&end| expected.is_char_boundary(end)) {
+            let prefix = &expected[..end];
+            assert!(text.starts_with(prefix), "{prefix:?}");
+            assert!(!text.starts_with(&format!("{prefix}q")), "{prefix:?}");
+        }
+        assert!(!text.starts_with(&format!("{expected} ")));
+
+        assert!(*text == *expected);
+        assert!(*expected == *text);
+        assert!(*text == expected);
+        assert!(expected == *text);
+        assert!(*text != *format!("{expected}q"));
+        if let Some(last) = expected.chars().last() {
+            let changed = format!("{}q", &expected[..expected.len() - last.len_utf8()]);
+            assert!(*text != *changed);
+        }
+    }
+
+    /// Checks that `text`, whose range splits a character, panics where the
+    /// red token walk panics and agrees with it elsewhere.
+    fn check_split_methods(text: &SyntaxNodeText, prefixes: &[&str]) {
+        assert_eq!(catch(|| text.to_string()), None);
+        for limit in 0..=8 {
+            assert_eq!(
+                catch(|| first_chunks(text, limit)),
+                catch(|| first_chunks_by_tokens(text, limit)),
+                "first {limit} chunks of {:?}",
+                text.range
+            );
+        }
+        for prefix in prefixes {
+            assert_eq!(
+                catch(|| text.starts_with(prefix)),
+                catch(|| starts_with_by_tokens(text, prefix)),
+                "{:?} starts with {prefix:?}",
+                text.range
+            );
+        }
+    }
+
+    #[test]
+    fn edge_case_tree_shares_a_subtree() {
+        let root = build_edge_case_tree();
+        assert_eq!(root.text_with_trivia().to_string(), EDGE_CASE_TEXT);
+
+        let shared: Vec<_> = root
+            .children()
+            .filter(|child| child.text_with_trivia() == " é界")
+            .collect();
+        assert_eq!(shared.len(), 2);
+        assert_ne!(
+            shared[0].text_range_with_trivia().start(),
+            shared[1].text_range_with_trivia().start()
+        );
+        assert!(std::ptr::eq(
+            shared[0].text_with_trivia().node.green(),
+            shared[1].text_with_trivia().node.green()
+        ));
+    }
+
+    #[test]
+    fn trimmed_range_past_the_node() {
+        let root = build_edge_case_tree();
+        let trivia_only = root.children().next().unwrap();
+        assert_eq!(trivia_only.text_with_trivia(), " ");
+
+        let text = trivia_only.text_trimmed();
+        assert!(!text.node.text_range().contains_range(text.range));
+        check_methods(&text, "");
+        check_methods(&text.slice(..), "");
+    }
+
+    #[test]
+    fn methods_on_every_range() {
+        let root = build_edge_case_tree();
+        let root_text = root.text_with_trivia();
+        let root_slices = slices(&root_text, EDGE_CASE_TEXT);
+        let prefixes: Vec<_> = root_slices
+            .iter()
+            .filter_map(|(_, expected)| *expected)
+            .chain(["q"])
+            .collect();
+
+        for node in root.descendants() {
+            let range = node.text_range_with_trivia();
+            let expected = &EDGE_CASE_TEXT[range];
+            let text = node.text_with_trivia();
+            check_methods(&text, expected);
+
+            let trimmed_range = node.text_trimmed_range();
+            check_methods(&node.text_trimmed(), &EDGE_CASE_TEXT[trimmed_range]);
+
+            for (slice, expected) in slices(&text, expected) {
+                match expected {
+                    Some(expected) => check_methods(&slice, expected),
+                    None => check_split_methods(&slice, &prefixes),
+                }
+
+                for (other, other_expected) in &root_slices {
+                    if other.len() != slice.len() {
+                        continue;
+                    }
+                    let eq = catch(|| slice == *other);
+                    assert_eq!(eq, catch(|| eq_by_tokens(&slice, other)));
+                    if let (Some(expected), Some(other_expected)) = (expected, other_expected) {
+                        assert_eq!(eq, Some(expected == *other_expected));
+                    }
+                }
+            }
         }
     }
 }

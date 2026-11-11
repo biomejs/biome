@@ -8,6 +8,13 @@ all-features = true
 
 [bans]
 multiple-versions = "allow"
+deny              = [
+  # These versions bundle mimalloc v3.3.0 or v3.3.1, which crash with an access violation on Windows ARM64.
+  # Version ranges need the `name:req` form; `name@req` only matches an exact version.
+  # See: https://github.com/microsoft/mimalloc/issues/1277
+  # See: https://github.com/biomejs/biome/issues/12909
+  { crate = "libmimalloc-sys:>=0.1.45, <0.1.48", reason = "Bundles mimalloc v3.3.0/v3.3.1, which crashes on Windows ARM64" },
+]
 
 [advisories]
 unmaintained = "workspace"

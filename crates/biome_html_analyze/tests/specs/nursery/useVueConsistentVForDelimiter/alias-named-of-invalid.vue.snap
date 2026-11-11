@@ -1,0 +1,56 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: alias-named-of-invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<!-- Only parse errors are expected here: the rule must not report an item named `of`. -->
+<template>
+  <div v-for="of in items"></div>
+</template>
+
+```
+
+# Diagnostics
+```
+alias-named-of-invalid.vue:4:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a v-for binding but instead found 'of'.
+  
+    2 │ <!-- Only parse errors are expected here: the rule must not report an item named `of`. -->
+    3 │ <template>
+  > 4 │   <div v-for="of in items"></div>
+      │               ^^
+    5 │ </template>
+    6 │ 
+  
+  i Expected a v-for binding here.
+  
+    2 │ <!-- Only parse errors are expected here: the rule must not report an item named `of`. -->
+    3 │ <template>
+  > 4 │   <div v-for="of in items"></div>
+      │               ^^
+    5 │ </template>
+    6 │ 
+  
+
+```
+
+```
+alias-named-of-invalid.vue:4:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression for the left hand side of the `in` operator.
+  
+    2 │ <!-- Only parse errors are expected here: the rule must not report an item named `of`. -->
+    3 │ <template>
+  > 4 │   <div v-for="of in items"></div>
+      │                  ^^
+    5 │ </template>
+    6 │ 
+  
+  i This operator requires a left hand side value
+  
+
+```

@@ -151,8 +151,21 @@ impl<L: Language> SyntaxToken<L> {
         self.raw.parent().map(SyntaxNode::from)
     }
 
+    /// Returns this token's ancestor nodes, starting with its parent.
     pub fn ancestors(&self) -> impl Iterator<Item = SyntaxNode<L>> + use<L> {
+        self.parent_ancestors()
+    }
+
+    /// Returns this token's ancestor nodes, starting with its parent.
+    pub fn parent_ancestors(&self) -> impl Iterator<Item = SyntaxNode<L>> + use<L> {
         self.raw.ancestors().map(SyntaxNode::from)
+    }
+
+    /// Returns the topmost node of the tree containing this token.
+    ///
+    /// Returns `None` if this token is detached.
+    pub fn tree_top(&self) -> Option<SyntaxNode<L>> {
+        self.raw.tree_top().map(SyntaxNode::from)
     }
 
     pub fn next_sibling_or_token(&self) -> Option<SyntaxElement<L>> {
@@ -171,13 +184,37 @@ impl<L: Language> SyntaxToken<L> {
             .map(SyntaxElement::from)
     }
 
-    /// Next token in the tree (i.e, not necessary a sibling).
+    /// Returns the next token in the tree, regardless of its parent.
     pub fn next_token(&self) -> Option<Self> {
         self.raw.next_token().map(Self::from)
     }
-    /// Previous token in the tree (i.e, not necessary a sibling).
+
+    /// Returns the previous token in the tree, regardless of its parent.
     pub fn prev_token(&self) -> Option<Self> {
         self.raw.prev_token().map(Self::from)
+    }
+
+    /// Returns the previous token's trailing trivia followed by this token's leading trivia.
+    pub fn trivia_before(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = SyntaxTriviaPiece<L>> + Clone + use<L> {
+        self.prev_token()
+            .map(|token| token.trailing_trivia().pieces())
+            .into_iter()
+            .flatten()
+            .chain(self.leading_trivia().pieces())
+    }
+
+    /// Returns this token's trailing trivia followed by the next token's leading trivia.
+    pub fn trivia_after(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = SyntaxTriviaPiece<L>> + Clone + use<L> {
+        let next = self
+            .next_token()
+            .map(|token| token.leading_trivia().pieces());
+        self.trailing_trivia()
+            .pieces()
+            .chain(next.into_iter().flatten())
     }
 
     /// Return a new version of this token detached from its parent node
@@ -467,6 +504,55 @@ impl<L: Language> SyntaxToken<L> {
                 .map(|pos| pos + 1)
                 .unwrap_or(0);
         self.leading_trivia().pieces().skip(skip_count)
+    }
+
+    /// Returns the column at which the token starts: the length, in bytes, of the text that
+    /// precedes it on its line, including trivia and preceding tokens.
+    ///
+    /// Lines end with `\n`, `\r\n`, or `\r`.
+    ///
+    /// ```
+    /// use biome_rowan::raw_language::{RawLanguageKind, RawSyntaxTreeBuilder};
+    /// use biome_rowan::*;
+    /// let node = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |builder| {
+    ///     builder.token(RawLanguageKind::LET_TOKEN, "let");
+    ///     builder.token_with_trivia(
+    ///         RawLanguageKind::STRING_TOKEN,
+    ///         "\n  a ",
+    ///         &[TriviaPiece::newline(1), TriviaPiece::whitespace(2)],
+    ///         &[TriviaPiece::whitespace(1)],
+    ///     );
+    ///     builder.token(RawLanguageKind::EQUAL_TOKEN, "=");
+    /// });
+    /// let tokens: Vec<_> = node.descendants_tokens(Direction::Next).collect();
+    /// // `a` starts its line after two spaces
+    /// assert_eq!(tokens[1].column(), TextSize::from(2));
+    /// // `=` follows `a` and its trailing space on the same line
+    /// assert_eq!(tokens[2].column(), TextSize::from(4));
+    /// ```
+    pub fn column(&self) -> TextSize {
+        /// Returns the length of `text` after its last line break, or `Err` with the length of
+        /// `text` if it has none.
+        fn len_after_line_break(text: &str) -> Result<TextSize, TextSize> {
+            match text.rfind(['\n', '\r']) {
+                Some(index) => Ok(TextSize::of(&text[index + 1..])),
+                None => Err(TextSize::of(text)),
+            }
+        }
+
+        let mut column = match len_after_line_break(self.leading_trivia().text()) {
+            Ok(len) => return len,
+            Err(len) => len,
+        };
+        let mut previous = self.prev_token();
+        while let Some(token) = previous {
+            match len_after_line_break(token.text()) {
+                Ok(len) => return column + len,
+                Err(len) => column += len,
+            }
+            previous = token.prev_token();
+        }
+        column
     }
 
     /// Returns the token's leading trivia.

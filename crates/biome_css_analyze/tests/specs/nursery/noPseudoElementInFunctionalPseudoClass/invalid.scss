@@ -1,0 +1,10 @@
+/* should generate diagnostics */
+.a {
+	&:is(::before, ::after) {
+		content: "";
+	}
+
+	.b:not(&::marker) {
+		color: red;
+	}
+}

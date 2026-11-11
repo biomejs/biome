@@ -1,0 +1,777 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <my-component :modelValue="foo" @update:modelValue="foo = $event" />
+  <my-component :model-value="foo" @update:model-value="foo = $event" />
+  <my-component :model-value="foo" @update:modelValue="foo = $event" />
+  <MyComponent :foo="bar" @update:foo="bar = $event" />
+  <my-component
+    :foo="bar"
+    bar
+    @update:foo="bar = $event"
+  />
+  <my-component v-bind:foo='bar["baz"]' v-on:update:foo='bar["baz"] = $event' />
+  <my-component :foo="bar" @update:foo="(val) => bar = val" />
+  <my-component :foo="bar" @update:foo="val => bar = val" />
+  <my-component :foo="obj.bar" @update:foo="obj.bar = $event" />
+  <my-component :foo="obj.bar" @update:foo="(val) => obj.bar = val" />
+  <my-component :foo="a" @update:foo="a = $event" :bar="b" @update:bar="b = $event" />
+  <my-component @update:foo="bar = $event" :foo="bar" />
+  <my-component :foo-bar="baz" @update:fooBar="baz = $event" />
+  <my-component :foo="bar" @update:foo="bar = $event"></my-component>
+  <my-component :foo="bar" bar @update:foo="bar = $event"></my-component>
+  <my-component :foo="bar" @update:foo="bar = $event"/>
+  <component :is="view" :foo="bar" @update:foo="bar = $event" />
+  <input is="vue:my-input" :value="bar" @update:value="bar = $event" />
+  <card :foo="bar" @update:foo="bar = $event" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:17 lint/nursery/useVueVModel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The modelValue prop is bound and updated by hand, which v-model does for you.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <my-component :modelValue="foo" @update:modelValue="foo = $event" />
+      │                 ^^^^^^^^^^^^^^^^^
+    4 │   <my-component :model-value="foo" @update:model-value="foo = $event" />
+    5 │   <my-component :model-value="foo" @update:modelValue="foo = $event" />
+  
+  i This listener only writes the new value back to the bound expression.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <my-component :modelValue="foo" @update:modelValue="foo = $event" />
+      │                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │   <my-component :model-value="foo" @update:model-value="foo = $event" />
+    5 │   <my-component :model-value="foo" @update:modelValue="foo = $event" />
+  
+  i Replace both with v-model, which is shorter and keeps the binding and the listener from getting out of sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace them with v-model.
+  
+     1  1 │   <!-- should generate diagnostics -->
+     2  2 │   <template>
+     3    │ - ··<my-component·:modelValue="foo"·@update:modelValue="foo·=·$event"·/>
+        3 │ + ··<my-component·v-model="foo"·/>
+     4  4 │     <my-component :model-value="foo" @update:model-value="foo = $event" />
+     5  5 │     <my-component :model-value="foo" @update:modelValue="foo = $event" />
+  
+
+```
+
+```
+invalid.vue:4:17 lint/nursery/useVueVModel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The model-value prop is bound and updated by hand, which v-model does for you.
+  
+    2 │ <template>
+    3 │   <my-component :modelValue="foo" @update:modelValue="foo = $event" />
+  > 4 │   <my-component :model-value="foo" @update:model-value="foo = $event" />
+      │                 ^^^^^^^^^^^^^^^^^^
+    5 │   <my-component :model-value="foo" @update:modelValue="foo = $event" />
+    6 │   <MyComponent :foo="bar" @update:foo="bar = $event" />
+  
+  i This listener only writes the new value back to the bound expression.
+  
+    2 │ <template>
+    3 │   <my-component :modelValue="foo" @update:modelValue="foo = $event" />
+  > 4 │   <my-component :model-value="foo" @update:model-value="foo = $event" />
+      │                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │   <my-component :model-value="foo" @update:modelValue="foo = $event" />
+    6 │   <MyComponent :foo="bar" @update:foo="bar = $event" />
+  
+  i Replace both with v-model, which is shorter and keeps the binding and the listener from getting out of sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace them with v-model.
+  
+     2  2 │   <template>
+     3  3 │     <my-component :modelValue="foo" @update:modelValue="foo = $event" />
+     4    │ - ··<my-component·:model-value="foo"·@update:model-value="foo·=·$event"·/>
+        4 │ + ··<my-component·v-model="foo"·/>
+     5  5 │     <my-component :model-value="foo" @update:modelValue="foo = $event" />
+     6  6 │     <MyComponent :foo="bar" @update:foo="bar = $event" />
+  
+
+```
+
+```
+invalid.vue:5:17 lint/nursery/useVueVModel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The model-value prop is bound and updated by hand, which v-model does for you.
+  
+    3 │   <my-component :modelValue="foo" @update:modelValue="foo = $event" />
+    4 │   <my-component :model-value="foo" @update:model-value="foo = $event" />
+  > 5 │   <my-component :model-value="foo" @update:modelValue="foo = $event" />
+      │                 ^^^^^^^^^^^^^^^^^^
+    6 │   <MyComponent :foo="bar" @update:foo="bar = $event" />
+    7 │   <my-component
+  
+  i This listener only writes the new value back to the bound expression.
+  
+    3 │   <my-component :modelValue="foo" @update:modelValue="foo = $event" />
+    4 │   <my-component :model-value="foo" @update:model-value="foo = $event" />
+  > 5 │   <my-component :model-value="foo" @update:modelValue="foo = $event" />
+      │                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │   <MyComponent :foo="bar" @update:foo="bar = $event" />
+    7 │   <my-component
+  
+  i Replace both with v-model, which is shorter and keeps the binding and the listener from getting out of sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace them with v-model.
+  
+     3  3 │     <my-component :modelValue="foo" @update:modelValue="foo = $event" />
+     4  4 │     <my-component :model-value="foo" @update:model-value="foo = $event" />
+     5    │ - ··<my-component·:model-value="foo"·@update:modelValue="foo·=·$event"·/>
+        5 │ + ··<my-component·v-model="foo"·/>
+     6  6 │     <MyComponent :foo="bar" @update:foo="bar = $event" />
+     7  7 │     <my-component
+  
+
+```
+
+```
+invalid.vue:6:16 lint/nursery/useVueVModel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The foo prop is bound and updated by hand, which v-model:foo does for you.
+  
+    4 │   <my-component :model-value="foo" @update:model-value="foo = $event" />
+    5 │   <my-component :model-value="foo" @update:modelValue="foo = $event" />
+  > 6 │   <MyComponent :foo="bar" @update:foo="bar = $event" />
+      │                ^^^^^^^^^^
+    7 │   <my-component
+    8 │     :foo="bar"
+  
+  i This listener only writes the new value back to the bound expression.
+  
+    4 │   <my-component :model-value="foo" @update:model-value="foo = $event" />
+    5 │   <my-component :model-value="foo" @update:modelValue="foo = $event" />
+  > 6 │   <MyComponent :foo="bar" @update:foo="bar = $event" />
+      │                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │   <my-component
+    8 │     :foo="bar"
+  
+  i Replace both with v-model:foo, which is shorter and keeps the binding and the listener from getting out of sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace them with v-model:foo.
+  
+     4  4 │     <my-component :model-value="foo" @update:model-value="foo = $event" />
+     5  5 │     <my-component :model-value="foo" @update:modelValue="foo = $event" />
+     6    │ - ··<MyComponent·:foo="bar"·@update:foo="bar·=·$event"·/>
+        6 │ + ··<MyComponent·v-model:foo="bar"·/>
+     7  7 │     <my-component
+     8  8 │       :foo="bar"
+  
+
+```
+
+```
+invalid.vue:8:5 lint/nursery/useVueVModel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The foo prop is bound and updated by hand, which v-model:foo does for you.
+  
+     6 │   <MyComponent :foo="bar" @update:foo="bar = $event" />
+     7 │   <my-component
+   > 8 │     :foo="bar"
+       │     ^^^^^^^^^^
+     9 │     bar
+    10 │     @update:foo="bar = $event"
+  
+  i This listener only writes the new value back to the bound expression.
+  
+     8 │     :foo="bar"
+     9 │     bar
+  > 10 │     @update:foo="bar = $event"
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │   />
+    12 │   <my-component v-bind:foo='bar["baz"]' v-on:update:foo='bar["baz"] = $event' />
+  
+  i Replace both with v-model:foo, which is shorter and keeps the binding and the listener from getting out of sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace them with v-model:foo.
+  
+     6  6 │     <MyComponent :foo="bar" @update:foo="bar = $event" />
+     7  7 │     <my-component
+     8    │ - ····:foo="bar"
+        8 │ + ····v-model:foo="bar"
+     9  9 │       bar
+    10    │ - ····@update:foo="bar·=·$event"
+    11 10 │     />
+    12 11 │     <my-component v-bind:foo='bar["baz"]' v-on:update:foo='bar["baz"] = $event' />
+  
+
+```
+
+```
+invalid.vue:12:17 lint/nursery/useVueVModel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The foo prop is bound and updated by hand, which v-model:foo does for you.
+  
+    10 │     @update:foo="bar = $event"
+    11 │   />
+  > 12 │   <my-component v-bind:foo='bar["baz"]' v-on:update:foo='bar["baz"] = $event' />
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^
+    13 │   <my-component :foo="bar" @update:foo="(val) => bar = val" />
+    14 │   <my-component :foo="bar" @update:foo="val => bar = val" />
+  
+  i This listener only writes the new value back to the bound expression.
+  
+    10 │     @update:foo="bar = $event"
+    11 │   />
+  > 12 │   <my-component v-bind:foo='bar["baz"]' v-on:update:foo='bar["baz"] = $event' />
+       │                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │   <my-component :foo="bar" @update:foo="(val) => bar = val" />
+    14 │   <my-component :foo="bar" @update:foo="val => bar = val" />
+  
+  i Replace both with v-model:foo, which is shorter and keeps the binding and the listener from getting out of sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace them with v-model:foo.
+  
+    10 10 │       @update:foo="bar = $event"
+    11 11 │     />
+    12    │ - ··<my-component·v-bind:foo='bar["baz"]'·v-on:update:foo='bar["baz"]·=·$event'·/>
+       12 │ + ··<my-component·v-model:foo='bar["baz"]'·/>
+    13 13 │     <my-component :foo="bar" @update:foo="(val) => bar = val" />
+    14 14 │     <my-component :foo="bar" @update:foo="val => bar = val" />
+  
+
+```
+
+```
+invalid.vue:13:17 lint/nursery/useVueVModel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The foo prop is bound and updated by hand, which v-model:foo does for you.
+  
+    11 │   />
+    12 │   <my-component v-bind:foo='bar["baz"]' v-on:update:foo='bar["baz"] = $event' />
+  > 13 │   <my-component :foo="bar" @update:foo="(val) => bar = val" />
+       │                 ^^^^^^^^^^
+    14 │   <my-component :foo="bar" @update:foo="val => bar = val" />
+    15 │   <my-component :foo="obj.bar" @update:foo="obj.bar = $event" />
+  
+  i This listener only writes the new value back to the bound expression.
+  
+    11 │   />
+    12 │   <my-component v-bind:foo='bar["baz"]' v-on:update:foo='bar["baz"] = $event' />
+  > 13 │   <my-component :foo="bar" @update:foo="(val) => bar = val" />
+       │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │   <my-component :foo="bar" @update:foo="val => bar = val" />
+    15 │   <my-component :foo="obj.bar" @update:foo="obj.bar = $event" />
+  
+  i Replace both with v-model:foo, which is shorter and keeps the binding and the listener from getting out of sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace them with v-model:foo.
+  
+    11 11 │     />
+    12 12 │     <my-component v-bind:foo='bar["baz"]' v-on:update:foo='bar["baz"] = $event' />
+    13    │ - ··<my-component·:foo="bar"·@update:foo="(val)·=>·bar·=·val"·/>
+       13 │ + ··<my-component·v-model:foo="bar"·/>
+    14 14 │     <my-component :foo="bar" @update:foo="val => bar = val" />
+    15 15 │     <my-component :foo="obj.bar" @update:foo="obj.bar = $event" />
+  
+
+```
+
+```
+invalid.vue:14:17 lint/nursery/useVueVModel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The foo prop is bound and updated by hand, which v-model:foo does for you.
+  
+    12 │   <my-component v-bind:foo='bar["baz"]' v-on:update:foo='bar["baz"] = $event' />
+    13 │   <my-component :foo="bar" @update:foo="(val) => bar = val" />
+  > 14 │   <my-component :foo="bar" @update:foo="val => bar = val" />
+       │                 ^^^^^^^^^^
+    15 │   <my-component :foo="obj.bar" @update:foo="obj.bar = $event" />
+    16 │   <my-component :foo="obj.bar" @update:foo="(val) => obj.bar = val" />
+  
+  i This listener only writes the new value back to the bound expression.
+  
+    12 │   <my-component v-bind:foo='bar["baz"]' v-on:update:foo='bar["baz"] = $event' />
+    13 │   <my-component :foo="bar" @update:foo="(val) => bar = val" />
+  > 14 │   <my-component :foo="bar" @update:foo="val => bar = val" />
+       │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │   <my-component :foo="obj.bar" @update:foo="obj.bar = $event" />
+    16 │   <my-component :foo="obj.bar" @update:foo="(val) => obj.bar = val" />
+  
+  i Replace both with v-model:foo, which is shorter and keeps the binding and the listener from getting out of sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace them with v-model:foo.
+  
+    12 12 │     <my-component v-bind:foo='bar["baz"]' v-on:update:foo='bar["baz"] = $event' />
+    13 13 │     <my-component :foo="bar" @update:foo="(val) => bar = val" />
+    14    │ - ··<my-component·:foo="bar"·@update:foo="val·=>·bar·=·val"·/>
+       14 │ + ··<my-component·v-model:foo="bar"·/>
+    15 15 │     <my-component :foo="obj.bar" @update:foo="obj.bar = $event" />
+    16 16 │     <my-component :foo="obj.bar" @update:foo="(val) => obj.bar = val" />
+  
+
+```
+
+```
+invalid.vue:15:17 lint/nursery/useVueVModel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The foo prop is bound and updated by hand, which v-model:foo does for you.
+  
+    13 │   <my-component :foo="bar" @update:foo="(val) => bar = val" />
+    14 │   <my-component :foo="bar" @update:foo="val => bar = val" />
+  > 15 │   <my-component :foo="obj.bar" @update:foo="obj.bar = $event" />
+       │                 ^^^^^^^^^^^^^^
+    16 │   <my-component :foo="obj.bar" @update:foo="(val) => obj.bar = val" />
+    17 │   <my-component :foo="a" @update:foo="a = $event" :bar="b" @update:bar="b = $event" />
+  
+  i This listener only writes the new value back to the bound expression.
+  
+    13 │   <my-component :foo="bar" @update:foo="(val) => bar = val" />
+    14 │   <my-component :foo="bar" @update:foo="val => bar = val" />
+  > 15 │   <my-component :foo="obj.bar" @update:foo="obj.bar = $event" />
+       │                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │   <my-component :foo="obj.bar" @update:foo="(val) => obj.bar = val" />
+    17 │   <my-component :foo="a" @update:foo="a = $event" :bar="b" @update:bar="b = $event" />
+  
+  i Replace both with v-model:foo, which is shorter and keeps the binding and the listener from getting out of sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace them with v-model:foo.
+  
+    13 13 │     <my-component :foo="bar" @update:foo="(val) => bar = val" />
+    14 14 │     <my-component :foo="bar" @update:foo="val => bar = val" />
+    15    │ - ··<my-component·:foo="obj.bar"·@update:foo="obj.bar·=·$event"·/>
+       15 │ + ··<my-component·v-model:foo="obj.bar"·/>
+    16 16 │     <my-component :foo="obj.bar" @update:foo="(val) => obj.bar = val" />
+    17 17 │     <my-component :foo="a" @update:foo="a = $event" :bar="b" @update:bar="b = $event" />
+  
+
+```
+
+```
+invalid.vue:16:17 lint/nursery/useVueVModel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The foo prop is bound and updated by hand, which v-model:foo does for you.
+  
+    14 │   <my-component :foo="bar" @update:foo="val => bar = val" />
+    15 │   <my-component :foo="obj.bar" @update:foo="obj.bar = $event" />
+  > 16 │   <my-component :foo="obj.bar" @update:foo="(val) => obj.bar = val" />
+       │                 ^^^^^^^^^^^^^^
+    17 │   <my-component :foo="a" @update:foo="a = $event" :bar="b" @update:bar="b = $event" />
+    18 │   <my-component @update:foo="bar = $event" :foo="bar" />
+  
+  i This listener only writes the new value back to the bound expression.
+  
+    14 │   <my-component :foo="bar" @update:foo="val => bar = val" />
+    15 │   <my-component :foo="obj.bar" @update:foo="obj.bar = $event" />
+  > 16 │   <my-component :foo="obj.bar" @update:foo="(val) => obj.bar = val" />
+       │                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │   <my-component :foo="a" @update:foo="a = $event" :bar="b" @update:bar="b = $event" />
+    18 │   <my-component @update:foo="bar = $event" :foo="bar" />
+  
+  i Replace both with v-model:foo, which is shorter and keeps the binding and the listener from getting out of sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace them with v-model:foo.
+  
+    14 14 │     <my-component :foo="bar" @update:foo="val => bar = val" />
+    15 15 │     <my-component :foo="obj.bar" @update:foo="obj.bar = $event" />
+    16    │ - ··<my-component·:foo="obj.bar"·@update:foo="(val)·=>·obj.bar·=·val"·/>
+       16 │ + ··<my-component·v-model:foo="obj.bar"·/>
+    17 17 │     <my-component :foo="a" @update:foo="a = $event" :bar="b" @update:bar="b = $event" />
+    18 18 │     <my-component @update:foo="bar = $event" :foo="bar" />
+  
+
+```
+
+```
+invalid.vue:17:17 lint/nursery/useVueVModel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The foo prop is bound and updated by hand, which v-model:foo does for you.
+  
+    15 │   <my-component :foo="obj.bar" @update:foo="obj.bar = $event" />
+    16 │   <my-component :foo="obj.bar" @update:foo="(val) => obj.bar = val" />
+  > 17 │   <my-component :foo="a" @update:foo="a = $event" :bar="b" @update:bar="b = $event" />
+       │                 ^^^^^^^^
+    18 │   <my-component @update:foo="bar = $event" :foo="bar" />
+    19 │   <my-component :foo-bar="baz" @update:fooBar="baz = $event" />
+  
+  i This listener only writes the new value back to the bound expression.
+  
+    15 │   <my-component :foo="obj.bar" @update:foo="obj.bar = $event" />
+    16 │   <my-component :foo="obj.bar" @update:foo="(val) => obj.bar = val" />
+  > 17 │   <my-component :foo="a" @update:foo="a = $event" :bar="b" @update:bar="b = $event" />
+       │                          ^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │   <my-component @update:foo="bar = $event" :foo="bar" />
+    19 │   <my-component :foo-bar="baz" @update:fooBar="baz = $event" />
+  
+  i Replace both with v-model:foo, which is shorter and keeps the binding and the listener from getting out of sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace them with v-model:foo.
+  
+    15 15 │     <my-component :foo="obj.bar" @update:foo="obj.bar = $event" />
+    16 16 │     <my-component :foo="obj.bar" @update:foo="(val) => obj.bar = val" />
+    17    │ - ··<my-component·:foo="a"·@update:foo="a·=·$event"·:bar="b"·@update:bar="b·=·$event"·/>
+       17 │ + ··<my-component·v-model:foo="a"·:bar="b"·@update:bar="b·=·$event"·/>
+    18 18 │     <my-component @update:foo="bar = $event" :foo="bar" />
+    19 19 │     <my-component :foo-bar="baz" @update:fooBar="baz = $event" />
+  
+
+```
+
+```
+invalid.vue:17:51 lint/nursery/useVueVModel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bar prop is bound and updated by hand, which v-model:bar does for you.
+  
+    15 │   <my-component :foo="obj.bar" @update:foo="obj.bar = $event" />
+    16 │   <my-component :foo="obj.bar" @update:foo="(val) => obj.bar = val" />
+  > 17 │   <my-component :foo="a" @update:foo="a = $event" :bar="b" @update:bar="b = $event" />
+       │                                                   ^^^^^^^^
+    18 │   <my-component @update:foo="bar = $event" :foo="bar" />
+    19 │   <my-component :foo-bar="baz" @update:fooBar="baz = $event" />
+  
+  i This listener only writes the new value back to the bound expression.
+  
+    15 │   <my-component :foo="obj.bar" @update:foo="obj.bar = $event" />
+    16 │   <my-component :foo="obj.bar" @update:foo="(val) => obj.bar = val" />
+  > 17 │   <my-component :foo="a" @update:foo="a = $event" :bar="b" @update:bar="b = $event" />
+       │                                                            ^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │   <my-component @update:foo="bar = $event" :foo="bar" />
+    19 │   <my-component :foo-bar="baz" @update:fooBar="baz = $event" />
+  
+  i Replace both with v-model:bar, which is shorter and keeps the binding and the listener from getting out of sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace them with v-model:bar.
+  
+    15 15 │     <my-component :foo="obj.bar" @update:foo="obj.bar = $event" />
+    16 16 │     <my-component :foo="obj.bar" @update:foo="(val) => obj.bar = val" />
+    17    │ - ··<my-component·:foo="a"·@update:foo="a·=·$event"·:bar="b"·@update:bar="b·=·$event"·/>
+       17 │ + ··<my-component·:foo="a"·@update:foo="a·=·$event"·v-model:bar="b"·/>
+    18 18 │     <my-component @update:foo="bar = $event" :foo="bar" />
+    19 19 │     <my-component :foo-bar="baz" @update:fooBar="baz = $event" />
+  
+
+```
+
+```
+invalid.vue:18:44 lint/nursery/useVueVModel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The foo prop is bound and updated by hand, which v-model:foo does for you.
+  
+    16 │   <my-component :foo="obj.bar" @update:foo="(val) => obj.bar = val" />
+    17 │   <my-component :foo="a" @update:foo="a = $event" :bar="b" @update:bar="b = $event" />
+  > 18 │   <my-component @update:foo="bar = $event" :foo="bar" />
+       │                                            ^^^^^^^^^^
+    19 │   <my-component :foo-bar="baz" @update:fooBar="baz = $event" />
+    20 │   <my-component :foo="bar" @update:foo="bar = $event"></my-component>
+  
+  i This listener only writes the new value back to the bound expression.
+  
+    16 │   <my-component :foo="obj.bar" @update:foo="(val) => obj.bar = val" />
+    17 │   <my-component :foo="a" @update:foo="a = $event" :bar="b" @update:bar="b = $event" />
+  > 18 │   <my-component @update:foo="bar = $event" :foo="bar" />
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │   <my-component :foo-bar="baz" @update:fooBar="baz = $event" />
+    20 │   <my-component :foo="bar" @update:foo="bar = $event"></my-component>
+  
+  i Replace both with v-model:foo, which is shorter and keeps the binding and the listener from getting out of sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace them with v-model:foo.
+  
+    16 16 │     <my-component :foo="obj.bar" @update:foo="(val) => obj.bar = val" />
+    17 17 │     <my-component :foo="a" @update:foo="a = $event" :bar="b" @update:bar="b = $event" />
+    18    │ - ··<my-component·@update:foo="bar·=·$event"·:foo="bar"·/>
+       18 │ + ··<my-component·v-model:foo="bar"·/>
+    19 19 │     <my-component :foo-bar="baz" @update:fooBar="baz = $event" />
+    20 20 │     <my-component :foo="bar" @update:foo="bar = $event"></my-component>
+  
+
+```
+
+```
+invalid.vue:19:17 lint/nursery/useVueVModel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The foo-bar prop is bound and updated by hand, which v-model:foo-bar does for you.
+  
+    17 │   <my-component :foo="a" @update:foo="a = $event" :bar="b" @update:bar="b = $event" />
+    18 │   <my-component @update:foo="bar = $event" :foo="bar" />
+  > 19 │   <my-component :foo-bar="baz" @update:fooBar="baz = $event" />
+       │                 ^^^^^^^^^^^^^^
+    20 │   <my-component :foo="bar" @update:foo="bar = $event"></my-component>
+    21 │   <my-component :foo="bar" bar @update:foo="bar = $event"></my-component>
+  
+  i This listener only writes the new value back to the bound expression.
+  
+    17 │   <my-component :foo="a" @update:foo="a = $event" :bar="b" @update:bar="b = $event" />
+    18 │   <my-component @update:foo="bar = $event" :foo="bar" />
+  > 19 │   <my-component :foo-bar="baz" @update:fooBar="baz = $event" />
+       │                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │   <my-component :foo="bar" @update:foo="bar = $event"></my-component>
+    21 │   <my-component :foo="bar" bar @update:foo="bar = $event"></my-component>
+  
+  i Replace both with v-model:foo-bar, which is shorter and keeps the binding and the listener from getting out of sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace them with v-model:foo-bar.
+  
+    17 17 │     <my-component :foo="a" @update:foo="a = $event" :bar="b" @update:bar="b = $event" />
+    18 18 │     <my-component @update:foo="bar = $event" :foo="bar" />
+    19    │ - ··<my-component·:foo-bar="baz"·@update:fooBar="baz·=·$event"·/>
+       19 │ + ··<my-component·v-model:foo-bar="baz"·/>
+    20 20 │     <my-component :foo="bar" @update:foo="bar = $event"></my-component>
+    21 21 │     <my-component :foo="bar" bar @update:foo="bar = $event"></my-component>
+  
+
+```
+
+```
+invalid.vue:20:17 lint/nursery/useVueVModel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The foo prop is bound and updated by hand, which v-model:foo does for you.
+  
+    18 │   <my-component @update:foo="bar = $event" :foo="bar" />
+    19 │   <my-component :foo-bar="baz" @update:fooBar="baz = $event" />
+  > 20 │   <my-component :foo="bar" @update:foo="bar = $event"></my-component>
+       │                 ^^^^^^^^^^
+    21 │   <my-component :foo="bar" bar @update:foo="bar = $event"></my-component>
+    22 │   <my-component :foo="bar" @update:foo="bar = $event"/>
+  
+  i This listener only writes the new value back to the bound expression.
+  
+    18 │   <my-component @update:foo="bar = $event" :foo="bar" />
+    19 │   <my-component :foo-bar="baz" @update:fooBar="baz = $event" />
+  > 20 │   <my-component :foo="bar" @update:foo="bar = $event"></my-component>
+       │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │   <my-component :foo="bar" bar @update:foo="bar = $event"></my-component>
+    22 │   <my-component :foo="bar" @update:foo="bar = $event"/>
+  
+  i Replace both with v-model:foo, which is shorter and keeps the binding and the listener from getting out of sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace them with v-model:foo.
+  
+    18 18 │     <my-component @update:foo="bar = $event" :foo="bar" />
+    19 19 │     <my-component :foo-bar="baz" @update:fooBar="baz = $event" />
+    20    │ - ··<my-component·:foo="bar"·@update:foo="bar·=·$event"></my-component>
+       20 │ + ··<my-component·v-model:foo="bar"></my-component>
+    21 21 │     <my-component :foo="bar" bar @update:foo="bar = $event"></my-component>
+    22 22 │     <my-component :foo="bar" @update:foo="bar = $event"/>
+  
+
+```
+
+```
+invalid.vue:21:17 lint/nursery/useVueVModel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The foo prop is bound and updated by hand, which v-model:foo does for you.
+  
+    19 │   <my-component :foo-bar="baz" @update:fooBar="baz = $event" />
+    20 │   <my-component :foo="bar" @update:foo="bar = $event"></my-component>
+  > 21 │   <my-component :foo="bar" bar @update:foo="bar = $event"></my-component>
+       │                 ^^^^^^^^^^
+    22 │   <my-component :foo="bar" @update:foo="bar = $event"/>
+    23 │   <component :is="view" :foo="bar" @update:foo="bar = $event" />
+  
+  i This listener only writes the new value back to the bound expression.
+  
+    19 │   <my-component :foo-bar="baz" @update:fooBar="baz = $event" />
+    20 │   <my-component :foo="bar" @update:foo="bar = $event"></my-component>
+  > 21 │   <my-component :foo="bar" bar @update:foo="bar = $event"></my-component>
+       │                                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │   <my-component :foo="bar" @update:foo="bar = $event"/>
+    23 │   <component :is="view" :foo="bar" @update:foo="bar = $event" />
+  
+  i Replace both with v-model:foo, which is shorter and keeps the binding and the listener from getting out of sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace them with v-model:foo.
+  
+    19 19 │     <my-component :foo-bar="baz" @update:fooBar="baz = $event" />
+    20 20 │     <my-component :foo="bar" @update:foo="bar = $event"></my-component>
+    21    │ - ··<my-component·:foo="bar"·bar·@update:foo="bar·=·$event"></my-component>
+       21 │ + ··<my-component·v-model:foo="bar"·bar></my-component>
+    22 22 │     <my-component :foo="bar" @update:foo="bar = $event"/>
+    23 23 │     <component :is="view" :foo="bar" @update:foo="bar = $event" />
+  
+
+```
+
+```
+invalid.vue:22:17 lint/nursery/useVueVModel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The foo prop is bound and updated by hand, which v-model:foo does for you.
+  
+    20 │   <my-component :foo="bar" @update:foo="bar = $event"></my-component>
+    21 │   <my-component :foo="bar" bar @update:foo="bar = $event"></my-component>
+  > 22 │   <my-component :foo="bar" @update:foo="bar = $event"/>
+       │                 ^^^^^^^^^^
+    23 │   <component :is="view" :foo="bar" @update:foo="bar = $event" />
+    24 │   <input is="vue:my-input" :value="bar" @update:value="bar = $event" />
+  
+  i This listener only writes the new value back to the bound expression.
+  
+    20 │   <my-component :foo="bar" @update:foo="bar = $event"></my-component>
+    21 │   <my-component :foo="bar" bar @update:foo="bar = $event"></my-component>
+  > 22 │   <my-component :foo="bar" @update:foo="bar = $event"/>
+       │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │   <component :is="view" :foo="bar" @update:foo="bar = $event" />
+    24 │   <input is="vue:my-input" :value="bar" @update:value="bar = $event" />
+  
+  i Replace both with v-model:foo, which is shorter and keeps the binding and the listener from getting out of sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace them with v-model:foo.
+  
+    20 20 │     <my-component :foo="bar" @update:foo="bar = $event"></my-component>
+    21 21 │     <my-component :foo="bar" bar @update:foo="bar = $event"></my-component>
+    22    │ - ··<my-component·:foo="bar"·@update:foo="bar·=·$event"/>
+       22 │ + ··<my-component·v-model:foo="bar"/>
+    23 23 │     <component :is="view" :foo="bar" @update:foo="bar = $event" />
+    24 24 │     <input is="vue:my-input" :value="bar" @update:value="bar = $event" />
+  
+
+```
+
+```
+invalid.vue:23:25 lint/nursery/useVueVModel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The foo prop is bound and updated by hand, which v-model:foo does for you.
+  
+    21 │   <my-component :foo="bar" bar @update:foo="bar = $event"></my-component>
+    22 │   <my-component :foo="bar" @update:foo="bar = $event"/>
+  > 23 │   <component :is="view" :foo="bar" @update:foo="bar = $event" />
+       │                         ^^^^^^^^^^
+    24 │   <input is="vue:my-input" :value="bar" @update:value="bar = $event" />
+    25 │   <card :foo="bar" @update:foo="bar = $event" />
+  
+  i This listener only writes the new value back to the bound expression.
+  
+    21 │   <my-component :foo="bar" bar @update:foo="bar = $event"></my-component>
+    22 │   <my-component :foo="bar" @update:foo="bar = $event"/>
+  > 23 │   <component :is="view" :foo="bar" @update:foo="bar = $event" />
+       │                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │   <input is="vue:my-input" :value="bar" @update:value="bar = $event" />
+    25 │   <card :foo="bar" @update:foo="bar = $event" />
+  
+  i Replace both with v-model:foo, which is shorter and keeps the binding and the listener from getting out of sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace them with v-model:foo.
+  
+    21 21 │     <my-component :foo="bar" bar @update:foo="bar = $event"></my-component>
+    22 22 │     <my-component :foo="bar" @update:foo="bar = $event"/>
+    23    │ - ··<component·:is="view"·:foo="bar"·@update:foo="bar·=·$event"·/>
+       23 │ + ··<component·:is="view"·v-model:foo="bar"·/>
+    24 24 │     <input is="vue:my-input" :value="bar" @update:value="bar = $event" />
+    25 25 │     <card :foo="bar" @update:foo="bar = $event" />
+  
+
+```
+
+```
+invalid.vue:24:28 lint/nursery/useVueVModel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value prop is bound and updated by hand, which v-model:value does for you.
+  
+    22 │   <my-component :foo="bar" @update:foo="bar = $event"/>
+    23 │   <component :is="view" :foo="bar" @update:foo="bar = $event" />
+  > 24 │   <input is="vue:my-input" :value="bar" @update:value="bar = $event" />
+       │                            ^^^^^^^^^^^^
+    25 │   <card :foo="bar" @update:foo="bar = $event" />
+    26 │ </template>
+  
+  i This listener only writes the new value back to the bound expression.
+  
+    22 │   <my-component :foo="bar" @update:foo="bar = $event"/>
+    23 │   <component :is="view" :foo="bar" @update:foo="bar = $event" />
+  > 24 │   <input is="vue:my-input" :value="bar" @update:value="bar = $event" />
+       │                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │   <card :foo="bar" @update:foo="bar = $event" />
+    26 │ </template>
+  
+  i Replace both with v-model:value, which is shorter and keeps the binding and the listener from getting out of sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace them with v-model:value.
+  
+    22 22 │     <my-component :foo="bar" @update:foo="bar = $event"/>
+    23 23 │     <component :is="view" :foo="bar" @update:foo="bar = $event" />
+    24    │ - ··<input·is="vue:my-input"·:value="bar"·@update:value="bar·=·$event"·/>
+       24 │ + ··<input·is="vue:my-input"·v-model:value="bar"·/>
+    25 25 │     <card :foo="bar" @update:foo="bar = $event" />
+    26 26 │   </template>
+  
+
+```
+
+```
+invalid.vue:25:9 lint/nursery/useVueVModel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The foo prop is bound and updated by hand, which v-model:foo does for you.
+  
+    23 │   <component :is="view" :foo="bar" @update:foo="bar = $event" />
+    24 │   <input is="vue:my-input" :value="bar" @update:value="bar = $event" />
+  > 25 │   <card :foo="bar" @update:foo="bar = $event" />
+       │         ^^^^^^^^^^
+    26 │ </template>
+    27 │ 
+  
+  i This listener only writes the new value back to the bound expression.
+  
+    23 │   <component :is="view" :foo="bar" @update:foo="bar = $event" />
+    24 │   <input is="vue:my-input" :value="bar" @update:value="bar = $event" />
+  > 25 │   <card :foo="bar" @update:foo="bar = $event" />
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ </template>
+    27 │ 
+  
+  i Replace both with v-model:foo, which is shorter and keeps the binding and the listener from getting out of sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace them with v-model:foo.
+  
+    23 23 │     <component :is="view" :foo="bar" @update:foo="bar = $event" />
+    24 24 │     <input is="vue:my-input" :value="bar" @update:value="bar = $event" />
+    25    │ - ··<card·:foo="bar"·@update:foo="bar·=·$event"·/>
+       25 │ + ··<card·v-model:foo="bar"·/>
+    26 26 │   </template>
+    27 27 │   
+  
+
+```

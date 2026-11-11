@@ -48,7 +48,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUnreadableIife {
-        version: "next",
+        version: "2.6.4",
         name: "noUnreadableIife",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-unreadable-iife").same()],

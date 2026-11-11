@@ -12,6 +12,10 @@ info: markdown/inline_links.md
 
 [  spaced  ](#link)
 
+somethong [ fff   ](   f) ssss
+
+somethong [    ](   f) ssss
+
 [link](https://example.com "title")
 
 [link](https://example.com "")
@@ -44,7 +48,11 @@ text with [inline](link) in the middle
 
 [\*](#styling-footnote)
 
-[  spaced  ](#link)
+[ spaced ](#link)
+
+somethong [ fff ](f) ssss
+
+somethong [ ](f) ssss
 
 [link](https://example.com "title")
 

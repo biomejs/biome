@@ -40,7 +40,7 @@ pub use crate::md::MdFileSource;
 #[cfg(feature = "lang_yaml")]
 pub use crate::yaml::YamlFileSource;
 
-pub use crate::db::LanguageDb;
+pub use crate::db::{LanguageDb, has_embedded_content};
 
 // NOTE: when adding a new ignore file, update [DocumentFileSource::try_from_path]
 pub const GIT_IGNORE_FILE_NAME: &str = ".gitignore";

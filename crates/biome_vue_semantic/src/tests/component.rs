@@ -1,5 +1,11 @@
 use super::js_model;
-use crate::{ComponentKind, DefaultSource, Namespace, OpenReason, PropForm, PropType, Tri};
+use crate::{
+    Access, ComponentKind, DefaultSource, DefaultSources, JsNodeId, Namespace, OpenReason,
+    PropForm, PropType, RefSite, Resolution, Tri, component_model,
+};
+use biome_js_parser::JsParserOptions;
+use biome_js_semantic::{SemanticModelOptions, semantic_model};
+use biome_js_syntax::JsSyntaxKind;
 use biome_languages::JsFileSource;
 
 fn setup_ts() -> JsFileSource {
@@ -66,6 +72,65 @@ fn options_export_only_in_vue_files() {
 }
 
 #[test]
+fn definitions_written_in_place() {
+    fn in_place(code: &str, source: JsFileSource) -> Vec<bool> {
+        js_model(code, source)
+            .components()
+            .map(|component| component.is_defined_in_place())
+            .collect()
+    }
+    let vue_import = r#"import { createApp, defineComponent } from "vue";"#;
+    let js = |calls: &str| format!("{vue_import} {calls}");
+
+    assert_eq!(
+        in_place(
+            &js("createApp({}); createApp(App); createApp(App, { msg: 'hi' });"),
+            JsFileSource::js_module()
+        ),
+        [true, false, false]
+    );
+    assert_eq!(
+        in_place(
+            &js(
+                "defineComponent({}); defineComponent(() => () => null); defineComponent(setup, {}); defineComponent(() => () => null, options); defineComponent(Foo);"
+            ),
+            JsFileSource::js_module()
+        ),
+        [true, true, true, true, false]
+    );
+    assert_eq!(in_place("export default {}", JsFileSource::vue()), [true]);
+    assert_eq!(
+        in_place("export default options", JsFileSource::vue()),
+        [false]
+    );
+    assert_eq!(in_place("const count = 0;", setup_ts()), [true]);
+}
+
+#[test]
+fn default_export_of_the_plain_block() {
+    let model = js_model(
+        r#"import { defineComponent } from "vue";
+const Helper = defineComponent({});
+export default defineComponent({ components: { Helper } });"#,
+        JsFileSource::vue(),
+    );
+    let defaults: Vec<_> = model
+        .components()
+        .map(|component| component.is_default_export())
+        .collect();
+    assert_eq!(defaults, [false, true]);
+
+    let model = js_model("export default { name: 'A' }", JsFileSource::vue());
+    assert!(
+        model
+            .components()
+            .next()
+            .expect("a component")
+            .is_default_export()
+    );
+}
+
+#[test]
 fn every_prop_form_has_the_same_shape() {
     let options = js_model(
         "export default { props: { enabled: { type: Boolean, default: true } } }",
@@ -96,6 +161,136 @@ fn every_prop_form_has_the_same_shape() {
 }
 
 #[test]
+fn external_default_sources_follow_the_define_props_call() {
+    for (code, expected) in [
+        ("defineProps<{ a?: string }>()", DefaultSources::empty()),
+        (
+            "const props = defineProps<{ a?: string }>()",
+            DefaultSources::empty(),
+        ),
+        (
+            "withDefaults(defineProps<{ a?: string }>(), {})",
+            DefaultSource::WithDefaults.into(),
+        ),
+        (
+            "const { a } = defineProps<{ a?: string }>()",
+            DefaultSource::Destructure.into(),
+        ),
+        (
+            "const { a } = withDefaults(defineProps<{ a?: string }>(), {})",
+            DefaultSource::WithDefaults | DefaultSource::Destructure,
+        ),
+    ] {
+        let model = js_model(code, setup_ts());
+        let component = model.components().next().expect("a component");
+        let prop = component.props().next().expect("a prop");
+        assert_eq!(prop.external_default_sources(), expected, "`{code}`");
+    }
+
+    let model = js_model(
+        "export default { props: { a: { type: String } } }",
+        JsFileSource::vue(),
+    );
+    let component = model.components().next().expect("a component");
+    let prop = component.props().next().expect("a prop");
+    assert!(prop.external_default_sources().is_empty());
+}
+
+#[test]
+fn unreadable_with_defaults_leaves_the_defaults_incomplete() {
+    for (code, complete) in [
+        (
+            "withDefaults(defineProps<{ a?: string }>(), { a: '' })",
+            true,
+        ),
+        (
+            "withDefaults(defineProps<{ a?: string }>(), { a: '' } as const)",
+            true,
+        ),
+        ("withDefaults(defineProps<{ a?: string }>())", true),
+        ("const { a = '' } = defineProps<{ a?: string }>()", true),
+        (
+            "withDefaults(defineProps<{ a?: string }>(), defaults)",
+            false,
+        ),
+        (
+            "withDefaults(defineProps<{ a?: string }>(), makeDefaults())",
+            false,
+        ),
+        (
+            "withDefaults(defineProps<{ a?: string }>(), { ...defaults })",
+            false,
+        ),
+        (
+            "withDefaults(defineProps<{ a?: string }>(), { [key]: '' })",
+            false,
+        ),
+    ] {
+        let model = js_model(code, setup_ts());
+        let component = model.components().next().expect("a component");
+        let prop = component.props().next().expect("a prop");
+        assert_eq!(prop.has_complete_defaults(), complete, "`{code}`");
+    }
+}
+
+#[test]
+fn unreadable_prop_options_leave_the_defaults_incomplete() {
+    for (code, complete) in [
+        ("export default { props: { a: { type: String } } }", true),
+        ("export default { props: { a: { ...shared } } }", false),
+        ("export default { props: { a: { [key]: 1 } } }", false),
+    ] {
+        let model = js_model(code, JsFileSource::vue());
+        let component = model.components().next().expect("a component");
+        let prop = component.props().next().expect("a prop");
+        assert_eq!(prop.has_complete_defaults(), complete, "`{code}`");
+    }
+}
+
+#[test]
+fn define_model_declares_a_prop() {
+    let runtime = js_model(
+        r#"defineModel("count", { type: Number, default: 0 })"#,
+        setup_ts(),
+    );
+    let component = runtime.components().next().expect("a component");
+    let model = component.models().next().expect("a model");
+    assert_eq!(model.name(), "count");
+    assert!(model.types() == PropType::Number);
+    assert_eq!(model.form(), Some(PropForm::Options));
+    let defaults: Vec<_> = model.defaults().collect();
+    assert_eq!(defaults.len(), 1);
+    assert_eq!(defaults[0].source(), DefaultSource::Inline);
+
+    let typed = js_model(r#"defineModel<string>({ default: "" })"#, setup_ts());
+    let component = typed.components().next().expect("a component");
+    let model = component.models().next().expect("a model");
+    assert_eq!(model.name(), "modelValue");
+    assert!(model.types() == PropType::String);
+    assert_eq!(model.form(), Some(PropForm::TypeMember));
+    assert_eq!(model.defaults().count(), 1);
+
+    let both = js_model(r#"defineModel<string>({ type: Number })"#, setup_ts());
+    let component = both.components().next().expect("a component");
+    let model = component.models().next().expect("a model");
+    assert!(model.types() == PropType::Number);
+    assert_eq!(model.form(), Some(PropForm::Options));
+}
+
+#[test]
+fn callable_type_literal_is_a_function() {
+    let model = js_model(
+        "defineProps<{ call?: { (): void }; make?: { new (): object }; both?: { (): void; size: number } }>()",
+        setup_ts(),
+    );
+    let component = model.components().next().expect("a component");
+    let types: Vec<_> = component.props().map(|prop| prop.types()).collect();
+    assert!(types[0] == PropType::Function);
+    assert!(types[1] == PropType::Function);
+    assert!(types[2] == PropType::Function | PropType::Object);
+}
+
+#[test]
 fn script_setup_macros() {
     let model = js_model(
         r#"import { ref, computed, onMounted, watch } from "vue";
@@ -113,6 +308,19 @@ watch(count, () => {});
         setup_ts(),
     );
     insta::assert_snapshot!(model.to_string());
+}
+
+#[test]
+fn mixins_option_range() {
+    let source = "export default { name: 'A', mixins: [m] }";
+    let model = js_model(source, JsFileSource::vue());
+    let component = model.components().next().unwrap();
+    let range = component.mixins_range().unwrap();
+    assert_eq!(&source[range], "mixins: [m]");
+
+    let model = js_model("export default { extends: m }", JsFileSource::vue());
+    let component = model.components().next().unwrap();
+    assert_eq!(component.mixins_range(), None);
 }
 
 #[test]
@@ -171,6 +379,24 @@ defineComponent({
 }
 
 #[test]
+fn vue_2_lifecycle_option_names() {
+    let model = js_model(
+        r#"import { defineComponent } from "vue";
+defineComponent({
+  beforeDestroy() {},
+  destroyed: () => {},
+});"#,
+        JsFileSource::js_module(),
+    );
+    let component = model.components().next().unwrap();
+    let names: Vec<_> = component
+        .hooks()
+        .map(|symbol| symbol.name().to_string())
+        .collect();
+    assert_eq!(names, ["beforeDestroy", "destroyed"]);
+}
+
+#[test]
 fn script_mode_file_with_vue_global() {
     let model = js_model(
         "Vue.createApp({ props: ['key'] });",
@@ -213,7 +439,6 @@ const Child = defineComponent({ props: ["inner"] });"#,
 fn non_literal_declarations_open_the_namespace() {
     for code in [
         "export default { props: shared }",
-        "export default { props: { title() {} } }",
         "export default { data() { return state } }",
         "export default { data }",
         "export default { computed: { [key]() {} } }",
@@ -255,6 +480,82 @@ fn shorthand_prop_is_a_prop_of_unknown_type() {
 }
 
 #[test]
+fn inline_function_prop_names_no_type() {
+    for code in [
+        "export default { props: { title() {} } }",
+        "export default { props: { title: () => {} } }",
+    ] {
+        let model = js_model(code, JsFileSource::vue());
+        let component = model.components().next().unwrap();
+        let prop = component.props().next().expect("a prop");
+        assert_eq!(prop.name(), "title", "`{code}`");
+        assert!(prop.types().is_empty(), "`{code}` should name no type");
+        assert!(component.is_complete(Namespace::Binding), "`{code}`");
+    }
+}
+
+#[test]
+fn type_option_held_by_a_variable_is_unknown() {
+    for code in [
+        "export default { props: { title: { type } } }",
+        "export default { props: { title: { type: function Title() {} } } }",
+    ] {
+        let model = js_model(code, JsFileSource::vue());
+        let component = model.components().next().unwrap();
+        let prop = component.props().next().expect("a prop");
+        assert!(prop.types() == PropType::Unknown, "`{code}`");
+    }
+}
+
+#[test]
+fn define_model_options_describe_its_prop() {
+    let model = js_model(
+        r#"const a = defineModel();
+const b = defineModel("b", { type: Boolean, required: true });
+const c = defineModel<string>("c");
+const d = defineModel(Number);"#,
+        setup_ts(),
+    );
+    let component = model.components().next().unwrap();
+    let models: Vec<_> = component.models().collect();
+    assert_eq!(models[0].name(), "modelValue");
+    assert_eq!(models[0].form(), None);
+    assert!(models[0].types().is_empty());
+    assert_eq!(models[1].name(), "b");
+    assert_eq!(models[1].form(), Some(PropForm::Options));
+    assert!(models[1].types() == PropType::Boolean);
+    assert_eq!(models[1].required(), Tri::Yes);
+    assert_eq!(models[2].form(), Some(PropForm::TypeMember));
+    assert!(models[2].types() == PropType::String);
+    assert_eq!(models[3].form(), Some(PropForm::Constructor));
+    assert!(models[3].types() == PropType::Number);
+}
+
+#[test]
+fn runtime_type_range_covers_the_type_as_written() {
+    let code = "defineProps({ a: Object as PropType<A>, b: { type: (Array), default: null }, c: { default: 1 }, d: String })";
+    let model = js_model(code, setup_ts());
+    let component = model.components().next().unwrap();
+    let types: Vec<_> = component
+        .props()
+        .map(|prop| prop.runtime_type_range().map(|range| &code[range]))
+        .collect();
+    assert_eq!(
+        types,
+        [
+            Some("Object as PropType<A>"),
+            Some("(Array)"),
+            None,
+            Some("String")
+        ]
+    );
+
+    let model = js_model("defineProps<{ a: object }>()", setup_ts());
+    let prop = model.components().next().unwrap().props().next().unwrap();
+    assert_eq!(prop.runtime_type_range(), None);
+}
+
+#[test]
 fn types_the_model_cannot_list_open_the_namespace() {
     for code in [
         "interface Base { a: string } interface Props extends Base { b: string } defineProps<Props>()",
@@ -281,6 +582,41 @@ fn method_signature_in_props_type_is_a_function_prop() {
     assert_eq!(prop.name(), "onClose");
     assert!(prop.types() == PropType::Function);
     assert!(component.is_complete(Namespace::Binding));
+}
+
+#[test]
+fn slots_option_declares_the_members_of_its_slots_type() {
+    let plain_ts = JsFileSource::ts().with_embedding_kind(*JsFileSource::vue().as_embedding_kind());
+    let model = js_model(
+        r#"import { defineComponent, SlotsType } from "vue";
+type Slots = { default: { msg: string }; "item-row"(props: {}): any };
+export default defineComponent({ slots: Object as SlotsType<Slots> });"#,
+        plain_ts,
+    );
+    let component = model.components().next().expect("a component");
+    let slots: Vec<_> = component
+        .slots()
+        .map(|slot| slot.name().to_string())
+        .collect();
+    assert_eq!(slots, ["default", "item-row"]);
+    assert!(component.is_complete(Namespace::Slot));
+
+    for code in [
+        "export default { slots: Object }",
+        "export default { slots: Object as SlotsType<Imported> }",
+        "export default { slots: Object as Other<{ a: any }> }",
+        "export default { slots: Object as SlotsType<{ [name: string]: any }> }",
+        "export default { slots: Object as SlotsType<{ [SLOT_NAME]: any }> }",
+    ] {
+        let model = js_model(code, plain_ts);
+        let component = model.components().next().expect("a component");
+        assert!(
+            component
+                .open_reasons(Namespace::Slot)
+                .contains(OpenReason::UnresolvedType),
+            "`{code}` should leave the slots open"
+        );
+    }
 }
 
 /// Returns the name of each emit of each component, the number of its uses,
@@ -372,4 +708,285 @@ fn script_block_read_without_its_file_has_open_uses() {
     assert_eq!(uses, [("a".into(), 0, false)]);
     let uses = emit_uses(r#"export default { emits: ["a"] }"#, JsFileSource::vue());
     assert_eq!(uses, [("a".into(), 0, false)]);
+}
+
+#[test]
+fn data_function_range_covers_each_function_form() {
+    for (code, function) in [
+        (
+            "export default { data() { return {}; } }",
+            "data() { return {}; }",
+        ),
+        (
+            "export default { data: function () { return {}; } }",
+            "function () { return {}; }",
+        ),
+        ("export default { data: (vm) => ({}) }", "(vm) => ({})"),
+    ] {
+        let model = js_model(code, JsFileSource::vue());
+        let component = model.components().next().expect("a component");
+        let range = component.data_function_range().expect("a data function");
+        assert_eq!(&code[range], function);
+    }
+}
+
+#[test]
+fn data_function_range_is_absent_without_a_function() {
+    for code in [
+        "export default { data: { a: 1 } }",
+        "export default { data: createData }",
+        "export default { computed: {} }",
+    ] {
+        let model = js_model(code, JsFileSource::vue());
+        let component = model.components().next().expect("a component");
+        assert_eq!(component.data_function_range(), None, "{code}");
+    }
+}
+
+#[test]
+fn render_option_range_covers_the_member() {
+    let code = "export default { name: 'A', render() { return null; } }";
+    let model = js_model(code, JsFileSource::vue());
+    let component = model.components().next().expect("a component");
+    let range = component.render_range().expect("a render option");
+    assert_eq!(&code[range], "render() { return null; }");
+
+    let model = js_model("export default { name: 'A' }", JsFileSource::vue());
+    let component = model.components().next().expect("a component");
+    assert_eq!(component.render_range(), None);
+}
+
+#[test]
+fn model_option_with_an_object_value_is_recorded() {
+    let code = r#"import { defineComponent, createApp } from "vue";
+defineComponent({ model: { prop: "checked", event: "change" } });
+createApp({ model: ({}) });
+defineComponent({ model() { return {}; } });
+const model = {};
+defineComponent({ model });
+"#;
+    let model = js_model(code, JsFileSource::js_module());
+    let ranges: Vec<_> = model
+        .components()
+        .map(|component| component.model_option_range().map(|range| &code[range]))
+        .collect();
+    assert_eq!(
+        ranges,
+        [
+            Some(r#"model: { prop: "checked", event: "change" }"#),
+            Some("model: ({})"),
+            None,
+            None,
+        ]
+    );
+}
+
+#[test]
+fn model_option_in_define_options_is_recorded() {
+    let code = "defineOptions({ model: { prop: \"checked\" } });\n";
+    let model = js_model(code, setup_ts());
+    let component = model.components().next().unwrap();
+    assert_eq!(
+        component.model_option_range().map(|range| &code[range]),
+        Some("model: { prop: \"checked\" }")
+    );
+}
+
+#[test]
+fn object_literal_data_lists_its_members() {
+    let model = js_model(
+        r#"import { defineComponent } from "vue";
+defineComponent({
+  data() {
+    return {
+      user: { name: "", address: { city: "" } },
+      settings: { ...defaults, theme: "dark" },
+      list: [],
+      empty: {},
+    };
+  },
+});"#,
+        JsFileSource::js_module(),
+    );
+    let component = model.components().next().unwrap();
+    let data: Vec<_> = component
+        .data()
+        .map(|symbol| {
+            (
+                symbol.name().to_string(),
+                symbol.has_known_members(),
+                symbol
+                    .members()
+                    .map(|member| member.name().to_string())
+                    .collect::<Vec<_>>(),
+            )
+        })
+        .collect();
+    assert_eq!(
+        data,
+        [
+            ("user".into(), true, vec!["name".into(), "address".into()]),
+            ("settings".into(), false, vec!["theme".into()]),
+            ("list".into(), false, vec![]),
+            ("empty".into(), true, vec![]),
+        ]
+    );
+    let user = component.data().next().unwrap();
+    let address = user.members().nth(1).unwrap();
+    assert!(address.has_known_members());
+    assert_eq!(address.members().next().unwrap().name(), "city");
+}
+
+#[test]
+fn names_written_as_strings_in_options_are_references() {
+    let model = js_model(
+        r#"import { defineComponent } from "vue";
+defineComponent({
+  data() {
+    return { count: 0, user: { name: "" } };
+  },
+  methods: { onCount() {} },
+  watch: { count: "onCount", "user.name": "missing", other() {} },
+  expose: ["count", "hidden"],
+});"#,
+        JsFileSource::js_module(),
+    );
+    let references: Vec<_> = model
+        .references()
+        .filter(|reference| reference.site() == RefSite::OptionName)
+        .map(|reference| {
+            (
+                reference.name().to_string(),
+                reference.path().map(str::to_string).collect::<Vec<_>>(),
+                reference.access(),
+                reference.resolution() == Resolution::Unresolved,
+            )
+        })
+        .collect();
+    assert_eq!(
+        references,
+        [
+            ("count".into(), vec![], Access::Read, false),
+            ("onCount".into(), vec![], Access::Call, false),
+            ("user".into(), vec!["name".into()], Access::Read, false),
+            ("missing".into(), vec![], Access::Call, true),
+            ("other".into(), vec![], Access::Read, true),
+            ("count".into(), vec![], Access::Read, false),
+            ("hidden".into(), vec![], Access::Read, true),
+        ]
+    );
+}
+
+#[test]
+fn declarations_and_components_point_to_their_nodes() {
+    let source = setup_ts();
+    let code = r#"const props = withDefaults(defineProps<{ title: string; onPick(): void }>(), { title: "a" });
+const emit = defineEmits(["change"]);
+const label = computed(() => props.title);
+watch(label, () => {});"#;
+    let parsed = biome_js_parser::parse(code, source, JsParserOptions::default());
+    let root = parsed.tree();
+    let js = semantic_model(&root, SemanticModelOptions::from(&source));
+    let model = component_model(&root, &js, source);
+
+    let nodes = model.resolve_js_nodes(&root, None);
+    let node_of = |id: JsNodeId| nodes.get(id).cloned().expect("a resolved node");
+
+    let component = model.components().next().expect("a component");
+    assert_eq!(
+        node_of(component.js_node()).text_trimmed_range(),
+        component.range()
+    );
+    let declarations: Vec<_> = component
+        .declarations()
+        .map(|symbol| {
+            let node = node_of(symbol.js_node().expect("a node"));
+            assert_eq!(node.text_trimmed_range(), symbol.declaration_range());
+            (symbol.name().to_string(), node.kind())
+        })
+        .collect();
+    assert_eq!(
+        declarations,
+        [
+            ("props".into(), JsSyntaxKind::JS_VARIABLE_STATEMENT),
+            ("emit".into(), JsSyntaxKind::JS_VARIABLE_STATEMENT),
+            ("label".into(), JsSyntaxKind::JS_VARIABLE_STATEMENT),
+            (
+                "title".into(),
+                JsSyntaxKind::TS_PROPERTY_SIGNATURE_TYPE_MEMBER
+            ),
+            (
+                "onPick".into(),
+                JsSyntaxKind::TS_METHOD_SIGNATURE_TYPE_MEMBER
+            ),
+            ("change".into(), JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION),
+            ("watch".into(), JsSyntaxKind::JS_CALL_EXPRESSION),
+        ]
+    );
+
+    let title = component.props().next().expect("a prop");
+    let default = title.defaults().next().expect("a default");
+    let default = node_of(default.js_node());
+    assert_eq!(
+        default.text_trimmed_range(),
+        title.defaults().next().unwrap().range()
+    );
+    assert_eq!(default.text_trimmed().to_string(), "\"a\"");
+}
+
+#[test]
+fn interface_that_extends_lists_its_own_members() {
+    let model = js_model(
+        "interface Base { size?: number }
+interface Props extends Base { title: string }
+defineProps<Props>()",
+        setup_ts(),
+    );
+    let component = model.components().next().expect("a component");
+    let props: Vec<_> = component
+        .props()
+        .map(|prop| prop.name().to_string())
+        .collect();
+    assert_eq!(props, ["title"]);
+    assert_eq!(
+        component.open_reasons(Namespace::Binding),
+        OpenReason::UnresolvedType
+    );
+}
+
+#[test]
+fn option_functions_and_runtime_types_point_to_their_nodes() {
+    let source = JsFileSource::vue();
+    let code = r#"export default {
+  props: { size: { type: [Number, String] } },
+  emits: { change: (value) => true },
+  data() { return {}; },
+  computed: { double: { get() { return 2; } } },
+  render() { return null; },
+};"#;
+    let parsed = biome_js_parser::parse(code, source, JsParserOptions::default());
+    let root = parsed.tree();
+    let js = semantic_model(&root, SemanticModelOptions::from(&source));
+    let model = component_model(&root, &js, source);
+    let nodes = model.resolve_js_nodes(&root, None);
+    let text_of = |id: Option<JsNodeId>| {
+        let node = nodes.get(id.expect("a node")).expect("a resolved node");
+        node.text_trimmed().to_string()
+    };
+
+    let component = model.components().next().expect("a component");
+    let size = component.props().next().expect("a prop");
+    assert_eq!(text_of(size.runtime_type_node()), "[Number, String]");
+    let change = component.emits().next().expect("an emit");
+    assert_eq!(text_of(change.validator_node()), "(value) => true");
+    let double = component.computed().next().expect("a computed property");
+    assert_eq!(text_of(double.getter_node()), "get() { return 2; }");
+    assert_eq!(
+        text_of(component.data_function_node()),
+        "data() { return {}; }"
+    );
+    assert_eq!(
+        text_of(component.render_node()),
+        "render() { return null; }"
+    );
 }

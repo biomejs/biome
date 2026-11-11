@@ -34,7 +34,7 @@ fn test_resolve_selector_simple_parent() {
     assert_eq!(parent_rule.selectors.len(), 1);
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), ".parent");
 
-    let child_rule_id = parent_rule.child_ids.first().unwrap();
+    let child_rule_id = parent_rule.child_ids().first().unwrap();
     let child_rule = model.get_rule_by_id(child_rule_id).unwrap();
 
     assert_eq!(child_rule.selectors.len(), 1);
@@ -62,7 +62,7 @@ fn test_resolve_selector_with_ampersand() {
     assert_eq!(parent_rule.selectors.len(), 1);
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), "a");
 
-    let child_rule_id = parent_rule.child_ids.first().unwrap();
+    let child_rule_id = parent_rule.child_ids().first().unwrap();
     let child_rule = model.get_rule_by_id(child_rule_id).unwrap();
 
     assert_eq!(child_rule.selectors.len(), 1);
@@ -92,7 +92,7 @@ fn test_resolve_selector_multiple_parents() {
         ".grandparent"
     );
 
-    let parent_rule_id = grandparent_rule.child_ids.first().unwrap();
+    let parent_rule_id = grandparent_rule.child_ids().first().unwrap();
     let parent_rule = model.get_rule_by_id(parent_rule_id).unwrap();
     assert_eq!(parent_rule.selectors.len(), 1);
     assert_eq!(
@@ -100,7 +100,7 @@ fn test_resolve_selector_multiple_parents() {
         ".grandparent .parent"
     );
 
-    let child_rule_id = parent_rule.child_ids.first().unwrap();
+    let child_rule_id = parent_rule.child_ids().first().unwrap();
     let child_rule = model.get_rule_by_id(child_rule_id).unwrap();
     assert_eq!(child_rule.selectors.len(), 1);
     assert_eq!(
@@ -127,7 +127,7 @@ fn test_resolve_selector_with_multi_ampersand() {
     assert_eq!(parent_rule.selectors.len(), 1);
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), "p");
 
-    let child_rule_id = parent_rule.child_ids.first().unwrap();
+    let child_rule_id = parent_rule.child_ids().first().unwrap();
     let child_rule = model.get_rule_by_id(child_rule_id).unwrap();
 
     assert_eq!(child_rule.selectors.len(), 1);
@@ -152,7 +152,7 @@ fn test_resolve_selector_no_ampersand_with_parents() {
     assert_eq!(parent_rule.selectors.len(), 1);
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), ".list");
 
-    let child_rule_id = parent_rule.child_ids.first().unwrap();
+    let child_rule_id = parent_rule.child_ids().first().unwrap();
     let child_rule = model.get_rule_by_id(child_rule_id).unwrap();
 
     assert_eq!(child_rule.selectors.len(), 1);
@@ -181,7 +181,7 @@ fn test_resolve_selector_with_complex_parent() {
         ".menu > ul"
     );
 
-    let child_rule_id = parent_rule.child_ids.first().unwrap();
+    let child_rule_id = parent_rule.child_ids().first().unwrap();
     let child_rule = model.get_rule_by_id(child_rule_id).unwrap();
 
     assert_eq!(child_rule.selectors.len(), 1);
@@ -209,7 +209,7 @@ fn test_resolve_selector_with_nested_ampersands() {
     assert_eq!(parent_rule.selectors.len(), 1);
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), ".btn");
 
-    let child_rule_id = parent_rule.child_ids.first().unwrap();
+    let child_rule_id = parent_rule.child_ids().first().unwrap();
     let child_rule = model.get_rule_by_id(child_rule_id).unwrap();
 
     assert_eq!(child_rule.selectors.len(), 1);
@@ -242,7 +242,7 @@ fn test_resolve_selector_with_multiple_parents_and_ampersand() {
         ".grandparent"
     );
 
-    let parent_rule_id = grandparent_rule.child_ids.first().unwrap();
+    let parent_rule_id = grandparent_rule.child_ids().first().unwrap();
     let parent_rule = model.get_rule_by_id(parent_rule_id).unwrap();
     assert_eq!(parent_rule.selectors.len(), 1);
     assert_eq!(
@@ -250,7 +250,7 @@ fn test_resolve_selector_with_multiple_parents_and_ampersand() {
         ".grandparent .parent"
     );
 
-    let child_rule_id = parent_rule.child_ids.first().unwrap();
+    let child_rule_id = parent_rule.child_ids().first().unwrap();
     let child_rule = model.get_rule_by_id(child_rule_id).unwrap();
     assert_eq!(child_rule.selectors.len(), 1);
     assert_eq!(
@@ -323,7 +323,7 @@ fn test_selector_list_with_nesting() {
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), ".a");
     assert_eq!(parent_rule.selectors[1].resolved().to_string(), ".b");
 
-    let child_rule_id = parent_rule.child_ids.first().unwrap();
+    let child_rule_id = parent_rule.child_ids().first().unwrap();
     let child_rule = model.get_rule_by_id(child_rule_id).unwrap();
 
     assert_eq!(child_rule.selectors.len(), 2);
@@ -349,7 +349,7 @@ fn test_ampersand_nesting_selector() {
     assert_eq!(parent_rule.selectors.len(), 1);
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), ".foo");
 
-    let child_rule_id = parent_rule.child_ids.first().unwrap();
+    let child_rule_id = parent_rule.child_ids().first().unwrap();
     let child_rule = model.get_rule_by_id(child_rule_id).unwrap();
 
     assert_eq!(child_rule.selectors.len(), 1);
@@ -441,7 +441,7 @@ fn test_nested_pseudo_element() {
     let parent_rule = rules.first().unwrap();
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), "a");
 
-    let child_rule_id = parent_rule.child_ids.first().unwrap();
+    let child_rule_id = parent_rule.child_ids().first().unwrap();
     let child_rule = model.get_rule_by_id(child_rule_id).unwrap();
     assert_eq!(child_rule.selectors.len(), 1);
     assert_eq!(child_rule.selectors[0].resolved().to_string(), "a::before");
@@ -467,7 +467,7 @@ fn test_selector_list_with_ampersand() {
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), ".a");
     assert_eq!(parent_rule.selectors[1].resolved().to_string(), ".b");
 
-    let child_rule_id = parent_rule.child_ids.first().unwrap();
+    let child_rule_id = parent_rule.child_ids().first().unwrap();
     let child_rule = model.get_rule_by_id(child_rule_id).unwrap();
     assert_eq!(child_rule.selectors.len(), 2);
     assert_eq!(child_rule.selectors[0].resolved().to_string(), ".a:hover");
@@ -492,7 +492,7 @@ fn test_nested_sibling_combinator() {
     let parent_rule = rules.first().unwrap();
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), "h2");
 
-    let child_rule_id = parent_rule.child_ids.first().unwrap();
+    let child_rule_id = parent_rule.child_ids().first().unwrap();
     let child_rule = model.get_rule_by_id(child_rule_id).unwrap();
     assert_eq!(child_rule.selectors.len(), 1);
     assert_eq!(child_rule.selectors[0].resolved().to_string(), "h2 ~ p");
@@ -520,11 +520,11 @@ fn test_nested_inside_media() {
     assert_eq!(card_rule.selectors[0].resolved().to_string(), ".card");
 
     // The @media rule is a child of .card.
-    let media_rule_id = card_rule.child_ids.first().unwrap();
+    let media_rule_id = card_rule.child_ids().first().unwrap();
     let media_rule = model.get_rule_by_id(media_rule_id).unwrap();
 
     // The .title rule is nested inside @media.
-    let title_rule_id = media_rule.child_ids.first().unwrap();
+    let title_rule_id = media_rule.child_ids().first().unwrap();
     let title_rule = model.get_rule_by_id(title_rule_id).unwrap();
 
     // @media is transparent for selector resolution: .title resolves as ".card .title".
@@ -555,10 +555,10 @@ fn test_nested_inside_supports() {
     let grid_rule = rules.first().unwrap();
     assert_eq!(grid_rule.selectors[0].resolved().to_string(), ".grid");
 
-    let supports_rule_id = grid_rule.child_ids.first().unwrap();
+    let supports_rule_id = grid_rule.child_ids().first().unwrap();
     let supports_rule = model.get_rule_by_id(supports_rule_id).unwrap();
 
-    let inner_rule_id = supports_rule.child_ids.first().unwrap();
+    let inner_rule_id = supports_rule.child_ids().first().unwrap();
     let inner_rule = model.get_rule_by_id(inner_rule_id).unwrap();
 
     assert_eq!(inner_rule.selectors.len(), 1);
@@ -604,7 +604,7 @@ fn test_ampersand_suffix_nesting() {
     let parent_rule = rules.first().unwrap();
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), ".block");
 
-    let child_rule_id = parent_rule.child_ids.first().unwrap();
+    let child_rule_id = parent_rule.child_ids().first().unwrap();
     let child_rule = model.get_rule_by_id(child_rule_id).unwrap();
     assert_eq!(child_rule.selectors.len(), 1);
     assert_eq!(
@@ -633,11 +633,11 @@ fn test_deeply_nested_ampersand() {
     let a_rule = rules.first().unwrap();
     assert_eq!(a_rule.selectors[0].resolved().to_string(), ".a");
 
-    let b_rule_id = a_rule.child_ids.first().unwrap();
+    let b_rule_id = a_rule.child_ids().first().unwrap();
     let b_rule = model.get_rule_by_id(b_rule_id).unwrap();
     assert_eq!(b_rule.selectors[0].resolved().to_string(), ".a .b");
 
-    let c_rule_id = b_rule.child_ids.first().unwrap();
+    let c_rule_id = b_rule.child_ids().first().unwrap();
     let c_rule = model.get_rule_by_id(c_rule_id).unwrap();
     assert_eq!(c_rule.selectors.len(), 1);
     assert_eq!(c_rule.selectors[0].resolved().to_string(), ".a .b.c");
@@ -657,7 +657,7 @@ fn resolved_deepest_scss_selector(source: &str, depth: usize) -> String {
 
     for _ in 0..depth {
         let child_id = rule
-            .child_ids
+            .child_ids()
             .first()
             .expect("expected a nested style rule");
         rule = model

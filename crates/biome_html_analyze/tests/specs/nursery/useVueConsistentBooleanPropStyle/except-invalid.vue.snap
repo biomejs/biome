@@ -1,0 +1,89 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: except-invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <MyComp value foo-bar />
+  <MyComp :show="true" />
+</template>
+
+```
+
+# Diagnostics
+```
+except-invalid.vue:3:11 lint/nursery/useVueConsistentBooleanPropStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  i The prop value is written without a value.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <MyComp value foo-bar />
+      │           ^^^^^
+    4 │   <MyComp :show="true" />
+    5 │ </template>
+  
+  i This project requires writing the value true explicitly, which makes it clear that the prop receives a boolean.
+  
+  i A prop without a value receives true only if the component declares it as Boolean and doesn't list String before Boolean. Otherwise, it receives an empty string. Check how the component declares the prop before you add the value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Write the value true explicitly.
+  
+    3 │ ··<MyComp·:value="true"·foo-bar·/>
+      │           +     +++++++           
+
+```
+
+```
+except-invalid.vue:3:17 lint/nursery/useVueConsistentBooleanPropStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  i The prop foo-bar is written without a value.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <MyComp value foo-bar />
+      │                 ^^^^^^^
+    4 │   <MyComp :show="true" />
+    5 │ </template>
+  
+  i This project requires writing the value true explicitly, which makes it clear that the prop receives a boolean.
+  
+  i A prop without a value receives true only if the component declares it as Boolean and doesn't list String before Boolean. Otherwise, it receives an empty string. Check how the component declares the prop before you add the value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Write the value true explicitly.
+  
+    3 │ ··<MyComp·value·:foo-bar="true"·/>
+      │                 +       +++++++   
+
+```
+
+```
+except-invalid.vue:4:11 lint/nursery/useVueConsistentBooleanPropStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  i The prop show has the value true, which can be omitted.
+  
+    2 │ <template>
+    3 │   <MyComp value foo-bar />
+  > 4 │   <MyComp :show="true" />
+      │           ^^^^^^^^^^^^
+    5 │ </template>
+    6 │ 
+  
+  i A prop written without a value receives true, so the shorthand form is shorter and passes the same value.
+  
+  i The shorthand form passes true only if the component declares the prop as Boolean and doesn't list String before Boolean. Otherwise, it passes an empty string. Check how the component declares the prop before you remove the value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the value.
+  
+    4 │ ··<MyComp·:show="true"·/>
+      │           -    -------   
+
+```

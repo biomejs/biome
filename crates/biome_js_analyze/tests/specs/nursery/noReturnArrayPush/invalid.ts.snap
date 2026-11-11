@@ -1,0 +1,182 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+const f1 = (value: string) => array.push(value);
+function f2() {
+	return array.push(value) as number;
+}
+function f3() {
+	return <number>array.unshift(value);
+}
+function f4() {
+	return array.push(value)!;
+}
+function f5() {
+	return array.unshift(value) satisfies number;
+}
+const f6 = (value: string) => array.push(value) satisfies number;
+function f7() {
+	return getArray()!.push(value);
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:37 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const f1 = (value: string) => array.push(value);
+      │                                     ^^^^
+    3 │ function f2() {
+    4 │ 	return array.push(value) as number;
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:15 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    2 │ const f1 = (value: string) => array.push(value);
+    3 │ function f2() {
+  > 4 │ 	return array.push(value) as number;
+      │ 	             ^^^^
+    5 │ }
+    6 │ function f3() {
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:7:23 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of unshift() is used here.
+  
+    5 │ }
+    6 │ function f3() {
+  > 7 │ 	return <number>array.unshift(value);
+      │ 	                     ^^^^^^^
+    8 │ }
+    9 │ function f4() {
+  
+  i unshift() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call unshift() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:10:15 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+     8 │ }
+     9 │ function f4() {
+  > 10 │ 	return array.push(value)!;
+       │ 	             ^^^^
+    11 │ }
+    12 │ function f5() {
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:13:15 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of unshift() is used here.
+  
+    11 │ }
+    12 │ function f5() {
+  > 13 │ 	return array.unshift(value) satisfies number;
+       │ 	             ^^^^^^^
+    14 │ }
+    15 │ const f6 = (value: string) => array.push(value) satisfies number;
+  
+  i unshift() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call unshift() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:15:37 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    13 │ 	return array.unshift(value) satisfies number;
+    14 │ }
+  > 15 │ const f6 = (value: string) => array.push(value) satisfies number;
+       │                                     ^^^^
+    16 │ function f7() {
+    17 │ 	return getArray()!.push(value);
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:21 lint/nursery/noReturnArrayPush  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    15 │ const f6 = (value: string) => array.push(value) satisfies number;
+    16 │ function f7() {
+  > 17 │ 	return getArray()!.push(value);
+       │ 	                   ^^^^
+    18 │ }
+    19 │ 
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the call before the return statement.
+  
+    15 15 │   const f6 = (value: string) => array.push(value) satisfies number;
+    16 16 │   function f7() {
+    17    │ - → return·getArray()!.push(value);
+       17 │ + → getArray()!.push(value);·return;
+    18 18 │   }
+    19 19 │   
+  
+
+```

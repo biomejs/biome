@@ -11,10 +11,12 @@ use biome_css_syntax::keywords::{
     VENDOR_PREFIXES, VENDOR_SPECIFIC_PSEUDO_ELEMENTS,
 };
 use biome_css_syntax::{
-    CssDeclarationWithSemicolon, CssSyntaxKind, CssSyntaxToken, ScssNestingDeclaration,
+    CssDeclarationWithSemicolon, CssSyntaxKind, CssSyntaxNode, CssSyntaxToken, ScssFunctionAtRule,
+    ScssNestingDeclaration,
 };
 use biome_rowan::{AstNode, declare_node_union};
 use biome_string_case::{StrLikeExtension, StrOnlyExtension};
+use std::cmp::Ordering;
 use std::iter::successors;
 
 pub fn is_css_variable(value: &str) -> bool {
@@ -229,4 +231,151 @@ pub fn nested_property_name(name: &str, group: AnyPropertyStatement) -> Option<S
         full_name.insert_str(0, group_name.text_trimmed());
     }
     Some(full_name)
+}
+
+const SCSS_BUILT_IN_FUNCTIONS: &[&str] = &[
+    "abs",
+    "adjust-color",
+    "adjust-hue",
+    "alpha",
+    "append",
+    "blue",
+    "call",
+    "ceil",
+    "change-color",
+    "color",
+    "comparable",
+    "complement",
+    "content-exists",
+    "darken",
+    "desaturate",
+    "fade-in",
+    "fade-out",
+    "feature-exists",
+    "floor",
+    "function-exists",
+    "get-function",
+    "global-variable-exists",
+    "grayscale",
+    "green",
+    "hsl",
+    "hsla",
+    "hue",
+    "hwb",
+    "ie-hex-str",
+    "if",
+    "index",
+    "inspect",
+    "invert",
+    "is-bracketed",
+    "is-superselector",
+    "join",
+    "keywords",
+    "lab",
+    "lch",
+    "length",
+    "lighten",
+    "lightness",
+    "list-separator",
+    "map-get",
+    "map-has-key",
+    "map-keys",
+    "map-merge",
+    "map-remove",
+    "map-values",
+    "max",
+    "min",
+    "mix",
+    "mixin-exists",
+    "nth",
+    "oklab",
+    "oklch",
+    "opacify",
+    "opacity",
+    "percentage",
+    "quote",
+    "random",
+    "red",
+    "rgb",
+    "rgba",
+    "round",
+    "saturate",
+    "saturation",
+    "scale-color",
+    "selector-append",
+    "selector-extend",
+    "selector-nest",
+    "selector-parse",
+    "selector-replace",
+    "selector-unify",
+    "set-nth",
+    "simple-selectors",
+    "str-index",
+    "str-insert",
+    "str-length",
+    "str-slice",
+    "to-lower-case",
+    "to-upper-case",
+    "transparentize",
+    "type-of",
+    "unique-id",
+    "unit",
+    "unitless",
+    "unquote",
+    "variable-exists",
+    "zip",
+];
+
+/// Whether `name` is a global Sass built-in function, such as `darken` or `map-get`. Sass treats
+/// `-` and `_` in function names as the same character.
+///
+/// The list includes built-ins that share their name with a CSS function, such as `rgb` and
+/// `max`.
+pub fn is_scss_built_in_function(name: &str) -> bool {
+    SCSS_BUILT_IN_FUNCTIONS
+        .binary_search_by(|built_in| compare_scss_function_names(built_in, name))
+        .is_ok()
+}
+
+/// Returns the name tokens of every `@function` under `root`, in source order.
+///
+/// Functions loaded from other files with `@use` or `@import` aren't included.
+pub fn scss_function_declarations(root: &CssSyntaxNode) -> impl Iterator<Item = CssSyntaxToken> {
+    root.descendants()
+        .filter_map(ScssFunctionAtRule::cast)
+        .filter_map(|function| function.name().ok()?.value_token().ok())
+}
+
+fn compare_scss_function_names(left: &str, right: &str) -> Ordering {
+    left.bytes()
+        .map(normalize_scss_function_name_byte)
+        .cmp(right.bytes().map(normalize_scss_function_name_byte))
+}
+
+fn normalize_scss_function_name_byte(byte: u8) -> u8 {
+    if byte == b'_' { b'-' } else { byte }
+}
+
+/// Whether two Sass function names refer to the same function. Sass treats `-` and `_` in function
+/// names as the same character.
+pub fn scss_function_names_equal(left: &str, right: &str) -> bool {
+    compare_scss_function_names(left, right) == Ordering::Equal
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn scss_built_in_functions_are_sorted() {
+        for pair in SCSS_BUILT_IN_FUNCTIONS.windows(2) {
+            assert_eq!(
+                compare_scss_function_names(pair[0], pair[1]),
+                Ordering::Less,
+                "{} should sort before {}",
+                pair[0],
+                pair[1]
+            );
+        }
+    }
 }

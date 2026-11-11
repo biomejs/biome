@@ -1,0 +1,126 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <my-component inline-template><div /></my-component>
+  <my-component inline-template=""><div /></my-component>
+  <my-component inline-template="foo"><div /></my-component>
+  <MyComponent inline-template>
+    <div>{{ message }}</div>
+  </MyComponent>
+  <div>
+    <my-component class="a" inline-template v-if="ok"><span /></my-component>
+  </div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:17 lint/nursery/noVueDeprecatedInlineTemplate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The inline-template attribute is not supported in Vue 3.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <my-component inline-template><div /></my-component>
+      │                 ^^^^^^^^^^^^^^^
+    4 │   <my-component inline-template=""><div /></my-component>
+    5 │   <my-component inline-template="foo"><div /></my-component>
+  
+  i Vue 3 no longer uses the content between the component's tags as its template. The component only shows that content if its template has a <slot>.
+  
+  i Move the content into the component's own template, or pass it to the component through a slot.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:17 lint/nursery/noVueDeprecatedInlineTemplate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The inline-template attribute is not supported in Vue 3.
+  
+    2 │ <template>
+    3 │   <my-component inline-template><div /></my-component>
+  > 4 │   <my-component inline-template=""><div /></my-component>
+      │                 ^^^^^^^^^^^^^^^
+    5 │   <my-component inline-template="foo"><div /></my-component>
+    6 │   <MyComponent inline-template>
+  
+  i Vue 3 no longer uses the content between the component's tags as its template. The component only shows that content if its template has a <slot>.
+  
+  i Move the content into the component's own template, or pass it to the component through a slot.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:17 lint/nursery/noVueDeprecatedInlineTemplate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The inline-template attribute is not supported in Vue 3.
+  
+    3 │   <my-component inline-template><div /></my-component>
+    4 │   <my-component inline-template=""><div /></my-component>
+  > 5 │   <my-component inline-template="foo"><div /></my-component>
+      │                 ^^^^^^^^^^^^^^^
+    6 │   <MyComponent inline-template>
+    7 │     <div>{{ message }}</div>
+  
+  i Vue 3 no longer uses the content between the component's tags as its template. The component only shows that content if its template has a <slot>.
+  
+  i Move the content into the component's own template, or pass it to the component through a slot.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:16 lint/nursery/noVueDeprecatedInlineTemplate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The inline-template attribute is not supported in Vue 3.
+  
+    4 │   <my-component inline-template=""><div /></my-component>
+    5 │   <my-component inline-template="foo"><div /></my-component>
+  > 6 │   <MyComponent inline-template>
+      │                ^^^^^^^^^^^^^^^
+    7 │     <div>{{ message }}</div>
+    8 │   </MyComponent>
+  
+  i Vue 3 no longer uses the content between the component's tags as its template. The component only shows that content if its template has a <slot>.
+  
+  i Move the content into the component's own template, or pass it to the component through a slot.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:29 lint/nursery/noVueDeprecatedInlineTemplate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The inline-template attribute is not supported in Vue 3.
+  
+     8 │   </MyComponent>
+     9 │   <div>
+  > 10 │     <my-component class="a" inline-template v-if="ok"><span /></my-component>
+       │                             ^^^^^^^^^^^^^^^
+    11 │   </div>
+    12 │ </template>
+  
+  i Vue 3 no longer uses the content between the component's tags as its template. The component only shows that content if its template has a <slot>.
+  
+  i Move the content into the component's own template, or pass it to the component through a slot.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

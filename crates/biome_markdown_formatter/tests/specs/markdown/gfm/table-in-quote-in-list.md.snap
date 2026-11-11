@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/gfm/table-in-quote-in-list.md
+---
+
+# Input
+
+```md
+- x
+
+  > | A | B |
+  > |---|---|
+  > | x | y |
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "parser": {
+      "gfm": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+- x
+
+  > | A   | B   |
+  > | --- | --- |
+  > | x   | y   |
+
+```

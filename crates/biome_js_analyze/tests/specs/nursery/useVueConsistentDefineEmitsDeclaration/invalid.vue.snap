@@ -1,0 +1,88 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+const a = defineEmits(["change", "update"]);
+
+const b = defineEmits({
+	change: (id) => typeof id === "number",
+	update: null,
+});
+
+const c = defineEmits<{ change: [id: number] }>(["change"]);
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:11 lint/nursery/useVueConsistentDefineEmitsDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This defineEmits call declares events with an argument instead of a type.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup lang="ts">
+  > 3 │ const a = defineEmits(["change", "update"]);
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ const b = defineEmits({
+  
+  i A type lets TypeScript check the name and the arguments of every event that the component emits.
+  
+  i Pass the events as a type between angle brackets, for example defineEmits<{ change: [id: number] }>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:11 lint/nursery/useVueConsistentDefineEmitsDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This defineEmits call declares events with an argument instead of a type.
+  
+     3 │ const a = defineEmits(["change", "update"]);
+     4 │ 
+   > 5 │ const b = defineEmits({
+       │           ^^^^^^^^^^^^^
+   > 6 │ 	change: (id) => typeof id === "number",
+   > 7 │ 	update: null,
+   > 8 │ });
+       │ ^^
+     9 │ 
+    10 │ const c = defineEmits<{ change: [id: number] }>(["change"]);
+  
+  i A type lets TypeScript check the name and the arguments of every event that the component emits.
+  
+  i Pass the events as a type between angle brackets, for example defineEmits<{ change: [id: number] }>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:11 lint/nursery/useVueConsistentDefineEmitsDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This defineEmits call declares events with both a type and an argument.
+  
+     8 │ });
+     9 │ 
+  > 10 │ const c = defineEmits<{ change: [id: number] }>(["change"]);
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ </script>
+    12 │ 
+  
+  i Vue doesn't accept a type and an argument in the same defineEmits call.
+  
+  i Remove the argument and keep the type between angle brackets.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

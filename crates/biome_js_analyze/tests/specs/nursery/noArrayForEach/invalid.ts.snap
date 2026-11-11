@@ -1,0 +1,277 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+function array(array: Array<string>) {
+	array.forEach((value) => console.log(value));
+}
+
+function strings(array: string[]) {
+	array.forEach((value) => console.log(value));
+}
+
+function tuple(array: [string, string]) {
+	array.forEach((value) => console.log(value));
+}
+
+type Strings = string[];
+function alias(array: Strings) {
+	array.forEach((value) => console.log(value));
+}
+
+type Map = string[];
+function aliasNamedMap(array: Map) {
+	array.forEach((value) => console.log(value));
+}
+
+function partialUnion(collection: string[] | Set<string>) {
+	collection.forEach((value) => console.log(value));
+}
+
+function typedArray(array: Uint8Array) {
+	array.forEach((value) => console.log(value));
+}
+
+function untyped(collection: { forEach(callback: (value: string) => void): void }) {
+	collection.forEach((value) => console.log(value));
+}
+
+(map as Array<string>).forEach((value) => console.log(value));
+
+function nullableArray(array: string[] | undefined) {
+	array?.forEach((value) => console.log(value));
+}
+
+function onlyNullish(value: null | undefined) {
+	value?.forEach((item) => console.log(item));
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:4:8 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    3 │ function array(array: Array<string>) {
+  > 4 │ 	array.forEach((value) => console.log(value));
+      │ 	      ^^^^^^^
+    5 │ }
+    6 │ 
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:8 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+     7 │ function strings(array: string[]) {
+   > 8 │ 	array.forEach((value) => console.log(value));
+       │ 	      ^^^^^^^
+     9 │ }
+    10 │ 
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:12:8 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    11 │ function tuple(array: [string, string]) {
+  > 12 │ 	array.forEach((value) => console.log(value));
+       │ 	      ^^^^^^^
+    13 │ }
+    14 │ 
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:8 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    15 │ type Strings = string[];
+    16 │ function alias(array: Strings) {
+  > 17 │ 	array.forEach((value) => console.log(value));
+       │ 	      ^^^^^^^
+    18 │ }
+    19 │ 
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:22:8 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    20 │ type Map = string[];
+    21 │ function aliasNamedMap(array: Map) {
+  > 22 │ 	array.forEach((value) => console.log(value));
+       │ 	      ^^^^^^^
+    23 │ }
+    24 │ 
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:26:13 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    25 │ function partialUnion(collection: string[] | Set<string>) {
+  > 26 │ 	collection.forEach((value) => console.log(value));
+       │ 	           ^^^^^^^
+    27 │ }
+    28 │ 
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:30:8 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    29 │ function typedArray(array: Uint8Array) {
+  > 30 │ 	array.forEach((value) => console.log(value));
+       │ 	      ^^^^^^^
+    31 │ }
+    32 │ 
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:34:13 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    33 │ function untyped(collection: { forEach(callback: (value: string) => void): void }) {
+  > 34 │ 	collection.forEach((value) => console.log(value));
+       │ 	           ^^^^^^^
+    35 │ }
+    36 │ 
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:37:24 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    35 │ }
+    36 │ 
+  > 37 │ (map as Array<string>).forEach((value) => console.log(value));
+       │                        ^^^^^^^
+    38 │ 
+    39 │ function nullableArray(array: string[] | undefined) {
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:40:9 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    39 │ function nullableArray(array: string[] | undefined) {
+  > 40 │ 	array?.forEach((value) => console.log(value));
+       │ 	       ^^^^^^^
+    41 │ }
+    42 │ 
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:44:9 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    43 │ function onlyNullish(value: null | undefined) {
+  > 44 │ 	value?.forEach((item) => console.log(item));
+       │ 	       ^^^^^^^
+    45 │ }
+    46 │ 
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

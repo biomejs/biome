@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-with-defaults.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+interface Props {
+  prop1?: string;
+  prop2?: string;
+  prop3?: string;
+}
+const props = withDefaults(defineProps<Props>(), { prop1: "a" });
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-with-defaults.vue:4:3 lint/nursery/noVueExcessiveProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This component declares too many props (3). The maximum allowed is 2.
+  
+    2 │ <script setup lang="ts">
+    3 │ interface Props {
+  > 4 │   prop1?: string;
+      │   ^^^^^^^^^^^^^^^
+  > 5 │   prop2?: string;
+  > 6 │   prop3?: string;
+      │   ^^^^^^^^^^^^^^^
+    7 │ }
+    8 │ const props = withDefaults(defineProps<Props>(), { prop1: "a" });
+  
+  i Each prop is another input that the component has to handle, which makes it harder to read, use, and test.
+  
+  i Split the component into smaller components that each need fewer props.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,335 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+import Vue, { set, del, set as setProperty, del as deleteProperty } from "vue";
+
+export default {
+  mounted() {
+    this.$set(obj, key, value);
+    this.$delete(obj, key);
+    this?.$set(obj, key, value);
+    (this).$delete(obj, key);
+    this["$set"](obj, key, value);
+  },
+  methods: {
+    update() {
+      const vm = this;
+      vm.$set(obj, key, value);
+      vm.$delete(obj, key);
+    },
+    withArrow() {
+      [1, 2].forEach(() => this.$set(obj, key, value));
+    },
+    fromVue() {
+      Vue.set(obj, key, value);
+      Vue.delete(obj, key);
+      set(obj, key, value);
+      del(obj, key);
+      setProperty(obj, key, value);
+      deleteProperty(obj, key);
+    },
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.vue:7:5 lint/nursery/noVueDeprecatedDeleteSet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This calls the Vue set function, which Vue 3 removed.
+  
+    5 │ export default {
+    6 │   mounted() {
+  > 7 │     this.$set(obj, key, value);
+      │     ^^^^^^^^^
+    8 │     this.$delete(obj, key);
+    9 │     this?.$set(obj, key, value);
+  
+  i Vue 3 detects added and deleted properties on its own, so this function no longer exists and calling it throws an error.
+  
+  i Assign the property directly instead, for example object.key = value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:5 lint/nursery/noVueDeprecatedDeleteSet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This calls the Vue delete function, which Vue 3 removed.
+  
+     6 │   mounted() {
+     7 │     this.$set(obj, key, value);
+   > 8 │     this.$delete(obj, key);
+       │     ^^^^^^^^^^^^
+     9 │     this?.$set(obj, key, value);
+    10 │     (this).$delete(obj, key);
+  
+  i Vue 3 detects added and deleted properties on its own, so this function no longer exists and calling it throws an error.
+  
+  i Use the delete operator instead, for example delete object.key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:5 lint/nursery/noVueDeprecatedDeleteSet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This calls the Vue set function, which Vue 3 removed.
+  
+     7 │     this.$set(obj, key, value);
+     8 │     this.$delete(obj, key);
+   > 9 │     this?.$set(obj, key, value);
+       │     ^^^^^^^^^^
+    10 │     (this).$delete(obj, key);
+    11 │     this["$set"](obj, key, value);
+  
+  i Vue 3 detects added and deleted properties on its own, so this function no longer exists and calling it throws an error.
+  
+  i Assign the property directly instead, for example object.key = value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:5 lint/nursery/noVueDeprecatedDeleteSet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This calls the Vue delete function, which Vue 3 removed.
+  
+     8 │     this.$delete(obj, key);
+     9 │     this?.$set(obj, key, value);
+  > 10 │     (this).$delete(obj, key);
+       │     ^^^^^^^^^^^^^^
+    11 │     this["$set"](obj, key, value);
+    12 │   },
+  
+  i Vue 3 detects added and deleted properties on its own, so this function no longer exists and calling it throws an error.
+  
+  i Use the delete operator instead, for example delete object.key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:5 lint/nursery/noVueDeprecatedDeleteSet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This calls the Vue set function, which Vue 3 removed.
+  
+     9 │     this?.$set(obj, key, value);
+    10 │     (this).$delete(obj, key);
+  > 11 │     this["$set"](obj, key, value);
+       │     ^^^^^^^^^^^^
+    12 │   },
+    13 │   methods: {
+  
+  i Vue 3 detects added and deleted properties on its own, so this function no longer exists and calling it throws an error.
+  
+  i Assign the property directly instead, for example object.key = value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:16:7 lint/nursery/noVueDeprecatedDeleteSet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This calls the Vue set function, which Vue 3 removed.
+  
+    14 │     update() {
+    15 │       const vm = this;
+  > 16 │       vm.$set(obj, key, value);
+       │       ^^^^^^^
+    17 │       vm.$delete(obj, key);
+    18 │     },
+  
+  i Vue 3 detects added and deleted properties on its own, so this function no longer exists and calling it throws an error.
+  
+  i Assign the property directly instead, for example object.key = value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:17:7 lint/nursery/noVueDeprecatedDeleteSet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This calls the Vue delete function, which Vue 3 removed.
+  
+    15 │       const vm = this;
+    16 │       vm.$set(obj, key, value);
+  > 17 │       vm.$delete(obj, key);
+       │       ^^^^^^^^^^
+    18 │     },
+    19 │     withArrow() {
+  
+  i Vue 3 detects added and deleted properties on its own, so this function no longer exists and calling it throws an error.
+  
+  i Use the delete operator instead, for example delete object.key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:20:28 lint/nursery/noVueDeprecatedDeleteSet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This calls the Vue set function, which Vue 3 removed.
+  
+    18 │     },
+    19 │     withArrow() {
+  > 20 │       [1, 2].forEach(() => this.$set(obj, key, value));
+       │                            ^^^^^^^^^
+    21 │     },
+    22 │     fromVue() {
+  
+  i Vue 3 detects added and deleted properties on its own, so this function no longer exists and calling it throws an error.
+  
+  i Assign the property directly instead, for example object.key = value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:23:7 lint/nursery/noVueDeprecatedDeleteSet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This calls the Vue set function, which Vue 3 removed.
+  
+    21 │     },
+    22 │     fromVue() {
+  > 23 │       Vue.set(obj, key, value);
+       │       ^^^^^^^
+    24 │       Vue.delete(obj, key);
+    25 │       set(obj, key, value);
+  
+  i Vue 3 detects added and deleted properties on its own, so this function no longer exists and calling it throws an error.
+  
+  i Assign the property directly instead, for example object.key = value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:24:7 lint/nursery/noVueDeprecatedDeleteSet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This calls the Vue delete function, which Vue 3 removed.
+  
+    22 │     fromVue() {
+    23 │       Vue.set(obj, key, value);
+  > 24 │       Vue.delete(obj, key);
+       │       ^^^^^^^^^^
+    25 │       set(obj, key, value);
+    26 │       del(obj, key);
+  
+  i Vue 3 detects added and deleted properties on its own, so this function no longer exists and calling it throws an error.
+  
+  i Use the delete operator instead, for example delete object.key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:25:7 lint/nursery/noVueDeprecatedDeleteSet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This calls the Vue set function, which Vue 3 removed.
+  
+    23 │       Vue.set(obj, key, value);
+    24 │       Vue.delete(obj, key);
+  > 25 │       set(obj, key, value);
+       │       ^^^
+    26 │       del(obj, key);
+    27 │       setProperty(obj, key, value);
+  
+  i Vue 3 detects added and deleted properties on its own, so this function no longer exists and calling it throws an error.
+  
+  i Assign the property directly instead, for example object.key = value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:26:7 lint/nursery/noVueDeprecatedDeleteSet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This calls the Vue delete function, which Vue 3 removed.
+  
+    24 │       Vue.delete(obj, key);
+    25 │       set(obj, key, value);
+  > 26 │       del(obj, key);
+       │       ^^^
+    27 │       setProperty(obj, key, value);
+    28 │       deleteProperty(obj, key);
+  
+  i Vue 3 detects added and deleted properties on its own, so this function no longer exists and calling it throws an error.
+  
+  i Use the delete operator instead, for example delete object.key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:27:7 lint/nursery/noVueDeprecatedDeleteSet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This calls the Vue set function, which Vue 3 removed.
+  
+    25 │       set(obj, key, value);
+    26 │       del(obj, key);
+  > 27 │       setProperty(obj, key, value);
+       │       ^^^^^^^^^^^
+    28 │       deleteProperty(obj, key);
+    29 │     },
+  
+  i Vue 3 detects added and deleted properties on its own, so this function no longer exists and calling it throws an error.
+  
+  i Assign the property directly instead, for example object.key = value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:28:7 lint/nursery/noVueDeprecatedDeleteSet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This calls the Vue delete function, which Vue 3 removed.
+  
+    26 │       del(obj, key);
+    27 │       setProperty(obj, key, value);
+  > 28 │       deleteProperty(obj, key);
+       │       ^^^^^^^^^^^^^^
+    29 │     },
+    30 │   },
+  
+  i Vue 3 detects added and deleted properties on its own, so this function no longer exists and calling it throws an error.
+  
+  i Use the delete operator instead, for example delete object.key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

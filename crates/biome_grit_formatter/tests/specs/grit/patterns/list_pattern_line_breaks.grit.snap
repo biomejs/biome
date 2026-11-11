@@ -1,0 +1,47 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: grit/patterns/list_pattern_line_breaks.grit
+---
+
+# Input
+
+```grit
+language js
+
+`foo($x)` as $c where {
+  register_diagnostic(span=$c, message=join(list=["aaaaaaaaaaaaaaaaaaaa", $x, "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], separator=""))
+}
+
+`bar($x)` where {
+  $x <: [
+    `1`,
+    `2`,
+
+    `3`
+  ]
+}
+
+```
+
+
+# Formatted
+
+```grit
+language js
+
+`foo($x)` as $c where {
+	register_diagnostic(span=$c, message=join(list=[
+		"aaaaaaaaaaaaaaaaaaaa", $x,
+		"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+	], separator=""))
+}
+
+`bar($x)` where {
+	$x <: [
+		`1`, `2`,
+
+		`3`
+	]
+}
+
+```

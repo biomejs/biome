@@ -1,0 +1,117 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+array.reduce<Record<string, Data>>((result, entry) => ({...result, [entry.id]: entry.data}), {});
+pairs.reduce((object: Record<string, number>, [key, value]: [string, number]) => ({...object, [key]: value}), {});
+function convert(values: number[]) {
+	return values.reduce((object, value) => ({...object, [value]: value}), {});
+}
+// The return type describes the object, not the pair returned after the fix.
+pairs.reduce((object, [key, value]): Record<string, number> => ({...object, [key]: value}), {});
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:7 lint/nursery/useObjectFromEntries ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ array.reduce<Record<string, Data>>((result, entry) => ({...result, [entry.id]: entry.data}), {});
+      │       ^^^^^^
+    3 │ pairs.reduce((object: Record<string, number>, [key, value]: [string, number]) => ({...object, [key]: value}), {});
+    4 │ function convert(values: number[]) {
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:7 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    1 │ /* should generate diagnostics */
+    2 │ array.reduce<Record<string, Data>>((result, entry) => ({...result, [entry.id]: entry.data}), {});
+  > 3 │ pairs.reduce((object: Record<string, number>, [key, value]: [string, number]) => ({...object, [key]: value}), {});
+      │       ^^^^^^
+    4 │ function convert(values: number[]) {
+    5 │ 	return values.reduce((object, value) => ({...object, [value]: value}), {});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   array.reduce<Record<string, Data>>((result, entry) => ({...result, [entry.id]: entry.data}), {});
+    3   │ - pairs.reduce((object:·Record<string,·number>,·[key,·value]:·[string,·number])·=>·({...object,·[key]:·value}),·{});
+      3 │ + Object.fromEntries(pairs.map(([key,·value]:·[string,·number])·=>·[key,·value]));
+    4 4 │   function convert(values: number[]) {
+    5 5 │   	return values.reduce((object, value) => ({...object, [value]: value}), {});
+  
+
+```
+
+```
+invalid.ts:5:16 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    3 │ pairs.reduce((object: Record<string, number>, [key, value]: [string, number]) => ({...object, [key]: value}), {});
+    4 │ function convert(values: number[]) {
+  > 5 │ 	return values.reduce((object, value) => ({...object, [value]: value}), {});
+      │ 	              ^^^^^^
+    6 │ }
+    7 │ // The return type describes the object, not the pair returned after the fix.
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    3 3 │   pairs.reduce((object: Record<string, number>, [key, value]: [string, number]) => ({...object, [key]: value}), {});
+    4 4 │   function convert(values: number[]) {
+    5   │ - → return·values.reduce((object,·value)·=>·({...object,·[value]:·value}),·{});
+      5 │ + → return·Object.fromEntries(values.map((value)·=>·[value,·value]));
+    6 6 │   }
+    7 7 │   // The return type describes the object, not the pair returned after the fix.
+  
+
+```
+
+```
+invalid.ts:8:7 lint/nursery/useObjectFromEntries ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    6 │ }
+    7 │ // The return type describes the object, not the pair returned after the fix.
+  > 8 │ pairs.reduce((object, [key, value]): Record<string, number> => ({...object, [key]: value}), {});
+      │       ^^^^^^
+    9 │ 
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

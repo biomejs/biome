@@ -37,13 +37,13 @@ MdRoot {
                             prefix: MdQuotePrefix {
                                 pre_marker_indent: MdQuoteIndentList [],
                                 marker_token: R_ANGLE@2..3 ">" [] [],
-                                post_marker_space_token: missing (optional),
+                                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@3..4 " " [] [],
                             },
                             content: MdBlockList [
                                 MdParagraph {
                                     list: MdInlineItemList [
                                         MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@3..10 " quoted" [] [],
+                                            value_token: MD_TEXTUAL_LITERAL@4..10 "quoted" [] [],
                                         },
                                         MdHardLine {
                                             value_token: MD_HARD_LINE_LITERAL@10..13 "  \n" [] [],
@@ -147,15 +147,15 @@ MdRoot {
             3: MD_INDENT_TOKEN_LIST@2..2
           1: MD_BLOCK_LIST@2..43
             0: MD_QUOTE@2..42
-              0: MD_QUOTE_PREFIX@2..3
+              0: MD_QUOTE_PREFIX@2..4
                 0: MD_QUOTE_INDENT_LIST@2..2
                 1: R_ANGLE@2..3 ">" [] []
-                2: (empty)
-              1: MD_BLOCK_LIST@3..42
-                0: MD_PARAGRAPH@3..24
-                  0: MD_INLINE_ITEM_LIST@3..24
-                    0: MD_TEXTUAL@3..10
-                      0: MD_TEXTUAL_LITERAL@3..10 " quoted" [] []
+                2: MD_QUOTE_POST_MARKER_SPACE@3..4 " " [] []
+              1: MD_BLOCK_LIST@4..42
+                0: MD_PARAGRAPH@4..24
+                  0: MD_INLINE_ITEM_LIST@4..24
+                    0: MD_TEXTUAL@4..10
+                      0: MD_TEXTUAL_LITERAL@4..10 "quoted" [] []
                     1: MD_HARD_LINE@10..13
                       0: MD_HARD_LINE_LITERAL@10..13 "  \n" [] []
                     2: MD_QUOTE_PREFIX@13..17

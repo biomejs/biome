@@ -6,7 +6,10 @@ use crate::syntax::scss::{
     parse_scss_interpolation_with_context,
 };
 use crate::syntax::value::dimension::{is_at_any_dimension, parse_any_dimension};
-use crate::syntax::value::function::is_nth_at_adjacent_l_paren;
+use crate::syntax::value::function::{
+    is_nth_at_adjacent_l_paren, try_parse_custom_property_if_function,
+};
+use crate::syntax::value::r#if::is_at_if_function;
 use crate::syntax::value::url::parse_custom_property_url_function;
 use crate::syntax::{is_at_identifier, parse_custom_identifier_with_keywords, parse_number};
 use biome_css_syntax::CssSyntaxKind::*;
@@ -97,6 +100,17 @@ pub(crate) fn parse_supports_custom_property_value(
         CssCustomPropertyCommentMode::ScssLineComments,
         CSS_CUSTOM_PROPERTY_VALUE,
     )
+}
+
+/// Parses a raw custom-property value with the caller's `//` policy.
+///
+/// Example: `$gap` in `--space: if(media(print): $gap; else: 0);`.
+pub(crate) fn parse_custom_property_value_with_mode(
+    p: &mut CssParser,
+    end_set: TokenSet<CssSyntaxKind>,
+    comment_mode: CssCustomPropertyCommentMode,
+) -> CompletedMarker {
+    parse_raw_property_value_with_mode(p, end_set, comment_mode, CSS_CUSTOM_PROPERTY_VALUE)
 }
 
 /// Parses a raw custom-property value with the caller's `//` policy.
@@ -279,6 +293,14 @@ fn parse_custom_property_function(
     if !legacy_filter_recovery && let Present(url) = parse_custom_property_url_function(p, context)
     {
         return Present(url);
+    }
+    // A modern `if()` gets its own node. Anything else, such as Sass's legacy
+    // `if($condition, $a, $b)`, stays a raw function.
+    if !legacy_filter_recovery
+        && is_at_if_function(p)
+        && let Present(function) = try_parse_custom_property_if_function(p, comment_mode)
+    {
+        return Present(function);
     }
 
     let function = p.start();

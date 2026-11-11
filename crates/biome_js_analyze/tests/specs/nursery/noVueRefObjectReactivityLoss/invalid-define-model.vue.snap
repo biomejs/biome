@@ -1,0 +1,84 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-model.vue
+---
+# Input
+```vue
+/* should generate diagnostics */
+<script setup>
+const model1 = defineModel();
+const [model2, modifiers] = defineModel();
+console.log(
+	model1.value,
+	model2.value,
+);
+let model3;
+[model3] = defineModel();
+console.log(model3.value);
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-define-model.vue:6:2 lint/nursery/noVueRefObjectReactivityLoss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reads the value of a ref only once, so it won't update when the ref changes.
+  
+    4 │ const [model2, modifiers] = defineModel();
+    5 │ console.log(
+  > 6 │ 	model1.value,
+      │ 	^^^^^^^^^^^^
+    7 │ 	model2.value,
+    8 │ );
+  
+  i This code runs only once, together with the code that creates the ref. The value read here is a copy, and Vue does not update it when the ref changes.
+  
+  i Read .value inside a function, such as a computed() getter, or pass the ref itself instead of its value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-model.vue:7:2 lint/nursery/noVueRefObjectReactivityLoss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reads the value of a ref only once, so it won't update when the ref changes.
+  
+    5 │ console.log(
+    6 │ 	model1.value,
+  > 7 │ 	model2.value,
+      │ 	^^^^^^^^^^^^
+    8 │ );
+    9 │ let model3;
+  
+  i This code runs only once, together with the code that creates the ref. The value read here is a copy, and Vue does not update it when the ref changes.
+  
+  i Read .value inside a function, such as a computed() getter, or pass the ref itself instead of its value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-model.vue:11:13 lint/nursery/noVueRefObjectReactivityLoss ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reads the value of a ref only once, so it won't update when the ref changes.
+  
+     9 │ let model3;
+    10 │ [model3] = defineModel();
+  > 11 │ console.log(model3.value);
+       │             ^^^^^^^^^^^^
+    12 │ </script>
+    13 │ 
+  
+  i This code runs only once, together with the code that creates the ref. The value read here is a copy, and Vue does not update it when the ref changes.
+  
+  i Read .value inside a function, such as a computed() getter, or pass the ref itself instead of its value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

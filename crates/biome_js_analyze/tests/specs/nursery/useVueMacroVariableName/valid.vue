@@ -1,0 +1,13 @@
+<script setup>
+/* should not generate diagnostics */
+import { toRef, useAttrs, useSlots } from "vue";
+
+const props = withDefaults(defineProps(["foo", "bar"]), {
+  foo: 42,
+  bar: "abc",
+});
+const foo = toRef(props, "foo");
+const emit = defineEmits(["change"]);
+const slots = useSlots();
+const attrs = useAttrs();
+</script>

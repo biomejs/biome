@@ -1,0 +1,82 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid-ignore.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <LinkList>
+    <three slot="three" />
+    <other-component slot="name" />
+  </LinkList>
+  <one>
+    <two slot="two" />
+  </one>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-ignore.vue:4:12 lint/nursery/noVueDeprecatedSlotAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot attribute is deprecated.
+  
+    2 │ <template>
+    3 │   <LinkList>
+  > 4 │     <three slot="three" />
+      │            ^^^^^^^^^^^^
+    5 │     <other-component slot="name" />
+    6 │   </LinkList>
+  
+  i Vue 3 treats it as a regular attribute, so the content goes to the component's default slot instead of the named slot.
+  
+  i Use the v-slot directive on a <template> element instead, for example <template v-slot:name> or <template #name>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-ignore.vue:5:22 lint/nursery/noVueDeprecatedSlotAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot attribute is deprecated.
+  
+    3 │   <LinkList>
+    4 │     <three slot="three" />
+  > 5 │     <other-component slot="name" />
+      │                      ^^^^^^^^^^^
+    6 │   </LinkList>
+    7 │   <one>
+  
+  i Vue 3 treats it as a regular attribute, so the content goes to the component's default slot instead of the named slot.
+  
+  i Use the v-slot directive on a <template> element instead, for example <template v-slot:name> or <template #name>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-ignore.vue:8:10 lint/nursery/noVueDeprecatedSlotAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot attribute is deprecated.
+  
+     6 │   </LinkList>
+     7 │   <one>
+   > 8 │     <two slot="two" />
+       │          ^^^^^^^^^^
+     9 │   </one>
+    10 │ </template>
+  
+  i Vue 3 treats it as a regular attribute, so the content goes to the component's default slot instead of the named slot.
+  
+  i Use the v-slot directive on a <template> element instead, for example <template v-slot:name> or <template #name>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

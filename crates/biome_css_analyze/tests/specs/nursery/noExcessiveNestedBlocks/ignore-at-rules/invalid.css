@@ -1,0 +1,28 @@
+/* should generate diagnostics */
+.a {
+    @media print {
+        .b {
+            .c {
+                color: red;
+            }
+        }
+    }
+}
+
+.a {
+    .b {
+        @container (width > 400px) {
+            color: red;
+        }
+    }
+}
+
+@media print {
+    .a {
+        .b {
+            .c {
+                color: red;
+            }
+        }
+    }
+}

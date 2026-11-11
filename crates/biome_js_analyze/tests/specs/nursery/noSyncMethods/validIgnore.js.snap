@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: validIgnore.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+fs.readFileSync(somePath);
+readFileSync(somePath);
+fs.barSync.call(null);
+
+```

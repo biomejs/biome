@@ -1,0 +1,539 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAll.js
+---
+# Input
+```js
+/* should generate diagnostics */
+Promise.all([promise]);
+const a = () => Promise.all([promise]);
+const b = await Promise.all([promise]);
+c = await Promise.all([promise]);
+const obj = { p: Promise.all([promise]) };
+const [d] = await Promise.all([promise]);
+let [e,] = await Promise.all([promise]);
+var[f] = await Promise.all([promise]);
+[g] = await Promise.all([promise]);
+const h = (await Promise.all([promise]))[0];
+const i = (await Promise.all([promise]))[0.0];
+j = (await Promise.all([promise]))[0];
+const [k] = await Promise.all([a ? b : c]);
+if (condition) {} else[l] = await Promise.all([promise]);
+
+// Reported without a fix.
+const [m = fallback] = await Promise.all([promise]);
+const [...n] = await Promise.all([promise]);
+const [, o] = await Promise.all([promise]);
+const p = ([q] = await Promise.all([promise]));
+const r = (await Promise.all([promise]))[1];
+const s = (await Promise.all([promise]))?.[0];
+foo((await Promise.all([promise]))[0]);
+return2 += await Promise.all([promise]);
+
+```
+
+# Diagnostics
+```
+invalidAll.js:2:13 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ Promise.all([promise]);
+      │             ^^^^^^^^^
+    3 │ const a = () => Promise.all([promise]);
+    4 │ const b = await Promise.all([promise]);
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAll.js:3:29 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+    1 │ /* should generate diagnostics */
+    2 │ Promise.all([promise]);
+  > 3 │ const a = () => Promise.all([promise]);
+      │                             ^^^^^^^^^
+    4 │ const b = await Promise.all([promise]);
+    5 │ c = await Promise.all([promise]);
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAll.js:4:29 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+    2 │ Promise.all([promise]);
+    3 │ const a = () => Promise.all([promise]);
+  > 4 │ const b = await Promise.all([promise]);
+      │                             ^^^^^^^^^
+    5 │ c = await Promise.all([promise]);
+    6 │ const obj = { p: Promise.all([promise]) };
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAll.js:5:23 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+    3 │ const a = () => Promise.all([promise]);
+    4 │ const b = await Promise.all([promise]);
+  > 5 │ c = await Promise.all([promise]);
+      │                       ^^^^^^^^^
+    6 │ const obj = { p: Promise.all([promise]) };
+    7 │ const [d] = await Promise.all([promise]);
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAll.js:6:30 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+    4 │ const b = await Promise.all([promise]);
+    5 │ c = await Promise.all([promise]);
+  > 6 │ const obj = { p: Promise.all([promise]) };
+      │                              ^^^^^^^^^
+    7 │ const [d] = await Promise.all([promise]);
+    8 │ let [e,] = await Promise.all([promise]);
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAll.js:7:31 lint/nursery/noSinglePromiseInPromiseMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+    5 │ c = await Promise.all([promise]);
+    6 │ const obj = { p: Promise.all([promise]) };
+  > 7 │ const [d] = await Promise.all([promise]);
+      │                               ^^^^^^^^^
+    8 │ let [e,] = await Promise.all([promise]);
+    9 │ var[f] = await Promise.all([promise]);
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Await the value directly.
+  
+    7 │ const·[d]·=·await·Promise.all([promise]);
+      │       - -         -------------       -- 
+
+```
+
+```
+invalidAll.js:8:30 lint/nursery/noSinglePromiseInPromiseMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+     6 │ const obj = { p: Promise.all([promise]) };
+     7 │ const [d] = await Promise.all([promise]);
+   > 8 │ let [e,] = await Promise.all([promise]);
+       │                              ^^^^^^^^^
+     9 │ var[f] = await Promise.all([promise]);
+    10 │ [g] = await Promise.all([promise]);
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Await the value directly.
+  
+    8 │ let·[e,]·=·await·Promise.all([promise]);
+      │     - --         -------------       -- 
+
+```
+
+```
+invalidAll.js:9:28 lint/nursery/noSinglePromiseInPromiseMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+     7 │ const [d] = await Promise.all([promise]);
+     8 │ let [e,] = await Promise.all([promise]);
+   > 9 │ var[f] = await Promise.all([promise]);
+       │                            ^^^^^^^^^
+    10 │ [g] = await Promise.all([promise]);
+    11 │ const h = (await Promise.all([promise]))[0];
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Await the value directly.
+  
+     7  7 │   const [d] = await Promise.all([promise]);
+     8  8 │   let [e,] = await Promise.all([promise]);
+     9    │ - var[f]·=·await·Promise.all([promise]);
+        9 │ + var·f·=·await·promise;
+    10 10 │   [g] = await Promise.all([promise]);
+    11 11 │   const h = (await Promise.all([promise]))[0];
+  
+
+```
+
+```
+invalidAll.js:10:25 lint/nursery/noSinglePromiseInPromiseMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+     8 │ let [e,] = await Promise.all([promise]);
+     9 │ var[f] = await Promise.all([promise]);
+  > 10 │ [g] = await Promise.all([promise]);
+       │                         ^^^^^^^^^
+    11 │ const h = (await Promise.all([promise]))[0];
+    12 │ const i = (await Promise.all([promise]))[0.0];
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Await the value directly.
+  
+    10 │ [g]·=·await·Promise.all([promise]);
+       │ - -         -------------       -- 
+
+```
+
+```
+invalidAll.js:11:30 lint/nursery/noSinglePromiseInPromiseMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+     9 │ var[f] = await Promise.all([promise]);
+    10 │ [g] = await Promise.all([promise]);
+  > 11 │ const h = (await Promise.all([promise]))[0];
+       │                              ^^^^^^^^^
+    12 │ const i = (await Promise.all([promise]))[0.0];
+    13 │ j = (await Promise.all([promise]))[0];
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Await the value directly.
+  
+    11 │ const·h·=·(await·Promise.all([promise]))[0];
+       │           -      -------------       ------ 
+
+```
+
+```
+invalidAll.js:12:30 lint/nursery/noSinglePromiseInPromiseMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+    10 │ [g] = await Promise.all([promise]);
+    11 │ const h = (await Promise.all([promise]))[0];
+  > 12 │ const i = (await Promise.all([promise]))[0.0];
+       │                              ^^^^^^^^^
+    13 │ j = (await Promise.all([promise]))[0];
+    14 │ const [k] = await Promise.all([a ? b : c]);
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Await the value directly.
+  
+    12 │ const·i·=·(await·Promise.all([promise]))[0.0];
+       │           -      -------------       -------- 
+
+```
+
+```
+invalidAll.js:13:24 lint/nursery/noSinglePromiseInPromiseMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+    11 │ const h = (await Promise.all([promise]))[0];
+    12 │ const i = (await Promise.all([promise]))[0.0];
+  > 13 │ j = (await Promise.all([promise]))[0];
+       │                        ^^^^^^^^^
+    14 │ const [k] = await Promise.all([a ? b : c]);
+    15 │ if (condition) {} else[l] = await Promise.all([promise]);
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Await the value directly.
+  
+    13 │ j·=·(await·Promise.all([promise]))[0];
+       │     -      -------------       ------ 
+
+```
+
+```
+invalidAll.js:14:31 lint/nursery/noSinglePromiseInPromiseMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+    12 │ const i = (await Promise.all([promise]))[0.0];
+    13 │ j = (await Promise.all([promise]))[0];
+  > 14 │ const [k] = await Promise.all([a ? b : c]);
+       │                               ^^^^^^^^^^^
+    15 │ if (condition) {} else[l] = await Promise.all([promise]);
+    16 │ 
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Await the value directly.
+  
+    14 │ const·[k]·=·await·Promise.all([a·?·b·:·c]);
+       │       - -         ----------- -         -  
+
+```
+
+```
+invalidAll.js:15:47 lint/nursery/noSinglePromiseInPromiseMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+    13 │ j = (await Promise.all([promise]))[0];
+    14 │ const [k] = await Promise.all([a ? b : c]);
+  > 15 │ if (condition) {} else[l] = await Promise.all([promise]);
+       │                                               ^^^^^^^^^
+    16 │ 
+    17 │ // Reported without a fix.
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Await the value directly.
+  
+    13 13 │   j = (await Promise.all([promise]))[0];
+    14 14 │   const [k] = await Promise.all([a ? b : c]);
+    15    │ - if·(condition)·{}·else[l]·=·await·Promise.all([promise]);
+       15 │ + if·(condition)·{}·else·l·=·await·promise;
+    16 16 │   
+    17 17 │   // Reported without a fix.
+  
+
+```
+
+```
+invalidAll.js:18:42 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+    17 │ // Reported without a fix.
+  > 18 │ const [m = fallback] = await Promise.all([promise]);
+       │                                          ^^^^^^^^^
+    19 │ const [...n] = await Promise.all([promise]);
+    20 │ const [, o] = await Promise.all([promise]);
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAll.js:19:34 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+    17 │ // Reported without a fix.
+    18 │ const [m = fallback] = await Promise.all([promise]);
+  > 19 │ const [...n] = await Promise.all([promise]);
+       │                                  ^^^^^^^^^
+    20 │ const [, o] = await Promise.all([promise]);
+    21 │ const p = ([q] = await Promise.all([promise]));
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAll.js:20:33 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+    18 │ const [m = fallback] = await Promise.all([promise]);
+    19 │ const [...n] = await Promise.all([promise]);
+  > 20 │ const [, o] = await Promise.all([promise]);
+       │                                 ^^^^^^^^^
+    21 │ const p = ([q] = await Promise.all([promise]));
+    22 │ const r = (await Promise.all([promise]))[1];
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAll.js:21:36 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+    19 │ const [...n] = await Promise.all([promise]);
+    20 │ const [, o] = await Promise.all([promise]);
+  > 21 │ const p = ([q] = await Promise.all([promise]));
+       │                                    ^^^^^^^^^
+    22 │ const r = (await Promise.all([promise]))[1];
+    23 │ const s = (await Promise.all([promise]))?.[0];
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAll.js:22:30 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+    20 │ const [, o] = await Promise.all([promise]);
+    21 │ const p = ([q] = await Promise.all([promise]));
+  > 22 │ const r = (await Promise.all([promise]))[1];
+       │                              ^^^^^^^^^
+    23 │ const s = (await Promise.all([promise]))?.[0];
+    24 │ foo((await Promise.all([promise]))[0]);
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAll.js:23:30 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+    21 │ const p = ([q] = await Promise.all([promise]));
+    22 │ const r = (await Promise.all([promise]))[1];
+  > 23 │ const s = (await Promise.all([promise]))?.[0];
+       │                              ^^^^^^^^^
+    24 │ foo((await Promise.all([promise]))[0]);
+    25 │ return2 += await Promise.all([promise]);
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAll.js:24:24 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+    22 │ const r = (await Promise.all([promise]))[1];
+    23 │ const s = (await Promise.all([promise]))?.[0];
+  > 24 │ foo((await Promise.all([promise]))[0]);
+       │                        ^^^^^^^^^
+    25 │ return2 += await Promise.all([promise]);
+    26 │ 
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAll.js:25:30 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+    23 │ const s = (await Promise.all([promise]))?.[0];
+    24 │ foo((await Promise.all([promise]))[0]);
+  > 25 │ return2 += await Promise.all([promise]);
+       │                              ^^^^^^^^^
+    26 │ 
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

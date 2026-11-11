@@ -430,6 +430,16 @@ impl<'src> TailwindLexer<'src> {
             return TW_BASE;
         }
 
+        // Tailwind takes everything before the first `-[` or `-(` as the root of a
+        // candidate with an arbitrary value or a CSS variable, whether or not the root
+        // is a known utility (`foo-bar-[1px]` has the root `foo-bar`). Without this,
+        // an unknown dashed root would end at its first `-` and leave the bracket
+        // inside a named value.
+        if let Some(arbitrary_end) = arbitrary_value_base_end(slice) {
+            self.advance(arbitrary_end);
+            return TW_BASE;
+        }
+
         // Fallback to dashed-basename trie matching for cases with '-' inside the basename
         let dashed_end = self.base_names.matcher(slice).base_end();
         self.advance(dashed_end);
@@ -786,6 +796,15 @@ fn css_identifier_kind(text: &[u8]) -> TailwindSyntaxKind {
         b"fr" => FR_KW,
         _ => IDENT,
     }
+}
+
+/// Returns the position of the first `-[` or `-(` before a delimiter, which ends
+/// the basename of a candidate with an arbitrary value or a CSS variable.
+fn arbitrary_value_base_end(slice: &[u8]) -> Option<usize> {
+    slice
+        .windows(2)
+        .take_while(|pair| !is_delimiter(lookup_byte(pair[0])))
+        .position(|pair| pair[0] == b'-' && matches!(pair[1], b'[' | b'('))
 }
 
 fn is_css_identifier_start(byte: u8) -> bool {

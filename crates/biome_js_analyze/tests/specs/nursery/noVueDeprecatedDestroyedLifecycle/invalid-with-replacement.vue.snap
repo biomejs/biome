@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-with-replacement.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  unmounted() {},
+  destroyed() {},
+  'beforeUnmount'() {},
+  beforeDestroy() {},
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-with-replacement.vue:5:3 lint/nursery/noVueDeprecatedDestroyedLifecycle ━━━━━━━━━━━━━━━━━━━━
+
+  × The destroyed hook was renamed to unmounted in Vue 3.
+  
+    3 │ export default {
+    4 │   unmounted() {},
+  > 5 │   destroyed() {},
+      │   ^^^^^^^^^
+    6 │   'beforeUnmount'() {},
+    7 │   beforeDestroy() {},
+  
+  i Vue 3 doesn't call the destroyed hook, so the code inside it never runs.
+  
+  i Move the code into the existing unmounted hook, and remove this one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-with-replacement.vue:7:3 lint/nursery/noVueDeprecatedDestroyedLifecycle ━━━━━━━━━━━━━━━━━━━━
+
+  × The beforeDestroy hook was renamed to beforeUnmount in Vue 3.
+  
+    5 │   destroyed() {},
+    6 │   'beforeUnmount'() {},
+  > 7 │   beforeDestroy() {},
+      │   ^^^^^^^^^^^^^
+    8 │ };
+    9 │ </script>
+  
+  i Vue 3 doesn't call the beforeDestroy hook, so the code inside it never runs.
+  
+  i Move the code into the existing beforeUnmount hook, and remove this one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

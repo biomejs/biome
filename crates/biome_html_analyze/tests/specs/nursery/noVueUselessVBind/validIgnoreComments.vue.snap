@@ -1,0 +1,14 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: validIgnoreComments.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <div :id="'comment'/*comment*/" />
+  <div :id="'comment'//comment
+  " />
+</template>
+
+```

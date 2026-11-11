@@ -1,0 +1,37 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/tailwind/theme-reference-list-value.scss
+---
+
+# Input
+
+```scss
+@theme {
+	--*: a b, c d;
+	--color-*: a b, c d;
+}
+
+```
+
+
+# Options
+
+```json
+{
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```scss
+@theme {
+	--*: a b, c d;
+	--color-*: a b, c d;
+}
+
+```

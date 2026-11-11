@@ -158,17 +158,19 @@ pub enum SvelteEmbeddingKind {
     TextInterpolation,
     /// The name and parameters from a `{#snippet ...}` block parsed as a Svelte snippet root.
     SnippetSignature,
-    /// The payload of a `{@const ...}` block parsed as an assignment expression.
+    /// The payload of a `{@const ...}` block parsed as a variable declarator.
     ///
     /// The HTML syntax stores the `const` token separately, so this mode receives
-    /// only the assignment payload. It must retain expression-root parsing for
-    /// compatibility with that representation.
+    /// only the binding, optional type annotation, and initializer.
     LegacyConst,
     /// The payload of a `{let ...}` or `{const ...}` tag parsed as a Svelte declaration root.
     ///
     /// The snippet includes the keyword and must contain one `let` or `const`
     /// variable declaration, an optional semicolon, and no trailing code.
     Declaration,
+    /// Type parameters from a Svelte `<script generics="...">` attribute, parsed
+    /// without surrounding angle brackets.
+    Generics,
 }
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -282,11 +284,14 @@ impl JsEmbeddingKind {
             }
         )
     }
-    pub const fn is_vue_generics_list(&self) -> bool {
+    pub const fn is_generics_list(&self) -> bool {
         matches!(
             self,
             Self::Vue {
                 generics_list: true,
+                ..
+            } | Self::Svelte {
+                embedding_kind: SvelteEmbeddingKind::Generics,
                 ..
             }
         )
@@ -605,8 +610,7 @@ impl JsFileSource {
             JsEmbeddingKind::Svelte {
                 embedding_kind: SvelteEmbeddingKind::Expression
                     | SvelteEmbeddingKind::TextInterpolation
-                    | SvelteEmbeddingKind::SnippetSignature
-                    | SvelteEmbeddingKind::LegacyConst,
+                    | SvelteEmbeddingKind::SnippetSignature,
                 ..
             } | JsEmbeddingKind::Vue {
                 allow_statements: false,
@@ -628,9 +632,10 @@ impl JsFileSource {
         self.embedding_kind.is_vue_slot_props()
     }
 
-    /// Returns true if this is the value of the `generic` attribute of a Vue `<script setup>`
-    pub const fn is_vue_generics_list(&self) -> bool {
-        self.embedding_kind.is_vue_generics_list()
+    /// Returns `true` for type parameters from a Vue `generic` attribute or a
+    /// Svelte `generics` attribute.
+    pub const fn is_generics_list(&self) -> bool {
+        self.embedding_kind.is_generics_list()
     }
 
     /// Returns true if this is a Svelte `{@const}` block
@@ -908,6 +913,19 @@ mod tests {
         });
         assert!(source.is_template_expression());
         assert!(source.as_embedding_kind().is_svelte_text_interpolation());
+        assert!(!source.is_embedded_source());
+    }
+
+    #[test]
+    fn svelte_generics_are_a_type_parameter_list() {
+        let source = JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Svelte {
+            is_module_script: false,
+            is_class_attribute: false,
+            file_kind: SvelteFileKind::Component,
+            embedding_kind: SvelteEmbeddingKind::Generics,
+        });
+        assert!(source.is_generics_list());
+        assert!(!source.is_template_expression());
         assert!(!source.is_embedded_source());
     }
 

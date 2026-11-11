@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-type-and-argument.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+const events = ["notify"];
+
+const emit = defineEmits<{ notify: [id: number] }>(events);
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-type-and-argument.vue:5:14 lint/nursery/useVueValidDefineEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This defineEmits call declares events with both a type and an argument.
+  
+    3 │ const events = ["notify"];
+    4 │ 
+  > 5 │ const emit = defineEmits<{ notify: [id: number] }>(events);
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ </script>
+    7 │ 
+  
+  i Vue accepts only one of the two, and fails to compile the component when both are present.
+  
+  i Remove either the type between the angle brackets or the argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

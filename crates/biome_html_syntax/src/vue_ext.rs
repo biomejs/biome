@@ -49,6 +49,18 @@ impl VueDirective {
     }
 
     #[inline]
+    pub fn is_else(&self) -> bool {
+        self.name_token()
+            .is_ok_and(|t| t.text_trimmed().eq_ignore_ascii_case("v-else"))
+    }
+
+    #[inline]
+    pub fn is_else_if(&self) -> bool {
+        self.name_token()
+            .is_ok_and(|t| t.text_trimmed().eq_ignore_ascii_case("v-else-if"))
+    }
+
+    #[inline]
     pub fn is_for(&self) -> bool {
         self.name_token()
             .is_ok_and(|t| t.text_trimmed().eq_ignore_ascii_case("v-for"))
@@ -61,15 +73,33 @@ impl VueDirective {
     }
 
     #[inline]
+    pub fn is_text(&self) -> bool {
+        self.name_token()
+            .is_ok_and(|t| t.text_trimmed().eq_ignore_ascii_case("v-text"))
+    }
+
+    #[inline]
     pub fn is_if(&self) -> bool {
         self.name_token()
             .is_ok_and(|t| t.text_trimmed().eq_ignore_ascii_case("v-if"))
     }
 
     #[inline]
+    pub fn is_slot(&self) -> bool {
+        self.name_token()
+            .is_ok_and(|t| t.text_trimmed().eq_ignore_ascii_case("v-slot"))
+    }
+
+    #[inline]
     pub fn is_show(&self) -> bool {
         self.name_token()
             .is_ok_and(|t| t.text_trimmed().eq_ignore_ascii_case("v-show"))
+    }
+
+    #[inline]
+    pub fn is_pre(&self) -> bool {
+        self.name_token()
+            .is_ok_and(|t| t.text_trimmed().eq_ignore_ascii_case("v-pre"))
     }
 }
 

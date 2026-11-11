@@ -1,18 +1,32 @@
 use crate::ast::JsAstNode;
+use crate::kind_set::{JsNodeKindSet, JsTokenKindSet};
 use crate::mutation::{JsMutation, create_mutation};
 use crate::token::factory_token;
 use biome_analyze::{PluginActionData, PluginDiagnosticEntry, RuleDiagnostic};
 use biome_diagnostics::{Applicability, Severity, category};
-use biome_js_syntax::JsSyntaxNode;
+use biome_js_syntax::{JsLanguage, JsSyntaxNode};
 use boa_engine::module::SyntheticModuleInitializer;
 use boa_engine::object::builtins::JsArray;
-use boa_engine::object::{FunctionObjectBuilder, ObjectInitializer};
+use boa_engine::object::{FunctionObjectBuilder, JsObject, ObjectInitializer};
 use boa_engine::property::Attribute;
 use boa_engine::{
     Context, JsNativeError, JsResult, JsString, JsValue, Module, NativeFunction, js_string,
 };
 use std::cell::RefCell;
 use std::rc::Rc;
+
+fn boolean_option(object: &JsObject, name: &str, context: &mut Context) -> JsResult<bool> {
+    let value = object.get(JsString::from(name), context)?;
+    if value.is_undefined() {
+        Ok(false)
+    } else {
+        value.as_boolean().ok_or_else(|| {
+            JsNativeError::typ()
+                .with_message(format!("The `{name}` query option must be a boolean."))
+                .into()
+        })
+    }
+}
 
 pub(crate) struct JsPluginApi {
     diagnostics: Rc<RefCell<Vec<PluginDiagnosticEntry>>>,
@@ -98,12 +112,12 @@ impl JsPluginApi {
         .name("ast")
         .build();
 
-        let semantic = FunctionObjectBuilder::new(
+        let grit = FunctionObjectBuilder::new(
             context.realm(),
-            NativeFunction::from_fn_ptr(Self::semantic_query),
+            NativeFunction::from_fn_ptr(Self::grit_query),
         )
         .length(1)
-        .name("semantic")
+        .name("grit")
         .build();
 
         let define_rule = FunctionObjectBuilder::new(
@@ -121,6 +135,22 @@ impl JsPluginApi {
         .length(1)
         .name("createMutation")
         .build();
+        let node_kinds = FunctionObjectBuilder::new(
+            context.realm(),
+            NativeFunction::from_fn_ptr(JsNodeKindSet::<JsLanguage>::create),
+        )
+        .length(0)
+        .name("nodeKinds")
+        .build();
+
+        let token_kinds = FunctionObjectBuilder::new(
+            context.realm(),
+            NativeFunction::from_fn_ptr(JsTokenKindSet::<JsLanguage>::create),
+        )
+        .length(0)
+        .name("tokenKinds")
+        .build();
+
         let factory = ObjectInitializer::new(context)
             .function(
                 NativeFunction::from_fn_ptr(factory_token),
@@ -133,35 +163,50 @@ impl JsPluginApi {
             &[
                 js_string!("registerDiagnostic"),
                 js_string!("ast"),
-                js_string!("semantic"),
+                js_string!("grit"),
                 js_string!("defineRule"),
                 js_string!("createMutation"),
                 js_string!("factory"),
+                js_string!("nodeKinds"),
+                js_string!("tokenKinds"),
             ],
             SyntheticModuleInitializer::from_copy_closure_with_captures(
                 |module,
-                 (register_diagnostic, ast, semantic, define_rule, create_mutation, factory),
+                 (
+                    register_diagnostic,
+                    ast,
+                    grit,
+                    define_rule,
+                    create_mutation,
+                    factory,
+                    node_kinds,
+                    token_kinds,
+                ),
                  _| {
                     module.set_export(
                         &js_string!("registerDiagnostic"),
                         register_diagnostic.clone().into(),
                     )?;
                     module.set_export(&js_string!("ast"), ast.clone().into())?;
-                    module.set_export(&js_string!("semantic"), semantic.clone().into())?;
+                    module.set_export(&js_string!("grit"), grit.clone().into())?;
                     module.set_export(&js_string!("defineRule"), define_rule.clone().into())?;
                     module.set_export(
                         &js_string!("createMutation"),
                         create_mutation.clone().into(),
                     )?;
-                    module.set_export(&js_string!("factory"), factory.clone().into())
+                    module.set_export(&js_string!("factory"), factory.clone().into())?;
+                    module.set_export(&js_string!("nodeKinds"), node_kinds.clone().into())?;
+                    module.set_export(&js_string!("tokenKinds"), token_kinds.clone().into())
                 },
                 (
                     register_diagnostic,
                     ast,
-                    semantic,
+                    grit,
                     define_rule,
                     create_mutation,
                     factory,
+                    node_kinds,
+                    token_kinds,
                 ),
             ),
             None,
@@ -170,28 +215,80 @@ impl JsPluginApi {
         )
     }
 
-    /// Implements `ast(...kinds)`: builds an AST query object from syntax kind names.
+    /// Implements `ast(...kinds, options)`: builds an AST query object from syntax kind names.
     fn ast_query(_this: &JsValue, args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
         Self::node_query("ast", args, context)
     }
 
-    fn semantic_query(
-        _this: &JsValue,
-        args: &[JsValue],
-        context: &mut Context,
-    ) -> JsResult<JsValue> {
-        Self::node_query("semantic", args, context)
+    /// Implements `grit(pattern, options)`: builds a Grit query object from a pattern string.
+    fn grit_query(_this: &JsValue, args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
+        let (pattern, options) = match args {
+            [pattern] => (pattern, None),
+            [pattern, options] if options.is_undefined() => (pattern, None),
+            [pattern, options] => {
+                let Some(options) = options.as_object() else {
+                    return Err(JsNativeError::typ()
+                        .with_message("grit() options must be an object. Pass { semantic: true } as the second argument.")
+                        .into());
+                };
+                (pattern, Some(options))
+            }
+            _ => {
+                return Err(JsNativeError::typ()
+                    .with_message("grit() requires one Grit pattern string and an optional options object. Pass grit(\"`console.log($args)`\", { semantic: true }).")
+                    .into());
+            }
+        };
+        let Some(pattern) = pattern.as_string() else {
+            return Err(JsNativeError::typ()
+                .with_message("grit() requires a Grit pattern string. Pass a string such as \"`console.log($args)`\", not a node or other value.")
+                .into());
+        };
+        let requires_semantic = match options.as_ref() {
+            Some(options) => boolean_option(options, "semantic", context)?,
+            None => false,
+        };
+
+        let query = ObjectInitializer::new(context)
+            .property(
+                js_string!("type"),
+                JsString::from("grit"),
+                Attribute::ENUMERABLE,
+            )
+            .property(
+                js_string!("pattern"),
+                JsValue::from(pattern.clone()),
+                Attribute::ENUMERABLE,
+            )
+            .property(
+                js_string!("requiresSemantic"),
+                JsValue::from(requires_semantic),
+                Attribute::ENUMERABLE,
+            )
+            .build();
+
+        Ok(query.into())
     }
 
     fn node_query(query_type: &str, args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
-        if args.is_empty() {
+        let (kinds_args, options) = match args.split_last() {
+            Some((last, rest)) if last.is_undefined() => (rest, None),
+            Some((last, rest)) if last.as_object().is_some() => (rest, last.as_object()),
+            _ => (args, None),
+        };
+        let requires_semantic = match options.as_ref() {
+            Some(options) => boolean_option(options, "semantic", context)?,
+            None => false,
+        };
+
+        if kinds_args.is_empty() {
             return Err(JsNativeError::typ()
                 .with_message(format!("{query_type}() requires at least one node kind. Pass a kind from JsNodeByKind, such as {query_type}(\"JS_CALL_EXPRESSION\")."))
                 .into());
         }
 
-        let mut kinds = Vec::with_capacity(args.len());
-        for arg in args {
+        let mut kinds = Vec::with_capacity(kinds_args.len());
+        for arg in kinds_args {
             let Some(kind) = arg.as_string() else {
                 return Err(JsNativeError::typ()
                     .with_message(format!("{query_type}() requires node kind names as strings. Pass names such as \"JS_CALL_EXPRESSION\", not node objects."))
@@ -216,6 +313,11 @@ impl JsPluginApi {
                 Attribute::ENUMERABLE,
             )
             .property(js_string!("kinds"), kinds, Attribute::ENUMERABLE)
+            .property(
+                js_string!("requiresSemantic"),
+                JsValue::from(requires_semantic),
+                Attribute::ENUMERABLE,
+            )
             .build();
 
         Ok(query.into())
@@ -243,7 +345,7 @@ impl JsPluginApi {
         {
             return Err(JsNativeError::typ()
                 .with_message(
-                    "The rule's query property must be a query object. Set it to ast(...) or semantic(...) with the node kinds the rule should inspect.",
+                    "The rule's query property must be a query object. Set it to ast(...) or grit(...) with the nodes the rule should inspect.",
                 )
                 .into());
         }
@@ -299,7 +401,7 @@ impl JsPluginApi {
                 ))
                 .into());
         };
-        if node.node.ancestors().last().as_ref() != Some(source) {
+        if &node.node.tree_top() != source {
             return Err(JsNativeError::typ()
                 .with_message("The diagnostic's node does not belong to the source being analyzed. Pass a node from that source to registerDiagnostic().")
                 .into());

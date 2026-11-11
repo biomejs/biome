@@ -965,10 +965,7 @@ mod tests {
 
     #[salsa::db]
     impl biome_db::Db for TestDb {
-        fn parsed_source_for_path(
-            &self,
-            _path: &camino::Utf8Path,
-        ) -> Option<biome_db::ParsedSource> {
+        fn parsed_source_for_path(&self, _path: &camino::Utf8Path) -> Option<biome_db::Source> {
             None
         }
     }

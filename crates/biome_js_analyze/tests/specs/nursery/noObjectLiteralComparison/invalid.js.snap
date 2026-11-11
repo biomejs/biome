@@ -1,0 +1,317 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+if (y === {}) {}
+if (arr !== []) {}
+if (typeof item == "object" && item == {}) {}
+if (data === []) {}
+if (typeof person != "object" || person != {}) {}
+if (list === {}) {}
+if (config != []) {}
+if ({} === value) {}
+if ([] == value) {}
+if (value === ({})) {}
+if (value === (([]))) {}
+if ({} === []) {}
+if ([] !== {}) {}
+if (value === (other, {})) {}
+
+```
+
+# Diagnostics
+```
+invalid.js:2:5 lint/nursery/noObjectLiteralComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares a value with an empty object literal.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ if (y === {}) {}
+      │     ^^^^^^^^
+    3 │ if (arr !== []) {}
+    4 │ if (typeof item == "object" && item == {}) {}
+  
+  i Each object literal creates a new object. Comparing a value with it never checks whether the value is empty: objects and arrays are compared by reference, not by their contents.
+  
+  i To check whether an object has no properties, use Object.keys(value).length === 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:5 lint/nursery/noObjectLiteralComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares a value with an empty array literal.
+  
+    1 │ /* should generate diagnostics */
+    2 │ if (y === {}) {}
+  > 3 │ if (arr !== []) {}
+      │     ^^^^^^^^^^
+    4 │ if (typeof item == "object" && item == {}) {}
+    5 │ if (data === []) {}
+  
+  i Each array literal creates a new array. Comparing a value with it never checks whether the value is empty: objects and arrays are compared by reference, not by their contents.
+  
+  i To check whether an array is empty, use value.length === 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:32 lint/nursery/noObjectLiteralComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares a value with an empty object literal.
+  
+    2 │ if (y === {}) {}
+    3 │ if (arr !== []) {}
+  > 4 │ if (typeof item == "object" && item == {}) {}
+      │                                ^^^^^^^^^^
+    5 │ if (data === []) {}
+    6 │ if (typeof person != "object" || person != {}) {}
+  
+  i Each object literal creates a new object. Comparing a value with it never checks whether the value is empty: objects and arrays are compared by reference, not by their contents.
+  
+  i To check whether an object has no properties, use Object.keys(value).length === 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:5 lint/nursery/noObjectLiteralComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares a value with an empty array literal.
+  
+    3 │ if (arr !== []) {}
+    4 │ if (typeof item == "object" && item == {}) {}
+  > 5 │ if (data === []) {}
+      │     ^^^^^^^^^^^
+    6 │ if (typeof person != "object" || person != {}) {}
+    7 │ if (list === {}) {}
+  
+  i Each array literal creates a new array. Comparing a value with it never checks whether the value is empty: objects and arrays are compared by reference, not by their contents.
+  
+  i To check whether an array is empty, use value.length === 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:34 lint/nursery/noObjectLiteralComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares a value with an empty object literal.
+  
+    4 │ if (typeof item == "object" && item == {}) {}
+    5 │ if (data === []) {}
+  > 6 │ if (typeof person != "object" || person != {}) {}
+      │                                  ^^^^^^^^^^^^
+    7 │ if (list === {}) {}
+    8 │ if (config != []) {}
+  
+  i Each object literal creates a new object. Comparing a value with it never checks whether the value is empty: objects and arrays are compared by reference, not by their contents.
+  
+  i To check whether an object has no properties, use Object.keys(value).length === 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:5 lint/nursery/noObjectLiteralComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares a value with an empty object literal.
+  
+    5 │ if (data === []) {}
+    6 │ if (typeof person != "object" || person != {}) {}
+  > 7 │ if (list === {}) {}
+      │     ^^^^^^^^^^^
+    8 │ if (config != []) {}
+    9 │ if ({} === value) {}
+  
+  i Each object literal creates a new object. Comparing a value with it never checks whether the value is empty: objects and arrays are compared by reference, not by their contents.
+  
+  i To check whether an object has no properties, use Object.keys(value).length === 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:5 lint/nursery/noObjectLiteralComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares a value with an empty array literal.
+  
+     6 │ if (typeof person != "object" || person != {}) {}
+     7 │ if (list === {}) {}
+   > 8 │ if (config != []) {}
+       │     ^^^^^^^^^^^^
+     9 │ if ({} === value) {}
+    10 │ if ([] == value) {}
+  
+  i Each array literal creates a new array. Comparing a value with it never checks whether the value is empty: objects and arrays are compared by reference, not by their contents.
+  
+  i To check whether an array is empty, use value.length === 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:5 lint/nursery/noObjectLiteralComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares a value with an empty object literal.
+  
+     7 │ if (list === {}) {}
+     8 │ if (config != []) {}
+   > 9 │ if ({} === value) {}
+       │     ^^^^^^^^^^^^
+    10 │ if ([] == value) {}
+    11 │ if (value === ({})) {}
+  
+  i Each object literal creates a new object. Comparing a value with it never checks whether the value is empty: objects and arrays are compared by reference, not by their contents.
+  
+  i To check whether an object has no properties, use Object.keys(value).length === 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:5 lint/nursery/noObjectLiteralComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares a value with an empty array literal.
+  
+     8 │ if (config != []) {}
+     9 │ if ({} === value) {}
+  > 10 │ if ([] == value) {}
+       │     ^^^^^^^^^^^
+    11 │ if (value === ({})) {}
+    12 │ if (value === (([]))) {}
+  
+  i Each array literal creates a new array. Comparing a value with it never checks whether the value is empty: objects and arrays are compared by reference, not by their contents.
+  
+  i To check whether an array is empty, use value.length === 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:5 lint/nursery/noObjectLiteralComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares a value with an empty object literal.
+  
+     9 │ if ({} === value) {}
+    10 │ if ([] == value) {}
+  > 11 │ if (value === ({})) {}
+       │     ^^^^^^^^^^^^^^
+    12 │ if (value === (([]))) {}
+    13 │ if ({} === []) {}
+  
+  i Each object literal creates a new object. Comparing a value with it never checks whether the value is empty: objects and arrays are compared by reference, not by their contents.
+  
+  i To check whether an object has no properties, use Object.keys(value).length === 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:5 lint/nursery/noObjectLiteralComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares a value with an empty array literal.
+  
+    10 │ if ([] == value) {}
+    11 │ if (value === ({})) {}
+  > 12 │ if (value === (([]))) {}
+       │     ^^^^^^^^^^^^^^^^
+    13 │ if ({} === []) {}
+    14 │ if ([] !== {}) {}
+  
+  i Each array literal creates a new array. Comparing a value with it never checks whether the value is empty: objects and arrays are compared by reference, not by their contents.
+  
+  i To check whether an array is empty, use value.length === 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:5 lint/nursery/noObjectLiteralComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares a value with an empty object literal.
+  
+    11 │ if (value === ({})) {}
+    12 │ if (value === (([]))) {}
+  > 13 │ if ({} === []) {}
+       │     ^^^^^^^^^
+    14 │ if ([] !== {}) {}
+    15 │ if (value === (other, {})) {}
+  
+  i Each object literal creates a new object. Comparing a value with it never checks whether the value is empty: objects and arrays are compared by reference, not by their contents.
+  
+  i To check whether an object has no properties, use Object.keys(value).length === 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:5 lint/nursery/noObjectLiteralComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares a value with an empty array literal.
+  
+    12 │ if (value === (([]))) {}
+    13 │ if ({} === []) {}
+  > 14 │ if ([] !== {}) {}
+       │     ^^^^^^^^^
+    15 │ if (value === (other, {})) {}
+    16 │ 
+  
+  i Each array literal creates a new array. Comparing a value with it never checks whether the value is empty: objects and arrays are compared by reference, not by their contents.
+  
+  i To check whether an array is empty, use value.length === 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:5 lint/nursery/noObjectLiteralComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares a value with an empty object literal.
+  
+    13 │ if ({} === []) {}
+    14 │ if ([] !== {}) {}
+  > 15 │ if (value === (other, {})) {}
+       │     ^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+  
+  i Each object literal creates a new object. Comparing a value with it never checks whether the value is empty: objects and arrays are compared by reference, not by their contents.
+  
+  i To check whether an object has no properties, use Object.keys(value).length === 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

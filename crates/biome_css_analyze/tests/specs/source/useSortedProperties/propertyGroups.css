@@ -1,0 +1,40 @@
+/* should generate diagnostics */
+.nested {
+  color: red;
+  display: block;
+  & { color: blue; }
+  color: green;
+  display: flex;
+}
+
+.conditional {
+  color: red;
+  display: block;
+  @media (width > 100px) { color: blue; }
+  color: green;
+  display: flex;
+}
+
+.consecutive {
+  & { color: blue; }
+  @media (width > 100px) { color: green; }
+  color: red;
+  display: block;
+  & { color: black; }
+}
+
+.shorthand-boundary {
+  margin-top: 1px;
+  display: block;
+  & { color: blue; }
+  margin: 2px;
+  display: flex;
+}
+
+.empty-declaration {
+  color: red;
+  display: block;
+  ;
+  color: blue;
+  display: flex;
+}

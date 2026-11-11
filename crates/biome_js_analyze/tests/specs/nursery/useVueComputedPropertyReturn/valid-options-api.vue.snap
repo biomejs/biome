@@ -1,0 +1,101 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: valid-options-api.vue
+---
+# Input
+```vue
+<script>
+/* should not generate diagnostics */
+export default {
+  computed: {
+    method() {
+      return true;
+    },
+    functionExpression: function () {
+      return false;
+    },
+    accessors: {
+      set(value) {
+        this.value = value;
+      },
+      get() {
+        return this.value;
+      },
+    },
+    arrowAccessor: {
+      get: () => 1,
+    },
+    setterOnly: {
+      set(value) {
+        this.value = value;
+      },
+    },
+    ifElse() {
+      if (this.ready) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    callbacks() {
+      const options = [];
+      this.matches.forEach((match) => {
+        options.push(match);
+      });
+      this.matches.forEach(function (match) {
+        options.push(match);
+      });
+      return options;
+    },
+    switchWithDefault() {
+      switch (this.kind) {
+        case "a":
+          return 1;
+        case "b":
+          return 2;
+        default:
+          return 3;
+      }
+    },
+    throws() {
+      if (!this.ready) {
+        throw new Error("not ready");
+      }
+      return this.value;
+    },
+    tryCatch() {
+      try {
+        return JSON.parse(this.raw);
+      } catch {
+        return null;
+      }
+    },
+    finallyReturns() {
+      try {
+        console.log("side effect");
+      } finally {
+        return "done";
+      }
+    },
+    infiniteLoop() {
+      while (true) {
+        return this.value;
+      }
+    },
+    returnsUndefined() {
+      return undefined;
+    },
+    arrowValue: () => 1,
+    notAFunction: getValue,
+  },
+  methods: {
+    noReturn() {},
+  },
+  watch: {
+    value() {},
+  },
+};
+</script>
+
+```

@@ -1,0 +1,78 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-options-api-array.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+export default {
+  props: ['greeting_text', 'greeting-text', 'GreetingText']
+}
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-options-api-array.vue:4:11 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop name greeting_text isn't in camelCase.
+  
+    2 │ /* should generate diagnostics */
+    3 │ export default {
+  > 4 │   props: ['greeting_text', 'greeting-text', 'GreetingText']
+      │           ^^^^^^^^^^^^^^^
+    5 │ }
+    6 │ </script>
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api-array.vue:4:28 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop name greeting-text isn't in camelCase.
+  
+    2 │ /* should generate diagnostics */
+    3 │ export default {
+  > 4 │   props: ['greeting_text', 'greeting-text', 'GreetingText']
+      │                            ^^^^^^^^^^^^^^^
+    5 │ }
+    6 │ </script>
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api-array.vue:4:45 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop name GreetingText isn't in camelCase.
+  
+    2 │ /* should generate diagnostics */
+    3 │ export default {
+  > 4 │   props: ['greeting_text', 'greeting-text', 'GreetingText']
+      │                                             ^^^^^^^^^^^^^^
+    5 │ }
+    6 │ </script>
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

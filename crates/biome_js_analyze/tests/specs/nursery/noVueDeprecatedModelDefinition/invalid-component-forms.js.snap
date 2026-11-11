@@ -1,0 +1,95 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-component-forms.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { createApp, defineComponent } from "vue";
+
+defineComponent({
+  model: {
+    prop: "value",
+    event: "input",
+  },
+});
+
+defineComponent((props) => {}, {
+  model: {},
+});
+
+createApp({
+  model: ({
+    event: "change",
+  }),
+});
+
+```
+
+# Diagnostics
+```
+invalid-component-forms.js:5:3 lint/nursery/noVueDeprecatedModelDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The model option is deprecated.
+  
+     4 │ defineComponent({
+   > 5 │   model: {
+       │   ^^^^^^^^
+   > 6 │     prop: "value",
+   > 7 │     event: "input",
+   > 8 │   },
+       │   ^
+     9 │ });
+    10 │ 
+  
+  i Vue 3 ignores this option. v-model on a component always uses the modelValue prop and the update:modelValue event.
+  
+  i Rename the prop to modelValue and emit update:modelValue, or keep the prop name and use a named v-model such as v-model:checked. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-component-forms.js:12:3 lint/nursery/noVueDeprecatedModelDefinition ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The model option is deprecated.
+  
+    11 │ defineComponent((props) => {}, {
+  > 12 │   model: {},
+       │   ^^^^^^^^^
+    13 │ });
+    14 │ 
+  
+  i Vue 3 ignores this option. v-model on a component always uses the modelValue prop and the update:modelValue event.
+  
+  i Rename the prop to modelValue and emit update:modelValue, or keep the prop name and use a named v-model such as v-model:checked. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-component-forms.js:16:3 lint/nursery/noVueDeprecatedModelDefinition ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The model option is deprecated.
+  
+    15 │ createApp({
+  > 16 │   model: ({
+       │   ^^^^^^^^^
+  > 17 │     event: "change",
+  > 18 │   }),
+       │   ^^
+    19 │ });
+    20 │ 
+  
+  i Vue 3 ignores this option. v-model on a component always uses the modelValue prop and the update:modelValue event.
+  
+  i Rename the prop to modelValue and emit update:modelValue, or keep the prop name and use a named v-model such as v-model:checked. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

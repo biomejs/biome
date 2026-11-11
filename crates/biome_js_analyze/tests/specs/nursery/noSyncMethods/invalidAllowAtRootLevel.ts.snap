@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalidAllowAtRootLevel.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+function outer() {
+	class Inner {
+		method(@decorator(fooSync()) x) {}
+	}
+}
+
+```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalidAllowAtRootLevel.ts:4:21 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    2 │ function outer() {
+    3 │ 	class Inner {
+  > 4 │ 		method(@decorator(fooSync()) x) {}
+      │ 		                  ^^^^^^^^^
+    5 │ 	}
+    6 │ }
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

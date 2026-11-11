@@ -25,6 +25,11 @@ pub trait QueryMatcher<L: Language> {
         let _ = phase;
         None
     }
+
+    /// Returns whether rule matching stopped after a panic.
+    fn has_panicked(&self) -> bool {
+        false
+    }
 }
 
 /// Parameters provided to [QueryMatcher::match_query] and require to run lint rules
@@ -113,6 +118,12 @@ impl Display for RuleKey {
     }
 }
 
+impl biome_console::fmt::Display for RuleKey {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        write!(fmt, "{}/{}", self.group, self.rule)
+    }
+}
+
 impl RuleKey {
     pub fn new(group: &'static str, rule: &'static str) -> Self {
         Self { group, rule }
@@ -150,6 +161,7 @@ impl PartialEq<RuleKey> for RuleFilter<'static> {
 pub enum SignalRuleKey {
     Rule(RuleKey),
     Plugin(Box<str>),
+    Internal,
 }
 
 impl From<RuleKey> for SignalRuleKey {
@@ -162,7 +174,7 @@ impl From<RuleKey> for SignalRuleKey {
 pub struct SignalEntry<'phase, L: Language> {
     /// Boxed analyzer signal to be emitted
     pub signal: Box<dyn AnalyzerSignal<L> + 'phase>,
-    /// Unique identifier for the rule that emitted this signal
+    /// Origin of this signal, used when matching suppression comments
     pub rule: SignalRuleKey,
     /// Optional rule instances being suppressed
     pub instances: Box<[Box<str>]>,
@@ -230,6 +242,10 @@ where
 
     fn syntax_query_kinds(&self, phase: Phases) -> Option<SyntaxKindSet<L>> {
         self.inner.syntax_query_kinds(phase)
+    }
+
+    fn has_panicked(&self) -> bool {
+        self.inner.has_panicked()
     }
 }
 

@@ -1,0 +1,82 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalidTs.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script lang="ts">
+	import { writable } from "svelte/store";
+
+	const foo = writable<number>(0);
+
+	foo.subscribe((value: number) => {});
+	foo.subscribe(() => {}) as unknown;
+	foo!.subscribe(() => {});
+</script>
+
+```
+
+# Diagnostics
+```
+invalidTs.svelte:7:6 lint/nursery/noSvelteIgnoredUnsubscribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function returned by subscribe() is ignored.
+  
+    5 │ 	const foo = writable<number>(0);
+    6 │ 
+  > 7 │ 	foo.subscribe((value: number) => {});
+      │ 	    ^^^^^^^^^
+    8 │ 	foo.subscribe(() => {}) as unknown;
+    9 │ 	foo!.subscribe(() => {});
+  
+  i Without this function, the subscription can't be stopped, so the store keeps calling the callback and keeps it in memory after it's no longer needed.
+  
+  i Save the returned function and call it when you no longer need the subscription, for example when the component is destroyed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTs.svelte:8:6 lint/nursery/noSvelteIgnoredUnsubscribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function returned by subscribe() is ignored.
+  
+     7 │ 	foo.subscribe((value: number) => {});
+   > 8 │ 	foo.subscribe(() => {}) as unknown;
+       │ 	    ^^^^^^^^^
+     9 │ 	foo!.subscribe(() => {});
+    10 │ </script>
+  
+  i Without this function, the subscription can't be stopped, so the store keeps calling the callback and keeps it in memory after it's no longer needed.
+  
+  i Save the returned function and call it when you no longer need the subscription, for example when the component is destroyed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTs.svelte:9:7 lint/nursery/noSvelteIgnoredUnsubscribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function returned by subscribe() is ignored.
+  
+     7 │ 	foo.subscribe((value: number) => {});
+     8 │ 	foo.subscribe(() => {}) as unknown;
+   > 9 │ 	foo!.subscribe(() => {});
+       │ 	     ^^^^^^^^^
+    10 │ </script>
+    11 │ 
+  
+  i Without this function, the subscription can't be stopped, so the store keeps calling the callback and keeps it in memory after it's no longer needed.
+  
+  i Save the returned function and call it when you no longer need the subscription, for example when the component is destroyed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

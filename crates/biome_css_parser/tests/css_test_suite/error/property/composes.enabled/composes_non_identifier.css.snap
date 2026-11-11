@@ -1,0 +1,1197 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.a {
+	composes: 1px;
+}
+
+.b {
+	composes: var(--x);
+}
+
+.c {
+	composes: a(b);
+}
+
+.d {
+	composes: a "string";
+}
+
+.e {
+	composes: a from url("./x.css");
+}
+
+.f {
+	composes: 1px 2px;
+}
+
+.g {
+	composes: a 1px;
+}
+
+.i {
+	composes: 1px;
+	color: red;
+}
+
+.j {
+	composes: 1px !important;
+}
+
+.h {
+	composes:
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..3 "a" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@3..4 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@4..14 "composes" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    COLON@14..16 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogus {
+                                                items: [
+                                                    CssComposesClassList [],
+                                                    CssBogusPropertyValue {
+                                                        items: [
+                                                            CSS_DIMENSION_VALUE@16..17 "1" [] [],
+                                                            PX_KW@17..19 "px" [] [],
+                                                        ],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@19..20 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@20..22 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@22..25 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@25..27 "b" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@27..28 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@28..38 "composes" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    COLON@38..40 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogus {
+                                                items: [
+                                                    CssBogus {
+                                                        items: [
+                                                            CssCustomIdentifier {
+                                                                value_token: IDENT@40..43 "var" [] [],
+                                                            },
+                                                            CssBogus {
+                                                                items: [
+                                                                    L_PAREN@43..44 "(" [] [],
+                                                                ],
+                                                            },
+                                                            CssCustomIdentifier {
+                                                                value_token: IDENT@44..47 "--x" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                    CssBogus {
+                        items: [
+                            R_PAREN@47..48 ")" [] [],
+                        ],
+                    },
+                    CssEmptyDeclaration {
+                        semicolon_token: SEMICOLON@48..49 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@49..51 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@51..54 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@54..56 "c" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@56..57 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@57..67 "composes" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    COLON@67..69 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogus {
+                                                items: [
+                                                    CssBogus {
+                                                        items: [
+                                                            CssCustomIdentifier {
+                                                                value_token: IDENT@69..70 "a" [] [],
+                                                            },
+                                                            CssBogus {
+                                                                items: [
+                                                                    L_PAREN@70..71 "(" [] [],
+                                                                ],
+                                                            },
+                                                            CssCustomIdentifier {
+                                                                value_token: IDENT@71..72 "b" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                    CssBogus {
+                        items: [
+                            R_PAREN@72..73 ")" [] [],
+                        ],
+                    },
+                    CssEmptyDeclaration {
+                        semicolon_token: SEMICOLON@73..74 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@74..76 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@76..79 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@79..81 "d" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@81..82 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@82..92 "composes" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    COLON@92..94 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssComposesPropertyValue {
+                                                classes: CssComposesClassList [
+                                                    CssCustomIdentifier {
+                                                        value_token: IDENT@94..96 "a" [] [Whitespace(" ")],
+                                                    },
+                                                ],
+                                                specifier: missing (optional),
+                                            },
+                                            CssBogus {
+                                                items: [
+                                                    CssComposesClassList [],
+                                                    CssBogusPropertyValue {
+                                                        items: [
+                                                            CSS_STRING_LITERAL@96..104 "\"string\"" [] [],
+                                                        ],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@104..105 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@105..107 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@107..110 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@110..112 "e" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@112..113 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@113..123 "composes" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    COLON@123..125 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssComposesPropertyValue {
+                                                classes: CssComposesClassList [
+                                                    CssCustomIdentifier {
+                                                        value_token: IDENT@125..127 "a" [] [Whitespace(" ")],
+                                                    },
+                                                ],
+                                                specifier: CssComposesImportSpecifier {
+                                                    from_token: FROM_KW@127..132 "from" [] [Whitespace(" ")],
+                                                    source: CssIdentifier {
+                                                        value_token: IDENT@132..135 "url" [] [],
+                                                    },
+                                                },
+                                            },
+                                            CssBogus {
+                                                items: [
+                                                    CssBogus {
+                                                        items: [
+                                                            CssBogus {
+                                                                items: [
+                                                                    L_PAREN@135..136 "(" [] [],
+                                                                    CSS_STRING_LITERAL@136..145 "\"./x.css\"" [] [],
+                                                                ],
+                                                            },
+                                                        ],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                    CssBogus {
+                        items: [
+                            R_PAREN@145..146 ")" [] [],
+                        ],
+                    },
+                    CssEmptyDeclaration {
+                        semicolon_token: SEMICOLON@146..147 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@147..149 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@149..152 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@152..154 "f" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@154..155 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@155..165 "composes" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    COLON@165..167 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogus {
+                                                items: [
+                                                    CssComposesClassList [],
+                                                    CssBogusPropertyValue {
+                                                        items: [
+                                                            CSS_DIMENSION_VALUE@167..168 "1" [] [],
+                                                            PX_KW@168..171 "px" [] [Whitespace(" ")],
+                                                            CSS_DIMENSION_VALUE@171..172 "2" [] [],
+                                                            PX_KW@172..174 "px" [] [],
+                                                        ],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@174..175 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@175..177 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@177..180 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@180..182 "g" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@182..183 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@183..193 "composes" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    COLON@193..195 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssComposesPropertyValue {
+                                                classes: CssComposesClassList [
+                                                    CssCustomIdentifier {
+                                                        value_token: IDENT@195..197 "a" [] [Whitespace(" ")],
+                                                    },
+                                                ],
+                                                specifier: missing (optional),
+                                            },
+                                            CssBogus {
+                                                items: [
+                                                    CssComposesClassList [],
+                                                    CssBogusPropertyValue {
+                                                        items: [
+                                                            CSS_DIMENSION_VALUE@197..198 "1" [] [],
+                                                            PX_KW@198..200 "px" [] [],
+                                                        ],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@200..201 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@201..203 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@203..206 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@206..208 "i" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@208..209 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@209..219 "composes" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    COLON@219..221 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogus {
+                                                items: [
+                                                    CssComposesClassList [],
+                                                    CssBogusPropertyValue {
+                                                        items: [
+                                                            CSS_DIMENSION_VALUE@221..222 "1" [] [],
+                                                            PX_KW@222..224 "px" [] [],
+                                                        ],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@224..225 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@225..232 "color" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@232..234 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@234..237 "red" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@237..238 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@238..240 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@240..243 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@243..245 "j" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@245..246 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@246..256 "composes" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    COLON@256..258 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogus {
+                                                items: [
+                                                    CssComposesClassList [],
+                                                    CssBogusPropertyValue {
+                                                        items: [
+                                                            CSS_DIMENSION_VALUE@258..259 "1" [] [],
+                                                            PX_KW@259..262 "px" [] [Whitespace(" ")],
+                                                        ],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: CssDeclarationImportant {
+                                excl_token: BANG@262..263 "!" [] [],
+                                important_token: IMPORTANT_KW@263..272 "important" [] [],
+                            },
+                        },
+                        semicolon_token: SEMICOLON@272..273 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@273..275 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@275..278 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@278..280 "h" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssBogusBlock {
+                items: [
+                    L_CURLY@280..281 "{" [] [],
+                    CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssComposesProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@281..291 "composes" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@291..292 ":" [] [],
+                                    values: CssComposesPropertyValueList [
+                                        CssComposesPropertyValue {
+                                            classes: CssComposesClassList [],
+                                            specifier: missing (optional),
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: missing (optional),
+                        },
+                    ],
+                ],
+            },
+        },
+    ],
+    eof_token: EOF@292..293 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..293
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..292
+    0: CSS_QUALIFIED_RULE@0..22
+      0: CSS_SELECTOR_LIST@0..3
+        0: CSS_COMPOUND_SELECTOR@0..3
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..3
+            0: CSS_CLASS_SELECTOR@0..3
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..3
+                0: IDENT@1..3 "a" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@3..22
+        0: L_CURLY@3..4 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@4..20
+          0: CSS_DECLARATION_WITH_SEMICOLON@4..20
+            0: CSS_DECLARATION@4..19
+              0: CSS_BOGUS_PROPERTY@4..19
+                0: CSS_IDENTIFIER@4..14
+                  0: IDENT@4..14 "composes" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@14..16 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@16..19
+                  0: CSS_BOGUS@16..19
+                    0: CSS_COMPOSES_CLASS_LIST@16..16
+                    1: CSS_BOGUS_PROPERTY_VALUE@16..19
+                      0: CSS_DIMENSION_VALUE@16..17 "1" [] []
+                      1: PX_KW@17..19 "px" [] []
+              1: (empty)
+            1: SEMICOLON@19..20 ";" [] []
+        2: R_CURLY@20..22 "}" [Newline("\n")] []
+    1: CSS_QUALIFIED_RULE@22..51
+      0: CSS_SELECTOR_LIST@22..27
+        0: CSS_COMPOUND_SELECTOR@22..27
+          0: CSS_NESTED_SELECTOR_LIST@22..22
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@22..27
+            0: CSS_CLASS_SELECTOR@22..27
+              0: DOT@22..25 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@25..27
+                0: IDENT@25..27 "b" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@27..51
+        0: L_CURLY@27..28 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@28..49
+          0: CSS_DECLARATION_WITH_SEMICOLON@28..47
+            0: CSS_DECLARATION@28..47
+              0: CSS_BOGUS_PROPERTY@28..47
+                0: CSS_IDENTIFIER@28..38
+                  0: IDENT@28..38 "composes" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@38..40 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@40..47
+                  0: CSS_BOGUS@40..47
+                    0: CSS_BOGUS@40..47
+                      0: CSS_CUSTOM_IDENTIFIER@40..43
+                        0: IDENT@40..43 "var" [] []
+                      1: CSS_BOGUS@43..44
+                        0: L_PAREN@43..44 "(" [] []
+                      2: CSS_CUSTOM_IDENTIFIER@44..47
+                        0: IDENT@44..47 "--x" [] []
+              1: (empty)
+            1: (empty)
+          1: CSS_BOGUS@47..48
+            0: R_PAREN@47..48 ")" [] []
+          2: CSS_EMPTY_DECLARATION@48..49
+            0: SEMICOLON@48..49 ";" [] []
+        2: R_CURLY@49..51 "}" [Newline("\n")] []
+    2: CSS_QUALIFIED_RULE@51..76
+      0: CSS_SELECTOR_LIST@51..56
+        0: CSS_COMPOUND_SELECTOR@51..56
+          0: CSS_NESTED_SELECTOR_LIST@51..51
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@51..56
+            0: CSS_CLASS_SELECTOR@51..56
+              0: DOT@51..54 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@54..56
+                0: IDENT@54..56 "c" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@56..76
+        0: L_CURLY@56..57 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@57..74
+          0: CSS_DECLARATION_WITH_SEMICOLON@57..72
+            0: CSS_DECLARATION@57..72
+              0: CSS_BOGUS_PROPERTY@57..72
+                0: CSS_IDENTIFIER@57..67
+                  0: IDENT@57..67 "composes" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@67..69 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@69..72
+                  0: CSS_BOGUS@69..72
+                    0: CSS_BOGUS@69..72
+                      0: CSS_CUSTOM_IDENTIFIER@69..70
+                        0: IDENT@69..70 "a" [] []
+                      1: CSS_BOGUS@70..71
+                        0: L_PAREN@70..71 "(" [] []
+                      2: CSS_CUSTOM_IDENTIFIER@71..72
+                        0: IDENT@71..72 "b" [] []
+              1: (empty)
+            1: (empty)
+          1: CSS_BOGUS@72..73
+            0: R_PAREN@72..73 ")" [] []
+          2: CSS_EMPTY_DECLARATION@73..74
+            0: SEMICOLON@73..74 ";" [] []
+        2: R_CURLY@74..76 "}" [Newline("\n")] []
+    3: CSS_QUALIFIED_RULE@76..107
+      0: CSS_SELECTOR_LIST@76..81
+        0: CSS_COMPOUND_SELECTOR@76..81
+          0: CSS_NESTED_SELECTOR_LIST@76..76
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@76..81
+            0: CSS_CLASS_SELECTOR@76..81
+              0: DOT@76..79 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@79..81
+                0: IDENT@79..81 "d" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@81..107
+        0: L_CURLY@81..82 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@82..105
+          0: CSS_DECLARATION_WITH_SEMICOLON@82..105
+            0: CSS_DECLARATION@82..104
+              0: CSS_BOGUS_PROPERTY@82..104
+                0: CSS_IDENTIFIER@82..92
+                  0: IDENT@82..92 "composes" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@92..94 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@94..104
+                  0: CSS_COMPOSES_PROPERTY_VALUE@94..96
+                    0: CSS_COMPOSES_CLASS_LIST@94..96
+                      0: CSS_CUSTOM_IDENTIFIER@94..96
+                        0: IDENT@94..96 "a" [] [Whitespace(" ")]
+                    1: (empty)
+                  1: CSS_BOGUS@96..104
+                    0: CSS_COMPOSES_CLASS_LIST@96..96
+                    1: CSS_BOGUS_PROPERTY_VALUE@96..104
+                      0: CSS_STRING_LITERAL@96..104 "\"string\"" [] []
+              1: (empty)
+            1: SEMICOLON@104..105 ";" [] []
+        2: R_CURLY@105..107 "}" [Newline("\n")] []
+    4: CSS_QUALIFIED_RULE@107..149
+      0: CSS_SELECTOR_LIST@107..112
+        0: CSS_COMPOUND_SELECTOR@107..112
+          0: CSS_NESTED_SELECTOR_LIST@107..107
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@107..112
+            0: CSS_CLASS_SELECTOR@107..112
+              0: DOT@107..110 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@110..112
+                0: IDENT@110..112 "e" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@112..149
+        0: L_CURLY@112..113 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@113..147
+          0: CSS_DECLARATION_WITH_SEMICOLON@113..145
+            0: CSS_DECLARATION@113..145
+              0: CSS_BOGUS_PROPERTY@113..145
+                0: CSS_IDENTIFIER@113..123
+                  0: IDENT@113..123 "composes" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@123..125 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@125..145
+                  0: CSS_COMPOSES_PROPERTY_VALUE@125..135
+                    0: CSS_COMPOSES_CLASS_LIST@125..127
+                      0: CSS_CUSTOM_IDENTIFIER@125..127
+                        0: IDENT@125..127 "a" [] [Whitespace(" ")]
+                    1: CSS_COMPOSES_IMPORT_SPECIFIER@127..135
+                      0: FROM_KW@127..132 "from" [] [Whitespace(" ")]
+                      1: CSS_IDENTIFIER@132..135
+                        0: IDENT@132..135 "url" [] []
+                  1: CSS_BOGUS@135..145
+                    0: CSS_BOGUS@135..145
+                      0: CSS_BOGUS@135..145
+                        0: L_PAREN@135..136 "(" [] []
+                        1: CSS_STRING_LITERAL@136..145 "\"./x.css\"" [] []
+              1: (empty)
+            1: (empty)
+          1: CSS_BOGUS@145..146
+            0: R_PAREN@145..146 ")" [] []
+          2: CSS_EMPTY_DECLARATION@146..147
+            0: SEMICOLON@146..147 ";" [] []
+        2: R_CURLY@147..149 "}" [Newline("\n")] []
+    5: CSS_QUALIFIED_RULE@149..177
+      0: CSS_SELECTOR_LIST@149..154
+        0: CSS_COMPOUND_SELECTOR@149..154
+          0: CSS_NESTED_SELECTOR_LIST@149..149
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@149..154
+            0: CSS_CLASS_SELECTOR@149..154
+              0: DOT@149..152 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@152..154
+                0: IDENT@152..154 "f" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@154..177
+        0: L_CURLY@154..155 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@155..175
+          0: CSS_DECLARATION_WITH_SEMICOLON@155..175
+            0: CSS_DECLARATION@155..174
+              0: CSS_BOGUS_PROPERTY@155..174
+                0: CSS_IDENTIFIER@155..165
+                  0: IDENT@155..165 "composes" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@165..167 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@167..174
+                  0: CSS_BOGUS@167..174
+                    0: CSS_COMPOSES_CLASS_LIST@167..167
+                    1: CSS_BOGUS_PROPERTY_VALUE@167..174
+                      0: CSS_DIMENSION_VALUE@167..168 "1" [] []
+                      1: PX_KW@168..171 "px" [] [Whitespace(" ")]
+                      2: CSS_DIMENSION_VALUE@171..172 "2" [] []
+                      3: PX_KW@172..174 "px" [] []
+              1: (empty)
+            1: SEMICOLON@174..175 ";" [] []
+        2: R_CURLY@175..177 "}" [Newline("\n")] []
+    6: CSS_QUALIFIED_RULE@177..203
+      0: CSS_SELECTOR_LIST@177..182
+        0: CSS_COMPOUND_SELECTOR@177..182
+          0: CSS_NESTED_SELECTOR_LIST@177..177
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@177..182
+            0: CSS_CLASS_SELECTOR@177..182
+              0: DOT@177..180 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@180..182
+                0: IDENT@180..182 "g" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@182..203
+        0: L_CURLY@182..183 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@183..201
+          0: CSS_DECLARATION_WITH_SEMICOLON@183..201
+            0: CSS_DECLARATION@183..200
+              0: CSS_BOGUS_PROPERTY@183..200
+                0: CSS_IDENTIFIER@183..193
+                  0: IDENT@183..193 "composes" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@193..195 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@195..200
+                  0: CSS_COMPOSES_PROPERTY_VALUE@195..197
+                    0: CSS_COMPOSES_CLASS_LIST@195..197
+                      0: CSS_CUSTOM_IDENTIFIER@195..197
+                        0: IDENT@195..197 "a" [] [Whitespace(" ")]
+                    1: (empty)
+                  1: CSS_BOGUS@197..200
+                    0: CSS_COMPOSES_CLASS_LIST@197..197
+                    1: CSS_BOGUS_PROPERTY_VALUE@197..200
+                      0: CSS_DIMENSION_VALUE@197..198 "1" [] []
+                      1: PX_KW@198..200 "px" [] []
+              1: (empty)
+            1: SEMICOLON@200..201 ";" [] []
+        2: R_CURLY@201..203 "}" [Newline("\n")] []
+    7: CSS_QUALIFIED_RULE@203..240
+      0: CSS_SELECTOR_LIST@203..208
+        0: CSS_COMPOUND_SELECTOR@203..208
+          0: CSS_NESTED_SELECTOR_LIST@203..203
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@203..208
+            0: CSS_CLASS_SELECTOR@203..208
+              0: DOT@203..206 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@206..208
+                0: IDENT@206..208 "i" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@208..240
+        0: L_CURLY@208..209 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@209..238
+          0: CSS_DECLARATION_WITH_SEMICOLON@209..225
+            0: CSS_DECLARATION@209..224
+              0: CSS_BOGUS_PROPERTY@209..224
+                0: CSS_IDENTIFIER@209..219
+                  0: IDENT@209..219 "composes" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@219..221 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@221..224
+                  0: CSS_BOGUS@221..224
+                    0: CSS_COMPOSES_CLASS_LIST@221..221
+                    1: CSS_BOGUS_PROPERTY_VALUE@221..224
+                      0: CSS_DIMENSION_VALUE@221..222 "1" [] []
+                      1: PX_KW@222..224 "px" [] []
+              1: (empty)
+            1: SEMICOLON@224..225 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@225..238
+            0: CSS_DECLARATION@225..237
+              0: CSS_GENERIC_PROPERTY@225..237
+                0: CSS_IDENTIFIER@225..232
+                  0: IDENT@225..232 "color" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@232..234 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@234..237
+                  0: CSS_IDENTIFIER@234..237
+                    0: IDENT@234..237 "red" [] []
+              1: (empty)
+            1: SEMICOLON@237..238 ";" [] []
+        2: R_CURLY@238..240 "}" [Newline("\n")] []
+    8: CSS_QUALIFIED_RULE@240..275
+      0: CSS_SELECTOR_LIST@240..245
+        0: CSS_COMPOUND_SELECTOR@240..245
+          0: CSS_NESTED_SELECTOR_LIST@240..240
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@240..245
+            0: CSS_CLASS_SELECTOR@240..245
+              0: DOT@240..243 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@243..245
+                0: IDENT@243..245 "j" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@245..275
+        0: L_CURLY@245..246 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@246..273
+          0: CSS_DECLARATION_WITH_SEMICOLON@246..273
+            0: CSS_DECLARATION@246..272
+              0: CSS_BOGUS_PROPERTY@246..262
+                0: CSS_IDENTIFIER@246..256
+                  0: IDENT@246..256 "composes" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@256..258 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@258..262
+                  0: CSS_BOGUS@258..262
+                    0: CSS_COMPOSES_CLASS_LIST@258..258
+                    1: CSS_BOGUS_PROPERTY_VALUE@258..262
+                      0: CSS_DIMENSION_VALUE@258..259 "1" [] []
+                      1: PX_KW@259..262 "px" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_IMPORTANT@262..272
+                0: BANG@262..263 "!" [] []
+                1: IMPORTANT_KW@263..272 "important" [] []
+            1: SEMICOLON@272..273 ";" [] []
+        2: R_CURLY@273..275 "}" [Newline("\n")] []
+    9: CSS_QUALIFIED_RULE@275..292
+      0: CSS_SELECTOR_LIST@275..280
+        0: CSS_COMPOUND_SELECTOR@275..280
+          0: CSS_NESTED_SELECTOR_LIST@275..275
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@275..280
+            0: CSS_CLASS_SELECTOR@275..280
+              0: DOT@275..278 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@278..280
+                0: IDENT@278..280 "h" [] [Whitespace(" ")]
+      1: CSS_BOGUS_BLOCK@280..292
+        0: L_CURLY@280..281 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@281..292
+          0: CSS_DECLARATION_WITH_SEMICOLON@281..292
+            0: CSS_DECLARATION@281..292
+              0: CSS_COMPOSES_PROPERTY@281..292
+                0: CSS_IDENTIFIER@281..291
+                  0: IDENT@281..291 "composes" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@291..292 ":" [] []
+                2: CSS_COMPOSES_PROPERTY_VALUE_LIST@292..292
+                  0: CSS_COMPOSES_PROPERTY_VALUE@292..292
+                    0: CSS_COMPOSES_CLASS_LIST@292..292
+                    1: (empty)
+              1: (empty)
+            1: (empty)
+  2: EOF@292..293 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+composes_non_identifier.css:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '1'.
+  
+    1 │ .a {
+  > 2 │ 	composes: 1px;
+      │ 	          ^
+    3 │ }
+    4 │ 
+  
+  i Expected an identifier here.
+  
+    1 │ .a {
+  > 2 │ 	composes: 1px;
+      │ 	          ^
+    3 │ }
+    4 │ 
+  
+composes_non_identifier.css:6:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '('.
+  
+    5 │ .b {
+  > 6 │ 	composes: var(--x);
+      │ 	             ^
+    7 │ }
+    8 │ 
+  
+  i Expected an identifier here.
+  
+    5 │ .b {
+  > 6 │ 	composes: var(--x);
+      │ 	             ^
+    7 │ }
+    8 │ 
+  
+composes_non_identifier.css:6:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead found `)`
+  
+    5 │ .b {
+  > 6 │ 	composes: var(--x);
+      │ 	                 ^
+    7 │ }
+    8 │ 
+  
+  i Remove )
+  
+composes_non_identifier.css:10:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '('.
+  
+     9 │ .c {
+  > 10 │ 	composes: a(b);
+       │ 	           ^
+    11 │ }
+    12 │ 
+  
+  i Expected an identifier here.
+  
+     9 │ .c {
+  > 10 │ 	composes: a(b);
+       │ 	           ^
+    11 │ }
+    12 │ 
+  
+composes_non_identifier.css:10:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead found `)`
+  
+     9 │ .c {
+  > 10 │ 	composes: a(b);
+       │ 	             ^
+    11 │ }
+    12 │ 
+  
+  i Remove )
+  
+composes_non_identifier.css:14:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '"string"'.
+  
+    13 │ .d {
+  > 14 │ 	composes: a "string";
+       │ 	            ^^^^^^^^
+    15 │ }
+    16 │ 
+  
+  i Expected an identifier here.
+  
+    13 │ .d {
+  > 14 │ 	composes: a "string";
+       │ 	            ^^^^^^^^
+    15 │ }
+    16 │ 
+  
+composes_non_identifier.css:18:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `(`
+  
+    17 │ .e {
+  > 18 │ 	composes: a from url("./x.css");
+       │ 	                    ^
+    19 │ }
+    20 │ 
+  
+  i Remove (
+  
+composes_non_identifier.css:18:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead found `)`
+  
+    17 │ .e {
+  > 18 │ 	composes: a from url("./x.css");
+       │ 	                              ^
+    19 │ }
+    20 │ 
+  
+  i Remove )
+  
+composes_non_identifier.css:22:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '1'.
+  
+    21 │ .f {
+  > 22 │ 	composes: 1px 2px;
+       │ 	          ^
+    23 │ }
+    24 │ 
+  
+  i Expected an identifier here.
+  
+    21 │ .f {
+  > 22 │ 	composes: 1px 2px;
+       │ 	          ^
+    23 │ }
+    24 │ 
+  
+composes_non_identifier.css:26:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '1'.
+  
+    25 │ .g {
+  > 26 │ 	composes: a 1px;
+       │ 	            ^
+    27 │ }
+    28 │ 
+  
+  i Expected an identifier here.
+  
+    25 │ .g {
+  > 26 │ 	composes: a 1px;
+       │ 	            ^
+    27 │ }
+    28 │ 
+  
+composes_non_identifier.css:30:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '1'.
+  
+    29 │ .i {
+  > 30 │ 	composes: 1px;
+       │ 	          ^
+    31 │ 	color: red;
+    32 │ }
+  
+  i Expected an identifier here.
+  
+    29 │ .i {
+  > 30 │ 	composes: 1px;
+       │ 	          ^
+    31 │ 	color: red;
+    32 │ }
+  
+composes_non_identifier.css:35:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '1'.
+  
+    34 │ .j {
+  > 35 │ 	composes: 1px !important;
+       │ 	          ^
+    36 │ }
+    37 │ 
+  
+  i Expected an identifier here.
+  
+    34 │ .j {
+  > 35 │ 	composes: 1px !important;
+       │ 	          ^
+    36 │ }
+    37 │ 
+  
+composes_non_identifier.css:40:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a non-empty list of classes after `composes`.
+  
+    38 │ .h {
+    39 │ 	composes:
+  > 40 │ 
+       │ 
+  
+```

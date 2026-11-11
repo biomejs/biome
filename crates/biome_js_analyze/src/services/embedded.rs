@@ -1,4 +1,5 @@
 use biome_analyze::{FromServices, RuleKey, RuleMetadata, ServiceBag, ServicesDiagnostic};
+use biome_db::Source;
 use biome_embeds::EmbeddedData;
 use biome_embeds::bindings::{
     InternedBindingText, InternedBindingTokenText, get_binding_by_name, get_binding_by_text,
@@ -8,9 +9,8 @@ use biome_embeds::references::{
     InternedReference, is_reference_used, is_svelte_store_reference_used, is_type_reference_used,
     is_value_reference_used, is_vue_directive_reference_used,
 };
-use biome_languages::LanguageDb;
+use biome_languages::{LanguageDb, has_embedded_content};
 use biome_rowan::{TextRange, TextSize, TokenText};
-use camino::Utf8PathBuf;
 use std::rc::Rc;
 use std::sync::Arc;
 
@@ -26,17 +26,25 @@ enum EmbeddedSource {
     Empty,
     Workspace {
         db: Rc<dyn LanguageDb>,
-        path: Utf8PathBuf,
+        /// The host document of the analyzed source.
+        document: Source,
     },
     Interned(Arc<EmbeddedData>),
 }
 
 impl EmbeddedService {
-    pub(crate) fn new(db: Rc<dyn LanguageDb>, path: Utf8PathBuf, snippet_offset: TextSize) -> Self {
-        let source = if db.has_embedded_content(&path) {
-            EmbeddedSource::Workspace { db, path }
-        } else {
-            EmbeddedSource::Empty
+    /// Creates the service for a source whose host document in `db` is
+    /// `document`. Without a document, the service finds no embedded content.
+    pub(crate) fn new(
+        db: Rc<dyn LanguageDb>,
+        document: Option<Source>,
+        snippet_offset: TextSize,
+    ) -> Self {
+        let source = match document {
+            Some(document) if has_embedded_content(db.as_ref(), document) => {
+                EmbeddedSource::Workspace { db, document }
+            }
+            _ => EmbeddedSource::Empty,
         };
         Self {
             source,
@@ -54,9 +62,9 @@ impl EmbeddedService {
     pub(crate) fn contains_binding(&self, binding: TokenText) -> bool {
         match &self.source {
             EmbeddedSource::Empty => false,
-            EmbeddedSource::Workspace { db, path } => get_binding_by_name(
+            EmbeddedSource::Workspace { db, document } => get_binding_by_name(
                 db.as_ref(),
-                InternedBindingTokenText::new(db.as_ref(), path.clone(), binding),
+                InternedBindingTokenText::new(db.as_ref(), *document, binding),
             )
             .is_some(),
             EmbeddedSource::Interned(data) => data.contains_binding(binding.text()),
@@ -66,9 +74,9 @@ impl EmbeddedService {
     pub(crate) fn contains_binding_text(&self, binding: &str) -> bool {
         match &self.source {
             EmbeddedSource::Empty => false,
-            EmbeddedSource::Workspace { db, path } => get_binding_by_text(
+            EmbeddedSource::Workspace { db, document } => get_binding_by_text(
                 db.as_ref(),
-                InternedBindingText::new(db.as_ref(), path.clone(), binding.to_string()),
+                InternedBindingText::new(db.as_ref(), *document, binding.to_string()),
             )
             .is_some(),
             EmbeddedSource::Interned(data) => data.contains_binding(binding),
@@ -78,9 +86,9 @@ impl EmbeddedService {
     pub(crate) fn is_used_as_value(&self, identifier: TokenText) -> bool {
         match &self.source {
             EmbeddedSource::Empty => false,
-            EmbeddedSource::Workspace { db, path } => is_value_reference_used(
+            EmbeddedSource::Workspace { db, document } => is_value_reference_used(
                 db.as_ref(),
-                InternedReference::new(db.as_ref(), path.clone(), identifier),
+                InternedReference::new(db.as_ref(), *document, identifier),
             ),
             EmbeddedSource::Interned(data) => data.is_used_as_value(identifier.text()),
         }
@@ -89,9 +97,9 @@ impl EmbeddedService {
     pub(crate) fn is_used_as_type(&self, identifier: TokenText) -> bool {
         match &self.source {
             EmbeddedSource::Empty => false,
-            EmbeddedSource::Workspace { db, path } => is_type_reference_used(
+            EmbeddedSource::Workspace { db, document } => is_type_reference_used(
                 db.as_ref(),
-                InternedReference::new(db.as_ref(), path.clone(), identifier),
+                InternedReference::new(db.as_ref(), *document, identifier),
             ),
             EmbeddedSource::Interned(data) => data.is_used_as_type(identifier.text()),
         }
@@ -100,9 +108,9 @@ impl EmbeddedService {
     pub(crate) fn is_used(&self, identifier: TokenText) -> bool {
         match &self.source {
             EmbeddedSource::Empty => false,
-            EmbeddedSource::Workspace { db, path } => is_reference_used(
+            EmbeddedSource::Workspace { db, document } => is_reference_used(
                 db.as_ref(),
-                InternedReference::new(db.as_ref(), path.clone(), identifier),
+                InternedReference::new(db.as_ref(), *document, identifier),
             ),
             EmbeddedSource::Interned(data) => data.is_used(identifier.text()),
         }
@@ -114,9 +122,9 @@ impl EmbeddedService {
     pub(crate) fn is_svelte_store_used(&self, identifier: TokenText) -> bool {
         match &self.source {
             EmbeddedSource::Empty => false,
-            EmbeddedSource::Workspace { db, path } => is_svelte_store_reference_used(
+            EmbeddedSource::Workspace { db, document } => is_svelte_store_reference_used(
                 db.as_ref(),
-                InternedReference::new(db.as_ref(), path.clone(), identifier),
+                InternedReference::new(db.as_ref(), *document, identifier),
             ),
             EmbeddedSource::Interned(data) => data.is_svelte_store_used(identifier.text()),
         }
@@ -130,9 +138,9 @@ impl EmbeddedService {
     pub(crate) fn is_vue_directive_used(&self, identifier: TokenText) -> bool {
         match &self.source {
             EmbeddedSource::Empty => false,
-            EmbeddedSource::Workspace { db, path } => is_vue_directive_reference_used(
+            EmbeddedSource::Workspace { db, document } => is_vue_directive_reference_used(
                 db.as_ref(),
-                InternedReference::new(db.as_ref(), path.clone(), identifier),
+                InternedReference::new(db.as_ref(), *document, identifier),
             ),
             EmbeddedSource::Interned(data) => data.is_vue_directive_used(identifier.text()),
         }
@@ -148,7 +156,9 @@ impl EmbeddedService {
         let range = range + self.snippet_offset;
         match &self.source {
             EmbeddedSource::Empty => None,
-            EmbeddedSource::Workspace { db, path } => component_at(db.as_ref(), path, range),
+            EmbeddedSource::Workspace { db, document } => {
+                component_at(db.as_ref(), *document, range)
+            }
             EmbeddedSource::Interned(data) => data.component_at(range).cloned(),
         }
     }
@@ -178,16 +188,19 @@ impl FromServices for EmbeddedService {
 mod tests {
     use super::*;
     use biome_db::testing::Events;
-    use biome_db::{ParsedSnippet, ParsedSource};
     use biome_js_parser::{JsParserOptions, parse};
     use biome_languages::{DocumentFileSource, JsFileSource};
+    use biome_parser::db::{ParseDb, SnippetOutput, SourceOutput};
     use biome_rowan::RawSyntaxKind;
-    use camino::Utf8Path;
+    use camino::{Utf8Path, Utf8PathBuf};
     use salsa::{EventKind, Storage};
 
     #[salsa::db]
     struct TestDb {
-        parsed: Option<ParsedSource>,
+        parsed: Option<Source>,
+        /// The texts of the snippets of the document, each at its last
+        /// occurrence in the document.
+        snippets: Vec<String>,
         storage: Storage<Self>,
     }
 
@@ -195,6 +208,7 @@ mod tests {
         fn new(events: Events) -> Self {
             Self {
                 parsed: None,
+                snippets: Vec::new(),
                 storage: Storage::new(Some(Box::new(move |event| {
                     events.0.lock().unwrap().push(event)
                 }))),
@@ -210,8 +224,31 @@ mod tests {
     }
 
     #[salsa::db]
+    impl ParseDb for TestDb {
+        fn parse_source(&self, source: Source) -> SourceOutput {
+            let text = source.text(self);
+            let snippets = self
+                .snippets
+                .iter()
+                .filter_map(|snippet| {
+                    let start = TextSize::from(text.rfind(snippet.as_str())? as u32);
+                    let range = TextRange::at(start, TextSize::of(snippet.as_str()));
+                    let parsed = parse(
+                        snippet,
+                        JsFileSource::js_module(),
+                        JsParserOptions::default(),
+                    );
+                    Some(SnippetOutput::new(parsed.into(), range, range, start, 0))
+                })
+                .collect();
+            let parsed = parse(text, JsFileSource::js_module(), JsParserOptions::default());
+            SourceOutput::new(parsed.into(), 0).with_snippets(snippets)
+        }
+    }
+
+    #[salsa::db]
     impl biome_db::Db for TestDb {
-        fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<ParsedSource> {
+        fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<Source> {
             self.parsed
         }
     }
@@ -225,30 +262,12 @@ mod tests {
     fn service_for(source: &str, snippets: &[&str]) -> (EmbeddedService, Events) {
         let events = Events::default();
         let mut db = TestDb::new(events.clone());
-        let snippets = snippets
-            .iter()
-            .map(|snippet| {
-                let start = TextSize::from(source.rfind(snippet).unwrap() as u32);
-                let range = TextRange::at(start, TextSize::of(*snippet));
-                let parsed = parse(
-                    snippet,
-                    JsFileSource::js_module(),
-                    JsParserOptions::default(),
-                )
-                .into();
-                ParsedSnippet::new(&db, parsed, range, range, start, 0)
-            })
-            .collect();
+        db.snippets = snippets.iter().map(ToString::to_string).collect();
         let path = Utf8PathBuf::from("src/file.js");
-        let parsed = parse(
-            source,
-            JsFileSource::js_module(),
-            JsParserOptions::default(),
-        )
-        .into();
-        db.parsed = Some(ParsedSource::new(&db, path.clone(), parsed, 0, snippets));
+        let document = Source::new(&db, path, source.into(), 0);
+        db.parsed = Some(document);
 
-        let service = EmbeddedService::new(Rc::new(db), path, TextSize::default());
+        let service = EmbeddedService::new(Rc::new(db), Some(document), TextSize::default());
         (service, events)
     }
 

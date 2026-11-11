@@ -12,6 +12,9 @@ expression: invalid.svelte
 		width: 100%;
 		margin-left: 1rem;
 		float: left;
+		padding: 1px 2px;
+		padding-inline-start: 1px;
+		padding-inline-end: 2px;
 	}
 </style>
 
@@ -38,12 +41,12 @@ invalid.svelte:6:3 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i Unsafe fix: Use the logical CSS replacement.
   
-    1 1 │   
-    2 2 │     .card {
-    3   │ - → → width:·100%;
-      3 │ + → → inline-size:·100%;
-    4 4 │       margin-left: 1rem;
-    5 5 │       float: left;
+     1  1 │   
+     2  2 │     .card {
+     3    │ - → → width:·100%;
+        3 │ + → → inline-size:·100%;
+     4  4 │       margin-left: 1rem;
+     5  5 │       float: left;
   
 
 ```
@@ -58,7 +61,7 @@ invalid.svelte:7:3 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   > 7 │ 		margin-left: 1rem;
       │ 		^^^^^^^^^^^
     8 │ 		float: left;
-    9 │ 	}
+    9 │ 		padding: 1px 2px;
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -68,12 +71,12 @@ invalid.svelte:7:3 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i Unsafe fix: Use the logical CSS replacement.
   
-    2 2 │     .card {
-    3 3 │       width: 100%;
-    4   │ - → → margin-left:·1rem;
-      4 │ + → → margin-inline-start:·1rem;
-    5 5 │       float: left;
-    6 6 │     }
+     2  2 │     .card {
+     3  3 │       width: 100%;
+     4    │ - → → margin-left:·1rem;
+        4 │ + → → margin-inline-start:·1rem;
+     5  5 │       float: left;
+     6  6 │       padding: 1px 2px;
   
 
 ```
@@ -87,8 +90,8 @@ invalid.svelte:8:10 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
      7 │ 		margin-left: 1rem;
    > 8 │ 		float: left;
        │ 		       ^^^^
-     9 │ 	}
-    10 │ </style>
+     9 │ 		padding: 1px 2px;
+    10 │ 		padding-inline-start: 1px;
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -98,12 +101,66 @@ invalid.svelte:8:10 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i Unsafe fix: Use the logical CSS replacement.
   
-    3 3 │       width: 100%;
-    4 4 │       margin-left: 1rem;
-    5   │ - → → float:·left;
-      5 │ + → → float:·inline-start;
-    6 6 │     }
-    7 7 │   
+     3  3 │       width: 100%;
+     4  4 │       margin-left: 1rem;
+     5    │ - → → float:·left;
+        5 │ + → → float:·inline-start;
+     6  6 │       padding: 1px 2px;
+     7  7 │       padding-inline-start: 1px;
+  
+
+```
+
+```
+invalid.svelte:9:3 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+     7 │ 		margin-left: 1rem;
+     8 │ 		float: left;
+   > 9 │ 		padding: 1px 2px;
+       │ 		^^^^^^^
+    10 │ 		padding-inline-start: 1px;
+    11 │ 		padding-inline-end: 2px;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with padding-block and padding-inline.
+  
+    6 │ → → padding-block:·1px;·padding-inline:·2px;
+      │            ++++++     +++++++++++++++++     
+
+```
+
+```
+invalid.svelte:10:3 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These logical longhands can be combined into a shorthand.
+  
+     8 │ 		float: left;
+     9 │ 		padding: 1px 2px;
+  > 10 │ 		padding-inline-start: 1px;
+       │ 		^^^^^^^^^^^^^^^^^^^^
+    11 │ 		padding-inline-end: 2px;
+    12 │ 	}
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine these properties as padding-inline.
+  
+     5 5 │       float: left;
+     6 6 │       padding: 1px 2px;
+     7   │ - → → padding-inline-start:·1px;
+     8   │ - → → padding-inline-end:·2px;
+       7 │ + → → padding-inline:·1px·2px;
+     9 8 │     }
+    10 9 │   
   
 
 ```

@@ -21,6 +21,7 @@ impl FormatRule<AnyCssCustomPropertyComponent> for FormatAnyCssCustomPropertyCom
             AnyCssCustomPropertyComponent::CssCustomPropertyParenthesizedBlock(node) => {
                 node.format().fmt(f)
             }
+            AnyCssCustomPropertyComponent::CssIfFunction(node) => node.format().fmt(f),
             AnyCssCustomPropertyComponent::CssNumber(node) => node.format().fmt(f),
             AnyCssCustomPropertyComponent::CssString(node) => node.format().fmt(f),
             AnyCssCustomPropertyComponent::CssUrlFunction(node) => node.format().fmt(f),

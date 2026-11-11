@@ -817,9 +817,9 @@ impl<'a> ConfigurationExtendsLoader<'a> {
                             &pending.external_resolution_base_path,
                             self.fs,
                         )
-                        .map_err(&cant_resolve)?
+                        .map_err(cant_resolve)?
                         {
-                            (result.map_err(&cant_resolve)?, false, None)
+                            (result.map_err(cant_resolve)?, false, None)
                         } else {
                             let (path, package) = self.resolve_named_manifest_config(
                                 package,

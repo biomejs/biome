@@ -8,13 +8,13 @@
 //! **Note:** Not 100% CommonMark §4.6 compliant. All HTML blocks terminate at
 //! blank lines, whereas CommonMark types 1-5 have specific terminators (`-->`, `?>`, etc.).
 
-use crate::MarkdownParser;
 use crate::lexer::MarkdownReLexContext;
 use crate::syntax::MAX_BLOCK_PREFIX_INDENT;
 use crate::syntax::quote::{consume_quote_prefix_without_virtual, has_quote_prefix};
+use crate::{MarkdownParser, MarkdownSyntaxFeatures};
 use biome_markdown_syntax::MarkdownSyntaxKind::*;
-use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
+use biome_parser::{Parser, SyntaxFeature};
 use biome_rowan::TextSize;
 
 /// Check if we're at an HTML block (line start, up to 3 spaces indent, then `<`).
@@ -64,7 +64,12 @@ enum Type1Tag {
 /// Determine HTML block type using raw source to match line-based CommonMark rules.
 /// Token lookahead is insufficient here because lexer contexts can split or merge
 /// tokens across `<...>` boundaries, and we need the exact line text.
+///
+/// MDX has no HTML: there, `<` starts JSX.
 fn html_block_kind(p: &MarkdownParser) -> Option<HtmlBlockKind> {
+    if MarkdownSyntaxFeatures::Mdx.is_supported(p) {
+        return None;
+    }
     let remaining = p.source_after_current();
     // Skip whitespace trivia that may precede the '<' token
     let remaining = remaining.trim_start_matches([' ', '\t']);

@@ -1,0 +1,100 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-options-api.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  props: ["name"],
+  data() {
+    return {
+      count: 0,
+    };
+  },
+  methods: {
+    click() {
+      this.count++;
+      this.cnt++;
+    },
+  },
+};
+</script>
+
+<template>
+  <div @click="click">{{ name }}: {{ count }}</div>
+  <div :title="label">{{ cnt }}</div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-options-api.vue:13:12 lint/nursery/noVueUndeclaredProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × cnt isn't declared by this component.
+  
+    11 │     click() {
+    12 │       this.count++;
+  > 13 │       this.cnt++;
+       │            ^^^
+    14 │     },
+    15 │   },
+  
+  i Vue doesn't track changes to it, so the page doesn't update when it changes.
+  
+  i This often means the name has a typo, or its declaration is missing.
+  
+  i Fix the name, or declare it in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:21:26 lint/nursery/noVueUndeclaredProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × cnt isn't declared by this component.
+  
+    19 │ <template>
+    20 │   <div @click="click">{{ name }}: {{ count }}</div>
+  > 21 │   <div :title="label">{{ cnt }}</div>
+       │                          ^^^
+    22 │ </template>
+    23 │ 
+  
+  i Its value is always undefined.
+  
+  i This often means the name has a typo, or its declaration is missing.
+  
+  i Fix the name, or declare it in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:21:16 lint/nursery/noVueUndeclaredProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × label isn't declared by this component.
+  
+    19 │ <template>
+    20 │   <div @click="click">{{ name }}: {{ count }}</div>
+  > 21 │   <div :title="label">{{ cnt }}</div>
+       │                ^^^^^
+    22 │ </template>
+    23 │ 
+  
+  i Its value is always undefined.
+  
+  i This often means the name has a typo, or its declaration is missing.
+  
+  i Fix the name, or declare it in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

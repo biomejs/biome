@@ -1,0 +1,91 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidTs.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+import { ref } from 'vue'
+const title = ref('')
+</script>
+
+<template>
+  <MyComponent :title="title" @update:title="(value: string) => title = value" />
+  <MyComponent :title="title" @update:title="(value?: string) => title = value" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalidTs.vue:8:16 lint/nursery/useVueVModel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The title prop is bound and updated by hand, which v-model:title does for you.
+  
+     7 │ <template>
+   > 8 │   <MyComponent :title="title" @update:title="(value: string) => title = value" />
+       │                ^^^^^^^^^^^^^^
+     9 │   <MyComponent :title="title" @update:title="(value?: string) => title = value" />
+    10 │ </template>
+  
+  i This listener only writes the new value back to the bound expression.
+  
+     7 │ <template>
+   > 8 │   <MyComponent :title="title" @update:title="(value: string) => title = value" />
+       │                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │   <MyComponent :title="title" @update:title="(value?: string) => title = value" />
+    10 │ </template>
+  
+  i Replace both with v-model:title, which is shorter and keeps the binding and the listener from getting out of sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace them with v-model:title.
+  
+     6  6 │   
+     7  7 │   <template>
+     8    │ - ··<MyComponent·:title="title"·@update:title="(value:·string)·=>·title·=·value"·/>
+        8 │ + ··<MyComponent·v-model:title="title"·/>
+     9  9 │     <MyComponent :title="title" @update:title="(value?: string) => title = value" />
+    10 10 │   </template>
+  
+
+```
+
+```
+invalidTs.vue:9:16 lint/nursery/useVueVModel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The title prop is bound and updated by hand, which v-model:title does for you.
+  
+     7 │ <template>
+     8 │   <MyComponent :title="title" @update:title="(value: string) => title = value" />
+   > 9 │   <MyComponent :title="title" @update:title="(value?: string) => title = value" />
+       │                ^^^^^^^^^^^^^^
+    10 │ </template>
+    11 │ 
+  
+  i This listener only writes the new value back to the bound expression.
+  
+     7 │ <template>
+     8 │   <MyComponent :title="title" @update:title="(value: string) => title = value" />
+   > 9 │   <MyComponent :title="title" @update:title="(value?: string) => title = value" />
+       │                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ </template>
+    11 │ 
+  
+  i Replace both with v-model:title, which is shorter and keeps the binding and the listener from getting out of sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace them with v-model:title.
+  
+     7  7 │   <template>
+     8  8 │     <MyComponent :title="title" @update:title="(value: string) => title = value" />
+     9    │ - ··<MyComponent·:title="title"·@update:title="(value?:·string)·=>·title·=·value"·/>
+        9 │ + ··<MyComponent·v-model:title="title"·/>
+    10 10 │   </template>
+    11 11 │   
+  
+
+```

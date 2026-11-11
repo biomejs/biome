@@ -1,0 +1,19 @@
+---
+source: crates/biome_analyze/src/diagnostics.rs
+expression: print_diagnostic_to_string(&diagnostic)
+---
+example.ts:1:7 internalError/panic  INTERNAL  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Biome encountered an internal error while running the lint rule suspicious/noRedeclare.
+  
+  > 1 │ const value = 1;
+      │       ^^^^^
+  
+  i Panic information: panicked at crates/biome_js_semantic/src/scope.rs:10:20:
+    missing scope
+  
+  i Thread: biome::worker_0
+  
+  i As a workaround, disable suspicious/noRedeclare or ignore this file.
+  
+  ! This diagnostic was derived from an internal Biome error. Potential bug, please report it if necessary.

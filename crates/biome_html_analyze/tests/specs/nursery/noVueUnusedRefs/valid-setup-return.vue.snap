@@ -1,0 +1,23 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid-setup-return.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+import { ref } from "vue";
+
+export default {
+  setup() {
+    const x = ref(null);
+    return { x };
+  },
+};
+</script>
+
+<template>
+  <input ref="x" />
+</template>
+
+```

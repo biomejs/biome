@@ -1,0 +1,351 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+if (a) {
+    if (b) {}
+}
+
+if (a) {
+} else {
+    if (b) {}
+}
+
+if (a) {
+} else if (b) {
+    if (c) {}
+}
+
+if (a) {
+    switch (b) {}
+}
+
+if (a) {
+    try {} catch {}
+}
+
+if (a) {
+    try {} finally {}
+}
+
+if (a) {
+    do {} while (b);
+}
+
+if (a) {
+    while (b) {}
+}
+
+if (a) {
+    for (;;) {}
+}
+
+if (a) {
+    for (const b in c) {}
+}
+
+if (a) {
+    for (const b of c) {}
+}
+
+async function forAwait() {
+    if (a) {
+        for await (const b of c) {}
+    }
+}
+
+for (;;) {
+    label: if (a) {}
+}
+
+if (a) if (b) {}
+
+```
+
+# Diagnostics
+```
+invalid.js:3:5 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    1 │ /* should generate diagnostics */
+    2 │ if (a) {
+  > 3 │     if (b) {}
+      │     ^^
+    4 │ }
+    5 │ 
+  
+  i Blocks nested 2 levels deep are hard to read and maintain. The configured maximum is 1.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:5 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+     6 │ if (a) {
+     7 │ } else {
+   > 8 │     if (b) {}
+       │     ^^
+     9 │ }
+    10 │ 
+  
+  i Blocks nested 2 levels deep are hard to read and maintain. The configured maximum is 1.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:5 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    11 │ if (a) {
+    12 │ } else if (b) {
+  > 13 │     if (c) {}
+       │     ^^
+    14 │ }
+    15 │ 
+  
+  i Blocks nested 2 levels deep are hard to read and maintain. The configured maximum is 1.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:5 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    16 │ if (a) {
+  > 17 │     switch (b) {}
+       │     ^^^^^^
+    18 │ }
+    19 │ 
+  
+  i Blocks nested 2 levels deep are hard to read and maintain. The configured maximum is 1.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:5 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    20 │ if (a) {
+  > 21 │     try {} catch {}
+       │     ^^^
+    22 │ }
+    23 │ 
+  
+  i Blocks nested 2 levels deep are hard to read and maintain. The configured maximum is 1.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:5 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    24 │ if (a) {
+  > 25 │     try {} finally {}
+       │     ^^^
+    26 │ }
+    27 │ 
+  
+  i Blocks nested 2 levels deep are hard to read and maintain. The configured maximum is 1.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:5 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    28 │ if (a) {
+  > 29 │     do {} while (b);
+       │     ^^
+    30 │ }
+    31 │ 
+  
+  i Blocks nested 2 levels deep are hard to read and maintain. The configured maximum is 1.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:33:5 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    32 │ if (a) {
+  > 33 │     while (b) {}
+       │     ^^^^^
+    34 │ }
+    35 │ 
+  
+  i Blocks nested 2 levels deep are hard to read and maintain. The configured maximum is 1.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:37:5 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    36 │ if (a) {
+  > 37 │     for (;;) {}
+       │     ^^^
+    38 │ }
+    39 │ 
+  
+  i Blocks nested 2 levels deep are hard to read and maintain. The configured maximum is 1.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:5 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    40 │ if (a) {
+  > 41 │     for (const b in c) {}
+       │     ^^^
+    42 │ }
+    43 │ 
+  
+  i Blocks nested 2 levels deep are hard to read and maintain. The configured maximum is 1.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:45:5 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    44 │ if (a) {
+  > 45 │     for (const b of c) {}
+       │     ^^^
+    46 │ }
+    47 │ 
+  
+  i Blocks nested 2 levels deep are hard to read and maintain. The configured maximum is 1.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:50:9 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    48 │ async function forAwait() {
+    49 │     if (a) {
+  > 50 │         for await (const b of c) {}
+       │         ^^^
+    51 │     }
+    52 │ }
+  
+  i Blocks nested 2 levels deep are hard to read and maintain. The configured maximum is 1.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:55:12 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    54 │ for (;;) {
+  > 55 │     label: if (a) {}
+       │            ^^
+    56 │ }
+    57 │ 
+  
+  i Blocks nested 2 levels deep are hard to read and maintain. The configured maximum is 1.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:58:8 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    56 │ }
+    57 │ 
+  > 58 │ if (a) if (b) {}
+       │        ^^
+    59 │ 
+  
+  i Blocks nested 2 levels deep are hard to read and maintain. The configured maximum is 1.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

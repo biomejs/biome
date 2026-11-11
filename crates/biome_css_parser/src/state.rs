@@ -7,6 +7,14 @@ pub(crate) enum IfFunctionKind {
     Legacy,
 }
 
+/// Where an `if()` call is parsed. Branch values inside an SCSS custom property are raw, so the
+/// same call can accept a different grammar there than as a regular value.
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+pub(crate) enum IfFunctionSite {
+    Value,
+    CustomProperty,
+}
+
 pub(crate) struct CssParserState {
     /// Indicates that the parser is speculatively parsing a syntax. Speculative parsing means that the
     /// parser tries to parse a syntax as one kind and determines at the end if the assumption was right
@@ -46,13 +54,13 @@ pub(crate) struct CssParserState {
     /// recovery inside the `if()` function.
     pub(crate) encountered_if_function: bool,
 
-    /// Selected grammars keyed by the source offset of each nested `if()` call.
+    /// Selected grammars keyed by the source offset and site of each nested `if()` call.
     /// Choices survive rewinds within one outer call and are cleared when it
     /// finishes. Without this cache, each failed outer attempt can repeat both
     /// alternatives for its children, causing exponential work with nesting.
     /// Recovery choices are retained too, preventing these repeated attempts
     /// on malformed input.
-    pub(crate) if_function_kinds: Option<HashMap<TextSize, IfFunctionKind>>,
+    pub(crate) if_function_kinds: Option<HashMap<(TextSize, IfFunctionSite), IfFunctionKind>>,
 }
 
 impl CssParserState {

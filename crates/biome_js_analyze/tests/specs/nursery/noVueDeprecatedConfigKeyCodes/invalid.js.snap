@@ -1,0 +1,140 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+Vue.config.keyCodes = {};
+Vue?.config?.keyCodes;
+(Vue?.config)?.keyCodes;
+Vue.config.keyCodes.f1 = 112;
+Vue["config"].keyCodes;
+const keyCodes = Vue.config.keyCodes;
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/noVueDeprecatedConfigKeyCodes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Vue.config.keyCodes option is deprecated and has no effect in Vue 3.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ Vue.config.keyCodes = {};
+      │ ^^^^^^^^^^^^^^^^^^^
+    3 │ Vue?.config?.keyCodes;
+    4 │ (Vue?.config)?.keyCodes;
+  
+  i Vue 3 no longer supports custom key names, because they rely on the deprecated KeyboardEvent.keyCode browser property.
+  
+  i Remove this option, and use the key name in kebab-case as the modifier instead, such as @keyup.page-down. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/noVueDeprecatedConfigKeyCodes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Vue.config.keyCodes option is deprecated and has no effect in Vue 3.
+  
+    1 │ /* should generate diagnostics */
+    2 │ Vue.config.keyCodes = {};
+  > 3 │ Vue?.config?.keyCodes;
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    4 │ (Vue?.config)?.keyCodes;
+    5 │ Vue.config.keyCodes.f1 = 112;
+  
+  i Vue 3 no longer supports custom key names, because they rely on the deprecated KeyboardEvent.keyCode browser property.
+  
+  i Remove this option, and use the key name in kebab-case as the modifier instead, such as @keyup.page-down. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/noVueDeprecatedConfigKeyCodes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Vue.config.keyCodes option is deprecated and has no effect in Vue 3.
+  
+    2 │ Vue.config.keyCodes = {};
+    3 │ Vue?.config?.keyCodes;
+  > 4 │ (Vue?.config)?.keyCodes;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ Vue.config.keyCodes.f1 = 112;
+    6 │ Vue["config"].keyCodes;
+  
+  i Vue 3 no longer supports custom key names, because they rely on the deprecated KeyboardEvent.keyCode browser property.
+  
+  i Remove this option, and use the key name in kebab-case as the modifier instead, such as @keyup.page-down. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/noVueDeprecatedConfigKeyCodes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Vue.config.keyCodes option is deprecated and has no effect in Vue 3.
+  
+    3 │ Vue?.config?.keyCodes;
+    4 │ (Vue?.config)?.keyCodes;
+  > 5 │ Vue.config.keyCodes.f1 = 112;
+      │ ^^^^^^^^^^^^^^^^^^^
+    6 │ Vue["config"].keyCodes;
+    7 │ const keyCodes = Vue.config.keyCodes;
+  
+  i Vue 3 no longer supports custom key names, because they rely on the deprecated KeyboardEvent.keyCode browser property.
+  
+  i Remove this option, and use the key name in kebab-case as the modifier instead, such as @keyup.page-down. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/noVueDeprecatedConfigKeyCodes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Vue.config.keyCodes option is deprecated and has no effect in Vue 3.
+  
+    4 │ (Vue?.config)?.keyCodes;
+    5 │ Vue.config.keyCodes.f1 = 112;
+  > 6 │ Vue["config"].keyCodes;
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    7 │ const keyCodes = Vue.config.keyCodes;
+    8 │ 
+  
+  i Vue 3 no longer supports custom key names, because they rely on the deprecated KeyboardEvent.keyCode browser property.
+  
+  i Remove this option, and use the key name in kebab-case as the modifier instead, such as @keyup.page-down. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:18 lint/nursery/noVueDeprecatedConfigKeyCodes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Vue.config.keyCodes option is deprecated and has no effect in Vue 3.
+  
+    5 │ Vue.config.keyCodes.f1 = 112;
+    6 │ Vue["config"].keyCodes;
+  > 7 │ const keyCodes = Vue.config.keyCodes;
+      │                  ^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i Vue 3 no longer supports custom key names, because they rely on the deprecated KeyboardEvent.keyCode browser property.
+  
+  i Remove this option, and use the key name in kebab-case as the modifier instead, such as @keyup.page-down. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

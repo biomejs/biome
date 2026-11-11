@@ -34,7 +34,7 @@ info: markdown/blockquote/notext-end.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -2,16 +2,14 @@
+@@ -2,14 +2,11 @@
  > `DOOM`
  
  > _b_
@@ -48,10 +48,7 @@ info: markdown/blockquote/notext-end.md
 -> >
  > > `a` > `b`
  
-+
  > This is a quote with an italic _across multuple lines
- > which should just work_. So make sure there is no > if we set
- > proseWrap to `never`
 ```
 
 # Output
@@ -67,7 +64,6 @@ info: markdown/blockquote/notext-end.md
 > _a_
 > > # foo
 > > `a` > `b`
-
 
 > This is a quote with an italic _across multuple lines
 > which should just work_. So make sure there is no > if we set

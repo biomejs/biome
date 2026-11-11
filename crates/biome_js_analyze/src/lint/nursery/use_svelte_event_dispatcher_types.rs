@@ -56,7 +56,7 @@ declare_lint_rule! {
     ///
     /// - [Svelte `createEventDispatcher`](https://svelte.dev/docs/svelte/svelte#createEventDispatcher)
     pub UseSvelteEventDispatcherTypes {
-        version: "next",
+        version: "2.6.4",
         name: "useSvelteEventDispatcherTypes",
         language: "js",
         domains: &[RuleDomain::Svelte],

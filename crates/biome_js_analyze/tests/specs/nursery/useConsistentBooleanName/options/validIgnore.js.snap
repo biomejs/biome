@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validIgnore.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+const value = true;
+const completed = true;
+const hasName = "Sindre";
+
+```

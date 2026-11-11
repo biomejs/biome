@@ -1,0 +1,149 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+10. a
+    > q
+> outside
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdOrderedListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MD_ORDERED_LIST_MARKER@0..3 "10." [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@3..4 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@4..5 "a" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@5..6 "\n" [] [],
+                                },
+                            ],
+                        },
+                        MdContinuationIndent {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@6..10 "    " [] [],
+                                },
+                            ],
+                        },
+                        MdQuote {
+                            prefix: MdQuotePrefix {
+                                pre_marker_indent: MdQuoteIndentList [],
+                                marker_token: R_ANGLE@10..11 ">" [] [],
+                                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@11..12 " " [] [],
+                            },
+                            content: MdBlockList [
+                                MdParagraph {
+                                    list: MdInlineItemList [
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@12..13 "q" [] [],
+                                        },
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@13..14 "\n" [] [],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdQuote {
+            prefix: MdQuotePrefix {
+                pre_marker_indent: MdQuoteIndentList [],
+                marker_token: R_ANGLE@14..15 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@15..16 " " [] [],
+            },
+            content: MdBlockList [
+                MdParagraph {
+                    list: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@16..23 "outside" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@23..24 "\n" [] [],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@24..24 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..24
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..24
+    0: MD_ORDERED_LIST_ITEM@0..14
+      0: MD_BULLET_LIST@0..14
+        0: MD_BULLET@0..14
+          0: MD_LIST_MARKER_PREFIX@0..4
+            0: MD_INDENT_TOKEN_LIST@0..0
+            1: MD_ORDERED_LIST_MARKER@0..3 "10." [] []
+            2: MD_LIST_POST_MARKER_SPACE@3..4 " " [] []
+            3: MD_INDENT_TOKEN_LIST@4..4
+          1: MD_BLOCK_LIST@4..14
+            0: MD_PARAGRAPH@4..6
+              0: MD_INLINE_ITEM_LIST@4..6
+                0: MD_TEXTUAL@4..5
+                  0: MD_TEXTUAL_LITERAL@4..5 "a" [] []
+                1: MD_TEXTUAL@5..6
+                  0: MD_TEXTUAL_LITERAL@5..6 "\n" [] []
+            1: MD_CONTINUATION_INDENT@6..10
+              0: MD_INDENT_TOKEN_LIST@6..10
+                0: MD_INDENT_TOKEN@6..10
+                  0: MD_INDENT_CHAR@6..10 "    " [] []
+            2: MD_QUOTE@10..14
+              0: MD_QUOTE_PREFIX@10..12
+                0: MD_QUOTE_INDENT_LIST@10..10
+                1: R_ANGLE@10..11 ">" [] []
+                2: MD_QUOTE_POST_MARKER_SPACE@11..12 " " [] []
+              1: MD_BLOCK_LIST@12..14
+                0: MD_PARAGRAPH@12..14
+                  0: MD_INLINE_ITEM_LIST@12..14
+                    0: MD_TEXTUAL@12..13
+                      0: MD_TEXTUAL_LITERAL@12..13 "q" [] []
+                    1: MD_TEXTUAL@13..14
+                      0: MD_TEXTUAL_LITERAL@13..14 "\n" [] []
+    1: MD_QUOTE@14..24
+      0: MD_QUOTE_PREFIX@14..16
+        0: MD_QUOTE_INDENT_LIST@14..14
+        1: R_ANGLE@14..15 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@15..16 " " [] []
+      1: MD_BLOCK_LIST@16..24
+        0: MD_PARAGRAPH@16..24
+          0: MD_INLINE_ITEM_LIST@16..24
+            0: MD_TEXTUAL@16..23
+              0: MD_TEXTUAL_LITERAL@16..23 "outside" [] []
+            1: MD_TEXTUAL@23..24
+              0: MD_TEXTUAL_LITERAL@23..24 "\n" [] []
+  3: EOF@24..24 "" [] []
+
+```

@@ -1,0 +1,26 @@
+Paragraph before a header:
+#### a heading
+
+Paragraph before a fenced code block:
+```json
+{}
+```
+
+Paragraph before a bullet list:
+- bullet 1
+- bullet 2
+
+Paragraph before an ordered list:
+1. one
+2. two
+
+Paragraph before a blockquote:
+> quote
+
+Paragraph before an HTML block:
+<div>
+html
+</div>
+
+- List item before a nested list:
+  - nested

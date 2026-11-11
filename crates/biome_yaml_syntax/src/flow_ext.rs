@@ -1,4 +1,27 @@
-use crate::{AnyYamlFlowNode, AnyYamlJsonContent, AnyYamlMappingImplicitKey};
+use crate::{
+    AnyYamlFlowNode, AnyYamlJsonContent, AnyYamlMappingImplicitKey, YamlDoubleQuotedScalar,
+    YamlPlainScalar, YamlSingleQuotedScalar, YamlSyntaxToken, inner_string_text,
+};
+use biome_rowan::{SyntaxResult, TokenText, declare_node_union};
+
+declare_node_union! {
+    /// A scalar in the flow style: plain, single-quoted, or double-quoted
+    pub AnyYamlFlowScalar = YamlPlainScalar | YamlSingleQuotedScalar | YamlDoubleQuotedScalar
+}
+
+impl AnyYamlFlowScalar {
+    pub fn value_token(&self) -> SyntaxResult<YamlSyntaxToken> {
+        match self {
+            Self::YamlPlainScalar(scalar) => scalar.value_token(),
+            Self::YamlSingleQuotedScalar(scalar) => scalar.value_token(),
+            Self::YamlDoubleQuotedScalar(scalar) => scalar.value_token(),
+        }
+    }
+
+    pub fn inner_string_text(&self) -> SyntaxResult<TokenText> {
+        Ok(inner_string_text(&self.value_token()?))
+    }
+}
 
 impl AnyYamlFlowNode {
     /// Whether this node is a flow collection (`[...]` or `{...}`)

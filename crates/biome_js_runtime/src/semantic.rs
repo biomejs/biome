@@ -322,7 +322,7 @@ fn model_node(model: &SemanticModel, value: &JsValue) -> JsResult<JsSyntaxNode> 
                 .with_message("Pass a node from the source associated with this semantic model.")
         })?
         .node;
-    if node.ancestors().last().as_ref() != Some(model.root().syntax()) {
+    if &node.tree_top() != model.root().syntax() {
         return Err(JsNativeError::typ().with_message(
             "The node belongs to a different source than this semantic model. Use a node from the model's original source.",
         ).into());

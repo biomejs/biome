@@ -87,7 +87,7 @@ info: markdown/list_continuation.md
 
 - outer
   - nested sub item
-    - another nested sub
+  - another nested sub
 
 - item with hard line break  
   normal continuation after hard break

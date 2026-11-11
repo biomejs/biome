@@ -1,8 +1,7 @@
 use biome_embeds::{
-    EmbeddedData, VueDirectiveResolution,
+    EmbeddedData,
     astro::{AstroData, astro_data},
     imports::static_imports,
-    vue_directives::{InternedVueDirective, resolve_vue_directive},
 };
 use biome_languages::LanguageDb;
 use biome_rowan::TextRange;
@@ -34,16 +33,6 @@ impl EmbeddedService {
     pub(crate) fn from_data(data: Arc<EmbeddedData>) -> Self {
         Self {
             source: EmbeddedSource::Interned(data),
-        }
-    }
-
-    pub(crate) fn resolve_vue_directive(&self, name: &str) -> VueDirectiveResolution {
-        match &self.source {
-            EmbeddedSource::Workspace { db, path } => resolve_vue_directive(
-                db.as_ref(),
-                InternedVueDirective::new(db.as_ref(), path.clone(), name.to_string()),
-            ),
-            EmbeddedSource::Interned(data) => data.resolve_vue_directive(name),
         }
     }
 

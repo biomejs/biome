@@ -1,0 +1,65 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-component-forms.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { createApp, defineComponent } from "vue";
+
+defineComponent({
+  render() {
+    return this.$slots.default(foo, bar);
+  },
+});
+
+createApp({
+  render() {
+    return this.$slots.default(...foo);
+  },
+});
+
+```
+
+# Diagnostics
+```
+invalid-component-forms.js:6:37 lint/nursery/noVueMultipleSlotArgs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This slot is called with more than one argument.
+  
+    4 │ defineComponent({
+    5 │   render() {
+  > 6 │     return this.$slots.default(foo, bar);
+      │                                     ^^^
+    7 │   },
+    8 │ });
+  
+  i Slot content written in a template receives only the first argument, so the other arguments are lost.
+  
+  i Pass a single object that holds all the values, for example this.$slots.default({ item, index }).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-component-forms.js:12:32 lint/nursery/noVueMultipleSlotArgs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This slot is called with a spread argument.
+  
+    10 │ createApp({
+    11 │   render() {
+  > 12 │     return this.$slots.default(...foo);
+       │                                ^^^^^^
+    13 │   },
+    14 │ });
+  
+  i Spreading passes each item as a separate argument, but slot content written in a template receives only the first one.
+  
+  i Pass a single object that holds all the values, for example this.$slots.default({ item, index }).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
