@@ -5586,7 +5586,7 @@ pub const RESET_TO_INITIAL_PROPERTIES_BY_FONT: [&str; 13] = [
 
 // https://developer.mozilla.org/ja/docs/Web/HTML/Element
 // https://github.com/sindresorhus/html-tags/blob/main/html-tags.json
-pub const HTML_TAGS: [&str; 150] = [
+pub const HTML_TAGS: [&str; 151] = [
     "a",
     "abbr",
     "acronym",
@@ -5704,6 +5704,7 @@ pub const HTML_TAGS: [&str; 150] = [
     "search",
     "section",
     "select",
+    "selectedcontent",
     "selectlist",
     "shadow",
     "slot",
