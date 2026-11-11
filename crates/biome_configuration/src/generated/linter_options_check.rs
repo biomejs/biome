@@ -3401,6 +3401,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_top_level_regex::UseTopLevelRegexOptions>(),
     ));
     result.push((
+        "nursery",
+        "useTopLevelRequire",
+        TypeId::of::<biome_rule_options::use_top_level_require::UseTopLevelRequireOptions>(),
+    ));
+    result.push((
         "style",
         "useTrimStartEnd",
         TypeId::of::<biome_rule_options::use_trim_start_end::UseTrimStartEndOptions>(),
