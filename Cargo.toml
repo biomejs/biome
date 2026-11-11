@@ -147,7 +147,7 @@ libc                         = "0.2.191"
 # See: https://github.com/biomejs/biome/issues/11242
 # See: https://github.com/biomejs/biome/issues/12909
 libmimalloc-sys              = "=0.1.44"
-mimalloc                     = "=0.1.48"
+mimalloc                     = "=0.1.52"
 notify                       = "8.2.2"
 papaya                       = "0.2.5"
 path-absolutize              = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
