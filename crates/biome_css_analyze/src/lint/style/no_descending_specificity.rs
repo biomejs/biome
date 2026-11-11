@@ -51,14 +51,11 @@ declare_lint_rule! {
     ///
     /// The rule reports likely conflicts between selectors that end with the same target under the
     /// same surrounding rules, such as `@media` or `@layer`. It cannot determine every case where
-    /// two selectors match the same element. Nested selectors are compared as written out in full,
-    /// so `nav { a { &:hover {} } }` behaves like `nav a:hover {}`.
+    /// two selectors match the same element. Nested selectors are combined with their parent
+    /// selectors before comparison, so `nav { a { &:hover {} } }` behaves like `nav a:hover {}`.
     ///
     /// Rules without declarations, such as a rule that only contains a comment or nested rules,
-    /// are ignored because they can't lose to another selector. In SCSS, an `@include` counts as
-    /// a declaration, because the mixin it includes usually adds some. Stylelint doesn't count an
-    /// `@include` without a `{ ... }` block, so this rule can report selectors that Stylelint
-    /// doesn't.
+    /// are ignored. These rules set no styles, so their position doesn't matter.
     ///
     /// ## SCSS limitations
     ///
@@ -66,6 +63,10 @@ declare_lint_rule! {
     /// SCSS block, but not selectors across mixin or include boundaries, or across mutually exclusive
     /// control-flow branches. Selectors containing interpolation or placeholders are ignored because
     /// their emitted selector and specificity depend on SCSS evaluation.
+    ///
+    /// In SCSS, an `@include` inserts the contents of a mixin. The rule can't see what the mixin
+    /// contains, so it treats every `@include` as a declaration. Stylelint does this only for an
+    /// `@include` with a `{ ... }` block, so this rule can report selectors that Stylelint doesn't.
     ///
     /// ## Examples
     ///
@@ -271,16 +272,19 @@ struct SelectorContext {
 }
 
 type SelectorContexts = FxHashMap<SelectorContext, FxHashMap<String, (TextRange, Specificity)>>;
-/// Writes the element a selector styles into `key`: the last compound of the resolved selector,
-/// without pseudo-classes. Pseudo-elements stay, including legacy single-colon ones such as
-/// `:before`, because they style a different element. Simple selectors are sorted and type
-/// selectors lowercased, so `.a.b` and `.b.a` share a key, as do `A` and `a`. Returns `false` when
-/// nothing is left, as for `:hover`.
+/// Builds a key that identifies the element a selector styles, so selectors that style the same
+/// element can be compared. The key is built from the selector's last compound (`li:hover` in
+/// `.a ul li:hover`), with pseudo-classes removed, its parts sorted, and element names lowercased:
+///  - The parts are sorted because `.a.b` and `.b.a` match the same elements, and element names
+///    are lowercased because `A` and `a` do too. Each pair needs the same key.
+///  - Pseudo-elements stay, even single-colon ones such as `:before`, because they style a
+///    different element.
+///
+/// Returns `false` when nothing is left, as for `:hover`.
 ///
 /// ```css
-/// .a ul li:hover {
+/// .a ul li:hover {}
 ///       ^^
-/// }
 /// ```
 fn subject_key<'a>(
     selector: &'a ResolvedSelector,
@@ -301,10 +305,11 @@ fn subject_key<'a>(
     !key.is_empty()
 }
 
-/// Returns whether the rule has declarations, directly, inside SCSS control flow, or inside a
-/// nested at-rule such as `@media`, but not inside a nested rule. An SCSS `@include` counts as a
-/// declaration, because the mixin usually emits some. A rule without declarations can't lose to a
-/// higher specificity selector.
+/// Returns whether the rule has declarations, directly, inside SCSS control flow such as `@if`,
+/// or inside a nested at-rule such as `@media`. Declarations in a nested rule don't count, because
+/// that rule is checked on its own. An SCSS `@include` counts as a declaration, because the rule
+/// can't see what the mixin it inserts contains. Rules without declarations set no styles, so
+/// their order doesn't matter.
 fn has_declarations(rule: &CssSemanticRule, rule_node: &AnyRuleStart) -> bool {
     if !rule.declarations().is_empty() {
         return true;
