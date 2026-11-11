@@ -10524,6 +10524,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useExpectToStrictEqual": {
+					"description": "Enforce using toStrictEqual() instead of toEqual() to compare values in tests.\nSee https://biomejs.dev/linter/rules/use-expect-to-strict-equal",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseExpectToStrictEqualConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useExplicitReturnType": {
 					"description": "Require explicit return types on functions and class methods.\nSee https://biomejs.dev/linter/rules/use-explicit-return-type",
 					"anyOf": [
@@ -17935,6 +17942,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseExpectToStrictEqualOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseExpectToStrictEqualOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseExplicitLengthCheckOptions": {
 			"type": "object",
 			"properties": {
@@ -23617,6 +23637,16 @@
 			]
 		},
 		"UseExpectToContainOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseExpectToStrictEqualConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseExpectToStrictEqualOptions" }
+			]
+		},
+		"UseExpectToStrictEqualOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

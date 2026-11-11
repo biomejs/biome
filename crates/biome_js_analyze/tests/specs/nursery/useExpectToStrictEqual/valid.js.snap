@@ -1,0 +1,49 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+expect(something).toStrictEqual(somethingElse);
+expect(something).not.toStrictEqual(somethingElse);
+expect(something).resolves.toStrictEqual(somethingElse);
+expect.soft(something).toStrictEqual(somethingElse);
+expect(something)["toStrictEqual"](somethingElse);
+
+// Other matchers.
+expect(a).toBe(b);
+expect(a).toMatchObject(b);
+expect(a).toEqualCaseInsensitive(b);
+
+// The matcher isn't called.
+expect(a);
+expect(a).toEqual;
+expect(a).not;
+expect(a).toEqual`b`;
+expect(a).toEqual.call(b);
+
+// The matcher name isn't known.
+expect(a)[toEqual](b);
+expect(a)[`to${"Equal"}`](b);
+
+// Not an `expect()` call.
+a().toEqual("b");
+a.b(c).toEqual(d);
+assert(a).toEqual(b);
+toEqual(b);
+expect.toEqual(b);
+expect.not.toEqual(b);
+expect.extend(a).toEqual(b);
+expect.anything().toEqual(b);
+expect(a)(b).toEqual(c);
+new expect(a).toEqual(b);
+
+// Modifiers that aren't valid.
+expect(a).not.not.toEqual(b);
+expect(a).not.resolves.toEqual(b);
+expect(a).resolves.rejects.toEqual(b);
+expect(a).to.toEqual(b);
+expect(a).resolves().toEqual(b);
+
+```

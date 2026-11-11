@@ -1,0 +1,1005 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+expect(something).toEqual(somethingElse);
+expect(something).toEqual(somethingElse,);
+expect(something).toEqual();
+expect(something, "custom message").toEqual(somethingElse);
+expect({ a: "a", b: undefined }).toEqual({ a: "a" });
+
+// Computed matcher names keep their quotes.
+expect(something)["toEqual"](somethingElse);
+expect(something)['toEqual'](somethingElse);
+expect(something)[`toEqual`](somethingElse);
+
+// Modifiers.
+expect(a).not.toEqual(b);
+expect(a)["not"].toEqual(b);
+expect(a).resolves.toEqual(b);
+expect(a).rejects.toEqual(b);
+expect(a).resolves.not.toEqual(b);
+expect(a).rejects.not.toEqual(b);
+expect(a)["resolves"]["not"]["toEqual"](b);
+
+// Other ways to call `expect`.
+expect.soft(a).toEqual(b);
+expect.soft(a).not.toEqual(b);
+expect.poll(() => a).toEqual(b);
+expect.soft.poll(() => a).toEqual(b);
+expect.element(a).toEqual(b);
+expect["soft"](a).toEqual(b);
+
+// Parentheses.
+(expect(a)).toEqual(b);
+(expect(a).toEqual)(b);
+(expect(a).not).toEqual(b);
+(expect)(a).toEqual(b);
+(expect.soft)(a).toEqual(b);
+
+test("nested in a test", async () => {
+	expect(a).toEqual(b);
+	await expect(a).resolves.toEqual(b);
+	expect(a).toEqual(expect(b).toEqual(c));
+});
+
+test("comments are kept", () => {
+	// leading comment
+	expect(a).toEqual(b); // trailing comment
+	expect(a) /* before dot */ . /* before name */ toEqual /* after name */ (b);
+	expect(a)
+		// why this is checked
+		.toEqual(b);
+	expect(a)[/* before name */ "toEqual" /* after name */](b);
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:2:19 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ expect(something).toEqual(somethingElse);
+      │                   ^^^^^^^
+    3 │ expect(something).toEqual(somethingElse,);
+    4 │ expect(something).toEqual();
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - expect(something).toEqual(somethingElse);
+        2 │ + expect(something).toStrictEqual(somethingElse);
+     3  3 │   expect(something).toEqual(somethingElse,);
+     4  4 │   expect(something).toEqual();
+  
+
+```
+
+```
+invalid.js:3:19 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    1 │ /* should generate diagnostics */
+    2 │ expect(something).toEqual(somethingElse);
+  > 3 │ expect(something).toEqual(somethingElse,);
+      │                   ^^^^^^^
+    4 │ expect(something).toEqual();
+    5 │ expect(something, "custom message").toEqual(somethingElse);
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   expect(something).toEqual(somethingElse);
+     3    │ - expect(something).toEqual(somethingElse,);
+        3 │ + expect(something).toStrictEqual(somethingElse,);
+     4  4 │   expect(something).toEqual();
+     5  5 │   expect(something, "custom message").toEqual(somethingElse);
+  
+
+```
+
+```
+invalid.js:4:19 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    2 │ expect(something).toEqual(somethingElse);
+    3 │ expect(something).toEqual(somethingElse,);
+  > 4 │ expect(something).toEqual();
+      │                   ^^^^^^^
+    5 │ expect(something, "custom message").toEqual(somethingElse);
+    6 │ expect({ a: "a", b: undefined }).toEqual({ a: "a" });
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+     2  2 │   expect(something).toEqual(somethingElse);
+     3  3 │   expect(something).toEqual(somethingElse,);
+     4    │ - expect(something).toEqual();
+        4 │ + expect(something).toStrictEqual();
+     5  5 │   expect(something, "custom message").toEqual(somethingElse);
+     6  6 │   expect({ a: "a", b: undefined }).toEqual({ a: "a" });
+  
+
+```
+
+```
+invalid.js:5:37 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    3 │ expect(something).toEqual(somethingElse,);
+    4 │ expect(something).toEqual();
+  > 5 │ expect(something, "custom message").toEqual(somethingElse);
+      │                                     ^^^^^^^
+    6 │ expect({ a: "a", b: undefined }).toEqual({ a: "a" });
+    7 │ 
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+     3  3 │   expect(something).toEqual(somethingElse,);
+     4  4 │   expect(something).toEqual();
+     5    │ - expect(something,·"custom·message").toEqual(somethingElse);
+        5 │ + expect(something,·"custom·message").toStrictEqual(somethingElse);
+     6  6 │   expect({ a: "a", b: undefined }).toEqual({ a: "a" });
+     7  7 │   
+  
+
+```
+
+```
+invalid.js:6:34 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    4 │ expect(something).toEqual();
+    5 │ expect(something, "custom message").toEqual(somethingElse);
+  > 6 │ expect({ a: "a", b: undefined }).toEqual({ a: "a" });
+      │                                  ^^^^^^^
+    7 │ 
+    8 │ // Computed matcher names keep their quotes.
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+     4  4 │   expect(something).toEqual();
+     5  5 │   expect(something, "custom message").toEqual(somethingElse);
+     6    │ - expect({·a:·"a",·b:·undefined·}).toEqual({·a:·"a"·});
+        6 │ + expect({·a:·"a",·b:·undefined·}).toStrictEqual({·a:·"a"·});
+     7  7 │   
+     8  8 │   // Computed matcher names keep their quotes.
+  
+
+```
+
+```
+invalid.js:9:19 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+     8 │ // Computed matcher names keep their quotes.
+   > 9 │ expect(something)["toEqual"](somethingElse);
+       │                   ^^^^^^^^^
+    10 │ expect(something)['toEqual'](somethingElse);
+    11 │ expect(something)[`toEqual`](somethingElse);
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+     7  7 │   
+     8  8 │   // Computed matcher names keep their quotes.
+     9    │ - expect(something)["toEqual"](somethingElse);
+        9 │ + expect(something)["toStrictEqual"](somethingElse);
+    10 10 │   expect(something)['toEqual'](somethingElse);
+    11 11 │   expect(something)[`toEqual`](somethingElse);
+  
+
+```
+
+```
+invalid.js:10:19 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+     8 │ // Computed matcher names keep their quotes.
+     9 │ expect(something)["toEqual"](somethingElse);
+  > 10 │ expect(something)['toEqual'](somethingElse);
+       │                   ^^^^^^^^^
+    11 │ expect(something)[`toEqual`](somethingElse);
+    12 │ 
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+     8  8 │   // Computed matcher names keep their quotes.
+     9  9 │   expect(something)["toEqual"](somethingElse);
+    10    │ - expect(something)['toEqual'](somethingElse);
+       10 │ + expect(something)['toStrictEqual'](somethingElse);
+    11 11 │   expect(something)[`toEqual`](somethingElse);
+    12 12 │   
+  
+
+```
+
+```
+invalid.js:11:20 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+     9 │ expect(something)["toEqual"](somethingElse);
+    10 │ expect(something)['toEqual'](somethingElse);
+  > 11 │ expect(something)[`toEqual`](somethingElse);
+       │                    ^^^^^^^
+    12 │ 
+    13 │ // Modifiers.
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+     9  9 │   expect(something)["toEqual"](somethingElse);
+    10 10 │   expect(something)['toEqual'](somethingElse);
+    11    │ - expect(something)[`toEqual`](somethingElse);
+       11 │ + expect(something)[`toStrictEqual`](somethingElse);
+    12 12 │   
+    13 13 │   // Modifiers.
+  
+
+```
+
+```
+invalid.js:14:15 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    13 │ // Modifiers.
+  > 14 │ expect(a).not.toEqual(b);
+       │               ^^^^^^^
+    15 │ expect(a)["not"].toEqual(b);
+    16 │ expect(a).resolves.toEqual(b);
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    12 12 │   
+    13 13 │   // Modifiers.
+    14    │ - expect(a).not.toEqual(b);
+       14 │ + expect(a).not.toStrictEqual(b);
+    15 15 │   expect(a)["not"].toEqual(b);
+    16 16 │   expect(a).resolves.toEqual(b);
+  
+
+```
+
+```
+invalid.js:15:18 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    13 │ // Modifiers.
+    14 │ expect(a).not.toEqual(b);
+  > 15 │ expect(a)["not"].toEqual(b);
+       │                  ^^^^^^^
+    16 │ expect(a).resolves.toEqual(b);
+    17 │ expect(a).rejects.toEqual(b);
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    13 13 │   // Modifiers.
+    14 14 │   expect(a).not.toEqual(b);
+    15    │ - expect(a)["not"].toEqual(b);
+       15 │ + expect(a)["not"].toStrictEqual(b);
+    16 16 │   expect(a).resolves.toEqual(b);
+    17 17 │   expect(a).rejects.toEqual(b);
+  
+
+```
+
+```
+invalid.js:16:20 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    14 │ expect(a).not.toEqual(b);
+    15 │ expect(a)["not"].toEqual(b);
+  > 16 │ expect(a).resolves.toEqual(b);
+       │                    ^^^^^^^
+    17 │ expect(a).rejects.toEqual(b);
+    18 │ expect(a).resolves.not.toEqual(b);
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    14 14 │   expect(a).not.toEqual(b);
+    15 15 │   expect(a)["not"].toEqual(b);
+    16    │ - expect(a).resolves.toEqual(b);
+       16 │ + expect(a).resolves.toStrictEqual(b);
+    17 17 │   expect(a).rejects.toEqual(b);
+    18 18 │   expect(a).resolves.not.toEqual(b);
+  
+
+```
+
+```
+invalid.js:17:19 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    15 │ expect(a)["not"].toEqual(b);
+    16 │ expect(a).resolves.toEqual(b);
+  > 17 │ expect(a).rejects.toEqual(b);
+       │                   ^^^^^^^
+    18 │ expect(a).resolves.not.toEqual(b);
+    19 │ expect(a).rejects.not.toEqual(b);
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    15 15 │   expect(a)["not"].toEqual(b);
+    16 16 │   expect(a).resolves.toEqual(b);
+    17    │ - expect(a).rejects.toEqual(b);
+       17 │ + expect(a).rejects.toStrictEqual(b);
+    18 18 │   expect(a).resolves.not.toEqual(b);
+    19 19 │   expect(a).rejects.not.toEqual(b);
+  
+
+```
+
+```
+invalid.js:18:24 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    16 │ expect(a).resolves.toEqual(b);
+    17 │ expect(a).rejects.toEqual(b);
+  > 18 │ expect(a).resolves.not.toEqual(b);
+       │                        ^^^^^^^
+    19 │ expect(a).rejects.not.toEqual(b);
+    20 │ expect(a)["resolves"]["not"]["toEqual"](b);
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    16 16 │   expect(a).resolves.toEqual(b);
+    17 17 │   expect(a).rejects.toEqual(b);
+    18    │ - expect(a).resolves.not.toEqual(b);
+       18 │ + expect(a).resolves.not.toStrictEqual(b);
+    19 19 │   expect(a).rejects.not.toEqual(b);
+    20 20 │   expect(a)["resolves"]["not"]["toEqual"](b);
+  
+
+```
+
+```
+invalid.js:19:23 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    17 │ expect(a).rejects.toEqual(b);
+    18 │ expect(a).resolves.not.toEqual(b);
+  > 19 │ expect(a).rejects.not.toEqual(b);
+       │                       ^^^^^^^
+    20 │ expect(a)["resolves"]["not"]["toEqual"](b);
+    21 │ 
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    17 17 │   expect(a).rejects.toEqual(b);
+    18 18 │   expect(a).resolves.not.toEqual(b);
+    19    │ - expect(a).rejects.not.toEqual(b);
+       19 │ + expect(a).rejects.not.toStrictEqual(b);
+    20 20 │   expect(a)["resolves"]["not"]["toEqual"](b);
+    21 21 │   
+  
+
+```
+
+```
+invalid.js:20:30 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    18 │ expect(a).resolves.not.toEqual(b);
+    19 │ expect(a).rejects.not.toEqual(b);
+  > 20 │ expect(a)["resolves"]["not"]["toEqual"](b);
+       │                              ^^^^^^^^^
+    21 │ 
+    22 │ // Other ways to call `expect`.
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    18 18 │   expect(a).resolves.not.toEqual(b);
+    19 19 │   expect(a).rejects.not.toEqual(b);
+    20    │ - expect(a)["resolves"]["not"]["toEqual"](b);
+       20 │ + expect(a)["resolves"]["not"]["toStrictEqual"](b);
+    21 21 │   
+    22 22 │   // Other ways to call `expect`.
+  
+
+```
+
+```
+invalid.js:23:16 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    22 │ // Other ways to call `expect`.
+  > 23 │ expect.soft(a).toEqual(b);
+       │                ^^^^^^^
+    24 │ expect.soft(a).not.toEqual(b);
+    25 │ expect.poll(() => a).toEqual(b);
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    21 21 │   
+    22 22 │   // Other ways to call `expect`.
+    23    │ - expect.soft(a).toEqual(b);
+       23 │ + expect.soft(a).toStrictEqual(b);
+    24 24 │   expect.soft(a).not.toEqual(b);
+    25 25 │   expect.poll(() => a).toEqual(b);
+  
+
+```
+
+```
+invalid.js:24:20 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    22 │ // Other ways to call `expect`.
+    23 │ expect.soft(a).toEqual(b);
+  > 24 │ expect.soft(a).not.toEqual(b);
+       │                    ^^^^^^^
+    25 │ expect.poll(() => a).toEqual(b);
+    26 │ expect.soft.poll(() => a).toEqual(b);
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    22 22 │   // Other ways to call `expect`.
+    23 23 │   expect.soft(a).toEqual(b);
+    24    │ - expect.soft(a).not.toEqual(b);
+       24 │ + expect.soft(a).not.toStrictEqual(b);
+    25 25 │   expect.poll(() => a).toEqual(b);
+    26 26 │   expect.soft.poll(() => a).toEqual(b);
+  
+
+```
+
+```
+invalid.js:25:22 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    23 │ expect.soft(a).toEqual(b);
+    24 │ expect.soft(a).not.toEqual(b);
+  > 25 │ expect.poll(() => a).toEqual(b);
+       │                      ^^^^^^^
+    26 │ expect.soft.poll(() => a).toEqual(b);
+    27 │ expect.element(a).toEqual(b);
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    23 23 │   expect.soft(a).toEqual(b);
+    24 24 │   expect.soft(a).not.toEqual(b);
+    25    │ - expect.poll(()·=>·a).toEqual(b);
+       25 │ + expect.poll(()·=>·a).toStrictEqual(b);
+    26 26 │   expect.soft.poll(() => a).toEqual(b);
+    27 27 │   expect.element(a).toEqual(b);
+  
+
+```
+
+```
+invalid.js:26:27 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    24 │ expect.soft(a).not.toEqual(b);
+    25 │ expect.poll(() => a).toEqual(b);
+  > 26 │ expect.soft.poll(() => a).toEqual(b);
+       │                           ^^^^^^^
+    27 │ expect.element(a).toEqual(b);
+    28 │ expect["soft"](a).toEqual(b);
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    24 24 │   expect.soft(a).not.toEqual(b);
+    25 25 │   expect.poll(() => a).toEqual(b);
+    26    │ - expect.soft.poll(()·=>·a).toEqual(b);
+       26 │ + expect.soft.poll(()·=>·a).toStrictEqual(b);
+    27 27 │   expect.element(a).toEqual(b);
+    28 28 │   expect["soft"](a).toEqual(b);
+  
+
+```
+
+```
+invalid.js:27:19 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    25 │ expect.poll(() => a).toEqual(b);
+    26 │ expect.soft.poll(() => a).toEqual(b);
+  > 27 │ expect.element(a).toEqual(b);
+       │                   ^^^^^^^
+    28 │ expect["soft"](a).toEqual(b);
+    29 │ 
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    25 25 │   expect.poll(() => a).toEqual(b);
+    26 26 │   expect.soft.poll(() => a).toEqual(b);
+    27    │ - expect.element(a).toEqual(b);
+       27 │ + expect.element(a).toStrictEqual(b);
+    28 28 │   expect["soft"](a).toEqual(b);
+    29 29 │   
+  
+
+```
+
+```
+invalid.js:28:19 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    26 │ expect.soft.poll(() => a).toEqual(b);
+    27 │ expect.element(a).toEqual(b);
+  > 28 │ expect["soft"](a).toEqual(b);
+       │                   ^^^^^^^
+    29 │ 
+    30 │ // Parentheses.
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    26 26 │   expect.soft.poll(() => a).toEqual(b);
+    27 27 │   expect.element(a).toEqual(b);
+    28    │ - expect["soft"](a).toEqual(b);
+       28 │ + expect["soft"](a).toStrictEqual(b);
+    29 29 │   
+    30 30 │   // Parentheses.
+  
+
+```
+
+```
+invalid.js:31:13 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    30 │ // Parentheses.
+  > 31 │ (expect(a)).toEqual(b);
+       │             ^^^^^^^
+    32 │ (expect(a).toEqual)(b);
+    33 │ (expect(a).not).toEqual(b);
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    29 29 │   
+    30 30 │   // Parentheses.
+    31    │ - (expect(a)).toEqual(b);
+       31 │ + (expect(a)).toStrictEqual(b);
+    32 32 │   (expect(a).toEqual)(b);
+    33 33 │   (expect(a).not).toEqual(b);
+  
+
+```
+
+```
+invalid.js:32:12 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    30 │ // Parentheses.
+    31 │ (expect(a)).toEqual(b);
+  > 32 │ (expect(a).toEqual)(b);
+       │            ^^^^^^^
+    33 │ (expect(a).not).toEqual(b);
+    34 │ (expect)(a).toEqual(b);
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    30 30 │   // Parentheses.
+    31 31 │   (expect(a)).toEqual(b);
+    32    │ - (expect(a).toEqual)(b);
+       32 │ + (expect(a).toStrictEqual)(b);
+    33 33 │   (expect(a).not).toEqual(b);
+    34 34 │   (expect)(a).toEqual(b);
+  
+
+```
+
+```
+invalid.js:33:17 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    31 │ (expect(a)).toEqual(b);
+    32 │ (expect(a).toEqual)(b);
+  > 33 │ (expect(a).not).toEqual(b);
+       │                 ^^^^^^^
+    34 │ (expect)(a).toEqual(b);
+    35 │ (expect.soft)(a).toEqual(b);
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    31 31 │   (expect(a)).toEqual(b);
+    32 32 │   (expect(a).toEqual)(b);
+    33    │ - (expect(a).not).toEqual(b);
+       33 │ + (expect(a).not).toStrictEqual(b);
+    34 34 │   (expect)(a).toEqual(b);
+    35 35 │   (expect.soft)(a).toEqual(b);
+  
+
+```
+
+```
+invalid.js:34:13 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    32 │ (expect(a).toEqual)(b);
+    33 │ (expect(a).not).toEqual(b);
+  > 34 │ (expect)(a).toEqual(b);
+       │             ^^^^^^^
+    35 │ (expect.soft)(a).toEqual(b);
+    36 │ 
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    32 32 │   (expect(a).toEqual)(b);
+    33 33 │   (expect(a).not).toEqual(b);
+    34    │ - (expect)(a).toEqual(b);
+       34 │ + (expect)(a).toStrictEqual(b);
+    35 35 │   (expect.soft)(a).toEqual(b);
+    36 36 │   
+  
+
+```
+
+```
+invalid.js:35:18 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    33 │ (expect(a).not).toEqual(b);
+    34 │ (expect)(a).toEqual(b);
+  > 35 │ (expect.soft)(a).toEqual(b);
+       │                  ^^^^^^^
+    36 │ 
+    37 │ test("nested in a test", async () => {
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    33 33 │   (expect(a).not).toEqual(b);
+    34 34 │   (expect)(a).toEqual(b);
+    35    │ - (expect.soft)(a).toEqual(b);
+       35 │ + (expect.soft)(a).toStrictEqual(b);
+    36 36 │   
+    37 37 │   test("nested in a test", async () => {
+  
+
+```
+
+```
+invalid.js:38:12 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    37 │ test("nested in a test", async () => {
+  > 38 │ 	expect(a).toEqual(b);
+       │ 	          ^^^^^^^
+    39 │ 	await expect(a).resolves.toEqual(b);
+    40 │ 	expect(a).toEqual(expect(b).toEqual(c));
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    36 36 │   
+    37 37 │   test("nested in a test", async () => {
+    38    │ - → expect(a).toEqual(b);
+       38 │ + → expect(a).toStrictEqual(b);
+    39 39 │     await expect(a).resolves.toEqual(b);
+    40 40 │     expect(a).toEqual(expect(b).toEqual(c));
+  
+
+```
+
+```
+invalid.js:39:27 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    37 │ test("nested in a test", async () => {
+    38 │ 	expect(a).toEqual(b);
+  > 39 │ 	await expect(a).resolves.toEqual(b);
+       │ 	                         ^^^^^^^
+    40 │ 	expect(a).toEqual(expect(b).toEqual(c));
+    41 │ });
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    37 37 │   test("nested in a test", async () => {
+    38 38 │     expect(a).toEqual(b);
+    39    │ - → await·expect(a).resolves.toEqual(b);
+       39 │ + → await·expect(a).resolves.toStrictEqual(b);
+    40 40 │     expect(a).toEqual(expect(b).toEqual(c));
+    41 41 │   });
+  
+
+```
+
+```
+invalid.js:40:12 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    38 │ 	expect(a).toEqual(b);
+    39 │ 	await expect(a).resolves.toEqual(b);
+  > 40 │ 	expect(a).toEqual(expect(b).toEqual(c));
+       │ 	          ^^^^^^^
+    41 │ });
+    42 │ 
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    38 38 │     expect(a).toEqual(b);
+    39 39 │     await expect(a).resolves.toEqual(b);
+    40    │ - → expect(a).toEqual(expect(b).toEqual(c));
+       40 │ + → expect(a).toStrictEqual(expect(b).toEqual(c));
+    41 41 │   });
+    42 42 │   
+  
+
+```
+
+```
+invalid.js:40:30 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    38 │ 	expect(a).toEqual(b);
+    39 │ 	await expect(a).resolves.toEqual(b);
+  > 40 │ 	expect(a).toEqual(expect(b).toEqual(c));
+       │ 	                            ^^^^^^^
+    41 │ });
+    42 │ 
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    38 38 │     expect(a).toEqual(b);
+    39 39 │     await expect(a).resolves.toEqual(b);
+    40    │ - → expect(a).toEqual(expect(b).toEqual(c));
+       40 │ + → expect(a).toEqual(expect(b).toStrictEqual(c));
+    41 41 │   });
+    42 42 │   
+  
+
+```
+
+```
+invalid.js:45:12 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    43 │ test("comments are kept", () => {
+    44 │ 	// leading comment
+  > 45 │ 	expect(a).toEqual(b); // trailing comment
+       │ 	          ^^^^^^^
+    46 │ 	expect(a) /* before dot */ . /* before name */ toEqual /* after name */ (b);
+    47 │ 	expect(a)
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    43 43 │   test("comments are kept", () => {
+    44 44 │     // leading comment
+    45    │ - → expect(a).toEqual(b);·//·trailing·comment
+       45 │ + → expect(a).toStrictEqual(b);·//·trailing·comment
+    46 46 │     expect(a) /* before dot */ . /* before name */ toEqual /* after name */ (b);
+    47 47 │     expect(a)
+  
+
+```
+
+```
+invalid.js:46:49 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    44 │ 	// leading comment
+    45 │ 	expect(a).toEqual(b); // trailing comment
+  > 46 │ 	expect(a) /* before dot */ . /* before name */ toEqual /* after name */ (b);
+       │ 	                                               ^^^^^^^
+    47 │ 	expect(a)
+    48 │ 		// why this is checked
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    44 44 │     // leading comment
+    45 45 │     expect(a).toEqual(b); // trailing comment
+    46    │ - → expect(a)·/*·before·dot·*/·.·/*·before·name·*/·toEqual·/*·after·name·*/·(b);
+       46 │ + → expect(a)·/*·before·dot·*/·.·/*·before·name·*/·toStrictEqual·/*·after·name·*/·(b);
+    47 47 │     expect(a)
+    48 48 │       // why this is checked
+  
+
+```
+
+```
+invalid.js:49:4 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    47 │ 	expect(a)
+    48 │ 		// why this is checked
+  > 49 │ 		.toEqual(b);
+       │ 		 ^^^^^^^
+    50 │ 	expect(a)[/* before name */ "toEqual" /* after name */](b);
+    51 │ });
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    47 47 │     expect(a)
+    48 48 │       // why this is checked
+    49    │ - → → .toEqual(b);
+       49 │ + → → .toStrictEqual(b);
+    50 50 │     expect(a)[/* before name */ "toEqual" /* after name */](b);
+    51 51 │   });
+  
+
+```
+
+```
+invalid.js:50:30 lint/nursery/useExpectToStrictEqual  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toEqual() ignores some differences between the values it compares.
+  
+    48 │ 		// why this is checked
+    49 │ 		.toEqual(b);
+  > 50 │ 	expect(a)[/* before name */ "toEqual" /* after name */](b);
+       │ 	                            ^^^^^^^^^
+    51 │ });
+    52 │ 
+  
+  i It treats a property set to undefined the same as a missing property, and an object created from a class the same as a plain object, so it can treat two different values as equal.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toStrictEqual() instead.
+  
+    48 48 │       // why this is checked
+    49 49 │       .toEqual(b);
+    50    │ - → expect(a)[/*·before·name·*/·"toEqual"·/*·after·name·*/](b);
+       50 │ + → expect(a)[/*·before·name·*/·"toStrictEqual"·/*·after·name·*/](b);
+    51 51 │   });
+    52 52 │   
+  
+
+```
