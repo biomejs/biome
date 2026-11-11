@@ -10,7 +10,7 @@ use biome_css_syntax::{
     ScssParentSelector,
 };
 use biome_module_graph::{SymbolFromModuleInfo, is_class_referenced_by_importers};
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, declare_node_union};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, declare_node_union};
 use biome_rule_options::no_unused_classes::NoUnusedClassesOptions;
 
 declare_lint_rule! {
@@ -80,7 +80,8 @@ declare_node_union! {
 
 impl Rule for NoUnusedClasses {
     type Query = CssModuleGraph<AnyClassNameSelector>;
-    type State = String;
+    /// Index of the unused class in `ParentSuffixClassNames` is always 0 for a class selector
+    type State = usize;
     type Signals = Vec<Self::State>;
     type Options = NoUnusedClassesOptions;
 
@@ -103,28 +104,47 @@ impl Rule for NoUnusedClasses {
         match node {
             AnyClassNameSelector::CssClassSelector(selector) => selector
                 .name_text()
-                .map(|class_name| class_name.text().to_string())
-                .filter(|class_name| is_unused(class_name))
+                .filter(|class_name| is_unused(class_name.text()))
+                .map(|_| 0)
                 .into_iter()
                 .collect(),
             AnyClassNameSelector::ScssParentSelector(selector) => {
                 ParentSuffixClassNames::from_selector(selector)
                     .into_iter()
                     .flatten()
-                    .filter(|class_name| is_unused(class_name))
+                    .enumerate()
+                    .filter(|(_, class_name)| is_unused(class_name))
+                    .map(|(index, _)| index)
                     .collect()
             }
         }
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, class_name: &Self::State) -> Option<RuleDiagnostic> {
+    fn text_range(ctx: &RuleContext<Self>, _index: &Self::State) -> Option<TextRange> {
+        Some(ctx.query().range())
+    }
+
+    fn diagnostic(ctx: &RuleContext<Self>, index: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
+        let token_text;
+        let parent_suffix_class_name;
+        let class_name = match node {
+            AnyClassNameSelector::CssClassSelector(selector) => {
+                token_text = selector.name_text()?;
+                token_text.text()
+            }
+            AnyClassNameSelector::ScssParentSelector(selector) => {
+                parent_suffix_class_name =
+                    ParentSuffixClassNames::from_selector(selector)?.nth(*index)?;
+                parent_suffix_class_name.as_str()
+            }
+        };
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "The CSS class "<Emphasis>{class_name.as_str()}</Emphasis>" is not referenced in any HTML or JSX file."
+                    "The CSS class "<Emphasis>{class_name}</Emphasis>" is not referenced in any HTML or JSX file."
                 },
             )
             .note(markup! {
