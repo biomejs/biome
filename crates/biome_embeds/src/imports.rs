@@ -145,7 +145,9 @@ mod tests {
             parses
                 .iter()
                 .zip(&ranges)
-                .map(|(parse, range)| EmbeddedSnippet::new(parse, *range, JsFileSource::ts().into()))
+                .map(|(parse, range)| {
+                    EmbeddedSnippet::new(parse, *range, JsFileSource::ts().into())
+                })
                 .collect(),
         );
         assert_eq!(data.static_imports(whole), expected);

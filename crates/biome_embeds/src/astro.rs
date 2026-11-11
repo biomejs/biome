@@ -1,6 +1,5 @@
 use crate::bindings::EmbeddedBinding;
 use biome_db::Source;
-use biome_parser::db::SourceExt;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsModuleItem, AnyJsRoot, JsFunctionDeclaration, JsIdentifierAssignment,
     JsIdentifierBinding, JsImport, JsSyntaxKind, JsVariableDeclarator, inner_string_text,
@@ -8,6 +7,7 @@ use biome_js_syntax::{
 };
 use biome_languages::{DocumentFileSource, LanguageDb};
 use biome_parser::AnyParse;
+use biome_parser::db::SourceExt;
 use biome_rowan::{AstNode, Text, TextRange, TextSize, TokenText, WalkEvent};
 use camino::Utf8Path;
 
