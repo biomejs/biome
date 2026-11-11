@@ -1,0 +1,152 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+describe("test suite", () => {
+	test("my test", () => {});
+});
+
+describe("test suite", () => {
+	it("my test", () => {});
+});
+
+describe("test suite", () => {
+	beforeAll(() => {});
+	beforeEach(() => {});
+	afterEach(() => {});
+	afterAll(() => {});
+
+	it("my test", () => {});
+
+	describe("another test suite", () => {
+		beforeEach(() => {});
+		test("my other test", () => {});
+	});
+
+	test("my last test", () => {});
+});
+
+describe("test suite", function () {
+	it.skip("skipped", () => {});
+	it.only("focused", () => {});
+	it.todo("to do");
+	it.each([1, 2, 3])("%n", () => {});
+	it.each`
+		value
+		${1}
+	`("$value", () => {});
+});
+
+// Other kinds of describe blocks
+describe.only("test suite", () => {
+	it("my test", () => {});
+});
+
+describe.skip("test suite", () => {
+	it("my test", () => {});
+});
+
+describe.each([1, true])("trues", (value) => {
+	it("an it", () => expect(value).toBe(true));
+});
+
+describe.each`
+	value
+	${1}
+`("$value", () => {
+	it("my test", () => {});
+});
+
+describe.skipIf(isCI)("test suite", () => {
+	it("my test", () => {});
+});
+
+describe.runIf(isCI)("test suite", () => {
+	it("my test", () => {});
+});
+
+describe.skipIf(isCI).each([1, 2])("test suite %i", () => {
+	it("my test", () => {});
+});
+
+describe.runIf(isCI).concurrent("test suite", () => {
+	it("my test", () => {});
+});
+
+describe.shuffle("test suite", () => {
+	it("my test", () => {});
+});
+
+xdescribe("test suite", () => {
+	xit("my test", () => {});
+});
+
+fdescribe("test suite", () => {
+	fit("my test", () => {});
+});
+
+suite("test suite", () => {
+	test("my test", () => {});
+});
+
+// Playwright
+test.describe("test suite", () => {
+	test.beforeEach(async ({ page }) => {});
+
+	test("my test", async ({ page }) => {
+		await test.step("my step", async () => {});
+	});
+
+	test.describe("another test suite", () => {
+		test("my other test", async ({ page }) => {});
+	});
+});
+
+test.describe.serial("test suite", () => {
+	test("my test", async ({ page }) => {});
+});
+
+test.describe.parallel.only("test suite", () => {
+	test("my test", async ({ page }) => {});
+});
+
+test.describe.configure({ mode: "parallel" });
+test.use({ locale: "en-GB" });
+
+const it2 = test.extend({});
+
+// A step is a part of a test, and can be written in a helper function.
+async function login(page) {
+	await test.step("log in", async () => {});
+	await test.step.skip("log out", async () => {});
+}
+
+// Playwright annotations change how tests run, but they don't declare a test.
+test.skip(({ browserName }) => browserName !== "chromium", "Chromium only");
+test.fixme(isMobile, "Not ready for mobile");
+
+async function skipWithoutCredentials() {
+	test.skip(!process.env.USER, "No credentials");
+	test.fixme();
+}
+
+// Deno's built-in test runner has no describe blocks.
+Deno.test("my test", () => {});
+
+// A table without the call that declares the test
+it.each();
+it.each([1, 2, 3]);
+
+// Not tests
+foo();
+const tail$ = source$.pipe(skip(1));
+foo.test("my test", () => {});
+foo.beforeEach(() => {});
+/a/.test("my test");
+jest.doMock("my-module");
+
+```

@@ -200,40 +200,10 @@ impl Rule for UseLowercaseTestTitle {
 /// Returns `true` if the first argument of `call` is the title of a test,
 /// test suite, or benchmark.
 fn is_titled_test_call(call: &JsCallExpression) -> bool {
-    if TestBlockKind::from_call_expression(call).is_some() {
-        return true;
-    }
-    let Ok(callee) = call.callee() else {
-        return false;
-    };
-    match callee.omit_parentheses() {
-        // test.each`table`("title", ...)
-        AnyJsExpression::JsTemplateExpression(template) => template
-            .tag()
-            .is_some_and(|tag| tag.omit_parentheses().contains_a_test_each_pattern()),
-        // test.skipIf(condition)("title", ...)
-        AnyJsExpression::JsCallExpression(inner_call) => inner_call
+    TestBlockKind::from_call_expression(call).is_some()
+        || call
             .callee()
-            .is_ok_and(|inner_callee| is_conditional_test_callee(&inner_callee.omit_parentheses())),
-        callee => is_bench_callee(callee),
-    }
-}
-
-/// Returns `true` for a Vitest conditional test or suite such as
-/// `test.skipIf` or `describe.runIf`.
-fn is_conditional_test_callee(callee: &AnyJsExpression) -> bool {
-    let AnyJsExpression::JsStaticMemberExpression(member) = callee else {
-        return false;
-    };
-    let is_conditional = member
-        .member()
-        .ok()
-        .and_then(|member| member.as_js_name()?.value_token().ok())
-        .is_some_and(|name| matches!(name.text_trimmed(), "skipIf" | "runIf"));
-    is_conditional
-        && member
-            .object()
-            .is_ok_and(|object| object.omit_parentheses().contains_a_test_pattern())
+            .is_ok_and(|callee| is_bench_callee(callee.omit_parentheses()))
 }
 
 /// Returns `true` for the callee of a Vitest benchmark: `bench`, `bench.only`,

@@ -68,3 +68,14 @@ describe('quotes', () => {
   it("quoted", () => {});
   it(`quoted`, () => {});
 });
+
+// Describe blocks with a mode or another modifier
+test.describe.serial('serial', () => {
+  test('same', () => {});
+  test('same', () => {});
+});
+
+describe.shuffle('shuffle', () => {
+  it('same', () => {});
+  it('same', () => {});
+});

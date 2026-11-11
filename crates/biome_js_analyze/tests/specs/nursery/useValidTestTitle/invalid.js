@@ -39,3 +39,15 @@ describe.each([[1, 2]])(123, () => {});
 suite('', () => {});
 suite(' leading space', () => {});
 suite.each([[1, 2]])('', () => {});
+
+// Table and conditional calls with invalid titles
+test.each`
+  value
+  ${1}
+`('', () => {});
+describe.each`
+  value
+  ${1}
+`(' leading space', () => {});
+test.skipIf(condition)('', () => {});
+describe.runIf(condition)('trailing space ', () => {});

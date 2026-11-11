@@ -56,6 +56,12 @@ describe('member form', () => {
 afterEach(() => {});
 beforeAll(() => {});
 
+// Hooks out of order in a describe block with a mode
+test.describe.serial('serial suite', () => {
+  test.afterEach(() => {});
+  test.beforeEach(() => {});
+});
+
 ```
 
 # Diagnostics
@@ -230,6 +236,7 @@ invalid.js:51:1 lint/style/useTestHooksInOrder ━━━━━━━━━━━
   > 51 │ beforeAll(() => {});
        │ ^^^^^^^^^^^^^^^^^^^
     52 │ 
+    53 │ // Hooks out of order in a describe block with a mode
   
   i afterEach is declared here but executes after beforeAll.
   
@@ -238,6 +245,32 @@ invalid.js:51:1 lint/style/useTestHooksInOrder ━━━━━━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^
     51 │ beforeAll(() => {});
     52 │ 
+  
+  i Reorder the lifecycle hooks to appear in the order they execute: beforeAll/before, beforeEach, afterEach, afterAll/after.
+  
+
+```
+
+```
+invalid.js:56:3 lint/style/useTestHooksInOrder ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i beforeEach is out of order compared to afterEach.
+  
+    54 │ test.describe.serial('serial suite', () => {
+    55 │   test.afterEach(() => {});
+  > 56 │   test.beforeEach(() => {});
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ });
+    58 │ 
+  
+  i afterEach is declared here but executes after beforeEach.
+  
+    53 │ // Hooks out of order in a describe block with a mode
+    54 │ test.describe.serial('serial suite', () => {
+  > 55 │   test.afterEach(() => {});
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^
+    56 │   test.beforeEach(() => {});
+    57 │ });
   
   i Reorder the lifecycle hooks to appear in the order they execute: beforeAll/before, beforeEach, afterEach, afterAll/after.
   

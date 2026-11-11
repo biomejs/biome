@@ -3297,6 +3297,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useTopLevelDescribe",
+        TypeId::of::<biome_rule_options::use_top_level_describe::UseTopLevelDescribeOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useTopLevelHeading",
         TypeId::of::<biome_rule_options::use_top_level_heading::UseTopLevelHeadingOptions>(),
     ));

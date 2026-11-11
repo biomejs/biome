@@ -10868,6 +10868,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useTopLevelDescribe": {
+					"description": "Require tests and hooks to be inside a describe block.\nSee https://biomejs.dev/linter/rules/use-top-level-describe",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseTopLevelDescribeConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useTopLevelHeading": {
 					"description": "Require Markdown documents to start with a top-level heading.\nSee https://biomejs.dev/linter/rules/use-top-level-heading",
 					"anyOf": [
@@ -19430,6 +19437,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseTopLevelDescribeOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseTopLevelDescribeOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseTopLevelHeadingOptions": {
 			"type": "object",
 			"properties": {
@@ -25390,6 +25406,25 @@
 		},
 		"UseThrowOnlyErrorOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseTopLevelDescribeConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseTopLevelDescribeOptions" }
+			]
+		},
+		"UseTopLevelDescribeOptions": {
+			"type": "object",
+			"properties": {
+				"maxTopLevelDescribes": {
+					"description": "The maximum number of `describe` blocks allowed at the top level of a file.\n\nWhen this option isn't set, any number of top-level `describe` blocks is allowed.",
+					"type": ["integer", "null"],
+					"format": "uint16",
+					"maximum": 65535,
+					"minimum": 1
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseTopLevelHeadingConfiguration": {

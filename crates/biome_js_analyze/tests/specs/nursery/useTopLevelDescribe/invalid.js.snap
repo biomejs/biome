@@ -1,0 +1,742 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+beforeAll(() => {});
+beforeEach(() => {});
+
+test("above a describe block", () => {});
+
+describe("test suite", () => {
+	it("my test", () => {});
+});
+
+it("below a describe block", () => {});
+
+afterEach(() => {});
+afterAll(() => {});
+
+// Modifiers
+it.skip("skipped", () => {});
+it.only("focused", () => {});
+it.todo("to do");
+test.concurrent("concurrent", async () => {});
+test.fixme("broken", async ({ page }) => {});
+test.skip("skipped with details", { tag: "@slow" }, async ({ page }) => {});
+xit("skipped", () => {});
+xtest("skipped", () => {});
+fit("focused", () => {});
+
+// Tables
+it.each([1, 2, 3])("%n", () => {});
+it.skip.each([1, 2, 3])("%n", () => {});
+it.each`
+	value
+	${1}
+`("$value", () => {});
+it.skip.each`
+	value
+	${1}
+`("$value", () => {});
+test.for([1, 2, 3])("%n", () => {});
+
+// Conditions
+test.skipIf(isCI)("skipped in CI", () => {});
+test.runIf(isCI)("only in CI", () => {});
+
+// Playwright
+test.beforeAll(async () => {});
+test.beforeEach(async ({ page }) => {});
+test.afterEach(async ({ page }) => {});
+test.afterAll(async () => {});
+
+// Mocha and Node.js
+before(() => {});
+after(() => {});
+
+// Not directly at the top level of the file, but still outside a describe block
+function declareTests() {
+	test("in a function", () => {});
+}
+
+if (isCI) {
+	test("in a condition", () => {});
+}
+
+beforeEach(() => {
+	describe("in a hook", () => {
+		test("is inside a describe block", () => {});
+	});
+});
+
+// The describe block is an argument, so it doesn't contain the test.
+test("my test", describe("test suite", () => {}));
+
+```
+
+# Diagnostics
+```
+invalid.js:3:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook is not inside a describe block.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ beforeAll(() => {});
+      │ ^^^^^^^^^
+    4 │ beforeEach(() => {});
+    5 │ 
+  
+  i A hook outside of a describe block isn't tied to a named group of tests, which makes it harder to tell which tests depend on it.
+  
+  i Move this hook into the describe block that contains the tests it applies to.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook is not inside a describe block.
+  
+    3 │ beforeAll(() => {});
+  > 4 │ beforeEach(() => {});
+      │ ^^^^^^^^^^
+    5 │ 
+    6 │ test("above a describe block", () => {});
+  
+  i A hook outside of a describe block isn't tied to a named group of tests, which makes it harder to tell which tests depend on it.
+  
+  i Move this hook into the describe block that contains the tests it applies to.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test is not inside a describe block.
+  
+    4 │ beforeEach(() => {});
+    5 │ 
+  > 6 │ test("above a describe block", () => {});
+      │ ^^^^
+    7 │ 
+    8 │ describe("test suite", () => {
+  
+  i A test outside of a describe block isn't grouped with related tests under a shared name, which makes the file harder to navigate as it grows.
+  
+  i Move this test into a describe block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test is not inside a describe block.
+  
+    10 │ });
+    11 │ 
+  > 12 │ it("below a describe block", () => {});
+       │ ^^
+    13 │ 
+    14 │ afterEach(() => {});
+  
+  i A test outside of a describe block isn't grouped with related tests under a shared name, which makes the file harder to navigate as it grows.
+  
+  i Move this test into a describe block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook is not inside a describe block.
+  
+    12 │ it("below a describe block", () => {});
+    13 │ 
+  > 14 │ afterEach(() => {});
+       │ ^^^^^^^^^
+    15 │ afterAll(() => {});
+    16 │ 
+  
+  i A hook outside of a describe block isn't tied to a named group of tests, which makes it harder to tell which tests depend on it.
+  
+  i Move this hook into the describe block that contains the tests it applies to.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook is not inside a describe block.
+  
+    14 │ afterEach(() => {});
+  > 15 │ afterAll(() => {});
+       │ ^^^^^^^^
+    16 │ 
+    17 │ // Modifiers
+  
+  i A hook outside of a describe block isn't tied to a named group of tests, which makes it harder to tell which tests depend on it.
+  
+  i Move this hook into the describe block that contains the tests it applies to.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test is not inside a describe block.
+  
+    17 │ // Modifiers
+  > 18 │ it.skip("skipped", () => {});
+       │ ^^^^^^^
+    19 │ it.only("focused", () => {});
+    20 │ it.todo("to do");
+  
+  i A test outside of a describe block isn't grouped with related tests under a shared name, which makes the file harder to navigate as it grows.
+  
+  i Move this test into a describe block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test is not inside a describe block.
+  
+    17 │ // Modifiers
+    18 │ it.skip("skipped", () => {});
+  > 19 │ it.only("focused", () => {});
+       │ ^^^^^^^
+    20 │ it.todo("to do");
+    21 │ test.concurrent("concurrent", async () => {});
+  
+  i A test outside of a describe block isn't grouped with related tests under a shared name, which makes the file harder to navigate as it grows.
+  
+  i Move this test into a describe block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test is not inside a describe block.
+  
+    18 │ it.skip("skipped", () => {});
+    19 │ it.only("focused", () => {});
+  > 20 │ it.todo("to do");
+       │ ^^^^^^^
+    21 │ test.concurrent("concurrent", async () => {});
+    22 │ test.fixme("broken", async ({ page }) => {});
+  
+  i A test outside of a describe block isn't grouped with related tests under a shared name, which makes the file harder to navigate as it grows.
+  
+  i Move this test into a describe block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test is not inside a describe block.
+  
+    19 │ it.only("focused", () => {});
+    20 │ it.todo("to do");
+  > 21 │ test.concurrent("concurrent", async () => {});
+       │ ^^^^^^^^^^^^^^^
+    22 │ test.fixme("broken", async ({ page }) => {});
+    23 │ test.skip("skipped with details", { tag: "@slow" }, async ({ page }) => {});
+  
+  i A test outside of a describe block isn't grouped with related tests under a shared name, which makes the file harder to navigate as it grows.
+  
+  i Move this test into a describe block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test is not inside a describe block.
+  
+    20 │ it.todo("to do");
+    21 │ test.concurrent("concurrent", async () => {});
+  > 22 │ test.fixme("broken", async ({ page }) => {});
+       │ ^^^^^^^^^^
+    23 │ test.skip("skipped with details", { tag: "@slow" }, async ({ page }) => {});
+    24 │ xit("skipped", () => {});
+  
+  i A test outside of a describe block isn't grouped with related tests under a shared name, which makes the file harder to navigate as it grows.
+  
+  i Move this test into a describe block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test is not inside a describe block.
+  
+    21 │ test.concurrent("concurrent", async () => {});
+    22 │ test.fixme("broken", async ({ page }) => {});
+  > 23 │ test.skip("skipped with details", { tag: "@slow" }, async ({ page }) => {});
+       │ ^^^^^^^^^
+    24 │ xit("skipped", () => {});
+    25 │ xtest("skipped", () => {});
+  
+  i A test outside of a describe block isn't grouped with related tests under a shared name, which makes the file harder to navigate as it grows.
+  
+  i Move this test into a describe block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test is not inside a describe block.
+  
+    22 │ test.fixme("broken", async ({ page }) => {});
+    23 │ test.skip("skipped with details", { tag: "@slow" }, async ({ page }) => {});
+  > 24 │ xit("skipped", () => {});
+       │ ^^^
+    25 │ xtest("skipped", () => {});
+    26 │ fit("focused", () => {});
+  
+  i A test outside of a describe block isn't grouped with related tests under a shared name, which makes the file harder to navigate as it grows.
+  
+  i Move this test into a describe block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test is not inside a describe block.
+  
+    23 │ test.skip("skipped with details", { tag: "@slow" }, async ({ page }) => {});
+    24 │ xit("skipped", () => {});
+  > 25 │ xtest("skipped", () => {});
+       │ ^^^^^
+    26 │ fit("focused", () => {});
+    27 │ 
+  
+  i A test outside of a describe block isn't grouped with related tests under a shared name, which makes the file harder to navigate as it grows.
+  
+  i Move this test into a describe block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test is not inside a describe block.
+  
+    24 │ xit("skipped", () => {});
+    25 │ xtest("skipped", () => {});
+  > 26 │ fit("focused", () => {});
+       │ ^^^
+    27 │ 
+    28 │ // Tables
+  
+  i A test outside of a describe block isn't grouped with related tests under a shared name, which makes the file harder to navigate as it grows.
+  
+  i Move this test into a describe block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test is not inside a describe block.
+  
+    28 │ // Tables
+  > 29 │ it.each([1, 2, 3])("%n", () => {});
+       │ ^^^^^^^
+    30 │ it.skip.each([1, 2, 3])("%n", () => {});
+    31 │ it.each`
+  
+  i A test outside of a describe block isn't grouped with related tests under a shared name, which makes the file harder to navigate as it grows.
+  
+  i Move this test into a describe block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:30:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test is not inside a describe block.
+  
+    28 │ // Tables
+    29 │ it.each([1, 2, 3])("%n", () => {});
+  > 30 │ it.skip.each([1, 2, 3])("%n", () => {});
+       │ ^^^^^^^^^^^^
+    31 │ it.each`
+    32 │ 	value
+  
+  i A test outside of a describe block isn't grouped with related tests under a shared name, which makes the file harder to navigate as it grows.
+  
+  i Move this test into a describe block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test is not inside a describe block.
+  
+    29 │ it.each([1, 2, 3])("%n", () => {});
+    30 │ it.skip.each([1, 2, 3])("%n", () => {});
+  > 31 │ it.each`
+       │ ^^^^^^^
+    32 │ 	value
+    33 │ 	${1}
+  
+  i A test outside of a describe block isn't grouped with related tests under a shared name, which makes the file harder to navigate as it grows.
+  
+  i Move this test into a describe block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test is not inside a describe block.
+  
+    33 │ 	${1}
+    34 │ `("$value", () => {});
+  > 35 │ it.skip.each`
+       │ ^^^^^^^^^^^^
+    36 │ 	value
+    37 │ 	${1}
+  
+  i A test outside of a describe block isn't grouped with related tests under a shared name, which makes the file harder to navigate as it grows.
+  
+  i Move this test into a describe block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test is not inside a describe block.
+  
+    37 │ 	${1}
+    38 │ `("$value", () => {});
+  > 39 │ test.for([1, 2, 3])("%n", () => {});
+       │ ^^^^^^^^
+    40 │ 
+    41 │ // Conditions
+  
+  i A test outside of a describe block isn't grouped with related tests under a shared name, which makes the file harder to navigate as it grows.
+  
+  i Move this test into a describe block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:42:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test is not inside a describe block.
+  
+    41 │ // Conditions
+  > 42 │ test.skipIf(isCI)("skipped in CI", () => {});
+       │ ^^^^^^^^^^^
+    43 │ test.runIf(isCI)("only in CI", () => {});
+    44 │ 
+  
+  i A test outside of a describe block isn't grouped with related tests under a shared name, which makes the file harder to navigate as it grows.
+  
+  i Move this test into a describe block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:43:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test is not inside a describe block.
+  
+    41 │ // Conditions
+    42 │ test.skipIf(isCI)("skipped in CI", () => {});
+  > 43 │ test.runIf(isCI)("only in CI", () => {});
+       │ ^^^^^^^^^^
+    44 │ 
+    45 │ // Playwright
+  
+  i A test outside of a describe block isn't grouped with related tests under a shared name, which makes the file harder to navigate as it grows.
+  
+  i Move this test into a describe block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:46:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook is not inside a describe block.
+  
+    45 │ // Playwright
+  > 46 │ test.beforeAll(async () => {});
+       │ ^^^^^^^^^^^^^^
+    47 │ test.beforeEach(async ({ page }) => {});
+    48 │ test.afterEach(async ({ page }) => {});
+  
+  i A hook outside of a describe block isn't tied to a named group of tests, which makes it harder to tell which tests depend on it.
+  
+  i Move this hook into the describe block that contains the tests it applies to.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:47:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook is not inside a describe block.
+  
+    45 │ // Playwright
+    46 │ test.beforeAll(async () => {});
+  > 47 │ test.beforeEach(async ({ page }) => {});
+       │ ^^^^^^^^^^^^^^^
+    48 │ test.afterEach(async ({ page }) => {});
+    49 │ test.afterAll(async () => {});
+  
+  i A hook outside of a describe block isn't tied to a named group of tests, which makes it harder to tell which tests depend on it.
+  
+  i Move this hook into the describe block that contains the tests it applies to.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:48:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook is not inside a describe block.
+  
+    46 │ test.beforeAll(async () => {});
+    47 │ test.beforeEach(async ({ page }) => {});
+  > 48 │ test.afterEach(async ({ page }) => {});
+       │ ^^^^^^^^^^^^^^
+    49 │ test.afterAll(async () => {});
+    50 │ 
+  
+  i A hook outside of a describe block isn't tied to a named group of tests, which makes it harder to tell which tests depend on it.
+  
+  i Move this hook into the describe block that contains the tests it applies to.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:49:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook is not inside a describe block.
+  
+    47 │ test.beforeEach(async ({ page }) => {});
+    48 │ test.afterEach(async ({ page }) => {});
+  > 49 │ test.afterAll(async () => {});
+       │ ^^^^^^^^^^^^^
+    50 │ 
+    51 │ // Mocha and Node.js
+  
+  i A hook outside of a describe block isn't tied to a named group of tests, which makes it harder to tell which tests depend on it.
+  
+  i Move this hook into the describe block that contains the tests it applies to.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:52:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook is not inside a describe block.
+  
+    51 │ // Mocha and Node.js
+  > 52 │ before(() => {});
+       │ ^^^^^^
+    53 │ after(() => {});
+    54 │ 
+  
+  i A hook outside of a describe block isn't tied to a named group of tests, which makes it harder to tell which tests depend on it.
+  
+  i Move this hook into the describe block that contains the tests it applies to.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:53:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook is not inside a describe block.
+  
+    51 │ // Mocha and Node.js
+    52 │ before(() => {});
+  > 53 │ after(() => {});
+       │ ^^^^^
+    54 │ 
+    55 │ // Not directly at the top level of the file, but still outside a describe block
+  
+  i A hook outside of a describe block isn't tied to a named group of tests, which makes it harder to tell which tests depend on it.
+  
+  i Move this hook into the describe block that contains the tests it applies to.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:57:2 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test is not inside a describe block.
+  
+    55 │ // Not directly at the top level of the file, but still outside a describe block
+    56 │ function declareTests() {
+  > 57 │ 	test("in a function", () => {});
+       │ 	^^^^
+    58 │ }
+    59 │ 
+  
+  i A test outside of a describe block isn't grouped with related tests under a shared name, which makes the file harder to navigate as it grows.
+  
+  i Move this test into a describe block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:61:2 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test is not inside a describe block.
+  
+    60 │ if (isCI) {
+  > 61 │ 	test("in a condition", () => {});
+       │ 	^^^^
+    62 │ }
+    63 │ 
+  
+  i A test outside of a describe block isn't grouped with related tests under a shared name, which makes the file harder to navigate as it grows.
+  
+  i Move this test into a describe block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:64:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook is not inside a describe block.
+  
+    62 │ }
+    63 │ 
+  > 64 │ beforeEach(() => {
+       │ ^^^^^^^^^^
+    65 │ 	describe("in a hook", () => {
+    66 │ 		test("is inside a describe block", () => {});
+  
+  i A hook outside of a describe block isn't tied to a named group of tests, which makes it harder to tell which tests depend on it.
+  
+  i Move this hook into the describe block that contains the tests it applies to.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:71:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test is not inside a describe block.
+  
+    70 │ // The describe block is an argument, so it doesn't contain the test.
+  > 71 │ test("my test", describe("test suite", () => {}));
+       │ ^^^^
+    72 │ 
+  
+  i A test outside of a describe block isn't grouped with related tests under a shared name, which makes the file harder to navigate as it grows.
+  
+  i Move this test into a describe block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
