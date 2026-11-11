@@ -3028,10 +3028,10 @@ export interface Nursery {
 	 */
 	noDanglingUnderscore?: NoDanglingUnderscoreConfiguration;
 	/**
-	 * Discourages disabled on elements that act as buttons.
-	 * See https://biomejs.dev/linter/rules/no-disabled-button
+	 * Discourages the disabled attribute on form controls and on elements that act as buttons.
+	 * See https://biomejs.dev/linter/rules/no-disabled-attribute
 	 */
-	noDisabledButton?: NoDisabledButtonConfiguration;
+	noDisabledAttribute?: NoDisabledAttributeConfiguration;
 	/**
 	 * Disallow two comparisons of the same values that can be combined into one.
 	 * See https://biomejs.dev/linter/rules/no-double-comparison
@@ -6666,9 +6666,9 @@ export type NoConstantComparisonsConfiguration =
 export type NoDanglingUnderscoreConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDanglingUnderscoreOptions;
-export type NoDisabledButtonConfiguration =
+export type NoDisabledAttributeConfiguration =
 	| RulePlainConfiguration
-	| RuleWithNoDisabledButtonOptions;
+	| RuleWithNoDisabledAttributeOptions;
 export type NoDoubleComparisonConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDoubleComparisonOptions;
@@ -9689,13 +9689,13 @@ export interface RuleWithNoDanglingUnderscoreOptions {
 	level: RulePlainConfiguration;
 	options?: NoDanglingUnderscoreOptions;
 }
-export interface RuleWithNoDisabledButtonOptions {
+export interface RuleWithNoDisabledAttributeOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
 	 */
 	fix?: FixKind;
 	level: RulePlainConfiguration;
-	options?: NoDisabledButtonOptions;
+	options?: NoDisabledAttributeOptions;
 }
 export interface RuleWithNoDoubleComparisonOptions {
 	/**
@@ -13202,7 +13202,7 @@ export type NoChainedComparisonOptions = {};
 export type NoConsoleSpacesOptions = {};
 export type NoConstantComparisonsOptions = {};
 export type NoDanglingUnderscoreOptions = {};
-export type NoDisabledButtonOptions = {};
+export type NoDisabledAttributeOptions = {};
 export type NoDoubleComparisonOptions = {};
 export type NoDuplicateMapKeysOptions = {};
 export interface NoDuplicateTypeConstituentsOptions {
@@ -15576,7 +15576,7 @@ export type Category =
 	| "lint/nursery/noConsoleSpaces"
 	| "lint/nursery/noConstantComparisons"
 	| "lint/nursery/noDanglingUnderscore"
-	| "lint/nursery/noDisabledButton"
+	| "lint/nursery/noDisabledAttribute"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"

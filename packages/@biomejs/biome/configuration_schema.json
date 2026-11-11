@@ -4099,13 +4099,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"NoDisabledButtonConfiguration": {
+		"NoDisabledAttributeConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoDisabledButtonOptions" }
+				{ "$ref": "#/$defs/RuleWithNoDisabledAttributeOptions" }
 			]
 		},
-		"NoDisabledButtonOptions": {
+		"NoDisabledAttributeOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -9187,10 +9187,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noDisabledButton": {
-					"description": "Discourages disabled on elements that act as buttons.\nSee https://biomejs.dev/linter/rules/no-disabled-button",
+				"noDisabledAttribute": {
+					"description": "Discourages the disabled attribute on form controls and on elements that act as buttons.\nSee https://biomejs.dev/linter/rules/no-disabled-attribute",
 					"anyOf": [
-						{ "$ref": "#/$defs/NoDisabledButtonConfiguration" },
+						{ "$ref": "#/$defs/NoDisabledAttributeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12729,7 +12729,7 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
-		"RuleWithNoDisabledButtonOptions": {
+		"RuleWithNoDisabledAttributeOptions": {
 			"type": "object",
 			"properties": {
 				"fix": {
@@ -12737,7 +12737,7 @@
 					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoDisabledButtonOptions" }
+				"options": { "$ref": "#/$defs/NoDisabledAttributeOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
