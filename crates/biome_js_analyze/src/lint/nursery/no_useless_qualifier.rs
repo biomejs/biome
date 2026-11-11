@@ -80,7 +80,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUselessQualifier {
-        version: "next",
+        version: "2.6.7",
         name: "noUselessQualifier",
         language: "ts",
         recommended: false,

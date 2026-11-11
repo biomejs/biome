@@ -66,7 +66,7 @@ declare_lint_rule! {
     ///   that can't be resolved, see
     ///   [`noUnresolvedImports`](https://biomejs.dev/linter/rules/no-unresolved-imports/).
     pub NoUnresolvedDefaultImport {
-        version: "next",
+        version: "2.6.7",
         name: "noUnresolvedDefaultImport",
         language: "js",
         sources: &[RuleSource::EslintImport("default").same()],

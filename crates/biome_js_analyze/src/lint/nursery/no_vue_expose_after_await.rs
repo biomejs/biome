@@ -81,7 +81,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueExposeAfterAwait {
-        version: "next",
+        version: "2.6.7",
         name: "noVueExposeAfterAwait",
         language: "js",
         recommended: true,

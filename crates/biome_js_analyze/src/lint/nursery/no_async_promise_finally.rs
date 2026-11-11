@@ -79,7 +79,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoAsyncPromiseFinally {
-        version: "next",
+        version: "2.6.7",
         name: "noAsyncPromiseFinally",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-async-promise-finally").same()],
