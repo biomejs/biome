@@ -1,0 +1,295 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+new Buffer(5);
+new Buffer([1, 2, 3]);
+Buffer(5);
+Buffer([1, 2, 3]);
+new Buffer(res.body.amount);
+new Buffer(res.body.values);
+new (Buffer)(5);
+new globalThis.Buffer(5);
+window.Buffer(5);
+globalThis["Buffer"](5);
+new Buffer;
+new global.Buffer(5);
+self.Buffer(5);
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/noBufferConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use the deprecated new Buffer().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ new Buffer(5);
+      │ ^^^^^^^^^^^^^
+    3 │ new Buffer([1, 2, 3]);
+    4 │ Buffer(5);
+  
+  i It does different things depending on the type of its argument, which can expose data left in memory when the argument comes from user input.
+  
+  i Use Buffer.from() to create a buffer from existing data, or Buffer.alloc() to create a buffer of a given size.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/noBufferConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use the deprecated new Buffer().
+  
+    1 │ /* should generate diagnostics */
+    2 │ new Buffer(5);
+  > 3 │ new Buffer([1, 2, 3]);
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    4 │ Buffer(5);
+    5 │ Buffer([1, 2, 3]);
+  
+  i It does different things depending on the type of its argument, which can expose data left in memory when the argument comes from user input.
+  
+  i Use Buffer.from() to create a buffer from existing data, or Buffer.alloc() to create a buffer of a given size.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/noBufferConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use the deprecated Buffer().
+  
+    2 │ new Buffer(5);
+    3 │ new Buffer([1, 2, 3]);
+  > 4 │ Buffer(5);
+      │ ^^^^^^^^^
+    5 │ Buffer([1, 2, 3]);
+    6 │ new Buffer(res.body.amount);
+  
+  i It does different things depending on the type of its argument, which can expose data left in memory when the argument comes from user input.
+  
+  i Use Buffer.from() to create a buffer from existing data, or Buffer.alloc() to create a buffer of a given size.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/noBufferConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use the deprecated Buffer().
+  
+    3 │ new Buffer([1, 2, 3]);
+    4 │ Buffer(5);
+  > 5 │ Buffer([1, 2, 3]);
+      │ ^^^^^^^^^^^^^^^^^
+    6 │ new Buffer(res.body.amount);
+    7 │ new Buffer(res.body.values);
+  
+  i It does different things depending on the type of its argument, which can expose data left in memory when the argument comes from user input.
+  
+  i Use Buffer.from() to create a buffer from existing data, or Buffer.alloc() to create a buffer of a given size.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/noBufferConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use the deprecated new Buffer().
+  
+    4 │ Buffer(5);
+    5 │ Buffer([1, 2, 3]);
+  > 6 │ new Buffer(res.body.amount);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ new Buffer(res.body.values);
+    8 │ new (Buffer)(5);
+  
+  i It does different things depending on the type of its argument, which can expose data left in memory when the argument comes from user input.
+  
+  i Use Buffer.from() to create a buffer from existing data, or Buffer.alloc() to create a buffer of a given size.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/noBufferConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use the deprecated new Buffer().
+  
+    5 │ Buffer([1, 2, 3]);
+    6 │ new Buffer(res.body.amount);
+  > 7 │ new Buffer(res.body.values);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ new (Buffer)(5);
+    9 │ new globalThis.Buffer(5);
+  
+  i It does different things depending on the type of its argument, which can expose data left in memory when the argument comes from user input.
+  
+  i Use Buffer.from() to create a buffer from existing data, or Buffer.alloc() to create a buffer of a given size.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/noBufferConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use the deprecated new Buffer().
+  
+     6 │ new Buffer(res.body.amount);
+     7 │ new Buffer(res.body.values);
+   > 8 │ new (Buffer)(5);
+       │ ^^^^^^^^^^^^^^^
+     9 │ new globalThis.Buffer(5);
+    10 │ window.Buffer(5);
+  
+  i It does different things depending on the type of its argument, which can expose data left in memory when the argument comes from user input.
+  
+  i Use Buffer.from() to create a buffer from existing data, or Buffer.alloc() to create a buffer of a given size.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/noBufferConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use the deprecated new Buffer().
+  
+     7 │ new Buffer(res.body.values);
+     8 │ new (Buffer)(5);
+   > 9 │ new globalThis.Buffer(5);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ window.Buffer(5);
+    11 │ globalThis["Buffer"](5);
+  
+  i It does different things depending on the type of its argument, which can expose data left in memory when the argument comes from user input.
+  
+  i Use Buffer.from() to create a buffer from existing data, or Buffer.alloc() to create a buffer of a given size.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/noBufferConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use the deprecated Buffer().
+  
+     8 │ new (Buffer)(5);
+     9 │ new globalThis.Buffer(5);
+  > 10 │ window.Buffer(5);
+       │ ^^^^^^^^^^^^^^^^
+    11 │ globalThis["Buffer"](5);
+    12 │ new Buffer;
+  
+  i It does different things depending on the type of its argument, which can expose data left in memory when the argument comes from user input.
+  
+  i Use Buffer.from() to create a buffer from existing data, or Buffer.alloc() to create a buffer of a given size.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/noBufferConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use the deprecated Buffer().
+  
+     9 │ new globalThis.Buffer(5);
+    10 │ window.Buffer(5);
+  > 11 │ globalThis["Buffer"](5);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ new Buffer;
+    13 │ new global.Buffer(5);
+  
+  i It does different things depending on the type of its argument, which can expose data left in memory when the argument comes from user input.
+  
+  i Use Buffer.from() to create a buffer from existing data, or Buffer.alloc() to create a buffer of a given size.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/noBufferConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use the deprecated new Buffer().
+  
+    10 │ window.Buffer(5);
+    11 │ globalThis["Buffer"](5);
+  > 12 │ new Buffer;
+       │ ^^^^^^^^^^
+    13 │ new global.Buffer(5);
+    14 │ self.Buffer(5);
+  
+  i It does different things depending on the type of its argument, which can expose data left in memory when the argument comes from user input.
+  
+  i Use Buffer.from() to create a buffer from existing data, or Buffer.alloc() to create a buffer of a given size.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/noBufferConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use the deprecated new Buffer().
+  
+    11 │ globalThis["Buffer"](5);
+    12 │ new Buffer;
+  > 13 │ new global.Buffer(5);
+       │ ^^^^^^^^^^^^^^^^^^^^
+    14 │ self.Buffer(5);
+    15 │ 
+  
+  i It does different things depending on the type of its argument, which can expose data left in memory when the argument comes from user input.
+  
+  i Use Buffer.from() to create a buffer from existing data, or Buffer.alloc() to create a buffer of a given size.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:1 lint/nursery/noBufferConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use the deprecated Buffer().
+  
+    12 │ new Buffer;
+    13 │ new global.Buffer(5);
+  > 14 │ self.Buffer(5);
+       │ ^^^^^^^^^^^^^^
+    15 │ 
+  
+  i It does different things depending on the type of its argument, which can expose data left in memory when the argument comes from user input.
+  
+  i Use Buffer.from() to create a buffer from existing data, or Buffer.alloc() to create a buffer of a given size.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
