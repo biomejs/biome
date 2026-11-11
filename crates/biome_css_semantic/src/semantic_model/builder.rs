@@ -34,6 +34,7 @@ pub struct SemanticModelBuilder {
     /// IDs of top-level rules only
     top_level_rule_ids: Vec<RuleId>,
     root_declarations: Vec<CssModelDeclarationData>,
+    scss_mixin_declarations: Vec<CssModelDeclarationData>,
     custom_property_prefixes: Vec<(Text, TextRange)>,
     global_custom_variables: FxHashMap<TokenText, CssGlobalCustomVariableData>,
     at_property_rules: Vec<CssPropertyAtRuleData>,
@@ -55,6 +56,7 @@ impl SemanticModelBuilder {
             all_rules: Vec::new(),
             top_level_rule_ids: Vec::new(),
             root_declarations: Vec::new(),
+            scss_mixin_declarations: Vec::new(),
             custom_property_prefixes: Vec::new(),
             current_rule_stack: Vec::new(),
             global_custom_variables: FxHashMap::default(),
@@ -146,6 +148,7 @@ impl SemanticModelBuilder {
             all_rules: self.all_rules,
             top_level_rule_ids: self.top_level_rule_ids,
             root_declarations: self.root_declarations,
+            scss_mixin_declarations: self.scss_mixin_declarations,
             custom_property_prefixes: self.custom_property_prefixes,
             global_custom_variables: self.global_custom_variables,
             at_property_rules: self.at_property_rules,
@@ -277,8 +280,10 @@ impl SemanticModelBuilder {
                         self.all_rules[current_rule_id.index()]
                             .declarations
                             .push(declaration);
-                    } else if self.is_root_declaration(&node) || is_in_scss_mixin_or_include(&node) {
+                    } else if self.is_root_declaration(&node) {
                         self.root_declarations.push(declaration);
+                    } else if is_in_scss_mixin_or_include(&node) {
+                        self.scss_mixin_declarations.push(declaration);
                     }
                 }
             }
