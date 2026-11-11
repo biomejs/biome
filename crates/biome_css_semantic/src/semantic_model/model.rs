@@ -191,8 +191,8 @@ pub(crate) struct SemanticModelData {
     /// Declarations parsed outside a rule, such as declarations in a `style` attribute or at the
     /// top level of a CSS-in-JS template.
     pub(crate) root_declarations: Vec<CssModelDeclarationData>,
-    /// Declarations in an SCSS mixin body or `@include` block outside a rule. Where they apply
-    /// depends on the `@include` site, so only custom property lookups read them.
+    /// Declarations in an SCSS mixin body or `@include` block outside a rule. They apply wherever
+    /// the mixin is included, so only custom property lookups read them.
     pub(crate) scss_mixin_declarations: Vec<CssModelDeclarationData>,
     /// The static prefixes of interpolated custom property names, such as `--color-` for
     /// `--color-#{$name}`, with the range of each name.
