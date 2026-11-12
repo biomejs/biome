@@ -395,6 +395,7 @@ define_categories! {
     "lint/nursery/noVueDeprecatedSlotAttribute": "https://biomejs.dev/linter/rules/no-vue-deprecated-slot-attribute",
     "lint/nursery/noVueDeprecatedSlotScope": "https://biomejs.dev/linter/rules/no-vue-deprecated-slot-scope",
     "lint/nursery/noVueDeprecatedVBindSync": "https://biomejs.dev/linter/rules/no-vue-deprecated-v-bind-sync",
+    "lint/nursery/noVueDeprecatedVIs": "https://biomejs.dev/linter/rules/no-vue-deprecated-v-is",
     "lint/nursery/noVueDeprecatedVOnNativeModifier": "https://biomejs.dev/linter/rules/no-vue-deprecated-v-on-native-modifier",
     "lint/nursery/noVueExcessiveProps": "https://biomejs.dev/linter/rules/no-vue-excessive-props",
     "lint/nursery/noVueExposeAfterAwait": "https://biomejs.dev/linter/rules/no-vue-expose-after-await",

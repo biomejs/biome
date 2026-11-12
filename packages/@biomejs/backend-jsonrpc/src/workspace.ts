@@ -3683,6 +3683,11 @@ export interface Nursery {
 	 */
 	noVueDeprecatedVBindSync?: NoVueDeprecatedVBindSyncConfiguration;
 	/**
+	 * Disallow the deprecated Vue v-is directive.
+	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-v-is
+	 */
+	noVueDeprecatedVIs?: NoVueDeprecatedVIsConfiguration;
+	/**
 	 * Disallow the .native modifier on Vue's v-on directive.
 	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-v-on-native-modifier
 	 */
@@ -7059,6 +7064,9 @@ export type NoVueDeprecatedSlotScopeConfiguration =
 export type NoVueDeprecatedVBindSyncConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedVBindSyncOptions;
+export type NoVueDeprecatedVIsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDeprecatedVIsOptions;
 export type NoVueDeprecatedVOnNativeModifierConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedVOnNativeModifierOptions;
@@ -10377,6 +10385,10 @@ export interface RuleWithNoVueDeprecatedVBindSyncOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedVBindSyncOptions;
 }
+export interface RuleWithNoVueDeprecatedVIsOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueDeprecatedVIsOptions;
+}
 export interface RuleWithNoVueDeprecatedVOnNativeModifierOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedVOnNativeModifierOptions;
@@ -13562,6 +13574,7 @@ export interface NoVueDeprecatedSlotAttributeOptions {
 }
 export type NoVueDeprecatedSlotScopeOptions = {};
 export type NoVueDeprecatedVBindSyncOptions = {};
+export type NoVueDeprecatedVIsOptions = {};
 export type NoVueDeprecatedVOnNativeModifierOptions = {};
 export interface NoVueExcessivePropsOptions {
 	/**
@@ -15732,6 +15745,7 @@ export type Category =
 	| "lint/nursery/noVueDeprecatedSlotAttribute"
 	| "lint/nursery/noVueDeprecatedSlotScope"
 	| "lint/nursery/noVueDeprecatedVBindSync"
+	| "lint/nursery/noVueDeprecatedVIs"
 	| "lint/nursery/noVueDeprecatedVOnNativeModifier"
 	| "lint/nursery/noVueExcessiveProps"
 	| "lint/nursery/noVueExposeAfterAwait"
