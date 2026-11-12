@@ -344,6 +344,7 @@ pub mod no_then_property;
 pub mod no_this_in_static;
 pub mod no_this_outside_of_class;
 pub mod no_top_level_literals;
+pub mod no_triple_slash_reference;
 pub mod no_ts_ignore;
 pub mod no_unassigned_variables;
 pub mod no_undeclared_classes;

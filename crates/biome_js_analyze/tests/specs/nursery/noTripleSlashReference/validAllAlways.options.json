@@ -1,0 +1,13 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noTripleSlashReference": {
+          "level": "error",
+          "options": { "lib": "always", "path": "always", "types": "always" }
+        }
+      }
+    }
+  }
+}

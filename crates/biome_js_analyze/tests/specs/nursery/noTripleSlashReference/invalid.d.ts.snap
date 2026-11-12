@@ -1,0 +1,63 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.d.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+/// <reference path="./other.d.ts" />
+/// <reference types="foo" />
+declare module "bar" {
+	import { Foo } from "foo";
+}
+
+```
+
+# Diagnostics
+```
+invalid.d.ts:2:1 lint/nursery/noTripleSlashReference ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected triple-slash reference to ./other.d.ts.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ /// <reference path="./other.d.ts" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ /// <reference types="foo" />
+    4 │ declare module "bar" {
+  
+  i A triple-slash reference loads code for the whole file without showing which parts the file uses.
+  
+  i Use an import statement to load the file instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.d.ts:3:1 lint/nursery/noTripleSlashReference ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This triple-slash reference to foo is redundant.
+  
+    1 │ /* should generate diagnostics */
+    2 │ /// <reference path="./other.d.ts" />
+  > 3 │ /// <reference types="foo" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ declare module "bar" {
+    5 │ 	import { Foo } from "foo";
+  
+  i The file already imports foo here, which also loads its types.
+  
+    3 │ /// <reference types="foo" />
+    4 │ declare module "bar" {
+  > 5 │ 	import { Foo } from "foo";
+      │ 	                    ^^^^^
+    6 │ }
+    7 │ 
+  
+  i Remove the triple-slash reference.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
