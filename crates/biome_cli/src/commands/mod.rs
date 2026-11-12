@@ -845,15 +845,16 @@ impl BiomeCommand {
                 {
                     return Some(&ColorsArg::Off);
                 }
-                // In CI, we force colors for a better UX unless users explicitly set `--colors`.
-                // In GitHub Actions, we disable colors so the auto-enabled GitHub reporter
-                // output is not corrupted by ANSI escape codes.
+                // In CI environments, force colors for a better UX unless users explicitly set
+                // `--colors`. In GitHub Actions, disable colors so the auto-enabled GitHub reporter
+                // output is not corrupted by ANSI escape codes. Outside CI, let automatic color
+                // detection (TTY/NO_COLOR) decide.
                 if matches!(self, Self::Ci { .. }) && cli_options.colors.is_none() {
-                    if CiProvider::from_environment(environment) == Some(CiProvider::GithubActions)
-                    {
-                        return Some(&ColorsArg::Off);
-                    }
-                    return Some(&ColorsArg::Force);
+                    return match CiProvider::from_environment(environment) {
+                        Some(CiProvider::GithubActions) => Some(&ColorsArg::Off),
+                        Some(_) => Some(&ColorsArg::Force),
+                        None => None,
+                    };
                 }
                 // Normal behaviors
                 cli_options.colors.as_ref()
@@ -1222,5 +1223,13 @@ mod tests {
             command.get_color(&environment),
             Some(ColorsArg::Force)
         ));
+    }
+
+    #[test]
+    fn ci_uses_auto_colors_outside_ci_environment() {
+        let command = parse(&["ci", "file.js"]);
+        let environment = biome_flags::MemoryEnvironment::default();
+
+        assert!(matches!(command.get_color(&environment), None));
     }
 }
