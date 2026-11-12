@@ -1,0 +1,8 @@
+---
+// should generate diagnostics
+
+const classes = clsx("bg-green-500");
+---
+
+<div class={clsx("float-left", active && "dark:p-4")}></div>
+<div class:list={["w-1/2", condition && "group-hover:p-4"]}></div>

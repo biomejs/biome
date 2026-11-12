@@ -1,0 +1,126 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --only=nursery/noTailwindRestrictedClasses '<TEMP_DIR>/no_tailwind_restricted_classes_reads_stylesheet_utilities'
+```
+
+## `biome.json`
+
+```json
+{
+  "html": { "linter": { "enabled": true } },
+  "tailwind": { "stylesheet": "./src/app.css" },
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noTailwindRestrictedClasses": {
+          "level": "error",
+          "options": {
+            "classes": {
+              "slide-in-from-top-*": "Use the enter animation preset.",
+              "enter-legacy": { "use": "slide-in-from-top-4" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+## `src/App.jsx`
+
+```jsx
+export const a = <div className="md:slide-in-from-top-4 flex" />;
+export const b = <div className="enter-legacy" />;
+
+```
+
+## `src/app.css`
+
+```css
+@utility slide-in-from-top-* {
+    --tw-enter-translate-y: calc(--value(integer) * var(--spacing));
+}
+```
+
+## `src/index.html`
+
+```html
+<div class="slide-in-from-top-[48%] flex"></div>
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+src/App.jsx:1:37 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Tailwind CSS class slide-in-from-top-4 isn't allowed in this project.
+  
+  > 1 │ export const a = <div className="md:slide-in-from-top-4 flex" />;
+      │                                     ^^^^^^^^^^^^^^^^^^^
+    2 │ export const b = <div className="enter-legacy" />;
+    3 │ 
+  
+  i Use the enter animation preset.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+src/App.jsx:2:34 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Tailwind CSS class enter-legacy isn't allowed in this project.
+  
+    1 │ export const a = <div className="md:slide-in-from-top-4 flex" />;
+  > 2 │ export const b = <div className="enter-legacy" />;
+      │                                  ^^^^^^^^^^^^
+    3 │ 
+  
+  i The configuration of this rule restricts this class.
+  
+  i Use slide-in-from-top-4 instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+src/index.html:1:13 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Tailwind CSS class slide-in-from-top-[48%] isn't allowed in this project.
+  
+  > 1 │ <div class="slide-in-from-top-[48%] flex"></div>
+      │             ^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Use the enter animation preset.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+Checked 4 files in <TIME>. No fixes applied.
+Found 3 errors.
+```
