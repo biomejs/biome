@@ -156,6 +156,7 @@ impl<'db> DepthFirstVisitor<TypeData<'db>> for BooleanCoercionVisitor<'db> {
             | TypeData::TypeofExpression(_)
             | TypeData::IndexedAccess(_)
             | TypeData::MappedType(_)
+            | TypeData::Extends(_)
             | TypeData::ThisKeyword => {
                 return ControlFlow::Break(TypeTraversalError::UnresolvedType);
             }

@@ -560,6 +560,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::TypeOperator(_)
             | InferredTypeData::IndexedAccess(_)
             | InferredTypeData::MappedType(_)
+            | InferredTypeData::Extends(_)
             | InferredTypeData::Literal(_)
             | InferredTypeData::MergedReference(_)
             | InferredTypeData::TypeofExpression(_)
@@ -704,6 +705,9 @@ impl<'db> ResolutionCtx<'db, '_> {
                         object.has_unknown_members(self.db) || object.prototype(self.db).is_some(),
                     ));
                 }
+                InferredTypeData::Extends(extends) => {
+                    ty = self.select_conditional_branch(extends)?;
+                }
                 InferredTypeData::Unknown
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
@@ -741,60 +745,71 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     fn string_literal_keys(&mut self, ty: InferredTypeData<'db>) -> Option<Vec<Text>> {
-        match self.resolve_inferred_type(ty) {
-            InferredTypeData::Literal(literal) => match literal.literal(self.db) {
-                InferredLiteral::String(value) => Some(vec![value.as_ref().clone()]),
-                InferredLiteral::BigInt(_)
-                | InferredLiteral::Boolean(_)
-                | InferredLiteral::Number(_)
-                | InferredLiteral::Object(_)
-                | InferredLiteral::RegExp(_)
-                | InferredLiteral::Template(_) => None,
-            },
-            InferredTypeData::Union(union) => union
-                .types(self.db)
-                .to_vec()
-                .into_iter()
-                .map(|ty| self.string_literal_key(ty))
-                .collect(),
-            InferredTypeData::Unknown
-            | InferredTypeData::Global
-            | InferredTypeData::GlobalType(_)
-            | InferredTypeData::GlobalLocal(_)
-            | InferredTypeData::BigInt
-            | InferredTypeData::Boolean
-            | InferredTypeData::Null
-            | InferredTypeData::Number
-            | InferredTypeData::String
-            | InferredTypeData::Symbol
-            | InferredTypeData::Undefined
-            | InferredTypeData::Conditional
-            | InferredTypeData::Class(_)
-            | InferredTypeData::Constructor(_)
-            | InferredTypeData::Function(_)
-            | InferredTypeData::Interface(_)
-            | InferredTypeData::Module(_)
-            | InferredTypeData::Namespace(_)
-            | InferredTypeData::Object(_)
-            | InferredTypeData::Tuple(_)
-            | InferredTypeData::Generic(_)
-            | InferredTypeData::Local(_)
-            | InferredTypeData::Intersection(_)
-            | InferredTypeData::TypeOperator(_)
-            | InferredTypeData::IndexedAccess(_)
-            | InferredTypeData::MappedType(_)
-            | InferredTypeData::InstanceOf(_)
-            | InferredTypeData::MergedReference(_)
-            | InferredTypeData::TypeofExpression(_)
-            | InferredTypeData::TypeofType(_)
-            | InferredTypeData::TypeofValue(_)
-            | InferredTypeData::AnyKeyword
-            | InferredTypeData::NeverKeyword
-            | InferredTypeData::ObjectKeyword
-            | InferredTypeData::ThisKeyword
-            | InferredTypeData::UnknownKeyword
-            | InferredTypeData::VoidKeyword => None,
+        let mut ty = ty;
+        for _ in 0..MAX_LOCAL_TYPE_RESOLUTION_STEPS {
+            match self.resolve_inferred_type(ty) {
+                InferredTypeData::Extends(extends) => {
+                    ty = self.select_conditional_branch(extends)?;
+                }
+                InferredTypeData::Literal(literal) => {
+                    return match literal.literal(self.db) {
+                        InferredLiteral::String(value) => Some(vec![value.as_ref().clone()]),
+                        InferredLiteral::BigInt(_)
+                        | InferredLiteral::Boolean(_)
+                        | InferredLiteral::Number(_)
+                        | InferredLiteral::Object(_)
+                        | InferredLiteral::RegExp(_)
+                        | InferredLiteral::Template(_) => None,
+                    };
+                }
+                InferredTypeData::Union(union) => {
+                    return union
+                        .types(self.db)
+                        .to_vec()
+                        .into_iter()
+                        .map(|ty| self.string_literal_key(ty))
+                        .collect();
+                }
+                InferredTypeData::Unknown
+                | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
+                | InferredTypeData::GlobalLocal(_)
+                | InferredTypeData::BigInt
+                | InferredTypeData::Boolean
+                | InferredTypeData::Null
+                | InferredTypeData::Number
+                | InferredTypeData::String
+                | InferredTypeData::Symbol
+                | InferredTypeData::Undefined
+                | InferredTypeData::Conditional
+                | InferredTypeData::Class(_)
+                | InferredTypeData::Constructor(_)
+                | InferredTypeData::Function(_)
+                | InferredTypeData::Interface(_)
+                | InferredTypeData::Module(_)
+                | InferredTypeData::Namespace(_)
+                | InferredTypeData::Object(_)
+                | InferredTypeData::Tuple(_)
+                | InferredTypeData::Generic(_)
+                | InferredTypeData::Local(_)
+                | InferredTypeData::Intersection(_)
+                | InferredTypeData::TypeOperator(_)
+                | InferredTypeData::IndexedAccess(_)
+                | InferredTypeData::MappedType(_)
+                | InferredTypeData::InstanceOf(_)
+                | InferredTypeData::MergedReference(_)
+                | InferredTypeData::TypeofExpression(_)
+                | InferredTypeData::TypeofType(_)
+                | InferredTypeData::TypeofValue(_)
+                | InferredTypeData::AnyKeyword
+                | InferredTypeData::NeverKeyword
+                | InferredTypeData::ObjectKeyword
+                | InferredTypeData::ThisKeyword
+                | InferredTypeData::UnknownKeyword
+                | InferredTypeData::VoidKeyword => return None,
+            }
         }
+        None
     }
 
     fn string_literal_key(&mut self, ty: InferredTypeData<'db>) -> Option<Text> {
@@ -835,6 +850,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::TypeOperator(_)
             | InferredTypeData::IndexedAccess(_)
             | InferredTypeData::MappedType(_)
+            | InferredTypeData::Extends(_)
             | InferredTypeData::InstanceOf(_)
             | InferredTypeData::MergedReference(_)
             | InferredTypeData::TypeofExpression(_)

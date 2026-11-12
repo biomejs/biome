@@ -1,0 +1,85 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+type Unwrap<T> =
+	T extends Promise<infer U extends string>
+		? [U]
+		: [T] extends [string]
+			? 1
+			: 2;
+
+```
+
+## Result
+
+```
+instanceof Local TypeId(10)<Local TypeId(11)>
+```
+
+## Registered types
+
+```
+Module TypeId(0) => instanceof unresolved reference "T" (scope ID: 0)
+
+Module TypeId(1) => U extends string
+
+Module TypeId(2) => instanceof unresolved reference "Promise"<Local TypeId(1)> (scope ID: 0)
+
+Module TypeId(3) => instanceof unresolved reference "U" (scope ID: 0)
+
+Module TypeId(4) => Tuple {
+    elements: [
+        TupleElementType {
+            ty: Resolved(
+                Local TypeId(3),
+            ),
+            name: None,
+            is_optional: false,
+            is_rest: false,
+        },
+    ],
+    is_inferred_array: false,
+}
+
+Module TypeId(5) => Tuple {
+    elements: [
+        TupleElementType {
+            ty: Resolved(
+                Local TypeId(0),
+            ),
+            name: None,
+            is_optional: false,
+            is_rest: false,
+        },
+    ],
+    is_inferred_array: false,
+}
+
+Module TypeId(6) => Tuple {
+    elements: [
+        TupleElementType {
+            ty: Resolved(
+                string,
+            ),
+            name: None,
+            is_optional: false,
+            is_rest: false,
+        },
+    ],
+    is_inferred_array: false,
+}
+
+Module TypeId(7) => number: 1
+
+Module TypeId(8) => number: 2
+
+Module TypeId(9) => (Local TypeId(5) extends Local TypeId(6) ? Local TypeId(7) : Local TypeId(8))
+
+Module TypeId(10) => (Local TypeId(0) extends Local TypeId(2) ? Local TypeId(4) : Local TypeId(9)) infer [Local TypeId(1)] distributive
+
+Module TypeId(11) => T
+```

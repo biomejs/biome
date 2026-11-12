@@ -28,11 +28,11 @@ use biome_js_type_info::{
     TypeReference, TypeReferenceQualifier, TypeResolverLevel,
     TypeofExpression as RawTypeofExpression,
     interned_types::{
-        InternedMappedType as InferredMappedType, InternedModule as InferredModule,
-        InternedNamespace as InferredNamespace, InternedTypeofValue, Literal as InferredLiteral,
-        LocalTypeHandle, LocalTypeId, ModuleKey, TypeData as InferredTypeData,
-        TypeMember as InferredTypeMember, TypeMemberKind as InferredTypeMemberKind,
-        TypeSubstitution as InferredTypeSubstitution,
+        InternedExtendsType as InferredExtendsType, InternedMappedType as InferredMappedType,
+        InternedModule as InferredModule, InternedNamespace as InferredNamespace,
+        InternedTypeofValue, Literal as InferredLiteral, LocalTypeHandle, LocalTypeId, ModuleKey,
+        TypeData as InferredTypeData, TypeMember as InferredTypeMember,
+        TypeMemberKind as InferredTypeMemberKind, TypeSubstitution as InferredTypeSubstitution,
     },
 };
 use biome_rowan::{Text, TextRange};
@@ -1059,6 +1059,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
                 | InferredTypeData::TypeOperator(_)
                 | InferredTypeData::IndexedAccess(_)
                 | InferredTypeData::MappedType(_)
+                | InferredTypeData::Extends(_)
                 | InferredTypeData::Literal(_)
                 | InferredTypeData::MergedReference(_)
                 | InferredTypeData::TypeofType(_)
@@ -1106,6 +1107,30 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
         }
 
         ty
+    }
+
+    /// Selects the branch of a conditional type that an expression operates
+    /// on, such as the operand of `-value` in:
+    ///
+    /// ```ts
+    /// declare const value: true extends true ? bigint : number;
+    /// ```
+    ///
+    /// The branch is returned as declared, with its local handles unresolved.
+    /// Returns `None` when no branch can be selected, for example because the
+    /// check type still refers to a generic.
+    pub(in crate::db::type_inference) fn select_conditional_branch(
+        &mut self,
+        extends: InferredExtendsType<'db>,
+    ) -> Option<InferredTypeData<'db>> {
+        let db = self.db;
+        let check_type = extends.check_type(db);
+        if check_type.may_refer_to_free_generic(db) {
+            return None;
+        }
+        extends.select_branch(db, check_type, extends.extends_type(db), |ty| {
+            self.resolve_inferred_type(ty).expand_structural_global(db)
+        })
     }
 }
 
