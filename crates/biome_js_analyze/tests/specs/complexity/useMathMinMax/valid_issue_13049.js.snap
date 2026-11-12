@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: valid_issue_13049.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+const strings = ["foo", "bar"].map((a) => a);
+const largest = strings.reduce((a, b) => (a > b ? a : b), "");
+
+const largestNoInit = ["foo", "bar"].map((a) => a).reduce((a, b) => (a > b ? a : b));
+
+```

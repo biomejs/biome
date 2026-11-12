@@ -560,16 +560,18 @@ fn has_non_numeric_reduce_parameter(
     }
 
     let member = reduce_member_expression(&call)?;
+    let initial = arguments.next();
+    if index == 0
+        && let Some(Ok(initial)) = initial
+    {
+        return Some(initial.as_any_js_expression().is_some_and(|initial| {
+            has_non_numeric_reduction_value(initial, model).unwrap_or(false)
+        }));
+    }
+
     let array = array_from_reduce_receiver(&member.object().ok()?, model)?;
     Some(match index {
-        0 => match arguments.next() {
-            None => array_has_known_non_numeric_element(&array, model),
-            Some(Ok(initial)) => initial.as_any_js_expression().is_some_and(|initial| {
-                has_non_numeric_reduction_value(initial, model).unwrap_or(false)
-            }),
-            Some(Err(_)) => false,
-        },
-        1 => array_has_known_non_numeric_element(&array, model),
+        0 | 1 => array_has_known_non_numeric_element(&array, model),
         _ => false,
     })
 }
@@ -581,6 +583,9 @@ fn array_from_reduce_receiver(
     let receiver = receiver.clone().omit_type_wrappers()?;
     if let AnyJsExpression::JsArrayExpression(array) = receiver {
         return Some(array);
+    }
+    if let AnyJsExpression::JsCallExpression(call) = receiver {
+        return array_from_preserving_array_call(&call, model);
     }
     let AnyJsExpression::JsIdentifierExpression(identifier) = receiver else {
         return None;
@@ -610,13 +615,68 @@ fn array_from_reduce_receiver(
         return None;
     }
 
-    declarator
-        .initializer()?
-        .expression()
-        .ok()?
-        .omit_type_wrappers()?
-        .as_js_array_expression()
-        .cloned()
+    let init = declarator.initializer()?.expression().ok()?;
+    array_from_reduce_receiver(&init, model)
+}
+
+fn array_from_preserving_array_call(
+    call: &JsCallExpression,
+    model: &SemanticModel,
+) -> Option<JsArrayExpression> {
+    let member =
+        AnyJsMemberExpression::cast(call.callee().ok()?.omit_type_wrappers()?.into_syntax())?;
+    let name = member.member_name()?;
+    let preserves_elements = match name.text() {
+        "filter" | "slice" | "reverse" | "sort" | "toReversed" | "toSorted" => true,
+        "map" => is_identity_map_call(call),
+        _ => false,
+    };
+    if !preserves_elements {
+        return None;
+    }
+    array_from_reduce_receiver(&member.object().ok()?, model)
+}
+
+fn is_identity_map_call(call: &JsCallExpression) -> bool {
+    let Some(Ok(first_arg)) = call.arguments().ok().and_then(|args| args.args().iter().next()) else {
+        return false;
+    };
+    let Some(AnyJsExpression::JsArrowFunctionExpression(arrow)) = first_arg
+        .as_any_js_expression()
+        .and_then(|expr| expr.clone().omit_type_wrappers())
+    else {
+        return false;
+    };
+    let Ok(biome_js_syntax::AnyJsArrowFunctionParameters::JsParameters(params)) = arrow.parameters()
+    else {
+        return false;
+    };
+    let mut param_iter = params.items().iter();
+    let Some(Ok(biome_js_syntax::AnyJsParameter::AnyJsFormalParameter(
+        biome_js_syntax::AnyJsFormalParameter::JsFormalParameter(param),
+    ))) = param_iter.next()
+    else {
+        return false;
+    };
+    let Ok(AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(param_binding))) =
+        param.binding()
+    else {
+        return false;
+    };
+    let Ok(param_name) = param_binding.name_token() else {
+        return false;
+    };
+    let Ok(biome_js_syntax::AnyJsFunctionBody::AnyJsExpression(body)) = arrow.body() else {
+        return false;
+    };
+    let Some(body_ident) = body.omit_parentheses().as_js_identifier_expression().cloned() else {
+        return false;
+    };
+    body_ident
+        .name()
+        .ok()
+        .and_then(|name| name.value_token().ok())
+        .is_some_and(|token| token.text_trimmed() == param_name.text_trimmed())
 }
 
 fn array_has_known_non_numeric_element(array: &JsArrayExpression, model: &SemanticModel) -> bool {
