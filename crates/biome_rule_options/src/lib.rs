@@ -44,6 +44,7 @@ pub mod no_common_js;
 pub mod no_compare_neg_zero;
 pub mod no_component_hook_factories;
 pub mod no_conditional_expect;
+pub mod no_confusing_array_splice;
 pub mod no_confusing_labels;
 pub mod no_confusing_void_type;
 pub mod no_console;

@@ -236,6 +236,7 @@ define_categories! {
     "lint/nursery/noColorInvalidHex": "https://biomejs.dev/linter/rules/no-color-invalid-hex",
     "lint/nursery/noComponentHookFactories": "https://biomejs.dev/linter/rules/no-component-hook-factories",
     "lint/nursery/noConditionalExpect": "https://biomejs.dev/linter/rules/no-conditional-expect",
+    "lint/nursery/noConfusingArraySplice": "https://biomejs.dev/linter/rules/no-confusing-array-splice",
     "lint/nursery/noConsoleSpaces": "https://biomejs.dev/linter/rules/no-console-spaces",
     "lint/nursery/noConstantComparisons": "https://biomejs.dev/linter/rules/no-constant-comparisons",
     "lint/nursery/noDanglingUnderscore": "https://biomejs.dev/linter/rules/no-dangling-underscore",

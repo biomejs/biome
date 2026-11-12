@@ -1,0 +1,458 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+array.splice(index, 1 as const, element);
+array.splice(index, <number>1, element);
+array.splice(index, 1!, element);
+array.splice(index, 1 satisfies number, element);
+array.splice(-1 as const, 0 as const, element);
+array.splice(-1 satisfies number, 0 satisfies number, element);
+array.toSpliced(index, 1 as const, element);
+array.toSpliced(-1 satisfies number, 1, element);
+array.toSpliced(-(1 satisfies number), 1, element);
+array.toSpliced(-1 as const, 0 as const, element);
+array.splice(`1` as const, 1, element);
+array.splice(index as number, 1, element);
+array.splice(null as any, 1, element);
+array.splice(undefined!, 1, element);
+(array as unknown[]).splice(0, 1, element);
+function f(foo: unknown[]) { foo.splice(index, 1, element); }
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:1 lint/nursery/noConfusingArraySplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call replaces a single element.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ array.splice(index, 1 as const, element);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ array.splice(index, <number>1, element);
+    4 │ array.splice(index, 1!, element);
+  
+  i Readers have to work out what each argument means to understand the call.
+  
+  i Assign to the index instead, as in array[index] = element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Assign to the index instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - array.splice(index,·1·as·const,·element);
+        2 │ + array[index]·=·element;
+     3  3 │   array.splice(index, <number>1, element);
+     4  4 │   array.splice(index, 1!, element);
+  
+
+```
+
+```
+invalid.ts:3:1 lint/nursery/noConfusingArraySplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call replaces a single element.
+  
+    1 │ /* should generate diagnostics */
+    2 │ array.splice(index, 1 as const, element);
+  > 3 │ array.splice(index, <number>1, element);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ array.splice(index, 1!, element);
+    5 │ array.splice(index, 1 satisfies number, element);
+  
+  i Readers have to work out what each argument means to understand the call.
+  
+  i Assign to the index instead, as in array[index] = element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Assign to the index instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   array.splice(index, 1 as const, element);
+     3    │ - array.splice(index,·<number>1,·element);
+        3 │ + array[index]·=·element;
+     4  4 │   array.splice(index, 1!, element);
+     5  5 │   array.splice(index, 1 satisfies number, element);
+  
+
+```
+
+```
+invalid.ts:4:1 lint/nursery/noConfusingArraySplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call replaces a single element.
+  
+    2 │ array.splice(index, 1 as const, element);
+    3 │ array.splice(index, <number>1, element);
+  > 4 │ array.splice(index, 1!, element);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ array.splice(index, 1 satisfies number, element);
+    6 │ array.splice(-1 as const, 0 as const, element);
+  
+  i Readers have to work out what each argument means to understand the call.
+  
+  i Assign to the index instead, as in array[index] = element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Assign to the index instead.
+  
+     2  2 │   array.splice(index, 1 as const, element);
+     3  3 │   array.splice(index, <number>1, element);
+     4    │ - array.splice(index,·1!,·element);
+        4 │ + array[index]·=·element;
+     5  5 │   array.splice(index, 1 satisfies number, element);
+     6  6 │   array.splice(-1 as const, 0 as const, element);
+  
+
+```
+
+```
+invalid.ts:5:1 lint/nursery/noConfusingArraySplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call replaces a single element.
+  
+    3 │ array.splice(index, <number>1, element);
+    4 │ array.splice(index, 1!, element);
+  > 5 │ array.splice(index, 1 satisfies number, element);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ array.splice(-1 as const, 0 as const, element);
+    7 │ array.splice(-1 satisfies number, 0 satisfies number, element);
+  
+  i Readers have to work out what each argument means to understand the call.
+  
+  i Assign to the index instead, as in array[index] = element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Assign to the index instead.
+  
+     3  3 │   array.splice(index, <number>1, element);
+     4  4 │   array.splice(index, 1!, element);
+     5    │ - array.splice(index,·1·satisfies·number,·element);
+        5 │ + array[index]·=·element;
+     6  6 │   array.splice(-1 as const, 0 as const, element);
+     7  7 │   array.splice(-1 satisfies number, 0 satisfies number, element);
+  
+
+```
+
+```
+invalid.ts:6:1 lint/nursery/noConfusingArraySplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call inserts at index -1.
+  
+    4 │ array.splice(index, 1!, element);
+    5 │ array.splice(index, 1 satisfies number, element);
+  > 6 │ array.splice(-1 as const, 0 as const, element);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ array.splice(-1 satisfies number, 0 satisfies number, element);
+    8 │ array.toSpliced(index, 1 as const, element);
+  
+  i It inserts before the last element, or at the start when the array is empty. Readers can mistake it for inserting at the end.
+  
+  i Work out the index explicitly, as in Math.max(array.length - 1, 0).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Work out the insertion index explicitly.
+  
+     4  4 │   array.splice(index, 1!, element);
+     5  5 │   array.splice(index, 1 satisfies number, element);
+     6    │ - array.splice(-1·as·const,·0·as·const,·element);
+        6 │ + array.splice(Math.max(array.length·-·1,·0),·0·as·const,·element);
+     7  7 │   array.splice(-1 satisfies number, 0 satisfies number, element);
+     8  8 │   array.toSpliced(index, 1 as const, element);
+  
+
+```
+
+```
+invalid.ts:7:1 lint/nursery/noConfusingArraySplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call inserts at index -1.
+  
+    5 │ array.splice(index, 1 satisfies number, element);
+    6 │ array.splice(-1 as const, 0 as const, element);
+  > 7 │ array.splice(-1 satisfies number, 0 satisfies number, element);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ array.toSpliced(index, 1 as const, element);
+    9 │ array.toSpliced(-1 satisfies number, 1, element);
+  
+  i It inserts before the last element, or at the start when the array is empty. Readers can mistake it for inserting at the end.
+  
+  i Work out the index explicitly, as in Math.max(array.length - 1, 0).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Work out the insertion index explicitly.
+  
+     5  5 │   array.splice(index, 1 satisfies number, element);
+     6  6 │   array.splice(-1 as const, 0 as const, element);
+     7    │ - array.splice(-1·satisfies·number,·0·satisfies·number,·element);
+        7 │ + array.splice(Math.max(array.length·-·1,·0),·0·satisfies·number,·element);
+     8  8 │   array.toSpliced(index, 1 as const, element);
+     9  9 │   array.toSpliced(-1 satisfies number, 1, element);
+  
+
+```
+
+```
+invalid.ts:8:1 lint/nursery/noConfusingArraySplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This toSpliced() call replaces a single element.
+  
+     6 │ array.splice(-1 as const, 0 as const, element);
+     7 │ array.splice(-1 satisfies number, 0 satisfies number, element);
+   > 8 │ array.toSpliced(index, 1 as const, element);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ array.toSpliced(-1 satisfies number, 1, element);
+    10 │ array.toSpliced(-(1 satisfies number), 1, element);
+  
+  i Readers have to work out what each argument means to understand the call.
+  
+  i Use with() instead, as in array.with(index, element).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use with() instead.
+  
+     6  6 │   array.splice(-1 as const, 0 as const, element);
+     7  7 │   array.splice(-1 satisfies number, 0 satisfies number, element);
+     8    │ - array.toSpliced(index,·1·as·const,·element);
+        8 │ + array.with(index,·element);
+     9  9 │   array.toSpliced(-1 satisfies number, 1, element);
+    10 10 │   array.toSpliced(-(1 satisfies number), 1, element);
+  
+
+```
+
+```
+invalid.ts:9:1 lint/nursery/noConfusingArraySplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This toSpliced() call replaces a single element.
+  
+     7 │ array.splice(-1 satisfies number, 0 satisfies number, element);
+     8 │ array.toSpliced(index, 1 as const, element);
+   > 9 │ array.toSpliced(-1 satisfies number, 1, element);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ array.toSpliced(-(1 satisfies number), 1, element);
+    11 │ array.toSpliced(-1 as const, 0 as const, element);
+  
+  i Readers have to work out what each argument means to understand the call.
+  
+  i Use with() instead, as in array.with(index, element).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:10:1 lint/nursery/noConfusingArraySplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This toSpliced() call replaces a single element.
+  
+     8 │ array.toSpliced(index, 1 as const, element);
+     9 │ array.toSpliced(-1 satisfies number, 1, element);
+  > 10 │ array.toSpliced(-(1 satisfies number), 1, element);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ array.toSpliced(-1 as const, 0 as const, element);
+    12 │ array.splice(`1` as const, 1, element);
+  
+  i Readers have to work out what each argument means to understand the call.
+  
+  i Use with() instead, as in array.with(index, element).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:11:1 lint/nursery/noConfusingArraySplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This toSpliced() call inserts at index -1.
+  
+     9 │ array.toSpliced(-1 satisfies number, 1, element);
+    10 │ array.toSpliced(-(1 satisfies number), 1, element);
+  > 11 │ array.toSpliced(-1 as const, 0 as const, element);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ array.splice(`1` as const, 1, element);
+    13 │ array.splice(index as number, 1, element);
+  
+  i It inserts before the last element, or at the start when the array is empty. Readers can mistake it for inserting at the end.
+  
+  i Work out the index explicitly, as in Math.max(array.length - 1, 0).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Work out the insertion index explicitly.
+  
+     9  9 │   array.toSpliced(-1 satisfies number, 1, element);
+    10 10 │   array.toSpliced(-(1 satisfies number), 1, element);
+    11    │ - array.toSpliced(-1·as·const,·0·as·const,·element);
+       11 │ + array.toSpliced(Math.max(array.length·-·1,·0),·0·as·const,·element);
+    12 12 │   array.splice(`1` as const, 1, element);
+    13 13 │   array.splice(index as number, 1, element);
+  
+
+```
+
+```
+invalid.ts:12:1 lint/nursery/noConfusingArraySplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call replaces a single element.
+  
+    10 │ array.toSpliced(-(1 satisfies number), 1, element);
+    11 │ array.toSpliced(-1 as const, 0 as const, element);
+  > 12 │ array.splice(`1` as const, 1, element);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ array.splice(index as number, 1, element);
+    14 │ array.splice(null as any, 1, element);
+  
+  i Readers have to work out what each argument means to understand the call.
+  
+  i Assign to the index instead, as in array[index] = element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Assign to the index instead.
+  
+    10 10 │   array.toSpliced(-(1 satisfies number), 1, element);
+    11 11 │   array.toSpliced(-1 as const, 0 as const, element);
+    12    │ - array.splice(`1`·as·const,·1,·element);
+       12 │ + array[`1`·as·const]·=·element;
+    13 13 │   array.splice(index as number, 1, element);
+    14 14 │   array.splice(null as any, 1, element);
+  
+
+```
+
+```
+invalid.ts:13:1 lint/nursery/noConfusingArraySplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call replaces a single element.
+  
+    11 │ array.toSpliced(-1 as const, 0 as const, element);
+    12 │ array.splice(`1` as const, 1, element);
+  > 13 │ array.splice(index as number, 1, element);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ array.splice(null as any, 1, element);
+    15 │ array.splice(undefined!, 1, element);
+  
+  i Readers have to work out what each argument means to understand the call.
+  
+  i Assign to the index instead, as in array[index] = element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Assign to the index instead.
+  
+    11 11 │   array.toSpliced(-1 as const, 0 as const, element);
+    12 12 │   array.splice(`1` as const, 1, element);
+    13    │ - array.splice(index·as·number,·1,·element);
+       13 │ + array[index·as·number]·=·element;
+    14 14 │   array.splice(null as any, 1, element);
+    15 15 │   array.splice(undefined!, 1, element);
+  
+
+```
+
+```
+invalid.ts:14:1 lint/nursery/noConfusingArraySplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call replaces a single element.
+  
+    12 │ array.splice(`1` as const, 1, element);
+    13 │ array.splice(index as number, 1, element);
+  > 14 │ array.splice(null as any, 1, element);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ array.splice(undefined!, 1, element);
+    16 │ (array as unknown[]).splice(0, 1, element);
+  
+  i Readers have to work out what each argument means to understand the call.
+  
+  i Assign to the index instead, as in array[index] = element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:15:1 lint/nursery/noConfusingArraySplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call replaces a single element.
+  
+    13 │ array.splice(index as number, 1, element);
+    14 │ array.splice(null as any, 1, element);
+  > 15 │ array.splice(undefined!, 1, element);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ (array as unknown[]).splice(0, 1, element);
+    17 │ function f(foo: unknown[]) { foo.splice(index, 1, element); }
+  
+  i Readers have to work out what each argument means to understand the call.
+  
+  i Assign to the index instead, as in array[index] = element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:16:1 lint/nursery/noConfusingArraySplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call replaces a single element.
+  
+    14 │ array.splice(null as any, 1, element);
+    15 │ array.splice(undefined!, 1, element);
+  > 16 │ (array as unknown[]).splice(0, 1, element);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ function f(foo: unknown[]) { foo.splice(index, 1, element); }
+    18 │ 
+  
+  i Readers have to work out what each argument means to understand the call.
+  
+  i Assign to the index instead, as in array[index] = element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:30 lint/nursery/noConfusingArraySplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call replaces a single element.
+  
+    15 │ array.splice(undefined!, 1, element);
+    16 │ (array as unknown[]).splice(0, 1, element);
+  > 17 │ function f(foo: unknown[]) { foo.splice(index, 1, element); }
+       │                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
+  
+  i Readers have to work out what each argument means to understand the call.
+  
+  i Assign to the index instead, as in array[index] = element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Assign to the index instead.
+  
+    15 15 │   array.splice(undefined!, 1, element);
+    16 16 │   (array as unknown[]).splice(0, 1, element);
+    17    │ - function·f(foo:·unknown[])·{·foo.splice(index,·1,·element);·}
+       17 │ + function·f(foo:·unknown[])·{·foo[index]·=·element;·}
+    18 18 │   
+  
+
+```
