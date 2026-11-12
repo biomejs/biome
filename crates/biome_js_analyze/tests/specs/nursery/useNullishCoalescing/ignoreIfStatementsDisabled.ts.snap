@@ -12,12 +12,12 @@ expression: ignoreIfStatementsDisabled.ts
 declare let obj: { x: number } | null;
 declare function makeObj(): { x: number };
 
-// `!obj` on an object union: truthiness is equivalent to a null check, so the fix is safe.
+// Object-shaped annotations do not prove truthiness, so no safe fix is offered.
 if (!obj) {
 	obj = makeObj();
 }
 
-// single-statement body without braces, also safe.
+// The same uncertainty applies to a single-statement body.
 if (!obj) obj = makeObj();
 
 // loose null check: always safe to fix.
@@ -158,18 +158,18 @@ declare function sideEffect(): void;
 
 # Diagnostics
 ```
-ignoreIfStatementsDisabled.ts:10:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+ignoreIfStatementsDisabled.ts:10:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of an if statement for nullish assignment.
   
-     9 │ // `!obj` on an object union: truthiness is equivalent to a null check, so the fix is safe.
+     9 │ // Object-shaped annotations do not prove truthiness, so no safe fix is offered.
   > 10 │ if (!obj) {
        │ ^^^^^^^^^^^
   > 11 │ 	obj = makeObj();
   > 12 │ }
        │ ^
     13 │ 
-    14 │ // single-statement body without braces, also safe.
+    14 │ // The same uncertainty applies to a single-statement body.
   
   i This if statement only assigns when the variable is nullish, which ??= expresses directly.
   
@@ -177,26 +177,15 @@ ignoreIfStatementsDisabled.ts:10:1 lint/nursery/useNullishCoalescing  FIXABLE  �
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Replace the if statement with ??=.
-  
-      8   8 │   
-      9   9 │   // `!obj` on an object union: truthiness is equivalent to a null check, so the fix is safe.
-     10     │ - if·(!obj)·{
-     11     │ - → obj·=·makeObj();
-     12     │ - }
-         10 │ + obj·??=·makeObj();
-     13  11 │   
-     14  12 │   // single-statement body without braces, also safe.
-  
 
 ```
 
 ```
-ignoreIfStatementsDisabled.ts:15:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+ignoreIfStatementsDisabled.ts:15:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of an if statement for nullish assignment.
   
-    14 │ // single-statement body without braces, also safe.
+    14 │ // The same uncertainty applies to a single-statement body.
   > 15 │ if (!obj) obj = makeObj();
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
     16 │ 
@@ -207,15 +196,6 @@ ignoreIfStatementsDisabled.ts:15:1 lint/nursery/useNullishCoalescing  FIXABLE  �
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Replace the if statement with ??=.
-  
-     13  13 │   
-     14  14 │   // single-statement body without braces, also safe.
-     15     │ - if·(!obj)·obj·=·makeObj();
-         15 │ + obj·??=·makeObj();
-     16  16 │   
-     17  17 │   // loose null check: always safe to fix.
   
 
 ```
@@ -597,7 +577,7 @@ ignoreIfStatementsDisabled.ts:110:1 lint/nursery/useNullishCoalescing ━━━�
 ```
 
 ```
-ignoreIfStatementsDisabled.ts:139:9 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+ignoreIfStatementsDisabled.ts:139:9 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of ||=.
   
@@ -613,15 +593,6 @@ ignoreIfStatementsDisabled.ts:139:9 lint/nursery/useNullishCoalescing  FIXABLE  
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Replace ||= with ??=.
-  
-    137 137 │   declare let assign: { x: number } | null;
-    138 138 │   if (!assign) {
-    139     │ - → assign·||=·makeObj();
-        139 │ + → assign·??=·makeObj();
-    140 140 │   }
-    141 141 │   
   
 
 ```

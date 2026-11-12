@@ -18,8 +18,8 @@
 
 use super::{BindingTypeData, InferredModuleTypes, globals::global_type, lookup::MemberLookupMode};
 use crate::db::queries::{
-    LocalTypeInput, infer_local_type, infer_module_types, infer_module_types_from_tables,
-    inference_module_sccs,
+    ExpressionTypeInput, LocalTypeInput, infer_flow_expression_type, infer_local_type,
+    infer_module_types, infer_module_types_from_tables, inference_module_sccs,
 };
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{JsModuleInfo, ModuleDb, ModuleGraphGeneration, module_for_key};
@@ -256,7 +256,14 @@ pub(in crate::db) fn resolve_raw_types<'db>(
     let expressions = js_info
         .raw_expressions
         .iter()
-        .map(|(range, reference)| (*range, ctx.resolve(reference)))
+        .map(|(range, reference)| {
+            let ty = if js_info.flow.is_candidate(*range) {
+                infer_flow_expression_type(db, ExpressionTypeInput::new(db, module, *range))
+            } else {
+                None
+            };
+            (*range, ty.unwrap_or_else(|| ctx.resolve(reference)))
+        })
         .collect();
 
     let binding_type_data = js_info

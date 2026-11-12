@@ -44,17 +44,18 @@ use crate::{
     AssertsReturnType, CallArgumentType, Class, Constructor, ConstructorParameter,
     DestructureField, ExtendsType, Function, FunctionParameter, FunctionParameterBinding,
     GenericTypeParameter, IndexedAccessType, Interface, Intersection, Literal, MappedType,
-    MappedTypeKeys, MappedTypeModifier, Module, NamedFunctionParameter, Namespace, Object, Path,
-    PatternFunctionParameter, PredicateReturnType, RawTypeCollector, RawTypeId, ReturnType,
-    ScopeId, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberAccessibility,
-    TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier,
-    TypeofAdditionExpression, TypeofAwaitExpression, TypeofBitwiseNotExpression,
-    TypeofCallArgumentExpression, TypeofCallExpression, TypeofComputedMemberExpression,
-    TypeofConditionalExpression, TypeofDestructureExpression, TypeofExpression,
-    TypeofIndexExpression, TypeofIterableValueOfExpression, TypeofLogicalAndExpression,
-    TypeofLogicalOrExpression, TypeofNewExpression, TypeofNullishCoalescingExpression,
-    TypeofParameterExpression, TypeofStaticMemberExpression, TypeofThisOrSuperExpression,
-    TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue, Union,
+    MappedTypeKeys, MappedTypeModifier, Module, NamedFunctionParameter, Namespace, Object,
+    ObjectKind, Path, PatternFunctionParameter, PredicateReturnType, RawTypeCollector, RawTypeId,
+    ReturnType, ScopeId, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember,
+    TypeMemberAccessibility, TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference,
+    TypeReferenceQualifier, TypeofAdditionExpression, TypeofAwaitExpression,
+    TypeofBitwiseNotExpression, TypeofCallArgumentExpression, TypeofCallExpression,
+    TypeofComputedMemberExpression, TypeofConditionalExpression, TypeofDestructureExpression,
+    TypeofExpression, TypeofIndexExpression, TypeofIterableValueOfExpression,
+    TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNewExpression,
+    TypeofNullishCoalescingExpression, TypeofParameterExpression, TypeofStaticMemberExpression,
+    TypeofThisOrSuperExpression, TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
+    Union,
 };
 
 const MAX_CONST_ASSERTION_DEPTH: usize = 50;
@@ -819,6 +820,7 @@ impl TypeData {
                     prototype: None,
                     members,
                     has_unknown_members,
+                    kind: ObjectKind::Shape,
                 }))
             }
             AnyTsType::TsParenthesizedType(ty) => ty
@@ -1336,6 +1338,7 @@ impl TypeData {
             prototype: None,
             members,
             has_unknown_members,
+            kind: ObjectKind::Expression,
         }))
     }
 
@@ -1715,6 +1718,7 @@ impl TypeData {
             prototype: None,
             members,
             has_unknown_members: false,
+            kind: ObjectKind::Shape,
         }))
     }
 
@@ -3716,6 +3720,7 @@ fn apply_deep_const_inner(
                 })
                 .collect(),
             has_unknown_members: object.has_unknown_members,
+            kind: object.kind,
         })),
         _ => inner_type,
     }

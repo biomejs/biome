@@ -838,6 +838,22 @@ pub struct Object {
     /// that the object lacks it. Consumers that draw conclusions from a missing
     /// member must treat such an object as inconclusive.
     pub has_unknown_members: bool,
+
+    /// Whether the type describes the object that an object expression
+    /// creates, or any value with the object's members.
+    pub kind: ObjectKind,
+}
+
+/// What the values of an [`Object`] type are known to be.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum ObjectKind {
+    /// Any value that has the object's members, as a type literal such as
+    /// `{ length: number }` describes. Primitives such as `0` or `""` can
+    /// satisfy a shape, so its values are not always truthy.
+    Shape,
+    /// The object that an object expression such as `{ length: 0 }` creates.
+    /// It is never a primitive, so it is always truthy.
+    Expression,
 }
 
 /// Object literal used as a type.
