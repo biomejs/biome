@@ -1,0 +1,1288 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+spyOn(some, "object");
+spyOnProperty(some, "object");
+fail();
+pending();
+(fail)();
+fail?.();
+globalThis.spyOn(some, "object");
+window.pending();
+
+jasmine.addMatchers(matchers);
+jasmine.createSpy();
+jasmine.any();
+jasmine.anything();
+jasmine.arrayContaining();
+jasmine.objectContaining();
+jasmine.stringMatching();
+jasmine.getEnv();
+jasmine.empty();
+jasmine.falsy();
+jasmine.truthy();
+jasmine.arrayWithExactContents();
+jasmine.clock();
+jasmine.getEnv().addReporter(reporter);
+jasmine.matchersUtil.equals(first, second);
+
+jasmine["any"](Number);
+jasmine[`createSpy`]();
+jasmine[name]();
+(jasmine).anything();
+jasmine?.any(Number);
+globalThis.jasmine.any(Number);
+window.jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 10 * 1000;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = function () {};
+jasmine["DEFAULT_TIMEOUT_INTERVAL"] = 5000;
+jasmine.DEFAULT_TIMEOUT_INTERVAL += 1000;
+jasmine.MAX_PRETTY_PRINT_ARRAY_LENGTH = 42;
+previousTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+[jasmine.DEFAULT_TIMEOUT_INTERVAL] = [5000];
+jasmine.any = matcher;
+
+const originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+const anyMatcher = jasmine.any;
+
+// Comments around a replaced node are kept.
+jasmine /* object */ .any(Number);
+// Before the timeout.
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000; // After the timeout.
+jasmine.DEFAULT_TIMEOUT_INTERVAL =
+	5000;
+
+// The fix would lose these comments, so it isn't offered.
+jasmine.DEFAULT_TIMEOUT_INTERVAL = /* five seconds */ 5000;
+(jasmine /* object */).any(Number);
+globalThis /* global */ .jasmine.any(Number);
+
+// `expect` and `jest` refer to something else here, so no fix is offered.
+function withLocalExpect(expect) {
+	return jasmine.any(Number);
+}
+function withLocalJest(jest) {
+	jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+}
+
+// The parameter of the nested function doesn't affect the outer call.
+function outer() {
+	fail();
+	function nested(fail) {}
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:3:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ spyOn(some, "object");
+      │ ^^^^^
+    4 │ spyOnProperty(some, "object");
+    5 │ fail();
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use jest.spyOn() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    3 │ spyOn(some, "object");
+  > 4 │ spyOnProperty(some, "object");
+      │ ^^^^^^^^^^^^^
+    5 │ fail();
+    6 │ pending();
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use jest.spyOn() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    3 │ spyOn(some, "object");
+    4 │ spyOnProperty(some, "object");
+  > 5 │ fail();
+      │ ^^^^
+    6 │ pending();
+    7 │ (fail)();
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Throw an error to fail the test instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    4 │ spyOnProperty(some, "object");
+    5 │ fail();
+  > 6 │ pending();
+      │ ^^^^^^^
+    7 │ (fail)();
+    8 │ fail?.();
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use test.skip() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    5 │ fail();
+    6 │ pending();
+  > 7 │ (fail)();
+      │ ^^^^^^
+    8 │ fail?.();
+    9 │ globalThis.spyOn(some, "object");
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Throw an error to fail the test instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+     6 │ pending();
+     7 │ (fail)();
+   > 8 │ fail?.();
+       │ ^^^^
+     9 │ globalThis.spyOn(some, "object");
+    10 │ window.pending();
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Throw an error to fail the test instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+     7 │ (fail)();
+     8 │ fail?.();
+   > 9 │ globalThis.spyOn(some, "object");
+       │ ^^^^^^^^^^^^^^^^
+    10 │ window.pending();
+    11 │ 
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use jest.spyOn() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+     8 │ fail?.();
+     9 │ globalThis.spyOn(some, "object");
+  > 10 │ window.pending();
+       │ ^^^^^^^^^^^^^^
+    11 │ 
+    12 │ jasmine.addMatchers(matchers);
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use test.skip() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    10 │ window.pending();
+    11 │ 
+  > 12 │ jasmine.addMatchers(matchers);
+       │ ^^^^^^^^^^^^^^^^^^^
+    13 │ jasmine.createSpy();
+    14 │ jasmine.any();
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use expect.extend() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    12 │ jasmine.addMatchers(matchers);
+  > 13 │ jasmine.createSpy();
+       │ ^^^^^^^^^^^^^^^^^
+    14 │ jasmine.any();
+    15 │ jasmine.anything();
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use jest.fn() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:1 lint/nursery/noJasmineGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    12 │ jasmine.addMatchers(matchers);
+    13 │ jasmine.createSpy();
+  > 14 │ jasmine.any();
+       │ ^^^^^^^^^^^
+    15 │ jasmine.anything();
+    16 │ jasmine.arrayContaining();
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use expect.any() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use expect.any() instead.
+  
+    12 12 │   jasmine.addMatchers(matchers);
+    13 13 │   jasmine.createSpy();
+    14    │ - jasmine.any();
+       14 │ + expect.any();
+    15 15 │   jasmine.anything();
+    16 16 │   jasmine.arrayContaining();
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/noJasmineGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    13 │ jasmine.createSpy();
+    14 │ jasmine.any();
+  > 15 │ jasmine.anything();
+       │ ^^^^^^^^^^^^^^^^
+    16 │ jasmine.arrayContaining();
+    17 │ jasmine.objectContaining();
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use expect.anything() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use expect.anything() instead.
+  
+    13 13 │   jasmine.createSpy();
+    14 14 │   jasmine.any();
+    15    │ - jasmine.anything();
+       15 │ + expect.anything();
+    16 16 │   jasmine.arrayContaining();
+    17 17 │   jasmine.objectContaining();
+  
+
+```
+
+```
+invalid.js:16:1 lint/nursery/noJasmineGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    14 │ jasmine.any();
+    15 │ jasmine.anything();
+  > 16 │ jasmine.arrayContaining();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ jasmine.objectContaining();
+    18 │ jasmine.stringMatching();
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use expect.arrayContaining() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use expect.arrayContaining() instead.
+  
+    14 14 │   jasmine.any();
+    15 15 │   jasmine.anything();
+    16    │ - jasmine.arrayContaining();
+       16 │ + expect.arrayContaining();
+    17 17 │   jasmine.objectContaining();
+    18 18 │   jasmine.stringMatching();
+  
+
+```
+
+```
+invalid.js:17:1 lint/nursery/noJasmineGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    15 │ jasmine.anything();
+    16 │ jasmine.arrayContaining();
+  > 17 │ jasmine.objectContaining();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ jasmine.stringMatching();
+    19 │ jasmine.getEnv();
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use expect.objectContaining() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use expect.objectContaining() instead.
+  
+    15 15 │   jasmine.anything();
+    16 16 │   jasmine.arrayContaining();
+    17    │ - jasmine.objectContaining();
+       17 │ + expect.objectContaining();
+    18 18 │   jasmine.stringMatching();
+    19 19 │   jasmine.getEnv();
+  
+
+```
+
+```
+invalid.js:18:1 lint/nursery/noJasmineGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    16 │ jasmine.arrayContaining();
+    17 │ jasmine.objectContaining();
+  > 18 │ jasmine.stringMatching();
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    19 │ jasmine.getEnv();
+    20 │ jasmine.empty();
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use expect.stringMatching() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use expect.stringMatching() instead.
+  
+    16 16 │   jasmine.arrayContaining();
+    17 17 │   jasmine.objectContaining();
+    18    │ - jasmine.stringMatching();
+       18 │ + expect.stringMatching();
+    19 19 │   jasmine.getEnv();
+    20 20 │   jasmine.empty();
+  
+
+```
+
+```
+invalid.js:19:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    17 │ jasmine.objectContaining();
+    18 │ jasmine.stringMatching();
+  > 19 │ jasmine.getEnv();
+       │ ^^^^^^^^^^^^^^
+    20 │ jasmine.empty();
+    21 │ jasmine.falsy();
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use Jest's documented API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    18 │ jasmine.stringMatching();
+    19 │ jasmine.getEnv();
+  > 20 │ jasmine.empty();
+       │ ^^^^^^^^^^^^^
+    21 │ jasmine.falsy();
+    22 │ jasmine.truthy();
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use Jest's documented API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    19 │ jasmine.getEnv();
+    20 │ jasmine.empty();
+  > 21 │ jasmine.falsy();
+       │ ^^^^^^^^^^^^^
+    22 │ jasmine.truthy();
+    23 │ jasmine.arrayWithExactContents();
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use Jest's documented API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    20 │ jasmine.empty();
+    21 │ jasmine.falsy();
+  > 22 │ jasmine.truthy();
+       │ ^^^^^^^^^^^^^^
+    23 │ jasmine.arrayWithExactContents();
+    24 │ jasmine.clock();
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use Jest's documented API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    21 │ jasmine.falsy();
+    22 │ jasmine.truthy();
+  > 23 │ jasmine.arrayWithExactContents();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ jasmine.clock();
+    25 │ jasmine.getEnv().addReporter(reporter);
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use Jest's documented API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    22 │ jasmine.truthy();
+    23 │ jasmine.arrayWithExactContents();
+  > 24 │ jasmine.clock();
+       │ ^^^^^^^^^^^^^
+    25 │ jasmine.getEnv().addReporter(reporter);
+    26 │ jasmine.matchersUtil.equals(first, second);
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use Jest's documented API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    23 │ jasmine.arrayWithExactContents();
+    24 │ jasmine.clock();
+  > 25 │ jasmine.getEnv().addReporter(reporter);
+       │ ^^^^^^^^^^^^^^
+    26 │ jasmine.matchersUtil.equals(first, second);
+    27 │ 
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use Jest's documented API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    24 │ jasmine.clock();
+    25 │ jasmine.getEnv().addReporter(reporter);
+  > 26 │ jasmine.matchersUtil.equals(first, second);
+       │ ^^^^^^^^^^^^^^^^^^^^
+    27 │ 
+    28 │ jasmine["any"](Number);
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use Jest's documented API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:1 lint/nursery/noJasmineGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    26 │ jasmine.matchersUtil.equals(first, second);
+    27 │ 
+  > 28 │ jasmine["any"](Number);
+       │ ^^^^^^^^^^^^^^
+    29 │ jasmine[`createSpy`]();
+    30 │ jasmine[name]();
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use expect.any() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use expect.any() instead.
+  
+    26 26 │   jasmine.matchersUtil.equals(first, second);
+    27 27 │   
+    28    │ - jasmine["any"](Number);
+       28 │ + expect["any"](Number);
+    29 29 │   jasmine[`createSpy`]();
+    30 30 │   jasmine[name]();
+  
+
+```
+
+```
+invalid.js:29:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    28 │ jasmine["any"](Number);
+  > 29 │ jasmine[`createSpy`]();
+       │ ^^^^^^^^^^^^^^^^^^^^
+    30 │ jasmine[name]();
+    31 │ (jasmine).anything();
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use jest.fn() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:30:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    28 │ jasmine["any"](Number);
+    29 │ jasmine[`createSpy`]();
+  > 30 │ jasmine[name]();
+       │ ^^^^^^^^^^^^^
+    31 │ (jasmine).anything();
+    32 │ jasmine?.any(Number);
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use Jest's documented API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:1 lint/nursery/noJasmineGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    29 │ jasmine[`createSpy`]();
+    30 │ jasmine[name]();
+  > 31 │ (jasmine).anything();
+       │ ^^^^^^^^^^^^^^^^^^
+    32 │ jasmine?.any(Number);
+    33 │ globalThis.jasmine.any(Number);
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use expect.anything() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use expect.anything() instead.
+  
+    29 29 │   jasmine[`createSpy`]();
+    30 30 │   jasmine[name]();
+    31    │ - (jasmine).anything();
+       31 │ + expect.anything();
+    32 32 │   jasmine?.any(Number);
+    33 33 │   globalThis.jasmine.any(Number);
+  
+
+```
+
+```
+invalid.js:32:1 lint/nursery/noJasmineGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    30 │ jasmine[name]();
+    31 │ (jasmine).anything();
+  > 32 │ jasmine?.any(Number);
+       │ ^^^^^^^^^^^^
+    33 │ globalThis.jasmine.any(Number);
+    34 │ window.jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use expect.any() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use expect.any() instead.
+  
+    30 30 │   jasmine[name]();
+    31 31 │   (jasmine).anything();
+    32    │ - jasmine?.any(Number);
+       32 │ + expect?.any(Number);
+    33 33 │   globalThis.jasmine.any(Number);
+    34 34 │   window.jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+  
+
+```
+
+```
+invalid.js:33:1 lint/nursery/noJasmineGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    31 │ (jasmine).anything();
+    32 │ jasmine?.any(Number);
+  > 33 │ globalThis.jasmine.any(Number);
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    34 │ window.jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+    35 │ 
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use expect.any() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use expect.any() instead.
+  
+    31 31 │   (jasmine).anything();
+    32 32 │   jasmine?.any(Number);
+    33    │ - globalThis.jasmine.any(Number);
+       33 │ + expect.any(Number);
+    34 34 │   window.jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+    35 35 │   
+  
+
+```
+
+```
+invalid.js:34:1 lint/nursery/noJasmineGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    32 │ jasmine?.any(Number);
+    33 │ globalThis.jasmine.any(Number);
+  > 34 │ window.jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ 
+    36 │ jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use jest.setTimeout() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.setTimeout() instead.
+  
+    32 32 │   jasmine?.any(Number);
+    33 33 │   globalThis.jasmine.any(Number);
+    34    │ - window.jasmine.DEFAULT_TIMEOUT_INTERVAL·=·5000;
+       34 │ + jest.setTimeout(5000);
+    35 35 │   
+    36 36 │   jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+  
+
+```
+
+```
+invalid.js:36:1 lint/nursery/noJasmineGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    34 │ window.jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+    35 │ 
+  > 36 │ jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ jasmine.DEFAULT_TIMEOUT_INTERVAL = 10 * 1000;
+    38 │ jasmine.DEFAULT_TIMEOUT_INTERVAL = function () {};
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use jest.setTimeout() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.setTimeout() instead.
+  
+    34 34 │   window.jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+    35 35 │   
+    36    │ - jasmine.DEFAULT_TIMEOUT_INTERVAL·=·5000;
+       36 │ + jest.setTimeout(5000);
+    37 37 │   jasmine.DEFAULT_TIMEOUT_INTERVAL = 10 * 1000;
+    38 38 │   jasmine.DEFAULT_TIMEOUT_INTERVAL = function () {};
+  
+
+```
+
+```
+invalid.js:37:1 lint/nursery/noJasmineGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    36 │ jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+  > 37 │ jasmine.DEFAULT_TIMEOUT_INTERVAL = 10 * 1000;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ jasmine.DEFAULT_TIMEOUT_INTERVAL = function () {};
+    39 │ jasmine["DEFAULT_TIMEOUT_INTERVAL"] = 5000;
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use jest.setTimeout() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.setTimeout() instead.
+  
+    35 35 │   
+    36 36 │   jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+    37    │ - jasmine.DEFAULT_TIMEOUT_INTERVAL·=·10·*·1000;
+       37 │ + jest.setTimeout(10·*·1000);
+    38 38 │   jasmine.DEFAULT_TIMEOUT_INTERVAL = function () {};
+    39 39 │   jasmine["DEFAULT_TIMEOUT_INTERVAL"] = 5000;
+  
+
+```
+
+```
+invalid.js:38:1 lint/nursery/noJasmineGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    36 │ jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+    37 │ jasmine.DEFAULT_TIMEOUT_INTERVAL = 10 * 1000;
+  > 38 │ jasmine.DEFAULT_TIMEOUT_INTERVAL = function () {};
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ jasmine["DEFAULT_TIMEOUT_INTERVAL"] = 5000;
+    40 │ jasmine.DEFAULT_TIMEOUT_INTERVAL += 1000;
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use jest.setTimeout() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.setTimeout() instead.
+  
+    36 36 │   jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+    37 37 │   jasmine.DEFAULT_TIMEOUT_INTERVAL = 10 * 1000;
+    38    │ - jasmine.DEFAULT_TIMEOUT_INTERVAL·=·function·()·{};
+       38 │ + jest.setTimeout(function·()·{});
+    39 39 │   jasmine["DEFAULT_TIMEOUT_INTERVAL"] = 5000;
+    40 40 │   jasmine.DEFAULT_TIMEOUT_INTERVAL += 1000;
+  
+
+```
+
+```
+invalid.js:39:1 lint/nursery/noJasmineGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    37 │ jasmine.DEFAULT_TIMEOUT_INTERVAL = 10 * 1000;
+    38 │ jasmine.DEFAULT_TIMEOUT_INTERVAL = function () {};
+  > 39 │ jasmine["DEFAULT_TIMEOUT_INTERVAL"] = 5000;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ jasmine.DEFAULT_TIMEOUT_INTERVAL += 1000;
+    41 │ jasmine.MAX_PRETTY_PRINT_ARRAY_LENGTH = 42;
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use jest.setTimeout() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.setTimeout() instead.
+  
+    37 37 │   jasmine.DEFAULT_TIMEOUT_INTERVAL = 10 * 1000;
+    38 38 │   jasmine.DEFAULT_TIMEOUT_INTERVAL = function () {};
+    39    │ - jasmine["DEFAULT_TIMEOUT_INTERVAL"]·=·5000;
+       39 │ + jest.setTimeout(5000);
+    40 40 │   jasmine.DEFAULT_TIMEOUT_INTERVAL += 1000;
+    41 41 │   jasmine.MAX_PRETTY_PRINT_ARRAY_LENGTH = 42;
+  
+
+```
+
+```
+invalid.js:40:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    38 │ jasmine.DEFAULT_TIMEOUT_INTERVAL = function () {};
+    39 │ jasmine["DEFAULT_TIMEOUT_INTERVAL"] = 5000;
+  > 40 │ jasmine.DEFAULT_TIMEOUT_INTERVAL += 1000;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ jasmine.MAX_PRETTY_PRINT_ARRAY_LENGTH = 42;
+    42 │ previousTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use jest.setTimeout() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    39 │ jasmine["DEFAULT_TIMEOUT_INTERVAL"] = 5000;
+    40 │ jasmine.DEFAULT_TIMEOUT_INTERVAL += 1000;
+  > 41 │ jasmine.MAX_PRETTY_PRINT_ARRAY_LENGTH = 42;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    42 │ previousTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+    43 │ [jasmine.DEFAULT_TIMEOUT_INTERVAL] = [5000];
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use Jest's documented API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:42:19 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    40 │ jasmine.DEFAULT_TIMEOUT_INTERVAL += 1000;
+    41 │ jasmine.MAX_PRETTY_PRINT_ARRAY_LENGTH = 42;
+  > 42 │ previousTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ [jasmine.DEFAULT_TIMEOUT_INTERVAL] = [5000];
+    44 │ jasmine.any = matcher;
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use jest.setTimeout() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:43:2 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    41 │ jasmine.MAX_PRETTY_PRINT_ARRAY_LENGTH = 42;
+    42 │ previousTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+  > 43 │ [jasmine.DEFAULT_TIMEOUT_INTERVAL] = [5000];
+       │  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ jasmine.any = matcher;
+    45 │ 
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use jest.setTimeout() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:44:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    42 │ previousTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+    43 │ [jasmine.DEFAULT_TIMEOUT_INTERVAL] = [5000];
+  > 44 │ jasmine.any = matcher;
+       │ ^^^^^^^^^^^
+    45 │ 
+    46 │ const originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use Jest's documented API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:46:25 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    44 │ jasmine.any = matcher;
+    45 │ 
+  > 46 │ const originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    47 │ const anyMatcher = jasmine.any;
+    48 │ 
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use Jest's documented API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:47:20 lint/nursery/noJasmineGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    46 │ const originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+  > 47 │ const anyMatcher = jasmine.any;
+       │                    ^^^^^^^^^^^
+    48 │ 
+    49 │ // Comments around a replaced node are kept.
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use expect.any() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use expect.any() instead.
+  
+    45 45 │   
+    46 46 │   const originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+    47    │ - const·anyMatcher·=·jasmine.any;
+       47 │ + const·anyMatcher·=·expect.any;
+    48 48 │   
+    49 49 │   // Comments around a replaced node are kept.
+  
+
+```
+
+```
+invalid.js:50:1 lint/nursery/noJasmineGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    49 │ // Comments around a replaced node are kept.
+  > 50 │ jasmine /* object */ .any(Number);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    51 │ // Before the timeout.
+    52 │ jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000; // After the timeout.
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use expect.any() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use expect.any() instead.
+  
+    48 48 │   
+    49 49 │   // Comments around a replaced node are kept.
+    50    │ - jasmine·/*·object·*/·.any(Number);
+       50 │ + expect·/*·object·*/·.any(Number);
+    51 51 │   // Before the timeout.
+    52 52 │   jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000; // After the timeout.
+  
+
+```
+
+```
+invalid.js:52:1 lint/nursery/noJasmineGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    50 │ jasmine /* object */ .any(Number);
+    51 │ // Before the timeout.
+  > 52 │ jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000; // After the timeout.
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ jasmine.DEFAULT_TIMEOUT_INTERVAL =
+    54 │ 	5000;
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use jest.setTimeout() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.setTimeout() instead.
+  
+    50 50 │   jasmine /* object */ .any(Number);
+    51 51 │   // Before the timeout.
+    52    │ - jasmine.DEFAULT_TIMEOUT_INTERVAL·=·5000;·//·After·the·timeout.
+       52 │ + jest.setTimeout(5000);·//·After·the·timeout.
+    53 53 │   jasmine.DEFAULT_TIMEOUT_INTERVAL =
+    54 54 │   	5000;
+  
+
+```
+
+```
+invalid.js:53:1 lint/nursery/noJasmineGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    51 │ // Before the timeout.
+    52 │ jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000; // After the timeout.
+  > 53 │ jasmine.DEFAULT_TIMEOUT_INTERVAL =
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    54 │ 	5000;
+    55 │ 
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use jest.setTimeout() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.setTimeout() instead.
+  
+    51 51 │   // Before the timeout.
+    52 52 │   jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000; // After the timeout.
+    53    │ - jasmine.DEFAULT_TIMEOUT_INTERVAL·=
+    54    │ - → 5000;
+       53 │ + jest.setTimeout(5000);
+    55 54 │   
+    56 55 │   // The fix would lose these comments, so it isn't offered.
+  
+
+```
+
+```
+invalid.js:57:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    56 │ // The fix would lose these comments, so it isn't offered.
+  > 57 │ jasmine.DEFAULT_TIMEOUT_INTERVAL = /* five seconds */ 5000;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    58 │ (jasmine /* object */).any(Number);
+    59 │ globalThis /* global */ .jasmine.any(Number);
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use jest.setTimeout() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:58:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    56 │ // The fix would lose these comments, so it isn't offered.
+    57 │ jasmine.DEFAULT_TIMEOUT_INTERVAL = /* five seconds */ 5000;
+  > 58 │ (jasmine /* object */).any(Number);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    59 │ globalThis /* global */ .jasmine.any(Number);
+    60 │ 
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use expect.any() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:59:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    57 │ jasmine.DEFAULT_TIMEOUT_INTERVAL = /* five seconds */ 5000;
+    58 │ (jasmine /* object */).any(Number);
+  > 59 │ globalThis /* global */ .jasmine.any(Number);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    60 │ 
+    61 │ // `expect` and `jest` refer to something else here, so no fix is offered.
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use expect.any() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:63:9 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    61 │ // `expect` and `jest` refer to something else here, so no fix is offered.
+    62 │ function withLocalExpect(expect) {
+  > 63 │ 	return jasmine.any(Number);
+       │ 	       ^^^^^^^^^^^
+    64 │ }
+    65 │ function withLocalJest(jest) {
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use expect.any() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:66:2 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    64 │ }
+    65 │ function withLocalJest(jest) {
+  > 66 │ 	jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    67 │ }
+    68 │ 
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use jest.setTimeout() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:71:2 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    69 │ // The parameter of the nested function doesn't affect the outer call.
+    70 │ function outer() {
+  > 71 │ 	fail();
+       │ 	^^^^
+    72 │ 	function nested(fail) {}
+    73 │ }
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Throw an error to fail the test instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

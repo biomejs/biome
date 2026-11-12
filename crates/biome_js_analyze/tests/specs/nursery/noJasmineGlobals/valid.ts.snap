@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+// Types from the `jasmine` namespace aren't uses of the global object.
+let onSave: jasmine.Spy;
+type Matcher = jasmine.AsymmetricMatcher<string>;
+
+```
