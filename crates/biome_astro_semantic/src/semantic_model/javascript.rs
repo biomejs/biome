@@ -37,14 +37,14 @@ pub(crate) fn collect_module_bindings(
                 continue;
             }
             seen.push(local_range);
-            let range = to_host(local_range, snippet.content_offset);
+            let range = to_host(local_range, snippet.range_offset());
             let declaration = syntax
                 .ancestors()
                 .find(|ancestor| {
                     AnyJsStatement::can_cast(ancestor.kind()) || JsImport::can_cast(ancestor.kind())
                 })
                 .map_or(range, |node| {
-                    to_host(node.text_trimmed_range(), snippet.content_offset)
+                    to_host(node.text_trimmed_range(), snippet.range_offset())
                 });
             let declaration_kind = binding.declaration_kind();
             let type_only = is_type_only_binding(&binding);
@@ -105,7 +105,7 @@ fn collect_bound_references(
             continue;
         };
         builder.add_reference(ReferenceData {
-            range: to_host(token.text_trimmed_range(), snippet.content_offset),
+            range: to_host(token.text_trimmed_range(), snippet.range_offset()),
             name: token.token_text_trimmed(),
             snippet: Some(snippet_id),
             site: RefSite::Identifier,
@@ -157,7 +157,7 @@ pub(crate) fn collect_free_references(
             Lookup::Missing => Resolution::Unresolved,
         };
         builder.add_reference(ReferenceData {
-            range: to_host(token.text_trimmed_range(), snippet.content_offset),
+            range: to_host(token.text_trimmed_range(), snippet.range_offset()),
             name,
             snippet: Some(snippet_id),
             site: RefSite::Identifier,

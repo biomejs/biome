@@ -1,6 +1,6 @@
 use crate::{
     Access, AstroSemanticModel, AstroSemanticModelOptions, AstroSnippet, BlockKind, Namespace,
-    OpenReason, Origin, RefSite, Resolution, SymbolKind, astro_model_with_options,
+    OpenReason, Origin, RefSite, Resolution, SnippetHost, SymbolKind, astro_model_with_options,
 };
 use biome_html_parser::{HtmlParserOptions, parse_html};
 use biome_html_syntax::{
@@ -176,6 +176,45 @@ const broken =
     assert!(model.references().any(|reference| {
         reference.name() == "Missing" && reference.resolution() == Resolution::Unknowable
     }));
+}
+
+#[test]
+fn snippet_reports_uses_of_visible_declarations() {
+    let model = model(
+        r#"---
+const used = 1;
+const unused = 2;
+interface Props {}
+---
+<div>{used}</div>
+"#,
+    );
+    let frontmatter = model
+        .snippets()
+        .find(|snippet| matches!(snippet.host(), SnippetHost::Frontmatter(_)))
+        .expect("frontmatter snippet");
+
+    assert!(frontmatter.is_used(&[Namespace::Value], "used"));
+    assert!(!frontmatter.is_used(&[Namespace::Value], "unused"));
+    assert!(!frontmatter.is_used(&[Namespace::Value], "Props"));
+    assert!(frontmatter.is_used(&[Namespace::Type], "Props"));
+    assert!(!frontmatter.is_used(&[Namespace::Value], "missing"));
+}
+
+#[test]
+fn snippet_in_an_open_scope_reports_every_name_as_used() {
+    let model = model(
+        r#"---
+const broken =
+---
+"#,
+    );
+    let frontmatter = model
+        .snippets()
+        .find(|snippet| matches!(snippet.host(), SnippetHost::Frontmatter(_)))
+        .expect("frontmatter snippet");
+
+    assert!(frontmatter.is_used(&[Namespace::Value], "anything"));
 }
 
 #[test]
