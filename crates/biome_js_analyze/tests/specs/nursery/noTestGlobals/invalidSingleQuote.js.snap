@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidSingleQuote.js
+---
+# Input
+```js
+/* should generate diagnostics */
+describe('sum', () => {});
+
+```
+
+# Diagnostics
+```
+invalidSingleQuote.js:2:1 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test API describe is used as a global variable.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ describe('sum', () => {});
+      │ ^^^^^^^^
+    3 │ 
+  
+  i Whether this global variable exists depends on the configuration of the test runner. An import shows where the test API comes from and works with any configuration.
+  
+  i Import describe from @jest/globals instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Import describe from @jest/globals.
+  
+    1 1 │   /* should generate diagnostics */
+      2 │ + import·{·describe·}·from·'@jest/globals';
+    2 3 │   describe('sum', () => {});
+    3 4 │   
+  
+
+```

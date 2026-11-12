@@ -1,0 +1,9 @@
+{
+  "name": "no-test-globals",
+  "dependencies": {
+    "jest": "^29.0.0"
+  },
+  "devDependencies": {
+    "vitest": "^3.0.0"
+  }
+}

@@ -3448,6 +3448,11 @@ export interface Nursery {
 	 */
 	noTanstackQueryVoidQueryFn?: NoTanstackQueryVoidQueryFnConfiguration;
 	/**
+	 * Disallow using test APIs as global variables.
+	 * See https://biomejs.dev/linter/rules/no-test-globals
+	 */
+	noTestGlobals?: NoTestGlobalsConfiguration;
+	/**
 	 * Disallow this outside of classes.
 	 * See https://biomejs.dev/linter/rules/no-this-outside-of-class
 	 */
@@ -6918,6 +6923,9 @@ export type NoTanstackQueryRestDestructuringConfiguration =
 export type NoTanstackQueryVoidQueryFnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTanstackQueryVoidQueryFnOptions;
+export type NoTestGlobalsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTestGlobalsOptions;
 export type NoThisOutsideOfClassConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoThisOutsideOfClassOptions;
@@ -10128,6 +10136,14 @@ export interface RuleWithNoTanstackQueryRestDestructuringOptions {
 export interface RuleWithNoTanstackQueryVoidQueryFnOptions {
 	level: RulePlainConfiguration;
 	options?: NoTanstackQueryVoidQueryFnOptions;
+}
+export interface RuleWithNoTestGlobalsOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoTestGlobalsOptions;
 }
 export interface RuleWithNoThisOutsideOfClassOptions {
 	level: RulePlainConfiguration;
@@ -13487,6 +13503,7 @@ export interface NoTailwindRestyledComponentsOptions {
 }
 export type NoTanstackQueryRestDestructuringOptions = {};
 export type NoTanstackQueryVoidQueryFnOptions = {};
+export type NoTestGlobalsOptions = {};
 export type NoThisOutsideOfClassOptions = {};
 /**
  * Options for the `noUndeclaredClasses` rule.
@@ -15683,6 +15700,7 @@ export type Category =
 	| "lint/nursery/noTailwindRestyledComponents"
 	| "lint/nursery/noTanstackQueryRestDestructuring"
 	| "lint/nursery/noTanstackQueryVoidQueryFn"
+	| "lint/nursery/noTestGlobals"
 	| "lint/nursery/noThisOutsideOfClass"
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUndeclaredCustomProperties"
