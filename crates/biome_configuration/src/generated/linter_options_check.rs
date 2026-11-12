@@ -1589,6 +1589,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_ternary::NoTernaryOptions>(),
     ));
     result.push((
+        "nursery",
+        "noTestHooks",
+        TypeId::of::<biome_rule_options::no_test_hooks::NoTestHooksOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noThenProperty",
         TypeId::of::<biome_rule_options::no_then_property::NoThenPropertyOptions>(),

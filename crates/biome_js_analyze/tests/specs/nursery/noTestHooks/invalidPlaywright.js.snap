@@ -1,0 +1,62 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidPlaywright.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { test as base } from "@playwright/test";
+
+const test = base.extend({});
+
+test.beforeEach(async ({ page }) => {
+	await page.goto("/");
+});
+
+test.describe("checkout", () => {
+	test.afterAll(async () => {});
+});
+
+```
+
+# Diagnostics
+```
+invalidPlaywright.js:6:1 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The beforeEach hook is not allowed.
+  
+    4 │ const test = base.extend({});
+    5 │ 
+  > 6 │ test.beforeEach(async ({ page }) => {
+      │ ^^^^^^^^^^^^^^^
+    7 │ 	await page.goto("/");
+    8 │ });
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidPlaywright.js:11:2 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The afterAll hook is not allowed.
+  
+    10 │ test.describe("checkout", () => {
+  > 11 │ 	test.afterAll(async () => {});
+       │ 	^^^^^^^^^^^^^
+    12 │ });
+    13 │ 
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

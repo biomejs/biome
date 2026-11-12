@@ -110,7 +110,10 @@ pub(crate) fn is_named_framework_lib_export(
 
 /// Returns the imported name of `binding` if it is declared by a named import from one of
 /// `package_names`. For `import { a as b } from "pkg"`, the binding `b` returns `a`.
-fn named_framework_lib_export(binding: &Binding, package_names: &[&str]) -> Option<JsSyntaxToken> {
+pub(crate) fn named_framework_lib_export(
+    binding: &Binding,
+    package_names: &[&str],
+) -> Option<JsSyntaxToken> {
     let ident = JsIdentifierBinding::cast_ref(&binding.syntax())?;
     let import_specifier = ident.parent::<AnyJsNamedImportSpecifier>()?;
     let name_token = match &import_specifier {

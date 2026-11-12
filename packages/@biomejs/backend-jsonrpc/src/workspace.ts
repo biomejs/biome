@@ -3448,6 +3448,11 @@ export interface Nursery {
 	 */
 	noTanstackQueryVoidQueryFn?: NoTanstackQueryVoidQueryFnConfiguration;
 	/**
+	 * Disallow setup and teardown hooks in tests.
+	 * See https://biomejs.dev/linter/rules/no-test-hooks
+	 */
+	noTestHooks?: NoTestHooksConfiguration;
+	/**
 	 * Disallow this outside of classes.
 	 * See https://biomejs.dev/linter/rules/no-this-outside-of-class
 	 */
@@ -6918,6 +6923,9 @@ export type NoTanstackQueryRestDestructuringConfiguration =
 export type NoTanstackQueryVoidQueryFnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTanstackQueryVoidQueryFnOptions;
+export type NoTestHooksConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTestHooksOptions;
 export type NoThisOutsideOfClassConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoThisOutsideOfClassOptions;
@@ -10128,6 +10136,10 @@ export interface RuleWithNoTanstackQueryRestDestructuringOptions {
 export interface RuleWithNoTanstackQueryVoidQueryFnOptions {
 	level: RulePlainConfiguration;
 	options?: NoTanstackQueryVoidQueryFnOptions;
+}
+export interface RuleWithNoTestHooksOptions {
+	level: RulePlainConfiguration;
+	options?: NoTestHooksOptions;
 }
 export interface RuleWithNoThisOutsideOfClassOptions {
 	level: RulePlainConfiguration;
@@ -13487,6 +13499,7 @@ export interface NoTailwindRestyledComponentsOptions {
 }
 export type NoTanstackQueryRestDestructuringOptions = {};
 export type NoTanstackQueryVoidQueryFnOptions = {};
+export type NoTestHooksOptions = {};
 export type NoThisOutsideOfClassOptions = {};
 /**
  * Options for the `noUndeclaredClasses` rule.
@@ -15683,6 +15696,7 @@ export type Category =
 	| "lint/nursery/noTailwindRestyledComponents"
 	| "lint/nursery/noTanstackQueryRestDestructuring"
 	| "lint/nursery/noTanstackQueryVoidQueryFn"
+	| "lint/nursery/noTestHooks"
 	| "lint/nursery/noThisOutsideOfClass"
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUndeclaredCustomProperties"
