@@ -27,10 +27,11 @@ use biome_js_syntax::{
     JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsTemplateExpression,
     JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration, JsVariableDeclarator,
     TsConditionalType, TsDeclareFunctionDeclaration, TsExternalModuleDeclaration, TsInferType,
-    TsInstantiationExpression, TsInterfaceDeclaration, TsMappedType, TsModuleDeclaration,
-    TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
+    TsInstantiationExpression, TsInterfaceDeclaration, TsMappedType, TsMethodSignatureTypeMember,
+    TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
     TsSatisfiesExpression, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
-    TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
+    TsTypeMemberList, TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text,
+    unescape_js_string,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxResult, Text, TextRange, TokenText};
 use rustc_hash::FxHashMap;
@@ -806,12 +807,9 @@ impl TypeData {
             AnyTsType::TsNumberType(_) => Self::reference(GLOBAL_NUMBER_KEYWORD_ID),
             AnyTsType::TsObjectType(ty) => {
                 let mut has_unknown_members = false;
-                let members = ty
-                    .members()
+                let members = TypeMember::collect_type_members(collector, scope_id, ty.members())
                     .into_iter()
                     .filter_map(|member| {
-                        let member =
-                            TypeMember::from_any_ts_type_member(collector, scope_id, &member);
                         has_unknown_members |= member.is_none();
                         member
                     })
@@ -1517,13 +1515,9 @@ impl TypeData {
                     TypeReference::types_from_ts_type_list(collector, scope_id, extends.types())
                 })
                 .unwrap_or_default(),
-            members: decl
-                .members()
+            members: TypeMember::collect_type_members(collector, scope_id, decl.members())
                 .into_iter()
-                .map(|member| {
-                    TypeMember::from_any_ts_type_member(collector, scope_id, &member)
-                        .unwrap_or_else(TypeMember::uncollected)
-                })
+                .map(|member| member.unwrap_or_else(TypeMember::uncollected))
                 .collect(),
         }))
     }
@@ -2711,37 +2705,7 @@ impl TypeMember {
                 })
             }
             AnyTsTypeMember::TsMethodSignatureTypeMember(member) => {
-                let type_parameters = member.type_parameters();
-                // Reusing the enclosing scope lets nongeneric signatures share raw types.
-                let scope_id = if type_parameters.is_some() {
-                    collector
-                        .scope_for_node(member.syntax())
-                        .unwrap_or(scope_id)
-                } else {
-                    scope_id
-                };
-                member.name().ok().and_then(|name| name.name()).map(|name| {
-                    let function = Function {
-                        is_async: false,
-                        type_parameters: generic_params_from_ts_type_params(
-                            collector,
-                            scope_id,
-                            type_parameters,
-                        ),
-                        name: Some(name.clone().into()),
-                        parameters: function_params_from_js_params(
-                            collector,
-                            scope_id,
-                            member.parameters(),
-                        ),
-                        return_type: return_type_from_annotation(
-                            collector,
-                            scope_id,
-                            member.return_type_annotation(),
-                        )
-                        .unwrap_or_default(),
-                    };
-                    let ty = collector.register_and_resolve(function.into()).into();
+                method_signature_type(collector, scope_id, member).map(|(name, ty)| {
                     let is_optional = member.optional_token().is_some();
                     Self::from_name_and_optional_type(collector, name, ty, is_optional)
                 })
@@ -2946,21 +2910,160 @@ impl TypeMember {
                 } => {
                     member.ty = match signatures.as_slice() {
                         [signature] => signature.clone(),
-                        _ => collector.reference_to_owned_data(TypeData::object_with_members(
-                            signatures
-                                .into_iter()
-                                .map(|ty| Self {
-                                    kind: TypeMemberKind::CallSignature,
-                                    ty,
-                                })
-                                .collect(),
-                        )),
+                        _ => Self::overload_set_type(collector, signatures),
                     };
                     member
                 }
             })
             .collect()
     }
+
+    /// Collects the members of an interface or an object type.
+    ///
+    /// Method signatures with the same name form one member, so that a call
+    /// selects the overload that accepts its arguments. The type of that
+    /// member has one call signature per overload, in declaration order. An
+    /// optional method is optional as a whole. Members that can't be
+    /// collected are `None`.
+    ///
+    /// In this example, `listen` is one member with two call signatures. A
+    /// call with a single argument, such as `listen({})`, selects the second
+    /// signature and returns `Promise<string>`.
+    ///
+    /// ```ts
+    /// interface Server {
+    ///     listen(options: object, callback: () => void): void;
+    ///     listen(options?: object): Promise<string>;
+    /// }
+    /// ```
+    fn collect_type_members(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        member_list: TsTypeMemberList,
+    ) -> Vec<Option<Self>> {
+        enum CollectedMember {
+            Direct(Option<TypeMember>),
+            Method {
+                member: TypeMember,
+                is_optional: bool,
+                signatures: Vec<TypeReference>,
+            },
+        }
+
+        let mut collected = Vec::new();
+        let mut methods_by_name = FxHashMap::default();
+        for syntax_member in member_list {
+            let AnyTsTypeMember::TsMethodSignatureTypeMember(method) = &syntax_member else {
+                collected.push(CollectedMember::Direct(Self::from_any_ts_type_member(
+                    collector,
+                    scope_id,
+                    &syntax_member,
+                )));
+                continue;
+            };
+            let Some((name, signature)) = method_signature_type(collector, scope_id, method) else {
+                collected.push(CollectedMember::Direct(None));
+                continue;
+            };
+
+            let key = Text::from(name.clone());
+            // SAFETY: `index` is in bounds. The `else` branch stores
+            // `collected.len()` and then pushes a `CollectedMember::Method`,
+            // so every index in `methods_by_name` points at that member.
+            // Nothing removes items from `collected`.
+            if let Some(index) = methods_by_name.get(&key).copied()
+                && let CollectedMember::Method { signatures, .. } = &mut collected[index]
+            {
+                signatures.push(signature);
+            } else {
+                let is_optional = method.optional_token().is_some();
+                methods_by_name.insert(key, collected.len());
+                collected.push(CollectedMember::Method {
+                    member: Self::from_name_and_optional_type(
+                        collector,
+                        name,
+                        signature.clone(),
+                        is_optional,
+                    ),
+                    is_optional,
+                    signatures: vec![signature],
+                });
+            }
+        }
+
+        collected
+            .into_iter()
+            .map(|collected| match collected {
+                CollectedMember::Direct(member) => member,
+                CollectedMember::Method {
+                    mut member,
+                    is_optional,
+                    signatures,
+                } => {
+                    if signatures.len() > 1 {
+                        let ty = Self::overload_set_type(collector, signatures);
+                        member.ty = match is_optional {
+                            true => RawTypeId::Local(collector.optional(ty)).into(),
+                            false => ty,
+                        };
+                    }
+                    Some(member)
+                }
+            })
+            .collect()
+    }
+
+    /// Returns an object type with one call signature per overload, in
+    /// declaration order.
+    fn overload_set_type(
+        collector: &mut dyn RawTypeCollector,
+        signatures: Vec<TypeReference>,
+    ) -> TypeReference {
+        collector.reference_to_owned_data(TypeData::object_with_members(
+            signatures
+                .into_iter()
+                .map(|ty| Self {
+                    kind: TypeMemberKind::CallSignature,
+                    ty,
+                })
+                .collect(),
+        ))
+    }
+}
+
+/// Registers the function type of a method signature and returns it with the
+/// method name.
+///
+/// Returns `None` when the name isn't known statically, such as `[key](): void`.
+fn method_signature_type(
+    collector: &mut dyn RawTypeCollector,
+    scope_id: ScopeId,
+    member: &TsMethodSignatureTypeMember,
+) -> Option<(TokenText, TypeReference)> {
+    let type_parameters = member.type_parameters();
+    // Reusing the enclosing scope lets nongeneric signatures share raw types.
+    let scope_id = if type_parameters.is_some() {
+        collector
+            .scope_for_node(member.syntax())
+            .unwrap_or(scope_id)
+    } else {
+        scope_id
+    };
+    let name = member.name().ok()?.name()?;
+    let function = Function {
+        is_async: false,
+        type_parameters: generic_params_from_ts_type_params(collector, scope_id, type_parameters),
+        name: Some(name.clone().into()),
+        parameters: function_params_from_js_params(collector, scope_id, member.parameters()),
+        return_type: return_type_from_annotation(
+            collector,
+            scope_id,
+            member.return_type_annotation(),
+        )
+        .unwrap_or_default(),
+    };
+    let ty = collector.register_and_resolve(function.into()).into();
+    Some((name, ty))
 }
 
 fn computed_member_reference(
