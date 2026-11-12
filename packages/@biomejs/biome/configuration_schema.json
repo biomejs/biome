@@ -5549,6 +5549,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoLateCurrentTargetAccessConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoLateCurrentTargetAccessOptions" }
+			]
+		},
+		"NoLateCurrentTargetAccessOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoLateEventControlConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9399,6 +9409,13 @@
 					"description": "Disallow unsafe JSON values that may cause interoperability issues.\nSee https://biomejs.dev/linter/rules/no-json-unsafe-values",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoJsonUnsafeValuesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noLateCurrentTargetAccess": {
+					"description": "Disallow reading event.currentTarget after the browser has finished handling the event.\nSee https://biomejs.dev/linter/rules/no-late-current-target-access",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoLateCurrentTargetAccessConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14009,6 +14026,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoLabelWithoutControlOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoLateCurrentTargetAccessOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoLateCurrentTargetAccessOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

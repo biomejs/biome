@@ -3128,6 +3128,11 @@ export interface Nursery {
 	 */
 	noJsonUnsafeValues?: NoJsonUnsafeValuesConfiguration;
 	/**
+	 * Disallow reading event.currentTarget after the browser has finished handling the event.
+	 * See https://biomejs.dev/linter/rules/no-late-current-target-access
+	 */
+	noLateCurrentTargetAccess?: NoLateCurrentTargetAccessConfiguration;
+	/**
 	 * Disallow calling preventDefault(), stopPropagation(), or stopImmediatePropagation() after the browser has finished handling the event.
 	 * See https://biomejs.dev/linter/rules/no-late-event-control
 	 */
@@ -6746,6 +6751,9 @@ export type NoJsRestrictedPropertiesConfiguration =
 export type NoJsonUnsafeValuesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsonUnsafeValuesOptions;
+export type NoLateCurrentTargetAccessConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoLateCurrentTargetAccessOptions;
 export type NoLateEventControlConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoLateEventControlOptions;
@@ -9820,6 +9828,10 @@ export interface RuleWithNoJsRestrictedPropertiesOptions {
 export interface RuleWithNoJsonUnsafeValuesOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsonUnsafeValuesOptions;
+}
+export interface RuleWithNoLateCurrentTargetAccessOptions {
+	level: RulePlainConfiguration;
+	options?: NoLateCurrentTargetAccessOptions;
 }
 export interface RuleWithNoLateEventControlOptions {
 	level: RulePlainConfiguration;
@@ -13407,6 +13419,7 @@ export interface NoJsRestrictedPropertiesOptions {
 	entries?: RestrictedPropertyEntry[];
 }
 export type NoJsonUnsafeValuesOptions = {};
+export type NoLateCurrentTargetAccessOptions = {};
 export type NoLateEventControlOptions = {};
 export type NoMagicArrayFlatDepthOptions = {};
 export interface NoMapSpreadOptions {
@@ -15719,6 +15732,7 @@ export type Category =
 	| "lint/nursery/noIteratorProperty"
 	| "lint/nursery/noJsRestrictedProperties"
 	| "lint/nursery/noJsonUnsafeValues"
+	| "lint/nursery/noLateCurrentTargetAccess"
 	| "lint/nursery/noLateEventControl"
 	| "lint/nursery/noMagicArrayFlatDepth"
 	| "lint/nursery/noMapSpread"
