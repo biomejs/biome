@@ -6609,6 +6609,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoReturnInTestConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReturnInTestOptions" }
+			]
+		},
+		"NoReturnInTestOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoRootTypeConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9578,6 +9588,13 @@
 					"description": "Disallow return statements in Promise.prototype.finally() callbacks.\nSee https://biomejs.dev/linter/rules/no-return-in-finally",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoReturnInFinallyConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReturnInTest": {
+					"description": "Disallow return statements in tests.\nSee https://biomejs.dev/linter/rules/no-return-in-test",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReturnInTestConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14970,6 +14987,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoReturnInFinallyOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoReturnInTestOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReturnInTestOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
