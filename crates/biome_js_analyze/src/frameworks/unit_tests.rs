@@ -241,6 +241,28 @@ impl TestBlockKind {
             is_each_call(call)
         }
     }
+
+    /// Identifies the kind of test block that `callee` declares once it is
+    /// given its table of cases, as in `test.each(table)` or
+    /// `` describe.only.each`table` ``.
+    ///
+    /// Returns `None` if `callee` isn't a table callee such as `test.each`.
+    pub(crate) fn from_each_callee(callee: &AnyJsExpression) -> Option<Self> {
+        if !callee.contains_a_test_each_pattern() {
+            return None;
+        }
+
+        let AnyJsExpression::JsStaticMemberExpression(member) = callee else {
+            return None;
+        };
+        let object = member.object().ok()?.omit_parentheses();
+
+        if is_describe_callee(&object) {
+            Some(Self::Describe)
+        } else {
+            Some(Self::Test)
+        }
+    }
 }
 
 /// Returns the test block kind if the call is an `.each(...)` call.
@@ -249,22 +271,7 @@ pub(crate) fn is_each_call(call: &JsCallExpression) -> Option<TestBlockKind> {
     let AnyJsExpression::JsCallExpression(inner_call) = callee else {
         return None;
     };
-    let inner_callee = inner_call.callee().ok()?.omit_parentheses();
-
-    if !inner_callee.contains_a_test_each_pattern() {
-        return None;
-    }
-
-    let AnyJsExpression::JsStaticMemberExpression(member) = &inner_callee else {
-        return None;
-    };
-    let object = member.object().ok()?.omit_parentheses();
-
-    if is_describe_callee(&object) {
-        Some(TestBlockKind::Describe)
-    } else {
-        Some(TestBlockKind::Test)
-    }
+    TestBlockKind::from_each_callee(&inner_call.callee().ok()?.omit_parentheses())
 }
 
 #[cfg(test)]

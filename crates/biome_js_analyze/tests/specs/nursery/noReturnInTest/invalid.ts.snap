@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+test("type assertion", (() => {
+	return expect(1).toBe(1);
+}) as TestFunction);
+
+test("non-null assertion", typedTest!);
+function typedTest(): Promise<void> {
+	return expect(1).resolves.toBe(1);
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+    1 │ /* should generate diagnostics */
+    2 │ test("type assertion", (() => {
+  > 3 │ 	return expect(1).toBe(1);
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ }) as TestFunction);
+    5 │ 
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+     6 │ test("non-null assertion", typedTest!);
+     7 │ function typedTest(): Promise<void> {
+   > 8 │ 	return expect(1).resolves.toBe(1);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ }
+    10 │ 
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
