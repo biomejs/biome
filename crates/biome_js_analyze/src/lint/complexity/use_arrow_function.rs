@@ -216,7 +216,10 @@ impl Rule for UseArrowFunction {
         let mut arrow_function_builder = make::js_arrow_function_expression(
             function_expression.parameters().ok()?.into(),
             make::token(T![=>]).with_trailing_space(),
-            to_arrow_body(function_expression.body().ok()?),
+            to_arrow_body(
+                function_expression.body().ok()?,
+                is_in_for_initializer(function_expression),
+            ),
         );
         if let Some(async_token) = function_expression.async_token() {
             arrow_function_builder = arrow_function_builder.with_async_token(async_token);
@@ -321,8 +324,52 @@ declare_node_union! {
         | JsStaticInitializationBlockClassMember
 }
 
+/// Returns `true` if `function_expression` is part of the initializer of a `for` or `for-in` statement.
+///
+/// In this position, an unparenthesized `in` expression in an arrow function body
+/// is parsed as the `in` keyword of a `for-in` statement.
+fn is_in_for_initializer(function_expression: &JsFunctionExpression) -> bool {
+    let statement = function_expression
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .find_map(AnyJsStatement::cast);
+    let range = function_expression.range();
+    match statement {
+        Some(AnyJsStatement::JsForStatement(for_statement)) => for_statement
+            .initializer()
+            .is_some_and(|initializer| initializer.range().contains_range(range)),
+        // Annex B allows `for (var x = init in obj)` in sloppy mode.
+        Some(AnyJsStatement::JsForInStatement(for_in_statement)) => for_in_statement
+            .initializer()
+            .is_ok_and(|initializer| initializer.range().contains_range(range)),
+        _ => false,
+    }
+}
+
+/// Returns `true` if `expression` contains an `in` expression that isn't enclosed
+/// in parentheses or in a function body.
+fn has_unparenthesized_in_expression(expression: &AnyJsExpression) -> bool {
+    let mut preorder = expression.syntax().preorder();
+    while let Some(event) = preorder.next() {
+        if let WalkEvent::Enter(node) = event {
+            match node.kind() {
+                JsSyntaxKind::JS_IN_EXPRESSION => return true,
+                JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION | JsSyntaxKind::JS_FUNCTION_BODY => {
+                    preorder.skip_subtree();
+                }
+                _ => {}
+            }
+        }
+    }
+    false
+}
+
 /// Get a minimal arrow function body from a regular function body.
-fn to_arrow_body(body: JsFunctionBody) -> AnyJsFunctionBody {
+///
+/// When `in_for_initializer` is `true`, an expression body that contains an `in` expression
+/// is wrapped in parentheses.
+fn to_arrow_body(body: JsFunctionBody, in_for_initializer: bool) -> AnyJsFunctionBody {
     let directives = body.directives();
     let body_statements = body.statements();
     let early_result = AnyJsFunctionBody::from(body);
@@ -346,6 +393,7 @@ fn to_arrow_body(body: JsFunctionBody) -> AnyJsFunctionBody {
         return early_result;
     }
     if matches!(return_arg, AnyJsExpression::JsSequenceExpression(_))
+        || (in_for_initializer && has_unparenthesized_in_expression(&return_arg))
         || return_arg
             .syntax()
             .first_token()
@@ -353,6 +401,7 @@ fn to_arrow_body(body: JsFunctionBody) -> AnyJsFunctionBody {
     {
         // () => (first, second)
         // () => ({ ... })
+        // for (let f = () => (a in b); ;) {}
         return AnyJsFunctionBody::AnyJsExpression(make::parenthesized(return_arg).into());
     }
     // () => expression
