@@ -1,0 +1,20 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid-astro-define-vars-open-scope.astro
+---
+# Input
+```astro
+---
+const dynamic = { background: "blue" };
+---
+<!-- should not generate diagnostics -->
+
+<style define:vars={{ ...dynamic }}>
+.card { color: var(--possibly-injected); }
+</style>
+
+<style>
+.card { color: var(--possibly-injected-elsewhere); }
+</style>
+
+```

@@ -1,0 +1,49 @@
+---
+source: crates/biome_astro_semantic/src/tests.rs
+expression: "semantic_snapshot(source, &model)"
+---
+## Input
+
+```astro
+---
+---
+<script define:vars={{ __proto__: null }}>
+console.log(__proto__);
+</script>
+<script define:vars={{ ["__proto__"]: 1 }}>
+console.log(__proto__);
+</script>
+<style define:vars={{ __proto__: null }}>
+.card { color: var(--__proto__); }
+</style>
+<style define:vars={{ ["__proto__"]: 1 }}>
+.card { color: var(--__proto__); }
+</style>
+```
+
+## Semantic model
+
+```text
+block Frontmatter 0..7 scope#1
+block Script 8..84 content=50..75 scope#2 snippet#1
+block Script 85..162 content=128..153 scope#3 snippet#3
+block Style 163..248 content=204..240
+block Style 249..335 content=291..327
+  define:vars __proto__ 273..282
+snippet#0 29..48 ScriptDefineVars(BlockId(1)) offset=29 source=astro-template scope#1
+snippet#1 50..75 Script(BlockId(1)) offset=50 source=typescript scope#2
+snippet#2 106..126 ScriptDefineVars(BlockId(2)) offset=106 source=astro-template scope#1
+snippet#3 128..153 Script(BlockId(2)) offset=128 source=typescript scope#3
+snippet#4 183..202 StyleDefineVars(BlockId(3)) offset=183 source=astro-template scope#1
+snippet#5 269..289 StyleDefineVars(BlockId(4)) offset=269 source=astro-template scope#1
+scope#0 Builtins
+  Builtin Astro 0..0 origin=AstroBuiltin
+scope#1 Module(Some(BlockId(0))) parent=scope#0
+scope#2 Module(Some(BlockId(1)))
+scope#3 Module(Some(BlockId(2)))
+  Synthetic __proto__ 110..119 origin=DefineVars
+ref console 51..58 Value Identifier Read -> Global
+ref __proto__ 63..72 Value Identifier Read -> Unresolved
+ref console 129..136 Value Identifier Read -> Global
+ref __proto__ 141..150 Value Identifier Read -> Synthetic __proto__
+```

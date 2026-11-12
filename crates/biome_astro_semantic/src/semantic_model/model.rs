@@ -131,9 +131,21 @@ pub(crate) struct BlockData {
     pub(crate) kind: BlockKind,
     pub(crate) range: TextRange,
     pub(crate) content: Option<TextRange>,
+    pub(crate) supported: bool,
+    pub(crate) globally_scoped: bool,
     pub(crate) external: bool,
     pub(crate) scope: Option<ScopeId>,
     pub(crate) snippet: Option<SnippetId>,
+    pub(crate) define_vars: Vec<DefineVarData>,
+    pub(crate) define_vars_open: OpenReasons,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub(crate) struct DefineVarData {
+    pub(crate) name: TokenText,
+    pub(crate) semantic_name: Text,
+    pub(crate) range: TextRange,
+    pub(crate) declaration: TextRange,
 }
 
 /// Where an embedded snippet sits in the host document.
@@ -145,6 +157,8 @@ pub enum SnippetHost {
     Script(BlockId),
     /// The snippet belongs to a `define:vars` directive on the given script block.
     ScriptDefineVars(BlockId),
+    /// The snippet belongs to a `define:vars` directive on the given style block.
+    StyleDefineVars(BlockId),
     /// The snippet is an expression in the template.
     Expression,
     /// The model could not associate the snippet with a document block.
@@ -371,6 +385,14 @@ define_handle!(
     snippets,
     SnippetData
 );
+
+/// A statically known key from a `define:vars` directive.
+#[derive(Clone)]
+pub struct DefineVar {
+    data: Arc<SemanticModelData>,
+    block: BlockId,
+    index: usize,
+}
 define_handle!(
     /// A scope.
     Scope,
@@ -480,6 +502,16 @@ impl Block {
         self.row().content
     }
 
+    /// Returns whether this block's embedded language is supported.
+    pub fn is_supported(&self) -> bool {
+        self.row().supported
+    }
+
+    /// Returns whether the block's declarations are globally scoped.
+    pub fn is_globally_scoped(&self) -> bool {
+        self.row().globally_scoped
+    }
+
     /// Returns whether the block loads its content from an external source.
     pub fn has_external_source(&self) -> bool {
         self.row().external
@@ -499,6 +531,46 @@ impl Block {
             data: self.data.clone(),
             id,
         })
+    }
+
+    /// Returns statically known `define:vars` keys for this block.
+    pub fn define_vars(&self) -> impl Iterator<Item = DefineVar> + '_ {
+        (0..self.row().define_vars.len()).map(|index| DefineVar {
+            data: self.data.clone(),
+            block: self.id,
+            index,
+        })
+    }
+
+    /// Returns reasons additional `define:vars` keys may exist.
+    pub fn define_vars_open_reasons(&self) -> OpenReasons {
+        self.row().define_vars_open
+    }
+}
+
+impl DefineVar {
+    fn row(&self) -> &DefineVarData {
+        &self.data.blocks[self.block].define_vars[self.index]
+    }
+
+    /// Returns the source spelling of the key.
+    pub fn name(&self) -> &str {
+        self.row().name.text()
+    }
+
+    /// Returns the decoded semantic name of the key.
+    pub fn semantic_name(&self) -> &Text {
+        &self.row().semantic_name
+    }
+
+    /// Returns the key range in host-document coordinates.
+    pub fn host_range(&self) -> TextRange {
+        self.row().range
+    }
+
+    /// Returns the object-member range in host-document coordinates.
+    pub fn host_declaration_range(&self) -> TextRange {
+        self.row().declaration
     }
 }
 

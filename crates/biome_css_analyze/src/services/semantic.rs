@@ -3,8 +3,12 @@ use biome_analyze::{
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext,
     VisitorStartContext,
 };
+use biome_astro_semantic::{BlockKind, astro_model_from_source};
 use biome_css_semantic::model::SemanticModel;
-use biome_css_semantic::{db::css_semantic_model, semantic_model};
+use biome_css_semantic::{
+    SemanticModelOptions, SyntheticCustomProperty, db::css_semantic_model,
+    semantic_model_with_options,
+};
 use biome_css_syntax::{AnyCssRoot, CssLanguage, CssSyntaxNode, TextRange};
 use biome_languages::LanguageDb;
 use biome_parser::db::AnalyzedSource;
@@ -80,6 +84,39 @@ impl Visitor for SemanticModelBuilderVisitor {
         if ctx.services.get_service::<SemanticModel>().is_some() {
             return;
         }
+        let file_source = ctx
+            .services
+            .get_service::<biome_languages::CssFileSource>()
+            .copied()
+            .unwrap_or_default();
+        let mut options = SemanticModelOptions::default();
+        if file_source.as_embedding_kind().is_astro()
+            && let Some(db) = ctx.services.get_service::<Rc<dyn LanguageDb>>()
+            && let Some(AnalyzedSource::Snippet(snippet)) =
+                ctx.services.get_service::<AnalyzedSource>()
+        {
+            let astro_model = astro_model_from_source(db.as_ref(), snippet.source());
+            if let Some(block) = astro_model.blocks().find(|block| {
+                block.kind() == BlockKind::Style
+                    && block
+                        .content_range()
+                        .is_some_and(|range| range.contains_range(snippet.content_range()))
+            }) {
+                options.synthetic_custom_properties = block
+                    .define_vars()
+                    .map(|variable| {
+                        SyntheticCustomProperty::new(variable.semantic_name().clone())
+                            .with_host_range(variable.host_range())
+                    })
+                    .collect();
+                options.custom_properties_open = !block.define_vars_open_reasons().is_empty();
+            }
+        }
+        if !options.synthetic_custom_properties.is_empty() || options.custom_properties_open {
+            ctx.services
+                .insert_service(semantic_model_with_options(ctx.root, options));
+            return;
+        }
         if let Some(db) = ctx.services.get_service::<Rc<dyn LanguageDb>>()
             && let Some(source) = ctx.services.get_service::<AnalyzedSource>()
             && let Some(model) = css_semantic_model(db.as_ref(), source)
@@ -91,7 +128,8 @@ impl Visitor for SemanticModelBuilderVisitor {
                 return;
             }
         }
-        ctx.services.insert_service(semantic_model(ctx.root));
+        ctx.services
+            .insert_service(semantic_model_with_options(ctx.root, options));
     }
 
     fn visit(&mut self, _: &WalkEvent<CssSyntaxNode>, _: VisitorContext<CssLanguage>) {}

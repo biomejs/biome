@@ -7,23 +7,49 @@ use biome_css_syntax::{
 };
 use biome_db::Source;
 use biome_parser::db::{AnalyzedSource, ParseDb, SourceExt, TrackedSnippet};
-use biome_rowan::{AstNode, AstNodeList, TextRange, TokenText};
+use biome_rowan::{AstNode, AstNodeList, Text, TextRange, TextSize, TokenText};
 
 /// The name and source range of a custom property definition.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CssPropertyDefinition {
-    name: TokenText,
+    name: CssPropertyDefinitionName,
     range: TextRange,
+    range_is_host: bool,
     globally_scoped: bool,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+enum CssPropertyDefinitionName {
+    /// A name written in the stylesheet, including the leading `--`.
+    Authored(TokenText),
+    /// A name supplied by the embedding host, without the leading `--`.
+    Synthetic(Text),
 }
 
 impl CssPropertyDefinition {
     pub fn matches(&self, name: &str) -> bool {
-        decode_css_identifier(self.name.text()) == decode_css_identifier(name)
+        let name = decode_css_identifier(name);
+        match &self.name {
+            CssPropertyDefinitionName::Authored(authored) => {
+                decode_css_identifier(authored.text()) == name
+            }
+            CssPropertyDefinitionName::Synthetic(synthetic) => name
+                .strip_prefix("--")
+                .is_some_and(|name| decode_css_identifier(synthetic.text()) == name),
+        }
     }
 
     pub fn range(&self) -> TextRange {
         self.range
+    }
+
+    /// Returns this definition's range in host-document coordinates.
+    pub fn range_in_host(&self, content_offset: TextSize) -> TextRange {
+        if self.range_is_host {
+            self.range
+        } else {
+            self.range + content_offset
+        }
     }
 
     pub fn is_globally_scoped(&self) -> bool {
@@ -57,7 +83,7 @@ pub fn css_property_definitions_from_source(
     file: Source,
 ) -> Vec<CssPropertyDefinition> {
     let parsed: AnyCssRoot = file.parsed(db).tree();
-    collect_property_definitions(&semantic_model(&parsed))
+    css_property_definitions_from_model(&semantic_model(&parsed))
 }
 
 /// Returns custom property definitions from an embedded CSS document.
@@ -67,17 +93,18 @@ pub fn css_property_definitions_from_snippet<'db>(
     file: TrackedSnippet<'db>,
 ) -> Vec<CssPropertyDefinition> {
     let parsed: AnyCssRoot = file.parsed(db).tree();
-    collect_property_definitions(&semantic_model(&parsed))
+    css_property_definitions_from_model(&semantic_model(&parsed))
 }
 
-fn collect_property_definitions(model: &SemanticModel) -> Vec<CssPropertyDefinition> {
+pub fn css_property_definitions_from_model(model: &SemanticModel) -> Vec<CssPropertyDefinition> {
     let mut definitions = model
         .custom_property_declarations()
         .map(|declaration| {
             let property = declaration.property();
             CssPropertyDefinition {
-                name: declaration.name().clone(),
+                name: CssPropertyDefinitionName::Authored(declaration.name().clone()),
                 range: declaration.range(),
+                range_is_host: false,
                 globally_scoped: is_globally_scoped(property.syntax()),
             }
         })
@@ -86,11 +113,22 @@ fn collect_property_definitions(model: &SemanticModel) -> Vec<CssPropertyDefinit
                 .global_custom_variables()
                 .at_property_registration_candidates()
                 .map(|property| CssPropertyDefinition {
-                    name: property.name().clone(),
+                    name: CssPropertyDefinitionName::Authored(property.name().clone()),
                     range: property.range(),
+                    range_is_host: false,
                     globally_scoped: true,
                 }),
         )
+        .chain(model.synthetic_custom_properties().iter().map(|property| {
+            CssPropertyDefinition {
+                name: CssPropertyDefinitionName::Synthetic(property.name().clone()),
+                range: property
+                    .host_range()
+                    .unwrap_or_else(|| TextRange::empty(TextSize::from(0))),
+                range_is_host: property.host_range().is_some(),
+                globally_scoped: false,
+            }
+        }))
         .collect::<Vec<_>>();
     definitions.sort_unstable_by_key(|definition| definition.range.start());
     definitions
@@ -171,9 +209,10 @@ pub fn css_semantic_model<'db>(
 #[cfg(test)]
 mod tests {
     use super::{
-        collect_property_definitions, css_model_from_parsed_source,
+        css_model_from_parsed_source, css_property_definitions_from_model,
         css_property_definitions_from_snippet, css_property_definitions_from_source,
     };
+    use crate::{SemanticModelOptions, SyntheticCustomProperty, semantic_model_with_options};
     use biome_css_parser::{CssParserOptions, parse_css};
     use biome_css_syntax::property_syntax::{
         PropertySyntax, PropertySyntaxComponentName, PropertySyntaxResult, PropertySyntaxType,
@@ -185,7 +224,7 @@ mod tests {
     use biome_languages::css::CssFileSource;
     use biome_languages::{DocumentFileSource, LanguageDb};
     use biome_parser::db::{ParseDb, SnippetOutput, SourceExt, SourceOutput};
-    use biome_rowan::TextSize;
+    use biome_rowan::{TextRange, TextSize};
     use camino::{Utf8Path, Utf8PathBuf};
     use salsa::{Setter, Storage};
 
@@ -283,6 +322,40 @@ mod tests {
     }
 
     #[test]
+    fn host_custom_property_definitions_are_collected() {
+        let parsed = parse_css(
+            "a { color: var(--host); }",
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
+        let root = parsed.tree();
+        let model = semantic_model_with_options(
+            &root,
+            SemanticModelOptions {
+                synthetic_custom_properties: vec![
+                    SyntheticCustomProperty::new("host".into())
+                        .with_host_range(TextRange::new(TextSize::from(20), TextSize::from(26))),
+                ],
+                ..SemanticModelOptions::default()
+            },
+        );
+        let definitions = css_property_definitions_from_model(&model);
+        let definition = definitions
+            .iter()
+            .find(|definition| definition.matches("--host"))
+            .expect("host definition");
+        assert_eq!(
+            definition.range_in_host(TextSize::from(100)),
+            TextRange::new(TextSize::from(20), TextSize::from(26))
+        );
+        assert!(
+            !definitions
+                .iter()
+                .any(|definition| definition.matches("--missing"))
+        );
+    }
+
+    #[test]
     fn property_definition_ranges_track_parse_changes() {
         let mut db = TestDb {
             embeds_itself: true,
@@ -323,7 +396,7 @@ mod tests {
             CssParserOptions::default().allow_css_modules(),
         );
         let model = crate::semantic_model(&parse.tree());
-        let definitions = collect_property_definitions(&model);
+        let definitions = css_property_definitions_from_model(&model);
 
         assert_eq!(definitions.len(), 2);
         assert!(
