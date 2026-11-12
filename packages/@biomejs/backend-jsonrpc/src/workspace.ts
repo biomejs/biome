@@ -4148,6 +4148,11 @@ export interface Nursery {
 	 */
 	usePackageJsonValidEngines?: UsePackageJsonValidEnginesConfiguration;
 	/**
+	 * Require the license field in package.json to be a valid license.
+	 * See https://biomejs.dev/linter/rules/use-package-json-valid-license
+	 */
+	usePackageJsonValidLicense?: UsePackageJsonValidLicenseConfiguration;
+	/**
 	 * Require Error objects as Promise rejection reasons.
 	 * See https://biomejs.dev/linter/rules/use-promise-reject-errors
 	 */
@@ -7383,6 +7388,9 @@ export type UsePackageJsonValidCpuConfiguration =
 export type UsePackageJsonValidEnginesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUsePackageJsonValidEnginesOptions;
+export type UsePackageJsonValidLicenseConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUsePackageJsonValidLicenseOptions;
 export type UsePromiseRejectErrorsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUsePromiseRejectErrorsOptions;
@@ -10941,6 +10949,10 @@ export interface RuleWithUsePackageJsonValidEnginesOptions {
 	level: RulePlainConfiguration;
 	options?: UsePackageJsonValidEnginesOptions;
 }
+export interface RuleWithUsePackageJsonValidLicenseOptions {
+	level: RulePlainConfiguration;
+	options?: UsePackageJsonValidLicenseOptions;
+}
 export interface RuleWithUsePromiseRejectErrorsOptions {
 	level: RulePlainConfiguration;
 	options?: UsePromiseRejectErrorsOptions;
@@ -14048,6 +14060,7 @@ export type UsePackageJsonCpuOptions = {};
 export type UsePackageJsonEnginesOptions = {};
 export type UsePackageJsonValidCpuOptions = {};
 export type UsePackageJsonValidEnginesOptions = {};
+export type UsePackageJsonValidLicenseOptions = {};
 export type UsePromiseRejectErrorsOptions = {};
 export interface UseReactCompilerOptions {
 	/**
@@ -16040,6 +16053,7 @@ export type Category =
 	| "lint/nursery/usePackageJsonEngines"
 	| "lint/nursery/usePackageJsonValidCpu"
 	| "lint/nursery/usePackageJsonValidEngines"
+	| "lint/nursery/usePackageJsonValidLicense"
 	| "lint/nursery/usePromiseRejectErrors"
 	| "lint/nursery/useReactCompiler"
 	| "lint/nursery/useReactFunctionComponentDefinition"

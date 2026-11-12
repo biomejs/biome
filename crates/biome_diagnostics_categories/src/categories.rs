@@ -500,6 +500,7 @@ define_categories! {
     "lint/nursery/usePackageJsonEngines": "https://biomejs.dev/linter/rules/use-package-json-engines",
     "lint/nursery/usePackageJsonValidCpu": "https://biomejs.dev/linter/rules/use-package-json-valid-cpu",
     "lint/nursery/usePackageJsonValidEngines": "https://biomejs.dev/linter/rules/use-package-json-valid-engines",
+    "lint/nursery/usePackageJsonValidLicense": "https://biomejs.dev/linter/rules/use-package-json-valid-license",
     "lint/nursery/usePromiseRejectErrors": "https://biomejs.dev/linter/rules/use-promise-reject-errors",
     "lint/nursery/useReactCompiler": "https://biomejs.dev/linter/rules/use-react-compiler",
     "lint/nursery/useReactFunctionComponentDefinition": "https://biomejs.dev/linter/rules/use-react-function-component-definition",

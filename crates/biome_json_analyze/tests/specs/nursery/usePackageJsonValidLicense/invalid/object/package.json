@@ -1,0 +1,7 @@
+{
+	"name": "my-package",
+	"license": {
+		"type": "MIT",
+		"url": "https://opensource.org/licenses/MIT"
+	}
+}
