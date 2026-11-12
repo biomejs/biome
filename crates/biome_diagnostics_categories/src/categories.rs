@@ -279,6 +279,7 @@ define_categories! {
     "lint/nursery/noMissingScssInterpolation": "https://biomejs.dev/linter/rules/no-missing-scss-interpolation",
     "lint/nursery/noMissingThrow": "https://biomejs.dev/linter/rules/no-missing-throw",
     "lint/nursery/noMisusedPromises": "https://biomejs.dev/linter/rules/no-misused-promises",
+    "lint/nursery/noMisusedSpread": "https://biomejs.dev/linter/rules/no-misused-spread",
     "lint/nursery/noNegatedArrayPredicate": "https://biomejs.dev/linter/rules/no-negated-array-predicate",
     "lint/nursery/noNegationInEqualityCheck": "https://biomejs.dev/linter/rules/no-negation-in-equality-check",
     "lint/nursery/noNestedSwitch": "https://biomejs.dev/linter/rules/no-nested-switch",

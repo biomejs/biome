@@ -1,0 +1,171 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidString.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+const literal = [...'test'];
+
+function withText<Text extends string>(text: Text) {
+	return [...text];
+}
+
+declare const stringOrArray: string | number[];
+const fromUnion = [...stringOrArray];
+
+declare const branded: string & { __brand: 'test' };
+const fromBranded = [...branded];
+
+declare function getString(): string;
+const fromCall = [...getString()];
+
+declare function textIdentity(...args: string[]): void;
+declare const text: string;
+textIdentity(...text);
+
+declare function getGenericString<T extends string>(): T;
+const fromGenericCall = [...getGenericString()];
+
+```
+
+# Diagnostics
+```
+invalidString.ts:2:21 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a string splits it into code points, which can break characters apart.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const literal = [...'test'];
+      │                     ^^^^^^
+    3 │ 
+    4 │ function withText<Text extends string>(text: Text) {
+  
+  i Characters made of several code points, such as many emoji and some letters with accents, are split into separate pieces.
+  
+  i Use Intl.Segmenter to split the string into the characters that a reader sees. If the string only contains simple characters, suppress this diagnostic.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidString.ts:5:13 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a string splits it into code points, which can break characters apart.
+  
+    4 │ function withText<Text extends string>(text: Text) {
+  > 5 │ 	return [...text];
+      │ 	           ^^^^
+    6 │ }
+    7 │ 
+  
+  i Characters made of several code points, such as many emoji and some letters with accents, are split into separate pieces.
+  
+  i Use Intl.Segmenter to split the string into the characters that a reader sees. If the string only contains simple characters, suppress this diagnostic.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidString.ts:9:23 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a string splits it into code points, which can break characters apart.
+  
+     8 │ declare const stringOrArray: string | number[];
+   > 9 │ const fromUnion = [...stringOrArray];
+       │                       ^^^^^^^^^^^^^
+    10 │ 
+    11 │ declare const branded: string & { __brand: 'test' };
+  
+  i Characters made of several code points, such as many emoji and some letters with accents, are split into separate pieces.
+  
+  i Use Intl.Segmenter to split the string into the characters that a reader sees. If the string only contains simple characters, suppress this diagnostic.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidString.ts:12:25 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a string splits it into code points, which can break characters apart.
+  
+    11 │ declare const branded: string & { __brand: 'test' };
+  > 12 │ const fromBranded = [...branded];
+       │                         ^^^^^^^
+    13 │ 
+    14 │ declare function getString(): string;
+  
+  i Characters made of several code points, such as many emoji and some letters with accents, are split into separate pieces.
+  
+  i Use Intl.Segmenter to split the string into the characters that a reader sees. If the string only contains simple characters, suppress this diagnostic.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidString.ts:15:22 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a string splits it into code points, which can break characters apart.
+  
+    14 │ declare function getString(): string;
+  > 15 │ const fromCall = [...getString()];
+       │                      ^^^^^^^^^^^
+    16 │ 
+    17 │ declare function textIdentity(...args: string[]): void;
+  
+  i Characters made of several code points, such as many emoji and some letters with accents, are split into separate pieces.
+  
+  i Use Intl.Segmenter to split the string into the characters that a reader sees. If the string only contains simple characters, suppress this diagnostic.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidString.ts:19:17 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a string splits it into code points, which can break characters apart.
+  
+    17 │ declare function textIdentity(...args: string[]): void;
+    18 │ declare const text: string;
+  > 19 │ textIdentity(...text);
+       │                 ^^^^
+    20 │ 
+    21 │ declare function getGenericString<T extends string>(): T;
+  
+  i Characters made of several code points, such as many emoji and some letters with accents, are split into separate pieces.
+  
+  i Use Intl.Segmenter to split the string into the characters that a reader sees. If the string only contains simple characters, suppress this diagnostic.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidString.ts:22:29 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a string splits it into code points, which can break characters apart.
+  
+    21 │ declare function getGenericString<T extends string>(): T;
+  > 22 │ const fromGenericCall = [...getGenericString()];
+       │                             ^^^^^^^^^^^^^^^^^^
+    23 │ 
+  
+  i Characters made of several code points, such as many emoji and some letters with accents, are split into separate pieces.
+  
+  i Use Intl.Segmenter to split the string into the characters that a reader sees. If the string only contains simple characters, suppress this diagnostic.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

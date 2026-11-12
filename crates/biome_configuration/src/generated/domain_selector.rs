@@ -206,6 +206,7 @@ static TYPES_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noMeaninglessVoidOperator"),
         RuleFilter::Rule("nursery", "noMisleadingReturnType"),
         RuleFilter::Rule("nursery", "noMisusedPromises"),
+        RuleFilter::Rule("nursery", "noMisusedSpread"),
         RuleFilter::Rule("nursery", "noTanstackQueryVoidQueryFn"),
         RuleFilter::Rule("nursery", "noUnsafePlusOperands"),
         RuleFilter::Rule("nursery", "noUnsafeReturn"),
