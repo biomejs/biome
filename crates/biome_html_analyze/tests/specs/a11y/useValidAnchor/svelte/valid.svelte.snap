@@ -1,5 +1,6 @@
 ---
 source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
 expression: valid.svelte
 ---
 # Input
@@ -12,5 +13,6 @@ expression: valid.svelte
 <Link href="https://example.com">ok</Link>
 <Link href="#">ok</Link>
 <a {href}>test</a>
+<a {...props}>ok</a>
 
 ```

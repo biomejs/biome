@@ -4,8 +4,9 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_html_syntax::{AnyHtmlAttribute, AnyVueDirective};
 use biome_languages::HtmlFileSource;
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, AstNodeList, TextRange};
 use biome_rule_options::use_valid_anchor::UseValidAnchorOptions;
 use biome_string_case::StrLikeExtension;
 
@@ -103,7 +104,9 @@ impl Rule for UseValidAnchor {
                     ));
                 }
                 (None, None) => {
-                    return Some(UseValidAnchorState::MissingHrefAttribute(node.range()));
+                    if !has_spread_attribute(node) {
+                        return Some(UseValidAnchorState::MissingHrefAttribute(node.range()));
+                    }
                 }
             };
         }
@@ -176,4 +179,16 @@ impl UseValidAnchorState {
             | Self::IncorrectHref(range) => range,
         }
     }
+}
+
+/// Returns `true` if the element has a spread attribute (`{...props}`) or a
+/// Vue `v-bind="obj"` directive without a static argument, which may supply `href`.
+fn has_spread_attribute(element: &AnyHtmlTagElement) -> bool {
+    element.attributes().iter().any(|attribute| match &attribute {
+        AnyHtmlAttribute::HtmlSpreadAttribute(_) => true,
+        AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueDirective(directive)) => {
+            directive.is_binding() && attribute.name().is_none()
+        }
+        _ => false,
+    })
 }

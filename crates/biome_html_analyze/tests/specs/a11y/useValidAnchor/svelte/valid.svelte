@@ -6,3 +6,4 @@
 <Link href="https://example.com">ok</Link>
 <Link href="#">ok</Link>
 <a {href}>test</a>
+<a {...props}>ok</a>
