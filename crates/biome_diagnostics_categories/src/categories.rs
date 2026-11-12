@@ -266,6 +266,7 @@ define_categories! {
     "lint/nursery/noInvalidRemoveEventListener": "https://biomejs.dev/linter/rules/no-invalid-remove-event-listener",
     "lint/nursery/noInvalidThis": "https://biomejs.dev/linter/rules/no-invalid-this",
     "lint/nursery/noIteratorProperty": "https://biomejs.dev/linter/rules/no-iterator-property",
+    "lint/nursery/noJasmineGlobals": "https://biomejs.dev/linter/rules/no-jasmine-globals",
     "lint/nursery/noJsRestrictedProperties": "https://biomejs.dev/linter/rules/no-js-restricted-properties",
     "lint/nursery/noJsonUnsafeValues": "https://biomejs.dev/linter/rules/no-json-unsafe-values",
     "lint/nursery/noLateEventControl": "https://biomejs.dev/linter/rules/no-late-event-control",

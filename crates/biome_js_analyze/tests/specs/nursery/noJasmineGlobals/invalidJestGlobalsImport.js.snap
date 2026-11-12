@@ -1,0 +1,72 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidJestGlobalsImport.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { expect, jest } from "@jest/globals";
+
+// `expect` and `jest` are imported, so the fix is still offered.
+expect(total).toEqual(jasmine.any(Number));
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+
+```
+
+# Diagnostics
+```
+invalidJestGlobalsImport.js:5:23 lint/nursery/noJasmineGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    4 │ // `expect` and `jest` are imported, so the fix is still offered.
+  > 5 │ expect(total).toEqual(jasmine.any(Number));
+      │                       ^^^^^^^^^^^
+    6 │ jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+    7 │ 
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use expect.any() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use expect.any() instead.
+  
+    3 3 │   
+    4 4 │   // `expect` and `jest` are imported, so the fix is still offered.
+    5   │ - expect(total).toEqual(jasmine.any(Number));
+      5 │ + expect(total).toEqual(expect.any(Number));
+    6 6 │   jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+    7 7 │   
+  
+
+```
+
+```
+invalidJestGlobalsImport.js:6:1 lint/nursery/noJasmineGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    4 │ // `expect` and `jest` are imported, so the fix is still offered.
+    5 │ expect(total).toEqual(jasmine.any(Number));
+  > 6 │ jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use jest.setTimeout() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.setTimeout() instead.
+  
+    4 4 │   // `expect` and `jest` are imported, so the fix is still offered.
+    5 5 │   expect(total).toEqual(jasmine.any(Number));
+    6   │ - jasmine.DEFAULT_TIMEOUT_INTERVAL·=·5000;
+      6 │ + jest.setTimeout(5000);
+    7 7 │   
+  
+
+```

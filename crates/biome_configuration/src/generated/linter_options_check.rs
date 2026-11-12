@@ -831,6 +831,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noJasmineGlobals",
+        TypeId::of::<biome_rule_options::no_jasmine_globals::NoJasmineGlobalsOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noJsRestrictedProperties",
         TypeId::of::<
             biome_rule_options::no_js_restricted_properties::NoJsRestrictedPropertiesOptions,
