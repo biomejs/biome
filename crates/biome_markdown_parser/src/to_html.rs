@@ -649,10 +649,7 @@ impl<'a> HtmlRenderer<'a> {
             }
         }
 
-        self.buffers
-            .pop()
-            .map(|buffer| buffer.content)
-            .unwrap_or_default()
+        self.buffers.pop().map_or_default(|buffer| buffer.content)
     }
 
     fn enter(&mut self, node: SyntaxNode<MarkdownLanguage>) {

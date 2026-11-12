@@ -54,8 +54,7 @@ pub(crate) fn inspect_file(payload: InspectFile) -> Result<(), CliDiagnostic> {
     let project_directory = BiomePath::new(
         loaded_configuration
             .directory_path()
-            .map(Utf8PathBuf::from)
-            .unwrap_or_default(),
+            .map_or_default(Utf8PathBuf::from),
     );
 
     let result = workspace.open_project(OpenProjectParams {

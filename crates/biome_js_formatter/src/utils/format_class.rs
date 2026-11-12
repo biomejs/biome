@@ -26,11 +26,7 @@ impl FormatClass<'_> {
             return Ok(true);
         }
 
-        if self.class.implements_clause().is_some() {
-            return Ok(true);
-        }
-
-        Ok(false)
+        Ok(self.class.implements_clause().is_some())
     }
 }
 

@@ -296,10 +296,9 @@ impl<'l, 'a> GlobalBuilder<'l, 'a> {
         // Class type parameters are not in scope for static members.
         self.parameters.pop();
 
-        let constructor_interfaces = self
-            .group(constructor.text())
-            .map(|group| records_of_kind(group, |kind| kind == &DeclarationKind::Interface))
-            .unwrap_or_default();
+        let constructor_interfaces = self.group(constructor.text()).map_or_default(|group| {
+            records_of_kind(group, |kind| kind == &DeclarationKind::Interface)
+        });
         if constructor_interfaces.is_empty() {
             self.gap(format!("missing constructor interface {constructor}"));
         }

@@ -666,10 +666,7 @@ impl ParseNodeList for BulletList {
                 if next_is_bullet_at_indent {
                     // Per CommonMark §5.3, a change in bullet marker across
                     // a blank line starts a new list.
-                    if marker_changes_after_newline(p, marker_kind) {
-                        return Some(true);
-                    }
-                    Some(false)
+                    Some(marker_changes_after_newline(p, marker_kind))
                 } else {
                     // Check if bullet after blank lines is at correct indent
                     let has_item = p.lookahead(|p| {

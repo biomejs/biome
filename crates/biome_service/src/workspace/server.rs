@@ -2111,10 +2111,7 @@ impl WorkspaceServerWithDb<'_> {
                 }
             }
         } else if filename.is_some_and(|filename| filename == "pnpm-workspace.yaml") {
-            let workspace_root = path
-                .parent()
-                .map(|parent| parent.to_path_buf())
-                .unwrap_or_default();
+            let workspace_root = path.parent().map_or_default(|parent| parent.to_path_buf());
 
             for package_path in self.project_layout.package_paths() {
                 if !package_path.starts_with(&workspace_root) {
@@ -2413,14 +2410,13 @@ impl WorkspaceServerWithDb<'_> {
     pub fn db_get_parse_diagnostics(&self, path: &Utf8Path) -> Vec<ParseDiagnostic> {
         let db = self.get_db();
         db.get_client_parsed_source(path, self.client)
-            .map(|parsed_source| {
+            .map_or_default(|parsed_source| {
                 let mut diagnostics = Vec::new();
                 diagnostics.extend(parsed_source.parse_diagnostics(&*db).clone());
                 diagnostics.extend(parsed_source.snippets_parse_diagnostics(&*db).clone());
 
                 diagnostics
             })
-            .unwrap_or_default()
     }
 
     /// Makes sure that the file was parsed and it is within the configured file limit
@@ -2480,14 +2476,13 @@ impl WorkspaceServerWithDb<'_> {
     fn get_snippets(&self, path: &Utf8Path) -> Vec<SnippetRef> {
         let db = self.db_state.fork();
         db.get_client_parsed_source(path, self.client)
-            .map(|source| {
+            .map_or_default(|source| {
                 source
                     .snippets(&*db)
                     .iter()
                     .map(|snippet| snippet.to_ref(&*db))
                     .collect()
             })
-            .unwrap_or_default()
     }
 
     // #endregion
@@ -3008,8 +3003,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
 
             if let Some(workspace_directory) = &workspace_directory {
                 self.project_get_nested_settings(project_key, workspace_directory.as_path())
-                    .map(|settings| (*settings).clone())
-                    .unwrap_or_default()
+                    .map_or_default(|settings| (*settings).clone())
             } else {
                 return Err(WorkspaceError::no_workspace_directory());
             }
@@ -3122,8 +3116,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 let directory = settings
                     .vcs_settings
                     .to_base_path(workspace_directory.as_deref())
-                    .map(|p| normalize_path(&p))
-                    .unwrap_or_default();
+                    .map_or_default(|p| normalize_path(&p));
                 match settings.vcs_settings.client_kind {
                     None => {}
                     Some(VcsClientKind::Git) => {

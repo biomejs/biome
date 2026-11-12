@@ -120,8 +120,7 @@ impl BlockLangOptions {
                 // written explicitly.
                 let (defaults, langs): (Vec<_>, Vec<_>) = block
                     .lang
-                    .map(|langs| langs.0)
-                    .unwrap_or_default()
+                    .map_or_default(|langs| langs.0)
                     .into_iter()
                     .partition(|lang| default_langs.contains(&lang.as_ref()));
                 let options = if !langs.is_empty() {

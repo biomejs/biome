@@ -2043,9 +2043,7 @@ impl Prop {
     /// The set is empty when the declaration names no type, as in
     /// `props: ['name']`.
     pub fn types(&self) -> TypeSet {
-        self.prop_detail()
-            .map(|detail| detail.types)
-            .unwrap_or_default()
+        self.prop_detail().map_or_default(|detail| detail.types)
     }
 
     pub fn required(&self) -> Tri {
@@ -2058,8 +2056,7 @@ impl Prop {
     pub fn defaults(&self) -> impl Iterator<Item = PropDefault> + '_ {
         let snippet = self.0.row().snippet;
         self.prop_detail()
-            .map(|detail| &*detail.defaults)
-            .unwrap_or_default()
+            .map_or_default(|detail| &*detail.defaults)
             .iter()
             .map(move |default| PropDefault {
                 range: self.0.data.local(default.range, snippet),
@@ -2076,8 +2073,7 @@ impl Prop {
     /// object is destructured.
     pub fn external_default_sources(&self) -> DefaultSources {
         self.prop_detail()
-            .map(|detail| detail.external_default_sources)
-            .unwrap_or_default()
+            .map_or_default(|detail| detail.external_default_sources)
     }
 
     /// Whether [`Self::defaults`] lists every default value of the prop.

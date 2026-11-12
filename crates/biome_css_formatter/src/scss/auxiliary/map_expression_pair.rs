@@ -177,11 +177,7 @@ fn should_group_leading_comments_with_pair(node: &ScssMapExpressionPair, f: &Css
         return false;
     };
 
-    if is_self_breaking_value(&value) {
-        return false;
-    }
-
-    true
+    !is_self_breaking_value(&value)
 }
 
 fn is_map_pair_group_leading_comment(comment: &SourceComment<CssLanguage>) -> bool {

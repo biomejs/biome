@@ -205,15 +205,13 @@ impl SemanticModelBuilder {
                     } else {
                         self.get_last_parent_selector_rule()
                     };
-                    let parent_specificity = parent_rule
-                        .map(|rule| {
-                            rule.selectors
-                                .iter()
-                                .map(|selector| selector.specificity)
-                                .max()
-                                .unwrap_or_default()
-                        })
-                        .unwrap_or_default();
+                    let parent_specificity = parent_rule.map_or_default(|rule| {
+                        rule.selectors
+                            .iter()
+                            .map(|selector| selector.specificity)
+                            .max()
+                            .unwrap_or_default()
+                    });
                     let parent_specificity = (0..nesting_selector_count.max(1))
                         .fold(Specificity::default(), |specificity, _| {
                             specificity + parent_specificity

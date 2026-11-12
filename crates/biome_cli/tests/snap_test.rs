@@ -308,15 +308,12 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
         let found = matched.start()..matched.end();
         let matched_text = matched.as_str();
         // Preserve the whitespace after the colon
-        let whitespace = matched_text
-            .split_once(':')
-            .map(|(_, after)| {
-                after
-                    .chars()
-                    .take_while(|c| c.is_whitespace())
-                    .collect::<String>()
-            })
-            .unwrap_or_default();
+        let whitespace = matched_text.split_once(':').map_or_default(|(_, after)| {
+            after
+                .chars()
+                .take_while(|c| c.is_whitespace())
+                .collect::<String>()
+        });
         let replacement = format!("\"duration\":{whitespace}\"<TIME>\"");
         output.to_mut().replace_range(found, &replacement);
     }
@@ -325,15 +322,12 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
         let found = matched.start()..matched.end();
         let matched_text = matched.as_str();
         // Preserve the whitespace after the colon
-        let whitespace = matched_text
-            .split_once(':')
-            .map(|(_, after)| {
-                after
-                    .chars()
-                    .take_while(|c| c.is_whitespace())
-                    .collect::<String>()
-            })
-            .unwrap_or_default();
+        let whitespace = matched_text.split_once(':').map_or_default(|(_, after)| {
+            after
+                .chars()
+                .take_while(|c| c.is_whitespace())
+                .collect::<String>()
+        });
         let replacement = format!("\"scannerDuration\":{whitespace}\"<TIME>\"");
         output.to_mut().replace_range(found, &replacement);
     }

@@ -693,8 +693,7 @@ pub fn project_layout_for_test_file(
             project_layout.insert_node_manifest(
                 input_file
                     .parent()
-                    .map(|dir_path| dir_path.to_path_buf())
-                    .unwrap_or_default(),
+                    .map_or_default(|dir_path| dir_path.to_path_buf()),
                 manifest,
             );
         }
@@ -716,8 +715,7 @@ pub fn project_layout_for_test_file(
             project_layout.insert_tsconfig(
                 input_file
                     .parent()
-                    .map(|dir_path| dir_path.to_path_buf())
-                    .unwrap_or_default(),
+                    .map_or_default(|dir_path| dir_path.to_path_buf()),
                 deserialized.into_deserialized().unwrap_or_default(),
             );
         }
@@ -751,8 +749,7 @@ pub fn project_layout_for_test_file(
             project_layout.insert_turbo_json(
                 input_file
                     .parent()
-                    .map(|dir_path| dir_path.to_path_buf())
-                    .unwrap_or_default(),
+                    .map_or_default(|dir_path| dir_path.to_path_buf()),
                 deserialized.into_deserialized().unwrap_or_default(),
             );
         }

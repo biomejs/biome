@@ -165,8 +165,7 @@ impl Rule for NoUnresolvedImports {
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let cwd = Utf8PathBuf::from(
             std::env::current_dir()
-                .map(|cwd| cwd.to_string_lossy().to_string())
-                .unwrap_or_default(),
+                .map_or_default(|cwd| cwd.to_string_lossy().to_string()),
         );
 
         // Use the relative path if possible.

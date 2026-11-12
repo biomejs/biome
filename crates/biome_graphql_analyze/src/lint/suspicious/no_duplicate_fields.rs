@@ -81,8 +81,7 @@ impl Rule for NoDuplicateFields {
         match ctx.query() {
             AnyGraphqlOperationDefinition::GraphqlOperationDefinition(operation) => operation
                 .variables()
-                .map(|variables| check_duplicated_variable_definitions(&variables))
-                .unwrap_or_default(),
+                .map_or_default(|variables| check_duplicated_variable_definitions(&variables)),
             // Selection fields of an operation definition are handled by the selection set traversal.
             AnyGraphqlOperationDefinition::GraphqlSelectionSet(selection_set) => {
                 check_duplicated_selection_fields(selection_set)
