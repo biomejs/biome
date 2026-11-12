@@ -91,7 +91,14 @@ fn collect_bound_references(
             continue;
         };
         let namespace = reference_namespace(&reference_node);
-        if !builder.data.symbols[symbol].declares_in(namespace) {
+        let access = access_of(&reference_node, reference.is_write());
+        let symbol_data = &builder.data.symbols[symbol];
+        let resolves = symbol_data.declares_in(namespace)
+            || (access == Access::Type
+                && namespace == Namespace::Value
+                && symbol_data.kind == SymbolKind::Import
+                && symbol_data.declares_type);
+        if !resolves {
             continue;
         }
         builder.add_reference(ReferenceData {
@@ -102,7 +109,7 @@ fn collect_bound_references(
             namespace,
             scope: None,
             base: RefBase::Bare,
-            access: access_of(&reference_node, reference.is_write()),
+            access,
             resolution: Resolution::Symbol(symbol),
         });
     }
@@ -130,8 +137,15 @@ pub(crate) fn collect_free_references(
         };
         let name = token.token_text_trimmed();
         let namespace = reference_namespace(&reference);
+        let access = access_of(&reference, false);
         let resolution = if let Some(binding) = snippet.js.binding(&reference) {
-            if binding_capabilities(&binding).declares_in(namespace) {
+            let capabilities = binding_capabilities(&binding);
+            let resolves = capabilities.declares_in(namespace)
+                || (access == Access::Type
+                    && namespace == Namespace::Value
+                    && binding.is_imported()
+                    && capabilities.ty);
+            if resolves {
                 continue;
             }
             if namespace == Namespace::Value {
@@ -140,7 +154,7 @@ pub(crate) fn collect_free_references(
                 Resolution::Unknowable
             }
         } else {
-            match lookup(builder, scope, namespace, name.text()) {
+            match lookup(builder, scope, namespace, name.text(), access) {
                 Lookup::Symbol(symbol) => Resolution::Symbol(symbol),
                 Lookup::Unknowable => Resolution::Unknowable,
                 Lookup::Missing
@@ -164,7 +178,7 @@ pub(crate) fn collect_free_references(
             namespace,
             scope: Some(scope),
             base: RefBase::Bare,
-            access: access_of(&reference, false),
+            access,
             resolution,
         });
     }
@@ -181,6 +195,7 @@ pub(crate) fn lookup(
     mut scope: ScopeId,
     namespace: Namespace,
     name: &str,
+    access: Access,
 ) -> Lookup {
     let name = unescape_js_identifier(name);
     loop {
@@ -191,7 +206,12 @@ pub(crate) fn lookup(
             .copied()
             .filter(|id| {
                 let symbol = &builder.data.symbols[*id];
-                symbol.declares_in(namespace) && symbol.semantic_name.text() == name.as_ref()
+                let resolves = symbol.declares_in(namespace)
+                    || (access == Access::Type
+                        && namespace == Namespace::Value
+                        && symbol.kind == SymbolKind::Import
+                        && symbol.declares_type);
+                resolves && symbol.semantic_name.text() == name.as_ref()
             })
             .min_by_key(|id| builder.data.symbols[*id].kind == SymbolKind::Synthetic)
         {
