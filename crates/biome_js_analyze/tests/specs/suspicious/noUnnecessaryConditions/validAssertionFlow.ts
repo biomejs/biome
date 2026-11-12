@@ -1,0 +1,92 @@
+// should not generate diagnostics
+
+declare function assert(condition: unknown): asserts condition;
+declare function assertString(input: unknown, ignored?: unknown): asserts input is string;
+declare function assertBoolean(input: unknown): asserts input is boolean;
+declare function assertCompound(input: unknown): asserts input is string | number;
+declare function consume(...values: unknown[]): void;
+declare function read(): string | null;
+
+function stringMayBeEmpty(value: string | null) {
+	assertString(value);
+	if (value) {}
+}
+
+function booleanMayBeFalse(value: boolean | null) {
+	assertBoolean(value);
+	if (value) {}
+}
+
+function beforeAndDuringArguments(value: string | null) {
+	value?.length;
+	assertString(value, value?.length);
+}
+
+function bareArgument(value: string | null) {
+	assert(value?.length);
+	return value?.length;
+}
+
+function conditionalEffect(value: string | null, flag: boolean) {
+	if (flag) assertString(value);
+	return value?.length;
+}
+
+function returningBranch(value: string | null, flag: boolean) {
+	if (flag) {
+		assertString(value);
+		return;
+	}
+	return value?.length;
+}
+
+function loopMayNotRun(value: string | null, flag: boolean) {
+	while (flag) assertString(value);
+	return value?.length;
+}
+
+function optional(value: string | null, assertion: ((input: unknown) => asserts input is string) | undefined) {
+	assertion?.(value);
+	return value?.length;
+}
+
+function nested(value: string | null, flag: boolean) {
+	consume(assertString(value), value?.length);
+	flag && assertString(value);
+	flag ? assertString(value) : undefined;
+	(assertString(value), value?.length);
+	void assertString(value);
+	return value?.length;
+}
+
+function returnOperand(value: string | null) {
+	return (assertString(value), value?.length);
+}
+
+function throwOperand(value: string | null) {
+	throw (assertString(value), value?.length);
+}
+
+function shadowedSubject(value: string | null) {
+	assertString(value);
+	{
+		const value = read();
+		value?.length;
+	}
+}
+
+function shadowedCallee(value: string | null, assertString: (input: unknown) => asserts input is string) {
+	assertString(value);
+	return value?.length;
+}
+
+function written(value: string | null) {
+	assertString(value);
+	value = read();
+	return value?.length;
+}
+
+function unsupportedTarget(value: unknown) {
+	assertCompound(value);
+	return value ?? "fallback";
+}

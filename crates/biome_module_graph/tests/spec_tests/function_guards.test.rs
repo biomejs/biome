@@ -833,6 +833,39 @@ fn alias_targets_narrow_like_the_types_they_name() {
 }
 
 #[test]
+fn typeof_targets_narrow_like_the_values_they_query() {
+    for (target, literal) in [
+        ("typeof READY", r#""ready""#),
+        ("typeof config.mode", r#""strict""#),
+    ] {
+        let source = format!(
+            r#"
+                const READY = "ready";
+                const config = {{ mode: "strict" as const }};
+                declare function guard(input: unknown): input is {target};
+                declare const expectedTarget: {literal};
+                /*target*/expectedTarget;
+                function inspect(value: {literal} | null) {{
+                    if (guard(value)) {{ /*then*/value; }} else {{ /*else*/value; }}
+                }}
+            "#
+        );
+        let (db, module) = guard_db(&source);
+        let expected_target = normalized_type_at(&db, module, &source, "target", "expectedTarget");
+        for (marker, expected) in [("then", expected_target), ("else", InferredTypeData::Null)] {
+            let actual = normalized_type_at(&db, module, &source, marker, "value");
+            assert_eq!(
+                actual,
+                expected,
+                "{target}: {marker}: actual {}, expected {}",
+                format_inferred_type(&db, actual),
+                format_inferred_type(&db, expected),
+            );
+        }
+    }
+}
+
+#[test]
 fn guards_in_modules_that_read_eval_do_not_refine() {
     use InferredTypeData::{Number, String};
     for declaration in [
@@ -879,27 +912,22 @@ fn imported_guards_do_not_refine_even_when_the_export_is_available() {
 }
 
 #[test]
-fn assertion_calls_and_unchecked_predicate_calls_do_not_refine_following_reads() {
+fn unchecked_predicate_calls_do_not_refine_following_reads() {
     const SOURCE: &str = r#"
-        declare function assertString(input: unknown): asserts input is string;
         declare function isString(input: unknown): input is string;
         function inspect(value: string | number) {
-            assertString(value);
-            /*assertion*/value;
             isString(value);
             /*unchecked*/value;
         }
     "#;
     let (db, module) = guard_db(SOURCE);
-    for marker in ["assertion", "unchecked"] {
-        let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
-        assert_variants(
-            &db,
-            ty,
-            &[InferredTypeData::String, InferredTypeData::Number],
-            marker,
-        );
-    }
+    let ty = normalized_type_at(&db, module, SOURCE, "unchecked", "value");
+    assert_variants(
+        &db,
+        ty,
+        &[InferredTypeData::String, InferredTypeData::Number],
+        "unchecked",
+    );
 }
 
 #[test]
