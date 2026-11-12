@@ -3,7 +3,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{JsxElement, jsx_ext::AnyJsxElement};
+use biome_js_syntax::{
+    AnyJsxAttribute, AnyJsxAttributeName, JsxElement, jsx_ext::AnyJsxElement,
+};
+use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::use_heading_content::UseHeadingContentOptions;
 
@@ -93,7 +96,12 @@ impl Rule for UseHeadingContent {
                 return None;
             }
 
-            if has_valid_heading_content(node) {
+            let is_astro_template = ctx
+                .source_type::<JsFileSource>()
+                .as_embedding_kind()
+                .is_astro_template();
+
+            if has_valid_heading_content(node, is_astro_template) {
                 return None;
             }
 
@@ -131,7 +139,7 @@ impl Rule for UseHeadingContent {
 }
 
 /// check if the node has a valid heading attribute
-fn has_valid_heading_content(node: &AnyJsxElement) -> bool {
+fn has_valid_heading_content(node: &AnyJsxElement, is_astro_template: bool) -> bool {
     node.find_attribute_by_name("dangerouslySetInnerHTML")
         .is_some()
         || node
@@ -145,4 +153,20 @@ fn has_valid_heading_content(node: &AnyJsxElement) -> bool {
                     .is_none_or(|attribute| !attribute.is_falsy())
             })
         || node.has_spread_prop()
+        || (is_astro_template && has_astro_set_directive(node))
+}
+
+fn has_astro_set_directive(node: &AnyJsxElement) -> bool {
+    node.attributes().into_iter().any(|attr| {
+        let AnyJsxAttribute::JsxAttribute(jsx_attr) = attr else {
+            return false;
+        };
+        let Ok(AnyJsxAttributeName::JsxName(jsx_name)) = jsx_attr.name() else {
+            return false;
+        };
+        let Ok(token) = jsx_name.value_token() else {
+            return false;
+        };
+        matches!(token.text_trimmed(), "set:html" | "set:text")
+    })
 }

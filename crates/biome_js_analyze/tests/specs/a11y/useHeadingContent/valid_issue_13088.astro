@@ -1,0 +1,7 @@
+<!-- should not generate diagnostics -->
+---
+const html = "<em>Hello</em>";
+const text = "Hello";
+---
+{html && <h3 set:html={html} />}
+{text && <h3 set:text={text} />}
