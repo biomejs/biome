@@ -42,6 +42,10 @@ declare_lint_rule! {
     /// interpolation or function evaluation may not be reported. Static syntax inside mixin
     /// definitions is checked even when the mixin is not included.
     ///
+    /// Functions that Sass calculates while compiling are still reported. For example,
+    /// `round(1.6px, 1px)` is reported even though Sass replaces it with `2px` in the
+    /// compiled CSS.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
