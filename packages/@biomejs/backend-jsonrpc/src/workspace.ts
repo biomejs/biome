@@ -3628,6 +3628,11 @@ export interface Nursery {
 	 */
 	noVueComputedPropertiesInData?: NoVueComputedPropertiesInDataConfiguration;
 	/**
+	 * Disallow default values in Vue's defineModel().
+	 * See https://biomejs.dev/linter/rules/no-vue-define-model-default
+	 */
+	noVueDefineModelDefault?: NoVueDefineModelDefaultConfiguration;
+	/**
 	 * Disallow the deprecated Vue.config.keyCodes option.
 	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-config-key-codes
 	 */
@@ -7056,6 +7061,9 @@ export type NoVueChildContentConfiguration =
 export type NoVueComputedPropertiesInDataConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueComputedPropertiesInDataOptions;
+export type NoVueDefineModelDefaultConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDefineModelDefaultOptions;
 export type NoVueDeprecatedConfigKeyCodesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedConfigKeyCodesOptions;
@@ -10369,6 +10377,10 @@ export interface RuleWithNoVueComputedPropertiesInDataOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueComputedPropertiesInDataOptions;
 }
+export interface RuleWithNoVueDefineModelDefaultOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueDefineModelDefaultOptions;
+}
 export interface RuleWithNoVueDeprecatedConfigKeyCodesOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedConfigKeyCodesOptions;
@@ -13653,6 +13665,7 @@ export interface NoVueChildContentOptions {
 	additionalDirectives?: string[];
 }
 export type NoVueComputedPropertiesInDataOptions = {};
+export type NoVueDefineModelDefaultOptions = {};
 export type NoVueDeprecatedConfigKeyCodesOptions = {};
 export type NoVueDeprecatedDeleteSetOptions = {};
 export type NoVueDeprecatedDestroyedLifecycleOptions = {};
@@ -15867,6 +15880,7 @@ export type Category =
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueChildContent"
 	| "lint/nursery/noVueComputedPropertiesInData"
+	| "lint/nursery/noVueDefineModelDefault"
 	| "lint/nursery/noVueDeprecatedConfigKeyCodes"
 	| "lint/nursery/noVueDeprecatedDeleteSet"
 	| "lint/nursery/noVueDeprecatedDestroyedLifecycle"

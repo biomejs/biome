@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-ts.vue
+---
+# Input
+```vue
+<script setup lang="ts">
+/* should not generate diagnostics */
+const model = defineModel<string>({ required: true })
+const count = defineModel<number>('count')
+</script>
+
+```
