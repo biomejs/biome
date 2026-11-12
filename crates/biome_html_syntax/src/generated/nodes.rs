@@ -1522,9 +1522,7 @@ impl HtmlRoot {
         HtmlRootFields {
             bom_token: self.bom_token(),
             frontmatter: self.frontmatter(),
-            processing_instruction: self.processing_instruction(),
-            directive: self.directive(),
-            html: self.html(),
+            items: self.items(),
             eof_token: self.eof_token(),
         }
     }
@@ -1534,17 +1532,11 @@ impl HtmlRoot {
     pub fn frontmatter(&self) -> Option<AnyAstroFrontmatterElement> {
         support::node(&self.syntax, 1usize)
     }
-    pub fn processing_instruction(&self) -> Option<HtmlProcessingInstruction> {
-        support::node(&self.syntax, 2usize)
-    }
-    pub fn directive(&self) -> Option<HtmlDirective> {
-        support::node(&self.syntax, 3usize)
-    }
-    pub fn html(&self) -> HtmlElementList {
-        support::list(&self.syntax, 4usize)
+    pub fn items(&self) -> HtmlRootItemList {
+        support::list(&self.syntax, 2usize)
     }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 5usize)
+        support::required_token(&self.syntax, 3usize)
     }
 }
 impl Serialize for HtmlRoot {
@@ -1559,9 +1551,7 @@ impl Serialize for HtmlRoot {
 pub struct HtmlRootFields {
     pub bom_token: Option<SyntaxToken>,
     pub frontmatter: Option<AnyAstroFrontmatterElement>,
-    pub processing_instruction: Option<HtmlProcessingInstruction>,
-    pub directive: Option<HtmlDirective>,
-    pub html: HtmlElementList,
+    pub items: HtmlRootItemList,
     pub eof_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -5351,6 +5341,25 @@ impl AnyHtmlElement {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyHtmlRootItem {
+    AnyHtmlElement(AnyHtmlElement),
+    HtmlDirective(HtmlDirective),
+}
+impl AnyHtmlRootItem {
+    pub fn as_any_html_element(&self) -> Option<&AnyHtmlElement> {
+        match &self {
+            Self::AnyHtmlElement(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_html_directive(&self) -> Option<&HtmlDirective> {
+        match &self {
+            Self::HtmlDirective(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyHtmlTagName {
     HtmlComponentName(HtmlComponentName),
     HtmlMemberName(HtmlMemberName),
@@ -7806,15 +7815,7 @@ impl std::fmt::Debug for HtmlRoot {
                     "frontmatter",
                     &support::DebugOptionalElement(self.frontmatter()),
                 )
-                .field(
-                    "processing_instruction",
-                    &support::DebugOptionalElement(self.processing_instruction()),
-                )
-                .field(
-                    "directive",
-                    &support::DebugOptionalElement(self.directive()),
-                )
-                .field("html", &self.html())
+                .field("items", &self.items())
                 .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
                 .finish()
         } else {
@@ -12773,6 +12774,69 @@ impl From<AnyHtmlElement> for SyntaxElement {
         node.into()
     }
 }
+impl From<HtmlDirective> for AnyHtmlRootItem {
+    fn from(node: HtmlDirective) -> Self {
+        Self::HtmlDirective(node)
+    }
+}
+impl AstNode for AnyHtmlRootItem {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyHtmlElement::KIND_SET.union(HtmlDirective::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            HTML_DIRECTIVE => true,
+            k if AnyHtmlElement::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            HTML_DIRECTIVE => Self::HtmlDirective(HtmlDirective { syntax }),
+            _ => {
+                if let Some(any_html_element) = AnyHtmlElement::cast(syntax) {
+                    return Some(Self::AnyHtmlElement(any_html_element));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::HtmlDirective(it) => it.syntax(),
+            Self::AnyHtmlElement(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::HtmlDirective(it) => it.into_syntax(),
+            Self::AnyHtmlElement(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyHtmlRootItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AnyHtmlElement(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlDirective(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyHtmlRootItem> for SyntaxNode {
+    fn from(n: AnyHtmlRootItem) -> Self {
+        match n {
+            AnyHtmlRootItem::AnyHtmlElement(it) => it.into_syntax(),
+            AnyHtmlRootItem::HtmlDirective(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyHtmlRootItem> for SyntaxElement {
+    fn from(n: AnyHtmlRootItem) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<HtmlComponentName> for AnyHtmlTagName {
     fn from(node: HtmlComponentName) -> Self {
         Self::HtmlComponentName(node)
@@ -14440,6 +14504,11 @@ impl std::fmt::Display for AnyHtmlElement {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyHtmlRootItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyHtmlTagName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -15704,6 +15773,88 @@ impl IntoIterator for &HtmlElementList {
 impl IntoIterator for HtmlElementList {
     type Item = AnyHtmlElement;
     type IntoIter = AstNodeListIterator<Language, AnyHtmlElement>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct HtmlRootItemList {
+    syntax_list: SyntaxList,
+}
+impl HtmlRootItemList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for HtmlRootItemList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_ROOT_ITEM_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == HTML_ROOT_ITEM_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for HtmlRootItemList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for HtmlRootItemList {
+    type Language = Language;
+    type Node = AnyHtmlRootItem;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for HtmlRootItemList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("HtmlRootItemList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &HtmlRootItemList {
+    type Item = AnyHtmlRootItem;
+    type IntoIter = AstNodeListIterator<Language, AnyHtmlRootItem>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for HtmlRootItemList {
+    type Item = AnyHtmlRootItem;
+    type IntoIter = AstNodeListIterator<Language, AnyHtmlRootItem>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

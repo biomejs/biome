@@ -51,19 +51,18 @@ HtmlRoot {
         },
         r_fence_token: FENCE@101..104 "---" [] [],
     },
-    processing_instruction: missing (optional),
-    directive: HtmlDirective {
-        l_angle_token: L_ANGLE@104..107 "<" [Newline("\n"), Newline("\n")] [],
-        excl_token: BANG@107..108 "!" [] [],
-        doctype_token: DOCTYPE_KW@108..116 "doctype" [] [Whitespace(" ")],
-        name_token: missing (optional),
-        html_token: HTML_KW@116..120 "html" [] [],
-        quirk_token: missing (optional),
-        public_id_token: missing (optional),
-        system_id_token: missing (optional),
-        r_angle_token: R_ANGLE@120..121 ">" [] [],
-    },
-    html: HtmlElementList [
+    items: HtmlRootItemList [
+        HtmlDirective {
+            l_angle_token: L_ANGLE@104..107 "<" [Newline("\n"), Newline("\n")] [],
+            excl_token: BANG@107..108 "!" [] [],
+            doctype_token: DOCTYPE_KW@108..116 "doctype" [] [Whitespace(" ")],
+            name_token: missing (optional),
+            html_token: HTML_KW@116..120 "html" [] [],
+            quirk_token: missing (optional),
+            public_id_token: missing (optional),
+            system_id_token: missing (optional),
+            r_angle_token: R_ANGLE@120..121 ">" [] [],
+        },
         HtmlElement {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@121..123 "<" [Newline("\n")] [],
@@ -343,19 +342,18 @@ HtmlRoot {
     1: ASTRO_EMBEDDED_CONTENT@3..101
       0: HTML_LITERAL@3..101 "import Card from \"./Card.astro\";\nconst title = \"Hello\";\nconst items = [{ id: 1, label: \"One\" }];\n" [Newline("\n")] []
     2: FENCE@101..104 "---" [] []
-  2: (empty)
-  3: HTML_DIRECTIVE@104..121
-    0: L_ANGLE@104..107 "<" [Newline("\n"), Newline("\n")] []
-    1: BANG@107..108 "!" [] []
-    2: DOCTYPE_KW@108..116 "doctype" [] [Whitespace(" ")]
-    3: (empty)
-    4: HTML_KW@116..120 "html" [] []
-    5: (empty)
-    6: (empty)
-    7: (empty)
-    8: R_ANGLE@120..121 ">" [] []
-  4: HTML_ELEMENT_LIST@121..534
-    0: HTML_ELEMENT@121..534
+  2: HTML_ROOT_ITEM_LIST@104..534
+    0: HTML_DIRECTIVE@104..121
+      0: L_ANGLE@104..107 "<" [Newline("\n"), Newline("\n")] []
+      1: BANG@107..108 "!" [] []
+      2: DOCTYPE_KW@108..116 "doctype" [] [Whitespace(" ")]
+      3: (empty)
+      4: HTML_KW@116..120 "html" [] []
+      5: (empty)
+      6: (empty)
+      7: (empty)
+      8: R_ANGLE@120..121 ">" [] []
+    1: HTML_ELEMENT@121..534
       0: HTML_OPENING_ELEMENT@121..138
         0: L_ANGLE@121..123 "<" [Newline("\n")] []
         1: HTML_TAG_NAME@123..128
@@ -536,6 +534,6 @@ HtmlRoot {
         2: HTML_TAG_NAME@529..533
           0: HTML_KW@529..533 "html" [] []
         3: R_ANGLE@533..534 ">" [] []
-  5: EOF@534..535 "" [Newline("\n")] []
+  3: EOF@534..535 "" [Newline("\n")] []
 
 ```

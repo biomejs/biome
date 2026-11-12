@@ -19,9 +19,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
-    processing_instruction: missing (optional),
-    directive: missing (optional),
-    html: HtmlElementList [
+    items: HtmlRootItemList [
         SvelteKeyBlock {
             opening_block: SvelteKeyOpeningBlock {
                 sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
@@ -51,9 +49,7 @@ HtmlRoot {
 0: HTML_ROOT@0..26
   0: (empty)
   1: (empty)
-  2: (empty)
-  3: (empty)
-  4: HTML_ELEMENT_LIST@0..25
+  2: HTML_ROOT_ITEM_LIST@0..25
     0: SVELTE_KEY_BLOCK@0..25
       0: SVELTE_KEY_OPENING_BLOCK@0..7
         0: SV_CURLY_HASH@0..2 "{#" [] []
@@ -67,7 +63,7 @@ HtmlRoot {
         0: SV_CURLY_SLASH@18..21 "{/" [Newline("\n")] []
         1: KEY_KW@21..24 "key" [] []
         2: R_CURLY@24..25 "}" [] []
-  5: EOF@25..26 "" [Newline("\n")] []
+  3: EOF@25..26 "" [Newline("\n")] []
 
 ```
 

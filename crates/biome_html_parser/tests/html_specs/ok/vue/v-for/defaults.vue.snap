@@ -1,6 +1,5 @@
 ---
 source: crates/biome_html_parser/tests/spec_test.rs
-assertion_line: 155
 expression: snapshot
 ---
 
@@ -33,9 +32,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
-    processing_instruction: missing (optional),
-    directive: missing (optional),
-    html: HtmlElementList [
+    items: HtmlRootItemList [
         HtmlElement {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
@@ -742,9 +739,7 @@ HtmlRoot {
 0: HTML_ROOT@0..796
   0: (empty)
   1: (empty)
-  2: (empty)
-  3: (empty)
-  4: HTML_ELEMENT_LIST@0..795
+  2: HTML_ROOT_ITEM_LIST@0..795
     0: HTML_ELEMENT@0..795
       0: HTML_OPENING_ELEMENT@0..10
         0: L_ANGLE@0..1 "<" [] []
@@ -1231,6 +1226,6 @@ HtmlRoot {
         2: HTML_TAG_NAME@786..794
           0: TEMPLATE_KW@786..794 "template" [] []
         3: R_ANGLE@794..795 ">" [] []
-  5: EOF@795..796 "" [Newline("\n")] []
+  3: EOF@795..796 "" [Newline("\n")] []
 
 ```

@@ -6,11 +6,9 @@ pub(crate) struct FormatHtmlRoot;
 impl FormatNodeRule<HtmlRoot> for FormatHtmlRoot {
     fn fmt_fields(&self, node: &HtmlRoot, f: &mut HtmlFormatter) -> FormatResult<()> {
         let HtmlRootFields {
-            html,
             bom_token,
-            directive,
             frontmatter,
-            processing_instruction,
+            items,
             eof_token,
         } = node.as_fields();
 
@@ -22,19 +20,7 @@ impl FormatNodeRule<HtmlRoot> for FormatHtmlRoot {
             write!(f, [frontmatter.format(), empty_line()])?;
         }
 
-        if let Some(processing_instruction) = processing_instruction {
-            write!(
-                f,
-                [group(&processing_instruction.format()), hard_line_break()]
-            )?;
-        }
-
-        if let Some(directive) = directive {
-            directive.format().fmt(f)?;
-        }
-
-        html.format().fmt(f)?;
-
+        items.format().fmt(f)?;
         write!(f, [format_trailing_comments(node.syntax())])?;
 
         write!(f, [format_removed(&eof_token?)])?;

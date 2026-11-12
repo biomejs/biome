@@ -317,6 +317,7 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
     ],
     nodes: &[
         "HTML_ROOT",
+        "HTML_ROOT_ITEM_LIST",
         "HTML_DIRECTIVE",
         "HTML_SELF_CLOSING_TAG",
         "HTML_ELEMENT",

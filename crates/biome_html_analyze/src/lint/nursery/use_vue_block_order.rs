@@ -5,7 +5,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_html_syntax::{AnyHtmlElement, HtmlRoot};
 use biome_languages::HtmlFileSource;
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_vue_block_order::{BlockOrderEntry, UseVueBlockOrderOptions};
 
 use crate::HtmlRuleAction;
@@ -117,7 +117,7 @@ impl Rule for UseVueBlockOrder {
         let mut first_at_position: Vec<Option<(usize, AnyHtmlElement)>> = vec![None; order.len()];
         let mut signals = Vec::new();
 
-        for (block_index, block) in ctx.query().html().iter().enumerate() {
+        for (block_index, block) in ctx.query().elements().enumerate() {
             let Some(position) = block.name().and_then(|name| position_of(order, name.text()))
             else {
                 continue;
@@ -171,7 +171,7 @@ impl Rule for UseVueBlockOrder {
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<HtmlRuleAction> {
         let name = state.block.name()?;
         let unordered_name = state.first_unordered.name()?;
-        let elements: Vec<_> = ctx.query().html().iter().collect();
+        let elements: Vec<_> = ctx.query().elements().collect();
         let start = state.first_unordered_index;
         let end = state.block_index;
         if start >= end || end >= elements.len() {
