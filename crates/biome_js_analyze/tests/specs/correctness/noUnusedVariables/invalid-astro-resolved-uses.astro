@@ -1,0 +1,19 @@
+---
+let writtenOnly = 0;
+let mutated = 0;
+const unused = 1;
+const shadowed = 1;
+const used = 1;
+const recursive = () => recursive();
+interface Props {}
+interface Props { value?: string }
+---
+<!-- should generate diagnostics -->
+{used}
+{writtenOnly = 1}
+{mutated += 1}
+{((shadowed) => shadowed)(2)}
+<script>
+const unusedClient = 1;
+const recursiveClient = () => recursiveClient();
+</script>

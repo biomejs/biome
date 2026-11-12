@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-astro-shadowed-parameter.astro
+---
+# Input
+```astro
+---
+const value = 1;
+const render = (value) => "unused";
+---
+<!-- should generate diagnostics -->
+{value}
+
+```
+
+# Diagnostics
+```
+invalid-astro-shadowed-parameter.astro:3:17 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter value is unused.
+  
+    1 │ ---
+    2 │ const value = 1;
+  > 3 │ const render = (value) => "unused";
+      │                 ^^^^^
+    4 │ ---
+    5 │ <!-- should generate diagnostics -->
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend value with an underscore.
+  
+    1 1 │   const value = 1;
+    2   │ - const·render·=·(value)·=>·"unused";
+      2 │ + const·render·=·(_value)·=>·"unused";
+    3 3 │   
+  
+
+```
