@@ -500,6 +500,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("performance", "noDynamicNamespaceImportAccess", TypeId::of::<biome_rule_options::no_dynamic_namespace_import_access::NoDynamicNamespaceImportAccessOptions>()));
     result.push((
         "nursery",
+        "noDynamicRequire",
+        TypeId::of::<biome_rule_options::no_dynamic_require::NoDynamicRequireOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noEagerArrayMethodsInLoops",
         TypeId::of::<
             biome_rule_options::no_eager_array_methods_in_loops::NoEagerArrayMethodsInLoopsOptions,

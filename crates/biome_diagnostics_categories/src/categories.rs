@@ -248,6 +248,7 @@ define_categories! {
     "lint/nursery/noDuplicateSelectors": "https://biomejs.dev/linter/rules/no-duplicate-selectors",
     "lint/nursery/noDuplicateTypeConstituents": "https://biomejs.dev/linter/rules/no-duplicate-type-constituents",
     "lint/nursery/noDynamicDelete": "https://biomejs.dev/linter/rules/no-dynamic-delete",
+    "lint/nursery/noDynamicRequire": "https://biomejs.dev/linter/rules/no-dynamic-require",
     "lint/nursery/noEagerArrayMethodsInLoops": "https://biomejs.dev/linter/rules/no-eager-array-methods-in-loops",
     "lint/nursery/noEmptyObjectKeys": "https://biomejs.dev/linter/rules/no-empty-object-keys",
     "lint/nursery/noErasingOperation": "https://biomejs.dev/linter/rules/no-erasing-operation",

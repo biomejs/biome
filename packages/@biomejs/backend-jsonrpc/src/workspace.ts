@@ -3053,6 +3053,11 @@ export interface Nursery {
 	 */
 	noDynamicDelete?: NoDynamicDeleteConfiguration;
 	/**
+	 * Disallow require() calls whose module name isn't a fixed string.
+	 * See https://biomejs.dev/linter/rules/no-dynamic-require
+	 */
+	noDynamicRequire?: NoDynamicRequireConfiguration;
+	/**
 	 * Disallow .map() and .filter() calls in the header of for...of loops.
 	 * See https://biomejs.dev/linter/rules/no-eager-array-methods-in-loops
 	 */
@@ -6706,6 +6711,9 @@ export type NoDuplicateTypeConstituentsConfiguration =
 export type NoDynamicDeleteConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDynamicDeleteOptions;
+export type NoDynamicRequireConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDynamicRequireOptions;
 export type NoEagerArrayMethodsInLoopsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoEagerArrayMethodsInLoopsOptions;
@@ -9760,6 +9768,10 @@ export interface RuleWithNoDuplicateTypeConstituentsOptions {
 export interface RuleWithNoDynamicDeleteOptions {
 	level: RulePlainConfiguration;
 	options?: NoDynamicDeleteOptions;
+}
+export interface RuleWithNoDynamicRequireOptions {
+	level: RulePlainConfiguration;
+	options?: NoDynamicRequireOptions;
 }
 export interface RuleWithNoEagerArrayMethodsInLoopsOptions {
 	level: RulePlainConfiguration;
@@ -13281,6 +13293,13 @@ export interface NoDuplicateTypeConstituentsOptions {
 	ignoreUnions?: boolean;
 }
 export type NoDynamicDeleteOptions = {};
+export interface NoDynamicRequireOptions {
+	/**
+	 * Also report `import()` calls whose module name isn't a fixed string.
+	 * Disabled by default.
+	 */
+	checkDynamicImports?: boolean;
+}
 export type NoEagerArrayMethodsInLoopsOptions = {};
 export type NoErasingOperationOptions = {};
 export interface NoExcessiveNestedBlocksOptions {
@@ -15712,6 +15731,7 @@ export type Category =
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noDuplicateTypeConstituents"
 	| "lint/nursery/noDynamicDelete"
+	| "lint/nursery/noDynamicRequire"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
 	| "lint/nursery/noErasingOperation"
