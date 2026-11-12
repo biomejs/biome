@@ -5,9 +5,8 @@
 //! embedded syntax tree.
 
 use super::table::{Table, TableId};
-use biome_js_syntax::unescape_js_identifier;
 use biome_languages::JsFileSource;
-use biome_rowan::{TextRange, TextSize, TokenText};
+use biome_rowan::{Text, TextRange, TextSize, TokenText};
 use enumflags2::{BitFlags, bitflags};
 use std::sync::Arc;
 
@@ -110,6 +109,7 @@ pub enum OpenReason {
     ExternalSource = 1 << 2,
     /// A parse error prevents complete declaration collection.
     ParseError = 1 << 3,
+    Computed = 1 << 4,
 }
 
 /// The reasons declarations in a namespace may be incomplete.
@@ -131,6 +131,7 @@ pub(crate) struct BlockData {
     pub(crate) kind: BlockKind,
     pub(crate) range: TextRange,
     pub(crate) content: Option<TextRange>,
+    pub(crate) external: bool,
     pub(crate) scope: Option<ScopeId>,
     pub(crate) snippet: Option<SnippetId>,
 }
@@ -142,6 +143,8 @@ pub enum SnippetHost {
     Frontmatter(BlockId),
     /// The snippet belongs to the given script block.
     Script(BlockId),
+    /// The snippet belongs to a `define:vars` directive on the given script block.
+    ScriptDefineVars(BlockId),
     /// The snippet is an expression in the template.
     Expression,
     /// The model could not associate the snippet with a document block.
@@ -183,6 +186,8 @@ pub enum SymbolKind {
     Import,
     /// A declaration introduced by the document.
     Local,
+    /// A declaration synthesized from framework semantics.
+    Synthetic,
     /// A declaration supplied by Astro.
     Builtin,
 }
@@ -202,6 +207,7 @@ pub enum Origin {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct SymbolData {
     pub(crate) name: TokenText,
+    pub(crate) semantic_name: Text,
     pub(crate) range: TextRange,
     pub(crate) declaration: TextRange,
     pub(crate) snippet: Option<SnippetId>,
@@ -420,9 +426,20 @@ impl AstroSemanticModel {
 
     /// Returns all declarations in the model.
     pub fn symbols(&self) -> impl Iterator<Item = Symbol> + '_ {
-        (0..self.data.symbols.len()).map(|index| Symbol {
+        let mut ids: Vec<_> = (0..self.data.symbols.len()).map(SymbolId::new).collect();
+        ids.sort_by(|left, right| {
+            let left = &self.data.symbols[*left];
+            let right = &self.data.symbols[*right];
+            left.range
+                .start()
+                .cmp(&right.range.start())
+                .then_with(|| left.range.end().cmp(&right.range.end()))
+                .then_with(|| left.semantic_name.text().cmp(right.semantic_name.text()))
+                .then_with(|| (left.kind as u8).cmp(&(right.kind as u8)))
+        });
+        ids.into_iter().map(|id| Symbol {
             data: self.data.clone(),
-            id: SymbolId::new(index),
+            id,
         })
     }
 
@@ -461,6 +478,11 @@ impl Block {
     /// Returns the block content range in host-document coordinates.
     pub fn content_range(&self) -> Option<TextRange> {
         self.row().content
+    }
+
+    /// Returns whether the block loads its content from an external source.
+    pub fn has_external_source(&self) -> bool {
+        self.row().external
     }
 
     /// Returns the module scope associated with this block, if any.
@@ -536,14 +558,15 @@ impl Scope {
         std::iter::successors(Some(self.clone()), Self::parent)
     }
 
-    /// Finds the nearest visible declaration with the given name and namespace.
+    /// Finds the nearest declaration with the decoded semantic name and namespace.
     pub fn lookup(&self, namespace: Namespace, name: &str) -> Option<Symbol> {
-        let name = unescape_js_identifier(name);
         self.ancestors().find_map(|scope| {
-            scope.symbols().find(|symbol| {
-                symbol.row().declares_in(namespace)
-                    && unescape_js_identifier(symbol.name()).as_ref() == name.as_ref()
-            })
+            scope
+                .symbols()
+                .filter(|symbol| {
+                    symbol.row().declares_in(namespace) && symbol.semantic_name() == name
+                })
+                .min_by_key(|symbol| symbol.kind() == SymbolKind::Synthetic)
         })
     }
 
@@ -559,9 +582,14 @@ impl Scope {
 }
 
 impl Symbol {
-    /// Returns the declared name.
+    /// Returns the source spelling of the declared name.
     pub fn name(&self) -> &str {
         self.row().name.text()
+    }
+
+    /// Returns the name after JavaScript identifier or static-key escape decoding.
+    pub fn semantic_name(&self) -> &str {
+        self.row().semantic_name.text()
     }
 
     /// Returns the name range in host-document coordinates.

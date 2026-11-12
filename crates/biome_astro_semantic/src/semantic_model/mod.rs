@@ -1,4 +1,6 @@
 mod builder;
+mod client;
+mod javascript;
 mod model;
 mod server;
 mod snippets;
@@ -8,19 +10,37 @@ pub use model::*;
 pub use snippets::AstroSnippet;
 
 use biome_html_syntax::{
-    AnyAstroDirective, AnyHtmlAttribute, AnyHtmlTagName, AstroEmbeddedContent, HtmlElement,
-    HtmlEmbeddedContent, HtmlRoot, HtmlSelfClosingElement, ScriptType,
+    AnyAstroDirective, AnyHtmlAttribute, AnyHtmlTagName, AstroDefineDirective,
+    AstroEmbeddedContent, HtmlAttributeList, HtmlElement, HtmlEmbeddedContent, HtmlRoot,
+    HtmlSelfClosingElement, ScriptType,
 };
 use biome_rowan::{AstNode, AstNodeList, TextRange, WalkEvent};
 use builder::{ModelBuilder, NewSymbol, synthetic_name};
 
+/// Additional inputs used to build an Astro semantic model.
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct AstroSemanticModelOptions {
+    /// Configured globals available to embedded JavaScript and TypeScript.
+    pub globals: Vec<Box<str>>,
+}
+
 /// Builds the semantic model of one Astro document.
 pub fn astro_model(host: &HtmlRoot, snippets: &[AstroSnippet]) -> AstroSemanticModel {
+    astro_model_with_options(host, snippets, AstroSemanticModelOptions::default())
+}
+
+/// Builds the semantic model of one Astro document with the supplied options.
+pub fn astro_model_with_options(
+    host: &HtmlRoot,
+    snippets: &[AstroSnippet],
+    options: AstroSemanticModelOptions,
+) -> AstroSemanticModel {
     let mut builder = ModelBuilder::default();
     let builtins = builder.add_scope(ScopeKind::Builtins, None);
     let host_start = host.range().start();
     builder.add_symbol(NewSymbol {
         name: synthetic_name("Astro"),
+        semantic_name: "Astro".into(),
         range: TextRange::empty(host_start),
         declaration: TextRange::empty(host_start),
         snippet: None,
@@ -48,6 +68,7 @@ pub fn astro_model(host: &HtmlRoot, snippets: &[AstroSnippet]) -> AstroSemanticM
             BlockKind::Frontmatter,
             frontmatter.range(),
             content,
+            false,
             Some(scope),
         );
         builder.data.scopes[scope].kind = ScopeKind::Module(Some(block));
@@ -78,7 +99,11 @@ pub fn astro_model(host: &HtmlRoot, snippets: &[AstroSnippet]) -> AstroSemanticM
         let snippet_host = if embedding.is_astro_frontmatter() {
             frontmatter.map_or(SnippetHost::Unknown, SnippetHost::Frontmatter)
         } else if embedding.is_astro_template() {
-            SnippetHost::Expression
+            match script_define_vars_target(host, &builder, snippet.content_range) {
+                Some(ScriptDefineVarsTarget::Client(block)) => SnippetHost::ScriptDefineVars(block),
+                Some(ScriptDefineVarsTarget::Ignored) => SnippetHost::Unknown,
+                None => SnippetHost::Expression,
+            }
         } else {
             builder
                 .data
@@ -102,7 +127,7 @@ pub fn astro_model(host: &HtmlRoot, snippets: &[AstroSnippet]) -> AstroSemanticM
             SnippetHost::Expression if snippet.has_errors => {
                 Some(builder.add_scope(ScopeKind::Expression, Some(server_scope)))
             }
-            SnippetHost::Expression => Some(server_scope),
+            SnippetHost::ScriptDefineVars(_) | SnippetHost::Expression => Some(server_scope),
             SnippetHost::Unknown => None,
         };
         if snippet.has_errors
@@ -121,8 +146,73 @@ pub fn astro_model(host: &HtmlRoot, snippets: &[AstroSnippet]) -> AstroSemanticM
         );
     }
 
-    server::collect_server_semantics(&mut builder, host, snippets, &snippet_ids, server_scope);
+    server::collect_server_semantics(
+        &mut builder,
+        host,
+        snippets,
+        &snippet_ids,
+        server_scope,
+        &options.globals,
+    );
+    client::collect_client_semantics(&mut builder, host, snippets, &snippet_ids, &options.globals);
     builder.finish()
+}
+
+#[derive(Clone, Copy)]
+enum ScriptDefineVarsTarget {
+    Client(BlockId),
+    Ignored,
+}
+
+fn script_define_vars_target(
+    host: &HtmlRoot,
+    builder: &ModelBuilder,
+    content_range: TextRange,
+) -> Option<ScriptDefineVarsTarget> {
+    for event in host
+        .syntax()
+        .preorder_of_kinds(AstroDefineDirective::KIND_SET)
+    {
+        let element_range = if let WalkEvent::Enter(node) = event
+            && let Some(directive) = AstroDefineDirective::cast_ref(&node)
+            && let Ok(value) = directive.value()
+            && let Some(name) = value.name().ok().and_then(|name| name.value_token().ok())
+            && name.text_trimmed() == "vars"
+            && let Some(expression) = value
+                .initializer()
+                .and_then(|initializer| initializer.value().ok())
+                .and_then(|value| value.as_html_attribute_single_text_expression().cloned())
+                .and_then(|expression| expression.expression().ok())
+            && let Ok(token) = expression.html_literal_token()
+            && token.text_range() == content_range
+            && let Some(element_range) = directive.syntax().ancestors().find_map(|node| {
+                if let Some(element) = HtmlElement::cast_ref(&node) {
+                    Some(element.range())
+                } else {
+                    HtmlSelfClosingElement::cast_ref(&node).map(|element| element.range())
+                }
+            }) {
+            element_range
+        } else {
+            continue;
+        };
+        let block = builder
+            .data
+            .blocks
+            .iter()
+            .position(|block| block.range == element_range)
+            .map(BlockId::new)?;
+        let data = &builder.data.blocks[block];
+        if data.kind != BlockKind::Script {
+            return None;
+        }
+        return Some(if data.scope.is_some() && !data.external {
+            ScriptDefineVarsTarget::Client(block)
+        } else {
+            ScriptDefineVarsTarget::Ignored
+        });
+    }
+    None
 }
 
 fn add_element_block(builder: &mut ModelBuilder, element: &HtmlElement) {
@@ -145,7 +235,21 @@ fn add_element_block(builder: &mut ModelBuilder, element: &HtmlElement) {
         .map(|token| token.text_range());
     let module_scope =
         kind == BlockKind::Script && element.is_javascript_tag() && !element.has_astro_is_raw();
-    add_block(builder, kind, element.range(), content, module_scope);
+    let external = if kind == BlockKind::Script {
+        element
+            .opening_element()
+            .is_ok_and(|opening| classify_script(&opening.attributes()) == ScriptKind::External)
+    } else {
+        element.find_attribute_by_name("src").is_some()
+    };
+    add_block(
+        builder,
+        kind,
+        element.range(),
+        content,
+        external,
+        module_scope,
+    );
 }
 
 fn add_self_closing_block(builder: &mut ModelBuilder, element: &HtmlSelfClosingElement) {
@@ -163,7 +267,41 @@ fn add_self_closing_block(builder: &mut ModelBuilder, element: &HtmlSelfClosingE
         return;
     };
     let module_scope = kind == BlockKind::Script && is_javascript_self_closing_script(element);
-    add_block(builder, kind, element.range(), None, module_scope);
+    let external = if kind == BlockKind::Script {
+        classify_script(&element.attributes()) == ScriptKind::External
+    } else {
+        element.find_attribute_by_name("src").is_some()
+    };
+    add_block(builder, kind, element.range(), None, external, module_scope);
+}
+
+#[derive(Clone, Copy, Eq, PartialEq)]
+enum ScriptKind {
+    Inline,
+    External,
+}
+
+fn classify_script(attributes: &HtmlAttributeList) -> ScriptKind {
+    let has_src = attributes.find_attribute_by_name("src").is_some();
+    let is_inline = attributes.iter().any(|attribute| {
+        let AnyHtmlAttribute::AnyAstroDirective(AnyAstroDirective::AstroIsDirective(directive)) =
+            attribute
+        else {
+            return false;
+        };
+        directive
+            .value()
+            .ok()
+            .and_then(|value| value.name().ok())
+            .and_then(|name| name.value_token().ok())
+            .is_some_and(|token| token.text_trimmed() == "inline")
+    });
+
+    if has_src && !is_inline {
+        ScriptKind::External
+    } else {
+        ScriptKind::Inline
+    }
 }
 
 fn is_javascript_self_closing_script(element: &HtmlSelfClosingElement) -> bool {
@@ -201,10 +339,11 @@ fn add_block(
     kind: BlockKind,
     range: TextRange,
     content: Option<TextRange>,
+    external: bool,
     module_scope: bool,
 ) {
     let scope = module_scope.then(|| builder.add_scope(ScopeKind::Module(None), None));
-    let block = builder.add_block(kind, range, content, scope);
+    let block = builder.add_block(kind, range, content, external, scope);
     if let Some(scope) = scope {
         builder.data.scopes[scope].kind = ScopeKind::Module(Some(block));
     }

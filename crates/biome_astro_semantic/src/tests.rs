@@ -1,6 +1,6 @@
 use crate::{
-    Access, AstroSemanticModel, AstroSnippet, Namespace, OpenReason, Origin, RefSite, Resolution,
-    SymbolKind, astro_model,
+    Access, AstroSemanticModel, AstroSemanticModelOptions, AstroSnippet, BlockKind, Namespace,
+    OpenReason, Origin, RefSite, Resolution, SymbolKind, astro_model_with_options,
 };
 use biome_html_parser::{HtmlParserOptions, parse_html};
 use biome_html_syntax::{
@@ -39,6 +39,10 @@ fn semantic_snapshot(source: &str, model: &AstroSemanticModel) -> String {
 }
 
 fn model(source: &str) -> AstroSemanticModel {
+    model_with_globals(source, &["console"])
+}
+
+fn model_with_globals(source: &str, globals: &[&str]) -> AstroSemanticModel {
     let parsed = parse_html(source, HtmlParserOptions::from(&HtmlFileSource::astro()));
     let host: HtmlRoot = parsed.tree();
     let mut found = Vec::new();
@@ -119,9 +123,7 @@ fn model(source: &str) -> AstroSemanticModel {
                 biome_js_parser::parse(&snippet.text, snippet.source, JsParserOptions::default());
             let has_errors = parsed.has_errors();
             let root: AnyJsRoot = parsed.tree();
-            let mut options = SemanticModelOptions::from(&snippet.source);
-            options.globals.insert("console".into());
-            let js = semantic_model(&root, options);
+            let js = semantic_model(&root, SemanticModelOptions::from(&snippet.source));
             (root, js, has_errors)
         })
         .collect();
@@ -138,7 +140,13 @@ fn model(source: &str) -> AstroSemanticModel {
         })
         .collect();
 
-    astro_model(&host, &snippets)
+    astro_model_with_options(
+        &host,
+        &snippets,
+        AstroSemanticModelOptions {
+            globals: globals.iter().copied().map(Into::into).collect(),
+        },
+    )
 }
 
 #[test]
@@ -461,4 +469,444 @@ interface Props { name: string }
     assert!(ranges.windows(2).all(|ranges| ranges[0] <= ranges[1]));
 
     insta::assert_snapshot!(semantic_snapshot(source, &model));
+}
+
+#[test]
+fn isolates_client_scripts_and_bridges_define_vars() {
+    let source = r#"---
+const serverOnly = "server";
+const theme = "dark";
+const dynamic = { fromSpread: 1 };
+---
+<script define:vars={{ theme, count: 1, count: 2, local: 1, foo: 1, "\x66oo": 2, bar: 1, [`\x62ar`]: 2, zero: 1, "\u{0000007A}ero": 2, "😀": 3, "\uD83D\uDE00": 4, "\\u0066oo": 5, "\u{10400}": 6, "\u{D801}\u{DC00}": 7, "": 8, [``]: 9, [(``)]: 10 }}>
+console.log(theme, count, local, foo, \u0066oo, bar, zero, serverOnly, Astro);
+const local = theme;
+</script>
+<script>
+console.log(theme, local, serverOnly, Astro);
+const own = 1;
+</script>
+<script define:vars={{ ...dynamic }}>
+console.log(maybeInjected);
+</script>
+<script define:vars={dynamic}>
+console.log(unknownBinding);
+</script>
+<script define:vars={{ ["literalKey"]: 1, [theme]: 2 }}>
+console.log(literalKey, maybeComputed);
+</script>
+<script define:vars>
+console.log(missingInitializer);
+</script>
+<script define:vars={{ broken:, known: { nested: } }}>
+console.log(broken, known, malformedUnknown);
+</script>
+<script define:vars={{ "\01": 1 }}>
+console.log(octalUnknown);
+</script>
+<script type="application/json" define:vars={{ ignoredJson: serverOnly }}>{"ok":true}</script>
+<script define:vars={{ selfClosing: 1 }} />
+<script define:vars />
+<script src="/ignored.js" define:vars={{ externalInjected: serverOnly }}>
+const ignored = 1;
+console.log(ignored);
+</script>
+<script src="/external.js" />
+"#;
+    let model = model(source);
+    assert_eq!(
+        model
+            .blocks()
+            .filter(|block| block.kind() == BlockKind::Script)
+            .count(),
+        13
+    );
+    let scripts: Vec<_> = model
+        .blocks()
+        .filter(|block| block.kind() == BlockKind::Script && block.scope().is_some())
+        .collect();
+    assert_eq!(scripts.len(), 12);
+    let scopes: Vec<_> = scripts
+        .iter()
+        .map(|block| block.scope().expect("client script scope"))
+        .collect();
+    assert!(scopes.iter().all(|scope| scope.parent().is_none()));
+
+    let theme_binding = model
+        .symbols()
+        .find(|symbol| {
+            symbol.name() == "theme"
+                && symbol.origin() == Origin::DefineVars
+                && symbol.scope() == scopes[0]
+        })
+        .expect("static define:vars binding");
+    let count_binding = model
+        .symbols()
+        .find(|symbol| {
+            symbol.name() == "count"
+                && symbol.origin() == Origin::DefineVars
+                && symbol.scope() == scopes[0]
+        })
+        .expect("named define:vars binding");
+    assert_eq!(theme_binding.uses().count(), 2);
+    assert_eq!(count_binding.uses().count(), 1);
+    assert_eq!(
+        model
+            .symbols()
+            .filter(|symbol| {
+                symbol.name() == "count"
+                    && symbol.origin() == Origin::DefineVars
+                    && symbol.scope() == scopes[0]
+            })
+            .count(),
+        1
+    );
+    let foo = model
+        .symbols()
+        .find(|symbol| {
+            symbol.semantic_name() == "foo"
+                && symbol.origin() == Origin::DefineVars
+                && symbol.scope() == scopes[0]
+        })
+        .expect("escaped define:vars binding");
+    assert_eq!(foo.name(), r"\x66oo");
+    assert_eq!(foo.uses().count(), 2);
+    assert_eq!(
+        model
+            .symbols()
+            .filter(|symbol| {
+                symbol.semantic_name() == "foo"
+                    && symbol.origin() == Origin::DefineVars
+                    && symbol.scope() == scopes[0]
+            })
+            .count(),
+        1
+    );
+    let bar = model
+        .symbols()
+        .find(|symbol| {
+            symbol.semantic_name() == "bar"
+                && symbol.origin() == Origin::DefineVars
+                && symbol.scope() == scopes[0]
+        })
+        .expect("template-key define:vars binding");
+    assert_eq!(bar.name(), r"\x62ar");
+    assert_eq!(bar.uses().count(), 1);
+    assert_eq!(
+        model
+            .symbols()
+            .filter(|symbol| {
+                symbol.semantic_name() == "bar"
+                    && symbol.origin() == Origin::DefineVars
+                    && symbol.scope() == scopes[0]
+            })
+            .count(),
+        1
+    );
+    let zero = model
+        .symbols()
+        .find(|symbol| {
+            symbol.semantic_name() == "zero"
+                && symbol.origin() == Origin::DefineVars
+                && symbol.scope() == scopes[0]
+        })
+        .expect("leading-zero code-point binding");
+    assert_eq!(zero.name(), r"\u{0000007A}ero");
+    assert_eq!(zero.uses().count(), 1);
+    let emoji = model
+        .symbols()
+        .find(|symbol| {
+            symbol.semantic_name() == "😀"
+                && symbol.origin() == Origin::DefineVars
+                && symbol.scope() == scopes[0]
+        })
+        .expect("surrogate-pair define:vars binding");
+    assert_eq!(emoji.name(), r"\uD83D\uDE00");
+    let literal_escape = model
+        .symbols()
+        .find(|symbol| {
+            symbol.semantic_name() == r"\u0066oo"
+                && symbol.origin() == Origin::DefineVars
+                && symbol.scope() == scopes[0]
+        })
+        .expect("literal-backslash define:vars binding");
+    assert_eq!(literal_escape.name(), r"\\u0066oo");
+    assert_eq!(literal_escape.uses().count(), 0);
+    let deseret = model
+        .symbols()
+        .find(|symbol| {
+            symbol.semantic_name() == "𐐀"
+                && symbol.origin() == Origin::DefineVars
+                && symbol.scope() == scopes[0]
+        })
+        .expect("braced-surrogate define:vars binding");
+    assert_eq!(deseret.name(), r"\u{D801}\u{DC00}");
+    assert_eq!(
+        model
+            .symbols()
+            .filter(|symbol| {
+                symbol.semantic_name() == "𐐀"
+                    && symbol.origin() == Origin::DefineVars
+                    && symbol.scope() == scopes[0]
+            })
+            .count(),
+        1
+    );
+    let empty = model
+        .symbols()
+        .find(|symbol| {
+            symbol.semantic_name().is_empty()
+                && symbol.origin() == Origin::DefineVars
+                && symbol.scope() == scopes[0]
+        })
+        .expect("empty-template define:vars binding");
+    assert!(empty.name().is_empty());
+    assert_eq!(
+        model
+            .symbols()
+            .filter(|symbol| {
+                symbol.semantic_name().is_empty()
+                    && symbol.origin() == Origin::DefineVars
+                    && symbol.scope() == scopes[0]
+            })
+            .count(),
+        1
+    );
+    let local = model
+        .symbols()
+        .find(|symbol| {
+            symbol.name() == "local"
+                && symbol.kind() == SymbolKind::Local
+                && symbol.scope() == scopes[0]
+        })
+        .expect("client-local declaration");
+    let injected_local = model
+        .symbols()
+        .find(|symbol| {
+            symbol.name() == "local"
+                && symbol.origin() == Origin::DefineVars
+                && symbol.scope() == scopes[0]
+        })
+        .expect("shadowed define:vars binding");
+    assert_eq!(local.uses().count(), 1);
+    assert_eq!(injected_local.uses().count(), 0);
+    assert_eq!(
+        scopes[0]
+            .lookup(Namespace::Value, "local")
+            .expect("local lookup")
+            .id(),
+        local.id()
+    );
+    assert!(scopes[1].lookup(Namespace::Value, "theme").is_none());
+    assert!(model.references().any(|reference| {
+        reference.name() == "serverOnly"
+            && reference.scope() == Some(scopes[0].clone())
+            && reference.resolution() == Resolution::Unresolved
+    }));
+    assert!(model.references().any(|reference| {
+        reference.name() == "Astro"
+            && reference.scope() == Some(scopes[0].clone())
+            && reference.resolution() == Resolution::Unresolved
+    }));
+    assert!(
+        scopes[2]
+            .open_reasons(Namespace::Value)
+            .contains(OpenReason::Spread)
+    );
+    assert!(
+        scopes[3]
+            .open_reasons(Namespace::Value)
+            .contains(OpenReason::NonLiteral)
+    );
+    assert!(model.references().any(|reference| {
+        reference.name() == "maybeInjected"
+            && reference.scope() == Some(scopes[2].clone())
+            && reference.resolution() == Resolution::Unknowable
+    }));
+    assert!(model.references().any(|reference| {
+        reference.name() == "console"
+            && reference.scope() == Some(scopes[2].clone())
+            && reference.resolution() == Resolution::Unknowable
+    }));
+    assert!(model.references().any(|reference| {
+        reference.name() == "unknownBinding"
+            && reference.scope() == Some(scopes[3].clone())
+            && reference.resolution() == Resolution::Unknowable
+    }));
+    let literal_key = model
+        .symbols()
+        .find(|symbol| {
+            symbol.name() == "literalKey"
+                && symbol.origin() == Origin::DefineVars
+                && symbol.scope() == scopes[4]
+        })
+        .expect("literal computed define:vars binding");
+    assert_eq!(literal_key.uses().count(), 1);
+    assert!(
+        scopes[4]
+            .open_reasons(Namespace::Value)
+            .contains(OpenReason::Computed)
+    );
+    assert!(model.references().any(|reference| {
+        reference.name() == "maybeComputed"
+            && reference.scope() == Some(scopes[4].clone())
+            && reference.resolution() == Resolution::Unknowable
+    }));
+    assert!(
+        scopes[5]
+            .open_reasons(Namespace::Value)
+            .contains(OpenReason::ParseError)
+    );
+    assert!(
+        scopes[6]
+            .open_reasons(Namespace::Value)
+            .contains(OpenReason::ParseError)
+    );
+    assert!(
+        scopes[7]
+            .open_reasons(Namespace::Value)
+            .contains(OpenReason::ParseError)
+    );
+    for (name, scope) in [
+        ("missingInitializer", &scopes[5]),
+        ("broken", &scopes[6]),
+        ("known", &scopes[6]),
+        ("malformedUnknown", &scopes[6]),
+        ("octalUnknown", &scopes[7]),
+    ] {
+        assert!(
+            model.references().any(|reference| {
+                reference.name() == name
+                    && reference.scope() == Some(scope.clone())
+                    && reference.resolution() == Resolution::Unknowable
+            }),
+            "{name}"
+        );
+    }
+    assert!(model.symbols().all(|symbol| symbol.name() != "broken"));
+    assert!(model.symbols().all(|symbol| symbol.name() != "known"));
+    assert!(
+        model
+            .symbols()
+            .all(|symbol| symbol.name() != "externalInjected")
+    );
+    assert!(model.symbols().all(|symbol| symbol.name() != "ignoredJson"));
+    let self_closing = scopes[8]
+        .lookup(Namespace::Value, "selfClosing")
+        .expect("self-closing define:vars binding");
+    assert_eq!(self_closing.origin(), Origin::DefineVars);
+    let server_only = model
+        .symbols()
+        .find(|symbol| symbol.name() == "serverOnly")
+        .expect("server-only declaration");
+    assert_eq!(server_only.uses().count(), 0);
+    assert!(model.symbols().all(|symbol| symbol.name() != "ignored"));
+    assert!(
+        scopes[9]
+            .open_reasons(Namespace::Value)
+            .contains(OpenReason::ParseError)
+    );
+    for scope in [&scopes[10], &scopes[11]] {
+        for namespace in [Namespace::Value, Namespace::Type, Namespace::Namespace] {
+            assert!(
+                scope
+                    .open_reasons(namespace)
+                    .contains(OpenReason::ExternalSource)
+            );
+        }
+    }
+
+    insta::assert_snapshot!(semantic_snapshot(source, &model));
+}
+
+#[test]
+fn applies_configured_globals_to_server_and_client_snippets() {
+    let model = model_with_globals(
+        r#"---
+configuredGlobal;
+---
+<div>{configuredGlobal}</div>
+<script>configuredGlobal; console; Astro;</script>
+"#,
+        &["configuredGlobal", "console"],
+    );
+    let script_scope = model
+        .blocks()
+        .find(|block| block.kind() == BlockKind::Script)
+        .and_then(|block| block.scope())
+        .expect("client script scope");
+
+    assert!(model.references().any(|reference| {
+        reference.name() == "configuredGlobal"
+            && reference.scope() == Some(script_scope.clone())
+            && reference.resolution() == Resolution::Global
+    }));
+    assert!(model.references().any(|reference| {
+        reference.name() == "console"
+            && reference.scope() == Some(script_scope.clone())
+            && reference.resolution() == Resolution::Global
+    }));
+    assert!(model.references().any(|reference| {
+        reference.name() == "Astro"
+            && reference.scope() == Some(script_scope.clone())
+            && reference.resolution() == Resolution::Unresolved
+    }));
+    assert!(model.references().any(|reference| {
+        reference.name() == "configuredGlobal"
+            && reference.scope() != Some(script_scope.clone())
+            && reference.resolution() == Resolution::Global
+    }));
+}
+
+#[test]
+fn classifies_external_and_inline_src_scripts() {
+    let model = model(
+        r#"<script src></script>
+<script src=""></script>
+<script src="/inline.js" is:inline>const inlineValue = 1;</script>
+"#,
+    );
+    let scripts: Vec<_> = model
+        .blocks()
+        .filter(|block| block.kind() == BlockKind::Script)
+        .collect();
+
+    assert_eq!(scripts.len(), 3);
+    assert!(scripts[0].has_external_source());
+    assert!(scripts[1].has_external_source());
+    assert!(!scripts[2].has_external_source());
+
+    let inline_scope = scripts[2].scope().expect("inline script scope");
+    assert!(
+        model
+            .symbols()
+            .any(|symbol| { symbol.name() == "inlineValue" && symbol.scope() == inline_scope })
+    );
+}
+
+#[test]
+fn normalizes_raw_constant_template_line_endings() {
+    let source = "---\n---\n<script define:vars={{ [`line\r\nbreak`]: 1, [`line\nbreak`]: 2, [`line\\rbreak`]: 3 }}>\n</script>\n";
+    let model = model(source);
+    let scope = model
+        .blocks()
+        .find(|block| block.kind() == BlockKind::Script)
+        .and_then(|block| block.scope())
+        .expect("client script scope");
+    let names: Vec<_> = model
+        .symbols()
+        .filter(|symbol| {
+            symbol.semantic_name() == "line\nbreak" && symbol.origin() == Origin::DefineVars
+        })
+        .collect();
+    assert_eq!(names.len(), 1);
+    assert_eq!(names[0].name(), "line\nbreak");
+    let escaped = model
+        .symbols()
+        .find(|symbol| {
+            symbol.semantic_name() == "line\rbreak" && symbol.origin() == Origin::DefineVars
+        })
+        .expect("escaped carriage-return binding");
+    assert_eq!(escaped.name(), r"line\rbreak");
+    assert!(scope.open_reasons(Namespace::Value).is_empty());
 }
