@@ -774,6 +774,7 @@ pub mod use_vue_multi_word_component_names;
 pub mod use_vue_next_tick_promise;
 pub mod use_vue_one_component_per_file;
 pub mod use_vue_prop_type_constructor;
+pub mod use_vue_registered_component_name_casing;
 pub mod use_vue_render_return;
 pub mod use_vue_separate_static_class;
 pub mod use_vue_single_event_payload;

@@ -4393,6 +4393,11 @@ export interface Nursery {
 	 */
 	useVuePropTypeConstructor?: UseVuePropTypeConstructorConfiguration;
 	/**
+	 * Enforce a consistent casing style for the names of components registered in the components option of Vue components.
+	 * See https://biomejs.dev/linter/rules/use-vue-registered-component-name-casing
+	 */
+	useVueRegisteredComponentNameCasing?: UseVueRegisteredComponentNameCasingConfiguration;
+	/**
 	 * Require the render function of a Vue component to return a value.
 	 * See https://biomejs.dev/linter/rules/use-vue-render-return
 	 */
@@ -7525,6 +7530,9 @@ export type UseVueOneComponentPerFileConfiguration =
 export type UseVuePropTypeConstructorConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVuePropTypeConstructorOptions;
+export type UseVueRegisteredComponentNameCasingConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueRegisteredComponentNameCasingOptions;
 export type UseVueRenderReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueRenderReturnOptions;
@@ -11221,6 +11229,14 @@ export interface RuleWithUseVuePropTypeConstructorOptions {
 	level: RulePlainConfiguration;
 	options?: UseVuePropTypeConstructorOptions;
 }
+export interface RuleWithUseVueRegisteredComponentNameCasingOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueRegisteredComponentNameCasingOptions;
+}
 export interface RuleWithUseVueRenderReturnOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueRenderReturnOptions;
@@ -14220,6 +14236,13 @@ export interface UseVueMacroVariableNameOptions {
 export type UseVueMatchingComponentFileNameOptions = {};
 export type UseVueOneComponentPerFileOptions = {};
 export type UseVuePropTypeConstructorOptions = {};
+export interface UseVueRegisteredComponentNameCasingOptions {
+	/**
+	 * The casing that the names of components registered in the `components` option must
+	 * follow. If omitted, names must be in PascalCase.
+	 */
+	casing?: RegisteredComponentNameCasing;
+}
 export type UseVueRenderReturnOptions = {};
 export type UseVueSeparateStaticClassOptions = {};
 export type UseVueSingleEventPayloadOptions = {};
@@ -15243,6 +15266,10 @@ export type VueSlotStyle = "shorthand" | "longhand" | "v-slot";
  * How a named slot is written.
  */
 export type VueNamedSlotStyle = "shorthand" | "longhand";
+export type RegisteredComponentNameCasing =
+	| "PascalCase"
+	| "camelCase"
+	| "kebab-case";
 export type SlotNameCasing = "camelCase" | "kebab-case" | "singleword";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
@@ -16071,6 +16098,7 @@ export type Category =
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVueOneComponentPerFile"
 	| "lint/nursery/useVuePropTypeConstructor"
+	| "lint/nursery/useVueRegisteredComponentNameCasing"
 	| "lint/nursery/useVueRenderReturn"
 	| "lint/nursery/useVueSeparateStaticClass"
 	| "lint/nursery/useVueSingleEventPayload"

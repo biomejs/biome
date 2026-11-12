@@ -1,0 +1,73 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-component.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  components: {
+    fooBar,
+    "todo-item": TodoItem,
+  },
+});
+
+```
+
+# Diagnostics
+```
+invalid-define-component.js:6:5 lint/nursery/useVueRegisteredComponentNameCasing  FIXABLE  ━━━━━━━━━━
+
+  i The component name fooBar isn't in PascalCase.
+  
+    4 │ export default defineComponent({
+    5 │   components: {
+  > 6 │     fooBar,
+      │     ^^^^^^
+    7 │     "todo-item": TodoItem,
+    8 │   },
+  
+  i Using one naming style for all registered components makes them easier to find and to use.
+  
+  i Rename the component to PascalCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to FooBar.
+  
+    6 │ ····FooBar:·fooBar,
+      │     ++++++++       
+
+```
+
+```
+invalid-define-component.js:7:5 lint/nursery/useVueRegisteredComponentNameCasing  FIXABLE  ━━━━━━━━━━
+
+  i The component name todo-item isn't in PascalCase.
+  
+    5 │   components: {
+    6 │     fooBar,
+  > 7 │     "todo-item": TodoItem,
+      │     ^^^^^^^^^^^
+    8 │   },
+    9 │ });
+  
+  i Using one naming style for all registered components makes them easier to find and to use.
+  
+  i Rename the component to PascalCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to TodoItem.
+  
+     5  5 │     components: {
+     6  6 │       fooBar,
+     7    │ - ····"todo-item":·TodoItem,
+        7 │ + ····TodoItem:·TodoItem,
+     8  8 │     },
+     9  9 │   });
+  
+
+```

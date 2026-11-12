@@ -1,0 +1,104 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-camel-case.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+export default {
+  components: {
+    FooBar,
+    TodoItem: todoItem,
+    "todo-list": TodoList,
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-camel-case.vue:5:5 lint/nursery/useVueRegisteredComponentNameCasing  FIXABLE  ━━━━━━━━━━━━━━
+
+  × The component name FooBar isn't in camelCase.
+  
+    3 │ export default {
+    4 │   components: {
+  > 5 │     FooBar,
+      │     ^^^^^^
+    6 │     TodoItem: todoItem,
+    7 │     "todo-list": TodoList,
+  
+  i Using one naming style for all registered components makes them easier to find and to use.
+  
+  i Rename the component to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to fooBar.
+  
+    5 │ ····fooBar:·FooBar,
+      │     ++++++++       
+
+```
+
+```
+invalid-camel-case.vue:6:5 lint/nursery/useVueRegisteredComponentNameCasing  FIXABLE  ━━━━━━━━━━━━━━
+
+  × The component name TodoItem isn't in camelCase.
+  
+    4 │   components: {
+    5 │     FooBar,
+  > 6 │     TodoItem: todoItem,
+      │     ^^^^^^^^
+    7 │     "todo-list": TodoList,
+    8 │   },
+  
+  i Using one naming style for all registered components makes them easier to find and to use.
+  
+  i Rename the component to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to todoItem.
+  
+     4  4 │     components: {
+     5  5 │       FooBar,
+     6    │ - ····TodoItem:·todoItem,
+        6 │ + ····todoItem:·todoItem,
+     7  7 │       "todo-list": TodoList,
+     8  8 │     },
+  
+
+```
+
+```
+invalid-camel-case.vue:7:5 lint/nursery/useVueRegisteredComponentNameCasing  FIXABLE  ━━━━━━━━━━━━━━
+
+  × The component name todo-list isn't in camelCase.
+  
+    5 │     FooBar,
+    6 │     TodoItem: todoItem,
+  > 7 │     "todo-list": TodoList,
+      │     ^^^^^^^^^^^
+    8 │   },
+    9 │ };
+  
+  i Using one naming style for all registered components makes them easier to find and to use.
+  
+  i Rename the component to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to todoList.
+  
+     5  5 │       FooBar,
+     6  6 │       TodoItem: todoItem,
+     7    │ - ····"todo-list":·TodoList,
+        7 │ + ····todoList:·TodoList,
+     8  8 │     },
+     9  9 │   };
+  
+
+```
