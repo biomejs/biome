@@ -100,13 +100,13 @@ impl<'db> ResolutionCtx<'db, '_> {
             if let Some(binding) = binding {
                 let binding_is_imported = binding.is_imported();
                 let resolves_declarations_directly = self.resolves_declarations_directly();
-                // Project the selected namespace member before resolving its
-                // base. Building the complete namespace here would add
+                // Project the selected namespace members before resolving
+                // their base. Building the complete namespace here would add
                 // unrelated exports to the declaration graph and could turn
                 // an acyclic lookup into a dependency cycle.
-                let projected_member = self.import_resolution.is_on_demand().then(|| {
-                    members.first().and_then(|member| {
-                        self.resolve_namespace_import_member(
+                let projected_members =
+                    if self.import_resolution.is_on_demand() && !members.is_empty() {
+                        self.resolve_namespace_import_member_with_steps(
                             &TypeReference::Qualifier(Box::new(TypeReferenceQualifier {
                                 path: Path::from(identifier.clone()),
                                 type_parameters: Box::default(),
@@ -114,13 +114,14 @@ impl<'db> ResolutionCtx<'db, '_> {
                                 type_only: qualifier.type_only,
                                 excluded_binding_id: qualifier.excluded_binding_id,
                             })),
-                            member,
+                            &members,
+                            MAX_NAMESPACE_IMPORT_MEMBER_STEPS,
                         )
-                    })
-                });
-                let projected_member = projected_member.flatten();
-                let consumed_first_member = projected_member.is_some();
-                let mut target = if let Some(projected_member) = projected_member {
+                    } else {
+                        None
+                    };
+                let consumed_members = projected_members.map_or(0, |(_, consumed)| consumed);
+                let mut target = if let Some((projected_member, _)) = projected_members {
                     projected_member
                 } else if binding_is_imported
                     && let Some(import) = self.js_info.static_imports.get(identifier.text())
@@ -142,7 +143,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                         })
                 };
 
-                for member in members.iter().skip(usize::from(consumed_first_member)) {
+                for member in members.iter().skip(consumed_members) {
                     let Some(member_ty) =
                         self.resolve_static_member_expression(target, member.text())
                     else {
@@ -289,31 +290,34 @@ impl<'db> ResolutionCtx<'db, '_> {
     ) -> Option<InferredTypeData<'db>> {
         self.resolve_namespace_import_member_with_steps(
             reference,
-            member,
+            &[member],
             MAX_NAMESPACE_IMPORT_MEMBER_STEPS,
         )
+        .map(|(ty, _)| ty)
     }
 
     /// Follows local aliases and qualifiers until it reaches the import that
-    /// supplies `member`.
+    /// supplies the path of `members`.
     ///
-    /// Each iteration through the `TypeReference` chain consumes one step.
-    /// Entering `resolve_import_member_with_steps` consumes another step for
-    /// the cross-module projection. Walking parent scopes has a separate limit
-    /// and does not consume this budget.
+    /// Returns the projected type and the number of members it consumed; see
+    /// `resolve_import_member_with_steps` for how a projection consumes more
+    /// than one member. Each iteration through the `TypeReference` chain
+    /// consumes one step. Entering `resolve_import_member_with_steps` consumes
+    /// another step for the cross-module projection. Walking parent scopes has
+    /// a separate limit and does not consume this budget.
     pub(super) fn resolve_namespace_import_member_with_steps(
         &mut self,
         reference: &TypeReference,
-        member: &Text,
+        members: &[&Text],
         mut remaining_projection_steps: usize,
-    ) -> Option<InferredTypeData<'db>> {
+    ) -> Option<(InferredTypeData<'db>, usize)> {
         let mut reference = reference.clone();
         while remaining_projection_steps > 0 {
             remaining_projection_steps -= 1;
             if let TypeReference::Import(import) = &reference {
                 return self.resolve_import_member_with_steps(
                     import,
-                    member,
+                    members,
                     remaining_projection_steps,
                 );
             }
@@ -365,7 +369,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                                 specifier: Arc::new(import.specifier.clone()),
                                 type_only: qualifier.type_only,
                             },
-                            member,
+                            members,
                             remaining_projection_steps,
                         );
                     }
