@@ -369,6 +369,15 @@ impl Scanner {
                 .collect();
             scan_dependencies(project_path, dependencies, ctx).1
         })
+        .map(|mut diagnostics| {
+            diagnostics.extend(
+                workspace
+                    .framework_diagnostics(project_key)
+                    .into_iter()
+                    .map(Diagnostic::new),
+            );
+            diagnostics
+        })
         .inspect(|_| {
             // Files were indexed before the frameworks were recorded, so the
             // clients refresh their diagnostics again.
@@ -563,7 +572,7 @@ impl Scanner {
             mut diagnostics,
             duration: setup_duration,
         } = setup;
-        let (duration, files_diagnostics) =
+        let (duration, mut files_diagnostics) =
             self.run_scan_phase(workspace, project_key, trigger, scan_options, |ctx| {
                 let start = web_time::Instant::now();
                 // The other files read the manifests that the setup phase
@@ -616,6 +625,12 @@ impl Scanner {
 
                 duration
             });
+        files_diagnostics.extend(
+            workspace
+                .framework_diagnostics(project_key)
+                .into_iter()
+                .map(Diagnostic::new),
+        );
         diagnostics.extend(files_diagnostics);
 
         ScanResult {

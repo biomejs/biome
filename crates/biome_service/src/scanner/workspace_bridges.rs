@@ -142,6 +142,12 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
         Vec::new()
     }
 
+    /// Returns diagnostics that depend on both framework data and indexed
+    /// source files.
+    fn framework_diagnostics(&self, _project_key: ProjectKey) -> Vec<Error> {
+        Vec::new()
+    }
+
     /// Returns whether `path` is the configuration file of a framework that a
     /// framework loader reads, such as `astro.config.mjs`.
     fn is_framework_config(&self, _path: &Utf8Path) -> bool {
@@ -295,7 +301,12 @@ impl<'a, W: WorkspaceScannerBridge> ScannerWatcherBridge<'a, W> {
         affected: bool,
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         if !affected {
-            return Ok(Vec::new());
+            return Ok(self
+                .workspace
+                .framework_diagnostics(project_key)
+                .into_iter()
+                .map(Diagnostic::new)
+                .collect());
         }
         let runs_loaders = self
             .scanner

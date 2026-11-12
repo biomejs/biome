@@ -1,6 +1,6 @@
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_module_graph::{
-    CssPropertyDefinition, FrameworkScope, ModuleDb, SymbolFromModuleInfo,
+    CssPropertyDefinition, FrameworkScope, GlobalStylesheetScope, ModuleDb, SymbolFromModuleInfo,
     css_property_definitions, find_css_class_definition, framework_class_steps,
     has_unknown_framework_styles, is_class_referenced_by_importers,
     traverse_import_tree_for_classes,
@@ -19,6 +19,14 @@ fn scope(package_path: &str, stylesheets: &[&str], components: &[&str]) -> Frame
         stylesheets: stylesheets.iter().copied().map(Utf8PathBuf::from).collect(),
         components: components.iter().copied().map(Utf8PathBuf::from).collect(),
         ..FrameworkScope::default()
+    }
+}
+
+fn global_stylesheets(stylesheets: &[&str]) -> GlobalStylesheetScope {
+    GlobalStylesheetScope {
+        stylesheets: stylesheets.iter().copied().map(Utf8PathBuf::from).collect(),
+        is_authoritative: true,
+        has_unreadable_styles: false,
     }
 }
 
@@ -64,6 +72,162 @@ fn framework_classes(db: &WorkspaceDb, path: &str) -> Vec<String> {
 fn is_used(db: &WorkspaceDb, stylesheet: &str, class_name: &str) -> bool {
     let module = db.module_for_path(Utf8Path::new(stylesheet)).unwrap();
     is_class_referenced_by_importers(db, SymbolFromModuleInfo::new(db, class_name, module))
+}
+
+#[test]
+fn resolved_global_stylesheets_apply_only_to_their_files() {
+    let mut db = graph(
+        &[
+            ("/site/global.css", "@import './partial.css'; .global {}"),
+            ("/site/partial.css", ".partial {}"),
+        ],
+        &[
+            ("/site/admin.jsx", "export const Admin = () => <div />;"),
+            ("/site/public.jsx", "export const Public = () => <div />;"),
+        ],
+    );
+    db.set_framework_scope_for_test(
+        "/site".into(),
+        FrameworkScope {
+            has_unknown_styles: true,
+            ..scope("/site", &[], &[])
+        },
+    );
+    db.set_global_stylesheet_scope_for_test(
+        "/site".into(),
+        "/site/admin.jsx".into(),
+        global_stylesheets(&["/site/global.css"]),
+    );
+
+    assert_eq!(
+        framework_classes(&db, "/site/admin.jsx"),
+        ["global", "partial"]
+    );
+    assert!(framework_classes(&db, "/site/public.jsx").is_empty());
+    let admin = db
+        .module_for_path(Utf8Path::new("/site/admin.jsx"))
+        .unwrap();
+    let public = db
+        .module_for_path(Utf8Path::new("/site/public.jsx"))
+        .unwrap();
+    assert!(!has_unknown_framework_styles(&db, admin));
+    assert!(has_unknown_framework_styles(&db, public));
+}
+
+#[test]
+fn resolved_global_stylesheets_scope_class_usages() {
+    let mut db = graph(
+        &[("/site/global.css", ".admin {} .public {}")],
+        &[
+            (
+                "/site/admin.jsx",
+                "export const Admin = () => <div className=\"admin\" />;",
+            ),
+            (
+                "/site/public.jsx",
+                "export const Public = () => <div className=\"public\" />;",
+            ),
+        ],
+    );
+    db.set_framework_scope_for_test("/site".into(), scope("/site", &[], &[]));
+    db.set_global_stylesheet_scope_for_test(
+        "/site".into(),
+        "/site/admin.jsx".into(),
+        global_stylesheets(&["/site/global.css"]),
+    );
+
+    assert!(is_used(&db, "/site/global.css", "admin"));
+    assert!(!is_used(&db, "/site/global.css", "public"));
+}
+
+#[test]
+fn resolved_global_stylesheets_define_custom_properties_for_their_files() {
+    let (_, mut db) = build_css_db(&[
+        ("/site/global.css", ":root { --value: red; }"),
+        ("/site/admin.css", "a { color: var(--value); }"),
+        ("/site/public.css", "a { color: var(--value); }"),
+    ]);
+    db.set_framework_scope_for_test("/site".into(), scope("/site", &[], &[]));
+    db.set_global_stylesheet_scope_for_test(
+        "/site".into(),
+        "/site/admin.css".into(),
+        global_stylesheets(&["/site/global.css"]),
+    );
+
+    assert_eq!(
+        property_definitions(&db, "/site/admin.css"),
+        ["/site/global.css"]
+    );
+    assert!(property_definitions(&db, "/site/public.css").is_empty());
+}
+
+#[test]
+fn unreadable_global_stylesheet_imports_affect_only_their_files() {
+    let fs = MemoryFileSystem::default();
+    for (path, source) in [
+        ("/site/global.css", "@import './partial.css';"),
+        ("/site/partial.css", ".partial {}"),
+        ("/site/admin.jsx", "export const Admin = () => <div />;"),
+        ("/site/public.jsx", "export const Public = () => <div />;"),
+    ] {
+        fs.insert(path.into(), source);
+    }
+    let mut db = WorkspaceDb::new(fs.share());
+    add_css_modules(&mut db, &fs, &[BiomePath::new("/site/global.css")]);
+    add_js_modules(
+        &mut db,
+        &fs,
+        &[
+            BiomePath::new("/site/admin.jsx"),
+            BiomePath::new("/site/public.jsx"),
+        ],
+        false,
+    );
+    db.set_framework_scope_for_test("/site".into(), scope("/site", &[], &[]));
+    db.set_global_stylesheet_scope_for_test(
+        "/site".into(),
+        "/site/admin.jsx".into(),
+        global_stylesheets(&["/site/global.css"]),
+    );
+
+    let admin = db
+        .module_for_path(Utf8Path::new("/site/admin.jsx"))
+        .unwrap();
+    let public = db
+        .module_for_path(Utf8Path::new("/site/public.jsx"))
+        .unwrap();
+    assert!(has_unknown_framework_styles(&db, admin));
+    assert!(!has_unknown_framework_styles(&db, public));
+}
+
+#[test]
+fn unreadable_global_stylesheets_affect_only_their_files() {
+    let mut db = graph(
+        &[],
+        &[
+            ("/site/admin.jsx", "export const Admin = () => <div />;"),
+            ("/site/public.jsx", "export const Public = () => <div />;"),
+        ],
+    );
+    db.set_framework_scope_for_test("/site".into(), scope("/site", &[], &[]));
+    db.set_global_stylesheet_scope_for_test(
+        "/site".into(),
+        "/site/admin.jsx".into(),
+        GlobalStylesheetScope {
+            is_authoritative: true,
+            has_unreadable_styles: true,
+            ..GlobalStylesheetScope::default()
+        },
+    );
+
+    let admin = db
+        .module_for_path(Utf8Path::new("/site/admin.jsx"))
+        .unwrap();
+    let public = db
+        .module_for_path(Utf8Path::new("/site/public.jsx"))
+        .unwrap();
+    assert!(has_unknown_framework_styles(&db, admin));
+    assert!(!has_unknown_framework_styles(&db, public));
 }
 
 #[test]

@@ -21,6 +21,11 @@ use biome_fs::MemoryFileSystem;
 use biome_js_syntax::{JsLanguage, JsSyntaxNode};
 use biome_json_formatter::context::TrailingCommas;
 use biome_languages::css::CssEmbeddingKind;
+#[cfg(all(feature = "module_graph", feature = "lang_css"))]
+use biome_module_graph::{
+    SymbolFromModuleInfo, css_property_definitions, framework_class_steps,
+    is_class_referenced_by_importers,
+};
 use biome_rowan::{TextRange, TextSize};
 use camino::Utf8Path;
 use salsa::plumbing::{AsId, ZalsaDatabase};
@@ -7784,6 +7789,137 @@ fn framework_stylesheets_follow_removed_configurations() {
     assert!(!has_stylesheet());
 }
 
+#[cfg(all(feature = "module_graph", feature = "lang_css", feature = "lang_js"))]
+#[test]
+fn framework_style_diagnostics_respect_rule_overrides_and_file_kinds() {
+    let has_diagnostic = |configuration: &str| {
+        let fs = Arc::new(MemoryFileSystem::default());
+        for (path, content) in [
+            (
+                "/project/package.json",
+                r#"{ "dependencies": { "astro": "^5.0.0", "@astrojs/starlight": "^0.30.0" } }"#,
+            ),
+            (
+                "/project/node_modules/astro/package.json",
+                r#"{ "name": "astro", "version": "5.0.0" }"#,
+            ),
+            (
+                "/project/node_modules/@astrojs/starlight/package.json",
+                r#"{ "name": "@astrojs/starlight", "version": "0.30.0" }"#,
+            ),
+            (
+                "/project/astro.config.mjs",
+                r#"import starlight from "@astrojs/starlight";
+function stylesheets() { return ["./src/custom.css"]; }
+export default { integrations: [starlight({ customCss: stylesheets() })] };"#,
+            ),
+            (
+                "/project/src/Page.jsx",
+                "export const Page = () => <div className=\"page\" />;",
+            ),
+            ("/project/src/page.css", ".page {}"),
+        ] {
+            fs.insert(path.into(), content);
+        }
+        let configuration = biome_deserialize::json::deserialize_from_json_str::<Configuration>(
+            configuration,
+            biome_json_parser::JsonParserOptions::default(),
+            "",
+        )
+        .into_deserialized()
+        .unwrap();
+        let (workspace, project_key) =
+            scanned_lsp_workspace_with_configuration(&fs, "/project", configuration);
+        !workspace
+            .as_workspace()
+            .framework_diagnostics(project_key)
+            .is_empty()
+    };
+
+    for (configuration, expected) in [
+        (
+            r#"{ "linter": { "domains": { "project": "all" } } }"#,
+            false,
+        ),
+        (
+            r#"{
+                "css": { "linter": { "enabled": false } },
+                "linter": { "rules": { "nursery": { "noUnusedClasses": "error" } } }
+            }"#,
+            false,
+        ),
+        (
+            r#"{
+                "javascript": { "linter": { "enabled": false } },
+                "linter": { "rules": { "nursery": { "noUndeclaredClasses": "error" } } }
+            }"#,
+            false,
+        ),
+        (
+            r#"{
+                "linter": {
+                    "includes": ["src/*.jsx"],
+                    "rules": { "nursery": { "noUnusedClasses": "error" } }
+                }
+            }"#,
+            false,
+        ),
+        (
+            r#"{
+                "overrides": [{
+                    "includes": ["src/*.jsx"],
+                    "linter": { "rules": { "nursery": { "noUnusedClasses": "error" } } }
+                }]
+            }"#,
+            false,
+        ),
+        (
+            r#"{
+                "overrides": [{
+                    "includes": ["src/*.css"],
+                    "linter": { "rules": { "nursery": { "noUnusedClasses": "error" } } }
+                }]
+            }"#,
+            true,
+        ),
+        (
+            r#"{
+                "overrides": [
+                    {
+                        "includes": ["src/*.jsx"],
+                        "css": { "globals": ["src/page.css"] }
+                    },
+                    {
+                        "includes": ["src/*.css"],
+                        "linter": { "rules": { "nursery": { "noUnusedClasses": "error" } } }
+                    }
+                ]
+            }"#,
+            false,
+        ),
+        (
+            r#"{
+                "overrides": [{
+                    "includes": ["src/*.jsx"],
+                    "linter": { "rules": { "nursery": { "noUndeclaredClasses": "error" } } }
+                }]
+            }"#,
+            true,
+        ),
+        (
+            r#"{
+                "overrides": [{
+                    "includes": ["public/**"],
+                    "linter": { "rules": { "nursery": { "noUndeclaredClasses": "error" } } }
+                }]
+            }"#,
+            false,
+        ),
+    ] {
+        assert_eq!(has_diagnostic(configuration), expected);
+    }
+}
+
 #[cfg(feature = "module_graph")]
 #[test]
 fn new_package_folders_get_their_framework_modules() {
@@ -7822,6 +7958,77 @@ fn new_package_folders_get_their_framework_modules() {
     );
 }
 
+#[cfg(all(feature = "module_graph", feature = "lang_css", feature = "lang_js"))]
+#[test]
+fn css_globals_are_isolated_between_registered_projects() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    for (path, content) in [
+        ("/first/package.json", "{}"),
+        ("/first/src/theme.css", ".first {}"),
+        ("/first/src/Page.jsx", "export const Page = () => <div />;"),
+        ("/second/package.json", "{}"),
+        ("/second/src/theme.css", ".second {}"),
+        ("/second/src/Page.jsx", "export const Page = () => <div />;"),
+    ] {
+        fs.insert(path.into(), content);
+    }
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        fs,
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
+    for project_path in ["/first", "/second"] {
+        let project_key = workspace
+            .open_project(OpenProjectParams {
+                path: BiomePath::new(project_path),
+                open_uninitialized: true,
+            })
+            .unwrap()
+            .project_key;
+        workspace
+            .update_settings(UpdateSettingsParams {
+                project_key,
+                workspace_directory: Some(BiomePath::new(project_path)),
+                configuration: Configuration {
+                    css: Some(biome_configuration::CssConfiguration {
+                        globals: Some(["src/theme.css".into()].into_iter().collect()),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+                extended_configurations: vec![],
+                module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+            })
+            .unwrap();
+        workspace
+            .scan_project(ScanProjectParams {
+                project_key,
+                watch: false,
+                force: false,
+                scan_kind: ScanKind::TypeAware,
+                verbose: false,
+            })
+            .unwrap();
+    }
+
+    let db = workspace.get_db();
+    let classes = |path| {
+        let module = db.module_for_path(Utf8Path::new(path)).unwrap();
+        framework_class_steps(&db, module)
+            .iter()
+            .flat_map(|step| step.css_classes.values())
+            .map(|class| class.text().to_string())
+            .collect::<Vec<_>>()
+    };
+    assert_eq!(classes("/first/src/Page.jsx"), ["first"]);
+    assert_eq!(classes("/second/src/Page.jsx"), ["second"]);
+}
+
 #[cfg(all(feature = "module_graph", feature = "lang_css"))]
 #[test]
 fn css_globals_of_the_root_configuration_apply_to_nested_configurations() {
@@ -7846,12 +8053,14 @@ fn css_globals_of_the_root_configuration_apply_to_nested_configurations() {
         ..Default::default()
     };
     let (workspace, _) = scanned_lsp_workspace_with_configuration(&fs, "/project", configuration);
-    let scope = workspace
-        .get_db()
-        .framework_scope(Utf8Path::new(STYLESHEET))
-        .unwrap();
+    let db = workspace.get_db();
+    let scope = db.framework_scope(Utf8Path::new(STYLESHEET)).unwrap();
     assert_eq!(scope.package_path, "/project/site");
-    assert_eq!(scope.stylesheets, [Utf8PathBuf::from(STYLESHEET)]);
+    assert_eq!(
+        db.global_stylesheet_scope(Utf8Path::new(STYLESHEET))
+            .stylesheets,
+        [Utf8PathBuf::from(STYLESHEET)]
+    );
 }
 
 #[cfg(all(feature = "module_graph", feature = "lang_css"))]
@@ -7871,12 +8080,241 @@ fn css_globals_of_a_nested_configuration_apply_to_its_package() {
         fs.insert(path.into(), content);
     }
     let (workspace, _) = scanned_lsp_workspace(&fs, "/project");
-    let scope = workspace
-        .get_db()
-        .framework_scope(Utf8Path::new(STYLESHEET))
-        .unwrap();
+    let db = workspace.get_db();
+    let scope = db.framework_scope(Utf8Path::new(STYLESHEET)).unwrap();
     assert_eq!(scope.package_path, "/project/site");
-    assert_eq!(scope.stylesheets, [Utf8PathBuf::from(STYLESHEET)]);
+    assert_eq!(
+        db.global_stylesheet_scope(Utf8Path::new(STYLESHEET))
+            .stylesheets,
+        [Utf8PathBuf::from(STYLESHEET)]
+    );
+}
+
+#[cfg(all(feature = "module_graph", feature = "lang_css"))]
+#[test]
+fn css_globals_of_a_nested_configuration_apply_inside_the_same_package() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    for (path, content) in [
+        ("/project/package.json", "{}"),
+        (
+            "/project/nested/biome.json",
+            r#"{ "root": false, "css": { "globals": ["src/theme.css"] } }"#,
+        ),
+        ("/project/nested/src/theme.css", ".theme {}"),
+        (
+            "/project/nested/src/Page.jsx",
+            "export const Page = () => <div />;",
+        ),
+        (
+            "/project/src/Page.jsx",
+            "export const Page = () => <div />;",
+        ),
+    ] {
+        fs.insert(path.into(), content);
+    }
+    let (workspace, _) = scanned_lsp_workspace(&fs, "/project");
+    let db = workspace.get_db();
+    let classes = |path| {
+        let module = db.module_for_path(Utf8Path::new(path)).unwrap();
+        framework_class_steps(&db, module)
+            .iter()
+            .flat_map(|step| step.css_classes.values())
+            .map(|class| class.text().to_string())
+            .collect::<Vec<_>>()
+    };
+
+    assert_eq!(classes("/project/nested/src/Page.jsx"), ["theme"]);
+    assert!(classes("/project/src/Page.jsx").is_empty());
+}
+
+#[cfg(all(feature = "module_graph", feature = "lang_css"))]
+#[test]
+fn css_globals_from_extended_configurations_use_their_own_directory() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    for (path, content) in [
+        ("/project/package.json", "{}"),
+        (
+            "/project/configs/shared.json",
+            r#"{
+                "css": { "globals": ["base.css"] },
+                "overrides": [{
+                    "includes": ["src/admin/**"],
+                    "css": { "globals": ["admin.css"] }
+                }]
+            }"#,
+        ),
+        (
+            "/project/site/biome.json",
+            r#"{ "root": false, "extends": ["../configs/shared.json"] }"#,
+        ),
+        ("/project/configs/base.css", ".base {}"),
+        ("/project/configs/admin.css", ".admin {}"),
+        (
+            "/project/site/src/admin/Page.jsx",
+            "export const Page = () => <div />;",
+        ),
+        (
+            "/project/site/src/public/Page.jsx",
+            "export const Page = () => <div />;",
+        ),
+    ] {
+        fs.insert(path.into(), content);
+    }
+    let (workspace, _) = scanned_lsp_workspace(&fs, "/project");
+    let db = workspace.get_db();
+    let stylesheets = |path| {
+        let mut stylesheets = db
+            .global_stylesheet_scope(Utf8Path::new(path))
+            .stylesheets
+            .clone();
+        stylesheets.sort();
+        stylesheets
+    };
+
+    assert_eq!(
+        stylesheets("/project/site/src/admin/Page.jsx"),
+        [
+            Utf8PathBuf::from("/project/configs/admin.css"),
+            Utf8PathBuf::from("/project/configs/base.css"),
+        ]
+    );
+    assert_eq!(
+        stylesheets("/project/site/src/public/Page.jsx"),
+        [Utf8PathBuf::from("/project/configs/base.css")]
+    );
+}
+
+#[cfg(all(feature = "module_graph", feature = "lang_css"))]
+#[test]
+fn css_globals_of_overrides_apply_to_matching_files() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    for (path, content) in [
+        ("/project/package.json", "{}"),
+        ("/project/site/package.json", "{}"),
+        (
+            "/project/site/biome.json",
+            r#"{
+                "root": false,
+                "overrides": [
+                    { "css": { "globals": ["src/shared.css"] } },
+                    {
+                        "includes": ["src/**", "!src/public/**"],
+                        "css": { "globals": ["src/admin.css"] }
+                    }
+                ]
+            }"#,
+        ),
+        (
+            "/project/site/src/admin.css",
+            ":root { --admin: red; } .admin {} .public-only {}",
+        ),
+        ("/project/site/src/shared.css", ".shared {}"),
+        (
+            "/project/site/src/admin/Page.jsx",
+            "export const Page = () => <div className=\"admin\" />;",
+        ),
+        (
+            "/project/site/src/public/Page.jsx",
+            "export const Page = () => <div className=\"public-only\" />;",
+        ),
+        (
+            "/project/site/src/admin/page.css",
+            "a { color: var(--admin); }",
+        ),
+        (
+            "/project/site/src/public/page.css",
+            "a { color: var(--admin); }",
+        ),
+    ] {
+        fs.insert(path.into(), content);
+    }
+    let (workspace, _) = scanned_lsp_workspace(&fs, "/project");
+    let db = workspace.get_db();
+    let classes = |path| {
+        let module = db.module_for_path(Utf8Path::new(path)).unwrap();
+        let mut classes = framework_class_steps(&db, module)
+            .iter()
+            .flat_map(|step| step.css_classes.values())
+            .map(|class| class.text().to_string())
+            .collect::<Vec<_>>();
+        classes.sort_unstable();
+        classes
+    };
+
+    assert_eq!(
+        classes("/project/site/src/admin/Page.jsx"),
+        ["admin", "public-only", "shared"]
+    );
+    assert_eq!(classes("/project/site/src/public/Page.jsx"), ["shared"]);
+
+    let property_definitions = |path| {
+        let module = db.module_for_path(Utf8Path::new(path)).unwrap();
+        css_property_definitions(&db, SymbolFromModuleInfo::new(&db, "--admin", module))
+            .iter()
+            .map(|definition| definition.module_path.clone())
+            .collect::<Vec<_>>()
+    };
+    assert_eq!(
+        property_definitions("/project/site/src/admin/page.css"),
+        [Utf8PathBuf::from("/project/site/src/admin.css")]
+    );
+    assert!(property_definitions("/project/site/src/public/page.css").is_empty());
+
+    let stylesheet = db
+        .module_for_path(Utf8Path::new("/project/site/src/admin.css"))
+        .unwrap();
+    assert!(is_class_referenced_by_importers(
+        &db,
+        SymbolFromModuleInfo::new(&db, "admin", stylesheet),
+    ));
+    assert!(!is_class_referenced_by_importers(
+        &db,
+        SymbolFromModuleInfo::new(&db, "public-only", stylesheet),
+    ));
+}
+
+#[cfg(all(feature = "module_graph", feature = "lang_css"))]
+#[test]
+fn unreadable_css_globals_of_an_override_affect_only_matching_files() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    for (path, content) in [
+        ("/project/package.json", "{}"),
+        (
+            "/project/site/biome.json",
+            r#"{
+                "root": false,
+                "files": { "maxSize": 100 },
+                "overrides": [{
+                    "includes": ["src/admin/**"],
+                    "css": { "globals": ["src/theme.css"] }
+                }]
+            }"#,
+        ),
+        (
+            "/project/site/src/theme.css",
+            ".theme {}\n.theme {}\n.theme {}\n.theme {}\n.theme {}\n.theme {}\n.theme {}\n.theme {}\n.theme {}\n.theme {}\n.theme {}\n",
+        ),
+        (
+            "/project/site/src/admin/Page.jsx",
+            "export const Page = () => <div />;",
+        ),
+        (
+            "/project/site/src/public/Page.jsx",
+            "export const Page = () => <div />;",
+        ),
+    ] {
+        fs.insert(path.into(), content);
+    }
+    let (workspace, _) = scanned_lsp_workspace(&fs, "/project");
+    let db = workspace.get_db();
+    let admin = db.global_stylesheet_scope(Utf8Path::new("/project/site/src/admin/Page.jsx"));
+    assert!(admin.is_authoritative);
+    assert!(admin.has_unreadable_styles);
+    assert!(admin.stylesheets.is_empty());
+
+    let public = db.global_stylesheet_scope(Utf8Path::new("/project/site/src/public/Page.jsx"));
+    assert!(!public.is_authoritative);
+    assert!(!public.has_unreadable_styles);
 }
 
 #[cfg(all(feature = "module_graph", feature = "lang_css"))]
@@ -7908,13 +8346,20 @@ fn css_globals_of_root_and_nested_configurations_are_combined() {
     let db = workspace.get_db();
     let root_scope = db.framework_scope(Utf8Path::new(ROOT_STYLESHEET)).unwrap();
     assert_eq!(root_scope.package_path, "/project");
-    assert_eq!(root_scope.stylesheets, [Utf8PathBuf::from(ROOT_STYLESHEET)]);
+    assert_eq!(
+        db.global_stylesheet_scope(Utf8Path::new(ROOT_STYLESHEET))
+            .stylesheets,
+        [Utf8PathBuf::from(ROOT_STYLESHEET)]
+    );
 
     let nested_scope = db
         .framework_scope(Utf8Path::new(NESTED_STYLESHEET))
         .unwrap();
     assert_eq!(nested_scope.package_path, "/project/site");
-    let mut stylesheets = nested_scope.stylesheets.clone();
+    let mut stylesheets = db
+        .global_stylesheet_scope(Utf8Path::new(NESTED_STYLESHEET))
+        .stylesheets
+        .clone();
     stylesheets.sort();
     assert_eq!(
         stylesheets,
@@ -7950,8 +8395,7 @@ fn css_globals_globs_match_stylesheets_outside_node_modules() {
     let stylesheets = || {
         let mut stylesheets = workspace
             .get_db()
-            .framework_scope(Utf8Path::new("/project/src/theme.css"))
-            .unwrap()
+            .global_stylesheet_scope(Utf8Path::new("/project/src/theme.css"))
             .stylesheets
             .clone();
         stylesheets.sort();
@@ -7959,13 +8403,11 @@ fn css_globals_globs_match_stylesheets_outside_node_modules() {
     };
     assert_eq!(stylesheets(), [Utf8PathBuf::from("/project/src/theme.css")]);
     // A listed file that isn't a stylesheet doesn't make the styles unknown.
-    assert!(
-        !workspace
-            .get_db()
-            .framework_scope(Utf8Path::new("/project/src/theme.css"))
-            .unwrap()
-            .has_unknown_styles
-    );
+    let globals = workspace
+        .get_db()
+        .global_stylesheet_scope(Utf8Path::new("/project/src/theme.css"));
+    assert!(globals.is_authoritative);
+    assert!(!globals.has_unreadable_styles);
 
     fs.insert(NEW_STYLESHEET.into(), ".new {}");
     watcher(&workspace)

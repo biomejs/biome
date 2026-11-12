@@ -44,7 +44,7 @@ pub struct CssConfiguration {
     /// option has entries, these rules also report in packages where Biome can't find all the
     /// stylesheets that a framework adds, for example because a function computes them.
     ///
-    /// This option isn't supported in `overrides`.
+    /// In an override, these stylesheets apply only to files selected by that override.
     #[cfg_attr(feature = "cli", bpaf(pure(Default::default()), hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub globals: Option<rustc_hash::FxHashSet<Box<str>>>,

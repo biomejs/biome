@@ -13,7 +13,12 @@ biome lint site/src/styles/partial.css site/src/components/Card.jsx site/src/com
 ```json
 {
   "html": { "experimentalFullSupportEnabled": true },
-  "css": { "globals": ["site/src/styles/custom.css"] },
+  "overrides": [
+    {
+      "includes": ["site/**"],
+      "css": { "globals": ["site/src/styles/custom.css"] }
+    }
+  ],
   "linter": {
     "rules": {
       "nursery": {

@@ -1018,8 +1018,8 @@ mod test {
 }
 
 /// Biome can't find all the stylesheets that the frameworks of a package add
-/// to every page, so the rules that check classes and custom properties don't
-/// report anything in the package.
+/// to every page, so the rules that check classes and custom properties skip
+/// files that no `css.globals` configuration covers.
 #[derive(Debug, Diagnostic, Serialize, Deserialize)]
 #[diagnostic(
     category = "project/frameworks",
@@ -1045,13 +1045,13 @@ impl Advices for UnknownFrameworkStylesheetsAdvice {
         visitor.record_log(
             LogCategory::Info,
             &markup! {
-                "The rules "<Emphasis>"noUndeclaredClasses"</Emphasis>", "<Emphasis>"noUndeclaredCustomProperties"</Emphasis>" and "<Emphasis>"noUnusedClasses"</Emphasis>" don't report anything in this package. This happens when a framework isn't installed, or when its configuration computes the stylesheets, for example with a function."
+                "The rules "<Emphasis>"noUndeclaredClasses"</Emphasis>", "<Emphasis>"noUndeclaredCustomProperties"</Emphasis>" and "<Emphasis>"noUnusedClasses"</Emphasis>" don't report for files that aren't covered by "<Emphasis>"css.globals"</Emphasis>". This happens when a framework isn't installed, or when its configuration computes the stylesheets, for example with a function."
             },
         )?;
         visitor.record_log(
             LogCategory::Info,
             &markup! {
-                "List these stylesheets in the "<Emphasis>"css.globals"</Emphasis>" option of the Biome configuration to enable the rules."
+                "List these stylesheets in "<Emphasis>"css.globals"</Emphasis>" at the top level or in a matching override to enable the rules."
             },
         )
     }
@@ -1146,8 +1146,8 @@ pub struct InvalidCssGlobal {
     category = "project/frameworks",
     severity = Warning,
     message(
-        message("Biome can't read the stylesheet "<Emphasis>{self.path}</Emphasis>" that "<Emphasis>"css.globals"</Emphasis>" names, so the rules that check classes and custom properties don't report anything in this package."),
-        description = "Biome can't read the stylesheet {path} that css.globals names, so the rules that check classes and custom properties don't report anything in this package.",
+        message("Biome can't read the stylesheet "<Emphasis>{self.path}</Emphasis>" that "<Emphasis>"css.globals"</Emphasis>" names, so the rules that check classes and custom properties skip files to which the stylesheet applies."),
+        description = "Biome can't read the stylesheet {path} that css.globals names, so the rules that check classes and custom properties skip files to which the stylesheet applies.",
     ),
 )]
 pub struct UnreadableCssGlobal {

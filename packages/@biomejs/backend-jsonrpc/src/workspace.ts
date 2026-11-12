@@ -160,7 +160,7 @@ export interface CssConfiguration {
 	 * option has entries, these rules also report in packages where Biome can't find all the
 	 * stylesheets that a framework adds, for example because a function computes them.
 	 *
-	 * This option isn't supported in `overrides`.
+	 * In an override, these stylesheets apply only to files selected by that override.
 	 */
 	globals?: string[];
 	/**

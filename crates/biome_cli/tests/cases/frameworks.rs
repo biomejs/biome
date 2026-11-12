@@ -500,7 +500,10 @@ fn css_globals_enable_css_rules_when_framework_stylesheets_are_unknown() {
         &fs,
         br#"{
     "html": { "experimentalFullSupportEnabled": true },
-    "css": { "globals": ["site/src/styles/custom.css"] },
+    "overrides": [{
+        "includes": ["site/**"],
+        "css": { "globals": ["site/src/styles/custom.css"] }
+    }],
     "linter": {
         "rules": {
             "nursery": {
@@ -549,28 +552,55 @@ export default defineConfig({
 }
 
 #[test]
-fn css_globals_are_not_supported_in_overrides() {
+fn css_globals_apply_in_overrides() {
     let mut console = BufferConsole::default();
     let fs = MemoryFileSystem::default();
     fs.insert(
         Utf8Path::new("biome.json").into(),
         br#"{
-    "overrides": [{ "includes": ["**/*.css"], "css": { "globals": ["theme.css"] } }]
+    "css": { "globals": ["src/base.css"] },
+    "linter": {
+        "rules": { "nursery": { "noUndeclaredClasses": "error" } }
+    },
+    "overrides": [{
+        "includes": ["src/admin/**"],
+        "css": { "globals": ["src/admin.css"] }
+    }]
 }
 "#,
     );
-    let file = Utf8Path::new("theme.css");
-    fs.insert(file.into(), b".theme { color: red; }\n");
+    fs.insert(Utf8Path::new("package.json").into(), b"{}");
+    fs.insert(Utf8Path::new("src/base.css").into(), b".base {}\n");
+    fs.insert(Utf8Path::new("src/admin.css").into(), b".admin {}\n");
+    fs.insert(Utf8Path::new("src/local.css").into(), b".local {}\n");
+    let admin = Utf8Path::new("src/admin/Page.jsx");
+    fs.insert(
+        admin.into(),
+        br#"import "../local.css";
+
+export const Page = () => <div className="local base admin missing" />;
+"#,
+    );
+    let public = Utf8Path::new("src/public/Page.jsx");
+    fs.insert(
+        public.into(),
+        br#"import "../local.css";
+
+export const Page = () => <div className="local base admin missing" />;
+"#,
+    );
 
     let (fs, result) = run_cli_with_server_workspace(
         fs,
         &mut console,
-        Args::from(["lint", file.as_str()].as_slice()),
+        Args::from(["lint", admin.as_str(), public.as_str()].as_slice()),
     );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "css_globals_are_not_supported_in_overrides",
+        "css_globals_apply_in_overrides",
         fs,
         console,
         result,

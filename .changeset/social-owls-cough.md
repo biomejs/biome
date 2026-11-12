@@ -6,6 +6,6 @@ Added `project/frameworks` informational diagnostics when Biome can't determine 
 
 ```text
 i Biome can't find all the stylesheets that the frameworks of this package add to every page.
-i List these stylesheets in the css.globals option of the Biome configuration to enable the rules.
+i List these stylesheets in css.globals at the top level or in a matching override to enable the rules.
 ```
 
