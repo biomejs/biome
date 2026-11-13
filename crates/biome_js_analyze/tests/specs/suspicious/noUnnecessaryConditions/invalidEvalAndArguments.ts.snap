@@ -1,0 +1,111 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidEvalAndArguments.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// TypeScript ignores `eval` and the `arguments` object when narrowing, so
+// `value` is a `string` at each optional chain.
+
+function directEval(value: string | null) {
+	if (value !== null) {
+		eval("value = null");
+		return value?.length;
+	}
+}
+
+function escapedEval(value: string | null) {
+	if (value !== null) {
+		/u0065val("value = null");
+		return value?.length;
+	}
+}
+
+function mappedArguments(value: string | null) {
+	if (value !== null) {
+		arguments[0] = null;
+		return value?.length;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidEvalAndArguments.ts:8:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+     6 │ 	if (value !== null) {
+     7 │ 		eval("value = null");
+   > 8 │ 		return value?.length;
+       │ 		       ^^^^^
+     9 │ 	}
+    10 │ }
+  
+  i Replace ?. with ..
+  
+     6 │ 	if (value !== null) {
+     7 │ 		eval("value = null");
+   > 8 │ 		return value?.length;
+       │ 		            ^^
+     9 │ 	}
+    10 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidEvalAndArguments.ts:15:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    13 │ 	if (value !== null) {
+    14 │ 		/u0065val("value = null");
+  > 15 │ 		return value?.length;
+       │ 		       ^^^^^
+    16 │ 	}
+    17 │ }
+  
+  i Replace ?. with ..
+  
+    13 │ 	if (value !== null) {
+    14 │ 		/u0065val("value = null");
+  > 15 │ 		return value?.length;
+       │ 		            ^^
+    16 │ 	}
+    17 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidEvalAndArguments.ts:22:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    20 │ 	if (value !== null) {
+    21 │ 		arguments[0] = null;
+  > 22 │ 		return value?.length;
+       │ 		       ^^^^^
+    23 │ 	}
+    24 │ }
+  
+  i Replace ?. with ..
+  
+    20 │ 	if (value !== null) {
+    21 │ 		arguments[0] = null;
+  > 22 │ 		return value?.length;
+       │ 		            ^^
+    23 │ 	}
+    24 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
