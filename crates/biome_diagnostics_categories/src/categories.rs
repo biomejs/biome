@@ -322,6 +322,7 @@ define_categories! {
     "lint/nursery/noRestrictedDependencies": "https://biomejs.dev/linter/rules/no-restricted-dependencies",
     "lint/nursery/noReturnArrayPush": "https://biomejs.dev/linter/rules/no-return-array-push",
     "lint/nursery/noReturnInFinally": "https://biomejs.dev/linter/rules/no-return-in-finally",
+    "lint/nursery/noReturnInTest": "https://biomejs.dev/linter/rules/no-return-in-test",
     "lint/nursery/noScssNullComparison": "https://biomejs.dev/linter/rules/no-scss-null-comparison",
     "lint/nursery/noSelfImport": "https://biomejs.dev/linter/rules/no-self-import",
     "lint/nursery/noSelfNestedLayer": "https://biomejs.dev/linter/rules/no-self-nested-layer",

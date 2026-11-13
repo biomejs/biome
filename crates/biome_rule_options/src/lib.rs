@@ -292,6 +292,7 @@ pub mod no_restricted_types;
 pub mod no_return_array_push;
 pub mod no_return_assign;
 pub mod no_return_in_finally;
+pub mod no_return_in_test;
 pub mod no_root_type;
 pub mod no_script_url;
 pub mod no_scss_null_comparison;

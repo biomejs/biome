@@ -3328,6 +3328,11 @@ export interface Nursery {
 	 */
 	noReturnInFinally?: NoReturnInFinallyConfiguration;
 	/**
+	 * Disallow return statements in tests.
+	 * See https://biomejs.dev/linter/rules/no-return-in-test
+	 */
+	noReturnInTest?: NoReturnInTestConfiguration;
+	/**
 	 * Disallow comparing values to null in Sass @if conditions.
 	 * See https://biomejs.dev/linter/rules/no-scss-null-comparison
 	 */
@@ -6896,6 +6901,9 @@ export type NoReturnArrayPushConfiguration =
 export type NoReturnInFinallyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReturnInFinallyOptions;
+export type NoReturnInTestConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReturnInTestOptions;
 export type NoScssNullComparisonConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoScssNullComparisonOptions;
@@ -10084,6 +10092,10 @@ export interface RuleWithNoReturnArrayPushOptions {
 export interface RuleWithNoReturnInFinallyOptions {
 	level: RulePlainConfiguration;
 	options?: NoReturnInFinallyOptions;
+}
+export interface RuleWithNoReturnInTestOptions {
+	level: RulePlainConfiguration;
+	options?: NoReturnInTestOptions;
 }
 export interface RuleWithNoScssNullComparisonOptions {
 	level: RulePlainConfiguration;
@@ -13546,6 +13558,7 @@ export type NoRedundantTypeConstituentsOptions = {};
 export type NoRestrictedDependenciesOptions = {};
 export type NoReturnArrayPushOptions = {};
 export type NoReturnInFinallyOptions = {};
+export type NoReturnInTestOptions = {};
 export type NoScssNullComparisonOptions = {};
 export type NoSelfImportOptions = {};
 export type NoSelfNestedLayerOptions = {};
@@ -15875,6 +15888,7 @@ export type Category =
 	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noReturnArrayPush"
 	| "lint/nursery/noReturnInFinally"
+	| "lint/nursery/noReturnInTest"
 	| "lint/nursery/noScssNullComparison"
 	| "lint/nursery/noSelfImport"
 	| "lint/nursery/noSelfNestedLayer"
