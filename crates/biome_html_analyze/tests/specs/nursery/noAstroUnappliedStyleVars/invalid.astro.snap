@@ -1,0 +1,61 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+---
+// should generate diagnostics
+const color = "red";
+---
+<style define:vars={{ color }}>
+  p { color: var(--color); }
+</style>
+<style is:global define:vars={{ color }}>
+  :root { background: var(--color); }
+</style>
+
+```
+
+# Diagnostics
+```
+invalid.astro:5:8 lint/nursery/noAstroUnappliedStyleVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These style variables have no element to receive them.
+  
+    3 │ const color = "red";
+    4 │ ---
+  > 5 │ <style define:vars={{ color }}>
+      │        ^^^^^^^^^^^^^^^^^^^^^^^
+    6 │   p { color: var(--color); }
+    7 │ </style>
+  
+  i Astro defines CSS variables on elements rendered by this component, not on its parent's elements.
+  
+  i Add an element around the styled content, or define the variables in the component that renders it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:8:18 lint/nursery/noAstroUnappliedStyleVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These style variables have no element to receive them.
+  
+     6 │   p { color: var(--color); }
+     7 │ </style>
+   > 8 │ <style is:global define:vars={{ color }}>
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^
+     9 │   :root { background: var(--color); }
+    10 │ </style>
+  
+  i Astro defines CSS variables on elements rendered by this component, not on its parent's elements.
+  
+  i Add an element around the styled content, or define the variables in the component that renders it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

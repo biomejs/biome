@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: suppressed.astro
+---
+# Input
+```astro
+---
+// biome-ignore lint/nursery/noAstroRedirectInComponents: test
+return Astro.redirect("/login");
+---
+
+```

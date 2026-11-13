@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: suppressed.tsx
+---
+# Input
+```tsx
+// biome-ignore lint/nursery/noAstroComponentInFramework: test
+import Card from "./Card.astro";
+
+```

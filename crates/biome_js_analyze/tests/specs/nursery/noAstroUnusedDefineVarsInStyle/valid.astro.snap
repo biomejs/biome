@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+---
+// should not generate diagnostics
+const color = "red";
+const gap = "1rem";
+const e\u0073caped = "blue";
+---
+<style define:vars={{ color, gap, [dynamic]: "value", ...other, method() {} }}>
+.card {
+	color: var(--color);
+	gap: var(--gap);
+}
+</style>
+
+<style define:vars={{ e\u0073caped }}>
+.card { color: var(--escaped); }
+</style>
+
+<style define:vars={{ color }}>
+.card { color: var(--\63olor); }
+</style>
+
+<style lang="scss" define:vars={{ ignored: "red" }}>
+.card { color: var(--ignored); }
+</style>
+
+```

@@ -1,0 +1,16 @@
+---
+// should not generate diagnostics
+const value = "card active";
+---
+<div class:list={"single"}></div>
+<div class:list={" leading"}></div>
+<div class:list={"trailing "}></div>
+<div class:list={"two  spaces"}></div>
+<div class:list={"tab\tclass"}></div>
+<div class:list={"escaped\\ class"}></div>
+<div class:list={`card active`}></div>
+<div class:list={"card" + " active"}></div>
+<div class:list={getClasses("card active")}></div>
+<div class:list={[["nested array"]]}></div>
+<div class={"plain class"}></div>
+<div class:list={value}></div>

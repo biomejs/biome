@@ -1,0 +1,26 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: classic.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<script defer>import value from "./value.js";</script>
+
+```
+
+# Diagnostics
+```
+classic.html:2:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of an import declaration outside of a module
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <script defer>import value from "./value.js";</script>
+      │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i not allowed inside scripts
+  
+
+```

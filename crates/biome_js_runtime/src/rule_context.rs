@@ -88,6 +88,7 @@ fn embedding_kind(kind: &JsEmbeddingKind, context: &mut Context) -> JsValue {
         JsEmbeddingKind::Astro {
             frontmatter,
             is_class_attribute,
+            ..
         } => {
             object
                 .property(

@@ -1,0 +1,10 @@
+---
+// should generate diagnostics
+import \u0043ard from "./Card.astro";
+import { \u0049mage as \u0050hoto, Picture as \u0049llustration } from "astro:assets";
+import type \u0054ypeOnly from "./Card.astro";
+---
+<Card client:load />
+<Photo client:idle />
+<Illustration client:visible />
+<TypeOnly client:load />

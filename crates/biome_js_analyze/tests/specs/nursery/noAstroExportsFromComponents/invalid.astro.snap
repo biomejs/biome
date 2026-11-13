@@ -1,0 +1,100 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+---
+// should generate diagnostics
+export default value;
+export { value as default };
+export { default } from "./value";
+export * as default from "./value";
+---
+
+```
+
+# Diagnostics
+```
+invalid.astro:3:8 lint/nursery/noAstroExportsFromComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro components cannot define a runtime default export.
+  
+    1 │ ---
+    2 │ // should generate diagnostics
+  > 3 │ export default value;
+      │        ^^^^^^^
+    4 │ export { value as default };
+    5 │ export { default } from "./value";
+  
+  i Astro generates the component's default export from the component template.
+  
+  i Remove this export or expose the value through a named export.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:4:19 lint/nursery/noAstroExportsFromComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro components cannot define a runtime default export.
+  
+    2 │ // should generate diagnostics
+    3 │ export default value;
+  > 4 │ export { value as default };
+      │                   ^^^^^^^
+    5 │ export { default } from "./value";
+    6 │ export * as default from "./value";
+  
+  i Astro generates the component's default export from the component template.
+  
+  i Remove this export or expose the value through a named export.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:5:10 lint/nursery/noAstroExportsFromComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro components cannot define a runtime default export.
+  
+    3 │ export default value;
+    4 │ export { value as default };
+  > 5 │ export { default } from "./value";
+      │          ^^^^^^^
+    6 │ export * as default from "./value";
+    7 │ ---
+  
+  i Astro generates the component's default export from the component template.
+  
+  i Remove this export or expose the value through a named export.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:6:13 lint/nursery/noAstroExportsFromComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro components cannot define a runtime default export.
+  
+    4 │ export { value as default };
+    5 │ export { default } from "./value";
+  > 6 │ export * as default from "./value";
+      │             ^^^^^^^
+    7 │ ---
+    8 │ 
+  
+  i Astro generates the component's default export from the component template.
+  
+  i Remove this export or expose the value through a named export.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

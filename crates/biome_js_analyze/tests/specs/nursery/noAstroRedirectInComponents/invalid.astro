@@ -1,0 +1,5 @@
+---
+// should generate diagnostics
+if (!Astro.locals.user) return Astro.redirect("/login");
+Astro["redirect"]("/other");
+---

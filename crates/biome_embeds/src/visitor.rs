@@ -1,6 +1,8 @@
+use crate::astro::collect_astro_data;
 use crate::bindings::EmbeddedBinding;
 use crate::components::collect_embedded_elements;
 use crate::data::{EmbeddedData, VueDirectiveDeclarations};
+use crate::imports::collect_static_imports;
 use crate::references::{EmbeddedTypeReference, EmbeddedValueReference};
 use biome_db::Source;
 use biome_html_syntax::{
@@ -76,6 +78,20 @@ pub fn collect_embedded_data<'a>(
             .map_or_else(Vec::new, build_type_references),
         collected_bindings.vue_directive_declarations,
         collect_embedded_elements(host_source, host_parse),
+        collect_static_imports(snippets.iter().map(|snippet| {
+            (
+                snippet.parse,
+                snippet.file_source,
+                snippet.content_range.start(),
+            )
+        })),
+        collect_astro_data(snippets.iter().map(|snippet| {
+            (
+                snippet.parse,
+                snippet.file_source,
+                snippet.content_range.start(),
+            )
+        })),
     )
 }
 

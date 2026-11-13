@@ -1,0 +1,5 @@
+---
+// should generate diagnostics
+const posts = ["first"];
+export const getStaticPaths = (() => posts.map(post => ({ params: { post } }))) satisfies GetStaticPaths;
+---

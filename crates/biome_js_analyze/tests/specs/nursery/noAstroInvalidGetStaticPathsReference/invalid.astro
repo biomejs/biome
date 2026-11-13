@@ -1,0 +1,11 @@
+---
+// should generate diagnostics
+const posts = ["日本語"];
+const slug = "post";
+function helper() { return []; }
+export async function getStaticPaths() {
+  const nested = () => posts.map(post => ({ params: { [slug]: post } }));
+  helper();
+  return nested();
+}
+---

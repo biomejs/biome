@@ -1,0 +1,92 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: malformed.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+<script is:inline data-value=>import "./incomplete.js";</script>
+<script is:>import "./incomplete.js";</script>
+<script define:>import "./incomplete.js";</script>
+<script is:inline type=>import "./incomplete.js";</script>
+<script is:inline nonce={}>import "./incomplete.js";</script>
+<script define:vars={}>import "./incomplete.js";</script>
+
+```
+
+# Diagnostics
+```
+malformed.astro:2:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an initializer but instead found '>'.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <script is:inline data-value=>import "./incomplete.js";</script>
+      │                              ^
+    3 │ <script is:>import "./incomplete.js";</script>
+    4 │ <script define:>import "./incomplete.js";</script>
+  
+  i Expected an initializer here.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <script is:inline data-value=>import "./incomplete.js";</script>
+      │                              ^
+    3 │ <script is:>import "./incomplete.js";</script>
+    4 │ <script define:>import "./incomplete.js";</script>
+  
+
+```
+
+```
+malformed.astro:3:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a directive name after ':'
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script is:inline data-value=>import "./incomplete.js";</script>
+  > 3 │ <script is:>import "./incomplete.js";</script>
+      │            ^
+    4 │ <script define:>import "./incomplete.js";</script>
+    5 │ <script is:inline type=>import "./incomplete.js";</script>
+  
+
+```
+
+```
+malformed.astro:4:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a directive name after ':'
+  
+    2 │ <script is:inline data-value=>import "./incomplete.js";</script>
+    3 │ <script is:>import "./incomplete.js";</script>
+  > 4 │ <script define:>import "./incomplete.js";</script>
+      │                ^
+    5 │ <script is:inline type=>import "./incomplete.js";</script>
+    6 │ <script is:inline nonce={}>import "./incomplete.js";</script>
+  
+
+```
+
+```
+malformed.astro:5:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an initializer but instead found '>'.
+  
+    3 │ <script is:>import "./incomplete.js";</script>
+    4 │ <script define:>import "./incomplete.js";</script>
+  > 5 │ <script is:inline type=>import "./incomplete.js";</script>
+      │                        ^
+    6 │ <script is:inline nonce={}>import "./incomplete.js";</script>
+    7 │ <script define:vars={}>import "./incomplete.js";</script>
+  
+  i Expected an initializer here.
+  
+    3 │ <script is:>import "./incomplete.js";</script>
+    4 │ <script define:>import "./incomplete.js";</script>
+  > 5 │ <script is:inline type=>import "./incomplete.js";</script>
+      │                        ^
+    6 │ <script is:inline nonce={}>import "./incomplete.js";</script>
+    7 │ <script define:vars={}>import "./incomplete.js";</script>
+  
+
+```

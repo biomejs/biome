@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_variable.astro
+---
+# Input
+```astro
+---
+// should generate diagnostics
+const posts = ["first"];
+export const getStaticPaths = (() => posts.map(post => ({ params: { post } }))) satisfies GetStaticPaths;
+---
+
+```
+
+# Diagnostics
+```
+invalid_variable.astro:4:38 lint/nursery/noAstroInvalidGetStaticPathsReference ━━━━━━━━━━━━━━━━━━━━━
+
+  × This frontmatter value is unavailable inside getStaticPaths.
+  
+    2 │ // should generate diagnostics
+    3 │ const posts = ["first"];
+  > 4 │ export const getStaticPaths = (() => posts.map(post => ({ params: { post } }))) satisfies GetStaticPaths;
+      │                                      ^^^^^
+    5 │ ---
+    6 │ 
+  
+  i This value is declared outside the function.
+  
+    1 │ ---
+    2 │ // should generate diagnostics
+  > 3 │ const posts = ["first"];
+      │       ^^^^^
+    4 │ export const getStaticPaths = (() => posts.map(post => ({ params: { post } }))) satisfies GetStaticPaths;
+    5 │ ---
+  
+  i Astro executes getStaticPaths in a separate scope before rendering the component.
+  
+  i Move the declaration inside getStaticPaths or import the value from another module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

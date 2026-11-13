@@ -438,6 +438,42 @@ mod tests {
     use std::{collections::HashMap, str::FromStr};
 
     #[test]
+    fn analyzes_static_imports_for_html_rule() {
+        let mut services_builder = AnalyzerServicesBuilder::from_files(HashMap::new(), false);
+        let code_block = CodeBlock::from_str("astro").expect("valid code block");
+        let code = "---\nimport './frontmatter.js';\n---\n<p>日本語</p>\r\n<script define:vars={{ message: 'Hello' }}>\r\nimport { greet } from './greet.js';\r\nimport './greet.js';\r\n</script>\n<script>import './bundled.js';</script>\n<script type=\"module\">import './module.js';</script>\n<script is:inline>import('./dynamic.js');</script>";
+        let mut writer = DiagnosticConsoleWriter::default();
+
+        RuleCodeAnalyzer {
+            group: "nursery",
+            rule: "noAstroUnbundledImports",
+            rule_language: "html",
+            code_block: &code_block,
+            code,
+            configuration: None,
+            services_builder: &mut services_builder,
+            writer: &mut writer,
+        }
+        .analyze()
+        .unwrap();
+
+        assert!(!writer.has_parse_error);
+        assert_eq!(writer.action_count, 0);
+        assert_eq!(writer.all_diagnostics.len(), 2);
+        for (diagnostic, import) in writer.all_diagnostics.iter().zip([
+            "import { greet } from './greet.js';",
+            "import './greet.js';",
+        ]) {
+            assert_eq!(
+                diagnostic.category().unwrap().name(),
+                "lint/nursery/noAstroUnbundledImports"
+            );
+            let span = diagnostic.location().span.unwrap();
+            assert_eq!(&code[span], import);
+        }
+    }
+
+    #[test]
     fn resolves_relative_context_files_from_absolute_code_blocks() {
         let mut services_builder = AnalyzerServicesBuilder::from_files(
             HashMap::from([("foo.js".to_string(), "export const foo = 1;".to_string())]),
