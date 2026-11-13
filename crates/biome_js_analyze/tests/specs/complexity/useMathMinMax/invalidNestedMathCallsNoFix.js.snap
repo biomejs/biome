@@ -1,0 +1,460 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNestedMathCallsNoFix.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+const a = 1;
+const b = 2;
+
+Math.min(foo(), b) < c ? Math.min(foo(), b) : c;
+Math.min(...values) < c ? Math.min(...values) : c;
+Math.min([...values], b) < c ? Math.min([...values], b) : c;
+Math.min(tag`value`, b) < c ? Math.min(tag`value`, b) : c;
+Math["min"](a, b) < c ? Math["min"](a, b) : c;
+Math?.min(a, b) < c ? Math?.min(a, b) : c;
+Math.min?.(a, b) < c ? Math.min?.(a, b) : c;
+Math.min(a, b) < c ? Math.min(/* keep */ a, b) : c;
+Math.min(a, b) /* condition */ < c ? /* branch */ Math.min(a, b) : c;
+Math.min(a, b) < c
+    ? Math.min(a, b) // keep branch
+    : c;
+Math.min(a, b) // keep condition
+    < c ? Math.min(a, b) : c;
+
+let conversions = 0;
+const object = { valueOf() { return ++conversions; } };
+Math.min(object, 10) < 20 ? Math.min(object, 10) : 20;
+Math.max(object, 10) > 0 ? Math.max(object, 10) : 0;
+Math.min(Math.max(object, 10), 20) < 30 ? Math.min(Math.max(object, 10), 20) : 30;
+
+const alias = object;
+Math.min(alias, 10) < 20 ? Math.min(alias, 10) : 20;
+
+const primitiveHook = { [Symbol.toPrimitive]() { return ++conversions; } };
+Math.min(primitiveHook, 10) < 20 ? Math.min(primitiveHook, 10) : 20;
+
+function unknownArgument(value) {
+    return Math.min(value, 10) < 20 ? Math.min(value, 10) : 20;
+}
+
+let mutable = 1;
+mutable = object;
+Math.min(mutable, 10) < 20 ? Math.min(mutable, 10) : 20;
+
+const forward = later;
+const later = forward;
+Math.min(forward, 10) < 20 ? Math.min(forward, 10) : 20;
+
+function shadowedUndefined(undefined) {
+    return Math.min(undefined, 10) < 20 ? Math.min(undefined, 10) : 20;
+}
+
+```
+
+# Diagnostics
+```
+invalidNestedMathCallsNoFix.js:6:1 lint/complexity/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    4 │ const b = 2;
+    5 │ 
+  > 6 │ Math.min(foo(), b) < c ? Math.min(foo(), b) : c;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ Math.min(...values) < c ? Math.min(...values) : c;
+    8 │ Math.min([...values], b) < c ? Math.min([...values], b) : c;
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Consider using Math.min() instead.
+  
+  i Biome could not provide a fix because it can't guarantee that both arguments don't have side effects.
+  
+
+```
+
+```
+invalidNestedMathCallsNoFix.js:7:1 lint/complexity/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    6 │ Math.min(foo(), b) < c ? Math.min(foo(), b) : c;
+  > 7 │ Math.min(...values) < c ? Math.min(...values) : c;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ Math.min([...values], b) < c ? Math.min([...values], b) : c;
+    9 │ Math.min(tag`value`, b) < c ? Math.min(tag`value`, b) : c;
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Consider using Math.min() instead.
+  
+  i Biome could not provide a fix because it can't guarantee that both arguments don't have side effects.
+  
+
+```
+
+```
+invalidNestedMathCallsNoFix.js:8:1 lint/complexity/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+     6 │ Math.min(foo(), b) < c ? Math.min(foo(), b) : c;
+     7 │ Math.min(...values) < c ? Math.min(...values) : c;
+   > 8 │ Math.min([...values], b) < c ? Math.min([...values], b) : c;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ Math.min(tag`value`, b) < c ? Math.min(tag`value`, b) : c;
+    10 │ Math["min"](a, b) < c ? Math["min"](a, b) : c;
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Consider using Math.min() instead.
+  
+  i Biome could not provide a fix because it can't guarantee that both arguments don't have side effects.
+  
+
+```
+
+```
+invalidNestedMathCallsNoFix.js:9:1 lint/complexity/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+     7 │ Math.min(...values) < c ? Math.min(...values) : c;
+     8 │ Math.min([...values], b) < c ? Math.min([...values], b) : c;
+   > 9 │ Math.min(tag`value`, b) < c ? Math.min(tag`value`, b) : c;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ Math["min"](a, b) < c ? Math["min"](a, b) : c;
+    11 │ Math?.min(a, b) < c ? Math?.min(a, b) : c;
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Consider using Math.min() instead.
+  
+  i Biome could not provide a fix because it can't guarantee that both arguments don't have side effects.
+  
+
+```
+
+```
+invalidNestedMathCallsNoFix.js:10:1 lint/complexity/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+     8 │ Math.min([...values], b) < c ? Math.min([...values], b) : c;
+     9 │ Math.min(tag`value`, b) < c ? Math.min(tag`value`, b) : c;
+  > 10 │ Math["min"](a, b) < c ? Math["min"](a, b) : c;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ Math?.min(a, b) < c ? Math?.min(a, b) : c;
+    12 │ Math.min?.(a, b) < c ? Math.min?.(a, b) : c;
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Consider using Math.min() instead.
+  
+  i Biome could not provide a fix because it can't guarantee that both arguments don't have side effects.
+  
+
+```
+
+```
+invalidNestedMathCallsNoFix.js:11:1 lint/complexity/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+     9 │ Math.min(tag`value`, b) < c ? Math.min(tag`value`, b) : c;
+    10 │ Math["min"](a, b) < c ? Math["min"](a, b) : c;
+  > 11 │ Math?.min(a, b) < c ? Math?.min(a, b) : c;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ Math.min?.(a, b) < c ? Math.min?.(a, b) : c;
+    13 │ Math.min(a, b) < c ? Math.min(/* keep */ a, b) : c;
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Consider using Math.min() instead.
+  
+  i Biome could not provide a fix because it can't guarantee that both arguments don't have side effects.
+  
+
+```
+
+```
+invalidNestedMathCallsNoFix.js:12:1 lint/complexity/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    10 │ Math["min"](a, b) < c ? Math["min"](a, b) : c;
+    11 │ Math?.min(a, b) < c ? Math?.min(a, b) : c;
+  > 12 │ Math.min?.(a, b) < c ? Math.min?.(a, b) : c;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ Math.min(a, b) < c ? Math.min(/* keep */ a, b) : c;
+    14 │ Math.min(a, b) /* condition */ < c ? /* branch */ Math.min(a, b) : c;
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Consider using Math.min() instead.
+  
+  i Biome could not provide a fix because it can't guarantee that both arguments don't have side effects.
+  
+
+```
+
+```
+invalidNestedMathCallsNoFix.js:13:1 lint/complexity/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    11 │ Math?.min(a, b) < c ? Math?.min(a, b) : c;
+    12 │ Math.min?.(a, b) < c ? Math.min?.(a, b) : c;
+  > 13 │ Math.min(a, b) < c ? Math.min(/* keep */ a, b) : c;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ Math.min(a, b) /* condition */ < c ? /* branch */ Math.min(a, b) : c;
+    15 │ Math.min(a, b) < c
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+
+```
+
+```
+invalidNestedMathCallsNoFix.js:14:1 lint/complexity/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    12 │ Math.min?.(a, b) < c ? Math.min?.(a, b) : c;
+    13 │ Math.min(a, b) < c ? Math.min(/* keep */ a, b) : c;
+  > 14 │ Math.min(a, b) /* condition */ < c ? /* branch */ Math.min(a, b) : c;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ Math.min(a, b) < c
+    16 │     ? Math.min(a, b) // keep branch
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+
+```
+
+```
+invalidNestedMathCallsNoFix.js:15:1 lint/complexity/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    13 │ Math.min(a, b) < c ? Math.min(/* keep */ a, b) : c;
+    14 │ Math.min(a, b) /* condition */ < c ? /* branch */ Math.min(a, b) : c;
+  > 15 │ Math.min(a, b) < c
+       │ ^^^^^^^^^^^^^^^^^^
+  > 16 │     ? Math.min(a, b) // keep branch
+  > 17 │     : c;
+       │     ^^^
+    18 │ Math.min(a, b) // keep condition
+    19 │     < c ? Math.min(a, b) : c;
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+
+```
+
+```
+invalidNestedMathCallsNoFix.js:18:1 lint/complexity/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    16 │     ? Math.min(a, b) // keep branch
+    17 │     : c;
+  > 18 │ Math.min(a, b) // keep condition
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 19 │     < c ? Math.min(a, b) : c;
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ let conversions = 0;
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+
+```
+
+```
+invalidNestedMathCallsNoFix.js:23:1 lint/complexity/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    21 │ let conversions = 0;
+    22 │ const object = { valueOf() { return ++conversions; } };
+  > 23 │ Math.min(object, 10) < 20 ? Math.min(object, 10) : 20;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ Math.max(object, 10) > 0 ? Math.max(object, 10) : 0;
+    25 │ Math.min(Math.max(object, 10), 20) < 30 ? Math.min(Math.max(object, 10), 20) : 30;
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Consider using Math.min() instead.
+  
+  i Biome could not provide a fix because it can't guarantee that both arguments don't have side effects.
+  
+
+```
+
+```
+invalidNestedMathCallsNoFix.js:24:1 lint/complexity/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    22 │ const object = { valueOf() { return ++conversions; } };
+    23 │ Math.min(object, 10) < 20 ? Math.min(object, 10) : 20;
+  > 24 │ Math.max(object, 10) > 0 ? Math.max(object, 10) : 0;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ Math.min(Math.max(object, 10), 20) < 30 ? Math.min(Math.max(object, 10), 20) : 30;
+    26 │ 
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i Consider using Math.max() instead.
+  
+  i Biome could not provide a fix because it can't guarantee that both arguments don't have side effects.
+  
+
+```
+
+```
+invalidNestedMathCallsNoFix.js:25:1 lint/complexity/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    23 │ Math.min(object, 10) < 20 ? Math.min(object, 10) : 20;
+    24 │ Math.max(object, 10) > 0 ? Math.max(object, 10) : 0;
+  > 25 │ Math.min(Math.max(object, 10), 20) < 30 ? Math.min(Math.max(object, 10), 20) : 30;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ const alias = object;
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Consider using Math.min() instead.
+  
+  i Biome could not provide a fix because it can't guarantee that both arguments don't have side effects.
+  
+
+```
+
+```
+invalidNestedMathCallsNoFix.js:28:1 lint/complexity/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    27 │ const alias = object;
+  > 28 │ Math.min(alias, 10) < 20 ? Math.min(alias, 10) : 20;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ 
+    30 │ const primitiveHook = { [Symbol.toPrimitive]() { return ++conversions; } };
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Consider using Math.min() instead.
+  
+  i Biome could not provide a fix because it can't guarantee that both arguments don't have side effects.
+  
+
+```
+
+```
+invalidNestedMathCallsNoFix.js:31:1 lint/complexity/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    30 │ const primitiveHook = { [Symbol.toPrimitive]() { return ++conversions; } };
+  > 31 │ Math.min(primitiveHook, 10) < 20 ? Math.min(primitiveHook, 10) : 20;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ 
+    33 │ function unknownArgument(value) {
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Consider using Math.min() instead.
+  
+  i Biome could not provide a fix because it can't guarantee that both arguments don't have side effects.
+  
+
+```
+
+```
+invalidNestedMathCallsNoFix.js:34:12 lint/complexity/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    33 │ function unknownArgument(value) {
+  > 34 │     return Math.min(value, 10) < 20 ? Math.min(value, 10) : 20;
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ }
+    36 │ 
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Consider using Math.min() instead.
+  
+  i Biome could not provide a fix because it can't guarantee that both arguments don't have side effects.
+  
+
+```
+
+```
+invalidNestedMathCallsNoFix.js:39:1 lint/complexity/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    37 │ let mutable = 1;
+    38 │ mutable = object;
+  > 39 │ Math.min(mutable, 10) < 20 ? Math.min(mutable, 10) : 20;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ 
+    41 │ const forward = later;
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Consider using Math.min() instead.
+  
+  i Biome could not provide a fix because it can't guarantee that both arguments don't have side effects.
+  
+
+```
+
+```
+invalidNestedMathCallsNoFix.js:43:1 lint/complexity/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    41 │ const forward = later;
+    42 │ const later = forward;
+  > 43 │ Math.min(forward, 10) < 20 ? Math.min(forward, 10) : 20;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ 
+    45 │ function shadowedUndefined(undefined) {
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Consider using Math.min() instead.
+  
+  i Biome could not provide a fix because it can't guarantee that both arguments don't have side effects.
+  
+
+```
+
+```
+invalidNestedMathCallsNoFix.js:46:12 lint/complexity/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    45 │ function shadowedUndefined(undefined) {
+  > 46 │     return Math.min(undefined, 10) < 20 ? Math.min(undefined, 10) : 20;
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    47 │ }
+    48 │ 
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Consider using Math.min() instead.
+  
+  i Biome could not provide a fix because it can't guarantee that both arguments don't have side effects.
+  
+
+```
