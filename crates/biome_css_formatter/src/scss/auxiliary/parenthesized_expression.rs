@@ -2,6 +2,7 @@ use crate::prelude::*;
 use crate::utils::comment_trivia::has_inline_trailing_comment;
 use crate::utils::scss_include_keyword_value::is_top_level_include_keyword_parenthesized_value;
 use crate::utils::scss_list_layout::has_scss_list_shape;
+use crate::utils::scss_map_layout::allows_forced_scss_expansion;
 use crate::utils::scss_separator_comments::FormatScssSeparatorComments;
 use biome_css_syntax::{
     AnyScssExpression, ScssParenthesizedExpression, ScssParenthesizedExpressionFields,
@@ -64,8 +65,8 @@ impl<'a> ScssParenthesizedExpressionLayout<'a> {
     /// Expands parenthesized map values and include keyword lists.
     ///
     /// `key: (value)` and `2 * ($bar)` stay inline; `key: (a, b)` expands.
-    fn should_expand(&self) -> bool {
-        self.should_expand_map_value()
+    fn should_expand(&self, f: &CssFormatter) -> bool {
+        self.should_expand_map_value(f)
             || self.should_expand_include_value()
             || self.has_nested_include_parentheses()
             || self.has_include_trailing_comment()
@@ -83,8 +84,10 @@ impl<'a> ScssParenthesizedExpressionLayout<'a> {
     /// Expands map values with list or map payloads.
     ///
     /// `key: (value)` stays inline, but `key: (a, b)` and `key: (a: b)` expand.
-    fn should_expand_map_value(&self) -> bool {
-        is_scss_map_outer_parenthesized_value(self.node) && self.has_list_or_map_payload()
+    fn should_expand_map_value(&self, f: &CssFormatter) -> bool {
+        allows_forced_scss_expansion(self.node.syntax(), f)
+            && is_scss_map_outer_parenthesized_value(self.node)
+            && self.has_list_or_map_payload()
     }
 
     /// Expands include keyword values with list or map payloads.
@@ -157,7 +160,7 @@ impl Format<CssFormatContext> for ScssParenthesizedExpressionLayout<'_> {
                 soft_block_indent(&format_args![expression.format(), trailing_comma]),
                 r_paren_token.format()
             ])
-            .should_expand(self.should_expand())]
+            .should_expand(self.should_expand(f))]
         )
     }
 }

@@ -1,0 +1,46 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write base.scss overrides.scss
+```
+
+## `biome.json`
+
+```json
+{
+  "formatter": { "expand": "never" },
+  "overrides": [
+    {
+      "includes": ["overrides.scss"],
+      "css": { "formatter": { "expand": "always" } }
+    }
+  ]
+}
+```
+
+## `base.scss`
+
+```scss
+$m: (a: 1, b: 2);
+
+```
+
+## `overrides.scss`
+
+```scss
+$m: (
+	a: 1,
+	b: 2,
+);
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 2 files in <TIME>. Fixed 2 files.
+```

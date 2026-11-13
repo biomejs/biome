@@ -1,0 +1,38 @@
+$point: (x: 1, y: 2);
+
+$inks: (
+	"nav": (--be-nav, rgb(0, 0, 229)),
+	"text": (--be-text, rgb(0, 0, 0)),
+	"highlight": (--be-highlight, rgb(255, 255, 0)),
+	"window-tab-active": (--be-window-tab-active, rgb(255, 203, 0)),
+	"window-tab-inactive": (--be-window-tab-inactive, rgb(232, 232, 232)),
+);
+
+$breakpoints: (sm: (width: 576px, margin: 1), md: (width: 672px, margin: 3));
+
+@function be-bps($names) {
+	$out: ();
+	@each $name in $names {
+		$out: map.merge($out, ($name: be-bp($name)));
+	}
+	@return $out;
+}
+
+$single: (key: value);
+
+$collapses: (
+	"nav": (
+		--be-nav,
+		rgb(0, 0, 229),
+	),
+);
+
+$wide-value: (key: (first-very-long-value-name, second-very-long-value-name-here, third, fourth-x));
+
+@include foo($opts: (a: 1, b: 2), $list: (a, b));
+
+@use "x" with ($config: (k: 1, l: 2), $list: (a, b));
+
+@use "y" with ($c: (k: (a, b)));
+
+@include bar((k: (a, b)));

@@ -1,7 +1,8 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
-    DelimiterSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle, TrailingNewline,
+    DelimiterSpacing, Expand, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle,
+    TrailingNewline,
 };
 #[cfg(feature = "cli")]
 use bpaf::Bpaf;
@@ -18,18 +19,22 @@ use serde::{Deserialize, Serialize};
 pub struct CssConfiguration {
     /// CSS parsing options.
     #[cfg_attr(feature = "cli", bpaf(external(css_parser_configuration), optional))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub parser: Option<CssParserConfiguration>,
 
     /// CSS formatter options.
     #[cfg_attr(feature = "cli", bpaf(external(css_formatter_configuration), optional))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub formatter: Option<CssFormatterConfiguration>,
 
     /// CSS linter options.
     #[cfg_attr(feature = "cli", bpaf(external(css_linter_configuration), optional))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub linter: Option<CssLinterConfiguration>,
 
     /// CSS assist options.
     #[cfg_attr(feature = "cli", bpaf(external(css_assist_configuration), optional))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub assist: Option<CssAssistConfiguration>,
 
     /// Stylesheets that apply to every page without an import, such as the stylesheets that a
@@ -160,6 +165,18 @@ pub struct CssFormatterConfiguration {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub delimiter_spacing: Option<DelimiterSpacing>,
+
+    /// Controls whether SCSS maps, and lists used as map values, are expanded onto multiple lines.
+    /// `auto` and `always` expand them regardless of width, matching Prettier. `never` keeps them
+    /// on one line when they fit within the line width.
+    ///
+    /// If unset, inherits the global expansion setting.
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("css-formatter-expand"), argument("auto|always|never"), optional)
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub expand: Option<Expand>,
 
     /// Whether to add a trailing newline at the end of the file. If unset, inherits the global
     /// trailing newline setting.

@@ -3,10 +3,11 @@ use crate::utils::scss_closing_comments::{
     ClosingCommentSpacing, owns_include_map_closing_comments, write_include_closing_comments,
 };
 use biome_css_syntax::{
-    AnyScssExpressionItem, ScssEachHeader, ScssEachValueList, ScssExpression, ScssMapExpression,
-    ScssMapExpressionFields, is_in_scss_include_arguments, is_scss_map_key, single_expression_item,
+    AnyScssExpressionItem, CssSyntaxNode, ScssEachHeader, ScssEachValueList, ScssExpression,
+    ScssMapExpression, ScssMapExpressionFields, ScssModuleConfiguration,
+    is_in_scss_include_arguments, is_scss_map_key, single_expression_item,
 };
-use biome_formatter::{CstFormatContext, format_args, write};
+use biome_formatter::{CstFormatContext, Expand, format_args, write};
 use biome_rowan::AstSeparatedList;
 
 /// Shared map layout policy for `ScssMapExpression`.
@@ -114,14 +115,16 @@ impl<'a> ScssMapLayout<'a> {
                 soft_line_break(),
                 r_paren_token.format()
             ])
-            .should_expand(self.should_expand())]
+            .should_expand(self.should_expand(f))]
         )
     }
 
-    fn should_expand(&self) -> bool {
+    fn should_expand(&self, f: &CssFormatter) -> bool {
         // Prettier keeps direct `@each` maps inline when they fit:
         // `@each $k, $v in (a: 1, b: 2)`.
-        !is_direct_each_value_map(self.node) && should_expand_map_expression(self.node)
+        allows_forced_scss_expansion(self.node.syntax(), f)
+            && !is_direct_each_value_map(self.node)
+            && should_expand_map_expression(self.node)
     }
 
     fn write_include_trailing_comma(
@@ -152,6 +155,17 @@ impl<'a> ScssMapLayout<'a> {
 
         write_include_closing_comments(self.node.syntax(), ClosingCommentSpacing::SoftLineBreak, f)
     }
+}
+
+/// Returns `false` when `expand: never` lets a map or map-entry value stay
+/// inline. `@include` arguments and `@use ... with (...)` values ignore the
+/// option and keep Prettier's forced expansion.
+pub(crate) fn allows_forced_scss_expansion(node: &CssSyntaxNode, f: &CssFormatter) -> bool {
+    f.options().expand() != Expand::Never
+        || is_in_scss_include_arguments(node)
+        || node
+            .ancestors()
+            .any(|ancestor| ScssModuleConfiguration::can_cast(ancestor.kind()))
 }
 
 /// Returns `true` for the direct map value in `@each $name in (a: b)`.
