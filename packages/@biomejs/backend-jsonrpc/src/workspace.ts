@@ -3913,6 +3913,11 @@ export interface Nursery {
 	 */
 	noYamlBooleanKeys?: NoYamlBooleanKeysConfiguration;
 	/**
+	 * Disallow keys without a value in YAML maps.
+	 * See https://biomejs.dev/linter/rules/no-yaml-empty-map-values
+	 */
+	noYamlEmptyMapValues?: NoYamlEmptyMapValuesConfiguration;
+	/**
 	 * Disallow number literals with zero fractions or dangling dots.
 	 * See https://biomejs.dev/linter/rules/no-zero-fractions
 	 */
@@ -7262,6 +7267,9 @@ export type NoXorAsExponentiationConfiguration =
 export type NoYamlBooleanKeysConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoYamlBooleanKeysOptions;
+export type NoYamlEmptyMapValuesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoYamlEmptyMapValuesOptions;
 export type NoZeroFractionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoZeroFractionsOptions;
@@ -10689,6 +10697,10 @@ export interface RuleWithNoYamlBooleanKeysOptions {
 	level: RulePlainConfiguration;
 	options?: NoYamlBooleanKeysOptions;
 }
+export interface RuleWithNoYamlEmptyMapValuesOptions {
+	level: RulePlainConfiguration;
+	options?: NoYamlEmptyMapValuesOptions;
+}
 export interface RuleWithNoZeroFractionsOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -13882,6 +13894,7 @@ export type NoVueVTextVHtmlOnComponentOptions = {};
 export type NoVueWatchAfterAwaitOptions = {};
 export type NoXorAsExponentiationOptions = {};
 export type NoYamlBooleanKeysOptions = {};
+export type NoYamlEmptyMapValuesOptions = {};
 export type NoZeroFractionsOptions = {};
 export type NoZeroLengthUnitOptions = {};
 export type UseAccessorPairsOptions = {};
@@ -16059,6 +16072,7 @@ export type Category =
 	| "lint/nursery/noVueWatchAfterAwait"
 	| "lint/nursery/noXorAsExponentiation"
 	| "lint/nursery/noYamlBooleanKeys"
+	| "lint/nursery/noYamlEmptyMapValues"
 	| "lint/nursery/noZeroFractions"
 	| "lint/nursery/noZeroLengthUnit"
 	| "lint/nursery/useAccessorPairs"
