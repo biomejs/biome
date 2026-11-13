@@ -8,6 +8,8 @@ deliberate choices below.
 
 How narrowing is implemented, and how to extend it, is described in the flow
 section of [`CONTRIBUTING.md`](./CONTRIBUTING.md#flow-sensitive-expression-reads).
+The remaining work is tracked in
+[#13147](https://github.com/biomejs/biome/issues/13147).
 
 ## Terms
 
