@@ -344,6 +344,7 @@ pub mod no_tanstack_query_rest_destructuring;
 pub mod no_tanstack_query_void_query_fn;
 pub mod no_template_curly_in_string;
 pub mod no_ternary;
+pub mod no_test_globals;
 pub mod no_then_property;
 pub mod no_this_in_static;
 pub mod no_this_outside_of_class;
