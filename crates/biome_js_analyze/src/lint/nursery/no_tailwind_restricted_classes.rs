@@ -11,7 +11,7 @@ use biome_tailwind_logic::no_tailwind_restricted_classes::{
     ClassStringText, RestrictedClass, restricted_classes,
 };
 use biome_tailwind_logic::syntax_service::TailwindSyntax;
-use biome_tailwind_logic::use_tailwind_sorted_classes::TailwindDesignSystem;
+use biome_tailwind_logic::tailwind_v4::TailwindDesignSystem;
 use std::sync::Arc;
 
 declare_lint_rule! {
