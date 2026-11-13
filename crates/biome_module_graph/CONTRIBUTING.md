@@ -74,16 +74,30 @@ one of its own variables. Its parts live in `src/js_module_info/flow/`:
 - `scanner.rs` selects roots while the module visitor walks the syntax tree,
   so collection never walks the whole module again. A root is selected when
   its own code contains a condition or, in a module with an `asserts`
-  annotation, a standalone call. The scanner rejects a root whose own syntax
-  the builder does not support and a root over its node or depth limit.
-  Declaration files (`.d.ts`, `.d.mts`, `.d.cts`, in any letter case) contain
-  no code that runs, so the visitor does not look for roots in them.
+  annotation, a standalone call. The scanner rejects a root when its own code
+  contains a `with` statement or bogus syntax, and a root over its node or
+  depth limit. Declaration files (`.d.ts`, `.d.mts`, `.d.cts`, in any letter
+  case) contain no code that runs, so the visitor does not look for roots in
+  them.
 - `builder.rs` builds the graph of one selected root from start, join, and
   condition nodes. It records the incoming flow point of every reachable read
   and, for each condition node, the variables its guard may narrow. It skips
   class members: methods, accessors, constructors, and static blocks are roots
   of their own, and TypeScript analyzes a class field that has an initializer
-  apart from the code around the class.
+  apart from the code around the class. It also skips `declare` statements,
+  which never run.
+- The builder models the control flow of blocks, `if`, `while`, `do...while`,
+  `for`, labeled statements, `break`, `continue`, `return`, and `throw`. Any
+  other statement, such as `switch`, `try`, `for...in`, or `for...of`, is an
+  opaque region. The builder evaluates the expressions of a region in source
+  order from the flow point before it, without modelling the branches and
+  jumps inside it, and the next statement continues from the result. For each
+  `break` or `continue` inside the region that targets a statement outside it,
+  the builder adds the point before the region as a predecessor of that
+  target, once per target. Regions keep narrowing sound because only variables
+  that are never written narrow: the state before a region is never narrower
+  than the state at any point inside or after it. Replacing a region with a
+  model of its statement only makes narrowing more precise.
 - `guards.rs` decomposes every condition into guards on semantic bindings,
   combined the way `!`, `&&`, and `||` combine them. For example,
   `typeof value === "string"` becomes a runtime test of `value`. A call to a
