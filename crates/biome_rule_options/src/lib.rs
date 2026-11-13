@@ -760,6 +760,7 @@ pub mod use_vue_consistent_event_hyphenation;
 pub mod use_vue_consistent_prop_name_casing;
 pub mod use_vue_consistent_v_bind_style;
 pub mod use_vue_consistent_v_for_delimiter;
+pub mod use_vue_consistent_v_on_handler_style;
 pub mod use_vue_consistent_v_on_style;
 pub mod use_vue_consistent_v_slot_style;
 pub mod use_vue_default_export;

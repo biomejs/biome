@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-inline.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <button @click="foo()" />
+  <button @click="foo($event)" />
+  <button @click="count++" />
+  <button @click="foo(); bar()" />
+  <button @click="form.submit" />
+</template>
+
+```

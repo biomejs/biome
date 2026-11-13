@@ -4348,6 +4348,11 @@ export interface Nursery {
 	 */
 	useVueConsistentVForDelimiter?: UseVueConsistentVForDelimiterConfiguration;
 	/**
+	 * Enforce a consistent style for event handlers in Vue v-on directives.
+	 * See https://biomejs.dev/linter/rules/use-vue-consistent-v-on-handler-style
+	 */
+	useVueConsistentVOnHandlerStyle?: UseVueConsistentVOnHandlerStyleConfiguration;
+	/**
 	 * Enforce a consistent style for v-slot in Vue templates.
 	 * See https://biomejs.dev/linter/rules/use-vue-consistent-v-slot-style
 	 */
@@ -7513,6 +7518,9 @@ export type UseVueConsistentPropNameCasingConfiguration =
 export type UseVueConsistentVForDelimiterConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentVForDelimiterOptions;
+export type UseVueConsistentVOnHandlerStyleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueConsistentVOnHandlerStyleOptions;
 export type UseVueConsistentVSlotStyleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentVSlotStyleOptions;
@@ -11189,6 +11197,14 @@ export interface RuleWithUseVueConsistentVForDelimiterOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentVForDelimiterOptions;
 }
+export interface RuleWithUseVueConsistentVOnHandlerStyleOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueConsistentVOnHandlerStyleOptions;
+}
 export interface RuleWithUseVueConsistentVSlotStyleOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -14212,6 +14228,13 @@ export interface UseVueConsistentVForDelimiterOptions {
 	 */
 	delimiter?: VueVForDelimiter;
 }
+export interface UseVueConsistentVOnHandlerStyleOptions {
+	/**
+	 * The handler style to enforce in `v-on` directives.
+	 * If omitted, `"methodOrInlineFunction"` is used.
+	 */
+	style?: VueVOnHandlerStyle;
+}
 export interface UseVueConsistentVSlotStyleOptions {
 	/**
 	 * Preferred style for the default slot when `v-slot` is placed directly on a component,
@@ -15290,6 +15313,14 @@ export type EventHyphenation = "always" | "never";
 export type PropNameCasing = "camelCase" | "snake_case";
 export type VueVForDelimiter = "in" | "of";
 /**
+ * A style of event handler in a `v-on` directive.
+ */
+export type VueVOnHandlerStyle =
+	| "methodOrInlineFunction"
+	| "methodOrInline"
+	| "inlineFunction"
+	| "inline";
+/**
  * How a default slot is written.
  */
 export type VueSlotStyle = "shorthand" | "longhand" | "v-slot";
@@ -16119,6 +16150,7 @@ export type Category =
 	| "lint/nursery/useVueConsistentEventHyphenation"
 	| "lint/nursery/useVueConsistentPropNameCasing"
 	| "lint/nursery/useVueConsistentVForDelimiter"
+	| "lint/nursery/useVueConsistentVOnHandlerStyle"
 	| "lint/nursery/useVueConsistentVSlotStyle"
 	| "lint/nursery/useVueDefaultExport"
 	| "lint/nursery/useVueDefaultProp"
