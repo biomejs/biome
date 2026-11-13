@@ -1,0 +1,15 @@
+// should not generate diagnostics
+// TypeScript keeps `string` and `bigint` unchanged when a falsy test fails to
+// exclude them, so the nested tests are not constant.
+
+function emptyString(value: string) {
+	if (!value) {
+		if (value) {}
+	}
+}
+
+function zeroBigint(value: bigint) {
+	if (!value) {
+		if (value) {}
+	}
+}

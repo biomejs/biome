@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAssertionWithoutAnnotation.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// TypeScript ignores assertion functions declared as variables without a type
+// annotation (TS2775), so `value` keeps its declared type after the call.
+const assertString = (value: unknown): asserts value is string => {
+	if (typeof value !== "string") {
+		throw new Error();
+	}
+};
+
+function describe(value: string | object) {
+	assertString(value);
+	return `${value}`;
+}
+
+```
+
+# Diagnostics
+```
+invalidAssertionWithoutAnnotation.ts:12:12 lint/nursery/noBaseToString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This expression may use the default object stringification format, such as [object Object], when stringified.
+  
+    10 │ function describe(value: string | object) {
+    11 │ 	assertString(value);
+  > 12 │ 	return `${value}`;
+       │ 	          ^^^^^
+    13 │ }
+    14 │ 
+  
+  i Stringify a primitive value, define a custom stringification method, or serialize the object explicitly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
