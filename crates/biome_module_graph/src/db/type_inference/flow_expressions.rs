@@ -247,7 +247,10 @@ impl<'db> ResolutionCtx<'db, '_> {
         false
     }
 
-    fn flow_operand(&self, expression: &AnyJsExpression) -> Option<TypeData<'db>> {
+    fn flow_operand(&mut self, expression: &AnyJsExpression) -> Option<TypeData<'db>> {
+        if self.evaluates_flow_locally() {
+            return self.local_flow_expression_type(expression.range());
+        }
         infer_flow_expression_type(
             self.db,
             ExpressionTypeInput::new(self.db, self.module, expression.range()),

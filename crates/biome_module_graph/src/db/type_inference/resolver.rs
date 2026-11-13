@@ -16,7 +16,10 @@
 //! evaluator, which keeps the declaration graph intact across module
 //! boundaries without recursing through it on the Rust stack.
 
-use super::{BindingTypeData, InferredModuleTypes, globals::global_type, lookup::MemberLookupMode};
+use super::{
+    BindingTypeData, InferredModuleTypes, flow::LocalFlow, globals::global_type,
+    lookup::MemberLookupMode,
+};
 use crate::db::queries::{
     ExpressionTypeInput, LocalTypeInput, infer_flow_expression_type, infer_local_type,
     infer_module_types, infer_module_types_from_tables, inference_module_sccs,
@@ -247,6 +250,9 @@ pub(in crate::db) struct ResolutionCtx<'db, 'a> {
     /// often repeat the same lookup many times in one module.
     pub(in crate::db::type_inference) member_lookups:
         FxHashMap<(InferredTypeData<'db>, Text, MemberLookupMode), Option<InferredTypeData<'db>>>,
+    /// Flow results this context evaluates itself, or `None` when flow
+    /// candidates go through the flow queries.
+    pub(in crate::db::type_inference) local_flow: Option<Box<LocalFlow<'db>>>,
 }
 
 pub(in crate::db) fn resolve_raw_types<'db>(
@@ -261,14 +267,24 @@ pub(in crate::db) fn resolve_raw_types<'db>(
         .map(|index| ctx.resolve_raw_type_id(TypeId::new(index)))
         .collect();
 
+    // Flow queries resolve in a fresh context the binding and operand types
+    // that this context has just resolved. On-demand resolution reaches the
+    // same types either way, so it evaluates flow here; the other modes read
+    // imports differently from the flow queries and keep using them.
+    let evaluates_flow_locally = import_resolution.is_on_demand();
+    if evaluates_flow_locally {
+        ctx.evaluate_flow_locally();
+    }
     let expressions = js_info
         .raw_expressions
         .iter()
         .map(|(range, reference)| {
-            let ty = if js_info.flow.is_candidate(*range) {
-                infer_flow_expression_type(db, ExpressionTypeInput::new(db, module, *range))
-            } else {
+            let ty = if !js_info.flow.is_candidate(*range) {
                 None
+            } else if evaluates_flow_locally {
+                ctx.local_flow_expression_type(*range)
+            } else {
+                infer_flow_expression_type(db, ExpressionTypeInput::new(db, module, *range))
             };
             (*range, ty.unwrap_or_else(|| ctx.resolve(reference)))
         })
@@ -327,6 +343,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
             mapped_types: FxHashMap::default(),
             in_progress_reads: Cell::new(0),
             member_lookups: FxHashMap::default(),
+            local_flow: None,
         }
     }
 

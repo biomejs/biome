@@ -126,6 +126,9 @@ pub(crate) fn infer_flow_binding_baseline<'db>(
 /// Solves one binding at every point where an execution root reads it, so
 /// reads at different points share one walk over the root's flow.
 ///
+/// The key carries the type that narrowing starts from, so reads share the
+/// walk only when they start from the same type.
+///
 /// Returns each read point that collection recorded for the binding, sorted
 /// by point, with the binding's type there. The type is `never` at a read
 /// that no path reaches.
@@ -158,20 +161,22 @@ pub(crate) fn infer_flow_binding_states<'db>(
     )
 }
 
-/// Refines one binding at a collected flow point, shared by its reads there.
+/// Refines one binding at a collected flow point, shared by its reads there
+/// that start from the same type.
 ///
 /// Takes the binding's type at the point from [`infer_flow_binding_states`],
 /// or solves the point on its own when that query has no result.
 ///
 /// Returns `None` for unavailable roots or points, a binding whose type no
-/// test can change, or an unchanged type. Cycles and incomplete flow evaluation
-/// return an `Unknown` override rather than allowing the raw lookup to take over.
+/// test can change, or an unchanged type. A starting type of `Unknown`, cycles,
+/// and incomplete flow evaluation return an `Unknown` override rather than
+/// allowing the raw lookup to take over.
 #[salsa::tracked(returns(copy), cycle_result=infer_flow_binding_type_cycle_result)]
 pub(crate) fn infer_flow_binding_type<'db>(
     db: &'db dyn ModuleDb,
     input: FlowBindingTypeInput<'db>,
 ) -> Option<InferredTypeData<'db>> {
-    let binding = input.binding(db);
+    let binding = input.states(db).binding(db);
     let module = binding.module(db);
     execute_query(
         TypeInferenceQueryKind::Lookups,
