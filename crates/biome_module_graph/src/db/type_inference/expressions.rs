@@ -3130,15 +3130,18 @@ impl<'db> ResolutionCtx<'db, '_> {
     ) -> FilterAction<'db> {
         match subset {
             ConditionalSubset::Falsy => match ty {
+                // `0n`, `false`, and `""` are the only falsy values of their
+                // types. `number` stays broad because `-0` and `NaN` are falsy
+                // as well as `0`.
                 InferredTypeData::BigInt => FilterAction::Mapped(self.bigint_literal("0n")),
                 InferredTypeData::Boolean => FilterAction::Mapped(self.boolean_literal(false)),
-                InferredTypeData::Number => FilterAction::Mapped(self.number_literal("0")),
                 InferredTypeData::String => FilterAction::Mapped(self.string_literal("")),
                 InferredTypeData::Unknown
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
                 | InferredTypeData::GlobalLocal(_)
                 | InferredTypeData::Null
+                | InferredTypeData::Number
                 | InferredTypeData::Symbol
                 | InferredTypeData::Undefined
                 | InferredTypeData::Conditional
@@ -3255,13 +3258,6 @@ impl<'db> ResolutionCtx<'db, '_> {
         InferredTypeData::Literal(InferredInternedLiteral::new(
             self.db,
             InferredLiteral::Boolean(value.into()),
-        ))
-    }
-
-    fn number_literal(&self, value: &'static str) -> InferredTypeData<'db> {
-        InferredTypeData::Literal(InferredInternedLiteral::new(
-            self.db,
-            InferredLiteral::Number(NumberLiteral::new(Text::new_static(value))),
         ))
     }
 
