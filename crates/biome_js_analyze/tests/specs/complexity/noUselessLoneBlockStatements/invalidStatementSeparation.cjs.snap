@@ -1,0 +1,252 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidStatementSeparation.cjs
+---
+# Input
+```cjs
+function sameLine() {
+	{ console.log("a") } console.log("b")
+}
+
+function nextLineStartsWithParenthesis() {
+	{ a() }
+	(b || c).d()
+}
+
+function previousStatementWithoutSemicolon() {
+	a()
+	{ [b, c].forEach(d) }
+}
+
+function emptyBlockBetweenStatements() {
+	a()
+	{}
+	[b, c].forEach(d)
+}
+
+function nestedStatement() {
+	{ if (a) b() } c()
+}
+
+function trailingComment() {
+	{ a() /* comment */ } b()
+}
+
+function alreadyTerminated() {
+	{ a(); } b()
+}
+
+function endsWithBlock() {
+	{ if (a) {} } b()
+}
+
+```
+
+# Diagnostics
+```
+invalidStatementSeparation.cjs:2:2 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  i This block statement doesn't serve any purpose and can be safely removed.
+  
+    1 │ function sameLine() {
+  > 2 │ 	{ console.log("a") } console.log("b")
+      │ 	^^^^^^^^^^^^^^^^^^^^
+    3 │ }
+    4 │ 
+  
+  i Standalone block statements without any block-level declarations are redundant in JavaScript and can be removed to simplify the code.
+  
+  i Safe fix: Remove redundant block.
+  
+     1    │ - function·sameLine()·{
+     2    │ - → {·console.log("a")·}·console.log("b")
+        1 │ + function·sameLine()·{console.log("a");·console.log("b")
+     3  2 │   }
+     4  3 │   
+  
+
+```
+
+```
+invalidStatementSeparation.cjs:6:2 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  i This block statement doesn't serve any purpose and can be safely removed.
+  
+    5 │ function nextLineStartsWithParenthesis() {
+  > 6 │ 	{ a() }
+      │ 	^^^^^^^
+    7 │ 	(b || c).d()
+    8 │ }
+  
+  i Standalone block statements without any block-level declarations are redundant in JavaScript and can be removed to simplify the code.
+  
+  i Safe fix: Remove redundant block.
+  
+     3  3 │   }
+     4  4 │   
+     5    │ - function·nextLineStartsWithParenthesis()·{
+     6    │ - → {·a()·}
+        5 │ + function·nextLineStartsWithParenthesis()·{a();·
+     7  6 │     (b || c).d()
+     8  7 │   }
+  
+
+```
+
+```
+invalidStatementSeparation.cjs:12:2 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  i This block statement doesn't serve any purpose and can be safely removed.
+  
+    10 │ function previousStatementWithoutSemicolon() {
+    11 │ 	a()
+  > 12 │ 	{ [b, c].forEach(d) }
+       │ 	^^^^^^^^^^^^^^^^^^^^^
+    13 │ }
+    14 │ 
+  
+  i Standalone block statements without any block-level declarations are redundant in JavaScript and can be removed to simplify the code.
+  
+  i Safe fix: Remove redundant block.
+  
+     9  9 │   
+    10 10 │   function previousStatementWithoutSemicolon() {
+    11    │ - → a()
+    12    │ - → {·[b,·c].forEach(d)·}
+       11 │ + → a();[b,·c].forEach(d)·
+    13 12 │   }
+    14 13 │   
+  
+
+```
+
+```
+invalidStatementSeparation.cjs:17:2 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  i This block statement doesn't serve any purpose and can be safely removed.
+  
+    15 │ function emptyBlockBetweenStatements() {
+    16 │ 	a()
+  > 17 │ 	{}
+       │ 	^^
+    18 │ 	[b, c].forEach(d)
+    19 │ }
+  
+  i Standalone block statements without any block-level declarations are redundant in JavaScript and can be removed to simplify the code.
+  
+  i Safe fix: Remove redundant block.
+  
+    14 14 │   
+    15 15 │   function emptyBlockBetweenStatements() {
+    16    │ - → a()
+    17    │ - → {}
+       16 │ + → a();
+    18 17 │     [b, c].forEach(d)
+    19 18 │   }
+  
+
+```
+
+```
+invalidStatementSeparation.cjs:22:2 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  i This block statement doesn't serve any purpose and can be safely removed.
+  
+    21 │ function nestedStatement() {
+  > 22 │ 	{ if (a) b() } c()
+       │ 	^^^^^^^^^^^^^^
+    23 │ }
+    24 │ 
+  
+  i Standalone block statements without any block-level declarations are redundant in JavaScript and can be removed to simplify the code.
+  
+  i Safe fix: Remove redundant block.
+  
+    19 19 │   }
+    20 20 │   
+    21    │ - function·nestedStatement()·{
+    22    │ - → {·if·(a)·b()·}·c()
+       21 │ + function·nestedStatement()·{if·(a)·b();·c()
+    23 22 │   }
+    24 23 │   
+  
+
+```
+
+```
+invalidStatementSeparation.cjs:26:2 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  i This block statement doesn't serve any purpose and can be safely removed.
+  
+    25 │ function trailingComment() {
+  > 26 │ 	{ a() /* comment */ } b()
+       │ 	^^^^^^^^^^^^^^^^^^^^^
+    27 │ }
+    28 │ 
+  
+  i Standalone block statements without any block-level declarations are redundant in JavaScript and can be removed to simplify the code.
+  
+  i Safe fix: Remove redundant block.
+  
+    23 23 │   }
+    24 24 │   
+    25    │ - function·trailingComment()·{
+    26    │ - → {·a()·/*·comment·*/·}·b()
+       25 │ + function·trailingComment()·{a();·/*·comment·*/·b()
+    27 26 │   }
+    28 27 │   
+  
+
+```
+
+```
+invalidStatementSeparation.cjs:30:2 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  i This block statement doesn't serve any purpose and can be safely removed.
+  
+    29 │ function alreadyTerminated() {
+  > 30 │ 	{ a(); } b()
+       │ 	^^^^^^^^
+    31 │ }
+    32 │ 
+  
+  i Standalone block statements without any block-level declarations are redundant in JavaScript and can be removed to simplify the code.
+  
+  i Safe fix: Remove redundant block.
+  
+    27 27 │   }
+    28 28 │   
+    29    │ - function·alreadyTerminated()·{
+    30    │ - → {·a();·}·b()
+       29 │ + function·alreadyTerminated()·{a();·b()
+    31 30 │   }
+    32 31 │   
+  
+
+```
+
+```
+invalidStatementSeparation.cjs:34:2 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  i This block statement doesn't serve any purpose and can be safely removed.
+  
+    33 │ function endsWithBlock() {
+  > 34 │ 	{ if (a) {} } b()
+       │ 	^^^^^^^^^^^^^
+    35 │ }
+    36 │ 
+  
+  i Standalone block statements without any block-level declarations are redundant in JavaScript and can be removed to simplify the code.
+  
+  i Safe fix: Remove redundant block.
+  
+    31 31 │   }
+    32 32 │   
+    33    │ - function·endsWithBlock()·{
+    34    │ - → {·if·(a)·{}·}·b()
+       33 │ + function·endsWithBlock()·{if·(a)·{}·b()
+    35 34 │   }
+    36 35 │   
+  
+
+```
