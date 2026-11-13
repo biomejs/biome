@@ -49,7 +49,15 @@ use std::{
 // handles before recursion, so the remaining depth comes from structural types
 // nested within one declaration.
 pub(super) const MAX_RAW_TYPE_RESOLUTION_DEPTH: usize = 64;
-pub(super) const MAX_ON_DEMAND_IMPORT_DEPTH: u8 = 128;
+
+/// Number of imports that one on-demand lookup follows before it resolves the
+/// next import from complete module tables, inferred bottom-up.
+///
+/// Imports within the active import cycle do not count. The limit guards Rust
+/// stack recursion, because each followed import nests another lookup query.
+/// Debug builds use a lower limit because unoptimized code uses more stack for
+/// each nested query.
+pub const MAX_ON_DEMAND_IMPORT_DEPTH: u8 = if cfg!(debug_assertions) { 64 } else { 128 };
 const MAX_INFERRED_EXPRESSION_WRAPPER_STEPS: usize = 64;
 // Bounds nested rest elements followed when spreading a tuple.
 const MAX_SPREAD_ELEMENT_DEPTH: usize = 16;

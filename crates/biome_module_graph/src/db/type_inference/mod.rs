@@ -34,6 +34,7 @@ pub(in crate::db) use promise_classification::{
     PromiseClassification, classify_expression_array_promise, classify_expression_function_return,
     classify_expression_promise,
 };
+pub use resolver::MAX_ON_DEMAND_IMPORT_DEPTH;
 pub(in crate::db) use resolver::{ImportResolution, ResolutionCtx, resolve_raw_types};
 
 /// Type information attached to one binding declaration.

@@ -342,25 +342,34 @@ impl<'db> ResolutionCtx<'db, '_> {
         self.resolve_import_symbol(module, &qualifier.symbol)
     }
 
-    /// Projects `member` through an import without building the full namespace.
+    /// Projects a path of `members` through an import.
     ///
     /// Projection follows namespace imports, namespace re-exports, and bindings
-    /// that alias a namespace. `None` means available graph data and the
-    /// remaining work budget cannot establish such a projection. A supported
-    /// projection whose target cannot be inferred returns `Some(Unknown)`.
+    /// that alias a namespace. A member before the last that names a namespace
+    /// re-export continues the projection without building the namespace of
+    /// its module. For example, the path `core.Strip` projects `Strip` from
+    /// `./core` when the imported module declares
+    /// `export * as core from "./core"`. The member that ends the projection
+    /// resolves like a named import, so a last member that names a namespace
+    /// re-export still builds that namespace.
+    ///
+    /// Returns the projected type and the number of members it consumed, which
+    /// is at least one. The caller resolves the remaining members on that type.
+    /// `None` means available graph data and the remaining work budget cannot
+    /// establish such a projection. When the import names a namespace re-export
+    /// that does not resolve to an indexed module, the projection returns
+    /// `Unknown` and consumes every member.
     pub(super) fn resolve_import_member_with_steps(
         &self,
         qualifier: &TypeImportQualifier,
-        member: &Text,
+        members: &[&Text],
         remaining_projection_steps: usize,
-    ) -> Option<InferredTypeData<'db>> {
+    ) -> Option<(InferredTypeData<'db>, usize)> {
         let remaining_projection_steps = remaining_projection_steps.checked_sub(1)?;
         let module = self.module_for_import_qualifier(qualifier)?;
         let export_name = match &qualifier.symbol {
             ImportSymbol::All => {
-                return Some(
-                    self.resolve_import_symbol(module, &ImportSymbol::Named(member.clone())),
-                );
+                return self.resolve_namespace_members(module, members, remaining_projection_steps);
             }
             ImportSymbol::Default => "default",
             ImportSymbol::Named(name) => name.text(),
@@ -384,14 +393,12 @@ impl<'db> ResolutionCtx<'db, '_> {
                 if reexport.import.symbol != ImportSymbol::All {
                     return None;
                 }
-                Some(
-                    module_for_import(self.db, *module, &reexport.import).map_or(
-                        InferredTypeData::Unknown,
-                        |module| {
-                            self.resolve_import_symbol(module, &ImportSymbol::Named(member.clone()))
-                        },
-                    ),
-                )
+                match module_for_import(self.db, *module, &reexport.import) {
+                    Some(module) => {
+                        self.resolve_namespace_members(module, members, remaining_projection_steps)
+                    }
+                    None => Some((InferredTypeData::Unknown, members.len())),
+                }
             }
             JsOwnExport::Binding(range) => {
                 let reference = js_info.raw_binding_types.get(range)?.clone();
@@ -420,12 +427,67 @@ impl<'db> ResolutionCtx<'db, '_> {
                 };
                 ctx.resolve_namespace_import_member_with_steps(
                     &reference,
-                    member,
+                    members,
                     remaining_projection_steps,
                 )
             }
             JsOwnExport::Type(_) => None,
         }
+    }
+
+    /// Projects `members` from the namespace of `module`.
+    ///
+    /// Each member before the last that names a namespace re-export moves the
+    /// projection to the re-exported module and consumes one step. The first
+    /// other member, the last member, or the member reached when the steps run
+    /// out ends the projection. Returns the type of that member and the number
+    /// of members consumed, or `None` when `members` is empty.
+    fn resolve_namespace_members(
+        &self,
+        mut module: ModuleInfo,
+        members: &[&Text],
+        mut remaining_projection_steps: usize,
+    ) -> Option<(InferredTypeData<'db>, usize)> {
+        let mut consumed = 0;
+        while consumed + 1 < members.len() && remaining_projection_steps > 0 {
+            let Some(target) = self.namespace_reexport_target(module, members[consumed]) else {
+                break;
+            };
+            remaining_projection_steps -= 1;
+            module = target;
+            consumed += 1;
+        }
+        let member = members.get(consumed)?;
+        let ty = self.resolve_import_symbol(module, &ImportSymbol::Named((*member).clone()));
+        Some((ty, consumed + 1))
+    }
+
+    /// Returns the module that `module` re-exports in full under `name`.
+    ///
+    /// For example, `export * as core from "./core"` re-exports `./core` under
+    /// `core`. Returns `None` when the export is missing, ambiguous, or any
+    /// other kind of export, or when its specifier does not resolve to an
+    /// indexed module.
+    fn namespace_reexport_target(&self, module: ModuleInfo, name: &Text) -> Option<ModuleInfo> {
+        let symbol = SymbolFromModuleInfo::new(self.db, name.text().to_string(), module);
+        let ExportOriginResult::Found { module, name } = resolved_export_origin(self.db, symbol)
+        else {
+            return None;
+        };
+        let ModuleInfoKind::Js(js_info) = module.kind(self.db) else {
+            return None;
+        };
+        let Some(
+            JsExport::Own(JsOwnExport::Namespace(reexport))
+            | JsExport::OwnType(JsOwnExport::Namespace(reexport)),
+        ) = js_info.exports.get(name.text())
+        else {
+            return None;
+        };
+        if reexport.import.symbol != ImportSymbol::All {
+            return None;
+        }
+        module_for_import(self.db, *module, &reexport.import)
     }
 
     fn module_for_import_qualifier(&self, qualifier: &TypeImportQualifier) -> Option<ModuleInfo> {

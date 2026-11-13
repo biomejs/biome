@@ -249,7 +249,12 @@ pub(crate) fn infer_binding_type_with_import_budget<'db>(
 ) -> Option<InferredTypeData<'db>> {
     let lookup = input.lookup(db);
     let remaining = input.remaining(db);
-    infer_binding_type_impl(db, lookup, ImportResolution::OnDemand { remaining })
+    execute_query(
+        TypeInferenceQueryKind::Lookups,
+        TypeInferenceProfileOrigin::exact(lookup.module(db), lookup.range(db)),
+        "infer_binding_type_with_import_budget",
+        || infer_binding_type_impl(db, lookup, ImportResolution::OnDemand { remaining }),
+    )
 }
 
 #[salsa::tracked(returns(copy), cycle_result=infer_local_type_with_import_budget_cycle_result)]
@@ -259,7 +264,12 @@ pub(crate) fn infer_local_type_with_import_budget<'db>(
 ) -> Option<InferredTypeData<'db>> {
     let lookup = input.lookup(db);
     let remaining = input.remaining(db);
-    infer_local_type_impl(db, lookup, ImportResolution::OnDemand { remaining })
+    execute_query(
+        TypeInferenceQueryKind::Lookups,
+        TypeInferenceProfileOrigin::document(lookup.module(db)),
+        "infer_local_type_with_import_budget",
+        || infer_local_type_impl(db, lookup, ImportResolution::OnDemand { remaining }),
+    )
 }
 
 fn infer_binding_type_impl<'db>(
