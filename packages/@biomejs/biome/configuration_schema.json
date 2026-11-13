@@ -7251,6 +7251,13 @@
 			]
 		},
 		"NoTernaryOptions": { "type": "object", "additionalProperties": false },
+		"NoTestHooksConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTestHooksOptions" }
+			]
+		},
+		"NoTestHooksOptions": { "type": "object", "additionalProperties": false },
 		"NoThenPropertyConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9932,6 +9939,13 @@
 					"description": "Disallow TanStack Query functions that don't return any data.\nSee https://biomejs.dev/linter/rules/no-tanstack-query-void-query-fn",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoTanstackQueryVoidQueryFnConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noTestHooks": {
+					"description": "Disallow setup and teardown hooks in tests.\nSee https://biomejs.dev/linter/rules/no-test-hooks",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTestHooksConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -15752,6 +15766,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoTernaryOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoTestHooksOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTestHooksOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

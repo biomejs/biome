@@ -8,7 +8,7 @@ use biome_js_syntax::{
 /// `Ord` impl can be used directly to check whether hooks appear in the
 /// correct sequence.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub(crate) enum LifecycleHook {
+pub enum LifecycleHook {
     BeforeAll,
     /// from `node:test`, runs before all tests in a suite.
     Before,
@@ -84,7 +84,7 @@ impl LifecycleHook {
         }
     }
 
-    fn from_name(s: &str) -> Option<Self> {
+    pub(crate) fn from_name(s: &str) -> Option<Self> {
         match s {
             "beforeAll" => Some(Self::BeforeAll),
             "beforeEach" => Some(Self::BeforeEach),
@@ -94,6 +94,12 @@ impl LifecycleHook {
             "after" => Some(Self::After),
             _ => None,
         }
+    }
+}
+
+impl biome_console::fmt::Display for LifecycleHook {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+        fmt.write_str(self.as_str())
     }
 }
 

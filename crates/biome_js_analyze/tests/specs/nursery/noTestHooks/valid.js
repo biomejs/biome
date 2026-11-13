@@ -1,0 +1,19 @@
+/* should not generate diagnostics */
+test("foo");
+
+describe("foo", () => {
+	it("bar");
+});
+
+test("foo", () => {
+	expect(subject.beforeEach()).toBe(true);
+});
+
+foo.beforeEach(() => {});
+this.afterEach(() => {});
+test["beforeEach"](() => {});
+test.before(() => {});
+describe.after(() => {});
+
+const hooks = [beforeEach, afterEach];
+new beforeAll();

@@ -1,0 +1,476 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+beforeAll(() => {});
+beforeEach(() => {});
+afterEach(() => {});
+afterAll(() => {});
+before(() => {});
+after(() => {});
+
+describe("foo", () => {
+	let foo;
+
+	beforeEach(() => {
+		foo = setupFoo();
+	});
+
+	afterEach(() => {
+		foo = null;
+	});
+
+	it("does something", () => {
+		expect(foo.doesSomething()).toBe(true);
+	});
+
+	describe("with bar", () => {
+		let bar;
+
+		beforeEach(() => {
+			bar = setupBar();
+		});
+
+		afterEach(() => {
+			bar = null;
+		});
+
+		it("does something with bar", () => {
+			expect(foo.doesSomething(bar)).toBe(true);
+		});
+	});
+});
+
+test.beforeAll(async () => {});
+test.beforeEach(async ({ page }) => {});
+test.afterEach(async () => {});
+test.afterAll(async () => {});
+it.beforeEach(() => {});
+describe.afterAll(() => {});
+suite.beforeEach(() => {});
+
+(beforeEach)(() => {});
+beforeEach(setup);
+afterAll(async function () {}, 1000);
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The beforeAll hook is not allowed.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ beforeAll(() => {});
+      │ ^^^^^^^^^
+    3 │ beforeEach(() => {});
+    4 │ afterEach(() => {});
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The beforeEach hook is not allowed.
+  
+    1 │ /* should generate diagnostics */
+    2 │ beforeAll(() => {});
+  > 3 │ beforeEach(() => {});
+      │ ^^^^^^^^^^
+    4 │ afterEach(() => {});
+    5 │ afterAll(() => {});
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The afterEach hook is not allowed.
+  
+    2 │ beforeAll(() => {});
+    3 │ beforeEach(() => {});
+  > 4 │ afterEach(() => {});
+      │ ^^^^^^^^^
+    5 │ afterAll(() => {});
+    6 │ before(() => {});
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The afterAll hook is not allowed.
+  
+    3 │ beforeEach(() => {});
+    4 │ afterEach(() => {});
+  > 5 │ afterAll(() => {});
+      │ ^^^^^^^^
+    6 │ before(() => {});
+    7 │ after(() => {});
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The before hook is not allowed.
+  
+    4 │ afterEach(() => {});
+    5 │ afterAll(() => {});
+  > 6 │ before(() => {});
+      │ ^^^^^^
+    7 │ after(() => {});
+    8 │ 
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The after hook is not allowed.
+  
+    5 │ afterAll(() => {});
+    6 │ before(() => {});
+  > 7 │ after(() => {});
+      │ ^^^^^
+    8 │ 
+    9 │ describe("foo", () => {
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:2 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The beforeEach hook is not allowed.
+  
+    10 │ 	let foo;
+    11 │ 
+  > 12 │ 	beforeEach(() => {
+       │ 	^^^^^^^^^^
+    13 │ 		foo = setupFoo();
+    14 │ 	});
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:2 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The afterEach hook is not allowed.
+  
+    14 │ 	});
+    15 │ 
+  > 16 │ 	afterEach(() => {
+       │ 	^^^^^^^^^
+    17 │ 		foo = null;
+    18 │ 	});
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:3 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The beforeEach hook is not allowed.
+  
+    25 │ 		let bar;
+    26 │ 
+  > 27 │ 		beforeEach(() => {
+       │ 		^^^^^^^^^^
+    28 │ 			bar = setupBar();
+    29 │ 		});
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:3 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The afterEach hook is not allowed.
+  
+    29 │ 		});
+    30 │ 
+  > 31 │ 		afterEach(() => {
+       │ 		^^^^^^^^^
+    32 │ 			bar = null;
+    33 │ 		});
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:1 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The beforeAll hook is not allowed.
+  
+    39 │ });
+    40 │ 
+  > 41 │ test.beforeAll(async () => {});
+       │ ^^^^^^^^^^^^^^
+    42 │ test.beforeEach(async ({ page }) => {});
+    43 │ test.afterEach(async () => {});
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:42:1 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The beforeEach hook is not allowed.
+  
+    41 │ test.beforeAll(async () => {});
+  > 42 │ test.beforeEach(async ({ page }) => {});
+       │ ^^^^^^^^^^^^^^^
+    43 │ test.afterEach(async () => {});
+    44 │ test.afterAll(async () => {});
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:43:1 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The afterEach hook is not allowed.
+  
+    41 │ test.beforeAll(async () => {});
+    42 │ test.beforeEach(async ({ page }) => {});
+  > 43 │ test.afterEach(async () => {});
+       │ ^^^^^^^^^^^^^^
+    44 │ test.afterAll(async () => {});
+    45 │ it.beforeEach(() => {});
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:44:1 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The afterAll hook is not allowed.
+  
+    42 │ test.beforeEach(async ({ page }) => {});
+    43 │ test.afterEach(async () => {});
+  > 44 │ test.afterAll(async () => {});
+       │ ^^^^^^^^^^^^^
+    45 │ it.beforeEach(() => {});
+    46 │ describe.afterAll(() => {});
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:45:1 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The beforeEach hook is not allowed.
+  
+    43 │ test.afterEach(async () => {});
+    44 │ test.afterAll(async () => {});
+  > 45 │ it.beforeEach(() => {});
+       │ ^^^^^^^^^^^^^
+    46 │ describe.afterAll(() => {});
+    47 │ suite.beforeEach(() => {});
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:46:1 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The afterAll hook is not allowed.
+  
+    44 │ test.afterAll(async () => {});
+    45 │ it.beforeEach(() => {});
+  > 46 │ describe.afterAll(() => {});
+       │ ^^^^^^^^^^^^^^^^^
+    47 │ suite.beforeEach(() => {});
+    48 │ 
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:47:1 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The beforeEach hook is not allowed.
+  
+    45 │ it.beforeEach(() => {});
+    46 │ describe.afterAll(() => {});
+  > 47 │ suite.beforeEach(() => {});
+       │ ^^^^^^^^^^^^^^^^
+    48 │ 
+    49 │ (beforeEach)(() => {});
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:49:1 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The beforeEach hook is not allowed.
+  
+    47 │ suite.beforeEach(() => {});
+    48 │ 
+  > 49 │ (beforeEach)(() => {});
+       │ ^^^^^^^^^^^^
+    50 │ beforeEach(setup);
+    51 │ afterAll(async function () {}, 1000);
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:50:1 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The beforeEach hook is not allowed.
+  
+    49 │ (beforeEach)(() => {});
+  > 50 │ beforeEach(setup);
+       │ ^^^^^^^^^^
+    51 │ afterAll(async function () {}, 1000);
+    52 │ 
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:51:1 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The afterAll hook is not allowed.
+  
+    49 │ (beforeEach)(() => {});
+    50 │ beforeEach(setup);
+  > 51 │ afterAll(async function () {}, 1000);
+       │ ^^^^^^^^
+    52 │ 
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
