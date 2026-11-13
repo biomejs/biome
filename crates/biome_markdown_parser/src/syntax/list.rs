@@ -3313,7 +3313,7 @@ fn classify_blank_line_in_quote(
                 while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
                     p.bump(MD_TEXTUAL_LITERAL);
                 }
-                p.at(NEWLINE) || p.at(T![EOF])
+                p.at(NEWLINE) || p.at(T![EOF]) || at_trailing_spaces_line_end(p)
             });
 
             if !line_is_blank {
@@ -3328,8 +3328,8 @@ fn classify_blank_line_in_quote(
                 p.bump(MD_TEXTUAL_LITERAL);
             }
 
-            if p.at(NEWLINE) {
-                p.bump(NEWLINE);
+            if p.at(NEWLINE) || at_trailing_spaces_line_end(p) {
+                p.bump(p.cur());
                 continue;
             }
 
@@ -3454,6 +3454,14 @@ fn at_blank_line_after_prefix(p: &mut MarkdownParser) -> bool {
     })
 }
 
+/// Returns whether the current token is a line end made of two or more
+/// trailing spaces and the newline, which the lexer emits as one
+/// `MD_HARD_LINE_LITERAL`. A backslash before a newline lexes as the same kind
+/// but is content, so it never counts as blank-line whitespace.
+fn at_trailing_spaces_line_end(p: &MarkdownParser) -> bool {
+    p.at(MD_HARD_LINE_LITERAL) && p.cur_text().starts_with(' ')
+}
+
 fn consume_blank_line(p: &mut MarkdownParser) {
     // Consume blank-line whitespace as whitespace trivia (structural, no skipped trivia).
     while p.at(MD_TEXTUAL_LITERAL) {
@@ -3463,6 +3471,15 @@ fn consume_blank_line(p: &mut MarkdownParser) {
         } else {
             break;
         }
+    }
+
+    // A blank line has no hard break, so re-lex the spaces as one token, keep
+    // them as trivia, and leave the newline to the check below.
+    if at_trailing_spaces_line_end(p) {
+        let spaces = p.cur_text().trim_end_matches(['\n', '\r']).len();
+        let end = p.cur_range().start() + TextSize::from(spaces as u32);
+        p.re_lex_span(end, MD_TEXTUAL_LITERAL);
+        p.consume_as_whitespace_trivia();
     }
 
     if p.at(NEWLINE) {

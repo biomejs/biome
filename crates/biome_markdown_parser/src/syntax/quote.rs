@@ -596,6 +596,17 @@ impl ParseNodeList for QuoteBlockList {
             return self.handle_newline(p);
         }
 
+        // A line with only spaces or tabs after the prefix is blank, like a
+        // bare `>` line. Without this, wide whitespace would start an indented
+        // code block, and two or more trailing spaces would parse as a hard
+        // line break.
+        if consume_blank_line_rest(p) {
+            if p.at(NEWLINE) {
+                return self.handle_newline(p);
+            }
+            return Absent;
+        }
+
         if at_quote_indented_code_start(p) {
             let parsed = parse_quote_indented_code_block(p, self.depth);
             self.last_block_was_paragraph = false;
@@ -744,6 +755,31 @@ fn has_empty_line_before(p: &MarkdownParser) -> bool {
     }
     let source = p.source().source_text().as_bytes();
     matches!(source.get(start - 1), Some(b'\n' | b'\r'))
+}
+
+/// Consumes the rest of the line as whitespace trivia when it holds only
+/// spaces and tabs, and returns whether it did. The parser is then at the
+/// line's `NEWLINE`, or at EOF.
+///
+/// Checks the source rather than tokens because the whitespace may be lexed as
+/// several textual tokens or as one `MD_HARD_LINE_LITERAL` that also holds the
+/// newline.
+fn consume_blank_line_rest(p: &mut MarkdownParser) -> bool {
+    let rest = p.source_after_current().as_bytes();
+    let whitespace = rest
+        .iter()
+        .take_while(|byte| matches!(byte, b' ' | b'\t'))
+        .count();
+    if whitespace == 0 || !matches!(rest.get(whitespace), None | Some(b'\n' | b'\r')) {
+        return false;
+    }
+
+    // Fold the whitespace into one token, split from the newline when it was
+    // lexed as a hard line break, and keep it as trivia.
+    let end = p.cur_range().start() + TextSize::from(whitespace as u32);
+    p.re_lex_span(end, MD_TEXTUAL_LITERAL);
+    p.consume_as_whitespace_trivia();
+    true
 }
 
 pub(crate) fn at_quote_indented_code_start(p: &MarkdownParser) -> bool {
