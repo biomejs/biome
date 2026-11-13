@@ -242,6 +242,7 @@ define_categories! {
     "lint/nursery/noDanglingUnderscore": "https://biomejs.dev/linter/rules/no-dangling-underscore",
     "lint/nursery/noDisabledAttribute": "https://biomejs.dev/linter/rules/no-disabled-attribute",
     "lint/nursery/noDoubleComparison": "https://biomejs.dev/linter/rules/no-double-comparison",
+    "lint/nursery/noDrizzleDbObjectInsideTransaction": "https://biomejs.dev/linter/rules/no-drizzle-db-object-inside-transaction",
     "lint/nursery/noDrizzleDeleteWithoutWhere": "https://biomejs.dev/linter/rules/no-drizzle-delete-without-where",
     "lint/nursery/noDrizzleUpdateWithoutWhere": "https://biomejs.dev/linter/rules/no-drizzle-update-without-where",
     "lint/nursery/noDuplicateFieldDefinitionNames": "https://biomejs.dev/linter/rules/no-duplicate-field-definition-names",

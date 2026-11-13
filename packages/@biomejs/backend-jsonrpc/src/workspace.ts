@@ -3043,6 +3043,11 @@ export interface Nursery {
 	 */
 	noDoubleComparison?: NoDoubleComparisonConfiguration;
 	/**
+	 * Disallow using a Drizzle ORM instance inside its own transaction callback.
+	 * See https://biomejs.dev/linter/rules/no-drizzle-db-object-inside-transaction
+	 */
+	noDrizzleDbObjectInsideTransaction?: NoDrizzleDbObjectInsideTransactionConfiguration;
+	/**
 	 * Disallow two keys with the same name inside YAML maps.
 	 * See https://biomejs.dev/linter/rules/no-duplicate-map-keys
 	 */
@@ -6725,6 +6730,9 @@ export type NoDisabledAttributeConfiguration =
 export type NoDoubleComparisonConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDoubleComparisonOptions;
+export type NoDrizzleDbObjectInsideTransactionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDrizzleDbObjectInsideTransactionOptions;
 export type NoDuplicateMapKeysConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateMapKeysOptions;
@@ -9792,6 +9800,10 @@ export interface RuleWithNoDoubleComparisonOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoDoubleComparisonOptions;
+}
+export interface RuleWithNoDrizzleDbObjectInsideTransactionOptions {
+	level: RulePlainConfiguration;
+	options?: NoDrizzleDbObjectInsideTransactionOptions;
 }
 export interface RuleWithNoDuplicateMapKeysOptions {
 	level: RulePlainConfiguration;
@@ -13337,6 +13349,12 @@ export type NoConstantComparisonsOptions = {};
 export type NoDanglingUnderscoreOptions = {};
 export type NoDisabledAttributeOptions = {};
 export type NoDoubleComparisonOptions = {};
+export interface NoDrizzleDbObjectInsideTransactionOptions {
+	/**
+	 * List of variable names to consider as Drizzle ORM instances.
+	 */
+	drizzleObjectName?: string[];
+}
 export type NoDuplicateMapKeysOptions = {};
 export interface NoDuplicateTypeConstituentsOptions {
 	/**
@@ -15795,6 +15813,7 @@ export type Category =
 	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDisabledAttribute"
 	| "lint/nursery/noDoubleComparison"
+	| "lint/nursery/noDrizzleDbObjectInsideTransaction"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
