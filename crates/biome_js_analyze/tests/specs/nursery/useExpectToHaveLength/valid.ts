@@ -1,0 +1,6 @@
+/* should not generate diagnostics */
+// `toHaveLength()` fails on a missing value, which optional chaining allows.
+expect(files?.list!.length).toBe(1);
+expect(files?.list!.items.length).toBe(1);
+expect((files?.list as string[]).length).toBe(1);
+expect(files?.length!).toBe(1);
