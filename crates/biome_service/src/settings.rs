@@ -529,8 +529,7 @@ impl Settings {
             .linter
             .rules
             .as_ref()
-            .map(Rules::as_explicitly_enabled_rules)
-            .unwrap_or_default();
+            .map_or_default(Rules::as_explicitly_enabled_rules);
         for &index in indices {
             let Some(pattern_rules) = self
                 .override_settings
@@ -2477,7 +2476,7 @@ pub fn to_override_settings(
     for mut pattern in overrides.0 {
         let formatter = pattern
             .formatter
-            .map(|formatter| OverrideFormatSettings {
+            .map_or_default(|formatter| OverrideFormatSettings {
                 enabled: formatter.enabled.or(current_settings.formatter.enabled),
                 format_with_errors: formatter
                     .format_with_errors
@@ -2494,30 +2493,24 @@ pub fn to_override_settings(
                 #[cfg(feature = "lang_js")]
                 trailing_commas: formatter.trailing_commas,
                 trailing_newline: formatter.trailing_newline,
-            })
-            .unwrap_or_default();
+            });
         let linter = pattern
             .linter
-            .map(|linter| OverrideLinterSettings {
+            .map_or_default(|linter| OverrideLinterSettings {
                 enabled: linter.enabled.or(current_settings.linter.enabled),
                 rules: linter.rules,
                 domains: linter.domains,
-            })
-            .unwrap_or_default();
+            });
         let assist = pattern
             .assist
-            .map(|assist| OverrideAssistSettings {
+            .map_or_default(|assist| OverrideAssistSettings {
                 enabled: assist.enabled.or(current_settings.assist.enabled),
                 actions: assist.actions,
-            })
-            .unwrap_or_default();
+            });
 
-        let files = pattern
-            .files
-            .map(|files| OverrideFilesSettings {
-                max_size: files.max_size,
-            })
-            .unwrap_or_default();
+        let files = pattern.files.map_or_default(|files| OverrideFilesSettings {
+            max_size: files.max_size,
+        });
 
         let mut languages = LanguageListSettings::default();
         #[cfg(feature = "lang_js")]

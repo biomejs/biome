@@ -70,8 +70,7 @@ impl Rule for Includes {
             .include
             .as_ref()
             .or(state.ignore.as_ref())
-            .map(|node| node.range())
-            .unwrap_or_default();
+            .map_or_default(|node| node.range());
         let mut diagnostic = RuleDiagnostic::new(
             category!("migrate"),
             range,
@@ -102,15 +101,13 @@ impl Rule for Includes {
                 mutation.remove_node(ignore.clone());
                 if let Some(trailing_comma) = ignore
                     .syntax()
-                    .last_token()
-                    .and_then(|ignore_last_token| ignore_last_token.next_token())
+                    .next_token()
                     .filter(|next_token| next_token.kind() == T![,])
                 {
                     mutation.remove_token(trailing_comma);
                 } else if let Some(leading_comma) = ignore
                     .syntax()
-                    .first_token()
-                    .and_then(|ignore_last_token| ignore_last_token.prev_token())
+                    .prev_token()
                     .filter(|prev_token| prev_token.kind() == T![,])
                 {
                     mutation.remove_token(leading_comma);

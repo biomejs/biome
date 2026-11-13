@@ -6,7 +6,7 @@ use std::{
     path,
 };
 
-use biome_diagnostics::{DiagnosticExt, Error, IoError, Severity};
+use biome_diagnostics::{DiagnosticExt, Error, IoError, Severity, category};
 use camino::{Utf8Component, Utf8Path, Utf8PathBuf};
 use directories::ProjectDirs;
 use tracing::warn;
@@ -105,9 +105,11 @@ pub fn expand_symbolic_link(path: &Utf8Path) -> Result<(Utf8PathBuf, FileType), 
 }
 
 fn follow_symlink(path: &Utf8Path) -> Result<(Utf8PathBuf, FileType), Error> {
-    let target_path = path
-        .read_link_utf8()
-        .map_err(|err| IoError::from(err).with_file_path(path.to_string()))?;
+    let target_path = path.read_link_utf8().map_err(|err| {
+        IoError::from(err)
+            .with_category(category!("fs/io"))
+            .with_file_path(path.to_string())
+    })?;
 
     // Make sure relative symlinks are resolved:
     let target_path = path
@@ -124,10 +126,14 @@ fn follow_symlink(path: &Utf8Path) -> Result<(Utf8PathBuf, FileType), Error> {
                     path: path.clone(),
                     error_kind: FsErrorKind::DereferencedSymlink,
                     severity: Severity::Warning,
-                    source: Some(Error::from(IoError::from(err))),
+                    source: Some(Error::from(
+                        IoError::from(err).with_category(category!("fs/io")),
+                    )),
                 })
             } else {
-                IoError::from(err).with_file_path(path.to_string())
+                IoError::from(err)
+                    .with_category(category!("fs/io"))
+                    .with_file_path(path.to_string())
             });
         }
     };

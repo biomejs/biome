@@ -2,6 +2,18 @@
 source: crates/biome_plugin_loader/src/lib.rs
 expression: content
 ---
+# Plugin
+
+No plugin source was loaded.
+
+# Input
+
+No input was analyzed.
+
+# Diagnostics
+
+```block
 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unsupported rule format for plugin rule /my-plugin.js.
+```

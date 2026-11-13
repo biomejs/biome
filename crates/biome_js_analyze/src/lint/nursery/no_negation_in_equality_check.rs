@@ -137,24 +137,12 @@ impl Rule for NoNegationInEqualityCheck {
         // The `has_newline` flag is also used below after wrapping
         // function/class/object expressions in parens — the generated `(`
         // is itself an ASI hazard when preceded by a newline.
-        let has_preceding_newline = neg_op_token
-            .leading_trivia()
-            .pieces()
-            .any(|p| {
-                p.kind() == TriviaPieceKind::Newline
-                    || p.kind() == TriviaPieceKind::MultiLineComment
-            });
-        let prev_trailing_has_newline = neg_op_token
-            .prev_token()
-            .is_some_and(|t| {
-                t.trailing_trivia()
-                    .pieces()
-                    .any(|p| {
-                        p.kind() == TriviaPieceKind::Newline
-                            || p.kind() == TriviaPieceKind::MultiLineComment
-                    })
-            });
-        let has_newline = has_preceding_newline || prev_trailing_has_newline;
+        let has_newline = neg_op_token.trivia_before().any(|piece| {
+            matches!(
+                piece.kind(),
+                TriviaPieceKind::Newline | TriviaPieceKind::MultiLineComment
+            )
+        });
         if has_newline {
             let arg_text = negated_expr.syntax().text_trimmed().to_string();
             let first_char = arg_text.chars().next().unwrap_or('\0');

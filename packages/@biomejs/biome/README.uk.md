@@ -35,9 +35,9 @@
 
 **Biome** - це високопродуктивний інструментарій для веб-проєктів, який має на меті надавати інструменти розробникам для підтримки здоров'я проєктів.
 
-**Biome - це [швидкий форматувальник](https://github.com/biomejs/benchmark#formatting)** для _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_, _GraphQL_, _Markdown_, _YAML_ та _SCSS_, який досягає **[97% сумісності з _Prettier_](https://algora.io/challenges/prettier)**.
+**Biome - це [швидкий форматувальник](https://github.com/biomejs/benchmark#formatting)** для _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_, _GraphQL_, _HTML_, _Markdown_, _YAML_ та _SCSS_, який досягає **[97% сумісності з _Prettier_](https://algora.io/challenges/prettier)**.
 
-**Biome - це [високопродуктивний лінтер](https://github.com/biomejs/benchmark#linting)** для _JavaScript_, _TypeScript_, _JSX_, _CSS_, _GraphQL_, _Markdown_, _YAML_ та _SCSS_, який містить **[понад 500 правил](https://biomejs.dev/uk/linter/javascript/rules/)** з ESLint, typescript-eslint та [інших джерел](https://github.com/biomejs/biome/discussions/3).
+**Biome - це [високопродуктивний лінтер](https://github.com/biomejs/benchmark#linting)** для _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_, _GraphQL_, _HTML_, _Markdown_, _YAML_ та _SCSS_, який містить **[понад 750 правил](https://biomejs.dev/uk/linter/javascript/rules/)** з ESLint, typescript-eslint та [інших джерел](https://github.com/biomejs/biome/discussions/3).
 Він **виводить детальні та контекстуалізовані діагностичні дані**, які допомагають вам покращити ваш код та стати кращим програмістом!
 
 **Biome** з самого початку розроблений для [інтерактивного використання в редакторі](https://biomejs.dev/uk/editors/first-party-extensions/). Він може форматувати та лінтити некоректний код під час його написання.
@@ -175,9 +175,6 @@ Biome пропонує просту програму спонсорства, я�
       </td>
       <td align="center" valign="middle">
         <a href="https://www.convex.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/81530787?s=200&v=4" width="80" alt="Convex logo"></a>
-      </td>
-      <td align="center" valign="middle">
-        <a href="https://graphite.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/61942612?s=200&v=4" width="80" alt="Graphite logo"></a>
       </td>
       <td align="center" valign="middle">
         <a href="https://kraken.tech/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/105941848?s=200&v=4" width="80" alt="Kraken Tech logo"></a>

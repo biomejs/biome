@@ -1,7 +1,10 @@
 //! Shared state for the passes that build a [`VueSemanticModel`].
 
 use super::model::*;
-use biome_rowan::{RawSyntaxKind, TextRange, TextSize, TokenText};
+use super::nodes::{HtmlNodeId, JsNodeId};
+use biome_html_syntax::HtmlSyntaxNode;
+use biome_js_syntax::{JsLanguage, JsSyntaxNode};
+use biome_rowan::{RawSyntaxKind, SyntaxNodePtr, TextRange, TextSize, TokenText};
 use rustc_hash::FxHashMap;
 
 /// What a script-level JavaScript binding stands for in a component.
@@ -29,6 +32,8 @@ pub(crate) struct ModelBuilder {
     /// Names written as strings in component options. They are resolved by
     /// the reference pass, once every declaration is known.
     pub(crate) option_names: Vec<OptionName>,
+    /// The id given to each node already in [`SemanticModelData::js_nodes`].
+    js_node_ids: FxHashMap<(Option<SnippetId>, SyntaxNodePtr<JsLanguage>), JsNodeId>,
 }
 
 /// A name of the component instance written as a string in an option, as in
@@ -53,6 +58,7 @@ pub(crate) struct NewSymbol {
     pub(crate) namespace: Namespace,
     pub(crate) kind: SymbolKind,
     pub(crate) component: Option<ComponentId>,
+    pub(crate) node: Option<JsNodeId>,
 }
 
 impl ModelBuilder {
@@ -89,6 +95,7 @@ impl ModelBuilder {
             component: symbol.component,
             detail: Detail::None,
             type_only: false,
+            node: symbol.node,
         });
         self.data.uses.push(Vec::new());
         id
@@ -98,17 +105,43 @@ impl ModelBuilder {
         &mut self.data.symbols[id.index()]
     }
 
+    /// Returns the id of `node`, a node of the tree of `snippet`.
+    pub(crate) fn add_js_node(
+        &mut self,
+        snippet: Option<SnippetId>,
+        node: &JsSyntaxNode,
+    ) -> JsNodeId {
+        let ptr = SyntaxNodePtr::new(node);
+        *self.js_node_ids.entry((snippet, ptr)).or_insert_with(|| {
+            let id = JsNodeId::new(self.data.js_nodes.len());
+            self.data.js_nodes.push(JsNodeData { snippet, ptr });
+            id
+        })
+    }
+
+    /// Returns the id of `node`, a node of the host document.
+    pub(crate) fn add_html_node(&mut self, node: &HtmlSyntaxNode) -> HtmlNodeId {
+        let id = HtmlNodeId::new(self.data.html_nodes.len());
+        self.data.html_nodes.push(SyntaxNodePtr::new(node));
+        id
+    }
+
+    /// Adds a component defined by `definition`, a node of the tree of
+    /// `snippet` that starts at `offset` in the host document.
     pub(crate) fn add_component(
         &mut self,
         kind: ComponentKind,
-        definition: TextRange,
+        definition: &JsSyntaxNode,
         snippet: Option<SnippetId>,
+        offset: TextSize,
     ) -> ComponentId {
         let id = ComponentId::new(self.data.components.len());
         let instance = self.add_scope(ScopeKind::Instance(id), None);
+        let node = self.add_js_node(snippet, definition);
         self.data.components.push(ComponentData {
             kind,
-            definition,
+            definition: to_host(definition.text_trimmed_range(), offset),
+            node,
             snippet,
             has_template: false,
             instance,

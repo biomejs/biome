@@ -20,7 +20,9 @@ use biome_jsdoc_comment::JsdocComment;
 pub use crate::db::type_inference::InferredModuleTypes;
 pub use css::*;
 pub use dependencies::module_dependencies;
-pub(crate) use dependencies::{css_dependencies, html_dependencies, js_dependencies};
+pub(crate) use dependencies::{
+    css_dependencies, html_dependencies, js_dependencies, module_importers,
+};
 pub use js_scc::*;
 pub use type_inference::*;
 
@@ -86,6 +88,8 @@ pub fn find_js_exported_symbol<'db>(
                     }
                 }
             }
+            // `export * from "..."` never re-exports the default export.
+            None if symbol.name(db) == "default" => {}
             None => {
                 for reexport in module.blanket_reexports.iter() {
                     match reexport

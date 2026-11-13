@@ -10,6 +10,8 @@ use biome_js_type_info::interned_types::{
 use rustc_hash::{FxHashMap, FxHashSet};
 
 mod expressions;
+mod flow;
+mod flow_expressions;
 mod globals;
 mod imports;
 mod lookup;
@@ -17,6 +19,9 @@ mod promise_classification;
 mod qualifiers;
 mod resolver;
 
+pub(in crate::db) use flow::{
+    flow_binding_baseline, flow_binding_states, flow_binding_type, flow_expression_type,
+};
 pub(in crate::db) use imports::{
     ExportOriginResult, collect_namespace_export_names, find_export_origin,
     resolve_export_type_on_demand,
@@ -29,6 +34,7 @@ pub(in crate::db) use promise_classification::{
     PromiseClassification, classify_expression_array_promise, classify_expression_function_return,
     classify_expression_promise,
 };
+pub use resolver::MAX_ON_DEMAND_IMPORT_DEPTH;
 pub(in crate::db) use resolver::{ImportResolution, ResolutionCtx, resolve_raw_types};
 
 /// Type information attached to one binding declaration.

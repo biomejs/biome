@@ -19,6 +19,7 @@ pub use db::{
     control_flow_model_from_snippet, control_flow_model_from_source, js_control_flow_model,
 };
 pub use model::ControlFlowModel;
+pub use nodes::is_truthy_literal;
 pub use visitor::AnyJsControlFlowRoot;
 
 use biome_js_syntax::{AnyJsRoot, JsLanguage};

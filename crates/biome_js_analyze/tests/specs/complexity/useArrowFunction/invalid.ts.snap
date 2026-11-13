@@ -72,6 +72,15 @@ const needsParentheses2 = function () {
 	return { foo: "bar" }.foo;
 }
 
+// https://github.com/biomejs/biome/issues/13129
+for (let has = function (k) { return k in cache; }, i = 0; i < 1; i++) {}
+
+for (has = function (k) { return !(k in cache); }; ;) {}
+
+for (let has = function (k) { return function () { return k in cache; }; }; ;) {}
+
+for (let i = 0; i < 1; i = function (k) { return k in cache; }) {}
+
 ```
 
 # Diagnostics
@@ -650,6 +659,7 @@ invalid.ts:65:27 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   > 67 │ }
        │ ^
     68 │ 
+    69 │ // https://github.com/biomejs/biome/issues/13129
   
   i Function expressions that don't use this can be turned into arrow functions.
   
@@ -662,6 +672,134 @@ invalid.ts:65:27 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
     67    │ - }
        65 │ + const·needsParentheses2·=·()·=>·({·foo:·"bar"·}.foo)
     68 66 │   
+    69 67 │   // https://github.com/biomejs/biome/issues/13129
+  
+
+```
+
+```
+invalid.ts:70:16 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    69 │ // https://github.com/biomejs/biome/issues/13129
+  > 70 │ for (let has = function (k) { return k in cache; }, i = 0; i < 1; i++) {}
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    71 │ 
+    72 │ for (has = function (k) { return !(k in cache); }; ;) {}
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    68 68 │   
+    69 69 │   // https://github.com/biomejs/biome/issues/13129
+    70    │ - for·(let·has·=·function·(k)·{·return·k·in·cache;·},·i·=·0;·i·<·1;·i++)·{}
+       70 │ + for·(let·has·=·(k)·=>·(k·in·cache),·i·=·0;·i·<·1;·i++)·{}
+    71 71 │   
+    72 72 │   for (has = function (k) { return !(k in cache); }; ;) {}
+  
+
+```
+
+```
+invalid.ts:72:12 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    70 │ for (let has = function (k) { return k in cache; }, i = 0; i < 1; i++) {}
+    71 │ 
+  > 72 │ for (has = function (k) { return !(k in cache); }; ;) {}
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    73 │ 
+    74 │ for (let has = function (k) { return function () { return k in cache; }; }; ;) {}
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    70 70 │   for (let has = function (k) { return k in cache; }, i = 0; i < 1; i++) {}
+    71 71 │   
+    72    │ - for·(has·=·function·(k)·{·return·!(k·in·cache);·};·;)·{}
+       72 │ + for·(has·=·(k)·=>·!(k·in·cache);·;)·{}
+    73 73 │   
+    74 74 │   for (let has = function (k) { return function () { return k in cache; }; }; ;) {}
+  
+
+```
+
+```
+invalid.ts:74:16 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    72 │ for (has = function (k) { return !(k in cache); }; ;) {}
+    73 │ 
+  > 74 │ for (let has = function (k) { return function () { return k in cache; }; }; ;) {}
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    75 │ 
+    76 │ for (let i = 0; i < 1; i = function (k) { return k in cache; }) {}
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    72 72 │   for (has = function (k) { return !(k in cache); }; ;) {}
+    73 73 │   
+    74    │ - for·(let·has·=·function·(k)·{·return·function·()·{·return·k·in·cache;·};·};·;)·{}
+       74 │ + for·(let·has·=·(k)·=>·function·()·{·return·k·in·cache;·};·;)·{}
+    75 75 │   
+    76 76 │   for (let i = 0; i < 1; i = function (k) { return k in cache; }) {}
+  
+
+```
+
+```
+invalid.ts:74:38 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    72 │ for (has = function (k) { return !(k in cache); }; ;) {}
+    73 │ 
+  > 74 │ for (let has = function (k) { return function () { return k in cache; }; }; ;) {}
+       │                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    75 │ 
+    76 │ for (let i = 0; i < 1; i = function (k) { return k in cache; }) {}
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    72 72 │   for (has = function (k) { return !(k in cache); }; ;) {}
+    73 73 │   
+    74    │ - for·(let·has·=·function·(k)·{·return·function·()·{·return·k·in·cache;·};·};·;)·{}
+       74 │ + for·(let·has·=·function·(k)·{·return·()·=>·k·in·cache;·};·;)·{}
+    75 75 │   
+    76 76 │   for (let i = 0; i < 1; i = function (k) { return k in cache; }) {}
+  
+
+```
+
+```
+invalid.ts:76:28 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    74 │ for (let has = function (k) { return function () { return k in cache; }; }; ;) {}
+    75 │ 
+  > 76 │ for (let i = 0; i < 1; i = function (k) { return k in cache; }) {}
+       │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    77 │ 
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    74 74 │   for (let has = function (k) { return function () { return k in cache; }; }; ;) {}
+    75 75 │   
+    76    │ - for·(let·i·=·0;·i·<·1;·i·=·function·(k)·{·return·k·in·cache;·})·{}
+       76 │ + for·(let·i·=·0;·i·<·1;·i·=·(k)·=>·k·in·cache)·{}
+    77 77 │   
   
 
 ```

@@ -1,0 +1,9 @@
+/* should generate diagnostics */
+a { font-weight: 400; }
+a { font-weight: 700; }
+a { font-weight: 400.0; }
+a { font: italic small-caps 700 16px/3 cursive; }
+a { font: normal 400 normal 16px serif; }
+a { font: 400 normal 16px serif; }
+a { font: 400 16px serif; }
+@font-face { font-weight: 400 700; }

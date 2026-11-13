@@ -1,4 +1,4 @@
-use crate::lexer::{CssCustomPropertyCommentMode, CssLexContext};
+use crate::lexer::{CssCustomPropertyCommentMode, CssLexContext, CssReLexContext};
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_component_value;
 use crate::syntax::scss::{
@@ -357,6 +357,15 @@ fn parse_custom_property_delimiter(p: &mut CssParser, context: CssLexContext) ->
     let delimiter = p.start();
     let kind = p.cur();
     p.bump_with_context(kind, context);
+
+    // A hash name may start with a digit, so `#4566a8` and `#12px` must not
+    // leave a dimension behind the `#`.
+    if kind == T![#]
+        && p.last_end() == Some(p.cur_range().start())
+        && matches!(p.cur_text().as_bytes().first(), Some(b'0'..=b'9' | b'-'))
+    {
+        p.re_lex(CssReLexContext::ScssIdentifierContinuation);
+    }
 
     Present(delimiter.complete(p, CSS_CUSTOM_PROPERTY_DELIMITER))
 }

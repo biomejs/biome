@@ -1,0 +1,84 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+import a
+
+{
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdxEsmBlock {
+            content_token: MDX_ESM_LITERAL@0..8 "import a" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@8..9 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@9..10 "\n" [] [],
+        },
+        MdxBlockExpression {
+            l_curly_token: L_CURLY@10..11 "{" [] [],
+            content: missing (optional),
+            r_curly_token: missing (required),
+        },
+    ],
+    eof_token: EOF@11..11 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..11
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..11
+    0: MDX_ESM_BLOCK@0..8
+      0: MDX_ESM_LITERAL@0..8 "import a" [] []
+    1: MD_NEWLINE@8..9
+      0: NEWLINE@8..9 "\n" [] []
+    2: MD_NEWLINE@9..10
+      0: NEWLINE@9..10 "\n" [] []
+    3: MDX_BLOCK_EXPRESSION@10..11
+      0: L_CURLY@10..11 "{" [] []
+      1: (empty)
+      2: (empty)
+  3: EOF@11..11 "" [] []
+
+```
+
+## Diagnostics
+
+```
+unclosed_block_expression_at_end_of_file.mdx:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unclosed expression, expected a closing `}`.
+  
+    1 │ import a
+    2 │ 
+  > 3 │ {
+      │ ^
+  
+  i expression started here
+  
+    1 │ import a
+    2 │ 
+  > 3 │ {
+      │ ^
+  
+  i Add the closing `}`. To write a literal brace in MDX, escape it as `\{`.
+  
+```

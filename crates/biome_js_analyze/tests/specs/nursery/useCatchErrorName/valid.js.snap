@@ -1,0 +1,69 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+try {} catch (error) {}
+try {} catch (error__) {}
+try {} catch (descriptiveError) {}
+try {} catch (descriptive_error__) {}
+try {} catch (Error) {}
+try {} catch {}
+try {} catch ({ message }) {}
+try {} catch (_) {}
+try {} catch (_) {
+	console.log(foo);
+}
+try {
+} catch (_) {
+	try {
+	} catch (_) {}
+}
+
+obj.catch((error) => {});
+obj.catch(error => {});
+obj.catch?.((err) => {});
+obj.then(undefined, (error) => {});
+obj.then((result) => {}, (error) => {});
+obj.then?.((result) => {}, (err) => {});
+obj.catch(function (error) {});
+obj.catch(function onReject(error) {});
+obj.then(function onFulfilled(result) {}, function onReject(error) {});
+obj.catch(function () {});
+obj.catch(() => {});
+obj.catch();
+obj.catch(({ message }) => {});
+obj.catch((_) => {});
+obj.catch((err) => {}, anotherArgument);
+obj.then(undefined, (err) => {}, anotherArgument);
+obj.then((err) => {});
+obj["catch"]((err) => {});
+foo((err) => {});
+foo(function (err) {});
+obj.catch(function (error, other) {});
+
+obj.catch((outerError) => {
+	return obj2.catch((innerError) => {});
+});
+
+try {
+} catch (outerError) {
+	try {
+	} catch (innerError) {}
+}
+
+const handleError = (error) => {
+	try {
+		doSomething();
+	} catch (error_) {
+		console.log(error_);
+	}
+};
+
+// With a spread argument, the handler's position is unknown.
+obj.then(...handlers, (value) => {});
+obj.catch(...handlers, (value) => {});
+
+```

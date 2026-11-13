@@ -1,0 +1,94 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```ts
+doubled: number = item * 2; extra()
+
+```
+
+
+## AST
+
+```
+JsSvelteLegacyConstRoot {
+    declarator: JsBogus {
+        items: [
+            JsIdentifierBinding {
+                name_token: IDENT@0..7 "doubled" [] [],
+            },
+            TsTypeAnnotation {
+                colon_token: COLON@7..9 ":" [] [Whitespace(" ")],
+                ty: TsNumberType {
+                    number_token: NUMBER_KW@9..16 "number" [] [Whitespace(" ")],
+                },
+            },
+            JsInitializerClause {
+                eq_token: EQ@16..18 "=" [] [Whitespace(" ")],
+                expression: JsBinaryExpression {
+                    left: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@18..23 "item" [] [Whitespace(" ")],
+                        },
+                    },
+                    operator_token: STAR@23..25 "*" [] [Whitespace(" ")],
+                    right: JsNumberLiteralExpression {
+                        value_token: JS_NUMBER_LITERAL@25..26 "2" [] [],
+                    },
+                },
+            },
+            SEMICOLON@26..28 ";" [] [Whitespace(" ")],
+            IDENT@28..33 "extra" [] [],
+            L_PAREN@33..34 "(" [] [],
+            R_PAREN@34..35 ")" [] [],
+        ],
+    },
+    eof_token: EOF@35..36 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SVELTE_LEGACY_CONST_ROOT@0..36
+  0: JS_BOGUS@0..35
+    0: JS_IDENTIFIER_BINDING@0..7
+      0: IDENT@0..7 "doubled" [] []
+    1: TS_TYPE_ANNOTATION@7..16
+      0: COLON@7..9 ":" [] [Whitespace(" ")]
+      1: TS_NUMBER_TYPE@9..16
+        0: NUMBER_KW@9..16 "number" [] [Whitespace(" ")]
+    2: JS_INITIALIZER_CLAUSE@16..26
+      0: EQ@16..18 "=" [] [Whitespace(" ")]
+      1: JS_BINARY_EXPRESSION@18..26
+        0: JS_IDENTIFIER_EXPRESSION@18..23
+          0: JS_REFERENCE_IDENTIFIER@18..23
+            0: IDENT@18..23 "item" [] [Whitespace(" ")]
+        1: STAR@23..25 "*" [] [Whitespace(" ")]
+        2: JS_NUMBER_LITERAL_EXPRESSION@25..26
+          0: JS_NUMBER_LITERAL@25..26 "2" [] []
+    3: SEMICOLON@26..28 ";" [] [Whitespace(" ")]
+    4: IDENT@28..33 "extra" [] []
+    5: L_PAREN@33..34 "(" [] []
+    6: R_PAREN@34..35 ")" [] []
+  1: EOF@35..36 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+trailing.svelte_const.ts:1:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Template expressions can only contain a single expression
+  
+  > 1 │ doubled: number = item * 2; extra()
+      │                           ^
+    2 │ 
+  
+  i Remove the extra code or split into multiple template expressions.
+  
+```

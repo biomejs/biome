@@ -1,7 +1,9 @@
 mod any_type_kind;
 mod boolean_coercion;
+mod spread_misuse;
 pub use any_type_kind::AnyTypeKind;
 pub use boolean_coercion::BooleanCoercion;
+pub use spread_misuse::ObjectSpreadMisuse;
 
 use crate::TypeDb;
 use crate::interned_types::{ConditionalType, Literal, ReturnType, TypeData, TypeMember};
@@ -385,6 +387,7 @@ impl<'db> InferredType<'db> {
                 | TypeData::Local(_)
                 | TypeData::IndexedAccess(_)
                 | TypeData::MappedType(_)
+                | TypeData::Extends(_)
                 | TypeData::TypeofExpression(_)
                 | TypeData::AnyKeyword
                 | TypeData::UnknownKeyword => return None,
@@ -650,7 +653,9 @@ impl<'db> InferredType<'db> {
                 | TypeData::UnknownKeyword => {
                     indeterminate = true;
                 }
-                TypeData::IndexedAccess(_) | TypeData::MappedType(_) => indeterminate = true,
+                TypeData::IndexedAccess(_) | TypeData::MappedType(_) | TypeData::Extends(_) => {
+                    indeterminate = true
+                }
             }
         }
 
@@ -1180,11 +1185,8 @@ impl<'db> InferredType<'db> {
     /// it encounters an unresolved or recursive type, or exceeds its limit.
     pub fn is_safe_for_nullish_coalescing(self) -> Option<bool> {
         self.try_all_variants_match(|data| {
-            if matches!(data, TypeData::InstanceOf(_)) {
-                return true;
-            }
             matches!(
-                data.conditional_type_shallow(self.db),
+                data.value_conditional_type_shallow(self.db),
                 Some(ConditionalType::Truthy | ConditionalType::Nullish)
             )
         })
@@ -1578,7 +1580,7 @@ impl<'db> InferredType<'db> {
                 continue;
             }
 
-            if let Some(next) = data.conditional_type_shallow(self.db) {
+            if let Some(next) = data.value_conditional_type_shallow(self.db) {
                 conditional = if conditional == ConditionalType::Unknown {
                     next
                 } else {
@@ -1594,18 +1596,7 @@ impl<'db> InferredType<'db> {
                     }
                     TypeData::GlobalType(id) => pending.push(crate::global_types(self.db).get(id)),
                     TypeData::GlobalLocal(local) => pending.push(local.expand(self.db)),
-                    TypeData::InstanceOf(instance) => {
-                        let target = instance.ty(self.db);
-                        if target.is_array_class(self.db) {
-                            conditional = if conditional == ConditionalType::Unknown {
-                                ConditionalType::Truthy
-                            } else {
-                                conditional.merged_with(ConditionalType::Truthy)
-                            };
-                        } else {
-                            pending.push(target);
-                        }
-                    }
+                    TypeData::InstanceOf(instance) => pending.push(instance.ty(self.db)),
                     TypeData::Intersection(intersection) => {
                         pending.extend(intersection.types(self.db).iter().copied());
                     }
@@ -1614,6 +1605,10 @@ impl<'db> InferredType<'db> {
                             return ConditionalType::Unknown;
                         };
                         pending.extend(types);
+                    }
+                    // Either branch of an unevaluated conditional may apply.
+                    TypeData::Extends(extends) => {
+                        pending.extend([extends.true_type(self.db), extends.false_type(self.db)])
                     }
                     TypeData::MergedReference(reference) => pending.extend(
                         [
@@ -1829,6 +1824,7 @@ impl<'db> DepthFirstVisitor<TypeData<'db>> for CallableVisitor<'db> {
             | TypeData::Local(_)
             | TypeData::IndexedAccess(_)
             | TypeData::MappedType(_)
+            | TypeData::Extends(_)
             | TypeData::TypeofExpression(_)
             | TypeData::AnyKeyword
             | TypeData::UnknownKeyword => self.indeterminate = true,
@@ -1990,9 +1986,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ObjectKind;
     use crate::interned_types::{
-        InternedIntersection, InternedLiteral, InternedObject, InternedUnion, TypeMember,
-        TypeMemberKind,
+        InternedClass, InternedConstructor, InternedFunction, InternedGenericTypeParameter,
+        InternedInterface, InternedIntersection, InternedLiteral, InternedObject, InternedTuple,
+        InternedTypeofType, InternedUnion, TypeMember, TypeMemberKind,
     };
     use crate::literal::NumberLiteral;
 
@@ -2090,6 +2088,163 @@ mod tests {
     }
 
     #[test]
+    fn structural_shapes_are_non_nullish_but_not_always_truthy() {
+        let db = TestDb::default();
+        let empty = TypeData::Object(InternedObject::new(
+            &db,
+            None,
+            Box::default(),
+            false,
+            ObjectKind::Shape,
+        ));
+        let length = TypeData::Object(InternedObject::new(
+            &db,
+            None,
+            Vec::from([TypeMember {
+                kind: TypeMemberKind::Named(Text::new_static("length")),
+                ty: TypeData::Number,
+            }])
+            .into_boxed_slice(),
+            false,
+            ObjectKind::Shape,
+        ));
+        let interface = TypeData::Interface(InternedInterface::new(
+            &db,
+            Box::default(),
+            Box::default(),
+            Box::default(),
+            Text::new_static("Shape"),
+        ));
+        let mut shapes = vec![empty, length, interface];
+        for name in ["Shape", "Array", "Promise", "Date"] {
+            let class = TypeData::Class(InternedClass::new(
+                &db,
+                Box::default(),
+                None,
+                Box::default(),
+                Box::default(),
+                Some(Text::new_static(name)),
+                false,
+            ));
+            shapes.push(TypeData::instance_of(&db, class, Box::default()));
+        }
+        for shape in shapes {
+            let generic = TypeData::Generic(InternedGenericTypeParameter::new(
+                &db,
+                false,
+                Some(shape),
+                None,
+                Text::new_static("T"),
+            ));
+            for data in [
+                shape,
+                generic,
+                TypeData::TypeofType(InternedTypeofType::new(&db, shape)),
+                TypeData::instance_of(&db, shape, Box::default()),
+            ] {
+                let ty = InferredType::new(&db, data);
+                assert!(ty.is_non_nullish(), "{data:?}");
+                assert!(!ty.is_always_truthy(), "{data:?}");
+                assert!(!ty.is_always_falsy(), "{data:?}");
+                assert_eq!(
+                    ty.boolean_coercion(),
+                    Err(TypeTraversalError::UnresolvedType),
+                    "{data:?}"
+                );
+                let nullable = InferredType::new(
+                    &db,
+                    TypeData::Union(InternedUnion::new(
+                        &db,
+                        Vec::from([data, TypeData::Null]).into_boxed_slice(),
+                    )),
+                );
+                assert!(!nullable.is_always_truthy());
+                assert!(!nullable.is_always_falsy());
+                assert!(!nullable.is_non_nullish());
+                assert_eq!(
+                    nullable.boolean_coercion(),
+                    Err(TypeTraversalError::UnresolvedType)
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn distinct_runtime_objects_and_constructors_remain_truthy() {
+        let db = TestDb::default();
+        let class = TypeData::Class(InternedClass::new(
+            &db,
+            Box::default(),
+            None,
+            Box::default(),
+            Box::default(),
+            Some(Text::new_static("Shape")),
+            false,
+        ));
+        for data in [
+            class,
+            TypeData::Object(InternedObject::new(
+                &db,
+                None,
+                Box::default(),
+                false,
+                ObjectKind::Expression,
+            )),
+            TypeData::Constructor(InternedConstructor::new(
+                &db,
+                Box::default(),
+                Box::default(),
+                None,
+            )),
+            TypeData::Function(InternedFunction::new(
+                &db,
+                Box::default(),
+                Box::default(),
+                ReturnType::Type(TypeData::VoidKeyword),
+                false,
+                None,
+            )),
+            TypeData::ObjectKeyword,
+            TypeData::Symbol,
+            TypeData::Tuple(InternedTuple::new(&db, Box::default(), false)),
+            TypeData::Literal(InternedLiteral::new(&db, Literal::Object(Box::default()))),
+            TypeData::array_instance(&db, Box::new([TypeData::String])),
+            TypeData::promise_instance(&db, Box::new([TypeData::String])),
+            TypeData::instance_of(&db, TypeData::date_class(), Box::default()),
+            TypeData::instance_of(&db, TypeData::map_class(), Box::default()),
+            TypeData::instance_of(&db, TypeData::set_class(), Box::default()),
+            TypeData::instance_of(&db, TypeData::weak_map_class(), Box::default()),
+            TypeData::instance_of(&db, TypeData::error_class(), Box::default()),
+            TypeData::instance_of(&db, TypeData::regexp_class(), Box::default()),
+            TypeData::instance_of(
+                &db,
+                TypeData::array_class().expand_canonical_global(&db),
+                Box::new([TypeData::String]),
+            ),
+            TypeData::instance_of(
+                &db,
+                TypeData::promise_class().expand_canonical_global(&db),
+                Box::new([TypeData::String]),
+            ),
+        ] {
+            let ty = InferredType::new(&db, data);
+            assert!(ty.is_always_truthy(), "{data:?}");
+            assert!(ty.is_non_nullish(), "{data:?}");
+            assert_eq!(ty.boolean_coercion(), Ok(BooleanCoercion::AlwaysTruthy));
+            let nullable = InferredType::new(
+                &db,
+                TypeData::Union(InternedUnion::new(
+                    &db,
+                    Vec::from([data, TypeData::Null]).into_boxed_slice(),
+                )),
+            );
+            assert!(!nullable.is_always_truthy());
+            assert!(!nullable.is_always_falsy());
+            assert_eq!(nullable.boolean_coercion(), Ok(BooleanCoercion::Safe));
+        }
+    }
+
+    #[test]
     fn void_like_variants_preserve_uncertainty() {
         let db = TestDb::default();
         for (data, expected) in [
@@ -2181,7 +2336,13 @@ mod tests {
     #[test]
     fn stringification_combines_compound_types_iteratively() {
         let db = TestDb::default();
-        let object = TypeData::Object(InternedObject::new(&db, None, Box::default(), false));
+        let object = TypeData::Object(InternedObject::new(
+            &db,
+            None,
+            Box::default(),
+            false,
+            ObjectKind::Shape,
+        ));
         let custom_object = TypeData::Object(InternedObject::new(
             &db,
             None,
@@ -2191,6 +2352,7 @@ mod tests {
             }])
             .into_boxed_slice(),
             false,
+            ObjectKind::Shape,
         ));
         let union = TypeData::Union(InternedUnion::new(
             &db,

@@ -1,0 +1,54 @@
+/* should not generate diagnostics */
+a {
+  @if $x {}
+}
+
+a {
+  @if not $x {}
+}
+
+a {
+  @if $x != null and $x > 1 {}
+}
+
+a {
+  @if ($x != null) and $x > 1 {}
+}
+
+a {
+  @if $a != null and $b != null and $a > $b {}
+}
+
+a {
+  @if not ($x != null and $y) {}
+}
+
+a {
+  @if $x == 1 {}
+}
+
+a {
+  @if $x == "null" {}
+}
+
+a {
+  @if $x == NULL {}
+}
+
+a {
+  @if ($x == null) == $y {}
+}
+
+a {
+  @if if($x == null, true, false) {}
+}
+
+a {
+  @while $x == null {}
+}
+
+a {
+  width: if($x == null, 1px, 2px);
+}
+
+$is-null: $x == null;

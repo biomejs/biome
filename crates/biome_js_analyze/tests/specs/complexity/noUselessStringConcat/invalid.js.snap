@@ -122,14 +122,14 @@ invalid.js:4:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:5:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:17 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Useless string concatenation.
   
     3 │ const a = 'a' + ('b' + 'c')
     4 │ const a = ('a' + 'b') + 'c'
   > 5 │ const a = foo + 'a' + 'b' + 'c'
-      │           ^^^^^^^^^^^^^^^^^^^^^
+      │                 ^^^^^^^^^^^^^^^
     6 │ const a = (foo + 'a') + ('b' + 'c')
     7 │ const a = ((foo + 'a') + ('b' + 'c') + 1)
   
@@ -140,7 +140,7 @@ invalid.js:5:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━�
      3  3 │   const a = 'a' + ('b' + 'c')
      4  4 │   const a = ('a' + 'b') + 'c'
      5    │ - const·a·=·foo·+·'a'·+·'b'·+·'c'
-        5 │ + const·a·=·foo·+·'a'·+·"bc"
+        5 │ + const·a·=·foo·+·"abc"
      6  6 │   const a = (foo + 'a') + ('b' + 'c')
      7  7 │   const a = ((foo + 'a') + ('b' + 'c') + 1)
   
@@ -148,14 +148,14 @@ invalid.js:5:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:6:26 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Useless string concatenation.
   
     4 │ const a = ('a' + 'b') + 'c'
     5 │ const a = foo + 'a' + 'b' + 'c'
   > 6 │ const a = (foo + 'a') + ('b' + 'c')
-      │                          ^^^^^^^^^
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^
     7 │ const a = ((foo + 'a') + ('b' + 'c') + 1)
     8 │ const a = 'a' + `b`
   
@@ -166,7 +166,7 @@ invalid.js:6:26 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━�
      4  4 │   const a = ('a' + 'b') + 'c'
      5  5 │   const a = foo + 'a' + 'b' + 'c'
      6    │ - const·a·=·(foo·+·'a')·+·('b'·+·'c')
-        6 │ + const·a·=·(foo·+·'a')·+·("bc")
+        6 │ + const·a·=·foo·+·"abc"
      7  7 │   const a = ((foo + 'a') + ('b' + 'c') + 1)
      8  8 │   const a = 'a' + `b`
   
@@ -174,14 +174,14 @@ invalid.js:6:26 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:7:27 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:12 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Useless string concatenation.
   
     5 │ const a = foo + 'a' + 'b' + 'c'
     6 │ const a = (foo + 'a') + ('b' + 'c')
   > 7 │ const a = ((foo + 'a') + ('b' + 'c') + 1)
-      │                           ^^^^^^^^^
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^^
     8 │ const a = 'a' + `b`
     9 │ const a = `a` + 'b'
   
@@ -192,7 +192,7 @@ invalid.js:7:27 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━�
      5  5 │   const a = foo + 'a' + 'b' + 'c'
      6  6 │   const a = (foo + 'a') + ('b' + 'c')
      7    │ - const·a·=·((foo·+·'a')·+·('b'·+·'c')·+·1)
-        7 │ + const·a·=·((foo·+·'a')·+·("bc")·+·1)
+        7 │ + const·a·=·(foo·+·"abc"·+·1)
      8  8 │   const a = 'a' + `b`
      9  9 │   const a = `a` + 'b'
   

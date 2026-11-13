@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validTypesAlways.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+/// <reference types="lodash" />
+import { debounce } from "lodash";
+
+```

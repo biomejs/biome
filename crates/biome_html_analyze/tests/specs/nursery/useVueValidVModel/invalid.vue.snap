@@ -1,6 +1,5 @@
 ---
 source: crates/biome_html_analyze/tests/spec_tests.rs
-assertion_line: 121
 expression: invalid.vue
 ---
 # Input
@@ -41,6 +40,7 @@ expression: invalid.vue
   <input v-for="x in list" v-model="x">
   <MyComponent v-slot="{ item }"><input v-model="item"></MyComponent>
   <MyComponent><template #default="{ item }"><input v-model="item"></template></MyComponent>
+  <mi v-model="x"></mi>
 </template>
 
 ```
@@ -749,7 +749,7 @@ invalid.vue:35:50 lint/nursery/useVueValidVModel ━━━━━━━━━━�
   > 35 │   <MyComponent v-slot="{ item }"><input v-model="item"></MyComponent>
        │                                                  ^^^^
     36 │   <MyComponent><template #default="{ item }"><input v-model="item"></template></MyComponent>
-    37 │ </template>
+    37 │   <mi v-model="x"></mi>
   
   i Vue doesn't allow assigning to the variables of v-slot, because the new value wouldn't reach the data they were read from.
   
@@ -769,12 +769,33 @@ invalid.vue:36:62 lint/nursery/useVueValidVModel ━━━━━━━━━━�
     35 │   <MyComponent v-slot="{ item }"><input v-model="item"></MyComponent>
   > 36 │   <MyComponent><template #default="{ item }"><input v-model="item"></template></MyComponent>
        │                                                              ^^^^
-    37 │ </template>
-    38 │ 
+    37 │   <mi v-model="x"></mi>
+    38 │ </template>
   
   i Vue doesn't allow assigning to the variables of v-slot, because the new value wouldn't reach the data they were read from.
   
   i Bind to a property of the variable instead, e.g. item.name, or to the original data.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:37:7 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-model directive can't be used on <mi> elements.
+  
+    35 │   <MyComponent v-slot="{ item }"><input v-model="item"></MyComponent>
+    36 │   <MyComponent><template #default="{ item }"><input v-model="item"></template></MyComponent>
+  > 37 │   <mi v-model="x"></mi>
+       │       ^^^^^^^^^^^
+    38 │ </template>
+    39 │ 
+  
+  i Vue can only keep <input>, <select>, <textarea>, and components in sync with a variable.
+  
+  i Move the directive to a form field or a component, or bind the value with v-bind and listen for changes with v-on.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

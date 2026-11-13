@@ -1,0 +1,39 @@
+.a {
+	composes: 1px;
+}
+
+.b {
+	composes: var(--x);
+}
+
+.c {
+	composes: a(b);
+}
+
+.d {
+	composes: a "string";
+}
+
+.e {
+	composes: a from url("./x.css");
+}
+
+.f {
+	composes: 1px 2px;
+}
+
+.g {
+	composes: a 1px;
+}
+
+.i {
+	composes: 1px;
+	color: red;
+}
+
+.j {
+	composes: 1px !important;
+}
+
+.h {
+	composes:

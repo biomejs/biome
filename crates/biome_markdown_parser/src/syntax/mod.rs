@@ -29,6 +29,8 @@ pub mod html_block;
 pub mod inline;
 pub mod link_block;
 pub mod list;
+#[cfg(feature = "lang_mdx")]
+mod mdx;
 pub mod parse_error;
 pub mod quote;
 pub mod reference;
@@ -75,6 +77,42 @@ use thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
 use crate::lexer::MarkdownReLexContext;
 use crate::parser::DeferredInlineFlavor;
 use crate::{MarkdownParser, MarkdownSyntaxFeatures};
+
+/// Stand-ins for the MDX parsers when the `lang_mdx` feature is off, where
+/// [`MarkdownSyntaxFeatures::Mdx`] is never supported.
+#[cfg(not(feature = "lang_mdx"))]
+mod mdx {
+    use crate::MarkdownParser;
+    use biome_parser::prelude::ParsedSyntax;
+
+    pub(crate) fn at_mdx_block(_p: &mut MarkdownParser) -> bool {
+        false
+    }
+
+    pub(crate) fn at_mdx_flow_line(_p: &MarkdownParser) -> bool {
+        false
+    }
+
+    pub(crate) fn parse_mdx_block(_p: &mut MarkdownParser) -> ParsedSyntax {
+        ParsedSyntax::Absent
+    }
+
+    pub(crate) fn parse_mdx_inline_expression(_p: &mut MarkdownParser) -> ParsedSyntax {
+        ParsedSyntax::Absent
+    }
+
+    pub(crate) fn mdx_expression_len(bytes: &[u8]) -> usize {
+        bytes.len()
+    }
+
+    pub(crate) fn parse_mdx_inline_tag(_p: &mut MarkdownParser) -> ParsedSyntax {
+        ParsedSyntax::Absent
+    }
+}
+
+#[cfg(feature = "lang_mdx")]
+pub(crate) use mdx::jsx_tag_pairing_diagnostics;
+pub(crate) use mdx::{mdx_expression_len, parse_mdx_inline_expression, parse_mdx_inline_tag};
 
 /// Check if current token consists only of ASCII spaces and/or tabs.
 ///
@@ -336,7 +374,9 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
         let block_start_is_underscore =
             matches!(block_start_dispatch, Some(IDT)) && block_start_byte == Some(b'_');
 
-        if matches!(block_start_dispatch, Some(TPL | TLD)) && at_fenced_code_block(p) {
+        if MarkdownSyntaxFeatures::Mdx.is_supported(p) && mdx::at_mdx_block(p) {
+            mdx::parse_mdx_block(p)
+        } else if matches!(block_start_dispatch, Some(TPL | TLD)) && at_fenced_code_block(p) {
             parse_fenced_code_block(p)
         } else if matches!(block_start_dispatch, Some(TPL | TLD)) && line_starts_with_fence(p) {
             parse_fenced_code_block_force(p)
@@ -505,7 +545,9 @@ enum QuoteBreakKind {
 /// Uses `line_start_leading_indent()` to correctly handle indentation when NEWLINE
 /// tokens are explicit (not trivia).
 pub(crate) fn at_indent_code_block(p: &mut MarkdownParser) -> bool {
-    if !p.is_at_line_start() {
+    // MDX has no indented code: indented lines are ordinary text, because
+    // content inside JSX is usually indented.
+    if MarkdownSyntaxFeatures::Mdx.is_supported(p) || !p.is_at_line_start() {
         return false;
     }
 
@@ -1634,11 +1676,10 @@ fn is_quote_only_blank_line_from_source(p: &MarkdownParser, depth: usize) -> boo
         }
     }
 
-    // Consume quote markers and optional single space after each
-    for _ in 0..depth {
-        if idx >= source.len() || source.as_bytes()[idx] != b'>' {
-            return false;
-        }
+    // A blank line may continue only the outer quotes, closing deeper quotes.
+    let mut marker_count = 0;
+    while marker_count < depth && idx < source.len() && source.as_bytes()[idx] == b'>' {
+        marker_count += 1;
         idx += 1;
         if idx < source.len() {
             let c = source.as_bytes()[idx];
@@ -1646,6 +1687,9 @@ fn is_quote_only_blank_line_from_source(p: &MarkdownParser, depth: usize) -> boo
                 idx += 1;
             }
         }
+    }
+    if marker_count == 0 {
+        return false;
     }
 
     // Skip trailing whitespace
@@ -1958,6 +2002,11 @@ fn consume_partial_quote_prefix_lookahead(p: &mut MarkdownParser, depth: usize) 
 /// - Ordered lists can interrupt paragraphs ONLY if starting with `1` AND not empty
 #[inline]
 pub(crate) fn at_block_interrupt(p: &mut MarkdownParser) -> bool {
+    // A line of JSX tags and expressions interrupts a paragraph at any
+    // indentation, because MDX has no indented code.
+    if MarkdownSyntaxFeatures::Mdx.is_supported(p) && mdx::at_mdx_flow_line(p) {
+        return true;
+    }
     let Some((byte, dispatch)) = block_interrupt_candidate(p) else {
         return false;
     };

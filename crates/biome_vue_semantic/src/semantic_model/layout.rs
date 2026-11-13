@@ -9,8 +9,8 @@ use super::model::*;
 use biome_html_syntax::{
     AnyHtmlAttribute, AnyHtmlAttributeInitializer, AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName,
     AnyVueDirective, AnyVueDirectiveArgument, HtmlAttributeInitializerClause, HtmlAttributeList,
-    HtmlElementList, HtmlRoot, HtmlSyntaxKind, VueDirectiveArgument, VueModifierList,
-    VueVForIdentifierBinding, VueVForValue,
+    HtmlElementList, HtmlRoot, HtmlSyntaxKind, HtmlSyntaxNode, VueDirectiveArgument,
+    VueModifierList, VueVForIdentifierBinding, VueVForValue,
 };
 use biome_rowan::{AstNode, AstNodeList, TextRange, TextSize, TokenText};
 
@@ -44,6 +44,7 @@ pub(crate) fn collect_layout(builder: &mut ModelBuilder, root: &HtmlRoot) -> Lay
 /// The parts of an element the layout pass reads, for both `<a></a>` and
 /// `<a />`.
 struct Tag {
+    node: HtmlSyntaxNode,
     range: TextRange,
     start_tag: TextRange,
     name: AnyHtmlTagName,
@@ -67,6 +68,7 @@ impl Tag {
                         closing.syntax().text_trimmed_range().start()
                     });
                 Some(Self {
+                    node: element.syntax().clone(),
                     range: element.syntax().text_trimmed_range(),
                     start_tag,
                     name: opening.name().ok()?,
@@ -79,6 +81,7 @@ impl Tag {
             AnyHtmlElement::HtmlSelfClosingElement(element) => {
                 let range = element.syntax().text_trimmed_range();
                 Some(Self {
+                    node: element.syntax().clone(),
                     range,
                     start_tag: range,
                     name: element.name().ok()?,
@@ -200,11 +203,15 @@ fn visit_tag(
     .or_else(|| tag.name.token_text_trimmed())
     .filter(|name| name.text() == tag_text)
     .unwrap_or_else(|| synthetic_name(&tag_text));
-    let is_component =
-        !matches!(tag.name, AnyHtmlTagName::HtmlTagName(_)) || tag_text.contains('-');
+    // Known tags such as `annotation-xml` are native even though they contain a `-`.
+    let is_component = tag
+        .name
+        .tag_name_kind()
+        .is_none_or(|kind| kind == HtmlSyntaxKind::HTML_UNKNOWN_TAG && tag_text.contains('-'));
 
     let parent_scope = parent.map(|parent| builder.data.elements[parent.index()].scope);
     let scope = builder.add_scope(ScopeKind::Element(id), parent_scope);
+    let node = builder.add_html_node(&tag.node);
 
     builder.data.elements.push(ElementData {
         range: tag.range,
@@ -219,6 +226,7 @@ fn visit_tag(
         chain: None,
         self_closing: tag.self_closing,
         class_open: false,
+        node,
     });
 
     let first_attr = builder.data.attrs.len() as u32;
@@ -333,12 +341,14 @@ fn visit_attribute(
                     _ => {}
                 }
             }
+            let node = builder.add_html_node(attribute.syntax());
             builder.data.attrs.push(AttrData {
                 element,
                 range,
                 name: AttrName::Plain(name),
                 value,
                 value_range,
+                node,
             });
         }
         AnyHtmlAttribute::AnyVueDirective(directive) => {
@@ -370,6 +380,7 @@ fn visit_attribute(
                 }
                 Some(_) => (AttrValueData::Unparsed, None),
             };
+            let node = builder.add_html_node(attribute.syntax());
             builder.data.attrs.push(AttrData {
                 element,
                 range,
@@ -383,6 +394,7 @@ fn visit_attribute(
                 },
                 value,
                 value_range,
+                node,
             });
         }
         _ => {}

@@ -1,0 +1,138 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+    indented text is a paragraph
+
+Paragraph
+
+    still a paragraph
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..1 " " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@1..2 " " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@2..3 " " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@3..4 " " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@4..32 "indented text is a paragraph" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@32..33 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@33..34 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@34..43 "Paragraph" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@43..44 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@44..45 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@45..46 " " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@46..47 " " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@47..48 " " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@48..49 " " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@49..66 "still a paragraph" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@66..67 "\n" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@67..67 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..67
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..67
+    0: MD_PARAGRAPH@0..33
+      0: MD_INLINE_ITEM_LIST@0..33
+        0: MD_TEXTUAL@0..1
+          0: MD_TEXTUAL_LITERAL@0..1 " " [] []
+        1: MD_TEXTUAL@1..2
+          0: MD_TEXTUAL_LITERAL@1..2 " " [] []
+        2: MD_TEXTUAL@2..3
+          0: MD_TEXTUAL_LITERAL@2..3 " " [] []
+        3: MD_TEXTUAL@3..4
+          0: MD_TEXTUAL_LITERAL@3..4 " " [] []
+        4: MD_TEXTUAL@4..32
+          0: MD_TEXTUAL_LITERAL@4..32 "indented text is a paragraph" [] []
+        5: MD_TEXTUAL@32..33
+          0: MD_TEXTUAL_LITERAL@32..33 "\n" [] []
+    1: MD_NEWLINE@33..34
+      0: NEWLINE@33..34 "\n" [] []
+    2: MD_PARAGRAPH@34..44
+      0: MD_INLINE_ITEM_LIST@34..44
+        0: MD_TEXTUAL@34..43
+          0: MD_TEXTUAL_LITERAL@34..43 "Paragraph" [] []
+        1: MD_TEXTUAL@43..44
+          0: MD_TEXTUAL_LITERAL@43..44 "\n" [] []
+    3: MD_NEWLINE@44..45
+      0: NEWLINE@44..45 "\n" [] []
+    4: MD_PARAGRAPH@45..67
+      0: MD_INLINE_ITEM_LIST@45..67
+        0: MD_TEXTUAL@45..46
+          0: MD_TEXTUAL_LITERAL@45..46 " " [] []
+        1: MD_TEXTUAL@46..47
+          0: MD_TEXTUAL_LITERAL@46..47 " " [] []
+        2: MD_TEXTUAL@47..48
+          0: MD_TEXTUAL_LITERAL@47..48 " " [] []
+        3: MD_TEXTUAL@48..49
+          0: MD_TEXTUAL_LITERAL@48..49 " " [] []
+        4: MD_TEXTUAL@49..66
+          0: MD_TEXTUAL_LITERAL@49..66 "still a paragraph" [] []
+        5: MD_TEXTUAL@66..67
+          0: MD_TEXTUAL_LITERAL@66..67 "\n" [] []
+  3: EOF@67..67 "" [] []
+
+```

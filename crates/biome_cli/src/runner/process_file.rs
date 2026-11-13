@@ -58,7 +58,10 @@ pub(crate) enum Message {
         skipped_suggested_fixes: u32,
     },
     Failure,
-    Error(Error),
+    Error {
+        diagnostic: Error,
+        is_traversal_error: bool,
+    },
     Diagnostics {
         file_path: String,
         content: String,
@@ -91,7 +94,10 @@ where
     D: std::fmt::Debug,
 {
     fn from(err: D) -> Self {
-        Self::Error(Error::from(err))
+        Self::Error {
+            diagnostic: Error::from(err),
+            is_traversal_error: false,
+        }
     }
 }
 
@@ -177,7 +183,7 @@ pub(crate) trait ProcessFile: Send + Sync + std::panic::RefUnwindSafe {
                 })
                 .with_file_path_and_code_and_tags(
                     biome_path.to_string(),
-                    category!("files/missingHandler"),
+                    category!("fs/missingHandler"),
                     DiagnosticTags::VERBOSE,
                 )?;
 

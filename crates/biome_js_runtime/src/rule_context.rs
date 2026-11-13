@@ -138,6 +138,7 @@ fn embedding_kind(kind: &JsEmbeddingKind, context: &mut Context) -> JsValue {
                 SvelteEmbeddingKind::SnippetSignature => js_string!("snippetSignature"),
                 SvelteEmbeddingKind::LegacyConst => js_string!("legacyConst"),
                 SvelteEmbeddingKind::Declaration => js_string!("declaration"),
+                SvelteEmbeddingKind::Generics => js_string!("generics"),
             };
             object
                 .property(

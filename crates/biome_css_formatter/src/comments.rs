@@ -632,8 +632,7 @@ fn is_media_separator_comment(
 ) -> bool {
     let Some(comma_token) = preceding_query
         .syntax()
-        .last_token()
-        .and_then(|token| token.next_token())
+        .next_token()
         .filter(|token| token.kind() == CssSyntaxKind::COMMA)
     else {
         return false;
@@ -791,8 +790,7 @@ fn find_value_boundary_owner(comment: &DecoratedComment<CssLanguage>) -> Option<
     let group = find_scss_declaration_list_group(following)?;
     let separator = group
         .syntax()
-        .first_token()
-        .and_then(|token| token.prev_token())
+        .prev_token()
         .filter(|token| token.kind() == CssSyntaxKind::COMMA)?;
 
     TextRange::new(

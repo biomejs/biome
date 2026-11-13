@@ -1,0 +1,122 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-ts.vue
+---
+# Input
+```vue
+<script setup lang="ts">
+/* should generate diagnostics */
+const modelValue = defineModel<string>({ default: '' })
+const count = defineModel<number>('count', { default: 0 })
+const items = defineModel<string[]>('items', { default: () => [] })
+const asConst = defineModel('asConst', { default: 'foo' } as const)
+const satisfied = defineModel('satisfied', { default: 'foo' } satisfies object)
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-ts.vue:3:51 lint/nursery/noVueDefineModelDefault ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The model modelValue has a default value.
+  
+    1 │ <script setup lang="ts">
+    2 │ /* should generate diagnostics */
+  > 3 │ const modelValue = defineModel<string>({ default: '' })
+      │                                                   ^^
+    4 │ const count = defineModel<number>('count', { default: 0 })
+    5 │ const items = defineModel<string[]>('items', { default: () => [] })
+  
+  i When the parent component passes undefined with v-model, this component uses the default value while the parent keeps undefined. The two components then show different values.
+  
+  i Remove the default value, and give the variable an initial value in the parent component instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-ts.vue:4:55 lint/nursery/noVueDefineModelDefault ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The model count has a default value.
+  
+    2 │ /* should generate diagnostics */
+    3 │ const modelValue = defineModel<string>({ default: '' })
+  > 4 │ const count = defineModel<number>('count', { default: 0 })
+      │                                                       ^
+    5 │ const items = defineModel<string[]>('items', { default: () => [] })
+    6 │ const asConst = defineModel('asConst', { default: 'foo' } as const)
+  
+  i When the parent component passes undefined with v-model, this component uses the default value while the parent keeps undefined. The two components then show different values.
+  
+  i Remove the default value, and give the variable an initial value in the parent component instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-ts.vue:5:57 lint/nursery/noVueDefineModelDefault ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The model items has a default value.
+  
+    3 │ const modelValue = defineModel<string>({ default: '' })
+    4 │ const count = defineModel<number>('count', { default: 0 })
+  > 5 │ const items = defineModel<string[]>('items', { default: () => [] })
+      │                                                         ^^^^^^^^
+    6 │ const asConst = defineModel('asConst', { default: 'foo' } as const)
+    7 │ const satisfied = defineModel('satisfied', { default: 'foo' } satisfies object)
+  
+  i When the parent component passes undefined with v-model, this component uses the default value while the parent keeps undefined. The two components then show different values.
+  
+  i Remove the default value, and give the variable an initial value in the parent component instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-ts.vue:6:51 lint/nursery/noVueDefineModelDefault ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The model asConst has a default value.
+  
+    4 │ const count = defineModel<number>('count', { default: 0 })
+    5 │ const items = defineModel<string[]>('items', { default: () => [] })
+  > 6 │ const asConst = defineModel('asConst', { default: 'foo' } as const)
+      │                                                   ^^^^^
+    7 │ const satisfied = defineModel('satisfied', { default: 'foo' } satisfies object)
+    8 │ </script>
+  
+  i When the parent component passes undefined with v-model, this component uses the default value while the parent keeps undefined. The two components then show different values.
+  
+  i Remove the default value, and give the variable an initial value in the parent component instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-ts.vue:7:55 lint/nursery/noVueDefineModelDefault ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The model satisfied has a default value.
+  
+    5 │ const items = defineModel<string[]>('items', { default: () => [] })
+    6 │ const asConst = defineModel('asConst', { default: 'foo' } as const)
+  > 7 │ const satisfied = defineModel('satisfied', { default: 'foo' } satisfies object)
+      │                                                       ^^^^^
+    8 │ </script>
+    9 │ 
+  
+  i When the parent component passes undefined with v-model, this component uses the default value while the parent keeps undefined. The two components then show different values.
+  
+  i Remove the default value, and give the variable an initial value in the parent component instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

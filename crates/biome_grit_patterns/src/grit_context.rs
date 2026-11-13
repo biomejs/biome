@@ -57,6 +57,12 @@ pub struct GritExecContext<'a> {
     pub predicates: &'a [PredicateDefinition<GritQueryContext>],
 
     pub diagnostics: Mutex<Vec<(RuleDiagnostic, Applicability)>>,
+
+    /// Whether the query was compiled as a node selector.
+    ///
+    /// Selector queries allow snippets to match multi-child lists. Regular
+    /// Grit queries keep their existing list-matching behavior.
+    pub node_selector: bool,
 }
 
 impl GritExecContext<'_> {

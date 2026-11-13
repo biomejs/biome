@@ -2271,7 +2271,7 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
         Vec<RuleFilter<'a>>,
         FxHashSet<RuleFilter<'a>>,
     ) {
-        let actions = self.actions.map(Cow::Borrowed).unwrap_or_default();
+        let actions = self.actions.map_or_default(Cow::Borrowed);
         self.enabled_rules.extend(actions.as_enabled_rules());
         self.disabled_rules.extend(actions.as_disabled_rules());
         (self.enabled_rules, self.disabled_rules, self.rules_with_fix)

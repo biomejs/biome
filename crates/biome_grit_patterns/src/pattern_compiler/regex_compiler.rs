@@ -54,13 +54,12 @@ impl RegexCompiler {
         let variables: Vec<_> = node
             .variables()
             .map(|variables| variables.args())
-            .map(|args| {
+            .map_or_default(|args| {
                 args.into_iter()
                     .filter_map(Result::ok)
                     .map(|variable| VariableCompiler::from_node(&variable, context))
                     .collect()
-            })
-            .unwrap_or_default();
+            });
 
         Ok(RegexPattern::new(regex, variables))
     }

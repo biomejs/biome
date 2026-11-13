@@ -48,8 +48,13 @@ pub(crate) fn generate_license(mode: Mode) -> Result<()> {
     Ok(())
 }
 
-fn create_data(license_list: LicenseList) -> io::Result<TokenStream> {
+fn create_data(mut license_list: LicenseList) -> io::Result<TokenStream> {
     let mut list = vec![];
+
+    // `biome_package` looks up licenses with a binary search on the license ID.
+    license_list
+        .licenses
+        .sort_unstable_by(|a, b| a.license_id.cmp(&b.license_id));
 
     let version = Literal::string(&license_list.license_list_version);
     let release_date = Literal::string(&license_list.release_date);

@@ -335,6 +335,7 @@ impl SemanticEventExtractor {
         JS_SCRIPT,
         JS_EXPRESSION_TEMPLATE_ROOT,
         JS_SVELTE_DECLARATION_ROOT,
+        JS_SVELTE_LEGACY_CONST_ROOT,
         JS_SVELTE_SNIPPET_ROOT,
         JS_VUE_SLOT_PROPS_ROOT,
         JS_VUE_GENERIC_ROOT,
@@ -439,6 +440,7 @@ impl SemanticEventExtractor {
 
             JS_EXPRESSION_TEMPLATE_ROOT
             | JS_SVELTE_DECLARATION_ROOT
+            | JS_SVELTE_LEGACY_CONST_ROOT
             | JS_SVELTE_SNIPPET_ROOT
             | JS_VUE_SLOT_PROPS_ROOT
             | JS_VUE_GENERIC_ROOT => {
@@ -1041,6 +1043,7 @@ impl SemanticEventExtractor {
             | JS_SCRIPT
             | JS_EXPRESSION_TEMPLATE_ROOT
             | JS_SVELTE_DECLARATION_ROOT
+            | JS_SVELTE_LEGACY_CONST_ROOT
             | JS_SVELTE_SNIPPET_ROOT
             | JS_VUE_SLOT_PROPS_ROOT
             | JS_VUE_GENERIC_ROOT

@@ -1,0 +1,339 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.limits.css
+---
+# Input
+```css
+/* should generate diagnostics */
+#a #b {}
+#a > #b {}
+ul li a {}
+div.foo p a {}
+[name="foo"][type="text"] {}
+input:not([name="bar"][disabled]) {}
+button:hover + a:visited {}
+.foo:first-child:hover {}
+* * {}
+.a .b .c .d {}
+.a > .b + .c ~ .d {}
+:is(#a #b) {}
+.parent {
+	#a #b {}
+}
+
+```
+
+# Diagnostics
+```
+invalid.limits.css:2:1 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This selector has too many ID selectors: it has 2, but the limit is 1.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ #a #b {}
+      │ ^^^^^
+    3 │ #a > #b {}
+    4 │ ul li a {}
+  
+  i Complex selectors are hard to read and override, and break easily when the page structure changes.
+  
+  i Simplify the selector, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.limits.css:3:1 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This selector has too many ID selectors: it has 2, but the limit is 1.
+  
+    1 │ /* should generate diagnostics */
+    2 │ #a #b {}
+  > 3 │ #a > #b {}
+      │ ^^^^^^^
+    4 │ ul li a {}
+    5 │ div.foo p a {}
+  
+  i Complex selectors are hard to read and override, and break easily when the page structure changes.
+  
+  i Simplify the selector, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.limits.css:4:1 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This selector has too many type selectors: it has 3, but the limit is 2.
+  
+    2 │ #a #b {}
+    3 │ #a > #b {}
+  > 4 │ ul li a {}
+      │ ^^^^^^^
+    5 │ div.foo p a {}
+    6 │ [name="foo"][type="text"] {}
+  
+  i Complex selectors are hard to read and override, and break easily when the page structure changes.
+  
+  i Simplify the selector, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.limits.css:5:1 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This selector has too many type selectors: it has 3, but the limit is 2.
+  
+    3 │ #a > #b {}
+    4 │ ul li a {}
+  > 5 │ div.foo p a {}
+      │ ^^^^^^^^^^^
+    6 │ [name="foo"][type="text"] {}
+    7 │ input:not([name="bar"][disabled]) {}
+  
+  i Complex selectors are hard to read and override, and break easily when the page structure changes.
+  
+  i Simplify the selector, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.limits.css:6:1 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This selector has too many attribute selectors: it has 2, but the limit is 1.
+  
+    4 │ ul li a {}
+    5 │ div.foo p a {}
+  > 6 │ [name="foo"][type="text"] {}
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ input:not([name="bar"][disabled]) {}
+    8 │ button:hover + a:visited {}
+  
+  i Complex selectors are hard to read and override, and break easily when the page structure changes.
+  
+  i Simplify the selector, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.limits.css:7:11 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This selector has too many attribute selectors: it has 2, but the limit is 1.
+  
+    5 │ div.foo p a {}
+    6 │ [name="foo"][type="text"] {}
+  > 7 │ input:not([name="bar"][disabled]) {}
+      │           ^^^^^^^^^^^^^^^^^^^^^^
+    8 │ button:hover + a:visited {}
+    9 │ .foo:first-child:hover {}
+  
+  i Complex selectors are hard to read and override, and break easily when the page structure changes.
+  
+  i Simplify the selector, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.limits.css:8:1 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This selector has too many pseudo-classes: it has 2, but the limit is 1.
+  
+     6 │ [name="foo"][type="text"] {}
+     7 │ input:not([name="bar"][disabled]) {}
+   > 8 │ button:hover + a:visited {}
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ .foo:first-child:hover {}
+    10 │ * * {}
+  
+  i Complex selectors are hard to read and override, and break easily when the page structure changes.
+  
+  i Simplify the selector, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.limits.css:9:1 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This selector has too many pseudo-classes: it has 2, but the limit is 1.
+  
+     7 │ input:not([name="bar"][disabled]) {}
+     8 │ button:hover + a:visited {}
+   > 9 │ .foo:first-child:hover {}
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    10 │ * * {}
+    11 │ .a .b .c .d {}
+  
+  i Complex selectors are hard to read and override, and break easily when the page structure changes.
+  
+  i Simplify the selector, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.limits.css:10:1 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This selector has too many universal selectors: it has 2, but the limit is 1.
+  
+     8 │ button:hover + a:visited {}
+     9 │ .foo:first-child:hover {}
+  > 10 │ * * {}
+       │ ^^^
+    11 │ .a .b .c .d {}
+    12 │ .a > .b + .c ~ .d {}
+  
+  i Complex selectors are hard to read and override, and break easily when the page structure changes.
+  
+  i Simplify the selector, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.limits.css:11:1 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This selector has too many compound selectors: it has 4, but the limit is 3.
+  
+     9 │ .foo:first-child:hover {}
+    10 │ * * {}
+  > 11 │ .a .b .c .d {}
+       │ ^^^^^^^^^^^
+    12 │ .a > .b + .c ~ .d {}
+    13 │ :is(#a #b) {}
+  
+  i Complex selectors are hard to read and override, and break easily when the page structure changes.
+  
+  i Simplify the selector, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.limits.css:11:1 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This selector has too many combinators: it has 3, but the limit is 2.
+  
+     9 │ .foo:first-child:hover {}
+    10 │ * * {}
+  > 11 │ .a .b .c .d {}
+       │ ^^^^^^^^^^^
+    12 │ .a > .b + .c ~ .d {}
+    13 │ :is(#a #b) {}
+  
+  i Complex selectors are hard to read and override, and break easily when the page structure changes.
+  
+  i Simplify the selector, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.limits.css:12:1 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This selector has too many combinators: it has 3, but the limit is 2.
+  
+    10 │ * * {}
+    11 │ .a .b .c .d {}
+  > 12 │ .a > .b + .c ~ .d {}
+       │ ^^^^^^^^^^^^^^^^^
+    13 │ :is(#a #b) {}
+    14 │ .parent {
+  
+  i Complex selectors are hard to read and override, and break easily when the page structure changes.
+  
+  i Simplify the selector, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.limits.css:12:1 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This selector has too many compound selectors: it has 4, but the limit is 3.
+  
+    10 │ * * {}
+    11 │ .a .b .c .d {}
+  > 12 │ .a > .b + .c ~ .d {}
+       │ ^^^^^^^^^^^^^^^^^
+    13 │ :is(#a #b) {}
+    14 │ .parent {
+  
+  i Complex selectors are hard to read and override, and break easily when the page structure changes.
+  
+  i Simplify the selector, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.limits.css:13:5 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This selector has too many ID selectors: it has 2, but the limit is 1.
+  
+    11 │ .a .b .c .d {}
+    12 │ .a > .b + .c ~ .d {}
+  > 13 │ :is(#a #b) {}
+       │     ^^^^^
+    14 │ .parent {
+    15 │ 	#a #b {}
+  
+  i Complex selectors are hard to read and override, and break easily when the page structure changes.
+  
+  i Simplify the selector, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.limits.css:15:2 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This selector has too many ID selectors: it has 2, but the limit is 1.
+  
+    13 │ :is(#a #b) {}
+    14 │ .parent {
+  > 15 │ 	#a #b {}
+       │ 	^^^^^
+    16 │ }
+    17 │ 
+  
+  i Complex selectors are hard to read and override, and break easily when the page structure changes.
+  
+  i Simplify the selector, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

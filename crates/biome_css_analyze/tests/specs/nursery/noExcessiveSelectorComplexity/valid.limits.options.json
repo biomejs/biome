@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noExcessiveSelectorComplexity": {
+          "level": "error",
+          "options": {
+            "maxIds": 1,
+            "maxTypes": 2,
+            "maxAttributes": 1,
+            "maxPseudoClasses": 1,
+            "maxUniversals": 1,
+            "maxCompounds": 3,
+            "maxCombinators": 2
+          }
+        }
+      }
+    }
+  }
+}

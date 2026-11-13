@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validExportAssignment.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+const foo = 1;
+
+export = foo;
+
+```

@@ -94,13 +94,12 @@ impl Rule for NoVueDeprecatedPropsDefaultThis {
         if prop.types() == PropType::Function {
             return Box::default();
         }
-        let root = ctx.root();
         let mut signals = Vec::new();
         for default in prop
             .defaults()
             .filter(|default| default.source() == DefaultSource::Inline)
         {
-            let Some(node) = root.syntax().covering_element(default.range()).into_node() else {
+            let Some(node) = ctx.vue_model().node(&default) else {
                 continue;
             };
             // Arrow functions are not matched: their `this` is the one of the

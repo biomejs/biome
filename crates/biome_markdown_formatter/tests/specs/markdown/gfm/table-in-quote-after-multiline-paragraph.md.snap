@@ -1,0 +1,113 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/gfm/table-in-quote-after-multiline-paragraph.md
+---
+
+# Input
+
+```md
+> First line of a paragraph,
+> second line of it.
+>
+> | A | B |
+> |---|---|
+> | x | y |
+
+> > First line of a paragraph,
+> > second line of it.
+> >
+> > | A | B |
+> > |---|---|
+> > | x | y |
+
+> First line of a paragraph,
+> second line of it.
+>
+> > | A | B |
+> > |---|---|
+> > | x | y |
+
+> First line of a paragraph,
+> second line of it.
+>
+> - | A | B |
+>   |---|---|
+>   | x | y |
+
+ > | A | B |
+ > |---|---|
+ > | x | y |
+
+> - | A | B |
+>   |---|---|
+>   | x | y |
+
+- > First line of a paragraph,
+  > second line of it.
+  >
+  > | A | B |
+  > |---|---|
+  > | x | y |
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "parser": {
+      "gfm": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+> First line of a paragraph,
+> second line of it.
+>
+> | A   | B   |
+> | --- | --- |
+> | x   | y   |
+
+> > First line of a paragraph,
+> > second line of it.
+> >
+> > | A   | B   |
+> > | --- | --- |
+> > | x   | y   |
+
+> First line of a paragraph,
+> second line of it.
+>
+> > | A   | B   |
+> > | --- | --- |
+> > | x   | y   |
+
+> First line of a paragraph,
+> second line of it.
+>
+> - | A   | B   |
+>   | --- | --- |
+>   | x   | y   |
+
+ > | A   | B   |
+ > | --- | --- |
+ > | x   | y   |
+
+> - | A   | B   |
+>   | --- | --- |
+>   | x   | y   |
+
+- > First line of a paragraph,
+  > second line of it.
+  >
+  > | A   | B   |
+  > | --- | --- |
+  > | x   | y   |
+
+```

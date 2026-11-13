@@ -1,0 +1,41 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import { defineRule, grit, registerDiagnostic } from "@biomejs/runtime/plugin";
+export const rule = defineRule({
+	query: grit("JsReferenceIdentifier()", { semantic: true }),
+	run(node, { model }) {
+		const binding = model.binding(node);
+		registerDiagnostic(
+			node,
+			"information",
+			`${binding.syntax().text}:${binding.allReads().length}`,
+		);
+	},
+});
+```
+
+# Input
+
+## `/file.js`
+
+```js
+let value = 1; value;
+```
+
+# Diagnostics
+
+```block
+/file.js:1:16 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i value:1
+  
+  > 1 │ let value = 1; value;
+      │                ^^^^^
+```

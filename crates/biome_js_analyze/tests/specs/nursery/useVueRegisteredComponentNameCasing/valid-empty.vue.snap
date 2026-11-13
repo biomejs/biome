@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-empty.vue
+---
+# Input
+```vue
+<script>
+/* should not generate diagnostics */
+export default {
+  ...base,
+};
+</script>
+
+```

@@ -1,0 +1,19 @@
+[package]
+name                 = "biome_js_extent"
+version.workspace    = true
+authors.workspace    = true
+edition.workspace    = true
+description          = "Finds where JavaScript embedded in another language ends"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
+
+[dependencies]
+biome_unicode_table = { workspace = true }
+smallvec            = { workspace = true }
+
+[lints]
+workspace = true

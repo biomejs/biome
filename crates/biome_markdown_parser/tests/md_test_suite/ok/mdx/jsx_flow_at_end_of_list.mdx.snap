@@ -1,0 +1,115 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+- item
+
+  <Tip /> {a}
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@0..1 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@1..2 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@2..6 "item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@6..7 "\n" [] [],
+                                },
+                            ],
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@7..8 "\n" [] [],
+                        },
+                        MdContinuationIndent {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@8..10 "  " [] [],
+                                },
+                            ],
+                        },
+                        MdxJsxBlockTag {
+                            value_token: MDX_JSX_TAG_LITERAL@10..17 "<Tip />" [] [],
+                        },
+                        MdxBlockExpression {
+                            l_curly_token: L_CURLY@17..19 "{" [Whitespace(" ")] [],
+                            content: MdxExpressionContent {
+                                value_token: MDX_EXPRESSION_LITERAL@19..20 "a" [] [],
+                            },
+                            r_curly_token: R_CURLY@20..21 "}" [] [],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@21..22 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@22..22 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..22
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..22
+    0: MD_BULLET_LIST_ITEM@0..21
+      0: MD_BULLET_LIST@0..21
+        0: MD_BULLET@0..21
+          0: MD_LIST_MARKER_PREFIX@0..2
+            0: MD_INDENT_TOKEN_LIST@0..0
+            1: MINUS@0..1 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@1..2 " " [] []
+            3: MD_INDENT_TOKEN_LIST@2..2
+          1: MD_BLOCK_LIST@2..21
+            0: MD_PARAGRAPH@2..7
+              0: MD_INLINE_ITEM_LIST@2..7
+                0: MD_TEXTUAL@2..6
+                  0: MD_TEXTUAL_LITERAL@2..6 "item" [] []
+                1: MD_TEXTUAL@6..7
+                  0: MD_TEXTUAL_LITERAL@6..7 "\n" [] []
+            1: MD_NEWLINE@7..8
+              0: NEWLINE@7..8 "\n" [] []
+            2: MD_CONTINUATION_INDENT@8..10
+              0: MD_INDENT_TOKEN_LIST@8..10
+                0: MD_INDENT_TOKEN@8..10
+                  0: MD_INDENT_CHAR@8..10 "  " [] []
+            3: MDX_JSX_BLOCK_TAG@10..17
+              0: MDX_JSX_TAG_LITERAL@10..17 "<Tip />" [] []
+            4: MDX_BLOCK_EXPRESSION@17..21
+              0: L_CURLY@17..19 "{" [Whitespace(" ")] []
+              1: MDX_EXPRESSION_CONTENT@19..20
+                0: MDX_EXPRESSION_LITERAL@19..20 "a" [] []
+              2: R_CURLY@20..21 "}" [] []
+    1: MD_NEWLINE@21..22
+      0: NEWLINE@21..22 "\n" [] []
+  3: EOF@22..22 "" [] []
+
+```

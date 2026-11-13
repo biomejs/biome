@@ -142,8 +142,7 @@ impl TailwindDesignSystem {
         options
             .stylesheet()
             .and_then(|path| module_db.module_for_path(path))
-            .map(|module| tailwind_design_system(module_db, module))
-            .unwrap_or_default()
+            .map_or_default(|module| tailwind_design_system(module_db, module))
     }
 
     /// Whether the design system has nothing beyond the default configuration.

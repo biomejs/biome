@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+array.splice(index, 1n, element);
+array.toSpliced(index, 1n as const, element);
+array.splice(index, count as number, element);
+array.splice(-2 as const, 0, element);
+
+```

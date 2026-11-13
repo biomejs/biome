@@ -2,11 +2,11 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, JsCallArgumentList, JsCallExpression, JsUnaryOperator,
-};
+use biome_js_syntax::{AnyJsCallArgument, JsCallArgumentList, JsCallExpression};
 use biome_rowan::{AstNode, AstSeparatedList};
 use biome_rule_options::no_magic_array_flat_depth::NoMagicArrayFlatDepthOptions;
+
+use crate::utils::static_number_value;
 
 declare_lint_rule! {
     /// Disallow unexplained numbers as the depth argument of `Array.prototype.flat()`.
@@ -100,23 +100,4 @@ fn single_argument(arguments: &JsCallArgumentList) -> Option<AnyJsCallArgument> 
     let mut iter = arguments.iter();
     let first = iter.next()?.ok()?;
     iter.next().is_none().then_some(first)
-}
-
-/// Returns the value of a number literal, looking through parentheses, TypeScript type
-/// wrappers, and unary `+` and `-`.
-fn static_number_value(expression: &AnyJsExpression) -> Option<f64> {
-    match expression.clone().omit_type_wrappers()? {
-        AnyJsExpression::AnyJsLiteralExpression(literal) => {
-            literal.as_js_number_literal_expression()?.as_number()
-        }
-        AnyJsExpression::JsUnaryExpression(unary) => {
-            let value = static_number_value(&unary.argument().ok()?)?;
-            match unary.operator().ok()? {
-                JsUnaryOperator::Minus => Some(-value),
-                JsUnaryOperator::Plus => Some(value),
-                _ => None,
-            }
-        }
-        _ => None,
-    }
 }

@@ -19,7 +19,7 @@ pub use generated::*;
 pub use script_type::*;
 pub use svg::*;
 pub use syntax_node::*;
-pub use tags::{HTML_TAG_NAMES, VOID_ELEMENTS};
+pub use tags::{HTML_TAG_NAMES, MATHML_TAG_NAMES, VOID_ELEMENTS};
 
 use crate::HtmlSyntaxKind::{
     ASTRO_BOGUS_FRONTMATTER, HTML_BOGUS, HTML_BOGUS_ATTRIBUTE, HTML_BOGUS_ELEMENT,

@@ -151,9 +151,9 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
 
                 match condition {
                     DisregardedSlotCondition::Always => true,
-                    DisregardedSlotCondition::OnlyIf(node_texts) => node_texts.iter().any(|text| {
-                        *text == node.as_ref().map(|node| node.text()).unwrap_or_default()
-                    }),
+                    DisregardedSlotCondition::OnlyIf(node_texts) => node_texts
+                        .iter()
+                        .any(|text| *text == node.as_ref().map_or_default(|node| node.text())),
                 }
             },
         )

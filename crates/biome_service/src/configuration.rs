@@ -817,9 +817,9 @@ impl<'a> ConfigurationExtendsLoader<'a> {
                             &pending.external_resolution_base_path,
                             self.fs,
                         )
-                        .map_err(&cant_resolve)?
+                        .map_err(cant_resolve)?
                         {
-                            (result.map_err(&cant_resolve)?, false, None)
+                            (result.map_err(cant_resolve)?, false, None)
                         } else {
                             let (path, package) = self.resolve_named_manifest_config(
                                 package,
@@ -1433,8 +1433,7 @@ impl PendingConfiguration {
             .extends
             .as_ref()
             .and_then(|extends| extends.as_list())
-            .map(|extends| extends.iter().map(|entry| entry.to_string()).collect())
-            .unwrap_or_default()
+            .map_or_default(|extends| extends.iter().map(|entry| entry.to_string()).collect())
     }
 
     fn next_specifier(&mut self) -> Option<String> {

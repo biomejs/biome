@@ -2013,10 +2013,10 @@ async fn pull_js_plugin_code_action_when_query_and_diagnostic_ranges_are_disjoin
             "rules": { "recommended": false }
         }
     }"#;
-    let plugin = br#"import { createMutation, defineRule, factory, registerDiagnostic, semantic } from "@biomejs/runtime/plugin";
+    let plugin = br#"import { ast, createMutation, defineRule, factory, registerDiagnostic } from "@biomejs/runtime/plugin";
 
 export const renameReference = defineRule({
-    query: semantic("JS_REFERENCE_IDENTIFIER"),
+    query: ast("JS_REFERENCE_IDENTIFIER", { semantic: true }),
     run(node, { model }) {
         const binding = model.binding(node);
         if (!binding) return;
@@ -4453,6 +4453,178 @@ async fn pull_source_assist_action() -> Result<()> {
 
     server.shutdown().await?;
     reader.abort();
+
+    Ok(())
+}
+
+async fn apply_source_action(
+    server: &mut Server,
+    uri: &Uri,
+    input: &str,
+    resolve: bool,
+) -> Result<String> {
+    let actions: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier { uri: uri.clone() },
+                range: Range::new(
+                    Position::new(0, 0),
+                    Position::new(input.lines().count() as u32, 0),
+                ),
+                context: CodeActionContext {
+                    diagnostics: vec![],
+                    only: Some(vec![CodeActionKind::new("source.biome")]),
+                    ..Default::default()
+                },
+                work_done_progress_params: Default::default(),
+                partial_result_params: Default::default(),
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    let [CodeActionOrCommand::CodeAction(action)] = actions.as_slice() else {
+        panic!("expected one source action: {actions:?}");
+    };
+    let mut action = action.clone();
+    if resolve && action.edit.is_none() {
+        action = server
+            .request("codeAction/resolve", "resolve_code_action", action)
+            .await?
+            .context("codeAction/resolve returned None")?;
+    }
+
+    let edits = action
+        .edit
+        .context("expected edit")?
+        .changes
+        .context("expected changes")?
+        .remove(uri)
+        .context("expected edits for document")?;
+    let changes = edits
+        .into_iter()
+        .rev()
+        .map(|edit| TextDocumentContentChangeEvent {
+            range: Some(edit.range),
+            range_length: None,
+            text: edit.new_text,
+        })
+        .collect();
+
+    Ok(crate::utils::apply_document_changes(
+        biome_lsp_converters::negotiated_encoding(&ClientCapabilities::default()),
+        input.to_string(),
+        changes,
+    ))
+}
+
+#[tokio::test]
+async fn source_assists_suppress_nested_actions() -> Result<()> {
+    for (config, uri, language, input, after_first_action, expected) in [
+        (
+            r#"{
+                "assist": {
+                    "actions": {
+                        "source": {
+                            "useSortedKeys": "on"
+                        }
+                    }
+                }
+            }"#,
+            uri!("file.ts"),
+            "typescript",
+            "const test = {\n\taVar: 1,\n\tcVar: 2,\n\tbVar: {\n\t\ta: 3,\n\t\tb: 4,\n\t\td: 6,\n\t\tc: 5,\n\t}\n}\n",
+            "const test = {\n\taVar: 1,\n\tbVar: {\n\t\ta: 3,\n\t\tb: 4,\n\t\td: 6,\n\t\tc: 5,\n\t}, \n\tcVar: 2\n}\n",
+            "const test = {\n\taVar: 1,\n\tbVar: {\n\t\ta: 3,\n\t\tb: 4,\n\t\tc: 5,\n\t\td: 6,\n\t}, \n\tcVar: 2\n}\n",
+        ),
+        (
+            r#"{
+                "assist": {
+                    "actions": {
+                        "source": {
+                            "useSortedKeys": "on"
+                        }
+                    }
+                }
+            }"#,
+            uri!("file.json"),
+            "json",
+            "{\"a\":1,\"c\":2,\"b\":{\"a\":3,\"d\":6,\"c\":5}}\n",
+            "{\"a\":1,\"b\":{\"a\":3,\"d\":6,\"c\":5},\"c\":2}\n",
+            "{\"a\":1,\"b\":{\"a\":3,\"c\":5,\"d\":6},\"c\":2}\n",
+        ),
+        (
+            r#"{
+                "graphql": {
+                    "assist": {
+                        "enabled": true
+                    }
+                },
+                "assist": {
+                    "actions": {
+                        "source": {
+                            "useSortedSelectionSet": "on"
+                        }
+                    }
+                }
+            }"#,
+            uri!("file.graphql"),
+            "graphql",
+            "query {\n\tz {\n\t\tz\n\t\ta\n\t}\n\ta\n}\n",
+            "query {\n\ta\n\tz {\n\t\tz\n\t\ta\n\t}\n}\n",
+            "query {\n\ta\n\tz {\n\t\ta\n\t\tz\n\t}\n}\n",
+        ),
+    ] {
+        for resolve in [false, true] {
+            let fs = MemoryFileSystem::default();
+            fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
+
+            let factory = ServerFactory::new_with_fs(Arc::new(fs));
+            let (service, client) = factory.create().into_inner();
+            let (stream, sink) = client.split();
+            let mut server = Server::new(service);
+            let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+            let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+            if resolve {
+                server.initialize_with_resolve_support().await?;
+            } else {
+                server.initialize().await?;
+            }
+            server.initialized().await?;
+            server
+                .open_named_document(input, uri.clone(), language)
+                .await?;
+
+            let output = apply_source_action(&mut server, &uri, input, resolve).await?;
+            assert_eq!(output, after_first_action, "{language}, resolve={resolve}");
+
+            server
+                .notify(
+                    "textDocument/didChange",
+                    lsp::DidChangeTextDocumentParams {
+                        text_document: lsp::VersionedTextDocumentIdentifier {
+                            uri: uri.clone(),
+                            version: 1,
+                        },
+                        content_changes: vec![TextDocumentContentChangeEvent {
+                            range: None,
+                            range_length: None,
+                            text: output.clone(),
+                        }],
+                    },
+                )
+                .await?;
+
+            let output = apply_source_action(&mut server, &uri, &output, resolve).await?;
+            assert_eq!(output, expected, "{language}, resolve={resolve}");
+
+            server.shutdown().await?;
+            reader.abort();
+        }
+    }
 
     Ok(())
 }

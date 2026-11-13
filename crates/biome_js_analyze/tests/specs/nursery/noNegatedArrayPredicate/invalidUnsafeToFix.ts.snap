@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidUnsafeToFix.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+// Removing the `!` would continue the previous statement with a comparison.
+foo
+!<boolean>array.some(value => value);
+
+```
+
+# Diagnostics
+```
+invalidUnsafeToFix.ts:4:17 lint/nursery/noNegatedArrayPredicate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of some() is negated with !.
+  
+    2 │ // Removing the `!` would continue the previous statement with a comparison.
+    3 │ foo
+  > 4 │ !<boolean>array.some(value => value);
+      │                 ^^^^
+    5 │ 
+  
+  i Negating the whole call hides the condition that is actually checked. Calling every() with a negated callback function gives the same result and is easier to read.
+  
+  i Remove the ! before the call, use every() instead, and negate the value that the callback function returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

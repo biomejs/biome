@@ -1,0 +1,289 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// A parameter with an event type
+async function f(event: Event) {
+	await y();
+	event.currentTarget;
+}
+
+// An event type decides, even when the name doesn't look like an event
+async function f(click: MouseEvent) {
+	await y();
+	click.currentTarget;
+}
+
+// A React event type
+import type { SyntheticEvent } from "react";
+async function f(target: SyntheticEvent) {
+	await y();
+	target.currentTarget;
+}
+
+// A type assertion still refers to the event
+el.addEventListener("click", async (e) => {
+	await x;
+	(e as Event).currentTarget;
+});
+
+// A non-null assertion still refers to the event
+el.addEventListener("click", async (e) => {
+	await x;
+	e!.currentTarget;
+});
+
+// A `satisfies` expression still refers to the event
+el.addEventListener("click", async (event) => {
+	await x;
+	(event satisfies Event).currentTarget;
+});
+
+// A type assertion with optional chaining
+el.addEventListener("click", async (event) => {
+	await x;
+	(event as Event)?.currentTarget;
+});
+
+// A type assertion in a nested function
+el.addEventListener("click", (e) => {
+	setTimeout(() => (e as Event).currentTarget);
+});
+
+```
+
+# Diagnostics
+```
+invalid.ts:6:2 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    4 │ async function f(event: Event) {
+    5 │ 	await y();
+  > 6 │ 	event.currentTarget;
+      │ 	^^^^^^^^^^^^^^^^^^^
+    7 │ }
+    8 │ 
+  
+  i The event handler pauses here.
+  
+    3 │ // A parameter with an event type
+    4 │ async function f(event: Event) {
+  > 5 │ 	await y();
+      │ 	^^^^^^^^^
+    6 │ 	event.currentTarget;
+    7 │ }
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:12:2 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! click.currentTarget is read after the event handler pauses.
+  
+    10 │ async function f(click: MouseEvent) {
+    11 │ 	await y();
+  > 12 │ 	click.currentTarget;
+       │ 	^^^^^^^^^^^^^^^^^^^
+    13 │ }
+    14 │ 
+  
+  i The event handler pauses here.
+  
+     9 │ // An event type decides, even when the name doesn't look like an event
+    10 │ async function f(click: MouseEvent) {
+  > 11 │ 	await y();
+       │ 	^^^^^^^^^
+    12 │ 	click.currentTarget;
+    13 │ }
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save click.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:19:2 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! target.currentTarget is read after the event handler pauses.
+  
+    17 │ async function f(target: SyntheticEvent) {
+    18 │ 	await y();
+  > 19 │ 	target.currentTarget;
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    20 │ }
+    21 │ 
+  
+  i The event handler pauses here.
+  
+    16 │ import type { SyntheticEvent } from "react";
+    17 │ async function f(target: SyntheticEvent) {
+  > 18 │ 	await y();
+       │ 	^^^^^^^^^
+    19 │ 	target.currentTarget;
+    20 │ }
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save target.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:25:2 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! e.currentTarget is read after the event handler pauses.
+  
+    23 │ el.addEventListener("click", async (e) => {
+    24 │ 	await x;
+  > 25 │ 	(e as Event).currentTarget;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ });
+    27 │ 
+  
+  i The event handler pauses here.
+  
+    22 │ // A type assertion still refers to the event
+    23 │ el.addEventListener("click", async (e) => {
+  > 24 │ 	await x;
+       │ 	^^^^^^^
+    25 │ 	(e as Event).currentTarget;
+    26 │ });
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save e.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:31:2 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! e.currentTarget is read after the event handler pauses.
+  
+    29 │ el.addEventListener("click", async (e) => {
+    30 │ 	await x;
+  > 31 │ 	e!.currentTarget;
+       │ 	^^^^^^^^^^^^^^^^
+    32 │ });
+    33 │ 
+  
+  i The event handler pauses here.
+  
+    28 │ // A non-null assertion still refers to the event
+    29 │ el.addEventListener("click", async (e) => {
+  > 30 │ 	await x;
+       │ 	^^^^^^^
+    31 │ 	e!.currentTarget;
+    32 │ });
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save e.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:37:2 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    35 │ el.addEventListener("click", async (event) => {
+    36 │ 	await x;
+  > 37 │ 	(event satisfies Event).currentTarget;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ });
+    39 │ 
+  
+  i The event handler pauses here.
+  
+    34 │ // A `satisfies` expression still refers to the event
+    35 │ el.addEventListener("click", async (event) => {
+  > 36 │ 	await x;
+       │ 	^^^^^^^
+    37 │ 	(event satisfies Event).currentTarget;
+    38 │ });
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:43:2 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    41 │ el.addEventListener("click", async (event) => {
+    42 │ 	await x;
+  > 43 │ 	(event as Event)?.currentTarget;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ });
+    45 │ 
+  
+  i The event handler pauses here.
+  
+    40 │ // A type assertion with optional chaining
+    41 │ el.addEventListener("click", async (event) => {
+  > 42 │ 	await x;
+       │ 	^^^^^^^
+    43 │ 	(event as Event)?.currentTarget;
+    44 │ });
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:48:19 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! e.currentTarget is read inside a function nested in the event handler.
+  
+    46 │ // A type assertion in a nested function
+    47 │ el.addEventListener("click", (e) => {
+  > 48 │ 	setTimeout(() => (e as Event).currentTarget);
+       │ 	                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    49 │ });
+    50 │ 
+  
+  i The nested function may run after the browser finishes handling the event, when currentTarget is null.
+  
+  i Save e.currentTarget to a variable in the event handler, and use that variable in the nested function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

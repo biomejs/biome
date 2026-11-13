@@ -1,0 +1,20 @@
+/* should not generate diagnostics */
+#a {}
+#a,
+#b {}
+#a:not(#b) {}
+li a {}
+li.foo a {}
+button img:not(img.foo) {}
+[name="foo"] {}
+button:hover + a {}
+li:nth-child(2) a {}
+a:hover::before {}
+a:hover:before {}
+* {}
+.a .b .c {}
+.a > .b + .c {}
+.parent {
+	& > .b {}
+	> .b .c {}
+}

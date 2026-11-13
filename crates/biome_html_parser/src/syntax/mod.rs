@@ -258,7 +258,7 @@ fn parse_any_tag_name(p: &mut HtmlParser) -> ParsedSyntax {
         }
         Present(name)
     } else if p.cur().is_html_tag_name() {
-        // A known HTML/SVG tag, or the unknown-tag fallback.
+        // A known HTML/SVG/MathML tag, or the unknown-tag fallback.
         let m = p.start();
         p.bump_with_context(p.cur(), inside_tag_context(p));
         Present(m.complete(p, HTML_TAG_NAME))
@@ -493,7 +493,6 @@ fn parse_element_allowing_sfc_blocks(
     // these checks are now `O(1)` on the token kind.
     let name_kind = p.cur();
     let name_range = p.cur_range();
-    let opening_tag_name = p.cur_text().to_string();
     let should_be_self_closing = VOID_ELEMENTS.contains(name_kind);
     // In Svelte files, the preformatted elements must be parsed as regular
     // elements so that Svelte expressions inside them ({@html expr}, {expr})
@@ -506,9 +505,7 @@ fn parse_element_allowing_sfc_blocks(
             && (Svelte.is_supported(p) || Astro.is_supported(p)));
 
     // MathML is foreign content with no expressions; `<Math>` is a component.
-    let is_astro_math = Astro.is_supported(p)
-        && name_kind != HTML_COMPONENT_LITERAL
-        && opening_tag_name.eq_ignore_ascii_case("math");
+    let is_astro_math = Astro.is_supported(p) && name_kind == T![math];
 
     let opening_name = parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
 
@@ -522,9 +519,12 @@ fn parse_element_allowing_sfc_blocks(
         _ => {}
     }
 
-    // Only a top-level block of a single-file component asks about `lang`, so
-    // the list looks for it there and nowhere else.
-    let mut attributes = AttributeList::new(sfc_blocks);
+    // Only a top-level block of a Vue single-file component asks about `lang`.
+    // Svelte script attributes also distinguish `generics` from templates.
+    let mut attributes = AttributeList::new(
+        sfc_blocks,
+        Svelte.is_supported(p) && name_kind == T![script],
+    );
     attributes.parse_list(p);
     let is_raw_text_block =
         sfc_blocks && is_vue_raw_text_block(name_kind, attributes.names_a_language);
@@ -896,6 +896,9 @@ struct AttributeList {
     /// Whether to watch for a `lang` attribute. Off unless the caller asks, so
     /// that ordinary attribute parsing doesn't pay for the lookahead.
     track_lang: bool,
+    /// Whether the list belongs to a Svelte `<script>` element, whose `generics`
+    /// value is TypeScript rather than an interpolated attribute template.
+    is_svelte_script: bool,
     /// Whether the list held a `lang` attribute naming a language. Always false
     /// without [`Self::track_lang`].
     names_a_language: bool,
@@ -904,9 +907,10 @@ struct AttributeList {
 }
 
 impl AttributeList {
-    fn new(track_lang: bool) -> Self {
+    fn new(track_lang: bool, is_svelte_script: bool) -> Self {
         Self {
             track_lang,
+            is_svelte_script,
             names_a_language: false,
             is_raw: false,
         }
@@ -924,7 +928,7 @@ impl ParseNodeList for AttributeList {
         }
         self.is_raw |= is_at_astro_raw_directive(p);
 
-        parse_attribute(p)
+        parse_attribute(p, self.is_svelte_script)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -969,7 +973,7 @@ fn is_at_lang_naming_a_language(p: &mut HtmlParser) -> bool {
     })
 }
 
-fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
+fn parse_attribute(p: &mut HtmlParser, is_svelte_script: bool) -> ParsedSyntax {
     if !is_at_attribute_start(p) {
         return Absent;
     }
@@ -1058,6 +1062,9 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
                 disabled_svelte(p, m.range(p))
             }),
         _ => {
+            let is_svelte_generics = is_svelte_script
+                && p.at(HTML_LITERAL)
+                && p.cur_text().eq_ignore_ascii_case("generics");
             let m = p.start();
             // we've already determined that this isn't a valid astro directive, so if it looks like one, we should remap it as a literal.
             if Astro.is_supported(p) && is_at_astro_directive_keyword(p) {
@@ -1069,7 +1076,12 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             }
 
             if p.at(T![=]) {
-                parse_attribute_initializer(p, AttrInitializerContext::Regular).ok();
+                let context = if is_svelte_generics {
+                    AttrInitializerContext::SvelteGenerics
+                } else {
+                    AttrInitializerContext::Regular
+                };
+                parse_attribute_initializer(p, context).ok();
             }
             Present(m.complete(p, HTML_ATTRIBUTE))
         }
@@ -1251,11 +1263,12 @@ fn parse_attribute_initializer(
         return Present(m.complete(p, HTML_ATTRIBUTE_INITIALIZER_CLAUSE));
     }
 
-    let attr_value_context = if Svelte.is_supported(p) {
-        HtmlLexContext::SvelteAttributeValue
-    } else {
-        HtmlLexContext::AttributeValue
-    };
+    let attr_value_context =
+        if Svelte.is_supported(p) && context != AttrInitializerContext::SvelteGenerics {
+            HtmlLexContext::SvelteAttributeValue
+        } else {
+            HtmlLexContext::AttributeValue
+        };
     p.bump_with_context(T![=], attr_value_context);
     if p.at(T!['{']) {
         HtmlSyntaxFeatures::SingleTextExpressions
@@ -1296,7 +1309,10 @@ fn parse_attribute_initializer(
                 expected_attribute,
             )
             .ok();
-    } else if Svelte.is_supported(p) && matches!(p.cur(), T!['"'] | T!["'"]) {
+    } else if Svelte.is_supported(p)
+        && context != AttrInitializerContext::SvelteGenerics
+        && matches!(p.cur(), T!['"'] | T!["'"])
+    {
         // Speculatively parse as a template. If no interpolation is found the
         // value is a plain string, so rewind and re-lex it as a single
         // `HTML_STRING_LITERAL` to parse it as a normal `HtmlString`.
@@ -1317,6 +1333,7 @@ pub(crate) enum AttrInitializerContext {
     #[default]
     Regular,
     VueVFor,
+    SvelteGenerics,
 }
 
 fn parse_cdata_section(p: &mut HtmlParser) -> ParsedSyntax {

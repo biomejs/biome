@@ -947,6 +947,7 @@ pub(crate) fn compare_declared_return_type_owned<'db>(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ObjectKind;
     use crate::interned_types::{
         InternedClass, InternedGenericTypeParameter, InternedLiteral, InternedObject,
         InternedTuple, InternedTypeInstance, InternedUnion, TupleElementType, TypeMember,
@@ -1043,6 +1044,7 @@ mod tests {
                 ty,
             }]) as Box<[_]>,
             false,
+            ObjectKind::Shape,
         ))
     }
 
@@ -1055,6 +1057,7 @@ mod tests {
                 ty,
             }]) as Box<[_]>,
             false,
+            ObjectKind::Shape,
         ))
     }
 

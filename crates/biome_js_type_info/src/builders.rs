@@ -1,10 +1,11 @@
 use std::hash::Hash;
 
-use crate::Path;
 use crate::interned_types::{
     InternedClass, InternedFunction, InternedInterface, InternedIntersection, InternedNamespace,
     InternedObject, InternedUnion, Literal, TypeData, TypeDb, TypeMember, TypeMemberKind,
 };
+use crate::type_relation::intersect_primitives;
+use crate::{ObjectKind, Path};
 use biome_rowan::Text;
 use rustc_hash::{FxHashMap, FxHashSet};
 
@@ -137,18 +138,14 @@ impl<'db> IntersectionBuilder<'db> {
                         self.types.push(TypeData::NeverKeyword);
                     }
                 }
-                ty => {
-                    if ty.is_primitive(self.db)
-                        && self
-                            .types
-                            .iter()
-                            .any(|other| *other != ty && other.is_primitive(self.db))
-                    {
+                ty if ty.is_primitive(self.db) => {
+                    if !self.add_primitive(ty) {
                         self.types.clear();
                         self.types.push(TypeData::NeverKeyword);
                         return self;
                     }
-
+                }
+                ty => {
                     if !self.types.contains(&ty) {
                         self.types.push(ty);
                     }
@@ -157,6 +154,42 @@ impl<'db> IntersectionBuilder<'db> {
         }
 
         self
+    }
+
+    /// Adds the primitive `ty`, keeping only the narrower of two primitives
+    /// where one includes the other, so `string & "a"` becomes `"a"`.
+    ///
+    /// Returns `false` when `ty` shares no value with a primitive already
+    /// added, which makes the intersection `never`.
+    fn add_primitive(&mut self, ty: TypeData<'db>) -> bool {
+        // `None` once a primitive already added is at least as narrow.
+        let mut ty = Some(ty);
+        let mut types = Vec::with_capacity(self.types.len() + 1);
+        for other in std::mem::take(&mut self.types) {
+            let Some(current) =
+                ty.filter(|current| *current != other && other.is_primitive(self.db))
+            else {
+                if ty == Some(other) {
+                    ty = None;
+                }
+                types.push(other);
+                continue;
+            };
+            // `other` comes first, so it's kept when both have the same value.
+            match intersect_primitives(self.db, other, current) {
+                Some(TypeData::NeverKeyword) => return false,
+                Some(narrower) if narrower == other => {
+                    ty = None;
+                    types.push(other);
+                }
+                // `current` is narrower, so it replaces `other`.
+                Some(_) => {}
+                None => types.push(other),
+            }
+        }
+        types.extend(ty);
+        self.types = types;
+        true
     }
 
     pub(crate) fn add_all(mut self, types: impl IntoIterator<Item = TypeData<'db>>) -> Self {
@@ -192,6 +225,7 @@ pub(crate) fn object_from_members<'db>(
         None,
         members.into_boxed_slice(),
         false,
+        ObjectKind::Shape,
     ))
 }
 
@@ -356,6 +390,11 @@ impl<'db> MergedType<'db> {
         {
             return None;
         }
+        // `IntersectionBuilder::add` only keeps several primitives together
+        // when their intersection can't be decided.
+        if types.iter().filter(|ty| ty.is_primitive(db)).count() > 1 {
+            return None;
+        }
 
         let mut types = types.iter().copied();
         let mut merged = Self::from_type(db, types.next()?)?;
@@ -507,6 +546,7 @@ impl<'db> MergedType<'db> {
                 None,
                 members.into_boxed_slice(),
                 has_unknown_members,
+                ObjectKind::Shape,
             )),
             Self::Primitive(primitive) => primitive,
             Self::Unknown => TypeData::Unknown,

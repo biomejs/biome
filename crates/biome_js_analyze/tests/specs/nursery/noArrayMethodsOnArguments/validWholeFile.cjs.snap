@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validWholeFile.cjs
+---
+# Input
+```cjs
+/* should not generate diagnostics */
+function count(arguments) {
+    return arguments.filter(Boolean).length;
+}
+
+```

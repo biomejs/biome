@@ -7,8 +7,13 @@
 //!   compares declarations with each other.
 //! - [`VueProp`] runs the rule once per prop. Use it when the rule judges
 //!   one prop on its own.
+//! - [`VueModel`] runs the rule once per model declared with
+//!   `defineModel()`. Use it when the rule judges one model on its own.
 //! - [`VueEmit`] runs the rule once per declared event. Use it when the rule
 //!   judges one event declaration on its own.
+//! - [`VueComponentRegistration`] runs the rule once per entry of the
+//!   `components` option. Use it when the rule judges one locally registered
+//!   component on its own.
 //! - [`VueSnippet`] runs the rule once on an embedded snippet, such as a
 //!   directive value. Use it when the rule judges a template expression
 //!   by where it is written.
@@ -25,26 +30,29 @@
 //!
 //! The model already folds the different ways Vue lets a declaration be
 //! written into one shape, so a rule never matches on syntax to find them.
+//! When a rule needs the syntax anyway, to build a fix or to read what the
+//! model does not describe, [`AnalyzedVueModel::node`] returns the node a row
+//! of the model stands for in constant time.
 //!
 //! A query for another kind of declaration is one `define_vue_query!` call
 //! and one loop in [`VueSemanticVisitor`]. References have their own visitors,
 //! [`VueReferenceVisitor`] and [`VueEventVisitor`], so that files analyzed
 //! without a rule that asks for them don't pay for matching every reference.
 
-use crate::services::semantic::{SemanticModelBuilderVisitor, SemanticServices};
+use crate::services::semantic::SemanticModelBuilderVisitor;
 use biome_analyze::{
-    AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleKey,
-    RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext,
+    AddVisitor, AnalyzedTree, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable,
+    RuleKey, RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext,
     VisitorStartContext,
 };
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange};
 use biome_languages::{JsFileSource, LanguageDb};
 use biome_parser::db::AnalyzedSource;
-use biome_rowan::{AstNode, NodeOrToken, WalkEvent};
+use biome_rowan::{AstNode, WalkEvent};
 use biome_vue_semantic::{
-    Component, Emit, Prop, RefSite, Reference, Snippet, SnippetId, Symbol, VueSemanticModel,
-    component_model, vue_model_from_source,
+    AnalyzedVueModel, Component, Emit, Prop, RefSite, Reference, Snippet, SnippetId, Symbol,
+    VueSemanticModel, component_model, vue_model_from_source,
 };
 use std::rc::Rc;
 
@@ -52,7 +60,7 @@ use std::rc::Rc;
 /// snippets the analyzed tree is.
 #[derive(Clone, Debug)]
 pub struct VueSemanticService {
-    model: VueSemanticModel,
+    model: AnalyzedVueModel<JsLanguage>,
     /// `None` when the analyzed tree is a whole JavaScript file.
     snippet: Option<SnippetId>,
 }
@@ -64,7 +72,8 @@ impl VueSemanticService {
     /// stored one. A fix pass analyzes a tree the database does not hold; its
     /// ranges would not match a stored model, so the model is then built from
     /// the tree alone and describes its components without their template.
-    fn from_services(root: &AnyJsRoot, services: &ServiceBag) -> Self {
+    fn from_services(tree: AnalyzedTree<'_, JsLanguage>, services: &ServiceBag) -> Self {
+        let root = tree.root();
         let stored = services
             .get_service::<Rc<dyn LanguageDb>>()
             .zip(services.get_service::<AnalyzedSource>())
@@ -75,19 +84,17 @@ impl VueSemanticService {
                     return None;
                 }
                 match source {
-                    AnalyzedSource::Source(file) => Some(Self {
-                        model: vue_model_from_source(db, *file).clone(),
-                        snippet: None,
-                    }),
+                    AnalyzedSource::Source(file) => Some(Self::new(
+                        vue_model_from_source(db, *file).clone(),
+                        None,
+                        tree,
+                    )),
                     AnalyzedSource::Snippet(snippet) => {
                         // Use the host document of the snippet: the document
                         // of its path can be the one of another client.
                         let model = vue_model_from_source(db, snippet.source()).clone();
                         let snippet = model.snippet_at_offset(snippet.content_offset())?.id();
-                        Some(Self {
-                            model,
-                            snippet: Some(snippet),
-                        })
+                        Some(Self::new(model, Some(snippet), tree))
                     }
                 }
             });
@@ -100,16 +107,24 @@ impl VueSemanticService {
                 Some(js) => component_model(root, js, source_type),
                 None => VueSemanticModel::default(),
             };
-            Self {
-                model,
-                snippet: None,
-            }
+            Self::new(model, None, tree)
         })
+    }
+
+    fn new(
+        model: VueSemanticModel,
+        snippet: Option<SnippetId>,
+        tree: AnalyzedTree<'_, JsLanguage>,
+    ) -> Self {
+        Self {
+            model: AnalyzedVueModel::<JsLanguage>::new(model, tree, snippet),
+            snippet,
+        }
     }
 
     /// The model of the whole file, including the script blocks of a
     /// single-file component other than the analyzed one.
-    pub(crate) fn model(&self) -> &VueSemanticModel {
+    pub(crate) fn model(&self) -> &AnalyzedVueModel<JsLanguage> {
         &self.model
     }
 
@@ -122,7 +137,7 @@ impl VueSemanticService {
     /// already did.
     fn insert_into(ctx: &mut VisitorStartContext<JsLanguage>) {
         if ctx.services.get_service::<Self>().is_none() {
-            let service = Self::from_services(ctx.root, ctx.services);
+            let service = Self::from_services(ctx.tree(), ctx.services);
             ctx.services.insert_service(service);
         }
     }
@@ -156,8 +171,17 @@ impl Visitor for VueSemanticVisitor {
             for prop in component.props().filter(|prop| service.declares(prop)) {
                 ctx.match_query(VuePropMatch(prop));
             }
+            for model in component.models().filter(|model| service.declares(model)) {
+                ctx.match_query(VueModelMatch(model));
+            }
             for emit in component.emits().filter(|emit| service.declares(emit)) {
                 ctx.match_query(VueEmitMatch(emit));
+            }
+            for registration in component
+                .registered_components()
+                .filter(|registration| service.declares(registration))
+            {
+                ctx.match_query(VueComponentRegistrationMatch(registration));
             }
         }
         if let Some(snippet) = service.snippet {
@@ -249,7 +273,7 @@ macro_rules! define_vue_query {
             type Input = $input;
             type Output = $output;
             type Language = JsLanguage;
-            type Services = SemanticServices;
+            type Services = VueSemanticServices;
 
             fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _: &AnyJsRoot) {
                 analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
@@ -276,11 +300,25 @@ define_vue_query!(
     Prop
 );
 define_vue_query!(
+    /// Matches each model of each Vue component, declared with
+    /// `defineModel()`. A model also declares a prop, so its output is the
+    /// [`Prop`] it declares.
+    VueModel,
+    VueModelMatch,
+    Prop
+);
+define_vue_query!(
     /// Matches each event each Vue component declares, whatever syntax
     /// declares it.
     VueEmit,
     VueEmitMatch,
     Emit
+);
+define_vue_query!(
+    /// Matches each entry of the `components` option of each Vue component.
+    VueComponentRegistration,
+    VueComponentRegistrationMatch,
+    Symbol
 );
 define_vue_query!(
     /// Matches the analyzed tree when it is a snippet embedded in a `.vue`
@@ -298,9 +336,9 @@ define_vue_query!(
     VueReferenceVisitor
 );
 
-/// The services of a rule that queries [`VueSemantic`]: the JavaScript
-/// semantic model of the analyzed tree, and the Vue semantic model of the
-/// file it belongs to.
+/// The services of the rules that query the Vue semantic model: the
+/// JavaScript semantic model of the analyzed tree, and the Vue semantic model
+/// of the file it belongs to.
 pub struct VueSemanticServices {
     model: SemanticModel,
     vue: VueSemanticService,
@@ -312,11 +350,12 @@ impl VueSemanticServices {
         &self.model
     }
 
-    /// The Vue semantic model of the file the analyzed tree belongs to.
+    /// The Vue semantic model of the file the analyzed tree belongs to, with
+    /// the nodes of the analyzed tree its rows stand for.
     ///
     /// When the analyzed tree is not the one stored for the file, as in a fix
     /// pass, the model covers the analyzed tree only.
-    pub fn vue_model(&self) -> &VueSemanticModel {
+    pub fn vue_model(&self) -> &AnalyzedVueModel<JsLanguage> {
         self.vue.model()
     }
 
@@ -417,22 +456,4 @@ impl VueEventSite {
             Self::Call(reference) => reference.range(),
         }
     }
-}
-
-/// Returns the node of type `N` whose range in `root` is exactly `range`.
-pub(crate) fn node_at_range<N: AstNode<Language = JsLanguage>>(
-    root: &AnyJsRoot,
-    range: TextRange,
-) -> Option<N> {
-    let root = root.syntax();
-    if !root.text_range_with_trivia().contains_range(range) {
-        return None;
-    }
-    let node = match root.covering_element(range) {
-        NodeOrToken::Node(node) => node,
-        NodeOrToken::Token(token) => token.parent()?,
-    };
-    node.ancestors()
-        .filter(|node| node.text_trimmed_range() == range)
-        .find_map(N::cast)
 }

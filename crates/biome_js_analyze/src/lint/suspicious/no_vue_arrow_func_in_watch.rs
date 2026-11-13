@@ -14,14 +14,9 @@ use biome_rowan::{
 };
 use biome_rule_options::no_vue_arrow_func_in_watch::NoVueArrowFuncInWatchOptions;
 
-use crate::{
-    JsRuleAction,
-    frameworks::vue::vue_component::{
-        AnyPotentialVueComponent, AnyVueComponent, VueComponent, VueComponentDeclarations,
-        VueDeclarationCollectionFilter,
-    },
-    services::semantic::Semantic,
-};
+use biome_vue_semantic::ComponentKind;
+
+use crate::{JsRuleAction, services::vue::VueComponent};
 
 declare_lint_rule! {
     /// Disallows using arrow functions when defining a watcher.
@@ -106,44 +101,33 @@ declare_lint_rule! {
 }
 
 impl Rule for NoVueArrowFuncInWatch {
-    type Query = Semantic<AnyPotentialVueComponent>;
+    type Query = VueComponent;
     type State = JsArrowFunctionExpression;
     type Signals = Box<[Self::State]>;
     type Options = NoVueArrowFuncInWatchOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let Some(component) = VueComponent::from_potential_component(
-            ctx.query(),
-            ctx.model(),
-            ctx.source_type(),
-            ctx.file_path(),
-        ) else {
+        let component = ctx.query();
+        if !matches!(
+            component.kind(),
+            ComponentKind::OptionsObject | ComponentKind::DefineComponent
+        ) {
             return [].into();
-        };
-
-        let mut violations = vec![];
-        let watchers = match component.kind() {
-            AnyVueComponent::OptionsApi(component) => {
-                component.declarations(VueDeclarationCollectionFilter::Watcher.into())
-            }
-            AnyVueComponent::DefineComponent(component) => {
-                component.declarations(VueDeclarationCollectionFilter::Watcher.into())
-            }
-            _ => return [].into(),
         }
-        .into_iter()
-        .filter_map(|declaration| declaration.as_watcher().cloned());
-
-        for watcher in watchers {
-            let Some(handler) = extract_watcher_handler(&watcher) else {
-                continue;
-            };
-            if let AnyJsFunctionExpression::JsArrowFunctionExpression(arrow_func) = handler {
-                violations.push(arrow_func);
-            }
-        }
-
-        violations.into_boxed_slice()
+        // Watchers registered with `watch()` in `setup()` are calls, not
+        // members of the `watch` option, and don't bind `this`.
+        component
+            .watchers()
+            .filter_map(|watcher| {
+                let watcher = JsPropertyObjectMember::cast(ctx.vue_model().node(&watcher)?)?;
+                match extract_watcher_handler(&watcher)? {
+                    AnyJsFunctionExpression::JsArrowFunctionExpression(arrow_func) => {
+                        Some(arrow_func)
+                    }
+                    AnyJsFunctionExpression::JsFunctionExpression(_) => None,
+                }
+            })
+            .collect()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

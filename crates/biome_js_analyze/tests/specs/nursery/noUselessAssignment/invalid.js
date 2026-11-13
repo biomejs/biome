@@ -253,3 +253,34 @@ function conditionalExpressionWrite() {
 	console.log(v);
 	condition ? (v = "unused") : (v = "unused too");
 }
+
+function destructuringDefaultWrite() {
+	const obj = { a: 1 };
+	let { a, b = (a = 2) } = obj;
+	a = 3;
+	console.log(a, b);
+}
+
+function forOfIterableRead(first, second) {
+	let list = first;
+	list = second;
+	for (const item of list) {
+		f(item);
+	}
+}
+
+function forInIterableRead(first, second) {
+	let object = first;
+	object = second;
+	for (const key in object) {
+		f(key);
+	}
+}
+
+function parameterDefaultRead(a, b = a) {
+	a = 1;
+	a = 2;
+	f(a, b);
+}
+
+const expressionBodyWrite = (a, b = a) => (a = 1);

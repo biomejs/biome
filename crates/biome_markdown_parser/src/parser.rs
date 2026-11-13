@@ -35,6 +35,10 @@ pub struct MarkdownParserOptions {
     /// Applies the CommonMark CJK-friendly amendments to the emphasis and
     /// strikethrough flanking rules.
     pub(crate) cjk_friendly_emphasis: bool,
+
+    /// Parses the MDX variant of Markdown.
+    #[cfg(feature = "lang_mdx")]
+    pub(crate) mdx: bool,
 }
 
 impl MarkdownParserOptions {
@@ -58,6 +62,28 @@ impl MarkdownParserOptions {
         self.cjk_friendly_emphasis = cjk_friendly_emphasis;
         self
     }
+
+    /// Controls whether the source is parsed as [MDX](https://mdxjs.com/), the
+    /// variant of Markdown that adds JavaScript `import` and `export`
+    /// statements, `{expressions}`, and JSX. MDX also drops indented code,
+    /// HTML, and `<url>` autolinks.
+    #[cfg(feature = "lang_mdx")]
+    pub fn with_mdx(mut self, mdx: bool) -> Self {
+        self.mdx = mdx;
+        self
+    }
+
+    /// Returns whether the source is parsed as MDX.
+    pub(crate) fn is_mdx(&self) -> bool {
+        #[cfg(feature = "lang_mdx")]
+        {
+            self.mdx
+        }
+        #[cfg(not(feature = "lang_mdx"))]
+        {
+            false
+        }
+    }
 }
 
 impl Default for MarkdownParserOptions {
@@ -67,6 +93,8 @@ impl Default for MarkdownParserOptions {
             frontmatter: false,
             gfm: false,
             cjk_friendly_emphasis: false,
+            #[cfg(feature = "lang_mdx")]
+            mdx: false,
         }
     }
 }
@@ -146,6 +174,9 @@ pub(crate) struct MarkdownParserState {
     pub(crate) quote_depth_exceeded: bool,
     /// Whether the next paragraph is the first block of a list item.
     pub(crate) task_list_item_allowed: bool,
+    /// Where the content of the ATX heading being parsed ends, before its
+    /// closing sequence and line ending.
+    pub(crate) atx_heading_content_end: Option<TextSize>,
 }
 
 struct MarkdownParserStateCheckpoint {
@@ -169,6 +200,7 @@ struct MarkdownParserStateCheckpoint {
     virtual_line_start: Option<TextSize>,
     quote_depth_exceeded: bool,
     task_list_item_allowed: bool,
+    atx_heading_content_end: Option<TextSize>,
 }
 
 impl MarkdownParserState {
@@ -194,6 +226,7 @@ impl MarkdownParserState {
             virtual_line_start: self.virtual_line_start,
             quote_depth_exceeded: self.quote_depth_exceeded,
             task_list_item_allowed: self.task_list_item_allowed,
+            atx_heading_content_end: self.atx_heading_content_end,
         }
     }
 
@@ -222,6 +255,7 @@ impl MarkdownParserState {
         self.virtual_line_start = checkpoint.virtual_line_start;
         self.quote_depth_exceeded = checkpoint.quote_depth_exceeded;
         self.task_list_item_allowed = checkpoint.task_list_item_allowed;
+        self.atx_heading_content_end = checkpoint.atx_heading_content_end;
     }
 }
 

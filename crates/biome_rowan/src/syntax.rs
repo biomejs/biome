@@ -132,9 +132,12 @@ impl<L: Language> IntoIterator for SyntaxList<L> {
 mod tests {
     use biome_text_size::TextRange;
 
-    use crate::Direction;
     use crate::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
-    use crate::syntax::{SyntaxNode, SyntaxToken, TriviaPiece, TriviaPieceKind};
+    use crate::syntax::{
+        Preorder, PreorderWithTokens, SyntaxElement, SyntaxNode, SyntaxToken, SyntaxTriviaPiece,
+        TriviaPiece, TriviaPieceKind,
+    };
+    use crate::{Direction, SyntaxKindSet, WalkEvent};
 
     #[test]
     fn empty_list() {
@@ -362,6 +365,334 @@ mod tests {
             first_semicolon.prev_sibling_or_token(),
             first_semicolon.siblings_with_tokens(Direction::Prev).next()
         );
+    }
+
+    fn trivia_texts(pieces: impl Iterator<Item = SyntaxTriviaPiece<RawLanguage>>) -> Vec<String> {
+        pieces.map(|piece| piece.text().to_owned()).collect()
+    }
+
+    fn node_with_token(kind: RawLanguageKind, text: &str) -> SyntaxNode<RawLanguage> {
+        let token = SyntaxToken::new_detached(RawLanguageKind::STRING_TOKEN, text, [], []);
+        SyntaxNode::new_detached(kind, [Some(token.into())])
+    }
+
+    fn token_navigation_tree() -> SyntaxNode<RawLanguage> {
+        let before = SyntaxToken::new_detached(RawLanguageKind::STRING_TOKEN, "before", [], []);
+        let inside = SyntaxToken::new_detached(RawLanguageKind::STRING_TOKEN, "inside", [], []);
+        let after = SyntaxToken::new_detached(RawLanguageKind::STRING_TOKEN, "after", [], []);
+        let leading_empty = SyntaxNode::new_detached(RawLanguageKind::BOGUS, []);
+        let trailing_empty = SyntaxNode::new_detached(RawLanguageKind::BOGUS, []);
+        let subtree = SyntaxNode::new_detached(
+            RawLanguageKind::BOGUS,
+            [
+                Some(leading_empty.into()),
+                Some(inside.into()),
+                Some(trailing_empty.into()),
+            ],
+        );
+        let empty = SyntaxNode::new_detached(RawLanguageKind::BOGUS, [None]);
+
+        SyntaxNode::new_detached(
+            RawLanguageKind::ROOT,
+            [
+                Some(before.into()),
+                Some(subtree.into()),
+                None,
+                Some(empty.into()),
+                Some(after.into()),
+            ],
+        )
+    }
+
+    #[test]
+    fn kind_filtered_child_and_sibling_navigation() {
+        let first_literal = node_with_token(RawLanguageKind::LITERAL_EXPRESSION, "1");
+        let condition = node_with_token(RawLanguageKind::CONDITION, "2");
+        let last_literal = node_with_token(RawLanguageKind::LITERAL_EXPRESSION, "3");
+        let leading =
+            SyntaxToken::<RawLanguage>::new_detached(RawLanguageKind::STRING_TOKEN, "a", [], []);
+        let plus =
+            SyntaxToken::<RawLanguage>::new_detached(RawLanguageKind::PLUS_TOKEN, "+", [], []);
+        let root = SyntaxNode::new_detached(
+            RawLanguageKind::ROOT,
+            [
+                Some(leading.into()),
+                Some(first_literal.into()),
+                None,
+                Some(condition.into()),
+                Some(plus.into()),
+                Some(last_literal.into()),
+            ],
+        );
+        let literals = SyntaxKindSet::<RawLanguage>::of(RawLanguageKind::LITERAL_EXPRESSION);
+        let condition = SyntaxKindSet::<RawLanguage>::of(RawLanguageKind::CONDITION);
+        let condition_or_plus = condition.union(SyntaxKindSet::of(RawLanguageKind::PLUS_TOKEN));
+
+        let literal_texts: Vec<_> = root
+            .children_of_kinds(literals)
+            .map(|node| node.text_with_trivia().to_string())
+            .collect();
+        assert_eq!(literal_texts, ["1", "3"]);
+        assert_eq!(
+            root.first_child_of_kinds(literals)
+                .unwrap()
+                .text_with_trivia(),
+            "1"
+        );
+        assert!(root.first_child_of_kinds(SyntaxKindSet::EMPTY).is_none());
+
+        let elements: Vec<_> = root
+            .children_with_tokens_of_kinds(condition_or_plus)
+            .map(|element| (element.kind(), element.to_string()))
+            .collect();
+        assert_eq!(
+            elements,
+            [
+                (RawLanguageKind::CONDITION, "2".to_string()),
+                (RawLanguageKind::PLUS_TOKEN, "+".to_string()),
+            ]
+        );
+        assert_eq!(
+            root.first_child_or_token_of_kinds(SyntaxKindSet::of(RawLanguageKind::STRING_TOKEN))
+                .unwrap()
+                .to_string(),
+            "a"
+        );
+
+        let mut children = root.children();
+        let first_literal = children.next().unwrap();
+        let condition_node = children.next().unwrap();
+        let last_literal = children.next().unwrap();
+
+        assert_eq!(
+            first_literal.next_sibling_of_kinds(condition),
+            Some(condition_node.clone())
+        );
+        assert_eq!(
+            first_literal.next_sibling_of_kinds(literals),
+            Some(last_literal.clone())
+        );
+        assert_eq!(
+            condition_node
+                .next_sibling_or_token_of_kinds(condition_or_plus)
+                .unwrap()
+                .kind(),
+            RawLanguageKind::PLUS_TOKEN
+        );
+        assert!(last_literal.next_sibling_of_kinds(literals).is_none());
+    }
+
+    #[test]
+    fn nodes_and_elements_navigate_to_surrounding_tokens() {
+        let root = token_navigation_tree();
+        let before = root.first_token().unwrap();
+        let after = root.last_token().unwrap();
+        let mut root_children = root.children();
+        let subtree = root_children.next().unwrap();
+        let empty = root_children.next().unwrap();
+        let inside = subtree.first_token().unwrap();
+        let mut subtree_children = subtree.children();
+        let leading_empty = subtree_children.next().unwrap();
+        let trailing_empty = subtree_children.next().unwrap();
+
+        assert_eq!(root.prev_token(), None);
+        assert_eq!(root.next_token(), None);
+        assert_eq!(subtree.prev_token(), Some(before.clone()));
+        assert_eq!(subtree.next_token(), Some(after.clone()));
+        assert_eq!(leading_empty.prev_token(), Some(before.clone()));
+        assert_eq!(leading_empty.next_token(), Some(inside.clone()));
+        assert_eq!(trailing_empty.prev_token(), Some(inside.clone()));
+        assert_eq!(trailing_empty.next_token(), Some(after.clone()));
+        assert_eq!(empty.prev_token(), Some(inside.clone()));
+        assert_eq!(empty.next_token(), Some(after.clone()));
+
+        let subtree_element: SyntaxElement<_> = subtree.into();
+        assert_eq!(subtree_element.first_token(), Some(inside.clone()));
+        assert_eq!(subtree_element.last_token(), Some(inside.clone()));
+        assert_eq!(subtree_element.prev_token(), Some(before.clone()));
+        assert_eq!(subtree_element.next_token(), Some(after.clone()));
+
+        let empty_element: SyntaxElement<_> = empty.into();
+        assert_eq!(empty_element.first_token(), None);
+        assert_eq!(empty_element.last_token(), None);
+        assert_eq!(empty_element.prev_token(), Some(inside.clone()));
+        assert_eq!(empty_element.next_token(), Some(after.clone()));
+
+        let before_element: SyntaxElement<_> = before.clone().into();
+        assert_eq!(before_element.first_token(), Some(before.clone()));
+        assert_eq!(before_element.last_token(), Some(before.clone()));
+        assert_eq!(before_element.prev_token(), None);
+        assert_eq!(before_element.next_token(), Some(inside.clone()));
+
+        let inside_element: SyntaxElement<_> = inside.into();
+        assert_eq!(inside_element.prev_token(), Some(before));
+        assert_eq!(inside_element.next_token(), Some(after));
+    }
+
+    #[test]
+    fn token_navigation_keeps_zero_width_tokens() {
+        let before = SyntaxToken::<RawLanguage>::new_detached(
+            RawLanguageKind::STRING_TOKEN,
+            "before",
+            [],
+            [],
+        );
+        let zero_width = SyntaxToken::<RawLanguage>::new_detached(RawLanguageKind::EOF, "", [], []);
+        let after = SyntaxToken::<RawLanguage>::new_detached(
+            RawLanguageKind::STRING_TOKEN,
+            "after",
+            [],
+            [],
+        );
+        let subtree = SyntaxNode::new_detached(RawLanguageKind::BOGUS, [Some(before.into())]);
+        let root = SyntaxNode::new_detached(
+            RawLanguageKind::ROOT,
+            [
+                Some(subtree.into()),
+                Some(zero_width.into()),
+                Some(after.into()),
+            ],
+        );
+        let subtree = root.children().next().unwrap();
+        let zero_width = subtree.next_token().unwrap();
+
+        assert_eq!(zero_width.kind(), RawLanguageKind::EOF);
+        assert_eq!(zero_width.text(), "");
+        assert_eq!(zero_width.prev_token(), subtree.last_token());
+        assert_eq!(zero_width.next_token().unwrap().text(), "after");
+    }
+
+    #[test]
+    fn tree_top_handles_nodes_and_detached_tokens() {
+        let root = token_navigation_tree();
+        let subtree = root.children().next().unwrap();
+        let token = subtree.first_token().unwrap();
+        let node_element: SyntaxElement<_> = subtree.clone().into();
+        let token_element: SyntaxElement<_> = token.clone().into();
+
+        assert_eq!(root.tree_top(), root);
+        assert_eq!(subtree.tree_top(), root);
+        assert_eq!(token.tree_top(), Some(root.clone()));
+        assert_eq!(
+            token.ancestors().collect::<Vec<_>>(),
+            token.parent_ancestors().collect::<Vec<_>>()
+        );
+        assert_eq!(node_element.tree_top(), Some(root.clone()));
+        assert_eq!(token_element.tree_top(), Some(root));
+
+        let detached_node = SyntaxNode::<RawLanguage>::new_detached(RawLanguageKind::BOGUS, []);
+        let detached_token = SyntaxToken::<RawLanguage>::new_detached(
+            RawLanguageKind::STRING_TOKEN,
+            "token",
+            [],
+            [],
+        );
+        let detached_node_element: SyntaxElement<_> = detached_node.clone().into();
+        let detached_token_element: SyntaxElement<_> = detached_token.clone().into();
+
+        assert_eq!(detached_node.tree_top(), detached_node);
+        assert_eq!(detached_token.tree_top(), None);
+        assert_eq!(detached_node_element.tree_top(), Some(detached_node));
+        assert_eq!(detached_token_element.tree_top(), None);
+    }
+
+    #[test]
+    fn trivia_around_tokens_nodes_and_elements_is_in_source_order() {
+        let root = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |builder| {
+            builder.token_with_trivia(
+                RawLanguageKind::STRING_TOKEN,
+                "a /*a*/",
+                &[],
+                &[
+                    TriviaPiece::whitespace(1),
+                    TriviaPiece::single_line_comment(5),
+                ],
+            );
+            builder.start_node(RawLanguageKind::BOGUS);
+            builder.token_with_trivia(
+                RawLanguageKind::STRING_TOKEN,
+                "\n /*b*/b \t",
+                &[
+                    TriviaPiece::newline(1),
+                    TriviaPiece::whitespace(1),
+                    TriviaPiece::single_line_comment(5),
+                ],
+                &[TriviaPiece::whitespace(2)],
+            );
+            builder.finish_node();
+            builder.token_with_trivia(
+                RawLanguageKind::STRING_TOKEN,
+                " //c\nc",
+                &[
+                    TriviaPiece::whitespace(1),
+                    TriviaPiece::single_line_comment(3),
+                    TriviaPiece::newline(1),
+                ],
+                &[],
+            );
+            builder.start_node(RawLanguageKind::BOGUS);
+            builder.finish_node();
+        });
+
+        let first = root.first_token().unwrap();
+        let middle_node = root.children().next().unwrap();
+        let middle = middle_node.first_token().unwrap();
+        let last = root.last_token().unwrap();
+        let tokenless = root.children().nth(1).unwrap();
+        let middle_element: SyntaxElement<_> = middle_node.clone().into();
+
+        let before_middle = [" ", "/*a*/", "\n", " ", "/*b*/"];
+        assert_eq!(trivia_texts(first.trivia_after()), before_middle);
+        assert_eq!(trivia_texts(middle.trivia_before()), before_middle);
+        assert_eq!(trivia_texts(middle_node.trivia_before()), before_middle);
+        assert_eq!(trivia_texts(middle_element.trivia_before()), before_middle);
+        assert_eq!(
+            trivia_texts(middle.trivia_before().rev()),
+            ["/*b*/", " ", "\n", "/*a*/", " "]
+        );
+
+        let after_middle = [" \t", " ", "//c", "\n"];
+        assert_eq!(trivia_texts(middle.trivia_after()), after_middle);
+        assert_eq!(trivia_texts(last.trivia_before()), after_middle);
+        assert_eq!(trivia_texts(middle_node.trivia_after()), after_middle);
+        assert_eq!(trivia_texts(middle_element.trivia_after()), after_middle);
+
+        assert!(first.trivia_before().next().is_none());
+        assert!(last.trivia_after().next().is_none());
+        assert!(tokenless.trivia_before().next().is_none());
+        assert!(tokenless.trivia_after().next().is_none());
+    }
+
+    #[test]
+    fn preorder_iterators_are_cloneable_and_debuggable() {
+        let root = token_navigation_tree();
+        let mut nodes = root.preorder();
+        nodes.next();
+        let cloned_nodes = nodes.clone();
+        let _ = format!("{cloned_nodes:?}");
+        let node_events = |events: Preorder<RawLanguage>| {
+            events
+                .map(|event| match event {
+                    WalkEvent::Enter(node) => (true, node.kind()),
+                    WalkEvent::Leave(node) => (false, node.kind()),
+                })
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(node_events(nodes), node_events(cloned_nodes));
+
+        let mut elements = root.preorder_with_tokens(Direction::Next);
+        elements.next();
+        let cloned_elements = elements.clone();
+        let _ = format!("{cloned_elements:?}");
+        let element_events = |events: PreorderWithTokens<RawLanguage>| {
+            events
+                .map(|event| match event {
+                    WalkEvent::Enter(element) => (true, element.kind()),
+                    WalkEvent::Leave(element) => (false, element.kind()),
+                })
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(element_events(elements), element_events(cloned_elements));
     }
 
     #[test]

@@ -5048,6 +5048,32 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.into_node(JS_SVELTE_DECLARATION_ROOT, children)
             }
+            JS_SVELTE_LEGACY_CONST_ROOT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && AnyJsSvelteLegacyConstDeclarator::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![EOF]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        JS_SVELTE_LEGACY_CONST_ROOT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(JS_SVELTE_LEGACY_CONST_ROOT, children)
+            }
             JS_SVELTE_SNIPPET_ROOT => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();

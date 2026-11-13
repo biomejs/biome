@@ -489,8 +489,7 @@ fn generate_for_groups(
         group_strings.push(Literal::string(group_name));
         group_descriptions.push(
             assist_group_description(group_name)
-                .map(|description| quote! { #[doc = #description] })
-                .unwrap_or_default(),
+                .map_or_default(|description| quote! { #[doc = #description] }),
         );
         rule_group_names.extend(rules.keys().map(|rule_name| RuleGroup {
             rule_name,

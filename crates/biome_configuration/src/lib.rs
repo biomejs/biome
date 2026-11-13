@@ -433,10 +433,7 @@ impl Configuration {
     }
 
     pub fn get_linter_rules(&self) -> Rules {
-        self.linter
-            .as_ref()
-            .map(|f| f.get_rules())
-            .unwrap_or_default()
+        self.linter.as_ref().map_or_default(|f| f.get_rules())
     }
 
     pub fn get_linter_domains(&self) -> Option<&RuleDomains> {
@@ -444,10 +441,7 @@ impl Configuration {
     }
 
     pub fn get_assist_actions(&self) -> Actions {
-        self.assist
-            .as_ref()
-            .map(|f| f.get_actions())
-            .unwrap_or_default()
+        self.assist.as_ref().map_or_default(|f| f.get_actions())
     }
 
     pub fn is_vcs_enabled(&self) -> bool {

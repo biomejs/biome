@@ -129,49 +129,49 @@ impl InferenceModuleSccs {
     }
 }
 
+/// Computes the strongly connected components of the import graph that type
+/// inference follows.
+///
+/// Two modules belong to the same component, and import each other in a
+/// cycle, when each one reaches the other through the targets of
+/// [`inference_dependency_targets`]. The graph includes modules in
+/// `node_modules`, because declaration files of dependencies can import each
+/// other in a cycle.
+///
+/// The query reads the set of indexed modules and the targets of each one.
+/// Adding, removing, or replacing a module recomputes the components. An edit
+/// that keeps the targets of every module unchanged doesn't.
 #[salsa::tracked]
 pub(crate) fn inference_module_sccs(
     db: &dyn ModuleDb,
     generation: ModuleGraphGeneration,
 ) -> InferenceModuleSccs {
-    let _ = generation.value(db);
-    let mut id_by_module = FxHashMap::default();
+    execute_query(
+        TypeInferenceQueryKind::ModuleTypes,
+        TypeInferenceProfileOrigin::Inherited,
+        "inference_module_sccs",
+        || inference_module_sccs_impl(db, generation),
+    )
+}
 
-    db.for_each_module(&mut |module| {
-        if matches!(module.kind(db), ModuleInfoKind::Js(_)) {
-            id_by_module.insert(module, id_by_module.len() as u32);
-        }
-    });
-
-    let mut edges = vec![Vec::new(); id_by_module.len()];
-    db.for_each_module(&mut |module| {
-        let ModuleInfoKind::Js(js_info) = module.kind(db) else {
-            return;
-        };
-        let Some(&from_id) = id_by_module.get(&module) else {
-            return;
-        };
-        let Some(edges) = edges.get_mut(from_id as usize) else {
-            return;
-        };
-        push_inference_dependency_ids(db, &id_by_module, edges, module, js_info);
-    });
-
-    let (component_by_id, component_sizes) = compute_sccs(&edges);
-    let component_by_module = id_by_module
-        .into_iter()
-        .filter_map(|(module, id)| {
-            component_by_id
-                .get(id as usize)
-                .copied()
-                .map(|component| (module, component))
-        })
-        .collect();
-
-    InferenceModuleSccs {
-        component_by_module,
-        component_sizes: component_sizes.into_boxed_slice(),
-    }
+/// Returns the indexed modules that `module` depends on for type inference.
+///
+/// The targets come from the static imports, blanket re-exports, named
+/// re-exports, and namespace re-exports of `module`. An import that does not
+/// resolve to an indexed module has no target.
+///
+/// Returns `None` when `module` is not a JavaScript module.
+#[salsa::tracked(returns(as_deref))]
+pub(crate) fn inference_dependency_targets(
+    db: &dyn ModuleDb,
+    module: ModuleInfo,
+) -> Option<Box<[ModuleInfo]>> {
+    execute_query(
+        TypeInferenceQueryKind::ModuleTypes,
+        TypeInferenceProfileOrigin::Inherited,
+        "inference_dependency_targets",
+        || inference_dependency_targets_impl(db, module),
+    )
 }
 
 // #endregion
@@ -282,6 +282,63 @@ enum ModuleInferenceMode {
 
 // #region QUERY HELPER FUNCTIONS
 
+fn inference_module_sccs_impl(
+    db: &dyn ModuleDb,
+    generation: ModuleGraphGeneration,
+) -> InferenceModuleSccs {
+    let _ = generation.value(db);
+    let mut id_by_module = FxHashMap::default();
+    let mut targets_by_id = Vec::new();
+    db.for_each_module(&mut |module| {
+        if let Some(targets) = inference_dependency_targets(db, module) {
+            id_by_module.insert(module, targets_by_id.len() as u32);
+            targets_by_id.push(targets);
+        }
+    });
+
+    let edges: Vec<_> = targets_by_id
+        .iter()
+        .map(|targets| {
+            targets
+                .iter()
+                .filter_map(|target| id_by_module.get(target).copied())
+                .collect()
+        })
+        .collect();
+    let (component_by_id, component_sizes) = compute_sccs(&edges);
+    let component_by_module = id_by_module
+        .into_iter()
+        .filter_map(|(module, id)| {
+            component_by_id
+                .get(id as usize)
+                .copied()
+                .map(|component| (module, component))
+        })
+        .collect();
+
+    InferenceModuleSccs {
+        component_by_module,
+        component_sizes: component_sizes.into_boxed_slice(),
+    }
+}
+
+fn inference_dependency_targets_impl(
+    db: &dyn ModuleDb,
+    module: ModuleInfo,
+) -> Option<Box<[ModuleInfo]>> {
+    let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+        return None;
+    };
+    let targets = js_info
+        .type_inference_dependencies()
+        .filter_map(|import| {
+            let path = import.resolve_js(db, module).path().as_path()?;
+            db.module_for_path(path)
+        })
+        .collect();
+    Some(targets)
+}
+
 fn push_inference_dependency(
     db: &dyn ModuleDb,
     visited: &FxHashSet<ModuleInfo>,
@@ -307,28 +364,6 @@ fn push_scheduled_inference_dependencies(
 ) {
     for import in js_info.type_inference_dependencies() {
         push_inference_dependency(db, visited, stack, owner, import);
-    }
-}
-
-fn push_inference_dependency_ids(
-    db: &dyn ModuleDb,
-    id_by_module: &FxHashMap<ModuleInfo, u32>,
-    edges: &mut Vec<u32>,
-    owner: ModuleInfo,
-    js_info: &crate::JsModuleInfo,
-) {
-    let mut push = |import: &JsImport| {
-        let resolved = import.resolve_js(db, owner);
-        if let Some(path) = resolved.path().as_path()
-            && let Some(module) = db.module_for_path(path)
-            && let Some(&id) = id_by_module.get(&module)
-        {
-            edges.push(id);
-        }
-    };
-
-    for import in js_info.type_inference_dependencies() {
-        push(import);
     }
 }
 

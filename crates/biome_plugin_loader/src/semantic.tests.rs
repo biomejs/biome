@@ -58,9 +58,9 @@ fn native_summary(model: &SemanticModel) -> Value {
 
 #[test]
 fn semantic_results_match_the_native_model() {
-    let plugin_source = r#"import { defineRule, semantic, registerDiagnostic } from "@biomejs/runtime/plugin";
+    let plugin_source = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
         export const inspect = defineRule({
-            query: semantic("JS_MODULE", "TS_DECLARATION_MODULE"),
+            query: ast("JS_MODULE", "TS_DECLARATION_MODULE", { semantic: true }),
             run(root, { model }) {
                 const reference = ref => [ref.syntax().kind, ref.syntax().text,
                     ref.isRead(), ref.isWrite(), ref.binding()?.syntax().text];
@@ -203,7 +203,7 @@ fn semantic_results_match_the_native_model() {
 
 #[test]
 fn semantic_rules_resolve_the_model_and_syntax_rules_keep_their_context() {
-    let plugin_source = r#"import { ast, createMutation, defineRule, factory, semantic, registerDiagnostic } from "@biomejs/runtime/plugin";
+    let plugin_source = r#"import { ast, createMutation, defineRule, factory, registerDiagnostic } from "@biomejs/runtime/plugin";
         export const aSyntax = defineRule({
             query: ast("JS_REFERENCE_IDENTIFIER"),
             run(node, context) {
@@ -211,7 +211,7 @@ fn semantic_rules_resolve_the_model_and_syntax_rules_keep_their_context() {
             },
         });
         export const bSemantic = defineRule({
-            query: semantic("JS_REFERENCE_IDENTIFIER"),
+            query: ast("JS_REFERENCE_IDENTIFIER", { semantic: true }),
             run(node, context) {
                 const binding = context.model.binding(node);
                 const reference = binding.allReads()[0].syntax();
@@ -302,9 +302,9 @@ fn semantic_rules_resolve_the_model_and_syntax_rules_keep_their_context() {
 
 #[test]
 fn analysis_range_filters_plugin_diagnostics_not_queries() {
-    let plugin_source = r#"import { defineRule, semantic, registerDiagnostic } from "@biomejs/runtime/plugin";
+    let plugin_source = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
         export const reportDeclaration = defineRule({
-            query: semantic("JS_REFERENCE_IDENTIFIER"),
+            query: ast("JS_REFERENCE_IDENTIFIER", { semantic: true }),
             run(node, { model }) {
                 const binding = model.binding(node);
                 registerDiagnostic(binding.syntax(), "information", "declaration");
@@ -352,10 +352,10 @@ fn analysis_range_filters_plugin_diagnostics_not_queries() {
 
 #[test]
 fn semantic_handles_retain_their_source() {
-    let plugin_source = r#"import { defineRule, semantic, registerDiagnostic } from "@biomejs/runtime/plugin";
+    let plugin_source = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
         let saved;
         export const retained = defineRule({
-            query: semantic("JS_MODULE"),
+            query: ast("JS_MODULE", { semantic: true }),
             run(root, { model }) {
                 const bindings = model.allBindings();
                 const binding = bindings[0];
@@ -419,7 +419,7 @@ fn semantic_handles_retain_their_source() {
 #[test]
 fn semantic_scopes_preserve_nesting_bindings_and_hoisting() {
     // Boa parses this fixture on the test thread's stack; avoid deeply nested expressions.
-    let plugin_source = r#"import { defineRule, semantic, registerDiagnostic } from "@biomejs/runtime/plugin";
+    let plugin_source = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
         function describe(scope) {
             if (!scope) return null;
             const names = [];
@@ -429,7 +429,7 @@ fn semantic_scopes_preserve_nesting_bindings_and_hoisting() {
             return [scope.syntax().kind, names];
         }
         export const scopes = defineRule({
-            query: semantic("JS_MODULE"),
+            query: ast("JS_MODULE", { semantic: true }),
             run(root, { model }) {
                 const scopes = model.scopes();
                 const global = model.globalScope();

@@ -365,3 +365,71 @@ export const gray = <div className="hover:text-slate-100/80" />;
         result,
     ));
 }
+
+#[test]
+fn no_tailwind_restricted_classes_reads_stylesheet_utilities() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("no_tailwind_restricted_classes_reads_stylesheet_utilities");
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "html": { "linter": { "enabled": true } },
+    "tailwind": { "stylesheet": "./src/app.css" },
+    "linter": {
+        "rules": {
+            "nursery": {
+                "noTailwindRestrictedClasses": {
+                    "level": "error",
+                    "options": {
+                        "classes": {
+                            "slide-in-from-top-*": "Use the enter animation preset.",
+                            "enter-legacy": { "use": "slide-in-from-top-4" }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}"#,
+    );
+    fs.create_file(
+        "src/app.css",
+        r#"@utility slide-in-from-top-* {
+    --tw-enter-translate-y: calc(--value(integer) * var(--spacing));
+}
+"#,
+    );
+    // `slide-in-from-top` is a utility name only because the stylesheet
+    // defines it. `enter-legacy` has no fix, because its replacement is also
+    // restricted.
+    fs.create_file(
+        "src/App.jsx",
+        r#"export const a = <div className="md:slide-in-from-top-4 flex" />;
+export const b = <div className="enter-legacy" />;
+"#,
+    );
+    fs.create_file(
+        "src/index.html",
+        r#"<div class="slide-in-from-top-[48%] flex"></div>
+"#,
+    );
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--only=nursery/noTailwindRestrictedClasses",
+                fs.cli_path(),
+            ]
+            .as_slice(),
+        ),
+    );
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_tailwind_restricted_classes_reads_stylesheet_utilities",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}

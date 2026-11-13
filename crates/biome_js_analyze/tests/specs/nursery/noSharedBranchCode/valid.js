@@ -1,0 +1,184 @@
+/* should not generate diagnostics */
+function differentCode(condition) {
+	if (condition) {
+		foo();
+	} else {
+		bar();
+	}
+	if (condition) {
+		foo();
+		bar();
+	} else {
+		baz();
+		qux();
+	}
+}
+
+function noElse(condition, condition2) {
+	if (condition) {
+		foo();
+	}
+	if (condition) {
+		foo();
+		bar();
+	} else if (condition2) {
+		foo();
+	}
+}
+
+function branchIsOnlySharedCode(condition) {
+	if (condition) {
+		foo();
+	} else {
+		foo();
+		bar();
+	}
+	if (condition) {
+		foo();
+		bar();
+	} else {
+		foo();
+	}
+	if (condition) {
+		foo();
+	} else {
+		foo();
+	}
+}
+
+function emptyBranches(condition) {
+	if (condition) {
+	} else {
+	}
+}
+
+function notBlocks(condition) {
+	if (condition) foo();
+	else foo();
+	if (condition) {
+		foo();
+		bar();
+	} else foo();
+}
+
+function differentDeclarations(x) {
+	if (x > 0) {
+		const a = 1;
+		console.log("positive");
+	} else {
+		const a = 2;
+		console.log("negative");
+	}
+}
+
+function usesBranchVariable(x) {
+	if (x > 0) {
+		const a = 1;
+		console.log(a);
+	} else {
+		const a = 2;
+		console.log(a);
+	}
+}
+
+function usesBranchVariableInOneBranch(x, a) {
+	if (x > 0) {
+		const a = 1;
+		console.log(a);
+	} else {
+		doSomething();
+		console.log(a);
+	}
+}
+
+function usesHoistedFunction(x) {
+	if (x) {
+		helper();
+		function helper() {
+			return 1;
+		}
+	} else {
+		helper();
+		function helper() {
+			return 2;
+		}
+	}
+}
+
+function onlyEmptyStatementsShared(value) {
+	if (isArray(value)) {
+		;(origin)[property] = [...value]
+	} else if (isPlainObject(value)) {
+		;(origin)[property] = { ...value }
+	} else {
+		;(origin)[property] = value
+	}
+}
+
+function nestedIfsDiffer(maybe, maybe2) {
+	if (maybe) {
+		if (maybe2) {
+			console.log("maybe and maybe2");
+		}
+	} else {
+		if (maybe2) {
+			console.log("not maybe and maybe2");
+		}
+	}
+}
+
+function notSharedByEveryBranch(someCondition, someOtherCondition) {
+	if (someCondition) {
+		y = somethingElse;
+		x = "1";
+	} else if (someOtherCondition) {
+		y = somethingElse;
+		x = "b";
+	} else {
+		viewId = accountId;
+		x = "b";
+	}
+}
+
+function assignsConditionVariable(x) {
+	if (x > 0) {
+		x = 0;
+		a();
+	} else {
+		x = 0;
+		b();
+	}
+}
+
+function updatesElseIfConditionVariable(first, count) {
+	if (first) {
+		count++;
+		a();
+	} else if (count > 1) {
+		count++;
+		b();
+	} else {
+		count++;
+		c();
+	}
+}
+
+function assignsGlobalConditionVariable() {
+	if (ready) {
+		ready = false;
+		a();
+	} else {
+		ready = false;
+		b();
+	}
+}
+
+function assignsConditionProperty(state) {
+	if (state.count > 0) {
+		state.items[0].count = 0;
+		a();
+	} else {
+		state.items[0].count = 0;
+		b();
+	}
+}

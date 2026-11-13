@@ -41,6 +41,7 @@ fn expression_range_by_source(
 const BUDGETED_BINDING_QUERY: &str = "infer_binding_type_with_import_budget";
 const IMPORT_DEPTH_PREPARATION_QUERY: &str = "prepare_module_types_bottom_up_for_import_depth";
 const INFERENCE_SCC_QUERY: &str = "inference_module_sccs";
+const DEPENDENCY_TARGETS_QUERY: &str = "inference_dependency_targets";
 
 #[test]
 fn test_binding_query_does_not_infer_complete_module_tables() {
@@ -118,6 +119,72 @@ fn test_local_lookups_skip_cycle_detection_for_unrelated_imports() {
 }
 
 #[test]
+fn test_import_cycle_detection_is_reused_after_edits_that_keep_imports() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/left.ts".into(),
+        "import { right } from './right.ts'; export const left = 1;",
+    );
+    fs.insert(
+        "/src/right.ts".into(),
+        "import { left } from './left.ts'; export const right = left;",
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        "import { right } from './right.ts'; export const value = right;",
+    );
+    let mut db = build_js_test_module_db(
+        &fs,
+        &["/src/left.ts", "/src/right.ts", "/src/index.ts"],
+        true,
+    );
+    let index = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let input = BindingTypeInput::new(&db, index, binding_range_by_name(&db, index, "value"));
+
+    db.clear_salsa_events();
+    let ty = infer_binding_type(&db, input).expect("value type must be inferred");
+    assert!(is_inferred_number(&db, ty));
+    let events = db.take_salsa_events();
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, INFERENCE_SCC_QUERY, &events),
+        1
+    );
+
+    for (source, scc_executions) in [
+        (
+            "import { right } from './right.ts'; export const value = right; export const other = 2;",
+            0,
+        ),
+        (
+            "import { left } from './left.ts'; export const value = left;",
+            1,
+        ),
+    ] {
+        fs.insert("/src/index.ts".into(), source);
+        let kind = resolve_js_module_kind_for_test(&fs, "/src/index.ts", true);
+        salsa::Setter::to(index.set_kind(&mut db), kind);
+
+        db.clear_salsa_events();
+        let input = BindingTypeInput::new(&db, index, binding_range_by_name(&db, index, "value"));
+        let ty = infer_binding_type(&db, input).expect("value type must be inferred");
+        assert!(is_inferred_number(&db, ty), "{source}");
+        let events = db.take_salsa_events();
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, INFERENCE_SCC_QUERY, &events),
+            scc_executions,
+            "{source}"
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, DEPENDENCY_TARGETS_QUERY, &events),
+            1,
+            "{source} must recompute only the edited module's targets"
+        );
+    }
+}
+
+#[test]
 fn test_binding_query_resolves_imports_without_complete_module_inference() {
     let fs = MemoryFileSystem::default();
     fs.insert("/src/source.ts".into(), "export const value = 1;");
@@ -150,7 +217,7 @@ fn test_binding_query_resolves_imports_without_complete_module_inference() {
 
 #[test]
 fn test_binding_query_keeps_local_export_granular_beside_deep_import_branch() {
-    const IMPORT_COUNT: usize = 129;
+    const IMPORT_COUNT: usize = MAX_ON_DEMAND_IMPORT_DEPTH as usize + 1;
 
     let fs = MemoryFileSystem::default();
     let mut paths = (0..=IMPORT_COUNT)
@@ -196,7 +263,7 @@ fn test_binding_query_keeps_local_export_granular_beside_deep_import_branch() {
 
 #[test]
 fn test_binding_queries_reuse_a_deep_import_chain_across_roots() {
-    const IMPORT_COUNT: usize = 129;
+    const IMPORT_COUNT: usize = MAX_ON_DEMAND_IMPORT_DEPTH as usize + 1;
     const ROOT_COUNT: usize = 64;
 
     let fs = MemoryFileSystem::default();
@@ -272,9 +339,9 @@ fn test_binding_queries_reuse_a_deep_import_chain_across_roots() {
 
 #[test]
 fn test_binding_query_bounds_fallbacks_in_a_dense_import_graph() {
-    const MODULE_COUNT: usize = 160;
+    const MODULE_COUNT: usize = MAX_ON_DEMAND_IMPORT_DEPTH as usize + 32;
     const IMPORT_FANOUT: usize = 8;
-    const MAX_DISTINCT_CUTOFF_MODULES: usize = MODULE_COUNT - 128;
+    const MAX_DISTINCT_CUTOFF_MODULES: usize = MODULE_COUNT - MAX_ON_DEMAND_IMPORT_DEPTH as usize;
 
     let fs = MemoryFileSystem::default();
     let paths = (0..MODULE_COUNT)
@@ -448,6 +515,122 @@ fn test_namespace_member_inference_skips_unrelated_exports() {
                 function_query_will_execute_count_by_name(&db, query, &events),
                 0,
                 "{expression} must not execute {query}"
+            );
+        }
+    }
+}
+
+#[test]
+fn test_qualified_names_follow_namespace_reexports_without_building_namespaces() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/schema.ts".into(),
+        r#"
+            export * as core from "./core.ts";
+            export * as partial from "./partial.ts";
+            export namespace Outer {
+                export interface Inner { flag: boolean; }
+            }
+        "#,
+    );
+    fs.insert("/src/barrel.ts".into(), "export * from './schema.ts';");
+    // The unresolved blanket re-export prevents listing the namespace of
+    // `partial.ts`, but it cannot hide the explicit `Kept` export.
+    fs.insert(
+        "/src/partial.ts".into(),
+        "export interface Kept { kept: string; } export * from './missing.ts';",
+    );
+    fs.insert(
+        "/src/core.ts".into(),
+        r#"
+            export interface Strip { mode: string; }
+            export declare const unrelated: number;
+            export * as nested from "./nested.ts";
+        "#,
+    );
+    fs.insert(
+        "/src/nested.ts".into(),
+        "export interface Deep { found: boolean; } export declare const unused: number;",
+    );
+
+    for (import, annotation, member, expected) in [
+        (
+            "import * as z from './schema.ts';",
+            "z.core.Strip",
+            "mode",
+            InferredTypeData::String,
+        ),
+        (
+            "import * as z from './schema.ts';",
+            "z.core.nested.Deep",
+            "found",
+            InferredTypeData::Boolean,
+        ),
+        (
+            "import { core } from './schema.ts';",
+            "core.nested.Deep",
+            "found",
+            InferredTypeData::Boolean,
+        ),
+        (
+            "import * as barrel from './barrel.ts';",
+            "barrel.core.Strip",
+            "mode",
+            InferredTypeData::String,
+        ),
+        (
+            "import * as z from './schema.ts';",
+            "z.partial.Kept",
+            "kept",
+            InferredTypeData::String,
+        ),
+        (
+            "import * as z from './schema.ts';",
+            "z.Outer.Inner",
+            "flag",
+            InferredTypeData::Boolean,
+        ),
+    ] {
+        let expression = format!("value.{member}");
+        let source = format!(
+            "{import} declare const value: {annotation}; export const result = {expression};"
+        );
+        fs.insert("/src/index.ts".into(), source.as_str());
+        let db = build_js_test_module_db(
+            &fs,
+            &[
+                "/src/schema.ts",
+                "/src/barrel.ts",
+                "/src/partial.ts",
+                "/src/core.ts",
+                "/src/nested.ts",
+                "/src/index.ts",
+            ],
+            true,
+        );
+        let module = db
+            .module_for_path(Utf8Path::new("/src/index.ts"))
+            .expect("index module must exist");
+        let input = ExpressionTypeInput::new(
+            &db,
+            module,
+            expression_range_by_source(&db, module, &source, &expression),
+        );
+
+        db.clear_salsa_events();
+        let ty = infer_expression_type(&db, input).expect("expression type must be inferred");
+        let ty = normalize_type_query(&db, NormalizeTypeInput::new(&db, module, ty));
+        assert_eq!(ty, expected, "{annotation}");
+        let events = db.take_salsa_events();
+        for query in [
+            "namespace_export_names",
+            "infer_module_types",
+            IMPORT_DEPTH_PREPARATION_QUERY,
+        ] {
+            assert_eq!(
+                function_query_will_execute_count_by_name(&db, query, &events),
+                0,
+                "{annotation} must not execute {query}"
             );
         }
     }
@@ -2156,10 +2339,18 @@ fn test_member_lookup_exhaustion_returns_unknown() {
     let fs = MemoryFileSystem::default();
     fs.insert("/src/index.ts".into(), "");
     let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
-    let mut ty = InferredTypeData::Object(InferredObject::new(&db, None, Box::default(), false));
+    let shape = biome_js_type_info::ObjectKind::Shape;
+    let mut ty =
+        InferredTypeData::Object(InferredObject::new(&db, None, Box::default(), false, shape));
 
     for _ in 0..1025 {
-        ty = InferredTypeData::Object(InferredObject::new(&db, Some(ty), Box::default(), false));
+        ty = InferredTypeData::Object(InferredObject::new(
+            &db,
+            Some(ty),
+            Box::default(),
+            false,
+            shape,
+        ));
     }
 
     assert_eq!(

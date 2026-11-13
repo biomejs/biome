@@ -1,0 +1,264 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalidNamedWherePossible.css
+---
+# Input
+```css
+/* should generate diagnostics */
+a { font-weight: 400; }
+a { font-weight: 700; }
+a { font-weight: 400.0; }
+a { font: italic small-caps 700 16px/3 cursive; }
+a { font: normal 400 normal 16px serif; }
+a { font: 400 normal 16px serif; }
+a { font: 400 16px serif; }
+@font-face { font-weight: 400 700; }
+
+```
+
+# Diagnostics
+```
+invalidNamedWherePossible.css:2:18 lint/nursery/useConsistentFontWeightNotation  FIXABLE  ━━━━━━━━━━
+
+  i This font weight is written as the number 400 instead of the keyword normal.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ a { font-weight: 400; }
+      │                  ^^^
+    3 │ a { font-weight: 700; }
+    4 │ a { font-weight: 400.0; }
+  
+  i Writing font weights the same way everywhere makes styles easier to read and compare.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use normal instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - a·{·font-weight:·400;·}
+        2 │ + a·{·font-weight:·normal;·}
+     3  3 │   a { font-weight: 700; }
+     4  4 │   a { font-weight: 400.0; }
+  
+
+```
+
+```
+invalidNamedWherePossible.css:3:18 lint/nursery/useConsistentFontWeightNotation  FIXABLE  ━━━━━━━━━━
+
+  i This font weight is written as the number 700 instead of the keyword bold.
+  
+    1 │ /* should generate diagnostics */
+    2 │ a { font-weight: 400; }
+  > 3 │ a { font-weight: 700; }
+      │                  ^^^
+    4 │ a { font-weight: 400.0; }
+    5 │ a { font: italic small-caps 700 16px/3 cursive; }
+  
+  i Writing font weights the same way everywhere makes styles easier to read and compare.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use bold instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   a { font-weight: 400; }
+     3    │ - a·{·font-weight:·700;·}
+        3 │ + a·{·font-weight:·bold;·}
+     4  4 │   a { font-weight: 400.0; }
+     5  5 │   a { font: italic small-caps 700 16px/3 cursive; }
+  
+
+```
+
+```
+invalidNamedWherePossible.css:4:18 lint/nursery/useConsistentFontWeightNotation  FIXABLE  ━━━━━━━━━━
+
+  i This font weight is written as the number 400.0 instead of the keyword normal.
+  
+    2 │ a { font-weight: 400; }
+    3 │ a { font-weight: 700; }
+  > 4 │ a { font-weight: 400.0; }
+      │                  ^^^^^
+    5 │ a { font: italic small-caps 700 16px/3 cursive; }
+    6 │ a { font: normal 400 normal 16px serif; }
+  
+  i Writing font weights the same way everywhere makes styles easier to read and compare.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use normal instead.
+  
+     2  2 │   a { font-weight: 400; }
+     3  3 │   a { font-weight: 700; }
+     4    │ - a·{·font-weight:·400.0;·}
+        4 │ + a·{·font-weight:·normal;·}
+     5  5 │   a { font: italic small-caps 700 16px/3 cursive; }
+     6  6 │   a { font: normal 400 normal 16px serif; }
+  
+
+```
+
+```
+invalidNamedWherePossible.css:5:29 lint/nursery/useConsistentFontWeightNotation  FIXABLE  ━━━━━━━━━━
+
+  i This font weight is written as the number 700 instead of the keyword bold.
+  
+    3 │ a { font-weight: 700; }
+    4 │ a { font-weight: 400.0; }
+  > 5 │ a { font: italic small-caps 700 16px/3 cursive; }
+      │                             ^^^
+    6 │ a { font: normal 400 normal 16px serif; }
+    7 │ a { font: 400 normal 16px serif; }
+  
+  i Writing font weights the same way everywhere makes styles easier to read and compare.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use bold instead.
+  
+     3  3 │   a { font-weight: 700; }
+     4  4 │   a { font-weight: 400.0; }
+     5    │ - a·{·font:·italic·small-caps·700·16px/3·cursive;·}
+        5 │ + a·{·font:·italic·small-caps·bold·16px/3·cursive;·}
+     6  6 │   a { font: normal 400 normal 16px serif; }
+     7  7 │   a { font: 400 normal 16px serif; }
+  
+
+```
+
+```
+invalidNamedWherePossible.css:6:18 lint/nursery/useConsistentFontWeightNotation  FIXABLE  ━━━━━━━━━━
+
+  i This font weight is written as the number 400 instead of the keyword normal.
+  
+    4 │ a { font-weight: 400.0; }
+    5 │ a { font: italic small-caps 700 16px/3 cursive; }
+  > 6 │ a { font: normal 400 normal 16px serif; }
+      │                  ^^^
+    7 │ a { font: 400 normal 16px serif; }
+    8 │ a { font: 400 16px serif; }
+  
+  i Writing font weights the same way everywhere makes styles easier to read and compare.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use normal instead.
+  
+     4  4 │   a { font-weight: 400.0; }
+     5  5 │   a { font: italic small-caps 700 16px/3 cursive; }
+     6    │ - a·{·font:·normal·400·normal·16px·serif;·}
+        6 │ + a·{·font:·normal·normal·normal·16px·serif;·}
+     7  7 │   a { font: 400 normal 16px serif; }
+     8  8 │   a { font: 400 16px serif; }
+  
+
+```
+
+```
+invalidNamedWherePossible.css:7:11 lint/nursery/useConsistentFontWeightNotation  FIXABLE  ━━━━━━━━━━
+
+  i This font weight is written as the number 400 instead of the keyword normal.
+  
+    5 │ a { font: italic small-caps 700 16px/3 cursive; }
+    6 │ a { font: normal 400 normal 16px serif; }
+  > 7 │ a { font: 400 normal 16px serif; }
+      │           ^^^
+    8 │ a { font: 400 16px serif; }
+    9 │ @font-face { font-weight: 400 700; }
+  
+  i Writing font weights the same way everywhere makes styles easier to read and compare.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use normal instead.
+  
+     5  5 │   a { font: italic small-caps 700 16px/3 cursive; }
+     6  6 │   a { font: normal 400 normal 16px serif; }
+     7    │ - a·{·font:·400·normal·16px·serif;·}
+        7 │ + a·{·font:·normal·normal·16px·serif;·}
+     8  8 │   a { font: 400 16px serif; }
+     9  9 │   @font-face { font-weight: 400 700; }
+  
+
+```
+
+```
+invalidNamedWherePossible.css:8:11 lint/nursery/useConsistentFontWeightNotation  FIXABLE  ━━━━━━━━━━
+
+  i This font weight is written as the number 400 instead of the keyword normal.
+  
+     6 │ a { font: normal 400 normal 16px serif; }
+     7 │ a { font: 400 normal 16px serif; }
+   > 8 │ a { font: 400 16px serif; }
+       │           ^^^
+     9 │ @font-face { font-weight: 400 700; }
+    10 │ 
+  
+  i Writing font weights the same way everywhere makes styles easier to read and compare.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use normal instead.
+  
+     6  6 │   a { font: normal 400 normal 16px serif; }
+     7  7 │   a { font: 400 normal 16px serif; }
+     8    │ - a·{·font:·400·16px·serif;·}
+        8 │ + a·{·font:·normal·16px·serif;·}
+     9  9 │   @font-face { font-weight: 400 700; }
+    10 10 │   
+  
+
+```
+
+```
+invalidNamedWherePossible.css:9:27 lint/nursery/useConsistentFontWeightNotation  FIXABLE  ━━━━━━━━━━
+
+  i This font weight is written as the number 400 instead of the keyword normal.
+  
+     7 │ a { font: 400 normal 16px serif; }
+     8 │ a { font: 400 16px serif; }
+   > 9 │ @font-face { font-weight: 400 700; }
+       │                           ^^^
+    10 │ 
+  
+  i Writing font weights the same way everywhere makes styles easier to read and compare.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use normal instead.
+  
+     7  7 │   a { font: 400 normal 16px serif; }
+     8  8 │   a { font: 400 16px serif; }
+     9    │ - @font-face·{·font-weight:·400·700;·}
+        9 │ + @font-face·{·font-weight:·normal·700;·}
+    10 10 │   
+  
+
+```
+
+```
+invalidNamedWherePossible.css:9:31 lint/nursery/useConsistentFontWeightNotation  FIXABLE  ━━━━━━━━━━
+
+  i This font weight is written as the number 700 instead of the keyword bold.
+  
+     7 │ a { font: 400 normal 16px serif; }
+     8 │ a { font: 400 16px serif; }
+   > 9 │ @font-face { font-weight: 400 700; }
+       │                               ^^^
+    10 │ 
+  
+  i Writing font weights the same way everywhere makes styles easier to read and compare.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use bold instead.
+  
+     7  7 │   a { font: 400 normal 16px serif; }
+     8  8 │   a { font: 400 16px serif; }
+     9    │ - @font-face·{·font-weight:·400·700;·}
+        9 │ + @font-face·{·font-weight:·400·bold;·}
+    10 10 │   
+  
+
+```

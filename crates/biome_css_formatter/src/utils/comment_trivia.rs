@@ -148,19 +148,8 @@ pub(crate) fn has_source_gap_before_token(
 pub(crate) fn has_block_comment_gap_before_token(token: &CssSyntaxToken) -> bool {
     let token_start = token.text_trimmed_range().start();
 
-    if let Some(comment) = token
-        .leading_trivia()
-        .pieces()
+    token
+        .trivia_before()
         .rfind(is_block_style_comment)
-    {
-        return comment.text_range().end() < token_start;
-    }
-
-    token.prev_token().is_some_and(|previous_token| {
-        previous_token
-            .trailing_trivia()
-            .pieces()
-            .rfind(is_block_style_comment)
-            .is_some_and(|comment| comment.text_range().end() < token_start)
-    })
+        .is_some_and(|comment| comment.text_range().end() < token_start)
 }

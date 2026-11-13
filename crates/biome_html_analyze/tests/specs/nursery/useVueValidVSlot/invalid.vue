@@ -56,4 +56,5 @@
   <MyComponent v-slot>content</MyComponent>
   <MyComponent v-slot="">content</MyComponent>
   <MyComponent #default="  ">content</MyComponent>
+  <mrow v-slot="x">content</mrow>
 </template>

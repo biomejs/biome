@@ -147,6 +147,59 @@ const reported = styled.div`colr: red;`;"#
 }
 
 #[test]
+fn embedded_css_rules_check_top_level_declarations() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let file = Utf8Path::new("file.js");
+    fs.insert(
+        file.into(),
+        r#"const Button = styled.div`
+  --size: 1px;
+  --size: 2px;
+  color: red;
+  color: blue;
+  width: --size;
+  &:hover {
+    height: --size;
+  }
+`;"#
+        .as_bytes(),
+    );
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "javascript": { "experimentalEmbeddedSnippetsEnabled": true },
+  "linter": {
+    "rules": {
+      "preset": "none",
+      "correctness": { "noMissingVarFunction": "error" },
+      "suspicious": {
+        "noDuplicateProperties": "error",
+        "noDuplicateCustomProperties": "error"
+      }
+    }
+  }
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file.as_str()].as_slice()),
+    );
+    assert!(result.is_err(), "{result:?}\n{console:#?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "embedded_css_rules_check_top_level_declarations",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn host_and_css_suppressions_are_both_used() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

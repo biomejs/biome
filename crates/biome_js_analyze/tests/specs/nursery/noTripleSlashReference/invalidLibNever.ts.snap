@@ -1,0 +1,52 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidLibNever.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+/// <reference lib="dom" />
+/// <reference lib="es2020" />
+
+```
+
+# Diagnostics
+```
+invalidLibNever.ts:2:1 lint/nursery/noTripleSlashReference ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected triple-slash reference to dom.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ /// <reference lib="dom" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ /// <reference lib="es2020" />
+    4 │ 
+  
+  i A triple-slash reference loads code for the whole file without showing which parts the file uses.
+  
+  i Add the library to the lib option of your tsconfig.json file instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidLibNever.ts:3:1 lint/nursery/noTripleSlashReference ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected triple-slash reference to es2020.
+  
+    1 │ /* should generate diagnostics */
+    2 │ /// <reference lib="dom" />
+  > 3 │ /// <reference lib="es2020" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i A triple-slash reference loads code for the whole file without showing which parts the file uses.
+  
+  i Add the library to the lib option of your tsconfig.json file instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

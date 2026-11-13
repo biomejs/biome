@@ -35,6 +35,7 @@ use biome_parser::{
     Parser,
     prelude::ParsedSyntax::{self, *},
 };
+use biome_rowan::TextSize;
 use std::rc::Rc;
 
 /// Maximum number of `#` characters allowed in an ATX heading (CommonMark §4.2).
@@ -171,6 +172,9 @@ pub(crate) fn parse_header_content(p: &mut MarkdownParser) {
 
     // Set up emphasis context for header content (single line only)
     let prev_context = set_header_emphasis_context(p);
+    let content_len = atx_content_len(p.source_after_current());
+    p.state_mut().atx_heading_content_end =
+        Some(p.cur_range().start() + TextSize::from(content_len as u32));
     let m = p.start();
     let inline_m = p.start();
 
@@ -218,6 +222,7 @@ pub(crate) fn parse_header_content(p: &mut MarkdownParser) {
 
     // Restore previous emphasis context
     p.set_emphasis_context(prev_context);
+    p.state_mut().atx_heading_content_end = None;
 }
 
 /// Compute the byte length of header content (up to end of line or trailing hashes).
@@ -275,6 +280,23 @@ fn header_content_source_len(p: &mut MarkdownParser) -> usize {
 
         len
     })
+}
+
+/// Returns the length of the ATX heading content at the start of `line`, up
+/// to its line ending and without the optional closing sequence: the run of
+/// `#` at the end of the line, preceded by a space or a tab, and the spaces
+/// and tabs around it. See CommonMark §4.2.
+fn atx_content_len(line: &str) -> usize {
+    let line = &line[..line.find(['\n', '\r']).unwrap_or(line.len())];
+    let content = line.trim_end_matches([' ', '\t']);
+    let before_hashes = content.trim_end_matches('#');
+    if before_hashes.len() < content.len()
+        && (before_hashes.is_empty() || before_hashes.ends_with([' ', '\t']))
+    {
+        before_hashes.trim_end_matches([' ', '\t']).len()
+    } else {
+        content.len()
+    }
 }
 
 /// Build an emphasis context for header content and install it on the parser.

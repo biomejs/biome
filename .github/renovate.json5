@@ -28,6 +28,15 @@
       ]
     },
     {
+      // Must be at least `registry.global-min-publish-age` in .cargo/config.toml,
+      // otherwise Cargo refuses to resolve the version Renovate proposes.
+      // Covers every Cargo.toml, including the root `[workspace.dependencies]`.
+      "minimumReleaseAge": "3 days",
+      "matchDatasources": [
+        "crate"
+      ]
+    },
+    {
       "minimumReleaseAge": "3 days",
       "groupName": "Rust crates",
       "matchManagers": [

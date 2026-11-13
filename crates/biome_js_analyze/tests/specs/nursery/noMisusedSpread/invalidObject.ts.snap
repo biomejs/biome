@@ -1,0 +1,702 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidObject.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// Arrays
+const fromArrayLiteral = { ...[1, 2, 3] };
+
+const constArray = [1, 2, 3] as const;
+const fromConstArray = { ...constArray };
+
+declare const arrayUnion: number[] | string[];
+const fromArrayUnion = { ...arrayUnion };
+
+declare function getReadonlyArray(): readonly number[];
+const fromReadonlyArray = { ...getReadonlyArray() };
+
+// Iterables
+const fromNewSet = { ...new Set([1, 2, 3]) };
+
+declare const setOrObject: Set<number> | { a: number };
+const fromSetUnion = { ...setOrObject };
+
+const iterableObject = {
+	*[Symbol.iterator]() {
+		yield 'test';
+	},
+};
+const fromIterableObject = { ...iterableObject };
+
+declare const iterable: Iterable<string>;
+const fromIterable = { ...iterable };
+
+class IterableClass {
+	[Symbol.iterator]() {
+		return {
+			next() {
+				return { done: true, value: undefined };
+			},
+		};
+	}
+}
+const fromIterableClass = { ...new IterableClass() };
+
+// Maps
+declare const map: Map<string, number>;
+const fromMap = { ...map };
+const fromMapWithOther = { other: 1, ...map };
+
+declare const weakMap: WeakMap<{ a: number }, string>;
+const fromWeakMap = { ...weakMap };
+
+const fromNewMap = {
+	...new Map([
+		['test-1', 1],
+		['test-2', 2],
+	]),
+};
+
+// Class instances
+const fromDate = { ...new Date() };
+
+declare class HTMLElementLike {}
+declare const element: HTMLElementLike;
+const fromDeclaredClass = { ...element };
+
+class WithFields {
+	a = 1;
+	public b = 2;
+	private c = 3;
+	protected d = 4;
+	static e = 5;
+}
+const fromInstance = { ...new WithFields() };
+
+class Base {
+	a = 1;
+}
+class Derived extends Base {}
+const fromDerived = { ...new Derived() };
+
+// Classes
+class Declaration {}
+const fromClass = { ...Declaration };
+
+const Expression = class {};
+const fromClassExpression = { ...Expression };
+
+declare const either: typeof Declaration | typeof Expression;
+const fromClassUnion = { ...either };
+
+// Promises
+const promise = new Promise(() => {});
+const fromPromise = { ...promise };
+
+declare const maybePromise: Promise<number> | { a: number };
+const fromPromiseUnion = { ...maybePromise };
+
+function withPromise<P extends Promise<void>>(promise: P) {
+	return { ...promise };
+}
+
+declare function getPromise(): Promise<number>;
+const fromPromiseCall = { ...getPromise() };
+
+// Functions
+function declared() {}
+const fromFunction = { ...declared };
+
+declare function getFunction(): () => void;
+const fromReturnedFunction = { ...getFunction() };
+
+function* generator() {}
+const fromGenerator = { ...generator };
+
+interface FunctionWithProps {
+	(): string;
+	prop: boolean;
+}
+type FunctionWithoutProps = () => string;
+declare const functionUnion: FunctionWithProps | FunctionWithoutProps | object;
+const fromFunctionUnion = { ...functionUnion };
+
+```
+
+# Diagnostics
+```
+invalidObject.ts:4:31 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array into an object creates properties named after its indexes.
+  
+    3 │ // Arrays
+  > 4 │ const fromArrayLiteral = { ...[1, 2, 3] };
+      │                               ^^^^^^^^^
+    5 │ 
+    6 │ const constArray = [1, 2, 3] as const;
+  
+  i Each element becomes a property such as 0 or 1.
+  
+  i To copy the elements, spread the array into another array instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:7:29 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array into an object creates properties named after its indexes.
+  
+    6 │ const constArray = [1, 2, 3] as const;
+  > 7 │ const fromConstArray = { ...constArray };
+      │                             ^^^^^^^^^^
+    8 │ 
+    9 │ declare const arrayUnion: number[] | string[];
+  
+  i Each element becomes a property such as 0 or 1.
+  
+  i To copy the elements, spread the array into another array instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:10:29 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array into an object creates properties named after its indexes.
+  
+     9 │ declare const arrayUnion: number[] | string[];
+  > 10 │ const fromArrayUnion = { ...arrayUnion };
+       │                             ^^^^^^^^^^
+    11 │ 
+    12 │ declare function getReadonlyArray(): readonly number[];
+  
+  i Each element becomes a property such as 0 or 1.
+  
+  i To copy the elements, spread the array into another array instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:13:32 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array into an object creates properties named after its indexes.
+  
+    12 │ declare function getReadonlyArray(): readonly number[];
+  > 13 │ const fromReadonlyArray = { ...getReadonlyArray() };
+       │                                ^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ // Iterables
+  
+  i Each element becomes a property such as 0 or 1.
+  
+  i To copy the elements, spread the array into another array instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:16:25 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an iterable value into an object doesn't copy the values it contains.
+  
+    15 │ // Iterables
+  > 16 │ const fromNewSet = { ...new Set([1, 2, 3]) };
+       │                         ^^^^^^^^^^^^^^^^^^
+    17 │ 
+    18 │ declare const setOrObject: Set<number> | { a: number };
+  
+  i Values such as the items of a Set are produced by iterating, and aren't properties.
+  
+  i To copy the values, spread them into an array instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:19:27 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an iterable value into an object doesn't copy the values it contains.
+  
+    18 │ declare const setOrObject: Set<number> | { a: number };
+  > 19 │ const fromSetUnion = { ...setOrObject };
+       │                           ^^^^^^^^^^^
+    20 │ 
+    21 │ const iterableObject = {
+  
+  i Values such as the items of a Set are produced by iterating, and aren't properties.
+  
+  i To copy the values, spread them into an array instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:26:33 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an iterable value into an object doesn't copy the values it contains.
+  
+    24 │ 	},
+    25 │ };
+  > 26 │ const fromIterableObject = { ...iterableObject };
+       │                                 ^^^^^^^^^^^^^^
+    27 │ 
+    28 │ declare const iterable: Iterable<string>;
+  
+  i Values such as the items of a Set are produced by iterating, and aren't properties.
+  
+  i To copy the values, spread them into an array instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:29:27 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an iterable value into an object doesn't copy the values it contains.
+  
+    28 │ declare const iterable: Iterable<string>;
+  > 29 │ const fromIterable = { ...iterable };
+       │                           ^^^^^^^^
+    30 │ 
+    31 │ class IterableClass {
+  
+  i Values such as the items of a Set are produced by iterating, and aren't properties.
+  
+  i To copy the values, spread them into an array instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:40:32 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an iterable value into an object doesn't copy the values it contains.
+  
+    38 │ 	}
+    39 │ }
+  > 40 │ const fromIterableClass = { ...new IterableClass() };
+       │                                ^^^^^^^^^^^^^^^^^^^
+    41 │ 
+    42 │ // Maps
+  
+  i Values such as the items of a Set are produced by iterating, and aren't properties.
+  
+  i To copy the values, spread them into an array instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:44:22 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a map into an object creates an empty object.
+  
+    42 │ // Maps
+    43 │ declare const map: Map<string, number>;
+  > 44 │ const fromMap = { ...map };
+       │                      ^^^
+    45 │ const fromMapWithOther = { other: 1, ...map };
+    46 │ 
+  
+  i The entries of a map aren't properties, so they aren't copied.
+  
+  i To turn the entries of a Map into properties, use Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:45:41 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a map into an object creates an empty object.
+  
+    43 │ declare const map: Map<string, number>;
+    44 │ const fromMap = { ...map };
+  > 45 │ const fromMapWithOther = { other: 1, ...map };
+       │                                         ^^^
+    46 │ 
+    47 │ declare const weakMap: WeakMap<{ a: number }, string>;
+  
+  i The entries of a map aren't properties, so they aren't copied.
+  
+  i To turn the entries of a Map into properties, use Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:48:26 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a map into an object creates an empty object.
+  
+    47 │ declare const weakMap: WeakMap<{ a: number }, string>;
+  > 48 │ const fromWeakMap = { ...weakMap };
+       │                          ^^^^^^^
+    49 │ 
+    50 │ const fromNewMap = {
+  
+  i The entries of a map aren't properties, so they aren't copied.
+  
+  i To turn the entries of a Map into properties, use Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:51:5 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a map into an object creates an empty object.
+  
+    50 │ const fromNewMap = {
+  > 51 │ 	...new Map([
+       │ 	   ^^^^^^^^^
+  > 52 │ 		['test-1', 1],
+  > 53 │ 		['test-2', 2],
+  > 54 │ 	]),
+       │ 	^^
+    55 │ };
+    56 │ 
+  
+  i The entries of a map aren't properties, so they aren't copied.
+  
+  i To turn the entries of a Map into properties, use Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:58:23 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a class instance into an object loses the methods of its class.
+  
+    57 │ // Class instances
+  > 58 │ const fromDate = { ...new Date() };
+       │                       ^^^^^^^^^^
+    59 │ 
+    60 │ declare class HTMLElementLike {}
+  
+  i Only the own properties of the instance are copied into a plain object. Methods and getters of the class aren't.
+  
+  i Keep using the instance, or create a new one with the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:62:32 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a class instance into an object loses the methods of its class.
+  
+    60 │ declare class HTMLElementLike {}
+    61 │ declare const element: HTMLElementLike;
+  > 62 │ const fromDeclaredClass = { ...element };
+       │                                ^^^^^^^
+    63 │ 
+    64 │ class WithFields {
+  
+  i Only the own properties of the instance are copied into a plain object. Methods and getters of the class aren't.
+  
+  i Keep using the instance, or create a new one with the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:71:27 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a class instance into an object loses the methods of its class.
+  
+    69 │ 	static e = 5;
+    70 │ }
+  > 71 │ const fromInstance = { ...new WithFields() };
+       │                           ^^^^^^^^^^^^^^^^
+    72 │ 
+    73 │ class Base {
+  
+  i Only the own properties of the instance are copied into a plain object. Methods and getters of the class aren't.
+  
+  i Keep using the instance, or create a new one with the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:77:26 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a class instance into an object loses the methods of its class.
+  
+    75 │ }
+    76 │ class Derived extends Base {}
+  > 77 │ const fromDerived = { ...new Derived() };
+       │                          ^^^^^^^^^^^^^
+    78 │ 
+    79 │ // Classes
+  
+  i Only the own properties of the instance are copied into a plain object. Methods and getters of the class aren't.
+  
+  i Keep using the instance, or create a new one with the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:81:24 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a class into an object only copies its static properties.
+  
+    79 │ // Classes
+    80 │ class Declaration {}
+  > 81 │ const fromClass = { ...Declaration };
+       │                        ^^^^^^^^^^^
+    82 │ 
+    83 │ const Expression = class {};
+  
+  i The new object is a plain object: it can't create instances and has none of the methods of the class.
+  
+  i Did you mean to spread an instance of the class?
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:84:34 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a class into an object only copies its static properties.
+  
+    83 │ const Expression = class {};
+  > 84 │ const fromClassExpression = { ...Expression };
+       │                                  ^^^^^^^^^^
+    85 │ 
+    86 │ declare const either: typeof Declaration | typeof Expression;
+  
+  i The new object is a plain object: it can't create instances and has none of the methods of the class.
+  
+  i Did you mean to spread an instance of the class?
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:87:29 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a class into an object only copies its static properties.
+  
+    86 │ declare const either: typeof Declaration | typeof Expression;
+  > 87 │ const fromClassUnion = { ...either };
+       │                             ^^^^^^
+    88 │ 
+    89 │ // Promises
+  
+  i The new object is a plain object: it can't create instances and has none of the methods of the class.
+  
+  i Did you mean to spread an instance of the class?
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:91:26 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a Promise into an object copies nothing.
+  
+    89 │ // Promises
+    90 │ const promise = new Promise(() => {});
+  > 91 │ const fromPromise = { ...promise };
+       │                          ^^^^^^^
+    92 │ 
+    93 │ declare const maybePromise: Promise<number> | { a: number };
+  
+  i The value of a Promise is only available after it resolves.
+  
+  i Did you forget to await it?
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:94:31 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a Promise into an object copies nothing.
+  
+    93 │ declare const maybePromise: Promise<number> | { a: number };
+  > 94 │ const fromPromiseUnion = { ...maybePromise };
+       │                               ^^^^^^^^^^^^
+    95 │ 
+    96 │ function withPromise<P extends Promise<void>>(promise: P) {
+  
+  i The value of a Promise is only available after it resolves.
+  
+  i Did you forget to await it?
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:97:14 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a Promise into an object copies nothing.
+  
+    96 │ function withPromise<P extends Promise<void>>(promise: P) {
+  > 97 │ 	return { ...promise };
+       │ 	            ^^^^^^^
+    98 │ }
+    99 │ 
+  
+  i The value of a Promise is only available after it resolves.
+  
+  i Did you forget to await it?
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:101:30 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a Promise into an object copies nothing.
+  
+    100 │ declare function getPromise(): Promise<number>;
+  > 101 │ const fromPromiseCall = { ...getPromise() };
+        │                              ^^^^^^^^^^^^
+    102 │ 
+    103 │ // Functions
+  
+  i The value of a Promise is only available after it resolves.
+  
+  i Did you forget to await it?
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:105:27 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a function into an object copies nothing.
+  
+    103 │ // Functions
+    104 │ function declared() {}
+  > 105 │ const fromFunction = { ...declared };
+        │                           ^^^^^^^^
+    106 │ 
+    107 │ declare function getFunction(): () => void;
+  
+  i Only the properties of the function are copied, and this function has none.
+  
+  i Did you forget to call the function?
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:108:35 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a function into an object copies nothing.
+  
+    107 │ declare function getFunction(): () => void;
+  > 108 │ const fromReturnedFunction = { ...getFunction() };
+        │                                   ^^^^^^^^^^^^^
+    109 │ 
+    110 │ function* generator() {}
+  
+  i Only the properties of the function are copied, and this function has none.
+  
+  i Did you forget to call the function?
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:111:28 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a function into an object copies nothing.
+  
+    110 │ function* generator() {}
+  > 111 │ const fromGenerator = { ...generator };
+        │                            ^^^^^^^^^
+    112 │ 
+    113 │ interface FunctionWithProps {
+  
+  i Only the properties of the function are copied, and this function has none.
+  
+  i Did you forget to call the function?
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObject.ts:119:32 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a function into an object copies nothing.
+  
+    117 │ type FunctionWithoutProps = () => string;
+    118 │ declare const functionUnion: FunctionWithProps | FunctionWithoutProps | object;
+  > 119 │ const fromFunctionUnion = { ...functionUnion };
+        │                                ^^^^^^^^^^^^^
+    120 │ 
+  
+  i Only the properties of the function are copied, and this function has none.
+  
+  i Did you forget to call the function?
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,54 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidTypesNever.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+/// <reference types="vite/client" />
+/// <reference types="lodash" />
+import { debounce } from "lodash";
+
+```
+
+# Diagnostics
+```
+invalidTypesNever.ts:2:1 lint/nursery/noTripleSlashReference ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected triple-slash reference to vite/client.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ /// <reference types="vite/client" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ /// <reference types="lodash" />
+    4 │ import { debounce } from "lodash";
+  
+  i A triple-slash reference loads code for the whole file without showing which parts the file uses.
+  
+  i Import from the package instead, or add the package to the types option of your tsconfig.json file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTypesNever.ts:3:1 lint/nursery/noTripleSlashReference ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected triple-slash reference to lodash.
+  
+    1 │ /* should generate diagnostics */
+    2 │ /// <reference types="vite/client" />
+  > 3 │ /// <reference types="lodash" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ import { debounce } from "lodash";
+    5 │ 
+  
+  i A triple-slash reference loads code for the whole file without showing which parts the file uses.
+  
+  i Import from the package instead, or add the package to the types option of your tsconfig.json file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

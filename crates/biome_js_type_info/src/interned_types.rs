@@ -15,7 +15,7 @@ use rustc_hash::FxHashSet;
 use std::iter::FusedIterator;
 
 use crate::{
-    ScopeId,
+    ObjectKind, ScopeId,
     builders::{IntersectionBuilder, UnionBuilder},
     generated::global_types::ids::{
         ARRAY_ID_GLOBAL_TYPE_ID, ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID, DATE_ID_GLOBAL_TYPE_ID,
@@ -147,6 +147,7 @@ pub enum TypeData<'db> {
     TypeOperator(InternedTypeOperatorType<'db>),
     IndexedAccess(InternedIndexedAccessType<'db>),
     MappedType(InternedMappedType<'db>),
+    Extends(InternedExtendsType<'db>),
     Literal(InternedLiteral<'db>),
     InstanceOf(InternedTypeInstance<'db>),
     MergedReference(InternedMergedReference<'db>),
@@ -277,6 +278,7 @@ impl<'db> TypeData<'db> {
                 | Self::TypeofExpression(_)
                 | Self::IndexedAccess(_)
                 | Self::MappedType(_)
+                | Self::Extends(_)
                 | Self::AnyKeyword
                 | Self::UnknownKeyword
         )
@@ -360,6 +362,7 @@ impl<'db> TypeData<'db> {
                 Self::TypeOperator(_) => "type operator",
                 Self::IndexedAccess(_) => "indexed access",
                 Self::MappedType(_) => "mapped type",
+                Self::Extends(_) => "conditional type",
                 Self::TypeofExpression(_) | Self::TypeofType(_) | Self::TypeofValue(_) => "typeof",
                 Self::Conditional => "conditional",
                 Self::Global | Self::GlobalType(_) => "global",
@@ -562,6 +565,38 @@ impl<'db> TypeData<'db> {
         }
     }
 
+    /// Classifies values for analyzer inspection without traversing compound types.
+    ///
+    /// Property shapes and class instance annotations can describe primitives.
+    /// Unlike expression-evaluation categories, their structure alone does not
+    /// prove truthiness. The object that an object expression creates is always
+    /// truthy. `None` means further traversal is needed.
+    pub(crate) fn value_conditional_type_shallow(
+        self,
+        db: &'db dyn TypeDb,
+    ) -> Option<ConditionalType> {
+        match self {
+            Self::Object(object) => Some(match object.kind(db) {
+                ObjectKind::Expression => ConditionalType::Truthy,
+                ObjectKind::Shape => ConditionalType::NonNullish,
+            }),
+            Self::InstanceOf(instance) => {
+                let target = instance.ty(db);
+                if target.is_builtin_object_class(db) {
+                    Some(ConditionalType::Truthy)
+                } else if matches!(
+                    target.expand_canonical_global(db),
+                    Self::Class(_) | Self::Interface(_) | Self::Object(_)
+                ) {
+                    Some(ConditionalType::NonNullish)
+                } else {
+                    None
+                }
+            }
+            _ => self.conditional_type_shallow(db),
+        }
+    }
+
     pub fn conditional_type_shallow(self, db: &'db dyn TypeDb) -> Option<ConditionalType> {
         match self {
             Self::AnyKeyword
@@ -621,6 +656,7 @@ impl<'db> TypeData<'db> {
             | Self::TypeOperator(_)
             | Self::IndexedAccess(_)
             | Self::MappedType(_)
+            | Self::Extends(_)
             | Self::TypeofType(_)
             | Self::TypeofValue(_)
             | Self::InstanceOf(_)
@@ -660,7 +696,8 @@ impl<'db> TypeData<'db> {
             | Self::MappedType(_)
             | Self::Object(_)
             | Self::Tuple(_)
-            | Self::Union(_) => type_parameters.is_empty(),
+            | Self::Union(_)
+            | Self::Extends(_) => type_parameters.is_empty(),
             Self::Class(_)
             | Self::Generic(_)
             | Self::GlobalType(_)
@@ -691,6 +728,40 @@ impl<'db> TypeData<'db> {
     pub fn is_promise_class(self, db: &'db dyn TypeDb) -> bool {
         self == Self::GlobalType(PROMISE_ID_GLOBAL_TYPE_ID)
             || self.is_builtin_class_named(db, "Promise")
+    }
+
+    /// Recognizes built-in classes whose instances are non-primitive values.
+    /// A user-defined class with the same name does not establish that fact.
+    pub(crate) fn is_builtin_object_class(self, db: &'db dyn TypeDb) -> bool {
+        match self {
+            Self::GlobalType(id) => [
+                ARRAY_ID_GLOBAL_TYPE_ID,
+                PROMISE_ID_GLOBAL_TYPE_ID,
+                DATE_ID_GLOBAL_TYPE_ID,
+                ERROR_ID_GLOBAL_TYPE_ID,
+                MAP_ID_GLOBAL_TYPE_ID,
+                REG_EXP_ID_GLOBAL_TYPE_ID,
+                SET_ID_GLOBAL_TYPE_ID,
+                WEAK_MAP_ID_GLOBAL_TYPE_ID,
+            ]
+            .contains(&id),
+            Self::Class(class) if class.is_builtin(db) => {
+                class.name(db).as_ref().is_some_and(|name| {
+                    matches!(
+                        name.text(),
+                        "Array"
+                            | "Promise"
+                            | "Date"
+                            | "Error"
+                            | "Map"
+                            | "RegExp"
+                            | "Set"
+                            | "WeakMap"
+                    )
+                })
+            }
+            _ => false,
+        }
     }
 
     fn is_builtin_class_named(self, db: &'db dyn TypeDb, expected_name: &str) -> bool {
@@ -949,6 +1020,7 @@ impl<'db> TypeData<'db> {
             | Self::TypeOperator(_)
             | Self::IndexedAccess(_)
             | Self::MappedType(_)
+            | Self::Extends(_)
             | Self::Literal(_)
             | Self::InstanceOf(_)
             | Self::MergedReference(_)
@@ -1118,6 +1190,7 @@ impl<'db> TypeData<'db> {
                 object.prototype.as_ref().map(&mut *resolve_reference),
                 convert_type_members(db, &object.members, resolve_reference, resolve_member),
                 object.has_unknown_members,
+                object.kind,
             )),
             raw::TypeData::Tuple(tuple) => Self::Tuple(InternedTuple::new(
                 db,
@@ -1178,6 +1251,15 @@ impl<'db> TypeData<'db> {
                 resolve_reference(&mapped.ty),
                 mapped.readonly_modifier,
                 mapped.optional_modifier,
+            )),
+            raw::TypeData::Extends(extends) => Self::Extends(InternedExtendsType::new(
+                db,
+                resolve_reference(&extends.check_type),
+                resolve_reference(&extends.extends_type),
+                resolve_reference(&extends.true_type),
+                resolve_reference(&extends.false_type),
+                convert_references(db, &extends.infer_types, resolve_reference),
+                extends.distributive,
             )),
             raw::TypeData::Literal(literal) => Self::Literal(InternedLiteral::new(
                 db,
@@ -1317,6 +1399,15 @@ impl<'db> TypeDataSlots<'db> {
                 mapped.keys(db).operand(),
                 mapped.ty(db),
             ]),
+            TypeData::Extends(extends) => {
+                result.slots.extend([
+                    extends.check_type(db),
+                    extends.extends_type(db),
+                    extends.true_type(db),
+                    extends.false_type(db),
+                ]);
+                result.slots.extend_from_slice(extends.infer_types(db));
+            }
             TypeData::Literal(literal) => {
                 if let Literal::Object(members) = literal.literal(db) {
                     result.push_type_members_slots(members);
@@ -1633,6 +1724,7 @@ impl<'db> TypeDataSlotReplacements<'db> {
                 self.take_optional_type(object.prototype(db))?,
                 self.rebuild_type_members(object.members(db))?,
                 object.has_unknown_members(db),
+                object.kind(db),
             )),
             TypeData::Tuple(tuple) => TypeData::Tuple(InternedTuple::new(
                 db,
@@ -1685,6 +1777,15 @@ impl<'db> TypeDataSlotReplacements<'db> {
                 self.take_type()?,
                 mapped.readonly_modifier(db),
                 mapped.optional_modifier(db),
+            )),
+            TypeData::Extends(extends) => TypeData::Extends(InternedExtendsType::new(
+                db,
+                self.take_type()?,
+                self.take_type()?,
+                self.take_type()?,
+                self.take_type()?,
+                self.take_types(extends.infer_types(db).len())?,
+                extends.distributive(db),
             )),
             TypeData::Literal(literal) => TypeData::Literal(InternedLiteral::new(
                 db,
@@ -2605,6 +2706,10 @@ pub struct InternedObject<'db> {
     /// See [`crate::type_data::Object::has_unknown_members`].
     #[returns(copy)]
     pub has_unknown_members: bool,
+
+    /// See [`crate::type_data::Object::kind`].
+    #[returns(copy)]
+    pub kind: ObjectKind,
 }
 
 #[salsa::interned]
@@ -2720,6 +2825,27 @@ pub struct InternedIndexedAccessType<'db> {
     pub object: TypeData<'db>,
     #[returns(copy)]
     pub index: TypeData<'db>,
+}
+
+/// The operands of a TypeScript conditional type, stored in the database. See
+/// [`raw::ExtendsType`] for an example.
+#[salsa::interned]
+#[derive(Debug)]
+pub struct InternedExtendsType<'db> {
+    #[returns(copy)]
+    pub check_type: TypeData<'db>,
+    #[returns(copy)]
+    pub extends_type: TypeData<'db>,
+    #[returns(copy)]
+    pub true_type: TypeData<'db>,
+    #[returns(copy)]
+    pub false_type: TypeData<'db>,
+    /// Generics declared by `infer` inside `extends_type`.
+    #[returns(ref)]
+    pub infer_types: Box<[TypeData<'db>]>,
+    /// Whether the check type was a bare type parameter when declared.
+    #[returns(copy)]
+    pub distributive: bool,
 }
 
 impl<'db> InternedIndexedAccessType<'db> {
@@ -3707,6 +3833,7 @@ mod tests {
                 Some(s.next()),
                 boxed([named_member(s)]),
                 false,
+                ObjectKind::Shape,
             ))
         });
         assert_identity(&db, |s| {
@@ -3715,6 +3842,7 @@ mod tests {
                 Some(s.next()),
                 boxed([named_member(s)]),
                 true,
+                ObjectKind::Expression,
             ))
         });
         assert_identity(&db, |s| {
@@ -3763,6 +3891,17 @@ mod tests {
         });
         assert_identity(&db, |s| {
             TypeData::IndexedAccess(InternedIndexedAccessType::new(&db, s.next(), s.next()))
+        });
+        assert_identity(&db, |s| {
+            TypeData::Extends(InternedExtendsType::new(
+                &db,
+                s.next(),
+                s.next(),
+                s.next(),
+                s.next(),
+                Box::<[_]>::from([s.next(), s.next()]),
+                true,
+            ))
         });
         assert_identity(&db, |s| {
             TypeData::Literal(InternedLiteral::new(

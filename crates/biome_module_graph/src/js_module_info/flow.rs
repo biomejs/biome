@@ -1,0 +1,483 @@
+//! Syntax-only flow facts that let type inference refine variable reads.
+//!
+//! Collection records, for each execution root that tests one of its own
+//! variables, a graph of possible paths whose conditions are already
+//! decomposed into guards on semantic bindings. It also records the incoming
+//! path of every read such a guard can reach. Type inference later applies the
+//! guards to resolved types without inspecting syntax again.
+//!
+//! An execution root is a body analyzed independently, such as a module,
+//! function, or method. Only `let`, `const`, and parameter bindings that are
+//! never reassigned and are read in the root that declares them participate,
+//! so refinements cannot cross closure boundaries. The graph does not
+//! invalidate facts on writes or calls, which is why written bindings are
+//! excluded.
+
+mod builder;
+mod expressions;
+mod guards;
+mod scanner;
+
+pub(crate) use expressions::AnyFlowExpression;
+pub(crate) use guards::{FlowGuard, FlowTest, guard_signature};
+pub(crate) use scanner::FlowRootScanner;
+
+use biome_js_control_flow::AnyJsControlFlowRoot;
+use biome_js_semantic::{JsDeclarationKind, SemanticModel};
+use biome_js_syntax::JsIdentifierBinding;
+use biome_js_type_info::{RawTypeData, TypeReference, is_raw_narrowing_invariant};
+use biome_rowan::{AstNode, AstPtr, TextRange};
+use builder::{BuiltRoot, build_root};
+use guards::GuardFunctions;
+use rustc_hash::{FxHashMap, FxHashSet};
+
+/// Index of a node in [`RootFlow::nodes`].
+///
+/// Construction gives up on a root before its node count exceeds this type.
+pub(crate) type FlowNodeId = u32;
+
+/// Limits the graph steps spent deciding which reads a test can reach in one
+/// execution root. Like other construction limits, exceeding it leaves the
+/// root without flow, so its reads keep their ordinary types.
+const MAX_RELEVANCE_STEPS: usize = 1_048_576;
+
+/// A predecessor relation, not an instruction to execute.
+///
+/// Joins retain every reachable predecessor. Loop backedges can make the graph
+/// cyclic, so consumers must bound their traversal.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub(crate) enum FlowNode {
+    Start,
+    Join(Vec<FlowNodeId>),
+    Condition {
+        antecedent: FlowNodeId,
+        /// Index of the condition's guard in [`RootFlow::guards`].
+        guard: usize,
+    },
+}
+
+/// The paths through one execution root and the guards its conditions apply.
+#[derive(Debug)]
+pub(crate) struct RootFlow {
+    pub(crate) nodes: Box<[FlowNode]>,
+    pub(crate) guards: Box<[FlowGuard]>,
+    /// The points of each binding's reads, sorted and without duplicates.
+    pub(crate) read_points: FxHashMap<TextRange, Box<[FlowNodeId]>>,
+}
+
+impl RootFlow {
+    /// Returns the points where the root reads `binding`, sorted, or an empty
+    /// slice when it keeps no read of it.
+    pub(crate) fn read_points(&self, binding: TextRange) -> &[FlowNodeId] {
+        self.read_points.get(&binding).map_or(&[], |points| points)
+    }
+}
+
+/// A read whose type a test in its execution root may refine.
+#[derive(Clone, Copy, Debug)]
+pub(crate) struct FlowRead {
+    /// Index of the read's execution root in the module flow.
+    pub(crate) root: usize,
+    /// The flow that reaches the read, before evaluating it.
+    pub(crate) point: FlowNodeId,
+    /// Range of the binding the read refers to.
+    pub(crate) binding: TextRange,
+}
+
+/// Flow facts for one module.
+#[derive(Debug, Default)]
+pub(crate) struct ModuleFlow {
+    roots: Vec<RootFlow>,
+    reads: FxHashMap<TextRange, FlowRead>,
+    /// Points to each candidate expression, keyed by its trimmed range.
+    candidates: FxHashMap<TextRange, AstPtr<AnyFlowExpression>>,
+}
+
+impl ModuleFlow {
+    /// Collects flow for the execution roots that a [`FlowRootScanner`]
+    /// selected.
+    ///
+    /// Reads are kept only when their binding has a narrowable collected type,
+    /// as decided by [`is_raw_narrowing_invariant`], and a test of that binding
+    /// can reach them. Execution roots that exceed a construction or relevance
+    /// work limit keep no reads.
+    pub(crate) fn collect(
+        roots: FlowRootScanner,
+        model: &SemanticModel,
+        raw_types: &[RawTypeData],
+        raw_binding_types: &FxHashMap<TextRange, TypeReference>,
+    ) -> Self {
+        Self::collect_with_relevance_budget(
+            roots,
+            model,
+            raw_types,
+            raw_binding_types,
+            MAX_RELEVANCE_STEPS,
+        )
+    }
+
+    fn collect_with_relevance_budget(
+        roots: FlowRootScanner,
+        model: &SemanticModel,
+        raw_types: &[RawTypeData],
+        raw_binding_types: &FxHashMap<TextRange, TypeReference>,
+        relevance_budget: usize,
+    ) -> Self {
+        let mut flow = Self::default();
+        let mut collector = RootCollector {
+            model,
+            raw_types,
+            raw_binding_types,
+            relevance_budget,
+            functions: GuardFunctions::new(raw_types, raw_binding_types, roots.has_dynamic_scope()),
+        };
+        for selected in roots.selected() {
+            collector.add_root(&mut flow, &selected.root, roots.bindings(selected));
+        }
+        flow
+    }
+
+    /// Returns whether the expression at `range` may have a flow-sensitive type.
+    pub(crate) fn is_candidate(&self, range: TextRange) -> bool {
+        self.candidates.contains_key(&range)
+    }
+
+    /// Returns a pointer to the candidate expression at `range`, which
+    /// resolves in the module's syntax tree without searching by range.
+    pub(crate) fn candidate(&self, range: TextRange) -> Option<&AstPtr<AnyFlowExpression>> {
+        self.candidates.get(&range)
+    }
+
+    /// Returns the flow of the identifier read at `range`.
+    pub(crate) fn read(&self, range: TextRange) -> Option<FlowRead> {
+        self.reads.get(&range).copied()
+    }
+
+    pub(crate) fn root(&self, index: usize) -> Option<&RootFlow> {
+        self.roots.get(index)
+    }
+}
+
+struct RootCollector<'a> {
+    model: &'a SemanticModel,
+    raw_types: &'a [RawTypeData],
+    raw_binding_types: &'a FxHashMap<TextRange, TypeReference>,
+    relevance_budget: usize,
+    functions: GuardFunctions<'a>,
+}
+
+impl RootCollector<'_> {
+    fn add_root(
+        &mut self,
+        flow: &mut ModuleFlow,
+        root: &AnyJsControlFlowRoot,
+        bindings: &[JsIdentifierBinding],
+    ) {
+        let eligible: FxHashSet<TextRange> = bindings
+            .iter()
+            .filter_map(|binding| self.eligible_range(binding))
+            .collect();
+        // Only bindings declared by the root itself can narrow in it, so
+        // without one the graph would keep no reads.
+        if eligible.is_empty() {
+            return;
+        }
+        let Some(BuiltRoot {
+            nodes,
+            guards,
+            mentions,
+            reads,
+        }) = build_root(root, self.model, &mut self.functions)
+        else {
+            return;
+        };
+        let tested: FxHashSet<TextRange> = mentions.iter().map(|(_, binding)| *binding).collect();
+        let reads: Vec<_> = reads
+            .into_iter()
+            .filter(|read| tested.contains(&read.binding) && eligible.contains(&read.binding))
+            .collect();
+        if reads.is_empty() {
+            return;
+        }
+
+        let Some(reachable) = self.reachable_from_tests(&nodes, &mentions, &reads) else {
+            return;
+        };
+        let index = flow.roots.len();
+        let mut read_points: FxHashMap<_, Vec<_>> = FxHashMap::default();
+        for read in reads {
+            if !reachable.contains(&(read.binding, read.point)) {
+                continue;
+            }
+            read_points
+                .entry(read.binding)
+                .or_default()
+                .push(read.point);
+            let identifier = AnyFlowExpression::JsIdentifierExpression(read.identifier);
+            flow.candidates
+                .insert(identifier.range(), AstPtr::new(&identifier));
+            flow.candidates.extend(
+                identifier
+                    .evaluated_ancestors()
+                    .map(|ancestor| (ancestor.range(), AstPtr::new(&ancestor))),
+            );
+            flow.reads.insert(
+                identifier.range(),
+                FlowRead {
+                    root: index,
+                    point: read.point,
+                    binding: read.binding,
+                },
+            );
+        }
+        if !read_points.is_empty() {
+            flow.roots.push(RootFlow {
+                nodes: nodes.into_boxed_slice(),
+                guards: guards.into_boxed_slice(),
+                read_points: read_points
+                    .into_iter()
+                    .map(|(binding, mut points)| {
+                        points.sort_unstable();
+                        points.dedup();
+                        (binding, points.into_boxed_slice())
+                    })
+                    .collect(),
+            });
+        }
+    }
+
+    /// Returns the range of `binding` when the root that declares it can
+    /// narrow its reads.
+    fn eligible_range(&self, binding: &JsIdentifierBinding) -> Option<TextRange> {
+        let range = binding.range();
+        let binding = self.model.as_binding_by_range(range)?;
+        // The semantic index matches the start offset, not the entire range.
+        // A `var` initializer is not a semantic write and may follow an
+        // earlier guard.
+        if binding.range() != range
+            || binding.is_imported()
+            || binding.declaration_kind() == JsDeclarationKind::HoistedValue
+            || binding.all_writes().next().is_some()
+        {
+            return None;
+        }
+        // Untyped and `any` bindings never narrow, so their reads need no flow.
+        if self
+            .raw_binding_types
+            .get(&range)
+            .is_none_or(|reference| is_raw_narrowing_invariant(reference, self.raw_types))
+        {
+            return None;
+        }
+        Some(range)
+    }
+
+    /// Returns the `(binding, point)` pairs that a test of the binding can
+    /// reach, including the test itself.
+    ///
+    /// Returns `None` when the root's work limit is spent.
+    fn reachable_from_tests(
+        &self,
+        nodes: &[FlowNode],
+        mentions: &[(FlowNodeId, TextRange)],
+        reads: &[builder::BuiltRead],
+    ) -> Option<FxHashSet<(TextRange, FlowNodeId)>> {
+        let mut successors = vec![Vec::new(); nodes.len()];
+        for (index, node) in (0..).zip(nodes) {
+            match node {
+                FlowNode::Start => {}
+                FlowNode::Join(predecessors) => {
+                    for predecessor in predecessors {
+                        successors[*predecessor as usize].push(index);
+                    }
+                }
+                FlowNode::Condition { antecedent, .. } => {
+                    successors[*antecedent as usize].push(index);
+                }
+            }
+        }
+        let bindings: FxHashSet<TextRange> = reads.iter().map(|read| read.binding).collect();
+        let mut reachable = FxHashSet::default();
+        let mut remaining = self.relevance_budget;
+        for binding in bindings {
+            let mut seen = vec![false; nodes.len()];
+            let mut pending: Vec<FlowNodeId> = mentions
+                .iter()
+                .filter(|(_, mentioned)| *mentioned == binding)
+                .map(|(node, _)| *node)
+                .collect();
+            while let Some(node) = pending.pop() {
+                remaining = remaining.checked_sub(1)?;
+                if std::mem::replace(&mut seen[node as usize], true) {
+                    continue;
+                }
+                reachable.insert((binding, node));
+                pending.extend(&successors[node as usize]);
+            }
+        }
+        Some(reachable)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::js_module_info::{JsModuleInfo, JsModuleVisitor, TypeInferenceMode};
+    use biome_js_parser::{JsParserOptions, parse};
+    use biome_js_semantic::{SemanticModelOptions, semantic_model};
+    use biome_languages::JsFileSource;
+    use biome_rowan::{AstNode, TextRange, TextSize, WalkEvent};
+    use camino::Utf8PathBuf;
+    use std::sync::Arc;
+
+    fn module(source: &str) -> JsModuleInfo {
+        module_at(source, "/index.ts")
+    }
+
+    /// Collects the TypeScript `source` as if it were the module at `path`.
+    fn module_at(source: &str, path: &str) -> JsModuleInfo {
+        let parsed = parse(source, JsFileSource::ts(), JsParserOptions::default());
+        assert!(!parsed.has_errors(), "{source}");
+        let root = parsed.tree();
+        let model = Arc::new(semantic_model(&root, SemanticModelOptions::default()));
+        JsModuleVisitor::new(
+            root,
+            Utf8PathBuf::from(path),
+            model,
+            TypeInferenceMode::RawTypesOnly,
+        )
+        .collect_info()
+    }
+
+    fn marked(source: &str, marker: &str, expression: &str) -> TextRange {
+        let start = source.find(&format!("/*{marker}*/")).unwrap() + marker.len() + 4;
+        assert!(source[start..].starts_with(expression));
+        TextRange::at(
+            TextSize::try_from(start).unwrap(),
+            TextSize::try_from(expression.len()).unwrap(),
+        )
+    }
+
+    #[test]
+    fn dynamic_scope_references_in_nested_functions_disable_enclosing_flow() {
+        for (closure, expected) in [("value", true), ("eval('value = null')", false)] {
+            let source = format!(
+                "function f(value: string | null) {{ const g = () => {closure}; if (value !== null) {{ /*read*/value; }} }}"
+            );
+            let info = module(&source);
+            assert_eq!(
+                info.flow.is_candidate(marked(&source, "read", "value")),
+                expected,
+                "{closure}"
+            );
+        }
+    }
+
+    #[test]
+    fn only_the_root_that_declares_a_variable_narrows_its_reads() {
+        const SOURCE: &str = r#"
+            function f(outer: string | null) {
+                const g = (own: string | null) =>
+                    own !== null && outer !== null && /*own*/own && /*outer*/outer;
+            }
+        "#;
+        let info = module(SOURCE);
+        for (marker, expression, expected) in [("own", "own", true), ("outer", "outer", false)] {
+            assert_eq!(
+                info.flow.is_candidate(marked(SOURCE, marker, expression)),
+                expected,
+                "{marker}"
+            );
+        }
+    }
+
+    #[test]
+    fn declared_function_names_belong_to_the_enclosing_root() {
+        // A `declare` statement makes its root unsupported, unlike an exported
+        // declaration or a bodiless signature.
+        for source in [
+            "export declare function g(): void; if (!g) { /*read*/g; }",
+            "function g(): void; if (!g) { /*read*/g; }",
+        ] {
+            let read = marked(source, "read", "g");
+            assert!(module(source).flow.is_candidate(read), "{source}");
+        }
+    }
+
+    #[test]
+    fn declaration_files_get_no_flow() {
+        const SOURCE: &str =
+            "function f(value: string | null) { if (value !== null) { /*read*/value; } }";
+        let read = marked(SOURCE, "read", "value");
+        // A path without a known file source still gets flow.
+        for path in ["/index.ts", "/index"] {
+            assert!(module_at(SOURCE, path).flow.is_candidate(read), "{path}");
+        }
+        for path in ["/index.d.ts", "/index.d.mts", "/index.d.cts", "/INDEX.D.TS"] {
+            assert!(!module_at(SOURCE, path).flow.is_candidate(read), "{path}");
+        }
+    }
+
+    #[test]
+    fn roots_over_the_relevance_budget_keep_no_reads() {
+        const SOURCE: &str =
+            "function f(value: string | null) { if (value !== null) { /*read*/value; } }";
+        let info = module(SOURCE);
+        let read = marked(SOURCE, "read", "value");
+        assert!(info.flow.is_candidate(read));
+        let mut roots = super::FlowRootScanner::default();
+        for event in info.semantic_model.root().syntax().preorder() {
+            match event {
+                WalkEvent::Enter(node) => roots.enter(&node, &info.semantic_model),
+                WalkEvent::Leave(node) => roots.leave(&node),
+            }
+        }
+        let flow = super::ModuleFlow::collect_with_relevance_budget(
+            roots,
+            &info.semantic_model,
+            &info.raw_types,
+            &info.raw_binding_types,
+            0,
+        );
+        assert!(!flow.is_candidate(read));
+    }
+
+    #[test]
+    fn candidates_are_reachable_reads_and_their_evaluated_ancestors() {
+        const SOURCE: &str = r#"
+            declare function id<T>(value: T): T;
+            function f(value: string | null, loose) {
+                /*before*/value;
+                if (value !== null && loose) {
+                    /*member*/id(/*read*/value).length;
+                    /*array*/[value];
+                    /*loose*/loose;
+                }
+            }
+        "#;
+        let info = module(SOURCE);
+        for (marker, expression, expected) in [
+            ("before", "value", false),
+            ("read", "value", true),
+            ("member", "id(/*read*/value).length", true),
+            ("member", "id(/*read*/value)", true),
+            ("array", "[value]", false),
+            ("loose", "loose", false),
+        ] {
+            let range = marked(SOURCE, marker, expression);
+            assert_eq!(
+                info.flow.is_candidate(range),
+                expected,
+                "{marker}: {expression}"
+            );
+            let resolved = info
+                .flow
+                .candidate(range)
+                .and_then(|pointer| pointer.try_to_node(info.semantic_model.root().syntax()));
+            assert_eq!(
+                resolved.map(|expression| expression.range()),
+                expected.then_some(range),
+                "{marker}: {expression}"
+            );
+        }
+    }
+}

@@ -67,3 +67,11 @@ a {
       color: --foo;
     }
 };
+
+:root {
+  --page-margin: 1in;
+}
+
+@page {
+  margin: --page-margin;
+}

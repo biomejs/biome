@@ -1,5 +1,42 @@
 # @biomejs/runtime
 
+## 2.6.7
+
+### Patch Changes
+
+- [#13066](https://github.com/biomejs/biome/pull/13066) [`f6cf28e`](https://github.com/biomejs/biome/commit/f6cf28e3518f6030861f1e4063c30a6091b57197) Thanks [@arendjr](https://github.com/arendjr)! - Removed the `semantic()` query function from the JavaScript plugin API. Pass `{ semantic: true }` to `ast()` instead to provide the semantic model to a rule.
+  
+  ```ts
+  export const rule = defineRule({
+    query: semantic("JS_REFERENCE_IDENTIFIER"),
+    run(node, { model }) {
+      // Use `model` here.
+    },
+  });
+  ```
+  
+  Becomes:
+  
+  ```ts
+  export const rule = defineRule({
+    query: ast("JS_REFERENCE_IDENTIFIER", { semantic: true }),
+    run(node, { model }) {
+      // Use `model` here.
+    },
+  });
+  ```
+  
+  This behaviour matches the `grit()` query function, which also accepts the `{ semantic: true }` option.
+- Updated dependencies [[`b3375d2`](https://github.com/biomejs/biome/commit/b3375d2caf4ba351ac887801144bc4258fc66a6e), [`e24da6f`](https://github.com/biomejs/biome/commit/e24da6f6705a0e302bcabdc96ef53c7eebeab814), [`6c15027`](https://github.com/biomejs/biome/commit/6c15027cdb24e768435fa7fbfb12c2c02c12b3f8), [`0b8f429`](https://github.com/biomejs/biome/commit/0b8f429a38805f0779bdb9b06d95e498acee829b), [`9b6b9f4`](https://github.com/biomejs/biome/commit/9b6b9f46459977dbd69899de67456cd02736cbaa), [`739440f`](https://github.com/biomejs/biome/commit/739440f66a3bf6781e2276196f4a3135877614d1), [`71ab61b`](https://github.com/biomejs/biome/commit/71ab61bced2604fc17329472e5bff65b7d7a1bcd), [`37d9f41`](https://github.com/biomejs/biome/commit/37d9f4143469221735aa5d0e8a09cd5ea3d42684), [`f16842e`](https://github.com/biomejs/biome/commit/f16842ed8ad85191da172ca63e9452d7d76efcb6), [`c198be2`](https://github.com/biomejs/biome/commit/c198be2b71b01dead768987b96506ce674515cc2), [`a4d1b0f`](https://github.com/biomejs/biome/commit/a4d1b0fd45d83c650689460add99f99de6495662), [`d7d755b`](https://github.com/biomejs/biome/commit/d7d755b0d90cf8a38334d136239129eadbd3a4e7), [`d33e56e`](https://github.com/biomejs/biome/commit/d33e56e958b97360355ac220cc6393dc5916a6c6), [`48e3572`](https://github.com/biomejs/biome/commit/48e357294beebfbe930c46bf54cc66d3a736e3a3), [`5b00387`](https://github.com/biomejs/biome/commit/5b003879a1d82398ee8a43af19455a1b470252d8), [`8d33c85`](https://github.com/biomejs/biome/commit/8d33c8541cd3067b122629b3ab5032592d94f537), [`7252cbd`](https://github.com/biomejs/biome/commit/7252cbd6e57033df127c6e157d2c77533c8bd532), [`e781bc3`](https://github.com/biomejs/biome/commit/e781bc3037396ed000d2ec56bfc9e92e5b10fefd), [`a968e1a`](https://github.com/biomejs/biome/commit/a968e1a0e2fa99837f6fa731e326960bf594beed), [`7a795d0`](https://github.com/biomejs/biome/commit/7a795d07e188adaf726ce818a07b7ef979eee4ac), [`79ce388`](https://github.com/biomejs/biome/commit/79ce388835afd7a402a2378a426ff495686177c4), [`bd9faae`](https://github.com/biomejs/biome/commit/bd9faae50e48d17a8ac908029e6729f39b665e61), [`98f4d53`](https://github.com/biomejs/biome/commit/98f4d533a1e68b8f170cfdc1a7a128df77845510), [`7638393`](https://github.com/biomejs/biome/commit/76383936f3a4e4224ad3e87956642f752c01097a), [`37d9f41`](https://github.com/biomejs/biome/commit/37d9f4143469221735aa5d0e8a09cd5ea3d42684), [`d33e56e`](https://github.com/biomejs/biome/commit/d33e56e958b97360355ac220cc6393dc5916a6c6), [`d33e56e`](https://github.com/biomejs/biome/commit/d33e56e958b97360355ac220cc6393dc5916a6c6), [`2468384`](https://github.com/biomejs/biome/commit/2468384ab3cd0cab5457bc09050e00b7b099b0d2), [`7fdb28f`](https://github.com/biomejs/biome/commit/7fdb28f7a636f8737e3b3e3a974d584f20959018), [`d1896a0`](https://github.com/biomejs/biome/commit/d1896a07302b835acf2894083f7829736bee7537), [`81d0187`](https://github.com/biomejs/biome/commit/81d0187ed947e3647e4ad422112d012f7f1283d9), [`ace98cf`](https://github.com/biomejs/biome/commit/ace98cff2ed85b13b537143ec89adc22843a75e4), [`45c8c4d`](https://github.com/biomejs/biome/commit/45c8c4d9f1420a1ea6eda028ce1a3aaf8224fd78), [`0668c8f`](https://github.com/biomejs/biome/commit/0668c8ff61f7f2ef066c6ae5019ec5a79a7f24d5), [`e1ef913`](https://github.com/biomejs/biome/commit/e1ef91390ce3c02bc15ebf58482b082a6ab97a46), [`419aa5d`](https://github.com/biomejs/biome/commit/419aa5dd1ddc8ae3d698f7901a068104d048ec2d), [`6a25d72`](https://github.com/biomejs/biome/commit/6a25d72694a0cfb8f38667d148cbedaefac56559), [`60f4695`](https://github.com/biomejs/biome/commit/60f46952be732210d52fc4a45c01fbbf88acdb3c), [`478e056`](https://github.com/biomejs/biome/commit/478e0561852b269b0fe2d13ce80baa9a26c88478), [`f6cf28e`](https://github.com/biomejs/biome/commit/f6cf28e3518f6030861f1e4063c30a6091b57197), [`014b976`](https://github.com/biomejs/biome/commit/014b976ba021119c5c99cfe6bb07361c8e89edc9), [`827e610`](https://github.com/biomejs/biome/commit/827e6103c9baf8c4d42ff50692ea98f32d4a2d2c), [`ae0e186`](https://github.com/biomejs/biome/commit/ae0e186b7ba1a245595d5685c525b6ce60cf5a62), [`24734a8`](https://github.com/biomejs/biome/commit/24734a8a91befa250d3466d555af5c8b77c4c070), [`bd0988e`](https://github.com/biomejs/biome/commit/bd0988e566acadb7375026c3f24b27b0d491eb15), [`24734a8`](https://github.com/biomejs/biome/commit/24734a8a91befa250d3466d555af5c8b77c4c070), [`05a1409`](https://github.com/biomejs/biome/commit/05a14096d37cc6a83211125ce51241c98c1b681d), [`ec0142b`](https://github.com/biomejs/biome/commit/ec0142bfd45d7260f5241ad291a7c02bd0bfe24e), [`24734a8`](https://github.com/biomejs/biome/commit/24734a8a91befa250d3466d555af5c8b77c4c070), [`78c744a`](https://github.com/biomejs/biome/commit/78c744ad9b730c1429eac6979c2a7c9c04170d83), [`c6feec1`](https://github.com/biomejs/biome/commit/c6feec1a09da6d3176e0443ed63a4510500be2d0), [`7f971ed`](https://github.com/biomejs/biome/commit/7f971eddf9af7e1bb6e05dce9cd0ba80d04da509), [`bd0988e`](https://github.com/biomejs/biome/commit/bd0988e566acadb7375026c3f24b27b0d491eb15), [`d9267a5`](https://github.com/biomejs/biome/commit/d9267a5e5f46b8f768902e48007d76c0819771cf), [`24734a8`](https://github.com/biomejs/biome/commit/24734a8a91befa250d3466d555af5c8b77c4c070)]:
+  - @biomejs/biome@2.6.7
+
+## 2.6.6
+
+### Patch Changes
+
+- Updated dependencies [[`da0422e`](https://github.com/biomejs/biome/commit/da0422e5201555239e49f81e5236068935b9445a), [`cd9e10f`](https://github.com/biomejs/biome/commit/cd9e10f1510d043ee2b5148a5e069fee3638ad65), [`a7c9586`](https://github.com/biomejs/biome/commit/a7c9586a6ff00e455a1d647d8707036bd705bcda), [`e954f55`](https://github.com/biomejs/biome/commit/e954f55b09f271ab97a79c732be53c7523b7f2bc), [`15039f7`](https://github.com/biomejs/biome/commit/15039f762513ec3e20eb0f5d8c4584aba76c7d38), [`1cd7520`](https://github.com/biomejs/biome/commit/1cd7520c8eda7409db0b5648493370cb95aa5f23), [`d47fcfd`](https://github.com/biomejs/biome/commit/d47fcfd99c36c19751eb785cae6fb7b655a2432b), [`7c1cd5f`](https://github.com/biomejs/biome/commit/7c1cd5f09604b9762e2cc91e5f96ee0ddc04d485), [`6b73fcf`](https://github.com/biomejs/biome/commit/6b73fcfa5a0177ae03550d510bf97daaf640b058), [`3bb18d8`](https://github.com/biomejs/biome/commit/3bb18d85ca16f9cd18bc84810b69bbb04b2136ca), [`0538e30`](https://github.com/biomejs/biome/commit/0538e30afeaf0eb9fd97170e8bcbe05b67d9bb57), [`191111d`](https://github.com/biomejs/biome/commit/191111d99b6c8e0638cc8b9fc7950d55ad18d654), [`cc929af`](https://github.com/biomejs/biome/commit/cc929aff46bd49ae0bfc5c02a6f7b093caa82d25), [`fe9248e`](https://github.com/biomejs/biome/commit/fe9248e58613d2326d17b3de9c80859e7f0d8d71), [`22d27e8`](https://github.com/biomejs/biome/commit/22d27e8e49965757087c8284ddcab1f207d20ed9), [`5a06df5`](https://github.com/biomejs/biome/commit/5a06df57d0dd2a84b1930c56cbf4495fc82db55d), [`ce71284`](https://github.com/biomejs/biome/commit/ce7128402663d4af0a2d22e0731a0d6127e21489), [`2987b54`](https://github.com/biomejs/biome/commit/2987b54ef12d6949fefe97363fd8df8bedfa34f9)]:
+  - @biomejs/biome@2.6.6
+
 ## 2.6.5
 
 ### Patch Changes

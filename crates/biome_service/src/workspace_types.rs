@@ -105,12 +105,11 @@ fn instance_type<'a>(
             let required_properties = schema
                 .get("required")
                 .and_then(|v| v.as_array())
-                .map(|arr| {
+                .map_or_default(|arr| {
                     arr.iter()
                         .filter_map(|v| v.as_str())
                         .collect::<std::collections::HashSet<_>>()
-                })
-                .unwrap_or_default();
+                });
 
             let properties_obj =
                 schema
@@ -633,12 +632,11 @@ pub fn generate_type<'a>(
             let required_properties = schema
                 .get("required")
                 .and_then(|v| v.as_array())
-                .map(|arr| {
+                .map_or_default(|arr| {
                     arr.iter()
                         .filter_map(|v| v.as_str())
                         .collect::<std::collections::HashSet<_>>()
-                })
-                .unwrap_or_default();
+                });
 
             // Create a property signature member in the interface for each
             // property of the corresponding schema object

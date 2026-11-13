@@ -85,6 +85,9 @@ pub enum CompileError {
 
     /// Unsupported function definition: `{name}`
     UnsupportedFunctionDefinition(String),
+
+    /// A node selector query contains a rewrite.
+    RewritesNotAllowed,
 }
 
 impl Diagnostic for CompileError {
@@ -168,6 +171,9 @@ impl Diagnostic for CompileError {
             Self::UnsupportedFunctionDefinition(name) => {
                 fmt.write_markup(markup! { "Unsupported foreign function definition: "{{name}} })
             }
+            Self::RewritesNotAllowed => fmt.write_markup(markup! {
+                "Grit patterns used as JavaScript plugin queries cannot contain rewrites"
+            }),
         }
     }
 

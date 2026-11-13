@@ -314,17 +314,11 @@ where
     }
 }
 
-pub struct TailwindSyntaxVisitor<N: AstNode> {
-    skip_subtree: Option<SyntaxNode<N::Language>>,
-    _node: PhantomData<N>,
-}
+pub struct TailwindSyntaxVisitor<N>(PhantomData<N>);
 
-impl<N: AstNode> Default for TailwindSyntaxVisitor<N> {
+impl<N> Default for TailwindSyntaxVisitor<N> {
     fn default() -> Self {
-        Self {
-            skip_subtree: None,
-            _node: PhantomData,
-        }
+        Self(PhantomData)
     }
 }
 
@@ -339,26 +333,15 @@ where
         event: &WalkEvent<SyntaxNode<Self::Language>>,
         mut ctx: VisitorContext<Self::Language>,
     ) {
-        let node = match event {
-            WalkEvent::Enter(node) => node,
-            WalkEvent::Leave(node) => {
-                if let Some(skip_subtree) = &self.skip_subtree
-                    && skip_subtree == node
-                {
-                    self.skip_subtree = None;
-                }
-                return;
-            }
+        let WalkEvent::Enter(node) = event else {
+            return;
         };
 
-        if self.skip_subtree.is_some() {
-            return;
-        }
-
+        // A node overlaps the range only if all its ancestors do, so checking
+        // the node alone skips the same nodes as skipping whole subtrees.
         if let Some(range) = ctx.range
             && node.text_range_with_trivia().ordering(range).is_ne()
         {
-            self.skip_subtree = Some(node.clone());
             return;
         }
 
@@ -399,6 +382,13 @@ where
             node: node.clone(),
             class_string,
         });
+    }
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<Self::Language>>,
+    ) -> Option<SyntaxKindSet<Self::Language>> {
+        Some(N::KIND_SET)
     }
 }
 

@@ -1954,7 +1954,7 @@ mod test {
         #[cfg(not(feature = "js_plugin"))]
         {
             assert!(matches!(error, PluginDiagnostic::UnsupportedRuleFormat(_)));
-            snap_diagnostic("load_js_plugin_without_runtime_support", error.into());
+            snap_diagnostic("load_js_plugin_without_runtime_support", &[], error.into());
         }
     }
 

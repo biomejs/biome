@@ -267,11 +267,26 @@ impl<L: Language> SyntaxNode<L> {
         self.raw.ancestors().map(Self::from)
     }
 
+    /// Returns the topmost node of the tree containing this node.
+    pub fn tree_top(&self) -> Self {
+        Self::from(self.raw.tree_top())
+    }
+
     pub fn children(&self) -> SyntaxNodeChildren<L> {
         SyntaxNodeChildren {
             raw: self.raw.children(),
             _p: PhantomData,
         }
+    }
+
+    /// Returns the direct child nodes whose kinds are in `kinds`.
+    ///
+    /// Rejected children are filtered before their syntax nodes are allocated.
+    pub fn children_of_kinds(
+        &self,
+        kinds: SyntaxKindSet<L>,
+    ) -> impl Iterator<Item = Self> + Clone + use<L> {
+        self.raw.children_of_kinds(kinds).map(Self::from)
     }
 
     /// Returns the slot at `index`, or [None] if this node has no slot with that index.
@@ -298,6 +313,18 @@ impl<L: Language> SyntaxNode<L> {
         }
     }
 
+    /// Returns the direct child elements whose kinds are in `kinds`.
+    ///
+    /// Rejected children are filtered before their syntax elements are allocated.
+    pub fn children_with_tokens_of_kinds(
+        &self,
+        kinds: SyntaxKindSet<L>,
+    ) -> impl Iterator<Item = SyntaxElement<L>> + Clone + use<L> {
+        self.raw
+            .children_with_tokens_of_kinds(kinds)
+            .map(SyntaxElement::from)
+    }
+
     pub fn tokens(&self) -> impl DoubleEndedIterator<Item = SyntaxToken<L>> + '_ {
         self.raw.tokens().map(SyntaxToken::from)
     }
@@ -305,6 +332,12 @@ impl<L: Language> SyntaxNode<L> {
     pub fn first_child(&self) -> Option<Self> {
         self.raw.first_child().map(Self::from)
     }
+
+    /// Returns the first direct child node whose kind is in `kinds`.
+    pub fn first_child_of_kinds(&self, kinds: SyntaxKindSet<L>) -> Option<Self> {
+        self.raw.first_child_of_kinds(kinds).map(Self::from)
+    }
+
     pub fn last_child(&self) -> Option<Self> {
         self.raw.last_child().map(Self::from)
     }
@@ -312,6 +345,17 @@ impl<L: Language> SyntaxNode<L> {
     pub fn first_child_or_token(&self) -> Option<SyntaxElement<L>> {
         self.raw.first_child_or_token().map(NodeOrToken::from)
     }
+
+    /// Returns the first direct child element whose kind is in `kinds`.
+    pub fn first_child_or_token_of_kinds(
+        &self,
+        kinds: SyntaxKindSet<L>,
+    ) -> Option<SyntaxElement<L>> {
+        self.raw
+            .first_child_or_token_of_kinds(kinds)
+            .map(SyntaxElement::from)
+    }
+
     pub fn last_child_or_token(&self) -> Option<SyntaxElement<L>> {
         self.raw.last_child_or_token().map(NodeOrToken::from)
     }
@@ -319,6 +363,12 @@ impl<L: Language> SyntaxNode<L> {
     pub fn next_sibling(&self) -> Option<Self> {
         self.raw.next_sibling().map(Self::from)
     }
+
+    /// Returns the next sibling node whose kind is in `kinds`.
+    pub fn next_sibling_of_kinds(&self, kinds: SyntaxKindSet<L>) -> Option<Self> {
+        self.raw.next_sibling_of_kinds(kinds).map(Self::from)
+    }
+
     pub fn prev_sibling(&self) -> Option<Self> {
         self.raw.prev_sibling().map(Self::from)
     }
@@ -326,6 +376,17 @@ impl<L: Language> SyntaxNode<L> {
     pub fn next_sibling_or_token(&self) -> Option<SyntaxElement<L>> {
         self.raw.next_sibling_or_token().map(NodeOrToken::from)
     }
+
+    /// Returns the next sibling element whose kind is in `kinds`.
+    pub fn next_sibling_or_token_of_kinds(
+        &self,
+        kinds: SyntaxKindSet<L>,
+    ) -> Option<SyntaxElement<L>> {
+        self.raw
+            .next_sibling_or_token_of_kinds(kinds)
+            .map(SyntaxElement::from)
+    }
+
     pub fn prev_sibling_or_token(&self) -> Option<SyntaxElement<L>> {
         self.raw.prev_sibling_or_token().map(NodeOrToken::from)
     }
@@ -337,6 +398,40 @@ impl<L: Language> SyntaxNode<L> {
     /// Return the rightmost token in the subtree of this node.
     pub fn last_token(&self) -> Option<SyntaxToken<L>> {
         self.raw.last_token().map(SyntaxToken::from)
+    }
+
+    /// Returns the token immediately after this node's subtree.
+    pub fn next_token(&self) -> Option<SyntaxToken<L>> {
+        self.raw.next_token().map(SyntaxToken::from)
+    }
+
+    /// Returns the token immediately before this node's subtree.
+    pub fn prev_token(&self) -> Option<SyntaxToken<L>> {
+        self.raw.prev_token().map(SyntaxToken::from)
+    }
+
+    /// Returns the trivia before this node's first token, in source order.
+    ///
+    /// Returns an empty iterator if this node contains no tokens.
+    pub fn trivia_before(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = SyntaxTriviaPiece<L>> + Clone + use<L> {
+        self.first_token()
+            .map(|token| token.trivia_before())
+            .into_iter()
+            .flatten()
+    }
+
+    /// Returns the trivia after this node's last token, in source order.
+    ///
+    /// Returns an empty iterator if this node contains no tokens.
+    pub fn trivia_after(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = SyntaxTriviaPiece<L>> + Clone + use<L> {
+        self.last_token()
+            .map(|token| token.trivia_after())
+            .into_iter()
+            .flatten()
     }
 
     pub fn siblings(&self, direction: Direction) -> impl Iterator<Item = Self> + use<L> {
@@ -1136,6 +1231,7 @@ impl<L: Language> Iterator for SyntaxElementChildren<L> {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct Preorder<L: Language> {
     raw: cursor::Preorder,
     _p: PhantomData<L>,
@@ -1210,6 +1306,7 @@ impl<L: Language> Iterator for PreorderTokens<L> {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct PreorderWithTokens<L: Language> {
     raw: cursor::PreorderWithTokens,
     _p: PhantomData<L>,
