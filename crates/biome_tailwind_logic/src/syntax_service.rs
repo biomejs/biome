@@ -37,7 +37,7 @@ use biome_tailwind_parser::{TailwindParse, TailwindParserOptions, parse_tailwind
 use biome_tailwind_syntax::{TailwindLanguage, TwRoot};
 use rustc_hash::FxHashMap;
 
-use crate::use_tailwind_sorted_classes::TailwindDesignSystem;
+use crate::tailwind_v4::TailwindDesignSystem;
 
 #[derive(Clone, Debug)]
 pub struct SyntaxService<L> {
@@ -108,11 +108,15 @@ impl TailwindClassString {
     /// Whether `range`, relative to the start of `text`, touches part of a
     /// class.
     fn touches_partial_class(&self, range: TextRange) -> bool {
-        self.partial_classes
-            .iter()
-            .flatten()
-            .any(|partial| partial.intersect(range).is_some())
+        touches_any(&self.partial_classes, range)
     }
+}
+
+fn touches_any(ranges: &[Option<TextRange>; 2], range: TextRange) -> bool {
+    ranges
+        .iter()
+        .flatten()
+        .any(|other| other.intersect(range).is_some())
 }
 
 pub struct ParsedTailwindSyntax {
@@ -218,6 +222,8 @@ pub trait TailwindClassStringHost: AstNode {
 pub struct TailwindSyntax<N> {
     node: N,
     parse: Rc<TailwindParse>,
+    /// See [TailwindClassString::partial_classes].
+    partial_classes: [Option<TextRange>; 2],
 }
 
 pub struct TailwindSyntaxMatch<L: Language> {
@@ -246,6 +252,13 @@ impl<N> TailwindSyntax<N> {
 
     pub fn tailwind_has_errors(&self) -> bool {
         self.parse.has_errors()
+    }
+
+    /// Whether `range`, relative to the start of the class string, touches a
+    /// class that continues outside the string, such as `bar` in
+    /// `` `foo bar${suffix}` ``.
+    pub fn touches_partial_class(&self, range: TextRange) -> bool {
+        touches_any(&self.partial_classes, range)
     }
 }
 
@@ -310,6 +323,7 @@ where
         Self {
             node: ast_node,
             parse,
+            partial_classes: node.class_string.partial_classes,
         }
     }
 }

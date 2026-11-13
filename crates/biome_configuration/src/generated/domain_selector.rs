@@ -58,6 +58,7 @@ static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useImportExtensions"),
         RuleFilter::Rule("correctness", "useJsonImportAttributes"),
         RuleFilter::Rule("nursery", "noSelfImport"),
+        RuleFilter::Rule("nursery", "noTailwindConflictingClasses"),
         RuleFilter::Rule("nursery", "noTailwindRawColors"),
         RuleFilter::Rule("nursery", "noTailwindRestrictedClasses"),
         RuleFilter::Rule("nursery", "noUndeclaredClasses"),
@@ -160,6 +161,7 @@ static SVELTE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
 static TAILWIND_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noTailwindArbitraryValue"),
+        RuleFilter::Rule("nursery", "noTailwindConflictingClasses"),
         RuleFilter::Rule("nursery", "noTailwindLegacyUtilities"),
         RuleFilter::Rule("nursery", "noTailwindRawColors"),
         RuleFilter::Rule("nursery", "noTailwindRestrictedClasses"),

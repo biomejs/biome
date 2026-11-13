@@ -68,24 +68,39 @@ ${items}
 `;
 }
 
-// Build the deduplicated signature pool from every placement's
-// property-order list (statics, branches, and negative branches). Pool
-// entries are unique ascending index lists, addressed by the stable
-// index stored in each placement.
+// Build the signature pool from every placement's property-order list
+// (statics, branches, and negative branches). Pool entries are ascending
+// index lists, addressed by the stable index stored in each placement.
+//
+// Placements share an entry only when their `declarations` match too, so
+// the index tells whether two candidates override each other. Several
+// entries can therefore hold the same list.
 function collectSignaturePool(utils: ExtractedUtilities): {
 	pool: number[][];
+	declarations: string[];
+	exact: boolean[];
 	idxOf: (sort: PropertySort) => number;
 } {
 	const pool: number[][] = [];
+	const declarations: string[] = [];
+	// Whether every placement of an entry has one declaration per property
+	// in its `declarations`. `declarations` leaves out `--tw-sort` and
+	// repeated properties, which the count includes.
+	const exact: boolean[] = [];
 	const byKey = new Map<string, number>();
 	const intern = (sort: PropertySort): number => {
-		const key = sort.order.join(".");
+		const key = `${sort.order.join(".")}|${sort.declarations}`;
 		let idx = byKey.get(key);
 		if (idx === undefined) {
 			idx = pool.length;
 			byKey.set(key, idx);
 			pool.push(sort.order);
+			declarations.push(sort.declarations);
+			exact.push(true);
 		}
+		const properties =
+			sort.declarations === "" ? 0 : sort.declarations.split(";").length;
+		exact[idx] &&= sort.count === properties;
 		return idx;
 	};
 	const internBranches = (
@@ -105,7 +120,94 @@ function collectSignaturePool(utils: ExtractedUtilities): {
 			internBranches(u.negative.namedBranches, u.negative.arbitraryBranches);
 		}
 	}
-	return { pool, idxOf: intern };
+	for (const m of utils.modifiers) intern(m.withModifier);
+	for (const v of utils.variables) intern(v.sort);
+	return { pool, declarations, exact, idxOf: intern };
+}
+
+// An arbitrary property such as `[display:grid]` compiles to its one
+// declaration, and an `@utility` rule that holds only declarations compiles
+// to those, all outside any selector or at-rule. Each sets the same
+// properties as the placement whose `declarations` hold exactly those
+// top-level properties, one declaration each. A placement with more
+// declarations, such as the hidden `--tw-sort` of `size-4`, doesn't match.
+function renderPropertySetSignatures(
+	declarations: string[],
+	exact: boolean[],
+): string {
+	const bySet = new Map<string, number>();
+	declarations.forEach((declaration, idx) => {
+		if (declaration === "" || !exact[idx]) return;
+		const parts = declaration.split(";");
+		if (!parts.every((part) => part.startsWith("|"))) return;
+		const key = parts.map((part) => part.slice(1)).join(";");
+		const known = bySet.get(key);
+		if (known !== undefined) {
+			throw new Error(
+				`signatures ${known} and ${idx} both set only \`${key}\``,
+			);
+		}
+		bySet.set(key, idx);
+	});
+	const lines = [...bySet]
+		.sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+		.map(([key, idx]) => `    ${rustString(key)} => ${idx}u16,`);
+	return `/// The \`SIGNATURE_POOL\` index of the placement that sets exactly the given
+/// properties, outside any selector or at-rule, keyed by the property names
+/// in ascending order joined with \`;\`. \`[display:grid]\` sets the same
+/// properties as \`flex\`, and \`@utility tab-4 { tab-size: 4; }\` the same as
+/// \`tab-2\`.
+pub(super) static PROPERTY_SET_SIGNATURES: phf::Map<&'static str, u16> = phf_map! {
+${lines.join("\n")}
+};
+`;
+}
+
+function renderVariableSignatures(
+	utils: ExtractedUtilities,
+	sigIdx: (sort: PropertySort) => number,
+): string {
+	const lines = utils.variables.map(
+		(v) =>
+			`    ${rustString(v.basename)} => ${checked(v.sort, sigIdx(v.sort)).sig}u16,`,
+	);
+	return `/// The \`SIGNATURE_POOL\` index of each functional utility that doesn't
+/// take its \`Fallback\` branch for a \`var()\` value. \`font-[var(--x)]\` sets
+/// the font weight, while the fallback of \`font\` sets the font family. A
+/// negative utility keeps its sign.
+pub(super) static VARIABLE_SIGNATURES: phf::Map<&'static str, u16> = phf_map! {
+${lines.join("\n")}
+};
+`;
+}
+
+function renderModifierSignatures(
+	utils: ExtractedUtilities,
+	sigIdx: (sort: PropertySort) => number,
+): string {
+	const withModifier = new Map<number, number>();
+	for (const m of utils.modifiers) {
+		const from = sigIdx(m.sort);
+		const to = checked(m.withModifier, sigIdx(m.withModifier)).sig;
+		const known = withModifier.get(from);
+		if (known !== undefined && known !== to) {
+			throw new Error(
+				`signature ${from} maps to both ${known} and ${to} with a modifier`,
+			);
+		}
+		withModifier.set(from, to);
+	}
+	const lines = [...withModifier]
+		.sort(([a], [b]) => a - b)
+		.map(([from, to]) => `    ${from}u16 => ${to}u16,`);
+	return `/// The \`SIGNATURE_POOL\` index of each placement whose declarations change
+/// when the candidate takes a modifier, mapped to the index with a modifier.
+/// \`text-[14px]/6\` also sets \`line-height\`, and \`shadow-lg/50\` also sets
+/// \`--tw-shadow-alpha\`.
+pub(super) static MODIFIER_SIGNATURES: phf::Map<u16, u16> = phf_map! {
+${lines.join("\n")}
+};
+`;
 }
 
 function checked(
@@ -125,7 +227,13 @@ function renderSignaturePool(pool: number[][]): string {
 		}
 		return `    &[${order.join(", ")}],`;
 	});
-	return `pub(super) static SIGNATURE_POOL: &[&[u16]] = &[
+	return `/// The property-order indices of each placement, addressed by the index a
+/// placement stores.
+///
+/// Two placements share an entry only when their utilities set the same
+/// properties under the same selectors and at-rules, so several entries can
+/// hold the same list.
+pub(super) static SIGNATURE_POOL: &[&[u16]] = &[
 ${items.join("\n")}
 ];
 `;
@@ -429,15 +537,21 @@ export function renderRust(input: {
 	const { pool: keywordPool, idxOf: keywordIdx } = collectKeywordPool(
 		input.utilities,
 	);
-	const { pool: signaturePool, idxOf: sigIdx } = collectSignaturePool(
-		input.utilities,
-	);
+	const {
+		pool: signaturePool,
+		declarations,
+		exact,
+		idxOf: sigIdx,
+	} = collectSignaturePool(input.utilities);
 
 	return [
 		HEADER,
 		renderPropertyIndex(input.propertyOrder),
 		renderKeywordPool(keywordPool),
 		renderSignaturePool(signaturePool),
+		renderModifierSignatures(input.utilities, sigIdx),
+		renderVariableSignatures(input.utilities, sigIdx),
+		renderPropertySetSignatures(declarations, exact),
 		renderStaticUtilities(input.utilities, sigIdx),
 		renderFunctionalUtilities(input.utilities, sigIdx, keywordIdx),
 		renderVariants(input.variants.variants),

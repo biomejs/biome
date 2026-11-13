@@ -16,7 +16,7 @@
 //           type-blind fallback property, if any.
 //        b. (basename × every CssDataType, with explicit dataType marker)
 //           `<basename>-[<marker>:<sample>]` — emit `ArbitraryBranch::Typed`
-//           only when the resulting (property, count) differs from the nonsense
+//           only when the resulting placement differs from the nonsense
 //           fallback. Equal results are absorbed by the `ArbitraryBranch::Fallback`
 //           entry.
 //        c. If the utility produced a nonsense result, emit one
@@ -25,7 +25,7 @@
 //      utilities. Classes not in `keys('static')`, not numeric, not
 //      theme-keyed, and not a probe token are keyword variants baked
 //      into the compileFn (e.g. `origin-top`, `accent-current`). Group
-//      by (basename, prop, count) and emit `NamedBranch::Keyword` branches.
+//      by (basename, placement) and emit `NamedBranch::Keyword` branches.
 //   5. Static utilities (`keys('static')`) get a flat per-name table.
 
 import { __unstable__loadDesignSystem } from "tailwindcss";
@@ -54,9 +54,17 @@ import type {
 // declaration count. Taken verbatim from `compileAstNodes(...).propertySort`
 // so the preset carries the exact numbers Tailwind sorts with (including
 // `--tw-sort` hints and nested at-rule declarations).
+//
+// `declarations` isn't part of Tailwind's sort data. It names the compiled
+// declarations apart from their values. Two candidates with the same
+// `declarations` set the same properties, so one overrides the other. `order`
+// can't tell that on its own, because it leaves out the properties missing
+// from Tailwind's property order, and the selectors and at-rules a
+// declaration is nested in.
 export type PropertySort = {
 	order: number[];
 	count: number;
+	declarations: string;
 };
 
 export type StaticUtility = {
@@ -130,18 +138,66 @@ export type Negative =
 			registration_idx: number;
 	  } & FunctionalBranches);
 
+// A placement whose declarations change when the candidate takes a
+// modifier: `text-[14px]/6` also sets `line-height`, and `shadow-lg/50` also
+// sets `--tw-shadow-alpha`. An opacity modifier on a color only changes the
+// value of a declaration, so color placements aren't listed.
+export type ModifierPlacement = {
+	sort: PropertySort;
+	withModifier: PropertySort;
+};
+
+// The placement of a functional utility with a `var()` value, when it isn't
+// the placement of the `Fallback` branch. Tailwind can't read a type from
+// `var()`, so it compiles the utility's default: `font-[var(--x)]` sets the
+// font weight. The fallback probe is an identifier, which `font` reads as a
+// font family.
+export type VariablePlacement = {
+	basename: string;
+	sort: PropertySort;
+};
+
 export type ExtractedUtilities = {
 	static: StaticUtility[];
 	functional: FunctionalUtility[];
+	modifiers: ModifierPlacement[];
+	variables: VariablePlacement[];
 };
 
 type DesignSystem = Awaited<ReturnType<typeof __unstable__loadDesignSystem>>;
+type CompiledNode = ReturnType<DesignSystem["compileAstNodes"]>[number]["node"];
+
+// The `declarations` of a compiled candidate: every property it sets, each
+// with the selectors and at-rules it is nested in, sorted and deduplicated.
+// `--tw-sort` only hints at the sort order, and an `at-root` node holds the
+// `@property` rules Tailwind hoists out of the utility.
+function declarationsOf(compiled: CompiledNode): string {
+	const declarations = new Set<string>();
+	const walk = (nodes: CompiledNode[], path: string) => {
+		for (const node of nodes) {
+			if (node.kind === "declaration") {
+				if (node.value !== undefined && node.property !== "--tw-sort") {
+					declarations.add(`${path}|${node.property}`);
+				}
+			} else if (node.kind === "rule") {
+				walk(node.nodes, `${path}{${node.selector}`);
+			} else if (node.kind === "at-rule") {
+				walk(node.nodes, `${path}{${node.name} ${node.params}`);
+			}
+		}
+	};
+	walk("nodes" in compiled ? compiled.nodes : [], "");
+	return [...declarations].sort().join(";");
+}
 
 // Mirror of the comparator `compileCandidates` sorts compiled nodes
 // with: walk the shared prefix of the ascending order lists, first
 // differing index decides, an exhausted list counts as Infinity (so the
 // longer list wins a shared prefix), then declaration count descending.
-function comparePropertySort(a: PropertySort, b: PropertySort): number {
+function comparePropertySort(
+	a: Omit<PropertySort, "declarations">,
+	b: Omit<PropertySort, "declarations">,
+): number {
 	let i = 0;
 	while (i < a.order.length && i < b.order.length && a.order[i] === b.order[i])
 		i++;
@@ -160,19 +216,24 @@ function propertySortOf(
 	ds: DesignSystem,
 	className: string,
 ): PropertySort | null {
-	let best: PropertySort | null = null;
-	for (const candidate of ds.parseCandidate(className)) {
-		for (const { propertySort } of ds.compileAstNodes(candidate)) {
-			if (best === null || comparePropertySort(propertySort, best) < 0) {
-				best = propertySort;
-			}
+	const compiled = [...ds.parseCandidate(className)].flatMap((candidate) =>
+		ds.compileAstNodes(candidate),
+	);
+	let best: (typeof compiled)[number] | null = null;
+	for (const entry of compiled) {
+		if (
+			best === null ||
+			comparePropertySort(entry.propertySort, best.propertySort) < 0
+		) {
+			best = entry;
 		}
 	}
-	return best;
+	if (best === null) return null;
+	return { ...best.propertySort, declarations: declarationsOf(best.node) };
 }
 
 function sortKeyOf(sort: PropertySort): string {
-	return `${sort.order.join(".")}|${sort.count}`;
+	return `${sort.order.join(".")}|${sort.count}|${sort.declarations}`;
 }
 
 // The `/modifier` a branch accepts, probed from a representative candidate
@@ -183,6 +244,20 @@ function sortKeyOf(sort: PropertySort): string {
 function modifierKindOf(ds: DesignSystem, base: string): ModifierKind {
 	if (!propertySortOf(ds, `${base}/50`)) return "None";
 	return propertySortOf(ds, `${base}/loose`) ? "LineHeight" : "Opacity";
+}
+
+// Records the placement of `base` with a modifier in `modifiers`, when the
+// modifier changes the declarations of `sort`, the placement without one.
+function addModifierPlacement(
+	ds: DesignSystem,
+	modifiers: ModifierPlacement[],
+	base: string,
+	sort: PropertySort,
+): void {
+	const withModifier = propertySortOf(ds, `${base}/50`);
+	if (withModifier && withModifier.declarations !== sort.declarations) {
+		modifiers.push({ sort, withModifier });
+	}
 }
 
 export async function extractUtilities(): Promise<ExtractedUtilities> {
@@ -213,9 +288,17 @@ export async function extractUtilities(): Promise<ExtractedUtilities> {
 	);
 
 	const staticUtilities = extractStatic(ds, staticKeys);
-	const branchesByBasename = extractFunctionalBranches(ds, functionalKeys);
+	const modifiers: ModifierPlacement[] = [];
+	const variables: VariablePlacement[] = [];
+	const branchesByBasename = extractFunctionalBranches(
+		ds,
+		functionalKeys,
+		modifiers,
+		variables,
+	);
 	addKeywordBranches(ds, {
 		branchesByBasename,
+		modifiers,
 		staticKeySet,
 		allThemeKeys,
 		probeTokens,
@@ -264,7 +347,12 @@ export async function extractUtilities(): Promise<ExtractedUtilities> {
 		(a, b) => a.registration_idx - b.registration_idx,
 	);
 
-	return { static: staticUtilities, functional: functionalUtilities };
+	return {
+		static: staticUtilities,
+		functional: functionalUtilities,
+		modifiers,
+		variables,
+	};
 }
 
 function extractStatic(
@@ -319,6 +407,8 @@ function emptyFunctionalBranches(): FunctionalBranches {
 function extractFunctionalBranches(
 	ds: DesignSystem,
 	functionalKeys: string[],
+	modifiers: ModifierPlacement[],
+	variables: VariablePlacement[],
 ): Map<string, FunctionalBranches> {
 	const branchesByBasename = new Map<string, FunctionalBranches>();
 	for (const basename of functionalKeys) {
@@ -328,6 +418,7 @@ function extractFunctionalBranches(
 			const probe = `${basename}-${probeToken(variant)}`;
 			const sort = propertySortOf(ds, probe);
 			if (!sort) continue;
+			addModifierPlacement(ds, modifiers, probe, sort);
 			branches.namedBranches.push({
 				kind: "Theme",
 				namespace: variant,
@@ -374,11 +465,19 @@ function extractFunctionalBranches(
 		const nonsenseProbe = `${basename}-[${NONSENSE_PROBE}]`;
 		const nonsense = propertySortOf(ds, nonsenseProbe);
 		if (nonsense) {
+			addModifierPlacement(ds, modifiers, nonsenseProbe, nonsense);
 			branches.arbitraryBranches.push({
 				kind: "Fallback",
 				modifier: modifierKindOf(ds, nonsenseProbe),
 				sort: nonsense,
 			});
+			const variable = propertySortOf(
+				ds,
+				`${basename}-[var(--${NONSENSE_PROBE})]`,
+			);
+			if (variable && variable.declarations !== nonsense.declarations) {
+				variables.push({ basename, sort: variable });
+			}
 		}
 		for (const p of ARBITRARY_PROBES) {
 			const probe = `${basename}-[${p.marker}:${p.value}]`;
@@ -387,6 +486,7 @@ function extractFunctionalBranches(
 			if (nonsense && sortKeyOf(sort) === sortKeyOf(nonsense)) {
 				continue;
 			}
+			addModifierPlacement(ds, modifiers, probe, sort);
 			branches.arbitraryBranches.push({
 				kind: "Typed",
 				value_type: p.type,
@@ -404,6 +504,7 @@ function addKeywordBranches(
 	ds: DesignSystem,
 	ctx: {
 		branchesByBasename: Map<string, FunctionalBranches>;
+		modifiers: ModifierPlacement[];
 		staticKeySet: Set<string>;
 		allThemeKeys: Set<string>;
 		probeTokens: Set<string>;
@@ -440,6 +541,12 @@ function addKeywordBranches(
 		const branches =
 			ctx.branchesByBasename.get(group.basename) ?? emptyFunctionalBranches();
 		const keywords = [...group.keywords].sort();
+		addModifierPlacement(
+			ds,
+			ctx.modifiers,
+			`${group.basename}-${keywords[0]}`,
+			group.sort,
+		);
 		branches.namedBranches.push({
 			kind: "Keyword",
 			keywords,

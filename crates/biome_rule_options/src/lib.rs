@@ -336,6 +336,7 @@ pub mod no_switch_declarations;
 pub mod no_sync_methods;
 pub mod no_sync_scripts;
 pub mod no_tailwind_arbitrary_value;
+pub mod no_tailwind_conflicting_classes;
 pub mod no_tailwind_legacy_utilities;
 pub mod no_tailwind_raw_colors;
 pub mod no_tailwind_restricted_classes;

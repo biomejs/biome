@@ -228,3 +228,51 @@ fn functional_utilities_record_minified_value_functions() {
         ]
     );
 }
+
+#[test]
+fn utilities_record_whether_they_hold_only_declarations() {
+    let db = build_tailwind_css_db(&[(
+        "/main.css",
+        r#"@utility plain { color: red; --gap: 1rem; }
+@utility nested { color: red; &:hover { color: blue; } }
+@utility applied { @apply flex; }
+@utility conditional { color: if(style(--enabled: true): red; else: blue); }
+@utility plain-* { width: --value(integer); }
+@utility nested-* { width: --value(integer); @media (width >= 40rem) { height: --value(integer); } }"#,
+    )]);
+    let module = db.module_for_path(Utf8Path::new("/main.css")).unwrap();
+    let stylesheet = tailwind_stylesheet(&db, module);
+    assert_eq!(
+        stylesheet
+            .utilities
+            .iter()
+            .map(|utility| (
+                utility.name.to_string(),
+                utility
+                    .declared_properties
+                    .as_ref()
+                    .map(|properties| properties
+                        .iter()
+                        .map(ToString::to_string)
+                        .collect::<Vec<_>>())
+            ))
+            .collect::<Vec<_>>(),
+        [
+            (
+                "plain".to_string(),
+                Some(vec!["color".to_string(), "--gap".to_string()])
+            ),
+            ("nested".to_string(), None),
+            ("applied".to_string(), None),
+            ("conditional".to_string(), None),
+        ]
+    );
+    assert_eq!(
+        stylesheet
+            .functional_utilities
+            .iter()
+            .map(|utility| (utility.name.to_string(), utility.has_only_declarations))
+            .collect::<Vec<_>>(),
+        [("plain".to_string(), true), ("nested".to_string(), false)]
+    );
+}

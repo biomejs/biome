@@ -1,0 +1,7 @@
+<!-- should not generate diagnostics -->
+<template>
+	<div class="flex w-full"></div>
+	<div class="flex md:grid"></div>
+	<div :class="'p-2 px-4'"></div>
+	<div :class="{ flex: isFlex, grid: isGrid }"></div>
+</template>

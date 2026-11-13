@@ -31,7 +31,7 @@ use biome_parser::db::AnalyzedSource;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::TextSize;
 use biome_tailwind_logic::syntax_service::TwSyntaxService;
-use biome_tailwind_logic::use_tailwind_sorted_classes::TailwindDesignSystem;
+use biome_tailwind_logic::tailwind_v4::TailwindDesignSystem;
 use std::ops::Deref;
 use std::rc::Rc;
 use std::sync::{Arc, LazyLock};

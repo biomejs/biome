@@ -10,7 +10,7 @@ use biome_console::markup;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_tailwind_sorted_classes::UseTailwindSortedClassesOptions;
 use biome_tailwind_logic::syntax_service::TailwindSyntax;
-use biome_tailwind_logic::use_tailwind_sorted_classes::TailwindDesignSystem;
+use biome_tailwind_logic::tailwind_v4::TailwindDesignSystem;
 use std::sync::Arc;
 
 declare_lint_rule! {
