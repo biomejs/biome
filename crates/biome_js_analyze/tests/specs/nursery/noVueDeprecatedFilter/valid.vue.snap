@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <p>{{ msg }}</p>
+  <p>{{ method(msg) }}</p>
+  <p>{{ a || b }}</p>
+  <p>{{ (a | b) }}</p>
+  <p>{{ [a | b] }}</p>
+  <p>{{ fn(a | b) }}</p>
+  <p>{{ `${a | b}` }}</p>
+  <p>{{ "a | b" }}</p>
+  <div :id="filter(msg)"></div>
+  <div :id="(a | b)"></div>
+  <Field :format="value => { return value | currency }"></Field>
+  <Field :format="(value = a | b) => value"></Field>
+  <div v-if="a | b"></div>
+  <div v-show="a | b"></div>
+  <div @click="a | b"></div>
+  <div id="msg | filter"></div>
+  <div v-pre :id="msg | filter">
+    <p>{{ msg | filter }}</p>
+  </div>
+</template>
+
+```

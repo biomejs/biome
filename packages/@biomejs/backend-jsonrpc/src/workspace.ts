@@ -3663,6 +3663,11 @@ export interface Nursery {
 	 */
 	noVueDeprecatedEventsApi?: NoVueDeprecatedEventsApiConfiguration;
 	/**
+	 * Disallow the filter syntax that Vue 3 removed.
+	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-filter
+	 */
+	noVueDeprecatedFilter?: NoVueDeprecatedFilterConfiguration;
+	/**
 	 * Disallow the deprecated functional attribute on the \<template> of a Vue component.
 	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-functional-template
 	 */
@@ -7107,6 +7112,9 @@ export type NoVueDeprecatedDestroyedLifecycleConfiguration =
 export type NoVueDeprecatedEventsApiConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedEventsApiOptions;
+export type NoVueDeprecatedFilterConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDeprecatedFilterOptions;
 export type NoVueDeprecatedFunctionalTemplateConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedFunctionalTemplateOptions;
@@ -10453,6 +10461,10 @@ export interface RuleWithNoVueDeprecatedEventsApiOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedEventsApiOptions;
 }
+export interface RuleWithNoVueDeprecatedFilterOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueDeprecatedFilterOptions;
+}
 export interface RuleWithNoVueDeprecatedFunctionalTemplateOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedFunctionalTemplateOptions;
@@ -13749,6 +13761,7 @@ export type NoVueDeprecatedConfigKeyCodesOptions = {};
 export type NoVueDeprecatedDeleteSetOptions = {};
 export type NoVueDeprecatedDestroyedLifecycleOptions = {};
 export type NoVueDeprecatedEventsApiOptions = {};
+export type NoVueDeprecatedFilterOptions = {};
 export type NoVueDeprecatedFunctionalTemplateOptions = {};
 export type NoVueDeprecatedHtmlElementIsOptions = {};
 export type NoVueDeprecatedInlineTemplateOptions = {};
@@ -15990,6 +16003,7 @@ export type Category =
 	| "lint/nursery/noVueComputedPropertiesInData"
 	| "lint/nursery/noVueDefineModelDefault"
 	| "lint/nursery/noVueDeprecatedConfigKeyCodes"
+	| "lint/nursery/noVueDeprecatedFilter"
 	| "lint/nursery/noVueDeprecatedDeleteSet"
 	| "lint/nursery/noVueDeprecatedDestroyedLifecycle"
 	| "lint/nursery/noVueDeprecatedEventsApi"
