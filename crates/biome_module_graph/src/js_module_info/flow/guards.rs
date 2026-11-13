@@ -1,11 +1,12 @@
+use super::subjects::subject_of;
 use super::{FlowSubjectId, FlowSubjectTable};
 use crate::js_module_info::TsBindingReferenceExt;
 use biome_js_semantic::{Binding, JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsExpression, AnyJsFormalParameter,
-    AnyJsLiteralExpression, AnyJsParameter, JsBinaryOperator, JsCallExpression,
-    JsIdentifierExpression, JsLogicalOperator, JsReferenceIdentifier, JsUnaryOperator,
-    binding_ext::AnyJsBindingDeclaration, unescape_js_identifier,
+    AnyJsLiteralExpression, AnyJsParameter, JsBinaryOperator, JsCallExpression, JsLogicalOperator,
+    JsReferenceIdentifier, JsUnaryOperator, binding_ext::AnyJsBindingDeclaration,
+    unescape_js_identifier,
 };
 use biome_js_type_info::{
     Function, FunctionParameter, RawPrimitiveTarget, RawTypeData, RawTypeId, ReturnType,
@@ -20,7 +21,7 @@ use std::borrow::Cow;
 const MAX_CONDITION_DEPTH: usize = 32;
 /// Limits the syntax steps spent decomposing one condition.
 const MAX_CONDITION_STEPS: usize = 16_384;
-/// Limits the descendants scanned for variables when decomposition stops early.
+/// Limits the descendants scanned for subjects when decomposition stops early.
 const MAX_FALLBACK_NODES: usize = 1024;
 
 /// The result of a condition that a flow path has observed.
@@ -183,25 +184,18 @@ impl<'a> GuardFunctions<'a> {
         }
     }
 
-    /// Returns the variable that `call` tests, with the range of the type
-    /// predicate it calls.
+    /// Returns the argument that `call` tests, without parentheses, with the
+    /// range of the type predicate it calls.
     ///
-    /// Returns `None` unless `call` calls a supported type predicate and passes
-    /// an identifier as the tested argument.
-    fn tested_variable(
+    /// Returns `None` unless `call` calls a supported type predicate.
+    fn tested_argument(
         &mut self,
         call: &JsCallExpression,
         model: &SemanticModel,
         remaining: &mut usize,
-    ) -> Option<(JsReferenceIdentifier, TextRange)> {
+    ) -> Option<(AnyJsExpression, TextRange)> {
         let (guard, function, argument) = self.guard_call(call, model, remaining)?;
-        if guard.kind != GuardKind::Predicate {
-            return None;
-        }
-        let AnyJsExpression::JsIdentifierExpression(subject) = argument else {
-            return None;
-        };
-        Some((subject.name().ok()?, function))
+        (guard.kind == GuardKind::Predicate).then_some((argument, function))
     }
 
     /// Returns the guard that `call` calls, the range of its declaration, and
@@ -421,9 +415,9 @@ fn named_binding(qualifier: &TypeReferenceQualifier, model: &SemanticModel) -> O
 /// when it returns, or returns `None` when `expression` does not call a
 /// supported assertion.
 ///
-/// `asserts value is T` tests an identifier argument against the guard's
-/// target. `asserts value` decomposes the argument as a condition that holds,
-/// so `assert(value !== null)` excludes `null` from `value`.
+/// `asserts value is T` tests an argument that is a subject against the
+/// guard's target. `asserts value` decomposes the argument as a condition that
+/// holds, so `assert(value !== null)` excludes `null` from `value`.
 pub(super) fn decompose_assertion(
     expression: &AnyJsExpression,
     model: &SemanticModel,
@@ -449,10 +443,7 @@ pub(super) fn decompose_assertion(
             guards,
         )),
         GuardKind::TypeAssertion => {
-            let AnyJsExpression::JsIdentifierExpression(argument) = argument else {
-                return None;
-            };
-            let subject = subjects.reference(model, &argument.name().ok()?)?;
+            let subject = subject_of(&argument, model, subjects)?;
             guards.push(FlowGuard::Test {
                 subject,
                 test: FlowTest::Predicate(function),
@@ -481,7 +472,7 @@ pub(super) struct DecomposedCondition {
     /// Subjects whose type the condition may refine.
     ///
     /// When decomposition stops early, this conservatively lists every
-    /// variable read directly in the condition.
+    /// variable and property path read directly in the condition.
     pub(super) mentions: Vec<FlowSubjectId>,
 }
 
@@ -513,8 +504,15 @@ pub(super) fn decompose_condition(
             .syntax()
             .descendants()
             .take(MAX_FALLBACK_NODES)
-            .filter_map(JsIdentifierExpression::cast)
-            .filter_map(|identifier| subjects.reference(model, &identifier.name().ok()?))
+            .filter_map(AnyJsExpression::cast)
+            .filter(|expression| {
+                matches!(
+                    expression,
+                    AnyJsExpression::JsIdentifierExpression(_)
+                        | AnyJsExpression::JsStaticMemberExpression(_)
+                )
+            })
+            .filter_map(|expression| subject_of(&expression, model, subjects))
             .collect()
     };
     DecomposedCondition { guard, mentions }
@@ -550,7 +548,7 @@ impl Decomposer<'_, '_> {
             ConditionStep::Call { call, positive } => {
                 match self
                     .functions
-                    .tested_variable(&call, self.model, &mut self.remaining)
+                    .tested_argument(&call, self.model, &mut self.remaining)
                 {
                     Some((subject, function)) => {
                         self.test(&subject, SyntaxGuard::Predicate(function), positive)
@@ -579,12 +577,7 @@ impl Decomposer<'_, '_> {
         self.push(guard)
     }
 
-    fn test(
-        &mut self,
-        subject: &JsReferenceIdentifier,
-        guard: SyntaxGuard,
-        positive: bool,
-    ) -> FlowGuard {
+    fn test(&mut self, subject: &AnyJsExpression, guard: SyntaxGuard, positive: bool) -> FlowGuard {
         let test = match guard {
             SyntaxGuard::Truthy => FlowTest::Truthy,
             SyntaxGuard::Nullish => FlowTest::Nullish,
@@ -602,7 +595,7 @@ impl Decomposer<'_, '_> {
             SyntaxGuard::Undefined { strict, .. } => FlowTest::Undefined { strict },
             SyntaxGuard::Predicate(function) => FlowTest::Predicate(function),
         };
-        let Some(subject) = self.subjects.reference(self.model, subject) else {
+        let Some(subject) = subject_of(subject, self.model, self.subjects) else {
             return FlowGuard::Keep;
         };
         self.mentions.push(subject);
@@ -635,8 +628,10 @@ enum SyntaxGuard {
 /// One syntax step, with child expressions left undecomposed.
 enum ConditionStep {
     Unsupported,
+    /// A runtime test of `subject`, an expression with the shape of a
+    /// subject.
     Guard {
-        subject: JsReferenceIdentifier,
+        subject: AnyJsExpression,
         guard: SyntaxGuard,
         positive: bool,
     },
@@ -672,15 +667,13 @@ fn condition_step(
     *remaining = remaining.checked_sub(1)?;
     let expression = omit_parentheses(expression, remaining)?;
     let positive = matches!(outcome, FlowOutcome::Truthy | FlowOutcome::Nullish);
-    if let AnyJsExpression::JsIdentifierExpression(identifier) = expression {
-        let subject = identifier.name().ok()?;
-        subject.value_token().ok()?;
+    if has_subject_shape(&expression)? {
         let guard = match outcome {
             FlowOutcome::Truthy | FlowOutcome::Falsy => SyntaxGuard::Truthy,
             FlowOutcome::Nullish | FlowOutcome::NonNullish => SyntaxGuard::Nullish,
         };
         return Some(ConditionStep::Guard {
-            subject,
+            subject: expression,
             guard,
             positive,
         });
@@ -748,7 +741,7 @@ fn condition_step(
 
 #[expect(
     clippy::wildcard_enum_match_arm,
-    reason = "Comparisons only support direct identifiers and primitive guards."
+    reason = "Comparisons only support subjects and primitive guards."
 )]
 fn comparison_step(
     subject: &AnyJsExpression,
@@ -758,7 +751,7 @@ fn comparison_step(
     remaining: &mut usize,
 ) -> Option<ConditionStep> {
     let (subject, guard) = match subject {
-        AnyJsExpression::JsIdentifierExpression(identifier) => {
+        subject if has_subject_shape(subject)? => {
             let guard = match value {
                 AnyJsExpression::AnyJsLiteralExpression(literal) => {
                     literal.value_token().ok()?;
@@ -787,7 +780,7 @@ fn comparison_step(
                 }
                 _ => return Some(ConditionStep::Unsupported),
             };
-            (identifier.name().ok()?, guard)
+            (subject.clone(), guard)
         }
         AnyJsExpression::JsUnaryExpression(unary) => {
             if unary.operator().ok()? != JsUnaryOperator::Typeof {
@@ -812,21 +805,43 @@ fn comparison_step(
                 "function" => TypeofKind::Function,
                 _ => return Some(ConditionStep::Unsupported),
             };
-            let AnyJsExpression::JsIdentifierExpression(identifier) =
-                omit_parentheses(argument, remaining)?
-            else {
+            let argument = omit_parentheses(argument, remaining)?;
+            if !has_subject_shape(&argument)? {
                 return Some(ConditionStep::Unsupported);
-            };
-            (identifier.name().ok()?, SyntaxGuard::Typeof(kind))
+            }
+            (argument, SyntaxGuard::Typeof(kind))
         }
         _ => return Some(ConditionStep::Unsupported),
     };
-    subject.value_token().ok()?;
     Some(ConditionStep::Guard {
         subject,
         guard,
         positive,
     })
+}
+
+/// Returns whether `expression` has the shape of a subject: an identifier or a
+/// static member access, which [`subject_of`] accepts when its object is a
+/// subject too.
+///
+/// Returns `None` when the identifier or the member name is missing.
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Only identifiers and static member accesses can be subjects."
+)]
+fn has_subject_shape(expression: &AnyJsExpression) -> Option<bool> {
+    match expression {
+        AnyJsExpression::JsIdentifierExpression(identifier) => {
+            identifier.name().ok()?.value_token().ok()?;
+            Some(true)
+        }
+        AnyJsExpression::JsStaticMemberExpression(member) => {
+            member.object().ok()?;
+            member.member().ok()?;
+            Some(true)
+        }
+        _ => Some(false),
+    }
 }
 
 fn omit_parentheses(
@@ -845,7 +860,7 @@ fn omit_parentheses(
 
 #[cfg(test)]
 mod tests {
-    use super::super::FlowSubject;
+    use super::super::{FlowSubject, PropertyKey};
     use super::*;
     use biome_js_parser::{JsParserOptions, parse};
     use biome_js_semantic::{SemanticModelOptions, semantic_model};
@@ -883,19 +898,32 @@ mod tests {
         let names = condition
             .mentions
             .iter()
-            .map(|subject| {
-                let FlowSubject::Binding(range) = &subjects[*subject as usize];
-                model
-                    .as_binding_by_range(*range)
-                    .unwrap()
-                    .tree()
-                    .name_token()
-                    .unwrap()
-                    .text_trimmed()
-                    .to_owned()
-            })
+            .map(|subject| subject_name(&model, &subjects, *subject))
             .collect();
         (guards, names)
+    }
+
+    /// Returns the name of the variable that `subject` starts at, followed by
+    /// the names along its path, as in `value.length`.
+    fn subject_name(
+        model: &SemanticModel,
+        subjects: &[FlowSubject],
+        subject: FlowSubjectId,
+    ) -> String {
+        match &subjects[subject as usize] {
+            FlowSubject::Binding(range) => model
+                .as_binding_by_range(*range)
+                .unwrap()
+                .tree()
+                .name_token()
+                .unwrap()
+                .text_trimmed()
+                .to_owned(),
+            FlowSubject::Member {
+                object,
+                key: PropertyKey::Name(name),
+            } => format!("{}.{name}", subject_name(model, subjects, *object)),
+        }
     }
 
     fn mentioned_names(source: &str, outcome: FlowOutcome) -> Vec<String> {
@@ -927,7 +955,28 @@ mod tests {
             ),
             ("value || other", FlowOutcome::Falsy, vec!["value", "other"]),
             ("value", FlowOutcome::Nullish, vec!["value"]),
-            ("value.length", FlowOutcome::Truthy, vec![]),
+            ("value.length", FlowOutcome::Truthy, vec!["value.length"]),
+            ("(value?.a).b", FlowOutcome::Falsy, vec!["value.a.b"]),
+            ("value.a", FlowOutcome::NonNullish, vec!["value.a"]),
+            ("value.a !== null", FlowOutcome::Truthy, vec!["value.a"]),
+            ("undefined == value.a", FlowOutcome::Falsy, vec!["value.a"]),
+            ("value.a === 'x'", FlowOutcome::Truthy, vec!["value.a"]),
+            (
+                "typeof value.a === 'string'",
+                FlowOutcome::Truthy,
+                vec!["value.a"],
+            ),
+            (
+                "value.a && other.b",
+                FlowOutcome::Truthy,
+                vec!["value.a", "other.b"],
+            ),
+            ("value['a']", FlowOutcome::Truthy, vec![]),
+            ("this.a", FlowOutcome::Truthy, vec![]),
+            ("value.f()", FlowOutcome::Truthy, vec![]),
+            ("value!.a", FlowOutcome::Truthy, vec![]),
+            ("global.a", FlowOutcome::Truthy, vec![]),
+            ("value.a === other.b", FlowOutcome::Truthy, vec![]),
             ("check(value)", FlowOutcome::Truthy, vec![]),
             ("value === other", FlowOutcome::Truthy, vec![]),
             ("value == 1", FlowOutcome::Truthy, vec![]),
@@ -953,7 +1002,7 @@ mod tests {
         let source = format!("{}value && other.length", "!".repeat(MAX_CONDITION_DEPTH));
         assert_eq!(
             mentioned_names(&source, FlowOutcome::Truthy),
-            ["value", "other"]
+            ["value", "other.length", "other"]
         );
     }
 }

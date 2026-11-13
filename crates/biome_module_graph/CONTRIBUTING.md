@@ -81,11 +81,12 @@ one of its own variables. Its parts live in `src/js_module_info/flow/`:
   them.
 - `builder.rs` builds the graph of one selected root from start, join, and
   condition nodes. It records the incoming flow point of every reachable read
-  and, for each condition node, the variables its guard may narrow. It skips
-  class members: methods, accessors, constructors, and static blocks are roots
-  of their own, and TypeScript analyzes a class field that has an initializer
-  apart from the code around the class. It also skips `declare` statements,
-  which never run.
+  of a subject and, for each condition node, the subjects its guard may
+  narrow. A read of a property path is recorded after its object is
+  evaluated. The builder skips class members: methods, accessors,
+  constructors, and static blocks are roots of their own, and TypeScript
+  analyzes a class field that has an initializer apart from the code around
+  the class. It also skips `declare` statements, which never run.
 - The builder models the control flow of blocks, `if`, `while`, `do...while`,
   `for`, labeled statements, `break`, `continue`, `return`, and `throw`. Any
   other statement, such as `switch`, `try`, `for...in`, or `for...of`, is an
@@ -94,53 +95,74 @@ one of its own variables. Its parts live in `src/js_module_info/flow/`:
   jumps inside it, and the next statement continues from the result. For each
   `break` or `continue` inside the region that targets a statement outside it,
   the builder adds the point before the region as a predecessor of that
-  target, once per target. Regions keep narrowing sound because only variables
-  that are never written narrow: the state before a region is never narrower
-  than the state at any point inside or after it. Replacing a region with a
-  model of its statement only makes narrowing more precise.
-- `guards.rs` decomposes every condition into guards on semantic bindings,
-  combined the way `!`, `&&`, and `||` combine them. For example,
-  `typeof value === "string"` becomes a runtime test of `value`. A call to a
-  local type-guard function becomes a runtime test of its argument: collection
-  selects the tested argument from the function's collected signature, and
-  inference later resolves only the target of its type predicate. Neither step
-  infers the function's body. For a standalone call to an assertion function,
+  target, once per target. Regions keep narrowing sound because only subjects
+  that the root never writes narrow: the state before a region is never
+  narrower than the state at any point inside or after it. Replacing a region
+  with a model of its statement only makes narrowing more precise.
+- `subjects.rs` maps an expression to the subject it reads or tests: a
+  variable, or a property path that starts at one, such as `o.v` or `a.b.c`.
+  Only static member accesses with a named property extend a path.
+  Parentheses are skipped, and `o?.v` is the same subject as `o.v`. Each root
+  stores its subjects in a table, a path after its prefixes, so the builder
+  and the decomposer give a read and a test of the same subject the same id.
+- `guards.rs` decomposes every condition into guards on subjects, combined
+  the way `!`, `&&`, and `||` combine them. For example,
+  `typeof value === "string"` becomes a runtime test of `value`, and
+  `o.v !== null` a runtime test of `o.v`. A call to a local type-guard
+  function becomes a runtime test of its argument: collection selects the
+  tested argument from the function's collected signature, and inference
+  later resolves only the target of its type predicate. Neither step infers
+  the function's body. For a standalone call to an assertion function,
   the builder adds a condition node after the call, so the call and its
   arguments still use the types from before it. `asserts value is T` becomes a
   runtime test of the argument, as `value is T` does, while `asserts value`
   decomposes the argument as a condition that holds, so
   `assert(value !== null)` excludes `null` from `value`.
+- `writes.rs` finds the property paths that a root may write. The graph has
+  no write points, so a written path does not narrow anywhere in its root.
+  The scan visits the root's own code, including function and arrow
+  expressions called where they are defined and class static blocks, but not
+  the bodies of other functions, methods, accessors, and constructors, which
+  run only when called. A write cancels the written path and every path that
+  extends it, and a write through a computed key, as in `o[k] = x`, cancels
+  every path below its object.
 
-Collection then keeps only the reads that a runtime test of their variable can
-reach, and only for variables that can narrow: declared in the root, never
-written, neither untyped nor annotated `any`, and not supplied by a
-destructuring default, which the declared type ignores. Those reads, plus the
-enclosing expressions that can use a narrowed operand, become candidates. A
-test inside a nested function never reaches reads in the enclosing one, and an
-array or object literal ends the chain of enclosing candidates. A root that
-declares no variable that can narrow gets no graph. Other variable types are
-resolved only when a candidate read is queried, because resolving them can be
-costly.
+Collection then keeps only the reads that a runtime test of their subject can
+reach, and only for subjects that can narrow. A variable can narrow when it is
+declared in the root, never written, neither untyped nor annotated `any`, and
+not supplied by a destructuring default, which the declared type ignores. A
+property path can narrow when its variable can and the write scan finds no
+write that cancels it; the scan runs only when the root reads a tested path.
+Those reads, plus the enclosing expressions that can use a narrowed operand,
+become candidates. A test inside a nested function never reaches reads in the
+enclosing one, and an array or object literal ends the chain of enclosing
+candidates. A root that declares no variable that can narrow gets no graph.
+Other variable types are resolved only when a candidate read is queried,
+because resolving them can be costly.
 
 #### Tracked solve
 
-Lookups skip flow for any expression that is not a candidate. Collection keeps
-a table of subjects for each root, where a subject is what a runtime test
-checks; every subject is a variable. Guards, the subjects each condition may
-narrow, and reads refer to a subject by its id in that table, so a test and a
-read of the same subject match. For a candidate read,
-`infer_flow_binding_baseline` resolves the variable's declared type once.
-`infer_flow_subject_states` then applies the guards on every path to all reads
-of the subject in one root in a single solve, and `infer_flow_subject_type`
-takes the result at the read's incoming flow point. Both queries take the
-declared type as part of their key, so reads of a subject share one solve when
-they start from the same type.
+Lookups skip flow for any expression that is not a candidate. Guards, the
+subjects each condition may narrow, and reads refer to a subject by its id in
+its root's subject table, so a test and a read of the same subject match. For
+a candidate read of a variable, `infer_flow_binding_baseline` resolves the
+variable's declared type once. For a read of a property path, the declared
+type is the type of the member access at that read, computed from the
+narrowed type of its object when the object has one, as TypeScript types
+property reads. Facts about the variable therefore reach its
+paths only through that member lookup. `infer_flow_subject_states` then
+applies the guards on every path to all reads of the subject in one root in a
+single solve, and `infer_flow_subject_type` takes the result at the read's
+incoming flow point. Both queries take the starting type as part of their
+key, so reads of a subject share one solve when they start from the same
+type.
 
 Complete module inference evaluates flow candidates in its own resolution
 context instead of through `infer_flow_expression_type` and
 `infer_flow_binding_baseline`. When it reaches expressions, that context has
-resolved every raw type of the module, so a variable's declared type costs a
-cache read there, while the queries would resolve it again in a fresh context.
+resolved every raw type of the module, so a variable's declared type, and the
+member access that gives a property path its declared type, read types it
+already holds, while the queries would resolve them again in a fresh context.
 It still solves through `infer_flow_subject_states` and
 `infer_flow_subject_type`. Cycle fallback and the import-depth fallback read
 imports differently from the flow queries, so they keep using the queries.
@@ -169,7 +191,9 @@ changes; they do not track edits separately for each function.
 
 Collection, condition decomposition, and the solve each have work limits. A
 root that exceeds a limit while its flow is collected gets no graph, so its
-reads keep their declared types. If decomposing a condition cannot finish
+reads keep their declared types. The limit on finding the reads that a test
+can reach is spent on variables before property paths; when it runs out on
+paths, the root keeps its graph and only its path reads lose narrowing. If decomposing a condition cannot finish
 within its work limit, the guard makes the result unknown rather than assuming
 the expression is unaffected. When the shared solve exceeds its work limit or
 meets a query cycle, `infer_flow_subject_type` solves the read's point on its
