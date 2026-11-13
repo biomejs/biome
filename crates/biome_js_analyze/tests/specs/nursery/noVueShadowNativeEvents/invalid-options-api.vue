@@ -7,11 +7,6 @@ export default {
       this.$emit("change");
       this?.$emit?.("focus");
     },
-    onAlias() {
-      const vm = this;
-      vm.$emit("blur");
-      (vm?.$emit)?.("submit");
-    },
   },
 };
 </script>

@@ -14,9 +14,9 @@ use biome_rule_options::no_vue_restricted_call_after_await::{
     NoVueRestrictedCallAfterAwaitOptions, RestrictedFunction,
 };
 
-use crate::frameworks::vue::vue_component::{VueComponent, VueComponentQuery};
+use crate::services::vue::VueComponent;
 use crate::frameworks::vue::vue_setup::{
-    filter_map_vue_setup_calls_after_await, vue_setup_function_body,
+    filter_map_vue_setup_calls_after_await, vue_setup_function,
 };
 
 declare_lint_rule! {
@@ -149,7 +149,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoVueRestrictedCallAfterAwait {
-    type Query = VueComponentQuery;
+    type Query = VueComponent;
     type State = RestrictedCallAfterAwait;
     type Signals = Box<[Self::State]>;
     type Options = NoVueRestrictedCallAfterAwaitOptions;
@@ -159,19 +159,11 @@ impl Rule for NoVueRestrictedCallAfterAwait {
         if functions.is_empty() {
             return [].into();
         }
-        let Some(component) = VueComponent::from_potential_component(
-            ctx.query(),
-            ctx.model(),
-            ctx.source_type(),
-            ctx.file_path(),
-        ) else {
-            return [].into();
-        };
-        let Some(body) = vue_setup_function_body(component.kind()) else {
+        let Some(body) = vue_setup_function(ctx.query(), ctx.vue_model()).and_then(|function| function.body().ok()) else {
             return [].into();
         };
 
-        filter_map_vue_setup_calls_after_await(&body, |call, first_await| {
+        filter_map_vue_setup_calls_after_await(&body.into(), |call, first_await| {
             let function = find_restricted_function(&call, functions, ctx.model())?;
             Some(RestrictedCallAfterAwait {
                 call,

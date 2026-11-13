@@ -5,21 +5,20 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsBindingPattern, AnyJsExpression,
-    AnyJsFormalParameter, AnyJsFunctionBody, AnyJsMemberExpression,
-    AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsParameter, JsAwaitExpression,
-    JsCallExpression, JsExpressionStatement, JsForOfStatement, JsIdentifierBinding, JsLanguage,
-    JsModule, JsModuleItemList, JsParameters, WalkEvent,
+    AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, AnyJsFormalParameter,
+    AnyJsMemberExpression, AnyJsObjectBindingPatternMember, AnyJsParameter, JsCallExpression,
+    JsExpressionStatement, JsIdentifierBinding, JsModule, JsModuleItemList, JsParameters,
 };
-use biome_rowan::{AstNode, AstSeparatedList, SyntaxKindSet, TextRange, declare_node_union};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use biome_rule_options::no_vue_expose_after_await::NoVueExposeAfterAwaitOptions;
+use biome_vue_semantic::ComponentKind;
 
 use crate::frameworks::vue::vue_call::is_vue_compiler_macro_call;
-use crate::frameworks::vue::vue_component::{
-    AnyPotentialVueComponent, AnyVueComponent, VueComponent, VueComponentQuery,
-    VueOptionsApiBasedComponent,
+use crate::frameworks::vue::vue_setup::{
+    AnyVueSetupCode, filter_map_vue_setup_calls_after_await, vue_setup_function,
+    vue_setup_function_parameters,
 };
-use crate::services::control_flow::AnyJsControlFlowRoot;
+use crate::services::vue::VueComponent;
 
 declare_lint_rule! {
     /// Disallow calling `expose()` or `defineExpose()` after an `await` in `setup()`.
@@ -92,47 +91,46 @@ declare_lint_rule! {
 }
 
 impl Rule for NoVueExposeAfterAwait {
-    type Query = VueComponentQuery;
+    type Query = VueComponent;
     type State = ExposeAfterAwait;
     type Signals = Box<[Self::State]>;
     type Options = NoVueExposeAfterAwaitOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let Some(component) = VueComponent::from_potential_component(
-            ctx.query(),
-            ctx.model(),
-            ctx.source_type(),
-            ctx.file_path(),
-        ) else {
-            return [].into();
-        };
+        let component = ctx.query();
+        let vue_model = ctx.vue_model();
         let model = ctx.model();
 
-        let setup = match component.kind() {
-            AnyVueComponent::OptionsApi(component) => setup_function(component),
-            AnyVueComponent::CreateApp(component) => setup_function(component),
-            AnyVueComponent::DefineComponent(component) => setup_function(component),
-            AnyVueComponent::Setup(_) => {
-                let AnyPotentialVueComponent::JsModule(module) = ctx.query() else {
-                    return [].into();
-                };
-                return find_calls_after_await(
-                    &AnyVueSetupCode::JsModule(module.clone()),
-                    &ExposeFunction::DefineExpose,
-                    model,
-                );
-            }
+        let (code, expose) = if component.kind() == ComponentKind::Setup {
+            let Some(module) = vue_model.node(component).and_then(JsModule::cast) else {
+                return [].into();
+            };
+            (AnyVueSetupCode::JsModule(module), ExposeFunction::DefineExpose)
+        } else {
+            let Some(setup) = vue_setup_function(component, vue_model) else {
+                return [].into();
+            };
+            let Some(expose) = vue_setup_function_parameters(&setup)
+                .as_ref()
+                .and_then(ExposeFunction::from_setup_parameters)
+            else {
+                return [].into();
+            };
+            let Ok(body) = setup.body() else {
+                return [].into();
+            };
+            (AnyVueSetupCode::AnyJsFunctionBody(body), expose)
         };
 
-        let Some((parameters, body)) = setup else {
-            return [].into();
-        };
-        match ExposeFunction::from_setup_parameters(&parameters) {
-            Some(expose) => {
-                find_calls_after_await(&AnyVueSetupCode::AnyJsFunctionBody(body), &expose, model)
-            }
-            None => [].into(),
-        }
+        filter_map_vue_setup_calls_after_await(&code, |call, first_await| {
+            expose
+                .is_called_by(&call, model)
+                .then(|| ExposeAfterAwait {
+                    call,
+                    kind: expose.kind(),
+                    first_await,
+                })
+        })
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -178,11 +176,6 @@ impl biome_console::fmt::Display for ExposeKind {
             Self::DefineExpose => "defineExpose()",
         })
     }
-}
-
-declare_node_union! {
-    /// The code that runs while a component is being set up.
-    pub AnyVueSetupCode = AnyJsFunctionBody | JsModule
 }
 
 /// The function that exposes properties of the component being set up.
@@ -288,47 +281,6 @@ impl ExposeFunction {
     }
 }
 
-/// Returns the parameters and body of the component's `setup()` function.
-fn setup_function(
-    component: &impl VueOptionsApiBasedComponent,
-) -> Option<(JsParameters, AnyJsFunctionBody)> {
-    // `defineComponent((props, context) => { ... }, { ... })`
-    if let Some(setup) = component.setup_func() {
-        return function_parts(&setup);
-    }
-    let (_, member) = component
-        .iter_declaration_groups()
-        .find(|(name, _)| name.text() == "setup")?;
-    match member {
-        AnyJsObjectMember::JsMethodObjectMember(method) => Some((
-            method.parameters().ok()?,
-            AnyJsFunctionBody::JsFunctionBody(method.body().ok()?),
-        )),
-        AnyJsObjectMember::JsPropertyObjectMember(property) => {
-            function_parts(&property.value().ok()?)
-        }
-        _ => None,
-    }
-}
-
-/// Returns the parameters and body of `function` when it is a function or arrow function
-/// expression.
-fn function_parts(function: &AnyJsExpression) -> Option<(JsParameters, AnyJsFunctionBody)> {
-    match function.inner_expression()? {
-        AnyJsExpression::JsFunctionExpression(function) => Some((
-            function.parameters().ok()?,
-            AnyJsFunctionBody::JsFunctionBody(function.body().ok()?),
-        )),
-        AnyJsExpression::JsArrowFunctionExpression(function) => match function.parameters().ok()? {
-            AnyJsArrowFunctionParameters::JsParameters(parameters) => {
-                Some((parameters, function.body().ok()?))
-            }
-            AnyJsArrowFunctionParameters::AnyJsBinding(_) => None,
-        },
-        _ => None,
-    }
-}
-
 /// Returns `true` if `expression` is a read of `binding`.
 fn reads_binding(
     expression: &AnyJsExpression,
@@ -341,61 +293,3 @@ fn reads_binding(
         .and_then(|reference| model.binding(&reference))
         .is_some_and(|declaration| &declaration.syntax() == binding.syntax())
 }
-
-/// Finds the calls to `expose` in `code` that run after the setup code pauses at an `await`.
-///
-/// Code inside nested functions is ignored, because it runs when that function is called, not as
-/// part of the setup code.
-fn find_calls_after_await(
-    code: &AnyVueSetupCode,
-    expose: &ExposeFunction,
-    model: &SemanticModel,
-) -> Box<[ExposeAfterAwait]> {
-    let root = code.syntax();
-    let mut first_await = None;
-    let mut calls = Vec::new();
-    let mut preorder = root.preorder_of_kinds(WALKED_KINDS);
-    while let Some(event) = preorder.next() {
-        match event {
-            WalkEvent::Enter(node) => {
-                if &node != root && AnyJsControlFlowRoot::KIND_SET.matches(node.kind()) {
-                    preorder.skip_subtree();
-                } else if first_await.is_none()
-                    && let Some(for_of) = JsForOfStatement::cast(node)
-                {
-                    first_await = for_of.await_token().map(|token| token.text_trimmed_range());
-                }
-            }
-            // Leave events come after the node's children, which matches evaluation order: the
-            // setup code pauses only once the awaited value has been computed, and a function is
-            // called only once its arguments have been computed. So `await expose()` exposes the
-            // properties before pausing, while `expose(await load())` exposes them after.
-            WalkEvent::Leave(node) => {
-                if let Some(first_await) = first_await {
-                    if let Some(call) = JsCallExpression::cast(node)
-                        && expose.is_called_by(&call, model)
-                    {
-                        calls.push(ExposeAfterAwait {
-                            call,
-                            kind: expose.kind(),
-                            first_await,
-                        });
-                    }
-                } else if let Some(await_expression) = JsAwaitExpression::cast(node) {
-                    first_await = await_expression
-                        .await_token()
-                        .ok()
-                        .map(|token| token.text_trimmed_range());
-                }
-            }
-        }
-    }
-    calls.into_boxed_slice()
-}
-
-/// The nodes that [find_calls_after_await] needs to see: the nested functions it skips, the
-/// `await`s that pause the setup code, and the calls it checks.
-const WALKED_KINDS: SyntaxKindSet<JsLanguage> = AnyJsControlFlowRoot::KIND_SET
-    .union(JsForOfStatement::KIND_SET)
-    .union(JsAwaitExpression::KIND_SET)
-    .union(JsCallExpression::KIND_SET);

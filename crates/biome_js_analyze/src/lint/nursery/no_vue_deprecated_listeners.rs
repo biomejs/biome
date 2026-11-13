@@ -2,7 +2,7 @@ use crate::frameworks::vue::vue_instance::{
     component_instance_property_member, template_instance_property_reference,
 };
 use crate::services::embedded::EmbeddedService;
-use crate::services::semantic::Semantic;
+use crate::services::vue::VueSemantic;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -63,7 +63,7 @@ declare_node_union! {
 }
 
 impl Rule for NoVueDeprecatedListeners {
-    type Query = Semantic<AnyListenersReference>;
+    type Query = VueSemantic<AnyListenersReference>;
     type State = JsSyntaxToken;
     type Signals = Option<Self::State>;
     type Options = NoVueDeprecatedListenersOptions;
@@ -93,8 +93,7 @@ impl Rule for NoVueDeprecatedListeners {
             member.as_js_name()?,
             "$listeners",
             model,
-            source,
-            ctx.file_path(),
+            ctx.vue_model(),
         )
     }
 

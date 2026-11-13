@@ -19,7 +19,8 @@ use biome_js_syntax::{
     JsGetterClassMember, JsGetterObjectMember, JsIdentifierBinding, JsImport, JsLanguage, JsModule,
     JsObjectBindingPattern, JsObjectExpression, JsParameters, JsReferenceIdentifier,
     JsReturnStatement, JsSetterClassMember, JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode,
-    TsIdentifierBinding, TsInterfaceDeclaration, TsTypeAliasDeclaration, TsTypeMemberList,
+    TsFunctionType, TsIdentifierBinding, TsInterfaceDeclaration, TsTypeAliasDeclaration,
+    TsTypeMemberList, static_value::StaticValue,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{
@@ -357,6 +358,15 @@ impl Collector<'_, '_> {
                 if let Some(options) = arguments.last() {
                     self.collect_options_expression(options, component);
                 }
+                // Vue replaces the `setup` option with the first argument,
+                // so that option never runs.
+                if arguments.len() == 2
+                    && let Some(setup) = arguments.first()
+                {
+                    let setup_function =
+                        expression_function(setup).map(|function| self.node_ref(function.syntax()));
+                    self.builder.component_mut(component).setup_function = setup_function;
+                }
             }
         }
     }
@@ -524,6 +534,8 @@ impl Collector<'_, '_> {
             self.builder.open_all(component, OpenReason::NonLiteral);
             return;
         };
+        let options_object = self.node_ref(object.syntax());
+        self.builder.component_mut(component).options_object = Some(options_object);
         self.collect_options_object(&object, component);
     }
 
@@ -1027,25 +1039,22 @@ impl Collector<'_, '_> {
         match expression.inner_expression() {
             Some(AnyJsExpression::JsArrayExpression(array)) => {
                 for element in array.elements().iter().flatten() {
-                    let AnyJsArrayElement::AnyJsExpression(
-                        AnyJsExpression::AnyJsLiteralExpression(
-                            AnyJsLiteralExpression::JsStringLiteralExpression(literal),
-                        ),
-                    ) = element
-                    else {
+                    let AnyJsArrayElement::AnyJsExpression(element) = element else {
                         self.builder
                             .open(component, Namespace::Emit, OpenReason::NonLiteral);
                         continue;
                     };
-                    let Ok(name) = literal.inner_string_text() else {
+                    let Some(name) = static_string_text(&element) else {
+                        self.builder
+                            .open(component, Namespace::Emit, OpenReason::NonLiteral);
                         continue;
                     };
-                    let range = literal.syntax().text_trimmed_range();
+                    let range = element.syntax().text_trimmed_range();
                     let id = self.add_instance_symbol(
                         component,
                         name,
                         Some(range),
-                        literal.syntax(),
+                        element.syntax(),
                         Namespace::Emit,
                         SymbolKind::Emit,
                     );
@@ -1097,9 +1106,25 @@ impl Collector<'_, '_> {
     }
 
     /// Reads emits written as a type: `defineEmits<{ change: [id: number] }>()`,
-    /// `defineEmits<{ change(id: number): void }>()` or
-    /// `defineEmits<{ (e: 'change', id: number): void }>()`.
+    /// `defineEmits<{ change(id: number): void }>()`,
+    /// `defineEmits<{ (e: 'change', id: number): void }>()` or
+    /// `defineEmits<(e: 'change', id: number) => void>()`.
     fn collect_type_emits(&mut self, ty: &AnyTsType, component: ComponentId) {
+        if let Some(function) = self.resolve_function_type_within(ty, MAX_TYPE_ALIAS_DEPTH) {
+            match function.parameters() {
+                Ok(parameters) => self.collect_signature_emits(
+                    &parameters,
+                    function.syntax(),
+                    EmitForm::FunctionType,
+                    component,
+                ),
+                Err(_) => {
+                    self.builder
+                        .open(component, Namespace::Emit, OpenReason::UnresolvedType);
+                }
+            }
+            return;
+        }
         let Some(members) = self.type_members(ty, component, Namespace::Emit) else {
             return;
         };
@@ -1137,41 +1162,12 @@ impl Collector<'_, '_> {
                     let Ok(parameters) = signature.parameters() else {
                         continue;
                     };
-                    let count = parameters.items().len();
-                    let Some(Ok(AnyJsParameter::AnyJsFormalParameter(first))) =
-                        parameters.items().iter().next()
-                    else {
-                        continue;
-                    };
-                    let Some(event_type) = first
-                        .as_js_formal_parameter()
-                        .and_then(|parameter| parameter.type_annotation())
-                        .and_then(|annotation| annotation.ty().ok())
-                    else {
-                        self.builder
-                            .open(component, Namespace::Emit, OpenReason::UnresolvedType);
-                        continue;
-                    };
-                    let mut names = Vec::new();
-                    if !string_literal_types(&event_type, &mut names) {
-                        self.builder
-                            .open(component, Namespace::Emit, OpenReason::UnresolvedType);
-                    }
-                    for (name, range) in names {
-                        let id = self.add_instance_symbol(
-                            component,
-                            name,
-                            Some(range),
-                            signature.syntax(),
-                            Namespace::Emit,
-                            SymbolKind::Emit,
-                        );
-                        self.builder.symbol_mut(id).detail = Detail::Emit {
-                            payload_params: Some(count.saturating_sub(1) as u8),
-                            validator: None,
-                            form: EmitForm::CallSignature,
-                        };
-                    }
+                    self.collect_signature_emits(
+                        &parameters,
+                        signature.syntax(),
+                        EmitForm::CallSignature,
+                        component,
+                    );
                 }
                 AnyTsTypeMember::TsMethodSignatureTypeMember(method) => {
                     let Some(name) = method.name().ok().and_then(|name| name.name()) else {
@@ -1200,6 +1196,74 @@ impl Collector<'_, '_> {
                 }
                 _ => {}
             }
+        }
+    }
+
+    /// Reads the events a signature declares with the type of its first
+    /// parameter, as in `(e: 'change' | 'update', id: number)`. `node` is the
+    /// signature, which each event points to.
+    fn collect_signature_emits(
+        &mut self,
+        parameters: &JsParameters,
+        node: &JsSyntaxNode,
+        form: EmitForm,
+        component: ComponentId,
+    ) {
+        let count = parameters.items().len();
+        let Some(Ok(AnyJsParameter::AnyJsFormalParameter(first))) =
+            parameters.items().iter().next()
+        else {
+            return;
+        };
+        let Some(event_type) = first
+            .as_js_formal_parameter()
+            .and_then(|parameter| parameter.type_annotation())
+            .and_then(|annotation| annotation.ty().ok())
+        else {
+            self.builder
+                .open(component, Namespace::Emit, OpenReason::UnresolvedType);
+            return;
+        };
+        let mut names = Vec::new();
+        if !string_literal_types(&event_type, &mut names) {
+            self.builder
+                .open(component, Namespace::Emit, OpenReason::UnresolvedType);
+        }
+        for (name, range) in names {
+            let id = self.add_instance_symbol(
+                component,
+                name,
+                Some(range),
+                node,
+                Namespace::Emit,
+                SymbolKind::Emit,
+            );
+            self.builder.symbol_mut(id).detail = Detail::Emit {
+                payload_params: Some(count.saturating_sub(1) as u8),
+                validator: None,
+                form,
+            };
+        }
+    }
+
+    /// Returns the function type `ty` is, following parentheses and local
+    /// type aliases.
+    fn resolve_function_type_within(&self, ty: &AnyTsType, depth: u8) -> Option<TsFunctionType> {
+        // Aliases can refer to each other in a cycle.
+        let depth = depth.checked_sub(1)?;
+        match ty {
+            AnyTsType::TsFunctionType(function) => Some(function.clone()),
+            AnyTsType::TsParenthesizedType(parenthesized) => {
+                self.resolve_function_type_within(&parenthesized.ty().ok()?, depth)
+            }
+            AnyTsType::TsReferenceType(reference) => {
+                let name = reference.name().ok()?;
+                let binding = self.input.js.binding(name.as_js_reference_identifier()?)?;
+                let alias = TsIdentifierBinding::cast(binding.syntax())?
+                    .parent::<TsTypeAliasDeclaration>()?;
+                self.resolve_function_type_within(&alias.ty().ok()?, depth)
+            }
+            _ => None,
         }
     }
 
@@ -1703,6 +1767,8 @@ impl Collector<'_, '_> {
             self.builder.open_all_uses(component);
             return;
         };
+        let setup_function = self.node_ref(function.syntax());
+        self.builder.component_mut(component).setup_function = Some(setup_function);
 
         if let Some(parameters) = parameter_patterns(&function) {
             if let Some(props) = parameters.first() {
@@ -2297,6 +2363,28 @@ fn member_name_range(member: &AnyJsObjectMember) -> Option<TextRange> {
             .name()
             .ok()
             .map(|name| name.syntax().text_trimmed_range()),
+        _ => None,
+    }
+}
+
+/// Returns the text of `expression` when it is a string written in place: a
+/// string literal, as in `'change'`, or a template literal without a tag or
+/// substitutions, as in `` `change` ``.
+///
+/// Parentheses around `expression` must already be removed.
+pub(crate) fn static_string_text(expression: &AnyJsExpression) -> Option<TokenText> {
+    match expression {
+        AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsStringLiteralExpression(literal),
+        ) => literal.inner_string_text().ok(),
+        // A tagged template calls its tag, so its value is unknown.
+        AnyJsExpression::JsTemplateExpression(template) if template.tag().is_none() => {
+            match expression.as_static_value()? {
+                StaticValue::String(token) => Some(token.token_text_trimmed()),
+                StaticValue::EmptyString(_) => Some(synthetic_name("")),
+                _ => None,
+            }
+        }
         _ => None,
     }
 }

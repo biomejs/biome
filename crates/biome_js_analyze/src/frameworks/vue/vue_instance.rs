@@ -4,9 +4,6 @@
 //! These properties are reachable in two ways: as bare identifiers in template expressions,
 //! and as members of `this` inside an Options API component definition.
 
-use crate::frameworks::vue::vue_component::{
-    AnyPotentialVueComponent, AnyVueComponent, VueComponent, VueOptionsApiBasedComponent,
-};
 use crate::services::embedded::EmbeddedService;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
@@ -15,7 +12,7 @@ use biome_js_syntax::{
 };
 use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
-use camino::Utf8Path;
+use biome_vue_semantic::AnalyzedVueModel;
 
 /// Returns the name token of `reference` if it is the instance property `name` used in a Vue
 /// template expression.
@@ -57,13 +54,12 @@ pub fn component_instance_property_member(
     member: &JsName,
     name: &str,
     model: &SemanticModel,
-    source: &JsFileSource,
-    path: &Utf8Path,
+    vue_model: &AnalyzedVueModel<JsLanguage>,
 ) -> Option<JsSyntaxToken> {
     let token = member.value_token().ok()?;
     if token.text_trimmed() != name
         || !is_this_or_direct_const_alias(object, model)
-        || !is_in_component_definition_object(member, model, source, path)
+        || !is_in_component_definition_object(member, vue_model)
     {
         return None;
     }
@@ -128,33 +124,11 @@ fn is_direct_const_this_alias(identifier: &JsIdentifierExpression, model: &Seman
 /// `<script setup>` components have no such object, so code in them never matches.
 pub fn is_in_component_definition_object(
     node: &impl AstNode<Language = JsLanguage>,
-    model: &SemanticModel,
-    source: &JsFileSource,
-    path: &Utf8Path,
+    vue_model: &AnalyzedVueModel<JsLanguage>,
 ) -> bool {
     let node = node.syntax();
-    node.ancestors().skip(1).any(|ancestor| {
-        let Some(potential_component) = AnyPotentialVueComponent::cast(ancestor) else {
-            return false;
-        };
-        let Some(component) =
-            VueComponent::from_potential_component(&potential_component, model, source, path)
-        else {
-            return false;
-        };
-
-        let definition = match component.kind() {
-            AnyVueComponent::OptionsApi(component) => component.definition_expression(),
-            AnyVueComponent::CreateApp(component) => component.definition_expression(),
-            AnyVueComponent::DefineComponent(component) => component.definition_expression(),
-            AnyVueComponent::Setup(_) => None,
-        };
-        definition
-            .and_then(|definition| definition.inner_expression())
-            .and_then(|definition| definition.as_js_object_expression().cloned())
-            .is_some_and(|definition| {
-                node.ancestors()
-                    .any(|ancestor| ancestor == *definition.syntax())
-            })
-    })
+    vue_model
+        .components()
+        .filter_map(|component| vue_model.node(&component.options_object_node()?))
+        .any(|definition| node.ancestors().any(|ancestor| ancestor == definition))
 }

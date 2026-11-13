@@ -11,7 +11,7 @@
 //! `emit('change')` is a use of the event `change`.
 
 use super::builder::{ModelBuilder, NewSymbol, synthetic_name};
-use super::component::ScriptInput;
+use super::component::{ScriptInput, static_string_text};
 use super::layout::Layout;
 use super::model::*;
 use super::snippets::SfcSnippet;
@@ -552,9 +552,7 @@ impl Walker<'_> {
             .into_iter()
             .flat_map(|arguments| arguments.args().iter().flatten())
             .collect();
-        let Some(AnyJsExpression::AnyJsLiteralExpression(
-            AnyJsLiteralExpression::JsStringLiteralExpression(literal),
-        )) = arguments
+        let Some(literal) = arguments
             .first()
             .and_then(AnyJsCallArgument::as_any_js_expression)
             .map(|argument| argument.clone().omit_parentheses())
@@ -562,7 +560,8 @@ impl Walker<'_> {
             self.mark_uses_open(component, Namespace::Emit);
             return;
         };
-        let Ok(name) = literal.inner_string_text() else {
+        let Some(name) = static_string_text(&literal) else {
+            self.mark_uses_open(component, Namespace::Emit);
             return;
         };
         let mut resolution =

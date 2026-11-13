@@ -631,6 +631,8 @@ pub enum EmitForm {
     Object,
     /// `defineEmits<{ (e: 'change', id: number): void }>()`
     CallSignature,
+    /// `defineEmits<(e: 'change', id: number) => void>()`
+    FunctionType,
     /// `defineEmits<{ change: [id: number] }>()` or
     /// `defineEmits<{ change(id: number): void }>()`
     TypeMember,
@@ -794,6 +796,10 @@ pub(crate) struct ComponentData {
     pub(crate) macro_options: MacroOptions,
     /// The function the `data` option is written as.
     pub(crate) data_function: Option<JsNodeRef>,
+    /// The `setup()` function.
+    pub(crate) setup_function: Option<JsNodeRef>,
+    /// The object literal the definition is written as.
+    pub(crate) options_object: Option<JsNodeRef>,
     /// The range of the `mixins` option.
     pub(crate) mixins: Option<TextRange>,
     /// Whether the definition is written in place rather than reused from a
@@ -2319,6 +2325,50 @@ impl Component {
     /// [`Self::data_function_range`] covers.
     pub fn data_function_node(&self) -> Option<JsNodeId> {
         Some(self.row().data_function?.node)
+    }
+
+    /// The range of the object literal that defines the component's options,
+    /// in the coordinates of the tree that holds the component: the object in
+    /// `export default { ... }`, the last argument of
+    /// `defineComponent(..., { ... })`, or the first argument of
+    /// `createApp({ ... })`.
+    ///
+    /// `None` for a `<script setup>` component, and when the options are not
+    /// an object literal written in place, as in `createApp(App)`.
+    pub fn options_object_range(&self) -> Option<TextRange> {
+        let options_object = self.row().options_object?;
+        Some(self.data.local(options_object.range, self.row().snippet))
+    }
+
+    /// The node of the options object, the one
+    /// [`Self::options_object_range`] covers. It casts to
+    /// [`JsObjectExpression`](biome_js_syntax::JsObjectExpression).
+    pub fn options_object_node(&self) -> Option<JsNodeId> {
+        Some(self.row().options_object?.node)
+    }
+
+    /// The range of the `setup()` function, in the coordinates of the tree
+    /// that holds the component: the `setup` option written as
+    /// `setup() { ... }`, `setup: function () { ... }` or
+    /// `setup: () => { ... }`, or the function passed to
+    /// `defineComponent((props, context) => { ... }, { ... })`.
+    ///
+    /// When `defineComponent()` receives both a function and an options
+    /// object, Vue runs the function and ignores the `setup` option.
+    ///
+    /// `None` for a `<script setup>` component, which has no such function,
+    /// and when the function that runs is not written in place, as in
+    /// `setup: sharedSetup` or `defineComponent(sharedSetup, { ... })`.
+    pub fn setup_function_range(&self) -> Option<TextRange> {
+        let setup_function = self.row().setup_function?;
+        Some(self.data.local(setup_function.range, self.row().snippet))
+    }
+
+    /// The node of the `setup()` function, the one
+    /// [`Self::setup_function_range`] covers. It casts to
+    /// [`AnyFunctionLike`](biome_js_syntax::AnyFunctionLike).
+    pub fn setup_function_node(&self) -> Option<JsNodeId> {
+        Some(self.row().setup_function?.node)
     }
 
     /// Whether the definition is written where the component is created: a

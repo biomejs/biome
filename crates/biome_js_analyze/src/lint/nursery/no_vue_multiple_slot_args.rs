@@ -1,7 +1,7 @@
 use crate::frameworks::vue::vue_instance::{
     is_in_component_definition_object, is_this_or_direct_const_alias,
 };
-use crate::services::semantic::Semantic;
+use crate::services::vue::VueSemantic;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -11,7 +11,6 @@ use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, JsAssignmentExpression,
     JsCallExpression, JsIdentifierExpression, JsVariableDeclarator,
 };
-use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use biome_rule_options::no_vue_multiple_slot_args::NoVueMultipleSlotArgsOptions;
 
@@ -85,7 +84,7 @@ pub enum SlotArgumentProblem {
 }
 
 impl Rule for NoVueMultipleSlotArgs {
-    type Query = Semantic<JsCallExpression>;
+    type Query = VueSemantic<JsCallExpression>;
     type State = SlotArgumentProblem;
     type Signals = Box<[Self::State]>;
     type Options = NoVueMultipleSlotArgsOptions;
@@ -193,11 +192,7 @@ fn is_slot_member(ctx: &RuleContext<NoVueMultipleSlotArgs>, expression: &AnyJsEx
             .object()
             .is_ok_and(|object| is_this_or_direct_const_alias(object, ctx.model()))
         && is_in_component_definition_object(
-            &slots,
-            ctx.model(),
-            ctx.source_type::<JsFileSource>(),
-            ctx.file_path(),
-        )
+            &slots, ctx.vue_model())
 }
 
 /// Returns `true` if the variable `identifier` refers to is initialized with,

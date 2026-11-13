@@ -2,13 +2,12 @@ use crate::frameworks::vue::vue_call::vue_api_name;
 use crate::frameworks::vue::vue_instance::{
     is_in_component_definition_object, is_this_or_direct_const_alias,
 };
-use crate::services::semantic::Semantic;
+use crate::services::vue::VueSemantic;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, AnyJsMemberExpression, JsCallExpression};
-use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::no_vue_deprecated_delete_set::NoVueDeprecatedDeleteSetOptions;
 
@@ -90,7 +89,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoVueDeprecatedDeleteSet {
-    type Query = Semantic<JsCallExpression>;
+    type Query = VueSemantic<JsCallExpression>;
     type State = RemovedApi;
     type Signals = Option<Self::State>;
     type Options = NoVueDeprecatedDeleteSetOptions;
@@ -158,11 +157,7 @@ fn component_instance_api(
     let object = member.object().ok()?;
     let is_component_instance = is_this_or_direct_const_alias(object.clone(), ctx.model())
         && is_in_component_definition_object(
-            &object,
-            ctx.model(),
-            ctx.source_type::<JsFileSource>(),
-            ctx.file_path(),
-        );
+            &object, ctx.vue_model());
     is_component_instance.then_some(api)
 }
 

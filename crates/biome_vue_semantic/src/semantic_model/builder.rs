@@ -153,6 +153,8 @@ impl ModelBuilder {
             uses_open: [false; Namespace::COUNT],
             macro_options: MacroOptions::empty(),
             data_function: None,
+            setup_function: None,
+            options_object: None,
             mixins: None,
             is_defined_in_place: false,
             is_default_export: false,

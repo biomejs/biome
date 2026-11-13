@@ -121,7 +121,7 @@ impl Rule for UseVueEmitValidator {
                     Some(MissingValidator::NotFunction)
                 }
             }
-            EmitForm::CallSignature | EmitForm::TypeMember => None,
+            EmitForm::CallSignature | EmitForm::FunctionType | EmitForm::TypeMember => None,
         }
     }
 
