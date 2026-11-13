@@ -86,23 +86,22 @@ impl<'a> SpdxExpression<'a> {
                 }
 
                 // Must be a valid SPDX identifier
-                let valid_spdx = LICENSE_LIST.is_valid(id);
-                if !valid_spdx {
+                let Some(license) = LICENSE_LIST.find(id) else {
                     return Err(RejectReason::Untrusted);
-                }
+                };
 
                 // Deprecated check (reject when ignore_deprecated is false)
-                if !config.ignore_deprecated && LICENSE_LIST.is_deprecated(id) {
+                if !config.ignore_deprecated && license.is_deprecated_license_id {
                     return Err(RejectReason::Deprecated);
                 }
 
                 // OSI check
-                if config.require_osi_approved && !LICENSE_LIST.is_osi_approved(id) {
+                if config.require_osi_approved && !license.is_osi_approved {
                     return Err(RejectReason::NotOsiApproved);
                 }
 
                 // FSF check
-                if config.require_fsf_libre && !LICENSE_LIST.is_fsf_libre(id) {
+                if config.require_fsf_libre && !license.is_fsf_libre {
                     return Err(RejectReason::NotFsfLibre);
                 }
 
