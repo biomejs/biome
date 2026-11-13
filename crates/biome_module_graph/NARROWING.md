@@ -20,7 +20,7 @@ The remaining work is tracked in
   or from inference that ignores flow.
 - **Read**: one place where the program uses a variable's value.
 - **Execution root**: a body analyzed on its own: a module, a function, a
-  method, or a class field initializer.
+  method, an accessor, a constructor, or a class static block.
 - **Condition**: the expression whose result decides which branch runs, such
   as the test of an `if` or an operand of `&&`. A **runtime test** is one
   check of one variable that a condition performs, such as `typeof x ===
@@ -75,17 +75,19 @@ These limits apply to every *Supported* and *Partial* row below:
 - A read narrows only when it reads a parameter, or a variable declared with
   `let`, `const`, or `function`, that is declared in the execution root of the
   read and never written after its declaration. `var` declarations and
-  imported bindings never narrow. A read inside a nested function or class
-  member never sees facts from the enclosing execution root.
+  imported bindings never narrow, and neither does a variable that a
+  destructuring default can supply, as in `const { a = 0 } = o`, because its
+  declared type ignores the default. A read inside a nested function or class
+  member never sees facts from the enclosing execution root, and a read in a
+  class field, including its decorators and computed key, never narrows.
 - Variables whose declared type is `any`, or includes a part that inference
   cannot determine, never narrow.
 - An execution root gets no narrowing at all when its own code, outside nested
   functions, contains a `switch`, `try`, `for...in`, `for...of`, or `with`
-  statement, a class declaration or class expression, a destructuring pattern
-  or destructuring assignment, a logical assignment (`&&=`, `||=`, `??=`), a
-  TypeScript declaration statement other than a type alias, an interface, or a
-  function overload signature, or a syntax error. Execution roots that are very
-  large or deeply nested get no narrowing either.
+  statement, a class declaration, a TypeScript declaration statement other than
+  a type alias, an interface, or a function overload signature, or a syntax
+  error. Execution roots that are very large or deeply nested get no narrowing
+  either.
 
 ## Behaviour
 
