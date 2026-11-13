@@ -114,6 +114,21 @@ declare_lint_rule! {
     /// void a
     /// ```
     ///
+    /// A `satisfies` expression is allowed, because it checks the type of its
+    /// operand at compile time. This is commonly used to ensure a `switch`
+    /// statement is exhaustive:
+    ///
+    /// ```ts
+    /// declare const shape: "circle" | "square";
+    /// switch (shape) {
+    ///     case "circle":
+    ///     case "square":
+    ///         break;
+    ///     default:
+    ///         shape satisfies never;
+    /// }
+    /// ```
+    ///
     /// ### Handling of Directives
     ///
     /// Any stand-alone string at the start of a script, module, or function is
@@ -287,6 +302,9 @@ fn is_disallowed(expr: &AnyJsExpression) -> SyntaxResult<bool> {
         | AnyJsExpression::JsPreUpdateExpression(_)
         | AnyJsExpression::JsBogusExpression(_)
         | AnyJsExpression::JsMetavariable(_) => false,
+        // `x satisfies T;` is a compile-time type check, commonly used as
+        // `x satisfies never;` to enforce exhaustiveness.
+        AnyJsExpression::TsSatisfiesExpression(_) => false,
         AnyJsExpression::JsParenthesizedExpression(expr) => is_disallowed(&expr.expression()?)?,
         AnyJsExpression::JsUnaryExpression(expr) => match expr.operator()? {
             JsUnaryOperator::BitwiseNot
@@ -299,7 +317,6 @@ fn is_disallowed(expr: &AnyJsExpression) -> SyntaxResult<bool> {
         AnyJsExpression::TsAsExpression(expr) => is_disallowed(&expr.expression()?)?,
         AnyJsExpression::TsInstantiationExpression(expr) => is_disallowed(&expr.expression()?)?,
         AnyJsExpression::TsNonNullAssertionExpression(expr) => is_disallowed(&expr.expression()?)?,
-        AnyJsExpression::TsSatisfiesExpression(expr) => is_disallowed(&expr.expression()?)?,
         AnyJsExpression::TsTypeAssertionExpression(expr) => is_disallowed(&expr.expression()?)?,
     };
     Ok(is_disallowed)
