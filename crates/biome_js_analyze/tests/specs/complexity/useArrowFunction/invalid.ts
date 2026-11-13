@@ -65,3 +65,12 @@ const needsParentheses1 = function () {
 const needsParentheses2 = function () {
 	return { foo: "bar" }.foo;
 }
+
+// https://github.com/biomejs/biome/issues/13129
+for (let has = function (k) { return k in cache; }, i = 0; i < 1; i++) {}
+
+for (has = function (k) { return !(k in cache); }; ;) {}
+
+for (let has = function (k) { return function () { return k in cache; }; }; ;) {}
+
+for (let i = 0; i < 1; i = function (k) { return k in cache; }) {}
