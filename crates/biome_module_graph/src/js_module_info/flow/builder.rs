@@ -31,7 +31,7 @@ pub(super) struct BuiltRoot {
 }
 
 pub(super) struct BuiltRead {
-    /// The identifier or static member expression that reads the subject.
+    /// The identifier or member expression that reads the subject.
     pub(super) expression: AnyFlowExpression,
     pub(super) point: FlowNodeId,
     pub(super) subject: FlowSubjectId,
@@ -689,14 +689,17 @@ impl RootBuilder<'_, '_> {
             return Ok(incoming);
         }
         match AnyJsExpression::cast_ref(node) {
-            // The object is evaluated before the property is read.
-            Some(expression @ AnyJsExpression::JsStaticMemberExpression(_)) => {
+            // The object and the key are evaluated before the property is read.
+            Some(
+                expression @ (AnyJsExpression::JsStaticMemberExpression(_)
+                | AnyJsExpression::JsComputedMemberExpression(_)),
+            ) => {
                 let flow = self.children(node, incoming, depth)?;
                 if let Some(subject) = subject_of(&expression, self.model, &mut self.subjects)
-                    && let AnyJsExpression::JsStaticMemberExpression(member) = expression
+                    && let Some(expression) = AnyFlowExpression::cast(expression.into_syntax())
                 {
                     self.reads.push(BuiltRead {
-                        expression: AnyFlowExpression::JsStaticMemberExpression(member),
+                        expression,
                         point: flow,
                         subject,
                     });

@@ -510,6 +510,7 @@ pub(super) fn decompose_condition(
                     expression,
                     AnyJsExpression::JsIdentifierExpression(_)
                         | AnyJsExpression::JsStaticMemberExpression(_)
+                        | AnyJsExpression::JsComputedMemberExpression(_)
                 )
             })
             .filter_map(|expression| subject_of(&expression, model, subjects))
@@ -821,13 +822,13 @@ fn comparison_step(
 }
 
 /// Returns whether `expression` has the shape of a subject: an identifier or a
-/// static member access, which [`subject_of`] accepts when its object is a
-/// subject too.
+/// member access, which [`subject_of`] accepts when its object is a subject
+/// too and, for an element access, its key is a literal.
 ///
-/// Returns `None` when the identifier or the member name is missing.
+/// Returns `None` when the identifier, the object, or the member is missing.
 #[expect(
     clippy::wildcard_enum_match_arm,
-    reason = "Only identifiers and static member accesses can be subjects."
+    reason = "Only identifiers and member accesses can be subjects."
 )]
 fn has_subject_shape(expression: &AnyJsExpression) -> Option<bool> {
     match expression {
@@ -836,6 +837,11 @@ fn has_subject_shape(expression: &AnyJsExpression) -> Option<bool> {
             Some(true)
         }
         AnyJsExpression::JsStaticMemberExpression(member) => {
+            member.object().ok()?;
+            member.member().ok()?;
+            Some(true)
+        }
+        AnyJsExpression::JsComputedMemberExpression(member) => {
             member.object().ok()?;
             member.member().ok()?;
             Some(true)
@@ -971,7 +977,16 @@ mod tests {
                 FlowOutcome::Truthy,
                 vec!["value.a", "other.b"],
             ),
-            ("value['a']", FlowOutcome::Truthy, vec![]),
+            ("value['a']", FlowOutcome::Truthy, vec!["value.a"]),
+            ("value?.[0] !== null", FlowOutcome::Truthy, vec!["value.0"]),
+            (
+                "typeof value['a'].b === 'string'",
+                FlowOutcome::Truthy,
+                vec!["value.a.b"],
+            ),
+            ("value[other]", FlowOutcome::Truthy, vec![]),
+            ("value[0x0]", FlowOutcome::Truthy, vec![]),
+            ("value[other] === null", FlowOutcome::Truthy, vec![]),
             ("this.a", FlowOutcome::Truthy, vec![]),
             ("value.f()", FlowOutcome::Truthy, vec![]),
             ("value!.a", FlowOutcome::Truthy, vec![]),
@@ -999,10 +1014,21 @@ mod tests {
 
     #[test]
     fn incomplete_decomposition_mentions_every_direct_read() {
-        let source = format!("{}value && other.length", "!".repeat(MAX_CONDITION_DEPTH));
+        let source = format!(
+            "{}value && other.length && other['a'] && other[value]",
+            "!".repeat(MAX_CONDITION_DEPTH)
+        );
         assert_eq!(
             mentioned_names(&source, FlowOutcome::Truthy),
-            ["value", "other.length", "other"]
+            [
+                "value",
+                "other.length",
+                "other",
+                "other.a",
+                "other",
+                "other",
+                "value"
+            ]
         );
     }
 }

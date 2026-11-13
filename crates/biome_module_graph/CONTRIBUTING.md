@@ -82,7 +82,7 @@ one of its own variables. Its parts live in `src/js_module_info/flow/`:
 - `builder.rs` builds the graph of one selected root from start, join, and
   condition nodes. It records the incoming flow point of every reachable read
   of a subject and, for each condition node, the subjects its guard may
-  narrow. A read of a property path is recorded after its object is
+  narrow. A read of a property path is recorded after its object and key are
   evaluated. The builder skips class members: methods, accessors,
   constructors, and static blocks are roots of their own, and TypeScript
   analyzes a class field that has an initializer apart from the code around
@@ -100,11 +100,17 @@ one of its own variables. Its parts live in `src/js_module_info/flow/`:
   narrower than the state at any point inside or after it. Replacing a region
   with a model of its statement only makes narrowing more precise.
 - `subjects.rs` maps an expression to the subject it reads or tests: a
-  variable, or a property path that starts at one, such as `o.v` or `a.b.c`.
-  Only static member accesses with a named property extend a path.
-  Parentheses are skipped, and `o?.v` is the same subject as `o.v`. Each root
-  stores its subjects in a table, a path after its prefixes, so the builder
-  and the decomposer give a read and a test of the same subject the same id.
+  variable, or a property path that starts at one, such as `o.v`, `a.b.c`, or
+  `t[0]`. A static member access with a named property extends a path, and so
+  does an element access whose key spells its property's name: a string
+  literal without escapes, or a decimal integer literal from 0 to 2^53 - 1
+  without leading zeros or separators. JavaScript converts a number key to a
+  string, and such an integer converts to its own digits, so `o["v"]` is the
+  same subject as `o.v`, and `t[0]` the same as `t["0"]`. Any other key, such
+  as `k`, `-0`, or `0x0`, ends the subject. Parentheses are skipped, and `o?.v` is the same subject
+  as `o.v`. Each root stores its subjects in a table, a path after its
+  prefixes, so the builder and the decomposer give a read and a test of the
+  same subject the same id.
 - `guards.rs` decomposes every condition into guards on subjects, combined
   the way `!`, `&&`, and `||` combine them. For example,
   `typeof value === "string"` becomes a runtime test of `value`, and
@@ -124,8 +130,10 @@ one of its own variables. Its parts live in `src/js_module_info/flow/`:
   expressions called where they are defined and class static blocks, but not
   the bodies of other functions, methods, accessors, and constructors, which
   run only when called. A write cancels the written path and every path that
-  extends it, and a write through a computed key, as in `o[k] = x`, cancels
-  every path below its object.
+  extends it. A write through an element access whose key `subjects.rs`
+  accepts, as in `o["v"] = x`, writes the path that the key names, and a
+  write through any other key, as in `o[k] = x`, cancels every path below its
+  object.
 
 Collection then keeps only the reads that a runtime test of their subject can
 reach, and only for subjects that can narrow. A variable can narrow when it is

@@ -7,18 +7,19 @@
 //! to resolved types without inspecting syntax again.
 //!
 //! A subject is what a runtime test checks and a read narrows: a variable, or
-//! a property path that starts at a variable, such as `o.v` or `a.b.c`. Guards
-//! and reads refer to a subject by its id in the root's subject table, so a
-//! test and a read of the same subject match without comparing syntax.
+//! a property path that starts at a variable, such as `o.v`, `a.b.c`, or
+//! `t[0]`. Guards and reads refer to a subject by its id in the root's subject
+//! table, so a test and a read of the same subject match without comparing
+//! syntax.
 //!
 //! An execution root is a body analyzed independently, such as a module,
 //! function, or method. Only `let`, `const`, and parameter bindings that are
 //! never reassigned and are read in the root that declares them participate,
 //! so refinements cannot cross closure boundaries. A property path narrows
 //! only when its variable does and the root never writes the path, one of its
-//! prefixes, or an unknown property of one of its prefixes. The graph does not
-//! invalidate facts on writes or calls, which is why written subjects are
-//! excluded.
+//! prefixes, or a property of one of its prefixes through a key that is not a
+//! literal. The graph does not invalidate facts on writes or calls, which is
+//! why written subjects are excluded.
 
 mod builder;
 mod expressions;
@@ -57,7 +58,7 @@ pub(crate) type FlowSubjectId = u32;
 pub(crate) enum FlowSubject {
     /// The variable declared at this range.
     Binding(TextRange),
-    /// The property `key` of the subject `object`, as in `o.v`.
+    /// The property `key` of the subject `object`, as in `o.v` or `o["v"]`.
     ///
     /// A table stores `object` before its members, so `object` is always a
     /// smaller id than the member.
@@ -70,8 +71,10 @@ pub(crate) enum FlowSubject {
 /// The property that a step of a subject's path reads.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub(crate) enum PropertyKey {
-    /// A property named by an identifier, with its escapes decoded, so `o.v`
-    /// and `o.\u0076` read the same property.
+    /// A property named by an identifier, with its escapes decoded, or by an
+    /// element access key whose spelling is the property's name, so `o.v`,
+    /// `o.\u0076`, and `o["v"]` read the same property, and so do `t[0]` and
+    /// `t["0"]`.
     Name(Text),
 }
 
@@ -273,8 +276,8 @@ impl ModuleFlow {
         self.candidates.get(&range)
     }
 
-    /// Returns the flow of the read at `range`, an identifier or a static
-    /// member expression.
+    /// Returns the flow of the read at `range`, an identifier or a member
+    /// expression.
     pub(crate) fn read(&self, range: TextRange) -> Option<FlowRead> {
         self.reads.get(&range).copied()
     }

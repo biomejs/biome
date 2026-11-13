@@ -398,6 +398,211 @@ fn narrowed_callees_resolve_their_calls() {
     );
 }
 
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type:
+// an element access with a string or integer literal key reads the same
+// property as a named access, so `o["a"]` and `o.a` share their narrowing, and
+// so do `t[0]` and `t["0"]`.
+#[test]
+fn literal_keys_read_the_same_property_as_names() {
+    use InferredTypeData::{Null, Number, String};
+    const SOURCE: &str = r#"
+        function isString(v: unknown): v is string { return typeof v === "string"; }
+        function names(o: { a: string | null }) {
+            if (o["a"]) { /*element*/o["a"]; /*fromElement*/o.a; }
+            if (o.a) { /*fromName*/o["a"]; }
+            if (o['a']) { /*quotes*/o["a"]; }
+            if (o?.["a"]) { /*optional*/o.a; }
+            if (o["a"] !== null) { /*notNull*/o["a"]; } else { /*null*/o["a"]; }
+            o["a"] ?? /*nullish*/o["a"];
+        }
+        function tests(o: { a: string | number }) {
+            if (typeof o["a"] === "string") { /*typeof*/o["a"]; }
+            if (isString(o["a"])) { /*guard*/o["a"]; } else { /*guardElse*/o.a; }
+        }
+        function nested(o: { a: { b: string | null } }) {
+            if (o["a"]["b"]) { /*nested*/o.a.b; /*mixed*/o["a"].b; }
+        }
+        function tuple(t: [string | null, number]) {
+            if (t[0]) { /*index*/t[0]; }
+            if (t["0"]) { /*fromString*/t[0]; }
+        }
+        function array(a: (string | null)[]) {
+            if (a[0]) { /*array*/a[0]; }
+        }
+        function record(r: Record<string, string | null>) {
+            if (r[1]) { /*fromNumber*/r["1"]; }
+        }
+    "#;
+    assert_reads(
+        SOURCE,
+        &[
+            ("element", r#"o["a"]"#, &[String]),
+            ("fromElement", "o.a", &[String]),
+            ("fromName", r#"o["a"]"#, &[String]),
+            ("quotes", r#"o["a"]"#, &[String]),
+            ("optional", "o.a", &[String]),
+            ("notNull", r#"o["a"]"#, &[String]),
+            ("null", r#"o["a"]"#, &[Null]),
+            ("nullish", r#"o["a"]"#, &[Null]),
+            ("typeof", r#"o["a"]"#, &[String]),
+            ("guard", r#"o["a"]"#, &[String]),
+            ("guardElse", "o.a", &[Number]),
+            ("nested", "o.a.b", &[String]),
+            ("mixed", r#"o["a"].b"#, &[String]),
+            ("index", "t[0]", &[String]),
+            ("fromString", "t[0]", &[String]),
+            ("array", "a[0]", &[String]),
+            ("fromNumber", r#"r["1"]"#, &[String]),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) narrows every read below to `string`: a
+// write through a literal key writes only the property it names, and a call
+// such as `a.shift()` never cancels narrowing.
+#[test]
+fn literal_key_writes_keep_other_properties() {
+    use InferredTypeData::String;
+    const SOURCE: &str = r#"
+        function otherKey(o: { a: string | null; b: string | null }) {
+            if (o.a) { o["b"] = null; /*otherKey*/o.a; }
+        }
+        function otherName(o: { a: string | null; b: string | null }) {
+            if (o["a"]) { o.b = null; /*otherName*/o["a"]; }
+        }
+        function otherIndex(t: [string | null, string | null]) {
+            if (t[0]) { t[1] = null; /*otherIndex*/t[0]; }
+        }
+        function shift(a: (string | null)[]) {
+            if (a[0]) { a.shift(); /*shift*/a[0]; }
+        }
+    "#;
+    assert_reads(
+        SOURCE,
+        &[
+            ("otherKey", "o.a", &[String]),
+            ("otherName", r#"o["a"]"#, &[String]),
+            ("otherIndex", "t[0]", &[String]),
+            ("shift", "a[0]", &[String]),
+        ],
+    );
+
+    // TypeScript gives `{ b: string | null }`: writing `o["a"]["b"]` leaves
+    // `o["a"]`.
+    const EXTENSION: &str = r#"
+        function extension(o: { a: { b: string | null } | null }) {
+            /*declared*/o["a"];
+            if (o.a !== null) { o["a"]["b"] = null; /*extension*/o["a"]; }
+        }
+    "#;
+    let (db, module) = narrowing_db(EXTENSION);
+    let declared = normalized_type_at(&db, module, EXTENSION, "declared", r#"o["a"]"#);
+    assert!(contains_inferred_null(&db, declared));
+    let narrowed = normalized_type_at(&db, module, EXTENSION, "extension", r#"o["a"]"#);
+    assert_ne!(narrowed, InferredTypeData::Unknown);
+    assert!(
+        !contains_inferred_null(&db, narrowed),
+        "{}",
+        format_inferred_type(&db, narrowed)
+    );
+}
+
+// Each expected type keeps `null` or `undefined`. TypeScript 6.0.3
+// (`tsc --strict`) gives the type in the comment after each read. Where it
+// differs, TypeScript narrows the path at the write itself, which Biome does
+// not model yet, or ignores the write: a write through a key that is not a
+// literal (`anyIndex` and `negativeZero`; `NARROWING.md` lists this among the
+// deliberate choices) and `delete` through an element access (`deleted`).
+// Biome's declared type of `a[0]` includes `undefined`.
+#[test]
+fn literal_key_writes_cancel_their_path() {
+    use InferredTypeData::{Null, String, Undefined};
+    const SOURCE: &str = r#"
+        function sameKey(o: { a: string | null }) {
+            if (o.a) { o["a"] = null; /*sameKey*/o.a; } // null
+        }
+        function stringKey(t: [string | null]) {
+            if (t[0]) { t["0"] = null; /*stringKey*/t[0]; } // null
+        }
+        function numberKey(r: Record<string, string | null>) {
+            if (r["1"]) { r[1] = null; /*numberKey*/r["1"]; } // null
+        }
+        function prefix(o: { a: { b: string | null } }) {
+            if (o.a.b) { o["a"] = { b: null }; /*prefix*/o.a.b; } // string | null
+        }
+        function nestedWrite(o: { a: { b: string | null } }) {
+            if (o.a.b) { o["a"]["b"] = null; /*nestedWrite*/o.a.b; } // null
+        }
+        function anyIndex(a: (string | null)[], i: number) {
+            if (a[0]) { a[i] = null; /*anyIndex*/a[0]; } // string
+        }
+        function negativeZero(t: [string | null]) {
+            if (t[0]) { t[-0] = null; /*negativeZero*/t[0]; } // string
+        }
+        function deleted(o: { v?: string }) {
+            if (o.v) { delete o["v"]; /*deleted*/o.v; } // string
+        }
+    "#;
+    assert_reads(
+        SOURCE,
+        &[
+            ("sameKey", "o.a", &[String, Null]),
+            ("stringKey", "t[0]", &[String, Null]),
+            ("numberKey", r#"r["1"]"#, &[String, Null]),
+            ("prefix", "o.a.b", &[String, Null]),
+            ("nestedWrite", "o.a.b", &[String, Null]),
+            ("anyIndex", "a[0]", &[String, Null, Undefined]),
+            ("negativeZero", "t[0]", &[String, Null]),
+            ("deleted", "o.v", &[String, Undefined]),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) gives the type in the comment after each
+// read. Two keys match only when they name the same property: `-0` is not a
+// literal, `"01"` names another property than `1`, and an integer literal
+// above 2^53 - 1 names the property of the nearest number, so
+// `9007199254740993` names `"9007199254740992"`. TypeScript also matches other
+// spellings of a key, such as `0x0`, `1e0`, a template literal, and an escape;
+// Biome does not, so it is wider there.
+#[test]
+fn keys_that_name_other_properties_do_not_match() {
+    use InferredTypeData::{Null, String};
+    const SOURCE: &str = r#"
+        function negativeZero(t: [string | null]) {
+            if (t[-0]) { /*negativeZero*/t[0]; } // string | null
+        }
+        function leadingZero(o: { "01": string | null; 1: string | null }) {
+            if (o[1]) { /*leadingZero*/o["01"]; } // string | null
+            if (o["01"]) { /*withoutZero*/o["1"]; } // string | null
+        }
+        function unsafeInteger(r: Record<string, string | null>) {
+            if (r[9007199254740993]) { /*unsafe*/r["9007199254740993"]; } // string | null
+            if (r[12345678901234567890]) { /*large*/r["12345678901234567890"]; } // string | null
+        }
+        function otherSpellings(o: { a: string | null; 1: string | null }, t: [string | null]) {
+            if (t[0x0]) { /*hex*/t[0]; } // string
+            if (o[1e0]) { /*exponent*/o["1"]; } // string
+            if (o[`a`]) { /*template*/o.a; } // string
+            if (o["\u0061"]) { /*escape*/o.a; } // string
+        }
+    "#;
+    assert_reads(
+        SOURCE,
+        &[
+            ("negativeZero", "t[0]", &[String, Null]),
+            ("leadingZero", r#"o["01"]"#, &[String, Null]),
+            ("withoutZero", r#"o["1"]"#, &[String, Null]),
+            ("unsafe", r#"r["9007199254740993"]"#, &[String, Null]),
+            ("large", r#"r["12345678901234567890"]"#, &[String, Null]),
+            ("hex", "t[0]", &[String, Null]),
+            ("exponent", r#"o["1"]"#, &[String, Null]),
+            ("template", "o.a", &[String, Null]),
+            ("escape", "o.a", &[String, Null]),
+        ],
+    );
+}
+
 #[test]
 fn reads_of_a_path_with_one_declared_type_share_one_solve() {
     const SOURCE: &str = r#"
@@ -405,14 +610,19 @@ fn reads_of_a_path_with_one_declared_type_share_one_solve() {
             if (o.v !== null) {
                 /*first*/o.v;
                 /*second*/o.v;
+                /*element*/o["v"];
             }
         }
     "#;
     let (db, module) = narrowing_db(SOURCE);
     db.clear_salsa_events();
-    for marker in ["first", "second"] {
+    for (marker, expression) in [
+        ("first", "o.v"),
+        ("second", "o.v"),
+        ("element", r#"o["v"]"#),
+    ] {
         assert_eq!(
-            normalized_type_at(&db, module, SOURCE, marker, "o.v"),
+            normalized_type_at(&db, module, SOURCE, marker, expression),
             InferredTypeData::String
         );
     }
@@ -434,15 +644,18 @@ fn complete_module_tables_agree_with_path_reads() {
         function f(o: { v: string | null } | null) {
             if (o && o.v !== null) {
                 /*read*/o.v;
+                /*element*/o["v"];
             }
         }
     "#;
     let (db, module) = narrowing_db(SOURCE);
-    let range = marked_range(SOURCE, "read", "o.v");
-    let ty = infer_expression_type(&db, ExpressionTypeInput::new(&db, module, range)).unwrap();
-    assert_eq!(normalize_type(&db, module, ty), InferredTypeData::String);
-    assert_eq!(
-        infer_module_types(&db, module).unwrap().expressions[&range],
-        ty
-    );
+    for (marker, expression) in [("read", "o.v"), ("element", r#"o["v"]"#)] {
+        let range = marked_range(SOURCE, marker, expression);
+        let ty = infer_expression_type(&db, ExpressionTypeInput::new(&db, module, range)).unwrap();
+        assert_eq!(normalize_type(&db, module, ty), InferredTypeData::String);
+        assert_eq!(
+            infer_module_types(&db, module).unwrap().expressions[&range],
+            ty
+        );
+    }
 }
