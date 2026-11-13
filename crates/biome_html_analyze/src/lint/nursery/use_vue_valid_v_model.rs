@@ -340,7 +340,7 @@ fn enclosing_tag_element(directive: &VueDirective) -> Option<AnyHtmlTagElement> 
 }
 
 /// Returns `true` when Vue renders `element` as a component: its name isn't a
-/// known HTML or SVG tag, or it has an `is` attribute.
+/// known HTML, SVG, or MathML tag, or it has an `is` attribute.
 fn is_component(element: &AnyHtmlTagElement, tag_kind: Option<HtmlSyntaxKind>) -> bool {
     tag_kind.is_none_or(|kind| kind == HtmlSyntaxKind::HTML_UNKNOWN_TAG)
         || element.find_attribute_or_vue_binding("is").is_some()

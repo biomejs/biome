@@ -41,6 +41,7 @@ expression: invalid.html
 <div role="button" disabled>Save</div>
 <div role="unknown button" disabled>Save</div>
 <a role="button" disabled>Save</a>
+<mrow role="button" disabled></mrow>
 
 ```
 
@@ -826,7 +827,7 @@ invalid.html:36:28 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━
   > 36 │ <div role="unknown button" disabled>Save</div>
        │                            ^^^^^^^^
     37 │ <a role="button" disabled>Save</a>
-    38 │ 
+    38 │ <mrow role="button" disabled></mrow>
   
   i The button role changes accessibility semantics but does not add native button behavior.
   
@@ -850,7 +851,8 @@ invalid.html:37:18 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━
     36 │ <div role="unknown button" disabled>Save</div>
   > 37 │ <a role="button" disabled>Save</a>
        │                  ^^^^^^^^
-    38 │ 
+    38 │ <mrow role="button" disabled></mrow>
+    39 │ 
   
   i The button role changes accessibility semantics but does not add native button behavior.
   
@@ -862,5 +864,29 @@ invalid.html:37:18 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━
   
     37 │ <a·role="button"·aria-disabled="true">Save</a>
        │                  +++++        +++++++         
+
+```
+
+```
+invalid.html:38:21 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The disabled attribute has no effect on this element.
+  
+    36 │ <div role="unknown button" disabled>Save</div>
+    37 │ <a role="button" disabled>Save</a>
+  > 38 │ <mrow role="button" disabled></mrow>
+       │                     ^^^^^^^^
+    39 │ 
+  
+  i The button role changes accessibility semantics but does not add native button behavior.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    38 │ <mrow·role="button"·aria-disabled="true"></mrow>
+       │                     +++++        +++++++        
 
 ```

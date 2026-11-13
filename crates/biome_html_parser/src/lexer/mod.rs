@@ -1240,12 +1240,14 @@ impl<'src> HtmlLexer<'src> {
     /// Consumes a tag-name token starting with the given byte, classifying it
     /// into a specific token kind according to `mode`:
     ///
-    /// - A known HTML/SVG tag name becomes its keyword kind (e.g. `div` -> `DIV_KW`,
-    ///   `circle` -> `CIRCLE_KW`). HTML names are matched case-insensitively; SVG
-    ///   camelCase names (e.g. `feGaussianBlur`) match by their exact spelling.
-    /// - Any name containing `-` or `_` becomes `HTML_COMPONENT_LITERAL`.
     /// - In a framework file a PascalCase name, or any name immediately followed by
     ///   `.` (a member expression base), becomes `HTML_COMPONENT_LITERAL`.
+    /// - A known HTML/SVG/MathML tag name becomes its keyword kind (e.g. `div` ->
+    ///   `DIV_KW`, `circle` -> `CIRCLE_KW`, `annotation-xml` -> `ANNOTATION_XML_KW`).
+    ///   HTML and MathML names are matched case-insensitively; SVG camelCase names
+    ///   (e.g. `feGaussianBlur`) match by their exact spelling.
+    /// - In a framework file any other name containing `-` becomes
+    ///   `HTML_COMPONENT_LITERAL`.
     /// - In the component-name context (`ComponentOnly`) every name becomes
     ///   `HTML_COMPONENT_LITERAL`.
     /// - Anything else (custom elements, namespaced names, unknown tags) becomes
@@ -1292,39 +1294,40 @@ impl<'src> HtmlLexer<'src> {
         }
 
         // Component / member-expression detection.
-        if (mode.allows_components() && has_component_separator)
-            || mode == TagNameMode::ComponentOnly
+        if mode == TagNameMode::ComponentOnly
+            || (mode.allows_components()
+                && (first.is_ascii_uppercase() || self.current_byte() == Some(b'.')))
         {
             return HTML_COMPONENT_LITERAL;
-        }
-        if mode.allows_components()
-            && (first.is_ascii_uppercase() || self.current_byte() == Some(b'.'))
-        {
-            return HTML_COMPONENT_LITERAL;
-        }
-
-        // A name too long to be a known tag is always unknown.
-        if overflow {
-            return HTML_UNKNOWN_TAG;
         }
 
         // Tag names are keywords. Try the exact spelling first (so case-sensitive
         // SVG names like `feGaussianBlur` match), then a lower-cased fallback (so
         // HTML names like `<DIV>` match case-insensitively). Keywords that aren't
-        // tag names (e.g. the Svelte `bind` keyword) are rejected and lex as
-        // `HTML_UNKNOWN_TAG`.
+        // tag names (e.g. the Svelte `bind` keyword) are rejected. A name too long
+        // to be a known tag skips the lookup.
         let lookup = |name: &str| {
             HtmlSyntaxKind::from_keyword(name).filter(|kind| HTML_TAG_NAMES.contains(*kind))
         };
         let name = &buffer[..len];
-        let kind = std::str::from_utf8(name).ok().and_then(lookup).or_else(|| {
-            let mut lower = [0u8; BUFFER_SIZE];
-            lower[..len].copy_from_slice(name);
-            lower[..len].make_ascii_lowercase();
-            std::str::from_utf8(&lower[..len]).ok().and_then(lookup)
-        });
+        let kind = if overflow {
+            None
+        } else {
+            std::str::from_utf8(name).ok().and_then(lookup).or_else(|| {
+                let mut lower = [0u8; BUFFER_SIZE];
+                lower[..len].copy_from_slice(name);
+                lower[..len].make_ascii_lowercase();
+                std::str::from_utf8(&lower[..len]).ok().and_then(lookup)
+            })
+        };
 
-        kind.unwrap_or(HTML_UNKNOWN_TAG)
+        // Hyphenated names are components in framework files, unless they are known
+        // tags such as `annotation-xml` or `font-face`.
+        match kind {
+            Some(kind) => kind,
+            None if mode.allows_components() && has_component_separator => HTML_COMPONENT_LITERAL,
+            None => HTML_UNKNOWN_TAG,
+        }
     }
 
     /// Consumes a quoted string literal token.

@@ -26,7 +26,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_UNKNOWN_TAG@1..5 "math" [] [],
+                    value_token: MATH_KW@1..5 "math" [] [],
                 },
                 attributes: HtmlAttributeList [],
                 r_angle_token: R_ANGLE@5..6 ">" [] [],
@@ -36,7 +36,7 @@ HtmlRoot {
                     opening_element: HtmlOpeningElement {
                         l_angle_token: L_ANGLE@6..7 "<" [] [],
                         name: HtmlTagName {
-                            value_token: HTML_UNKNOWN_TAG@7..16 "semantics" [] [],
+                            value_token: SEMANTICS_KW@7..16 "semantics" [] [],
                         },
                         attributes: HtmlAttributeList [],
                         r_angle_token: R_ANGLE@16..17 ">" [] [],
@@ -46,7 +46,7 @@ HtmlRoot {
                             opening_element: HtmlOpeningElement {
                                 l_angle_token: L_ANGLE@17..18 "<" [] [],
                                 name: HtmlTagName {
-                                    value_token: HTML_UNKNOWN_TAG@18..29 "annotation" [] [Whitespace(" ")],
+                                    value_token: ANNOTATION_KW@18..29 "annotation" [] [Whitespace(" ")],
                                 },
                                 attributes: HtmlAttributeList [
                                     HtmlAttribute {
@@ -78,7 +78,7 @@ HtmlRoot {
                                 l_angle_token: L_ANGLE@48..49 "<" [] [],
                                 slash_token: SLASH@49..50 "/" [] [],
                                 name: HtmlTagName {
-                                    value_token: HTML_UNKNOWN_TAG@50..60 "annotation" [] [],
+                                    value_token: ANNOTATION_KW@50..60 "annotation" [] [],
                                 },
                                 r_angle_token: R_ANGLE@60..61 ">" [] [],
                             },
@@ -88,7 +88,7 @@ HtmlRoot {
                         l_angle_token: L_ANGLE@61..62 "<" [] [],
                         slash_token: SLASH@62..63 "/" [] [],
                         name: HtmlTagName {
-                            value_token: HTML_UNKNOWN_TAG@63..72 "semantics" [] [],
+                            value_token: SEMANTICS_KW@63..72 "semantics" [] [],
                         },
                         r_angle_token: R_ANGLE@72..73 ">" [] [],
                     },
@@ -98,7 +98,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@73..74 "<" [] [],
                 slash_token: SLASH@74..75 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_UNKNOWN_TAG@75..79 "math" [] [],
+                    value_token: MATH_KW@75..79 "math" [] [],
                 },
                 r_angle_token: R_ANGLE@79..80 ">" [] [],
             },
@@ -195,7 +195,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@0..6
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..5
-          0: HTML_UNKNOWN_TAG@1..5 "math" [] []
+          0: MATH_KW@1..5 "math" [] []
         2: HTML_ATTRIBUTE_LIST@5..5
         3: R_ANGLE@5..6 ">" [] []
       1: HTML_ELEMENT_LIST@6..73
@@ -203,7 +203,7 @@ HtmlRoot {
           0: HTML_OPENING_ELEMENT@6..17
             0: L_ANGLE@6..7 "<" [] []
             1: HTML_TAG_NAME@7..16
-              0: HTML_UNKNOWN_TAG@7..16 "semantics" [] []
+              0: SEMANTICS_KW@7..16 "semantics" [] []
             2: HTML_ATTRIBUTE_LIST@16..16
             3: R_ANGLE@16..17 ">" [] []
           1: HTML_ELEMENT_LIST@17..61
@@ -211,7 +211,7 @@ HtmlRoot {
               0: HTML_OPENING_ELEMENT@17..42
                 0: L_ANGLE@17..18 "<" [] []
                 1: HTML_TAG_NAME@18..29
-                  0: HTML_UNKNOWN_TAG@18..29 "annotation" [] [Whitespace(" ")]
+                  0: ANNOTATION_KW@18..29 "annotation" [] [Whitespace(" ")]
                 2: HTML_ATTRIBUTE_LIST@29..41
                   0: HTML_ATTRIBUTE@29..41
                     0: HTML_ATTRIBUTE_NAME@29..37
@@ -232,19 +232,19 @@ HtmlRoot {
                 0: L_ANGLE@48..49 "<" [] []
                 1: SLASH@49..50 "/" [] []
                 2: HTML_TAG_NAME@50..60
-                  0: HTML_UNKNOWN_TAG@50..60 "annotation" [] []
+                  0: ANNOTATION_KW@50..60 "annotation" [] []
                 3: R_ANGLE@60..61 ">" [] []
           2: HTML_CLOSING_ELEMENT@61..73
             0: L_ANGLE@61..62 "<" [] []
             1: SLASH@62..63 "/" [] []
             2: HTML_TAG_NAME@63..72
-              0: HTML_UNKNOWN_TAG@63..72 "semantics" [] []
+              0: SEMANTICS_KW@63..72 "semantics" [] []
             3: R_ANGLE@72..73 ">" [] []
       2: HTML_CLOSING_ELEMENT@73..80
         0: L_ANGLE@73..74 "<" [] []
         1: SLASH@74..75 "/" [] []
         2: HTML_TAG_NAME@75..79
-          0: HTML_UNKNOWN_TAG@75..79 "math" [] []
+          0: MATH_KW@75..79 "math" [] []
         3: R_ANGLE@79..80 ">" [] []
     1: HTML_ELEMENT@80..102
       0: HTML_OPENING_ELEMENT@80..86

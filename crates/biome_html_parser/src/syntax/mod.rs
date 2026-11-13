@@ -258,7 +258,7 @@ fn parse_any_tag_name(p: &mut HtmlParser) -> ParsedSyntax {
         }
         Present(name)
     } else if p.cur().is_html_tag_name() {
-        // A known HTML/SVG tag, or the unknown-tag fallback.
+        // A known HTML/SVG/MathML tag, or the unknown-tag fallback.
         let m = p.start();
         p.bump_with_context(p.cur(), inside_tag_context(p));
         Present(m.complete(p, HTML_TAG_NAME))
@@ -493,7 +493,6 @@ fn parse_element_allowing_sfc_blocks(
     // these checks are now `O(1)` on the token kind.
     let name_kind = p.cur();
     let name_range = p.cur_range();
-    let opening_tag_name = p.cur_text().to_string();
     let should_be_self_closing = VOID_ELEMENTS.contains(name_kind);
     // In Svelte files, the preformatted elements must be parsed as regular
     // elements so that Svelte expressions inside them ({@html expr}, {expr})
@@ -506,9 +505,7 @@ fn parse_element_allowing_sfc_blocks(
             && (Svelte.is_supported(p) || Astro.is_supported(p)));
 
     // MathML is foreign content with no expressions; `<Math>` is a component.
-    let is_astro_math = Astro.is_supported(p)
-        && name_kind != HTML_COMPONENT_LITERAL
-        && opening_tag_name.eq_ignore_ascii_case("math");
+    let is_astro_math = Astro.is_supported(p) && name_kind == T![math];
 
     let opening_name = parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
 

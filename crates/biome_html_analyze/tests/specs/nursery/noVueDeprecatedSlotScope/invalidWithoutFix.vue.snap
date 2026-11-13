@@ -1,6 +1,5 @@
 ---
 source: crates/biome_html_analyze/tests/spec_tests.rs
-assertion_line: 121
 expression: invalidWithoutFix.vue
 ---
 # Input
@@ -40,6 +39,9 @@ expression: invalidWithoutFix.vue
   <component :is="list">
     <template slot-scope="{a}">{{ a }}</template>
   </component>
+  <math>
+    <template slot-scope="{a}">{{ a }}</template>
+  </math>
 </template>
 
 ```
@@ -244,7 +246,28 @@ invalidWithoutFix.vue:34:15 lint/nursery/noVueDeprecatedSlotScope ━━━━�
   > 34 │     <template slot-scope="{a}">{{ a }}</template>
        │               ^^^^^^^^^^^^^^^^
     35 │   </component>
-    36 │ </template>
+    36 │   <math>
+  
+  i Vue 3 doesn't support slot-scope, so the variables it declares are never set.
+  
+  i Use the v-slot directive on a <template> element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWithoutFix.vue:37:15 lint/nursery/noVueDeprecatedSlotScope ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot-scope attribute is deprecated.
+  
+    35 │   </component>
+    36 │   <math>
+  > 37 │     <template slot-scope="{a}">{{ a }}</template>
+       │               ^^^^^^^^^^^^^^^^
+    38 │   </math>
+    39 │ </template>
   
   i Vue 3 doesn't support slot-scope, so the variables it declares are never set.
   

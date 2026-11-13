@@ -28,4 +28,5 @@ const undefined = true;
 	<input :type="'radio'" disabled />
 	<fieldset :disabled="condition" />
 	<fieldset role="button" disabled />
+	<mrow role="button" disabled />
 </template>

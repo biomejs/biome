@@ -498,6 +498,22 @@ fn external_script_makes_missing_names_unknowable() {
 }
 
 #[test]
+fn known_hyphenated_tags_are_native() {
+    let model = sfc(r#"<template>
+  <math><annotation-xml encoding="text/html" /></math>
+  <svg><font-face /></svg>
+  <my-card />
+</template>
+"#);
+    let components: Vec<_> = model
+        .elements()
+        .filter(|element| element.is_component())
+        .map(|element| element.tag().to_string())
+        .collect();
+    assert_eq!(components, ["my-card"]);
+}
+
+#[test]
 fn components_and_directives() {
     let model = sfc(r#"<script setup lang="ts">
 import MyCard from './MyCard.vue'
