@@ -84,7 +84,17 @@ impl Rule for NoDistractingElements {
     fn action(ctx: &RuleContext<Self>, name: &Self::State) -> Option<JsRuleAction> {
         let element = ctx.query();
         let mut mutation = ctx.root().begin();
-        mutation.remove_node(element.clone());
+        // A paired element is matched through its opening element: remove the
+        // whole <marquee>...</marquee> so the children and the closing tag are
+        // not left behind.
+        match element {
+            AnyJsxElement::JsxOpeningElement(_) => {
+                mutation.remove_node(JsxElement::cast(element.syntax().parent()?)?);
+            }
+            AnyJsxElement::JsxSelfClosingElement(_) => {
+                mutation.remove_node(element.clone());
+            }
+        }
 
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),

@@ -5,53 +5,143 @@ expression: invalid.jsx
 # Input
 ```jsx
 /* should generate diagnostics */
-<div>
-    <div />
-    <marquee />
-    <blink />
-</div>
+<>
+    <div>
+        <div />
+        <marquee />
+        <blink />
+    </div>
+    <marquee>Restricted content</marquee>
+    <blink>
+        <span>Legacy notice</span>
+    </blink>
+    <section>
+        <marquee>
+            <p>Limited time offer</p>
+            <strong>Ends soon</strong>
+        </marquee>
+    </section>
+</>
 
 ```
 
 # Diagnostics
 ```
-invalid.jsx:4:5 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:5:9 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Don't use the 'marquee' element.
   
-    2 │ <div>
-    3 │     <div />
-  > 4 │     <marquee />
-      │     ^^^^^^^^^^^
-    5 │     <blink />
-    6 │ </div>
+    3 │     <div>
+    4 │         <div />
+  > 5 │         <marquee />
+      │         ^^^^^^^^^^^
+    6 │         <blink />
+    7 │     </div>
   
   i Visually distracting elements can cause accessibility issues and should be avoided.
   
   i Unsafe fix: Remove the 'marquee' element.
   
-    4 │ ····<marquee·/>
-      │     -----------
+    5 │ ········<marquee·/>
+      │         -----------
 
 ```
 
 ```
-invalid.jsx:5:5 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:6:9 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Don't use the 'blink' element.
   
-    3 │     <div />
-    4 │     <marquee />
-  > 5 │     <blink />
-      │     ^^^^^^^^^
-    6 │ </div>
-    7 │ 
+    4 │         <div />
+    5 │         <marquee />
+  > 6 │         <blink />
+      │         ^^^^^^^^^
+    7 │     </div>
+    8 │     <marquee>Restricted content</marquee>
   
   i Visually distracting elements can cause accessibility issues and should be avoided.
   
   i Unsafe fix: Remove the 'blink' element.
   
-    5 │ ····<blink·/>
-      │     ---------
+    6 │ ········<blink·/>
+      │         ---------
+
+```
+
+```
+invalid.jsx:8:5 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't use the 'marquee' element.
+  
+     6 │         <blink />
+     7 │     </div>
+   > 8 │     <marquee>Restricted content</marquee>
+       │     ^^^^^^^^^
+     9 │     <blink>
+    10 │         <span>Legacy notice</span>
+  
+  i Visually distracting elements can cause accessibility issues and should be avoided.
+  
+  i Unsafe fix: Remove the 'marquee' element.
+  
+    8 │ ····<marquee>Restricted·content</marquee>
+      │     -------------------------------------
+
+```
+
+```
+invalid.jsx:9:5 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't use the 'blink' element.
+  
+     7 │     </div>
+     8 │     <marquee>Restricted content</marquee>
+   > 9 │     <blink>
+       │     ^^^^^^^
+    10 │         <span>Legacy notice</span>
+    11 │     </blink>
+  
+  i Visually distracting elements can cause accessibility issues and should be avoided.
+  
+  i Unsafe fix: Remove the 'blink' element.
+  
+     7  7 │       </div>
+     8  8 │       <marquee>Restricted content</marquee>
+     9    │ - ····<blink>
+    10    │ - ········<span>Legacy·notice</span>
+    11    │ - ····</blink>
+        9 │ + ····
+    12 10 │       <section>
+    13 11 │           <marquee>
+  
+
+```
+
+```
+invalid.jsx:13:9 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't use the 'marquee' element.
+  
+    11 │     </blink>
+    12 │     <section>
+  > 13 │         <marquee>
+       │         ^^^^^^^^^
+    14 │             <p>Limited time offer</p>
+    15 │             <strong>Ends soon</strong>
+  
+  i Visually distracting elements can cause accessibility issues and should be avoided.
+  
+  i Unsafe fix: Remove the 'marquee' element.
+  
+    11 11 │       </blink>
+    12 12 │       <section>
+    13    │ - ········<marquee>
+    14    │ - ············<p>Limited·time·offer</p>
+    15    │ - ············<strong>Ends·soon</strong>
+    16    │ - ········</marquee>
+       13 │ + ········
+    17 14 │       </section>
+    18 15 │   </>
+  
 
 ```
