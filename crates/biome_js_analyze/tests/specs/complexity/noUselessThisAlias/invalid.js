@@ -25,6 +25,16 @@ function f() {
 }
 
 
+// https://github.com/biomejs/biome/issues/13125
+// `this` inside a computed member name binds to the outer `this`.
+function f() {
+    const self = this;
+    class Widget {
+        [self.count] = 42;
+    }
+    return new Widget();
+}
+
 // https://github.com/biomejs/biome/issues/1633
 class FetchServersMetrics extends React.Component {
     _fetchServersMetrics() {

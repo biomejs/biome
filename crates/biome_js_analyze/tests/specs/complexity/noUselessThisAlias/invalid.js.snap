@@ -31,6 +31,16 @@ function f() {
 }
 
 
+// https://github.com/biomejs/biome/issues/13125
+// `this` inside a computed member name binds to the outer `this`.
+function f() {
+    const self = this;
+    class Widget {
+        [self.count] = 42;
+    }
+    return new Widget();
+}
+
 // https://github.com/biomejs/biome/issues/1633
 class FetchServersMetrics extends React.Component {
     _fetchServersMetrics() {
@@ -185,42 +195,70 @@ invalid.js:19:9 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:32:13 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:31:11 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This aliasing of this is unnecessary.
   
-    30 │     _fetchServersMetrics() {
-    31 │       const { onStatusChange, appIds, filters, time } = this.props;
-  > 32 │       const component = this;
-       │             ^^^^^^^^^^^^^^^^
-    33 │ 
-    34 │       fetchServers(appIds, time)
+    29 │ // `this` inside a computed member name binds to the outer `this`.
+    30 │ function f() {
+  > 31 │     const self = this;
+       │           ^^^^^^^^^^^
+    32 │     class Widget {
+    33 │         [self.count] = 42;
   
   i Arrow functions inherits `this` from their enclosing scope.
   
   i Safe fix: Use this instead of an alias.
   
-    30 30 │       _fetchServersMetrics() {
-    31 31 │         const { onStatusChange, appIds, filters, time } = this.props;
-    32    │ - ······const·component·=·this;
-    33 32 │   
-    34 33 │         fetchServers(appIds, time)
-    35 34 │           .then(servers => {
-    36 35 │             const data = isEmpty(filters) ? servers : applyFilters(servers, filters);
-    37    │ - ··········component.setState({
-       36 │ + ··········this.setState({
-    38 37 │               timestamp: new Date().getTime(),
-    39 38 │               isLoading: false,
+    29 29 │   // `this` inside a computed member name binds to the outer `this`.
+    30 30 │   function f() {
+    31    │ - ····const·self·=·this;
+    32 31 │       class Widget {
+    33    │ - ········[self.count]·=·42;
+       32 │ + ········[this.count]·=·42;
+    34 33 │       }
+    35 34 │       return new Widget();
+  
+
+```
+
+```
+invalid.js:42:13 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This aliasing of this is unnecessary.
+  
+    40 │     _fetchServersMetrics() {
+    41 │       const { onStatusChange, appIds, filters, time } = this.props;
+  > 42 │       const component = this;
+       │             ^^^^^^^^^^^^^^^^
+    43 │ 
+    44 │       fetchServers(appIds, time)
+  
+  i Arrow functions inherits `this` from their enclosing scope.
+  
+  i Safe fix: Use this instead of an alias.
+  
+    40 40 │       _fetchServersMetrics() {
+    41 41 │         const { onStatusChange, appIds, filters, time } = this.props;
+    42    │ - ······const·component·=·this;
+    43 42 │   
+    44 43 │         fetchServers(appIds, time)
+    45 44 │           .then(servers => {
+    46 45 │             const data = isEmpty(filters) ? servers : applyFilters(servers, filters);
+    47    │ - ··········component.setState({
+       46 │ + ··········this.setState({
+    48 47 │               timestamp: new Date().getTime(),
+    49 48 │               isLoading: false,
     ····· │ 
-    42 41 │           })
-    43 42 │           .catch((err) => {
-    44    │ - ··········component.setState({·serverError:·throwOrResolve(err)·});
-       43 │ + ··········this.setState({·serverError:·throwOrResolve(err)·});
-    45 44 │           })
-    46    │ - ········.then(()·=>·component.setState({·isLoading:·false·}));
-       45 │ + ········.then(()·=>·this.setState({·isLoading:·false·}));
-    47 46 │       }
-    48 47 │   
+    52 51 │           })
+    53 52 │           .catch((err) => {
+    54    │ - ··········component.setState({·serverError:·throwOrResolve(err)·});
+       53 │ + ··········this.setState({·serverError:·throwOrResolve(err)·});
+    55 54 │           })
+    56    │ - ········.then(()·=>·component.setState({·isLoading:·false·}));
+       55 │ + ········.then(()·=>·this.setState({·isLoading:·false·}));
+    57 56 │       }
+    58 57 │   
   
 
 ```

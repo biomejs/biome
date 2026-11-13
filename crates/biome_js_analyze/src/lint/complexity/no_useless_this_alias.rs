@@ -11,7 +11,8 @@ use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
     AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, JsArrowFunctionExpression,
     JsAssignmentExpression, JsExpressionStatement, JsIdentifierBinding, JsIdentifierExpression,
-    JsThisExpression, JsVariableDeclaration, JsVariableDeclarator, JsVariableStatement, T,
+    JsInitializerClause, JsPropertyClassMember, JsThisExpression, JsVariableDeclaration,
+    JsVariableDeclarator, JsVariableStatement, T, TsInitializedPropertySignatureClassMember,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::no_useless_this_alias::NoUselessThisAliasOptions;
@@ -104,13 +105,24 @@ impl Rule for NoUselessThisAlias {
             return None;
         }
         for reference in id.all_references(model) {
+            // Class field initializers bind `this` to the instance being
+            // initialized, but they aren't control flow roots.
             let current_this_scope = reference
                 .syntax()
                 .ancestors()
                 .skip(1)
                 .filter(|x| !JsArrowFunctionExpression::can_cast(x.kind()))
-                .find_map(AnyJsControlFlowRoot::cast)?;
-            if this_scope != current_this_scope {
+                .find(|x| {
+                    AnyJsControlFlowRoot::can_cast(x.kind())
+                        || (JsInitializerClause::can_cast(x.kind())
+                            && x.parent().is_some_and(|parent| {
+                                JsPropertyClassMember::can_cast(parent.kind())
+                                    || TsInitializedPropertySignatureClassMember::can_cast(
+                                        parent.kind(),
+                                    )
+                            }))
+                })?;
+            if AnyJsControlFlowRoot::cast(current_this_scope).as_ref() != Some(&this_scope) {
                 // The aliasing is required because they have not the same `this` scope.
                 return None;
             }

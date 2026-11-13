@@ -38,6 +38,27 @@ function f() {
     }
 }
 
+// https://github.com/biomejs/biome/issues/13125
+const store = {
+    count: 42,
+    makeWidget() {
+        const self = this;
+        class Widget {
+            initial = self.count;
+            getCount = () => self.count;
+        }
+        return new Widget();
+    },
+};
+
+function f() {
+    const self = this;
+    class Widget {
+        static initial = self.count;
+    }
+    return new Widget();
+}
+
 class Class {
     a = this;
     #priv = this;
