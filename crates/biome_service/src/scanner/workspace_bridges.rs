@@ -134,6 +134,17 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
     /// `/// <reference path="..." />` directives name, are indexed with `index`
     /// first.
     fn index_framework_files(&self, _project_key: ProjectKey, _index: &dyn Fn(Vec<Utf8PathBuf>)) {}
+
+    /// Returns whether `path` is the configuration file of a framework that a
+    /// framework loader reads, such as `astro.config.mjs`.
+    fn is_framework_config(&self, _path: &Utf8Path) -> bool {
+        false
+    }
+
+    /// Returns whether the folder at `path` contains a package, or is one.
+    fn contains_package(&self, _path: &Utf8Path) -> bool {
+        false
+    }
 }
 
 /// Trait used to give access to workspace functionality required by the
@@ -215,6 +226,16 @@ pub trait WorkspaceWatcherBridge {
         project_key: ProjectKey,
     ) -> Result<Vec<Diagnostic>, WorkspaceError>;
 
+    /// Runs the framework loaders again when `path` is the configuration file
+    /// of a framework that the settings ignore. The loaders read such a file
+    /// like a scan does, although the watcher doesn't index it.
+    fn reload_frameworks_for_ignored_config(
+        &self,
+        _path: &Utf8Path,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        Ok(Vec::new())
+    }
+
     /// Notifies service notification listeners that the watcher has stopped.
     fn notify_stopped(&self);
 }
@@ -234,6 +255,45 @@ pub(crate) struct ScannerWatcherBridge<'a, W: WorkspaceScannerBridge> {
 impl<'a, W: WorkspaceScannerBridge> ScannerWatcherBridge<'a, W> {
     pub fn new((scanner, workspace): (&'a Scanner, &'a W)) -> Self {
         Self { scanner, workspace }
+    }
+
+    /// Returns whether the change at `path` affects what the framework
+    /// loaders read: the configuration file of a framework, or a manifest,
+    /// when `manifest_changed` is set.
+    ///
+    /// The loaders read `package.json` manifests, but not the other manifests
+    /// of the resolver, such as `tsconfig.json`.
+    fn affects_frameworks(&self, path: &Utf8Path, manifest_changed: bool) -> bool {
+        let is_package_or_folder =
+            path.file_name() == Some("package.json") || path.extension().is_none();
+        (manifest_changed && is_package_or_folder) || self.workspace.is_framework_config(path)
+    }
+
+    /// Runs the framework loaders of the project again when `affected` is
+    /// set. See [Self::affects_frameworks].
+    ///
+    /// Like the initial scan, only project and type-aware scans run the
+    /// loaders.
+    fn reload_frameworks(
+        &self,
+        project_key: ProjectKey,
+        affected: bool,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        if !affected {
+            return Ok(Vec::new());
+        }
+        let runs_loaders = self
+            .scanner
+            .get_scan_kind_for_project(project_key)
+            .is_some_and(|scan_kind| scan_kind.is_project() || scan_kind.is_type_aware());
+        let Some(project_path) = self.workspace.get_project_path(project_key) else {
+            return Ok(Vec::new());
+        };
+        if !runs_loaders {
+            return Ok(Vec::new());
+        }
+        self.scanner
+            .reindex_framework_files(self.workspace, project_key, &project_path)
     }
 }
 
@@ -291,6 +351,7 @@ where
         // The file is indexed with the refreshed path info, so its imports resolve
         // against the current filesystem.
         let manifest_changed = self.workspace.sync_path_info(&path);
+        let affects_frameworks = self.affects_frameworks(&path, manifest_changed);
         let (dependencies, diagnostics) =
             self.workspace
                 .index_file(project_key, path, IndexTrigger::Update)?;
@@ -312,6 +373,7 @@ where
         if manifest_changed {
             diagnostics.extend(self.workspace.index_new_module_dependencies(project_key)?);
         }
+        diagnostics.extend(self.reload_frameworks(project_key, affects_frameworks)?);
         Ok(diagnostics)
     }
 
@@ -327,6 +389,11 @@ where
         if manifest_changed {
             diagnostics.extend(self.workspace.index_new_module_dependencies(project_key)?);
         }
+        // A new package, such as a renamed package folder, has no manifest
+        // that the resolver knew before the folder was indexed.
+        let affects_frameworks = self.affects_frameworks(path, manifest_changed)
+            || self.workspace.contains_package(path);
+        diagnostics.extend(self.reload_frameworks(project_key, affects_frameworks)?);
         Ok(diagnostics)
     }
 
@@ -346,9 +413,13 @@ where
         project_key: ProjectKey,
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         let mut diagnostics = self.workspace.unload_file(path, project_key)?;
-        if self.workspace.sync_path_info(path) {
+        let manifest_changed = self.workspace.sync_path_info(path);
+        if manifest_changed {
             diagnostics.extend(self.workspace.index_new_module_dependencies(project_key)?);
         }
+        diagnostics.extend(
+            self.reload_frameworks(project_key, self.affects_frameworks(path, manifest_changed))?,
+        );
         Ok(diagnostics)
     }
 
@@ -360,10 +431,35 @@ where
         let mut diagnostics = self.workspace.unload_path(path, project_key)?;
         // Renames and directory removals also unload manifests, which may make
         // other dependencies reachable.
-        if self.workspace.sync_path_info(path) {
+        let manifest_changed = self.workspace.sync_path_info(path);
+        if manifest_changed {
             diagnostics.extend(self.workspace.index_new_module_dependencies(project_key)?);
         }
+        diagnostics.extend(
+            self.reload_frameworks(project_key, self.affects_frameworks(path, manifest_changed))?,
+        );
         Ok(diagnostics)
+    }
+
+    fn reload_frameworks_for_ignored_config(
+        &self,
+        path: &Utf8Path,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        if !self.workspace.is_framework_config(path) {
+            return Ok(Vec::new());
+        }
+        let Some((project_key, scan_kind)) = self.find_project_with_scan_kind_for_path(path) else {
+            return Ok(Vec::new());
+        };
+        // A removed path can't be checked, so its configuration is reloaded
+        // in case it was ignored.
+        if matches!(
+            WorkspaceWatcherBridge::is_ignored(self, project_key, &scan_kind, path, None),
+            Ok(false)
+        ) {
+            return Ok(Vec::new());
+        }
+        self.reload_frameworks(project_key, true)
     }
 
     #[inline]
