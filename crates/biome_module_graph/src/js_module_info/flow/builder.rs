@@ -2,7 +2,7 @@ use super::guards::{
     DecomposedCondition, FlowGuard, FlowOutcome, GuardFunctions, decompose_assertion,
     decompose_condition,
 };
-use super::{FlowNode, FlowNodeId};
+use super::{FlowNode, FlowNodeId, FlowSubject, FlowSubjectId, FlowSubjectTable};
 use biome_js_control_flow::{AnyJsControlFlowRoot, is_truthy_literal};
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
@@ -10,7 +10,7 @@ use biome_js_syntax::{
     JsDoWhileStatement, JsForStatement, JsIdentifierExpression, JsIfStatement, JsSyntaxNode,
     JsWhileStatement, T,
 };
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, TokenText};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TokenText};
 
 const MAX_SYNTAX_NODES: usize = 16_384;
 /// Limits how deeply syntax can nest below the execution root that gets flow.
@@ -21,8 +21,11 @@ const MAX_FLOW_NODES: usize = 65_536;
 pub(super) struct BuiltRoot {
     pub(super) nodes: Vec<FlowNode>,
     pub(super) guards: Vec<FlowGuard>,
-    /// Condition nodes paired with each binding their guard may refine.
-    pub(super) mentions: Vec<(FlowNodeId, TextRange)>,
+    /// The subjects that guards, mentions, and reads refer to, each at the
+    /// index of its id.
+    pub(super) subjects: Vec<FlowSubject>,
+    /// Condition nodes paired with each subject their guard may refine.
+    pub(super) mentions: Vec<(FlowNodeId, FlowSubjectId)>,
     /// Reachable reads of local bindings with their incoming flow.
     pub(super) reads: Vec<BuiltRead>,
 }
@@ -30,7 +33,7 @@ pub(super) struct BuiltRoot {
 pub(super) struct BuiltRead {
     pub(super) identifier: JsIdentifierExpression,
     pub(super) point: FlowNodeId,
-    pub(super) binding: TextRange,
+    pub(super) subject: FlowSubjectId,
 }
 
 /// Marks a root whose syntax or control flow narrowing does not support.
@@ -77,6 +80,7 @@ pub(super) fn build_root(
         functions,
         nodes: vec![FlowNode::Start],
         guards: Vec::new(),
+        subjects: FlowSubjectTable::default(),
         mentions: Vec::new(),
         reads: Vec::new(),
         jumps: Vec::new(),
@@ -87,6 +91,7 @@ pub(super) fn build_root(
     Some(BuiltRoot {
         nodes: builder.nodes,
         guards: builder.guards,
+        subjects: builder.subjects.into_subjects(),
         mentions: builder.mentions,
         reads: builder.reads,
     })
@@ -319,7 +324,8 @@ struct RootBuilder<'a, 'raw> {
     functions: &'a mut GuardFunctions<'raw>,
     nodes: Vec<FlowNode>,
     guards: Vec<FlowGuard>,
-    mentions: Vec<(FlowNodeId, TextRange)>,
+    subjects: FlowSubjectTable,
+    mentions: Vec<(FlowNodeId, FlowSubjectId)>,
     reads: Vec<BuiltRead>,
     jumps: Vec<JumpTarget>,
     /// The incoming flow of the next statement, or `None` when unreachable.
@@ -401,6 +407,7 @@ impl RootBuilder<'_, '_> {
                         &expression,
                         self.model,
                         self.functions,
+                        &mut self.subjects,
                         &mut self.guards,
                     ) {
                         Some(condition) => self.push_condition(flow, condition)?,
@@ -667,15 +674,15 @@ impl RootBuilder<'_, '_> {
             return Ok(incoming);
         }
         if let Some(identifier) = JsIdentifierExpression::cast_ref(node) {
-            if let Some(binding) = identifier
+            if let Some(subject) = identifier
                 .name()
                 .ok()
-                .and_then(|name| self.model.binding(&name))
+                .and_then(|name| self.subjects.reference(self.model, &name))
             {
                 self.reads.push(BuiltRead {
                     identifier,
                     point: incoming,
-                    binding: binding.range(),
+                    subject,
                 });
             }
             return Ok(incoming);
@@ -729,6 +736,7 @@ impl RootBuilder<'_, '_> {
             outcome,
             self.model,
             self.functions,
+            &mut self.subjects,
             &mut self.guards,
         );
         self.push_condition(antecedent, condition)
@@ -748,7 +756,7 @@ impl RootBuilder<'_, '_> {
             condition
                 .mentions
                 .into_iter()
-                .map(|binding| (node, binding)),
+                .map(|subject| (node, subject)),
         );
         Ok(node)
     }
@@ -797,7 +805,7 @@ mod tests {
     use biome_js_semantic::{SemanticModelOptions, semantic_model};
     use biome_js_syntax::JsSyntaxKind;
     use biome_languages::JsFileSource;
-    use biome_rowan::TextSize;
+    use biome_rowan::{TextRange, TextSize};
     use rustc_hash::FxHashMap;
 
     struct Built {
@@ -898,10 +906,11 @@ mod tests {
             match &self.root().guards[guard] {
                 FlowGuard::Keep | FlowGuard::Incomplete => {}
                 FlowGuard::Test {
-                    binding,
+                    subject,
                     test,
                     positive,
                 } => {
+                    let FlowSubject::Binding(binding) = &self.root().subjects[*subject as usize];
                     let name =
                         &self.source[usize::from(binding.start())..usize::from(binding.end())];
                     let test = match test {

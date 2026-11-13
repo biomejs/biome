@@ -2,9 +2,14 @@
 //!
 //! Collection records, for each execution root that tests one of its own
 //! variables, a graph of possible paths whose conditions are already
-//! decomposed into guards on semantic bindings. It also records the incoming
-//! path of every read such a guard can reach. Type inference later applies the
-//! guards to resolved types without inspecting syntax again.
+//! decomposed into guards on subjects. It also records the incoming path of
+//! every read such a guard can reach. Type inference later applies the guards
+//! to resolved types without inspecting syntax again.
+//!
+//! A subject is what a runtime test checks and a read narrows. Guards and
+//! reads refer to a subject by its id in the root's subject table, so a test
+//! and a read of the same subject match without comparing syntax. Every
+//! subject is a semantic binding.
 //!
 //! An execution root is a body analyzed independently, such as a module,
 //! function, or method. Only `let`, `const`, and parameter bindings that are
@@ -26,7 +31,7 @@ use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::{JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
     JsArrayBindingPatternElement, JsIdentifierBinding, JsObjectBindingPatternProperty,
-    JsObjectBindingPatternShorthandProperty, JsSyntaxKind,
+    JsObjectBindingPatternShorthandProperty, JsReferenceIdentifier, JsSyntaxKind,
 };
 use biome_js_type_info::{RawTypeData, TypeReference, is_raw_narrowing_invariant};
 use biome_rowan::{AstNode, AstPtr, TextRange};
@@ -38,6 +43,58 @@ use rustc_hash::{FxHashMap, FxHashSet};
 ///
 /// Construction gives up on a root before its node count exceeds this type.
 pub(crate) type FlowNodeId = u32;
+
+/// Index of a subject in [`RootFlow::subjects`].
+pub(crate) type FlowSubjectId = u32;
+
+/// What a runtime test checks and a read narrows within one execution root.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub(crate) enum FlowSubject {
+    /// The variable declared at this range.
+    Binding(TextRange),
+}
+
+/// The subjects of one execution root under construction, each stored once.
+///
+/// The builder records reads and the condition decomposer records runtime
+/// tests through the same table, so a read and a test of the same subject get
+/// the same id.
+#[derive(Default)]
+struct FlowSubjectTable {
+    subjects: Vec<FlowSubject>,
+    ids: FxHashMap<FlowSubject, FlowSubjectId>,
+}
+
+impl FlowSubjectTable {
+    /// Returns the id of the variable that `reference` refers to, adding the
+    /// variable to the table on first use.
+    ///
+    /// Returns `None` when `reference` refers to no declaration, as a global
+    /// does, or when the table has used every [`FlowSubjectId`].
+    fn reference(
+        &mut self,
+        model: &SemanticModel,
+        reference: &JsReferenceIdentifier,
+    ) -> Option<FlowSubjectId> {
+        let binding = model.binding(reference)?;
+        self.intern(FlowSubject::Binding(binding.range()))
+    }
+
+    fn intern(&mut self, subject: FlowSubject) -> Option<FlowSubjectId> {
+        if let Some(id) = self.ids.get(&subject) {
+            return Some(*id);
+        }
+        let id = FlowSubjectId::try_from(self.subjects.len()).ok()?;
+        self.subjects.push(subject.clone());
+        self.ids.insert(subject, id);
+        Some(id)
+    }
+
+    /// Returns the subjects, each at the index of its id.
+    fn into_subjects(self) -> Vec<FlowSubject> {
+        self.subjects
+    }
+}
 
 /// Limits the graph steps spent deciding which reads a test can reach in one
 /// execution root. Like other construction limits, exceeding it leaves the
@@ -64,15 +121,24 @@ pub(crate) enum FlowNode {
 pub(crate) struct RootFlow {
     pub(crate) nodes: Box<[FlowNode]>,
     pub(crate) guards: Box<[FlowGuard]>,
-    /// The points of each binding's reads, sorted and without duplicates.
-    pub(crate) read_points: FxHashMap<TextRange, Box<[FlowNodeId]>>,
+    /// The subjects that guards and reads refer to, each at the index of its
+    /// id.
+    pub(crate) subjects: Box<[FlowSubject]>,
+    /// The points of each subject's reads, sorted and without duplicates.
+    pub(crate) read_points: FxHashMap<FlowSubjectId, Box<[FlowNodeId]>>,
 }
 
 impl RootFlow {
-    /// Returns the points where the root reads `binding`, sorted, or an empty
+    /// Returns the points where the root reads `subject`, sorted, or an empty
     /// slice when it keeps no read of it.
-    pub(crate) fn read_points(&self, binding: TextRange) -> &[FlowNodeId] {
-        self.read_points.get(&binding).map_or(&[], |points| points)
+    pub(crate) fn read_points(&self, subject: FlowSubjectId) -> &[FlowNodeId] {
+        self.read_points.get(&subject).map_or(&[], |points| points)
+    }
+
+    /// Returns the subject with id `subject`, or `None` when the root has no
+    /// such subject.
+    pub(crate) fn subject(&self, subject: FlowSubjectId) -> Option<&FlowSubject> {
+        self.subjects.get(subject as usize)
     }
 }
 
@@ -83,8 +149,8 @@ pub(crate) struct FlowRead {
     pub(crate) root: usize,
     /// The flow that reaches the read, before evaluating it.
     pub(crate) point: FlowNodeId,
-    /// Range of the binding the read refers to.
-    pub(crate) binding: TextRange,
+    /// The subject the read refers to, in its root's subject table.
+    pub(crate) subject: FlowSubjectId,
 }
 
 /// Flow facts for one module.
@@ -188,16 +254,25 @@ impl RootCollector<'_> {
         let Some(BuiltRoot {
             nodes,
             guards,
+            subjects,
             mentions,
             reads,
         }) = build_root(root, self.model, &mut self.functions)
         else {
             return;
         };
-        let tested: FxHashSet<TextRange> = mentions.iter().map(|(_, binding)| *binding).collect();
+        let tested: FxHashSet<FlowSubjectId> =
+            mentions.iter().map(|(_, subject)| *subject).collect();
         let reads: Vec<_> = reads
             .into_iter()
-            .filter(|read| tested.contains(&read.binding) && eligible.contains(&read.binding))
+            .filter(|read| {
+                tested.contains(&read.subject)
+                    && subjects
+                        .get(read.subject as usize)
+                        .is_some_and(|subject| match subject {
+                            FlowSubject::Binding(range) => eligible.contains(range),
+                        })
+            })
             .collect();
         if reads.is_empty() {
             return;
@@ -209,11 +284,11 @@ impl RootCollector<'_> {
         let index = flow.roots.len();
         let mut read_points: FxHashMap<_, Vec<_>> = FxHashMap::default();
         for read in reads {
-            if !reachable.contains(&(read.binding, read.point)) {
+            if !reachable.contains(&(read.subject, read.point)) {
                 continue;
             }
             read_points
-                .entry(read.binding)
+                .entry(read.subject)
                 .or_default()
                 .push(read.point);
             let identifier = AnyFlowExpression::JsIdentifierExpression(read.identifier);
@@ -229,7 +304,7 @@ impl RootCollector<'_> {
                 FlowRead {
                     root: index,
                     point: read.point,
-                    binding: read.binding,
+                    subject: read.subject,
                 },
             );
         }
@@ -237,12 +312,13 @@ impl RootCollector<'_> {
             flow.roots.push(RootFlow {
                 nodes: nodes.into_boxed_slice(),
                 guards: guards.into_boxed_slice(),
+                subjects: subjects.into_boxed_slice(),
                 read_points: read_points
                     .into_iter()
-                    .map(|(binding, mut points)| {
+                    .map(|(subject, mut points)| {
                         points.sort_unstable();
                         points.dedup();
-                        (binding, points.into_boxed_slice())
+                        (subject, points.into_boxed_slice())
                     })
                     .collect(),
             });
@@ -280,16 +356,16 @@ impl RootCollector<'_> {
         Some(range)
     }
 
-    /// Returns the `(binding, point)` pairs that a test of the binding can
+    /// Returns the `(subject, point)` pairs that a test of the subject can
     /// reach, including the test itself.
     ///
     /// Returns `None` when the root's work limit is spent.
     fn reachable_from_tests(
         &self,
         nodes: &[FlowNode],
-        mentions: &[(FlowNodeId, TextRange)],
+        mentions: &[(FlowNodeId, FlowSubjectId)],
         reads: &[builder::BuiltRead],
-    ) -> Option<FxHashSet<(TextRange, FlowNodeId)>> {
+    ) -> Option<FxHashSet<(FlowSubjectId, FlowNodeId)>> {
         let mut successors = vec![Vec::new(); nodes.len()];
         for (index, node) in (0..).zip(nodes) {
             match node {
@@ -304,14 +380,14 @@ impl RootCollector<'_> {
                 }
             }
         }
-        let bindings: FxHashSet<TextRange> = reads.iter().map(|read| read.binding).collect();
+        let subjects: FxHashSet<FlowSubjectId> = reads.iter().map(|read| read.subject).collect();
         let mut reachable = FxHashSet::default();
         let mut remaining = self.relevance_budget;
-        for binding in bindings {
+        for subject in subjects {
             let mut seen = vec![false; nodes.len()];
             let mut pending: Vec<FlowNodeId> = mentions
                 .iter()
-                .filter(|(_, mentioned)| *mentioned == binding)
+                .filter(|(_, mentioned)| *mentioned == subject)
                 .map(|(node, _)| *node)
                 .collect();
             while let Some(node) = pending.pop() {
@@ -319,7 +395,7 @@ impl RootCollector<'_> {
                 if std::mem::replace(&mut seen[node as usize], true) {
                     continue;
                 }
-                reachable.insert((binding, node));
+                reachable.insert((subject, node));
                 pending.extend(&successors[node as usize]);
             }
         }

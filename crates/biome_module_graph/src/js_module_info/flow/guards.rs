@@ -1,3 +1,4 @@
+use super::{FlowSubjectId, FlowSubjectTable};
 use crate::js_module_info::TsBindingReferenceExt;
 use biome_js_semantic::{Binding, JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
@@ -33,19 +34,19 @@ pub(crate) enum FlowOutcome {
 
 /// One step of a decomposed condition, stored in an arena per execution root.
 ///
-/// Applying a guard to a variable's incoming type yields its type once the
-/// condition holds. `Keep` and tests of other variables return the incoming
+/// Applying a guard to a subject's incoming type yields its type once the
+/// condition holds. `Keep` and tests of other subjects return the incoming
 /// type, while `Incomplete` makes it unknown.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) enum FlowGuard {
-    /// The step cannot refine any variable, so the incoming type is kept.
+    /// The step cannot refine any subject, so the incoming type is kept.
     Keep,
     /// Decomposition stopped at its work limit or at missing syntax, so the
     /// incoming type becomes unknown.
     Incomplete,
-    /// A runtime test of the variable declared at `binding`.
+    /// A runtime test of `subject`, an id in the root's subject table.
     Test {
-        binding: TextRange,
+        subject: FlowSubjectId,
         test: FlowTest,
         positive: bool,
     },
@@ -427,6 +428,7 @@ pub(super) fn decompose_assertion(
     expression: &AnyJsExpression,
     model: &SemanticModel,
     functions: &mut GuardFunctions,
+    subjects: &mut FlowSubjectTable,
     guards: &mut Vec<FlowGuard>,
 ) -> Option<DecomposedCondition> {
     let mut remaining = MAX_CONDITION_STEPS;
@@ -443,21 +445,22 @@ pub(super) fn decompose_assertion(
             FlowOutcome::Truthy,
             model,
             functions,
+            subjects,
             guards,
         )),
         GuardKind::TypeAssertion => {
-            let AnyJsExpression::JsIdentifierExpression(subject) = argument else {
+            let AnyJsExpression::JsIdentifierExpression(argument) = argument else {
                 return None;
             };
-            let binding = model.binding(&subject.name().ok()?)?.range();
+            let subject = subjects.reference(model, &argument.name().ok()?)?;
             guards.push(FlowGuard::Test {
-                binding,
+                subject,
                 test: FlowTest::Predicate(function),
                 positive: true,
             });
             Some(DecomposedCondition {
                 guard: guards.len() - 1,
-                mentions: vec![binding],
+                mentions: vec![subject],
             })
         }
     }
@@ -475,24 +478,27 @@ fn parameter_name(name: &Text) -> Option<Cow<'_, str>> {
 /// A condition decomposed into the arena.
 pub(super) struct DecomposedCondition {
     pub(super) guard: usize,
-    /// Bindings whose type the condition may refine.
+    /// Subjects whose type the condition may refine.
     ///
     /// When decomposition stops early, this conservatively lists every
     /// variable read directly in the condition.
-    pub(super) mentions: Vec<TextRange>,
+    pub(super) mentions: Vec<FlowSubjectId>,
 }
 
-/// Decomposes `expression`, assuming `outcome`, into guards appended to `guards`.
+/// Decomposes `expression`, assuming `outcome`, into guards appended to
+/// `guards`, whose tests refer to subjects by their ids in `subjects`.
 pub(super) fn decompose_condition(
     expression: &AnyJsExpression,
     outcome: FlowOutcome,
     model: &SemanticModel,
     functions: &mut GuardFunctions,
+    subjects: &mut FlowSubjectTable,
     guards: &mut Vec<FlowGuard>,
 ) -> DecomposedCondition {
     let mut decomposer = Decomposer {
         model,
         functions,
+        subjects,
         guards,
         remaining: MAX_CONDITION_STEPS,
         mentions: Vec::new(),
@@ -502,13 +508,13 @@ pub(super) fn decompose_condition(
     let mentions = if decomposer.complete {
         decomposer.mentions
     } else {
+        let subjects = decomposer.subjects;
         expression
             .syntax()
             .descendants()
             .take(MAX_FALLBACK_NODES)
             .filter_map(JsIdentifierExpression::cast)
-            .filter_map(|identifier| model.binding(&identifier.name().ok()?))
-            .map(|binding| binding.range())
+            .filter_map(|identifier| subjects.reference(model, &identifier.name().ok()?))
             .collect()
     };
     DecomposedCondition { guard, mentions }
@@ -517,9 +523,10 @@ pub(super) fn decompose_condition(
 struct Decomposer<'a, 'raw> {
     model: &'a SemanticModel,
     functions: &'a mut GuardFunctions<'raw>,
+    subjects: &'a mut FlowSubjectTable,
     guards: &'a mut Vec<FlowGuard>,
     remaining: usize,
-    mentions: Vec<TextRange>,
+    mentions: Vec<FlowSubjectId>,
     complete: bool,
 }
 
@@ -595,12 +602,12 @@ impl Decomposer<'_, '_> {
             SyntaxGuard::Undefined { strict, .. } => FlowTest::Undefined { strict },
             SyntaxGuard::Predicate(function) => FlowTest::Predicate(function),
         };
-        let Some(binding) = self.model.binding(subject) else {
+        let Some(subject) = self.subjects.reference(self.model, subject) else {
             return FlowGuard::Keep;
         };
-        self.mentions.push(binding.range());
+        self.mentions.push(subject);
         FlowGuard::Test {
-            binding: binding.range(),
+            subject,
             test,
             positive,
         }
@@ -838,13 +845,14 @@ fn omit_parentheses(
 
 #[cfg(test)]
 mod tests {
+    use super::super::FlowSubject;
     use super::*;
     use biome_js_parser::{JsParserOptions, parse};
     use biome_js_semantic::{SemanticModelOptions, semantic_model};
     use biome_js_syntax::JsIfStatement;
     use biome_languages::JsFileSource;
 
-    /// Decomposes the `if` test `source` and names the mentioned bindings.
+    /// Decomposes the `if` test `source` and names the mentioned subjects.
     fn decompose(source: &str, outcome: FlowOutcome) -> (Vec<FlowGuard>, Vec<String>) {
         let parsed = parse(
             &format!("function f(value, other) {{ if ({source}) {{}} }}"),
@@ -862,11 +870,21 @@ mod tests {
         let mut guards = Vec::new();
         let raw_binding_types = FxHashMap::default();
         let mut functions = GuardFunctions::new(&[], &raw_binding_types);
-        let condition = decompose_condition(&test, outcome, &model, &mut functions, &mut guards);
+        let mut subjects = FlowSubjectTable::default();
+        let condition = decompose_condition(
+            &test,
+            outcome,
+            &model,
+            &mut functions,
+            &mut subjects,
+            &mut guards,
+        );
+        let subjects = subjects.into_subjects();
         let names = condition
             .mentions
             .iter()
-            .map(|range| {
+            .map(|subject| {
+                let FlowSubject::Binding(range) = &subjects[*subject as usize];
                 model
                     .as_binding_by_range(*range)
                     .unwrap()
