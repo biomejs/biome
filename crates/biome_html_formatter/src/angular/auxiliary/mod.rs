@@ -2,6 +2,9 @@
 
 pub(crate) mod binding_name;
 pub(crate) mod block_body;
+pub(crate) mod case_clause;
+pub(crate) mod default_clause;
+pub(crate) mod default_expression_clause;
 pub(crate) mod else_clause;
 pub(crate) mod else_if_clause;
 pub(crate) mod empty_clause;
@@ -20,5 +23,8 @@ pub(crate) mod let_block;
 pub(crate) mod let_initializer_clause;
 pub(crate) mod property_binding;
 pub(crate) mod structural_directive;
+pub(crate) mod switch_block;
+pub(crate) mod switch_opening_block;
+pub(crate) mod switch_parameters;
 pub(crate) mod template_ref_variable;
 pub(crate) mod two_way_binding;
