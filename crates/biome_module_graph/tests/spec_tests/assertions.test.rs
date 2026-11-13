@@ -656,7 +656,7 @@ fn unsupported_assertion_targets_do_not_expand_large_baselines() {
         assert_eq!(read("after"), ordinary, "{target}");
         let events = db.take_salsa_events();
         assert_eq!(
-            function_query_will_execute_count_by_name(&db, "infer_flow_binding_type", &events),
+            function_query_will_execute_count_by_name(&db, "infer_flow_subject_type", &events),
             0,
             "{target}"
         );
