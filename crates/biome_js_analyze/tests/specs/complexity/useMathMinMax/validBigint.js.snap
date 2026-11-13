@@ -1,0 +1,91 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: validBigint.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+// unary minus and bitwise not
+foo < -1n ? -1n : foo;
+foo < ~1n ? ~1n : foo;
+foo < -(1n) ? -(1n) : foo;
+foo < - -1n ? - -1n : foo;
+
+// arithmetic and bitwise operators with two bigint operands
+foo > 2n ** 62n - 1n ? 2n ** 62n - 1n : foo;
+foo > (2n ** 62n) - 1n ? (2n ** 62n) - 1n : foo;
+foo > 1n + 2n ? 1n + 2n : foo;
+foo > 1n - 2n ? 1n - 2n : foo;
+foo > 2n * 3n ? 2n * 3n : foo;
+foo > 6n / 3n ? 6n / 3n : foo;
+foo > 7n % 4n ? 7n % 4n : foo;
+foo > 2n ** 3n ? 2n ** 3n : foo;
+foo > 1n << 2n ? 1n << 2n : foo;
+foo > 8n >> 2n ? 8n >> 2n : foo;
+foo > (6n & 3n) ? (6n & 3n) : foo;
+foo > (6n | 3n) ? (6n | 3n) : foo;
+foo > (6n ^ 3n) ? (6n ^ 3n) : foo;
+
+// BigInt methods
+foo > BigInt.asIntN(64, bar) ? BigInt.asIntN(64, bar) : foo;
+foo > BigInt.asUintN(64, bar) ? BigInt.asUintN(64, bar) : foo;
+foo > BigInt["asUintN"](64, bar) ? BigInt["asUintN"](64, bar) : foo;
+
+// expressions that pass a bigint through
+foo > (bar, 1n) ? (bar, 1n) : foo;
+foo > (bar || 1n) ? (bar || 1n) : foo;
+foo > (bar && 1n) ? (bar && 1n) : foo;
+foo > (bar ?? 1n) ? (bar ?? 1n) : foo;
+foo > (bar ? 1n : 2) ? (bar ? 1n : 2) : foo;
+foo > (bar ? 2 : 1n) ? (bar ? 2 : 1n) : foo;
+
+// variables initialized with a bigint
+const NEG = -1n;
+const MAX = 2n ** 62n - 1n;
+const BITS = 62n;
+const SHIFTED = 2n ** BITS - 1n;
+const ONE = 1n;
+const ALIASED = MAX;
+const CALLED = BigInt(10);
+const ASSIGNED = (target = 1n);
+const FALLBACK = bar ?? ONE;
+foo < NEG ? NEG : foo;
+foo > MAX ? MAX : foo;
+foo > SHIFTED ? SHIFTED : foo;
+foo < -ONE ? -ONE : foo;
+foo > ONE + ONE ? ONE + ONE : foo;
+foo > ALIASED ? ALIASED : foo;
+foo > CALLED ? CALLED : foo;
+foo > ASSIGNED ? ASSIGNED : foo;
+foo > FALLBACK ? FALLBACK : foo;
+
+let reassigned = -1n;
+reassigned = bar;
+foo < reassigned ? reassigned : foo;
+
+var varNeg = -1n;
+foo < varNeg ? varNeg : foo;
+
+// parameter defaults
+function negativeDefault(a = -1n, b) {
+    return a > b ? a : b;
+}
+
+function expressionDefault(a = 2n ** 62n - 1n, b) {
+    return a > b ? a : b;
+}
+
+function objectPatternDefault({ a = 1n }, b) {
+    return a > b ? a : b;
+}
+
+function renamedPatternDefault({ x: a = 2n ** 62n - 1n }, b) {
+    return a > b ? a : b;
+}
+
+function arrayPatternDefault([a = -1n], b) {
+    return a > b ? a : b;
+}
+
+```
