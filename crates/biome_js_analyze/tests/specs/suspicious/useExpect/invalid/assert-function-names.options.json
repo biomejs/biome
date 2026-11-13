@@ -1,0 +1,15 @@
+{
+	"$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"linter": {
+		"rules": {
+			"suspicious": {
+				"useExpect": {
+					"level": "error",
+					"options": {
+						"assertFunctionNames": ["expectSaga", "utils.assertValid"]
+					}
+				}
+			}
+		}
+	}
+}

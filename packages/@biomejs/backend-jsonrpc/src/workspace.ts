@@ -12793,7 +12793,13 @@ export interface UseDeprecatedDateOptions {
 	argumentName?: string;
 }
 export type UseErrorMessageOptions = {};
-export type UseExpectOptions = {};
+export interface UseExpectOptions {
+	/**
+	 * Additional function names that count as assertions, such as
+	 * `expectSaga` or `utils.assertValid`.
+	 */
+	assertFunctionNames?: string[];
+}
 export type UseGetterReturnOptions = {};
 export type UseGoogleFontDisplayOptions = {};
 export type UseGuardForInOptions = {};

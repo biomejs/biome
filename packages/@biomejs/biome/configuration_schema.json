@@ -20297,7 +20297,17 @@
 				{ "$ref": "#/$defs/RuleWithUseExpectOptions" }
 			]
 		},
-		"UseExpectOptions": { "type": "object", "additionalProperties": false },
+		"UseExpectOptions": {
+			"type": "object",
+			"properties": {
+				"assertFunctionNames": {
+					"description": "Additional function names that count as assertions, such as\n`expectSaga` or `utils.assertValid`.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseExpectToContainConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
