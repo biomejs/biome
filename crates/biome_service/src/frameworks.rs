@@ -9,13 +9,24 @@
 //!
 //! - The modules that a declaration file declares become [FrameworkModules],
 //!   which module resolution falls back to.
-//! - A stylesheet applies to every page of the package.
+//! - A stylesheet loaded by a framework applies to every page of the package.
 //! - An HTML-like component is rendered on every page of the package.
+//!
+//! File-specific global stylesheets are resolved from workspace settings and
+//! recorded separately from framework contributions.
 
-use biome_module_graph::FrameworkScope;
+#[cfg(all(feature = "lang_js", feature = "lang_css"))]
+use crate::configuration::display_path;
+#[cfg(all(feature = "lang_js", feature = "lang_css"))]
+use crate::diagnostics::{InvalidCssGlobal, NegatedCssGlobal, UnmatchedCssGlobal};
+#[cfg(all(feature = "lang_js", feature = "lang_css"))]
+use biome_fs::is_node_modules_path;
+use biome_module_graph::{FrameworkScope, GlobalStylesheetScope};
 use biome_resolver::{match_pattern_key, pattern_key_compare};
 use camino::Utf8PathBuf;
 use rustc_hash::FxHashMap;
+#[cfg(feature = "lang_css")]
+use rustc_hash::FxHashSet;
 use std::sync::Arc;
 
 #[cfg(feature = "lang_js")]
@@ -24,16 +35,198 @@ mod host;
 #[cfg(feature = "lang_js")]
 pub(crate) use host::{WorkspaceLoaderHost, referenced_declaration_files};
 
+/// What the framework loaders contribute to a package.
+pub(crate) struct LoadedPackage {
+    pub(crate) package_path: Utf8PathBuf,
+    pub(crate) contributions: biome_frameworks::FrameworkContributions,
+}
+
+/// Framework contributions and global stylesheets loaded for one project.
+#[derive(Default)]
+pub(crate) struct LoadedFrameworks {
+    pub(crate) packages: Vec<LoadedPackage>,
+    pub(crate) css_globals: Arc<CssGlobalStylesheets>,
+    pub(crate) css_global_visits: Vec<Utf8PathBuf>,
+    pub(crate) diagnostics: Vec<biome_diagnostics::Error>,
+}
+
+/// Concrete stylesheets grouped by the global-style entry that named them.
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub(crate) struct CssGlobalStylesheets {
+    stylesheets: FxHashMap<Box<str>, Vec<Utf8PathBuf>>,
+}
+
+impl CssGlobalStylesheets {
+    #[cfg(feature = "lang_css")]
+    pub(crate) fn resolve<'a>(
+        &self,
+        entries: impl IntoIterator<Item = &'a str>,
+    ) -> Vec<Utf8PathBuf> {
+        let mut result = FxHashSet::default();
+        for entry in entries {
+            for path in self.stylesheets.get(entry).into_iter().flatten() {
+                result.insert(path.clone());
+            }
+        }
+        let mut result: Vec<_> = result.into_iter().collect();
+        result.sort_unstable();
+        result
+    }
+
+    #[cfg(feature = "lang_css")]
+    pub(crate) fn all(&self) -> Vec<Utf8PathBuf> {
+        self.resolve(self.stylesheets.keys().map(AsRef::as_ref))
+    }
+}
+
+/// The stylesheets that the entries of `css.globals` name, expanded once for
+/// all settings of a project.
+#[cfg(all(feature = "lang_js", feature = "lang_css"))]
+#[derive(Default)]
+pub(crate) struct CssGlobals {
+    pub(crate) stylesheets: CssGlobalStylesheets,
+    /// Warnings about the entries that name no stylesheet.
+    pub(crate) diagnostics: Vec<biome_diagnostics::Error>,
+}
+
+#[cfg(all(feature = "lang_js", feature = "lang_css"))]
+impl CssGlobals {
+    /// Returns the stylesheets that `entry` names, expanding it with `expand`
+    /// the first time.
+    ///
+    /// A negated entry, which starts with `!`, names no stylesheet.
+    pub(crate) fn stylesheets(
+        &mut self,
+        entry: &str,
+        expand: impl FnOnce(&str) -> Result<Vec<Utf8PathBuf>, String>,
+    ) -> &[Utf8PathBuf] {
+        if !self.stylesheets.stylesheets.contains_key(entry) {
+            let stylesheets = if entry.starts_with('!') {
+                self.diagnostics
+                    .push(biome_diagnostics::Error::from(NegatedCssGlobal {
+                        entry: display_path(camino::Utf8Path::new(entry)).into_owned(),
+                    }));
+                Vec::new()
+            } else {
+                match expand(entry) {
+                    Ok(stylesheets) => {
+                        if stylesheets.is_empty() {
+                            self.diagnostics.push(biome_diagnostics::Error::from(
+                                UnmatchedCssGlobal {
+                                    entry: display_path(camino::Utf8Path::new(entry)).into_owned(),
+                                },
+                            ));
+                        }
+                        stylesheets
+                    }
+                    Err(error) => {
+                        self.diagnostics
+                            .push(biome_diagnostics::Error::from(InvalidCssGlobal {
+                                entry: display_path(camino::Utf8Path::new(entry)).into_owned(),
+                                error,
+                            }));
+                        Vec::new()
+                    }
+                }
+            };
+            self.stylesheets
+                .stylesheets
+                .insert(entry.into(), stylesheets);
+        }
+        &self.stylesheets.stylesheets[entry]
+    }
+}
+
+/// Returns the stylesheets that `entry`, an absolute path or glob pattern of
+/// `css.globals`, names.
+///
+/// Only stylesheets match, and a glob pattern doesn't enter `node_modules`.
+/// Returns the error of a glob pattern that isn't valid.
+#[cfg(all(feature = "lang_js", feature = "lang_css"))]
+pub(crate) fn css_global_stylesheets(
+    host: &WorkspaceLoaderHost,
+    entry: &str,
+) -> Result<Vec<Utf8PathBuf>, String> {
+    use biome_frameworks::LoaderHost;
+
+    let Some((directory, glob)) = split_css_global(entry) else {
+        let path = camino::Utf8Path::new(entry);
+        return Ok(if is_stylesheet(&path) && host.is_file(path) {
+            vec![path.to_path_buf()]
+        } else {
+            Vec::new()
+        });
+    };
+    let glob = glob?;
+    Ok(host
+        .glob(&directory, &glob)
+        .into_iter()
+        .filter(is_stylesheet)
+        .filter(|path| !is_node_modules_path(path))
+        .collect())
+}
+
+/// Returns whether `path` is a stylesheet that `entry`, an absolute path or
+/// glob pattern of `css.globals`, names. See [css_global_stylesheets].
+#[cfg(all(feature = "lang_js", feature = "lang_css"))]
+pub(crate) fn is_css_global(entry: &str, path: &camino::Utf8Path) -> bool {
+    if entry.starts_with('!') {
+        return false;
+    }
+    match split_css_global(entry) {
+        None => is_stylesheet(&path) && camino::Utf8Path::new(entry) == path,
+        Some((directory, Ok(glob))) => {
+            is_stylesheet(&path)
+                && !is_node_modules_path(path)
+                && path
+                    .strip_prefix(&directory)
+                    .is_ok_and(|relative| glob.is_match(relative))
+        }
+        Some((_, Err(_))) => false,
+    }
+}
+
+/// Splits the glob pattern `entry` into the folder before its first component
+/// with a wildcard or alternatives, and the pattern of the rest. Returns
+/// `None` when `entry` is a path.
+#[cfg(all(feature = "lang_js", feature = "lang_css"))]
+fn split_css_global(entry: &str) -> Option<(Utf8PathBuf, Result<biome_glob::Glob, String>)> {
+    if !entry.contains(['*', '{']) {
+        return None;
+    }
+    let mut directory = Utf8PathBuf::new();
+    let mut pattern = Vec::new();
+    for component in camino::Utf8Path::new(entry).components() {
+        if pattern.is_empty() && !component.as_str().contains(['*', '{']) {
+            directory.push(component);
+        } else {
+            pattern.push(component.as_str());
+        }
+    }
+    let glob = pattern
+        .join("/")
+        .parse::<biome_glob::Glob>()
+        .map_err(|error| error.to_string());
+    Some((directory, glob))
+}
+
+#[cfg(all(feature = "lang_js", feature = "lang_css"))]
+fn is_stylesheet(path: &impl AsRef<camino::Utf8Path>) -> bool {
+    biome_languages::DocumentFileSource::from_well_known(path.as_ref(), true).is_css_like()
+}
+
 /// What the frameworks of a package inject.
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub(crate) struct PackageFrameworks {
     pub(crate) modules: FrameworkModules,
     pub(crate) scope: Arc<FrameworkScope>,
+    pub(crate) css_globals: Arc<CssGlobalStylesheets>,
+    pub(crate) resolved_global_stylesheets: FxHashMap<Utf8PathBuf, Arc<GlobalStylesheetScope>>,
 }
 
 /// The modules that the frameworks of a package declare, by the specifier
 /// that imports them.
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub(crate) struct FrameworkModules {
     /// Modules declared with a name without `*`, such as `astro:content`.
     exact: FxHashMap<String, Utf8PathBuf>,

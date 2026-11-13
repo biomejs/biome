@@ -1,7 +1,8 @@
 //! Salsa database traits and tracked module-graph queries.
 
 use crate::{
-    CssModuleInfo, FrameworkScope, HtmlModuleInfo, JsModuleInfo, ModuleInfo, ModuleInfoKind,
+    CssModuleInfo, FrameworkScope, GlobalStylesheetScope, HtmlModuleInfo, JsModuleInfo, ModuleInfo,
+    ModuleInfoKind,
 };
 pub use biome_js_type_info::TypeDb;
 use biome_js_type_info::resolved::InferredModuleKey;
@@ -129,6 +130,12 @@ pub trait ModuleDb: ResolverDb + TypeDb + LanguageDb {
     /// The default implementation doesn't know any framework.
     fn framework_scopes(&self) -> Vec<Arc<FrameworkScope>> {
         Vec::new()
+    }
+
+    /// Returns the global stylesheets that apply to `path` after the caller
+    /// resolves its file-specific settings.
+    fn global_stylesheet_scope(&self, _path: &Utf8Path) -> Arc<GlobalStylesheetScope> {
+        Arc::new(GlobalStylesheetScope::default())
     }
 
     /// Collects all module paths and their kinds.

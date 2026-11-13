@@ -66,11 +66,43 @@ use std::str::FromStr;
 use std::sync::Arc;
 use tracing::instrument;
 
-fn display_path(path: &Utf8Path) -> Cow<'_, str> {
+pub(crate) fn display_path(path: &Utf8Path) -> Cow<'_, str> {
     if cfg!(any(test, windows)) {
         Cow::Owned(path.as_str().replace('\\', "/"))
     } else {
         Cow::Borrowed(path.as_str())
+    }
+}
+
+#[cfg(feature = "lang_css")]
+pub(crate) fn normalize_css_globals(configuration: &mut Configuration, base: &Utf8Path) {
+    let resolve_globals = |globals: &mut FxHashSet<Box<str>>| {
+        *globals = globals
+            .iter()
+            .map(|entry| {
+                if entry.starts_with('!') {
+                    entry.clone()
+                } else {
+                    normalize_path(&base.join(entry.as_ref()))
+                        .into_string()
+                        .into_boxed_str()
+                }
+            })
+            .collect();
+    };
+    if let Some(globals) = configuration
+        .css
+        .as_mut()
+        .and_then(|css| css.globals.as_mut())
+    {
+        resolve_globals(globals);
+    }
+    if let Some(overrides) = configuration.overrides.as_mut() {
+        for pattern in &mut overrides.0 {
+            if let Some(globals) = pattern.css.as_mut().and_then(|css| css.globals.as_mut()) {
+                resolve_globals(globals);
+            }
+        }
     }
 }
 
@@ -1268,6 +1300,11 @@ impl<'a> ConfigurationExtendsLoader<'a> {
                 &resolved.file_path,
                 resolved.file_path.parent().unwrap_or(Utf8Path::new("")),
             )?;
+            #[cfg(feature = "lang_css")]
+            normalize_css_globals(
+                configuration,
+                resolved.file_path.parent().unwrap_or(Utf8Path::new("")),
+            );
         }
         let diagnostics = diagnostics
             .into_iter()

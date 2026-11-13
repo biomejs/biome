@@ -21,8 +21,9 @@ use biome_languages::DocumentFileSource;
 use biome_languages::LanguageDb;
 #[cfg(feature = "module_graph")]
 use biome_module_graph::{
-    FrameworkScope, InferredLocalTypeId, InferredModuleKey, ModuleDb, ModuleGraphGeneration,
-    ModuleInfo, ModuleInfoKind, TypeDb, ambient_module_declaring_file, module_for_key,
+    FrameworkScope, GlobalStylesheetScope, InferredLocalTypeId, InferredModuleKey, ModuleDb,
+    ModuleGraphGeneration, ModuleInfo, ModuleInfoKind, TypeDb, ambient_module_declaring_file,
+    module_for_key,
 };
 use biome_resolver::FsWithResolverProxy;
 #[cfg(feature = "module_graph")]
@@ -1171,7 +1172,26 @@ impl WorkspaceDb {
         let frameworks = PackageFrameworks {
             modules: Default::default(),
             scope: Arc::new(scope),
+            ..PackageFrameworks::default()
         };
+        self.set_frameworks(package_path, Arc::new(frameworks));
+    }
+
+    /// Sets the resolved global stylesheets of `path` for test purposes.
+    #[cfg(all(feature = "module_graph", feature = "testing"))]
+    pub fn set_global_stylesheet_scope_for_test(
+        &mut self,
+        package_path: Utf8PathBuf,
+        path: Utf8PathBuf,
+        scope: GlobalStylesheetScope,
+    ) {
+        let mut frameworks = self
+            .frameworks(&package_path)
+            .map(|frameworks| (*frameworks).clone())
+            .unwrap_or_default();
+        frameworks
+            .resolved_global_stylesheets
+            .insert(path, Arc::new(scope));
         self.set_frameworks(package_path, Arc::new(frameworks));
     }
 
@@ -1698,6 +1718,54 @@ impl ModuleDb for WorkspaceDb {
             .values()
             .map(|frameworks| frameworks.scope.clone())
             .collect()
+    }
+
+    fn global_stylesheet_scope(&self, path: &Utf8Path) -> Arc<GlobalStylesheetScope> {
+        let Some(frameworks) = self.package_frameworks(path) else {
+            return Arc::new(GlobalStylesheetScope::default());
+        };
+        if let Some(scope) = frameworks.resolved_global_stylesheets.get(path) {
+            return scope.clone();
+        }
+
+        #[cfg(feature = "lang_css")]
+        {
+            let Some(project_key) = ProjectDb::find_project_for_path(self, path) else {
+                return Arc::new(GlobalStylesheetScope::default());
+            };
+            let Some((_, _, _, settings)) = self.get_settings_context_for_path(project_key, path)
+            else {
+                return Arc::new(GlobalStylesheetScope::default());
+            };
+            let settings = settings.as_ref();
+            let indices: Vec<_> = settings.override_settings.matching_indices(path).collect();
+            let entries = settings.css_globals_by_indices(&indices);
+            if entries.is_empty() {
+                return Arc::new(GlobalStylesheetScope::default());
+            }
+
+            let mut stylesheets = frameworks.css_globals.resolve(entries);
+            let has_unreadable_styles = stylesheets.iter().any(|stylesheet| {
+                !matches!(
+                    self.module_info_for_path(stylesheet),
+                    Some(ModuleInfoKind::Css(_))
+                )
+            });
+            stylesheets.retain(|stylesheet| {
+                matches!(
+                    self.module_info_for_path(stylesheet),
+                    Some(ModuleInfoKind::Css(_))
+                )
+            });
+            Arc::new(GlobalStylesheetScope {
+                stylesheets,
+                is_authoritative: true,
+                has_unreadable_styles,
+            })
+        }
+
+        #[cfg(not(feature = "lang_css"))]
+        Arc::new(GlobalStylesheetScope::default())
     }
 }
 

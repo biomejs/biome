@@ -1,8 +1,8 @@
 use crate::TestArgs as Args;
-use crate::run_cli_with_server_workspace;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
+use crate::{run_cli_with_dyn_fs, run_cli_with_server_workspace};
 use biome_console::BufferConsole;
-use biome_fs::MemoryFileSystem;
+use biome_fs::{MemoryFileSystem, TemporaryFs};
 use camino::Utf8Path;
 
 const NO_UNRESOLVED_IMPORTS: &[u8] = br#"{
@@ -486,6 +486,261 @@ export { getCollection, helper, Image };
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "unindexed_framework_declarations_make_framework_modules_unknown",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn css_globals_enable_css_rules_when_framework_stylesheets_are_unknown() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    insert_starlight_site(
+        &fs,
+        br#"{
+    "html": { "experimentalFullSupportEnabled": true },
+    "overrides": [{
+        "includes": ["site/**"],
+        "css": { "globals": ["site/src/styles/custom.css"] }
+    }],
+    "linter": {
+        "rules": {
+            "nursery": {
+                "noUndeclaredClasses": "error",
+                "noUndeclaredCustomProperties": "error",
+                "noUnusedClasses": "error"
+            }
+        }
+    }
+}
+"#,
+        br#"import { defineConfig } from "astro/config";
+import starlight from "@astrojs/starlight";
+
+function stylesheets() {
+	return ["./src/styles/custom.css"];
+}
+
+export default defineConfig({
+	integrations: [starlight({ customCss: stylesheets() })],
+});
+"#,
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(
+            ["lint"]
+                .into_iter()
+                .chain(STARLIGHT_SITE_FILES)
+                .collect::<Vec<_>>()
+                .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "css_globals_enable_css_rules_when_framework_stylesheets_are_unknown",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn css_globals_apply_in_overrides() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        br#"{
+    "css": { "globals": ["src/base.css"] },
+    "linter": {
+        "rules": { "nursery": { "noUndeclaredClasses": "error" } }
+    },
+    "overrides": [{
+        "includes": ["src/admin/**"],
+        "css": { "globals": ["src/admin.css"] }
+    }]
+}
+"#,
+    );
+    fs.insert(Utf8Path::new("package.json").into(), b"{}");
+    fs.insert(Utf8Path::new("src/base.css").into(), b".base {}\n");
+    fs.insert(Utf8Path::new("src/admin.css").into(), b".admin {}\n");
+    fs.insert(Utf8Path::new("src/local.css").into(), b".local {}\n");
+    let admin = Utf8Path::new("src/admin/Page.jsx");
+    fs.insert(
+        admin.into(),
+        br#"import "../local.css";
+
+export const Page = () => <div className="local base admin missing" />;
+"#,
+    );
+    let public = Utf8Path::new("src/public/Page.jsx");
+    fs.insert(
+        public.into(),
+        br#"import "../local.css";
+
+export const Page = () => <div className="local base admin missing" />;
+"#,
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", admin.as_str(), public.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "css_globals_apply_in_overrides",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn css_globals_follow_nested_configurations() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("css_globals_follow_nested_configurations");
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "css": { "globals": ["src/root.css"] },
+    "linter": {
+        "rules": { "nursery": { "noUndeclaredClasses": "error" } }
+    }
+}
+"#,
+    );
+    fs.create_file("package.json", "{}");
+    fs.create_file("src/root.css", ".root { color: red; }\n");
+    fs.create_file("src/local.css", ".local { display: block; }\n");
+    let root = fs.create_file(
+        "src/Root.jsx",
+        r#"import "./local.css";
+
+export const Root = () => <div className="local root nested" />;
+"#,
+    );
+    fs.create_file("nested/package.json", "{}");
+    fs.create_file(
+        "nested/biome.json",
+        r#"{
+    "root": false,
+    "css": { "globals": ["src/nested.css"] },
+    "linter": {
+        "rules": { "nursery": { "noUndeclaredClasses": "error" } }
+    }
+}
+"#,
+    );
+    fs.create_file("nested/src/nested.css", ".nested { color: blue; }\n");
+    fs.create_file("nested/src/local.css", ".local { display: block; }\n");
+    let nested = fs.create_file(
+        "nested/src/Nested.jsx",
+        r#"import "./local.css";
+
+export const Nested = () => <div className="local nested root missing" />;
+"#,
+    );
+    fs.create_file("combined/package.json", "{}");
+    fs.create_file(
+        "combined/biome.json",
+        r#"{
+    "root": false,
+    "extends": "//",
+    "css": { "globals": ["src/combined.css"] }
+}
+"#,
+    );
+    fs.create_file("combined/src/combined.css", ".combined { color: green; }\n");
+    fs.create_file("combined/src/local.css", ".local { display: block; }\n");
+    let combined = fs.create_file(
+        "combined/src/Combined.jsx",
+        r#"import "./local.css";
+
+export const Combined = () => <div className="local root combined missing" />;
+"#,
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", root.as_str(), nested.as_str(), combined.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "css_globals_follow_nested_configurations",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn css_globals_list_the_stylesheets_of_every_page() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    insert_starlight_site(
+        &fs,
+        br#"{
+    "html": { "experimentalFullSupportEnabled": true },
+    "css": {
+        "globals": ["./site/src/styles/*.css", "site/src/missing.css", "!site/src/styles/partial.css"]
+    },
+    "linter": {
+        "rules": {
+            "nursery": {
+                "noUndeclaredClasses": "error",
+                "noUndeclaredCustomProperties": "error",
+                "noUnusedClasses": "error"
+            }
+        }
+    }
+}
+"#,
+        br#"import { defineConfig } from "astro/config";
+import starlight from "@astrojs/starlight";
+
+export default defineConfig({
+	integrations: [starlight({ customCss: ["./src/styles/theme.styl"] })],
+});
+"#,
+    );
+    fs.insert(
+        Utf8Path::new("site/src/styles/theme.styl").into(),
+        b".theme\n  color red\n",
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(
+            ["lint"]
+                .into_iter()
+                .chain(STARLIGHT_SITE_FILES)
+                .collect::<Vec<_>>()
+                .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "css_globals_list_the_stylesheets_of_every_page",
         fs,
         console,
         result,

@@ -44,3 +44,18 @@ pub struct FrameworkScope {
     /// package names.
     pub has_unknown_modules: bool,
 }
+
+/// Global stylesheets that apply to one source file.
+///
+/// The database resolves this scope before module-graph queries consume it.
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct GlobalStylesheetScope {
+    /// Stylesheets that apply to the source file. Their imports apply too.
+    pub stylesheets: Vec<Utf8PathBuf>,
+
+    /// Whether the listed stylesheets describe every expected global style.
+    pub is_authoritative: bool,
+
+    /// Whether an applicable stylesheet could not be indexed.
+    pub has_unreadable_styles: bool,
+}
