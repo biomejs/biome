@@ -89,8 +89,7 @@ impl GritAstNode for GritNode {
             address: self
                 .0
                 .first_token()
-                .map(|token| token.text().as_ptr() as usize)
-                .unwrap_or_default(),
+                .map_or_default(|token| token.text().as_ptr() as usize),
         }
     }
 

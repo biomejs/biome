@@ -379,21 +379,19 @@ impl ServiceLanguage for JsLanguage {
             .javascript
             .formatter
             .quote_style
-            .map(|quote_style: QuoteStyle| match quote_style {
+            .map_or_default(|quote_style: QuoteStyle| match quote_style {
                 QuoteStyle::Single => PreferredQuote::Single,
                 QuoteStyle::Double => PreferredQuote::Double,
-            })
-            .unwrap_or_default();
+            });
         let preferred_jsx_quote = global
             .languages
             .javascript
             .formatter
             .jsx_quote_style
-            .map(|quote_style: QuoteStyle| match quote_style {
+            .map_or_default(|quote_style: QuoteStyle| match quote_style {
                 QuoteStyle::Single => PreferredQuote::Single,
                 QuoteStyle::Double => PreferredQuote::Double,
-            })
-            .unwrap_or_default();
+            });
         let preferred_indentation = {
             let indent_style = global
                 .languages
@@ -1063,8 +1061,7 @@ fn debug_control_flow(
                 std::cmp::Reverse(graph.node.ancestors().count()),
             )
         })
-        .map(|graph| graph.to_string())
-        .unwrap_or_default()
+        .map_or_default(|graph| graph.to_string())
 }
 
 fn debug_formatter_ir(

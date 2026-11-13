@@ -805,10 +805,7 @@ fn extract_anchor_kinds_from_predicate(
             if predicate_scope != variable_scope || predicate_index != variable_index {
                 return vec![];
             }
-            m.pattern
-                .as_ref()
-                .map(extract_anchor_kinds)
-                .unwrap_or_default()
+            m.pattern.as_ref().map_or_default(extract_anchor_kinds)
         }
         Predicate::And(and) => and
             .predicates

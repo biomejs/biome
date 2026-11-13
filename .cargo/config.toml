@@ -40,6 +40,10 @@ new-crate              = "run -p xtask_codegen -- new-crate"
 [profile.release]
 lto = true
 
+[registry]
+# Matches `minimumReleaseAge` in pnpm-workspace.yaml.
+global-min-publish-age = "3 days"
+
 # getrandom 0.3 (pulled in by boa_engine) requires an explicit backend on wasm,
 # in addition to its `wasm_js` cargo feature (enabled in biome_js_runtime).
 [target.wasm32-unknown-unknown]

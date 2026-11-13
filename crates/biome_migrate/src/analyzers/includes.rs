@@ -70,8 +70,7 @@ impl Rule for Includes {
             .include
             .as_ref()
             .or(state.ignore.as_ref())
-            .map(|node| node.range())
-            .unwrap_or_default();
+            .map_or_default(|node| node.range());
         let mut diagnostic = RuleDiagnostic::new(
             category!("migrate"),
             range,

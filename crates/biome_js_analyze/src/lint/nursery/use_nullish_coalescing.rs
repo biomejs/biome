@@ -959,17 +959,12 @@ fn is_safe_syntax_context_for_replacement(logical: &JsLogicalExpression) -> bool
     let left = logical.left().ok();
     let right = logical.right().ok();
 
-    if left
+    !(left
         .as_ref()
         .is_some_and(is_unparenthesized_and_or_expression)
         || right
             .as_ref()
-            .is_some_and(is_unparenthesized_and_or_expression)
-    {
-        return false;
-    }
-
-    true
+            .is_some_and(is_unparenthesized_and_or_expression))
 }
 
 fn is_unparenthesized_and_or_expression(expr: &AnyJsExpression) -> bool {

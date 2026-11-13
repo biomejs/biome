@@ -170,13 +170,11 @@ fn with_trivia_of(element: &AnyJsArrayElement, slot: &AnyJsArrayElement) -> AnyJ
     let leading: Vec<_> = slot
         .syntax()
         .first_leading_trivia()
-        .map(|trivia| trivia.pieces().collect())
-        .unwrap_or_default();
+        .map_or_default(|trivia| trivia.pieces().collect());
     let trailing: Vec<_> = slot
         .syntax()
         .last_trailing_trivia()
-        .map(|trivia| trivia.pieces().collect())
-        .unwrap_or_default();
+        .map_or_default(|trivia| trivia.pieces().collect());
     element
         .clone()
         .with_leading_trivia_pieces(leading)

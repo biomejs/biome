@@ -211,8 +211,7 @@ impl Rule for NoImportCycles {
 
         let cwd = Utf8PathBuf::from(
             std::env::current_dir()
-                .map(|cwd| cwd.to_string_lossy().to_string())
-                .unwrap_or_default(),
+                .map_or_default(|cwd| cwd.to_string_lossy().to_string()),
         );
 
         let mut note = markup!("This import resolves to ").to_owned();

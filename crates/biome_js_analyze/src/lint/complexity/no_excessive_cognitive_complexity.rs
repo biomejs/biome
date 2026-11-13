@@ -208,8 +208,7 @@ impl CognitiveComplexityVisitor {
                     function_like,
                     score: 0,
                     nesting_level: parent
-                        .map(|parent| parent.nesting_level + 1)
-                        .unwrap_or_default(),
+                        .map_or_default(|parent| parent.nesting_level + 1),
                     last_seen_operator: None,
                 });
             } else if let Some(parent) = self.stack.last_mut() {

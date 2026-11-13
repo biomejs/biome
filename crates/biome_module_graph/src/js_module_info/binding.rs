@@ -62,8 +62,7 @@ impl JsBinding {
             .tree()
             .name_token()
             .ok()
-            .map(|t| t.token_text_trimmed().into())
-            .unwrap_or_default()
+            .map_or_default(|t| t.token_text_trimmed().into())
     }
 
     /// Returns the scope of this binding.

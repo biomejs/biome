@@ -362,8 +362,7 @@ pub(crate) fn inspect_plugins(
     let overrides = configuration
         .overrides
         .as_ref()
-        .map(|overrides| overrides.0.as_slice())
-        .unwrap_or_default();
+        .map_or_default(|overrides| overrides.0.as_slice());
     let declarations = std::iter::once((None, None, configuration.plugins.as_ref())).chain(
         overrides.iter().enumerate().map(|(index, pattern)| {
             (

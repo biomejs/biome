@@ -368,15 +368,9 @@ impl VueComponentDeclarations for VueSetupComponent {
                     if !filter.contains(VueDeclarationCollectionFilter::SetupImport) {
                         continue;
                     }
-                    result.extend(
-                        import
-                            .import_clause()
-                            .ok()
-                            .map(|import_clause| {
-                                import_clause.collect_vue_setup_declarations(model)
-                            })
-                            .unwrap_or_default(),
-                    );
+                    result.extend(import.import_clause().ok().map_or_default(|import_clause| {
+                        import_clause.collect_vue_setup_declarations(model)
+                    }));
                 }
                 // Ignore exports in setup components
                 AnyJsModuleItem::JsExport(_) => {}
@@ -1368,13 +1362,11 @@ impl VueCollectSetupDeclarations for JsVariableDeclarator {
     fn collect_vue_setup_declarations(&self, model: &SemanticModel) -> Vec<VueDeclaration> {
         let mut result = self
             .id()
-            .map(|id| id.collect_vue_setup_declarations(model))
-            .unwrap_or_default();
+            .map_or_default(|id| id.collect_vue_setup_declarations(model));
         result.extend(
             self.initializer()
                 .and_then(|initializer| initializer.expression().ok())
-                .map(|expression| expression.collect_vue_setup_declarations(model))
-                .unwrap_or_default(),
+                .map_or_default(|expression| expression.collect_vue_setup_declarations(model)),
         );
         result
     }
@@ -1383,8 +1375,7 @@ impl VueCollectSetupDeclarations for JsVariableDeclarator {
 impl VueCollectSetupDeclarations for AnyJsExpression {
     fn collect_vue_setup_declarations(&self, model: &SemanticModel) -> Vec<VueDeclaration> {
         VueDefinePropsCall::from_expression(self, model)
-            .map(|call| call.declarations(model))
-            .unwrap_or_default()
+            .map_or_default(|call| call.declarations(model))
     }
 }
 
@@ -1430,16 +1421,13 @@ impl VueCollectSetupDeclarations for AnyJsObjectBindingPatternMember {
         match self {
             Self::JsObjectBindingPatternProperty(property) => property
                 .pattern()
-                .map(|pattern| pattern.collect_vue_setup_declarations(model))
-                .unwrap_or_default(),
+                .map_or_default(|pattern| pattern.collect_vue_setup_declarations(model)),
             Self::JsObjectBindingPatternRest(rest) => rest
                 .binding()
-                .map(|binding| binding.collect_vue_setup_declarations(model))
-                .unwrap_or_default(),
+                .map_or_default(|binding| binding.collect_vue_setup_declarations(model)),
             Self::JsObjectBindingPatternShorthandProperty(property) => property
                 .identifier()
-                .map(|identifier| identifier.collect_vue_setup_declarations(model))
-                .unwrap_or_default(),
+                .map_or_default(|identifier| identifier.collect_vue_setup_declarations(model)),
             _ => vec![],
         }
     }
@@ -1460,12 +1448,10 @@ impl VueCollectSetupDeclarations for AnyJsArrayBindingPatternElement {
         match self {
             Self::JsArrayBindingPatternElement(element) => element
                 .pattern()
-                .map(|pattern| pattern.collect_vue_setup_declarations(model))
-                .unwrap_or_default(),
+                .map_or_default(|pattern| pattern.collect_vue_setup_declarations(model)),
             Self::JsArrayBindingPatternRestElement(rest) => rest
                 .pattern()
-                .map(|pattern| pattern.collect_vue_setup_declarations(model))
-                .unwrap_or_default(),
+                .map_or_default(|pattern| pattern.collect_vue_setup_declarations(model)),
             Self::JsArrayHole(_) => vec![],
         }
     }
@@ -1495,18 +1481,15 @@ impl VueCollectSetupDeclarations for AnyJsImportClause {
             Self::JsImportDefaultClause(default_clause) => default_clause
                 .default_specifier()
                 .ok()
-                .map(|specifier| specifier.collect_vue_setup_declarations(model))
-                .unwrap_or_default(),
+                .map_or_default(|specifier| specifier.collect_vue_setup_declarations(model)),
             Self::JsImportNamedClause(named_clause) => named_clause
                 .named_specifiers()
                 .ok()
-                .map(|specifier| specifier.collect_vue_setup_declarations(model))
-                .unwrap_or_default(),
+                .map_or_default(|specifier| specifier.collect_vue_setup_declarations(model)),
             Self::JsImportNamespaceClause(namespace_clause) => namespace_clause
                 .namespace_specifier()
                 .ok()
-                .map(|specifier| specifier.collect_vue_setup_declarations(model))
-                .unwrap_or_default(),
+                .map_or_default(|specifier| specifier.collect_vue_setup_declarations(model)),
             Self::JsImportBareClause(_) => vec![],
         }
     }

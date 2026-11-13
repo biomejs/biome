@@ -174,16 +174,12 @@ fn load_test_cases() -> Vec<(String, String, String)> {
                     .name()
                     .ok()
                     .and_then(|n| n.inner_string_text())
-                    .map(|t| t.to_string())
-                    .unwrap_or_default();
+                    .map_or_default(|t| t.to_string());
 
                 match key.as_str() {
                     "testName" => {
                         if let Ok(AnyJsonValue::JsonStringValue(s)) = member.value() {
-                            test_name = s
-                                .inner_string_text()
-                                .map(|t| t.to_string())
-                                .unwrap_or_default();
+                            test_name = s.inner_string_text().map_or_default(|t| t.to_string());
                         }
                     }
                     "input" => {

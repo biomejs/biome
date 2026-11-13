@@ -79,8 +79,7 @@ fn fmt_diagnostic<D: Diagnostic + ?Sized>(
     let title = {
         diagnostic
             .category()
-            .map(|category| category.name())
-            .unwrap_or_default()
+            .map_or_default(|category| category.name())
     };
 
     fmt.write_str(
