@@ -65,13 +65,6 @@ function initializedAfterGuard(flag: boolean) {
 	}
 }
 
-function escapedEval(value: string | null) {
-	if (value !== null) {
-		/u0065val("value = null");
-		return value?.length;
-	}
-}
-
 function nonNullStructure(value: {} | null) {
 	if (value == null) return;
 	if (value) {}

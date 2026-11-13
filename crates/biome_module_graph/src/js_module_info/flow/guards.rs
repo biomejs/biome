@@ -145,10 +145,6 @@ pub(crate) fn guard_signature<'a>(
 pub(super) struct GuardFunctions<'a> {
     raw_types: &'a [RawTypeData],
     raw_binding_types: &'a FxHashMap<TextRange, TypeReference>,
-    /// Whether the module may read the global `eval` or the implicit
-    /// `arguments` object. A direct `eval` can reassign any guard, so the
-    /// module then has no supported guard.
-    has_dynamic_scope: bool,
     /// Maps each function binding to its guard, or to `None` when the
     /// function is not a supported guard.
     guards: FxHashMap<TextRange, Option<Guard>>,
@@ -178,12 +174,10 @@ impl<'a> GuardFunctions<'a> {
     pub(super) fn new(
         raw_types: &'a [RawTypeData],
         raw_binding_types: &'a FxHashMap<TextRange, TypeReference>,
-        has_dynamic_scope: bool,
     ) -> Self {
         Self {
             raw_types,
             raw_binding_types,
-            has_dynamic_scope,
             guards: FxHashMap::default(),
         }
     }
@@ -264,8 +258,7 @@ impl<'a> GuardFunctions<'a> {
     /// `undefined` argument. A target type must be able to resolve to a
     /// primitive type or a primitive literal, the only targets that narrow.
     fn guard(&self, function: &Binding, model: &SemanticModel) -> Option<Guard> {
-        if self.has_dynamic_scope
-            || function.is_imported()
+        if function.is_imported()
             || !matches!(
                 function.declaration_kind(),
                 JsDeclarationKind::Function | JsDeclarationKind::Value
@@ -868,7 +861,7 @@ mod tests {
             .unwrap();
         let mut guards = Vec::new();
         let raw_binding_types = FxHashMap::default();
-        let mut functions = GuardFunctions::new(&[], &raw_binding_types, false);
+        let mut functions = GuardFunctions::new(&[], &raw_binding_types);
         let condition = decompose_condition(&test, outcome, &model, &mut functions, &mut guards);
         let names = condition
             .mentions
