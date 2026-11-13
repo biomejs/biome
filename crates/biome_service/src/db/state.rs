@@ -1243,21 +1243,21 @@ impl DbState {
         }
     }
 
-    /// Replaces the modules that the frameworks of the package in
-    /// `package_path` declare. See [WorkspaceDb::set_framework_modules].
+    /// Replaces what the frameworks of the package in `package_path` inject.
+    /// See [WorkspaceDb::set_frameworks].
     ///
-    /// Nothing happens when they don't change, so that queries keep their
+    /// Nothing happens when it doesn't change, so that queries keep their
     /// results.
     #[cfg(feature = "module_graph")]
-    pub(crate) fn set_framework_modules(
+    pub(crate) fn set_frameworks(
         &self,
         package_path: camino::Utf8PathBuf,
-        modules: std::sync::Arc<crate::frameworks::FrameworkModules>,
+        frameworks: std::sync::Arc<crate::frameworks::PackageFrameworks>,
     ) {
         if self
             .fork()
-            .framework_modules(&package_path)
-            .is_some_and(|current| current == modules)
+            .frameworks(&package_path)
+            .is_some_and(|current| current == frameworks)
         {
             return;
         }
@@ -1266,11 +1266,11 @@ impl DbState {
                 shared_db
                     .fork()
                     .data()
-                    .set_framework_modules(package_path, modules);
+                    .set_frameworks(package_path, frameworks);
                 self.mark_module_graph_dirty();
             }
             DbStorage::Owned(db) => {
-                db.with_setter(|db| db.set_framework_modules(package_path, modules));
+                db.with_setter(|db| db.set_frameworks(package_path, frameworks));
             }
         }
     }

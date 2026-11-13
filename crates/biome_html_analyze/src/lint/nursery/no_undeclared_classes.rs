@@ -1,13 +1,15 @@
 use crate::services::module_graph::HtmlModuleGraph;
-use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Rule, RuleDiagnostic, RuleDomain, RuleFramework, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_html_syntax::{
     AnyHtmlAttributeInitializer, AnyHtmlTagName, HtmlAttribute, HtmlOpeningElement,
     HtmlSelfClosingElement,
 };
 use biome_module_graph::{
-    ImportTreeDisplay, ImportTreeNode, build_import_tree_for_html,
-    traverse_import_tree_for_html_classes,
+    ImportTreeDisplay, ImportTreeNode, build_import_tree_for_html, framework_class_steps,
+    has_unknown_framework_styles, traverse_import_tree_for_html_classes,
 };
 use biome_rowan::{AstNode, TextRange, TextSize};
 use biome_rule_options::no_undeclared_classes::NoUndeclaredClassesOptions;
@@ -81,6 +83,7 @@ declare_lint_rule! {
         recommended: false,
         issue_number: Some("9156"),
         domains: &[RuleDomain::Project],
+        frameworks: &[RuleFramework::Astro, RuleFramework::Starlight],
     }
 }
 
@@ -107,6 +110,9 @@ impl Rule for NoUndeclaredClasses {
         let Some(module) = db.module_for_path(file_path) else {
             return Vec::new();
         };
+        if has_unknown_framework_styles(db, module) {
+            return Vec::new();
+        }
 
         // Collect all CSS steps reachable from this file (inline styles, linked
         // stylesheets, and CSS imported by parent files via upward traversal).
@@ -117,6 +123,7 @@ impl Rule for NoUndeclaredClasses {
         if css_steps.is_empty() {
             return Vec::new();
         }
+        let framework_steps = framework_class_steps(db, module);
 
         // Check each class name in the attribute value.
         let mut signals = Vec::new();
@@ -130,7 +137,7 @@ impl Rule for NoUndeclaredClasses {
 
             // Check if this class exists in any of the collected CSS steps.
             let mut found_class = false;
-            for step in css_steps {
+            for step in css_steps.iter().chain(framework_steps) {
                 if step
                     .css_classes
                     .values()
@@ -150,6 +157,7 @@ impl Rule for NoUndeclaredClasses {
                     range: TextRange::new(start, end),
                     name: class_name.to_string(),
                     import_tree,
+                    has_framework_stylesheets: !framework_steps.is_empty(),
                 });
             }
 
@@ -179,6 +187,11 @@ impl Rule for NoUndeclaredClasses {
                 "Checked import tree:\n\n"{tree_display}
             });
         }
+        if state.has_framework_stylesheets {
+            diag = diag.note(markup! {
+                "The stylesheets that frameworks add to every page were checked too."
+            });
+        }
 
         Some(diag.note(markup! {
             "Either define this class in a `<style>` block, import a CSS file that contains it, or remove this class name."
@@ -194,6 +207,8 @@ pub struct UndeclaredClass {
     pub name: String,
     /// The import tree structure for displaying which files/CSS were checked.
     pub import_tree: Option<ImportTreeNode>,
+    /// Whether the stylesheets that frameworks add to every page were checked.
+    pub has_framework_stylesheets: bool,
 }
 
 /// Helper to extract class attribute data needed for analysis.

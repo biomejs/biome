@@ -1,0 +1,105 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint src/index.ts
+```
+
+## `biome.json`
+
+```json
+{
+  "files": { "maxSize": 200 },
+  "linter": {
+    "rules": { "correctness": { "noUnresolvedImports": "error" } }
+  }
+}
+```
+
+## `node_modules/astro/client.d.ts`
+
+```ts
+/// <reference path="./types/large.d.ts" />
+
+declare module "astro:assets" {
+	export const Image: unknown;
+}
+
+```
+
+## `node_modules/astro/package.json`
+
+```json
+{ "name": "astro", "version": "5.0.0" }
+```
+
+## `node_modules/astro/types/large.d.ts`
+
+```ts
+declare const large: number;
+declare const large: number;
+declare const large: number;
+declare const large: number;
+declare const large: number;
+declare const large: number;
+declare const large: number;
+declare const large: number;
+declare const large: number;
+declare const large: number;
+
+```
+
+## `package.json`
+
+```json
+{ "dependencies": { "astro": "^5.0.0" } }
+```
+
+## `src/index.ts`
+
+```ts
+import { Image } from "astro:assets";
+import { getCollection } from "astro:content";
+import { helper } from "./missing";
+
+export { getCollection, helper, Image };
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+src/index.ts:3:24 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The path ./missing cannot be resolved: module not found
+  
+    1 │ import { Image } from "astro:assets";
+    2 │ import { getCollection } from "astro:content";
+  > 3 │ import { helper } from "./missing";
+      │                        ^^^^^^^^^^^
+    4 │ 
+    5 │ export { getCollection, helper, Image };
+  
+  i Make sure that the path exists and is readable.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

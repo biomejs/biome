@@ -1,17 +1,21 @@
 use super::SymbolFromModuleInfo;
 use crate::css_module_info::TailwindPosition;
 use crate::css_module_info::traverse::{
-    CssClassStep, CssClassTraversal, CssPropertyBranch, CssPropertyTraversal,
+    CssClassStep, CssClassTraversal, CssPropertyBranch, CssPropertyTraversal, css_class_step,
 };
 use crate::traverse::UpwardTraversalVisitor;
 use crate::{
-    CssPropertyDefinition, ImportTreeNode, ModuleDb, ModuleInfo, ModuleInfoKind, TailwindStylesheet,
+    CssClassReference, CssPropertyDefinition, FrameworkScope, ImportTreeNode, ModuleDb, ModuleInfo,
+    ModuleInfoKind, TailwindStylesheet,
 };
 use biome_css_syntax::{TextRange, TextSize};
+use biome_fs::is_node_modules_path;
+use biome_languages::DocumentFileSource;
 use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexMap;
 use rustc_hash::FxHashSet;
 use std::collections::VecDeque;
+use std::sync::Arc;
 
 // #region EXPORTED TRACKED QUERIES
 
@@ -298,6 +302,47 @@ pub fn traverse_import_tree_for_html_classes(
         .collect()
 }
 
+/// Returns the classes that the frameworks of the package of `module` make
+/// available to every page: the classes of the stylesheets that they apply,
+/// and of the stylesheets that these import, then the global styles of their
+/// components.
+///
+/// Unlike [traverse_import_tree_for_classes] and
+/// [traverse_import_tree_for_html_classes], the result doesn't depend on the
+/// imports and importers of `module`.
+pub fn framework_class_steps(db: &dyn ModuleDb, module: ModuleInfo) -> &[CssClassStep] {
+    let Some(scope) = db.framework_scope(module.path(db)) else {
+        return &[];
+    };
+    framework_package_class_steps(db, FrameworkPackage::new(db, scope.package_path.clone()))
+}
+
+/// Returns the classes that the frameworks of `package` make available to
+/// every page. See [framework_class_steps].
+#[salsa::tracked(returns(deref))]
+fn framework_package_class_steps<'db>(
+    db: &'db dyn ModuleDb,
+    package: FrameworkPackage<'db>,
+) -> Vec<CssClassStep> {
+    let Some(scope) = db.framework_scope(package.path(db)) else {
+        return Vec::new();
+    };
+    let mut stylesheets: Vec<_> = framework_package_stylesheets(db, package).iter().collect();
+    stylesheets.sort_unstable();
+    let components = scope.components.iter().filter_map(|component| {
+        let info = db.html_module_info_for_path(component)?;
+        Some(CssClassStep {
+            css_path: component.clone(),
+            css_classes: info.get_global_styles(),
+        })
+    });
+    stylesheets
+        .into_iter()
+        .filter_map(|stylesheet| css_class_step(db, stylesheet))
+        .chain(components)
+        .collect()
+}
+
 /// Returns the nearest visible custom property definitions for a CSS, JavaScript, or HTML-like module.
 ///
 /// A CSS module's local definition takes precedence over definitions reached
@@ -309,6 +354,11 @@ pub fn traverse_import_tree_for_html_classes(
 /// Definitions reached through the same authored rule are deduplicated, while
 /// definitions from separate branches remain separate. Result order is
 /// unspecified.
+///
+/// When no branch finds a definition, the definitions that frameworks make
+/// visible to every page are returned: the frameworks of the package that
+/// contains the module, and of the packages that apply the module, a
+/// stylesheet, to every page.
 #[salsa::tracked(returns(deref))]
 pub fn css_property_definitions<'db>(
     db: &'db dyn ModuleDb,
@@ -327,21 +377,60 @@ pub fn css_property_definitions<'db>(
         return vec![definition];
     }
 
-    traversal
+    let definitions: Vec<_> = traversal
         .into_upward_iter(
             path.to_path_buf(),
             CssPropertyBranch::new(path.to_path_buf()),
         )
-        .collect()
+        .collect();
+    if !definitions.is_empty() {
+        return definitions;
+    }
+    framework_property_definitions(db, module, &name)
+}
+
+/// Returns whether the stylesheets that frameworks apply to the pages where
+/// `module` applies can't all be known: the frameworks of the package that
+/// contains `module`, or of a package that applies `module`, a stylesheet, to
+/// every page.
+///
+/// Rules that report a missing style skip such a module.
+#[salsa::tracked(returns(copy))]
+pub fn has_unknown_framework_styles(db: &dyn ModuleDb, module: ModuleInfo) -> bool {
+    db.framework_scope(module.path(db))
+        .is_some_and(|scope| scope.has_unknown_styles)
+        || framework_scopes_applying(db, module)
+            .iter()
+            .any(|scope| scope.has_unknown_styles)
 }
 
 /// Returns `true` if the given CSS `class_name` is referenced in any
 /// JS or HTML file that transitively imports `css_path`.
+///
+/// A class of a stylesheet that the frameworks of a package apply to every
+/// page is also referenced when any file of that package, or any component of
+/// the frameworks, references it. Such a class is assumed to be referenced
+/// when some pages of that package can't be read. Every class of a package is
+/// assumed to be referenced when the stylesheets that its frameworks apply to
+/// every page can't all be known.
 #[salsa::tracked(returns(copy))]
 pub fn is_class_referenced_by_importers<'db>(
     db: &'db dyn ModuleDb,
     class_name: SymbolFromModuleInfo<'db>,
 ) -> bool {
+    let module = *class_name.module(db);
+    if has_unknown_framework_styles(db, module) {
+        return true;
+    }
+    for scope in framework_scopes_applying(db, module) {
+        let package = FrameworkPackage::new(db, scope.package_path.clone());
+        match framework_package_class_usages(db, package) {
+            None => return true,
+            Some(usages) if usages.contains(&class_name.name(db)) => return true,
+            Some(_) => {}
+        }
+    }
+
     let importers = transitive_importers_of(db, *class_name.module(db));
 
     for importer_path in importers {
@@ -399,6 +488,33 @@ pub fn find_css_class_definition<'db>(
         let Some(module) = db.module_for_path(&step.css_path) else {
             continue;
         };
+        let this_result = search_css_class_transitive(
+            db,
+            SymbolFromModuleInfo::new(db, symbol.name(db), module),
+            &mut visited_css,
+        );
+
+        result.extend(this_result);
+    }
+
+    // 4. Check the CSS files that frameworks apply to every page, and the
+    //    global styles of their components (carry content_offset)
+    for step in framework_class_steps(db, *module) {
+        let Some(module) = db.module_for_path(&step.css_path) else {
+            continue;
+        };
+        if let ModuleInfoKind::Html(html_info) = module.kind(db) {
+            for class_def in &html_info.style_classes {
+                if class_def.applicability.is_global() && class_def.name.text() == symbol.name(db) {
+                    result.push((
+                        step.css_path.clone(),
+                        class_def.range,
+                        class_def.content_offset,
+                    ));
+                }
+            }
+            continue;
+        }
         let this_result = search_css_class_transitive(
             db,
             SymbolFromModuleInfo::new(db, symbol.name(db), module),
@@ -480,6 +596,226 @@ pub fn build_import_tree_for_html(db: &dyn ModuleDb, module: ModuleInfo) -> Opti
 // #endregion
 
 // #region QUERY HELPER FUNCTIONS
+
+/// Returns the classes that the pages of `package` use, or `None` when some
+/// pages can't be read.
+///
+/// Every JavaScript and HTML-like file of the package can use a class of a
+/// stylesheet that its frameworks apply to every page, and so can the
+/// components of the frameworks: their class attributes and the classes of
+/// their local styles count as uses. A file belongs to the nearest package
+/// that contains it. The pages can't be read when the frameworks report it, or
+/// when the package has an HTML-like file whose markup Biome didn't read, such
+/// as an Astro file indexed without full HTML support.
+#[salsa::tracked(returns(ref))]
+fn framework_package_class_usages<'db>(
+    db: &'db dyn ModuleDb,
+    package: FrameworkPackage<'db>,
+) -> Option<FxHashSet<String>> {
+    let Some(scope) = db.framework_scope(package.path(db)) else {
+        return Some(FxHashSet::default());
+    };
+    if scope.has_unknown_class_usages {
+        return None;
+    }
+
+    let mut usages = FxHashSet::default();
+    let mut has_unread_markup = false;
+    db.for_each_module(&mut |module| {
+        let path = module.path(db);
+        // Dependencies aren't pages of the package. The components that the
+        // frameworks render are counted below.
+        let is_in_package = !is_node_modules_path(path)
+            && db
+                .framework_scope(path)
+                .is_some_and(|nearest| nearest.package_path == scope.package_path);
+        if !is_in_package {
+            return;
+        }
+        match module.kind(db) {
+            ModuleInfoKind::Js(_)
+                if DocumentFileSource::from_well_known(path, true).is_html_like() =>
+            {
+                has_unread_markup = true;
+            }
+            ModuleInfoKind::Js(info) => usages.extend(class_names(&info.referenced_classes)),
+            ModuleInfoKind::Html(info) => usages.extend(class_names(&info.referenced_classes)),
+            ModuleInfoKind::Css(_) => {}
+        }
+    });
+    if has_unread_markup {
+        return None;
+    }
+    for component in &scope.components {
+        let Some(info) = db.html_module_info_for_path(component) else {
+            continue;
+        };
+        usages.extend(class_names(&info.referenced_classes));
+        usages.extend(
+            info.style_classes
+                .iter()
+                .filter(|class| !class.applicability.is_global())
+                .map(|class| class.name.text().to_string()),
+        );
+    }
+    Some(usages)
+}
+
+/// Returns the class names of the class attributes in `references`.
+fn class_names(references: &[CssClassReference]) -> impl Iterator<Item = String> + '_ {
+    references.iter().flat_map(|reference| {
+        reference
+            .token
+            .text()
+            .split_ascii_whitespace()
+            .map(str::to_string)
+    })
+}
+
+/// Returns the stylesheets that the frameworks of `package` apply to every
+/// page. See [framework_stylesheets].
+#[salsa::tracked(returns(ref))]
+fn framework_package_stylesheets<'db>(
+    db: &'db dyn ModuleDb,
+    package: FrameworkPackage<'db>,
+) -> FxHashSet<Utf8PathBuf> {
+    db.framework_scope(package.path(db))
+        .map_or_else(FxHashSet::default, |scope| {
+            framework_stylesheets(db, &scope)
+        })
+}
+
+/// Returns the stylesheets that the frameworks of a package apply to every
+/// page: the stylesheets of `scope`, the stylesheets that the components of
+/// `scope` import globally, and the stylesheets that these import.
+fn framework_stylesheets(db: &dyn ModuleDb, scope: &FrameworkScope) -> FxHashSet<Utf8PathBuf> {
+    let mut stylesheets = FxHashSet::default();
+    let mut queue: VecDeque<_> = scope.stylesheets.iter().cloned().collect();
+    for component in &scope.components {
+        queue.extend(global_imports_of_component(db, component));
+    }
+    while let Some(path) = queue.pop_front() {
+        if stylesheets.contains(&path) {
+            continue;
+        }
+        let Some(module) = db.module_for_path(&path) else {
+            continue;
+        };
+        let ModuleInfoKind::Css(info) = module.kind(db) else {
+            continue;
+        };
+        queue.extend(info.imports.iter().filter_map(|import| {
+            let resolved = import.resolve_css(db, module);
+            Some(resolved.path().as_path()?.to_path_buf())
+        }));
+        stylesheets.insert(path);
+    }
+    stylesheets
+}
+
+/// Returns the paths that the HTML-like component at `path` imports for
+/// every page, with `<link>` elements, global `<style>` blocks and script
+/// imports.
+fn global_imports_of_component(db: &dyn ModuleDb, path: &Utf8Path) -> Vec<Utf8PathBuf> {
+    let Some(module) = db.module_for_path(path) else {
+        return Vec::new();
+    };
+    let ModuleInfoKind::Html(info) = module.kind(db) else {
+        return Vec::new();
+    };
+    let stylesheets = info
+        .imported_stylesheets
+        .iter()
+        .filter(|import| import.applicability.is_global())
+        .map(|import| import.resolve_css(db, module));
+    let scripts = info
+        .import_paths
+        .iter()
+        .filter(|import| import.applicability.is_global())
+        .map(|import| import.resolve_html(db, module));
+    stylesheets
+        .chain(scripts)
+        .filter_map(|resolved| Some(resolved.path().as_path()?.to_path_buf()))
+        .collect()
+}
+
+/// Returns the scopes of the packages whose frameworks apply the stylesheet
+/// `module` to every page, directly or through a stylesheet that imports it.
+///
+/// The stylesheet can be outside the folders of these packages, for example
+/// in a sibling package of a monorepo. A module that isn't a stylesheet has
+/// no such package.
+#[salsa::tracked(returns(deref))]
+fn framework_scopes_applying(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Arc<FrameworkScope>> {
+    if !matches!(module.kind(db), ModuleInfoKind::Css(_)) {
+        return Vec::new();
+    }
+    let path = module.path(db);
+    db.framework_scopes()
+        .into_iter()
+        .filter(|scope| {
+            let package = FrameworkPackage::new(db, scope.package_path.clone());
+            framework_package_stylesheets(db, package).contains(path)
+        })
+        .collect()
+}
+
+/// Returns the definitions of the custom property `name` that frameworks
+/// make visible to every page where `module` applies.
+///
+/// These are the frameworks of the package that contains `module`, and of the
+/// packages that apply `module`, a stylesheet, to every page. See
+/// [framework_package_property_definitions].
+fn framework_property_definitions(
+    db: &dyn ModuleDb,
+    module: ModuleInfo,
+    name: &str,
+) -> Vec<CssPropertyDefinition> {
+    let nearest = db.framework_scope(module.path(db));
+    let mut packages = FxHashSet::default();
+    let mut definitions = FxHashSet::default();
+    nearest
+        .iter()
+        .chain(framework_scopes_applying(db, module))
+        .map(|scope| FrameworkPackage::new(db, scope.package_path.clone()))
+        .filter(|package| packages.insert(*package))
+        .flat_map(|package| framework_package_property_definitions(db, package, name.to_string()))
+        .filter(|definition| definitions.insert(*definition))
+        .cloned()
+        .collect()
+}
+
+/// Returns the definitions of the custom property `name` that the frameworks
+/// of `package` make visible to every page: the last definition of each
+/// stylesheet and component that they apply, and the definitions of their
+/// configuration.
+#[salsa::tracked(returns(deref))]
+fn framework_package_property_definitions<'db>(
+    db: &'db dyn ModuleDb,
+    package: FrameworkPackage<'db>,
+    name: String,
+) -> Vec<CssPropertyDefinition> {
+    let Some(scope) = db.framework_scope(package.path(db)) else {
+        return Vec::new();
+    };
+    let traversal = CssPropertyTraversal::new(db, &name);
+    let mut definitions: Vec<_> = scope
+        .stylesheets
+        .iter()
+        .chain(&scope.components)
+        .filter_map(|path| traversal.last_property_in_global_context(path))
+        .chain(
+            scope
+                .custom_properties
+                .iter()
+                .filter(|(property, _)| property.text() == name)
+                .map(|(_, definition)| definition.clone()),
+        )
+        .collect();
+    let mut seen = FxHashSet::default();
+    definitions.retain(|definition| seen.insert(definition.clone()));
+    definitions
+}
 
 /// Checks if a class is used in a file or any of its imported components (transitively).
 #[salsa::tracked(returns(copy))]
@@ -656,5 +992,13 @@ fn build_parent_nodes(
 // #endregion
 
 // #region INTERNED TYPES
+
+/// The folder of a package, as the key of the queries over what its
+/// frameworks inject, so that they run once for all the files of the package.
+#[salsa::interned]
+struct FrameworkPackage {
+    #[returns(ref)]
+    path: Utf8PathBuf,
+}
 
 // #endregion

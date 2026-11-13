@@ -19,10 +19,10 @@ use crate::file_handlers::{
 };
 #[cfg(all(feature = "lang_js", feature = "lang_html"))]
 use crate::file_handlers::{SvelteFileHandler, VueFileHandler};
-#[cfg(feature = "module_graph")]
-use crate::frameworks::FrameworkModules;
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
-use crate::frameworks::{WorkspaceLoaderHost, referenced_declaration_files};
+use crate::frameworks::{
+    FrameworkModules, PackageFrameworks, WorkspaceLoaderHost, referenced_declaration_files,
+};
 use crate::module_graph::ModuleDependencies;
 #[cfg(all(feature = "module_graph", feature = "lang_css"))]
 use crate::module_graph::resolve_css_module;
@@ -75,7 +75,7 @@ use biome_diagnostics::{
 use biome_embeds::{EmbeddedData, EmbeddedSnippet, collect_embedded_data};
 use biome_formatter::rowan::Printed;
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
-use biome_frameworks::LOADERS;
+use biome_frameworks::{DeclarationKind, Facet, FrameworkContributions, LOADERS};
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
 use biome_fs::is_node_modules_path;
 use biome_fs::{BiomePath, ConfigName, PathKind, normalize_path};
@@ -93,6 +93,8 @@ use biome_languages::JsFileSource;
 #[cfg(feature = "lang_js")]
 use biome_languages::javascript::{JsEmbeddingKind, ModuleKind};
 use biome_languages::{DocumentFileSource, JsonFileSource, LanguageDb};
+#[cfg(all(feature = "module_graph", feature = "lang_js"))]
+use biome_module_graph::{CssPropertyDefinition, FrameworkScope};
 #[cfg(feature = "lang_js")]
 use biome_package::PackageType;
 use biome_package::{Catalogs, PackageJson};
@@ -163,6 +165,11 @@ pub struct WorkspaceServer {
     /// The lock orders them: either the request finds its client closed and
     /// removes the view itself, or the close finds the view and removes it.
     closed_clients: Mutex<FxHashSet<ClientId>>,
+
+    /// The files that framework loaders visit, such as the Astro components
+    /// of Starlight. These are read with full HTML support whatever the
+    /// settings, because the frameworks render them on every page.
+    framework_files: papaya::HashSet<Utf8PathBuf, FxBuildHasher>,
 
     #[cfg(test)]
     cancel_change_file_after_document_update: AtomicBool,
@@ -496,6 +503,7 @@ impl WorkspaceServer {
             fs,
             notification_tx,
             closed_clients: Default::default(),
+            framework_files: Default::default(),
             #[cfg(test)]
             cancel_change_file_after_document_update: AtomicBool::new(false),
             #[cfg(test)]
@@ -880,7 +888,8 @@ impl WorkspaceServerWithDb<'_> {
         }
         .ok_or_else(WorkspaceError::no_project)?;
 
-        let html_ish_supported = settings.as_ref().experimental_full_html_support_enabled();
+        let html_ish_supported = settings.as_ref().experimental_full_html_support_enabled()
+            || self.framework_files.pin().contains(&path);
         let path_source = if html_ish_supported {
             DocumentFileSource::from_path(&path, true)
         } else {
@@ -2433,6 +2442,108 @@ impl WorkspaceServerWithDb<'_> {
             }
         }
         Ok(diagnostics)
+    }
+
+    /// Runs the framework loaders of each package of the project outside
+    /// `node_modules`, and returns what they contribute by the path of the
+    /// package.
+    #[cfg(all(feature = "module_graph", feature = "lang_js"))]
+    fn load_package_frameworks(
+        &self,
+        project_key: ProjectKey,
+    ) -> Vec<(Utf8PathBuf, FrameworkContributions)> {
+        let Some(project_path) = self.project_get_path(project_key) else {
+            return Vec::new();
+        };
+        let db = self.get_db();
+        let host = WorkspaceLoaderHost {
+            fs: self.fs.as_ref(),
+            db: &db,
+        };
+        self.project_layout
+            .package_paths()
+            .into_iter()
+            .filter(|package_path| {
+                package_path.starts_with(&project_path) && !is_node_modules_path(package_path)
+            })
+            .filter_map(|package_path| {
+                let manifest = self
+                    .project_layout
+                    .get_node_manifest_for_package(&package_path)?;
+                let contributions =
+                    biome_frameworks::load_frameworks(&host, LOADERS, &package_path, &manifest);
+                Some((package_path, contributions))
+            })
+            .collect()
+    }
+
+    /// Records what the frameworks of the package in `package_path` inject.
+    ///
+    /// `files` are the indexed files that the loaders of the package visit,
+    /// and the declaration files that they reference. Each file contributes
+    /// by its kind: the modules that a JavaScript file declares, a stylesheet
+    /// that applies to every page, or an HTML-like component that is rendered
+    /// on every page.
+    ///
+    /// What a file would contribute is unknown when Biome didn't index it, or
+    /// when it indexed only the script of a component.
+    #[cfg(all(feature = "module_graph", feature = "lang_js"))]
+    fn register_frameworks(
+        &self,
+        package_path: Utf8PathBuf,
+        files: &[Utf8PathBuf],
+        contributions: &FrameworkContributions,
+    ) {
+        let mut modules = FrameworkModules::default();
+        let mut scope = FrameworkScope {
+            package_path: package_path.clone(),
+            has_unknown_styles: contributions.incomplete.contains(&Facet::Styles),
+            has_unknown_class_usages: contributions.incomplete.contains(&Facet::ClassUsages),
+            has_unknown_modules: contributions.incomplete.contains(&Facet::Modules),
+            ..FrameworkScope::default()
+        };
+        {
+            let db = self.get_db();
+            for file in files {
+                let file_source = DocumentFileSource::from_well_known(file, true);
+                match db.module_info_for_path(file) {
+                    Some(ModuleInfoKind::Css(_)) => scope.stylesheets.push(file.clone()),
+                    Some(ModuleInfoKind::Html(_)) => scope.components.push(file.clone()),
+                    Some(ModuleInfoKind::Js(info)) if !file_source.is_html_like() => {
+                        for (index, ambient_module) in info.ambient_modules.iter().enumerate() {
+                            modules.insert(
+                                ambient_module.name.text(),
+                                ambient_module_path(file, index),
+                            );
+                        }
+                    }
+                    _ if file_source.is_html_like() => {
+                        scope.has_unknown_styles = true;
+                        scope.has_unknown_class_usages = true;
+                    }
+                    _ if file_source.is_javascript_like() => scope.has_unknown_modules = true,
+                    _ => scope.has_unknown_styles = true,
+                }
+            }
+        }
+        scope.custom_properties = contributions
+            .declarations
+            .iter()
+            .filter(|declaration| declaration.kind == DeclarationKind::CssCustomProperty)
+            .map(|declaration| {
+                let definition = CssPropertyDefinition {
+                    module_path: declaration.origin.path.clone(),
+                    range: declaration.origin.range,
+                };
+                (declaration.name.clone(), definition)
+            })
+            .collect();
+        let frameworks = PackageFrameworks {
+            modules,
+            scope: Arc::new(scope),
+        };
+        self.db_state
+            .set_frameworks(package_path, Arc::new(frameworks));
     }
 
     // #region DATABASE OPERATIONS
@@ -4909,53 +5020,35 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
     }
 
     #[cfg(all(feature = "module_graph", feature = "lang_js"))]
-    fn framework_visits(&self, project_key: ProjectKey) -> Vec<(Utf8PathBuf, Vec<Utf8PathBuf>)> {
-        let Some(project_path) = self.project_get_path(project_key) else {
-            return Vec::new();
-        };
-        let db = self.get_db();
-        let host = WorkspaceLoaderHost {
-            fs: self.fs.as_ref(),
-            db: &db,
-        };
-        self.project_layout
-            .package_paths()
-            .into_iter()
-            .filter(|package_path| {
-                package_path.starts_with(&project_path) && !is_node_modules_path(package_path)
-            })
-            .filter_map(|package_path| {
-                let manifest = self
-                    .project_layout
-                    .get_node_manifest_for_package(&package_path)?;
-                let contributions =
-                    biome_frameworks::load_frameworks(&host, LOADERS, &package_path, &manifest);
-                Some((package_path, contributions.visits.into_iter().collect()))
-            })
-            .collect()
-    }
-
-    #[cfg(all(feature = "module_graph", feature = "lang_js"))]
-    fn declaration_references(&self, path: &Utf8Path) -> Vec<Utf8PathBuf> {
-        referenced_declaration_files(self.fs.as_ref(), path)
-    }
-
-    #[cfg(feature = "module_graph")]
-    fn register_framework_modules(&self, package_path: &Utf8Path, files: &[Utf8PathBuf]) {
-        let mut modules = FrameworkModules::default();
-        {
-            let db = self.get_db();
-            for file in files {
-                let Some(info) = db.js_module_info_for_path(file) else {
-                    continue;
-                };
-                for (index, ambient_module) in info.ambient_modules.iter().enumerate() {
-                    modules.insert(ambient_module.name.text(), ambient_module_path(file, index));
+    fn index_framework_files(&self, project_key: ProjectKey, index: &dyn Fn(Vec<Utf8PathBuf>)) {
+        for (package_path, contributions) in self.load_package_frameworks(project_key) {
+            let mut seen: FxHashSet<_> = contributions.visits.iter().cloned().collect();
+            let mut pending: Vec<_> = contributions.visits.iter().cloned().collect();
+            let mut files = Vec::new();
+            while !pending.is_empty() {
+                {
+                    let framework_files = self.framework_files.pin();
+                    for path in &pending {
+                        framework_files.insert(path.clone());
+                    }
                 }
+                index(
+                    pending
+                        .iter()
+                        .filter(|path| !self.is_indexed(path))
+                        .cloned()
+                        .collect(),
+                );
+                let references: Vec<_> = pending
+                    .iter()
+                    .flat_map(|path| referenced_declaration_files(self.fs.as_ref(), path))
+                    .filter(|reference| seen.insert(reference.clone()))
+                    .collect();
+                files.append(&mut pending);
+                pending = references;
             }
+            self.register_frameworks(package_path, &files, &contributions);
         }
-        self.db_state
-            .set_framework_modules(package_path.to_path_buf(), Arc::new(modules));
     }
 }
 
@@ -5053,17 +5146,9 @@ impl WorkspaceScannerBridge for LocalWorkspace {
             .index_new_module_dependencies(project_key)
     }
 
-    fn framework_visits(&self, project_key: ProjectKey) -> Vec<(Utf8PathBuf, Vec<Utf8PathBuf>)> {
-        self.as_workspace().framework_visits(project_key)
-    }
-
-    fn declaration_references(&self, path: &Utf8Path) -> Vec<Utf8PathBuf> {
-        self.as_workspace().declaration_references(path)
-    }
-
-    fn register_framework_modules(&self, package_path: &Utf8Path, files: &[Utf8PathBuf]) {
+    fn index_framework_files(&self, project_key: ProjectKey, index: &dyn Fn(Vec<Utf8PathBuf>)) {
         self.as_workspace()
-            .register_framework_modules(package_path, files);
+            .index_framework_files(project_key, index);
     }
 }
 

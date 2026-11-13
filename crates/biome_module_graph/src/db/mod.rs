@@ -1,12 +1,15 @@
 //! Salsa database traits and tracked module-graph queries.
 
-use crate::{CssModuleInfo, HtmlModuleInfo, JsModuleInfo, ModuleInfo, ModuleInfoKind};
+use crate::{
+    CssModuleInfo, FrameworkScope, HtmlModuleInfo, JsModuleInfo, ModuleInfo, ModuleInfoKind,
+};
 pub use biome_js_type_info::TypeDb;
 use biome_js_type_info::resolved::InferredModuleKey;
 use biome_languages::LanguageDb;
 pub use biome_resolver::ResolverDb;
 use camino::{Utf8Path, Utf8PathBuf};
 use salsa::plumbing::{AsId, FromId};
+use std::sync::Arc;
 
 pub mod queries;
 mod type_inference;
@@ -111,6 +114,21 @@ pub trait ModuleDb: ResolverDb + TypeDb + LanguageDb {
     fn module_info_for_path(&self, path: &Utf8Path) -> Option<ModuleInfoKind> {
         self.module_for_path(path)
             .map(|info| info.kind(self).clone())
+    }
+
+    /// Returns what the frameworks of the package that contains `path`
+    /// inject into its pages.
+    ///
+    /// The default implementation doesn't know any framework.
+    fn framework_scope(&self, _path: &Utf8Path) -> Option<Arc<FrameworkScope>> {
+        None
+    }
+
+    /// Returns what the frameworks of each package inject into its pages.
+    ///
+    /// The default implementation doesn't know any framework.
+    fn framework_scopes(&self) -> Vec<Arc<FrameworkScope>> {
+        Vec::new()
     }
 
     /// Collects all module paths and their kinds.

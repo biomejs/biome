@@ -1,0 +1,163 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint site/src/styles/partial.css site/src/components/Card.jsx site/src/components/Plain.jsx site/src/pages/index.astro
+```
+
+## `biome.json`
+
+```json
+{
+  "html": { "experimentalFullSupportEnabled": true },
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noUndeclaredClasses": "error",
+        "noUndeclaredCustomProperties": "error",
+        "noUnusedClasses": "error"
+      }
+    }
+  }
+}
+```
+
+## `site/astro.config.mjs`
+
+```mjs
+import { defineConfig } from "astro/config";
+import starlight from "@astrojs/starlight";
+
+function stylesheets() {
+	return ["./src/styles/custom.css"];
+}
+
+export default defineConfig({
+	integrations: [starlight({ customCss: stylesheets() })],
+});
+
+```
+
+## `site/node_modules/@astrojs/starlight/dist/components/PageFrame.astro`
+
+```astro
+---
+---
+<div class="sidebar-content"><slot /></div>
+<style is:global>
+	.sl-flex { display: flex; }
+</style>
+
+```
+
+## `site/node_modules/@astrojs/starlight/dist/style/props.css`
+
+```css
+:root {
+  --sl-color-text: black;
+}
+```
+
+## `site/node_modules/@astrojs/starlight/package.json`
+
+```json
+{ "name": "@astrojs/starlight", "version": "0.30.0" }
+```
+
+## `site/node_modules/astro/client.d.ts`
+
+```ts
+declare module "astro:content" {
+	export const getCollection: (...args: any[]) => any;
+}
+
+```
+
+## `site/node_modules/astro/package.json`
+
+```json
+{ "name": "astro", "version": "5.0.0" }
+```
+
+## `site/package.json`
+
+```json
+{ "dependencies": { "astro": "^5.0.0", "@astrojs/starlight": "^0.30.0" } }
+```
+
+## `site/src/components/Card.jsx`
+
+```jsx
+import "./card.css";
+
+export const Card = () => (
+	<div
+		className="card card-body sl-flex missing-class"
+		style="color: var(--sl-color-text); margin: var(--jsx-missing-space)"
+	/>
+);
+
+```
+
+## `site/src/components/Plain.jsx`
+
+```jsx
+export const Plain = () => <div className="unchecked-class" />;
+
+```
+
+## `site/src/components/card.css`
+
+```css
+.card-body {
+  padding: 1rem;
+}
+```
+
+## `site/src/pages/index.astro`
+
+```astro
+---
+import "../styles/page.css";
+---
+<div class="page sl-flex astro-missing" style="color: var(--sl-color-text); margin: var(--astro-missing-space)"></div>
+
+```
+
+## `site/src/styles/custom.css`
+
+```css
+@import "./partial.css";
+```
+
+## `site/src/styles/page.css`
+
+```css
+.page {
+  display: block;
+}
+```
+
+## `site/src/styles/partial.css`
+
+```css
+.sidebar-content {
+  color: var(--sl-color-text);
+}
+.card {
+  color: var(--missing-color);
+  font-family: var(--font-body);
+}
+.unused {
+  color: red;
+}
+```
+
+# Emitted Messages
+
+```block
+Checked 4 files in <TIME>. No fixes applied.
+```
