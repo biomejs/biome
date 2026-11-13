@@ -60,4 +60,5 @@
   <button :is="kind" @click="foo" @click.ctrl="bar"></button>
   <div @click.right="foo" @contextmenu.ctrl="bar"></div>
   <div @mousedown="foo" @mousedown.ctrl.right="bar"></div>
+  <math @click="foo" @click.ctrl="bar"><mi @click="foo" @click.ctrl="bar">x</mi></math>
 </template>

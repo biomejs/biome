@@ -1,7 +1,7 @@
 //! Tag-name token classification.
 //!
-//! Known HTML/SVG tag names are lexed into their keyword token kinds (e.g.
-//! `<div>` -> `DIV_KW`, `<circle>` -> `CIRCLE_KW`), so a tag-name check is an
+//! Known HTML/SVG/MathML tag names are lexed into their keyword token kinds (e.g.
+//! `<div>` -> `DIV_KW`, `<circle>` -> `CIRCLE_KW`, `<mfrac>` -> `MFRAC_KW`), so a tag-name check is an
 //! `O(1)` token-set membership test instead of a case-insensitive string scan.
 //!
 //! [`HTML_TAG_NAMES`] is the single source of truth for which keyword kinds are
@@ -12,8 +12,8 @@ use crate::HtmlSyntaxKind::{self, *};
 use biome_parser::{TokenSet, token_set};
 
 /// Every token kind that may appear as the name of an [`crate::HtmlTagName`]: the
-/// known HTML and SVG tag-name keywords, plus the `HTML_UNKNOWN_TAG` fallback for
-/// custom/unknown tags.
+/// known HTML, SVG, and MathML tag-name keywords, plus the `HTML_UNKNOWN_TAG`
+/// fallback for custom/unknown tags.
 pub const HTML_TAG_NAMES: TokenSet<HtmlSyntaxKind> = token_set!(
     // Tag names that reuse a kind from an existing (non-tag-section) keyword:
     // `<html>`/`<style>` (HTML) and `<use>`/`<set>`/`<animate>` (SVG).
@@ -240,6 +240,44 @@ pub const HTML_TAG_NAMES: TokenSet<HtmlSyntaxKind> = token_set!(
     SLOT_KW,
     COMPONENT_KW,
     HTML_UNKNOWN_TAG
+)
+.union(MATHML_TAG_NAMES);
+
+/// Tag-name token kinds of the [MathML Core](https://w3c.github.io/mathml-core/#mathml-elements-and-attributes)
+/// elements.
+///
+/// MathML Core also defines `a`, which lexes as the HTML `A_KW` and is not part of this set.
+pub const MATHML_TAG_NAMES: TokenSet<HtmlSyntaxKind> = token_set!(
+    ANNOTATION_KW,
+    ANNOTATION_XML_KW,
+    MACTION_KW,
+    MATH_KW,
+    MERROR_KW,
+    MFRAC_KW,
+    MI_KW,
+    MMULTISCRIPTS_KW,
+    MN_KW,
+    MO_KW,
+    MOVER_KW,
+    MPADDED_KW,
+    MPHANTOM_KW,
+    MPRESCRIPTS_KW,
+    MROOT_KW,
+    MROW_KW,
+    MS_KW,
+    MSPACE_KW,
+    MSQRT_KW,
+    MSTYLE_KW,
+    MSUB_KW,
+    MSUBSUP_KW,
+    MSUP_KW,
+    MTABLE_KW,
+    MTD_KW,
+    MTEXT_KW,
+    MTR_KW,
+    MUNDER_KW,
+    MUNDEROVER_KW,
+    SEMANTICS_KW,
 );
 
 /// The tag-name keyword kinds of the HTML [void elements](https://html.spec.whatwg.org/#void-elements),
@@ -251,7 +289,7 @@ pub const VOID_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(
 
 impl HtmlSyntaxKind {
     /// Returns `true` if this kind can be the name of an [`crate::HtmlTagName`]: a
-    /// known HTML/SVG tag-name keyword or the `HTML_UNKNOWN_TAG` fallback.
+    /// known HTML/SVG/MathML tag-name keyword or the `HTML_UNKNOWN_TAG` fallback.
     pub fn is_html_tag_name(self) -> bool {
         HTML_TAG_NAMES.contains(self)
     }

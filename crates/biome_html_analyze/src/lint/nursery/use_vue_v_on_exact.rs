@@ -143,7 +143,7 @@ impl Rule for UseVueVOnExact {
 
 /// Returns `true` if Vue renders the element as a component instead of a native element.
 ///
-/// Tags that aren't known HTML or SVG elements, such as `<card>`, `<component>` or `<MyComponent>`,
+/// Tags that aren't known HTML, SVG, or MathML elements, such as `<card>`, `<component>` or `<MyComponent>`,
 /// are components. A native element becomes a component when its `is` attribute starts with
 /// `vue:`, as in `<tr is="vue:my-row">`.
 fn is_component(element: &AnyHtmlTagElement) -> bool {
@@ -157,8 +157,8 @@ fn is_component(element: &AnyHtmlTagElement) -> bool {
             .is_some_and(|value| value.text().starts_with("vue:"))
 }
 
-/// Tag name kinds that Vue resolves to a component: `<component>` and tags that aren't known HTML
-/// or SVG elements.
+/// Tag name kinds that Vue resolves to a component: `<component>` and tags that aren't known HTML,
+/// SVG, or MathML elements.
 const COMPONENT_TAG_NAMES: TokenSet<HtmlSyntaxKind> = token_set![
     HtmlSyntaxKind::COMPONENT_KW,
     HtmlSyntaxKind::HTML_UNKNOWN_TAG

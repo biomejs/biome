@@ -203,8 +203,11 @@ fn visit_tag(
     .or_else(|| tag.name.token_text_trimmed())
     .filter(|name| name.text() == tag_text)
     .unwrap_or_else(|| synthetic_name(&tag_text));
-    let is_component =
-        !matches!(tag.name, AnyHtmlTagName::HtmlTagName(_)) || tag_text.contains('-');
+    // Known tags such as `annotation-xml` are native even though they contain a `-`.
+    let is_component = tag
+        .name
+        .tag_name_kind()
+        .is_none_or(|kind| kind == HtmlSyntaxKind::HTML_UNKNOWN_TAG && tag_text.contains('-'));
 
     let parent_scope = parent.map(|parent| builder.data.elements[parent.index()].scope);
     let scope = builder.add_scope(ScopeKind::Element(id), parent_scope);

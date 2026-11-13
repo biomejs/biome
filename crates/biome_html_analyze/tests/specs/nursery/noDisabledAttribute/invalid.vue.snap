@@ -34,6 +34,7 @@ const undefined = true;
 	<input :type="'radio'" disabled />
 	<fieldset :disabled="condition" />
 	<fieldset role="button" disabled />
+	<mrow role="button" disabled />
 </template>
 
 ```
@@ -634,7 +635,7 @@ invalid.vue:29:12 lint/nursery/noDisabledAttribute ━━━━━━━━━�
   > 29 │ 	<fieldset :disabled="condition" />
        │ 	          ^^^^^^^^^^^^^^^^^^^^^
     30 │ 	<fieldset role="button" disabled />
-    31 │ </template>
+    31 │ 	<mrow role="button" disabled />
   
   i A disabled fieldset disables every form control inside it, so none of them can be reached with the Tab key.
   
@@ -654,8 +655,8 @@ invalid.vue:30:26 lint/nursery/noDisabledAttribute ━━━━━━━━━�
     29 │ 	<fieldset :disabled="condition" />
   > 30 │ 	<fieldset role="button" disabled />
        │ 	                        ^^^^^^^^
-    31 │ </template>
-    32 │ 
+    31 │ 	<mrow role="button" disabled />
+    32 │ </template>
   
   i A disabled fieldset disables every form control inside it, so none of them can be reached with the Tab key.
   
@@ -663,5 +664,30 @@ invalid.vue:30:26 lint/nursery/noDisabledAttribute ━━━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+
+```
+
+```
+invalid.vue:31:22 lint/nursery/noDisabledAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The disabled attribute has no effect on this element.
+  
+    29 │ 	<fieldset :disabled="condition" />
+    30 │ 	<fieldset role="button" disabled />
+  > 31 │ 	<mrow role="button" disabled />
+       │ 	                    ^^^^^^^^
+    32 │ </template>
+    33 │ 
+  
+  i The button role changes accessibility semantics but does not add native button behavior.
+  
+  i Replace it with aria-disabled, which only exposes the disabled state to assistive technology. It does not suppress pointer or keyboard activation, form submission or validation, or apply disabled styling. Implement those behaviors, including forced-colors styling.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use aria-disabled instead.
+  
+    31 │ → <mrow·role="button"·aria-disabled="true"·/>
+       │                       +++++        +++++++   
 
 ```

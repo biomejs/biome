@@ -1,0 +1,306 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<math><mi>{x}</mi><annotation-xml encoding="text/html"></annotation-xml></math>
+<svg><font-face></font-face><missing-glyph></missing-glyph></svg>
+<my-element></my-element>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: MATH_KW@1..5 "math" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@5..6 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@6..7 "<" [] [],
+                        name: HtmlTagName {
+                            value_token: MI_KW@7..9 "mi" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@9..10 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlSingleTextExpression {
+                            l_curly_token: L_CURLY@10..11 "{" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@11..12 "x" [] [],
+                            },
+                            r_curly_token: R_CURLY@12..13 "}" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@13..14 "<" [] [],
+                        slash_token: SLASH@14..15 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: MI_KW@15..17 "mi" [] [],
+                        },
+                        r_angle_token: R_ANGLE@17..18 ">" [] [],
+                    },
+                },
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@18..19 "<" [] [],
+                        name: HtmlTagName {
+                            value_token: ANNOTATION_XML_KW@19..34 "annotation-xml" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            HtmlAttribute {
+                                name: HtmlAttributeName {
+                                    value_token: HTML_LITERAL@34..42 "encoding" [] [],
+                                },
+                                initializer: HtmlAttributeInitializerClause {
+                                    eq_token: EQ@42..43 "=" [] [],
+                                    value: HtmlString {
+                                        value_token: HTML_STRING_LITERAL@43..54 "\"text/html\"" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@54..55 ">" [] [],
+                    },
+                    children: HtmlElementList [],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@55..56 "<" [] [],
+                        slash_token: SLASH@56..57 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: ANNOTATION_XML_KW@57..71 "annotation-xml" [] [],
+                        },
+                        r_angle_token: R_ANGLE@71..72 ">" [] [],
+                    },
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@72..73 "<" [] [],
+                slash_token: SLASH@73..74 "/" [] [],
+                name: HtmlTagName {
+                    value_token: MATH_KW@74..78 "math" [] [],
+                },
+                r_angle_token: R_ANGLE@78..79 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@79..81 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: SVG_KW@81..84 "svg" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@84..85 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@85..86 "<" [] [],
+                        name: HtmlTagName {
+                            value_token: FONT_FACE_KW@86..95 "font-face" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@95..96 ">" [] [],
+                    },
+                    children: HtmlElementList [],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@96..97 "<" [] [],
+                        slash_token: SLASH@97..98 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: FONT_FACE_KW@98..107 "font-face" [] [],
+                        },
+                        r_angle_token: R_ANGLE@107..108 ">" [] [],
+                    },
+                },
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@108..109 "<" [] [],
+                        name: HtmlTagName {
+                            value_token: MISSING_GLYPH_KW@109..122 "missing-glyph" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@122..123 ">" [] [],
+                    },
+                    children: HtmlElementList [],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@123..124 "<" [] [],
+                        slash_token: SLASH@124..125 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: MISSING_GLYPH_KW@125..138 "missing-glyph" [] [],
+                        },
+                        r_angle_token: R_ANGLE@138..139 ">" [] [],
+                    },
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@139..140 "<" [] [],
+                slash_token: SLASH@140..141 "/" [] [],
+                name: HtmlTagName {
+                    value_token: SVG_KW@141..144 "svg" [] [],
+                },
+                r_angle_token: R_ANGLE@144..145 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@145..147 "<" [Newline("\n")] [],
+                name: HtmlComponentName {
+                    value_token: HTML_COMPONENT_LITERAL@147..157 "my-element" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@157..158 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@158..159 "<" [] [],
+                slash_token: SLASH@159..160 "/" [] [],
+                name: HtmlComponentName {
+                    value_token: HTML_COMPONENT_LITERAL@160..170 "my-element" [] [],
+                },
+                r_angle_token: R_ANGLE@170..171 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@171..172 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..172
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..171
+    0: HTML_ELEMENT@0..79
+      0: HTML_OPENING_ELEMENT@0..6
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: MATH_KW@1..5 "math" [] []
+        2: HTML_ATTRIBUTE_LIST@5..5
+        3: R_ANGLE@5..6 ">" [] []
+      1: HTML_ELEMENT_LIST@6..72
+        0: HTML_ELEMENT@6..18
+          0: HTML_OPENING_ELEMENT@6..10
+            0: L_ANGLE@6..7 "<" [] []
+            1: HTML_TAG_NAME@7..9
+              0: MI_KW@7..9 "mi" [] []
+            2: HTML_ATTRIBUTE_LIST@9..9
+            3: R_ANGLE@9..10 ">" [] []
+          1: HTML_ELEMENT_LIST@10..13
+            0: HTML_SINGLE_TEXT_EXPRESSION@10..13
+              0: L_CURLY@10..11 "{" [] []
+              1: HTML_TEXT_EXPRESSION@11..12
+                0: HTML_LITERAL@11..12 "x" [] []
+              2: R_CURLY@12..13 "}" [] []
+          2: HTML_CLOSING_ELEMENT@13..18
+            0: L_ANGLE@13..14 "<" [] []
+            1: SLASH@14..15 "/" [] []
+            2: HTML_TAG_NAME@15..17
+              0: MI_KW@15..17 "mi" [] []
+            3: R_ANGLE@17..18 ">" [] []
+        1: HTML_ELEMENT@18..72
+          0: HTML_OPENING_ELEMENT@18..55
+            0: L_ANGLE@18..19 "<" [] []
+            1: HTML_TAG_NAME@19..34
+              0: ANNOTATION_XML_KW@19..34 "annotation-xml" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@34..54
+              0: HTML_ATTRIBUTE@34..54
+                0: HTML_ATTRIBUTE_NAME@34..42
+                  0: HTML_LITERAL@34..42 "encoding" [] []
+                1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@42..54
+                  0: EQ@42..43 "=" [] []
+                  1: HTML_STRING@43..54
+                    0: HTML_STRING_LITERAL@43..54 "\"text/html\"" [] []
+            3: R_ANGLE@54..55 ">" [] []
+          1: HTML_ELEMENT_LIST@55..55
+          2: HTML_CLOSING_ELEMENT@55..72
+            0: L_ANGLE@55..56 "<" [] []
+            1: SLASH@56..57 "/" [] []
+            2: HTML_TAG_NAME@57..71
+              0: ANNOTATION_XML_KW@57..71 "annotation-xml" [] []
+            3: R_ANGLE@71..72 ">" [] []
+      2: HTML_CLOSING_ELEMENT@72..79
+        0: L_ANGLE@72..73 "<" [] []
+        1: SLASH@73..74 "/" [] []
+        2: HTML_TAG_NAME@74..78
+          0: MATH_KW@74..78 "math" [] []
+        3: R_ANGLE@78..79 ">" [] []
+    1: HTML_ELEMENT@79..145
+      0: HTML_OPENING_ELEMENT@79..85
+        0: L_ANGLE@79..81 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@81..84
+          0: SVG_KW@81..84 "svg" [] []
+        2: HTML_ATTRIBUTE_LIST@84..84
+        3: R_ANGLE@84..85 ">" [] []
+      1: HTML_ELEMENT_LIST@85..139
+        0: HTML_ELEMENT@85..108
+          0: HTML_OPENING_ELEMENT@85..96
+            0: L_ANGLE@85..86 "<" [] []
+            1: HTML_TAG_NAME@86..95
+              0: FONT_FACE_KW@86..95 "font-face" [] []
+            2: HTML_ATTRIBUTE_LIST@95..95
+            3: R_ANGLE@95..96 ">" [] []
+          1: HTML_ELEMENT_LIST@96..96
+          2: HTML_CLOSING_ELEMENT@96..108
+            0: L_ANGLE@96..97 "<" [] []
+            1: SLASH@97..98 "/" [] []
+            2: HTML_TAG_NAME@98..107
+              0: FONT_FACE_KW@98..107 "font-face" [] []
+            3: R_ANGLE@107..108 ">" [] []
+        1: HTML_ELEMENT@108..139
+          0: HTML_OPENING_ELEMENT@108..123
+            0: L_ANGLE@108..109 "<" [] []
+            1: HTML_TAG_NAME@109..122
+              0: MISSING_GLYPH_KW@109..122 "missing-glyph" [] []
+            2: HTML_ATTRIBUTE_LIST@122..122
+            3: R_ANGLE@122..123 ">" [] []
+          1: HTML_ELEMENT_LIST@123..123
+          2: HTML_CLOSING_ELEMENT@123..139
+            0: L_ANGLE@123..124 "<" [] []
+            1: SLASH@124..125 "/" [] []
+            2: HTML_TAG_NAME@125..138
+              0: MISSING_GLYPH_KW@125..138 "missing-glyph" [] []
+            3: R_ANGLE@138..139 ">" [] []
+      2: HTML_CLOSING_ELEMENT@139..145
+        0: L_ANGLE@139..140 "<" [] []
+        1: SLASH@140..141 "/" [] []
+        2: HTML_TAG_NAME@141..144
+          0: SVG_KW@141..144 "svg" [] []
+        3: R_ANGLE@144..145 ">" [] []
+    2: HTML_ELEMENT@145..171
+      0: HTML_OPENING_ELEMENT@145..158
+        0: L_ANGLE@145..147 "<" [Newline("\n")] []
+        1: HTML_COMPONENT_NAME@147..157
+          0: HTML_COMPONENT_LITERAL@147..157 "my-element" [] []
+        2: HTML_ATTRIBUTE_LIST@157..157
+        3: R_ANGLE@157..158 ">" [] []
+      1: HTML_ELEMENT_LIST@158..158
+      2: HTML_CLOSING_ELEMENT@158..171
+        0: L_ANGLE@158..159 "<" [] []
+        1: SLASH@159..160 "/" [] []
+        2: HTML_COMPONENT_NAME@160..170
+          0: HTML_COMPONENT_LITERAL@160..170 "my-element" [] []
+        3: R_ANGLE@170..171 ">" [] []
+  5: EOF@171..172 "" [Newline("\n")] []
+
+```
