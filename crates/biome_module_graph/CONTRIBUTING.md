@@ -128,7 +128,17 @@ Lookups skip flow for any expression that is not a candidate. For a candidate
 read, `infer_flow_binding_baseline` resolves the variable's declared type once.
 `infer_flow_binding_states` then applies the guards on every path to all reads
 of the variable in one root in a single solve, and `infer_flow_binding_type`
-takes the result at the read's incoming flow point.
+takes the result at the read's incoming flow point. Both solve queries take the
+type that narrowing starts from as part of their key.
+
+Complete module inference evaluates flow candidates in its own resolution
+context instead of through `infer_flow_expression_type` and
+`infer_flow_binding_baseline`. When it reaches expressions, that context has
+resolved every raw type of the module, so a variable's declared type costs a
+cache read there, while the queries would resolve it again in a fresh context.
+It still solves through `infer_flow_binding_states` and
+`infer_flow_binding_type`. Cycle fallback and the import-depth fallback read
+imports differently from the flow queries, so they keep using the queries.
 
 `src/db/type_inference/flow.rs` applies each runtime test with `narrow_type`
 from `biome_js_type_info`. Where branches meet, or a loop returns to an earlier
@@ -136,7 +146,8 @@ point, it keeps every type still possible on a reachable path. A read on a path
 that no value can take gets type Unknown, not `never`. `flow_expressions.rs`
 uses narrowed operands when inferring member accesses, calls, logical and
 conditional expressions, `await`, the comma operator, and `+`. Complete module
-inference uses the same read-specific results as individual expression queries.
+inference narrows each read as an individual expression query does, from the
+declared type its own context resolved.
 
 #### Caching
 
@@ -144,9 +155,10 @@ Collected flow belongs to the module input, so an edit replaces it together
 with the raw type tables, even when variable declarations and references stay
 the same. Salsa caches the type work: all reads of a variable share the type
 that narrowing starts from, its reads in one root share one narrowing
-calculation, and reads at the same flow point share their result. These caches
-recompute when the module input changes; they do not track edits separately
-for each function.
+calculation, and reads at the same flow point share their result. Lookups and
+complete module inference share the calculation and the results when they
+start from the same type. These caches recompute when the module input
+changes; they do not track edits separately for each function.
 
 #### Work limits
 

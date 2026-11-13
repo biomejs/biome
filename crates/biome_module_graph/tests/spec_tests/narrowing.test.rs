@@ -854,6 +854,67 @@ fn repeated_narrowed_reads_share_flow_states_and_agree_with_complete_tables() {
 }
 
 #[test]
+fn complete_module_inference_shares_narrowing_solves_with_lookups() {
+    use InferredTypeData::{Number, String};
+    const SOURCE: &str = r#"
+        function inspect(value: string | number | null) {
+            if (value === null) return;
+            if (typeof value === "string") {
+                /*string*/value;
+            } else {
+                /*number*/value;
+            }
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    let reads = [("string", String), ("number", Number)]
+        .map(|(marker, expected)| (marked_range(SOURCE, marker, "value"), expected));
+
+    db.clear_salsa_events();
+    let complete = infer_module_types(&db, module).unwrap();
+    for (range, expected) in reads {
+        assert_eq!(complete.expressions[&range], expected);
+    }
+    let events = db.take_salsa_events();
+    for query in [
+        "infer_flow_expression_type_impl",
+        "infer_flow_binding_baseline",
+    ] {
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, query, &events),
+            0,
+            "complete module inference must start narrowing from the types it resolved: {query}"
+        );
+    }
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, "infer_flow_binding_states", &events),
+        1,
+        "complete module inference must solve the binding's root once"
+    );
+
+    db.clear_salsa_events();
+    for (range, expected) in reads {
+        assert_eq!(
+            infer_expression_type(&db, ExpressionTypeInput::new(&db, module, range)),
+            Some(expected)
+        );
+    }
+    let events = db.take_salsa_events();
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, "infer_flow_binding_baseline", &events),
+        1,
+        "lookups must resolve the binding's starting type themselves"
+    );
+    for query in ["infer_flow_binding_states", "infer_flow_binding_type"] {
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, query, &events),
+            0,
+            "lookups starting from the same type must reuse the solve: {query}"
+        );
+    }
+}
+
+#[test]
 fn reads_beyond_the_shared_flow_limit_are_solved_one_point_at_a_time() {
     // Every `&&` adds two conditions and a join, so these branches cost more
     // flow work per syntax node than `if` statements and stay within the

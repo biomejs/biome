@@ -36,7 +36,12 @@ pub struct BindingTypeInput<'db> {
     pub range: TextRange,
 }
 
-/// Identifies a binding within one execution root.
+/// Identifies a binding within one execution root, together with the type
+/// that narrowing starts from.
+///
+/// Reads of the binding in that root share this key, and with it one solve of
+/// the root's flow, when they start from the same type, whether a lookup or
+/// complete module inference resolved that type.
 #[salsa::interned]
 #[derive(Debug)]
 pub(crate) struct FlowBindingRootInput<'db> {
@@ -45,17 +50,20 @@ pub(crate) struct FlowBindingRootInput<'db> {
     /// Index of the execution root in the binding module's collected flow.
     #[returns(copy)]
     pub root: usize,
+    /// The type that narrowing starts from: the binding's declared type
+    /// flattened for narrowing, or `None` when no runtime test can change
+    /// that type. Lookups take it from [`super::infer_flow_binding_baseline`].
+    #[returns(copy)]
+    pub baseline: Option<InferredTypeData<'db>>,
 }
 
-/// Identifies a binding's incoming state within one execution root.
+/// Identifies a binding's incoming state at one point of its execution root.
 #[salsa::interned]
 #[derive(Debug)]
 pub(crate) struct FlowBindingTypeInput<'db> {
+    /// The binding, its root, and the type that narrowing starts from.
     #[returns(copy)]
-    pub binding: BindingTypeInput<'db>,
-    /// Index of the execution root in the binding module's collected flow.
-    #[returns(copy)]
-    pub root: usize,
+    pub states: FlowBindingRootInput<'db>,
     /// Node index in that root's flow graph.
     #[returns(copy)]
     pub point: FlowNodeId,
