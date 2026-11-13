@@ -1,9 +1,9 @@
 use super::builder::MAX_DEPTH;
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsStatement, AnyTsReturnType, JsConditionalExpression, JsDoWhileStatement,
-    JsForStatement, JsIdentifierBinding, JsIfStatement, JsLogicalExpression, JsSyntaxKind,
-    JsSyntaxNode, JsWhileStatement, TsDeclareFunctionDeclaration,
+    AnyJsBinding, AnyTsReturnType, JsConditionalExpression, JsDoWhileStatement, JsForStatement,
+    JsIdentifierBinding, JsIfStatement, JsLogicalExpression, JsSyntaxKind, JsSyntaxNode,
+    JsWhileStatement, TsDeclareFunctionDeclaration,
 };
 use biome_rowan::{AstNode, SyntaxKind, declare_node_union};
 use std::ops::Range;
@@ -31,12 +31,12 @@ declare_node_union! {
 /// [`MAX_ROOT_NODES`] syntax nodes, and uses only syntax the flow builder
 /// supports.
 ///
-/// The builder supports truthiness tests in `if`, `while`, `do` and ordinary
-/// `for` statements, and expression-level `&&`, `||`, `??` and `?:`. A root is
-/// not selected when its own syntax, outside nested roots, contains a statement
-/// the builder does not support, such as an exception handler, `switch`,
-/// `for-in`/`for-of`, `with`, or a class declaration, bogus syntax, or nesting
-/// deeper than [`MAX_DEPTH`].
+/// The builder treats statements it does not model, such as `switch` or
+/// `try`, as opaque regions, so they do not reject a root. A root is not
+/// selected when its own syntax, outside nested roots, contains a `with`
+/// statement, bogus syntax, or nesting deeper than [`MAX_DEPTH`]. A `with`
+/// statement changes what the names inside it refer to, and TypeScript types
+/// its contents as `any`.
 ///
 /// Types never run, so the scanner ignores conditions and bindings inside
 /// them, skips type aliases and interfaces entirely, and skips everything but
@@ -236,25 +236,7 @@ impl OpenRoot {
         }
         self.is_unsupported = kind.is_bogus()
             || kind.is_metavariable()
-            || (AnyJsStatement::can_cast(kind)
-                && !matches!(
-                    kind,
-                    JsSyntaxKind::JS_BLOCK_STATEMENT
-                        | JsSyntaxKind::JS_BREAK_STATEMENT
-                        | JsSyntaxKind::JS_CONTINUE_STATEMENT
-                        | JsSyntaxKind::JS_DEBUGGER_STATEMENT
-                        | JsSyntaxKind::JS_DO_WHILE_STATEMENT
-                        | JsSyntaxKind::JS_EMPTY_STATEMENT
-                        | JsSyntaxKind::JS_EXPRESSION_STATEMENT
-                        | JsSyntaxKind::JS_FOR_STATEMENT
-                        | JsSyntaxKind::JS_FUNCTION_DECLARATION
-                        | JsSyntaxKind::JS_IF_STATEMENT
-                        | JsSyntaxKind::JS_LABELED_STATEMENT
-                        | JsSyntaxKind::JS_RETURN_STATEMENT
-                        | JsSyntaxKind::JS_THROW_STATEMENT
-                        | JsSyntaxKind::JS_VARIABLE_STATEMENT
-                        | JsSyntaxKind::JS_WHILE_STATEMENT
-                ))
+            || kind == JsSyntaxKind::JS_WITH_STATEMENT
             // A property signature is only checked as a root, never as part of
             // another root's syntax, because it is itself an execution root.
             || kind == JsSyntaxKind::TS_PROPERTY_SIGNATURE_TYPE_MEMBER;
@@ -350,21 +332,56 @@ mod tests {
     }
 
     #[test]
-    fn unsupported_syntax_rejects_only_its_own_root() {
+    fn statements_the_builder_does_not_model_keep_their_root() {
         for body in [
-            "try { read(x); } catch {}",
-            "try { read(x); } finally {}",
-            "switch (x) { case 1: read(x); }",
+            "try { read(x); } catch (error) { read(error); }",
+            "try { read(x); } finally { read(x); }",
+            "switch (x) { case 1: read(x); break; default: read(x); }",
             "for (const key in x) read(key);",
             "for (const item of x) read(item);",
-            "class C { field = read(x); }",
+            "class C extends Base { field = read(x); }",
+            "enum E { A = 1 }",
         ] {
             let source = format!("function f(x) {{ if (x) read(x); {body} }}");
-            assert!(selected(&source).is_empty(), "{body}");
-            let source =
-                format!("function f(x) {{ if (x) read(x); const g = () => {{ {body} }}; }}");
-            assert_eq!(selected(&source).len(), 1, "{body}");
+            assert_eq!(selected(&source), [source.as_str()], "{body}");
         }
+        for body in [
+            "declare const d: string | null;",
+            "declare module \"m\" { export const v: string; }",
+            "declare global { var v: string; }",
+            "import y = require(\"y\");",
+            "export import z = N.z;",
+            "namespace N { export const z = 1; }",
+            "export class C {}",
+            "export enum E { A }",
+            "export declare class D {}",
+            "export = x;",
+        ] {
+            let source = format!("declare const x: string | null; if (x) read(x); {body}");
+            assert_eq!(selected(&source), [source.as_str()], "{body}");
+        }
+    }
+
+    #[test]
+    fn with_statements_reject_only_their_own_root() {
+        let selected_in_script = |source: &str| {
+            let parsed = parse(
+                source,
+                JsFileSource::js_script(),
+                JsParserOptions::default(),
+            );
+            assert!(!parsed.has_errors(), "{source}");
+            selected_in(&parsed.tree())
+        };
+        assert!(
+            selected_in_script("function f(x) { if (x) read(x); with (x) read(x); }").is_empty()
+        );
+        assert_eq!(
+            selected_in_script(
+                "function f(x) { if (x) read(x); const g = () => { with (x) read(x); }; }"
+            ),
+            ["function f(x) { if (x) read(x); const g = () => { with (x) read(x); }; }"]
+        );
     }
 
     #[test]
@@ -397,10 +414,13 @@ mod tests {
     }
 
     #[test]
-    fn namespaces_are_roots_without_flow() {
+    fn namespaces_are_roots_of_their_own() {
         const SOURCE: &str =
             "let x: string | null = null; if (x) read(x); namespace N { if (x) read(x); }";
-        assert_eq!(selected(SOURCE), [SOURCE]);
+        assert_eq!(
+            selected(SOURCE),
+            ["namespace N { if (x) read(x); }", SOURCE]
+        );
     }
 
     #[test]

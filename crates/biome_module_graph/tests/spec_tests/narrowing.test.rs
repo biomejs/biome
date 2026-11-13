@@ -1346,7 +1346,7 @@ fn narrowing_is_isolated_by_binding_identity() {
 }
 
 #[test]
-fn writes_captures_and_try_finally_roots_remain_conservative() {
+fn writes_and_captures_remain_conservative() {
     use InferredTypeData::{Number, String};
     const SOURCE: &str = r#"
         function reassigned(value: string | number) {
@@ -1360,18 +1360,9 @@ fn writes_captures_and_try_finally_roots_remain_conservative() {
                 return () => /*captured*/value;
             }
         }
-        function unsupported(value: string | number) {
-            try {
-                if (typeof value === "string") {
-                    /*try*/value;
-                }
-            } finally {
-                /*finally*/value;
-            }
-        }
     "#;
     let (db, module) = narrowing_db(SOURCE);
-    for marker in ["written", "captured", "try", "finally"] {
+    for marker in ["written", "captured"] {
         let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
         assert_variants(&db, ty, &[String, Number], marker);
     }
@@ -1684,12 +1675,10 @@ fn class_expressions_keep_narrowing_outside_their_members() {
         let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
         assert_variants(&db, ty, expected, marker);
     }
-    // A default-exported class does not stop narrowing in the module. A
-    // `declare` statement would.
+    // Neither a `declare` statement nor a default-exported class stops
+    // narrowing in the module.
     const MODULE: &str = r#"
-        function read(): string | null {
-            return null;
-        }
+        declare function read(): string | null;
         const value = read();
         if (value !== null) {
             /*module*/value;
@@ -1701,6 +1690,276 @@ fn class_expressions_keep_narrowing_outside_their_members() {
     let (db, module) = narrowing_db(MODULE);
     let ty = normalized_type_at(&db, module, MODULE, "module", "value");
     assert_variants(&db, ty, &[String], "module");
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) narrows every read below to `string`.
+#[test]
+fn unmodelled_statements_elsewhere_keep_narrowing() {
+    const SOURCE: &str = r#"
+        declare const items: (string | null)[];
+        declare function check(): boolean;
+        function switches(value: string | null, kind: number) {
+            switch (kind) {
+                case 1:
+                    check();
+                    break;
+                default:
+                    check();
+            }
+            if (value !== null) {
+                /*switch*/value;
+            }
+        }
+        function tries(value: string | null) {
+            try {
+                check();
+            } catch (error) {
+                check();
+            } finally {
+                check();
+            }
+            if (value !== null) {
+                /*try*/value;
+            }
+        }
+        function loops(value: string | null) {
+            for (const item of items) {
+                check();
+            }
+            if (value !== null) {
+                /*forOf*/value;
+            }
+        }
+        function classes(value: string | null) {
+            class Local {
+                field = 1;
+            }
+            if (value !== null) {
+                /*class*/value;
+            }
+        }
+        function enums(value: string | null) {
+            enum Choice {
+                A,
+                B,
+            }
+            if (value !== null) {
+                /*enum*/value;
+            }
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    for marker in ["switch", "try", "forOf", "class", "enum"] {
+        let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
+        assert_variants(&db, ty, &[InferredTypeData::String], marker);
+    }
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) narrows every read below to `string`.
+#[test]
+fn reads_inside_unmodelled_statements_keep_the_facts_from_before_them() {
+    const SOURCE: &str = r#"
+        declare const items: (string | null)[];
+        function reads(value: string | null, kind: number) {
+            if (value === null) {
+                return;
+            }
+            try {
+                /*try*/value;
+            } catch (error) {
+                /*catch*/value;
+            } finally {
+                /*finally*/value;
+            }
+            switch (kind) {
+                case 1:
+                    /*case*/value;
+                    break;
+                default:
+                    /*default*/value;
+            }
+            for (const item of items) {
+                /*forOf*/value;
+            }
+            for (const key in items) {
+                /*forIn*/value;
+            }
+            /*after*/value;
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    for marker in [
+        "try", "catch", "finally", "case", "default", "forOf", "forIn", "after",
+    ] {
+        let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
+        assert_variants(&db, ty, &[InferredTypeData::String], marker);
+    }
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) narrows `tryAfterReturn`, `afterTry`, and
+// `caseIf` to `string`, and gives `string | null` at `finally`. Biome does not
+// model the control flow inside a `try` or `switch` statement yet, so an `if`
+// or `return` inside one narrows nothing, and Biome deliberately keeps the
+// wider declared type at every read.
+#[test]
+fn conditions_inside_unmodelled_statements_do_not_narrow_yet() {
+    use InferredTypeData::{Null, String};
+    const SOURCE: &str = r#"
+        function wider(value: string | null, kind: number) {
+            try {
+                if (value === null) {
+                    return;
+                }
+                /*tryAfterReturn*/value;
+            } finally {
+                /*finally*/value;
+            }
+            /*afterTry*/value;
+            switch (kind) {
+                case 1:
+                    if (value !== null) {
+                        /*caseIf*/value;
+                    }
+            }
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    for marker in ["tryAfterReturn", "finally", "afterTry", "caseIf"] {
+        let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
+        assert_variants(&db, ty, &[String, Null], marker);
+    }
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) gives `string | null` after both loops:
+// the `break` leaves the first loop while `value` is a `string`, and the
+// `continue` reaches the test of the second loop while `value` is `null`. It
+// gives `string` at the test of the third loop, which only the `continue` in
+// its `switch` reaches.
+#[test]
+fn jumps_out_of_unmodelled_statements_carry_their_entry_facts() {
+    use InferredTypeData::{Null, String};
+    const SOURCE: &str = r#"
+        declare function check(): boolean;
+        declare function test(value: string): boolean;
+        function breaks(value: string | null) {
+            while (value !== null) {
+                try {
+                    if (check()) {
+                        break;
+                    }
+                } finally {
+                }
+            }
+            /*break*/value;
+        }
+        function continues(value: string | null) {
+            do {
+                if (value === null) {
+                    try {
+                        if (check()) {
+                            continue;
+                        }
+                    } finally {
+                    }
+                    return;
+                }
+            } while (check());
+            /*continue*/value;
+        }
+        function continueTarget(value: string | null) {
+            do {
+                if (value !== null) {
+                    switch (check()) {
+                        case true:
+                            continue;
+                    }
+                }
+                return;
+            } while (test(/*test*/value));
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    for (marker, expected) in [
+        ("break", &[String, Null][..]),
+        ("continue", &[String, Null]),
+        ("test", &[String]),
+    ] {
+        let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
+        assert_variants(&db, ty, expected, marker);
+    }
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) narrows the decorator, the `extends`
+// expression, the enum initializer, the static block, and the read after the
+// class to `string`, and gives `string | null` in the method: a method of a
+// class declaration does not see the narrowing around the class. Biome
+// analyzes the static block on its own, so it keeps the declared type there.
+#[test]
+fn class_and_enum_declarations_keep_narrowing_outside_their_members() {
+    use InferredTypeData::{Null, String};
+    const SOURCE: &str = r#"
+        declare function base(value: string): new () => object;
+        declare function decorate(value: string): (target: unknown, context: unknown) => void;
+        function declarations(value: string | null) {
+            if (value !== null) {
+                @decorate(/*decorator*/value)
+                class Derived extends base(/*extends*/value) {
+                    method() {
+                        return /*method*/value;
+                    }
+                    static {
+                        /*static*/value;
+                    }
+                }
+                enum Sizes {
+                    Small = /*enum*/value.length,
+                }
+                /*after*/value;
+            }
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    for (marker, expected) in [
+        ("decorator", &[String][..]),
+        ("extends", &[String]),
+        ("method", &[String, Null]),
+        ("static", &[String, Null]),
+        ("enum", &[String]),
+        ("after", &[String]),
+    ] {
+        let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
+        assert_variants(&db, ty, expected, marker);
+    }
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) narrows `local` to `string` and keeps
+// `outer` as `string | null`: a namespace body does not see the narrowing of
+// the module around it.
+#[test]
+fn namespaces_narrow_their_own_variables() {
+    use InferredTypeData::{Null, String};
+    const SOURCE: &str = r#"
+        declare function read(): string | null;
+        const outer = read();
+        if (outer === null) {
+            throw new Error();
+        }
+        namespace Inner {
+            const local = read();
+            if (local !== null) {
+                /*local*/local;
+            }
+            /*outer*/outer;
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    for (marker, expression, expected) in [
+        ("local", "local", &[String][..]),
+        ("outer", "outer", &[String, Null]),
+    ] {
+        let ty = normalized_type_at(&db, module, SOURCE, marker, expression);
+        assert_variants(&db, ty, expected, marker);
+    }
 }
 
 #[test]
