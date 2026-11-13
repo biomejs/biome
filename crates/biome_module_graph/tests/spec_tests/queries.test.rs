@@ -217,7 +217,7 @@ fn test_binding_query_resolves_imports_without_complete_module_inference() {
 
 #[test]
 fn test_binding_query_keeps_local_export_granular_beside_deep_import_branch() {
-    const IMPORT_COUNT: usize = 129;
+    const IMPORT_COUNT: usize = MAX_ON_DEMAND_IMPORT_DEPTH as usize + 1;
 
     let fs = MemoryFileSystem::default();
     let mut paths = (0..=IMPORT_COUNT)
@@ -263,7 +263,7 @@ fn test_binding_query_keeps_local_export_granular_beside_deep_import_branch() {
 
 #[test]
 fn test_binding_queries_reuse_a_deep_import_chain_across_roots() {
-    const IMPORT_COUNT: usize = 129;
+    const IMPORT_COUNT: usize = MAX_ON_DEMAND_IMPORT_DEPTH as usize + 1;
     const ROOT_COUNT: usize = 64;
 
     let fs = MemoryFileSystem::default();
@@ -339,9 +339,9 @@ fn test_binding_queries_reuse_a_deep_import_chain_across_roots() {
 
 #[test]
 fn test_binding_query_bounds_fallbacks_in_a_dense_import_graph() {
-    const MODULE_COUNT: usize = 160;
+    const MODULE_COUNT: usize = MAX_ON_DEMAND_IMPORT_DEPTH as usize + 32;
     const IMPORT_FANOUT: usize = 8;
-    const MAX_DISTINCT_CUTOFF_MODULES: usize = MODULE_COUNT - 128;
+    const MAX_DISTINCT_CUTOFF_MODULES: usize = MODULE_COUNT - MAX_ON_DEMAND_IMPORT_DEPTH as usize;
 
     let fs = MemoryFileSystem::default();
     let paths = (0..MODULE_COUNT)

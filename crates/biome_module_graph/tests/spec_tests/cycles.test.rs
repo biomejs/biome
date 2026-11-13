@@ -52,7 +52,8 @@ fn insert_import_chain(fs: &MemoryFileSystem, import_count: usize) -> Vec<String
 
 #[test]
 fn test_import_chains_preserve_terminal_export_across_on_demand_depth_boundary() {
-    for import_count in [127, 128, 129] {
+    let depth = usize::from(MAX_ON_DEMAND_IMPORT_DEPTH);
+    for import_count in [depth - 1, depth, depth + 1] {
         let fs = MemoryFileSystem::default();
         let paths = insert_import_chain(&fs, import_count);
         let path_refs = paths.iter().map(String::as_str).collect::<Vec<_>>();
@@ -682,7 +683,7 @@ fn test_binding_query_marks_a_structural_self_import_cycle_unknown() {
 
 #[test]
 fn test_binding_query_evaluates_a_deep_declaration_chain_in_an_import_cycle() {
-    const MODULE_COUNT: usize = 132;
+    const MODULE_COUNT: usize = MAX_ON_DEMAND_IMPORT_DEPTH as usize + 4;
 
     let fs = MemoryFileSystem::default();
     let paths = (0..MODULE_COUNT)

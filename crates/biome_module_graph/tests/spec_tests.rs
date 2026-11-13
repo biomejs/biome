@@ -20,8 +20,8 @@ use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 use biome_module_graph::{
     CallArgumentTypeInput, CallExpressionTypeInput, InferredModuleTypes, JsExport, JsOwnExport,
-    ModuleDb, ModuleGraphGeneration, ModuleInfo, ModuleInfoKind, NormalizeTypeInput, ResolverDb,
-    find_value_member_type, infer_call_argument_type,
+    MAX_ON_DEMAND_IMPORT_DEPTH, ModuleDb, ModuleGraphGeneration, ModuleInfo, ModuleInfoKind,
+    NormalizeTypeInput, ResolverDb, find_value_member_type, infer_call_argument_type,
     infer_call_expression_type as infer_call_expression_type_query,
     infer_constructor_argument_type, infer_module_types, infer_module_types_bottom_up,
     module_for_key, normalize_type as normalize_type_query, resolve_js_module,
