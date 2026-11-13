@@ -1527,11 +1527,11 @@ pub trait Rule: RuleMeta + Sized {
         None
     }
 }
-fn build_top_level_suppression<L: Language>(
+pub(crate) fn build_top_level_suppression<L: Language>(
     root: L::Root,
     category: RuleCategory,
-    group_name: &'static str,
-    rule_name: &'static str,
+    group_name: &str,
+    rule_name: &str,
     suppression_action: &dyn SuppressionAction<Language = L>,
 ) -> Option<SuppressAction<L>> {
     if matches!(
@@ -1571,15 +1571,14 @@ fn build_top_level_suppression<L: Language>(
     None
 }
 
-/// Body of [Rule::inline_suppression], kept outside the trait so it is
-/// monomorphized once per language instead of once per rule: the rule only
-/// contributes its category, group name, and rule name.
-fn build_inline_suppression<L: Language>(
+/// Shared by [Rule::inline_suppression] and plugin signals, and kept outside
+/// the trait so it is monomorphized once per language instead of once per rule.
+pub(crate) fn build_inline_suppression<L: Language>(
     root: L::Root,
     text_range: &TextRange,
     category: RuleCategory,
-    group_name: &'static str,
-    rule_name: &'static str,
+    group_name: &str,
+    rule_name: &str,
     suppression_action: &dyn SuppressionAction<Language = L>,
     suppression_reason: Option<&str>,
 ) -> Option<SuppressAction<L>> {

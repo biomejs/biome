@@ -96,6 +96,22 @@ impl PluginDiagnostic {
         })
     }
 
+    /// Reports a single-file plugin whose file name can't be used as a plugin
+    /// name in suppression comments.
+    pub fn invalid_plugin_file_name(path: &Utf8Path) -> Self {
+        Self::InvalidManifest(InvalidManifest {
+            message: MessageAndDescription::from(
+                markup! {
+                    "The plugin file name "<Emphasis>{path.file_name().unwrap_or(path.as_str())}</Emphasis>
+                    " must not contain whitespace, "<Emphasis>":"</Emphasis>", or "<Emphasis>"("</Emphasis>
+                    ", because the file name is the plugin name used in suppression comments."
+                }
+                .to_owned(),
+            ),
+            source: None,
+        })
+    }
+
     /// Reports a plugin or manifest rule path that doesn't point to a file.
     pub fn plugin_file_not_found(path: &Utf8Path) -> Self {
         Self::CantResolve(CantResolve {

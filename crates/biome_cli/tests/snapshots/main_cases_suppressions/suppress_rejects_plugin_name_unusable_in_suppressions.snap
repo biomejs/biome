@@ -1,0 +1,47 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --suppress file.js
+```
+
+## `biome.json`
+
+```json
+{
+  "plugins": ["no foo.grit"]
+}
+```
+
+## `file.js`
+
+```js
+foo(1);
+
+```
+
+## `no foo.grit`
+
+```grit
+language js
+
+`foo($args)` where {
+    register_diagnostic(span=$args, message="Do not call foo", severity="error")
+}
+
+```
+
+# Termination Message
+
+```block
+plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Error(s) during loading of plugins:
+    The plugin file name no foo.grit must not contain whitespace, :, or (, because the file name is the plugin name used in suppression comments.
+  
+
+
+```
