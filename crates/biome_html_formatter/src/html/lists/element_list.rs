@@ -521,8 +521,8 @@ impl FormatHtmlElementList {
             }
 
             let mut last: Option<&HtmlChild> = None;
-            // Tracks whether the last NonText element already had its trailing whitespace
-            // handled by the outer group pattern (needs_trailing_line_in_inner).
+            // Tracks whether the last NonText element already printed its trailing whitespace
+            // as a line inside its own group (needs_trailing_line_in_inner).
             let mut last_nontext_had_trailing_line = false;
             // Tracks the group ID of the previous inline element when it's directly followed
             // by another inline element (no whitespace between them). This is used to implement
@@ -729,8 +729,7 @@ impl FormatHtmlElementList {
                             // Whitespace AFTER an element (followed by text or end)
                             let last_css_display = get_element_css_display(last_elem);
                             if last_nontext_had_trailing_line {
-                                // The outer group pattern already added the trailing space
-                                // Don't add another one
+                                // The element's group already printed this whitespace as a line
                             } else if force_multiline
                                 && matches!(children_iter.peek(), Some(HtmlChild::Word(_)))
                                 && last_css_display.is_block_like()
@@ -819,13 +818,26 @@ impl FormatHtmlElementList {
                         let needs_outer_group = css_display.is_externally_whitespace_sensitive(f)
                             && matches!(last, Some(HtmlChild::Whitespace));
 
-                        // For the outer group pattern, check if we need a trailing line inside the inner group.
+                        // Check if we need a trailing line inside the element's group.
                         // This handles cases like `<a>link</a> more` where there's whitespace then text after.
-                        let needs_trailing_line_in_inner = needs_outer_group
-                            && matches!(
+                        // In the group, the line breaks only if the next word doesn't fit. Outside of it,
+                        // the line would break whenever the parent group breaks, for example after an
+                        // earlier newline.
+                        let needs_trailing_line_in_inner = if needs_outer_group {
+                            matches!(
                                 children_iter.peek(),
                                 Some(HtmlChild::Whitespace | HtmlChild::Newline)
-                            );
+                            )
+                        } else {
+                            css_display.is_externally_whitespace_sensitive(f)
+                                && !is_br_element(non_text)
+                                && (self.is_container_whitespace_sensitive
+                                    || !is_double_text_expression(non_text))
+                                && matches!(children_iter.peek(), Some(HtmlChild::Whitespace))
+                                && matches!(children_iter.peek_next(), Some(HtmlChild::Word(_)))
+                        };
+                        let trailing_line =
+                            needs_trailing_line_in_inner.then(soft_line_break_or_space);
 
                         // Check if the next child is also an inline element with no whitespace between.
                         // If so, we'll set prev_inline_group_id so the next element can use it for
@@ -1046,7 +1058,8 @@ impl FormatHtmlElementList {
                                             .with_group_id(Some(prev_id)),
                                         group(&format_args![
                                             &element_format,
-                                            format_separator(SeparatorPlacement::InsideGroup)
+                                            format_separator(SeparatorPlacement::InsideGroup),
+                                            trailing_line
                                         ])
                                         .with_group_id(Some(non_text_group_id)),
                                         format_separator(SeparatorPlacement::OutsideGroup)
@@ -1058,14 +1071,15 @@ impl FormatHtmlElementList {
                                     [
                                         group(&format_args![
                                             &element_format,
-                                            format_separator(SeparatorPlacement::InsideGroup)
+                                            format_separator(SeparatorPlacement::InsideGroup),
+                                            trailing_line
                                         ])
                                         .with_group_id(Some(non_text_group_id)),
                                         format_separator(SeparatorPlacement::OutsideGroup)
                                     ]
                                 )?;
                             }
-                            last_nontext_had_trailing_line = false;
+                            last_nontext_had_trailing_line = needs_trailing_line_in_inner;
                         } else {
                             let mut memoized = element_format.memoized();
 
@@ -1097,7 +1111,8 @@ impl FormatHtmlElementList {
                                             .with_group_id(Some(prev_id)),
                                         group(&format_args![
                                             &memoized,
-                                            format_separator(SeparatorPlacement::InsideGroup)
+                                            format_separator(SeparatorPlacement::InsideGroup),
+                                            trailing_line
                                         ])
                                         .with_group_id(Some(non_text_group_id)),
                                         format_separator(SeparatorPlacement::OutsideGroup)
@@ -1109,14 +1124,15 @@ impl FormatHtmlElementList {
                                     [
                                         group(&format_args![
                                             &memoized,
-                                            format_separator(SeparatorPlacement::InsideGroup)
+                                            format_separator(SeparatorPlacement::InsideGroup),
+                                            trailing_line
                                         ])
                                         .with_group_id(Some(non_text_group_id)),
                                         format_separator(SeparatorPlacement::OutsideGroup)
                                     ]
                                 )?;
                             }
-                            last_nontext_had_trailing_line = false;
+                            last_nontext_had_trailing_line = needs_trailing_line_in_inner;
                         }
 
                         // A single-brace expression cannot lend its closing token to the
