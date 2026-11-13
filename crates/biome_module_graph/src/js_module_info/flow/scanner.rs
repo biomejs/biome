@@ -1,10 +1,9 @@
 use super::builder::MAX_DEPTH;
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsStatement, AnyTsReturnType, JsAssignmentExpression, JsAssignmentOperator,
-    JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIdentifierBinding,
-    JsIfStatement, JsLogicalExpression, JsSyntaxKind, JsSyntaxNode, JsWhileStatement,
-    TsDeclareFunctionDeclaration,
+    AnyJsBinding, AnyJsStatement, AnyTsReturnType, JsConditionalExpression, JsDoWhileStatement,
+    JsForStatement, JsIdentifierBinding, JsIfStatement, JsLogicalExpression, JsSyntaxKind,
+    JsSyntaxNode, JsWhileStatement, TsDeclareFunctionDeclaration,
 };
 use biome_rowan::{AstNode, SyntaxKind, declare_node_union};
 use std::ops::Range;
@@ -34,9 +33,10 @@ declare_node_union! {
 ///
 /// The builder supports truthiness tests in `if`, `while`, `do` and ordinary
 /// `for` statements, and expression-level `&&`, `||`, `??` and `?:`. A root is
-/// not selected when its own syntax, outside nested roots, contains exception
-/// handlers, `switch`, `for-in`/`for-of`, `with`, classes, destructuring,
-/// logical assignments, bogus syntax, or nesting deeper than [`MAX_DEPTH`].
+/// not selected when its own syntax, outside nested roots, contains a statement
+/// the builder does not support, such as an exception handler, `switch`,
+/// `for-in`/`for-of`, `with`, or a class declaration, bogus syntax, or nesting
+/// deeper than [`MAX_DEPTH`].
 ///
 /// Types never run, so the scanner ignores conditions and bindings inside
 /// them, skips type aliases and interfaces entirely, and skips everything but
@@ -120,7 +120,7 @@ impl FlowRootScanner {
             self.declaration = Some(self.depth);
             return;
         }
-        root.check_node(node, kind);
+        root.check_node(kind);
         if self.type_region.is_some() {
             return;
         }
@@ -228,9 +228,9 @@ impl OpenRoot {
         }
     }
 
-    /// Marks the root unsupported when the flow builder does not support
-    /// `node`, a node of its own syntax, regardless of its descendants.
-    fn check_node(&mut self, node: &JsSyntaxNode, kind: JsSyntaxKind) {
+    /// Marks the root unsupported when the flow builder does not support a
+    /// node of `kind` in its own syntax, regardless of the node's descendants.
+    fn check_node(&mut self, kind: JsSyntaxKind) {
         if self.is_unsupported {
             return;
         }
@@ -257,24 +257,7 @@ impl OpenRoot {
                 ))
             // A property signature is only checked as a root, never as part of
             // another root's syntax, because it is itself an execution root.
-            || matches!(
-                kind,
-                JsSyntaxKind::JS_CLASS_EXPRESSION
-                    | JsSyntaxKind::JS_CLASS_EXPORT_DEFAULT_DECLARATION
-                    | JsSyntaxKind::JS_ARRAY_BINDING_PATTERN
-                    | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN
-                    | JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN
-                    | JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN
-                    | JsSyntaxKind::TS_PROPERTY_SIGNATURE_TYPE_MEMBER
-            )
-            || JsAssignmentExpression::cast_ref(node).is_some_and(|assignment| {
-                matches!(
-                    assignment.operator(),
-                    Ok(JsAssignmentOperator::LogicalAndAssign
-                        | JsAssignmentOperator::LogicalOrAssign
-                        | JsAssignmentOperator::NullishCoalescingAssign)
-                )
-            });
+            || kind == JsSyntaxKind::TS_PROPERTY_SIGNATURE_TYPE_MEMBER;
     }
 }
 
@@ -374,10 +357,6 @@ mod tests {
             "switch (x) { case 1: read(x); }",
             "for (const key in x) read(key);",
             "for (const item of x) read(item);",
-            "x &&= read(x);",
-            "x ||= read(x);",
-            "x ??= read(x);",
-            "const { value = read(x) } = x;",
             "class C { field = read(x); }",
         ] {
             let source = format!("function f(x) {{ if (x) read(x); {body} }}");
@@ -385,6 +364,29 @@ mod tests {
             let source =
                 format!("function f(x) {{ if (x) read(x); const g = () => {{ {body} }}; }}");
             assert_eq!(selected(&source).len(), 1, "{body}");
+        }
+    }
+
+    #[test]
+    fn patterns_class_expressions_and_logical_assignments_keep_their_root() {
+        for body in [
+            "const { value = read(x), ...rest } = x;",
+            "const [first, ...others] = x;",
+            "({ value: y } = x);",
+            "[y = read(x)] = x;",
+            "y &&= read(x);",
+            "y ||= read(x);",
+            "y ??= read(x);",
+            "const C = class extends Base { field = read(x); static { read(x); } m() {} };",
+        ] {
+            let source = format!("function f(x) {{ if (x) read(x); {body} }}");
+            assert_eq!(selected(&source), [source.as_str()], "{body}");
+        }
+        for source in [
+            "function f({ value }, [first]) { if (value) read(first); }",
+            "if (x) read(x); export default class { field = read(x); }",
+        ] {
+            assert_eq!(selected(source), [source], "{source}");
         }
     }
 

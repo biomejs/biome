@@ -1,0 +1,34 @@
+// should not generate diagnostics
+// TypeScript types `value` and `label` as `string | null` at each optional
+// chain.
+
+declare function readNullable(): string | null;
+
+function writtenByDestructuring(value: string | null) {
+	if (value !== null) {
+		[value] = [readNullable()];
+		return value?.length;
+	}
+}
+
+function writtenByLogicalAssignment(value: string | null) {
+	if (value !== null) {
+		value ||= readNullable();
+		return value?.length;
+	}
+}
+
+function destructuringDefault(input: { label?: string }) {
+	const { label = null } = input;
+	if (label !== undefined) {
+		return label?.length;
+	}
+}
+
+function classField(value: string | null) {
+	if (value !== null) {
+		return class {
+			length = value?.length;
+		};
+	}
+}

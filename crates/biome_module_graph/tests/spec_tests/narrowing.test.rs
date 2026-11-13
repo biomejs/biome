@@ -1500,6 +1500,209 @@ fn eval_and_arguments_do_not_prevent_narrowing() {
     }
 }
 
+// TypeScript 6.0.3 (`tsc --strict`) narrows `a` to `string` and `first` to
+// `number`.
+#[test]
+fn variables_declared_by_destructuring_narrow() {
+    use InferredTypeData::{Number, String};
+    const SOURCE: &str = r#"
+        declare function make(): { a: string | null; b: [number | undefined] };
+        function parameter({ a }: { a: string | null }) {
+            if (a !== null) {
+                /*parameter*/a;
+            }
+        }
+        function declared() {
+            const { a, b: [first] } = make();
+            if (a !== null) {
+                /*const*/a;
+            }
+            if (first !== undefined) {
+                /*array*/first;
+            }
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    for (marker, expression, expected) in [
+        ("parameter", "a", String),
+        ("const", "a", String),
+        ("array", "first", Number),
+    ] {
+        let ty = normalized_type_at(&db, module, SOURCE, marker, expression);
+        assert_variants(&db, ty, &[expected], marker);
+    }
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) types `size` as `number | "auto"` at both
+// reads, and `first` as `string | number | undefined` before the condition and
+// `string | number` after it. The declared type that Biome gives a
+// destructured variable ignores defaults, so it lacks `"auto"` for `size` and
+// `number` for `first`, and narrowing it would give a type narrower than
+// TypeScript's.
+#[test]
+fn variables_with_destructuring_defaults_do_not_narrow() {
+    const SOURCE: &str = r#"
+        declare function options(): { size?: number; pair?: [string | undefined] };
+        function declared() {
+            const { size = "auto", pair: [first] = [0] } = options();
+            /*sizeBefore*/size;
+            if (size !== undefined) {
+                /*size*/size;
+            }
+            /*firstBefore*/first;
+            if (first !== undefined) {
+                /*first*/first;
+            }
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    for name in ["size", "first"] {
+        let before = normalized_type_at(&db, module, SOURCE, &format!("{name}Before"), name);
+        let after = normalized_type_at(&db, module, SOURCE, name, name);
+        assert_eq!(
+            after,
+            before,
+            "{name}: got {}",
+            format_inferred_type(&db, after)
+        );
+    }
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) narrows the read to `string`.
+#[test]
+fn destructuring_and_logical_assignments_to_other_variables_keep_narrowing() {
+    const SOURCE: &str = r#"
+        declare const numbers: (number | undefined)[];
+        function assignments(value: string | null) {
+            let other: number | undefined;
+            [other] = numbers;
+            ({ other } = { other: 1 });
+            other ??= 1;
+            if (value !== null) {
+                [other] = numbers;
+                other ||= 2;
+                other &&= 3;
+                /*read*/value;
+            }
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    let ty = normalized_type_at(&db, module, SOURCE, "read", "value");
+    assert_variants(&db, ty, &[InferredTypeData::String], "read");
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) narrows every read below to `string`,
+// because none of the writes comes between the condition and the read. Biome
+// narrows only variables that are never written, so these reads keep their
+// declared type.
+#[test]
+fn variables_written_by_destructuring_or_logical_assignments_do_not_narrow() {
+    use InferredTypeData::{Null, String};
+    const SOURCE: &str = r#"
+        declare function read(): string | null;
+        function arrayPattern(value: string | null) {
+            if (value !== null) {
+                /*array*/value;
+            }
+            [value] = [read()];
+        }
+        function objectPattern(value: string | null) {
+            if (value !== null) {
+                /*object*/value;
+            }
+            ({ value } = { value: read() });
+        }
+        function logical(value: string | null, fallback: string) {
+            if (value !== null) {
+                /*logical*/value;
+            }
+            value ??= fallback;
+        }
+        function nested(value: string | null) {
+            const reset = () => {
+                [value] = [null];
+            };
+            if (value !== null) {
+                /*nested*/value;
+            }
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    for marker in ["array", "object", "logical", "nested"] {
+        let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
+        assert_variants(&db, ty, &[String, Null], marker);
+    }
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type,
+// except the read in `method`, which it narrows to `string`: it keeps the
+// narrowing of a parameter that a method of a class expression captures, when
+// nothing writes the parameter. Biome does not narrow reads in closures yet.
+// TypeScript analyzes a class field with an initializer on its own, so reads
+// in the field keep their declared type.
+#[test]
+fn class_expressions_keep_narrowing_outside_their_members() {
+    use InferredTypeData::{Null, String};
+    const SOURCE: &str = r#"
+        declare function base(value: string): new () => object;
+        declare function decorate(value: string): (target: unknown, context: unknown) => void;
+        function members(value: string | null) {
+            if (value !== null) {
+                const Derived = @decorate(/*decorator*/value) class extends base(/*extends*/value) {
+                    field = /*field*/value;
+                    static shared = /*static*/value;
+                    method() {
+                        return /*method*/value;
+                    }
+                };
+                /*after*/value;
+            }
+        }
+        function conditions(value: string | null) {
+            if (value) {
+            }
+            const Checker = class {
+                check() {
+                    if (value === null) {
+                        return;
+                    }
+                }
+            };
+            /*outside*/value;
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    for (marker, expected) in [
+        ("decorator", &[String][..]),
+        ("extends", &[String]),
+        ("field", &[String, Null]),
+        ("static", &[String, Null]),
+        ("method", &[String, Null]),
+        ("after", &[String]),
+        ("outside", &[String, Null]),
+    ] {
+        let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
+        assert_variants(&db, ty, expected, marker);
+    }
+    // A default-exported class does not stop narrowing in the module. A
+    // `declare` statement would.
+    const MODULE: &str = r#"
+        function read(): string | null {
+            return null;
+        }
+        const value = read();
+        if (value !== null) {
+            /*module*/value;
+        }
+        export default class {
+            field = 1;
+        }
+    "#;
+    let (db, module) = narrowing_db(MODULE);
+    let ty = normalized_type_at(&db, module, MODULE, "module", "value");
+    assert_variants(&db, ty, &[String], "module");
+}
+
 #[test]
 fn promise_classification_uses_narrowed_identifiers_without_whole_module_inference() {
     use TypeInferenceClassification::{Match, NoMatch};
