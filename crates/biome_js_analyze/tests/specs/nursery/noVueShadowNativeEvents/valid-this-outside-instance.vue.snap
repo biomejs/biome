@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-this-outside-instance.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<!-- `this` in an arrow function method or in a nested function is not the component. -->
+<script>
+export default {
+  methods: {
+    onArrow: () => this.$emit("click"),
+    onNested() {
+      list.forEach(function () {
+        this.$emit("click");
+      });
+    },
+  },
+};
+</script>
+
+```

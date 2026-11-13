@@ -1,0 +1,83 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidDefineComponentSetupFunction.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { defineComponent, onMounted, onUnmounted } from "vue";
+
+defineComponent(
+	async (props, context) => {
+		await doSomething();
+		onMounted(() => {});
+	},
+	{ props: ["source"] },
+);
+
+defineComponent(
+	async function (props) {
+		await doSomething();
+		onUnmounted(() => {});
+	},
+	{ props: ["source"] },
+);
+
+```
+
+# Diagnostics
+```
+invalidDefineComponentSetupFunction.js:7:3 lint/nursery/noVueLifecycleAfterAwait ━━━━━━━━━━━━━━━━━━━
+
+  × This lifecycle hook is registered after an await, so it never runs.
+  
+    5 │ 	async (props, context) => {
+    6 │ 		await doSomething();
+  > 7 │ 		onMounted(() => {});
+      │ 		^^^^^^^^^^^^^^^^^^^
+    8 │ 	},
+    9 │ 	{ props: ["source"] },
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component the hook belongs to.
+  
+    4 │ defineComponent(
+    5 │ 	async (props, context) => {
+  > 6 │ 		await doSomething();
+      │ 		^^^^^
+    7 │ 		onMounted(() => {});
+    8 │ 	},
+  
+  i Call the lifecycle hook before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidDefineComponentSetupFunction.js:15:3 lint/nursery/noVueLifecycleAfterAwait ━━━━━━━━━━━━━━━━━━
+
+  × This lifecycle hook is registered after an await, so it never runs.
+  
+    13 │ 	async function (props) {
+    14 │ 		await doSomething();
+  > 15 │ 		onUnmounted(() => {});
+       │ 		^^^^^^^^^^^^^^^^^^^^^
+    16 │ 	},
+    17 │ 	{ props: ["source"] },
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component the hook belongs to.
+  
+    12 │ defineComponent(
+    13 │ 	async function (props) {
+  > 14 │ 		await doSomething();
+       │ 		^^^^^
+    15 │ 		onUnmounted(() => {});
+    16 │ 	},
+  
+  i Call the lifecycle hook before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

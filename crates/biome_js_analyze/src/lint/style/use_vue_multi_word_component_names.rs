@@ -1,10 +1,11 @@
-use crate::frameworks::vue::vue_component::{VueComponent, VueComponentName, VueComponentQuery};
+use crate::services::vue::VueComponent;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, TextRange, TokenText};
+use biome_rowan::TextRange;
+use biome_vue_semantic::ComponentKind;
 use biome_rule_options::use_vue_multi_word_component_names::UseVueMultiWordComponentNamesOptions;
 
 declare_lint_rule! {
@@ -111,42 +112,50 @@ declare_lint_rule! {
     }
 }
 
+/// A component with a single-word name.
+pub struct SingleWordName {
+    /// The name written in the component definition, or `None` when the name comes from the
+    /// file name.
+    name: Option<Box<str>>,
+    /// The range of the written name, or of the whole component when the name comes from the
+    /// file name.
+    range: TextRange,
+}
+
 impl Rule for UseVueMultiWordComponentNames {
-    type Query = VueComponentQuery;
-    type State = Option<(TokenText, TextRange)>;
+    type Query = VueComponent;
+    type State = SingleWordName;
     type Signals = Option<Self::State>;
     type Options = UseVueMultiWordComponentNamesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        // Build potential Vue component; bail if not a component or not in a Vue embedding
-        let component = VueComponent::from_potential_component(
-            ctx.query(),
-            ctx.model(),
-            ctx.source_type(),
-            ctx.file_path(),
-        )?;
-        let component_name = component.name()?;
-        if should_report(component_name.as_ref(), ctx.options()) {
-            if let VueComponentName::FromComponent(name_token) = component_name {
-                Some(Some(name_token))
-            } else {
-                // Name inferred from path; can't point to precise range, so flag whole component
-                Some(None)
-            }
-        } else {
+        let component = ctx.query();
+        // A `<script setup>` component is named after its file.
+        let written_name = if component.kind() == ComponentKind::Setup {
             None
-        }
+        } else {
+            component.name().zip(component.name_range())
+        };
+        let state = match written_name {
+            Some((name, range)) => SingleWordName {
+                name: Some(name.into()),
+                range,
+            },
+            // Only single-file components are named after their file.
+            None if ctx.file_path().extension() == Some("vue") => SingleWordName {
+                name: None,
+                range: component.range(),
+            },
+            None => return None,
+        };
+        let name = state.name.as_deref().or_else(|| ctx.file_path().file_stem())?;
+        should_report(name, ctx.options()).then_some(state)
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        // If the state is Some, we can point to the precise range of the name token. Otherwise, we have to flag the whole component.
-
-        let range = state
-            .as_ref()
-            .map_or_else(|| ctx.query().range(), |token_text| token_text.1);
         let Some(component_name) = state
-            .as_ref()
-            .map(|token_text| token_text.0.text())
+            .name
+            .as_deref()
             .or_else(|| ctx.file_path().file_stem())
         else {
             // Can't determine component name; shouldn't happen since we had a name from the component before
@@ -154,11 +163,11 @@ impl Rule for UseVueMultiWordComponentNames {
             debug_assert!(false, "should never get here");
             return None;
         };
-        let got_name_from_file_name = state.is_none();
+        let got_name_from_file_name = state.name.is_none();
 
         let mut diagnostic = RuleDiagnostic::new(
             rule_category!(),
-            range,
+            state.range,
             markup! {
                 "This Component's name "<Emphasis>"\""{component_name}"\""</Emphasis>" only contains one word."
             },

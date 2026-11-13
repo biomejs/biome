@@ -28,16 +28,16 @@ createApp({
 
 # Diagnostics
 ```
-invalid-nested-component.js:16:18 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-nested-component.js:9:22 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This component event has the same name as the browser event keydown.
+  ! This component event has the same name as the browser event click.
   
-    14 │   methods: {
-    15 │     onKeydown() {
-  > 16 │       this.$emit("keydown");
-       │                  ^^^^^^^^^
-    17 │     },
-    18 │   },
+     7 │       methods: {
+     8 │         onClick() {
+   > 9 │           this.$emit("click");
+       │                      ^^^^^^^
+    10 │         },
+    11 │       },
   
   i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
   
@@ -49,16 +49,16 @@ invalid-nested-component.js:16:18 lint/nursery/noVueShadowNativeEvents ━━━
 ```
 
 ```
-invalid-nested-component.js:9:22 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-nested-component.js:16:18 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This component event has the same name as the browser event click.
+  ! This component event has the same name as the browser event keydown.
   
-     7 │       methods: {
-     8 │         onClick() {
-   > 9 │           this.$emit("click");
-       │                      ^^^^^^^
-    10 │         },
-    11 │       },
+    14 │   methods: {
+    15 │     onKeydown() {
+  > 16 │       this.$emit("keydown");
+       │                  ^^^^^^^^^
+    17 │     },
+    18 │   },
   
   i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
   

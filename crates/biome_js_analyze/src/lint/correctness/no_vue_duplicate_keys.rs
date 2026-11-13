@@ -1,15 +1,15 @@
-use crate::frameworks::vue::vue_component::{
-    VueComponent, VueComponentDeclarations, VueComponentQuery, VueDeclaration,
-    VueDeclarationCollectionFilter, VueDeclarationName,
-};
+use crate::frameworks::vue::vue_call::is_vue_compiler_macro_call;
+use crate::services::vue::VueComponent;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_rowan::TokenText;
+use biome_js_semantic::SemanticModel;
+use biome_js_syntax::{JsCallExpression, JsLanguage, JsReferenceIdentifier, JsVariableDeclarator};
+use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_vue_duplicate_keys::NoVueDuplicateKeysOptions;
-use enumflags2::BitFlag;
+use biome_vue_semantic::{AnalyzedVueModel, Origin, Symbol, SymbolKind};
 use rustc_hash::FxHashMap;
 
 declare_lint_rule! {
@@ -120,75 +120,75 @@ declare_lint_rule! {
 }
 
 impl Rule for NoVueDuplicateKeys {
-    type Query = VueComponentQuery;
+    type Query = VueComponent;
     type State = RuleState;
     type Signals = Box<[Self::State]>;
     type Options = NoVueDuplicateKeysOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let component = ctx.query();
+        let vue_model = ctx.vue_model();
         let model = ctx.model();
-        let Some(component) = VueComponent::from_potential_component(
-            ctx.query(),
-            model,
-            ctx.source_type(),
-            ctx.file_path(),
-        ) else {
-            return Box::new([]);
-        };
 
-        let mut key_declarations: FxHashMap<TokenText, Vec<VueDeclaration>> = FxHashMap::default();
+        // The variables that hold the props object, as in `const props = defineProps(['foo'])`.
+        let props_objects: Vec<_> = component
+            .declarations()
+            .filter(|symbol| symbol.origin() == Origin::DefineProps)
+            .map(|symbol| symbol.range())
+            .collect();
 
-        // Collect all declarations across all Vue component sections
-        for declaration in component.declarations(
-            VueDeclarationCollectionFilter::all() ^ VueDeclarationCollectionFilter::Watcher,
-        ) {
-            if let Some(name) = declaration.declaration_name() {
+        let mut declarations: Vec<_> = component
+            .declarations()
+            .filter(|symbol| symbol.parent().is_none())
+            .filter(|symbol| match symbol.kind() {
+                SymbolKind::Prop
+                | SymbolKind::Data
+                | SymbolKind::AsyncData
+                | SymbolKind::Computed
+                | SymbolKind::Method
+                | SymbolKind::SetupReturn => true,
                 // A setup variable derived from props is the same value as the prop it comes
-                // from, so it doesn't compete with it. Handles cases like
-                // `const { foo } = defineProps(...)` or `const foo = toRef(props, 'foo')`.
-                if let VueDeclaration::Setup(ref setup_decl) = declaration
-                    && setup_decl.is_derived_from_props(model)
-                {
-                    continue;
+                // from, so it doesn't compete with it.
+                SymbolKind::Local | SymbolKind::Import => {
+                    !symbol.is_type_only()
+                        && !is_derived_from_props(symbol, vue_model, model, &props_objects)
                 }
-                key_declarations.entry(name).or_default().push(declaration);
-            }
-        }
+                _ => false,
+            })
+            .map(|symbol| (Box::<str>::from(symbol.name()), symbol.range()))
+            .collect();
+        declarations.sort_by_key(|(_, range)| range.start());
 
-        // Find duplicates
+        let mut key_declarations: FxHashMap<Box<str>, Vec<TextRange>> = FxHashMap::default();
+        for (name, range) in declarations {
+            key_declarations.entry(name).or_default().push(range);
+        }
         key_declarations
             .into_iter()
-            .filter_map(|(key, declarations)| {
-                if declarations.len() > 1 {
-                    Some(RuleState { key, declarations })
-                } else {
-                    None
-                }
-            })
-            .collect::<Box<[_]>>()
+            .filter(|(_, ranges)| ranges.len() > 1)
+            .map(|(key, ranges)| RuleState { key, ranges })
+            .collect()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let mut declarations_iterator = state.declarations.iter();
-        let first_declaration = declarations_iterator.next()?;
+        let (first_range, other_ranges) = state.ranges.split_first()?;
+        let key = &*state.key;
         let mut diagnostic = RuleDiagnostic::new(
             rule_category!(),
-            first_declaration.declaration_name_range()?,
+            first_range,
             markup! {
-                "Duplicate key "<Emphasis>{state.key.text()}</Emphasis>" found in Vue component."
+                "Duplicate key "<Emphasis>{key}</Emphasis>" found in Vue component."
             },
         );
 
         // Add related information for other occurrences
-        for declaration in declarations_iterator {
-            if let Some(range) = declaration.declaration_name_range() {
-                diagnostic = diagnostic.detail(
-                    range,
-                    markup! {
-                        "Key "<Emphasis>{state.key.text()}</Emphasis>" is also defined here."
-                    },
-                );
-            }
+        for range in other_ranges {
+            diagnostic = diagnostic.detail(
+                range,
+                markup! {
+                    "Key "<Emphasis>{key}</Emphasis>" is also defined here."
+                },
+            );
         }
 
         diagnostic = diagnostic.note(markup! {
@@ -200,6 +200,49 @@ impl Rule for NoVueDuplicateKeys {
 }
 
 pub struct RuleState {
-    key: TokenText,
-    declarations: Vec<VueDeclaration>,
+    key: Box<str>,
+    /// The ranges of the names of the declarations, in source order.
+    ranges: Vec<TextRange>,
+}
+
+/// Returns `true` when `symbol`, a top-level variable of `<script setup>`, takes its value from
+/// the props: it destructures the props, holds the props object, or its initializer calls
+/// `defineProps()` or reads a variable in `props_objects`.
+///
+/// ```js
+/// const props = defineProps(['foo']);
+/// const foo = toRef(props, 'foo'); // derived from `props`
+/// const bar = 42;                  // not derived from `props`
+/// ```
+fn is_derived_from_props(
+    symbol: &Symbol,
+    vue_model: &AnalyzedVueModel<JsLanguage>,
+    model: &SemanticModel,
+    props_objects: &[TextRange],
+) -> bool {
+    if matches!(
+        symbol.origin(),
+        Origin::DefineProps | Origin::PropsDestructure
+    ) {
+        return true;
+    }
+    let Some(statement) = vue_model.node(symbol) else {
+        return false;
+    };
+    let Some(initializer) = statement
+        .descendants()
+        .filter_map(JsVariableDeclarator::cast)
+        .find(|declarator| declarator.range().contains_range(symbol.range()))
+        .and_then(|declarator| declarator.initializer()?.expression().ok())
+    else {
+        return false;
+    };
+    initializer.syntax().descendants().any(|node| {
+        if let Some(call) = JsCallExpression::cast_ref(&node) {
+            return is_vue_compiler_macro_call(&call, model, "defineProps");
+        }
+        JsReferenceIdentifier::cast(node)
+            .and_then(|reference| model.binding(&reference))
+            .is_some_and(|binding| props_objects.contains(&binding.syntax().text_trimmed_range()))
+    })
 }

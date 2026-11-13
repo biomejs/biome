@@ -6,7 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsFunction, AnyTsType, JsCallArguments, JsLanguage, JsMethodObjectMember, JsParameters,
-    TsCallSignatureTypeMember, TsPropertySignatureTypeMember,
+    TsCallSignatureTypeMember, TsFunctionType, TsPropertySignatureTypeMember,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, declare_node_union};
 use biome_rule_options::use_vue_single_event_payload::UseVueSingleEventPayloadOptions;
@@ -194,6 +194,11 @@ fn extra_declared_payloads(vue_model: &AnalyzedVueModel<JsLanguage>, emit: &Emit
         EmitForm::CallSignature => {
             let signature = TsCallSignatureTypeMember::cast(vue_model.node(emit)?)?;
             range_from(&signature.parameters().ok()?.items(), 2)
+        }
+        // `(e: 'change', value: string, extra: number) => void`
+        EmitForm::FunctionType => {
+            let function = TsFunctionType::cast(vue_model.node(emit)?)?;
+            range_from(&function.parameters().ok()?.items(), 2)
         }
         EmitForm::ArrayString => None,
     }

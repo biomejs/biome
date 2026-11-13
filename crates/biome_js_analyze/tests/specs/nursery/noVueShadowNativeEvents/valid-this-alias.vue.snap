@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-this-alias.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<!-- The rule doesn't follow variables that hold `this`. -->
+<script>
+export default {
+  methods: {
+    onAlias() {
+      const vm = this;
+      vm.$emit("blur");
+      (vm?.$emit)?.("submit");
+    },
+  },
+};
+</script>
+
+```

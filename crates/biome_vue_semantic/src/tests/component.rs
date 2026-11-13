@@ -1,7 +1,7 @@
 use super::js_model;
 use crate::{
-    Access, ComponentKind, DefaultSource, DefaultSources, JsNodeId, Namespace, OpenReason,
-    PropForm, PropType, RefSite, Resolution, Tri, component_model,
+    Access, ComponentKind, DefaultSource, DefaultSources, EmitForm, JsNodeId, Namespace,
+    OpenReason, PropForm, PropType, RefSite, Resolution, Tri, component_model,
 };
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
@@ -668,6 +668,70 @@ defineComponent({
 }
 
 #[test]
+fn template_literals_without_substitutions_name_events() {
+    let uses = emit_uses(
+        r#"import { defineComponent } from "vue";
+defineComponent({
+  emits: [`a`, "b"],
+  methods: { go() { this.$emit(`b`); this.$emit(``); } },
+});"#,
+        JsFileSource::js_module(),
+    );
+    assert_eq!(uses, [("a".into(), 0, true), ("b".into(), 1, true)]);
+
+    for (emits, call) in [
+        ("[`a${x}`]", "this.$emit('a')"),
+        ("['a']", "this.$emit(`a${x}`)"),
+        ("['a']", "this.$emit(tag`a`)"),
+    ] {
+        let code = format!(
+            r#"import {{ defineComponent }} from "vue";
+defineComponent({{ emits: {emits}, methods: {{ go() {{ {call}; }} }} }});"#
+        );
+        let model = js_model(&code, JsFileSource::js_module());
+        let component = model.components().next().expect("a component");
+        let is_open = !component.is_complete(Namespace::Emit)
+            || component.emits().any(|emit| !emit.has_complete_uses());
+        assert!(is_open, "{emits} {call}");
+    }
+}
+
+#[test]
+fn function_type_declares_events() {
+    for code in [
+        r#"defineEmits<(e: "a" | "b", value: number) => void>()"#,
+        r#"defineEmits<((e: "a" | "b", value: number) => void)>()"#,
+        r#"type Emits = (e: "a" | "b", value: number) => void;
+defineEmits<Emits>()"#,
+    ] {
+        let model = js_model(code, setup_ts());
+        let component = model.components().next().expect("a component");
+        let emits: Vec<_> = component
+            .emits()
+            .map(|emit| (emit.name().to_string(), emit.payload_params(), emit.form()))
+            .collect();
+        assert_eq!(
+            emits,
+            [
+                ("a".into(), Some(1), Some(EmitForm::FunctionType)),
+                ("b".into(), Some(1), Some(EmitForm::FunctionType)),
+            ],
+            "{code}"
+        );
+        assert!(component.is_complete(Namespace::Emit), "{code}");
+    }
+
+    let model = js_model("defineEmits<(e: string) => void>()", setup_ts());
+    let component = model.components().next().expect("a component");
+    assert_eq!(component.emits().count(), 0);
+    assert!(
+        component
+            .open_reasons(Namespace::Emit)
+            .contains(OpenReason::UnresolvedType)
+    );
+}
+
+#[test]
 fn emit_function_used_without_a_call_opens_the_uses() {
     for setup in [
         "setup(props, { emit }) { return { notify: enabled ? emit : noop }; }",
@@ -740,6 +804,109 @@ fn data_function_range_is_absent_without_a_function() {
         let model = js_model(code, JsFileSource::vue());
         let component = model.components().next().expect("a component");
         assert_eq!(component.data_function_range(), None, "{code}");
+    }
+}
+
+#[test]
+fn options_object_range_covers_the_object_literal() {
+    for (code, source, object) in [
+        (
+            "export default ({ name: 'A' })",
+            JsFileSource::vue(),
+            "{ name: 'A' }",
+        ),
+        (
+            r#"import { defineComponent } from "vue";
+defineComponent((props) => {}, { props: ["a"] });"#,
+            JsFileSource::js_module(),
+            r#"{ props: ["a"] }"#,
+        ),
+        (
+            r#"import { createApp } from "vue";
+createApp({ data() {} }, rootProps);"#,
+            JsFileSource::js_module(),
+            "{ data() {} }",
+        ),
+    ] {
+        let model = js_model(code, source);
+        let component = model.components().next().expect("a component");
+        let range = component.options_object_range().expect("an options object");
+        assert_eq!(&code[range], object);
+    }
+
+    for (code, source) in [
+        ("export default options", JsFileSource::vue()),
+        ("defineOptions({ name: 'A' })", setup_ts()),
+        (
+            r#"import { createApp } from "vue";
+createApp(App);"#,
+            JsFileSource::js_module(),
+        ),
+    ] {
+        let model = js_model(code, source);
+        let component = model.components().next().expect("a component");
+        assert_eq!(component.options_object_range(), None, "{code}");
+    }
+}
+
+#[test]
+fn setup_function_range_covers_each_function_form() {
+    for (code, source, function) in [
+        (
+            "export default { setup() { return {}; } }",
+            JsFileSource::vue(),
+            "setup() { return {}; }",
+        ),
+        (
+            "export default { setup: function (props) {} }",
+            JsFileSource::vue(),
+            "function (props) {}",
+        ),
+        (
+            "export default { setup: (props, context) => {} }",
+            JsFileSource::vue(),
+            "(props, context) => {}",
+        ),
+        (
+            r#"import { defineComponent } from "vue";
+defineComponent((props, context) => {}, { props: ["a"] });"#,
+            JsFileSource::js_module(),
+            "(props, context) => {}",
+        ),
+        (
+            r#"import { defineComponent } from "vue";
+defineComponent(function (props) {}, { setup() {} });"#,
+            JsFileSource::js_module(),
+            "function (props) {}",
+        ),
+    ] {
+        let model = js_model(code, source);
+        let component = model.components().next().expect("a component");
+        let range = component.setup_function_range().expect("a setup function");
+        assert_eq!(&code[range], function);
+    }
+}
+
+#[test]
+fn setup_function_range_is_absent_without_a_function() {
+    for (code, source) in [
+        ("export default { setup: sharedSetup }", JsFileSource::vue()),
+        (
+            r#"import { defineComponent } from "vue";
+defineComponent(sharedSetup, { setup() {} });"#,
+            JsFileSource::js_module(),
+        ),
+        ("export default { computed: {} }", JsFileSource::vue()),
+        ("const a = 1;", setup_ts()),
+        (
+            r#"import { defineComponent } from "vue";
+defineComponent({ props: ["a"] });"#,
+            JsFileSource::js_module(),
+        ),
+    ] {
+        let model = js_model(code, source);
+        let component = model.components().next().expect("a component");
+        assert_eq!(component.setup_function_range(), None, "{code}");
     }
 }
 
@@ -963,6 +1130,7 @@ fn option_functions_and_runtime_types_point_to_their_nodes() {
   data() { return {}; },
   computed: { double: { get() { return 2; } } },
   render() { return null; },
+  setup(props) {},
 };"#;
     let parsed = biome_js_parser::parse(code, source, JsParserOptions::default());
     let root = parsed.tree();
@@ -989,4 +1157,5 @@ fn option_functions_and_runtime_types_point_to_their_nodes() {
         text_of(component.render_node()),
         "render() { return null; }"
     );
+    assert_eq!(text_of(component.setup_function_node()), "setup(props) {}");
 }
