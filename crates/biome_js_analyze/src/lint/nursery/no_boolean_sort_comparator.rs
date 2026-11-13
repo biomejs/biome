@@ -100,7 +100,7 @@ impl Rule for NoBooleanSortComparator {
         let state = boolean_comparator(&comparator(call)?, model)?;
 
         // Resolving the receiver is the least likely check to reject a call, so it runs last.
-        if is_known_non_indexed_collection(&callee.object().ok()?, model, MAX_RESOLUTION_DEPTH) {
+        if is_known_non_indexed_collection(&callee.object().ok()?, model) {
             return None;
         }
 

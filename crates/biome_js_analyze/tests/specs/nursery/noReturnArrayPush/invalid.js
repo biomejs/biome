@@ -37,3 +37,4 @@ async function f8() {
 }
 const length8 = (array.push)(value);
 const length9 = tag`items`.push(value);
+const length10 = new Uint8Array(4).push(value);

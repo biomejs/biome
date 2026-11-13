@@ -20,3 +20,7 @@ annotated.toSorted((a, b) => a - b)[0];
 function collections(values: Set<number> | Map<number, number>) {
 	return values.toSorted((a, b) => a - b)[0];
 }
+type Numbers = Set<number>;
+function alias(values: Numbers) {
+	return values.toSorted((a, b) => a - b)[0];
+}

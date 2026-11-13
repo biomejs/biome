@@ -32,6 +32,28 @@ function annotatedVariable() {
 	}
 }
 
+function constString() {
+	const names = "abc" as const;
+	for (let index = 0; index < Math.min(names.length, scores.length); index++) {
+		save(names[index], scores[index]);
+	}
+}
+
+type Names = string | undefined;
+function aliasedType(names: Names, scores: number[]) {
+	for (let index = 0; index < Math.min(names.length, scores.length); index++) {
+		save(names[index], scores[index]);
+	}
+}
+
+class ParameterProperty {
+	constructor(private names: string, scores: number[]) {
+		for (let index = 0; index < Math.min(names.length, scores.length); index++) {
+			save(names[index], scores[index]);
+		}
+	}
+}
+
 declare const declaredNames: string;
 declare const declaredScores: number[];
 for (let index = 0; index < Math.min(declaredNames.length, declaredScores.length); index++) {

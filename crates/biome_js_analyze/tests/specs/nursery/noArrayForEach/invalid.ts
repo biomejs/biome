@@ -39,7 +39,3 @@ function untyped(collection: { forEach(callback: (value: string) => void): void 
 function nullableArray(array: string[] | undefined) {
 	array?.forEach((value) => console.log(value));
 }
-
-function onlyNullish(value: null | undefined) {
-	value?.forEach((item) => console.log(item));
-}

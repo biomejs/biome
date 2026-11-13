@@ -41,3 +41,10 @@ function cachedWithAnnotation() {
 for (let index: number = 0; index < Math.min(names.length, scores.length); index++) {
 	save(names[index], scores[index]);
 }
+
+type Set<T> = T[];
+function shadowedSet(names: Set<string>, scores: number[]) {
+	for (let index = 0; index < Math.min(names.length, scores.length); index++) {
+		save(names[index], scores[index]);
+	}
+}
