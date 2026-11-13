@@ -18,7 +18,8 @@ The remaining work is tracked in
   declared type never changes.
 - **Declared type**: a variable's type before narrowing, from its annotation
   or from inference that ignores flow.
-- **Read**: one place where the program uses a variable's value.
+- **Read**: one place where the program uses the value of a variable or of a
+  property path.
 - **Execution root**: a body analyzed on its own: a module, a namespace, a
   function, a method, an accessor, a constructor, or a class static block.
 - **Condition**: the expression whose result decides which branch runs, such
@@ -67,6 +68,9 @@ revisiting the row.
 | `??` used as a condition | `x: string \| null \| undefined; y: boolean;`<br>`if (x ?? y) {} else { x }` | `null \| undefined` | `string \| null \| undefined`: `??` in a condition narrows neither operand in either branch | `x` is `""` in the `else` branch when `x` is `""` and `y` is false, because `""` is not nullish. The pattern is rare, so the sound result loses little. |
 | Falsy part of a broad `number` in the value of `&&` | `n: number; s: string;`<br>`n && s` | `string \| 0` | `number \| string` | `-0` and `NaN` are falsy numbers too, so `0` is wrong at runtime. A `string` or `bigint` left operand still contributes `""` or `0n`, its only falsy value. |
 | `eval` and the `arguments` object do not stop narrowing | `x: string \| null;`<br>`if (x !== null) { eval("x = null"); x }`<br>`if (x !== null) { arguments[0] = null; x }` | `string` | `string`, the same as TypeScript | A direct `eval` can write any variable it can see, including a type-guard function. In a function that is not in strict mode and has no default, rest, or destructured parameter, `arguments[0] = null` also writes the first parameter. Either way, `x` can be `null` at the read. Excluding them would stop narrowing in every function that reads `arguments`, even only `arguments.length`, or that contains a direct `eval`, while code that writes a narrowed variable this way is rare. |
+| Calls, callbacks, and writes through other variables keep property narrowing | `o: { v: string \| null }; reset: () => void;`<br>`if (o.v) { reset(); o.v }`<br>`if (o.v) { const a = o; a.v = null; o.v }`<br>`if (o.v) { [1].forEach(() => { o.v = null; }); o.v }` | `string` | `string`, the same as TypeScript. A write to `o.v` in the function's own code still stops the narrowing, including inside a function or arrow expression called where it is defined and inside a class static block. Biome also counts such a function when it is `async`, where TypeScript gives `string`. | `reset` or the callback can set `o.v` to `null`, and `a.v = null` sets it through another variable, so `o.v` can be `null` at the read. Stopping property narrowing at every call would make it useless, because most tests of a property are followed by a call, and rules would report code that TypeScript accepts. An `async` function called where it is defined runs until its first `await` before the code after the call, so Biome counts its writes. |
+| A write through a computed key | `o: { v: string \| null; w: string \| null };`<br>`k: "v" \| "w";`<br>`if (o.v) { o[k] = null; o.v }` | `string` | `string \| null`: a write through a key that is not a literal stops the narrowing of every property of the object | TypeScript ignores the write unless the key is a `const` with a literal type, although `k` can be `"v"` here. Treating the write as a write to every property is sound, and such writes are rare next to tests of a property. |
+| A getter narrows like a field | `class G { get v(): string \| null }`<br>`g: G; if (g.v) g.v` | `string` | `string`, the same as TypeScript | A getter can return a different value each time it runs, so `g.v` can be `null` at the second read. Treating getters as fields keeps narrowing for classes that expose their state through getters, while getters that change between two reads close together are rare. |
 
 ## Limits
 
@@ -80,6 +84,24 @@ These limits apply to every *Supported* and *Partial* row below:
   declared type ignores the default. A read inside a nested function or class
   member never sees facts from the enclosing execution root, and a read in a
   class field, including its decorators and computed key, never narrows.
+- A property path, such as `o.v` or `a.b.c`, narrows only when its variable
+  can narrow by the rule above, so a path on a variable declared in an
+  enclosing execution root, such as a module variable read in a function,
+  does not narrow. Its declared type at a read is the property's type on the
+  narrowed type of its object at that read. Only named properties, written
+  with `.` or `?.`, form a path: element access such as `o["v"]` or `t[0]`,
+  `this.x`, and private names such as `o.#v` do not narrow yet. `o?.v` and
+  `(o).v` are the same path as `o.v`.
+- A property path does not narrow anywhere in its execution root when the
+  root's own code writes the path or one of its prefixes, or writes any
+  property of one of its prefixes through a computed key, such as `o[k] = x`
+  or `o["v"] = x`. Assignments of every kind, `++` and `--`, destructuring
+  targets, the targets of `for...in` and `for...of`, and `delete` count as
+  writes, even after the read. So do writes inside a function or arrow
+  expression called where it is defined, a class static block, a field
+  initializer, a decorator, a computed key, or a parameter default. Writes in
+  the body of any other function, method, accessor, or constructor do not
+  count, and neither do writes through another variable.
 - Variables whose declared type is `any`, or includes a part that inference
   cannot determine, never narrow.
 - An execution root gets no narrowing at all when its own code, outside nested
@@ -120,7 +142,7 @@ code as TS7027, an error with `allowUnreachableCode: false`.
 | `!`, `!!`, and parentheses | `x: string \| null; if (!!x) x` | `string` | Supported |
 | `&&` and `\|\|` in conditions and as operands | `x: string \| null; y: number \| undefined;`<br>`if (x && y) x`; `x && x.length` | `string` at both reads | Supported |
 | The branches of a conditional expression | `x: string \| null; x ? f(x) : g(x)` | `string` in `f(x)`, `string \| null` in `g(x)` | Supported |
-| Truthiness of a property narrows the property | `o: { v: string \| null }; if (o.v) o.v` | `string` | Not yet |
+| Truthiness of a property narrows the property | `o: { v: string \| null }; if (o.v) o.v` | `string` | Supported |
 | Truthiness of a generic gives `NonNullable<T>` | `function f<T>(x: T) { x && x }` | `NonNullable<T>` at the right operand | Not yet |
 | A constant condition makes a branch unreachable | `x: string \| null;`<br>`if (x === null) { if (true) return; } x` | `string`; the branch of `if (false)` is unreachable (TS7027) | Partial: only `while` and `do...while` loops whose condition is a truthy literal, and `for` loops without a condition, have no exit other than `break`. The branches of `if (true)` and `if (false)` stay reachable, so the example gives `string \| null`. |
 
@@ -152,7 +174,7 @@ code as TS7027, an error with `allowUnreachableCode: false`.
 | `typeof` of `unknown` | `x: unknown; if (typeof x === "object") x`<br>`if (typeof x === "function") x` | `object \| null`; `Function` | Partial: only `"string"`, `"number"`, `"bigint"`, `"boolean"`, `"symbol"`, and `"undefined"` narrow `unknown`. |
 | `typeof` of `{}` gives the primitive | `x: {}; if (typeof x === "string") x` | `string` | Not yet |
 | `typeof` of a generic gives an intersection | `function f<T>(x: T) { if (typeof x === "string") x }` | `T & string` | Not yet |
-| `typeof` of a property | `o: { v: string \| number }; if (typeof o.v === "string") o.v` | `string` | Not yet |
+| `typeof` of a property | `o: { v: string \| number }; if (typeof o.v === "string") o.v` | `string` | Supported |
 | `typeof` of a discriminant narrows the object | `o: { k: "a"; a: 1 } \| { k: 1; b: 2 };`<br>`if (typeof o.k === "string") o` | `{ k: "a"; a: 1 }` | Not yet |
 | `typeof x?.y` removes nullish types from `x` | `x: { y: number } \| undefined;`<br>`if (typeof x?.y === "number") x` | `{ y: number }` | Not yet |
 | `switch (typeof x)` | `x: string \| number;`<br>`switch (typeof x) { case "string": x }` | `string` | Not yet |
@@ -220,7 +242,7 @@ The rows use `type Circle = { kind: "c"; r: number }` and
 | A generic type-guard function | `function isNonNull<T>(v: T \| null): v is T;`<br>`x: string \| null; if (isNonNull(x)) x` | `string` | Not yet |
 | An overloaded type-guard function | `function isS(v: string \| number): v is string;`<br>`function isS(v: boolean): boolean;`<br>`x: string \| number; if (isS(x)) x` | `string` | Not yet |
 | `this is T` | `class TreeNode { isLeaf(): this is Leaf }`<br>`n: TreeNode; if (n.isLeaf()) n` | `Leaf` | Not yet |
-| The argument is a property or an optional chain | `o: { v: string \| number }; if (isString(o.v)) o.v`<br>`x: { y: string \| number } \| undefined; if (isString(x?.y)) x` | `string`; `{ y: string \| number }` | Not yet |
+| The argument is a property or an optional chain | `o: { v: string \| number }; if (isString(o.v)) o.v`<br>`x: { y: string \| number } \| undefined; if (isString(x?.y)) x` | `string`; `{ y: string \| number }` | Partial: the property narrows, but the receiver of an optional chain does not, so the second example gives `{ y: string \| number } \| undefined`. |
 | Inferred type predicates | `const isStr = (v: unknown) => typeof v === "string";`<br>`x: string \| number; if (isStr(x)) x` | `string` | Not yet |
 | A variable annotated with a function type that returns a type predicate | `const g: (v: unknown) => v is string = ...;`<br>`if (g(x)) x` | `string` | Not yet |
 
@@ -334,7 +356,8 @@ whose result is not tested, do not narrow.
 
 | Behaviour | Example | TypeScript | Status |
 | --- | --- | --- | --- |
-| Property paths such as `a.b.c` | `a: { b: { c: string \| null } }; if (a.b.c) a.b.c` | `string` | Not yet |
+| Property paths such as `a.b.c` | `a: { b: { c: string \| null } }; if (a.b.c) a.b.c` | `string` | Supported |
+| An optional chain reads the same property as a plain access | `x: { y: string \| null } \| undefined; if (x?.y) x?.y` | `string` | Supported |
 | `this.x`, including assignments in a constructor | `class K { x: string \| null = null; m() { if (this.x) this.x } }` | `string` | Not yet |
 | Element access with a literal key | `o: { a: string \| null }; if (o["a"]) o["a"]` | `string` | Not yet |
 | Element access with a `const` key | `o: { a: string \| number }; const k = "a";`<br>`if (typeof o[k] === "string") o[k]` | `string` | Not yet |

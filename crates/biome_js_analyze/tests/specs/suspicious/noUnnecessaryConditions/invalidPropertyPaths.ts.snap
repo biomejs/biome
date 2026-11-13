@@ -1,0 +1,82 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidPropertyPaths.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// A property path narrows like a variable: after the test, `options.timer`
+// and `config.retry` cannot be nullish at the optional chains, as in
+// TypeScript.
+
+interface Timer {
+	cancel(): void;
+}
+
+function stop(options: { timer: Timer | null }) {
+	if (options.timer !== null) {
+		options.timer?.cancel();
+	}
+}
+
+function delay(config: { retry: { delay: number } | undefined }) {
+	if (!config.retry) {
+		return 0;
+	}
+	return config.retry?.delay;
+}
+
+```
+
+# Diagnostics
+```
+invalidPropertyPaths.ts:12:3 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    10 │ function stop(options: { timer: Timer | null }) {
+    11 │ 	if (options.timer !== null) {
+  > 12 │ 		options.timer?.cancel();
+       │ 		^^^^^^^^^^^^^
+    13 │ 	}
+    14 │ }
+  
+  i Replace ?. with ..
+  
+    10 │ function stop(options: { timer: Timer | null }) {
+    11 │ 	if (options.timer !== null) {
+  > 12 │ 		options.timer?.cancel();
+       │ 		             ^^
+    13 │ 	}
+    14 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidPropertyPaths.ts:20:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    18 │ 		return 0;
+    19 │ 	}
+  > 20 │ 	return config.retry?.delay;
+       │ 	       ^^^^^^^^^^^^
+    21 │ }
+    22 │ 
+  
+  i Replace ?. with ..
+  
+    18 │ 		return 0;
+    19 │ 	}
+  > 20 │ 	return config.retry?.delay;
+       │ 	                   ^^
+    21 │ }
+    22 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```

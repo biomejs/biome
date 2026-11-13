@@ -47,16 +47,30 @@ impl<'db> ResolutionCtx<'db, '_> {
                 self.flow_operand(&parenthesized.expression().ok()?)
             }
             AnyFlowExpression::JsStaticMemberExpression(member) => {
-                let object = self.flow_operand(&member.object().ok()?)?;
-                let name = member.member().ok()?.value_token().ok()?;
-                let result = self
-                    .resolve_static_member_expression(object, name.text_trimmed())
-                    .unwrap_or(TypeData::Unknown);
-                Some(if member.is_optional_chain() {
-                    self.optional_chain_result(object, result)
-                } else {
-                    result
-                })
+                let object = self.flow_operand(&member.object().ok()?);
+                // The type of the access, from the narrowed object when there
+                // is one, is the declared type that a property path narrows.
+                let declared = match object {
+                    Some(object) => {
+                        let name = member.member().ok()?.value_token().ok()?;
+                        let result = self
+                            .resolve_static_member_expression(object, name.text_trimmed())
+                            .unwrap_or(TypeData::Unknown);
+                        if member.is_optional_chain() {
+                            self.optional_chain_result(object, result)
+                        } else {
+                            result
+                        }
+                    }
+                    None if self.js_info.flow.read(member.range()).is_some() => {
+                        self.raw_operand(&AnyJsExpression::from(member.clone()))?
+                    }
+                    None => return None,
+                };
+                match self.narrow_path(member, declared) {
+                    Some(narrowed) => Some(narrowed),
+                    None => object.is_some().then_some(declared),
+                }
             }
             AnyFlowExpression::JsComputedMemberExpression(member) => {
                 let object_expression = member.object().ok()?;

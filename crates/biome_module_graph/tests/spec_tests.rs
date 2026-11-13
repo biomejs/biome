@@ -78,6 +78,8 @@ mod normalization;
 mod overloads;
 #[path = "spec_tests/promises.test.rs"]
 mod promises;
+#[path = "spec_tests/property_narrowing.test.rs"]
+mod property_narrowing;
 #[path = "spec_tests/queries.test.rs"]
 mod queries;
 #[path = "spec_tests/requests.test.rs"]

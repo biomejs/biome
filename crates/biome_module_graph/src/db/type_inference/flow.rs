@@ -2,8 +2,11 @@
 //!
 //! Collection records the incoming flow of each refinable read and the guards
 //! that the conditions of its execution root apply (see
-//! [`crate::js_module_info::flow`]). This module resolves the read's binding
-//! type and applies those guards along every path that reaches the read.
+//! [`crate::js_module_info::flow`]). This module resolves the type that the
+//! read's subject starts from and applies those guards along every path that
+//! reaches the read. A variable starts from its declared type. The declared
+//! type of a property path at a read is the type of the member access there,
+//! given the narrowed type of its object, as TypeScript types property reads.
 
 use super::{ImportResolution, ResolutionCtx, resolve_local_type_on_demand};
 use crate::db::queries::{
@@ -15,7 +18,7 @@ use crate::js_module_info::flow::{
     guard_signature,
 };
 use crate::{JsModuleInfo, ModuleDb, ModuleInfo};
-use biome_js_syntax::JsIdentifierExpression;
+use biome_js_syntax::{JsIdentifierExpression, JsStaticMemberExpression};
 use biome_js_type_info::interned_types::{Literal, TypeData};
 use biome_js_type_info::{NarrowingPredicate, TypeofKind, is_narrowing_invariant, narrow_type};
 use biome_rowan::{AstNode, TextRange};
@@ -45,6 +48,8 @@ pub(in crate::db) fn flow_binding_baseline<'db>(
     info: &JsModuleInfo,
     range: TextRange,
 ) -> Option<TypeData<'db>> {
+    // Declaration queries can erase a cyclic object's shape. The raw baseline
+    // still lets flow detect an impossible branch and return an unknown override.
     let reference = info.raw_binding_types.get(&range)?;
     let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
     let declared = ctx.resolve(reference);
@@ -301,7 +306,10 @@ impl<'db> ResolutionCtx<'db, '_> {
     ) -> Option<TypeData<'db>> {
         let info = self.js_info;
         let read = info.flow.read(identifier.range())?;
-        let &FlowSubject::Binding(binding) = info.flow.root(read.root)?.subject(read.subject)?;
+        let &FlowSubject::Binding(binding) = info.flow.root(read.root)?.subject(read.subject)?
+        else {
+            return None;
+        };
         let baseline = if self.evaluates_flow_locally() {
             self.local_binding_baseline(binding)
         } else {
@@ -327,6 +335,8 @@ impl<'db> ResolutionCtx<'db, '_> {
         if let Some(baseline) = self.local_flow.as_ref()?.baselines.get(&binding) {
             return *baseline;
         }
+        // As in `flow_binding_baseline`, the raw binding type gives the
+        // declared type.
         let baseline = self
             .js_info
             .raw_binding_types
@@ -343,7 +353,32 @@ impl<'db> ResolutionCtx<'db, '_> {
         baseline
     }
 
-    /// Returns the type that narrowing of a binding whose declared type is
+    /// Returns the narrowed type of the property path read at `member`, given
+    /// its `declared` type there: the type of the member access with its
+    /// object's narrowed type.
+    ///
+    /// Returns `None` when collection kept no flow for the read, when no
+    /// runtime test can change `declared`, or when narrowing leaves it
+    /// unchanged. Reads of the same path with equal declared types share one
+    /// solve.
+    pub(super) fn narrow_path(
+        &mut self,
+        member: &JsStaticMemberExpression,
+        declared: TypeData<'db>,
+    ) -> Option<TypeData<'db>> {
+        let read = self.js_info.flow.read(member.range())?;
+        let baseline = self.narrowing_baseline(declared);
+        infer_flow_subject_type(
+            self.db,
+            FlowSubjectTypeInput::new(
+                self.db,
+                FlowSubjectRootInput::new(self.db, self.module, read.root, read.subject, baseline),
+                read.point,
+            ),
+        )
+    }
+
+    /// Returns the type that narrowing of a subject whose declared type is
     /// `declared` starts from: `declared` with its unions, aliases, and
     /// `typeof` types flattened.
     ///
@@ -351,10 +386,6 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// contains `any` or an undetermined member, and `Unknown` when flattening
     /// exceeds its work limit.
     fn narrowing_baseline(&mut self, declared: TypeData<'db>) -> Option<TypeData<'db>> {
-        // The declared type is resolved from the raw binding type, not through
-        // a declaration query: declaration queries can erase a cyclic object's
-        // shape, while the raw type still lets flow detect an impossible
-        // branch and return an unknown override.
         match self.flow_baseline(declared) {
             Some(baseline) if is_narrowing_invariant(baseline) => None,
             Some(baseline) => Some(baseline),
