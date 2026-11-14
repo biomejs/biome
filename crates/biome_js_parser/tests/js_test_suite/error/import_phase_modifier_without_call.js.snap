@@ -1,0 +1,389 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```js
+import.defer
+import.source;
+import.defer.foo
+import.source x
+new import.defer
+a = import.defer + 1
+import.defer("x")
+import.source("x")
+import.meta
+import.source
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsBogusExpression {
+                items: [
+                    IMPORT_KW@0..6 "import" [] [],
+                    DOT@6..7 "." [] [],
+                    DEFER_KW@7..12 "defer" [] [],
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsBogusExpression {
+                items: [
+                    IMPORT_KW@12..19 "import" [Newline("\n")] [],
+                    DOT@19..20 "." [] [],
+                    SOURCE_KW@20..26 "source" [] [],
+                ],
+            },
+            semicolon_token: SEMICOLON@26..27 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsStaticMemberExpression {
+                object: JsBogusExpression {
+                    items: [
+                        IMPORT_KW@27..34 "import" [Newline("\n")] [],
+                        DOT@34..35 "." [] [],
+                        DEFER_KW@35..40 "defer" [] [],
+                    ],
+                },
+                operator_token: DOT@40..41 "." [] [],
+                member: JsName {
+                    value_token: IDENT@41..44 "foo" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsBogusExpression {
+                items: [
+                    IMPORT_KW@44..51 "import" [Newline("\n")] [],
+                    DOT@51..52 "." [] [],
+                    SOURCE_KW@52..59 "source" [] [Whitespace(" ")],
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@59..60 "x" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsNewExpression {
+                new_token: NEW_KW@60..65 "new" [Newline("\n")] [Whitespace(" ")],
+                callee: JsBogusExpression {
+                    items: [
+                        IMPORT_KW@65..71 "import" [] [],
+                        DOT@71..72 "." [] [],
+                        DEFER_KW@72..77 "defer" [] [],
+                    ],
+                },
+                type_arguments: missing (optional),
+                arguments: missing (optional),
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsAssignmentExpression {
+                left: JsIdentifierAssignment {
+                    name_token: IDENT@77..80 "a" [Newline("\n")] [Whitespace(" ")],
+                },
+                operator_token: EQ@80..82 "=" [] [Whitespace(" ")],
+                right: JsBinaryExpression {
+                    left: JsBogusExpression {
+                        items: [
+                            IMPORT_KW@82..88 "import" [] [],
+                            DOT@88..89 "." [] [],
+                            DEFER_KW@89..95 "defer" [] [Whitespace(" ")],
+                        ],
+                    },
+                    operator_token: PLUS@95..97 "+" [] [Whitespace(" ")],
+                    right: JsNumberLiteralExpression {
+                        value_token: JS_NUMBER_LITERAL@97..98 "1" [] [],
+                    },
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsImportCallExpression {
+                import_token: IMPORT_KW@98..105 "import" [Newline("\n")] [],
+                dot_token: DOT@105..106 "." [] [],
+                phase: DEFER_KW@106..111 "defer" [] [],
+                arguments: JsCallArguments {
+                    l_paren_token: L_PAREN@111..112 "(" [] [],
+                    args: JsCallArgumentList [
+                        JsStringLiteralExpression {
+                            value_token: JS_STRING_LITERAL@112..115 "\"x\"" [] [],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@115..116 ")" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsImportCallExpression {
+                import_token: IMPORT_KW@116..123 "import" [Newline("\n")] [],
+                dot_token: DOT@123..124 "." [] [],
+                phase: SOURCE_KW@124..130 "source" [] [],
+                arguments: JsCallArguments {
+                    l_paren_token: L_PAREN@130..131 "(" [] [],
+                    args: JsCallArgumentList [
+                        JsStringLiteralExpression {
+                            value_token: JS_STRING_LITERAL@131..134 "\"x\"" [] [],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@134..135 ")" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsImportMetaExpression {
+                import_token: IMPORT_KW@135..142 "import" [Newline("\n")] [],
+                dot_token: DOT@142..143 "." [] [],
+                meta_token: META@143..147 "meta" [] [],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsBogusExpression {
+                items: [
+                    IMPORT_KW@147..154 "import" [Newline("\n")] [],
+                    DOT@154..155 "." [] [],
+                    SOURCE_KW@155..161 "source" [] [],
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@161..162 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..162
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..161
+    0: JS_EXPRESSION_STATEMENT@0..12
+      0: JS_BOGUS_EXPRESSION@0..12
+        0: IMPORT_KW@0..6 "import" [] []
+        1: DOT@6..7 "." [] []
+        2: DEFER_KW@7..12 "defer" [] []
+      1: (empty)
+    1: JS_EXPRESSION_STATEMENT@12..27
+      0: JS_BOGUS_EXPRESSION@12..26
+        0: IMPORT_KW@12..19 "import" [Newline("\n")] []
+        1: DOT@19..20 "." [] []
+        2: SOURCE_KW@20..26 "source" [] []
+      1: SEMICOLON@26..27 ";" [] []
+    2: JS_EXPRESSION_STATEMENT@27..44
+      0: JS_STATIC_MEMBER_EXPRESSION@27..44
+        0: JS_BOGUS_EXPRESSION@27..40
+          0: IMPORT_KW@27..34 "import" [Newline("\n")] []
+          1: DOT@34..35 "." [] []
+          2: DEFER_KW@35..40 "defer" [] []
+        1: DOT@40..41 "." [] []
+        2: JS_NAME@41..44
+          0: IDENT@41..44 "foo" [] []
+      1: (empty)
+    3: JS_EXPRESSION_STATEMENT@44..59
+      0: JS_BOGUS_EXPRESSION@44..59
+        0: IMPORT_KW@44..51 "import" [Newline("\n")] []
+        1: DOT@51..52 "." [] []
+        2: SOURCE_KW@52..59 "source" [] [Whitespace(" ")]
+      1: (empty)
+    4: JS_EXPRESSION_STATEMENT@59..60
+      0: JS_IDENTIFIER_EXPRESSION@59..60
+        0: JS_REFERENCE_IDENTIFIER@59..60
+          0: IDENT@59..60 "x" [] []
+      1: (empty)
+    5: JS_EXPRESSION_STATEMENT@60..77
+      0: JS_NEW_EXPRESSION@60..77
+        0: NEW_KW@60..65 "new" [Newline("\n")] [Whitespace(" ")]
+        1: JS_BOGUS_EXPRESSION@65..77
+          0: IMPORT_KW@65..71 "import" [] []
+          1: DOT@71..72 "." [] []
+          2: DEFER_KW@72..77 "defer" [] []
+        2: (empty)
+        3: (empty)
+      1: (empty)
+    6: JS_EXPRESSION_STATEMENT@77..98
+      0: JS_ASSIGNMENT_EXPRESSION@77..98
+        0: JS_IDENTIFIER_ASSIGNMENT@77..80
+          0: IDENT@77..80 "a" [Newline("\n")] [Whitespace(" ")]
+        1: EQ@80..82 "=" [] [Whitespace(" ")]
+        2: JS_BINARY_EXPRESSION@82..98
+          0: JS_BOGUS_EXPRESSION@82..95
+            0: IMPORT_KW@82..88 "import" [] []
+            1: DOT@88..89 "." [] []
+            2: DEFER_KW@89..95 "defer" [] [Whitespace(" ")]
+          1: PLUS@95..97 "+" [] [Whitespace(" ")]
+          2: JS_NUMBER_LITERAL_EXPRESSION@97..98
+            0: JS_NUMBER_LITERAL@97..98 "1" [] []
+      1: (empty)
+    7: JS_EXPRESSION_STATEMENT@98..116
+      0: JS_IMPORT_CALL_EXPRESSION@98..116
+        0: IMPORT_KW@98..105 "import" [Newline("\n")] []
+        1: DOT@105..106 "." [] []
+        2: DEFER_KW@106..111 "defer" [] []
+        3: JS_CALL_ARGUMENTS@111..116
+          0: L_PAREN@111..112 "(" [] []
+          1: JS_CALL_ARGUMENT_LIST@112..115
+            0: JS_STRING_LITERAL_EXPRESSION@112..115
+              0: JS_STRING_LITERAL@112..115 "\"x\"" [] []
+          2: R_PAREN@115..116 ")" [] []
+      1: (empty)
+    8: JS_EXPRESSION_STATEMENT@116..135
+      0: JS_IMPORT_CALL_EXPRESSION@116..135
+        0: IMPORT_KW@116..123 "import" [Newline("\n")] []
+        1: DOT@123..124 "." [] []
+        2: SOURCE_KW@124..130 "source" [] []
+        3: JS_CALL_ARGUMENTS@130..135
+          0: L_PAREN@130..131 "(" [] []
+          1: JS_CALL_ARGUMENT_LIST@131..134
+            0: JS_STRING_LITERAL_EXPRESSION@131..134
+              0: JS_STRING_LITERAL@131..134 "\"x\"" [] []
+          2: R_PAREN@134..135 ")" [] []
+      1: (empty)
+    9: JS_EXPRESSION_STATEMENT@135..147
+      0: JS_IMPORT_META_EXPRESSION@135..147
+        0: IMPORT_KW@135..142 "import" [Newline("\n")] []
+        1: DOT@142..143 "." [] []
+        2: META@143..147 "meta" [] []
+      1: (empty)
+    10: JS_EXPRESSION_STATEMENT@147..161
+      0: JS_BOGUS_EXPRESSION@147..161
+        0: IMPORT_KW@147..154 "import" [Newline("\n")] []
+        1: DOT@154..155 "." [] []
+        2: SOURCE_KW@155..161 "source" [] []
+      1: (empty)
+  4: EOF@161..162 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+import_phase_modifier_without_call.js:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `(` after `import.defer`
+  
+  > 1 │ import.defer
+      │        ^^^^^
+    2 │ import.source;
+    3 │ import.defer.foo
+  
+import_phase_modifier_without_call.js:2:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `(` after `import.source`
+  
+    1 │ import.defer
+  > 2 │ import.source;
+      │        ^^^^^^
+    3 │ import.defer.foo
+    4 │ import.source x
+  
+import_phase_modifier_without_call.js:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `(` after `import.defer`
+  
+    1 │ import.defer
+    2 │ import.source;
+  > 3 │ import.defer.foo
+      │        ^^^^^
+    4 │ import.source x
+    5 │ new import.defer
+  
+import_phase_modifier_without_call.js:4:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `(` after `import.source`
+  
+    2 │ import.source;
+    3 │ import.defer.foo
+  > 4 │ import.source x
+      │        ^^^^^^
+    5 │ new import.defer
+    6 │ a = import.defer + 1
+  
+import_phase_modifier_without_call.js:4:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    2 │ import.source;
+    3 │ import.defer.foo
+  > 4 │ import.source x
+      │               ^
+    5 │ new import.defer
+    6 │ a = import.defer + 1
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    2 │ import.source;
+    3 │ import.defer.foo
+  > 4 │ import.source x
+      │               ^
+    5 │ new import.defer
+    6 │ a = import.defer + 1
+  
+  i ...Which is required to end this statement
+  
+    2 │ import.source;
+    3 │ import.defer.foo
+  > 4 │ import.source x
+      │ ^^^^^^^^^^^^^^^
+    5 │ new import.defer
+    6 │ a = import.defer + 1
+  
+import_phase_modifier_without_call.js:5:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `(` after `import.defer`
+  
+    3 │ import.defer.foo
+    4 │ import.source x
+  > 5 │ new import.defer
+      │            ^^^^^
+    6 │ a = import.defer + 1
+    7 │ import.defer("x")
+  
+import_phase_modifier_without_call.js:6:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `(` after `import.defer`
+  
+    4 │ import.source x
+    5 │ new import.defer
+  > 6 │ a = import.defer + 1
+      │            ^^^^^
+    7 │ import.defer("x")
+    8 │ import.source("x")
+  
+import_phase_modifier_without_call.js:10:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `(` after `import.source`
+  
+     8 │ import.source("x")
+     9 │ import.meta
+  > 10 │ import.source
+       │        ^^^^^^
+    11 │ 
+  
+```
