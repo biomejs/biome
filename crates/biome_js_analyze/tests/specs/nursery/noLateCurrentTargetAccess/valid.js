@@ -40,6 +40,14 @@ element.onclick = async (event) => {
 	}
 };
 
+// A handler that is neither `async` nor a generator can't pause, so its `for await` loop is a syntax error, not a pause
+element.onclick = (event) => {
+	for await (const chunk of stream) {
+		log(chunk);
+	}
+	event.currentTarget.foo();
+};
+
 // Read before a `yield` in a generator handler
 element.onclick = function* (event) {
 	event.currentTarget.disabled = true;
