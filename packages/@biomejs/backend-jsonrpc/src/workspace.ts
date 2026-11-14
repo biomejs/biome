@@ -4053,6 +4053,11 @@ export interface Nursery {
 	 */
 	useExpectToContain?: UseExpectToContainConfiguration;
 	/**
+	 * Enforce using toHaveBeenCalled() to check whether a mock function was called.
+	 * See https://biomejs.dev/linter/rules/use-expect-to-have-been-called
+	 */
+	useExpectToHaveBeenCalled?: UseExpectToHaveBeenCalledConfiguration;
+	/**
 	 * Require explicit return types on functions and class methods.
 	 * See https://biomejs.dev/linter/rules/use-explicit-return-type
 	 */
@@ -7361,6 +7366,9 @@ export type UseExhaustiveSwitchCasesConfiguration =
 export type UseExpectToContainConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExpectToContainOptions;
+export type UseExpectToHaveBeenCalledConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseExpectToHaveBeenCalledOptions;
 export type UseExplicitReturnTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExplicitReturnTypeOptions;
@@ -10885,6 +10893,14 @@ export interface RuleWithUseExpectToContainOptions {
 	level: RulePlainConfiguration;
 	options?: UseExpectToContainOptions;
 }
+export interface RuleWithUseExpectToHaveBeenCalledOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseExpectToHaveBeenCalledOptions;
+}
 export interface RuleWithUseExplicitReturnTypeOptions {
 	level: RulePlainConfiguration;
 	options?: UseExplicitReturnTypeOptions;
@@ -14039,6 +14055,7 @@ export interface UseExhaustiveSwitchCasesOptions {
 	requireExplicitCase?: boolean;
 }
 export type UseExpectToContainOptions = {};
+export type UseExpectToHaveBeenCalledOptions = {};
 /**
  * Options for the `useExplicitReturnType` rule.
  */
@@ -16128,6 +16145,7 @@ export type Category =
 	| "lint/nursery/useDisposables"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExpectToContain"
+	| "lint/nursery/useExpectToHaveBeenCalled"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitReturnType"
 	| "lint/nursery/useExplicitType"

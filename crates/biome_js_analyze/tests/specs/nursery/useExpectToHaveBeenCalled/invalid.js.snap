@@ -1,0 +1,820 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+expect(method).toBeCalledTimes(0);
+expect(method).not.toBeCalledTimes(0);
+expect(method).toHaveBeenCalledTimes(0);
+expect(method).not.toHaveBeenCalledTimes(0);
+expect(method).resolves.toHaveBeenCalledTimes(0);
+expect(method).rejects.toHaveBeenCalledTimes(0);
+expect(method).resolves.not.toHaveBeenCalledTimes(0);
+expect(method).rejects.not.toHaveBeenCalledTimes(0);
+
+// Other ways to write the matcher, the modifier, and zero.
+expect(method)["toHaveBeenCalledTimes"](0);
+expect(method)["not"]["toBeCalledTimes"](0);
+expect(method)[`not`].toBeCalledTimes(0);
+expect(method).toHaveBeenCalledTimes((0));
+expect(method).toHaveBeenCalledTimes(0,);
+expect(method).toHaveBeenCalledTimes(0.0);
+expect(method).toHaveBeenCalledTimes(0x0);
+expect(object.method).toHaveBeenCalledTimes(0);
+expect(object?.method).not.toHaveBeenCalledTimes(0);
+expect(method, "custom message").toHaveBeenCalledTimes(0);
+
+test("assertions across several lines", () => {
+	expect(method)
+		.toHaveBeenCalledTimes(0);
+	expect(method)
+		.not
+		.toHaveBeenCalledTimes(0);
+});
+
+test("comments around the assertion are kept", () => {
+	// leading comment
+	expect(method).toHaveBeenCalledTimes(0); // trailing comment
+	/* before */ expect(method).not.toHaveBeenCalledTimes(0) /* after */;
+});
+
+test("no fix when comments would be removed", () => {
+	expect(method).toHaveBeenCalledTimes(/* never */ 0);
+	expect(method).not /* at least once */.toHaveBeenCalledTimes(0);
+	expect(method)
+		// why this is checked
+		.toHaveBeenCalledTimes(0);
+});
+
+test("no fix when extra arguments would be removed", () => {
+	expect(method).not.toHaveBeenCalledTimes(0, 1, 2);
+	expect(method).toHaveBeenCalledTimes(0, sideEffect());
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:2:16 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ expect(method).toBeCalledTimes(0);
+      │                ^^^^^^^^^^^^^^^
+    3 │ expect(method).not.toBeCalledTimes(0);
+    4 │ expect(method).toHaveBeenCalledTimes(0);
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use not.toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use not.toHaveBeenCalled() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - expect(method).toBeCalledTimes(0);
+        2 │ + expect(method).not.toHaveBeenCalled();
+     3  3 │   expect(method).not.toBeCalledTimes(0);
+     4  4 │   expect(method).toHaveBeenCalledTimes(0);
+  
+
+```
+
+```
+invalid.js:3:20 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    1 │ /* should generate diagnostics */
+    2 │ expect(method).toBeCalledTimes(0);
+  > 3 │ expect(method).not.toBeCalledTimes(0);
+      │                    ^^^^^^^^^^^^^^^
+    4 │ expect(method).toHaveBeenCalledTimes(0);
+    5 │ expect(method).not.toHaveBeenCalledTimes(0);
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toHaveBeenCalled() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   expect(method).toBeCalledTimes(0);
+     3    │ - expect(method).not.toBeCalledTimes(0);
+        3 │ + expect(method).toHaveBeenCalled();
+     4  4 │   expect(method).toHaveBeenCalledTimes(0);
+     5  5 │   expect(method).not.toHaveBeenCalledTimes(0);
+  
+
+```
+
+```
+invalid.js:4:16 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    2 │ expect(method).toBeCalledTimes(0);
+    3 │ expect(method).not.toBeCalledTimes(0);
+  > 4 │ expect(method).toHaveBeenCalledTimes(0);
+      │                ^^^^^^^^^^^^^^^^^^^^^
+    5 │ expect(method).not.toHaveBeenCalledTimes(0);
+    6 │ expect(method).resolves.toHaveBeenCalledTimes(0);
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use not.toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use not.toHaveBeenCalled() instead.
+  
+     2  2 │   expect(method).toBeCalledTimes(0);
+     3  3 │   expect(method).not.toBeCalledTimes(0);
+     4    │ - expect(method).toHaveBeenCalledTimes(0);
+        4 │ + expect(method).not.toHaveBeenCalled();
+     5  5 │   expect(method).not.toHaveBeenCalledTimes(0);
+     6  6 │   expect(method).resolves.toHaveBeenCalledTimes(0);
+  
+
+```
+
+```
+invalid.js:5:20 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    3 │ expect(method).not.toBeCalledTimes(0);
+    4 │ expect(method).toHaveBeenCalledTimes(0);
+  > 5 │ expect(method).not.toHaveBeenCalledTimes(0);
+      │                    ^^^^^^^^^^^^^^^^^^^^^
+    6 │ expect(method).resolves.toHaveBeenCalledTimes(0);
+    7 │ expect(method).rejects.toHaveBeenCalledTimes(0);
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toHaveBeenCalled() instead.
+  
+     3  3 │   expect(method).not.toBeCalledTimes(0);
+     4  4 │   expect(method).toHaveBeenCalledTimes(0);
+     5    │ - expect(method).not.toHaveBeenCalledTimes(0);
+        5 │ + expect(method).toHaveBeenCalled();
+     6  6 │   expect(method).resolves.toHaveBeenCalledTimes(0);
+     7  7 │   expect(method).rejects.toHaveBeenCalledTimes(0);
+  
+
+```
+
+```
+invalid.js:6:25 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    4 │ expect(method).toHaveBeenCalledTimes(0);
+    5 │ expect(method).not.toHaveBeenCalledTimes(0);
+  > 6 │ expect(method).resolves.toHaveBeenCalledTimes(0);
+      │                         ^^^^^^^^^^^^^^^^^^^^^
+    7 │ expect(method).rejects.toHaveBeenCalledTimes(0);
+    8 │ expect(method).resolves.not.toHaveBeenCalledTimes(0);
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use not.toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use not.toHaveBeenCalled() instead.
+  
+     4  4 │   expect(method).toHaveBeenCalledTimes(0);
+     5  5 │   expect(method).not.toHaveBeenCalledTimes(0);
+     6    │ - expect(method).resolves.toHaveBeenCalledTimes(0);
+        6 │ + expect(method).resolves.not.toHaveBeenCalled();
+     7  7 │   expect(method).rejects.toHaveBeenCalledTimes(0);
+     8  8 │   expect(method).resolves.not.toHaveBeenCalledTimes(0);
+  
+
+```
+
+```
+invalid.js:7:24 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    5 │ expect(method).not.toHaveBeenCalledTimes(0);
+    6 │ expect(method).resolves.toHaveBeenCalledTimes(0);
+  > 7 │ expect(method).rejects.toHaveBeenCalledTimes(0);
+      │                        ^^^^^^^^^^^^^^^^^^^^^
+    8 │ expect(method).resolves.not.toHaveBeenCalledTimes(0);
+    9 │ expect(method).rejects.not.toHaveBeenCalledTimes(0);
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use not.toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use not.toHaveBeenCalled() instead.
+  
+     5  5 │   expect(method).not.toHaveBeenCalledTimes(0);
+     6  6 │   expect(method).resolves.toHaveBeenCalledTimes(0);
+     7    │ - expect(method).rejects.toHaveBeenCalledTimes(0);
+        7 │ + expect(method).rejects.not.toHaveBeenCalled();
+     8  8 │   expect(method).resolves.not.toHaveBeenCalledTimes(0);
+     9  9 │   expect(method).rejects.not.toHaveBeenCalledTimes(0);
+  
+
+```
+
+```
+invalid.js:8:29 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+     6 │ expect(method).resolves.toHaveBeenCalledTimes(0);
+     7 │ expect(method).rejects.toHaveBeenCalledTimes(0);
+   > 8 │ expect(method).resolves.not.toHaveBeenCalledTimes(0);
+       │                             ^^^^^^^^^^^^^^^^^^^^^
+     9 │ expect(method).rejects.not.toHaveBeenCalledTimes(0);
+    10 │ 
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toHaveBeenCalled() instead.
+  
+     6  6 │   expect(method).resolves.toHaveBeenCalledTimes(0);
+     7  7 │   expect(method).rejects.toHaveBeenCalledTimes(0);
+     8    │ - expect(method).resolves.not.toHaveBeenCalledTimes(0);
+        8 │ + expect(method).resolves.toHaveBeenCalled();
+     9  9 │   expect(method).rejects.not.toHaveBeenCalledTimes(0);
+    10 10 │   
+  
+
+```
+
+```
+invalid.js:9:28 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+     7 │ expect(method).rejects.toHaveBeenCalledTimes(0);
+     8 │ expect(method).resolves.not.toHaveBeenCalledTimes(0);
+   > 9 │ expect(method).rejects.not.toHaveBeenCalledTimes(0);
+       │                            ^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ // Other ways to write the matcher, the modifier, and zero.
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toHaveBeenCalled() instead.
+  
+     7  7 │   expect(method).rejects.toHaveBeenCalledTimes(0);
+     8  8 │   expect(method).resolves.not.toHaveBeenCalledTimes(0);
+     9    │ - expect(method).rejects.not.toHaveBeenCalledTimes(0);
+        9 │ + expect(method).rejects.toHaveBeenCalled();
+    10 10 │   
+    11 11 │   // Other ways to write the matcher, the modifier, and zero.
+  
+
+```
+
+```
+invalid.js:12:16 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    11 │ // Other ways to write the matcher, the modifier, and zero.
+  > 12 │ expect(method)["toHaveBeenCalledTimes"](0);
+       │                ^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ expect(method)["not"]["toBeCalledTimes"](0);
+    14 │ expect(method)[`not`].toBeCalledTimes(0);
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use not.toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use not.toHaveBeenCalled() instead.
+  
+    10 10 │   
+    11 11 │   // Other ways to write the matcher, the modifier, and zero.
+    12    │ - expect(method)["toHaveBeenCalledTimes"](0);
+       12 │ + expect(method).not.toHaveBeenCalled();
+    13 13 │   expect(method)["not"]["toBeCalledTimes"](0);
+    14 14 │   expect(method)[`not`].toBeCalledTimes(0);
+  
+
+```
+
+```
+invalid.js:13:23 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    11 │ // Other ways to write the matcher, the modifier, and zero.
+    12 │ expect(method)["toHaveBeenCalledTimes"](0);
+  > 13 │ expect(method)["not"]["toBeCalledTimes"](0);
+       │                       ^^^^^^^^^^^^^^^^^
+    14 │ expect(method)[`not`].toBeCalledTimes(0);
+    15 │ expect(method).toHaveBeenCalledTimes((0));
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toHaveBeenCalled() instead.
+  
+    11 11 │   // Other ways to write the matcher, the modifier, and zero.
+    12 12 │   expect(method)["toHaveBeenCalledTimes"](0);
+    13    │ - expect(method)["not"]["toBeCalledTimes"](0);
+       13 │ + expect(method).toHaveBeenCalled();
+    14 14 │   expect(method)[`not`].toBeCalledTimes(0);
+    15 15 │   expect(method).toHaveBeenCalledTimes((0));
+  
+
+```
+
+```
+invalid.js:14:23 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    12 │ expect(method)["toHaveBeenCalledTimes"](0);
+    13 │ expect(method)["not"]["toBeCalledTimes"](0);
+  > 14 │ expect(method)[`not`].toBeCalledTimes(0);
+       │                       ^^^^^^^^^^^^^^^
+    15 │ expect(method).toHaveBeenCalledTimes((0));
+    16 │ expect(method).toHaveBeenCalledTimes(0,);
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toHaveBeenCalled() instead.
+  
+    12 12 │   expect(method)["toHaveBeenCalledTimes"](0);
+    13 13 │   expect(method)["not"]["toBeCalledTimes"](0);
+    14    │ - expect(method)[`not`].toBeCalledTimes(0);
+       14 │ + expect(method).toHaveBeenCalled();
+    15 15 │   expect(method).toHaveBeenCalledTimes((0));
+    16 16 │   expect(method).toHaveBeenCalledTimes(0,);
+  
+
+```
+
+```
+invalid.js:15:16 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    13 │ expect(method)["not"]["toBeCalledTimes"](0);
+    14 │ expect(method)[`not`].toBeCalledTimes(0);
+  > 15 │ expect(method).toHaveBeenCalledTimes((0));
+       │                ^^^^^^^^^^^^^^^^^^^^^
+    16 │ expect(method).toHaveBeenCalledTimes(0,);
+    17 │ expect(method).toHaveBeenCalledTimes(0.0);
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use not.toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use not.toHaveBeenCalled() instead.
+  
+    13 13 │   expect(method)["not"]["toBeCalledTimes"](0);
+    14 14 │   expect(method)[`not`].toBeCalledTimes(0);
+    15    │ - expect(method).toHaveBeenCalledTimes((0));
+       15 │ + expect(method).not.toHaveBeenCalled();
+    16 16 │   expect(method).toHaveBeenCalledTimes(0,);
+    17 17 │   expect(method).toHaveBeenCalledTimes(0.0);
+  
+
+```
+
+```
+invalid.js:16:16 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    14 │ expect(method)[`not`].toBeCalledTimes(0);
+    15 │ expect(method).toHaveBeenCalledTimes((0));
+  > 16 │ expect(method).toHaveBeenCalledTimes(0,);
+       │                ^^^^^^^^^^^^^^^^^^^^^
+    17 │ expect(method).toHaveBeenCalledTimes(0.0);
+    18 │ expect(method).toHaveBeenCalledTimes(0x0);
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use not.toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use not.toHaveBeenCalled() instead.
+  
+    14 14 │   expect(method)[`not`].toBeCalledTimes(0);
+    15 15 │   expect(method).toHaveBeenCalledTimes((0));
+    16    │ - expect(method).toHaveBeenCalledTimes(0,);
+       16 │ + expect(method).not.toHaveBeenCalled();
+    17 17 │   expect(method).toHaveBeenCalledTimes(0.0);
+    18 18 │   expect(method).toHaveBeenCalledTimes(0x0);
+  
+
+```
+
+```
+invalid.js:17:16 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    15 │ expect(method).toHaveBeenCalledTimes((0));
+    16 │ expect(method).toHaveBeenCalledTimes(0,);
+  > 17 │ expect(method).toHaveBeenCalledTimes(0.0);
+       │                ^^^^^^^^^^^^^^^^^^^^^
+    18 │ expect(method).toHaveBeenCalledTimes(0x0);
+    19 │ expect(object.method).toHaveBeenCalledTimes(0);
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use not.toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use not.toHaveBeenCalled() instead.
+  
+    15 15 │   expect(method).toHaveBeenCalledTimes((0));
+    16 16 │   expect(method).toHaveBeenCalledTimes(0,);
+    17    │ - expect(method).toHaveBeenCalledTimes(0.0);
+       17 │ + expect(method).not.toHaveBeenCalled();
+    18 18 │   expect(method).toHaveBeenCalledTimes(0x0);
+    19 19 │   expect(object.method).toHaveBeenCalledTimes(0);
+  
+
+```
+
+```
+invalid.js:18:16 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    16 │ expect(method).toHaveBeenCalledTimes(0,);
+    17 │ expect(method).toHaveBeenCalledTimes(0.0);
+  > 18 │ expect(method).toHaveBeenCalledTimes(0x0);
+       │                ^^^^^^^^^^^^^^^^^^^^^
+    19 │ expect(object.method).toHaveBeenCalledTimes(0);
+    20 │ expect(object?.method).not.toHaveBeenCalledTimes(0);
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use not.toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use not.toHaveBeenCalled() instead.
+  
+    16 16 │   expect(method).toHaveBeenCalledTimes(0,);
+    17 17 │   expect(method).toHaveBeenCalledTimes(0.0);
+    18    │ - expect(method).toHaveBeenCalledTimes(0x0);
+       18 │ + expect(method).not.toHaveBeenCalled();
+    19 19 │   expect(object.method).toHaveBeenCalledTimes(0);
+    20 20 │   expect(object?.method).not.toHaveBeenCalledTimes(0);
+  
+
+```
+
+```
+invalid.js:19:23 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    17 │ expect(method).toHaveBeenCalledTimes(0.0);
+    18 │ expect(method).toHaveBeenCalledTimes(0x0);
+  > 19 │ expect(object.method).toHaveBeenCalledTimes(0);
+       │                       ^^^^^^^^^^^^^^^^^^^^^
+    20 │ expect(object?.method).not.toHaveBeenCalledTimes(0);
+    21 │ expect(method, "custom message").toHaveBeenCalledTimes(0);
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use not.toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use not.toHaveBeenCalled() instead.
+  
+    17 17 │   expect(method).toHaveBeenCalledTimes(0.0);
+    18 18 │   expect(method).toHaveBeenCalledTimes(0x0);
+    19    │ - expect(object.method).toHaveBeenCalledTimes(0);
+       19 │ + expect(object.method).not.toHaveBeenCalled();
+    20 20 │   expect(object?.method).not.toHaveBeenCalledTimes(0);
+    21 21 │   expect(method, "custom message").toHaveBeenCalledTimes(0);
+  
+
+```
+
+```
+invalid.js:20:28 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    18 │ expect(method).toHaveBeenCalledTimes(0x0);
+    19 │ expect(object.method).toHaveBeenCalledTimes(0);
+  > 20 │ expect(object?.method).not.toHaveBeenCalledTimes(0);
+       │                            ^^^^^^^^^^^^^^^^^^^^^
+    21 │ expect(method, "custom message").toHaveBeenCalledTimes(0);
+    22 │ 
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toHaveBeenCalled() instead.
+  
+    18 18 │   expect(method).toHaveBeenCalledTimes(0x0);
+    19 19 │   expect(object.method).toHaveBeenCalledTimes(0);
+    20    │ - expect(object?.method).not.toHaveBeenCalledTimes(0);
+       20 │ + expect(object?.method).toHaveBeenCalled();
+    21 21 │   expect(method, "custom message").toHaveBeenCalledTimes(0);
+    22 22 │   
+  
+
+```
+
+```
+invalid.js:21:34 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    19 │ expect(object.method).toHaveBeenCalledTimes(0);
+    20 │ expect(object?.method).not.toHaveBeenCalledTimes(0);
+  > 21 │ expect(method, "custom message").toHaveBeenCalledTimes(0);
+       │                                  ^^^^^^^^^^^^^^^^^^^^^
+    22 │ 
+    23 │ test("assertions across several lines", () => {
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use not.toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use not.toHaveBeenCalled() instead.
+  
+    19 19 │   expect(object.method).toHaveBeenCalledTimes(0);
+    20 20 │   expect(object?.method).not.toHaveBeenCalledTimes(0);
+    21    │ - expect(method,·"custom·message").toHaveBeenCalledTimes(0);
+       21 │ + expect(method,·"custom·message").not.toHaveBeenCalled();
+    22 22 │   
+    23 23 │   test("assertions across several lines", () => {
+  
+
+```
+
+```
+invalid.js:25:4 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    23 │ test("assertions across several lines", () => {
+    24 │ 	expect(method)
+  > 25 │ 		.toHaveBeenCalledTimes(0);
+       │ 		 ^^^^^^^^^^^^^^^^^^^^^
+    26 │ 	expect(method)
+    27 │ 		.not
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use not.toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use not.toHaveBeenCalled() instead.
+  
+    22 22 │   
+    23 23 │   test("assertions across several lines", () => {
+    24    │ - → expect(method)
+    25    │ - → → .toHaveBeenCalledTimes(0);
+       24 │ + → expect(method).not.toHaveBeenCalled();
+    26 25 │     expect(method)
+    27 26 │       .not
+  
+
+```
+
+```
+invalid.js:28:4 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    26 │ 	expect(method)
+    27 │ 		.not
+  > 28 │ 		.toHaveBeenCalledTimes(0);
+       │ 		 ^^^^^^^^^^^^^^^^^^^^^
+    29 │ });
+    30 │ 
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toHaveBeenCalled() instead.
+  
+    24 24 │     expect(method)
+    25 25 │       .toHaveBeenCalledTimes(0);
+    26    │ - → expect(method)
+    27    │ - → → .not
+    28    │ - → → .toHaveBeenCalledTimes(0);
+       26 │ + → expect(method).toHaveBeenCalled();
+    29 27 │   });
+    30 28 │   
+  
+
+```
+
+```
+invalid.js:33:17 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    31 │ test("comments around the assertion are kept", () => {
+    32 │ 	// leading comment
+  > 33 │ 	expect(method).toHaveBeenCalledTimes(0); // trailing comment
+       │ 	               ^^^^^^^^^^^^^^^^^^^^^
+    34 │ 	/* before */ expect(method).not.toHaveBeenCalledTimes(0) /* after */;
+    35 │ });
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use not.toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use not.toHaveBeenCalled() instead.
+  
+    31 31 │   test("comments around the assertion are kept", () => {
+    32 32 │     // leading comment
+    33    │ - → expect(method).toHaveBeenCalledTimes(0);·//·trailing·comment
+       33 │ + → expect(method).not.toHaveBeenCalled();·//·trailing·comment
+    34 34 │     /* before */ expect(method).not.toHaveBeenCalledTimes(0) /* after */;
+    35 35 │   });
+  
+
+```
+
+```
+invalid.js:34:34 lint/nursery/useExpectToHaveBeenCalled  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    32 │ 	// leading comment
+    33 │ 	expect(method).toHaveBeenCalledTimes(0); // trailing comment
+  > 34 │ 	/* before */ expect(method).not.toHaveBeenCalledTimes(0) /* after */;
+       │ 	                                ^^^^^^^^^^^^^^^^^^^^^
+    35 │ });
+    36 │ 
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toHaveBeenCalled() instead.
+  
+    32 32 │     // leading comment
+    33 33 │     expect(method).toHaveBeenCalledTimes(0); // trailing comment
+    34    │ - → /*·before·*/·expect(method).not.toHaveBeenCalledTimes(0)·/*·after·*/;
+       34 │ + → /*·before·*/·expect(method).toHaveBeenCalled()·/*·after·*/;
+    35 35 │   });
+    36 36 │   
+  
+
+```
+
+```
+invalid.js:38:17 lint/nursery/useExpectToHaveBeenCalled ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    37 │ test("no fix when comments would be removed", () => {
+  > 38 │ 	expect(method).toHaveBeenCalledTimes(/* never */ 0);
+       │ 	               ^^^^^^^^^^^^^^^^^^^^^
+    39 │ 	expect(method).not /* at least once */.toHaveBeenCalledTimes(0);
+    40 │ 	expect(method)
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use not.toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:41 lint/nursery/useExpectToHaveBeenCalled ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    37 │ test("no fix when comments would be removed", () => {
+    38 │ 	expect(method).toHaveBeenCalledTimes(/* never */ 0);
+  > 39 │ 	expect(method).not /* at least once */.toHaveBeenCalledTimes(0);
+       │ 	                                       ^^^^^^^^^^^^^^^^^^^^^
+    40 │ 	expect(method)
+    41 │ 		// why this is checked
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:42:4 lint/nursery/useExpectToHaveBeenCalled ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    40 │ 	expect(method)
+    41 │ 		// why this is checked
+  > 42 │ 		.toHaveBeenCalledTimes(0);
+       │ 		 ^^^^^^^^^^^^^^^^^^^^^
+    43 │ });
+    44 │ 
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use not.toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:46:21 lint/nursery/useExpectToHaveBeenCalled ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    45 │ test("no fix when extra arguments would be removed", () => {
+  > 46 │ 	expect(method).not.toHaveBeenCalledTimes(0, 1, 2);
+       │ 	                   ^^^^^^^^^^^^^^^^^^^^^
+    47 │ 	expect(method).toHaveBeenCalledTimes(0, sideEffect());
+    48 │ });
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:47:17 lint/nursery/useExpectToHaveBeenCalled ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assertion compares the number of calls to 0.
+  
+    45 │ test("no fix when extra arguments would be removed", () => {
+    46 │ 	expect(method).not.toHaveBeenCalledTimes(0, 1, 2);
+  > 47 │ 	expect(method).toHaveBeenCalledTimes(0, sideEffect());
+       │ 	               ^^^^^^^^^^^^^^^^^^^^^
+    48 │ });
+    49 │ 
+  
+  i A comparison to zero is an indirect way to check whether a function was called, and it makes the failure message harder to understand.
+  
+  i Use not.toHaveBeenCalled() to check whether the function was called.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
