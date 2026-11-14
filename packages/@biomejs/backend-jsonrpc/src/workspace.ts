@@ -3138,6 +3138,11 @@ export interface Nursery {
 	 */
 	noInvalidThis?: NoInvalidThisConfiguration;
 	/**
+	 * Disallow Jasmine globals in Jest tests.
+	 * See https://biomejs.dev/linter/rules/no-jasmine-globals
+	 */
+	noJasmineGlobals?: NoJasmineGlobalsConfiguration;
+	/**
 	 * Disallow specific object properties.
 	 * See https://biomejs.dev/linter/rules/no-js-restricted-properties
 	 */
@@ -6852,6 +6857,9 @@ export type NoInvalidRemoveEventListenerConfiguration =
 export type NoInvalidThisConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInvalidThisOptions;
+export type NoJasmineGlobalsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoJasmineGlobalsOptions;
 export type NoJsRestrictedPropertiesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsRestrictedPropertiesOptions;
@@ -9992,6 +10000,14 @@ export interface RuleWithNoInvalidRemoveEventListenerOptions {
 export interface RuleWithNoInvalidThisOptions {
 	level: RulePlainConfiguration;
 	options?: NoInvalidThisOptions;
+}
+export interface RuleWithNoJasmineGlobalsOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoJasmineGlobalsOptions;
 }
 export interface RuleWithNoJsRestrictedPropertiesOptions {
 	level: RulePlainConfiguration;
@@ -13670,6 +13686,7 @@ export type NoInvalidFileInputAcceptOptions = {};
 export type NoInvalidPropertyInitValueOptions = {};
 export type NoInvalidRemoveEventListenerOptions = {};
 export type NoInvalidThisOptions = {};
+export type NoJasmineGlobalsOptions = {};
 export interface NoJsRestrictedPropertiesOptions {
 	/**
 	 * Restriction entries for object/property access.
@@ -16041,6 +16058,7 @@ export type Category =
 	| "lint/nursery/noInvalidRemoveEventListener"
 	| "lint/nursery/noInvalidThis"
 	| "lint/nursery/noIteratorProperty"
+	| "lint/nursery/noJasmineGlobals"
 	| "lint/nursery/noJsRestrictedProperties"
 	| "lint/nursery/noJsonUnsafeValues"
 	| "lint/nursery/noLateCurrentTargetAccess"
