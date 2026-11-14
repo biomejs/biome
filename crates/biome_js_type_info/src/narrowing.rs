@@ -12,12 +12,18 @@ use crate::generated::global_types::ids::FUNCTION_ID_GLOBAL_TYPE_ID;
 use crate::globals::{
     GLOBAL_ANY_KEYWORD_ID, GLOBAL_BIGINT_KEYWORD_ID, GLOBAL_BOOLEAN_KEYWORD_ID,
     GLOBAL_NULL_KEYWORD_ID, GLOBAL_NUMBER_KEYWORD_ID, GLOBAL_STRING_KEYWORD_ID,
-    GLOBAL_SYMBOL_KEYWORD_ID, GLOBAL_UNKNOWN_ID,
+    GLOBAL_SYMBOL_KEYWORD_ID, GLOBAL_UNDEFINED_ID, GLOBAL_UNKNOWN_ID,
 };
 use crate::interned_types::{InternedLiteral, Literal};
 use crate::resolved::InferredTypeData;
-use crate::type_relation::{Assignability, TypeResolver, primitive_can_satisfy};
-use crate::{ObjectKind, RawTypeData, RawTypeId, TypeDb, TypeReference, TypeReferenceQualifier};
+use crate::type_relation::{
+    Assignability, PropertyLookup, TypeResolver, find_property, primitive_can_satisfy,
+    resolve_wrapped_type,
+};
+use crate::{
+    ObjectKind, RawTypeData, RawTypeId, TypeDb, TypeReference, TypeReferenceQualifier,
+    TypeofExpression,
+};
 
 const MAX_NARROWING_STEPS: usize = 256;
 const MAX_LITERAL_BYTES: usize = 1024;
@@ -75,6 +81,144 @@ pub fn is_raw_narrowing_invariant(reference: &TypeReference, raw_types: &[RawTyp
             Some(RawTypeData::Unknown | RawTypeData::AnyKeyword)
         ),
     }
+}
+
+/// Returns whether a collected type reference may resolve to a union with at
+/// least two members that are object types, without resolving it.
+///
+/// A runtime test of a property narrows the value that holds it only when
+/// the value's declared type is such a union, as [`may_narrow_by_property`]
+/// describes. This returns false when the raw tables show that the type is
+/// something else: a primitive type, a literal type, a single object type,
+/// interface, class, function, tuple, intersection, or generic written in
+/// place, or a union of such types with at most one that is not primitive,
+/// as in `o: { v: string | null }` or `x: { a: 1 } | undefined`. Among
+/// inferred types, it returns false for the result of `new`, taken as one
+/// instance, and for the results of `+`, unary `-`, `~`, and `typeof`, which
+/// are primitives. A type name, an import, a `typeof` type, other inferred
+/// types, and a chain of raw references longer than the step limit may stand
+/// for a union of object types. `raw_types` is the module table that local
+/// references index.
+pub fn raw_may_be_object_union(reference: &TypeReference, raw_types: &[RawTypeData]) -> bool {
+    raw_object_members(reference, raw_types) >= 2
+}
+
+/// Returns how many object types the type at `reference` may have among its
+/// members, as far as raw tables tell, up to two: zero for primitive types,
+/// one for a single object type, and two for a union with two object types or
+/// a type that only resolution tells, as [`raw_may_be_object_union`]
+/// describes.
+fn raw_object_members(reference: &TypeReference, raw_types: &[RawTypeData]) -> usize {
+    let Some(target) = raw_reference_target(reference, raw_types) else {
+        return 2;
+    };
+    match target {
+        // Global handles stand for keywords and built-in types.
+        RawReferenceTarget::Global(id) => usize::from(!is_primitive_global(id)),
+        RawReferenceTarget::Local(RawTypeData::Union(union)) => {
+            let mut count = 0;
+            for member in union.types() {
+                count += match raw_reference_target(member, raw_types) {
+                    Some(RawReferenceTarget::Global(id)) => usize::from(!is_primitive_global(id)),
+                    // A nested union counts as two, without looking into it.
+                    Some(RawReferenceTarget::Local(member)) => raw_local_object_members(member),
+                    None => 2,
+                };
+                if count >= 2 {
+                    return 2;
+                }
+            }
+            count
+        }
+        RawReferenceTarget::Local(data) => raw_local_object_members(data),
+    }
+}
+
+/// Returns how many object types the local type `data` may have, as
+/// [`raw_object_members`] counts them, counting a union as two.
+fn raw_local_object_members(data: &RawTypeData) -> usize {
+    match data {
+        RawTypeData::BigInt
+        | RawTypeData::Boolean
+        | RawTypeData::Null
+        | RawTypeData::Number
+        | RawTypeData::String
+        | RawTypeData::Symbol
+        | RawTypeData::Undefined => 0,
+        RawTypeData::Literal(literal) => usize::from(!literal.is_primitive()),
+        RawTypeData::TypeofExpression(expression) => match expression.as_ref() {
+            // A construct signature that returns a union is rare, and keeping
+            // the declared type there is only wider.
+            TypeofExpression::New(_) => 1,
+            TypeofExpression::Addition(_)
+            | TypeofExpression::BitwiseNot(_)
+            | TypeofExpression::Typeof(_)
+            | TypeofExpression::UnaryMinus(_) => 0,
+            _ => 2,
+        },
+        RawTypeData::Conditional
+        | RawTypeData::Extends(_)
+        | RawTypeData::Global
+        | RawTypeData::ImportNamespace(_)
+        | RawTypeData::IndexedAccess(_)
+        | RawTypeData::InstanceOf(_)
+        | RawTypeData::MappedType(_)
+        | RawTypeData::MergedReference(_)
+        | RawTypeData::Reference(_)
+        | RawTypeData::TypeofType(_)
+        | RawTypeData::TypeofValue(_)
+        | RawTypeData::Union(_)
+        | RawTypeData::Unknown => 2,
+        _ => 1,
+    }
+}
+
+/// Returns whether the global type `id` is a primitive keyword, `null`, or
+/// `undefined`.
+fn is_primitive_global(id: RawTypeId) -> bool {
+    [
+        GLOBAL_BIGINT_KEYWORD_ID,
+        GLOBAL_BOOLEAN_KEYWORD_ID,
+        GLOBAL_NULL_KEYWORD_ID,
+        GLOBAL_NUMBER_KEYWORD_ID,
+        GLOBAL_STRING_KEYWORD_ID,
+        GLOBAL_SYMBOL_KEYWORD_ID,
+        GLOBAL_UNDEFINED_ID,
+    ]
+    .contains(&id)
+}
+
+/// What a raw reference stands for once its chain of references is followed.
+enum RawReferenceTarget<'a> {
+    Global(RawTypeId),
+    Local(&'a RawTypeData),
+}
+
+/// Follows `reference` through raw references to the type it stands for.
+///
+/// Returns `None` for a type name or an import, which raw tables don't
+/// resolve, for a local id outside `raw_types`, and when the chain exceeds
+/// [`MAX_RAW_REFERENCE_STEPS`].
+fn raw_reference_target<'a>(
+    reference: &'a TypeReference,
+    raw_types: &'a [RawTypeData],
+) -> Option<RawReferenceTarget<'a>> {
+    let mut reference = reference;
+    for _ in 0..MAX_RAW_REFERENCE_STEPS {
+        match reference {
+            TypeReference::Qualifier(_) | TypeReference::Import(_) => return None,
+            TypeReference::Resolved(id @ RawTypeId::Global(_)) => {
+                return Some(RawReferenceTarget::Global(*id));
+            }
+            TypeReference::Resolved(RawTypeId::Local(local)) => {
+                match raw_types.get(local.index())? {
+                    RawTypeData::Reference(next) => reference = next,
+                    data => return Some(RawReferenceTarget::Local(data)),
+                }
+            }
+        }
+    }
+    None
 }
 
 /// Limits the chain of raw references that [`raw_primitive_target`] follows.
@@ -218,18 +362,421 @@ pub fn narrow_type<'db>(
     if is_narrowing_invariant(ty) {
         return ty;
     }
-    let predicate = match predicate {
-        NarrowingPredicate::Truthy => PreparedPredicate::Truthy,
-        NarrowingPredicate::Nullish => PreparedPredicate::Nullish,
-        NarrowingPredicate::Typeof(kind) => PreparedPredicate::Typeof(kind),
-        NarrowingPredicate::Literal(literal) => {
-            let Some(value) = literal_value(db, literal) else {
-                return ty;
-            };
-            PreparedPredicate::Literal(literal, value)
-        }
+    let Some(predicate) = PreparedPredicate::new(db, predicate) else {
+        return ty;
     };
     narrow_prepared(db, ty, &predicate, positive, &mut resolve)
+}
+
+/// A runtime test of a property of a value, as `shape.kind === "circle"`
+/// tests the property `kind` of `shape`.
+#[derive(Clone, Copy, Debug)]
+pub struct PropertyTest<'a, 'db> {
+    /// The name of the tested property.
+    pub name: &'a str,
+    /// The test that the property's value passes when `positive` is true, or
+    /// fails when it is false.
+    pub predicate: NarrowingPredicate<'db>,
+    pub positive: bool,
+    /// Whether the test reads the property through an optional chain, as in
+    /// `shape?.kind`, which gives `undefined` when `shape` is `null` or
+    /// `undefined`.
+    pub optional_chain: bool,
+}
+
+/// Narrows `ty` by a runtime test of one of its properties, as
+/// `if (shape.kind === "circle")` narrows `shape`, following TypeScript's
+/// narrowing by a discriminant.
+///
+/// `declared` is the declared type of the tested value. It decides whether
+/// the property is a discriminant, as in TypeScript: `declared` is a union,
+/// and the property type of at least one of its members is made of unit
+/// types, such as `"circle"`, `1`, `null`, or `boolean`. Members that are
+/// primitives or that lack the property don't count. Otherwise `ty` is
+/// returned unchanged, so `{ k: string } | { k: number }` is not narrowed by
+/// `typeof k`. A property whose type is the same in every member, which
+/// TypeScript does not treat as a discriminant either, keeps every member.
+/// `ty` is also returned unchanged when `declared` has fewer than two members
+/// that may be object types, as [`may_narrow_by_property`] describes, where
+/// TypeScript can only give `never`.
+///
+/// The test's predicate applies, as [`narrow_type`] applies it, to the union
+/// of the property types of the members of `ty`. The result keeps the members
+/// whose property type shares a value with what the predicate leaves. So
+/// `kind !== "c"` keeps both members of `{ kind: "c" } | { kind: string }`,
+/// because `kind` can be another string in both. A test that no property
+/// value passes gives `never`, as does a single member whose property the
+/// test rules out when `ty` is not a union.
+///
+/// A `null` or `undefined` member of `ty` is kept when the test reads the
+/// property through an optional chain, where it gives the property the value
+/// `undefined`. Otherwise `ty` is returned unchanged, as it is when another
+/// member is not an object type with the property, when a property type
+/// includes a type that this function can't compare, such as a generic,
+/// `unknown`, or an intersection, and when the union traversal, which visits
+/// at most 256 types, runs out. Object types are assumed to share a value
+/// with every type except `null` and `undefined`. `resolve` resolves handles
+/// as for [`narrow_type`], and is also used to look up the properties.
+pub fn narrow_by_property<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    declared: InferredTypeData<'db>,
+    test: PropertyTest<'_, 'db>,
+    mut resolve: impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
+    if is_narrowing_invariant(ty)
+        || ty == InferredTypeData::NeverKeyword
+        || !may_narrow_by_property(db, declared)
+    {
+        return ty;
+    }
+    let Some(predicate) = PreparedPredicate::new(db, test.predicate) else {
+        return ty;
+    };
+    let resolve: &mut TypeResolver<'db, '_> = &mut resolve;
+    let mut remaining = MAX_NARROWING_STEPS;
+    let Some(members) = union_members(db, ty, &mut remaining) else {
+        return ty;
+    };
+    let mut properties = Vec::with_capacity(members.len());
+    let mut has_nullish = false;
+    for member in &members {
+        match member_property(db, *member, test.name, resolve, &mut remaining) {
+            Some(MemberProperty::Nullish) if test.optional_chain => {
+                has_nullish = true;
+                properties.push(None);
+            }
+            Some(MemberProperty::Values(values)) => properties.push(Some(values)),
+            _ => return ty,
+        }
+    }
+    let is_discriminant = if ty == declared {
+        properties.iter().flatten().any(is_unit)
+    } else {
+        is_discriminant(db, declared, test.name, resolve, &mut remaining)
+    };
+    if !is_discriminant {
+        return ty;
+    }
+    let mut property_types: Vec<_> = properties
+        .iter()
+        .flatten()
+        .flatten()
+        .map(|(ty, _)| *ty)
+        .collect();
+    if property_types.is_empty() {
+        return ty;
+    }
+    if has_nullish {
+        property_types.push(InferredTypeData::Undefined);
+    }
+    let property = InferredTypeData::union_from_types(db, property_types);
+    let narrowed = narrow_prepared(db, property, &predicate, test.positive, resolve);
+    if narrowed == InferredTypeData::NeverKeyword {
+        return narrowed;
+    }
+    let Some(remaining_values) = union_members(db, narrowed, &mut remaining).and_then(|types| {
+        types
+            .into_iter()
+            .map(|ty| PropertyValue::new(db, ty, resolve))
+            .collect::<Option<Vec<_>>>()
+    }) else {
+        return ty;
+    };
+    let kept: Vec<_> = members
+        .iter()
+        .zip(&properties)
+        .filter(|(_, values)| {
+            values.as_ref().is_none_or(|values| {
+                values.iter().any(|(_, value)| {
+                    remaining_values
+                        .iter()
+                        .any(|remaining| value.overlaps(db, remaining))
+                })
+            })
+        })
+        .map(|(member, _)| *member)
+        .collect();
+    if kept.len() == members.len() {
+        ty
+    } else {
+        InferredTypeData::union_from_types(db, kept)
+    }
+}
+
+/// Returns whether [`narrow_by_property`] can narrow a value whose declared
+/// type is `declared` to a type other than `never`: whether `declared` is a
+/// union with at least two members that are neither `null`, `undefined`, nor
+/// a primitive type.
+///
+/// A test of a property keeps the `null` and `undefined` members and no
+/// primitive member has a discriminant, so with at most one other member the
+/// test either keeps the value or rules out every member.
+pub fn may_narrow_by_property(db: &dyn TypeDb, declared: InferredTypeData) -> bool {
+    let InferredTypeData::Union(union) = declared else {
+        return false;
+    };
+    union
+        .types(db)
+        .iter()
+        .filter(|member| {
+            !matches!(member, InferredTypeData::Null | InferredTypeData::Undefined)
+                && !matches!(
+                    typeof_kind(db, **member),
+                    Some(
+                        TypeofKind::BigInt
+                            | TypeofKind::Boolean
+                            | TypeofKind::Number
+                            | TypeofKind::String
+                            | TypeofKind::Symbol
+                    )
+                )
+        })
+        .nth(1)
+        .is_some()
+}
+
+/// Returns whether the property `name` is a discriminant of `declared`, as
+/// [`narrow_by_property`] decides it.
+///
+/// Returns false when a member's property can't be looked up or has a type
+/// that [`PropertyValue`] does not describe, and when the `remaining` budget
+/// runs out.
+fn is_discriminant<'db>(
+    db: &'db dyn TypeDb,
+    declared: InferredTypeData<'db>,
+    name: &str,
+    resolve: &mut TypeResolver<'db, '_>,
+    remaining: &mut usize,
+) -> bool {
+    let Some(members) = union_members(db, declared, remaining) else {
+        return false;
+    };
+    let mut is_discriminant = false;
+    for member in members {
+        match member_property(db, member, name, resolve, remaining) {
+            Some(MemberProperty::Values(values)) => is_discriminant |= is_unit(&values),
+            Some(MemberProperty::Nullish | MemberProperty::Primitive | MemberProperty::Missing) => {
+            }
+            Some(MemberProperty::Unknown) | None => return false,
+        }
+    }
+    is_discriminant
+}
+
+/// Returns whether every value of a property type is a unit type, as
+/// [`PropertyValue::is_unit`] describes, which makes the property a
+/// discriminant.
+fn is_unit(values: &PropertyValues) -> bool {
+    values.iter().all(|(_, value)| value.is_unit())
+}
+
+/// Returns the members of `ty`, with nested unions flattened, or `ty` itself
+/// when it is not a union.
+///
+/// Returns `None` when the members exceed the `remaining` budget, which each
+/// visited type spends.
+fn union_members<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    remaining: &mut usize,
+) -> Option<Vec<InferredTypeData<'db>>> {
+    let mut pending = vec![ty];
+    let mut members = Vec::new();
+    while let Some(current) = pending.pop() {
+        *remaining = remaining.checked_sub(1)?;
+        match current {
+            InferredTypeData::Union(union) => pending.extend(union.types(db).iter().rev()),
+            _ => members.push(current),
+        }
+    }
+    Some(members)
+}
+
+/// The resolved values of a property type, each with the type it comes from.
+type PropertyValues<'db> = Vec<(InferredTypeData<'db>, PropertyValue<'db>)>;
+
+/// What a member of a union says about one of its properties.
+enum MemberProperty<'db> {
+    /// The member is `null` or `undefined`, which has no properties.
+    Nullish,
+    /// The member is a primitive type, whose properties are not looked up.
+    Primitive,
+    /// The member is an object type without the property.
+    Missing,
+    /// The property can't be looked up, or its type includes a type that
+    /// [`PropertyValue`] does not describe.
+    Unknown,
+    /// The values of the property. An optional property also has the value
+    /// `undefined`.
+    Values(PropertyValues<'db>),
+}
+
+/// Returns what `member` says about its property `name`, or `None` when the
+/// `remaining` budget runs out.
+fn member_property<'db>(
+    db: &'db dyn TypeDb,
+    member: InferredTypeData<'db>,
+    name: &str,
+    resolve: &mut TypeResolver<'db, '_>,
+    remaining: &mut usize,
+) -> Option<MemberProperty<'db>> {
+    *remaining = remaining.checked_sub(1)?;
+    if matches!(member, InferredTypeData::Null | InferredTypeData::Undefined) {
+        return Some(MemberProperty::Nullish);
+    }
+    if matches!(
+        typeof_kind(db, member),
+        Some(
+            TypeofKind::BigInt
+                | TypeofKind::Boolean
+                | TypeofKind::Number
+                | TypeofKind::String
+                | TypeofKind::Symbol
+        )
+    ) {
+        return Some(MemberProperty::Primitive);
+    }
+    let (ty, is_optional) = match find_property(db, member, name, resolve) {
+        PropertyLookup::Found { ty, is_optional } => (ty, is_optional),
+        PropertyLookup::Missing => return Some(MemberProperty::Missing),
+        PropertyLookup::Unknown => return Some(MemberProperty::Unknown),
+    };
+    let mut values = Vec::new();
+    let mut pending = vec![ty];
+    if is_optional {
+        pending.push(InferredTypeData::Undefined);
+    }
+    while let Some(current) = pending.pop() {
+        *remaining = remaining.checked_sub(1)?;
+        match resolve_wrapped_type(db, current, resolve) {
+            InferredTypeData::Union(union) => pending.extend(union.types(db).iter().rev()),
+            resolved => match PropertyValue::new(db, resolved, resolve) {
+                Some(value) => values.push((resolved, value)),
+                None => return Some(MemberProperty::Unknown),
+            },
+        }
+    }
+    Some(MemberProperty::Values(values))
+}
+
+/// What [`narrow_by_property`] knows about the values of one type in a
+/// property type.
+#[derive(Clone, Copy)]
+enum PropertyValue<'db> {
+    Null,
+    Undefined,
+    /// A string, number, bigint, boolean, or symbol: the literal type
+    /// `literal`, or any value of `kind` when `literal` is `None`.
+    Primitive {
+        kind: TypeofKind,
+        literal: Option<InferredTypeData<'db>>,
+    },
+    /// A value of an object type, a function, or a tuple, which is never
+    /// `null` or `undefined`.
+    Object,
+}
+
+impl<'db> PropertyValue<'db> {
+    /// Returns what the resolved type `ty` says about its values, or `None`
+    /// for a type it does not describe, such as a generic, `unknown`, `void`,
+    /// or an intersection.
+    fn new(
+        db: &'db dyn TypeDb,
+        ty: InferredTypeData<'db>,
+        resolve: &mut TypeResolver<'db, '_>,
+    ) -> Option<Self> {
+        Some(match ty {
+            InferredTypeData::Null => Self::Null,
+            InferredTypeData::Undefined => Self::Undefined,
+            InferredTypeData::Literal(literal) => match literal.literal(db) {
+                Literal::Object(_) | Literal::RegExp(_) => Self::Object,
+                // A template literal type can have many values.
+                Literal::Template(_) => Self::Primitive {
+                    kind: TypeofKind::String,
+                    literal: None,
+                },
+                Literal::BigInt(_)
+                | Literal::Boolean(_)
+                | Literal::Number(_)
+                | Literal::String(_) => Self::Primitive {
+                    kind: typeof_kind(db, ty)?,
+                    literal: Some(ty),
+                },
+            },
+            InferredTypeData::InstanceOf(instance) => {
+                match resolve(instance.ty(db)).expand_canonical_global(db) {
+                    InferredTypeData::Class(_)
+                    | InferredTypeData::Interface(_)
+                    | InferredTypeData::Object(_)
+                    | InferredTypeData::Tuple(_) => Self::Object,
+                    _ => return None,
+                }
+            }
+            InferredTypeData::Object(_) | InferredTypeData::Interface(_) => Self::Object,
+            ty if is_non_primitive(db, ty) => Self::Object,
+            ty => match typeof_kind(db, ty)? {
+                TypeofKind::Object | TypeofKind::Function => Self::Object,
+                TypeofKind::Undefined => Self::Undefined,
+                kind => Self::Primitive {
+                    kind,
+                    literal: None,
+                },
+            },
+        })
+    }
+
+    /// Returns whether TypeScript counts the type as a unit type when it
+    /// looks for a discriminant: a literal type, `null`, `undefined`, or
+    /// `boolean`, which is the union of two literal types.
+    fn is_unit(&self) -> bool {
+        match self {
+            Self::Null | Self::Undefined => true,
+            Self::Primitive { kind, literal } => literal.is_some() || *kind == TypeofKind::Boolean,
+            Self::Object => false,
+        }
+    }
+
+    /// Returns whether a value can have both this type and `other`.
+    ///
+    /// Two primitives of the same kind can share a value unless they are
+    /// different literals. An object type can share a value with every type
+    /// except `null` and `undefined`, because comparing object types with
+    /// each other or with primitives isn't modelled.
+    fn overlaps(&self, db: &'db dyn TypeDb, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Null, Self::Null) | (Self::Undefined, Self::Undefined) => true,
+            (Self::Null | Self::Undefined, _) | (_, Self::Null | Self::Undefined) => false,
+            (Self::Object, _) | (_, Self::Object) => true,
+            (
+                Self::Primitive {
+                    kind,
+                    literal: Some(literal),
+                },
+                Self::Primitive {
+                    kind: other_kind,
+                    literal: Some(other_literal),
+                },
+            ) => {
+                kind == other_kind
+                    && (literal == other_literal
+                        || match (
+                            literal_value(db, *literal),
+                            literal_value(db, *other_literal),
+                        ) {
+                            (Some(value), Some(other_value)) => value == other_value,
+                            // Literals that can't be decoded might be equal.
+                            _ => true,
+                        })
+            }
+            (
+                Self::Primitive { kind, .. },
+                Self::Primitive {
+                    kind: other_kind, ..
+                },
+            ) => kind == other_kind,
+        }
+    }
 }
 
 /// Returns the falsy values of `ty`: the type that a left operand of `&&`
@@ -305,6 +852,21 @@ enum PreparedPredicate<'db> {
     Nullish,
     Typeof(TypeofKind),
     Literal(InferredTypeData<'db>, LiteralValue<'db>),
+}
+
+impl<'db> PreparedPredicate<'db> {
+    /// Returns `predicate` with its literal decoded, or `None` for a literal
+    /// that can't be decoded, which leaves every type unchanged.
+    fn new(db: &'db dyn TypeDb, predicate: NarrowingPredicate<'db>) -> Option<Self> {
+        Some(match predicate {
+            NarrowingPredicate::Truthy => Self::Truthy,
+            NarrowingPredicate::Nullish => Self::Nullish,
+            NarrowingPredicate::Typeof(kind) => Self::Typeof(kind),
+            NarrowingPredicate::Literal(literal) => {
+                Self::Literal(literal, literal_value(db, literal)?)
+            }
+        })
+    }
 }
 
 fn narrow_non_union<'db>(
@@ -639,9 +1201,9 @@ mod tests {
     use super::*;
     use crate::interned_types::{
         InternedClass, InternedFunction, InternedGenericTypeParameter, InternedInterface,
-        InternedIntersection, InternedObject, InternedTypeInstance, InternedTypeofType,
-        InternedUnion, LocalTypeHandle, LocalTypeId, ModuleKey, ReturnType, TypeMember,
-        TypeMemberKind,
+        InternedIntersection, InternedObject, InternedTuple, InternedTypeInstance,
+        InternedTypeofType, InternedUnion, LocalTypeHandle, LocalTypeId, ModuleKey, ReturnType,
+        TupleElementType, TypeMember, TypeMemberKind,
     };
     use crate::literal::NumberLiteral;
     use salsa::plumbing::AsId;
@@ -1834,5 +2396,428 @@ mod tests {
             narrow_type(&db, repeated, NarrowingPredicate::Truthy, true),
             repeated
         );
+    }
+
+    /// Returns an object type literal with `members`.
+    fn object<'db>(db: &'db TestDb, members: Vec<TypeMember<'db>>) -> InferredTypeData<'db> {
+        InferredTypeData::Object(InternedObject::new(
+            db,
+            None,
+            members.into_boxed_slice(),
+            false,
+            ObjectKind::Shape,
+        ))
+    }
+
+    /// Returns `{ kind: kind, value: value }`.
+    fn shape<'db>(
+        db: &'db TestDb,
+        kind: InferredTypeData<'db>,
+        value: InferredTypeData<'db>,
+    ) -> InferredTypeData<'db> {
+        object(db, vec![member("kind", kind), member("value", value)])
+    }
+
+    /// Narrows `ty`, whose declared type is `declared`, by `predicate`
+    /// applied to its property `name`, with a resolver that returns its input.
+    fn narrow_property<'db>(
+        db: &'db dyn TypeDb,
+        ty: InferredTypeData<'db>,
+        declared: InferredTypeData<'db>,
+        name: &str,
+        predicate: NarrowingPredicate<'db>,
+        positive: bool,
+    ) -> InferredTypeData<'db> {
+        let test = PropertyTest {
+            name,
+            predicate,
+            positive,
+            optional_chain: false,
+        };
+        super::narrow_by_property(db, ty, declared, test, |ty| ty)
+    }
+
+    #[test]
+    fn discriminants_keep_the_members_whose_property_passes_the_test() {
+        let db = TestDb::default();
+        let circle = shape(&db, string(&db, "c"), InferredTypeData::Number);
+        let square = shape(&db, string(&db, "s"), InferredTypeData::String);
+        let shapes = union(&db, &[circle, square]);
+        let literal = NarrowingPredicate::Literal(string(&db, "c"));
+        for (predicate, positive, expected) in [
+            (literal, true, circle),
+            (literal, false, square),
+            (NarrowingPredicate::Typeof(TypeofKind::String), true, shapes),
+            (
+                NarrowingPredicate::Typeof(TypeofKind::String),
+                false,
+                InferredTypeData::NeverKeyword,
+            ),
+            (NarrowingPredicate::Truthy, true, shapes),
+            (
+                NarrowingPredicate::Literal(string(&db, "x")),
+                true,
+                InferredTypeData::NeverKeyword,
+            ),
+        ] {
+            assert_eq!(
+                narrow_property(&db, shapes, shapes, "kind", predicate, positive),
+                expected,
+                "{predicate:?} {positive}"
+            );
+        }
+
+        // A single member left by earlier tests is checked against the
+        // declared union.
+        assert_eq!(
+            narrow_property(&db, circle, shapes, "kind", literal, true),
+            circle
+        );
+        assert_eq!(
+            narrow_property(&db, circle, shapes, "kind", literal, false),
+            InferredTypeData::NeverKeyword
+        );
+
+        // A broad property type shares a value with every literal of its
+        // kind, so `kind !== "c"` keeps both members.
+        let broad = shape(&db, InferredTypeData::String, InferredTypeData::Number);
+        let mixed = union(&db, &[circle, broad]);
+        for positive in [true, false] {
+            assert_eq!(
+                narrow_property(&db, mixed, mixed, "kind", literal, positive),
+                mixed,
+                "{positive}"
+            );
+        }
+
+        // `boolean` is a unit type for discriminants, and `true` shares a
+        // value with it.
+        let flag = shape(&db, InferredTypeData::Boolean, InferredTypeData::Number);
+        let text = shape(&db, InferredTypeData::String, InferredTypeData::Number);
+        let flags = union(&db, &[flag, text]);
+        assert_eq!(
+            narrow_property(
+                &db,
+                flags,
+                flags,
+                "kind",
+                NarrowingPredicate::Literal(boolean_literal(&db, true)),
+                true
+            ),
+            flag
+        );
+
+        // An optional property also has the value `undefined`.
+        let optional = object(&db, vec![optional_member("kind", string(&db, "c"))]);
+        let optionals = union(&db, &[optional, square]);
+        assert_eq!(
+            narrow_property(
+                &db,
+                optionals,
+                optionals,
+                "kind",
+                NarrowingPredicate::Literal(InferredTypeData::Undefined),
+                true
+            ),
+            optional
+        );
+    }
+
+    #[test]
+    fn properties_that_are_not_discriminants_leave_the_type_unchanged() {
+        let db = TestDb::default();
+        let literal = NarrowingPredicate::Literal(string(&db, "c"));
+        let circle = shape(&db, string(&db, "c"), InferredTypeData::Number);
+        let square = shape(&db, string(&db, "s"), InferredTypeData::String);
+        let generic = InferredTypeData::Generic(InternedGenericTypeParameter::new(
+            &db,
+            false,
+            None,
+            None,
+            Text::new_static("T"),
+        ));
+        let index = InferredTypeData::Interface(InternedInterface::new(
+            &db,
+            Box::default(),
+            Box::default(),
+            Box::from([TypeMember {
+                kind: TypeMemberKind::IndexSignature(InferredTypeData::String),
+                ty: string(&db, "c"),
+            }]),
+            Text::new_static("Index"),
+        ));
+        let cases = [
+            // No member has a unit property type.
+            union(
+                &db,
+                &[
+                    shape(&db, InferredTypeData::String, InferredTypeData::Number),
+                    shape(&db, InferredTypeData::Number, InferredTypeData::Number),
+                ],
+            ),
+            // A generic property type.
+            union(
+                &db,
+                &[circle, shape(&db, generic, InferredTypeData::Number)],
+            ),
+            // A member without the property.
+            union(
+                &db,
+                &[
+                    circle,
+                    object(&db, vec![member("r", InferredTypeData::Number)]),
+                ],
+            ),
+            // A member with an index signature.
+            union(&db, &[circle, index]),
+            // A primitive member.
+            union(&db, &[circle, InferredTypeData::String]),
+            // A nullish member, without an optional chain.
+            union(&db, &[circle, square, InferredTypeData::Undefined]),
+        ];
+        for ty in cases {
+            for positive in [true, false] {
+                assert_eq!(
+                    narrow_property(&db, ty, ty, "kind", literal, positive),
+                    ty,
+                    "{ty:?} {positive}"
+                );
+            }
+        }
+        // A type that is not a union is never narrowed.
+        assert_eq!(
+            narrow_property(&db, circle, circle, "kind", literal, false),
+            circle
+        );
+        // Undecodable literals leave every type unchanged.
+        let shapes = union(&db, &[circle, square]);
+        assert_eq!(
+            narrow_property(
+                &db,
+                shapes,
+                shapes,
+                "kind",
+                NarrowingPredicate::Literal(string(&db, "\\u0063")),
+                true
+            ),
+            shapes
+        );
+    }
+
+    #[test]
+    fn primitive_and_missing_members_of_the_declared_type_do_not_count() {
+        let db = TestDb::default();
+        let literal = NarrowingPredicate::Literal(string(&db, "c"));
+        let circle = shape(&db, string(&db, "c"), InferredTypeData::Number);
+        let square = shape(&db, string(&db, "s"), InferredTypeData::String);
+        let other = object(&db, vec![member("r", InferredTypeData::Number)]);
+        let shapes = union(&db, &[circle, square]);
+        for declared in [
+            union(&db, &[circle, square, InferredTypeData::String]),
+            union(&db, &[circle, square, other]),
+        ] {
+            assert_eq!(
+                narrow_property(&db, shapes, declared, "kind", literal, true),
+                circle,
+                "{declared:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn nullish_members_are_kept_through_optional_chains() {
+        let db = TestDb::default();
+        let circle = shape(&db, string(&db, "c"), InferredTypeData::Number);
+        let square = shape(&db, string(&db, "s"), InferredTypeData::String);
+        let nullable = union(&db, &[circle, square, InferredTypeData::Undefined]);
+        let chained = |predicate, positive| {
+            let test = PropertyTest {
+                name: "kind",
+                predicate,
+                positive,
+                optional_chain: true,
+            };
+            super::narrow_by_property(&db, nullable, nullable, test, |ty| ty)
+        };
+        let literal = NarrowingPredicate::Literal(string(&db, "c"));
+        assert_eq!(
+            chained(literal, true),
+            union(&db, &[circle, InferredTypeData::Undefined])
+        );
+        assert_eq!(
+            chained(literal, false),
+            union(&db, &[square, InferredTypeData::Undefined])
+        );
+        // The chain gives `undefined` when the object is nullish.
+        assert_eq!(
+            chained(
+                NarrowingPredicate::Literal(InferredTypeData::Undefined),
+                true
+            ),
+            InferredTypeData::Undefined
+        );
+    }
+
+    #[test]
+    fn tuple_elements_are_properties_named_by_their_index() {
+        let db = &TestDb::default();
+        /// Returns a tuple of `elements`, each with whether it is optional.
+        fn tuple<'db>(
+            db: &'db TestDb,
+            elements: &[(InferredTypeData<'db>, bool)],
+        ) -> InferredTypeData<'db> {
+            InferredTypeData::Tuple(InternedTuple::new(
+                db,
+                elements
+                    .iter()
+                    .map(|(ty, is_optional)| TupleElementType {
+                        ty: *ty,
+                        name: None,
+                        is_optional: *is_optional,
+                        is_rest: false,
+                    })
+                    .collect::<Box<[_]>>(),
+                false,
+            ))
+        }
+        let first = tuple(
+            db,
+            &[(string(db, "a"), false), (InferredTypeData::Number, false)],
+        );
+        let second = tuple(
+            db,
+            &[(string(db, "b"), false), (InferredTypeData::Number, true)],
+        );
+        let tuples = union(db, &[first, second]);
+        let literal = NarrowingPredicate::Literal(string(db, "a"));
+        assert_eq!(
+            narrow_property(db, tuples, tuples, "0", literal, true),
+            first
+        );
+        assert_eq!(
+            narrow_property(db, tuples, tuples, "0", literal, false),
+            second
+        );
+        // `length`, a key past the last element, and a key that is not the
+        // canonical spelling of an index are not looked up.
+        for name in ["length", "2", "00"] {
+            assert_eq!(
+                narrow_property(db, tuples, tuples, name, literal, true),
+                tuples,
+                "{name}"
+            );
+        }
+    }
+
+    #[test]
+    fn raw_object_unions_need_no_resolution() {
+        let local = |index| TypeReference::Resolved(RawTypeId::Local(crate::TypeId::new(index)));
+        let union_of = |types: Vec<TypeReference>| {
+            RawTypeData::Union(Box::new(crate::Union(types.into_boxed_slice())))
+        };
+        let primitives = union_of(vec![
+            TypeReference::Resolved(GLOBAL_STRING_KEYWORD_ID),
+            TypeReference::Resolved(GLOBAL_UNDEFINED_ID),
+            local(1),
+        ]);
+        let with_object = union_of(vec![
+            TypeReference::Resolved(GLOBAL_STRING_KEYWORD_ID),
+            local(2),
+        ]);
+        let with_objects = union_of(vec![local(2), local(2)]);
+        let with_name = union_of(vec![
+            TypeReference::Resolved(GLOBAL_NULL_KEYWORD_ID),
+            local(1),
+        ]);
+        let string_literal = RawTypeData::Literal(Box::new(crate::Literal::String(
+            crate::literal::StringLiteral::from(Text::new_static("a")),
+        )));
+        for (raw_types, expected) in [
+            (vec![primitives, string_literal.clone()], false),
+            // One object type among primitives can't be told apart by a
+            // property.
+            (
+                vec![
+                    with_object,
+                    string_literal.clone(),
+                    RawTypeData::ObjectKeyword,
+                ],
+                false,
+            ),
+            (
+                vec![
+                    with_objects,
+                    string_literal.clone(),
+                    RawTypeData::ObjectKeyword,
+                ],
+                true,
+            ),
+            // An instance of a named type may be a union itself.
+            (
+                vec![
+                    with_name,
+                    RawTypeData::TypeofType(Box::new(TypeReference::unknown())),
+                ],
+                true,
+            ),
+            (vec![RawTypeData::ObjectKeyword], false),
+            (vec![RawTypeData::String], false),
+            (
+                vec![
+                    RawTypeData::Reference(local(1)),
+                    union_of(vec![
+                        TypeReference::Resolved(GLOBAL_NULL_KEYWORD_ID),
+                        local(2),
+                    ]),
+                    string_literal.clone(),
+                ],
+                false,
+            ),
+            (
+                vec![RawTypeData::TypeofType(Box::new(TypeReference::unknown()))],
+                true,
+            ),
+            (vec![RawTypeData::Unknown], true),
+            // Inferred types: `new C()` is one instance, `typeof x` is a
+            // string, and the result of a call may be anything.
+            (
+                vec![RawTypeData::from(TypeofExpression::New(
+                    crate::TypeofNewExpression {
+                        callee: TypeReference::unknown(),
+                        arguments: Box::default(),
+                    },
+                ))],
+                false,
+            ),
+            (
+                vec![RawTypeData::from(TypeofExpression::Typeof(
+                    crate::TypeofTypeofExpression {
+                        argument: TypeReference::unknown(),
+                    },
+                ))],
+                false,
+            ),
+            (
+                vec![RawTypeData::from(TypeofExpression::Call(
+                    crate::TypeofCallExpression {
+                        callee: TypeReference::unknown(),
+                        arguments: Box::default(),
+                    },
+                ))],
+                true,
+            ),
+        ] {
+            assert_eq!(
+                raw_may_be_object_union(&local(0), &raw_types),
+                expected,
+                "{raw_types:?}"
+            );
+        }
+        assert!(!raw_may_be_object_union(
+            &TypeReference::Resolved(GLOBAL_STRING_KEYWORD_ID),
+            &[]
+        ));
+        // A local id outside the table may stand for anything.
+        assert!(raw_may_be_object_union(&local(3), &[]));
     }
 }

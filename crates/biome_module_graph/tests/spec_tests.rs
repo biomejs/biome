@@ -52,6 +52,8 @@ mod css_properties;
 mod cycles;
 #[path = "spec_tests/database.test.rs"]
 mod database;
+#[path = "spec_tests/discriminants.test.rs"]
+mod discriminants;
 #[path = "spec_tests/expected_argument_inference.test.rs"]
 mod expected_argument_inference;
 #[path = "spec_tests/expressions.test.rs"]

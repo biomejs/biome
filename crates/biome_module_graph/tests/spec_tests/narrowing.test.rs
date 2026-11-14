@@ -419,7 +419,7 @@ fn tests_in_nested_roots_or_after_the_read_skip_flow_queries() {
 
 #[test]
 fn unrefinable_binding_types_skip_flow_queries() {
-    for (parameter, resolved_queries) in [("value: any", 0), ("value", 0), ("value: Loose", 1)] {
+    for (parameter, baseline_queries) in [("value: any", 0), ("value", 0), ("value: Loose", 1)] {
         let source = format!(
             "type Loose = any;\n\
              function f({parameter}) {{ /*before*/value; if (typeof value === 'string') {{ /*after*/value; }} }}"
@@ -437,11 +437,15 @@ fn unrefinable_binding_types_skip_flow_queries() {
         db.clear_salsa_events();
         assert_eq!(read("after"), ordinary, "{parameter}");
         let events = db.take_salsa_events();
-        // Only a type that resolves to `any` needs flow queries to find out.
-        for query in ["infer_flow_subject_type", "infer_flow_binding_baseline"] {
+        // Only a type that resolves to `any` needs a flow query to find out,
+        // and once its declared type shows that, no solve runs.
+        for (query, count) in [
+            ("infer_flow_binding_baseline", baseline_queries),
+            ("infer_flow_subject_type", 0),
+        ] {
             assert_eq!(
                 function_query_will_execute_count_by_name(&db, query, &events),
-                resolved_queries,
+                count,
                 "{parameter}: {query}"
             );
         }

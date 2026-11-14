@@ -1,0 +1,117 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalidDiscriminants.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// A test of a discriminant narrows the object that holds it, so the narrowed
+// members decide the type of its other properties, as in TypeScript.
+
+interface Loaded {
+	state: "loaded";
+	data: { size: number };
+}
+
+interface Failed {
+	state: "failed";
+	data: null;
+}
+
+type Result = Loaded | Failed;
+
+function size(result: Result) {
+	if (result.state === "loaded") {
+		return result.data?.size;
+	}
+}
+
+function failed(result: Result) {
+	if (result.state !== "loaded") {
+		if (result.data) {
+			return 1;
+		}
+	}
+}
+
+function aliased(result: Result) {
+	const loaded = result.state === "loaded";
+	if (loaded) {
+		return result.data?.size;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidDiscriminants.ts:19:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    17 │ function size(result: Result) {
+    18 │ 	if (result.state === "loaded") {
+  > 19 │ 		return result.data?.size;
+       │ 		       ^^^^^^^^^^^
+    20 │ 	}
+    21 │ }
+  
+  i Replace ?. with ..
+  
+    17 │ function size(result: Result) {
+    18 │ 	if (result.state === "loaded") {
+  > 19 │ 		return result.data?.size;
+       │ 		                  ^^
+    20 │ 	}
+    21 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidDiscriminants.ts:25:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    23 │ function failed(result: Result) {
+    24 │ 	if (result.state !== "loaded") {
+  > 25 │ 		if (result.data) {
+       │ 		    ^^^^^^^^^^^
+    26 │ 			return 1;
+    27 │ 		}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
+
+```
+
+```
+invalidDiscriminants.ts:34:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    32 │ 	const loaded = result.state === "loaded";
+    33 │ 	if (loaded) {
+  > 34 │ 		return result.data?.size;
+       │ 		       ^^^^^^^^^^^
+    35 │ 	}
+    36 │ }
+  
+  i Replace ?. with ..
+  
+    32 │ 	const loaded = result.state === "loaded";
+    33 │ 	if (loaded) {
+  > 34 │ 		return result.data?.size;
+       │ 		                  ^^
+    35 │ 	}
+    36 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```

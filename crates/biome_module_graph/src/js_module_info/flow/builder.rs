@@ -12,6 +12,7 @@ use biome_js_syntax::{
     JsWhileStatement, T,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TokenText};
+use rustc_hash::FxHashSet;
 
 const MAX_SYNTAX_NODES: usize = 16_384;
 /// Limits how deeply syntax can nest below the execution root that gets flow.
@@ -26,6 +27,10 @@ pub(super) struct BuiltRoot {
     pub(super) subjects: FlowSubjectTable,
     /// Condition nodes paired with each subject their guard may refine.
     pub(super) mentions: Vec<(FlowNodeId, FlowSubjectId)>,
+    /// The subjects that conditions refine only through
+    /// [`FlowGuard::Property`], such as `s` when the only condition that
+    /// mentions it is `s.kind === "c"`.
+    pub(super) property_only: FxHashSet<FlowSubjectId>,
     /// Reachable reads of subjects with their incoming flow.
     pub(super) reads: Vec<BuiltRead>,
 }
@@ -89,17 +94,25 @@ pub(super) fn build_root(
         guards: Vec::new(),
         subjects: FlowSubjectTable::new(root, this_can_narrow),
         mentions: Vec::new(),
+        tested: FxHashSet::default(),
+        parents: FxHashSet::default(),
         reads: Vec::new(),
         jumps: Vec::new(),
         current: Some(0),
         remaining_visits: MAX_SYNTAX_NODES,
     };
     builder.root(root).ok()?;
+    let property_only = builder
+        .parents
+        .difference(&builder.tested)
+        .copied()
+        .collect();
     Some(BuiltRoot {
         nodes: builder.nodes,
         guards: builder.guards,
         subjects: builder.subjects,
         mentions: builder.mentions,
+        property_only,
         reads: builder.reads,
     })
 }
@@ -333,6 +346,11 @@ struct RootBuilder<'a, 'raw> {
     guards: Vec<FlowGuard>,
     subjects: FlowSubjectTable,
     mentions: Vec<(FlowNodeId, FlowSubjectId)>,
+    /// The subjects that a condition mentions other than as the object of a
+    /// [`FlowGuard::Property`].
+    tested: FxHashSet<FlowSubjectId>,
+    /// The objects of the [`FlowGuard::Property`] guards of all conditions.
+    parents: FxHashSet<FlowSubjectId>,
     reads: Vec<BuiltRead>,
     jumps: Vec<JumpTarget>,
     /// The incoming flow of the next statement, or `None` when unreachable.
@@ -785,10 +803,13 @@ impl RootBuilder<'_, '_> {
             antecedent,
             guard: condition.guard,
         })?;
+        self.tested.extend(condition.mentions.iter().copied());
+        self.parents.extend(condition.parents.iter().copied());
         self.mentions.extend(
             condition
                 .mentions
                 .into_iter()
+                .chain(condition.parents)
                 .map(|subject| (node, subject)),
         );
         Ok(node)
@@ -955,6 +976,26 @@ mod tests {
                     };
                     let negation = if *positive { "" } else { "!" };
                     facts.push(format!("{negation}{name}:{test}"));
+                }
+                // A test of `o.k` that narrows `o` is written `o[k]:Test`.
+                FlowGuard::Property {
+                    object,
+                    key,
+                    test,
+                    positive,
+                    ..
+                } => {
+                    let object = self.subject_name(*object);
+                    let key = match key {
+                        PropertyKey::Name(name) | PropertyKey::Private(name) => name,
+                    };
+                    let test = match test {
+                        FlowTest::Truthy => "Truthy",
+                        FlowTest::Nullish => "Nullish",
+                        _ => "Other",
+                    };
+                    let negation = if *positive { "" } else { "!" };
+                    facts.push(format!("{negation}{object}[{key}]:{test}"));
                 }
                 FlowGuard::Both { left, right, .. } => {
                     self.facts(*left, facts);
