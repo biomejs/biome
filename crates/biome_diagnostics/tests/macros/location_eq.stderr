@@ -1,4 +1,4 @@
-error: failed to parse "location" attribute: expected parentheses
+error: failed to parse "location" attribute: expected parentheses: #[location(...)]
  --> tests/macros/location_eq.rs:5:16
   |
 5 |     #[location = Identifier]

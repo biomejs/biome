@@ -55,7 +55,7 @@ regex                    = { workspace = true }
 schemars                 = { workspace = true }
 serde                    = { workspace = true, optional = true }
 serde_json               = { workspace = true, optional = true }
-syn                      = { version = "2.0", features = ["full"] }
+syn                      = { workspace = true, features = ["full"] }
 ureq                     = { workspace = true }
 xtask_glue               = { workspace = true }
 

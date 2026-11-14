@@ -203,7 +203,7 @@ similar                      = "2.7.0"
 similar-asserts              = "1.7.0"
 smallvec                     = { version = "1.16.5", features = ["const_new", "serde", "union"] }
 static_assertions            = "1.1"
-syn                          = "1.0.109"
+syn                          = "2.0.106"
 termcolor                    = "1.4.1"
 terminal_size                = "0.4.4"
 tests_macros                 = { path = "./crates/tests_macros" }

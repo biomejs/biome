@@ -1,6 +1,6 @@
 use quote::ToTokens;
 use syn::spanned::Spanned;
-use syn::{Attribute, Error, Lit, Meta, MetaNameValue};
+use syn::{Attribute, Error, Expr, ExprLit, Lit, Meta, MetaNameValue};
 
 use crate::util::parse_meta_list;
 
@@ -18,12 +18,15 @@ impl TryFrom<&Vec<Attribute>> for EnumVariantAttrs {
     fn try_from(attrs: &Vec<Attribute>) -> Result<Self, Self::Error> {
         let mut opts = Self::default();
         for attr in attrs {
-            if attr.path.is_ident("deserializable") {
-                parse_meta_list(&attr.parse_meta()?, |meta| {
+            if attr.path().is_ident("deserializable") {
+                parse_meta_list(&attr.meta, |meta| {
                     match meta {
                         Meta::NameValue(MetaNameValue {
                             path,
-                            lit: Lit::Str(s),
+                            value:
+                                Expr::Lit(ExprLit {
+                                    lit: Lit::Str(s), ..
+                                }),
                             ..
                         }) if path.is_ident("rename") => opts.rename = Some(s.value()),
                         val => {
@@ -36,12 +39,15 @@ impl TryFrom<&Vec<Attribute>> for EnumVariantAttrs {
                     }
                     Ok(())
                 })?;
-            } else if attr.path.is_ident("serde") {
-                parse_meta_list(&attr.parse_meta()?, |meta| {
+            } else if attr.path().is_ident("serde") {
+                parse_meta_list(&attr.meta, |meta| {
                     match meta {
                         Meta::NameValue(MetaNameValue {
                             path,
-                            lit: Lit::Str(s),
+                            value:
+                                Expr::Lit(ExprLit {
+                                    lit: Lit::Str(s), ..
+                                }),
                             ..
                         }) if opts.rename.is_none() && path.is_ident("rename") => {
                             opts.rename = Some(s.value())

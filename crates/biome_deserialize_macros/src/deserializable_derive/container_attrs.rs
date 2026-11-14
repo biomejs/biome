@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use quote::ToTokens;
 use syn::spanned::Spanned;
-use syn::{Attribute, Error, Lit, Meta, MetaNameValue, Path};
+use syn::{Attribute, Error, Expr, ExprLit, Lit, Meta, MetaNameValue, Path};
 
 use crate::util::parse_meta_list;
 
@@ -48,25 +48,34 @@ impl TryFrom<&Vec<Attribute>> for ContainerAttrs {
     fn try_from(attrs: &Vec<Attribute>) -> Result<Self, Self::Error> {
         let mut opts = Self::default();
         for attr in attrs {
-            if attr.path.is_ident("deserializable") {
-                parse_meta_list(&attr.parse_meta()?, |meta| {
+            if attr.path().is_ident("deserializable") {
+                parse_meta_list(&attr.meta, |meta| {
                     match meta {
                         Meta::Path(path) if path.is_ident("with_validator") => {
                             opts.with_validator = true
                         }
                         Meta::NameValue(MetaNameValue {
                             path,
-                            lit: Lit::Str(s),
+                            value:
+                                Expr::Lit(ExprLit {
+                                    lit: Lit::Str(s), ..
+                                }),
                             ..
                         }) if path.is_ident("from") => opts.from = Some(s.parse()?),
                         Meta::NameValue(MetaNameValue {
                             path,
-                            lit: Lit::Str(s),
+                            value:
+                                Expr::Lit(ExprLit {
+                                    lit: Lit::Str(s), ..
+                                }),
                             ..
                         }) if path.is_ident("try_from") => opts.try_from = Some(s.parse()?),
                         Meta::NameValue(MetaNameValue {
                             path,
-                            lit: Lit::Str(s),
+                            value:
+                                Expr::Lit(ExprLit {
+                                    lit: Lit::Str(s), ..
+                                }),
                             ..
                         }) if path.is_ident("unknown_fields") => {
                             match UnknownFields::from_str(&s.value()) {
@@ -90,8 +99,8 @@ impl TryFrom<&Vec<Attribute>> for ContainerAttrs {
                     }
                     Ok(())
                 })?;
-            } else if attr.path.is_ident("serde") {
-                parse_meta_list(&attr.parse_meta()?, |meta| {
+            } else if attr.path().is_ident("serde") {
+                parse_meta_list(&attr.meta, |meta| {
                     match meta {
                         Meta::Path(path)
                             if path.is_ident("deny_unknown_fields")
@@ -101,7 +110,10 @@ impl TryFrom<&Vec<Attribute>> for ContainerAttrs {
                         }
                         Meta::NameValue(MetaNameValue {
                             path,
-                            lit: Lit::Str(s),
+                            value:
+                                Expr::Lit(ExprLit {
+                                    lit: Lit::Str(s), ..
+                                }),
                             ..
                         }) => {
                             if opts.from.is_none() && path.is_ident("from") {

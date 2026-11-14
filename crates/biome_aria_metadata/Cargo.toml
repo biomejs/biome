@@ -25,7 +25,7 @@ proc-macro2              = { workspace = true, features = ["span-locations"] }
 quote                    = { workspace = true }
 serde                    = { workspace = true }
 serde_json               = { workspace = true }
-syn                      = "2.0.76"
+syn                      = { workspace = true }
 
 [lints]
 workspace = true

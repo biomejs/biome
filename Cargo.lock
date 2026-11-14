@@ -554,6 +554,7 @@ dependencies = [
  "serde",
  "serde_json",
  "smallvec",
+ "trybuild",
 ]
 
 [[package]]
@@ -564,7 +565,7 @@ dependencies = [
  "proc-macro-error3",
  "proc-macro2",
  "quote",
- "syn 1.0.109",
+ "syn 2.0.106",
 ]
 
 [[package]]
@@ -609,7 +610,7 @@ dependencies = [
  "proc-macro-error3",
  "proc-macro2",
  "quote",
- "syn 1.0.109",
+ "syn 2.0.106",
 ]
 
 [[package]]
