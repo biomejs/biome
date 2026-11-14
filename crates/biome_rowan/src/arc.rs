@@ -149,6 +149,7 @@ impl<T: ?Sized> Deref for Arc<T> {
     }
 }
 
+#[expect(dead_code)]
 impl<T: ?Sized> Arc<T> {
     /// Provides mutable access to the contents _if_ the `Arc` is uniquely owned.
     #[inline]
@@ -338,15 +339,11 @@ impl<H, T> ThinArc<H, T> {
         f(&transient)
     }
 
-    /// Creates a `ThinArc` for a HeaderSlice using the given header struct and
-    /// iterator to generate the slice.
-    pub(crate) fn from_header_and_iter<I>(header: H, mut items: I) -> Self
-    where
-        I: Iterator<Item = T> + ExactSizeIterator,
-    {
+    /// Allocates a `ThinArc` for `num_items` items and writes its reference
+    /// count and length. The header and the items are left uninitialized.
+    #[inline]
+    fn allocate(num_items: usize) -> ptr::NonNull<ArcInner<HeaderSlice<H, [T; 0]>>> {
         assert_ne!(mem::size_of::<T>(), 0, "Need to think about ZST");
-
-        let num_items = items.len();
 
         // Offset of the start of the slice in the allocation.
         let inner_to_data_offset = offset_of!(ArcInner<HeaderSlice<H, [T; 0]>>, data);
@@ -367,7 +364,6 @@ impl<H, T> ThinArc<H, T> {
         assert!(size >= usable_size, "size overflows");
         let layout = Layout::from_size_align(size, align).expect("invalid layout");
 
-        let ptr: *mut ArcInner<HeaderSlice<H, [T; 0]>>;
         unsafe {
             let buffer = alloc::alloc(layout);
 
@@ -375,53 +371,90 @@ impl<H, T> ThinArc<H, T> {
                 alloc::handle_alloc_error(layout);
             }
 
-            // // Synthesize the fat pointer. We do this by claiming we have a direct
-            // // pointer to a [T], and then changing the type of the borrow. The key
-            // // point here is that the length portion of the fat pointer applies
-            // // only to the number of elements in the dynamically-sized portion of
-            // // the type, so the value will be the same whether it points to a [T]
-            // // or something else with a [T] as its last member.
-            // let fake_slice: &mut [T] = slice::from_raw_parts_mut(buffer as *mut T, num_items);
-            // ptr = fake_slice as *mut [T] as *mut ArcInner<HeaderSlice<H, [T]>>;
-            ptr = buffer as *mut _;
-
-            let count = atomic::AtomicUsize::new(1);
-
-            // Write the data.
-            //
-            // Note that any panics here (i.e. from the iterator) are safe, since
-            // we'll just leak the uninitialized memory.
-            ptr::write(ptr::addr_of_mut!((*ptr).count), count);
-            ptr::write(ptr::addr_of_mut!((*ptr).data.header), header);
+            let ptr = buffer as *mut ArcInner<HeaderSlice<H, [T; 0]>>;
+            debug_assert_eq!(
+                ptr::addr_of_mut!((*ptr).data.slice) as usize - buffer as usize,
+                slice_offset
+            );
+            ptr::write(ptr::addr_of_mut!((*ptr).count), atomic::AtomicUsize::new(1));
             ptr::write(ptr::addr_of_mut!((*ptr).data.length), num_items);
-            if num_items != 0 {
-                let mut current = ptr::addr_of_mut!((*ptr).data.slice) as *mut T;
-                debug_assert_eq!(current as usize - buffer as usize, slice_offset);
-                for _ in 0..num_items {
-                    ptr::write(
-                        current,
-                        items
-                            .next()
-                            .expect("ExactSizeIterator over-reported length"),
-                    );
-                    current = current.offset(1);
-                }
-                assert!(
-                    items.next().is_none(),
-                    "ExactSizeIterator under-reported length"
-                );
+            ptr::NonNull::new_unchecked(ptr)
+        }
+    }
 
-                // We should have consumed the buffer exactly.
-                debug_assert_eq!(current as *mut u8, buffer.add(usable_size));
+    /// Creates a `ThinArc` for a HeaderSlice using the given header struct and
+    /// iterator to generate the slice.
+    #[inline]
+    pub(crate) fn from_header_and_iter<I>(header: H, items: I) -> Self
+    where
+        I: Iterator<Item = T> + ExactSizeIterator,
+    {
+        Self::from_header_and_iter_with(header, items, |_, item| item)
+    }
+
+    /// Creates a `ThinArc` whose slice holds `map(header, item)` for each item
+    /// of `items`, in order.
+    ///
+    /// `map` can update the header from each item, for example to sum lengths.
+    /// The header is stored after the last item has been mapped.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `items` yields more or fewer items than its `len()`. If `map`
+    /// or the iterator panics, the allocation and the items already written
+    /// are leaked.
+    #[inline]
+    pub(crate) fn from_header_and_iter_with<I, F>(mut header: H, mut items: I, mut map: F) -> Self
+    where
+        I: ExactSizeIterator,
+        F: FnMut(&mut H, I::Item) -> T,
+    {
+        let num_items = items.len();
+        let ptr = Self::allocate(num_items);
+
+        unsafe {
+            let ptr = ptr.as_ptr();
+            let mut current = ptr::addr_of_mut!((*ptr).data.slice) as *mut T;
+            for _ in 0..num_items {
+                let item = items
+                    .next()
+                    .expect("ExactSizeIterator over-reported length");
+                ptr::write(current, map(&mut header, item));
+                current = current.add(1);
             }
             assert!(
                 items.next().is_none(),
                 "ExactSizeIterator under-reported length"
             );
+            ptr::write(ptr::addr_of_mut!((*ptr).data.header), header);
         }
 
         Self {
-            ptr: unsafe { ptr::NonNull::new_unchecked(ptr) },
+            ptr,
+            phantom: PhantomData,
+        }
+    }
+
+    /// Creates a `ThinArc` whose slice is a copy of `items`.
+    #[inline]
+    pub(crate) fn from_header_and_slice(header: H, items: &[T]) -> Self
+    where
+        T: Copy,
+    {
+        let ptr = Self::allocate(items.len());
+
+        unsafe {
+            let ptr = ptr.as_ptr();
+            ptr::write(ptr::addr_of_mut!((*ptr).data.header), header);
+            ptr::copy_nonoverlapping(
+                items.as_ptr(),
+                ptr::addr_of_mut!((*ptr).data.slice) as *mut T,
+                items.len(),
+            );
+        }
+
+        Self {
+            ptr,
             phantom: PhantomData,
         }
     }
@@ -501,5 +534,91 @@ impl<H: Eq, T: Eq> Eq for ThinArc<H, T> {}
 impl<H: Hash, T: Hash> Hash for ThinArc<H, T> {
     fn hash<HSR: Hasher>(&self, state: &mut HSR) {
         (**self).hash(state)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::ThinArc;
+
+    #[test]
+    fn from_header_and_slice_copies_items() {
+        let arc = ThinArc::from_header_and_slice(7u16, b"hello");
+        assert_eq!(arc.header, 7);
+        assert_eq!(arc.len(), 5);
+        assert_eq!(arc.slice(), b"hello");
+
+        let empty = ThinArc::<u16, u8>::from_header_and_slice(1, &[]);
+        assert_eq!(empty.header, 1);
+        assert_eq!(empty.len(), 0);
+        assert!(empty.slice().is_empty());
+    }
+
+    #[test]
+    fn from_header_and_iter_with_updates_header_in_order() {
+        let arc =
+            ThinArc::from_header_and_iter_with(0u32, [1u32, 2, 3].into_iter(), |sum, item| {
+                let offset = *sum;
+                *sum += item;
+                offset
+            });
+        assert_eq!(arc.header, 6);
+        assert_eq!(arc.slice(), &[0, 1, 3]);
+
+        let empty =
+            ThinArc::from_header_and_iter_with(5u32, std::iter::empty::<u32>(), |_, item| item);
+        assert_eq!(empty.header, 5);
+        assert!(empty.slice().is_empty());
+    }
+
+    /// An iterator whose `len()` claims more items than it yields.
+    struct OverReported;
+
+    impl Iterator for OverReported {
+        type Item = u32;
+
+        fn next(&mut self) -> Option<u32> {
+            None
+        }
+
+        fn size_hint(&self) -> (usize, Option<usize>) {
+            (2, Some(2))
+        }
+    }
+
+    impl ExactSizeIterator for OverReported {}
+
+    // The panic leaks the allocation by design, which Miri reports as an error.
+    #[cfg_attr(miri, ignore)]
+    #[test]
+    #[should_panic(expected = "ExactSizeIterator over-reported length")]
+    fn from_header_and_iter_with_panics_on_missing_items() {
+        ThinArc::from_header_and_iter_with((), OverReported, |_, item| item);
+    }
+
+    /// An iterator whose `len()` claims fewer items than it yields.
+    struct UnderReported(u32);
+
+    impl Iterator for UnderReported {
+        type Item = u32;
+
+        fn next(&mut self) -> Option<u32> {
+            self.0 += 1;
+            (self.0 <= 2).then_some(self.0)
+        }
+
+        fn size_hint(&self) -> (usize, Option<usize>) {
+            (1, Some(1))
+        }
+    }
+
+    impl ExactSizeIterator for UnderReported {}
+
+    // The panic leaks the allocation by design, which Miri reports as an error.
+    #[cfg_attr(miri, ignore)]
+    #[test]
+    #[should_panic(expected = "ExactSizeIterator under-reported length")]
+    fn from_header_and_iter_with_panics_on_extra_items() {
+        ThinArc::from_header_and_iter_with((), UnderReported(0), |_, item| item);
     }
 }
