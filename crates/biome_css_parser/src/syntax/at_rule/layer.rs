@@ -49,7 +49,7 @@ pub(crate) fn parse_any_layer(p: &mut CssParser) -> CompletedMarker {
     m.complete(p, kind)
 }
 
-const LAYER_REFERENCE_LIST_END_SET: TokenSet<CssSyntaxKind> = token_set!(T!['{'], T![;]);
+const LAYER_REFERENCE_LIST_END_SET: TokenSet<CssSyntaxKind> = token_set!(T![')'], T!['{'], T![;]);
 const LAYER_REFERENCE_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     LAYER_REFERENCE_LIST_END_SET.union(token_set!(T![,]));
 

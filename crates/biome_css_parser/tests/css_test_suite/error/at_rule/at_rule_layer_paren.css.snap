@@ -1,0 +1,179 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@layer)
+@layer a b)
+@layer){}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssLayerAtRule {
+                layer_token: LAYER_KW@1..6 "layer" [] [],
+                layer: CssBogusLayer {
+                    items: [
+                        CssLayerReferenceList [],
+                    ],
+                },
+            },
+        },
+        CssBogusRule {
+            items: [
+                R_PAREN@6..7 ")" [] [],
+            ],
+        },
+        CssAtRule {
+            at_token: AT@7..9 "@" [Newline("\n")] [],
+            rule: CssLayerAtRule {
+                layer_token: LAYER_KW@9..15 "layer" [] [Whitespace(" ")],
+                layer: CssBogusLayer {
+                    items: [
+                        CssLayerReferenceList [
+                            CssLayerNameList [
+                                CssIdentifier {
+                                    value_token: IDENT@15..17 "a" [] [Whitespace(" ")],
+                                },
+                                missing separator,
+                                CssIdentifier {
+                                    value_token: IDENT@17..18 "b" [] [],
+                                },
+                            ],
+                        ],
+                    ],
+                },
+            },
+        },
+        CssBogusRule {
+            items: [
+                R_PAREN@18..19 ")" [] [],
+            ],
+        },
+        CssAtRule {
+            at_token: AT@19..21 "@" [Newline("\n")] [],
+            rule: CssLayerAtRule {
+                layer_token: LAYER_KW@21..26 "layer" [] [],
+                layer: CssBogusLayer {
+                    items: [
+                        CssLayerReferenceList [],
+                    ],
+                },
+            },
+        },
+        CssBogusRule {
+            items: [
+                R_PAREN@26..27 ")" [] [],
+                L_CURLY@27..28 "{" [] [],
+                R_CURLY@28..29 "}" [] [],
+            ],
+        },
+    ],
+    eof_token: EOF@29..30 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..30
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..29
+    0: CSS_AT_RULE@0..6
+      0: AT@0..1 "@" [] []
+      1: CSS_LAYER_AT_RULE@1..6
+        0: LAYER_KW@1..6 "layer" [] []
+        1: CSS_BOGUS_LAYER@6..6
+          0: CSS_LAYER_REFERENCE_LIST@6..6
+    1: CSS_BOGUS_RULE@6..7
+      0: R_PAREN@6..7 ")" [] []
+    2: CSS_AT_RULE@7..18
+      0: AT@7..9 "@" [Newline("\n")] []
+      1: CSS_LAYER_AT_RULE@9..18
+        0: LAYER_KW@9..15 "layer" [] [Whitespace(" ")]
+        1: CSS_BOGUS_LAYER@15..18
+          0: CSS_LAYER_REFERENCE_LIST@15..18
+            0: CSS_LAYER_NAME_LIST@15..18
+              0: CSS_IDENTIFIER@15..17
+                0: IDENT@15..17 "a" [] [Whitespace(" ")]
+              1: (empty)
+              2: CSS_IDENTIFIER@17..18
+                0: IDENT@17..18 "b" [] []
+    3: CSS_BOGUS_RULE@18..19
+      0: R_PAREN@18..19 ")" [] []
+    4: CSS_AT_RULE@19..26
+      0: AT@19..21 "@" [Newline("\n")] []
+      1: CSS_LAYER_AT_RULE@21..26
+        0: LAYER_KW@21..26 "layer" [] []
+        1: CSS_BOGUS_LAYER@26..26
+          0: CSS_LAYER_REFERENCE_LIST@26..26
+    5: CSS_BOGUS_RULE@26..29
+      0: R_PAREN@26..27 ")" [] []
+      1: L_CURLY@27..28 "{" [] []
+      2: R_CURLY@28..29 "}" [] []
+  2: EOF@29..30 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_layer_paren.css:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead found `)`
+  
+  > 1 │ @layer)
+      │       ^
+    2 │ @layer a b)
+    3 │ @layer){}
+  
+  i Remove )
+  
+at_rule_layer_paren.css:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `.` but instead found `b`
+  
+    1 │ @layer)
+  > 2 │ @layer a b)
+      │          ^
+    3 │ @layer){}
+    4 │ 
+  
+  i Remove b
+  
+at_rule_layer_paren.css:2:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead found `)`
+  
+    1 │ @layer)
+  > 2 │ @layer a b)
+      │           ^
+    3 │ @layer){}
+    4 │ 
+  
+  i Remove )
+  
+at_rule_layer_paren.css:3:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead found `)`
+  
+    1 │ @layer)
+    2 │ @layer a b)
+  > 3 │ @layer){}
+      │       ^
+    4 │ 
+  
+  i Remove )
+  
+```
