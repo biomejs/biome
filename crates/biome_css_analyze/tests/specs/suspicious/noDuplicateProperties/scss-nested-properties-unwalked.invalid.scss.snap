@@ -1,0 +1,150 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
+expression: scss-nested-properties-unwalked.invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+$side: top;
+
+.interpolated-group {
+  border-#{$side}: {
+    width: 1px;
+    width: 2px;
+  }
+}
+
+@page {
+  margin: {
+    top: 1px;
+    top: 2px;
+  }
+}
+
+.if-in-interpolated-group {
+  border-#{$side}: {
+    @if true {
+      width: 1px;
+      width: 2px;
+    }
+  }
+}
+
+.if-under-interpolated-group {
+  border-#{$side}: {
+    top: {
+      @if true {
+        width: 1px;
+        width: 2px;
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+scss-nested-properties-unwalked.invalid.scss:7:5 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    5 │   border-#{$side}: {
+    6 │     width: 1px;
+  > 7 │     width: 2px;
+      │     ^^^^^
+    8 │   }
+    9 │ }
+  
+  i width is already defined here.
+  
+    4 │ .interpolated-group {
+    5 │   border-#{$side}: {
+  > 6 │     width: 1px;
+      │     ^^^^^
+    7 │     width: 2px;
+    8 │   }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+scss-nested-properties-unwalked.invalid.scss:14:5 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    12 │   margin: {
+    13 │     top: 1px;
+  > 14 │     top: 2px;
+       │     ^^^
+    15 │   }
+    16 │ }
+  
+  i margin-top is already defined here.
+  
+    11 │ @page {
+    12 │   margin: {
+  > 13 │     top: 1px;
+       │     ^^^
+    14 │     top: 2px;
+    15 │   }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+scss-nested-properties-unwalked.invalid.scss:22:7 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    20 │     @if true {
+    21 │       width: 1px;
+  > 22 │       width: 2px;
+       │       ^^^^^
+    23 │     }
+    24 │   }
+  
+  i width is already defined here.
+  
+    19 │   border-#{$side}: {
+    20 │     @if true {
+  > 21 │       width: 1px;
+       │       ^^^^^
+    22 │       width: 2px;
+    23 │     }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+scss-nested-properties-unwalked.invalid.scss:32:9 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    30 │       @if true {
+    31 │         width: 1px;
+  > 32 │         width: 2px;
+       │         ^^^^^
+    33 │       }
+    34 │     }
+  
+  i width is already defined here.
+  
+    29 │     top: {
+    30 │       @if true {
+  > 31 │         width: 1px;
+       │         ^^^^^
+    32 │         width: 2px;
+    33 │       }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```

@@ -1,0 +1,95 @@
+/* should generate diagnostics */
+$c: true;
+$items: a b;
+
+@mixin m {
+  @content;
+}
+
+.prefixed-then-nested {
+  border-radius: 1px;
+  border: {
+    radius: 2px;
+  }
+}
+
+.nested-then-prefixed {
+  font: {
+    family: serif;
+  }
+  font-family: sans-serif;
+}
+
+.deeply-nested {
+  border: {
+    top: {
+      left-radius: 1px;
+    }
+  }
+  border-top-left-radius: 2px;
+}
+
+.group-with-value {
+  font: 12px;
+  font: bold {
+    family: serif;
+  }
+}
+
+.repeated-groups {
+  margin: {
+    top: 1px;
+  }
+  margin: {
+    top: 2px;
+  }
+}
+
+.if-in-group {
+  border: {
+    @if $c {
+      radius: 1px;
+      radius: 2px;
+    }
+  }
+}
+
+.each-in-group {
+  border: {
+    @each $item in $items {
+      radius: 1px;
+      radius: 2px;
+    }
+  }
+}
+
+.if-in-deeply-nested-group {
+  border: {
+    top: {
+      @if $c {
+        left-radius: 1px;
+        left-radius: 2px;
+      }
+    }
+  }
+}
+
+.else-in-group {
+  border: {
+    @if $c {
+      width: 1px;
+    } @else {
+      radius: 1px;
+      radius: 2px;
+    }
+  }
+}
+
+.include-in-group {
+  border: {
+    @include m {
+      radius: 1px;
+      radius: 2px;
+    }
+  }
+}

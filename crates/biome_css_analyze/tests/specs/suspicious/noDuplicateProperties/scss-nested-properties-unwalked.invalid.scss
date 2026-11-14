@@ -1,0 +1,36 @@
+/* should generate diagnostics */
+$side: top;
+
+.interpolated-group {
+  border-#{$side}: {
+    width: 1px;
+    width: 2px;
+  }
+}
+
+@page {
+  margin: {
+    top: 1px;
+    top: 2px;
+  }
+}
+
+.if-in-interpolated-group {
+  border-#{$side}: {
+    @if true {
+      width: 1px;
+      width: 2px;
+    }
+  }
+}
+
+.if-under-interpolated-group {
+  border-#{$side}: {
+    top: {
+      @if true {
+        width: 1px;
+        width: 2px;
+      }
+    }
+  }
+}
