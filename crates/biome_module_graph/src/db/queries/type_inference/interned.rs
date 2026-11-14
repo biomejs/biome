@@ -6,11 +6,12 @@
 
 use crate::ModuleInfo;
 use crate::js_module_info::flow::{FlowNodeId, FlowSubjectId};
+use biome_js_type_info::GlobalTypeId;
 use biome_js_type_info::interned_types::{
     CallArgumentType as InferredCallArgumentType, LocalTypeId as InferredLocalTypeId,
     TypeData as InferredTypeData, TypeSubstitution as InferredTypeSubstitution,
 };
-use biome_rowan::TextRange;
+use biome_rowan::{Text, TextRange};
 
 // #region INTERNED TYPES
 
@@ -163,6 +164,38 @@ pub struct NormalizeTypeInput<'db> {
     pub module: ModuleInfo,
     #[returns(copy)]
     pub ty: InferredTypeData<'db>,
+}
+
+/// Interned input for [`super::augmentation_target`]: a name that an
+/// augmentation of a module declares.
+///
+/// The name borrows the source text of the augmentation, so interning it
+/// allocates no string.
+#[salsa::interned]
+#[derive(Debug)]
+pub(crate) struct AugmentedExportInput<'db> {
+    /// The module that the augmentation names.
+    #[returns(copy)]
+    pub module: ModuleInfo,
+    /// The name of the interface that the augmentation declares.
+    pub name: Text,
+}
+
+/// Interned input for [`super::global_type_contributions`].
+#[salsa::interned]
+#[derive(Debug)]
+pub(crate) struct GlobalTypeContributionsInput<'db> {
+    #[returns(copy)]
+    pub id: GlobalTypeId,
+}
+
+/// Interned input for [`super::global_name_declaration`], a global that the
+/// standard library doesn't declare. The name borrows the source text that
+/// refers to it.
+#[salsa::interned]
+#[derive(Debug)]
+pub(crate) struct GlobalNameInput<'db> {
+    pub name: Text,
 }
 
 // #endregion

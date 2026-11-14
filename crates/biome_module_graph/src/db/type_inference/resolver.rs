@@ -21,8 +21,9 @@ use super::{
     lookup::MemberLookupMode,
 };
 use crate::db::queries::{
-    ExpressionTypeInput, LocalTypeInput, infer_flow_expression_type, infer_local_type,
-    infer_module_types, infer_module_types_from_tables, inference_module_sccs,
+    DeclarationContributions, ExpressionTypeInput, LocalTypeInput, declaration_contributions,
+    infer_flow_expression_type, infer_local_type, infer_module_types,
+    infer_module_types_from_tables, inference_module_sccs,
 };
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{JsModuleInfo, ModuleDb, ModuleGraphGeneration, module_for_key};
@@ -253,6 +254,10 @@ pub(in crate::db) struct ResolutionCtx<'db, 'a> {
     /// Flow results this context evaluates itself, or `None` when flow
     /// candidates go through the flow queries.
     pub(in crate::db::type_inference) local_flow: Option<Box<LocalFlow<'db>>>,
+    /// The contributions that other modules make to this module's
+    /// declarations, read on the first interface or class that this context
+    /// resolves.
+    contributions: Option<&'db DeclarationContributions>,
 }
 
 pub(in crate::db) fn resolve_raw_types<'db>(
@@ -344,6 +349,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
             in_progress_reads: Cell::new(0),
             member_lookups: FxHashMap::default(),
             local_flow: None,
+            contributions: None,
         }
     }
 
@@ -804,10 +810,43 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
             .get(type_id.index())
             .map_or(InferredTypeData::Unknown, |raw| self.resolve_raw_type(raw));
         let ty = self.with_namespace_members(type_id, ty);
+        let ty = self.with_contributions(type_id, ty);
 
         self.in_progress.remove(&type_id);
         self.resolved.insert(type_id, ty);
         ty
+    }
+
+    /// Adds to the interface or class `ty`, the data of the declaration
+    /// `type_id`, the interfaces that other modules merge into it through
+    /// module augmentations, as [`InferredTypeData::with_contributions`]
+    /// describes. Other types are returned unchanged.
+    ///
+    /// Every import resolution mode builds a declaration's data here, from
+    /// the same tracked index, so a handle to the declaration has the same
+    /// data in every context. A context that built the data without the
+    /// contributions would make one declaration two different ones for
+    /// `instanceof`.
+    fn with_contributions(
+        &mut self,
+        type_id: TypeId,
+        ty: InferredTypeData<'db>,
+    ) -> InferredTypeData<'db> {
+        if !matches!(
+            ty,
+            InferredTypeData::Interface(_) | InferredTypeData::Class(_)
+        ) {
+            return ty;
+        }
+        let db = self.db;
+        let module = self.module;
+        let contributions = *self
+            .contributions
+            .get_or_insert_with(|| declaration_contributions(db, module));
+        match contributions.binary_search_by_key(&type_id.index(), |(id, _)| id.index()) {
+            Ok(position) => ty.with_contributions(db, &contributions[position].1),
+            Err(_) => ty,
+        }
     }
 
     fn with_namespace_members(

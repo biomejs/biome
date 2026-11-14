@@ -144,6 +144,13 @@ pub fn global_type_id_for_qualifier(qualifier: &TypeReferenceQualifier) -> Optio
     }
 }
 
+/// Resolves a name that a type annotation refers to, such as `String` in
+/// `interface String {}`, to a global that the TypeScript standard library
+/// declares as a type.
+pub fn global_type_id_for_type_name(name: &str) -> Option<GlobalTypeId> {
+    lookup_global(crate::generated::global_types::TYPE_GLOBALS, name)
+}
+
 /// Resolves a name that an expression refers to.
 pub fn global_type_id_for_value(name: &str) -> Option<GlobalTypeId> {
     match name {
@@ -255,7 +262,7 @@ fn resolve_global_type<'db>(
             raw
         }
     };
-    InferredTypeData::from_raw_with_member_resolver(
+    let ty = InferredTypeData::from_raw_with_member_resolver(
         db,
         raw,
         true,
@@ -275,7 +282,14 @@ fn resolve_global_type<'db>(
             }
             reference => resolve_global_reference(db, owner, local, reference),
         }),
-    )
+    );
+    // Supporting types aren't declarations that a project can merge into.
+    match (local, ty) {
+        (None, InferredTypeData::Class(_) | InferredTypeData::Interface(_)) => {
+            ty.with_contributions(db, db.global_contributions(owner))
+        }
+        _ => ty,
+    }
 }
 
 /// Resolves a reference inside the data of `owner`, or of its supporting type `local`.

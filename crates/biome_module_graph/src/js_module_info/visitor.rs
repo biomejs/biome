@@ -3,20 +3,22 @@ use biome_js_semantic::ScopeId;
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern, AnyJsDeclarationClause,
     AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportLike,
-    AnyJsObjectBindingPatternMember, AnyJsRoot, AnyJsxAttributeName, AnyJsxAttributeValue,
-    AnyTsIdentifierBinding, AnyTsModuleName, JsExport, JsExportFromClause, JsExportNamedFromClause,
-    JsExportNamedSpecifierList, JsIdentifierBinding, JsVariableDeclaratorList, JsxAttribute,
-    TsExportAssignmentClause, unescape_js_string,
+    AnyJsModuleItem, AnyJsObjectBindingPatternMember, AnyJsRoot, AnyJsStatement,
+    AnyJsxAttributeName, AnyJsxAttributeValue, AnyTsExternalModuleDeclarationBody,
+    AnyTsIdentifierBinding, AnyTsModuleName, AnyTsModuleReference, JsExport, JsExportFromClause,
+    JsExportNamedFromClause, JsExportNamedSpecifierList, JsIdentifierBinding, JsModuleItemList,
+    JsVariableDeclaratorList, JsxAttribute, TsExportAssignmentClause, TsInterfaceDeclaration,
+    unescape_js_string,
 };
 use biome_js_type_info::{ImportSymbol, RawTypeCollector, TypeData, TypeReference};
 use biome_languages::JsFileSource;
-use biome_rowan::{AstNode, TokenText, WalkEvent};
+use biome_rowan::{AstNode, AstNodeList, TokenText, WalkEvent};
 use camino::Utf8PathBuf;
 use either::Either;
 
 use crate::{
     JsImport, JsImportPhase, JsModuleInfo, JsReexport,
-    js_module_info::collector::{JsCollectedExport, TypeInferenceMode},
+    js_module_info::collector::{ContributionTarget, JsCollectedExport, TypeInferenceMode},
     js_module_info::flow::FlowRootScanner,
 };
 
@@ -86,6 +88,9 @@ impl JsModuleVisitor {
                 }
             }
         }
+        if self.inference_mode != TypeInferenceMode::Disabled {
+            self.visit_contributions(&mut collector);
+        }
 
         JsModuleInfo::new(
             collector,
@@ -93,6 +98,77 @@ impl JsModuleVisitor {
             self.inference_mode,
             flow_roots,
         )
+    }
+
+    /// Registers the interfaces that this module merges into declarations
+    /// that it doesn't own, as TypeScript merges them: those of each
+    /// `declare module "specifier" {}` and `declare global {}` block of a
+    /// module, and the top-level interfaces of a declaration file that is a
+    /// script, whose declarations are globals.
+    ///
+    /// Only the top-level items of the file and the blocks' own items are
+    /// read, because TypeScript accepts these blocks only at the top level
+    /// of a module. In a script, `declare module "specifier" {}` declares a
+    /// module instead of augmenting one, so it adds nothing here, and so does
+    /// a TypeScript file that isn't a declaration file and has no import or
+    /// export, which is more often a test fixture than a file of globals.
+    fn visit_contributions(&self, collector: &mut JsModuleInfoCollector) {
+        let items = match &self.root {
+            AnyJsRoot::JsModule(module) => module.items(),
+            AnyJsRoot::TsDeclarationModule(module) => module.items(),
+            AnyJsRoot::JsScript(_)
+            | AnyJsRoot::JsExpressionSnippet(_)
+            | AnyJsRoot::JsExpressionTemplateRoot(_)
+            | AnyJsRoot::JsSvelteSnippetRoot(_)
+            | AnyJsRoot::JsSvelteDeclarationRoot(_)
+            | AnyJsRoot::JsSvelteLegacyConstRoot(_)
+            | AnyJsRoot::JsVueGenericRoot(_)
+            | AnyJsRoot::JsVueSlotPropsRoot(_) => return,
+        };
+        let Ok(source) = JsFileSource::try_from(self.file_path.as_path()) else {
+            return;
+        };
+        if !source.is_typescript() {
+            return;
+        }
+
+        if items.iter().any(|item| is_external_module_indicator(&item)) {
+            for item in items {
+                match declaration_clause(&item) {
+                    Some(AnyJsDeclarationClause::TsExternalModuleDeclaration(declaration)) => {
+                        let Some(specifier) = declaration.source().ok().and_then(|source| {
+                            source.as_js_module_source()?.inner_string_text().ok()
+                        }) else {
+                            continue;
+                        };
+                        let Some(AnyTsExternalModuleDeclarationBody::TsModuleBlock(block)) =
+                            declaration.body()
+                        else {
+                            continue;
+                        };
+                        for interface in block_interfaces(&block.items()) {
+                            collector.register_contribution(
+                                ContributionTarget::Module(specifier.clone()),
+                                &interface,
+                            );
+                        }
+                    }
+                    Some(AnyJsDeclarationClause::TsGlobalDeclaration(declaration)) => {
+                        let Ok(block) = declaration.body() else {
+                            continue;
+                        };
+                        for interface in block_interfaces(&block.items()) {
+                            collector.register_contribution(ContributionTarget::Global, &interface);
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        } else if source.language().is_definition_file() {
+            for interface in block_interfaces(&items) {
+                collector.register_contribution(ContributionTarget::Global, &interface);
+            }
+        }
     }
 
     /// Collects static CSS class references from JSX `class` and `className`
@@ -524,4 +600,56 @@ fn get_ts_name(binding_result: AnyTsIdentifierBinding) -> Option<TokenText> {
         .ok()?
         .token_text_trimmed();
     Some(name)
+}
+
+/// Returns whether `item` makes its file a module, as TypeScript's
+/// `isAnExternalModuleIndicatorNode` decides: an import or export
+/// declaration, or `import x = require("...")`.
+fn is_external_module_indicator(item: &AnyJsModuleItem) -> bool {
+    match item {
+        AnyJsModuleItem::JsImport(_) | AnyJsModuleItem::JsExport(_) => true,
+        AnyJsModuleItem::AnyJsStatement(AnyJsStatement::TsImportEqualsDeclaration(declaration)) => {
+            matches!(
+                declaration.module_reference(),
+                Ok(AnyTsModuleReference::TsExternalModuleReference(_))
+            )
+        }
+        AnyJsModuleItem::AnyJsStatement(_) => false,
+    }
+}
+
+/// Returns the declaration that `item` makes, with or without `declare` or
+/// `export`, as `interface X {}`, `declare global {}`, or
+/// `export interface X {}`.
+fn declaration_clause(item: &AnyJsModuleItem) -> Option<AnyJsDeclarationClause> {
+    match item {
+        AnyJsModuleItem::AnyJsStatement(statement) => match statement {
+            AnyJsStatement::TsDeclareStatement(statement) => statement.declaration().ok(),
+            AnyJsStatement::TsInterfaceDeclaration(declaration) => Some(declaration.clone().into()),
+            AnyJsStatement::TsExternalModuleDeclaration(declaration) => {
+                Some(declaration.clone().into())
+            }
+            AnyJsStatement::TsGlobalDeclaration(declaration) => Some(declaration.clone().into()),
+            _ => None,
+        },
+        AnyJsModuleItem::JsExport(export) => match export.export_clause().ok()? {
+            AnyJsExportClause::AnyJsDeclarationClause(clause) => Some(clause),
+            AnyJsExportClause::TsExportDeclareClause(clause) => clause.declaration().ok(),
+            _ => None,
+        },
+        AnyJsModuleItem::JsImport(_) => None,
+    }
+}
+
+/// Returns the interfaces that the items of a block or a file declare
+/// directly, in source order.
+fn block_interfaces(
+    items: &JsModuleItemList,
+) -> impl Iterator<Item = TsInterfaceDeclaration> + use<> {
+    items
+        .iter()
+        .filter_map(|item| match declaration_clause(&item) {
+            Some(AnyJsDeclarationClause::TsInterfaceDeclaration(interface)) => Some(interface),
+            _ => None,
+        })
 }

@@ -3,10 +3,11 @@ use crate::db::queries::{
     LocalTypeInput, TypeSubstitutionInput, infer_local_type, infer_module_types, substitute_types,
     substitute_types_in_root_body,
 };
+use crate::js_module_info::order_merged_overloads;
 use crate::{ModuleDb, module_for_key};
 use biome_js_type_info::TypeOperator;
 use biome_js_type_info::interned_types::{
-    ClassParents, InternedExtendsType as InferredExtendsType,
+    ClassParents, InternedExtendsType as InferredExtendsType, InternedFunction,
     InternedMappedType as InferredMappedType, Literal as InferredLiteral, LocalTypeHandle,
     ReturnType as InferredReturnType, TupleElementType as InferredTupleElementType,
     TypeData as InferredTypeData, TypeMember as InferredTypeMember,
@@ -489,7 +490,15 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
             continue;
         }
 
-        if let Some((member_ty, is_optional)) = find_own_member_type(db, ty, key, state.mode) {
+        let own_member = find_own_member_type(db, ty, key, state.mode);
+        let own_member = match key {
+            MemberLookupKey::Name(name) if !contributions(db, ty).is_empty() => {
+                merged_contributed_method(db, resolver, ty, own_member, name, state.mode)
+                    .or(own_member)
+            }
+            MemberLookupKey::Name(_) | MemberLookupKey::Symbol(_) => own_member,
+        };
+        if let Some((member_ty, is_optional)) = own_member {
             let member_ty = resolver.finalize_member_type(
                 db,
                 member_ty,
@@ -516,13 +525,19 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
                     extends,
                     interface_bases,
                 } = class.parents(db);
-                // Interface bases give only instance-side members, so a lookup
-                // of static members skips them. They are pushed first, so the
-                // parent class is searched before them, as in TypeScript.
-                if matches!(
+                let (contributions, interface_bases) =
+                    interface_bases.split_at(class.contributions(db).min(interface_bases.len()));
+                // Interface bases give only instance-side members, which a
+                // lookup of static members never reaches. They are pushed
+                // first, so the parent class, as in TypeScript's base types of
+                // a class, is searched before them. Contributions are pushed
+                // last, so they are searched before the parent class: their
+                // members are the class's own in TypeScript.
+                let is_instance_side = matches!(
                     state.mode,
                     MemberLookupMode::Any | MemberLookupMode::Instance
-                ) {
+                );
+                if is_instance_side {
                     pending.extend(
                         interface_bases
                             .iter()
@@ -538,6 +553,14 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
                         extends = class_side_type(db, extends);
                     }
                     pending.push(state.child(extends, state.collect_result));
+                }
+                if is_instance_side {
+                    pending.extend(
+                        contributions
+                            .iter()
+                            .rev()
+                            .map(|ty| state.child(*ty, state.collect_result)),
+                    );
                 }
             }
             InferredTypeData::Interface(interface) => {
@@ -627,6 +650,173 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
     }
 
     collected_type_result(db, found)
+}
+
+/// Returns the contributions of the interface or class `ty`: the
+/// interfaces that other modules merge into it, as
+/// [`InferredTypeData::with_contributions`] places them.
+fn contributions<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+) -> &'db [InferredTypeData<'db>] {
+    let (parents, count) = if let InferredTypeData::Interface(interface) = ty {
+        (interface.extends(db).as_ref(), interface.contributions(db))
+    } else if let InferredTypeData::Class(class) = ty {
+        let ClassParents {
+            extends: _,
+            interface_bases,
+        } = class.parents(db);
+        (interface_bases.as_ref(), class.contributions(db))
+    } else {
+        return &[];
+    };
+    &parents[..count.min(parents.len())]
+}
+
+/// Returns the method `name` of the interface or class `ty`, which has
+/// contributions, with the overloads of `ty`'s own declaration, given as
+/// `own_member`, and of each contribution that declares the method, ordered
+/// as TypeScript orders the overloads of merged declarations (see
+/// [`order_merged_overloads`]): the contributions follow the declaration, in
+/// their order, so the last contribution's overloads are tried first.
+///
+/// Returns `None` when fewer than two of them declare `name` as a method, or
+/// when one declares it as something else, such as a property, which
+/// TypeScript rejects. The lookup then finds the member as it finds any
+/// other: the declaration's own first, then the contributions'. Only the
+/// contributions' own members count, not those they inherit.
+///
+/// The returned type has the type parameters of `ty`, so the lookup applies
+/// its substitutions to it as to an own member's type.
+fn merged_contributed_method<'db>(
+    db: &'db dyn ModuleDb,
+    resolver: &mut impl MemberLookupResolver<'db>,
+    ty: InferredTypeData<'db>,
+    own_member: Option<(InferredTypeData<'db>, bool)>,
+    name: &str,
+    mode: MemberLookupMode,
+) -> Option<(InferredTypeData<'db>, bool)> {
+    if !matches!(mode, MemberLookupMode::Any | MemberLookupMode::Instance) {
+        return None;
+    }
+    let key = MemberLookupKey::Name(name);
+    let mut declarations = Vec::new();
+    let mut is_optional = None;
+    if let Some((own_ty, own_is_optional)) = own_member {
+        declarations.push(method_signatures(db, resolver, own_ty)?);
+        is_optional = Some(own_is_optional);
+    }
+    for contribution in contributions(db, ty) {
+        let contribution = resolver
+            .resolve_type(db, *contribution)
+            .expand_canonical_global(db);
+        let (target, substitutions) = if let InferredTypeData::InstanceOf(instance) = contribution {
+            let target = resolver
+                .resolve_type(db, instance.ty(db))
+                .expand_canonical_global(db);
+            // The contribution's type parameters stand for `ty`'s.
+            let substitutions =
+                substitutions_for_instance(db, target, instance.type_parameters(db), &[]);
+            (target, substitutions)
+        } else {
+            (contribution, Vec::new())
+        };
+        let Some((member_ty, member_is_optional)) =
+            find_own_member_type(db, target, key, MemberLookupMode::Instance)
+        else {
+            continue;
+        };
+        let member_ty = apply_substitutions(db, member_ty, &substitutions);
+        declarations.push(method_signatures(db, resolver, member_ty)?);
+        is_optional.get_or_insert(member_is_optional);
+    }
+    if declarations.len() < 2 {
+        return None;
+    }
+
+    let signatures = order_merged_overloads(declarations)
+        .into_iter()
+        .map(|ty| InferredTypeMember {
+            kind: InferredTypeMemberKind::CallSignature,
+            ty,
+        })
+        .collect();
+    Some((
+        InferredTypeData::object_from_members(db, signatures),
+        is_optional.unwrap_or(false),
+    ))
+}
+
+/// Returns the call signatures of a method whose type is `ty`, each with
+/// whether it is specialized, as [`order_merged_overloads`] takes them, or
+/// `None` when `ty` isn't a method's type, as for a property's.
+///
+/// A method's type is a named function, or an object with one call
+/// signature per overload. An optional method's type also includes
+/// `undefined`.
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Only functions and overload sets are methods."
+)]
+fn method_signatures<'db>(
+    db: &'db dyn ModuleDb,
+    resolver: &mut impl MemberLookupResolver<'db>,
+    ty: InferredTypeData<'db>,
+) -> Option<Vec<(InferredTypeData<'db>, bool)>> {
+    match resolver.resolve_type(db, ty).expand_canonical_global(db) {
+        InferredTypeData::Function(function) if function.name(db).is_some() => Some(vec![(
+            InferredTypeData::Function(function),
+            is_specialized(db, function),
+        )]),
+        InferredTypeData::Object(object)
+            if object.prototype(db).is_none()
+                && !object.members(db).is_empty()
+                && object
+                    .members(db)
+                    .iter()
+                    .all(|member| member.kind.is_call_signature()) =>
+        {
+            object
+                .members(db)
+                .iter()
+                .map(|member| {
+                    match resolver
+                        .resolve_type(db, member.ty)
+                        .expand_canonical_global(db)
+                    {
+                        InferredTypeData::Function(function) => Some((
+                            InferredTypeData::Function(function),
+                            is_specialized(db, function),
+                        )),
+                        _ => None,
+                    }
+                })
+                .collect()
+        }
+        InferredTypeData::Union(union) => match union.types(db).as_ref() {
+            [method, InferredTypeData::Undefined] => method_signatures(db, resolver, *method),
+            _ => None,
+        },
+        _ => None,
+    }
+}
+
+/// Returns whether a parameter of `function` has a literal type, such as
+/// `"a"`, `1`, or `true`, which makes TypeScript try the signature before the
+/// others of its method.
+fn is_specialized<'db>(db: &'db dyn ModuleDb, function: InternedFunction<'db>) -> bool {
+    function.parameters(db).iter().any(|parameter| {
+        matches!(
+            parameter.ty(),
+            InferredTypeData::Literal(literal) if matches!(
+                literal.literal(db),
+                InferredLiteral::BigInt(_)
+                    | InferredLiteral::Boolean(_)
+                    | InferredLiteral::Number(_)
+                    | InferredLiteral::String(_)
+            )
+        )
+    })
 }
 
 /// Returns the type that supplies the members of a value of the resolved type
@@ -1242,6 +1432,7 @@ mod tests {
             Box::default(),
             Text::from("Base"),
             None,
+            0,
         ));
         let parent = substitutions_for_instance(&db, target, &[InferredTypeData::Number], &[]);
         let unchanged =
@@ -1311,6 +1502,7 @@ mod tests {
             Box::default(),
             Text::from("Pair"),
             None,
+            0,
         ));
         let parent = substitutions_for_instance(
             &db,
@@ -1352,6 +1544,7 @@ mod tests {
             Box::default(),
             Text::from("Recursive"),
             None,
+            0,
         ));
         let argument = InferredTypeData::IndexedAccess(InternedIndexedAccessType::new(
             &db,

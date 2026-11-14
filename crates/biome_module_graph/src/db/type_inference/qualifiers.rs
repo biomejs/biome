@@ -1,4 +1,5 @@
 use super::{imports::MAX_NAMESPACE_IMPORT_MEMBER_STEPS, resolver::ResolutionCtx};
+use crate::db::queries::{GlobalNameInput, contribution_type, global_name_declaration};
 use crate::{js_module_info::TsBindingReferenceExt, module_for_key, module_graph::ModuleInfoKind};
 use biome_js_type_info::{
     ObjectKind, Path, TypeImportQualifier, TypeReference, TypeReferenceQualifier,
@@ -271,6 +272,19 @@ impl<'db> ResolutionCtx<'db, '_> {
         if let Some(id) = global_type_id_for_qualifier(qualifier) {
             return self.apply_qualifier_type_parameters(
                 super::globals::global_type(self.db, id),
+                qualifier,
+            );
+        }
+
+        // A global that only the project declares, through `declare global`
+        // or a declaration script.
+        if qualifier.type_only
+            && let Some(name) = qualifier.path.identifier()
+            && let Some(declaration) =
+                global_name_declaration(self.db, GlobalNameInput::new(self.db, name.clone()))
+        {
+            return self.apply_qualifier_type_parameters(
+                contribution_type(self.db, declaration),
                 qualifier,
             );
         }

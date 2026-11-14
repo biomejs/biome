@@ -2142,6 +2142,7 @@ mod tests {
             Box::default(),
             Text::new_static("Shape"),
             None,
+            0,
         ));
         let mut shapes = vec![empty, length, interface];
         for name in ["Shape", "Array", "Promise", "Date"] {
@@ -2154,6 +2155,7 @@ mod tests {
                 Some(Text::new_static(name)),
                 false,
                 None,
+                0,
             ));
             shapes.push(TypeData::instance_of(&db, class, Box::default()));
         }
@@ -2210,6 +2212,7 @@ mod tests {
             Some(Text::new_static("Shape")),
             false,
             None,
+            0,
         ));
         for data in [
             class,

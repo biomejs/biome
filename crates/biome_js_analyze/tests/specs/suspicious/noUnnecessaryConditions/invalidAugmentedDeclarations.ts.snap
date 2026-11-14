@@ -1,0 +1,48 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAugmentedDeclarations.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// `declare global` adds members to the global types, as in TypeScript, so a
+// method that it declares returns its declared type, which isn't nullish.
+
+declare global {
+	interface String {
+		format(): string;
+	}
+}
+
+function wrapper(text: string) {
+	return text.format() ?? "unformatted";
+}
+
+export {};
+
+```
+
+# Diagnostics
+```
+invalidAugmentedDeclarations.ts:12:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    11 │ function wrapper(text: string) {
+  > 12 │ 	return text.format() ?? "unformatted";
+       │ 	       ^^^^^^^^^^^^^
+    13 │ }
+    14 │ 
+  
+  i Drop ?? and the fallback expression.
+  
+    11 │ function wrapper(text: string) {
+  > 12 │ 	return text.format() ?? "unformatted";
+       │ 	                     ^^
+    13 │ }
+    14 │ 
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```

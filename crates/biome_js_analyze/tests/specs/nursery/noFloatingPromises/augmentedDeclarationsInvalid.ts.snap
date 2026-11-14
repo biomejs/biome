@@ -1,0 +1,71 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: augmentedDeclarationsInvalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// A later declaration of a merged interface gives the overload that a call
+// tries first, as in TypeScript, and `declare global` adds methods to the
+// global types, so these calls return promises.
+
+interface Store {
+	save(): void;
+}
+
+interface Store {
+	save(): Promise<void>;
+}
+
+declare const store: Store;
+store.save();
+
+declare global {
+	interface Array<T> {
+		flush(): Promise<void>;
+	}
+}
+
+declare const items: string[];
+items.flush();
+
+export {};
+
+```
+
+# Diagnostics
+```
+augmentedDeclarationsInvalid.ts:15:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    14 │ declare const store: Store;
+  > 15 │ store.save();
+       │ ^^^^^^^^^^^^^
+    16 │ 
+    17 │ declare global {
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+augmentedDeclarationsInvalid.ts:24:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    23 │ declare const items: string[];
+  > 24 │ items.flush();
+       │ ^^^^^^^^^^^^^^
+    25 │ 
+    26 │ export {};
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

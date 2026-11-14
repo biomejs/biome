@@ -2102,6 +2102,20 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             }) {
                 return MemberLookup::Unknown;
             }
+            // The interfaces that the project merges into the wrapper with
+            // `declare global`, as in `interface String { format(): string }`.
+            let ClassParents {
+                extends: _,
+                interface_bases,
+            } = class.parents(self.db);
+            let mut visited = FxHashSet::default();
+            for base in interface_bases.iter() {
+                match self.find_member(*base, name, 1, &mut visited) {
+                    found @ MemberLookup::Found { .. } => return found.inherited(),
+                    MemberLookup::Missing => {}
+                    MemberLookup::Unknown => return MemberLookup::Unknown,
+                }
+            }
         }
         let object = TypeData::instance_of(
             self.db,
@@ -3032,18 +3046,22 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 interface.extends(self.db).to_vec(),
                 true,
             ),
-            // The parent class comes before the interface bases, so its
-            // members take precedence over theirs, as in TypeScript.
+            // The parent class comes before the interface bases, as in
+            // TypeScript's base types of a class. Contributions come first:
+            // TypeScript counts their members as the class's own.
             TypeData::Class(class) if matches!(ty, TypeData::InstanceOf(_)) => {
                 let ClassParents {
                     extends,
                     interface_bases,
                 } = class.parents(self.db);
+                let (contributions, interface_bases) = interface_bases
+                    .split_at(class.contributions(self.db).min(interface_bases.len()));
                 (
                     class.members(self.db).as_ref(),
                     class.type_parameters(self.db).as_ref(),
-                    extends
+                    contributions
                         .iter()
+                        .chain(extends.iter())
                         .chain(interface_bases.iter())
                         .copied()
                         .collect(),

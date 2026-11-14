@@ -590,10 +590,9 @@ pub fn may_narrow_by_property(db: &dyn TypeDb, declared: InferredTypeData) -> bo
 /// `Readonly<T>` makes it readonly, and when it is an element of a `readonly`
 /// tuple. A getter is never readonly, because Biome doesn't collect setters,
 /// so a getter may have one. A property that a member inherits, through an
-/// `extends` clause or a prototype, doesn't count. Another declaration of an
-/// interface or a class in the same module, or a module augmentation, can
-/// give the member a property of the same name that isn't readonly, and
-/// Biome's types include neither.
+/// `extends` clause, a prototype, or a module augmentation, doesn't count: an
+/// augmentation in a module that Biome doesn't index can give the member a
+/// property of the same name that isn't readonly.
 ///
 /// Returns false when `ty` has no member other than `null` and `undefined`,
 /// when a member is a primitive, a function, an array, an intersection, a
@@ -2508,6 +2507,7 @@ mod tests {
             members.into_boxed_slice(),
             Text::new_static("Shape"),
             None,
+            0,
         ))
     }
 
@@ -2525,6 +2525,7 @@ mod tests {
             Some(Text::new_static("K")),
             false,
             None,
+            0,
         ));
         InferredTypeData::instance_of(db, class, Box::default())
     }
@@ -2906,6 +2907,7 @@ mod tests {
             Some(Text::new_static("K")),
             false,
             None,
+            0,
         ));
         let ty = union(
             &db,
@@ -3213,6 +3215,7 @@ mod tests {
             }]),
             Text::new_static("Index"),
             None,
+            0,
         ));
         let cases = [
             // No member has a unit property type.
@@ -3816,6 +3819,7 @@ mod tests {
             Some(Text::new_static(name)),
             false,
             None,
+            0,
         ))
     }
 
@@ -3951,6 +3955,7 @@ mod tests {
             Some(Text::new_static("Box")),
             false,
             None,
+            0,
         ));
         let has_instance = class(
             db,
@@ -4224,6 +4229,7 @@ mod tests {
             members.into_boxed_slice(),
             Text::new_static(name),
             None,
+            0,
         ))
     }
 
@@ -4512,6 +4518,7 @@ mod tests {
             Some(Text::new_static(name)),
             false,
             None,
+            0,
         ));
         InferredTypeData::instance_of(db, class, Box::default())
     }
