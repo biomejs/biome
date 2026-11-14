@@ -149,6 +149,41 @@ impl CommentStyle for HtmlCommentStyle {
             return CommentPlacement::leading(parent, comment);
         }
 
+        // A comment on the same line as the token before the children of an element or a Svelte
+        // block, which is the `>` of the opening tag or the `}` of `{#if a}`, is in the trailing
+        // trivia of that token. The element list of the children prints it before the first child,
+        // so it must be attached to that child, which leaves it to the list. Otherwise, it becomes
+        // a trailing comment of the opening tag, or of the node before the `}`, which prints it
+        // again.
+        //
+        // ```svelte
+        // <div><!-- this comment is attached to the `<span>` element -->
+        //   <span>a</span>
+        // </div>
+        // {#if a}<!-- this comment is attached to the `<span>` element -->
+        //   <span>a</span>
+        // {/if}
+        // ```
+        if comment.piece().text_range().start() >= token.text_trimmed_range().end()
+            && let Some(following_token) = comment.following_token()
+            && let Some(first_child) = following_token.ancestors().find(|node| {
+                node.parent()
+                    .is_some_and(|parent| parent.kind() == HtmlSyntaxKind::HTML_ELEMENT_LIST)
+            })
+            && first_child.prev_sibling().is_none()
+            && first_child.first_token().as_ref() == Some(following_token)
+            && let Some(children) = first_child.parent()
+            && match token.kind() {
+                HtmlSyntaxKind::R_CURLY => true,
+                HtmlSyntaxKind::R_ANGLE => children
+                    .parent()
+                    .is_some_and(|parent| parent.kind() == HtmlSyntaxKind::HTML_ELEMENT),
+                _ => false,
+            }
+        {
+            return CommentPlacement::leading(first_child, comment);
+        }
+
         // Attach comments between attributes to the following attribute as leading comments.
         // This is required for suppression comments (e.g. `// biome-ignore format: reason`)
         // to work on attributes:
