@@ -1,0 +1,68 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+obj!.method = jest.fn();
+(obj as Foo).method = vi.fn<() => number>();
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ obj!.method = jest.fn();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ (obj as Foo).method = vi.fn<() => number>();
+    4 │ 
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use jest.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.spyOn() instead.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - obj!.method·=·jest.fn();
+      2 │ + jest.spyOn(obj!,·"method").mockImplementation();
+    3 3 │   (obj as Foo).method = vi.fn<() => number>();
+    4 4 │   
+  
+
+```
+
+```
+invalid.ts:3:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+    1 │ /* should generate diagnostics */
+    2 │ obj!.method = jest.fn();
+  > 3 │ (obj as Foo).method = vi.fn<() => number>();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use vi.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use vi.spyOn() instead.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   obj!.method = jest.fn();
+    3   │ - (obj·as·Foo).method·=·vi.fn<()·=>·number>();
+      3 │ + vi.spyOn((obj·as·Foo),·"method").mockImplementation(()·=>·undefined);
+    4 4 │   
+  
+
+```

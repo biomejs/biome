@@ -3279,6 +3279,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_spread_over_apply::UseSpreadOverApplyOptions>(),
     ));
     result.push((
+        "nursery",
+        "useSpyOn",
+        TypeId::of::<biome_rule_options::use_spy_on::UseSpyOnOptions>(),
+    ));
+    result.push((
         "suspicious",
         "useStaticResponseMethods",
         TypeId::of::<
