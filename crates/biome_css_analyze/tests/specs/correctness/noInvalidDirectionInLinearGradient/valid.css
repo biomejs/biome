@@ -98,3 +98,5 @@
 	background: url(foo.png), -ms-linear-gradient(bottom, #fff, #000),
 		url(bar.png);
 }
+.var-a { background: linear-gradient(var(--top), red, blue); }
+.var-b { background: linear-gradient(to var(--side), red, blue); }
