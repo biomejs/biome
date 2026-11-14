@@ -1,0 +1,84 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-issue-8762.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// A `@module` comment only counts in the file header, before the first line
+// of code. Both comments below come after code, so neither counts.
+
+import type { Foo } from "./foo";
+import type { Bar } from "./bar";
+
+/**
+ * Documents {@link Foo}.
+ * @module
+ */
+console.log("side effect");
+
+/**
+ * Documents {@link Bar}.
+ * @module
+ */
+
+```
+
+# Diagnostics
+```
+invalid-issue-8762.ts:6:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    4 │ // of code. Both comments below come after code, so neither counts.
+    5 │ 
+  > 6 │ import type { Foo } from "./foo";
+      │             ^^^^^^^
+    7 │ import type { Bar } from "./bar";
+    8 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     1    │ - /*·should·generate·diagnostics·*/
+     2    │ - 
+     3    │ - //·A·`@module`·comment·only·counts·in·the·file·header,·before·the·first·line
+     4    │ - //·of·code.·Both·comments·below·come·after·code,·so·neither·counts.
+     5    │ - 
+     6    │ - import·type·{·Foo·}·from·"./foo";
+        1 │ + /*·should·generate·diagnostics·*/
+        2 │ + 
+        3 │ + //·A·`@module`·comment·only·counts·in·the·file·header,·before·the·first·line
+        4 │ + //·of·code.·Both·comments·below·come·after·code,·so·neither·counts.
+        5 │ + 
+     7  6 │   import type { Bar } from "./bar";
+     8  7 │   
+  
+
+```
+
+```
+invalid-issue-8762.ts:7:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    6 │ import type { Foo } from "./foo";
+  > 7 │ import type { Bar } from "./bar";
+      │             ^^^^^^^
+    8 │ 
+    9 │ /**
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     5  5 │   
+     6  6 │   import type { Foo } from "./foo";
+     7    │ - import·type·{·Bar·}·from·"./bar";
+     8  7 │   
+     9  8 │   /**
+  
+
+```

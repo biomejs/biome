@@ -1,0 +1,15 @@
+/*
+ * Copyright (c) Example Corp.
+ * Licensed under the MIT license.
+ */
+// SPDX-License-Identifier: MIT
+/** @license MIT */
+
+/**
+ * Helpers for working with {@linkcode Foo}.
+ * @module
+ */
+
+/* should not generate diagnostics */
+
+import type { Foo } from "./foo";
