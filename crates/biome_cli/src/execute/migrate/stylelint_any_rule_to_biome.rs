@@ -9,6 +9,28 @@ pub(crate) fn migrate_stylelint_any_rule(
     results: &mut stylelint_to_biome::StylelintMigrationResults,
 ) -> bool {
     match stylelint_name {
+        "at-rule-descriptor-no-unknown" => {
+            if !options.include_inspired {
+                results.add(
+                    stylelint_name,
+                    eslint_to_biome::RuleMigrationResult::Inspired,
+                );
+                return false;
+            }
+            if !options.include_nursery {
+                results.add(
+                    stylelint_name,
+                    eslint_to_biome::RuleMigrationResult::Nursery,
+                );
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_unknown_at_rule_descriptor
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_level));
+        }
         "at-rule-no-unknown" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group

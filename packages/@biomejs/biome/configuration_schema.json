@@ -7472,6 +7472,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnknownAtRuleDescriptorConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnknownAtRuleDescriptorOptions" }
+			]
+		},
+		"NoUnknownAtRuleDescriptorOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUnknownAtRulesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -10060,6 +10070,13 @@
 					"description": "Disallow array methods with callbacks on arrays that only have empty slots.\nSee https://biomejs.dev/linter/rules/no-uninvoked-array-callback",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUninvokedArrayCallbackConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnknownAtRuleDescriptor": {
+					"description": "Disallow unknown descriptors in at-rules.\nSee https://biomejs.dev/linter/rules/no-unknown-at-rule-descriptor",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnknownAtRuleDescriptorConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -16074,6 +16091,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUninvokedArrayCallbackOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnknownAtRuleDescriptorOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnknownAtRuleDescriptorOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

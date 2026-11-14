@@ -5958,6 +5958,54 @@ pub const TYPED_MATH_FUNCTIONS: &[&str] = &[
     "abs", "calc", "clamp", "hypot", "max", "min", "mod", "random", "rem", "round",
 ];
 
+/// Properties accepted by the CSS `@position-try` at-rule: the inset, margin, sizing, and
+/// self-alignment properties, `position-anchor`, and `position-area`.
+///
+/// Webref lists no descriptors for `@position-try`, so this list is maintained by hand.
+///
+/// See <https://drafts.csswg.org/css-anchor-position-1/#accepted-position-try-properties>.
+pub const POSITION_TRY_PROPERTIES: &[&str] = &[
+    "align-self",
+    "block-size",
+    "bottom",
+    "height",
+    "inline-size",
+    "inset",
+    "inset-block",
+    "inset-block-end",
+    "inset-block-start",
+    "inset-inline",
+    "inset-inline-end",
+    "inset-inline-start",
+    "justify-self",
+    "left",
+    "margin",
+    "margin-block",
+    "margin-block-end",
+    "margin-block-start",
+    "margin-bottom",
+    "margin-inline",
+    "margin-inline-end",
+    "margin-inline-start",
+    "margin-left",
+    "margin-right",
+    "margin-top",
+    "max-block-size",
+    "max-height",
+    "max-inline-size",
+    "max-width",
+    "min-block-size",
+    "min-height",
+    "min-inline-size",
+    "min-width",
+    "place-self",
+    "position-anchor",
+    "position-area",
+    "right",
+    "top",
+    "width",
+];
+
 #[cfg(test)]
 mod tests {
     use std::collections::HashSet;
@@ -6033,6 +6081,11 @@ mod tests {
     #[test]
     fn test_typed_math_functions_order() {
         assert_strictly_ordered(TYPED_MATH_FUNCTIONS);
+    }
+
+    #[test]
+    fn test_position_try_properties_order() {
+        assert_strictly_ordered(POSITION_TRY_PROPERTIES);
     }
 
     #[test]

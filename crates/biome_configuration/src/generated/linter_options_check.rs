@@ -1685,6 +1685,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
+        "nursery",
+        "noUnknownAtRuleDescriptor",
+        TypeId::of::<
+            biome_rule_options::no_unknown_at_rule_descriptor::NoUnknownAtRuleDescriptorOptions,
+        >(),
+    ));
+    result.push((
         "suspicious",
         "noUnknownAtRules",
         TypeId::of::<biome_rule_options::no_unknown_at_rules::NoUnknownAtRulesOptions>(),

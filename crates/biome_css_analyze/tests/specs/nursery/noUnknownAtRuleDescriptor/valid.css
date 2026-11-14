@@ -1,0 +1,88 @@
+/* should not generate diagnostics */
+a {
+	unknown: 0;
+}
+
+@media (width > 400px) {
+	a {
+		color: red;
+	}
+}
+
+a {
+	@media (width > 400px) {
+		color: red;
+	}
+}
+
+@foo {
+	bar: 0;
+}
+
+@font-face {
+	font-family: "Example";
+	src: url("example.woff2") format("woff2");
+	font-display: swap;
+	font-stretch: condensed;
+	font-width: condensed;
+	unicode-range: U+0000-00FF;
+	size-adjust: 90%;
+	-webkit-font-smoothing: antialiased;
+}
+
+@FONT-FACE {
+	FONT-FAMILY: "Example";
+}
+
+@counter-style foo {
+	system: cyclic;
+	symbols: url(bar.svg);
+	suffix: " ";
+}
+
+@property --foo {
+	syntax: "<integer>";
+	inherits: false;
+	initial-value: 0;
+}
+
+@color-profile --swop5c {
+	src: url("https://example.com/swop5c.icc");
+	rendering-intent: relative-colorimetric;
+}
+
+@font-palette-values --identifier {
+	font-family: Bixa;
+	base-palette: 1;
+	override-colors: 0 red;
+}
+
+@position-try --foo {
+	top: anchor(bottom);
+	inset-inline-start: 0;
+	margin-block: 1px;
+	min-width: 10px;
+	justify-self: center;
+	position-anchor: --anchor;
+	position-area: top;
+}
+
+@view-transition {
+	navigation: auto;
+	types: slide;
+}
+
+@page {
+	size: landscape;
+	bar: 0;
+}
+
+@font-feature-values Font One {
+	@styleset {
+		nice-style: 12;
+	}
+}
+
+@function --double(--x) {
+	result: calc(var(--x) * 2);
+}
