@@ -15,6 +15,12 @@ a = import.defer + 1
 import.defer("x")
 import.source("x")
 import.meta
+if (import.defer) {}
+let a = import.defer, b = 1;
+import.defer
+foo()
+import.defer { foo(); }
+import.defer const x = 1;
 import.source
 
 ```
@@ -49,18 +55,18 @@ JsModule {
             semicolon_token: SEMICOLON@26..27 ";" [] [],
         },
         JsExpressionStatement {
-            expression: JsStaticMemberExpression {
-                object: JsBogusExpression {
-                    items: [
-                        IMPORT_KW@27..34 "import" [Newline("\n")] [],
-                        DOT@34..35 "." [] [],
-                        DEFER_KW@35..40 "defer" [] [],
-                    ],
-                },
-                operator_token: DOT@40..41 "." [] [],
-                member: JsName {
-                    value_token: IDENT@41..44 "foo" [] [],
-                },
+            expression: JsBogusExpression {
+                items: [
+                    IMPORT_KW@27..34 "import" [Newline("\n")] [],
+                    DOT@34..35 "." [] [],
+                    DEFER_KW@35..40 "defer" [] [],
+                    JsBogus {
+                        items: [
+                            DOT@40..41 "." [] [],
+                            IDENT@41..44 "foo" [] [],
+                        ],
+                    },
+                ],
             },
             semicolon_token: missing (optional),
         },
@@ -70,15 +76,12 @@ JsModule {
                     IMPORT_KW@44..51 "import" [Newline("\n")] [],
                     DOT@51..52 "." [] [],
                     SOURCE_KW@52..59 "source" [] [Whitespace(" ")],
+                    JsBogus {
+                        items: [
+                            IDENT@59..60 "x" [] [],
+                        ],
+                    },
                 ],
-            },
-            semicolon_token: missing (optional),
-        },
-        JsExpressionStatement {
-            expression: JsIdentifierExpression {
-                name: JsReferenceIdentifier {
-                    value_token: IDENT@59..60 "x" [] [],
-                },
             },
             semicolon_token: missing (optional),
         },
@@ -103,18 +106,18 @@ JsModule {
                     name_token: IDENT@77..80 "a" [Newline("\n")] [Whitespace(" ")],
                 },
                 operator_token: EQ@80..82 "=" [] [Whitespace(" ")],
-                right: JsBinaryExpression {
-                    left: JsBogusExpression {
-                        items: [
-                            IMPORT_KW@82..88 "import" [] [],
-                            DOT@88..89 "." [] [],
-                            DEFER_KW@89..95 "defer" [] [Whitespace(" ")],
-                        ],
-                    },
-                    operator_token: PLUS@95..97 "+" [] [Whitespace(" ")],
-                    right: JsNumberLiteralExpression {
-                        value_token: JS_NUMBER_LITERAL@97..98 "1" [] [],
-                    },
+                right: JsBogusExpression {
+                    items: [
+                        IMPORT_KW@82..88 "import" [] [],
+                        DOT@88..89 "." [] [],
+                        DEFER_KW@89..95 "defer" [] [Whitespace(" ")],
+                        JsBogus {
+                            items: [
+                                PLUS@95..97 "+" [] [Whitespace(" ")],
+                                JS_NUMBER_LITERAL@97..98 "1" [] [],
+                            ],
+                        },
+                    ],
                 },
             },
             semicolon_token: missing (optional),
@@ -161,29 +164,176 @@ JsModule {
             },
             semicolon_token: missing (optional),
         },
+        JsIfStatement {
+            if_token: IF_KW@147..151 "if" [Newline("\n")] [Whitespace(" ")],
+            l_paren_token: L_PAREN@151..152 "(" [] [],
+            test: JsBogusExpression {
+                items: [
+                    IMPORT_KW@152..158 "import" [] [],
+                    DOT@158..159 "." [] [],
+                    DEFER_KW@159..164 "defer" [] [],
+                ],
+            },
+            r_paren_token: R_PAREN@164..166 ")" [] [Whitespace(" ")],
+            consequent: JsBlockStatement {
+                l_curly_token: L_CURLY@166..167 "{" [] [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@167..168 "}" [] [],
+            },
+            else_clause: missing (optional),
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@168..173 "let" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@173..175 "a" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@175..177 "=" [] [Whitespace(" ")],
+                            expression: JsBogusExpression {
+                                items: [
+                                    IMPORT_KW@177..183 "import" [] [],
+                                    DOT@183..184 "." [] [],
+                                    DEFER_KW@184..189 "defer" [] [],
+                                ],
+                            },
+                        },
+                    },
+                    COMMA@189..191 "," [] [Whitespace(" ")],
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@191..193 "b" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@193..195 "=" [] [Whitespace(" ")],
+                            expression: JsNumberLiteralExpression {
+                                value_token: JS_NUMBER_LITERAL@195..196 "1" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@196..197 ";" [] [],
+        },
         JsExpressionStatement {
             expression: JsBogusExpression {
                 items: [
-                    IMPORT_KW@147..154 "import" [Newline("\n")] [],
-                    DOT@154..155 "." [] [],
-                    SOURCE_KW@155..161 "source" [] [],
+                    IMPORT_KW@197..204 "import" [Newline("\n")] [],
+                    DOT@204..205 "." [] [],
+                    DEFER_KW@205..210 "defer" [] [],
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsCallExpression {
+                callee: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@210..214 "foo" [Newline("\n")] [],
+                    },
+                },
+                optional_chain_token: missing (optional),
+                type_arguments: missing (optional),
+                arguments: JsCallArguments {
+                    l_paren_token: L_PAREN@214..215 "(" [] [],
+                    args: JsCallArgumentList [],
+                    r_paren_token: R_PAREN@215..216 ")" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsBogusExpression {
+                items: [
+                    IMPORT_KW@216..223 "import" [Newline("\n")] [],
+                    DOT@223..224 "." [] [],
+                    DEFER_KW@224..230 "defer" [] [Whitespace(" ")],
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsBlockStatement {
+            l_curly_token: L_CURLY@230..232 "{" [] [Whitespace(" ")],
+            statements: JsStatementList [
+                JsExpressionStatement {
+                    expression: JsCallExpression {
+                        callee: JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@232..235 "foo" [] [],
+                            },
+                        },
+                        optional_chain_token: missing (optional),
+                        type_arguments: missing (optional),
+                        arguments: JsCallArguments {
+                            l_paren_token: L_PAREN@235..236 "(" [] [],
+                            args: JsCallArgumentList [],
+                            r_paren_token: R_PAREN@236..237 ")" [] [],
+                        },
+                    },
+                    semicolon_token: SEMICOLON@237..239 ";" [] [Whitespace(" ")],
+                },
+            ],
+            r_curly_token: R_CURLY@239..240 "}" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsBogusExpression {
+                items: [
+                    IMPORT_KW@240..247 "import" [Newline("\n")] [],
+                    DOT@247..248 "." [] [],
+                    DEFER_KW@248..254 "defer" [] [Whitespace(" ")],
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@254..260 "const" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@260..262 "x" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@262..264 "=" [] [Whitespace(" ")],
+                            expression: JsNumberLiteralExpression {
+                                value_token: JS_NUMBER_LITERAL@264..265 "1" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@265..266 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsBogusExpression {
+                items: [
+                    IMPORT_KW@266..273 "import" [Newline("\n")] [],
+                    DOT@273..274 "." [] [],
+                    SOURCE_KW@274..280 "source" [] [],
                 ],
             },
             semicolon_token: missing (optional),
         },
     ],
-    eof_token: EOF@161..162 "" [Newline("\n")] [],
+    eof_token: EOF@280..281 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: JS_MODULE@0..162
+0: JS_MODULE@0..281
   0: (empty)
   1: (empty)
   2: JS_DIRECTIVE_LIST@0..0
-  3: JS_MODULE_ITEM_LIST@0..161
+  3: JS_MODULE_ITEM_LIST@0..280
     0: JS_EXPRESSION_STATEMENT@0..12
       0: JS_BOGUS_EXPRESSION@0..12
         0: IMPORT_KW@0..6 "import" [] []
@@ -197,27 +347,23 @@ JsModule {
         2: SOURCE_KW@20..26 "source" [] []
       1: SEMICOLON@26..27 ";" [] []
     2: JS_EXPRESSION_STATEMENT@27..44
-      0: JS_STATIC_MEMBER_EXPRESSION@27..44
-        0: JS_BOGUS_EXPRESSION@27..40
-          0: IMPORT_KW@27..34 "import" [Newline("\n")] []
-          1: DOT@34..35 "." [] []
-          2: DEFER_KW@35..40 "defer" [] []
-        1: DOT@40..41 "." [] []
-        2: JS_NAME@41..44
-          0: IDENT@41..44 "foo" [] []
+      0: JS_BOGUS_EXPRESSION@27..44
+        0: IMPORT_KW@27..34 "import" [Newline("\n")] []
+        1: DOT@34..35 "." [] []
+        2: DEFER_KW@35..40 "defer" [] []
+        3: JS_BOGUS@40..44
+          0: DOT@40..41 "." [] []
+          1: IDENT@41..44 "foo" [] []
       1: (empty)
-    3: JS_EXPRESSION_STATEMENT@44..59
-      0: JS_BOGUS_EXPRESSION@44..59
+    3: JS_EXPRESSION_STATEMENT@44..60
+      0: JS_BOGUS_EXPRESSION@44..60
         0: IMPORT_KW@44..51 "import" [Newline("\n")] []
         1: DOT@51..52 "." [] []
         2: SOURCE_KW@52..59 "source" [] [Whitespace(" ")]
-      1: (empty)
-    4: JS_EXPRESSION_STATEMENT@59..60
-      0: JS_IDENTIFIER_EXPRESSION@59..60
-        0: JS_REFERENCE_IDENTIFIER@59..60
+        3: JS_BOGUS@59..60
           0: IDENT@59..60 "x" [] []
       1: (empty)
-    5: JS_EXPRESSION_STATEMENT@60..77
+    4: JS_EXPRESSION_STATEMENT@60..77
       0: JS_NEW_EXPRESSION@60..77
         0: NEW_KW@60..65 "new" [Newline("\n")] [Whitespace(" ")]
         1: JS_BOGUS_EXPRESSION@65..77
@@ -227,21 +373,20 @@ JsModule {
         2: (empty)
         3: (empty)
       1: (empty)
-    6: JS_EXPRESSION_STATEMENT@77..98
+    5: JS_EXPRESSION_STATEMENT@77..98
       0: JS_ASSIGNMENT_EXPRESSION@77..98
         0: JS_IDENTIFIER_ASSIGNMENT@77..80
           0: IDENT@77..80 "a" [Newline("\n")] [Whitespace(" ")]
         1: EQ@80..82 "=" [] [Whitespace(" ")]
-        2: JS_BINARY_EXPRESSION@82..98
-          0: JS_BOGUS_EXPRESSION@82..95
-            0: IMPORT_KW@82..88 "import" [] []
-            1: DOT@88..89 "." [] []
-            2: DEFER_KW@89..95 "defer" [] [Whitespace(" ")]
-          1: PLUS@95..97 "+" [] [Whitespace(" ")]
-          2: JS_NUMBER_LITERAL_EXPRESSION@97..98
-            0: JS_NUMBER_LITERAL@97..98 "1" [] []
+        2: JS_BOGUS_EXPRESSION@82..98
+          0: IMPORT_KW@82..88 "import" [] []
+          1: DOT@88..89 "." [] []
+          2: DEFER_KW@89..95 "defer" [] [Whitespace(" ")]
+          3: JS_BOGUS@95..98
+            0: PLUS@95..97 "+" [] [Whitespace(" ")]
+            1: JS_NUMBER_LITERAL@97..98 "1" [] []
       1: (empty)
-    7: JS_EXPRESSION_STATEMENT@98..116
+    6: JS_EXPRESSION_STATEMENT@98..116
       0: JS_IMPORT_CALL_EXPRESSION@98..116
         0: IMPORT_KW@98..105 "import" [Newline("\n")] []
         1: DOT@105..106 "." [] []
@@ -253,7 +398,7 @@ JsModule {
               0: JS_STRING_LITERAL@112..115 "\"x\"" [] []
           2: R_PAREN@115..116 ")" [] []
       1: (empty)
-    8: JS_EXPRESSION_STATEMENT@116..135
+    7: JS_EXPRESSION_STATEMENT@116..135
       0: JS_IMPORT_CALL_EXPRESSION@116..135
         0: IMPORT_KW@116..123 "import" [Newline("\n")] []
         1: DOT@123..124 "." [] []
@@ -265,19 +410,117 @@ JsModule {
               0: JS_STRING_LITERAL@131..134 "\"x\"" [] []
           2: R_PAREN@134..135 ")" [] []
       1: (empty)
-    9: JS_EXPRESSION_STATEMENT@135..147
+    8: JS_EXPRESSION_STATEMENT@135..147
       0: JS_IMPORT_META_EXPRESSION@135..147
         0: IMPORT_KW@135..142 "import" [Newline("\n")] []
         1: DOT@142..143 "." [] []
         2: META@143..147 "meta" [] []
       1: (empty)
-    10: JS_EXPRESSION_STATEMENT@147..161
-      0: JS_BOGUS_EXPRESSION@147..161
-        0: IMPORT_KW@147..154 "import" [Newline("\n")] []
-        1: DOT@154..155 "." [] []
-        2: SOURCE_KW@155..161 "source" [] []
+    9: JS_IF_STATEMENT@147..168
+      0: IF_KW@147..151 "if" [Newline("\n")] [Whitespace(" ")]
+      1: L_PAREN@151..152 "(" [] []
+      2: JS_BOGUS_EXPRESSION@152..164
+        0: IMPORT_KW@152..158 "import" [] []
+        1: DOT@158..159 "." [] []
+        2: DEFER_KW@159..164 "defer" [] []
+      3: R_PAREN@164..166 ")" [] [Whitespace(" ")]
+      4: JS_BLOCK_STATEMENT@166..168
+        0: L_CURLY@166..167 "{" [] []
+        1: JS_STATEMENT_LIST@167..167
+        2: R_CURLY@167..168 "}" [] []
+      5: (empty)
+    10: JS_VARIABLE_STATEMENT@168..197
+      0: JS_VARIABLE_DECLARATION@168..196
+        0: (empty)
+        1: LET_KW@168..173 "let" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@173..196
+          0: JS_VARIABLE_DECLARATOR@173..189
+            0: JS_IDENTIFIER_BINDING@173..175
+              0: IDENT@173..175 "a" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@175..189
+              0: EQ@175..177 "=" [] [Whitespace(" ")]
+              1: JS_BOGUS_EXPRESSION@177..189
+                0: IMPORT_KW@177..183 "import" [] []
+                1: DOT@183..184 "." [] []
+                2: DEFER_KW@184..189 "defer" [] []
+          1: COMMA@189..191 "," [] [Whitespace(" ")]
+          2: JS_VARIABLE_DECLARATOR@191..196
+            0: JS_IDENTIFIER_BINDING@191..193
+              0: IDENT@191..193 "b" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@193..196
+              0: EQ@193..195 "=" [] [Whitespace(" ")]
+              1: JS_NUMBER_LITERAL_EXPRESSION@195..196
+                0: JS_NUMBER_LITERAL@195..196 "1" [] []
+      1: SEMICOLON@196..197 ";" [] []
+    11: JS_EXPRESSION_STATEMENT@197..210
+      0: JS_BOGUS_EXPRESSION@197..210
+        0: IMPORT_KW@197..204 "import" [Newline("\n")] []
+        1: DOT@204..205 "." [] []
+        2: DEFER_KW@205..210 "defer" [] []
       1: (empty)
-  4: EOF@161..162 "" [Newline("\n")] []
+    12: JS_EXPRESSION_STATEMENT@210..216
+      0: JS_CALL_EXPRESSION@210..216
+        0: JS_IDENTIFIER_EXPRESSION@210..214
+          0: JS_REFERENCE_IDENTIFIER@210..214
+            0: IDENT@210..214 "foo" [Newline("\n")] []
+        1: (empty)
+        2: (empty)
+        3: JS_CALL_ARGUMENTS@214..216
+          0: L_PAREN@214..215 "(" [] []
+          1: JS_CALL_ARGUMENT_LIST@215..215
+          2: R_PAREN@215..216 ")" [] []
+      1: (empty)
+    13: JS_EXPRESSION_STATEMENT@216..230
+      0: JS_BOGUS_EXPRESSION@216..230
+        0: IMPORT_KW@216..223 "import" [Newline("\n")] []
+        1: DOT@223..224 "." [] []
+        2: DEFER_KW@224..230 "defer" [] [Whitespace(" ")]
+      1: (empty)
+    14: JS_BLOCK_STATEMENT@230..240
+      0: L_CURLY@230..232 "{" [] [Whitespace(" ")]
+      1: JS_STATEMENT_LIST@232..239
+        0: JS_EXPRESSION_STATEMENT@232..239
+          0: JS_CALL_EXPRESSION@232..237
+            0: JS_IDENTIFIER_EXPRESSION@232..235
+              0: JS_REFERENCE_IDENTIFIER@232..235
+                0: IDENT@232..235 "foo" [] []
+            1: (empty)
+            2: (empty)
+            3: JS_CALL_ARGUMENTS@235..237
+              0: L_PAREN@235..236 "(" [] []
+              1: JS_CALL_ARGUMENT_LIST@236..236
+              2: R_PAREN@236..237 ")" [] []
+          1: SEMICOLON@237..239 ";" [] [Whitespace(" ")]
+      2: R_CURLY@239..240 "}" [] []
+    15: JS_EXPRESSION_STATEMENT@240..254
+      0: JS_BOGUS_EXPRESSION@240..254
+        0: IMPORT_KW@240..247 "import" [Newline("\n")] []
+        1: DOT@247..248 "." [] []
+        2: DEFER_KW@248..254 "defer" [] [Whitespace(" ")]
+      1: (empty)
+    16: JS_VARIABLE_STATEMENT@254..266
+      0: JS_VARIABLE_DECLARATION@254..265
+        0: (empty)
+        1: CONST_KW@254..260 "const" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@260..265
+          0: JS_VARIABLE_DECLARATOR@260..265
+            0: JS_IDENTIFIER_BINDING@260..262
+              0: IDENT@260..262 "x" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@262..265
+              0: EQ@262..264 "=" [] [Whitespace(" ")]
+              1: JS_NUMBER_LITERAL_EXPRESSION@264..265
+                0: JS_NUMBER_LITERAL@264..265 "1" [] []
+      1: SEMICOLON@265..266 ";" [] []
+    17: JS_EXPRESSION_STATEMENT@266..280
+      0: JS_BOGUS_EXPRESSION@266..280
+        0: IMPORT_KW@266..273 "import" [Newline("\n")] []
+        1: DOT@273..274 "." [] []
+        2: SOURCE_KW@274..280 "source" [] []
+      1: (empty)
+  4: EOF@280..281 "" [Newline("\n")] []
 
 ```
 
@@ -325,35 +568,6 @@ import_phase_modifier_without_call.js:4:8 parse ━━━━━━━━━━�
     5 │ new import.defer
     6 │ a = import.defer + 1
   
-import_phase_modifier_without_call.js:4:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a semicolon or an implicit semicolon after a statement, but found none
-  
-    2 │ import.source;
-    3 │ import.defer.foo
-  > 4 │ import.source x
-      │               ^
-    5 │ new import.defer
-    6 │ a = import.defer + 1
-  
-  i An explicit or implicit semicolon is expected here...
-  
-    2 │ import.source;
-    3 │ import.defer.foo
-  > 4 │ import.source x
-      │               ^
-    5 │ new import.defer
-    6 │ a = import.defer + 1
-  
-  i ...Which is required to end this statement
-  
-    2 │ import.source;
-    3 │ import.defer.foo
-  > 4 │ import.source x
-      │ ^^^^^^^^^^^^^^^
-    5 │ new import.defer
-    6 │ a = import.defer + 1
-  
 import_phase_modifier_without_call.js:5:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected `(` after `import.defer`
@@ -376,14 +590,127 @@ import_phase_modifier_without_call.js:6:12 parse ━━━━━━━━━━�
     7 │ import.defer("x")
     8 │ import.source("x")
   
-import_phase_modifier_without_call.js:10:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+import_phase_modifier_without_call.js:10:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected `(` after `import.source`
+  × Expected `(` after `import.defer`
   
      8 │ import.source("x")
      9 │ import.meta
-  > 10 │ import.source
+  > 10 │ if (import.defer) {}
+       │            ^^^^^
+    11 │ let a = import.defer, b = 1;
+    12 │ import.defer
+  
+import_phase_modifier_without_call.js:11:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `(` after `import.defer`
+  
+     9 │ import.meta
+    10 │ if (import.defer) {}
+  > 11 │ let a = import.defer, b = 1;
+       │                ^^^^^
+    12 │ import.defer
+    13 │ foo()
+  
+import_phase_modifier_without_call.js:12:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `(` after `import.defer`
+  
+    10 │ if (import.defer) {}
+    11 │ let a = import.defer, b = 1;
+  > 12 │ import.defer
+       │        ^^^^^
+    13 │ foo()
+    14 │ import.defer { foo(); }
+  
+import_phase_modifier_without_call.js:14:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `(` after `import.defer`
+  
+    12 │ import.defer
+    13 │ foo()
+  > 14 │ import.defer { foo(); }
+       │        ^^^^^
+    15 │ import.defer const x = 1;
+    16 │ import.source
+  
+import_phase_modifier_without_call.js:14:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    12 │ import.defer
+    13 │ foo()
+  > 14 │ import.defer { foo(); }
+       │              ^
+    15 │ import.defer const x = 1;
+    16 │ import.source
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    12 │ import.defer
+    13 │ foo()
+  > 14 │ import.defer { foo(); }
+       │              ^
+    15 │ import.defer const x = 1;
+    16 │ import.source
+  
+  i ...Which is required to end this statement
+  
+    12 │ import.defer
+    13 │ foo()
+  > 14 │ import.defer { foo(); }
+       │ ^^^^^^^^^^^^^^
+    15 │ import.defer const x = 1;
+    16 │ import.source
+  
+import_phase_modifier_without_call.js:15:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `(` after `import.defer`
+  
+    13 │ foo()
+    14 │ import.defer { foo(); }
+  > 15 │ import.defer const x = 1;
+       │        ^^^^^
+    16 │ import.source
+    17 │ 
+  
+import_phase_modifier_without_call.js:15:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    13 │ foo()
+    14 │ import.defer { foo(); }
+  > 15 │ import.defer const x = 1;
+       │              ^^^^^
+    16 │ import.source
+    17 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    13 │ foo()
+    14 │ import.defer { foo(); }
+  > 15 │ import.defer const x = 1;
+       │              ^^^^^
+    16 │ import.source
+    17 │ 
+  
+  i ...Which is required to end this statement
+  
+    13 │ foo()
+    14 │ import.defer { foo(); }
+  > 15 │ import.defer const x = 1;
+       │ ^^^^^^^^^^^^^^^^^^
+    16 │ import.source
+    17 │ 
+  
+import_phase_modifier_without_call.js:16:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `(` after `import.source`
+  
+    14 │ import.defer { foo(); }
+    15 │ import.defer const x = 1;
+  > 16 │ import.source
        │        ^^^^^^
-    11 │ 
+    17 │ 
   
 ```

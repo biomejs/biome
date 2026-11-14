@@ -1371,6 +1371,16 @@ fn parse_primary_expression(p: &mut JsParser, context: ExpressionContext) -> Par
                             phase,
                         );
                         p.error(err);
+                        let _ = ParseRecoveryTokenSet::new(
+                            JS_BOGUS,
+                            STMT_RECOVERY_SET.union(EXPR_RECOVERY_SET).union(token_set![
+                                T![,],
+                                T!['}'],
+                                T![:]
+                            ]),
+                        )
+                        .enable_recovery_on_line_break()
+                        .recover(p);
                         m.complete(p, JS_BOGUS_EXPRESSION)
                     }
                 } else if p.at(T![ident]) && p.text(p.cur_range()) == "meta" {
