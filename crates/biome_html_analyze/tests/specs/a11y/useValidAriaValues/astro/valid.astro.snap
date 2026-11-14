@@ -16,4 +16,7 @@ expression: valid.astro
 
 <div role="grid" aria-rowcount={count}></div>
 
+<!-- template literals with interpolations are evaluated at runtime -->
+<button type="button" aria-pressed=`${view === 'cards' ? 'true' : 'false'}`>Button</button>
+
 ```
