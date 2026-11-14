@@ -24,8 +24,9 @@ use biome_js_syntax::JsIdentifierExpression;
 use biome_js_type_info::interned_types::{Literal, TypeData};
 use biome_js_type_info::{
     NarrowingPredicate, PropertyTest, RawTypeData, RawTypeId, TypeId, TypeReference,
-    TypeofExpression, TypeofKind, is_narrowing_invariant, may_narrow_by_property,
-    narrow_by_in_operator, narrow_by_property, narrow_type,
+    TypeofExpression, TypeofKind, is_narrowing_invariant, may_narrow_by_instanceof,
+    may_narrow_by_property, narrow_by_in_operator, narrow_by_instanceof, narrow_by_property,
+    narrow_type,
 };
 use biome_rowan::{AstNode, TextRange};
 use rustc_hash::FxHashMap;
@@ -148,8 +149,8 @@ enum FlatteningError {
 
 /// The state of one solve that its guards share: the subject it narrows, the
 /// subject's declared type at the root's start, and the results of the
-/// property guards and `in` tests applied so far, keyed by guard index and
-/// incoming type.
+/// property guards, `in` tests, and `instanceof` tests applied so far, keyed
+/// by guard index and incoming type.
 struct GuardSolve<'db> {
     /// The subject that the solve narrows.
     subject: FlowSubjectId,
@@ -384,7 +385,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         let baseline = match declared {
             Some(declared) => {
                 let baseline = if root.is_property_only(read.subject) {
-                    self.property_baseline(declared)
+                    self.property_baseline(declared, root.is_instance_tested(read.subject))
                 } else {
                     self.narrowing_baseline(declared)
                 };
@@ -512,7 +513,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         let read = self.js_info.flow.read(member)?;
         let root = self.js_info.flow.root(read.root)?;
         let baseline = if root.is_property_only(read.subject) {
-            self.property_baseline(declared)
+            self.property_baseline(declared, root.is_instance_tested(read.subject))
         } else {
             self.narrowing_baseline(declared)
         }?;
@@ -551,7 +552,7 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// or of the pattern at that range, starts from, given its `declared`
     /// type: [`Self::pattern_baseline`] for a pattern,
     /// [`Self::property_baseline`] when conditions narrow the binding only
-    /// through tests of its properties, and [`Self::narrowing_baseline`]
+    /// through tests of its shape, and [`Self::narrowing_baseline`]
     /// otherwise.
     fn binding_baseline(
         &mut self,
@@ -562,7 +563,8 @@ impl<'db> ResolutionCtx<'db, '_> {
         if flow.pattern_type(binding).is_some() {
             self.pattern_baseline(declared)
         } else if flow.is_property_only_binding(binding) {
-            self.property_baseline(declared)
+            let instance_tested = flow.is_instance_tested_binding(binding);
+            self.property_baseline(declared, instance_tested)
         } else {
             self.narrowing_baseline(declared)
         }
@@ -601,15 +603,14 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     /// Returns the type that narrowing of a subject in
     /// [`RootFlow::property_only`] starts from, given its `declared` type, or
-    /// `None` when no test of a property can narrow it.
+    /// `None` when no test of its shape can narrow it.
     ///
-    /// Such a test narrows only a union with at least two members that are
-    /// neither `null`, `undefined`, nor primitive types, the condition that
-    /// [`may_narrow_by_property`] checks. When the flattened type is such a
-    /// union, the result matches [`Self::narrowing_baseline`]. Returns
-    /// `Unknown` when flattening exceeds its work limit, and `None` when
-    /// handles to local types of the module form a cycle or a chain longer
-    /// than [`MAX_MODULE_HANDLE_STEPS`].
+    /// A test of a property or `in` narrows only a union with two object
+    /// types, as [`may_narrow_by_property`] describes, so this is
+    /// [`Self::narrowing_baseline`] when the flattened type is one. When
+    /// `instance_tested` is true, an `instanceof` test narrows the subject
+    /// too, which also narrows a type with one object type, as
+    /// [`may_narrow_by_instanceof`] describes.
     ///
     /// Unlike [`Self::narrowing_baseline`], flattening resolves handles to
     /// local types of this context's module through this context instead of
@@ -617,10 +618,18 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// the time it evaluates flow, so there, finding out that a subject can't
     /// narrow costs only cache reads. A lookup would resolve each type again
     /// in a fresh context.
-    fn property_baseline(&mut self, declared: TypeData<'db>) -> Option<TypeData<'db>> {
+    fn property_baseline(
+        &mut self,
+        declared: TypeData<'db>,
+        instance_tested: bool,
+    ) -> Option<TypeData<'db>> {
         match self.flatten_baseline(declared, true) {
             Ok(baseline) => (!is_narrowing_invariant(baseline)
-                && may_narrow_by_property(self.db, baseline))
+                && if instance_tested {
+                    may_narrow_by_instanceof(self.db, baseline)
+                } else {
+                    may_narrow_by_property(self.db, baseline)
+                })
             .then_some(baseline),
             Err(FlatteningError::Exceeded) => Some(TypeData::Unknown),
             Err(FlatteningError::Cycle) => None,
@@ -831,13 +840,17 @@ impl<'db> ResolutionCtx<'db, '_> {
                 if *tested != subject {
                     return Some(ty);
                 }
-                if let FlowTest::In(key) = test {
-                    // Loops revisit conditions, and each application looks
-                    // up the property in every member of the union.
+                if let FlowTest::In(_) | FlowTest::Instanceof(_) = test {
+                    // Loops revisit conditions, and each application compares
+                    // every member of the union.
                     if let Some(narrowed) = solve.properties.get(&(index, ty)) {
                         return Some(*narrowed);
                     }
-                    let narrowed = self.narrow_by_in(ty, solve.declared, *key, *positive);
+                    let narrowed = if let FlowTest::In(key) = test {
+                        self.narrow_by_in(ty, solve.declared, *key, *positive)
+                    } else {
+                        self.narrow_by_instance(ty, solve.declared, *test, *positive)
+                    };
                     solve.properties.insert((index, ty), narrowed);
                     return Some(narrowed);
                 }
@@ -946,6 +959,40 @@ impl<'db> ResolutionCtx<'db, '_> {
         narrow_by_in_operator(self.db, ty, name, positive, self.narrowing_resolver())
     }
 
+    /// Returns `ty` narrowed by `value instanceof C`, where `test` is the
+    /// [`FlowTest::Instanceof`] that names `C`, given the subject's `declared`
+    /// type, as [`narrow_by_instanceof`] narrows it.
+    ///
+    /// Returns `ty` unchanged when `declared` has no object type and is not
+    /// `unknown`, as [`may_narrow_by_instanceof`] describes, because the test
+    /// could then only make a branch impossible. `C` is resolved only after
+    /// that check.
+    fn narrow_by_instance(
+        &mut self,
+        ty: TypeData<'db>,
+        declared: TypeData<'db>,
+        test: FlowTest,
+        positive: bool,
+    ) -> TypeData<'db> {
+        let FlowTest::Instanceof(constructor) = test else {
+            return ty;
+        };
+        if !may_narrow_by_instanceof(self.db, declared) {
+            return ty;
+        }
+        let Some(reference) = self.js_info.raw_expressions.get(&constructor) else {
+            return ty;
+        };
+        let constructor = self.resolve(reference);
+        narrow_by_instanceof(
+            self.db,
+            ty,
+            constructor,
+            positive,
+            self.narrowing_resolver(),
+        )
+    }
+
     fn test_predicate(&mut self, test: FlowTest) -> Option<NarrowingPredicate<'db>> {
         Some(match test {
             FlowTest::Truthy => NarrowingPredicate::Truthy,
@@ -961,7 +1008,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             FlowTest::Undefined { strict: false } => NarrowingPredicate::Nullish,
             FlowTest::Predicate(function) => return self.guard_predicate(function),
-            FlowTest::In(_) => return None,
+            FlowTest::In(_) | FlowTest::Instanceof(_) => return None,
         })
     }
 
@@ -1032,6 +1079,7 @@ mod tests {
             subjects: Box::default(),
             read_points: Default::default(),
             property_only: Default::default(),
+            instance_tested: Default::default(),
             pattern_elements: Default::default(),
         };
         let reaching = ReachingFlow::new(&root, &[2]).unwrap();

@@ -1,0 +1,138 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidInstanceof.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// `instanceof` keeps the union members derived from the class, so a check
+// that the narrowed value can't fail is reported, as in TypeScript.
+
+class Loaded {
+	data = { size: 1 };
+}
+
+class Failed {
+	data = null;
+}
+
+function removedMember(result: Loaded | Failed) {
+	if (!(result instanceof Loaded)) {
+		if (result.data) {
+			return 1;
+		}
+	}
+}
+
+function optionalChain(result: Loaded | Failed | undefined) {
+	if (result instanceof Loaded) {
+		return result?.data.size;
+	}
+}
+
+function falseBranch(result: Loaded | null) {
+	if (!(result instanceof Loaded)) {
+		if (result) {
+			return 1;
+		}
+	}
+}
+
+function unknownValue(value: unknown) {
+	if (value instanceof Error) {
+		return value?.message;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidInstanceof.ts:15:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    13 │ function removedMember(result: Loaded | Failed) {
+    14 │ 	if (!(result instanceof Loaded)) {
+  > 15 │ 		if (result.data) {
+       │ 		    ^^^^^^^^^^^
+    16 │ 			return 1;
+    17 │ 		}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
+
+```
+
+```
+invalidInstanceof.ts:23:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    21 │ function optionalChain(result: Loaded | Failed | undefined) {
+    22 │ 	if (result instanceof Loaded) {
+  > 23 │ 		return result?.data.size;
+       │ 		       ^^^^^^
+    24 │ 	}
+    25 │ }
+  
+  i Replace ?. with ..
+  
+    21 │ function optionalChain(result: Loaded | Failed | undefined) {
+    22 │ 	if (result instanceof Loaded) {
+  > 23 │ 		return result?.data.size;
+       │ 		             ^^
+    24 │ 	}
+    25 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidInstanceof.ts:29:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    27 │ function falseBranch(result: Loaded | null) {
+    28 │ 	if (!(result instanceof Loaded)) {
+  > 29 │ 		if (result) {
+       │ 		    ^^^^^^
+    30 │ 			return 1;
+    31 │ 		}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
+
+```
+
+```
+invalidInstanceof.ts:37:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    35 │ function unknownValue(value: unknown) {
+    36 │ 	if (value instanceof Error) {
+  > 37 │ 		return value?.message;
+       │ 		       ^^^^^
+    38 │ 	}
+    39 │ }
+  
+  i Replace ?. with ..
+  
+    35 │ function unknownValue(value: unknown) {
+    36 │ 	if (value instanceof Error) {
+  > 37 │ 		return value?.message;
+       │ 		            ^^
+    38 │ 	}
+    39 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```

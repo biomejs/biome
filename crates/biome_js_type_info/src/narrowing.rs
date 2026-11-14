@@ -17,8 +17,9 @@ use crate::globals::{
 use crate::interned_types::{InternedLiteral, Literal};
 use crate::resolved::InferredTypeData;
 use crate::type_relation::{
-    Assignability, PropertyLookup, PropertyPresence, TypeResolver, find_property,
-    primitive_can_satisfy, property_presence, resolve_wrapped_type,
+    Assignability, InstanceType, PropertyLookup, PropertyPresence, TypeResolver, find_property,
+    instance_types, is_derived_from, is_empty_object_type, is_subtype, primitive_can_satisfy,
+    property_presence, resolve_wrapped_type,
 };
 use crate::{
     ObjectKind, RawTypeData, RawTypeId, TypeDb, TypeReference, TypeReferenceQualifier,
@@ -107,6 +108,20 @@ pub fn is_raw_narrowing_invariant(reference: &TypeReference, raw_types: &[RawTyp
 /// table that local references index.
 pub fn raw_may_be_object_union(reference: &TypeReference, raw_types: &[RawTypeData]) -> bool {
     raw_object_members(reference, raw_types) >= 2
+}
+
+/// Returns whether a collected type reference may resolve to a type that
+/// `instanceof` can narrow, as [`may_narrow_by_instanceof`] describes,
+/// without resolving it.
+///
+/// This returns false when the raw tables show that every member of the type
+/// is a primitive type, a literal type of a primitive, `null`, or
+/// `undefined`, as for `x: string | null`, and for the results of `+`, unary
+/// `-`, `~`, and `typeof`. Otherwise, as for an object type, `unknown`, a
+/// type name, or an inferred type, it returns true. `raw_types` is the
+/// module table that local references index.
+pub fn raw_may_narrow_by_instanceof(reference: &TypeReference, raw_types: &[RawTypeData]) -> bool {
+    raw_object_members(reference, raw_types) >= 1
 }
 
 /// Returns how many object types the type at `reference` may have among its
@@ -646,6 +661,174 @@ pub fn narrow_by_in_operator<'db>(
         InferredTypeData::NeverKeyword
     } else {
         InferredTypeData::union_from_types(db, kept)
+    }
+}
+
+/// Narrows `ty` by the runtime test `value instanceof C`, where
+/// `constructor` is the type of `C`, as TypeScript's `narrowTypeByInstanceof`
+/// does.
+///
+/// The test compares the members of the union `ty` with the instance types of
+/// `constructor`, such as `Date` for `x instanceof Date`, by their
+/// declarations, as [`is_derived_from`] describes:
+///
+/// - When `positive` is true, a member derived from an instance type stays,
+///   a member that an instance type is derived from becomes that instance
+///   type, and the other members are removed. So `A | string` becomes `B`
+///   with `class B extends A`. When no member remains, the result is the
+///   instance type if it is a subtype of `ty`, as `A` is of
+///   `{ a: number } | string` with `class A { a = 1 }`, and `ty` otherwise,
+///   where TypeScript gives the intersection of the two. `unknown` becomes
+///   the instance type.
+/// - When `positive` is false, the members derived from the instance type
+///   are removed, which can give `never`. Nothing is removed when
+///   `constructor` has several instance types, or when the instance type is
+///   not an object type, as TypeScript does.
+///
+/// TypeScript gives an instance of a generic class `any` type arguments,
+/// such as `Box<any>`. Biome has no such type, so `unknown` stays `unknown`,
+/// a member that an instance of a generic class is derived from stays as it
+/// is, and the result is `ty` when no member remains.
+///
+/// `ty` is returned unchanged when [`instance_types`] can't tell the instance
+/// types, as for `Object`, `Function`, a generic construct signature, or a
+/// class with a static `[Symbol.hasInstance]` method, when a member is a
+/// generic or `unknown` in a union, when [`is_derived_from`] can't decide
+/// for a pair, and when the union traversal, which visits at most 256 types,
+/// runs out. `resolve` resolves handles as for [`narrow_type`].
+pub fn narrow_by_instanceof<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    constructor: InferredTypeData<'db>,
+    positive: bool,
+    mut resolve: impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
+    if is_narrowing_invariant(ty) || ty == InferredTypeData::NeverKeyword {
+        return ty;
+    }
+    let resolve: &mut TypeResolver<'db, '_> = &mut resolve;
+    let Some(instances) = instance_types(db, constructor, resolve) else {
+        return ty;
+    };
+    let narrowed = if positive {
+        instances_in(db, ty, &instances, resolve)
+    } else {
+        instances_excluded(db, ty, &instances, resolve)
+    };
+    narrowed.unwrap_or(ty)
+}
+
+/// Returns the true branch of [`narrow_by_instanceof`], or `None` when it
+/// leaves `ty` unchanged.
+fn instances_in<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    instances: &[InstanceType<'db>],
+    resolve: &mut TypeResolver<'db, '_>,
+) -> Option<InferredTypeData<'db>> {
+    // The type of a read, which an instance of a generic class without type
+    // arguments must never become.
+    let instance_type = || {
+        instances
+            .iter()
+            .map(|instance| (!instance.is_generic).then_some(instance.target))
+            .collect::<Option<Vec<_>>>()
+            .map(|types| InferredTypeData::union_from_types(db, types))
+    };
+    if ty == InferredTypeData::UnknownKeyword {
+        return instance_type();
+    }
+    let mut remaining = MAX_NARROWING_STEPS;
+    let members = union_members(db, ty, &mut remaining)?;
+    if members.contains(&InferredTypeData::UnknownKeyword) {
+        return None;
+    }
+    let mut narrowed = Vec::new();
+    for instance in instances {
+        for member in &members {
+            remaining = remaining.checked_sub(1)?;
+            if is_derived_from(db, *member, instance.target, resolve)? {
+                narrowed.push(*member);
+            } else if is_derived_from(db, instance.target, *member, resolve)? {
+                // A member keeps its own type arguments, which an instance
+                // of a generic class lacks.
+                narrowed.push(if instance.is_generic {
+                    *member
+                } else {
+                    instance.target
+                });
+            }
+        }
+    }
+    if !narrowed.is_empty() {
+        return Some(InferredTypeData::union_from_types(db, narrowed));
+    }
+    let instance_type = instance_type()?;
+    (is_subtype(db, instance_type, ty, resolve) == Assignability::Assignable)
+        .then_some(instance_type)
+}
+
+/// Returns the false branch of [`narrow_by_instanceof`], or `None` when it
+/// leaves `ty` unchanged.
+fn instances_excluded<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    instances: &[InstanceType<'db>],
+    resolve: &mut TypeResolver<'db, '_>,
+) -> Option<InferredTypeData<'db>> {
+    let [instance] = instances else {
+        return None;
+    };
+    if !is_object_type(db, instance.target, resolve)
+        || is_empty_object_type(db, instance.target, resolve)
+    {
+        return None;
+    }
+    let mut remaining = MAX_NARROWING_STEPS;
+    let members = union_members(db, ty, &mut remaining)?;
+    let mut kept = Vec::with_capacity(members.len());
+    for member in &members {
+        remaining = remaining.checked_sub(1)?;
+        if !is_derived_from(db, *member, instance.target, resolve)? {
+            kept.push(*member);
+        }
+    }
+    Some(if kept.len() == members.len() {
+        ty
+    } else {
+        InferredTypeData::union_from_types(db, kept)
+    })
+}
+
+/// Returns whether [`narrow_by_instanceof`] can narrow a value whose
+/// declared type is `declared` to a type other than `never`: whether
+/// `declared` is `unknown` or has a member that is neither `null`,
+/// `undefined`, nor a primitive type.
+///
+/// No primitive is derived from a class, so `instanceof` can only make a
+/// branch impossible for a value of a primitive type, or leave it unchanged.
+pub fn may_narrow_by_instanceof(db: &dyn TypeDb, declared: InferredTypeData) -> bool {
+    let is_object = |member: &InferredTypeData| {
+        !matches!(
+            member,
+            InferredTypeData::Null
+                | InferredTypeData::Undefined
+                | InferredTypeData::VoidKeyword
+                | InferredTypeData::NeverKeyword
+        ) && !matches!(
+            typeof_kind(db, *member),
+            Some(
+                TypeofKind::BigInt
+                    | TypeofKind::Boolean
+                    | TypeofKind::Number
+                    | TypeofKind::String
+                    | TypeofKind::Symbol
+            )
+        )
+    };
+    match declared {
+        InferredTypeData::Union(union) => union.types(db).iter().any(is_object),
+        declared => is_object(&declared),
     }
 }
 
@@ -1320,12 +1503,14 @@ fn narrow_literal<'db>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::generated::global_types::ids::ERROR_ID_GLOBAL_TYPE_ID;
+    use crate::generated::global_types::ids::{
+        ARRAY_ID_GLOBAL_TYPE_ID, ERROR_ID_GLOBAL_TYPE_ID, OBJECT_ID_GLOBAL_TYPE_ID,
+    };
     use crate::interned_types::{
-        InternedClass, InternedFunction, InternedGenericTypeParameter, InternedInterface,
-        InternedIntersection, InternedObject, InternedTuple, InternedTypeInstance,
-        InternedTypeofType, InternedUnion, LocalTypeHandle, LocalTypeId, ModuleKey, ReturnType,
-        TupleElementType, TypeMember, TypeMemberKind,
+        InternedClass, InternedConstructor, InternedFunction, InternedGenericTypeParameter,
+        InternedInterface, InternedIntersection, InternedObject, InternedTuple,
+        InternedTypeInstance, InternedTypeofType, InternedUnion, LocalTypeHandle, LocalTypeId,
+        ModuleKey, ReturnType, TupleElementType, TypeMember, TypeMemberKind,
     };
     use crate::literal::NumberLiteral;
     use salsa::plumbing::AsId;
@@ -2980,6 +3165,263 @@ mod tests {
         assert_eq!(narrow_in(db, ty, "p", false), a);
     }
 
+    /// Narrows `ty` by `ty instanceof C`, where `constructor` is the type of
+    /// `C`, with a resolver that returns its input.
+    fn narrow_instance<'db>(
+        db: &'db dyn TypeDb,
+        ty: InferredTypeData<'db>,
+        constructor: InferredTypeData<'db>,
+        positive: bool,
+    ) -> InferredTypeData<'db> {
+        super::narrow_by_instanceof(db, ty, constructor, positive, |ty| ty)
+    }
+
+    /// Returns the class `name` with `members`, extending `parent`.
+    fn class<'db>(
+        db: &'db TestDb,
+        name: &'static str,
+        parent: Option<InferredTypeData<'db>>,
+        members: Vec<TypeMember<'db>>,
+    ) -> InferredTypeData<'db> {
+        InferredTypeData::Class(InternedClass::new(
+            db,
+            Box::default(),
+            parent,
+            Box::default(),
+            members.into_boxed_slice(),
+            Some(Text::new_static(name)),
+            false,
+        ))
+    }
+
+    fn instance<'db>(db: &'db TestDb, class: InferredTypeData<'db>) -> InferredTypeData<'db> {
+        InferredTypeData::instance_of(db, class, Box::default())
+    }
+
+    #[test]
+    fn instanceof_keeps_derived_members_and_replaces_their_parents() {
+        let db = &TestDb::default();
+        let a = class(db, "A", None, vec![member("a", InferredTypeData::Number)]);
+        let b = class(
+            db,
+            "B",
+            Some(a),
+            vec![member("b", InferredTypeData::Number)],
+        );
+        let c = class(db, "C", None, vec![member("c", InferredTypeData::Number)]);
+        let (ia, ib, ic) = (instance(db, a), instance(db, b), instance(db, c));
+        let extending = interface(db, &[ia], vec![member("z", InferredTypeData::Number)]);
+        let array = InferredTypeData::GlobalType(ARRAY_ID_GLOBAL_TYPE_ID);
+        let tuple = InferredTypeData::Tuple(InternedTuple::new(
+            db,
+            Box::from([TupleElementType {
+                ty: InferredTypeData::Number,
+                name: None,
+                is_optional: false,
+                is_rest: false,
+            }]),
+            false,
+        ));
+        for (ty, constructor, positive, expected) in [
+            (union(db, &[ib, ic]), a, true, ib),
+            (union(db, &[ib, ic]), a, false, ic),
+            (union(db, &[ib, ic]), b, true, ib),
+            (union(db, &[ia, InferredTypeData::String]), b, true, ib),
+            (
+                union(db, &[ia, InferredTypeData::String]),
+                b,
+                false,
+                union(db, &[ia, InferredTypeData::String]),
+            ),
+            (union(db, &[ib, InferredTypeData::Null]), a, true, ib),
+            (
+                union(db, &[ib, InferredTypeData::Null]),
+                a,
+                false,
+                InferredTypeData::Null,
+            ),
+            (ib, b, false, InferredTypeData::NeverKeyword),
+            (InferredTypeData::UnknownKeyword, a, true, ia),
+            (
+                InferredTypeData::UnknownKeyword,
+                a,
+                false,
+                InferredTypeData::UnknownKeyword,
+            ),
+            // An interface derives from the class it extends.
+            (union(db, &[extending, ic]), a, true, extending),
+            (union(db, &[extending, ic]), a, false, ic),
+            // A tuple derives from `Array`.
+            (
+                union(db, &[tuple, InferredTypeData::String]),
+                array,
+                true,
+                tuple,
+            ),
+            (
+                union(db, &[tuple, InferredTypeData::String]),
+                array,
+                false,
+                InferredTypeData::String,
+            ),
+        ] {
+            assert_eq!(
+                narrow_instance(db, ty, constructor, positive),
+                expected,
+                "{positive}"
+            );
+        }
+    }
+
+    #[test]
+    fn instanceof_gives_the_instance_type_when_it_is_a_subtype_of_the_value() {
+        let db = &TestDb::default();
+        let a = class(db, "A", None, vec![member("a", InferredTypeData::Number)]);
+        let ia = instance(db, a);
+        let shaped = object(db, vec![member("a", InferredTypeData::Number)]);
+        assert_eq!(
+            narrow_instance(db, union(db, &[shaped, InferredTypeData::String]), a, true),
+            ia
+        );
+        assert_eq!(
+            narrow_instance(db, InferredTypeData::ObjectKeyword, a, true),
+            ia
+        );
+        // `A` is assignable to these types but not a subtype of them, as
+        // TypeScript decides it: it lacks the optional property `z`.
+        for ty in [
+            union(db, &[InferredTypeData::String, InferredTypeData::Number]),
+            object(
+                db,
+                vec![
+                    member("a", InferredTypeData::Number),
+                    optional_member("z", InferredTypeData::Number),
+                ],
+            ),
+        ] {
+            assert_eq!(narrow_instance(db, ty, a, true), ty);
+        }
+    }
+
+    #[test]
+    fn instanceof_leaves_the_type_unchanged_when_biome_cannot_tell() {
+        let db = &TestDb::default();
+        let a = class(db, "A", None, vec![member("a", InferredTypeData::Number)]);
+        let c = class(db, "C", None, vec![member("c", InferredTypeData::Number)]);
+        let (ia, ic) = (instance(db, a), instance(db, c));
+        let generic = InferredTypeData::Generic(InternedGenericTypeParameter::new(
+            db,
+            false,
+            None,
+            None,
+            Text::new_static("T"),
+        ));
+        let generic_class = InferredTypeData::Class(InternedClass::new(
+            db,
+            Box::from([generic]),
+            None,
+            Box::default(),
+            Box::default(),
+            Some(Text::new_static("Box")),
+            false,
+        ));
+        let has_instance = class(
+            db,
+            "Checker",
+            None,
+            vec![TypeMember {
+                kind: TypeMemberKind::ComputedStaticNamed(
+                    Text::new_static("Symbol.hasInstance"),
+                    InferredTypeData::Unknown,
+                ),
+                ty: method(db, "hasInstance", InferredTypeData::Boolean),
+            }],
+        );
+        let inherits_has_instance = class(db, "SubChecker", Some(has_instance), Vec::new());
+        let unresolved_parent = class(db, "X", Some(InferredTypeData::Unknown), Vec::new());
+        let generic_constructor = InferredTypeData::Constructor(InternedConstructor::new(
+            db,
+            Box::from([generic]),
+            Box::default(),
+            Some(ia),
+        ));
+        let object_class = InferredTypeData::GlobalType(OBJECT_ID_GLOBAL_TYPE_ID);
+        let value = union(db, &[ia, ic]);
+        for (ty, constructor) in [
+            // TypeScript gives `Box<any>`.
+            (InferredTypeData::UnknownKeyword, generic_class),
+            (value, has_instance),
+            (value, inherits_has_instance),
+            (value, generic_constructor),
+            (value, object_class),
+            (union(db, &[generic, ic]), a),
+            (union(db, &[instance(db, unresolved_parent), ic]), a),
+        ] {
+            for positive in [true, false] {
+                assert_eq!(narrow_instance(db, ty, constructor, positive), ty);
+            }
+        }
+        // Several instance types narrow only the true branch.
+        let constructors = union(db, &[a, c]);
+        assert_eq!(
+            narrow_instance(db, value, constructors, true),
+            InferredTypeData::union_from_types(db, vec![ia, ic])
+        );
+        assert_eq!(narrow_instance(db, value, constructors, false), value);
+    }
+
+    #[test]
+    fn instanceof_tells_apart_classes_with_the_same_contents_only_by_handle() {
+        let db = &TestDb::default();
+        let wrapper = InternedTypeofType::new(db, InferredTypeData::Number);
+        let handle = |index| {
+            InferredTypeData::Local(LocalTypeHandle::new(
+                db,
+                ModuleKey::new(wrapper.as_id()),
+                LocalTypeId::new(index),
+            ))
+        };
+        let (first, second) = (handle(0), handle(1));
+        let k = class(db, "K", None, vec![member("k", InferredTypeData::Number)]);
+        let resolve = |ty| if ty == first || ty == second { k } else { ty };
+        let ty = union(db, &[instance(db, first), InferredTypeData::String]);
+        assert_eq!(
+            super::narrow_by_instanceof(db, ty, first, true, resolve),
+            instance(db, first)
+        );
+        assert_eq!(
+            super::narrow_by_instanceof(db, ty, first, false, resolve),
+            InferredTypeData::String
+        );
+        // Another handle to the same contents may be another declaration.
+        for positive in [true, false] {
+            assert_eq!(
+                super::narrow_by_instanceof(db, ty, second, positive, resolve),
+                ty
+            );
+        }
+    }
+
+    #[test]
+    fn only_object_types_and_unknown_may_narrow_by_instanceof() {
+        let db = &TestDb::default();
+        let a = instance(db, class(db, "A", None, Vec::new()));
+        for (ty, expected) in [
+            (union(db, &[a, InferredTypeData::String]), true),
+            (a, true),
+            (InferredTypeData::ObjectKeyword, true),
+            (InferredTypeData::UnknownKeyword, true),
+            (
+                union(db, &[InferredTypeData::String, InferredTypeData::Null]),
+                false,
+            ),
+            (InferredTypeData::Number, false),
+            (InferredTypeData::Undefined, false),
+        ] {
+            assert_eq!(may_narrow_by_instanceof(db, ty), expected);
+        }
+    }
+
     #[test]
     fn raw_object_unions_need_no_resolution() {
         let local = |index| TypeReference::Resolved(RawTypeId::Local(crate::TypeId::new(index)));
@@ -3090,5 +3532,43 @@ mod tests {
         ));
         // A local id outside the table may stand for anything.
         assert!(raw_may_be_object_union(&local(3), &[]));
+    }
+
+    #[test]
+    fn raw_types_with_an_object_type_may_narrow_by_instanceof() {
+        let local = |index| TypeReference::Resolved(RawTypeId::Local(crate::TypeId::new(index)));
+        let union_of = |types: Vec<TypeReference>| {
+            RawTypeData::Union(Box::new(crate::Union(types.into_boxed_slice())))
+        };
+        let primitives = union_of(vec![
+            TypeReference::Resolved(GLOBAL_STRING_KEYWORD_ID),
+            TypeReference::Resolved(GLOBAL_NULL_KEYWORD_ID),
+        ]);
+        let with_object = union_of(vec![
+            TypeReference::Resolved(GLOBAL_STRING_KEYWORD_ID),
+            local(1),
+        ]);
+        for (raw_types, expected) in [
+            (vec![primitives], false),
+            (vec![RawTypeData::String], false),
+            // One object type is enough for `instanceof`.
+            (vec![with_object, RawTypeData::ObjectKeyword], true),
+            (vec![RawTypeData::ObjectKeyword], true),
+            (vec![RawTypeData::Unknown], true),
+        ] {
+            assert_eq!(
+                raw_may_narrow_by_instanceof(&local(0), &raw_types),
+                expected,
+                "{raw_types:?}"
+            );
+        }
+        assert!(raw_may_narrow_by_instanceof(
+            &TypeReference::Resolved(crate::globals::GLOBAL_UNKNOWN_KEYWORD_ID),
+            &[]
+        ));
+        assert!(!raw_may_narrow_by_instanceof(
+            &TypeReference::Resolved(GLOBAL_NUMBER_KEYWORD_ID),
+            &[]
+        ));
     }
 }

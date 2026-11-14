@@ -54,7 +54,7 @@ use biome_js_syntax::{
 };
 use biome_js_type_info::{
     RawTypeData, RawTypeId, TypeReference, TypeofExpression, is_raw_narrowing_invariant,
-    raw_may_be_object_union,
+    raw_may_be_object_union, raw_may_narrow_by_instanceof,
 };
 use biome_rowan::{AstNode, AstPtr, SyntaxKindSet, Text, TextRange};
 use builder::{BuiltRoot, build_root};
@@ -308,12 +308,18 @@ pub(crate) struct RootFlow {
     /// The points of each subject's reads, sorted and without duplicates.
     pub(crate) read_points: FxHashMap<FlowSubjectId, Box<[FlowNodeId]>>,
     /// The subjects with reads that conditions narrow only through tests of
-    /// their properties, such as `s` when the only conditions that mention it
-    /// are `s.kind === "c"` ([`FlowGuard::Property`]) or `"a" in s`
-    /// ([`FlowTest::In`]). Such a test narrows only a union with two object
-    /// types, so these subjects need no solve when their declared type is not
-    /// one. Every [`FlowSubject::Pattern`] with reads is one.
+    /// their shape: [`FlowGuard::Property`], such as `s` when the only
+    /// condition that mentions it is `s.kind === "c"`, `in`, which
+    /// [`FlowTest::In`] applies to `x` in `"a" in x`, and `instanceof`, which
+    /// [`FlowTest::Instanceof`] applies to `x` in `x instanceof Date`. A test
+    /// of a property or `in` narrows only a union with two object types, and
+    /// `instanceof` only a type with an object type or `unknown`, so these
+    /// subjects need no solve when their declared type is not one. Every
+    /// [`FlowSubject::Pattern`] with reads is one.
     pub(crate) property_only: FxHashSet<FlowSubjectId>,
+    /// The subjects in [`Self::property_only`] that an `instanceof` test
+    /// narrows, whose declared type need not be a union.
+    pub(crate) instance_tested: FxHashSet<FlowSubjectId>,
     /// The [`FlowSubject::Pattern`] of each element whose reads a test of the
     /// pattern can reach, keyed by the element's subject. Each such read is
     /// also a read point of the pattern, so that the declared type of the
@@ -335,10 +341,15 @@ impl RootFlow {
     }
 
     /// Returns whether conditions narrow `subject` only through tests of its
-    /// properties, such as `s.kind === "c"` or `"a" in s`. See
-    /// [`Self::property_only`].
+    /// shape, as [`Self::property_only`] describes.
     pub(crate) fn is_property_only(&self, subject: FlowSubjectId) -> bool {
         self.property_only.contains(&subject)
+    }
+
+    /// Returns whether an `instanceof` test narrows `subject`, a subject that
+    /// [`Self::is_property_only`] accepts.
+    pub(crate) fn is_instance_tested(&self, subject: FlowSubjectId) -> bool {
+        self.instance_tested.contains(&subject)
     }
 
     /// Returns the [`FlowSubject::Pattern`] that holds the element `subject`
@@ -386,13 +397,15 @@ pub(crate) struct ModuleFlow {
     candidates: FxHashMap<TextRange, AstPtr<AnyFlowExpression>>,
     /// The declarations of the bindings in [`RootFlow::property_only`].
     property_only_bindings: FxHashSet<TextRange>,
-    /// Maps the range of a candidate to the declaration of the binding, or
-    /// the range of the pattern, whose reads alone make it a candidate. Such
-    /// a candidate is, or contains,
-    /// reads of one binding in [`Self::property_only_bindings`], or reads of
-    /// elements of one pattern in [`Self::pattern_types`] that no test of
-    /// the elements themselves reaches. It keeps its type when no test of a
-    /// property can narrow the binding or the pattern.
+    /// The declarations of the bindings in [`RootFlow::instance_tested`].
+    instance_tested_bindings: FxHashSet<TextRange>,
+    /// The candidates that are candidates only because they are, or contain,
+    /// reads of one binding in [`Self::property_only_bindings`], reads of one
+    /// binding that only `instanceof` tests reach, or reads of elements of
+    /// one pattern in [`Self::pattern_types`] that no test of the elements
+    /// themselves reaches, keyed by range, with the range of that binding's
+    /// declaration or of that pattern. Such a candidate keeps its type when
+    /// the binding or the pattern has no type that narrowing starts from.
     property_only_candidates: FxHashMap<TextRange, TextRange>,
     /// Maps the range of each [`FlowSubject::Pattern`] with reads to its
     /// declared type, which is the collected type of the value that the
@@ -461,10 +474,15 @@ impl ModuleFlow {
     }
 
     /// Returns whether conditions narrow the binding declared at `range` only
-    /// through tests of its properties, such as `s.kind === "c"` or
-    /// `"a" in s`. See [`RootFlow::property_only`].
+    /// through tests of its shape, as [`RootFlow::property_only`] describes.
     pub(crate) fn is_property_only_binding(&self, range: TextRange) -> bool {
         self.property_only_bindings.contains(&range)
+    }
+
+    /// Returns whether an `instanceof` test narrows the binding declared at
+    /// `range`, one that [`Self::is_property_only_binding`] accepts.
+    pub(crate) fn is_instance_tested_binding(&self, range: TextRange) -> bool {
+        self.instance_tested_bindings.contains(&range)
     }
 
     /// Returns the declaration of the binding, or the range of the pattern,
@@ -549,6 +567,8 @@ impl RootCollector<'_> {
             subjects,
             mut mentions,
             mut property_only,
+            mut instance_tested,
+            instance_mentions,
             reads,
         }) = build_root(root, self.model, &mut self.functions, this_can_narrow)
         else {
@@ -566,7 +586,8 @@ impl RootCollector<'_> {
             }
         }
         // A test of a property narrows its object only when the object's
-        // declared type is a union with at least two object types, so a
+        // declared type is a union with at least two object types, and
+        // `instanceof` only a type with an object type or `unknown`, so a
         // variable or a pattern that only such tests mention keeps its
         // declared type when its collected type shows, without resolving it,
         // that it is not one. Dropping it here spares its reads the flow
@@ -580,12 +601,17 @@ impl RootCollector<'_> {
                     Some(FlowSubject::Pattern(_)) => pattern_types.get(subject),
                     Some(FlowSubject::This | FlowSubject::Member { .. }) | None => return false,
                 };
-                reference
-                    .is_none_or(|reference| !raw_may_be_object_union(reference, self.raw_types))
+                let may_narrow = if instance_tested.contains(subject) {
+                    raw_may_narrow_by_instanceof
+                } else {
+                    raw_may_be_object_union
+                };
+                reference.is_none_or(|reference| !may_narrow(reference, self.raw_types))
             })
             .collect();
         if !unnarrowable.is_empty() {
             property_only.retain(|subject| !unnarrowable.contains(subject));
+            instance_tested.retain(|subject| !unnarrowable.contains(subject));
             mentions.retain(|(_, subject)| !unnarrowable.contains(subject));
         }
         let tested: FxHashSet<FlowSubjectId> =
@@ -694,6 +720,24 @@ impl RootCollector<'_> {
             })
             .flatten()
             .collect();
+        // Variables that other tests also mention, whose reads only an
+        // `instanceof` test may reach. Such a read narrows only when the
+        // variable's declared type can, so its candidate records the variable
+        // as a read of a variable in `property_only` does.
+        let instance_reached: Vec<FlowSubjectId> = walked
+            .iter()
+            .copied()
+            .filter(|subject| {
+                !property_only.contains(subject)
+                    && matches!(
+                        subjects.as_slice().get(*subject as usize),
+                        Some(FlowSubject::Binding(_))
+                    )
+                    && instance_mentions
+                        .iter()
+                        .any(|(_, mentioned)| mentioned == subject)
+            })
+            .collect();
         let Some(reachable) = self.reachable_from_tests(
             &nodes,
             subjects.as_slice(),
@@ -702,6 +746,23 @@ impl RootCollector<'_> {
             walked,
         ) else {
             return;
+        };
+        // Without this, every such read counts as reached by other tests too.
+        let reached_by_other_tests = if instance_reached.is_empty() {
+            None
+        } else {
+            let other_mentions: Vec<_> = mentions
+                .iter()
+                .filter(|mention| !instance_mentions.contains(mention))
+                .copied()
+                .collect();
+            self.reachable_from_tests(
+                &nodes,
+                subjects.as_slice(),
+                &other_mentions,
+                &property_only,
+                instance_reached,
+            )
         };
         let index = flow.roots.len();
         let mut read_points: FxHashMap<_, Vec<_>> = FxHashMap::default();
@@ -722,10 +783,21 @@ impl RootCollector<'_> {
                     .push(read.point);
                 if let Some(FlowSubject::Binding(range)) =
                     subjects.as_slice().get(read.subject as usize)
-                    && property_only.contains(&read.subject)
                 {
-                    flow.property_only_bindings.insert(*range);
-                    binding = Some(*range);
+                    if property_only.contains(&read.subject) {
+                        flow.property_only_bindings.insert(*range);
+                        if instance_tested.contains(&read.subject) {
+                            flow.instance_tested_bindings.insert(*range);
+                        }
+                        binding = Some(*range);
+                    } else if reached_by_other_tests.as_ref().is_some_and(|reached| {
+                        instance_mentions
+                            .iter()
+                            .any(|(_, mentioned)| *mentioned == read.subject)
+                            && !reached.contains(&(read.subject, read.point))
+                    }) {
+                        binding = Some(*range);
+                    }
                 }
             }
             if let Some(pattern) = pattern {
@@ -756,15 +828,17 @@ impl RootCollector<'_> {
             );
         }
         if !read_points.is_empty() {
-            let property_only = property_only
+            let property_only: FxHashSet<_> = property_only
                 .into_iter()
                 .filter(|subject| read_points.contains_key(subject))
                 .collect();
+            instance_tested.retain(|subject| property_only.contains(subject));
             flow.roots.push(RootFlow {
                 nodes: nodes.into_boxed_slice(),
                 guards: guards.into_boxed_slice(),
                 subjects: subjects.into_subjects().into_boxed_slice(),
                 property_only,
+                instance_tested,
                 pattern_elements,
                 read_points: read_points
                     .into_iter()
@@ -1235,6 +1309,75 @@ mod tests {
         // The annotation of `z` shows that it has one object type, so its read
         // is dropped without resolving anything.
         assert!(!info.flow.is_candidate(marked(SOURCE, "z", "z")));
+    }
+
+    #[test]
+    fn subjects_of_instanceof_are_property_only_subjects() {
+        const SOURCE: &str = r#"
+            function f(x: Date | string, y: Date | null, z: string | null, w: unknown, v: Date | { a: 1 }) {
+                if (x instanceof Date) { /*x*/x; }
+                if (y && y instanceof Date) { /*y*/y; }
+                if (z instanceof Date) { /*z*/z; }
+                if (w instanceof Date) { /*w*/w; }
+                if (v instanceof Date || "a" in v) { /*v*/v; }
+            }
+        "#;
+        let info = module(SOURCE);
+        let read = info.flow.read(marked(SOURCE, "x", "x")).unwrap();
+        let root = info.flow.root(read.root).unwrap();
+        // `x` is tested only by `instanceof`, which also narrows a type with
+        // a single object type, while `y` is also tested itself.
+        assert!(root.is_property_only(read.subject));
+        assert!(root.is_instance_tested(read.subject));
+        let Some(&super::FlowSubject::Binding(binding)) = root.subject(read.subject) else {
+            panic!("`x` must be a binding subject");
+        };
+        assert!(info.flow.is_instance_tested_binding(binding));
+        assert_eq!(
+            info.flow.property_only_candidate(marked(SOURCE, "x", "x")),
+            Some(binding)
+        );
+        let read = info.flow.read(marked(SOURCE, "y", "y")).unwrap();
+        assert!(!root.is_property_only(read.subject));
+        // The annotation of `z` shows that it has no object type, so its read
+        // is dropped without resolving anything.
+        assert!(!info.flow.is_candidate(marked(SOURCE, "z", "z")));
+        let read = info.flow.read(marked(SOURCE, "w", "w")).unwrap();
+        assert!(root.is_instance_tested(read.subject));
+        // `in` also tests `v`, whose single object type is enough for
+        // `instanceof`.
+        let read = info.flow.read(marked(SOURCE, "v", "v")).unwrap();
+        assert!(root.is_property_only(read.subject));
+        assert!(root.is_instance_tested(read.subject));
+    }
+
+    #[test]
+    fn reads_that_only_instanceof_reaches_are_candidates_named_by_their_variable() {
+        const SOURCE: &str = r#"
+            declare function g(...values: unknown[]): unknown;
+            function f() {
+                const x = g();
+                if (x instanceof Date) { /*inside*/x; }
+                if (!x) { return; }
+                /*after*/x;
+            }
+        "#;
+        let info = module(SOURCE);
+        let inside = marked(SOURCE, "inside", "x");
+        let read = info.flow.read(inside).unwrap();
+        let root = info.flow.root(read.root).unwrap();
+        assert!(!root.is_property_only(read.subject));
+        let Some(&super::FlowSubject::Binding(binding)) = root.subject(read.subject) else {
+            panic!("`x` must be a binding subject");
+        };
+        // Only the `instanceof` test reaches the first read, which narrows
+        // only when the type of `x` can, so inference can skip it.
+        assert_eq!(info.flow.property_only_candidate(inside), Some(binding));
+        assert!(!info.flow.is_property_only_binding(binding));
+        // The truthiness test reaches the second read.
+        let after = marked(SOURCE, "after", "x");
+        assert!(info.flow.is_candidate(after));
+        assert_eq!(info.flow.property_only_candidate(after), None);
     }
 
     #[test]

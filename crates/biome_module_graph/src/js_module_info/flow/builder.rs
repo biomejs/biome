@@ -41,8 +41,14 @@ pub(super) struct BuiltRoot {
     pub(super) mentions: Vec<(FlowNodeId, FlowSubjectId)>,
     /// The subjects that conditions narrow only through
     /// [`FlowGuard::Property`], such as `s` when the only condition that
-    /// mentions it is `s.kind === "c"`, or through `in`, as in `"a" in s`.
+    /// mentions it is `s.kind === "c"`, or through `in` or `instanceof`, as
+    /// in `"a" in s` or `s instanceof Date`.
     pub(super) property_only: FxHashSet<FlowSubjectId>,
+    /// The subjects in `property_only` that an `instanceof` test refines.
+    pub(super) instance_tested: FxHashSet<FlowSubjectId>,
+    /// The condition nodes, each with a subject in `mentions`, whose
+    /// condition mentions the subject only as the subject of `instanceof`.
+    pub(super) instance_mentions: FxHashSet<(FlowNodeId, FlowSubjectId)>,
     /// Reachable reads of subjects with their incoming flow.
     pub(super) reads: Vec<BuiltRead>,
 }
@@ -108,15 +114,22 @@ pub(super) fn build_root(
         mentions: Vec::new(),
         tested: FxHashSet::default(),
         parents: FxHashSet::default(),
+        instance_tested: FxHashSet::default(),
+        instance_mentions: FxHashSet::default(),
         reads: Vec::new(),
         jumps: Vec::new(),
         current: Some(0),
         remaining_visits: MAX_SYNTAX_NODES,
     };
     builder.root(root).ok()?;
-    let property_only = builder
+    let property_only: FxHashSet<_> = builder
         .parents
         .difference(&builder.tested)
+        .copied()
+        .collect();
+    let instance_tested = builder
+        .instance_tested
+        .intersection(&property_only)
         .copied()
         .collect();
     Some(BuiltRoot {
@@ -125,6 +138,8 @@ pub(super) fn build_root(
         subjects: builder.subjects,
         mentions: builder.mentions,
         property_only,
+        instance_tested,
+        instance_mentions: builder.instance_mentions,
         reads: builder.reads,
     })
 }
@@ -355,11 +370,14 @@ struct RootBuilder<'a, 'raw> {
     subjects: FlowSubjectTable,
     mentions: Vec<(FlowNodeId, FlowSubjectId)>,
     /// The subjects that a condition mentions other than as the object of a
-    /// [`FlowGuard::Property`] or the subject of `in`.
+    /// [`FlowGuard::Property`] or the subject of `in` or `instanceof`.
     tested: FxHashSet<FlowSubjectId>,
     /// The objects of the [`FlowGuard::Property`] guards and the subjects of
-    /// the `in` tests of all conditions.
+    /// the `in` and `instanceof` tests of all conditions.
     parents: FxHashSet<FlowSubjectId>,
+    /// The subjects of the `instanceof` tests of all conditions.
+    instance_tested: FxHashSet<FlowSubjectId>,
+    instance_mentions: FxHashSet<(FlowNodeId, FlowSubjectId)>,
     reads: Vec<BuiltRead>,
     jumps: Vec<JumpTarget>,
     /// The incoming flow of the next statement, or `None` when unreachable.
@@ -805,8 +823,14 @@ impl RootBuilder<'_, '_> {
             antecedent,
             guard: condition.guard,
         })?;
+        for subject in &condition.instance_tested {
+            if !condition.mentions.contains(subject) {
+                self.instance_mentions.insert((node, *subject));
+            }
+        }
         self.tested.extend(condition.mentions.iter().copied());
         self.parents.extend(condition.parents.iter().copied());
+        self.instance_tested.extend(condition.instance_tested);
         self.mentions.extend(
             condition
                 .mentions
