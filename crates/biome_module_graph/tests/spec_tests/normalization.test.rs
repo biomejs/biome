@@ -1620,3 +1620,38 @@ fn test_expressions_select_the_branch_of_a_conditional_operand() {
         &[],
     );
 }
+
+#[test]
+fn test_conditional_types_compare_user_generic_instances_structurally() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        interface Box<T> { value: T }
+        type IsNumBox<T> = T extends Box<number> ? true : false;
+        interface ListNode<T> { next: ListNode<T>; value: T }
+        class Holder<T> { constructor(public held: T) {} }
+        declare const stringBox: IsNumBox<Box<string>>;
+        declare const numberBox: IsNumBox<Box<number>>;
+        declare const recursiveMismatch: ListNode<string> extends ListNode<number> ? 1 : 2;
+        declare const classMismatch: Holder<string> extends Holder<number> ? 1 : 2;
+        interface Handler<T> { handle(value: T): void }
+        interface Overloaded<T> { get(key: string): string; get(key: number): number; value: T }
+        declare const methodMismatch: Handler<string> extends Handler<number> ? 1 : 2;
+        declare const overloadedMismatch: Overloaded<string> extends Overloaded<number> ? 1 : 2;
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    for (name, expected) in [
+        ("stringBox", "bool: false"),
+        ("numberBox", "bool: true"),
+        ("recursiveMismatch", "number: 2"),
+        ("classMismatch", "number: 2"),
+        ("methodMismatch", "number: 2"),
+        ("overloadedMismatch", "number: 2"),
+    ] {
+        let ty = projected_binding(&db, module, name);
+        assert_eq!(format_inferred_type(&db, ty), expected, "{name}");
+    }
+}
