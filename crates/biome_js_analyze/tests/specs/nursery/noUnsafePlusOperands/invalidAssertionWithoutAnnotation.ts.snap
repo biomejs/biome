@@ -1,0 +1,50 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAssertionWithoutAnnotation.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// TypeScript ignores assertion functions declared as variables without a type
+// annotation (TS2775), so `value` keeps its declared type after the call.
+const assertNumber = (value: unknown): asserts value is number => {
+	if (typeof value !== "number") {
+		throw new Error();
+	}
+};
+
+function increment(value: number | bigint) {
+	assertNumber(value);
+	return value + 1;
+}
+
+```
+
+# Diagnostics
+```
+invalidAssertionWithoutAnnotation.ts:12:9 lint/nursery/noUnsafePlusOperands ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Numeric + operations must use either two bigint values or two number values.
+  
+    10 │ function increment(value: number | bigint) {
+    11 │ 	assertNumber(value);
+  > 12 │ 	return value + 1;
+       │ 	       ^^^^^^^^^
+    13 │ }
+    14 │ 
+  
+  i This operation mixes union with union.
+  
+    10 │ function increment(value: number | bigint) {
+    11 │ 	assertNumber(value);
+  > 12 │ 	return value + 1;
+       │ 	       ^^^^^^^^^
+    13 │ }
+    14 │ 
+  
+  i Convert one side so both operands use the same numeric type before applying + or +=.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

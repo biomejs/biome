@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAssertionWithoutAnnotation.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// TypeScript ignores assertion functions declared as variables without a type
+// annotation (TS2775), so `value` keeps its declared type after the call.
+const assertString = (value: unknown): asserts value is string => {
+	if (typeof value !== "string") {
+		throw new Error();
+	}
+};
+
+function copy(value: string | number[]) {
+	assertString(value);
+	return { ...value };
+}
+
+```
+
+# Diagnostics
+```
+invalidAssertionWithoutAnnotation.ts:12:14 lint/nursery/noMisusedSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array into an object creates properties named after its indexes.
+  
+    10 │ function copy(value: string | number[]) {
+    11 │ 	assertString(value);
+  > 12 │ 	return { ...value };
+       │ 	            ^^^^^
+    13 │ }
+    14 │ 
+  
+  i Each element becomes a property such as 0 or 1.
+  
+  i To copy the elements, spread the array into another array instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
