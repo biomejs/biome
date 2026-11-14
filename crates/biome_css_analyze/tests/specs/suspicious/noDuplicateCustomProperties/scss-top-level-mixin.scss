@@ -1,0 +1,10 @@
+/* should not generate diagnostics */
+@mixin theme {
+  --accent: red;
+  --accent: blue;
+}
+
+@include theme {
+  --gap: 0;
+  --gap: 1px;
+}

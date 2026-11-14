@@ -1,0 +1,19 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
+expression: scss-top-level-mixin.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+@mixin hover {
+  color: red;
+  color: blue;
+}
+
+@include hover {
+  margin: 0;
+  margin: 1px;
+}
+
+```

@@ -7,19 +7,28 @@ use biome_css_syntax::{
 };
 use biome_db::Source;
 use biome_parser::db::{AnalyzedSource, ParseDb, SourceExt, TrackedSnippet};
-use biome_rowan::{AstNode, AstNodeList, TextRange, TokenText};
+use biome_rowan::{AstNode, AstNodeList, Text, TextRange};
 
 /// The name and source range of a custom property definition.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CssPropertyDefinition {
-    name: TokenText,
+    name: Text,
     range: TextRange,
     globally_scoped: bool,
+    /// Whether `name` is the static prefix of an interpolated SCSS name, such as `--color-` for
+    /// `--color-#{$name}`, which can define any custom property that starts with it.
+    is_prefix: bool,
 }
 
 impl CssPropertyDefinition {
     pub fn matches(&self, name: &str) -> bool {
-        decode_css_identifier(self.name.text()) == decode_css_identifier(name)
+        let defined = decode_css_identifier(&self.name);
+        let name = decode_css_identifier(name);
+        if self.is_prefix {
+            name.starts_with(defined.as_ref())
+        } else {
+            defined == name
+        }
     }
 
     pub fn range(&self) -> TextRange {
@@ -76,9 +85,10 @@ fn collect_property_definitions(model: &SemanticModel) -> Vec<CssPropertyDefinit
         .map(|declaration| {
             let property = declaration.property();
             CssPropertyDefinition {
-                name: declaration.name().clone(),
+                name: declaration.name().clone().into(),
                 range: declaration.range(),
                 globally_scoped: is_globally_scoped(property.syntax()),
+                is_prefix: false,
             }
         })
         .chain(
@@ -86,9 +96,21 @@ fn collect_property_definitions(model: &SemanticModel) -> Vec<CssPropertyDefinit
                 .global_custom_variables()
                 .at_property_registration_candidates()
                 .map(|property| CssPropertyDefinition {
-                    name: property.name().clone(),
+                    name: property.name().clone().into(),
                     range: property.range(),
                     globally_scoped: true,
+                    is_prefix: false,
+                }),
+        )
+        .chain(
+            model
+                .custom_property_prefixes()
+                .iter()
+                .map(|(prefix, range)| CssPropertyDefinition {
+                    name: prefix.clone(),
+                    range: *range,
+                    globally_scoped: false,
+                    is_prefix: true,
                 }),
         )
         .collect::<Vec<_>>();

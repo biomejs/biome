@@ -28,6 +28,18 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```scss,file=invalid.scss
+    /// :root {
+    ///   @each $name in primary, secondary {
+    ///     --color-#{$name}: red;
+    ///   }
+    /// }
+    ///
+    /// a {
+    ///   color: var(--colour-primary);
+    /// }
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```css,file=valid.css
@@ -37,6 +49,25 @@ declare_lint_rule! {
     ///
     /// a {
     ///   color: var(--link-color);
+    /// }
+    /// ```
+    ///
+    /// ```scss,file=valid.scss
+    /// @mixin spacing {
+    ///   --spacing: 4px;
+    /// }
+    ///
+    /// :root {
+    ///   @include spacing;
+    ///
+    ///   @each $name in primary, secondary {
+    ///     --color-#{$name}: red;
+    ///   }
+    /// }
+    ///
+    /// a {
+    ///   margin: var(--spacing);
+    ///   color: var(--color-primary);
     /// }
     /// ```
     ///

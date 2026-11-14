@@ -11,7 +11,7 @@ use biome_css_syntax::{
     },
     single_expression_item,
 };
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, TextRange};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, Text, TextRange};
 use std::collections::VecDeque;
 
 use crate::model::{AnyCssSelectorLike, AnyRuleStart};
@@ -64,6 +64,11 @@ pub enum SemanticEvent {
     /// An SCSS `@function` rule
     ScssFunctionDeclaration {
         name: CssSyntaxToken,
+    },
+    /// A custom property declaration with an interpolated name, such as `--color-#{$name}`
+    CustomPropertyPrefixDeclaration {
+        prefix: Text,
+        range: TextRange,
     },
 }
 
@@ -183,9 +188,19 @@ impl SemanticEventExtractor {
                                     AnyCssDashedIdentifier::CssDashedIdentifier(name),
                                 ) => CssProperty::from(name),
                                 AnyCssDeclarationName::AnyCssDashedIdentifier(
-                                    AnyCssDashedIdentifier::ScssInterpolatedDashedIdentifier(_),
-                                )
-                                | AnyCssDeclarationName::ScssInterpolatedIdentifier(_)
+                                    AnyCssDashedIdentifier::ScssInterpolatedDashedIdentifier(name),
+                                ) => {
+                                    if let Some(prefix) = name.custom_property_prefix() {
+                                        self.stash.push_back(
+                                            SemanticEvent::CustomPropertyPrefixDeclaration {
+                                                prefix,
+                                                range: name.syntax().text_trimmed_range(),
+                                            },
+                                        );
+                                    }
+                                    return;
+                                }
+                                AnyCssDeclarationName::ScssInterpolatedIdentifier(_)
                                 | AnyCssDeclarationName::CssMetavariable(_) => {
                                     return;
                                 }

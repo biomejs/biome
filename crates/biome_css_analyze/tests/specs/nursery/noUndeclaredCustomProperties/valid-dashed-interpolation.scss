@@ -1,0 +1,10 @@
+/* should not generate diagnostics */
+:root {
+  @each $name in a, b {
+    --#{$name}: red;
+  }
+}
+
+.everything {
+  color: var(--anything-at-all);
+}
