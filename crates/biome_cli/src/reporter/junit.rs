@@ -4,8 +4,11 @@ use crate::{DiagnosticsPayload, TraversalSummary};
 use biome_console::markup;
 use biome_diagnostics::display::SourceFile;
 use biome_diagnostics::{Error, Resource};
+use biome_rowan::TextRange;
 use camino::{Utf8Path, Utf8PathBuf};
+use indexmap::IndexMap;
 use quick_junit::{NonSuccessKind, Report, TestCase, TestCaseStatus, TestSuite};
+use rustc_hash::FxBuildHasher;
 use std::fmt::{Display, Formatter};
 use std::io;
 
@@ -85,16 +88,17 @@ impl ReporterVisitor for JunitReporterVisitor {
             }
         });
 
+        let mut test_suites: IndexMap<_, TestSuite, FxBuildHasher> = IndexMap::default();
+
         for diagnostic in diagnostics {
             let mut status = TestCaseStatus::non_success(NonSuccessKind::Failure);
             let message = format!("{}", JunitDiagnostic { diagnostic });
             status.set_message(message.clone());
 
             let location = diagnostic.location();
+            let span = location.span.unwrap_or(TextRange::new(1.into(), 1.into()));
 
-            if let (Some(span), Some(source_code), Some(resource)) =
-                (location.span, location.source_code, location.resource)
-            {
+            if let (Some(source_code), Some(resource)) = (location.source_code, location.resource) {
                 let source = SourceFile::new(source_code);
                 let start = source.location(span.start())?;
 
@@ -116,20 +120,28 @@ impl ReporterVisitor for JunitReporterVisitor {
                 );
 
                 if let Resource::File(path) = resource {
-                    let mut test_suite = TestSuite::new(path);
                     case.extra
                         .insert("line".into(), start.line_number.get().to_string().into());
                     case.extra.insert(
                         "column".into(),
                         start.column_number.get().to_string().into(),
                     );
-                    test_suite
-                        .extra
-                        .insert("package".into(), "org.biome".into());
-                    test_suite.add_test_case(case);
-                    self.0.add_test_suite(test_suite);
+                    test_suites
+                        .entry(path)
+                        .or_insert_with(|| {
+                            let mut test_suite = TestSuite::new(path);
+                            test_suite
+                                .extra
+                                .insert("package".into(), "org.biome".into());
+                            test_suite
+                        })
+                        .add_test_case(case);
                 }
             }
+        }
+
+        for test_suite in test_suites.into_values() {
+            self.0.add_test_suite(test_suite);
         }
 
         writer.log(markup! {
