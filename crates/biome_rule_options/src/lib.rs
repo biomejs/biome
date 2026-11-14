@@ -535,6 +535,7 @@ pub mod use_at_index;
 pub mod use_atomic_updates;
 pub mod use_await;
 pub mod use_await_thenable;
+pub mod use_banner_comment;
 pub mod use_baseline;
 pub mod use_better_dom_traversing;
 pub mod use_bigint_literals;

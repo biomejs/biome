@@ -1,0 +1,6 @@
+/**
+ * Copyright 2026 Acme
+ */
+.a { color: red; }
+/* should not generate diagnostics */
+.b { color: blue; }
