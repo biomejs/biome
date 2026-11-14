@@ -24,8 +24,8 @@ use biome_js_syntax::JsIdentifierExpression;
 use biome_js_type_info::interned_types::{Literal, TypeData};
 use biome_js_type_info::{
     NarrowingPredicate, PropertyTest, RawTypeData, RawTypeId, TypeId, TypeReference,
-    TypeofExpression, TypeofKind, is_narrowing_invariant, may_narrow_by_instanceof,
-    may_narrow_by_property, narrow_by_in_operator, narrow_by_instanceof, narrow_by_property,
+    TypeofExpression, is_narrowing_invariant, may_narrow_by_instanceof, may_narrow_by_property,
+    narrow_by_in_operator, narrow_by_instanceof, narrow_by_property, narrow_by_type_predicate,
     narrow_type,
 };
 use biome_rowan::{AstNode, TextRange};
@@ -149,8 +149,8 @@ enum FlatteningError {
 
 /// The state of one solve that its guards share: the subject it narrows, the
 /// subject's declared type at the root's start, and the results of the
-/// property guards, `in` tests, and `instanceof` tests applied so far, keyed
-/// by guard index and incoming type.
+/// property guards, `in` tests, `instanceof` tests, and calls to type-guard
+/// functions applied so far, keyed by guard index and incoming type.
 struct GuardSolve<'db> {
     /// The subject that the solve narrows.
     subject: FlowSubjectId,
@@ -608,9 +608,10 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// A test of a property or `in` narrows only a union with two object
     /// types, as [`may_narrow_by_property`] describes, so this is
     /// [`Self::narrowing_baseline`] when the flattened type is one. When
-    /// `instance_tested` is true, an `instanceof` test narrows the subject
-    /// too. Such a test narrows any type with an object type or `unknown`, so
-    /// one object type is then enough.
+    /// `instance_tested` is true, `instanceof` or a type-guard function whose
+    /// target has only object types narrows the subject too, which also
+    /// narrows a type with one object type, as [`may_narrow_by_instanceof`]
+    /// describes.
     ///
     /// Unlike [`Self::narrowing_baseline`], flattening resolves handles to
     /// local types of this context's module through this context instead of
@@ -840,16 +841,34 @@ impl<'db> ResolutionCtx<'db, '_> {
                 if *tested != subject {
                     return Some(ty);
                 }
-                if let FlowTest::In(_) | FlowTest::Instanceof(_) = test {
+                if let FlowTest::In(_) | FlowTest::Instanceof(_) | FlowTest::Predicate { .. } = test
+                {
                     // Loops revisit conditions, and each application compares
                     // every member of the union.
                     if let Some(narrowed) = solve.properties.get(&(index, ty)) {
                         return Some(*narrowed);
                     }
-                    let narrowed = if let FlowTest::In(key) = test {
-                        self.narrow_by_in(ty, solve.declared, *key, *positive)
-                    } else {
-                        self.narrow_by_instance(ty, solve.declared, *test, *positive)
+                    let narrowed = match *test {
+                        FlowTest::In(key) => self.narrow_by_in(ty, solve.declared, key, *positive),
+                        FlowTest::Predicate {
+                            function,
+                            object_target,
+                        } => self.narrow_by_predicate(
+                            ty,
+                            solve.declared,
+                            function,
+                            object_target,
+                            *positive,
+                        ),
+                        test @ FlowTest::Instanceof(_) => {
+                            self.narrow_by_instance(ty, solve.declared, test, *positive)
+                        }
+                        FlowTest::Truthy
+                        | FlowTest::Nullish
+                        | FlowTest::Typeof(_)
+                        | FlowTest::Null
+                        | FlowTest::Literal(_)
+                        | FlowTest::Undefined { .. } => ty,
                     };
                     solve.properties.insert((index, ty), narrowed);
                     return Some(narrowed);
@@ -1006,47 +1025,50 @@ impl<'db> ResolutionCtx<'db, '_> {
                 NarrowingPredicate::Literal(TypeData::Undefined)
             }
             FlowTest::Undefined { strict: false } => NarrowingPredicate::Nullish,
-            FlowTest::Predicate(function) => return self.guard_predicate(function),
-            FlowTest::In(_) | FlowTest::Instanceof(_) => return None,
+            FlowTest::Predicate { .. } | FlowTest::In(_) | FlowTest::Instanceof(_) => {
+                return None;
+            }
         })
     }
 
-    /// Returns the test that the guard declared at `function` applies to its
-    /// tested argument, whether a call reports it or asserts it.
+    /// Returns `ty` narrowed by a call to the type-guard function declared at
+    /// `function`, given the subject's `declared` type, as
+    /// [`narrow_by_type_predicate`] narrows it.
     ///
-    /// Returns `None` when the guard's target type is neither a primitive type
-    /// nor a primitive literal.
-    #[expect(
-        clippy::wildcard_enum_match_arm,
-        reason = "Only primitive types and primitive literals map to a runtime test."
-    )]
-    fn guard_predicate(&mut self, function: TextRange) -> Option<NarrowingPredicate<'db>> {
+    /// When `object_target` is true, collection found that every member of
+    /// the target is an object type, which narrows only a type with an object
+    /// type or `unknown` in Biome, as [`may_narrow_by_instanceof`] describes,
+    /// so `ty` is returned unchanged without resolving the target when
+    /// `declared` is not one. TypeScript also narrows a primitive by such a
+    /// target, as `string` by `{ length: number }`.
+    fn narrow_by_predicate(
+        &mut self,
+        ty: TypeData<'db>,
+        declared: TypeData<'db>,
+        function: TextRange,
+        object_target: bool,
+        positive: bool,
+    ) -> TypeData<'db> {
+        if object_target && !may_narrow_by_instanceof(self.db, declared) {
+            return ty;
+        }
+        let Some(target) = self.guard_target(function) else {
+            return ty;
+        };
+        narrow_by_type_predicate(self.db, ty, target, positive, self.narrowing_resolver())
+    }
+
+    /// Returns the target type of the type predicate of the guard declared at
+    /// `function`, flattened as a declared type is, or `None` when the guard
+    /// has no target, as `asserts value`, or flattening exceeds its work
+    /// limit.
+    fn guard_target(&mut self, function: TextRange) -> Option<TypeData<'db>> {
         let info = self.js_info;
         let (_, contract) = guard_signature(&info.raw_types, &info.raw_binding_types, function)?;
         let target = self.resolve(contract.target?);
         // An alias resolves to an instance of its target. The baseline flattens
         // that instance, as it does for a variable declared with the alias.
-        let target = self.flow_baseline(target)?;
-        Some(match target {
-            TypeData::BigInt => NarrowingPredicate::Typeof(TypeofKind::BigInt),
-            TypeData::Boolean => NarrowingPredicate::Typeof(TypeofKind::Boolean),
-            TypeData::Number => NarrowingPredicate::Typeof(TypeofKind::Number),
-            TypeData::String => NarrowingPredicate::Typeof(TypeofKind::String),
-            TypeData::Symbol => NarrowingPredicate::Typeof(TypeofKind::Symbol),
-            TypeData::Null | TypeData::Undefined => NarrowingPredicate::Literal(target),
-            TypeData::Literal(literal)
-                if matches!(
-                    literal.literal(self.db),
-                    Literal::BigInt(_)
-                        | Literal::Boolean(_)
-                        | Literal::Number(_)
-                        | Literal::String(_)
-                ) =>
-            {
-                NarrowingPredicate::Literal(target)
-            }
-            _ => return None,
-        })
+        self.flow_baseline(target)
     }
 }
 

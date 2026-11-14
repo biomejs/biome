@@ -10,8 +10,8 @@ use biome_js_syntax::{
     JsVariableKind, binding_ext::AnyJsBindingDeclaration, unescape_js_identifier,
 };
 use biome_js_type_info::{
-    Function, FunctionParameter, RawPrimitiveTarget, RawTypeData, RawTypeId, ReturnType,
-    TypeReference, TypeReferenceQualifier, TypeofKind, raw_primitive_target,
+    Function, FunctionParameter, RawPredicateTarget, RawTypeData, RawTypeId, ReturnType,
+    TypeReference, TypeReferenceQualifier, TypeofKind, raw_predicate_target,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxKind, Text, TextRange};
 use rustc_hash::FxHashMap;
@@ -106,10 +106,16 @@ pub(crate) enum FlowTest {
     Undefined {
         strict: bool,
     },
-    /// A call to the guard declared at this range. The guard's return
-    /// annotation states the tested type, as in `value is string` or
-    /// `asserts value is string`.
-    Predicate(TextRange),
+    /// A call to the guard declared at `function`, whose return annotation
+    /// states the tested type, as in `value is string` or
+    /// `asserts value is Foo`.
+    Predicate {
+        function: TextRange,
+        /// Whether every member of the tested type is an object type, as
+        /// for `Foo` or `Foo | Bar`, so the test narrows only a type that
+        /// has an object type or is `unknown`.
+        object_target: bool,
+    },
     /// The `in` operator, as in `"a" in value`. The range is the key, a string
     /// or number literal that spells the property's name, such as `"a"` or `0`
     /// but not `"\u0061"` or `0x0`. See [`literal_key`].
@@ -201,11 +207,12 @@ struct Guard {
 #[derive(Clone, Copy, Eq, PartialEq)]
 enum GuardKind {
     /// `value is T`: the call's result reports whether the argument has type
-    /// `T`.
-    Predicate,
+    /// `T`. `object_target` tells whether every member of `T` is an object
+    /// type, as for [`FlowTest::Predicate`].
+    Predicate { object_target: bool },
     /// `asserts value is T`: the call returns only when the argument has type
     /// `T`.
-    TypeAssertion,
+    TypeAssertion { object_target: bool },
     /// `asserts value`: the call returns only when the argument is truthy.
     TruthyAssertion,
 }
@@ -223,7 +230,7 @@ impl<'a> GuardFunctions<'a> {
     }
 
     /// Returns the argument that `call` tests, without parentheses, with the
-    /// range of the type predicate it calls.
+    /// test that the type predicate it calls applies.
     ///
     /// Returns `None` unless `call` calls a supported type predicate.
     fn tested_argument(
@@ -231,9 +238,18 @@ impl<'a> GuardFunctions<'a> {
         call: &JsCallExpression,
         model: &SemanticModel,
         remaining: &mut usize,
-    ) -> Option<(AnyJsExpression, TextRange)> {
+    ) -> Option<(AnyJsExpression, FlowTest)> {
         let (guard, function, argument) = self.guard_call(call, model, remaining)?;
-        (guard.kind == GuardKind::Predicate).then_some((argument, function))
+        let GuardKind::Predicate { object_target } = guard.kind else {
+            return None;
+        };
+        Some((
+            argument,
+            FlowTest::Predicate {
+                function,
+                object_target,
+            },
+        ))
     }
 
     /// Returns the guard that `call` calls, the range of its declaration, and
@@ -288,8 +304,8 @@ impl<'a> GuardFunctions<'a> {
     /// Nothing reassigns it, and it is not a generator.
     /// Its tested parameter is named and is not a rest parameter. That
     /// parameter has no default value, because a default replaces an
-    /// `undefined` argument. A target type must be able to resolve to a
-    /// primitive type or a primitive literal, the only targets that narrow.
+    /// `undefined` argument. A target of `any` or `unknown`, which narrows
+    /// nothing, is not supported.
     fn guard(&self, function: &Binding, model: &SemanticModel) -> Option<Guard> {
         if function.is_imported()
             || !matches!(
@@ -307,9 +323,14 @@ impl<'a> GuardFunctions<'a> {
             return None;
         }
         let kind = match contract.target {
-            Some(target) if !self.may_resolve_to_primitive(target, model) => return None,
-            Some(_) if contract.asserts => GuardKind::TypeAssertion,
-            Some(_) => GuardKind::Predicate,
+            Some(target) => {
+                let object_target = self.is_object_target(target, model)?;
+                if contract.asserts {
+                    GuardKind::TypeAssertion { object_target }
+                } else {
+                    GuardKind::Predicate { object_target }
+                }
+            }
             None => GuardKind::TruthyAssertion,
         };
         let tested = parameter_name(contract.parameter)?;
@@ -388,45 +409,69 @@ impl<'a> GuardFunctions<'a> {
         parameter.initializer().is_none().then_some(guard)
     }
 
-    /// Returns whether the raw guard `target` can resolve to a primitive type
-    /// or a primitive literal.
+    /// Returns whether every member of the raw guard `target` is an object
+    /// type, as far as raw tables and the scopes that declare its names tell,
+    /// or `None` when `target` is `any` or `unknown`, or has such a member.
     ///
-    /// A name continues with the type that a local type alias names. An
-    /// imported name can name an alias in another module, so it returns true.
-    /// Other names, such as interfaces, classes, enums, and global types, and
-    /// names qualified by a namespace return false. A `typeof` query returns
-    /// true, because only inference tells the type of the value it names.
-    fn may_resolve_to_primitive(&self, target: &TypeReference, model: &SemanticModel) -> bool {
-        let mut target = target;
-        for _ in 0..MAX_ALIAS_STEPS {
-            let qualifier = match raw_primitive_target(target, self.raw_types) {
-                RawPrimitiveTarget::Primitive | RawPrimitiveTarget::Typeof => return true,
-                RawPrimitiveTarget::Other => return false,
-                RawPrimitiveTarget::Named(qualifier) => qualifier,
+    /// A name continues with the type that a local type alias names, and a
+    /// local interface or class is an object type. An imported name can name
+    /// an alias of a primitive in another module, so it is not taken as one.
+    /// Other names, such as enums and type parameters, aren't either, while a
+    /// name that no scope declares, such as a global type, and a name
+    /// qualified by a namespace are taken as object types. This decides only
+    /// which declared types the test is applied to, never its result, so a
+    /// name taken as an object type that names an alias of a primitive, as
+    /// the global `PropertyKey` does, only keeps the declared type of a
+    /// variable that has no object type.
+    fn is_object_target(&self, target: &TypeReference, model: &SemanticModel) -> Option<bool> {
+        let mut pending = vec![target];
+        let mut is_object = true;
+        for _ in 0..MAX_TARGET_STEPS {
+            let Some(target) = pending.pop() else {
+                return Some(is_object);
+            };
+            let qualifier = match raw_predicate_target(target, self.raw_types) {
+                RawPredicateTarget::Object => continue,
+                RawPredicateTarget::Other => {
+                    is_object = false;
+                    continue;
+                }
+                RawPredicateTarget::Top => return None,
+                RawPredicateTarget::Union(members) => {
+                    pending.extend(members);
+                    continue;
+                }
+                RawPredicateTarget::Named(qualifier) => qualifier,
             };
             let Some(binding) = named_binding(qualifier, model) else {
-                return false;
+                continue;
             };
             if binding.is_imported() {
-                return true;
+                is_object = false;
+                continue;
             }
-            if !matches!(
-                binding.tree().declaration(),
-                Some(AnyJsBindingDeclaration::TsTypeAliasDeclaration(_))
-            ) {
-                return false;
+            match binding.tree().declaration() {
+                Some(AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)) => {
+                    match self.raw_binding_types.get(&binding.range()) {
+                        Some(aliased) => pending.push(aliased),
+                        None => is_object = false,
+                    }
+                }
+                Some(
+                    AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
+                    | AnyJsBindingDeclaration::JsClassDeclaration(_)
+                    | AnyJsBindingDeclaration::JsClassExportDefaultDeclaration(_),
+                ) => {}
+                _ => is_object = false,
             }
-            let Some(aliased) = self.raw_binding_types.get(&binding.range()) else {
-                return false;
-            };
-            target = aliased;
         }
-        false
+        Some(false)
     }
 }
 
-/// Limits the chain of type aliases that a guard target follows.
-const MAX_ALIAS_STEPS: usize = 16;
+/// Limits the type references, including the chain of type aliases, that the
+/// target of a guard visits.
+const MAX_TARGET_STEPS: usize = 16;
 
 /// Returns the binding that `qualifier` names, or `None` for a name qualified
 /// by a namespace and for a name that no enclosing scope declares.
@@ -471,7 +516,7 @@ pub(super) fn decompose_assertion(
     };
     let (guard, function, argument) = functions.guard_call(&call, model, &mut remaining)?;
     match guard.kind {
-        GuardKind::Predicate => None,
+        GuardKind::Predicate { .. } => None,
         GuardKind::TruthyAssertion => Some(decompose_condition(
             &argument,
             FlowOutcome::Truthy,
@@ -480,19 +525,29 @@ pub(super) fn decompose_assertion(
             subjects,
             guards,
         )),
-        GuardKind::TypeAssertion => {
+        GuardKind::TypeAssertion { object_target } => {
             chain_receivers(&argument, &mut remaining)?;
             let subject = subject_of(&argument, model, subjects)?;
             guards.push(FlowGuard::Test {
                 subject,
-                test: FlowTest::Predicate(function),
+                test: FlowTest::Predicate {
+                    function,
+                    object_target,
+                },
                 positive: true,
             });
+            // As for `instanceof`, a target whose members are all object
+            // types narrows only a type with an object type or `unknown`.
+            let (mentions, parents) = if object_target {
+                (Vec::new(), vec![subject])
+            } else {
+                (vec![subject], Vec::new())
+            };
             Some(DecomposedCondition {
                 guard: guards.len() - 1,
-                mentions: vec![subject],
-                parents: Vec::new(),
-                instance_tested: Vec::new(),
+                mentions,
+                instance_tested: parents.clone(),
+                parents,
             })
         }
     }
@@ -518,20 +573,20 @@ pub(super) struct DecomposedCondition {
     /// variable cannot change between the alias and its test. See
     /// [`narrows_through_aliases`] for the variables that qualify.
     pub(super) mentions: Vec<FlowSubjectId>,
-    /// Subjects whose type the condition may narrow only through these
-    /// tests, unless `mentions` also lists them:
-    ///
-    /// - [`FlowGuard::Property`], such as `s` in `s.kind === "c"`;
-    /// - [`FlowTest::In`], such as `x` in `"a" in x`;
-    /// - [`FlowTest::Instanceof`], such as `x` in `x instanceof Date`.
-    ///
-    /// The first two narrow only a union with two object types, and
-    /// `instanceof` only a type with an object type or `unknown`. When
-    /// decomposition stops early, this also lists the pattern of every
-    /// variable in `mentions` that is an element of a destructuring pattern
-    /// that a test of the variable narrows.
+    /// Subjects whose type the condition may refine only through
+    /// [`FlowGuard::Property`], such as `s` in `s.kind === "c"`, through
+    /// [`FlowTest::In`], such as `x` in `"a" in x`, through
+    /// [`FlowTest::Instanceof`], such as `x` in `x instanceof Date`, or
+    /// through a [`FlowTest::Predicate`] whose target has only object types,
+    /// such as `x` in `isFoo(x)`, unless `mentions` also lists them. The
+    /// first two narrow only a union with two object types, and the others
+    /// only a type with an object type or `unknown`. When decomposition stops
+    /// early, this also lists the pattern of every variable in `mentions`
+    /// that is an element of a destructuring pattern that a test of the
+    /// variable narrows.
     pub(super) parents: Vec<FlowSubjectId>,
-    /// The subjects in `parents` that an `instanceof` test checks.
+    /// The subjects in `parents` that `instanceof` or a type-guard function
+    /// whose target has only object types checks.
     pub(super) instance_tested: Vec<FlowSubjectId>,
 }
 
@@ -627,10 +682,12 @@ struct Decomposer<'a, 'raw> {
     remaining: usize,
     mentions: Vec<FlowSubjectId>,
     /// The objects of the [`FlowGuard::Property`] guards and the subjects of
-    /// the [`FlowTest::In`] and [`FlowTest::Instanceof`] tests decomposed so
-    /// far.
+    /// the [`FlowTest::In`], [`FlowTest::Instanceof`], and object
+    /// [`FlowTest::Predicate`] tests decomposed so far.
     parents: Vec<FlowSubjectId>,
-    /// The subjects of the [`FlowTest::Instanceof`] tests decomposed so far.
+    /// The subjects of the [`FlowTest::Instanceof`] tests and of the
+    /// [`FlowTest::Predicate`] tests whose targets have only object types
+    /// decomposed so far.
     instance_tested: Vec<FlowSubjectId>,
     complete: bool,
     /// The number of aliased conditions whose initializers enclose the
@@ -686,8 +743,8 @@ impl Decomposer<'_, '_> {
                         .functions
                         .tested_argument(&call, self.model, &mut self.remaining)
                     {
-                        Some((subject, function)) => {
-                            self.test(&subject, SyntaxGuard::Predicate(function), positive, false)
+                        Some((subject, test)) => {
+                            self.test(&subject, SyntaxGuard::Predicate(test), positive, false)
                         }
                         None => FlowGuard::Keep,
                     };
@@ -753,7 +810,7 @@ impl Decomposer<'_, '_> {
                 return FlowGuard::Keep;
             }
             SyntaxGuard::Undefined { strict, .. } => Some(FlowTest::Undefined { strict }),
-            SyntaxGuard::Predicate(function) => Some(FlowTest::Predicate(function)),
+            SyntaxGuard::Predicate(test) => Some(test),
             SyntaxGuard::In(key) => Some(FlowTest::In(key)),
             SyntaxGuard::Instanceof(constructor) => Some(FlowTest::Instanceof(constructor)),
         };
@@ -765,11 +822,16 @@ impl Decomposer<'_, '_> {
         let mut guard = match tested {
             Some((test, subject)) if self.may_test(subject) => {
                 // `in` narrows only a union with two object types, as a test
-                // of a property narrows its object, and `instanceof` only a
-                // type with an object type or `unknown`.
+                // of a property narrows its object, and `instanceof` and a
+                // target with only object types only a type with an object
+                // type or `unknown`.
                 match test {
                     FlowTest::In(_) => self.parents.push(subject),
-                    FlowTest::Instanceof(_) => {
+                    FlowTest::Instanceof(_)
+                    | FlowTest::Predicate {
+                        object_target: true,
+                        ..
+                    } => {
                         self.parents.push(subject);
                         self.instance_tested.push(subject);
                     }
@@ -826,7 +888,7 @@ impl Decomposer<'_, '_> {
     ) -> Option<FlowGuard> {
         if matches!(
             test,
-            FlowTest::Predicate(_) | FlowTest::In(_) | FlowTest::Instanceof(_)
+            FlowTest::Predicate { .. } | FlowTest::In(_) | FlowTest::Instanceof(_)
         ) {
             return None;
         }
@@ -887,7 +949,7 @@ impl Decomposer<'_, '_> {
     ) -> Option<FlowGuard> {
         if matches!(
             test,
-            FlowTest::Predicate(_) | FlowTest::In(_) | FlowTest::Instanceof(_)
+            FlowTest::Predicate { .. } | FlowTest::In(_) | FlowTest::Instanceof(_)
         ) {
             return None;
         }
@@ -1205,8 +1267,9 @@ enum SyntaxGuard {
         reference: JsReferenceIdentifier,
         strict: bool,
     },
-    /// A call to the guard function declared at this range.
-    Predicate(TextRange),
+    /// A call to a type-guard function, with the test it applies, a
+    /// [`FlowTest::Predicate`].
+    Predicate(FlowTest),
     /// The `in` operator whose key is the literal at this range.
     In(TextRange),
     /// The `instanceof` operator whose right operand is at this range.
