@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validUntrackedTsExports.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+namespace Outer {
+	export const value = 1;
+}
+export import Alias = Outer.value;
+export namespace A.B {
+	export const c = 1;
+}
+export const tracked = 1;
+
+```

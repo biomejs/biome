@@ -65,6 +65,7 @@ static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noUndeclaredCustomProperties"),
         RuleFilter::Rule("nursery", "noUnresolvedDefaultImport"),
         RuleFilter::Rule("nursery", "useTailwindSortedClasses"),
+        RuleFilter::Rule("nursery", "useValidNamespaceImports"),
         RuleFilter::Rule("suspicious", "noDeprecatedImports"),
         RuleFilter::Rule("suspicious", "noImportCycles"),
     ]

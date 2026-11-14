@@ -1,7 +1,10 @@
+use crate::services::semantic::{SemanticModelBuilderVisitor, SemanticServices};
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleDomain, RuleKey,
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor,
 };
+use biome_js_semantic::SemanticModel;
+use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode};
 use biome_module_graph::{JsModuleInfo, ModuleDb, ModuleInfo};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{AstNode, Language, SyntaxNode, TextRange};
@@ -97,6 +100,84 @@ where
 
     fn build_visitor(analyzer: &mut impl AddVisitor<L>, _: &L::Root) {
         analyzer.add_visitor(Phases::Syntax, SyntaxVisitor::default);
+    }
+
+    fn key() -> QueryKey<Self::Language> {
+        QueryKey::Syntax(N::KIND_SET)
+    }
+
+    fn unwrap_match(_: &ServiceBag, node: &Self::Input) -> Self::Output {
+        N::unwrap_cast(node.clone())
+    }
+}
+
+/// Services for lint rules that need both the module database and the
+/// semantic model of the file being analyzed.
+pub struct ProjectSemanticServices {
+    db: DbService,
+    semantic: SemanticServices,
+}
+
+impl ProjectSemanticServices {
+    pub fn db(&self) -> &dyn ModuleDb {
+        self.db.db()
+    }
+
+    pub fn module_info_for_path(&self, path: &Utf8Path) -> Option<ModuleInfo> {
+        self.db.module_info_for_path(path)
+    }
+
+    pub fn model(&self) -> &SemanticModel {
+        self.semantic.model()
+    }
+}
+
+impl FromServices for ProjectSemanticServices {
+    fn from_services(
+        rule_key: &RuleKey,
+        rule_metadata: &RuleMetadata,
+        services: &ServiceBag,
+    ) -> Result<Self, ServicesDiagnostic> {
+        Ok(Self {
+            db: DbService::from_services(rule_key, rule_metadata, services)?,
+            semantic: SemanticServices::from_services(rule_key, rule_metadata, services)?,
+        })
+    }
+}
+
+impl Phase for ProjectSemanticServices {
+    fn phase() -> Phases {
+        Phases::Semantic
+    }
+}
+
+/// Query type usable by lint rules that match specific [AstNode] types and use
+/// both the module database and the semantic model.
+#[derive(Clone)]
+pub struct ProjectSemantic<N>(N);
+
+impl<N> QueryMatch for ProjectSemantic<N>
+where
+    N: AstNode<Language = JsLanguage> + 'static,
+{
+    fn text_range(&self) -> TextRange {
+        self.0.range()
+    }
+}
+
+impl<N> Queryable for ProjectSemantic<N>
+where
+    N: AstNode<Language = JsLanguage> + 'static,
+{
+    type Input = JsSyntaxNode;
+    type Output = N;
+
+    type Language = JsLanguage;
+    type Services = ProjectSemanticServices;
+
+    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _: &AnyJsRoot) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
+        analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
     }
 
     fn key() -> QueryKey<Self::Language> {

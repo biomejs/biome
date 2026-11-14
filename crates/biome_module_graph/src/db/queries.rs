@@ -29,23 +29,37 @@ pub use type_inference::*;
 // #region EXPORTED TRACKED QUERIES
 
 /// Finds the exported symbol with the given name, following re-exports.
+///
+/// Returns [JsExportedSymbolLookup::Unknown] instead of
+/// [JsExportedSymbolLookup::Missing] when a re-export leads to a module whose
+/// exports aren't tracked: a path that can't be resolved or isn't in the
+/// database, a module that isn't JavaScript, such as a JSON file, or a module
+/// without any `export` statements, such as a CommonJS module.
+///
+/// `export * from` statements don't forward the `default` export.
 #[salsa::tracked]
 pub fn find_js_exported_symbol<'db>(
     db: &'db dyn ModuleDb,
     symbol: SymbolFromModuleInfo<'db>,
 ) -> JsExportedSymbolLookup {
     let mut seen_paths = std::collections::BTreeSet::new();
+    let start = symbol;
     let mut stack = vec![symbol];
     let mut saw_unresolved_target = false;
 
     while let Some(symbol) = stack.pop() {
         let owning_module = *symbol.module(db);
         let ModuleInfoKind::Js(module) = owning_module.kind(db) else {
+            saw_unresolved_target |= symbol != start;
             continue;
         };
+        if symbol != start && module.exports.is_empty() && module.blanket_reexports.is_empty() {
+            saw_unresolved_target = true;
+            continue;
+        }
         match &module.exports.get(symbol.name(db).as_str()) {
             Some(JsExport::Own(own_export) | JsExport::OwnType(own_export)) => {
-                return JsExportedSymbolLookup::Found(own_export.clone());
+                return JsExportedSymbolLookup::Found(own_export.clone(), owning_module);
             }
             Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
                 match &reexport.import.symbol {
@@ -65,6 +79,8 @@ pub fn find_js_exported_symbol<'db>(
                                         lookup.clone(),
                                         module,
                                     ));
+                                } else {
+                                    saw_unresolved_target = true;
                                 }
                             }
                             Ok(_) => break,
@@ -81,9 +97,12 @@ pub fn find_js_exported_symbol<'db>(
                             .path()
                             .as_deref()
                             && seen_paths.insert(path.to_path_buf())
-                            && let Some(module) = db.module_for_path(path)
                         {
-                            stack.push(SymbolFromModuleInfo::new(db, symbol.name(db), module));
+                            if let Some(module) = db.module_for_path(path) {
+                                stack.push(SymbolFromModuleInfo::new(db, symbol.name(db), module));
+                            } else {
+                                saw_unresolved_target = true;
+                            }
                         }
                     }
                 }
@@ -99,10 +118,16 @@ pub fn find_js_exported_symbol<'db>(
                         .as_deref()
                     {
                         Ok(path) => {
-                            if seen_paths.insert(path.to_path_buf())
-                                && let Some(module) = db.module_for_path(path)
-                            {
-                                stack.push(SymbolFromModuleInfo::new(db, symbol.name(db), module));
+                            if seen_paths.insert(path.to_path_buf()) {
+                                if let Some(module) = db.module_for_path(path) {
+                                    stack.push(SymbolFromModuleInfo::new(
+                                        db,
+                                        symbol.name(db),
+                                        module,
+                                    ));
+                                } else {
+                                    saw_unresolved_target = true;
+                                }
                             }
                         }
                         Err(_) => saw_unresolved_target = true,

@@ -1,0 +1,25 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+import type * as typeOnly from "./validNamedExports.js";
+import * as names from "./validNamedExports.js";
+import { type deep } from "./validNamedExports.js";
+
+type FromTypeImport = typeOnly.Missing;
+type FromNamespace = names.Missing;
+type FromNamespaceQuery = typeof names.missing;
+
+import * as untracked from "./validUntrackedTsExports.ts";
+import * as nonJsBarrel from "./validNonJsBarrel.js";
+
+untracked.Alias;
+untracked.A.B.c;
+// Names re-exported from files that aren't JavaScript can't be checked.
+nonJsBarrel.foo;
+nonJsBarrel.bar;
+
+```
