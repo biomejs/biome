@@ -30,7 +30,7 @@ biome_rowan            = { workspace = true }
 biome_string_case      = { workspace = true }
 biome_unicode_table    = { workspace = true }
 # Optional dependency for test_utils feature (HTML rendering for spec tests)
-htmlize                = { version = "1.0.6", features = ["unescape"], optional = true }
+htmlize                = { version = "1.1.0", features = ["unescape"], optional = true }
 percent-encoding       = { version = "2.3.2", optional = true }
 tracing                = { workspace = true }
 unicode-bom            = { workspace = true }
@@ -42,7 +42,7 @@ unicode-bom            = { workspace = true }
 biome_configuration   = { path = "../biome_configuration", features = ["lang_md"] }
 biome_markdown_parser = { path = ".", features = ["lang_mdx", "test_utils"] }
 biome_test_utils      = { path = "../biome_test_utils" }
-criterion             = { package = "codspeed-criterion-compat", version = "=5.0.1" }
+criterion             = { package = "codspeed-criterion-compat", version = "=5.0.3" }
 insta                 = { workspace = true }
 quickcheck            = { workspace = true }
 quickcheck_macros     = { workspace = true }

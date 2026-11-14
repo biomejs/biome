@@ -56,7 +56,7 @@ schemars                 = { workspace = true }
 serde                    = { workspace = true, optional = true }
 serde_json               = { workspace = true, optional = true }
 syn                      = { version = "2.0", features = ["full"] }
-ureq                     = "3.3.0"
+ureq                     = "3.5.1"
 xtask_glue               = { workspace = true }
 
 [features]

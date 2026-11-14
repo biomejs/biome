@@ -24,12 +24,12 @@ biome_text_size      = { workspace = true }
 schemars             = { workspace = true, optional = true }
 serde                = { workspace = true, features = ["derive"], optional = true }
 termcolor            = { workspace = true }
-unicode-segmentation = "1.13.2"
+unicode-segmentation = "1.13.3"
 unicode-width        = { workspace = true }
 
 [dev-dependencies]
-criterion = { package = "codspeed-criterion-compat", version = "=5.0.1" }
-trybuild  = "=1.0.116"
+criterion = { package = "codspeed-criterion-compat", version = "=5.0.3" }
+trybuild  = "=1.0.122"
 
 [features]
 schema = ["biome_text_size/schema", "dep:schemars", "serde"]
