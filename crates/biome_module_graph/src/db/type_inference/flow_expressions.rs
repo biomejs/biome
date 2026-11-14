@@ -156,38 +156,31 @@ impl<'db> ResolutionCtx<'db, '_> {
                 Some(TypeData::union_from_types(self.db, vec![retained, right]))
             }
             AnyFlowExpression::JsConditionalExpression(conditional) => {
-                let test_expression = conditional.test().ok()?;
                 let consequent_expression = conditional.consequent().ok()?;
                 let alternate_expression = conditional.alternate().ok()?;
-                let test = self.flow_operand(&test_expression);
                 let consequent = self.flow_operand(&consequent_expression);
                 let alternate = self.flow_operand(&alternate_expression);
-                if test.is_none() && consequent.is_none() && alternate.is_none() {
+                // The test doesn't change the type of the expression, so
+                // without a refined branch it is the type that inference
+                // gives without flow.
+                if consequent.is_none() && alternate.is_none() {
                     return None;
-                }
-                let test = test.or_else(|| self.raw_operand(&test_expression))?;
-                if narrow_type(
-                    self.db,
-                    test,
-                    NarrowingPredicate::Truthy,
-                    true,
-                    self.narrowing_resolver(),
-                ) == TypeData::NeverKeyword
-                {
-                    return alternate.or_else(|| self.raw_operand(&alternate_expression));
-                }
-                if narrow_type(
-                    self.db,
-                    test,
-                    NarrowingPredicate::Truthy,
-                    false,
-                    self.narrowing_resolver(),
-                ) == TypeData::NeverKeyword
-                {
-                    return consequent.or_else(|| self.raw_operand(&consequent_expression));
                 }
                 let consequent = consequent.or_else(|| self.raw_operand(&consequent_expression))?;
                 let alternate = alternate.or_else(|| self.raw_operand(&alternate_expression))?;
+                let test_expression = conditional.test().ok()?;
+                let consequent = self.conditional_branch(
+                    &test_expression,
+                    &consequent_expression,
+                    consequent,
+                    true,
+                );
+                let alternate = self.conditional_branch(
+                    &test_expression,
+                    &alternate_expression,
+                    alternate,
+                    false,
+                );
                 Some(TypeData::union_from_types(
                     self.db,
                     vec![consequent, alternate],
@@ -261,6 +254,46 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
+    /// Returns the type that the branch `branch` of a conditional expression
+    /// whose test is `test` adds to the type of the expression, given the
+    /// branch's type `ty`. `positive` is true for the branch that runs when
+    /// the test is truthy.
+    ///
+    /// TypeScript gives a conditional expression the union of the types of
+    /// its branches, whatever its test, and a branch of type `never` adds
+    /// nothing. A branch that only reads the variable that the test reads, as
+    /// `x` in `x ? 1 : x`, is `never` in TypeScript when the test leaves the
+    /// variable no value in that branch, and Biome reads it as Unknown there,
+    /// so such a branch adds nothing either: with `x: { a: number }`,
+    /// `x ? 1 : x` is `1`. Any other branch gives `ty`, even when the test
+    /// can never select it, as in TypeScript, so `x ? 1 : "s"` is `1 | "s"`.
+    fn conditional_branch(
+        &mut self,
+        test: &AnyJsExpression,
+        branch: &AnyJsExpression,
+        ty: TypeData<'db>,
+        positive: bool,
+    ) -> TypeData<'db> {
+        if ty != TypeData::Unknown || !reads_same_variable(test, branch) {
+            return ty;
+        }
+        let Some(test) = self.flow_operand(test).or_else(|| self.raw_operand(test)) else {
+            return ty;
+        };
+        let narrowed = narrow_type(
+            self.db,
+            test,
+            NarrowingPredicate::Truthy,
+            positive,
+            self.narrowing_resolver(),
+        );
+        if narrowed == TypeData::NeverKeyword {
+            narrowed
+        } else {
+            ty
+        }
+    }
+
     /// Returns whether `ty` is a primitive or a union of primitives, so adding
     /// it cannot run a user-defined `valueOf` or `toString` method.
     ///
@@ -323,6 +356,29 @@ impl<'db> ResolutionCtx<'db, '_> {
             .clone();
         Some(self.resolve(&reference))
     }
+}
+
+/// Returns whether `test` and `branch`, without parentheses, are both a read of
+/// one variable, as in `x ? 1 : x`. Both are in one expression and neither is
+/// inside a function, so the same name means the same variable.
+fn reads_same_variable(test: &AnyJsExpression, branch: &AnyJsExpression) -> bool {
+    let (
+        AnyJsExpression::JsIdentifierExpression(test),
+        AnyJsExpression::JsIdentifierExpression(branch),
+    ) = (
+        test.clone().omit_parentheses(),
+        branch.clone().omit_parentheses(),
+    )
+    else {
+        return false;
+    };
+    let (Ok(test), Ok(branch)) = (test.name(), branch.name()) else {
+        return false;
+    };
+    let (Ok(test), Ok(branch)) = (test.value_token(), branch.value_token()) else {
+        return false;
+    };
+    test.text_trimmed() == branch.text_trimmed()
 }
 
 /// Returns the member name that local inference collected for `member`, or

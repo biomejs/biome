@@ -182,10 +182,9 @@ impl<'db> ResolutionCtx<'db, '_> {
                     })
             }
             RawTypeofExpression::Conditional(expression) => {
-                let test = self.resolve(&expression.test);
                 let consequent = self.resolve(&expression.consequent);
                 let alternate = self.resolve(&expression.alternate);
-                self.resolve_conditional_expression(test, consequent, alternate)
+                Some(self.resolve_conditional_expression(consequent, alternate))
             }
             RawTypeofExpression::Destructure(expression) => {
                 if self.import_resolution.is_on_demand()
@@ -314,12 +313,9 @@ impl<'db> ResolutionCtx<'db, '_> {
                         result
                     }
                 }),
-            InferredTypeofExpression::Conditional(expression) => self
-                .resolve_conditional_expression(
-                    expression.test,
-                    expression.consequent,
-                    expression.alternate,
-                ),
+            InferredTypeofExpression::Conditional(expression) => Some(
+                self.resolve_conditional_expression(expression.consequent, expression.alternate),
+            ),
             InferredTypeofExpression::Destructure(expression) => {
                 self.resolve_destructure_field(expression.ty, &expression.destructure_field)
             }
@@ -366,22 +362,18 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
+    /// Returns the type of a conditional expression whose branches have the
+    /// types `consequent` and `alternate`: their union, whatever the test, as
+    /// TypeScript gives it. A branch of type `never`, such as a call to a
+    /// function that never returns, adds nothing, so `x ? 1 : fail()` is `1`.
+    /// TypeScript keeps both branches even when the test is always truthy or
+    /// always falsy, as `true ? 1 : "s"`, which is `1 | "s"`.
     fn resolve_conditional_expression(
-        &mut self,
-        test: InferredTypeData<'db>,
+        &self,
         consequent: InferredTypeData<'db>,
         alternate: InferredTypeData<'db>,
-    ) -> Option<InferredTypeData<'db>> {
-        let conditional = self.conditional_type(test);
-        if conditional.is_truthy() {
-            Some(consequent)
-        } else if conditional.is_falsy() {
-            Some(alternate)
-        } else {
-            conditional.is_inferred().then(|| {
-                InferredTypeData::union_from_types(self.db, Vec::from([consequent, alternate]))
-            })
-        }
+    ) -> InferredTypeData<'db> {
+        InferredTypeData::union_from_types(self.db, Vec::from([consequent, alternate]))
     }
 
     fn resolve_logical_and_expression(

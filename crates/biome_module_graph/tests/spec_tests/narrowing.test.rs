@@ -64,6 +64,28 @@ fn assert_variants<'db>(
     );
 }
 
+/// Formats each member of `ty` on one line, sorted, naming an interface by its
+/// name.
+fn variant_texts(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
+    let variants = match ty {
+        InferredTypeData::Union(union) => union.types(db).to_vec(),
+        _ => vec![ty],
+    };
+    let mut texts: Vec<_> = variants
+        .into_iter()
+        .map(|ty| match ty {
+            InferredTypeData::Interface(interface) => interface.name(db).to_string(),
+            ty => format_inferred_type(db, ty)
+                .lines()
+                .map(str::trim)
+                .collect::<Vec<_>>()
+                .join(" "),
+        })
+        .collect();
+    texts.sort();
+    texts
+}
+
 fn assert_no_flow_queries(db: &TestModuleDb, events: &[salsa::Event]) {
     for query in [
         "infer_flow_expression_type_impl",
@@ -1346,6 +1368,90 @@ fn logical_and_keeps_broad_number_as_its_falsy_part() {
         let ty = normalized_type_at(&db, module, SOURCE, marker, expression);
         assert_variants(&db, ty, expected, marker);
     }
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) types each conditional expression below
+// as the union of its branches (`narrowing-probes/fix-a/spec.ts` L5 to L19):
+// a test that can never be truthy, or never falsy, removes no branch, but a
+// branch of type `never` adds nothing, including a read of the tested
+// variable that the test leaves no value, which Biome reads as Unknown. The
+// `narrowed*` cases reach the expression with a narrowed test or branch, and
+// the others without.
+#[test]
+fn conditional_expressions_keep_both_branches() {
+    const SOURCE: &str = r#"
+        interface Foo { a: number }
+        declare function fail(): never;
+        function declaredInterface(x: Foo) { const r = /*declaredInterface*/x ? 1 : "s"; }
+        function declaredObject(x: object) { const r = /*declaredObject*/x ? 1 : "s"; }
+        function literalTrue() { const r = /*literalTrue*/true ? 1 : "s"; }
+        function literalFalse() { const r = /*literalFalse*/false ? 1 : "s"; }
+        function never(x: never) { const r = /*never*/x ? 1 : "s"; }
+        function narrowedInterface(x: Foo | undefined) { if (x !== undefined) { const r = /*narrowedInterface*/x ? 1 : "s"; } }
+        function narrowedObject(x: object | null) { if (x !== null) { const r = /*narrowedObject*/x ? 1 : "s"; } }
+        function narrowedBranch(x: Foo | null, y: string | null) { if (x !== null && y !== null) { const r = /*narrowedBranch*/x ? 1 : y; } }
+        function sameVariable(x: Foo) { const r = /*sameVariable*/x ? 1 : x; }
+        function narrowedSameVariable(x: Foo | null) { if (x) { const r = /*narrowedSameVariable*/x ? 1 : x; } }
+        function neverBranch(x: Foo) { const r = /*neverBranch*/x ? 1 : fail(); }
+        function sameVariableTruthy(x: null) { const r = /*sameVariableTruthy*/x ? x : 1; }
+        function parenthesized(x: Foo) { const r = /*parenthesized*/(x) ? 1 : (x); }
+        function otherVariable(x: Foo, y: Foo) { const r = /*otherVariable*/x ? 1 : y; }
+        function nullishBranch(x: Foo | null) { if (x) { const r = /*nullishBranch*/x ? x.a : undefined; } }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    let mismatches: Vec<_> = [
+        (
+            "declaredInterface",
+            r#"x ? 1 : "s""#,
+            &["number: 1", "string: s"][..],
+        ),
+        (
+            "declaredObject",
+            r#"x ? 1 : "s""#,
+            &["number: 1", "string: s"],
+        ),
+        (
+            "literalTrue",
+            r#"true ? 1 : "s""#,
+            &["number: 1", "string: s"],
+        ),
+        (
+            "literalFalse",
+            r#"false ? 1 : "s""#,
+            &["number: 1", "string: s"],
+        ),
+        ("never", r#"x ? 1 : "s""#, &["number: 1", "string: s"]),
+        (
+            "narrowedInterface",
+            r#"x ? 1 : "s""#,
+            &["number: 1", "string: s"],
+        ),
+        (
+            "narrowedObject",
+            r#"x ? 1 : "s""#,
+            &["number: 1", "string: s"],
+        ),
+        ("narrowedBranch", "x ? 1 : y", &["number: 1", "string"]),
+        ("sameVariable", "x ? 1 : x", &["number: 1"]),
+        ("narrowedSameVariable", "x ? 1 : x", &["number: 1"]),
+        ("neverBranch", "x ? 1 : fail()", &["number: 1"]),
+        ("sameVariableTruthy", "x ? x : 1", &["number: 1"]),
+        ("parenthesized", "(x) ? 1 : (x)", &["number: 1"]),
+        ("otherVariable", "x ? 1 : y", &["Foo", "number: 1"]),
+        (
+            "nullishBranch",
+            "x ? x.a : undefined",
+            &["number", "undefined"],
+        ),
+    ]
+    .into_iter()
+    .filter_map(|(marker, expression, expected)| {
+        let ty = normalized_type_at(&db, module, SOURCE, marker, expression);
+        let actual = variant_texts(&db, ty);
+        (actual != expected).then(|| format!("{marker}: expected {expected:?}, got {actual:?}"))
+    })
+    .collect();
+    assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
 }
 
 #[test]

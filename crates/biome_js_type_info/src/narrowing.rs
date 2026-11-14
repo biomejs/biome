@@ -1128,9 +1128,10 @@ fn predicate_match<'db>(
     let is_candidate_subtype =
         |resolve: &mut TypeResolver<'db, '_>| is_subtype(db, candidate, member, resolve);
     Some(match is_subtype(db, member, candidate, resolve) {
-        // Biome identifies a class by its contents and by the handle that
-        // names it. Two classes with the same contents and no handle, as in
-        // two namespaces of one module, may be two declarations, which
+        // Biome identifies a class by its contents, which include the scope
+        // it opens in its module, and by the handle that names it. Two
+        // classes with the same contents and no handle, as one class in each
+        // of two modules with equal scopes, may be two declarations, which
         // TypeScript tells apart when they have private members.
         Assignability::Assignable
             if member == candidate && is_class_instance_without_handle(db, member, resolve) =>
@@ -2505,6 +2506,7 @@ mod tests {
             Box::<[_]>::from(parents),
             members.into_boxed_slice(),
             Text::new_static("Shape"),
+            None,
         ))
     }
 
@@ -2521,6 +2523,7 @@ mod tests {
             members.into_boxed_slice(),
             Some(Text::new_static("K")),
             false,
+            None,
         ));
         InferredTypeData::instance_of(db, class, Box::default())
     }
@@ -2901,6 +2904,7 @@ mod tests {
             Box::from([member("k", InferredTypeData::Number)]),
             Some(Text::new_static("K")),
             false,
+            None,
         ));
         let ty = union(
             &db,
@@ -3207,6 +3211,7 @@ mod tests {
                 ty: string(&db, "c"),
             }]),
             Text::new_static("Index"),
+            None,
         ));
         let cases = [
             // No member has a unit property type.
@@ -3806,6 +3811,7 @@ mod tests {
             members.into_boxed_slice(),
             Some(Text::new_static(name)),
             false,
+            None,
         ))
     }
 
@@ -3940,6 +3946,7 @@ mod tests {
             Box::default(),
             Some(Text::new_static("Box")),
             false,
+            None,
         ));
         let has_instance = class(
             db,
@@ -4212,6 +4219,7 @@ mod tests {
             Box::<[_]>::from(parents),
             members.into_boxed_slice(),
             Text::new_static(name),
+            None,
         ))
     }
 

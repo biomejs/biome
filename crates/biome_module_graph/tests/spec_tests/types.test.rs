@@ -196,6 +196,68 @@ fn test_infer_module_types_aggregates_merged_namespace_members() {
     assert!(inferred.find_member_type(&db, merged, "second").is_some());
 }
 
+// TypeScript 7.0.2 (`tsc --strict`) merges namespaces of one name only when
+// one scope or one namespace declares them, so `A.N` has no `b` and `B.N` no
+// `a` (TS2339), while `M.N` has both members
+// (`narrowing-probes/fix-a/namespaces.ts` L7 to L12).
+#[test]
+fn test_infer_module_types_keeps_namespaces_of_one_name_in_different_scopes_apart() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            namespace A {
+                export namespace N {
+                    export const a = 1;
+                }
+            }
+
+            namespace B {
+                export namespace N {
+                    export const b = "s";
+                }
+            }
+
+            namespace M {
+                export namespace N {
+                    export const first = 1;
+                }
+            }
+
+            namespace M {
+                export namespace N {
+                    export const second = "s";
+                }
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let nested = |name: &str| {
+        let outer = inferred_binding_ty_by_name(&db, module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} type must be inferred"));
+        inferred
+            .find_member_type(&db, outer, "N")
+            .unwrap_or_else(|| panic!("{name}.N type must be inferred"))
+    };
+
+    let a = nested("A");
+    assert!(inferred.find_member_type(&db, a, "a").is_some());
+    assert!(inferred.find_member_type(&db, a, "b").is_none());
+
+    let b = nested("B");
+    assert!(inferred.find_member_type(&db, b, "b").is_some());
+    assert!(inferred.find_member_type(&db, b, "a").is_none());
+
+    let m = nested("M");
+    assert!(inferred.find_member_type(&db, m, "first").is_some());
+    assert!(inferred.find_member_type(&db, m, "second").is_some());
+}
+
 #[test]
 fn test_infer_module_types_resolves_record_index_signature_on_build() {
     let fs = MemoryFileSystem::default();

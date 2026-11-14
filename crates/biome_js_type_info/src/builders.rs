@@ -524,6 +524,7 @@ impl<'db> MergedType<'db> {
                     members.into_boxed_slice(),
                     None,
                     false,
+                    None,
                 )),
                 Box::default(),
             ),
@@ -534,6 +535,7 @@ impl<'db> MergedType<'db> {
                 Box::default(),
                 members.into_boxed_slice(),
                 Text::new_static("(merged)"),
+                None,
             )),
             Self::Namespace(members) => TypeData::Namespace(InternedNamespace::new(
                 db,
