@@ -51,3 +51,11 @@ class FetchServersMetrics extends React.Component {
       return children(this._fetchServerMetrics);
     }
   }
+
+class WidgetWithInternalAlias {
+    initial = (() => {
+        const self = this;
+        return () => self.count;
+    })();
+}
+

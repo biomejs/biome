@@ -58,6 +58,14 @@ class FetchServersMetrics extends React.Component {
     }
   }
 
+class WidgetWithInternalAlias {
+    initial = (() => {
+        const self = this;
+        return () => self.count;
+    })();
+}
+
+
 ```
 
 # Diagnostics
@@ -221,6 +229,33 @@ invalid.js:32:13 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━
        45 │ + ········.then(()·=>·this.setState({·isLoading:·false·}));
     47 46 │       }
     48 47 │   
+  
+
+```
+
+```
+invalid.js:57:15 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This aliasing of this is unnecessary.
+  
+    55 │ class WidgetWithInternalAlias {
+    56 │     initial = (() => {
+  > 57 │         const self = this;
+       │               ^^^^^^^^^^^
+    58 │         return () => self.count;
+    59 │     })();
+  
+  i Arrow functions inherits `this` from their enclosing scope.
+  
+  i Safe fix: Use this instead of an alias.
+  
+    55 55 │   class WidgetWithInternalAlias {
+    56 56 │       initial = (() => {
+    57    │ - ········const·self·=·this;
+    58    │ - ········return·()·=>·self.count;
+       57 │ + ········return·()·=>·this.count;
+    59 58 │       })();
+    60 59 │   }
   
 
 ```

@@ -11,7 +11,8 @@ use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
     AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, JsArrowFunctionExpression,
     JsAssignmentExpression, JsExpressionStatement, JsIdentifierBinding, JsIdentifierExpression,
-    JsThisExpression, JsVariableDeclaration, JsVariableDeclarator, JsVariableStatement, T,
+    JsPropertyClassMember, JsSyntaxNode, JsThisExpression, JsVariableDeclaration,
+    JsVariableDeclarator, JsVariableStatement, T, TsInitializedPropertySignatureClassMember,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::no_useless_this_alias::NoUselessThisAliasOptions;
@@ -86,11 +87,7 @@ impl Rule for NoUselessThisAlias {
             // Ignore destructuring
             return None;
         };
-        let this_scope = declarator
-            .syntax()
-            .ancestors()
-            .skip(1)
-            .find_map(AnyJsControlFlowRoot::cast)?;
+        let this_scope = find_this_scope(declarator.syntax())?;
         for write in id.all_writes(model) {
             let assign = JsAssignmentExpression::cast(write.syntax().parent()?)?;
             let assign_right = assign.right().ok()?.omit_parentheses();
@@ -104,12 +101,7 @@ impl Rule for NoUselessThisAlias {
             return None;
         }
         for reference in id.all_references(model) {
-            let current_this_scope = reference
-                .syntax()
-                .ancestors()
-                .skip(1)
-                .filter(|x| !JsArrowFunctionExpression::can_cast(x.kind()))
-                .find_map(AnyJsControlFlowRoot::cast)?;
+            let current_this_scope = find_this_scope(&reference.syntax())?;
             if this_scope != current_this_scope {
                 // The aliasing is required because they have not the same `this` scope.
                 return None;
@@ -189,4 +181,37 @@ impl Rule for NoUselessThisAlias {
             mutation,
         ))
     }
+}
+
+fn find_this_scope(syntax: &JsSyntaxNode) -> Option<JsSyntaxNode> {
+    let mut prev = syntax.clone();
+    for node in syntax.ancestors().skip(1) {
+        if JsArrowFunctionExpression::can_cast(node.kind()) {
+            prev = node;
+            continue;
+        }
+
+        if let Some(prop) = JsPropertyClassMember::cast_ref(&node) {
+            if let Some(value) = prop.value() {
+                if value.syntax() == &prev {
+                    return Some(node);
+                }
+            }
+        }
+
+        if let Some(prop) = TsInitializedPropertySignatureClassMember::cast_ref(&node) {
+            if let Ok(value) = prop.value() {
+                if value.syntax() == &prev {
+                    return Some(node);
+                }
+            }
+        }
+
+        if let Some(root) = AnyJsControlFlowRoot::cast_ref(&node) {
+            return Some(root.into_syntax());
+        }
+
+        prev = node;
+    }
+    None
 }
