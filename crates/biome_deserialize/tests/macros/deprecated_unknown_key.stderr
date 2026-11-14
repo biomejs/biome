@@ -1,0 +1,7 @@
+error: proc-macro derive panicked
+ --> tests/macros/deprecated_unknown_key.rs:3:19
+  |
+3 | #[derive(Default, Deserializable)]
+  |                   ^^^^^^^^^^^^^^
+  |
+  = help: message: Could not parse field attributes: Error("Unexpected attribute inside deprecated(): reason")

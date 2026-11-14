@@ -1,0 +1,5 @@
+error: failed to parse "location" attribute: expected parentheses
+ --> tests/macros/location_bracket.rs:5:15
+  |
+5 |     #[location[span]]
+  |               ^

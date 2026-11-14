@@ -17,7 +17,7 @@ serde      = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
 
 [build-dependencies]
-quote = "1.0.14"
+quote = { workspace = true }
 
 [features]
 schema = ["dep:schemars", "dep:serde_json", "serde"]

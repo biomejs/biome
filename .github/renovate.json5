@@ -43,6 +43,7 @@
         "cargo"
       ],
       "matchFileNames": [
+        "Cargo.toml",
         "crates/**",
         "xtask/**"
       ],

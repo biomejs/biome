@@ -34,6 +34,7 @@ smallvec            = { workspace = true, optional = true }
 # Enables the optional data formats, so that their tests run
 biome_deserialize        = { path = ".", features = ["yaml"] }
 biome_deserialize_macros = { path = "../biome_deserialize_macros" }
+trybuild                 = { workspace = true }
 
 [features]
 camino   = ["dep:camino"]
