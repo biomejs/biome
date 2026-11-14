@@ -130,11 +130,10 @@ fn can_convert_to_string_literal(node: &JsTemplateExpression) -> bool {
             AnyJsTemplateElement::JsTemplateChunkElement(chunk) => {
                 match chunk.template_chunk_token() {
                     Ok(token) => {
+                        let text = token.text_trimmed();
                         // if token text has any special character
-                        token
-                            .text_trimmed()
-                            .bytes()
-                            .any(|byte| matches!(byte, b'\n' | b'\'' | b'"'))
+                        text.bytes().any(|byte| matches!(byte, b'\n' | b'\'' | b'"'))
+                            || has_template_only_escape(text)
                     }
                     Err(_) => {
                         // if we found an error, then just return `true`, which means that this template literal can't be converted to
@@ -145,4 +144,17 @@ fn can_convert_to_string_literal(node: &JsTemplateExpression) -> bool {
             }
         }
     })
+}
+
+/// Returns `true` if the text escapes `$`, `{` or a backtick, as in `` `\${name}` ``.
+/// These escapes are only needed in a template literal, so they would become
+/// useless escapes in a string literal.
+fn has_template_only_escape(text: &str) -> bool {
+    let mut bytes = text.bytes();
+    while let Some(byte) = bytes.next() {
+        if byte == b'\\' && matches!(bytes.next(), Some(b'$' | b'{' | b'`')) {
+            return true;
+        }
+    }
+    false
 }

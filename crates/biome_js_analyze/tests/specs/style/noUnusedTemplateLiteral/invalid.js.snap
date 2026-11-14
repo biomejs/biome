@@ -16,6 +16,8 @@ function foo() { `use strict`; foo(); }
 var foo = `foo\\nbar`;
 var foo = `foo\\\nbar`;
 var foo = `foo\\\\\\\nbar`;
+var foo = `C:\\temp`;
+
 ```
 
 # Diagnostics
@@ -283,6 +285,7 @@ invalid.js:11:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━
   > 11 │ var foo = `foo\\\nbar`;
        │           ^^^^^^^^^^^^
     12 │ var foo = `foo\\\\\\\nbar`;
+    13 │ var foo = `C:\\temp`;
   
   i A template literal is only needed for interpolation or special-character handling. Without them, a regular string is simpler.
   
@@ -293,6 +296,7 @@ invalid.js:11:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━
     11    │ - var·foo·=·`foo\\\nbar`;
        11 │ + var·foo·=·"foo\\\nbar";
     12 12 │   var foo = `foo\\\\\\\nbar`;
+    13 13 │   var foo = `C:\\temp`;
   
 
 ```
@@ -306,6 +310,8 @@ invalid.js:12:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━
     11 │ var foo = `foo\\\nbar`;
   > 12 │ var foo = `foo\\\\\\\nbar`;
        │           ^^^^^^^^^^^^^^^^
+    13 │ var foo = `C:\\temp`;
+    14 │ 
   
   i A template literal is only needed for interpolation or special-character handling. Without them, a regular string is simpler.
   
@@ -315,6 +321,32 @@ invalid.js:12:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━
     11 11 │   var foo = `foo\\\nbar`;
     12    │ - var·foo·=·`foo\\\\\\\nbar`;
        12 │ + var·foo·=·"foo\\\\\\\nbar";
+    13 13 │   var foo = `C:\\temp`;
+    14 14 │   
+  
+
+```
+
+```
+invalid.js:13:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary template literal.
+  
+    11 │ var foo = `foo\\\nbar`;
+    12 │ var foo = `foo\\\\\\\nbar`;
+  > 13 │ var foo = `C:\\temp`;
+       │           ^^^^^^^^^^
+    14 │ 
+  
+  i A template literal is only needed for interpolation or special-character handling. Without them, a regular string is simpler.
+  
+  i Safe fix: Replace with string literal
+  
+    11 11 │   var foo = `foo\\\nbar`;
+    12 12 │   var foo = `foo\\\\\\\nbar`;
+    13    │ - var·foo·=·`C:\\temp`;
+       13 │ + var·foo·=·"C:\\temp";
+    14 14 │   
   
 
 ```
