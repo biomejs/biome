@@ -43,16 +43,149 @@ fn test_named_type_ids_are_sorted_and_deduplicated() {
         })
         .collect::<Vec<_>>();
     names.sort();
+    // The two declarations of `InterfaceType` merge into one type.
     assert_eq!(
         names,
-        [
-            "ClassType",
-            "InterfaceType",
-            "InterfaceType",
-            "ModuleType",
-            "NamespaceType",
-        ]
+        ["ClassType", "InterfaceType", "ModuleType", "NamespaceType"]
     );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) merges the interfaces of one name in one
+// scope into one type, and a class with them
+// (`narrowing-probes/fix-c1/spec/types.ts` L7 to L16 and
+// `narrowing-probes/fix-c1/spec/typeparams.ts` L8 and L11, as in
+// `narrowing-probes/merging/local.ts` L21, L24, L36, and L39). Every binding
+// below has the type that TypeScript gives it, unless a comment gives
+// TypeScript's type.
+#[test]
+fn test_infer_module_types_merges_interfaces_and_classes_of_one_name() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            class A { a = 1 }
+            class C { c = 3 }
+            interface K2 extends A { j: 1 } class K2 extends C { k = 1 }
+            declare const k2: K2;
+            export const interfaceMember = k2.j;
+            export const classMember = k2.k;
+            export const throughNew = new K2().j;
+            export const interfaceBaseMember = k2.a;
+            export const classBaseMember = k2.c;
+            interface G<T> { a: T } interface G<T> { b: T }
+            declare const g: G<string>;
+            export const genericFirst = g.a;
+            export const genericLast = g.b;
+            interface M1 { m(): string } interface M1 { m(x: number): number }
+            declare const m1: M1;
+            export const overloadWithoutArguments = m1.m();
+            export const overloadWithArgument = m1.m(1);
+            interface T1<T> { a: T } interface T1<U> { b: U }
+            declare const t1: T1<string>;
+            export const differentNames = t1.a;
+            interface S2<T> { a: T } interface S2<T, U = number> { b: U }
+            declare const s2: S2<string>;
+            export const prefixFirst = s2.a;
+            export const prefixDefault = s2.b;
+            interface S3 { a: 1 } interface S3<T> { b: T }
+            declare const s3: S3<string>;
+            export const omittedWithoutDefault = s3.a;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let binding = |name: &str| {
+        let ty = inferred_binding_ty_by_name(&db, module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} type must be inferred"));
+        normalize_type(&db, module, ty)
+    };
+
+    assert!(is_inferred_number_literal(
+        &db,
+        binding("interfaceMember"),
+        "1"
+    ));
+    // TypeScript: `number`. Biome doesn't widen the literal types of class
+    // fields.
+    assert!(is_inferred_number_literal(&db, binding("classMember"), "1"));
+    assert!(is_inferred_number_literal(&db, binding("throughNew"), "1"));
+    // TypeScript: `number`, as above.
+    assert!(is_inferred_number_literal(
+        &db,
+        binding("interfaceBaseMember"),
+        "1"
+    ));
+    // TypeScript: `number`, as above.
+    assert!(is_inferred_number_literal(
+        &db,
+        binding("classBaseMember"),
+        "3"
+    ));
+    assert_eq!(binding("genericFirst"), InferredTypeData::String);
+    assert_eq!(binding("genericLast"), InferredTypeData::String);
+    assert_eq!(
+        binding("overloadWithoutArguments"),
+        InferredTypeData::String
+    );
+    // TypeScript: `number`. The first declaration of a method gives all its
+    // overloads, where TypeScript puts those of later declarations first.
+    assert_eq!(binding("overloadWithArgument"), InferredTypeData::String);
+    // TypeScript: `any`. The declarations name their type parameters
+    // differently (TS2428).
+    assert_eq!(binding("differentNames"), InferredTypeData::Unknown);
+    // A declaration can list the first type parameters of the merged type
+    // when each one it leaves out has a default.
+    assert_eq!(binding("prefixFirst"), InferredTypeData::String);
+    assert_eq!(binding("prefixDefault"), InferredTypeData::Number);
+    // TypeScript: `1`. The first declaration leaves out a type parameter
+    // without a default (TS2428).
+    assert_eq!(binding("omittedWithoutDefault"), InferredTypeData::Unknown);
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) merges a class and an interface of one
+// name, so a module that imports the name sees the members of both, whether
+// the interface or the class comes first.
+#[test]
+fn test_infer_module_types_imports_merged_classes_and_interfaces() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/shapes.ts".into(),
+        r#"
+            export class K { k = "k" }
+            export interface K { j: number }
+            export interface L { j: number }
+            export class L { k = "k" }
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import { K, L } from "./shapes";
+            declare const k: K;
+            declare const l: L;
+            export const classFirst = k.j;
+            export const interfaceFirst = l.j;
+            export const throughNew = new L().j;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/shapes.ts", "/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    for name in ["classFirst", "interfaceFirst", "throughNew"] {
+        let ty = inferred_binding_ty_by_name(&db, module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} type must be inferred"));
+        assert!(
+            is_inferred_number(&db, normalize_type(&db, module, ty)),
+            "{name}"
+        );
+    }
 }
 #[test]
 fn test_infer_module_types_poison_unresolved_union_variants() {

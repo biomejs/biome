@@ -28,7 +28,10 @@ uses the syntax tree and semantic model to record three inputs:
 
 - `raw_types`: declaration and structural type data owned by the module;
 - `raw_expressions`: expression ranges mapped to type references;
-- `raw_binding_types`: binding ranges mapped to type references.
+- `raw_binding_types`: binding ranges mapped to type references. The
+  bindings of interfaces of one name in one scope, and of a class with them,
+  all map to one merged type, as TypeScript merges these declarations (see
+  `JsModuleInfoCollector::merge_type_declarations`).
 
 A raw reference identifies another entry in the module table, a global type, or
 a name or import that still needs resolution. It is not an inferred type.

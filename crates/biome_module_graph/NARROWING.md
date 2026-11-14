@@ -169,10 +169,10 @@ These limits apply to every *Supported* and *Partial* row below:
     so a getter may have one; a `static readonly` field; an element of an
     array under `as const`, which Biome types as a tuple whose elements
     aren't readonly; or a property that the type of the object inherits
-    through `extends`. Another declaration of an interface or a class in the
-    same module, or a module augmentation, can declare an inherited property
-    on the type itself without `readonly`, which Biome doesn't see, as the
-    limits below describe for other tests.
+    through `extends`, including the `extends` clause of an interface
+    merged into a class. A module augmentation can declare an inherited
+    property on the type itself without `readonly`, which Biome doesn't see,
+    as the limits below describe for other tests.
   - An object along it is a generic, or a primitive, as for `s.length`.
   - The declared type of an object along it has a member that doesn't
     declare the property readonly, even where narrowing has removed that
@@ -371,17 +371,23 @@ These limits apply to every *Supported* and *Partial* row below:
   `declare module "./shapes" { interface X extends Base {} }` in one module,
   `x: X | Sub`, and `class Sub extends Base {}`, `x instanceof Base` gives
   `Sub`, where TypeScript gives `X | Sub`.
-- A class and an interface with the same name in one module, which
-  TypeScript merges into one type, have only the type of the last of the two
-  declarations in Biome, so `instanceof` doesn't see the `extends` clause of
-  the other one. So with `class N extends C {}`, then
-  `interface N extends A {}`, `x: N | D`, and `class D extends C { d = 1 }`,
-  `x instanceof C` gives `D`, where TypeScript gives `N | D`. Two interfaces
-  with the same name in one module have only the members of the last one, so
-  with `interface M { m: 1 }`, then `interface M { n: 2 }`,
-  `x: M | { m: 1; y: 2 } | string` gives `{ m: 1; y: 2 }` in the true branch
-  of `isM(x)` with `v is { m: 1 }`, where TypeScript gives
-  `M | { m: 1; y: 2 }`.
+- Interfaces with the same name in one scope merge into one type, as in
+  TypeScript, and so do a class and the interfaces with its name: the type
+  has the members and the `extends` clauses of every declaration, and the
+  first declaration of a property decides its type and whether it is
+  readonly. A method that several declarations declare takes all its
+  overloads from the first one, where TypeScript puts the overloads of later
+  declarations first, so with `interface M { m(): string }`, then
+  `interface M { m(x: number): number }`, and `x: M`, `x.m(1)` gives
+  `string`, where TypeScript gives `number`. Interfaces with the same name in two blocks of
+  one namespace, as in `namespace N { export interface I { a: 1 } }` and
+  `namespace N { export interface I { b: 2 } }`, don't merge yet: `N.I` is
+  the first of them. A declaration in a `declare global` block merges only
+  with those in other such blocks. Declarations whose type parameters
+  differ, which TypeScript reports (TS2428) unless a declaration lists only
+  the first ones of another and leaves out ones with defaults, give
+  Unknown, and so do interfaces that give a class a construct signature.
+  Two classes with the same name (TS2300) keep their own types.
 - Falsy and `typeof` tests compare an object type with the types that give
   primitives and functions their members, such as `String` and `Function`,
   from TypeScript's ES2015 library files. Members that the project adds to

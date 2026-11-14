@@ -2199,6 +2199,7 @@ fn global_symbol() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("toString")),
@@ -2375,6 +2376,7 @@ fn global_object() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("constructor")),
@@ -2626,6 +2628,7 @@ fn global_function() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("apply")),
@@ -2803,6 +2806,7 @@ fn global_string() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("toString")),
@@ -3056,6 +3060,7 @@ fn global_boolean() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("valueOf")),
@@ -3109,6 +3114,7 @@ fn global_number() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("toString")),
@@ -3586,6 +3592,7 @@ fn global_date() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("toString")),
@@ -3919,6 +3926,7 @@ fn global_reg_exp() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("exec")),
@@ -4246,6 +4254,7 @@ fn global_error() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("name")),
@@ -4307,6 +4316,7 @@ fn global_eval_error() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: Some(crate::globals::GLOBAL_ERROR_ID.into()),
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Constructor,
@@ -4356,6 +4366,7 @@ fn global_range_error() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: Some(crate::globals::GLOBAL_ERROR_ID.into()),
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Constructor,
@@ -4405,6 +4416,7 @@ fn global_reference_error() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: Some(crate::globals::GLOBAL_ERROR_ID.into()),
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Constructor,
@@ -4454,6 +4466,7 @@ fn global_syntax_error() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: Some(crate::globals::GLOBAL_ERROR_ID.into()),
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Constructor,
@@ -4503,6 +4516,7 @@ fn global_type_error() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: Some(crate::globals::GLOBAL_ERROR_ID.into()),
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Constructor,
@@ -4552,6 +4566,7 @@ fn global_uri_error() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: Some(crate::globals::GLOBAL_ERROR_ID.into()),
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Constructor,
@@ -4764,6 +4779,7 @@ fn global_array() -> crate::TypeData {
         type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(0)).into()]),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("length")),
@@ -5070,6 +5086,7 @@ fn global_promise() -> crate::TypeData {
         type_parameters: Box::new([crate::globals::GLOBAL_T_ID.into()]),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Constructor,
@@ -5300,6 +5317,7 @@ fn global_array_buffer() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
@@ -5418,6 +5436,7 @@ fn global_data_view() -> crate::TypeData {
         type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(1)).into()]),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static("buffer")),
@@ -5545,6 +5564,7 @@ fn global_int8_array() -> crate::TypeData {
         type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(1)).into()]),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
@@ -5798,6 +5818,7 @@ fn global_uint8_array() -> crate::TypeData {
         type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(1)).into()]),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
@@ -6051,6 +6072,7 @@ fn global_uint8_clamped_array() -> crate::TypeData {
         type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(1)).into()]),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
@@ -6304,6 +6326,7 @@ fn global_int16_array() -> crate::TypeData {
         type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(1)).into()]),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
@@ -6557,6 +6580,7 @@ fn global_uint16_array() -> crate::TypeData {
         type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(1)).into()]),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
@@ -6810,6 +6834,7 @@ fn global_int32_array() -> crate::TypeData {
         type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(1)).into()]),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
@@ -7063,6 +7088,7 @@ fn global_uint32_array() -> crate::TypeData {
         type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(1)).into()]),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
@@ -7316,6 +7342,7 @@ fn global_float32_array() -> crate::TypeData {
         type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(1)).into()]),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
@@ -7569,6 +7596,7 @@ fn global_float64_array() -> crate::TypeData {
         type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(1)).into()]),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
@@ -7912,6 +7940,7 @@ fn global_intl_collator() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("compare")),
@@ -8174,6 +8203,7 @@ fn global_intl_number_format() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("format")),
@@ -8389,6 +8419,7 @@ fn global_intl_date_time_format() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("format")),
@@ -8463,6 +8494,7 @@ fn global_map() -> crate::TypeData {
         ]),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("clear")),
@@ -8642,6 +8674,7 @@ fn global_weak_map() -> crate::TypeData {
         ]),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("delete")),
@@ -8713,6 +8746,7 @@ fn global_set() -> crate::TypeData {
         type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(0)).into()]),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("add")),
@@ -8862,6 +8896,7 @@ fn global_weak_set() -> crate::TypeData {
         type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(1)).into()]),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("add")),
@@ -9684,6 +9719,7 @@ fn global_aggregate_error() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: Some(crate::globals::GLOBAL_ERROR_ID.into()),
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("errors")),
@@ -9787,6 +9823,7 @@ fn global_suppressed_error() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: Some(crate::globals::GLOBAL_ERROR_ID.into()),
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("error")),
@@ -9844,6 +9881,7 @@ fn global_disposable_stack() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(
@@ -9923,6 +9961,7 @@ fn global_async_disposable_stack() -> crate::TypeData {
         type_parameters: Box::default(),
         extends: None,
         implements: Box::default(),
+        interface_bases: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static(

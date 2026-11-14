@@ -1,0 +1,77 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidMergedDeclarations.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// Interfaces of one name merge into one type, and a class with them, as in
+// TypeScript, so a condition on a member of any of the declarations sees the
+// member's type.
+
+interface Config {
+	handler: () => void;
+}
+
+interface Config {
+	name: string;
+}
+
+function first(config: Config) {
+	if (config.handler) {
+		return 1;
+	}
+}
+
+interface Job {
+	run: () => void;
+}
+
+class Job {
+	id = 1;
+}
+
+function classMember(job: Job) {
+	if (job.run) {
+		return 1;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidMergedDeclarations.ts:15:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    14 │ function first(config: Config) {
+  > 15 │ 	if (config.handler) {
+       │ 	    ^^^^^^^^^^^^^^
+    16 │ 		return 1;
+    17 │ 	}
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
+  
+
+```
+
+```
+invalidMergedDeclarations.ts:29:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    28 │ function classMember(job: Job) {
+  > 29 │ 	if (job.run) {
+       │ 	    ^^^^^^^
+    30 │ 		return 1;
+    31 │ 	}
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
+  
+
+```

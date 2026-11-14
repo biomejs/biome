@@ -1863,11 +1863,11 @@ mod tests {
         ARRAY_ID_GLOBAL_TYPE_ID, ERROR_ID_GLOBAL_TYPE_ID, OBJECT_ID_GLOBAL_TYPE_ID,
     };
     use crate::interned_types::{
-        InternedClass, InternedConstructor, InternedFunction, InternedGenericTypeParameter,
-        InternedInterface, InternedIntersection, InternedObject, InternedTuple,
-        InternedTypeInstance, InternedTypeOperatorType, InternedTypeofType, InternedUnion,
-        LocalTypeHandle, LocalTypeId, ModuleKey, ReturnType, TupleElementType, TypeMember,
-        TypeMemberKind,
+        ClassParents, InternedClass, InternedConstructor, InternedFunction,
+        InternedGenericTypeParameter, InternedInterface, InternedIntersection, InternedObject,
+        InternedTuple, InternedTypeInstance, InternedTypeOperatorType, InternedTypeofType,
+        InternedUnion, LocalTypeHandle, LocalTypeId, ModuleKey, ReturnType, TupleElementType,
+        TypeMember, TypeMemberKind,
     };
     use crate::literal::NumberLiteral;
     use salsa::plumbing::AsId;
@@ -2519,7 +2519,7 @@ mod tests {
         let class = InferredTypeData::Class(InternedClass::new(
             db,
             Box::default(),
-            None,
+            ClassParents::default(),
             Box::default(),
             members.into_boxed_slice(),
             Some(Text::new_static("K")),
@@ -2900,7 +2900,7 @@ mod tests {
         let class = InferredTypeData::Class(InternedClass::new(
             &db,
             Box::default(),
-            None,
+            ClassParents::default(),
             Box::default(),
             Box::from([member("k", InferredTypeData::Number)]),
             Some(Text::new_static("K")),
@@ -3807,7 +3807,10 @@ mod tests {
         InferredTypeData::Class(InternedClass::new(
             db,
             Box::default(),
-            parent,
+            ClassParents {
+                extends: parent,
+                interface_bases: Box::default(),
+            },
             Box::default(),
             members.into_boxed_slice(),
             Some(Text::new_static(name)),
@@ -3942,7 +3945,7 @@ mod tests {
         let generic_class = InferredTypeData::Class(InternedClass::new(
             db,
             Box::from([generic]),
-            None,
+            ClassParents::default(),
             Box::default(),
             Box::default(),
             Some(Text::new_static("Box")),
@@ -4486,6 +4489,119 @@ mod tests {
                     "{positive}"
                 );
             }
+        }
+    }
+
+    /// Returns an instance of the class `name` that interfaces merged into it
+    /// give `members` and `interface_bases`, without a parent class.
+    fn merged_class_instance<'db>(
+        db: &'db TestDb,
+        name: &'static str,
+        interface_bases: &[InferredTypeData<'db>],
+        members: Vec<TypeMember<'db>>,
+    ) -> InferredTypeData<'db> {
+        let class = InferredTypeData::Class(InternedClass::new(
+            db,
+            Box::default(),
+            ClassParents {
+                extends: None,
+                interface_bases: Box::<[_]>::from(interface_bases),
+            },
+            Box::default(),
+            members.into_boxed_slice(),
+            Some(Text::new_static(name)),
+            false,
+            None,
+        ));
+        InferredTypeData::instance_of(db, class, Box::default())
+    }
+
+    #[test]
+    fn class_instances_inherit_from_the_bases_of_merged_interfaces() {
+        let db = &TestDb::default();
+        let base = named_interface(db, "Base", &[], vec![member("b", InferredTypeData::Number)]);
+        let a = class(db, "A", None, vec![member("a", InferredTypeData::Number)]);
+        let c = class(db, "C", None, vec![member("c", InferredTypeData::Number)]);
+        let (ia, ic) = (instance(db, a), instance(db, c));
+        // `class N { k: number }` with `interface N extends Base {}`.
+        let n = merged_class_instance(
+            db,
+            "N",
+            &[base],
+            vec![member("k", InferredTypeData::Number)],
+        );
+        // `class M {}` with `interface M extends A {}`.
+        let m = merged_class_instance(db, "M", &[ia], vec![]);
+        let other = object(db, vec![member("o", InferredTypeData::Number)]);
+        let target = object(db, vec![member("b", InferredTypeData::Number)]);
+        let both = object(
+            db,
+            vec![
+                member("b", InferredTypeData::Number),
+                member("z", InferredTypeData::Number),
+            ],
+        );
+
+        // `in` finds the property on the interface base.
+        assert_eq!(narrow_in(db, union(db, &[n, other]), "b", false), other);
+        // `instanceof` derives the class from the interface base.
+        assert_eq!(narrow_instance(db, union(db, &[m, ic]), a, true), m);
+        assert_eq!(narrow_instance(db, union(db, &[m, ic]), a, false), ic);
+        // A type predicate finds the member on the interface base.
+        let ty = union(db, &[n, both, InferredTypeData::String]);
+        assert_eq!(
+            narrow_predicate(db, ty, target, true),
+            union(db, &[n, both])
+        );
+        assert_eq!(
+            narrow_predicate(db, ty, target, false),
+            InferredTypeData::String
+        );
+    }
+
+    #[test]
+    fn typeof_function_keeps_classes_that_merged_interfaces_make_callable() {
+        let db = &TestDb::default();
+        let callable = named_interface(
+            db,
+            "Callable",
+            &[],
+            vec![TypeMember {
+                kind: TypeMemberKind::CallSignature,
+                ty: method(db, "call", InferredTypeData::VoidKeyword),
+            }],
+        );
+        // `class F {}` with `interface F extends Callable {}`.
+        let through_base = merged_class_instance(db, "F", &[callable], vec![]);
+        // `class G { g: number }` with `interface G { (): void }`.
+        let own = merged_class_instance(
+            db,
+            "G",
+            &[],
+            vec![
+                member("g", InferredTypeData::Number),
+                TypeMember {
+                    kind: TypeMemberKind::CallSignature,
+                    ty: method(db, "call", InferredTypeData::VoidKeyword),
+                },
+            ],
+        );
+        // No string has a call signature.
+        assert_eq!(
+            primitive_can_satisfy(db, TypeofKind::String, through_base, &mut |ty| ty),
+            Assignability::NotAssignable
+        );
+        for instance in [through_base, own] {
+            let ty = union(db, &[instance, InferredTypeData::String]);
+            assert_eq!(
+                narrow_type(
+                    db,
+                    ty,
+                    NarrowingPredicate::Typeof(TypeofKind::Function),
+                    true
+                ),
+                instance
+            );
         }
     }
 }

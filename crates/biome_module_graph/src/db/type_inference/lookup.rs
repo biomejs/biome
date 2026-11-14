@@ -6,11 +6,11 @@ use crate::db::queries::{
 use crate::{ModuleDb, module_for_key};
 use biome_js_type_info::TypeOperator;
 use biome_js_type_info::interned_types::{
-    InternedExtendsType as InferredExtendsType, InternedMappedType as InferredMappedType,
-    Literal as InferredLiteral, LocalTypeHandle, ReturnType as InferredReturnType,
-    TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
-    TypeMember as InferredTypeMember, TypeMemberKind as InferredTypeMemberKind,
-    TypeSubstitution as InferredTypeSubstitution,
+    ClassParents, InternedExtendsType as InferredExtendsType,
+    InternedMappedType as InferredMappedType, Literal as InferredLiteral, LocalTypeHandle,
+    ReturnType as InferredReturnType, TupleElementType as InferredTupleElementType,
+    TypeData as InferredTypeData, TypeMember as InferredTypeMember,
+    TypeMemberKind as InferredTypeMemberKind, TypeSubstitution as InferredTypeSubstitution,
 };
 use rustc_hash::{FxHashSet, FxHasher};
 use std::hash::{Hash, Hasher};
@@ -512,7 +512,26 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
 
         match ty {
             InferredTypeData::Class(class) => {
-                if let Some(mut extends) = class.extends(db) {
+                let ClassParents {
+                    extends,
+                    interface_bases,
+                } = class.parents(db);
+                // Interface bases give only instance-side members, which a
+                // lookup of static members never reaches. They are pushed
+                // first, so the parent class, as in TypeScript's base types of
+                // a class, is searched before them.
+                if matches!(
+                    state.mode,
+                    MemberLookupMode::Any | MemberLookupMode::Instance
+                ) {
+                    pending.extend(
+                        interface_bases
+                            .iter()
+                            .rev()
+                            .map(|ty| state.child(*ty, state.collect_result)),
+                    );
+                }
+                if let Some(mut extends) = *extends {
                     if matches!(
                         state.mode,
                         MemberLookupMode::Any | MemberLookupMode::Class | MemberLookupMode::Value

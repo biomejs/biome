@@ -13,9 +13,9 @@ use crate::db::type_inference::{
 use crate::module_graph::ModuleInfoKind;
 use crate::{ModuleDb, module_for_key};
 use biome_js_type_info::{
-    RawTypeData, TypeReference, TypeResolverLevel, global_types,
+    Class, RawTypeData, TypeReference, TypeResolverLevel, global_types,
     interned_types::{
-        CallArgumentType as InferredCallArgumentType,
+        CallArgumentType as InferredCallArgumentType, ClassParents,
         FunctionParameter as InferredFunctionParameter, InternedConstructor as InferredConstructor,
         InternedFunction as InferredFunction, InternedMergedReference as InferredMergedReference,
         InternedTuple as InferredTuple, InternedTypeInstance as InferredTypeInstance,
@@ -1413,9 +1413,11 @@ impl<'db> ArgumentTypeCompatibility<'db> {
                     }) {
                         return Some(true);
                     }
-                    if let Some(extends) = class.extends(db) {
-                        pending.push(extends);
-                    }
+                    let ClassParents {
+                        extends,
+                        interface_bases,
+                    } = class.parents(db);
+                    pending.extend(extends.iter().chain(interface_bases.iter()).copied());
                 }
                 InferredTypeData::InstanceOf(instance) => pending.push(instance.ty(db)),
                 InferredTypeData::Local(local) => {
@@ -1423,9 +1425,11 @@ impl<'db> ArgumentTypeCompatibility<'db> {
                         return Some(true);
                     }
                     resolved_known_type = true;
-                    if let Some(extends) = raw_local_class_extends(db, local) {
-                        pending.push(InferredTypeData::Local(extends));
-                    }
+                    pending.extend(
+                        raw_local_class_parents(db, local)
+                            .into_iter()
+                            .map(InferredTypeData::Local),
+                    );
                 }
                 InferredTypeData::BigInt
                 | InferredTypeData::Boolean
@@ -1488,9 +1492,11 @@ impl<'db> ArgumentTypeCompatibility<'db> {
 
             match ty {
                 InferredTypeData::Class(class) => {
-                    if let Some(extends) = class.extends(db) {
-                        pending.push(extends);
-                    }
+                    let ClassParents {
+                        extends,
+                        interface_bases,
+                    } = class.parents(db);
+                    pending.extend(extends.iter().chain(interface_bases.iter()).copied());
                 }
                 InferredTypeData::InstanceOf(instance) => pending.push(instance.ty(db)),
                 InferredTypeData::Local(local) => {
@@ -1650,9 +1656,7 @@ fn raw_local_extends_class_name<'db>(
         if raw_local_class_name_matches(db, local, parameter_name) {
             return true;
         }
-        if let Some(extends) = raw_local_class_extends(db, local) {
-            pending.push(extends);
-        }
+        pending.extend(raw_local_class_parents(db, local));
     }
 
     false
@@ -1679,19 +1683,36 @@ fn raw_local_class_name_matches<'db>(
         .is_some_and(|name| name.text() == expected_name)
 }
 
-fn raw_local_class_extends<'db>(
+/// Returns the handles of the parents of the raw class behind `local` that
+/// its module's table resolves: its parent class, then its interface bases.
+fn raw_local_class_parents<'db>(
     db: &'db dyn ModuleDb,
     local: InferredLocalTypeHandle<'db>,
-) -> Option<InferredLocalTypeHandle<'db>> {
+) -> Vec<InferredLocalTypeHandle<'db>> {
     let module_key = local.module(db);
-    let current = module_for_key(db, module_key)?;
+    let Some(current) = module_for_key(db, module_key) else {
+        return Vec::new();
+    };
     let ModuleInfoKind::Js(js_info) = current.kind(db) else {
-        return None;
+        return Vec::new();
     };
-    let RawTypeData::Class(class) = js_info.raw_types.get(local.type_id(db).index())? else {
-        return None;
+    let Some(RawTypeData::Class(class)) = js_info.raw_types.get(local.type_id(db).index()) else {
+        return Vec::new();
     };
-    local_handle_from_reference(db, module_key, class.extends.as_ref()?)
+    let Class {
+        name: _,
+        type_parameters: _,
+        extends,
+        implements: _,
+        interface_bases,
+        members: _,
+        scope_id: _,
+    } = class.as_ref();
+    extends
+        .iter()
+        .chain(interface_bases.iter())
+        .filter_map(|reference| local_handle_from_reference(db, module_key, reference))
+        .collect()
 }
 
 fn local_handle_from_reference<'db>(

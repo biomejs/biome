@@ -1,8 +1,9 @@
 use std::hash::Hash;
 
 use crate::interned_types::{
-    InternedClass, InternedFunction, InternedInterface, InternedIntersection, InternedNamespace,
-    InternedObject, InternedUnion, Literal, TypeData, TypeDb, TypeMember, TypeMemberKind,
+    ClassParents, InternedClass, InternedFunction, InternedInterface, InternedIntersection,
+    InternedNamespace, InternedObject, InternedUnion, Literal, TypeData, TypeDb, TypeMember,
+    TypeMemberKind,
 };
 use crate::type_relation::intersect_primitives;
 use crate::{ObjectKind, Path};
@@ -519,7 +520,7 @@ impl<'db> MergedType<'db> {
                 TypeData::Class(InternedClass::new(
                     db,
                     Box::default(),
-                    None,
+                    ClassParents::default(),
                     Box::default(),
                     members.into_boxed_slice(),
                     None,

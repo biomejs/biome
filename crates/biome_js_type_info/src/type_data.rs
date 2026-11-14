@@ -529,6 +529,18 @@ pub struct Class {
     /// Interfaces being implemented by this class.
     pub implements: Box<[TypeReference]>,
 
+    /// The types that the `extends` clauses of the interfaces merged into the
+    /// class name, in source order, as `A` for `interface N extends A {}`
+    /// next to `class N {}`. TypeScript merges a class with the interfaces of
+    /// its name in its scope.
+    ///
+    /// Unlike [`Self::extends`], which names the parent class, a value, these
+    /// are instance types, as the `extends` clauses of an interface are: the
+    /// instances of the class inherit their members, and `instanceof` counts
+    /// the class as derived from them. The members that the interfaces
+    /// declare follow the class's own in [`Self::members`].
+    pub interface_bases: Box<[TypeReference]>,
+
     /// Class members.
     pub members: Box<[TypeMember]>,
 

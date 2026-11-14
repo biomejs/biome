@@ -392,6 +392,7 @@ impl TypeData {
                             implements.types(),
                         )
                     }),
+                    interface_bases: Box::default(),
                     members: TypeMember::collect_class_members(collector, scope_id, decl.members())
                         .into_boxed_slice(),
                     scope_id: collector.scope_for_node(decl.syntax()),
@@ -1040,6 +1041,7 @@ impl TypeData {
             implements: decl.implements_clause().map_or_default(|implements| {
                 TypeReference::types_from_ts_type_list(collector, scope_id, implements.types())
             }),
+            interface_bases: Box::default(),
             members: TypeMember::members_from_class_member_list(
                 collector,
                 scope_id,
@@ -1072,6 +1074,7 @@ impl TypeData {
             implements: decl.implements_clause().map_or_default(|implements| {
                 TypeReference::types_from_ts_type_list(collector, scope_id, implements.types())
             }),
+            interface_bases: Box::default(),
             members: TypeMember::members_from_class_member_list(
                 collector,
                 scope_id,

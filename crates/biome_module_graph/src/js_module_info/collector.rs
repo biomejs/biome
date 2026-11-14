@@ -2,18 +2,18 @@ use super::flow::{FlowRootScanner, ModuleFlow};
 use crate::css_module_info::CssClassReference;
 use std::{borrow::Cow, sync::Arc};
 
-use biome_js_semantic::{Reference, ScopeId, SemanticModel, TsBindingReference};
+use biome_js_semantic::{BindingId, Reference, ScopeId, SemanticModel, TsBindingReference};
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsDeclaration,
     AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause, JsArrowFunctionExpression,
     JsAssignmentExpression, JsCatchDeclaration, JsForVariableDeclaration, JsFormalParameter,
-    JsLanguage, JsRestParameter, JsSyntaxNode, JsVariableDeclaration, TsInferType, TsMappedType,
-    TsModuleDeclaration, TsTypeParameter, inner_string_text,
+    JsLanguage, JsRestParameter, JsSyntaxNode, JsVariableDeclaration, TsGlobalDeclaration,
+    TsInferType, TsMappedType, TsModuleDeclaration, TsTypeParameter, inner_string_text,
 };
 use biome_js_type_info::{
-    FunctionParameter, FunctionParameterBinding, GenericTypeParameter, RawTypeCollector,
-    RawTypeData, RawTypeId, TypeData, TypeId, TypeImportQualifier, TypeMember, TypeMemberKind,
-    TypeReference, TypeStore, UnionCollector, resolved::InferredLocalTypeId,
+    Class, FunctionParameter, FunctionParameterBinding, GenericTypeParameter, Interface,
+    RawTypeCollector, RawTypeData, RawTypeId, TypeData, TypeId, TypeImportQualifier, TypeMember,
+    TypeMemberKind, TypeReference, TypeStore, UnionCollector, resolved::InferredLocalTypeId,
 };
 use biome_rowan::{AstNode, SyntaxKindSet, Text, TextRange, TokenText};
 use indexmap::IndexMap;
@@ -418,6 +418,33 @@ impl JsModuleInfoCollector {
             }
         }
 
+        for scope in semantic_model.scopes() {
+            let scope_range = scope.range();
+            for set in scope.merged_type_declarations() {
+                // TypeScript merges a declaration in a `declare global` block
+                // into the global type, not into the module's declarations
+                // of the name, while Biome binds both in the module's scope.
+                let (global, local): (Vec<_>, Vec<_>) = set.into_iter().partition(|id| {
+                    semantic_model
+                        .as_binding_by_range(self.bindings[id.index()].range)
+                        .is_some_and(|binding| {
+                            binding
+                                .syntax()
+                                .ancestors()
+                                .find(|node| TsGlobalDeclaration::can_cast(node.kind()))
+                                .is_some_and(|global| {
+                                    scope_range.contains_range(global.text_trimmed_range())
+                                })
+                        })
+                });
+                for set in [local, global] {
+                    if set.len() > 1 {
+                        self.merge_type_declarations(&set);
+                    }
+                }
+            }
+        }
+
         // A set of same-name function overloads becomes an object with one call
         // signature per declaration, placed on the binding that name resolution
         // returns for the set (its last one) so a call site can select among them.
@@ -439,6 +466,145 @@ impl JsModuleInfoCollector {
         for (representative, signatures) in carriers {
             let ty = self.reference_to_owned_data(TypeData::object_with_members(signatures.into()));
             self.bindings[representative].ty = ty;
+        }
+    }
+
+    /// Gives the bindings of `set`, interface and class declarations of one
+    /// name in one scope in source order, the one type that TypeScript merges
+    /// them into, so whichever binding name resolution or an export picks, in
+    /// a type or a value position, names it.
+    ///
+    /// Interfaces merge into an interface with the `extends` clauses and
+    /// members of all of them in source order. A class and interfaces merge
+    /// into the class, with the class's members first, and the `extends`
+    /// clauses of the interfaces as its [`Class::interface_bases`]. The
+    /// merged type has the type parameters of the declaration that lists the
+    /// most of them. Member lookup takes the
+    /// first member of a name, so the first declaration of a property
+    /// decides its type and whether it is readonly, as in TypeScript, but
+    /// the first declaration of a method also gives all its overloads, where
+    /// TypeScript puts the overloads of later declarations first. The merged
+    /// type keeps the scope of the class or the first interface, which tells
+    /// it apart from an equal set in another scope.
+    ///
+    /// The bindings keep their own types when the set has two classes, which
+    /// TypeScript rejects (TS2300), or when a declaration has no collected
+    /// type. They get Unknown when a declaration's type parameters aren't the
+    /// first ones of the merged type, by name, or leave out one without a
+    /// default (TS2428), and when an interface gives a class a construct
+    /// signature, which Biome would take as the class's constructor.
+    fn merge_type_declarations(&mut self, set: &[BindingId]) {
+        let mut type_ids = Vec::with_capacity(set.len());
+        for id in set {
+            let TypeReference::Resolved(RawTypeId::Local(type_id)) = self.bindings[id.index()].ty
+            else {
+                return;
+            };
+            type_ids.push(type_id);
+        }
+
+        let mut class = None;
+        let mut interfaces = Vec::with_capacity(type_ids.len());
+        for type_id in &type_ids {
+            match self.types.get_by_id(*type_id) {
+                TypeData::Class(declaration) if class.is_none() => class = Some(declaration),
+                TypeData::Interface(declaration) => interfaces.push(declaration),
+                _ => return,
+            }
+        }
+        let declared_type_parameters: Vec<_> = class
+            .map(|class| &class.type_parameters)
+            .into_iter()
+            .chain(
+                interfaces
+                    .iter()
+                    .map(|interface| &interface.type_parameters),
+            )
+            .collect();
+        let Some(type_parameters) =
+            declared_type_parameters
+                .iter()
+                .copied()
+                .reduce(|longest, next| {
+                    if next.len() > longest.len() {
+                        next
+                    } else {
+                        longest
+                    }
+                })
+        else {
+            return;
+        };
+        let generic = |reference: &TypeReference| match reference {
+            TypeReference::Resolved(RawTypeId::Local(id)) => match self.types.get_by_id(*id) {
+                TypeData::Generic(generic) => Some(generic),
+                _ => None,
+            },
+            _ => None,
+        };
+        // As in TypeScript, a declaration can list a prefix of the type
+        // parameters of the merged type, when each one it leaves out has a
+        // default, as in `interface S {}` next to `class S<T = {}> {}`.
+        let declares_type_parameters = |declared: &[TypeReference]| {
+            declared.len() <= type_parameters.len()
+                && declared
+                    .iter()
+                    .zip(type_parameters.iter())
+                    .all(|(own, merged)| {
+                        generic(own)
+                            .zip(generic(merged))
+                            .is_some_and(|(own, merged)| own.name == merged.name)
+                    })
+                && type_parameters[declared.len()..]
+                    .iter()
+                    .all(|merged| generic(merged).is_some_and(|merged| merged.default.is_known()))
+        };
+        let is_unmergeable = !declared_type_parameters
+            .iter()
+            .all(|declared| declares_type_parameters(declared))
+            || class.is_some()
+                && interfaces
+                    .iter()
+                    .flat_map(|interface| interface.members.iter())
+                    .any(TypeMember::is_constructor);
+
+        let ty = if is_unmergeable {
+            TypeReference::unknown()
+        } else {
+            let extends = interfaces
+                .iter()
+                .flat_map(|interface| interface.extends.iter().cloned());
+            let interface_members = interfaces
+                .iter()
+                .flat_map(|interface| interface.members.iter().cloned());
+            let merged = match (class, interfaces.first()) {
+                (Some(class), _) => TypeData::Class(Box::new(Class {
+                    name: class.name.clone(),
+                    type_parameters: type_parameters.clone(),
+                    extends: class.extends.clone(),
+                    implements: class.implements.clone(),
+                    interface_bases: extends.collect(),
+                    members: class
+                        .members
+                        .iter()
+                        .cloned()
+                        .chain(interface_members)
+                        .collect(),
+                    scope_id: class.scope_id,
+                })),
+                (None, Some(first)) => TypeData::Interface(Box::new(Interface {
+                    name: first.name.clone(),
+                    type_parameters: type_parameters.clone(),
+                    extends: extends.collect(),
+                    members: interface_members.collect(),
+                    scope_id: first.scope_id,
+                })),
+                (None, None) => return,
+            };
+            self.reference_to_owned_data(merged)
+        };
+        for id in set {
+            self.bindings[id.index()].ty = ty.clone();
         }
     }
 

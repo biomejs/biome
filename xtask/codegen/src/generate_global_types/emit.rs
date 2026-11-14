@@ -286,6 +286,7 @@ fn render_class(class: &LoweredClass) -> String {
             type_parameters: {type_parameters},
             extends: {extends},
             implements: {implements},
+            interface_bases: Box::default(),
             members: Box::new([{members}]),
             scope_id: None,
         }}))",

@@ -532,7 +532,15 @@ impl<'db> TypeData<'db> {
             {
                 return Some(true);
             }
-            class = match class.extends(db) {
+            let ClassParents {
+                extends,
+                interface_bases,
+            } = class.parents(db);
+            // The instances have the members that the interface bases give.
+            if !interface_bases.is_empty() {
+                return Some(true);
+            }
+            class = match *extends {
                 None => return Some(false),
                 Some(Self::Class(base)) => base,
                 Some(Self::InstanceOf(instance)) => match instance.ty(db) {
@@ -1173,16 +1181,30 @@ impl<'db> TypeData<'db> {
             raw::TypeData::Undefined => Self::Undefined,
             raw::TypeData::Conditional => Self::Conditional,
             raw::TypeData::ImportNamespace(_) => Self::Unknown,
-            raw::TypeData::Class(class) => Self::Class(InternedClass::new(
-                db,
-                convert_references(db, &class.type_parameters, resolve_reference),
-                class.extends.as_ref().map(&mut *resolve_reference),
-                convert_references(db, &class.implements, resolve_reference),
-                convert_type_members(db, &class.members, resolve_reference, resolve_member),
-                class.name.clone(),
-                is_builtin,
-                class.scope_id,
-            )),
+            raw::TypeData::Class(class) => {
+                let raw::Class {
+                    name,
+                    type_parameters,
+                    extends,
+                    implements,
+                    interface_bases,
+                    members,
+                    scope_id,
+                } = class.as_ref();
+                Self::Class(InternedClass::new(
+                    db,
+                    convert_references(db, type_parameters, resolve_reference),
+                    ClassParents {
+                        extends: extends.as_ref().map(&mut *resolve_reference),
+                        interface_bases: convert_references(db, interface_bases, resolve_reference),
+                    },
+                    convert_references(db, implements, resolve_reference),
+                    convert_type_members(db, members, resolve_reference, resolve_member),
+                    name.clone(),
+                    is_builtin,
+                    *scope_id,
+                ))
+            }
             raw::TypeData::Constructor(constructor) => Self::Constructor(InternedConstructor::new(
                 db,
                 convert_references(db, &constructor.type_parameters, resolve_reference),
@@ -1372,8 +1394,13 @@ impl<'db> TypeDataSlots<'db> {
         let mut result = Self::new(parent);
         match parent {
             TypeData::Class(class) => {
+                let ClassParents {
+                    extends,
+                    interface_bases,
+                } = class.parents(db);
                 result.slots.extend_from_slice(class.type_parameters(db));
-                result.slots.extend(class.extends(db));
+                result.slots.extend(*extends);
+                result.slots.extend_from_slice(interface_bases);
                 result.slots.extend_from_slice(class.implements(db));
                 result.push_type_members_slots(class.members(db));
             }
@@ -1704,7 +1731,16 @@ impl<'db> TypeDataSlotReplacements<'db> {
             TypeData::Class(class) => TypeData::Class(InternedClass::new(
                 db,
                 self.take_types(class.type_parameters(db).len())?,
-                self.take_optional_type(class.extends(db))?,
+                {
+                    let ClassParents {
+                        extends,
+                        interface_bases,
+                    } = class.parents(db);
+                    ClassParents {
+                        extends: self.take_optional_type(*extends)?,
+                        interface_bases: self.take_types(interface_bases.len())?,
+                    }
+                },
                 self.take_types(class.implements(db).len())?,
                 self.rebuild_type_members(class.members(db))?,
                 class.name(db).clone(),
@@ -2780,8 +2816,7 @@ impl<'db> InternedFunction<'db> {
 #[derive(Debug)]
 pub struct InternedClass<'db> {
     pub type_parameters: Box<[TypeData<'db>]>,
-    #[returns(copy)]
-    pub extends: Option<TypeData<'db>>,
+    pub parents: ClassParents<'db>,
     pub implements: Box<[TypeData<'db>]>,
     pub members: Box<[TypeMember<'db>]>,
     pub name: Option<Text>,
@@ -2792,6 +2827,25 @@ pub struct InternedClass<'db> {
     /// values. See [`crate::type_data::Class::scope_id`].
     #[returns(copy)]
     pub scope_id: Option<ScopeId>,
+}
+
+/// The types that a class inherits from, as [`InternedClass::parents`]
+/// gives them.
+///
+/// The parents are grouped so that every reader of them destructures this
+/// struct and decides about each kind of parent: a reader that ignores the
+/// interface bases of a class reports its inherited members as missing.
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq, salsa::SalsaValue)]
+pub struct ClassParents<'db> {
+    /// The parent class, as in `class N extends C {}`: a value, whose
+    /// instances give the instance-side members, and whose static members the
+    /// class inherits.
+    pub extends: Option<TypeData<'db>>,
+    /// The instance types that the `extends` clauses of the interfaces merged
+    /// into the class name, as `A` for `interface N extends A {}` next to
+    /// `class N {}`, which give only instance-side members. See
+    /// [`crate::type_data::Class::interface_bases`].
+    pub interface_bases: Box<[TypeData<'db>]>,
 }
 
 #[salsa::interned]
@@ -3900,7 +3954,10 @@ mod tests {
             TypeData::Class(InternedClass::new(
                 &db,
                 boxed([s.next()]),
-                Some(s.next()),
+                ClassParents {
+                    extends: Some(s.next()),
+                    interface_bases: boxed([s.next(), s.next()]),
+                },
                 boxed([s.next()]),
                 boxed([named_member(s)]),
                 Some(text("Class")),

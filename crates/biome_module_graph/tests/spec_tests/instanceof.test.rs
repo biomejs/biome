@@ -493,3 +493,68 @@ fn instanceof_tells_classes_with_the_same_contents_apart() {
         ],
     );
 }
+
+// TypeScript 7.0.2 (`tsc --strict`) merges a class and the interfaces of its
+// name in one scope into one type, whose bases are the class's `extends`
+// clause and the interfaces' ones, and merges interfaces of one name with all
+// their `extends` clauses. It gives every read below the expected type
+// (`narrowing-probes/fix-c1/spec/instanceof.ts` L12 to L24, as in
+// `narrowing-probes/m3-l6/exposure.ts` L19, L20, and L22,
+// `narrowing-probes/m3-l6/merged.ts` L13 and L14, and
+// `narrowing-probes/merging/local.ts` L12, L14, and L18). An `else` branch
+// that no value reaches is `never` in TypeScript, which Biome reads as
+// Unknown.
+#[test]
+fn instanceof_follows_the_extends_clauses_of_every_merged_declaration() {
+    assert_reads(
+        r#"
+        class N extends C {} interface N extends A {}
+        interface N2 extends A {} class N2 extends C {}
+        class D2 extends C { d2 = 1 }
+        class M { m = 1 } interface M extends A {}
+        interface I3 extends A {} interface I3 { x: 1 } class D3 extends A { d = 1 }
+        interface I2 { x: 1 } interface I2 extends A {}
+        namespace Q3 { export class K { k = 1 } export interface K { j: 1 } }
+        namespace Q4 { export class K { k = 1 } export interface K { j: 1 } }
+        function classFirst(x: N | D2) { if (x instanceof C) /*classFirst*/x; else /*classFirstElse*/x; }
+        function interfaceBase(x: N | D2) { if (x instanceof A) /*interfaceBase*/x; else /*interfaceBaseElse*/x; }
+        function interfaceFirst(x: N2 | B) { if (x instanceof A) /*interfaceFirst*/x; else /*interfaceFirstElse*/x; }
+        function interfaceFirstClass(x: N2 | A) { if (x instanceof C) /*interfaceFirstClass*/x; else /*interfaceFirstClassElse*/x; }
+        function both(x: N | M) { if (x instanceof C) /*both*/x; else /*bothElse*/x; }
+        function firstDeclaration(x: I3 | D3) { if (x instanceof A) /*firstDeclaration*/x; else /*firstDeclarationElse*/x; }
+        function lastDeclaration(x: I2 | C) { if (x instanceof A) /*lastDeclaration*/x; else /*lastDeclarationElse*/x; }
+        function namespaces(x: Q3.K | string) { if (x instanceof Q4.K) /*namespaces*/x; else /*namespacesElse*/x; }
+        function sameNamespace(x: Q3.K | string) { if (x instanceof Q3.K) /*sameNamespace*/x; else /*sameNamespaceElse*/x; }
+        function bothBases(x: N | M) { if (x instanceof A) /*bothBases*/x; else /*bothBasesElse*/x; }
+        function baseAndClass(x: N | B) { if (x instanceof A) /*baseAndClass*/x; else /*baseAndClassElse*/x; }
+        "#,
+        &[
+            ("classFirst", "x", &["instanceof D2", "instanceof N"]),
+            ("classFirstElse", "x", &["unknown"]),
+            ("interfaceBase", "x", &["instanceof N"]),
+            ("interfaceBaseElse", "x", &["instanceof D2"]),
+            ("interfaceFirst", "x", &["instanceof B", "instanceof N2"]),
+            ("interfaceFirstElse", "x", &["unknown"]),
+            ("interfaceFirstClass", "x", &["instanceof N2"]),
+            ("interfaceFirstClassElse", "x", &["instanceof A"]),
+            ("both", "x", &["instanceof N"]),
+            ("bothElse", "x", &["instanceof M"]),
+            ("firstDeclaration", "x", &["I3", "instanceof D3"]),
+            ("firstDeclarationElse", "x", &["unknown"]),
+            ("lastDeclaration", "x", &["I2"]),
+            ("lastDeclarationElse", "x", &["instanceof C"]),
+            // `Q4.K`, which TypeScript relates to `Q3.K` by its members.
+            // Equal merged declarations in two namespaces are two classes, as
+            // `instanceof_tells_classes_with_the_same_contents_apart`
+            // describes, so the read keeps its type.
+            ("namespaces", "x", &["instanceof K", "string"]),
+            ("namespacesElse", "x", &["instanceof K", "string"]),
+            ("sameNamespace", "x", &["instanceof K"]),
+            ("sameNamespaceElse", "x", &["string"]),
+            ("bothBases", "x", &["instanceof M", "instanceof N"]),
+            ("bothBasesElse", "x", &["unknown"]),
+            ("baseAndClass", "x", &["instanceof B", "instanceof N"]),
+            ("baseAndClassElse", "x", &["unknown"]),
+        ],
+    );
+}

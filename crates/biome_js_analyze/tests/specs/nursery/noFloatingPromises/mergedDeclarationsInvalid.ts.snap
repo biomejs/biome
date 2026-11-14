@@ -1,0 +1,98 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: mergedDeclarationsInvalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// Interfaces of one name merge into one type, and a class with them, as in
+// TypeScript, so a method of any of the declarations returns its promise.
+
+interface Job {
+	run(): Promise<void>;
+}
+
+interface Job {
+	name: string;
+}
+
+declare const job: Job;
+job.run();
+
+class Task {
+	id = 1;
+}
+
+interface Task {
+	start(): Promise<void>;
+}
+
+new Task().start();
+
+interface Step {
+	finish(): Promise<void>;
+}
+
+class Step {
+	id = 1;
+}
+
+declare const step: Step;
+step.finish();
+
+```
+
+# Diagnostics
+```
+mergedDeclarationsInvalid.ts:14:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    13 │ declare const job: Job;
+  > 14 │ job.run();
+       │ ^^^^^^^^^^
+    15 │ 
+    16 │ class Task {
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+mergedDeclarationsInvalid.ts:24:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    22 │ }
+    23 │ 
+  > 24 │ new Task().start();
+       │ ^^^^^^^^^^^^^^^^^^^
+    25 │ 
+    26 │ interface Step {
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+mergedDeclarationsInvalid.ts:35:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    34 │ declare const step: Step;
+  > 35 │ step.finish();
+       │ ^^^^^^^^^^^^^^
+    36 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

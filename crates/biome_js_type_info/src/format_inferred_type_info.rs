@@ -1,11 +1,11 @@
 use crate::format_type_info::FormatTypeOptions;
 use crate::interned_types::{
-    CallArgumentType, ConstructorParameter, FunctionParameter, FunctionParameterBinding,
-    InternedClass, InternedConstructor, InternedFunction, InternedGenericTypeParameter,
-    InternedInterface, InternedLiteral, InternedMergedReference, InternedModule, InternedNamespace,
-    InternedObject, InternedTuple, InternedTypeInstance, InternedTypeofExpression, Literal,
-    NamedFunctionParameter, PatternFunctionParameter, ReturnType, TupleElementType, TypeData,
-    TypeDb, TypeMember, TypeMemberKind, TypeofExpression,
+    CallArgumentType, ClassParents, ConstructorParameter, FunctionParameter,
+    FunctionParameterBinding, InternedClass, InternedConstructor, InternedFunction,
+    InternedGenericTypeParameter, InternedInterface, InternedLiteral, InternedMergedReference,
+    InternedModule, InternedNamespace, InternedObject, InternedTuple, InternedTypeInstance,
+    InternedTypeofExpression, Literal, NamedFunctionParameter, PatternFunctionParameter,
+    ReturnType, TupleElementType, TypeData, TypeDb, TypeMember, TypeMemberKind, TypeofExpression,
 };
 use crate::interned_types::{InternedMappedType, MappedTypeKeys};
 use crate::{DestructureField, MappedTypeModifier};
@@ -533,11 +533,31 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for InternedClass<'db> {
                 Ok(())
             }
         });
+        let ClassParents {
+            extends,
+            interface_bases,
+        } = self.parents(db);
         let extends = format_with(|f| {
-            if let Some(extends) = self.extends(db) {
+            if let Some(extends) = extends {
                 write!(f, [extends])
             } else {
                 write!(f, [token("none")])
+            }
+        });
+        // Printed only for a class that interfaces merge into.
+        let interface_bases = format_with(|f| {
+            if interface_bases.is_empty() {
+                Ok(())
+            } else {
+                write!(
+                    f,
+                    [
+                        token("interface_bases:"),
+                        space(),
+                        FmtInferredTypes(interface_bases),
+                        hard_line_break()
+                    ]
+                )
             }
         });
         write!(
@@ -557,6 +577,7 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for InternedClass<'db> {
                     space(),
                     FmtInferredTypes(self.implements(db)),
                     hard_line_break(),
+                    interface_bases,
                     token("type_args:"),
                     space(),
                     FmtInferredTypes(self.type_parameters(db)),
