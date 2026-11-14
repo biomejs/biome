@@ -11208,6 +11208,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useTopLevelRequire": {
+					"description": "Require require() calls to be placed at the top level of the module.\nSee https://biomejs.dev/linter/rules/use-top-level-require",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseTopLevelRequireConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useUnaryMinus": {
 					"description": "Enforce the use of the unary minus operator over multiplying or dividing by -1.\nSee https://biomejs.dev/linter/rules/use-unary-minus",
 					"anyOf": [
@@ -20013,6 +20020,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseTopLevelRequireOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseTopLevelRequireOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseTrimStartEndOptions": {
 			"type": "object",
 			"properties": {
@@ -26093,6 +26109,16 @@
 			]
 		},
 		"UseTopLevelRegexOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseTopLevelRequireConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseTopLevelRequireOptions" }
+			]
+		},
+		"UseTopLevelRequireOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

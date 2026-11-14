@@ -4323,6 +4323,11 @@ export interface Nursery {
 	 */
 	useTopLevelHeading?: UseTopLevelHeadingConfiguration;
 	/**
+	 * Require require() calls to be placed at the top level of the module.
+	 * See https://biomejs.dev/linter/rules/use-top-level-require
+	 */
+	useTopLevelRequire?: UseTopLevelRequireConfiguration;
+	/**
 	 * Enforce the use of the unary minus operator over multiplying or dividing by -1.
 	 * See https://biomejs.dev/linter/rules/use-unary-minus
 	 */
@@ -7543,6 +7548,9 @@ export type UseTanstackQueryStableQueryClientConfiguration =
 export type UseTopLevelHeadingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTopLevelHeadingOptions;
+export type UseTopLevelRequireConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTopLevelRequireOptions;
 export type UseUnaryMinusConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUnaryMinusOptions;
@@ -11221,6 +11229,10 @@ export interface RuleWithUseTopLevelHeadingOptions {
 	level: RulePlainConfiguration;
 	options?: UseTopLevelHeadingOptions;
 }
+export interface RuleWithUseTopLevelRequireOptions {
+	level: RulePlainConfiguration;
+	options?: UseTopLevelRequireOptions;
+}
 export interface RuleWithUseUnaryMinusOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -14268,6 +14280,7 @@ export type UseTailwindVariablesShorthandOptions = {};
 export type UseTanstackQueryInfiniteQueryPropertyOrderOptions = {};
 export type UseTanstackQueryStableQueryClientOptions = {};
 export type UseTopLevelHeadingOptions = {};
+export type UseTopLevelRequireOptions = {};
 export type UseUnaryMinusOptions = {};
 export type UseValidCharacterComparisonOptions = {};
 export interface UseValidTestTitleOptions {
@@ -16255,6 +16268,7 @@ export type Category =
 	| "lint/nursery/useTanstackQueryInfiniteQueryPropertyOrder"
 	| "lint/nursery/useTanstackQueryStableQueryClient"
 	| "lint/nursery/useTopLevelHeading"
+	| "lint/nursery/useTopLevelRequire"
 	| "lint/nursery/useUnaryMinus"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"

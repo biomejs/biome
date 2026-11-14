@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+const a = require('a') as typeof import('a');
+const b = require('b') satisfies unknown;
+const c = require('c')!;
+const d = <any>require('d');
+
+```
