@@ -791,6 +791,10 @@ fn resolve_target_value(
 /// directories from `base_dir` upwards.
 ///
 /// If the `resolve_types` option is set, `type_roots` are searched as well.
+///
+/// A package in `type_roots` or `node_modules/@types` is skipped when it can't
+/// be resolved, whatever the error. A package that ships its own types may
+/// still have a deprecated stub `@types` package without declarations.
 fn resolve_dependency(
     specifier: &str,
     base_dir: &Utf8Path,
@@ -801,10 +805,8 @@ fn resolve_dependency(
 
     for type_root in options.type_roots.explicit_roots() {
         let package_path = join_package_name(&base_dir.join(type_root), package_name);
-        match resolve_package_path(&package_path, subpath, fs, options) {
-            Ok(path) => return Ok(path),
-            Err(ResolveError::NotFound) => { /* continue */ }
-            Err(error) => return Err(error),
+        if let Ok(path) = resolve_package_path(&package_path, subpath, fs, options) {
+            return Ok(path);
         }
 
         // FIXME: This is an incomplete approximation of how resolving inside
@@ -842,10 +844,8 @@ fn resolve_dependency(
         if options.resolve_types_in_node_modules() {
             let package_path = join_package_name(&node_module_path.join("@types"), package_name);
 
-            match resolve_package_path(&package_path, subpath, fs, options) {
-                Ok(path) => return Ok(path),
-                Err(ResolveError::NotFound) => { /* continue */ }
-                Err(error) => return Err(error),
+            if let Ok(path) = resolve_package_path(&package_path, subpath, fs, options) {
+                return Ok(path);
             }
         }
 
