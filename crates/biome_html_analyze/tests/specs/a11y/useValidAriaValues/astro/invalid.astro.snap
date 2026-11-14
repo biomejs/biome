@@ -14,6 +14,10 @@ expression: invalid.astro
 <!-- invalid tristate value -->
 <span aria-checked="test">some text</span>
 
+<button type="button" aria-pressed=`invalid`>Button</button>
+<button type="button" aria-pressed=`\${state}`>Button</button>
+<button type="button" aria-pressed="${state}">Button</button>
+
 ```
 
 # Diagnostics
@@ -48,10 +52,78 @@ invalid.astro:9:7 lint/a11y/useValidAriaValues ━━━━━━━━━━━
    > 9 │ <span aria-checked="test">some text</span>
        │       ^^^^^^^^^^^^^^^^^^^
     10 │ 
+    11 │ <button type="button" aria-pressed=`invalid`>Button</button>
   
   i Use a valid value for the aria-checked attribute according to the WAI-ARIA specification.
   
   i The only supported values for the aria-checked property are:
+  
+  - false
+  - true
+  - mixed
+  
+
+```
+
+```
+invalid.astro:11:23 lint/a11y/useValidAriaValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of the ARIA attribute aria-pressed is not correct.
+  
+     9 │ <span aria-checked="test">some text</span>
+    10 │ 
+  > 11 │ <button type="button" aria-pressed=`invalid`>Button</button>
+       │                       ^^^^^^^^^^^^^^^^^^^^^^
+    12 │ <button type="button" aria-pressed=`\${state}`>Button</button>
+    13 │ <button type="button" aria-pressed="${state}">Button</button>
+  
+  i Use a valid value for the aria-pressed attribute according to the WAI-ARIA specification.
+  
+  i The only supported values for the aria-pressed property are:
+  
+  - false
+  - true
+  - mixed
+  
+
+```
+
+```
+invalid.astro:12:23 lint/a11y/useValidAriaValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of the ARIA attribute aria-pressed is not correct.
+  
+    11 │ <button type="button" aria-pressed=`invalid`>Button</button>
+  > 12 │ <button type="button" aria-pressed=`\${state}`>Button</button>
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ <button type="button" aria-pressed="${state}">Button</button>
+    14 │ 
+  
+  i Use a valid value for the aria-pressed attribute according to the WAI-ARIA specification.
+  
+  i The only supported values for the aria-pressed property are:
+  
+  - false
+  - true
+  - mixed
+  
+
+```
+
+```
+invalid.astro:13:23 lint/a11y/useValidAriaValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of the ARIA attribute aria-pressed is not correct.
+  
+    11 │ <button type="button" aria-pressed=`invalid`>Button</button>
+    12 │ <button type="button" aria-pressed=`\${state}`>Button</button>
+  > 13 │ <button type="button" aria-pressed="${state}">Button</button>
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+  
+  i Use a valid value for the aria-pressed attribute according to the WAI-ARIA specification.
+  
+  i The only supported values for the aria-pressed property are:
   
   - false
   - true
