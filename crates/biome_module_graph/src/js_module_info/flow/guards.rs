@@ -257,7 +257,8 @@ impl<'a> GuardFunctions<'a> {
     ///
     /// Returns `None` unless `function` is a supported guard. A supported guard
     /// is a local function declaration, or an arrow or function expression that
-    /// initializes a variable. Nothing reassigns it, and it is not a generator.
+    /// initializes a variable and returns a type predicate, not an assertion.
+    /// Nothing reassigns it, and it is not a generator.
     /// Its tested parameter is named and is not a rest parameter. That
     /// parameter has no default value, because a default replaces an
     /// `undefined` argument. A target type must be able to resolve to a
@@ -324,6 +325,13 @@ impl<'a> GuardFunctions<'a> {
                 declaration.parameters().ok()?
             }
             AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
+                // TypeScript ignores an assertion whose callee is a variable
+                // without a type annotation (TS2775). An annotated variable
+                // never gets here, because `guard_signature` does not accept
+                // its collected type.
+                if contract.asserts {
+                    return None;
+                }
                 match declarator.initializer()?.expression().ok()? {
                     AnyJsExpression::JsArrowFunctionExpression(arrow) => {
                         match arrow.parameters().ok()? {
