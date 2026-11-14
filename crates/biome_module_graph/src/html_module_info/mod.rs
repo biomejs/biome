@@ -5,7 +5,7 @@ use crate::{ImportPathMap, ModuleDb, ModuleInfo, ResolutionMode, resolve_module_
 use biome_css_syntax::TextRange;
 use biome_languages::css::EmbeddingStyleApplicability;
 use biome_resolver::ResolvedSpecifier;
-use biome_rowan::{Text, TokenText};
+use biome_rowan::Text;
 use indexmap::IndexMap;
 use indexmap::IndexSet;
 use std::collections::BTreeSet;
@@ -117,7 +117,7 @@ pub struct HtmlModuleInfoInner {
     /// Collected by walking all `CssClassSelector` nodes in the embedded CSS
     /// ASTs (already parsed by the workspace server — no re-parsing needed).
     ///
-    /// Each `TokenText` represents a single class name (e.g., "header" from `.header`).
+    /// Each entry represents a single class name (e.g., "header" from `.header`).
     pub style_classes: IndexSet<CssClassDefinition>,
 
     /// CSS class references from `class="..."` attributes within this HTML file.
@@ -135,11 +135,11 @@ pub struct HtmlModuleInfoInner {
 
 impl HtmlModuleInfoInner {
     /// Returns CSS classes defined in `global` definitions
-    pub(crate) fn get_global_styles(&self) -> IndexMap<TextRange, TokenText> {
+    pub(crate) fn get_global_styles(&self) -> IndexMap<TextRange, Text> {
         self.style_classes
             .iter()
             .filter(|declaration| declaration.applicability.is_global())
-            .map(|c| (c.range, c.name.clone()))
+            .map(|c| (c.document_range(), c.name.clone()))
             .collect()
     }
 }

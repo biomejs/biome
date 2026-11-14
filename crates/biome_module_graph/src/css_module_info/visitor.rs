@@ -1,12 +1,12 @@
 use crate::css_module_info::{
-    CssImport, CssImports, CssModuleInfo, TailwindImport, TailwindStylesheet,
+    CssImport, CssImports, CssModuleInfo, TailwindImport, TailwindStylesheet, decoded_class_name,
 };
 use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
 use biome_css_syntax::{
     AnyCssImportUrl, AnyCssRoot, CssClassSelector, CssImportAtRule, CssLanguage,
     TwCustomVariantAtRule, TwThemeAtRule, TwUtilityAtRule,
 };
-use biome_rowan::{AstNode, SyntaxKindSet, Text, TextRange, TokenText, WalkEvent};
+use biome_rowan::{AstNode, SyntaxKindSet, Text, TextRange, WalkEvent};
 use indexmap::IndexMap;
 
 const VISITED_KINDS: SyntaxKindSet<CssLanguage> = AnyCssImportUrl::KIND_SET
@@ -28,7 +28,7 @@ impl CssModuleVisitor {
 
     pub(crate) fn visit(mut self) -> CssModuleInfo {
         let mut imports = CssImports::default();
-        let mut classes: IndexMap<TextRange, TokenText> = IndexMap::default();
+        let mut classes: IndexMap<TextRange, Text> = IndexMap::default();
         let mut tailwind = TailwindStylesheet::default();
         let mut tailwind_imports = Vec::new();
         // Tracks nesting depth inside `:global(...)` pseudo-class selectors.
@@ -92,19 +92,16 @@ impl CssModuleVisitor {
         )
     }
 
-    /// Extracts the class name from a `CssClassSelector` and inserts the
-    /// `TokenText` into the set.
-    ///
-    /// Each token represents a single class name (e.g., "header" from `.header`).
-    fn visit_class_selector(node: CssClassSelector, classes: &mut IndexMap<TextRange, TokenText>) {
+    /// Inserts the decoded class name of a `CssClassSelector` (e.g., "header"
+    /// from `.header`), keyed by the range of its name token without the dot.
+    fn visit_class_selector(node: CssClassSelector, classes: &mut IndexMap<TextRange, Text>) {
         if let Ok(name) = node.name()
             && let Some(name) = name.as_css_custom_identifier()
             && let Ok(token) = name.value_token()
         {
-            // Store the range of the class name token (without the dot)
             classes
                 .entry(token.text_trimmed_range())
-                .or_insert_with(|| token.token_text_trimmed());
+                .or_insert_with(|| decoded_class_name(&token));
         }
     }
 

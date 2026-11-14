@@ -52,6 +52,9 @@ export default function App() {
 
 			{/* State pseudo-class — .link is the class name (:hover doesn't add a new class) */}
 			<a className="link">Link</a>
+
+			{/* Escaped class names */}
+			<div className="foo+bar md:flex 10col">Escaped</div>
 		</div>
 	);
 }

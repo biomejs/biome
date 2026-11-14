@@ -75,6 +75,12 @@ expression: invalid.css
 	opacity: 0.5;
 }
 
+/* Escaped: .unused\:x is never referenced, reported with its source spelling */
+
+.unused\:x {
+	color: red;
+}
+
 ```
 
 # Diagnostics
@@ -431,6 +437,29 @@ invalid.css:68:8 lint/nursery/noUnusedClasses ━━━━━━━━━━━�
        │        ^^^^^^^
     69 │ 	opacity: 0.5;
     70 │ }
+  
+  i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
+  
+  i Either use this class somewhere or remove the selector.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:74:1 lint/nursery/noUnusedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class unused\:x is not referenced in any HTML or JSX file.
+  
+    72 │ /* Escaped: .unused\:x is never referenced, reported with its source spelling */
+    73 │ 
+  > 74 │ .unused\:x {
+       │ ^^^^^^^^^^
+    75 │ 	color: red;
+    76 │ }
   
   i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
   

@@ -1,3 +1,4 @@
 .btn { padding: 8px; }
 .primary { color: blue; }
 .container { max-width: 1200px; }
+.foo\+bar, .md\:flex, .\31 0col { color: blue; }
