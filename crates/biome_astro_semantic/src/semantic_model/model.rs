@@ -5,6 +5,7 @@
 //! embedded syntax tree.
 
 use super::table::{Table, TableId};
+use biome_js_syntax::unescape_js_identifier;
 use biome_languages::JsFileSource;
 use biome_rowan::{TextRange, TextSize, TokenText};
 use enumflags2::{BitFlags, bitflags};
@@ -80,12 +81,16 @@ impl From<bool> for Tri {
 /// A group of names resolved under the same rules.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Namespace {
-    /// Runtime and type-level JavaScript bindings.
-    Binding,
+    /// Runtime values, including component tags.
+    Value,
+    /// TypeScript type positions.
+    Type,
+    /// TypeScript namespace qualifiers.
+    Namespace,
 }
 
 impl Namespace {
-    pub(crate) const COUNT: usize = 1;
+    pub(crate) const COUNT: usize = 3;
 
     pub(crate) fn index(self) -> usize {
         self as usize
@@ -149,6 +154,7 @@ pub(crate) struct SnippetData {
     pub(crate) offset: TextSize,
     pub(crate) source: JsFileSource,
     pub(crate) host: SnippetHost,
+    pub(crate) scope: Option<ScopeId>,
 }
 
 /// What a scope belongs to.
@@ -156,6 +162,8 @@ pub(crate) struct SnippetData {
 pub enum ScopeKind {
     /// A module scope, optionally associated with a document block.
     Module(Option<BlockId>),
+    /// An isolated Astro template expression.
+    Expression,
     /// Framework-provided names available throughout the document.
     Builtins,
 }
@@ -201,7 +209,19 @@ pub(crate) struct SymbolData {
     pub(crate) namespace: Namespace,
     pub(crate) kind: SymbolKind,
     pub(crate) origin: Origin,
-    pub(crate) type_only: bool,
+    pub(crate) declares_value: bool,
+    pub(crate) declares_type: bool,
+    pub(crate) declares_namespace: bool,
+}
+
+impl SymbolData {
+    pub(crate) fn declares_in(&self, namespace: Namespace) -> bool {
+        match namespace {
+            Namespace::Value => self.declares_value,
+            Namespace::Type => self.declares_type,
+            Namespace::Namespace => self.declares_namespace,
+        }
+    }
 }
 
 /// Where a reference is written.
@@ -215,6 +235,8 @@ pub enum RefSite {
     Attribute,
     /// A framework directive.
     Directive,
+    /// A framework-defined use without a source reference.
+    Implicit,
 }
 
 /// What a reference is reached through.
@@ -477,6 +499,14 @@ impl Snippet {
     pub fn host(&self) -> SnippetHost {
         self.row().host
     }
+
+    /// The Astro scope the snippet resolves free names against.
+    pub fn scope(&self) -> Option<Scope> {
+        self.row().scope.map(|id| Scope {
+            data: self.data.clone(),
+            id,
+        })
+    }
 }
 
 impl Scope {
@@ -508,16 +538,23 @@ impl Scope {
 
     /// Finds the nearest visible declaration with the given name and namespace.
     pub fn lookup(&self, namespace: Namespace, name: &str) -> Option<Symbol> {
+        let name = unescape_js_identifier(name);
         self.ancestors().find_map(|scope| {
-            scope
-                .symbols()
-                .find(|symbol| symbol.namespace() == namespace && symbol.name() == name)
+            scope.symbols().find(|symbol| {
+                symbol.row().declares_in(namespace)
+                    && unescape_js_identifier(symbol.name()).as_ref() == name.as_ref()
+            })
         })
     }
 
     /// Returns why declarations in the namespace may be incomplete.
     pub fn open_reasons(&self, namespace: Namespace) -> OpenReasons {
         self.row().open[namespace.index()]
+    }
+
+    /// Returns whether declarations in the namespace may be incomplete.
+    pub fn is_open(&self, namespace: Namespace) -> bool {
+        !self.open_reasons(namespace).is_empty()
     }
 }
 
@@ -578,9 +615,24 @@ impl Symbol {
         self.row().origin
     }
 
-    /// Returns whether the declaration is available only in type positions.
+    /// Returns whether the declaration introduces a runtime value.
+    pub fn declares_value(&self) -> bool {
+        self.row().declares_value
+    }
+
+    /// Returns whether the declaration introduces a TypeScript type.
+    pub fn declares_type(&self) -> bool {
+        self.row().declares_type
+    }
+
+    /// Returns whether the declaration introduces a TypeScript namespace.
+    pub fn declares_namespace(&self) -> bool {
+        self.row().declares_namespace
+    }
+
+    /// Returns whether the declaration introduces a type but no runtime value.
     pub fn is_type_only(&self) -> bool {
-        self.row().type_only
+        self.row().declares_type && !self.row().declares_value
     }
 
     /// Returns references that resolve to this declaration.
@@ -626,7 +678,10 @@ impl Reference {
         self.row().namespace
     }
 
-    /// Returns the scope where resolution starts, if known.
+    /// Returns the Astro scope used to resolve the reference.
+    ///
+    /// References resolved entirely by the guest JavaScript model have no
+    /// Astro scope.
     pub fn scope(&self) -> Option<Scope> {
         self.row().scope.map(|id| Scope {
             data: self.data.clone(),
