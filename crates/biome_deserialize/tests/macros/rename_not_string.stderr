@@ -1,0 +1,7 @@
+error: proc-macro derive panicked
+ --> tests/macros/rename_not_string.rs:3:19
+  |
+3 | #[derive(Default, Deserializable)]
+  |                   ^^^^^^^^^^^^^^
+  |
+  = help: message: Could not parse enum variant attributes: Error("Unexpected attribute: rename = 1")
