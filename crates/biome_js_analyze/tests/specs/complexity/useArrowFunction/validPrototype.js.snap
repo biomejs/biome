@@ -1,0 +1,69 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validPrototype.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+// https://github.com/biomejs/biome/issues/12372
+const f = function () {};
+console.log(f.prototype.toString());
+
+const computedRead = function () {};
+console.log(computedRead["prototype"]);
+
+const parenthesizedRead = function () {};
+console.log((parenthesizedRead).prototype);
+
+const prototypeWrite = function () {};
+prototypeWrite.prototype.x = 0;
+
+const prototypeAssignment = function () {};
+prototypeAssignment.prototype = {};
+
+const computedAssignment = function () {};
+computedAssignment["prototype"] = {};
+
+const constructed = function () {};
+new constructed();
+
+const extended = function () {};
+class Derived extends extended {}
+
+const instance = function () {};
+console.log({} instanceof instance);
+
+const usedInClosure = function () {};
+function later() {
+	return usedInClosure.prototype;
+}
+
+var reassigned;
+reassigned = function () {};
+reassigned.prototype.y = 1;
+
+const parenthesizedFunction = (function () {});
+new parenthesizedFunction();
+
+// Conditional and logical initializers
+const conditional = cond ? function () {} : fallback;
+console.log(conditional.prototype);
+
+const conditionalAlternate = cond ? fallback : function () {};
+new conditionalAlternate();
+
+const logicalOr = fallback || function () {};
+logicalOr.prototype.x = 0;
+
+const nullish = fallback ?? (function () {});
+x instanceof nullish;
+
+let assignedConditional;
+assignedConditional = cond ? function () {} : fallback;
+assignedConditional.prototype;
+
+// Directly constructed through a conditional
+new (cond ? function () {} : fallback)();
+
+```
