@@ -1,0 +1,50 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --only=correctness/noUnusedImports '<TEMP_DIR>/lint_reads_jsx_factory_from_tsconfig'
+```
+
+## `biome.json`
+
+```json
+{
+  "javascript": {
+    "jsxRuntime": "reactClassic"
+  }
+}
+```
+
+## `file.jsx`
+
+```jsx
+import { h, Fragment } from "preact";
+
+export const App = () => (
+    <>
+        <div>Hello</div>
+    </>
+);
+
+```
+
+## `tsconfig.json`
+
+```json
+{
+    "compilerOptions": {
+        "jsx": "react",
+        "jsxFactory": "h",
+        "jsxFragmentFactory": "Fragment"
+    }
+}
+```
+
+# Emitted Messages
+
+```block
+Checked 3 files in <TIME>. No fixes applied.
+```
