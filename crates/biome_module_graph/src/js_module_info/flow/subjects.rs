@@ -283,10 +283,21 @@ fn pattern_element(element: &JsSyntaxNode, index: usize) -> Option<(TextRange, P
         return None;
     };
     let binding = binding.as_js_identifier_binding()?;
-    Some((
-        binding.range(),
-        PropertyKey::Name(Text::from(index.to_string())),
-    ))
+    Some((binding.range(), index_key(index)?))
+}
+
+/// Spells the array indices that [`index_key`] names without building a string.
+const INDEX_NAMES: [&str; 16] = [
+    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15",
+];
+
+/// Returns the key that names the element at `index` of an array, as
+/// `t[0]` and `t["0"]` do, or `None` from index 16 on, where an array pattern
+/// element doesn't narrow.
+pub(super) fn index_key(index: usize) -> Option<PropertyKey> {
+    INDEX_NAMES
+        .get(index)
+        .map(|name| PropertyKey::Name(Text::from(*name)))
 }
 
 /// Returns whether the declaration of the destructuring `pattern` lets a test
@@ -642,6 +653,13 @@ mod tests {
                 key: PropertyKey::Private(name),
             } => format!("{}.#{name}", path(source, subjects, *object)),
         }
+    }
+
+    #[test]
+    fn index_keys_name_array_elements_up_to_index_15() {
+        assert!(matches!(index_key(0), Some(PropertyKey::Name(name)) if name.text() == "0"));
+        assert!(matches!(index_key(15), Some(PropertyKey::Name(name)) if name.text() == "15"));
+        assert!(index_key(16).is_none());
     }
 
     #[test]

@@ -294,11 +294,11 @@ fn tuple_element<'db>(
     if tuple.is_inferred_array(db) {
         return PropertyLookup::Unknown;
     }
-    let Some(index) = name
-        .parse::<usize>()
-        .ok()
-        .filter(|index| index.to_string() == name)
-    else {
+    // Only the canonical spelling of an index, such as `1` but not `01` or
+    // `+1`, names an element.
+    let is_canonical =
+        name.bytes().all(|byte| byte.is_ascii_digit()) && (name == "0" || !name.starts_with('0'));
+    let Some(index) = name.parse::<usize>().ok().filter(|_| is_canonical) else {
         return PropertyLookup::Unknown;
     };
     for (position, element) in tuple.elements(db).iter().enumerate() {

@@ -189,7 +189,9 @@ These limits apply to every *Supported* and *Partial* row below:
   direct elements of the same pattern that have no default and are not rest
   elements, so in `const { a: { kind, v }, b } = w`, a test of `b` doesn't
   narrow `v`, and in `const { kind, ...rest } = s`, a test of `kind` doesn't
-  narrow `rest`. A nested pattern narrows only when no enclosing pattern
+  narrow `rest`. An element of an array pattern from index 16 on neither
+  narrows the pattern nor holds a discriminant, where TypeScript has no such
+  limit. A nested pattern narrows only when no enclosing pattern
   supplies a default, as `{ a: { kind, v } = d }` does. The destructured
   value narrows as the object of a test of its property does, by the rules
   above, except that its `null` and `undefined` members don't count, because

@@ -1,4 +1,4 @@
-use super::subjects::{identifier_key, literal_key, member_name_key, subject_of};
+use super::subjects::{identifier_key, index_key, literal_key, member_name_key, subject_of};
 use super::{FlowSubject, FlowSubjectId, FlowSubjectTable, PropertyKey};
 use crate::js_module_info::TsBindingReferenceExt;
 use biome_js_semantic::{Binding, JsDeclarationKind, SemanticModel};
@@ -943,7 +943,7 @@ impl Decomposer<'_, '_> {
                     .parent()?
                     .children()
                     .position(|sibling| sibling == *element.syntax())?;
-                let key = PropertyKey::Name(Text::from(index.to_string()));
+                let key = index_key(index)?;
                 (pattern_declarator(element.syntax())?, Some(key))
             }
             _ => return None,
