@@ -18,6 +18,7 @@ use biome_js_syntax::JsIdentifierExpression;
 use biome_js_type_info::interned_types::{Literal, TypeData};
 use biome_js_type_info::{NarrowingPredicate, TypeofKind, is_narrowing_invariant, narrow_type};
 use biome_rowan::{AstNode, TextRange};
+use rustc_hash::FxHashMap;
 use std::collections::VecDeque;
 
 const MAX_FLOW_STEPS: usize = 16_384;
@@ -43,16 +44,10 @@ pub(in crate::db) fn flow_binding_baseline<'db>(
     info: &JsModuleInfo,
     range: TextRange,
 ) -> Option<TypeData<'db>> {
-    // Declaration queries can erase a cyclic object's shape. The raw baseline
-    // still lets flow detect an impossible branch and return an unknown override.
     let reference = info.raw_binding_types.get(&range)?;
     let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
-    let baseline = ctx.resolve(reference);
-    match ctx.flow_baseline(baseline) {
-        Some(baseline) if is_narrowing_invariant(baseline) => None,
-        Some(baseline) => Some(baseline),
-        None => Some(TypeData::Unknown),
-    }
+    let declared = ctx.resolve(reference);
+    ctx.narrowing_baseline(declared)
 }
 
 pub(in crate::db) fn flow_binding_states<'db>(
@@ -67,7 +62,7 @@ pub(in crate::db) fn flow_binding_states<'db>(
     if points.is_empty() {
         return None;
     }
-    let baseline = infer_flow_binding_baseline(db, binding)?;
+    let baseline = input.baseline(db)?;
     if baseline == TypeData::Unknown {
         return None;
     }
@@ -82,24 +77,23 @@ pub(in crate::db) fn flow_binding_type<'db>(
     info: &JsModuleInfo,
     input: FlowBindingTypeInput<'db>,
 ) -> Option<TypeData<'db>> {
-    let root_index = input.root(db);
-    let root = info.flow.root(root_index)?;
+    let states = input.states(db);
+    let root = info.flow.root(states.root(db))?;
     let point = input.point(db);
     if point as usize >= root.nodes.len() {
         return None;
     }
-    let binding = input.binding(db);
-    let baseline = infer_flow_binding_baseline(db, binding)?;
+    let binding = states.binding(db);
+    let baseline = states.baseline(db)?;
     if baseline == TypeData::Unknown {
         return Some(TypeData::Unknown);
     }
-    let shared = infer_flow_binding_states(db, FlowBindingRootInput::new(db, binding, root_index))
-        .and_then(|states| {
-            let index = states
-                .binary_search_by_key(&point, |(point, _)| *point)
-                .ok()?;
-            Some(states[index].1)
-        });
+    let shared = infer_flow_binding_states(db, states).and_then(|states| {
+        let index = states
+            .binary_search_by_key(&point, |(point, _)| *point)
+            .ok()?;
+        Some(states[index].1)
+    });
     let narrowed = match shared {
         Some(narrowed) => narrowed,
         None => {
@@ -240,21 +234,123 @@ fn predecessor_ids(node: &FlowNode) -> &[FlowNodeId] {
     }
 }
 
+/// Flow results that a [`ResolutionCtx`] evaluates with its own resolved
+/// types instead of through the flow expression and baseline queries.
+///
+/// Complete module inference uses it: by the time it reaches expressions, its
+/// context has resolved every raw type of the module, so a fresh context in a
+/// query would only resolve those types again.
+#[derive(Default)]
+pub(in crate::db) struct LocalFlow<'db> {
+    /// The flow-sensitive type of each candidate expression evaluated so far.
+    expressions: FxHashMap<TextRange, Option<TypeData<'db>>>,
+    /// The type that narrowing starts from for each binding read so far.
+    baselines: FxHashMap<TextRange, Option<TypeData<'db>>>,
+}
+
 impl<'db> ResolutionCtx<'db, '_> {
+    /// Makes this context evaluate flow candidates with its own resolved
+    /// types, as [`Self::local_flow_expression_type`] describes.
+    pub(in crate::db) fn evaluate_flow_locally(&mut self) {
+        self.local_flow = Some(Box::default());
+    }
+
+    /// Returns the flow-sensitive type of the expression at `range`, as
+    /// [`crate::db::queries::infer_flow_expression_type`] returns it, but
+    /// evaluated in this context.
+    ///
+    /// Bindings start narrowing from their collected types resolved in this
+    /// context, and the solves of their roots are shared with lookups that
+    /// start from the same types. Returns `None` when this context does not
+    /// evaluate flow locally, when the expression is not a collected flow
+    /// candidate, or when no runtime test changes its type.
+    pub(in crate::db) fn local_flow_expression_type(
+        &mut self,
+        range: TextRange,
+    ) -> Option<TypeData<'db>> {
+        let info = self.js_info;
+        if !info.flow.is_candidate(range) || !info.raw_expressions.contains_key(&range) {
+            return None;
+        }
+        if let Some(ty) = self.local_flow.as_ref()?.expressions.get(&range) {
+            return *ty;
+        }
+        let tree = info.semantic_model.root();
+        let ty = info
+            .flow
+            .candidate(range)?
+            .try_to_node(tree.syntax())
+            .and_then(|expression| self.resolve_flow_expression(&expression));
+        self.local_flow.as_mut()?.expressions.insert(range, ty);
+        ty
+    }
+
+    /// Returns whether this context evaluates flow candidates itself.
+    pub(super) fn evaluates_flow_locally(&self) -> bool {
+        self.local_flow.is_some()
+    }
+
     pub(super) fn narrow_reference(
         &mut self,
         identifier: &JsIdentifierExpression,
     ) -> Option<TypeData<'db>> {
         let read = self.js_info.flow.read(identifier.range())?;
+        let binding = BindingTypeInput::new(self.db, self.module, read.binding);
+        let baseline = if self.evaluates_flow_locally() {
+            self.local_binding_baseline(read.binding)
+        } else {
+            infer_flow_binding_baseline(self.db, binding)
+        };
         infer_flow_binding_type(
             self.db,
             FlowBindingTypeInput::new(
                 self.db,
-                BindingTypeInput::new(self.db, self.module, read.binding),
-                read.root,
+                FlowBindingRootInput::new(self.db, binding, read.root, baseline),
                 read.point,
             ),
         )
+    }
+
+    /// Returns the type that narrowing of the binding declared at `binding`
+    /// starts from, as [`crate::db::queries::infer_flow_binding_baseline`]
+    /// returns it, but resolved in this context.
+    fn local_binding_baseline(&mut self, binding: TextRange) -> Option<TypeData<'db>> {
+        if let Some(baseline) = self.local_flow.as_ref()?.baselines.get(&binding) {
+            return *baseline;
+        }
+        let baseline = self
+            .js_info
+            .raw_binding_types
+            .get(&binding)
+            .cloned()
+            .and_then(|reference| {
+                let declared = self.resolve(&reference);
+                self.narrowing_baseline(declared)
+            });
+        self.local_flow
+            .as_mut()?
+            .baselines
+            .insert(binding, baseline);
+        baseline
+    }
+
+    /// Returns the type that narrowing of a binding whose declared type is
+    /// `declared` starts from: `declared` with its unions, aliases, and
+    /// `typeof` types flattened.
+    ///
+    /// Returns `None` when no runtime test can change the type, because it
+    /// contains `any` or an undetermined member, and `Unknown` when flattening
+    /// exceeds its work limit.
+    fn narrowing_baseline(&mut self, declared: TypeData<'db>) -> Option<TypeData<'db>> {
+        // The declared type is resolved from the raw binding type, not through
+        // a declaration query: declaration queries can erase a cyclic object's
+        // shape, while the raw type still lets flow detect an impossible
+        // branch and return an unknown override.
+        match self.flow_baseline(declared) {
+            Some(baseline) if is_narrowing_invariant(baseline) => None,
+            Some(baseline) => Some(baseline),
+            None => Some(TypeData::Unknown),
+        }
     }
 
     /// Returns the type of `binding` at each of `points`, given its `baseline`

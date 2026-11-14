@@ -580,7 +580,7 @@ ternaryInvalid.ts:59:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
 ```
 
 ```
-ternaryInvalid.ts:59:32 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ternaryInvalid.ts:59:32 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
@@ -596,6 +596,15 @@ ternaryInvalid.ts:59:32 lint/nursery/useNullishCoalescing ━━━━━━━�
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace || with ??.
+  
+     57  57 │   // Fallback is logical OR (needs parens, ?? cannot mix with ||)
+     58  58 │   declare const q: string | null;
+     59     │ - const·r15·=·q·!==·null·?·q·:·q·||·'default';
+         59 │ + const·r15·=·q·!==·null·?·q·:·q·??·'default';
+     60  60 │   
+     61  61 │   // Fallback is logical AND (needs parens, ?? cannot mix with &&)
   
 
 ```
@@ -668,36 +677,6 @@ ternaryInvalid.ts:71:13 lint/nursery/useNullishCoalescing ━━━━━━━�
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-ternaryInvalid.ts:75:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Prefer ?? over a ternary expression checking for nullish.
-  
-    73 │ // Undefined literal type
-    74 │ const undef: undefined = undefined;
-  > 75 │ const r19 = undef !== undefined ? undef : 'fallback';
-       │             ^^^^^^^^^^^^^^^^^^^
-    76 │ 
-    77 │ // Number | undefined (non-string union)
-  
-  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Replace the ternary with ??.
-  
-     73  73 │   // Undefined literal type
-     74  74 │   const undef: undefined = undefined;
-     75     │ - const·r19·=·undef·!==·undefined·?·undef·:·'fallback';
-         75 │ + const·r19·=·undef·??·'fallback';
-     76  76 │   
-     77  77 │   // Number | undefined (non-string union)
   
 
 ```

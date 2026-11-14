@@ -1,0 +1,123 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidOpaqueRegions.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// A `switch`, `try`, or `for...of` statement in a function does not stop
+// narrowing, and reads inside one keep the facts from before it, so `value` is
+// a `string` at each optional chain, as in TypeScript.
+
+declare const items: string[];
+
+function switchElsewhere(value: string | null, kind: number) {
+	switch (kind) {
+		case 1:
+			break;
+	}
+	if (value !== null) {
+		return value?.length;
+	}
+}
+
+function readInsideTry(value: string | null) {
+	if (value === null) {
+		return;
+	}
+	try {
+		return value?.length;
+	} catch {
+		return 0;
+	}
+}
+
+function readInsideForOf(value: string | null) {
+	if (value === null) {
+		return;
+	}
+	for (const item of items) {
+		value?.length;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidOpaqueRegions.ts:14:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    12 │ 	}
+    13 │ 	if (value !== null) {
+  > 14 │ 		return value?.length;
+       │ 		       ^^^^^
+    15 │ 	}
+    16 │ }
+  
+  i Replace ?. with ..
+  
+    12 │ 	}
+    13 │ 	if (value !== null) {
+  > 14 │ 		return value?.length;
+       │ 		            ^^
+    15 │ 	}
+    16 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidOpaqueRegions.ts:23:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    21 │ 	}
+    22 │ 	try {
+  > 23 │ 		return value?.length;
+       │ 		       ^^^^^
+    24 │ 	} catch {
+    25 │ 		return 0;
+  
+  i Replace ?. with ..
+  
+    21 │ 	}
+    22 │ 	try {
+  > 23 │ 		return value?.length;
+       │ 		            ^^
+    24 │ 	} catch {
+    25 │ 		return 0;
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidOpaqueRegions.ts:34:3 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    32 │ 	}
+    33 │ 	for (const item of items) {
+  > 34 │ 		value?.length;
+       │ 		^^^^^
+    35 │ 	}
+    36 │ }
+  
+  i Replace ?. with ..
+  
+    32 │ 	}
+    33 │ 	for (const item of items) {
+  > 34 │ 		value?.length;
+       │ 		     ^^
+    35 │ 	}
+    36 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```

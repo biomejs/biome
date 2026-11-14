@@ -19,8 +19,8 @@ The remaining work is tracked in
 - **Declared type**: a variable's type before narrowing, from its annotation
   or from inference that ignores flow.
 - **Read**: one place where the program uses a variable's value.
-- **Execution root**: a body analyzed on its own: a module, a function, a
-  method, an accessor, a constructor, or a class static block.
+- **Execution root**: a body analyzed on its own: a module, a namespace, a
+  function, a method, an accessor, a constructor, or a class static block.
 - **Condition**: the expression whose result decides which branch runs, such
   as the test of an `if` or an operand of `&&`. A **runtime test** is one
   check of one variable that a condition performs, such as `typeof x ===
@@ -83,11 +83,17 @@ These limits apply to every *Supported* and *Partial* row below:
 - Variables whose declared type is `any`, or includes a part that inference
   cannot determine, never narrow.
 - An execution root gets no narrowing at all when its own code, outside nested
-  functions, contains a `switch`, `try`, `for...in`, `for...of`, or `with`
-  statement, a class declaration, a TypeScript declaration statement other than
-  a type alias, an interface, or a function overload signature, or a syntax
-  error. Execution roots that are very large or deeply nested get no narrowing
-  either.
+  functions, contains a `with` statement or a syntax error, or when it is very
+  large or deeply nested.
+- Biome does not model the control flow inside a `switch`, `try`, `for...in`,
+  or `for...of` statement yet. A read inside one of these statements has the
+  type from just before the statement, narrowed further only by the rest of the
+  expression that contains the read, as in `x && x.length`. An `if`, a
+  `return`, or a loop inside the statement narrows nothing. The code after the
+  statement continues with the types from just before it, and so does the
+  target of a `break` or `continue` that leaves the statement. Class and enum
+  declarations, namespaces, `import x = require()`, and `declare` statements
+  do not stop narrowing either.
 
 ## Behaviour
 
@@ -283,6 +289,13 @@ whose result is not tested, do not narrow.
 | A function declaration never sees the outer narrowing | `x: string \| null; if (x) { function g() { x } }` | `string \| null` | Supported |
 | An immediately invoked function expression continues the outer flow | `x: string \| null; if (x) (() => x)()` | `string` | Not yet |
 
+### Class members
+
+| Behaviour | Example | TypeScript | Status |
+| --- | --- | --- | --- |
+| A method or accessor of a class expression keeps the outer narrowing as an arrow function does, and a static block of any class continues the outer flow | `x: string \| null;`<br>`if (x) { const C = class { m() { x } }; class D { static { x } n() { x } } }` | `string` in `m` and in the static block; `string \| null` in `n`, because a method of a class declaration never sees the outer narrowing | Not yet: Biome analyzes every method, accessor, and static block on its own, so a read of an outer variable there keeps its declared type. |
+| The decorators and computed keys of class members | `x: string \| null;`<br>`if (x) { const C = class { @dec(x) m() {} @dec(x) f?: number; @dec(x) g = 1 } }` | `string` in the decorators of `m` and `f`, `string \| null` in the decorator of `g`. In any class, the decorators and computed keys of a field without an initializer narrow, and those of a field with an initializer do not. Those of a method or accessor narrow in a class expression but not in a class declaration. | Not yet: Biome evaluates no class member in the enclosing flow, so these reads keep their declared type. |
+
 ### Loops
 
 | Behaviour | Example | TypeScript | Status |
@@ -290,7 +303,7 @@ whose result is not tested, do not narrow.
 | The condition of `while`, `do...while`, and `for` narrows the body and the exit | `x: string \| null; while (x) x` | `string` | Supported |
 | A read in a loop joins the entry and the back edge | `x: string \| null; while (flag) { x; if (!x) return; }` | `string \| null` at `x;` | Supported |
 | `while (true)` and `for (;;)` exit only through `break` | `x: string \| null; while (true) { if (x) break; } x` | `string` | Supported |
-| `for...in` and `for...of` | `xs: (string \| null)[]; for (const v of xs) { if (v !== null) v }` | `string` | Not yet |
+| `for...in` and `for...of` | `xs: (string \| null)[]; for (const v of xs) { if (v !== null) v }` | `string` | Not yet: a condition in the body narrows nothing, but the narrowing from before the loop still applies in the body and after the loop, as the limits above describe. |
 | `for (k in o)` removes nullish types from `o` | `o: { a: 1 } \| undefined; for (const k in o) o` | `{ a: 1 }` | Not yet |
 | Labeled `break` and `continue` | `x: string \| null; out: { if (x === null) break out; x }` | `string` | Supported |
 
@@ -369,5 +382,6 @@ whose result is not tested, do not narrow.
 | --- | --- | --- | --- |
 | `x!`, `satisfies`, or the comma operator inside a condition | `x: string \| null; if ((0, x)) x`; `if (x!) x` | `string` | Not yet |
 | Paths join with a union | `x: string \| number \| null;`<br>`if (typeof x === "string") {} else if (x === null) { return; } x` | `string \| number` | Supported |
+| A namespace narrows its own variables but never sees the narrowing around it | `o: string \| null; if (o === null) throw 0;`<br>`namespace N { const l: string \| null = get(); if (l) l; o }` | `string` at `l`; `string \| null` at `o` | Supported |
 | Reads in unreachable code | `x: string \| null; if (x === null) { return; x }` | `string \| null`; the read is unreachable (TS7027) | Supported |
 | A branch narrowed to an impossible type | `x: string; if (typeof x === "number") x` | `never` | Partial: the read has type Unknown, as the correctness contract requires, and no request reports the branch as unreachable yet. |
