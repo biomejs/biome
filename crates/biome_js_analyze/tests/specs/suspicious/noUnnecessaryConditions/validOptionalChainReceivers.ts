@@ -1,0 +1,31 @@
+// should not generate diagnostics
+
+type Options = { v: string | null; w: number; f(): boolean };
+
+function falsy(o: Options | undefined) {
+	if (!o?.v) {
+		return o?.w;
+	}
+}
+
+function notNull(o: Options | undefined) {
+	if (o?.v !== null) {
+		return o?.w;
+	}
+}
+
+function looseNull(o: Options | undefined) {
+	if (o?.v == null) {
+		return o?.w;
+	}
+}
+
+function coalesce(o: Options | undefined) {
+	return o?.f() ?? o?.w;
+}
+
+function parenthesized(o: { a?: Options } | undefined) {
+	if ((o?.a)?.w === 1) {
+		return o?.a;
+	}
+}
