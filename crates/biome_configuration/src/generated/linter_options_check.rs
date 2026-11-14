@@ -2175,6 +2175,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noVueExportInScriptSetup",
+        TypeId::of::<
+            biome_rule_options::no_vue_export_in_script_setup::NoVueExportInScriptSetupOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "noVueExposeAfterAwait",
         TypeId::of::<biome_rule_options::no_vue_expose_after_await::NoVueExposeAfterAwaitOptions>(),
     ));
