@@ -1,4 +1,5 @@
-//! Conservative branch filtering of normalized primitive types and unions.
+//! Conservative branch filtering of normalized types and unions by runtime
+//! tests.
 
 use std::borrow::Cow;
 
@@ -7,6 +8,7 @@ use biome_js_syntax::numbers::{
 };
 use biome_rowan::Text;
 
+use crate::generated::global_types::ids::FUNCTION_ID_GLOBAL_TYPE_ID;
 use crate::globals::{
     GLOBAL_ANY_KEYWORD_ID, GLOBAL_BIGINT_KEYWORD_ID, GLOBAL_BOOLEAN_KEYWORD_ID,
     GLOBAL_NULL_KEYWORD_ID, GLOBAL_NUMBER_KEYWORD_ID, GLOBAL_STRING_KEYWORD_ID,
@@ -14,6 +16,7 @@ use crate::globals::{
 };
 use crate::interned_types::{InternedLiteral, Literal};
 use crate::resolved::InferredTypeData;
+use crate::type_relation::{Assignability, TypeResolver, primitive_can_satisfy};
 use crate::{ObjectKind, RawTypeData, RawTypeId, TypeDb, TypeReference, TypeReferenceQualifier};
 
 const MAX_NARROWING_STEPS: usize = 256;
@@ -182,11 +185,35 @@ pub fn raw_primitive_target<'a>(
 /// exclude individual literals, and the false branch of a truthiness test keeps
 /// `string`, `number`, and `bigint` unchanged, as TypeScript does at a read.
 /// [`falsy_values`] gives the narrower type of the value that `&&` returns.
+///
+/// An object type that a primitive or a function might satisfy, such as
+/// `{ length: number }`, which every string has, is compared with the apparent
+/// types of the values that pass a falsy or `typeof` test:
+///
+/// - The false branch of a truthiness test removes it when no falsy string,
+///   number, boolean, or bigint can have it.
+/// - The true branch of `typeof` with a primitive kind or `"function"` removes
+///   it when no value of that kind can have it, and replaces it with the
+///   primitive type or `Function` when every value of that kind has it, as
+///   TypeScript does.
+/// - The true branch of `typeof` with `"undefined"` removes it.
+/// - The false branch of `typeof` with `"object"` removes it when no primitive
+///   and no function can have it.
+///
+/// Other branches keep it, and so does a comparison that cannot decide. Such
+/// object types are type literals, interfaces, and instances of classes and
+/// interfaces; generics and unresolved handles stay unchanged. `resolve`
+/// replaces local and global handles with the types they stand for, as for
+/// [`InternedExtendsType::select_branch`]. It is called only to compare
+/// object types, so other narrowing never calls it.
+///
+/// [`InternedExtendsType::select_branch`]: crate::interned_types::InternedExtendsType::select_branch
 pub fn narrow_type<'db>(
     db: &'db dyn TypeDb,
     ty: InferredTypeData<'db>,
     predicate: NarrowingPredicate<'db>,
     positive: bool,
+    mut resolve: impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db>,
 ) -> InferredTypeData<'db> {
     if is_narrowing_invariant(ty) {
         return ty;
@@ -202,7 +229,7 @@ pub fn narrow_type<'db>(
             PreparedPredicate::Literal(literal, value)
         }
     };
-    narrow_prepared(db, ty, &predicate, positive)
+    narrow_prepared(db, ty, &predicate, positive, &mut resolve)
 }
 
 /// Returns the falsy values of `ty`: the type that a left operand of `&&`
@@ -211,12 +238,17 @@ pub fn narrow_type<'db>(
 /// The result is the false branch of a truthiness test in [`narrow_type`],
 /// except that `string` and `bigint` become `""` and `0n`, their only falsy
 /// values. `number` stays `number` because both zero and `NaN` are falsy.
-/// Inputs, limits, and unchanged types are the same as for [`narrow_type`].
-pub fn falsy_values<'db>(db: &'db dyn TypeDb, ty: InferredTypeData<'db>) -> InferredTypeData<'db> {
+/// Inputs, limits, object types, `resolve`, and unchanged types are the same
+/// as for [`narrow_type`].
+pub fn falsy_values<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    mut resolve: impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
     if is_narrowing_invariant(ty) {
         return ty;
     }
-    narrow_prepared(db, ty, &PreparedPredicate::FalsyValues, false)
+    narrow_prepared(db, ty, &PreparedPredicate::FalsyValues, false, &mut resolve)
 }
 
 fn narrow_prepared<'db>(
@@ -224,9 +256,10 @@ fn narrow_prepared<'db>(
     ty: InferredTypeData<'db>,
     predicate: &PreparedPredicate<'db>,
     positive: bool,
+    resolve: &mut TypeResolver<'db, '_>,
 ) -> InferredTypeData<'db> {
     if !matches!(ty, InferredTypeData::Union(_)) {
-        return narrow_non_union(db, ty, predicate, positive);
+        return narrow_non_union(db, ty, predicate, positive, resolve);
     }
 
     let mut pending = vec![ty];
@@ -246,7 +279,7 @@ fn narrow_prepared<'db>(
             }
             pending.extend(types.iter().rev().copied());
         } else {
-            let result = narrow_non_union(db, current, predicate, positive);
+            let result = narrow_non_union(db, current, predicate, positive, resolve);
             changed |= result != current;
             if result != InferredTypeData::NeverKeyword {
                 narrowed.push(result);
@@ -279,6 +312,7 @@ fn narrow_non_union<'db>(
     ty: InferredTypeData<'db>,
     predicate: &PreparedPredicate<'db>,
     positive: bool,
+    resolve: &mut TypeResolver<'db, '_>,
 ) -> InferredTypeData<'db> {
     if ty == InferredTypeData::VoidKeyword {
         return InferredTypeData::Unknown;
@@ -301,7 +335,10 @@ fn narrow_non_union<'db>(
     match predicate {
         PreparedPredicate::Truthy => match ty {
             InferredTypeData::Boolean => boolean_literal(db, positive),
-            _ => retain_if(ty, truthiness(db, ty), positive),
+            _ => match truthiness(db, ty) {
+                None if !positive => narrow_object(db, ty, predicate, positive, resolve),
+                truthiness => retain_if(ty, truthiness, positive),
+            },
         },
         PreparedPredicate::FalsyValues => match ty {
             InferredTypeData::String => InferredTypeData::Literal(InternedLiteral::new(
@@ -312,7 +349,7 @@ fn narrow_non_union<'db>(
                 db,
                 Literal::BigInt(Text::new_static("0n")),
             )),
-            _ => narrow_non_union(db, ty, &PreparedPredicate::Truthy, false),
+            _ => narrow_non_union(db, ty, &PreparedPredicate::Truthy, false, resolve),
         },
         PreparedPredicate::Nullish => {
             let nullish = match ty {
@@ -332,12 +369,99 @@ fn narrow_non_union<'db>(
             } else {
                 typeof_kind(db, ty).map(|actual| actual == *kind)
             };
-            retain_if(ty, matches, positive)
+            match matches {
+                None => narrow_object(db, ty, predicate, positive, resolve),
+                matches => retain_if(ty, matches, positive),
+            }
         }
         PreparedPredicate::Literal(literal, value) => {
             narrow_literal(db, ty, *literal, value, positive)
         }
     }
+}
+
+/// Narrows `ty` by a falsy or `typeof` test that its kind alone does not
+/// decide, when it is an object type, as described by [`narrow_type`].
+fn narrow_object<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    predicate: &PreparedPredicate<'db>,
+    positive: bool,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> InferredTypeData<'db> {
+    const FALSY_KINDS: [TypeofKind; 4] = [
+        TypeofKind::String,
+        TypeofKind::Number,
+        TypeofKind::Boolean,
+        TypeofKind::BigInt,
+    ];
+    const NOT_OBJECT_KINDS: [TypeofKind; 6] = [
+        TypeofKind::String,
+        TypeofKind::Number,
+        TypeofKind::Boolean,
+        TypeofKind::BigInt,
+        TypeofKind::Symbol,
+        TypeofKind::Function,
+    ];
+    // The kinds of the values that pass the test, and the type that replaces
+    // `ty` when every value of the only kind has it.
+    let (kinds, implied) = match (predicate, positive) {
+        (PreparedPredicate::Truthy, false) => (&FALSY_KINDS[..], None),
+        (PreparedPredicate::Typeof(TypeofKind::Object), false) => (&NOT_OBJECT_KINDS[..], None),
+        (PreparedPredicate::Typeof(kind), true) if *kind != TypeofKind::Object => {
+            (std::slice::from_ref(kind), typeof_type(db, *kind))
+        }
+        _ => return ty,
+    };
+    if !is_object_type(db, ty, resolve) {
+        return ty;
+    }
+    for kind in kinds {
+        match primitive_can_satisfy(db, *kind, ty, resolve) {
+            Assignability::NotAssignable => {}
+            Assignability::Assignable => return implied.unwrap_or(ty),
+            Assignability::Undetermined => return ty,
+        }
+    }
+    InferredTypeData::NeverKeyword
+}
+
+/// Returns whether `ty` is a type literal, an interface, or an instance of a
+/// class, an interface, or a type literal.
+fn is_object_type<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> bool {
+    match ty {
+        InferredTypeData::Object(_) | InferredTypeData::Interface(_) => true,
+        InferredTypeData::InstanceOf(instance) => matches!(
+            resolve(instance.ty(db)).expand_canonical_global(db),
+            InferredTypeData::Class(_)
+                | InferredTypeData::Interface(_)
+                | InferredTypeData::Object(_)
+        ),
+        _ => false,
+    }
+}
+
+/// Returns the type that every value whose `typeof` is `kind` has, or `None`
+/// for `"object"`.
+fn typeof_type<'db>(db: &'db dyn TypeDb, kind: TypeofKind) -> Option<InferredTypeData<'db>> {
+    Some(match kind {
+        TypeofKind::Undefined => InferredTypeData::Undefined,
+        TypeofKind::Boolean => InferredTypeData::Boolean,
+        TypeofKind::Number => InferredTypeData::Number,
+        TypeofKind::BigInt => InferredTypeData::BigInt,
+        TypeofKind::String => InferredTypeData::String,
+        TypeofKind::Symbol => InferredTypeData::Symbol,
+        TypeofKind::Function => InferredTypeData::instance_of(
+            db,
+            InferredTypeData::GlobalType(FUNCTION_ID_GLOBAL_TYPE_ID).expand_canonical_global(db),
+            Box::default(),
+        ),
+        TypeofKind::Object => return None,
+    })
 }
 
 fn retain_if(
@@ -514,9 +638,10 @@ fn narrow_literal<'db>(
 mod tests {
     use super::*;
     use crate::interned_types::{
-        InternedFunction, InternedGenericTypeParameter, InternedIntersection, InternedObject,
-        InternedTypeInstance, InternedTypeofType, InternedUnion, LocalTypeHandle, LocalTypeId,
-        ModuleKey, ReturnType,
+        InternedClass, InternedFunction, InternedGenericTypeParameter, InternedInterface,
+        InternedIntersection, InternedObject, InternedTypeInstance, InternedTypeofType,
+        InternedUnion, LocalTypeHandle, LocalTypeId, ModuleKey, ReturnType, TypeMember,
+        TypeMemberKind,
     };
     use crate::literal::NumberLiteral;
     use salsa::plumbing::AsId;
@@ -539,6 +664,22 @@ mod tests {
 
     #[salsa::db]
     impl TypeDb for TestDb {}
+
+    /// Calls [`super::narrow_type`] with a resolver that returns its input,
+    /// because these tests build types without local handles.
+    fn narrow_type<'db>(
+        db: &'db dyn TypeDb,
+        ty: InferredTypeData<'db>,
+        predicate: NarrowingPredicate<'db>,
+        positive: bool,
+    ) -> InferredTypeData<'db> {
+        super::narrow_type(db, ty, predicate, positive, |ty| ty)
+    }
+
+    /// Calls [`super::falsy_values`] with a resolver that returns its input.
+    fn falsy_values<'db>(db: &'db dyn TypeDb, ty: InferredTypeData<'db>) -> InferredTypeData<'db> {
+        super::falsy_values(db, ty, |ty| ty)
+    }
 
     fn number<'db>(db: &'db TestDb, text: &str) -> InferredTypeData<'db> {
         InferredTypeData::Literal(InternedLiteral::new(
@@ -1114,8 +1255,91 @@ mod tests {
         }
     }
 
+    fn member<'db>(name: &'static str, ty: InferredTypeData<'db>) -> TypeMember<'db> {
+        TypeMember {
+            kind: TypeMemberKind::Named(Text::new_static(name)),
+            ty,
+        }
+    }
+
+    fn optional_member<'db>(name: &'static str, ty: InferredTypeData<'db>) -> TypeMember<'db> {
+        TypeMember {
+            kind: TypeMemberKind::NamedOptional(Text::new_static(name)),
+            ty,
+        }
+    }
+
+    /// Returns the interface `name` with `members`, extending `parents`.
+    fn interface<'db>(
+        db: &'db TestDb,
+        parents: &[InferredTypeData<'db>],
+        members: Vec<TypeMember<'db>>,
+    ) -> InferredTypeData<'db> {
+        InferredTypeData::Interface(InternedInterface::new(
+            db,
+            Box::default(),
+            Box::<[_]>::from(parents),
+            members.into_boxed_slice(),
+            Text::new_static("Shape"),
+        ))
+    }
+
+    /// Returns an instance of a class without a parent and with `members`.
+    fn class_instance<'db>(
+        db: &'db TestDb,
+        members: Vec<TypeMember<'db>>,
+    ) -> InferredTypeData<'db> {
+        let class = InferredTypeData::Class(InternedClass::new(
+            db,
+            Box::default(),
+            None,
+            Box::default(),
+            members.into_boxed_slice(),
+            Some(Text::new_static("K")),
+            false,
+        ));
+        InferredTypeData::instance_of(db, class, Box::default())
+    }
+
+    /// Returns a method without parameters.
+    fn method<'db>(
+        db: &'db TestDb,
+        name: &'static str,
+        returns: InferredTypeData<'db>,
+    ) -> InferredTypeData<'db> {
+        InferredTypeData::Function(InternedFunction::new(
+            db,
+            Box::default(),
+            Box::default(),
+            ReturnType::Type(returns),
+            false,
+            Some(Text::new_static(name)),
+        ))
+    }
+
+    fn function_instance(db: &TestDb) -> InferredTypeData<'_> {
+        InferredTypeData::instance_of(
+            db,
+            InferredTypeData::GlobalType(FUNCTION_ID_GLOBAL_TYPE_ID).expand_canonical_global(db),
+            Box::default(),
+        )
+    }
+
+    fn typeof_kinds() -> [TypeofKind; 8] {
+        [
+            TypeofKind::Undefined,
+            TypeofKind::Object,
+            TypeofKind::Boolean,
+            TypeofKind::Number,
+            TypeofKind::BigInt,
+            TypeofKind::String,
+            TypeofKind::Symbol,
+            TypeofKind::Function,
+        ]
+    }
+
     #[test]
-    fn structural_objects_are_non_nullish_but_may_be_primitive() {
+    fn empty_object_types_become_the_tested_kind() {
         let db = TestDb::default();
         let object = InferredTypeData::Object(InternedObject::new(
             &db,
@@ -1127,12 +1351,293 @@ mod tests {
         for ty in [
             object,
             InferredTypeData::instance_of(&db, object, Box::default()),
+            interface(&db, &[], Vec::new()),
         ] {
             assert_eq!(
                 narrow_type(&db, ty, NarrowingPredicate::Nullish, true),
                 InferredTypeData::NeverKeyword
             );
+            // `""`, `0`, `false`, and `0n` have every member of `{}`.
             assert_eq!(narrow_type(&db, ty, NarrowingPredicate::Truthy, false), ty);
+            for kind in typeof_kinds() {
+                let expected = match kind {
+                    TypeofKind::Undefined => InferredTypeData::NeverKeyword,
+                    TypeofKind::Object => ty,
+                    TypeofKind::Boolean => InferredTypeData::Boolean,
+                    TypeofKind::Number => InferredTypeData::Number,
+                    TypeofKind::BigInt => InferredTypeData::BigInt,
+                    TypeofKind::String => InferredTypeData::String,
+                    TypeofKind::Symbol => InferredTypeData::Symbol,
+                    TypeofKind::Function => function_instance(&db),
+                };
+                assert_eq!(
+                    narrow_type(&db, ty, NarrowingPredicate::Typeof(kind), true),
+                    expected,
+                    "{kind:?}"
+                );
+                assert_eq!(
+                    narrow_type(&db, ty, NarrowingPredicate::Typeof(kind), false),
+                    ty,
+                    "{kind:?}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn object_types_that_no_primitive_satisfies_are_removed() {
+        let db = TestDb::default();
+        let literal = InferredTypeData::Object(InternedObject::new(
+            &db,
+            None,
+            Box::from([member("a", InferredTypeData::Number)]),
+            false,
+            ObjectKind::Shape,
+        ));
+        for ty in [
+            literal,
+            interface(&db, &[], vec![member("a", InferredTypeData::Number)]),
+            class_instance(&db, vec![member("k", InferredTypeData::Number)]),
+            // A missing member is conclusive even when inherited members
+            // aren't listed.
+            interface(&db, &[literal], vec![member("b", InferredTypeData::String)]),
+            // Only optional members, none of which a primitive or a function
+            // has.
+            interface(
+                &db,
+                &[],
+                vec![optional_member("a", InferredTypeData::Number)],
+            ),
+        ] {
+            assert_eq!(
+                narrow_type(&db, ty, NarrowingPredicate::Truthy, false),
+                InferredTypeData::NeverKeyword
+            );
+            assert_eq!(narrow_type(&db, ty, NarrowingPredicate::Truthy, true), ty);
+            assert_eq!(
+                falsy_values(&db, union(&db, &[ty, InferredTypeData::Undefined])),
+                InferredTypeData::Undefined
+            );
+            for kind in typeof_kinds() {
+                let removed = kind != TypeofKind::Object;
+                assert_eq!(
+                    narrow_type(&db, ty, NarrowingPredicate::Typeof(kind), true),
+                    if removed {
+                        InferredTypeData::NeverKeyword
+                    } else {
+                        ty
+                    },
+                    "{kind:?}"
+                );
+                assert_eq!(
+                    narrow_type(&db, ty, NarrowingPredicate::Typeof(kind), false),
+                    if removed {
+                        ty
+                    } else {
+                        InferredTypeData::NeverKeyword
+                    },
+                    "{kind:?}"
+                );
+            }
+        }
+        // Instances of built-in classes are never primitives, and they are
+        // never functions either.
+        let date = InferredTypeData::instance_of(
+            &db,
+            InferredTypeData::GlobalType(
+                crate::generated::global_types::ids::DATE_ID_GLOBAL_TYPE_ID,
+            ),
+            Box::default(),
+        );
+        assert_eq!(
+            narrow_type(
+                &db,
+                date,
+                NarrowingPredicate::Typeof(TypeofKind::Function),
+                true
+            ),
+            InferredTypeData::NeverKeyword
+        );
+        assert_eq!(
+            narrow_type(
+                &db,
+                date,
+                NarrowingPredicate::Typeof(TypeofKind::Object),
+                false
+            ),
+            InferredTypeData::NeverKeyword
+        );
+        assert_eq!(
+            narrow_type(
+                &db,
+                date,
+                NarrowingPredicate::Typeof(TypeofKind::Object),
+                true
+            ),
+            date
+        );
+    }
+
+    #[test]
+    fn object_types_that_a_primitive_satisfies_are_kept_or_replaced() {
+        let db = TestDb::default();
+        let function = function_instance(&db);
+        // Every string and every function has `length`, but no number does.
+        let length = interface(&db, &[], vec![member("length", InferredTypeData::Number)]);
+        let fixed = interface(
+            &db,
+            &[],
+            vec![member(
+                "toFixed",
+                method(&db, "toFixed", InferredTypeData::String),
+            )],
+        );
+        let optional_length = interface(
+            &db,
+            &[],
+            vec![optional_member("length", InferredTypeData::Number)],
+        );
+        let cases = [
+            (length, TypeofKind::String, InferredTypeData::String),
+            (length, TypeofKind::Number, InferredTypeData::NeverKeyword),
+            (length, TypeofKind::Function, function),
+            (fixed, TypeofKind::Number, InferredTypeData::Number),
+            (fixed, TypeofKind::String, InferredTypeData::NeverKeyword),
+            (
+                optional_length,
+                TypeofKind::String,
+                InferredTypeData::String,
+            ),
+        ];
+        for (ty, kind, expected) in cases {
+            assert_eq!(
+                narrow_type(&db, ty, NarrowingPredicate::Typeof(kind), true),
+                expected,
+                "{kind:?}"
+            );
+        }
+        for ty in [length, fixed, optional_length] {
+            assert_eq!(narrow_type(&db, ty, NarrowingPredicate::Truthy, false), ty);
+            assert_eq!(
+                narrow_type(
+                    &db,
+                    ty,
+                    NarrowingPredicate::Typeof(TypeofKind::Object),
+                    false
+                ),
+                ty
+            );
+        }
+        // `Function` replaces an object type only when it is the only member
+        // of the branch: other members stay as they are.
+        let ty = union(&db, &[length, InferredTypeData::String]);
+        assert_eq!(
+            narrow_type(
+                &db,
+                ty,
+                NarrowingPredicate::Typeof(TypeofKind::Function),
+                true
+            ),
+            function
+        );
+    }
+
+    #[test]
+    fn undecided_comparisons_keep_object_types() {
+        let db = TestDb::default();
+        let cases = [
+            // `padStart` comes from ES2017 and `description` from ES2019, so
+            // their absence from the generated wrappers proves nothing.
+            (
+                interface(
+                    &db,
+                    &[],
+                    vec![member(
+                        "padStart",
+                        method(&db, "padStart", InferredTypeData::String),
+                    )],
+                ),
+                TypeofKind::String,
+            ),
+            (
+                interface(
+                    &db,
+                    &[],
+                    vec![optional_member("description", InferredTypeData::String)],
+                ),
+                TypeofKind::Symbol,
+            ),
+            // The generated globals have no `BigInt` to compare `toString` with.
+            (
+                interface(
+                    &db,
+                    &[],
+                    vec![member(
+                        "toString",
+                        method(&db, "toString", InferredTypeData::String),
+                    )],
+                ),
+                TypeofKind::BigInt,
+            ),
+            // A mismatched member type is not conclusive.
+            (
+                interface(&db, &[], vec![member("length", InferredTypeData::String)]),
+                TypeofKind::String,
+            ),
+            // A class can declare private members, which no string has.
+            (
+                class_instance(&db, vec![member("length", InferredTypeData::Number)]),
+                TypeofKind::String,
+            ),
+        ];
+        for (ty, kind) in cases {
+            assert_eq!(
+                narrow_type(&db, ty, NarrowingPredicate::Typeof(kind), true),
+                ty,
+                "{kind:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn callable_object_types_stay_in_function_branches() {
+        let db = TestDb::default();
+        let signature = TypeMember {
+            kind: TypeMemberKind::CallSignature,
+            ty: method(&db, "call", InferredTypeData::VoidKeyword),
+        };
+        let callable = interface(&db, &[], vec![signature.clone()]);
+        for ty in [
+            interface(
+                &db,
+                &[],
+                vec![signature, member("foo", InferredTypeData::String)],
+            ),
+            // The call signature is inherited.
+            interface(
+                &db,
+                &[callable],
+                vec![member("foo", InferredTypeData::String)],
+            ),
+        ] {
+            assert_eq!(
+                narrow_type(
+                    &db,
+                    ty,
+                    NarrowingPredicate::Typeof(TypeofKind::Function),
+                    true
+                ),
+                ty
+            );
+            assert_eq!(
+                narrow_type(
+                    &db,
+                    ty,
+                    NarrowingPredicate::Typeof(TypeofKind::Object),
+                    false
+                ),
+                ty
+            );
             assert_eq!(
                 narrow_type(
                     &db,
@@ -1140,17 +1645,137 @@ mod tests {
                     NarrowingPredicate::Typeof(TypeofKind::String),
                     true
                 ),
-                ty
+                InferredTypeData::NeverKeyword
             );
-            for kind in [TypeofKind::Object, TypeofKind::Function] {
-                for positive in [false, true] {
-                    assert_eq!(
-                        narrow_type(&db, ty, NarrowingPredicate::Typeof(kind), positive),
-                        ty
-                    );
-                }
+        }
+        // Only functions have call signatures.
+        assert_eq!(
+            narrow_type(
+                &db,
+                callable,
+                NarrowingPredicate::Typeof(TypeofKind::String),
+                true
+            ),
+            InferredTypeData::NeverKeyword
+        );
+    }
+
+    #[test]
+    fn object_types_are_resolved_but_generics_stay_unchanged() {
+        let db = TestDb::default();
+        let wrapper = InternedTypeofType::new(&db, InferredTypeData::Number);
+        let handle = InferredTypeData::Local(LocalTypeHandle::new(
+            &db,
+            ModuleKey::new(wrapper.as_id()),
+            LocalTypeId::new(0),
+        ));
+        let class = InferredTypeData::Class(InternedClass::new(
+            &db,
+            Box::default(),
+            None,
+            Box::default(),
+            Box::from([member("k", InferredTypeData::Number)]),
+            Some(Text::new_static("K")),
+            false,
+        ));
+        let ty = union(
+            &db,
+            &[
+                InferredTypeData::instance_of(&db, handle, Box::default()),
+                InferredTypeData::Undefined,
+            ],
+        );
+        let resolve = |ty| if ty == handle { class } else { ty };
+        assert_eq!(
+            super::narrow_type(&db, ty, NarrowingPredicate::Truthy, false, resolve),
+            InferredTypeData::Undefined
+        );
+        assert_eq!(narrow_type(&db, ty, NarrowingPredicate::Truthy, false), ty);
+
+        let generic = InferredTypeData::Generic(InternedGenericTypeParameter::new(
+            &db,
+            false,
+            Some(interface(
+                &db,
+                &[],
+                vec![member("a", InferredTypeData::Number)],
+            )),
+            None,
+            Text::new_static("T"),
+        ));
+        for ty in [
+            generic,
+            InferredTypeData::instance_of(&db, generic, Box::default()),
+        ] {
+            assert_eq!(narrow_type(&db, ty, NarrowingPredicate::Truthy, false), ty);
+            for kind in typeof_kinds() {
+                assert_eq!(
+                    narrow_type(&db, ty, NarrowingPredicate::Typeof(kind), true),
+                    ty
+                );
             }
         }
+    }
+
+    #[test]
+    fn only_object_types_call_the_resolver() {
+        let db = TestDb::default();
+        let foo = interface(&db, &[], vec![member("a", InferredTypeData::Number)]);
+        let primitives = union(
+            &db,
+            &[
+                InferredTypeData::String,
+                InferredTypeData::Number,
+                InferredTypeData::Boolean,
+                InferredTypeData::BigInt,
+                InferredTypeData::Symbol,
+                InferredTypeData::Null,
+                InferredTypeData::Undefined,
+                number(&db, "0"),
+                string(&db, ""),
+                method(&db, "f", InferredTypeData::VoidKeyword),
+            ],
+        );
+        let mut calls = 0;
+        let mut predicates = vec![
+            NarrowingPredicate::Truthy,
+            NarrowingPredicate::Nullish,
+            NarrowingPredicate::Literal(number(&db, "1")),
+        ];
+        predicates.extend(typeof_kinds().map(NarrowingPredicate::Typeof));
+        for predicate in predicates {
+            for positive in [false, true] {
+                super::narrow_type(&db, primitives, predicate, positive, |ty| {
+                    calls += 1;
+                    ty
+                });
+            }
+        }
+        super::falsy_values(&db, primitives, |ty| {
+            calls += 1;
+            ty
+        });
+        // Tests that never compare object types with primitives.
+        for (predicate, positive) in [
+            (NarrowingPredicate::Truthy, true),
+            (NarrowingPredicate::Nullish, true),
+            (NarrowingPredicate::Nullish, false),
+            (NarrowingPredicate::Typeof(TypeofKind::String), false),
+            (NarrowingPredicate::Typeof(TypeofKind::Object), true),
+            (NarrowingPredicate::Literal(number(&db, "1")), false),
+        ] {
+            super::narrow_type(&db, foo, predicate, positive, |ty| {
+                calls += 1;
+                ty
+            });
+        }
+        assert_eq!(calls, 0);
+
+        super::narrow_type(&db, foo, NarrowingPredicate::Truthy, false, |ty| {
+            calls += 1;
+            ty
+        });
+        assert_ne!(calls, 0);
     }
 
     #[test]

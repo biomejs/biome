@@ -544,7 +544,9 @@ impl<'db> ResolutionCtx<'db, '_> {
                     return Some(ty);
                 }
                 match self.test_predicate(*test) {
-                    Some(predicate) => narrow_type(self.db, ty, predicate, *positive),
+                    Some(predicate) => {
+                        narrow_type(self.db, ty, predicate, *positive, self.narrowing_resolver())
+                    }
                     None => ty,
                 }
             }

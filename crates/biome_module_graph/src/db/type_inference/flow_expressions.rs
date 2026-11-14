@@ -123,7 +123,13 @@ impl<'db> ResolutionCtx<'db, '_> {
                     JsLogicalOperator::LogicalOr => (NarrowingPredicate::Truthy, true),
                     JsLogicalOperator::NullishCoalescing => (NarrowingPredicate::Nullish, false),
                 };
-                let continuing = narrow_type(self.db, left, predicate, !retained);
+                let continuing = narrow_type(
+                    self.db,
+                    left,
+                    predicate,
+                    !retained,
+                    self.narrowing_resolver(),
+                );
                 if continuing == TypeData::NeverKeyword {
                     return Some(left);
                 }
@@ -132,9 +138,15 @@ impl<'db> ResolutionCtx<'db, '_> {
                 // so a `string` or `bigint` operand contributes `""` or `0n`,
                 // although a read in a falsy branch keeps the broad type.
                 let retained = if operator == JsLogicalOperator::LogicalAnd {
-                    falsy_values(self.db, left)
+                    falsy_values(self.db, left, self.narrowing_resolver())
                 } else {
-                    narrow_type(self.db, left, predicate, retained)
+                    narrow_type(
+                        self.db,
+                        left,
+                        predicate,
+                        retained,
+                        self.narrowing_resolver(),
+                    )
                 };
                 Some(TypeData::union_from_types(self.db, vec![retained, right]))
             }
@@ -149,13 +161,23 @@ impl<'db> ResolutionCtx<'db, '_> {
                     return None;
                 }
                 let test = test.or_else(|| self.raw_operand(&test_expression))?;
-                if narrow_type(self.db, test, NarrowingPredicate::Truthy, true)
-                    == TypeData::NeverKeyword
+                if narrow_type(
+                    self.db,
+                    test,
+                    NarrowingPredicate::Truthy,
+                    true,
+                    self.narrowing_resolver(),
+                ) == TypeData::NeverKeyword
                 {
                     return alternate.or_else(|| self.raw_operand(&alternate_expression));
                 }
-                if narrow_type(self.db, test, NarrowingPredicate::Truthy, false)
-                    == TypeData::NeverKeyword
+                if narrow_type(
+                    self.db,
+                    test,
+                    NarrowingPredicate::Truthy,
+                    false,
+                    self.narrowing_resolver(),
+                ) == TypeData::NeverKeyword
                 {
                     return consequent.or_else(|| self.raw_operand(&consequent_expression));
                 }

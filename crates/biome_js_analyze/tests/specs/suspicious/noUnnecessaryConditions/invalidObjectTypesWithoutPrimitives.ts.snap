@@ -1,0 +1,124 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidObjectTypesWithoutPrimitives.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// No primitive and no function has the member `id`, so a falsy test and the
+// tests of `typeof` below remove `Config` and `Point`.
+
+interface Config {
+	id: number;
+}
+
+class Point {
+	id = 0;
+}
+
+function falsyInterface(value: Config | undefined) {
+	if (!value) {
+		if (value) {
+		}
+	}
+}
+
+function falsyClass(value: Point | null) {
+	if (!value) {
+		if (value) {
+		}
+	}
+}
+
+function typeofUndefined(value: Config | undefined) {
+	if (typeof value === "undefined") {
+		if (value) {
+		}
+	}
+}
+
+function typeofFunction(value: Config | (() => void)) {
+	if (typeof value === "function") {
+		if (value) {
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidObjectTypesWithoutPrimitives.ts:15:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    13 │ function falsyInterface(value: Config | undefined) {
+    14 │ 	if (!value) {
+  > 15 │ 		if (value) {
+       │ 		    ^^^^^
+    16 │ 		}
+    17 │ 	}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
+
+```
+
+```
+invalidObjectTypesWithoutPrimitives.ts:22:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    20 │ function falsyClass(value: Point | null) {
+    21 │ 	if (!value) {
+  > 22 │ 		if (value) {
+       │ 		    ^^^^^
+    23 │ 		}
+    24 │ 	}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
+
+```
+
+```
+invalidObjectTypesWithoutPrimitives.ts:29:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    27 │ function typeofUndefined(value: Config | undefined) {
+    28 │ 	if (typeof value === "undefined") {
+  > 29 │ 		if (value) {
+       │ 		    ^^^^^
+    30 │ 		}
+    31 │ 	}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
+
+```
+
+```
+invalidObjectTypesWithoutPrimitives.ts:36:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    34 │ function typeofFunction(value: Config | (() => void)) {
+    35 │ 	if (typeof value === "function") {
+  > 36 │ 		if (value) {
+       │ 		    ^^^^^
+    37 │ 		}
+    38 │ 	}
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
+  
+
+```
