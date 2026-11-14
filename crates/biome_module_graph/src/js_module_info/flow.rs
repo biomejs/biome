@@ -41,7 +41,9 @@ use biome_js_syntax::{
     JsObjectBindingPatternShorthandProperty, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode,
     JsThisExpression,
 };
-use biome_js_type_info::{RawTypeData, TypeReference, is_raw_narrowing_invariant};
+use biome_js_type_info::{
+    RawTypeData, TypeReference, is_raw_narrowing_invariant, raw_may_be_object_union,
+};
 use biome_rowan::{AstNode, AstPtr, Text, TextRange};
 use builder::{BuiltRoot, build_root};
 use guards::GuardFunctions;
@@ -233,6 +235,11 @@ pub(crate) struct RootFlow {
     pub(crate) subjects: Box<[FlowSubject]>,
     /// The points of each subject's reads, sorted and without duplicates.
     pub(crate) read_points: FxHashMap<FlowSubjectId, Box<[FlowNodeId]>>,
+    /// The subjects with reads that conditions narrow only through
+    /// [`FlowGuard::Property`], such as `s` when the only condition that
+    /// mentions it is `s.kind === "c"`. Such a test narrows only a union, so
+    /// these subjects need no solve when their declared type is not one.
+    pub(crate) property_only: FxHashSet<FlowSubjectId>,
 }
 
 impl RootFlow {
@@ -240,6 +247,12 @@ impl RootFlow {
     /// slice when it keeps no read of it.
     pub(crate) fn read_points(&self, subject: FlowSubjectId) -> &[FlowNodeId] {
         self.read_points.get(&subject).map_or(&[], |points| points)
+    }
+
+    /// Returns whether conditions narrow `subject` only through
+    /// [`FlowGuard::Property`], as [`Self::property_only`] describes.
+    pub(crate) fn is_property_only(&self, subject: FlowSubjectId) -> bool {
+        self.property_only.contains(&subject)
     }
 
     /// Returns the subject with id `subject`, or `None` when the root has no
@@ -279,6 +292,13 @@ pub(crate) struct ModuleFlow {
     reads: FxHashMap<TextRange, FlowRead>,
     /// Points to each candidate expression, keyed by its trimmed range.
     candidates: FxHashMap<TextRange, AstPtr<AnyFlowExpression>>,
+    /// The declarations of the bindings in [`RootFlow::property_only`].
+    property_only_bindings: FxHashSet<TextRange>,
+    /// The candidates that are candidates only because they are, or contain,
+    /// reads of one binding in [`Self::property_only_bindings`], keyed by
+    /// range, with that binding's declaration. Such a candidate keeps its
+    /// type when no test of a property can narrow the binding.
+    property_only_candidates: FxHashMap<TextRange, TextRange>,
 }
 
 impl ModuleFlow {
@@ -341,6 +361,40 @@ impl ModuleFlow {
         self.candidates.get(&range)
     }
 
+    /// Returns whether conditions narrow the binding declared at `range` only
+    /// through [`FlowGuard::Property`], as [`RootFlow::property_only`]
+    /// describes.
+    pub(crate) fn is_property_only_binding(&self, range: TextRange) -> bool {
+        self.property_only_bindings.contains(&range)
+    }
+
+    /// Returns the declaration of the binding whose reads alone make the
+    /// expression at `range` a candidate, when that binding is one that
+    /// [`Self::is_property_only_binding`] accepts.
+    pub(crate) fn property_only_candidate(&self, range: TextRange) -> Option<TextRange> {
+        self.property_only_candidates.get(&range).copied()
+    }
+
+    /// Records `expression` as a candidate. `binding` is the declaration of
+    /// the binding in [`Self::property_only_bindings`] whose read makes it a
+    /// candidate, or `None` for a read of another subject.
+    fn insert_candidate(&mut self, expression: &AnyFlowExpression, binding: Option<TextRange>) {
+        let range = expression.range();
+        let is_new = !self.candidates.contains_key(&range);
+        if is_new {
+            self.candidates.insert(range, AstPtr::new(expression));
+        }
+        match binding {
+            Some(binding) if is_new => {
+                self.property_only_candidates.insert(range, binding);
+            }
+            Some(binding) if self.property_only_candidates.get(&range) == Some(&binding) => {}
+            _ => {
+                self.property_only_candidates.remove(&range);
+            }
+        }
+    }
+
     /// Returns the flow of the read at `range`, an identifier or a member
     /// expression.
     pub(crate) fn read(&self, range: TextRange) -> Option<FlowRead> {
@@ -384,12 +438,33 @@ impl RootCollector<'_> {
             nodes,
             guards,
             subjects,
-            mentions,
+            mut mentions,
+            mut property_only,
             reads,
         }) = build_root(root, self.model, &mut self.functions, this_can_narrow)
         else {
             return;
         };
+        // A test of a property narrows its object only when the object's
+        // declared type is a union with at least two object types, so a
+        // variable that only such tests mention keeps its declared type when
+        // its collected type shows, without resolving it, that it is not one.
+        // Dropping it here spares its reads the flow queries.
+        let unnarrowable: FxHashSet<FlowSubjectId> = property_only
+            .iter()
+            .copied()
+            .filter(|subject| match subjects.as_slice().get(*subject as usize) {
+                Some(FlowSubject::Binding(binding)) => self
+                    .raw_binding_types
+                    .get(binding)
+                    .is_none_or(|reference| !raw_may_be_object_union(reference, self.raw_types)),
+                Some(FlowSubject::This | FlowSubject::Member { .. }) | None => false,
+            })
+            .collect();
+        if !unnarrowable.is_empty() {
+            property_only.retain(|subject| !unnarrowable.contains(subject));
+            mentions.retain(|(_, subject)| !unnarrowable.contains(subject));
+        }
         let tested: FxHashSet<FlowSubjectId> =
             mentions.iter().map(|(_, subject)| *subject).collect();
         let is_path = |subject: FlowSubjectId| {
@@ -426,9 +501,13 @@ impl RootCollector<'_> {
             return;
         }
 
-        let Some(reachable) =
-            self.reachable_from_tests(&nodes, subjects.as_slice(), &mentions, &reads)
-        else {
+        let Some(reachable) = self.reachable_from_tests(
+            &nodes,
+            subjects.as_slice(),
+            &mentions,
+            &property_only,
+            &reads,
+        ) else {
             return;
         };
         let index = flow.roots.len();
@@ -441,14 +520,18 @@ impl RootCollector<'_> {
                 .entry(read.subject)
                 .or_default()
                 .push(read.point);
+            let binding = match subjects.as_slice().get(read.subject as usize) {
+                Some(FlowSubject::Binding(binding)) if property_only.contains(&read.subject) => {
+                    flow.property_only_bindings.insert(*binding);
+                    Some(*binding)
+                }
+                _ => None,
+            };
             let expression = read.expression;
-            flow.candidates
-                .insert(expression.range(), AstPtr::new(&expression));
-            flow.candidates.extend(
-                expression
-                    .evaluated_ancestors()
-                    .map(|ancestor| (ancestor.range(), AstPtr::new(&ancestor))),
-            );
+            flow.insert_candidate(&expression, binding);
+            for ancestor in expression.evaluated_ancestors() {
+                flow.insert_candidate(&ancestor, binding);
+            }
             flow.reads.insert(
                 expression.range(),
                 FlowRead {
@@ -459,10 +542,15 @@ impl RootCollector<'_> {
             );
         }
         if !read_points.is_empty() {
+            let property_only = property_only
+                .into_iter()
+                .filter(|subject| read_points.contains_key(subject))
+                .collect();
             flow.roots.push(RootFlow {
                 nodes: nodes.into_boxed_slice(),
                 guards: guards.into_boxed_slice(),
                 subjects: subjects.into_subjects().into_boxed_slice(),
+                property_only,
                 read_points: read_points
                     .into_iter()
                     .map(|(subject, mut points)| {
@@ -509,15 +597,18 @@ impl RootCollector<'_> {
     /// Returns the `(subject, point)` pairs that a test of the subject can
     /// reach, including the test itself.
     ///
-    /// Variables are walked before property paths, so the work limit never
-    /// takes narrowing away from a variable because of its paths. Returns no
-    /// pair of a path when the limit runs out on paths, and `None` when it runs
-    /// out on variables.
+    /// Variables are walked before property paths and before the subjects in
+    /// `property_only`, which only tests of their properties narrow, so the
+    /// work limit never takes narrowing away from a variable because of
+    /// them. Returns no pair of a path or of a subject in `property_only` when
+    /// the limit runs out on them, and `None` when it runs out on the other
+    /// variables.
     fn reachable_from_tests(
         &self,
         nodes: &[FlowNode],
         subjects: &[FlowSubject],
         mentions: &[(FlowNodeId, FlowSubjectId)],
+        property_only: &FxHashSet<FlowSubjectId>,
         reads: &[builder::BuiltRead],
     ) -> Option<FxHashSet<(FlowSubjectId, FlowNodeId)>> {
         let mut successors = vec![Vec::new(); nodes.len()];
@@ -534,14 +625,16 @@ impl RootCollector<'_> {
                 }
             }
         }
-        let is_path = |subject: FlowSubjectId| {
-            matches!(
-                subjects.get(subject as usize),
-                Some(FlowSubject::Member { .. })
-            )
+        // Paths and subjects in `property_only` lose their reads first.
+        let is_secondary = |subject: FlowSubjectId| {
+            property_only.contains(&subject)
+                || matches!(
+                    subjects.get(subject as usize),
+                    Some(FlowSubject::Member { .. })
+                )
         };
         let mut read_subjects: Vec<FlowSubjectId> = reads.iter().map(|read| read.subject).collect();
-        read_subjects.sort_unstable_by_key(|subject| (is_path(*subject), *subject));
+        read_subjects.sort_unstable_by_key(|subject| (is_secondary(*subject), *subject));
         read_subjects.dedup();
         let mut reachable = FxHashSet::default();
         let mut remaining = self.relevance_budget;
@@ -554,10 +647,10 @@ impl RootCollector<'_> {
                 .collect();
             while let Some(node) = pending.pop() {
                 let Some(left) = remaining.checked_sub(1) else {
-                    if !is_path(subject) {
+                    if !is_secondary(subject) {
                         return None;
                     }
-                    reachable.retain(|(subject, _)| !is_path(*subject));
+                    reachable.retain(|(subject, _)| !is_secondary(*subject));
                     break 'subjects;
                 };
                 remaining = left;
@@ -802,6 +895,8 @@ mod tests {
             }
         "#;
         let info = module(SOURCE);
+        // The paths can still be candidates, because their object `o` is a
+        // read that the tests of its properties can narrow.
         for (marker, expression, expected) in [
             ("object", "o.v", true),
             ("object", "o.v.w", false),
@@ -809,9 +904,104 @@ mod tests {
             ("after", "o.n", false),
         ] {
             assert_eq!(
-                info.flow.is_candidate(marked(SOURCE, marker, expression)),
+                info.flow.read(marked(SOURCE, marker, expression)).is_some(),
                 expected,
                 "{marker}: {expression}"
+            );
+        }
+    }
+
+    #[test]
+    fn objects_of_tested_properties_are_property_only_subjects() {
+        const SOURCE: &str = r#"
+            function f(s: { k: "a" } | { k: "b" }, t: { k: "a" } | { k: "b" } | null) {
+                if (s.k === "a") { /*s*/s; }
+                if (t && t.k === "a") { /*t*/t; }
+            }
+        "#;
+        let info = module(SOURCE);
+        let reads: Vec<_> = ["s", "t"]
+            .into_iter()
+            .map(|marker| info.flow.read(marked(SOURCE, marker, marker)).unwrap())
+            .collect();
+        let root = info.flow.root(reads[0].root).unwrap();
+        // `s` is tested only through `s.k`, while `t` is also tested itself.
+        assert!(root.is_property_only(reads[0].subject));
+        assert!(!root.is_property_only(reads[1].subject));
+    }
+
+    #[test]
+    fn candidates_made_only_by_reads_of_a_property_only_binding_name_it() {
+        const SOURCE: &str = r#"
+            declare function g(...values: unknown[]): void;
+            function f(s: { k: "a" } | { k: "b" }, x: string | null) {
+                if (s.k === "a" && x) { /*read*/s; /*call*/g(s); /*shared*/g(s, x); /*other*/x; }
+            }
+        "#;
+        let info = module(SOURCE);
+        let read = info.flow.read(marked(SOURCE, "read", "s")).unwrap();
+        let Some(&super::FlowSubject::Binding(binding)) =
+            info.flow.root(read.root).unwrap().subject(read.subject)
+        else {
+            panic!("`s` must be a binding subject");
+        };
+        assert!(info.flow.is_property_only_binding(binding));
+        // A candidate that also reads `x` must be evaluated even when no test
+        // of a property can narrow `s`.
+        for (marker, expression, named) in [
+            ("read", "s", true),
+            ("call", "g(s)", true),
+            ("shared", "g(s, x)", false),
+            ("other", "x", false),
+        ] {
+            let range = marked(SOURCE, marker, expression);
+            assert!(info.flow.is_candidate(range), "{marker}");
+            assert_eq!(
+                info.flow.property_only_candidate(range),
+                named.then_some(binding),
+                "{marker}"
+            );
+        }
+    }
+
+    #[test]
+    fn objects_whose_declared_type_is_not_a_union_of_objects_keep_no_reads() {
+        const SOURCE: &str = r#"
+            type Shape = { k: "a" } | { k: "b" };
+            declare function make(): Shape;
+            function f(
+                object: { v: string | null },
+                primitives: string | number | undefined,
+                nullable: { k: "a" } | null,
+                named: Shape,
+            ) {
+                const inferred = make();
+                const instance = new Date();
+                if (object.v && primitives.length && nullable.k && named.k && inferred.k && instance.getTime) {
+                    /*object*/object;
+                    /*primitives*/primitives;
+                    /*nullable*/nullable;
+                    /*named*/named;
+                    /*inferred*/inferred;
+                    /*instance*/instance;
+                }
+            }
+        "#;
+        let info = module(SOURCE);
+        for (marker, expected) in [
+            ("object", false),
+            ("primitives", false),
+            // One object type and `null` can't be told apart by a property.
+            ("nullable", false),
+            ("named", true),
+            ("inferred", true),
+            // `new` gives one instance.
+            ("instance", false),
+        ] {
+            assert_eq!(
+                info.flow.is_candidate(marked(SOURCE, marker, marker)),
+                expected,
+                "{marker}"
             );
         }
     }

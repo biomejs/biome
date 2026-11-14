@@ -229,6 +229,92 @@ pub(crate) fn primitive_can_satisfy<'db>(
     AssignabilityCheck::new(db, resolve, &[]).primitive_can_satisfy(kind, target)
 }
 
+/// Outcome of looking up a property with [`find_property`].
+pub(crate) enum PropertyLookup<'db> {
+    /// The property exists. `ty` is its type as a read sees it, with the
+    /// type arguments of the object substituted but its handles unresolved.
+    Found {
+        ty: TypeData<'db>,
+        is_optional: bool,
+    },
+    /// The type has no such property.
+    Missing,
+    /// The available type information can't tell, for example because the
+    /// type has an index signature or a computed key.
+    Unknown,
+}
+
+/// Looks up the property `name` of the normalized object type `ty` the way a
+/// property access reads it, following inheritance and falling back to the
+/// members of `Object`.
+///
+/// A tuple without rest elements has a property for each element, named by
+/// its index in decimal, such as `"0"`, which is optional when the element
+/// is. A tuple has no property for an index past its last element. Other
+/// names of tuple properties, such as `length`, give `Unknown`, and so do
+/// arrays, primitives, functions, and unresolved types.
+pub(crate) fn find_property<'db>(
+    db: &'db dyn TypeDb,
+    ty: TypeData<'db>,
+    name: &str,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> PropertyLookup<'db> {
+    let mut check = AssignabilityCheck::new(db, resolve, &[]);
+    let (resolved, _) = strip_readonly(db, check.resolve(ty));
+    if let TypeData::Tuple(tuple) = resolved {
+        return tuple_element(db, tuple, name);
+    }
+    match check.find_apparent_member(resolved, name) {
+        MemberLookup::Found { ty, is_optional } => PropertyLookup::Found { ty, is_optional },
+        MemberLookup::Missing => PropertyLookup::Missing,
+        MemberLookup::Unknown => PropertyLookup::Unknown,
+    }
+}
+
+/// Returns the property `name` of `tuple`, as [`find_property`] describes.
+fn tuple_element<'db>(
+    db: &'db dyn TypeDb,
+    tuple: InternedTuple<'db>,
+    name: &str,
+) -> PropertyLookup<'db> {
+    // An inferred array, such as the type of `[1, 2]`, has no fixed length.
+    if tuple.is_inferred_array(db) {
+        return PropertyLookup::Unknown;
+    }
+    let Some(index) = name
+        .parse::<usize>()
+        .ok()
+        .filter(|index| index.to_string() == name)
+    else {
+        return PropertyLookup::Unknown;
+    };
+    for (position, element) in tuple.elements(db).iter().enumerate() {
+        // An element at or after a rest element has no fixed index.
+        if element.is_rest {
+            return PropertyLookup::Unknown;
+        }
+        if position == index {
+            return PropertyLookup::Found {
+                ty: element.ty,
+                is_optional: element.is_optional,
+            };
+        }
+    }
+    PropertyLookup::Missing
+}
+
+/// Resolves the handles of the normalized type `ty` and removes the wrappers
+/// that don't change its values, such as an alias without type arguments or
+/// a `typeof` type, as assignability checks do before comparing types.
+/// Unions are left as they are.
+pub(crate) fn resolve_wrapped_type<'db>(
+    db: &'db dyn TypeDb,
+    ty: TypeData<'db>,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> TypeData<'db> {
+    AssignabilityCheck::new(db, resolve, &[]).resolve(ty)
+}
+
 /// Returns the members that TypeScript 6.0.3's library files declare on the
 /// wrapper of a `typeof` kind, but that the generated globals lack, because
 /// they come from library files newer than ES2015.

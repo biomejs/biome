@@ -1,5 +1,5 @@
 use super::subjects::subject_of;
-use super::{FlowSubject, FlowSubjectId, FlowSubjectTable};
+use super::{FlowSubject, FlowSubjectId, FlowSubjectTable, PropertyKey};
 use crate::js_module_info::TsBindingReferenceExt;
 use biome_js_semantic::{Binding, JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
@@ -54,6 +54,19 @@ pub(crate) enum FlowGuard {
         subject: FlowSubjectId,
         test: FlowTest,
         positive: bool,
+    },
+    /// A runtime test of the property `key` of `object`, which narrows
+    /// `object` itself when the property is a discriminant, as a test of
+    /// `s.kind` narrows `s`. The same test of the property's own subject is a
+    /// separate [`Self::Test`]. `test` is never [`FlowTest::Predicate`].
+    Property {
+        object: FlowSubjectId,
+        key: PropertyKey,
+        test: FlowTest,
+        positive: bool,
+        /// Whether the test reads the property through an optional chain, as
+        /// `s?.kind` does, which gives `undefined` when `s` is nullish.
+        optional_chain: bool,
     },
     /// The operands of `&&` or `||`. A sequential pair applies `right` to the
     /// result of `left`; otherwise both apply to the incoming type and their
@@ -457,6 +470,7 @@ pub(super) fn decompose_assertion(
             Some(DecomposedCondition {
                 guard: guards.len() - 1,
                 mentions: vec![subject],
+                parents: Vec::new(),
             })
         }
     }
@@ -481,6 +495,10 @@ pub(super) struct DecomposedCondition {
     /// subject read directly in an inlined initializer that
     /// [`narrows_through_aliases`] accepts.
     pub(super) mentions: Vec<FlowSubjectId>,
+    /// Subjects whose type the condition may refine only through
+    /// [`FlowGuard::Property`], such as `s` in `s.kind === "c"`, unless
+    /// `mentions` also lists them.
+    pub(super) parents: Vec<FlowSubjectId>,
 }
 
 /// Decomposes `expression`, assuming `outcome`, into guards appended to
@@ -506,11 +524,13 @@ pub(super) fn decompose_condition(
         guards,
         remaining: MAX_CONDITION_STEPS,
         mentions: Vec::new(),
+        parents: Vec::new(),
         complete: true,
         aliases: 0,
         initializers: Vec::new(),
     };
     let guard = decomposer.guard(expression.clone(), outcome, 0);
+    let parents = std::mem::take(&mut decomposer.parents);
     let mentions = if decomposer.complete {
         decomposer.mentions
     } else {
@@ -542,7 +562,11 @@ pub(super) fn decompose_condition(
             })
             .collect()
     };
-    DecomposedCondition { guard, mentions }
+    DecomposedCondition {
+        guard,
+        mentions,
+        parents,
+    }
 }
 
 struct Decomposer<'a, 'raw> {
@@ -552,6 +576,8 @@ struct Decomposer<'a, 'raw> {
     guards: &'a mut Vec<FlowGuard>,
     remaining: usize,
     mentions: Vec<FlowSubjectId>,
+    /// The objects of the [`FlowGuard::Property`] guards decomposed so far.
+    parents: Vec<FlowSubjectId>,
     complete: bool,
     /// The number of aliased conditions whose initializers enclose the
     /// expression being decomposed.
@@ -674,9 +700,9 @@ impl Decomposer<'_, '_> {
         let Some(chain) = chain_receivers(operand, &mut self.remaining) else {
             return FlowGuard::Keep;
         };
-        let guard = match test
-            .and_then(|test| Some((test, subject_of(operand, self.model, self.subjects)?)))
-        {
+        let tested =
+            test.and_then(|test| Some((test, subject_of(operand, self.model, self.subjects)?)));
+        let mut guard = match tested {
             Some((test, subject)) if self.may_test(subject) => {
                 self.mentions.push(subject);
                 FlowGuard::Test {
@@ -687,11 +713,63 @@ impl Decomposer<'_, '_> {
             }
             _ => FlowGuard::Keep,
         };
+        if let Some((test, subject)) = tested
+            && let Some(property) = self.property_guard(operand, subject, test, positive)
+        {
+            let left = self.push(guard);
+            let right = self.push(property);
+            guard = FlowGuard::Both {
+                left,
+                right,
+                sequential: true,
+            };
+        }
         if receivers {
             self.receiver_tests(chain, guard)
         } else {
             guard
         }
+    }
+
+    /// Returns the guard that a runtime test of `operand`, whose subject is
+    /// `subject`, applies to the object that holds it, as `s.kind === "c"`
+    /// applies to `s`, when `subject` is a named property of a subject other
+    /// than `this` that a test may narrow.
+    ///
+    /// Returns `None` for a call to a type-guard function, because
+    /// TypeScript never narrows `s` through `isC(s.kind)`. Only the object
+    /// that holds the property narrows: `o.a.kind` narrows `o.a`, not `o`.
+    fn property_guard(
+        &mut self,
+        operand: &AnyJsExpression,
+        subject: FlowSubjectId,
+        test: FlowTest,
+        positive: bool,
+    ) -> Option<FlowGuard> {
+        if matches!(test, FlowTest::Predicate(_)) {
+            return None;
+        }
+        let subjects = self.subjects.as_slice();
+        let FlowSubject::Member {
+            object,
+            key: key @ PropertyKey::Name(_),
+        } = subjects.get(subject as usize)?
+        else {
+            return None;
+        };
+        let (object, key) = (*object, key.clone());
+        if matches!(subjects.get(object as usize)?, FlowSubject::This) || !self.may_test(object) {
+            return None;
+        }
+        self.parents.push(object);
+        Some(FlowGuard::Property {
+            object,
+            key,
+            test,
+            positive,
+            optional_chain: AnyJsOptionalChainExpression::cast_ref(operand.syntax())
+                .is_some_and(|chain| chain.is_optional_chain()),
+        })
     }
 
     /// Returns `guard` combined, as `&&` combines its operands, with a test
@@ -1294,7 +1372,8 @@ mod tests {
 
     /// Decomposes the `if` test `source` and names the subjects that its
     /// receiver tests check, outermost guard first, followed by the main
-    /// guard that they wrap.
+    /// guard that they wrap, without the [`FlowGuard::Property`] that a test
+    /// of a property adds to it.
     fn receiver_names(source: &str, outcome: FlowOutcome) -> (Vec<String>, FlowGuard) {
         let Decomposed {
             guards,
@@ -1309,16 +1388,52 @@ mod tests {
             right,
             sequential: true,
         } = guard
-            && let FlowGuard::Test {
+        {
+            if matches!(guards[*right], FlowGuard::Property { .. }) {
+                guard = &guards[*left];
+                break;
+            }
+            let FlowGuard::Test {
                 subject,
                 test: FlowTest::Nullish,
                 positive: false,
             } = &guards[*left]
-        {
+            else {
+                break;
+            };
             names.push(subject_name(&model, &subjects, *subject));
             guard = &guards[*right];
         }
         (names, guard.clone())
+    }
+
+    /// Decomposes the `if` test `source` and names the objects of its
+    /// [`FlowGuard::Property`] guards with their keys, as `value[kind]`,
+    /// prefixed with `?` when the test reads the key through an optional
+    /// chain.
+    fn property_names(source: &str, outcome: FlowOutcome) -> Vec<String> {
+        let Decomposed {
+            guards,
+            model,
+            subjects,
+            ..
+        } = decomposed(source, outcome);
+        guards
+            .iter()
+            .filter_map(|guard| match guard {
+                FlowGuard::Property {
+                    object,
+                    key: PropertyKey::Name(key),
+                    optional_chain,
+                    ..
+                } => Some(format!(
+                    "{}{}[{key}]",
+                    if *optional_chain { "?" } else { "" },
+                    subject_name(&model, &subjects, *object)
+                )),
+                _ => None,
+            })
+            .collect()
     }
 
     #[test]
@@ -1418,6 +1533,103 @@ mod tests {
         let (receivers, main) = receiver_names("value?.f()", FlowOutcome::Truthy);
         assert_eq!(receivers, ["value", "value.f"]);
         assert_eq!(main, FlowGuard::Keep);
+    }
+
+    #[test]
+    fn tests_of_named_properties_also_test_their_object() {
+        use FlowOutcome::{Falsy, NonNullish, Truthy};
+        for (source, outcome, expected) in [
+            ("value.kind === 'a'", Truthy, vec!["value[kind]"]),
+            ("value.kind !== 'a'", Falsy, vec!["value[kind]"]),
+            ("value['kind'] === 1", Truthy, vec!["value[kind]"]),
+            ("value[0] === 'a'", Truthy, vec!["value[0]"]),
+            ("value.ok", Truthy, vec!["value[ok]"]),
+            ("!value.ok", Truthy, vec!["value[ok]"]),
+            ("value.ok", NonNullish, vec!["value[ok]"]),
+            ("value.kind === null", Truthy, vec!["value[kind]"]),
+            ("value.kind == null", Truthy, vec!["value[kind]"]),
+            ("value.kind !== undefined", Truthy, vec!["value[kind]"]),
+            (
+                "typeof value.kind === 'string'",
+                Truthy,
+                vec!["value[kind]"],
+            ),
+            ("value.a.kind === 'a'", Truthy, vec!["value.a[kind]"]),
+            ("value?.kind === 'a'", Truthy, vec!["?value[kind]"]),
+            ("value?.a.kind === 'a'", Truthy, vec!["?value.a[kind]"]),
+            ("(value).kind === 'a'", Truthy, vec!["value[kind]"]),
+            (
+                "value.kind === 'a' && other.ok",
+                Truthy,
+                vec!["value[kind]", "other[ok]"],
+            ),
+            // Loose equality with a literal narrows only the receivers of an
+            // optional chain.
+            ("value.kind == 'a'", Truthy, vec![]),
+            ("value.kind === other", Truthy, vec![]),
+            ("value[other] === 'a'", Truthy, vec![]),
+            ("this.kind === 'a'", Truthy, vec![]),
+            ("value", Truthy, vec![]),
+            ("check(value.kind)", Truthy, vec![]),
+        ] {
+            assert_eq!(property_names(source, outcome), expected, "{source}");
+        }
+        // The object is a parent, not a mention, unless a test checks it.
+        let decomposed = decomposed("value.kind === 'a'", Truthy);
+        let parents: Vec<_> = decomposed
+            .condition
+            .parents
+            .iter()
+            .map(|subject| subject_name(&decomposed.model, &decomposed.subjects, *subject))
+            .collect();
+        assert_eq!(parents, ["value"]);
+        assert_eq!(
+            mentioned_names("value.kind === 'a'", Truthy),
+            ["value.kind"]
+        );
+        assert_eq!(
+            mentioned_names("value?.kind === 'a'", Truthy),
+            ["value.kind", "value"]
+        );
+    }
+
+    #[test]
+    fn tests_of_properties_of_this_add_no_property_guard() {
+        let program = "class K { kind: string; m() { if (this.kind === 'a') {} } }";
+        let parsed = parse(program, JsFileSource::ts(), JsParserOptions::default());
+        let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
+        let test = parsed
+            .syntax()
+            .descendants()
+            .find_map(JsIfStatement::cast)
+            .unwrap()
+            .test()
+            .unwrap();
+        let method = parsed
+            .syntax()
+            .descendants()
+            .filter_map(biome_js_control_flow::AnyJsControlFlowRoot::cast)
+            .find(super::super::subjects::this_can_narrow)
+            .unwrap();
+        let mut guards = Vec::new();
+        let raw_binding_types = FxHashMap::default();
+        let mut functions = GuardFunctions::new(&[], &raw_binding_types);
+        let mut subjects = FlowSubjectTable::new(&method, true);
+        let condition = decompose_condition(
+            &test,
+            FlowOutcome::Truthy,
+            &model,
+            &mut functions,
+            &mut subjects,
+            &mut guards,
+        );
+        assert!(condition.parents.is_empty());
+        assert!(
+            guards
+                .iter()
+                .all(|guard| !matches!(guard, FlowGuard::Property { .. })),
+            "{guards:?}"
+        );
     }
 
     #[test]
