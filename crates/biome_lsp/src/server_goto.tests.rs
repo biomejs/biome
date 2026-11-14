@@ -9,7 +9,6 @@ use biome_service::workspace::{
 };
 use biome_service::{Watcher, WatcherOptions};
 use futures::channel::mpsc::channel;
-use tokio::task::spawn_blocking;
 use tower_lsp_server::ls_types::{
     self as lsp, DidOpenTextDocumentParams, Position, Range, TextDocumentIdentifier,
     TextDocumentItem, WorkDoneProgressParams,
@@ -118,11 +117,9 @@ async fn goto_definition_cross_file(
 
     let factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
-    let workspace = factory.workspace();
-    let db_state = factory.db_state();
-    spawn_blocking(move || {
-        workspace.start_watcher(&db_state, watcher);
-    });
+    factory
+        .workspace()
+        .start_watcher(factory.db_state(), watcher)?;
 
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();

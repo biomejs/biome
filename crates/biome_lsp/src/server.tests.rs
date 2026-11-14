@@ -21,7 +21,6 @@ use std::collections::{BTreeMap, HashMap};
 use std::str::FromStr;
 use std::sync::Arc;
 use std::time::Duration;
-use tokio::task::spawn_blocking;
 use tokio::time::sleep;
 use tower_lsp_server::ls_types::{
     self as lsp, ClientCapabilities, CodeAction, CodeActionContext, CodeActionKind,
@@ -4683,11 +4682,9 @@ export function bar() {
 
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
-    let workspace = factory.workspace();
-    let db_state = factory.db_state();
-    spawn_blocking(move || {
-        workspace.start_watcher(&db_state, watcher);
-    });
+    factory
+        .workspace()
+        .start_watcher(factory.db_state(), watcher)?;
 
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
@@ -4874,7 +4871,6 @@ export function bar() {
 }
 
 #[tokio::test]
-#[ignore = "Currently flaky, and fails from time to time. To review later"]
 async fn watcher_updates_tailwind_stylesheet() -> Result<()> {
     const THEME_WITH_BRAND: &str = "@theme {\n    --color-brand: #00f;\n}\n";
     const THEME_WITHOUT_BRAND: &str = "@theme {\n}\n";
@@ -4894,11 +4890,9 @@ async fn watcher_updates_tailwind_stylesheet() -> Result<()> {
 
     let (watcher, instruction_channel) = Watcher::new(WatcherOptions::default())?;
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
-    let workspace = factory.workspace();
-    let db_state = factory.db_state();
-    spawn_blocking(move || {
-        workspace.start_watcher(&db_state, watcher);
-    });
+    factory
+        .workspace()
+        .start_watcher(factory.db_state(), watcher)?;
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
@@ -5114,11 +5108,9 @@ export function bar() {
 
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
-    let workspace = factory.workspace();
-    let db_state = factory.db_state();
-    spawn_blocking(move || {
-        workspace.start_watcher(&db_state, watcher);
-    });
+    factory
+        .workspace()
+        .start_watcher(factory.db_state(), watcher)?;
 
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
@@ -5299,11 +5291,9 @@ async fn should_open_and_update_nested_files() -> Result<()> {
     // ARRANGE: Start server.
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
-    let workspace = factory.workspace();
-    let db_state = factory.db_state();
-    spawn_blocking(move || {
-        workspace.start_watcher(&db_state, watcher);
-    });
+    factory
+        .workspace()
+        .start_watcher(factory.db_state(), watcher)?;
 
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
