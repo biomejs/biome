@@ -1,0 +1,177 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidOverloadScopes.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+function localSignature(value: string): string;
+export function localSignature(value: string) { return value; }
+
+export function exportedSignature(value: string): string;
+function exportedSignature(value: string) { return value; }
+
+function outerSignature(value: string): string;
+function outer() {
+    function outerSignature(value: string) { return value; }
+    function innerSignature(value: string): string;
+}
+function innerSignature(value: string) { return value; }
+
+switch (value) {
+    case 0:
+        function switchSignature(value: string): string;
+}
+function switchSignature(value: string) { return value; }
+switch (value) {
+    case 0:
+        function otherSwitch(value: string) { return value; }
+}
+
+```
+
+# Diagnostics
+```
+invalidOverloadScopes.ts:3:17 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function expressions are required here, but this is a declaration.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function localSignature(value: string): string;
+  > 3 │ export function localSignature(value: string) { return value; }
+      │                 ^^^^^^^^^^^^^^
+    4 │ 
+    5 │ export function exportedSignature(value: string): string;
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function expression assigned to a variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidOverloadScopes.ts:6:10 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function expressions are required here, but this is a declaration.
+  
+    5 │ export function exportedSignature(value: string): string;
+  > 6 │ function exportedSignature(value: string) { return value; }
+      │          ^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ function outerSignature(value: string): string;
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function expression assigned to a variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidOverloadScopes.ts:9:10 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function expressions are required here, but this is a declaration.
+  
+     8 │ function outerSignature(value: string): string;
+   > 9 │ function outer() {
+       │          ^^^^^
+    10 │     function outerSignature(value: string) { return value; }
+    11 │     function innerSignature(value: string): string;
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function expression assigned to a variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidOverloadScopes.ts:10:14 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function expressions are required here, but this is a declaration.
+  
+     8 │ function outerSignature(value: string): string;
+     9 │ function outer() {
+  > 10 │     function outerSignature(value: string) { return value; }
+       │              ^^^^^^^^^^^^^^
+    11 │     function innerSignature(value: string): string;
+    12 │ }
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function expression assigned to a variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidOverloadScopes.ts:13:10 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function expressions are required here, but this is a declaration.
+  
+    11 │     function innerSignature(value: string): string;
+    12 │ }
+  > 13 │ function innerSignature(value: string) { return value; }
+       │          ^^^^^^^^^^^^^^
+    14 │ 
+    15 │ switch (value) {
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function expression assigned to a variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidOverloadScopes.ts:19:10 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function expressions are required here, but this is a declaration.
+  
+    17 │         function switchSignature(value: string): string;
+    18 │ }
+  > 19 │ function switchSignature(value: string) { return value; }
+       │          ^^^^^^^^^^^^^^^
+    20 │ switch (value) {
+    21 │     case 0:
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function expression assigned to a variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidOverloadScopes.ts:22:18 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function expressions are required here, but this is a declaration.
+  
+    20 │ switch (value) {
+    21 │     case 0:
+  > 22 │         function otherSwitch(value: string) { return value; }
+       │                  ^^^^^^^^^^^
+    23 │ }
+    24 │ 
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function expression assigned to a variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
