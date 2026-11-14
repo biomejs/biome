@@ -47,16 +47,16 @@ biome_ungrammar          = { workspace = true }
 biome_yaml_analyze       = { workspace = true, optional = true }
 biome_yaml_syntax        = { workspace = true, optional = true }
 bpaf                     = { workspace = true, features = ["derive"] }
-git2                     = { version = "0.21.0", default-features = false }
+git2                     = { workspace = true }
 prettyplease             = { workspace = true }
 proc-macro2              = { workspace = true, features = ["span-locations"] }
-quote                    = "1.0.36"
+quote                    = { workspace = true }
 regex                    = { workspace = true }
 schemars                 = { workspace = true }
 serde                    = { workspace = true, optional = true }
 serde_json               = { workspace = true, optional = true }
 syn                      = { version = "2.0", features = ["full"] }
-ureq                     = "3.3.0"
+ureq                     = { workspace = true }
 xtask_glue               = { workspace = true }
 
 [features]

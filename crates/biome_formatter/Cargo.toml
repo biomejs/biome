@@ -29,7 +29,7 @@ biome_suppression        = { workspace = true, optional = true }
 biome_text_size          = { workspace = true }
 camino                   = { workspace = true }
 countme                  = { workspace = true, optional = true }
-drop_bomb                = "0.1.5"
+drop_bomb                = { workspace = true }
 indexmap                 = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
