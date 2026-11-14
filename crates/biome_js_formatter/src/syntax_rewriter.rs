@@ -3,8 +3,8 @@ use biome_formatter::{TransformSourceMap, TransformSourceMapBuilder};
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsExpression, AnyJsOptionalChainExpression, AnyTsType,
     JsComputedMemberAssignment, JsLanguage, JsLogicalExpression, JsNewExpression,
-    JsStaticMemberAssignment, JsSyntaxKind, JsSyntaxNode, JsSyntaxTrivia, JsTemplateExpression,
-    misc_ext::AnyJsParenthesized,
+    JsStaticMemberAssignment, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsSyntaxTrivia,
+    JsTemplateExpression, misc_ext::AnyJsParenthesized,
 };
 use biome_rowan::{
     AstNode, SyntaxKind, SyntaxRewriter, SyntaxToken, TextSize, VisitNodeSignal,
@@ -364,7 +364,7 @@ impl JsFormatSyntaxRewriter {
                             {
                                 logical
                                     .with_left(
-                                        biome_js_factory::make::js_logical_expression(
+                                        make_left_recursive_logical_expression(
                                             left, operator, right_left,
                                         )
                                         .into(),
@@ -408,6 +408,39 @@ impl JsFormatSyntaxRewriter {
     pub(crate) fn finish(self) -> TransformSourceMap {
         self.source_map.finish()
     }
+}
+
+/// Creates the logical expression `left operator right`, keeping it left-recursive when `right` is
+/// itself a logical expression with the same operator.
+///
+/// This happens when re-balancing a right operand with more than two operands: for
+/// `a && (b && c && d)`, `right` is `b && c`, which must become `(a && b) && c` rather than
+/// `a && (b && c)`.
+fn make_left_recursive_logical_expression(
+    left: AnyJsExpression,
+    operator: JsSyntaxToken,
+    right: AnyJsExpression,
+) -> JsLogicalExpression {
+    // The operators and right operands along the left spine of `right`, from the outermost to the
+    // innermost expression.
+    let mut tail = Vec::new();
+    let mut innermost = right;
+
+    while let AnyJsExpression::JsLogicalExpression(logical) = &innermost
+        && let (Ok(logical_left), Ok(logical_operator), Ok(logical_right)) =
+            (logical.left(), logical.operator_token(), logical.right())
+        && logical_operator.kind() == operator.kind()
+    {
+        tail.push((logical_operator, logical_right));
+        innermost = logical_left;
+    }
+
+    let mut result = biome_js_factory::make::js_logical_expression(left, operator, innermost);
+    for (operator, right) in tail.into_iter().rev() {
+        result = biome_js_factory::make::js_logical_expression(result.into(), operator, right);
+    }
+
+    result
 }
 
 // TODO: This should be handled with a `NeedsParentheses` impl.
