@@ -179,8 +179,9 @@ pub fn raw_primitive_target<'a>(
 /// Union traversal visits at most 256 types and returns the original input on
 /// exhaustion. Literal decoding accepts at most 1024 bytes per operand. Escaped
 /// strings and template literals are not decoded. Broad primitive types cannot
-/// exclude individual literals; in particular, falsy `number` stays `number`
-/// because both zero and `NaN` are possible.
+/// exclude individual literals, and the false branch of a truthiness test keeps
+/// `string`, `number`, and `bigint` unchanged, as TypeScript does at a read.
+/// [`falsy_values`] gives the narrower type of the value that `&&` returns.
 pub fn narrow_type<'db>(
     db: &'db dyn TypeDb,
     ty: InferredTypeData<'db>,
@@ -201,8 +202,31 @@ pub fn narrow_type<'db>(
             PreparedPredicate::Literal(literal, value)
         }
     };
+    narrow_prepared(db, ty, &predicate, positive)
+}
+
+/// Returns the falsy values of `ty`: the type that a left operand of `&&`
+/// contributes to the value of the expression.
+///
+/// The result is the false branch of a truthiness test in [`narrow_type`],
+/// except that `string` and `bigint` become `""` and `0n`, their only falsy
+/// values. `number` stays `number` because both zero and `NaN` are falsy.
+/// Inputs, limits, and unchanged types are the same as for [`narrow_type`].
+pub fn falsy_values<'db>(db: &'db dyn TypeDb, ty: InferredTypeData<'db>) -> InferredTypeData<'db> {
+    if is_narrowing_invariant(ty) {
+        return ty;
+    }
+    narrow_prepared(db, ty, &PreparedPredicate::FalsyValues, false)
+}
+
+fn narrow_prepared<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    predicate: &PreparedPredicate<'db>,
+    positive: bool,
+) -> InferredTypeData<'db> {
     if !matches!(ty, InferredTypeData::Union(_)) {
-        return narrow_non_union(db, ty, &predicate, positive);
+        return narrow_non_union(db, ty, predicate, positive);
     }
 
     let mut pending = vec![ty];
@@ -222,7 +246,7 @@ pub fn narrow_type<'db>(
             }
             pending.extend(types.iter().rev().copied());
         } else {
-            let result = narrow_non_union(db, current, &predicate, positive);
+            let result = narrow_non_union(db, current, predicate, positive);
             changed |= result != current;
             if result != InferredTypeData::NeverKeyword {
                 narrowed.push(result);
@@ -243,6 +267,8 @@ pub fn narrow_type<'db>(
 
 enum PreparedPredicate<'db> {
     Truthy,
+    /// Keeps the values that [`falsy_values`] describes in either branch.
+    FalsyValues,
     Nullish,
     Typeof(TypeofKind),
     Literal(InferredTypeData<'db>, LiteralValue<'db>),
@@ -275,13 +301,18 @@ fn narrow_non_union<'db>(
     match predicate {
         PreparedPredicate::Truthy => match ty {
             InferredTypeData::Boolean => boolean_literal(db, positive),
-            InferredTypeData::String if !positive => InferredTypeData::Literal(
-                InternedLiteral::new(db, Literal::String(Text::new_static("").into())),
-            ),
-            InferredTypeData::BigInt if !positive => InferredTypeData::Literal(
-                InternedLiteral::new(db, Literal::BigInt(Text::new_static("0n"))),
-            ),
             _ => retain_if(ty, truthiness(db, ty), positive),
+        },
+        PreparedPredicate::FalsyValues => match ty {
+            InferredTypeData::String => InferredTypeData::Literal(InternedLiteral::new(
+                db,
+                Literal::String(Text::new_static("").into()),
+            )),
+            InferredTypeData::BigInt => InferredTypeData::Literal(InternedLiteral::new(
+                db,
+                Literal::BigInt(Text::new_static("0n")),
+            )),
+            _ => narrow_non_union(db, ty, &PreparedPredicate::Truthy, false),
         },
         PreparedPredicate::Nullish => {
             let nullish = match ty {
@@ -657,33 +688,21 @@ mod tests {
                 ),
                 boolean_literal(&db, positive)
             );
-            assert_eq!(
-                narrow_type(
-                    &db,
-                    InferredTypeData::Number,
-                    NarrowingPredicate::Truthy,
-                    positive
-                ),
-                InferredTypeData::Number
-            );
-        }
-        assert_eq!(
-            narrow_type(
-                &db,
+            for ty in [
+                InferredTypeData::Number,
                 InferredTypeData::String,
-                NarrowingPredicate::Truthy,
-                false
-            ),
-            string(&db, "")
-        );
-        assert_eq!(
-            narrow_type(
-                &db,
                 InferredTypeData::BigInt,
-                NarrowingPredicate::Truthy,
-                false
-            ),
-            bigint(&db, "0n")
+            ] {
+                assert_eq!(
+                    narrow_type(&db, ty, NarrowingPredicate::Truthy, positive),
+                    ty
+                );
+            }
+        }
+        let nullable = union(&db, &[InferredTypeData::String, InferredTypeData::Null]);
+        assert_eq!(
+            narrow_type(&db, nullable, NarrowingPredicate::Truthy, false),
+            nullable
         );
         let falsy = [
             boolean_literal(&db, false),
@@ -705,6 +724,48 @@ mod tests {
         assert_eq!(
             narrow_type(&db, ty, NarrowingPredicate::Truthy, false),
             union(&db, &[union(&db, &falsy), InferredTypeData::Number])
+        );
+    }
+
+    #[test]
+    fn falsy_values_reduce_broad_strings_and_bigints_to_their_falsy_value() {
+        let db = TestDb::default();
+        for (ty, expected) in [
+            (InferredTypeData::String, string(&db, "")),
+            (InferredTypeData::BigInt, bigint(&db, "0n")),
+            (InferredTypeData::Number, InferredTypeData::Number),
+            (InferredTypeData::Boolean, boolean_literal(&db, false)),
+            (InferredTypeData::Null, InferredTypeData::Null),
+            (InferredTypeData::Symbol, InferredTypeData::NeverKeyword),
+            (string(&db, "ok"), InferredTypeData::NeverKeyword),
+            (InferredTypeData::VoidKeyword, InferredTypeData::Unknown),
+            (
+                InferredTypeData::UnknownKeyword,
+                InferredTypeData::UnknownKeyword,
+            ),
+            (InferredTypeData::Unknown, InferredTypeData::Unknown),
+        ] {
+            assert_eq!(falsy_values(&db, ty), expected, "{ty:?}");
+        }
+        let ty = union(
+            &db,
+            &[
+                InferredTypeData::String,
+                InferredTypeData::BigInt,
+                string(&db, "ok"),
+                InferredTypeData::Undefined,
+            ],
+        );
+        assert_eq!(
+            falsy_values(&db, ty),
+            union(
+                &db,
+                &[
+                    string(&db, ""),
+                    bigint(&db, "0n"),
+                    InferredTypeData::Undefined
+                ]
+            )
         );
     }
 
