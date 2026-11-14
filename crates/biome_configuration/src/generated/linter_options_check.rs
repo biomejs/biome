@@ -2170,6 +2170,12 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noVueDuplicateVElseIf",
+        TypeId::of::<biome_rule_options::no_vue_duplicate_v_else_if::NoVueDuplicateVElseIfOptions>(
+        ),
+    ));
+    result.push((
+        "nursery",
         "noVueExcessiveProps",
         TypeId::of::<biome_rule_options::no_vue_excessive_props::NoVueExcessivePropsOptions>(),
     ));

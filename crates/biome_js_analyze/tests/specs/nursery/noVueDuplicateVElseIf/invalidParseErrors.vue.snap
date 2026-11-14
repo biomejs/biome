@@ -1,0 +1,138 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidParseErrors.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-if="foo." />
+  <div v-else-if="foo." />
+
+  <div v-else-if="foo." />
+  <div v-else-if="foo" />
+
+  <div v-if="foo." />
+  <div v-else-if="bar" />
+  <div v-else-if="bar" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalidParseErrors.vue:3:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found the end of the file.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-if="foo." />
+      │                  
+    4 │   <div v-else-if="foo." />
+    5 │ 
+  
+  i Expected an identifier here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-if="foo." />
+      │                  
+    4 │   <div v-else-if="foo." />
+    5 │ 
+  
+
+```
+
+```
+invalidParseErrors.vue:4:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found the end of the file.
+  
+    2 │ <template>
+    3 │   <div v-if="foo." />
+  > 4 │   <div v-else-if="foo." />
+      │                       
+    5 │ 
+    6 │   <div v-else-if="foo." />
+  
+  i Expected an identifier here.
+  
+    2 │ <template>
+    3 │   <div v-if="foo." />
+  > 4 │   <div v-else-if="foo." />
+      │                       
+    5 │ 
+    6 │   <div v-else-if="foo." />
+  
+
+```
+
+```
+invalidParseErrors.vue:6:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found the end of the file.
+  
+    4 │   <div v-else-if="foo." />
+    5 │ 
+  > 6 │   <div v-else-if="foo." />
+      │                       
+    7 │   <div v-else-if="foo" />
+    8 │ 
+  
+  i Expected an identifier here.
+  
+    4 │   <div v-else-if="foo." />
+    5 │ 
+  > 6 │   <div v-else-if="foo." />
+      │                       
+    7 │   <div v-else-if="foo" />
+    8 │ 
+  
+
+```
+
+```
+invalidParseErrors.vue:9:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found the end of the file.
+  
+     7 │   <div v-else-if="foo" />
+     8 │ 
+   > 9 │   <div v-if="foo." />
+       │                  
+    10 │   <div v-else-if="bar" />
+    11 │   <div v-else-if="bar" />
+  
+  i Expected an identifier here.
+  
+     7 │   <div v-else-if="foo" />
+     8 │ 
+   > 9 │   <div v-if="foo." />
+       │                  
+    10 │   <div v-else-if="bar" />
+    11 │   <div v-else-if="bar" />
+  
+
+```
+
+```
+invalidParseErrors.vue:11:19 lint/nursery/noVueDuplicateVElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, earlier conditions in the v-if / v-else-if chain.
+  
+     9 │   <div v-if="foo." />
+    10 │   <div v-else-if="bar" />
+  > 11 │   <div v-else-if="bar" />
+       │                   ^^^
+    12 │ </template>
+    13 │ 
+  
+  i Whenever this condition is true, an earlier condition of the chain is true too, so this element is never rendered.
+  
+  i Remove this element, or change its condition to the one you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
