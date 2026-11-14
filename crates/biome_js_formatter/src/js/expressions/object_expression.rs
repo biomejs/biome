@@ -41,6 +41,11 @@ mod tests {
         assert_needs_parentheses!("a => ({ a: 'test' })`template`", JsObjectExpression);
         assert_needs_parentheses!("({ a: 'test' }).member", JsObjectExpression);
         assert_needs_parentheses!("({ a: 'test' })[member]", JsObjectExpression);
+        assert_needs_parentheses!("({ a: 'test' }).member++", JsObjectExpression);
+        assert_needs_parentheses!("({ a: 'test' })[member]--", JsObjectExpression);
+        assert_needs_parentheses!("a => ({ a: 'test' }).member++", JsObjectExpression);
+        assert_needs_parentheses!("({ a: 'test' }).member! = 1", JsObjectExpression);
+        assert_needs_parentheses!("({ a: 'test' }).member!++", JsObjectExpression);
         assert_needs_parentheses!("({ a: 'test' })()", JsObjectExpression);
         assert_needs_parentheses!("new ({ a: 'test' })()", JsObjectExpression);
         assert_needs_parentheses!("({ a: 'test' }) as number", JsObjectExpression);
@@ -55,5 +60,6 @@ mod tests {
         assert_not_needs_parentheses!("() => (a = {});", JsObjectExpression);
         assert_not_needs_parentheses!("() => ({}.prop = 0);", JsObjectExpression);
         assert_not_needs_parentheses!("() => ({}['prop'] = 0);", JsObjectExpression);
+        assert_not_needs_parentheses!("a = {}.prop++;", JsObjectExpression);
     }
 }
