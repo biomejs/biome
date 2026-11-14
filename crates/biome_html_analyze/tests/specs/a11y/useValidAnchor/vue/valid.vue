@@ -11,4 +11,8 @@
 <a :href="'https://example.com'">ok</a>
 <a v-bind:href="'#id'">ok</a>
 <a v-bind="spread">ok</a>
+<a href="#" v-bind="spread">ok</a>
+<a href v-bind="spread">ok</a>
+<a @click="count++" v-bind="spread">ok</a>
+<a :href="'javascript:void(0)'" v-bind="spread">ok</a>
 </template>
