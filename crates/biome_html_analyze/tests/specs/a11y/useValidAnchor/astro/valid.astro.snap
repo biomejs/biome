@@ -13,5 +13,9 @@ expression: valid.astro
 <Link href="#">ok</Link>
 <a {href}>ok</a>
 <a {...spread}>ok</a>
+<a href="#" {...spread}>ok</a>
+<a href {...spread}>ok</a>
+<a onclick={something} {...spread}>ok</a>
+<a href="javascript:void(0)" {...spread}>ok</a>
 
 ```
