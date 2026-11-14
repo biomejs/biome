@@ -403,57 +403,92 @@ fn is_known_css_function(name: &str) -> bool {
     KNOWN.contains(&name)
 }
 
-fn tier_tokens(tier: Tier) -> proc_macro2::TokenStream {
+fn tier_name(tier: Tier) -> &'static str {
     match tier {
-        Tier::Widely => quote! { BaselineTier::Widely },
-        Tier::Newly => quote! { BaselineTier::Newly },
-        Tier::Limited => quote! { BaselineTier::Limited },
+        Tier::Widely => "Widely",
+        Tier::Newly => "Newly",
+        Tier::Limited => "Limited",
     }
 }
 
-fn year_tokens(year: Option<u16>) -> proc_macro2::TokenStream {
+fn year_expr(year: Option<u16>) -> String {
     match year {
-        Some(y) => quote! { BaselineYear::Known(#y) },
-        None => quote! { BaselineYear::Unknown },
+        Some(year) => format!("Known({year})"),
+        None => "Unknown".to_string(),
     }
 }
 
-fn status_entry(status: &Status) -> proc_macro2::TokenStream {
-    let tier = tier_tokens(status.tier);
-    let year = year_tokens(status.year);
-    quote! { BaselineStatus { tier: #tier, year: #year } }
+/// Renders the `phf_map!` static `name`, documented by `doc`, holding `entries`.
+///
+/// The static is rendered as text instead of with `quote!` because rustfmt
+/// leaves the body of a brace-delimited macro invocation as it is. A token
+/// stream would put the whole map on one line, so every change to the data
+/// would rewrite that line. Here each entry gets its own lines.
+fn phf_map_static(
+    doc: &str,
+    name: &str,
+    entries: impl IntoIterator<Item = (String, Status)>,
+) -> String {
+    let mut out = String::new();
+    for line in doc.lines() {
+        out.push_str(&format!("/// {line}\n"));
+    }
+    out.push_str(&format!(
+        "pub static {name}: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {{\n"
+    ));
+    for (key, status) in entries {
+        let key = Literal::string(&key);
+        let tier = tier_name(status.tier);
+        let year = year_expr(status.year);
+        out.push_str(&format!("    {key} => BaselineStatus {{\n"));
+        out.push_str(&format!("            tier: BaselineTier::{tier},\n"));
+        out.push_str(&format!("            year: BaselineYear::{year},\n"));
+        out.push_str("        },\n");
+    }
+    out.push_str("};\n");
+    out
 }
 
-fn phf_map_entries(items: &[(String, Status)]) -> Vec<proc_macro2::TokenStream> {
-    items
-        .iter()
-        .map(|(name, status)| {
-            let name_lit = Literal::string(name);
-            let entry = status_entry(status);
-            quote! { #name_lit => #entry }
-        })
-        .collect()
-}
-
-fn generate_code(features: CssFeatures) -> proc_macro2::TokenStream {
-    let properties = phf_map_entries(&features.properties);
-    let at_rules = phf_map_entries(&features.at_rules);
-    let media_conditions = phf_map_entries(&features.media_conditions);
-    let functions = phf_map_entries(&features.functions);
-    let selectors = phf_map_entries(&features.selectors);
-
-    // Property values: flat map keyed by "property:value".
-    let property_values: Vec<_> = features
+fn generate_code(features: CssFeatures) -> String {
+    let property_values = features
         .property_values
-        .iter()
-        .map(|(prop, val, status)| {
-            let key_lit = Literal::string(&format!("{prop}:{val}"));
-            let entry = status_entry(status);
-            quote! { #key_lit => #entry }
-        })
-        .collect();
+        .into_iter()
+        .map(|(prop, val, status)| (format!("{prop}:{val}"), status));
 
-    quote! {
+    let maps = [
+        phf_map_static(
+            "Baseline status for CSS properties.",
+            "BASELINE_PROPERTIES",
+            features.properties,
+        ),
+        phf_map_static(
+            "Baseline status for CSS property values (identifier keywords only).\nKeys are in `\"property:value\"` format (lowercase).",
+            "BASELINE_PROPERTY_VALUES",
+            property_values,
+        ),
+        phf_map_static(
+            "Baseline status for CSS at-rules.",
+            "BASELINE_AT_RULES",
+            features.at_rules,
+        ),
+        phf_map_static(
+            "Baseline status for CSS media query conditions.",
+            "BASELINE_MEDIA_CONDITIONS",
+            features.media_conditions,
+        ),
+        phf_map_static(
+            "Baseline status for CSS value functions.",
+            "BASELINE_FUNCTIONS",
+            features.functions,
+        ),
+        phf_map_static(
+            "Baseline status for CSS pseudo-class and pseudo-element selectors.",
+            "BASELINE_SELECTORS",
+            features.selectors,
+        ),
+    ];
+
+    let definitions = quote! {
         /// The Baseline availability tier of a CSS feature.
         #[derive(Debug, Clone, Copy, PartialEq, Eq)]
         pub enum BaselineTier {
@@ -495,38 +530,9 @@ fn generate_code(features: CssFeatures) -> proc_macro2::TokenStream {
             let key = format!("{property}:{value}");
             BASELINE_PROPERTY_VALUES.get(key.as_str()).copied()
         }
+    };
 
-        /// Baseline status for CSS properties.
-        pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
-            #( #properties ),*
-        };
-
-        /// Baseline status for CSS property values (identifier keywords only).
-        /// Keys are in `"property:value"` format (lowercase).
-        pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
-            #( #property_values ),*
-        };
-
-        /// Baseline status for CSS at-rules.
-        pub static BASELINE_AT_RULES: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
-            #( #at_rules ),*
-        };
-
-        /// Baseline status for CSS media query conditions.
-        pub static BASELINE_MEDIA_CONDITIONS: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
-            #( #media_conditions ),*
-        };
-
-        /// Baseline status for CSS value functions.
-        pub static BASELINE_FUNCTIONS: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
-            #( #functions ),*
-        };
-
-        /// Baseline status for CSS pseudo-class and pseudo-element selectors.
-        pub static BASELINE_SELECTORS: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
-            #( #selectors ),*
-        };
-    }
+    format!("{definitions}\n{}", maps.concat())
 }
 
 pub fn generate_css_baseline(mode: Mode) -> Result<()> {
@@ -555,10 +561,10 @@ pub fn generate_css_baseline(mode: Mode) -> Result<()> {
         features.selectors.len(),
     );
 
-    let tokens = generate_code(features);
+    let code = generate_code(features);
     let output_path = project_root().join("crates/biome_css_analyze/src/baseline_data.rs");
 
-    let content = &xtask_glue::reformat_with_command(tokens.to_string(), "baseline")?;
+    let content = &xtask_glue::reformat_with_command(code, "baseline")?;
 
     update(output_path.as_path(), content, &mode)?;
 

@@ -1,0 +1,114 @@
+# Regenerates the Baseline data of the useBaseline lint rule and opens a PR when it changed
+name: Update useBaseline data
+
+on:
+  workflow_dispatch:
+  schedule:
+    # This cron schedule runs the workflow at 00:23 on Sundays. Scheduled runs
+    # are delayed the most at the start of an hour, so it avoids minute 0.
+    - cron: '23 0 * * 0'
+
+permissions:
+  contents: read
+
+env:
+  UPDATE_BRANCH: chore/update-css-baseline-data
+
+jobs:
+  update-baseline-data:
+    runs-on: depot-ubuntu-24.04-arm-16
+    permissions:
+      # Commit the generated data.
+      contents: write
+      # Open the update PR.
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install just
+        uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4.0.0
+
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
+        with:
+          cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate the Baseline data
+        run: just gen-css-baseline
+
+      - name: Check for changes
+        id: changes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if git diff --quiet; then
+            echo "The Baseline data is up to date."
+            echo "should_open_pr=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # New data can break the tests of the rule, and the fixes are pushed
+          # to the update branch. Opening another update would force-push over
+          # them. A fork can open a PR from a branch with the same name, those
+          # don't count.
+          open_pr=$(gh pr list --head "$UPDATE_BRANCH" --base main --state open --json url,isCrossRepository --jq 'map(select(.isCrossRepository | not))[0].url // empty')
+          if [ -n "$open_pr" ]; then
+            echo "An update PR is already open ($open_pr). Merge or close it first, skipping."
+            echo "should_open_pr=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_open_pr=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # The tests of the rule depend on the Baseline status of the features they
+      # use, so new data can break them. A PR opened with GITHUB_TOKEN doesn't
+      # trigger the pull request workflows, so the tests run here and the result
+      # is reported in the PR.
+      - name: Run the CSS analyzer tests
+        id: tests
+        if: steps.changes.outputs.should_open_pr == 'true'
+        continue-on-error: true
+        run: cargo test -p biome_css_analyze
+
+      - name: Create changeset
+        if: steps.changes.outputs.should_open_pr == 'true'
+        run: |
+          # The file name is fixed so that a second update before the next
+          # release replaces the changeset of the first one.
+          cat > .changeset/update-baseline-data.md << 'EOF'
+          ---
+          "@biomejs/biome": patch
+          ---
+
+          Updated the Baseline data of the [`useBaseline`](https://biomejs.dev/linter/rules/use-baseline/) rule. The rule now reports CSS features according to their latest Baseline status.
+          EOF
+
+      - name: Create pull request
+        if: steps.changes.outputs.should_open_pr == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TESTS_OUTCOME: ${{ steps.tests.outcome }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="chore: update useBaseline data"
+          body_file="$RUNNER_TEMP/pr-body.md"
+          echo "Automated update of the Baseline data used by the useBaseline rule." > "$body_file"
+          draft=()
+          if [ "$TESTS_OUTCOME" != "success" ]; then
+            {
+              echo
+              echo "The \`biome_css_analyze\` tests fail with the new data, see $RUN_URL."
+              echo "Update the affected tests in this branch before merging."
+            } >> "$body_file"
+            draft=(--draft)
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .changeset crates/biome_css_analyze/src/baseline_data.rs
+          git commit -m "$title"
+          # The branch of a previous update PR may still exist.
+          git push origin "HEAD:$UPDATE_BRANCH" -f
+          gh pr create --title "$title" --body-file "$body_file" --base main --head "$UPDATE_BRANCH" "${draft[@]}"
