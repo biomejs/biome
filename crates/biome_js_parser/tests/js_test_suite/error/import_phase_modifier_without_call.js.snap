@@ -60,7 +60,7 @@ JsModule {
                     IMPORT_KW@27..34 "import" [Newline("\n")] [],
                     DOT@34..35 "." [] [],
                     DEFER_KW@35..40 "defer" [] [],
-                    JsBogus {
+                    JsBogusExpression {
                         items: [
                             DOT@40..41 "." [] [],
                             IDENT@41..44 "foo" [] [],
@@ -76,7 +76,7 @@ JsModule {
                     IMPORT_KW@44..51 "import" [Newline("\n")] [],
                     DOT@51..52 "." [] [],
                     SOURCE_KW@52..59 "source" [] [Whitespace(" ")],
-                    JsBogus {
+                    JsBogusExpression {
                         items: [
                             IDENT@59..60 "x" [] [],
                         ],
@@ -111,7 +111,7 @@ JsModule {
                         IMPORT_KW@82..88 "import" [] [],
                         DOT@88..89 "." [] [],
                         DEFER_KW@89..95 "defer" [] [Whitespace(" ")],
-                        JsBogus {
+                        JsBogusExpression {
                             items: [
                                 PLUS@95..97 "+" [] [Whitespace(" ")],
                                 JS_NUMBER_LITERAL@97..98 "1" [] [],
@@ -351,7 +351,7 @@ JsModule {
         0: IMPORT_KW@27..34 "import" [Newline("\n")] []
         1: DOT@34..35 "." [] []
         2: DEFER_KW@35..40 "defer" [] []
-        3: JS_BOGUS@40..44
+        3: JS_BOGUS_EXPRESSION@40..44
           0: DOT@40..41 "." [] []
           1: IDENT@41..44 "foo" [] []
       1: (empty)
@@ -360,7 +360,7 @@ JsModule {
         0: IMPORT_KW@44..51 "import" [Newline("\n")] []
         1: DOT@51..52 "." [] []
         2: SOURCE_KW@52..59 "source" [] [Whitespace(" ")]
-        3: JS_BOGUS@59..60
+        3: JS_BOGUS_EXPRESSION@59..60
           0: IDENT@59..60 "x" [] []
       1: (empty)
     4: JS_EXPRESSION_STATEMENT@60..77
@@ -382,7 +382,7 @@ JsModule {
           0: IMPORT_KW@82..88 "import" [] []
           1: DOT@88..89 "." [] []
           2: DEFER_KW@89..95 "defer" [] [Whitespace(" ")]
-          3: JS_BOGUS@95..98
+          3: JS_BOGUS_EXPRESSION@95..98
             0: PLUS@95..97 "+" [] [Whitespace(" ")]
             1: JS_NUMBER_LITERAL@97..98 "1" [] []
       1: (empty)

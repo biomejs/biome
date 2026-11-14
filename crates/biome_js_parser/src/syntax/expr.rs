@@ -1372,7 +1372,7 @@ fn parse_primary_expression(p: &mut JsParser, context: ExpressionContext) -> Par
                         );
                         p.error(err);
                         let _ = ParseRecoveryTokenSet::new(
-                            JS_BOGUS,
+                            JS_BOGUS_EXPRESSION,
                             STMT_RECOVERY_SET.union(EXPR_RECOVERY_SET).union(token_set![
                                 T![,],
                                 T!['}'],
