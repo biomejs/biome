@@ -43,14 +43,16 @@ pub(crate) use scanner::FlowRootScanner;
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::{JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
-    JsArrayBindingPatternElement, JsIdentifierBinding, JsObjectBindingPatternProperty,
+    JsArrayBindingPattern, JsArrayBindingPatternElement, JsArrayBindingPatternElementList,
+    JsArrayBindingPatternRestElement, JsIdentifierBinding, JsLanguage, JsObjectBindingPattern,
+    JsObjectBindingPatternProperty, JsObjectBindingPatternPropertyList, JsObjectBindingPatternRest,
     JsObjectBindingPatternShorthandProperty, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode,
     JsThisExpression,
 };
 use biome_js_type_info::{
     RawTypeData, TypeReference, is_raw_narrowing_invariant, raw_may_be_object_union,
 };
-use biome_rowan::{AstNode, AstPtr, Text, TextRange};
+use biome_rowan::{AstNode, AstPtr, SyntaxKindSet, Text, TextRange};
 use builder::{BuiltRoot, build_root};
 use guards::GuardFunctions;
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -707,6 +709,17 @@ impl RootCollector<'_> {
     }
 }
 
+/// Binding patterns, with their elements and lists, which can enclose a binding.
+const BINDING_PATTERN_KINDS: SyntaxKindSet<JsLanguage> = JsArrayBindingPattern::KIND_SET
+    .union(JsArrayBindingPatternElement::KIND_SET)
+    .union(JsArrayBindingPatternElementList::KIND_SET)
+    .union(JsArrayBindingPatternRestElement::KIND_SET)
+    .union(JsObjectBindingPattern::KIND_SET)
+    .union(JsObjectBindingPatternProperty::KIND_SET)
+    .union(JsObjectBindingPatternPropertyList::KIND_SET)
+    .union(JsObjectBindingPatternRest::KIND_SET)
+    .union(JsObjectBindingPatternShorthandProperty::KIND_SET);
+
 /// Returns whether a destructuring default can supply the value of `binding`,
 /// either its own default, as in `{ a = 1 }`, or the default of an enclosing
 /// pattern, as in `{ pair: [a] = [1] }`.
@@ -715,20 +728,7 @@ fn has_destructuring_default(binding: &JsIdentifierBinding) -> bool {
         .syntax()
         .ancestors()
         .skip(1)
-        .take_while(|node| {
-            matches!(
-                node.kind(),
-                JsSyntaxKind::JS_ARRAY_BINDING_PATTERN
-                    | JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_ELEMENT
-                    | JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST
-                    | JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_REST_ELEMENT
-                    | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN
-                    | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY
-                    | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST
-                    | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST
-                    | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY
-            )
-        })
+        .take_while(|node| BINDING_PATTERN_KINDS.matches(node.kind()))
         .any(|node| {
             JsArrayBindingPatternElement::cast_ref(&node)
                 .is_some_and(|element| element.init().is_some())
