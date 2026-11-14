@@ -10819,6 +10819,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useExpectToHaveBeenCalledTimes": {
+					"description": "Enforce using toHaveBeenCalledTimes() to check how many times a mock function was called.\nSee https://biomejs.dev/linter/rules/use-expect-to-have-been-called-times",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseExpectToHaveBeenCalledTimesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useExplicitReturnType": {
 					"description": "Require explicit return types on functions and class methods.\nSee https://biomejs.dev/linter/rules/use-explicit-return-type",
 					"anyOf": [
@@ -18425,6 +18432,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseExpectToHaveBeenCalledTimesOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseExpectToHaveBeenCalledTimesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseExplicitLengthCheckOptions": {
 			"type": "object",
 			"properties": {
@@ -24208,6 +24228,16 @@
 			]
 		},
 		"UseExpectToHaveBeenCalledOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseExpectToHaveBeenCalledTimesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseExpectToHaveBeenCalledTimesOptions" }
+			]
+		},
+		"UseExpectToHaveBeenCalledTimesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
