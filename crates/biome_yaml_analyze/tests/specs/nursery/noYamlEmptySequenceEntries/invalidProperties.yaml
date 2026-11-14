@@ -1,0 +1,5 @@
+# should generate diagnostics
+- &anchor
+- !!str
+- &other !!str
+- # a comment after the dash

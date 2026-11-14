@@ -1,0 +1,30 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: invalidNoTrailingNewline.yaml
+---
+# Input
+```yaml
+# should generate diagnostics
+- a
+-
+```
+
+# Diagnostics
+```
+invalidNoTrailingNewline.yaml:3:1 lint/nursery/noYamlEmptySequenceEntries ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This list item is empty.
+  
+    1 │ # should generate diagnostics
+    2 │ - a
+  > 3 │ -
+      │ ^
+  
+  i An item with no value is read as null, and is often left by mistake.
+  
+  i Add a value to the item, or remove the item. If the item is meant to have no value, write null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
