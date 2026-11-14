@@ -28,6 +28,9 @@ The remaining work is tracked in
   "string"`.
 - **Subject**: what a runtime test checks: a variable or `this`, optionally
   followed by a path of property names, such as `opts.timeout` or `pair[0]`.
+- **Aliased condition**: a `const` whose initializer is a condition, which
+  narrows the condition's subjects when the `const` itself is tested, as `ok`
+  does in `const ok = x !== null; if (ok) x`.
 - **Type predicate**: a return annotation such as `value is T`,
   `asserts value is T`, or `asserts value`. A **type-guard function** returns a
   type predicate; an **assertion function** is a type-guard function whose type
@@ -129,6 +132,16 @@ These limits apply to every *Supported* and *Partial* row below:
   that count stands for the root's `this`, even where it is another object,
   as in a static block, so `this.v = x` and `super.v = x` both write
   `this.v`.
+- Testing an aliased condition applies the condition that initializes it only
+  to variables whose value cannot change between the `const` and the test:
+  parameters, `catch` variables, and variables declared with `const` or
+  `let`, if they are never written and not exported. A `let` statement at the
+  top level of a file does not count, because other scripts can write a
+  top-level `let` of a script, and Biome cannot tell a script from a module.
+  A property path, or `this`, never narrows through an aliased condition. As
+  in TypeScript, aliased conditions inline into one another at most five
+  levels deep, so in `const c2 = c1; ...; const c6 = c5; if (c6)`, only the
+  truthiness of `c1` is tested.
 - Variables whose declared type is `any`, or includes a part that inference
   cannot determine, never narrow.
 - An execution root gets no narrowing at all when its own code, outside nested
@@ -326,8 +339,8 @@ whose result is not tested, do not narrow.
 
 | Behaviour | Example | TypeScript | Status |
 | --- | --- | --- | --- |
-| A `const` holding a runtime test, up to five levels deep | `x: string \| number; const isS = typeof x === "string"; if (isS) x` | `string` | Not yet |
-| A `const` holding `&&` or `\|\|` of runtime tests | `a: string \| null; b: string \| null;`<br>`const ok = a !== null && b !== null; if (ok) a` | `string` | Not yet |
+| A `const` holding a runtime test, up to five levels deep | `x: string \| number; const isS = typeof x === "string"; if (isS) x` | `string` | Partial: the `const` must have an initializer and no type annotation, must declare a name rather than a destructuring pattern, and must not be exported, and the condition narrows only the variables that the limits above allow. TypeScript also narrows a `readonly` property, as in `o: { readonly v: string \| null }; const ok = o.v !== null; if (ok) o.v`, a variable declared by a `let` statement at the top level of a module, and a `const` exported only by an `export { ... }` list, which it also accepts as the aliased condition. A comparison such as `if (isS === true)` does not narrow `x` yet, as the row on equality with the result of a runtime test describes. |
+| A `const` holding `&&` or `\|\|` of runtime tests | `a: string \| null; b: string \| null;`<br>`const ok = a !== null && b !== null; if (ok) a` | `string` | Supported |
 
 ### Closures
 
