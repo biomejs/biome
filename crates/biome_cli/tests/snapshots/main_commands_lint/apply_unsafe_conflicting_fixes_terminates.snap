@@ -1,0 +1,66 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --write --unsafe test.tsx
+```
+
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "a11y": {
+        "useAriaActivedescendantWithTabindex": "error",
+        "noNoninteractiveTabindex": "error"
+      }
+    }
+  }
+}
+```
+
+## `test.tsx`
+
+```tsx
+export const List = () => <div aria-activedescendant="x">hi</div>;
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × No files were processed in the specified paths.
+  
+  i Check your biome.json or biome.jsonc to ensure the paths are not ignored by the configuration.
+  
+  i These paths were provided but ignored:
+  
+  - test.tsx
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+test.tsx lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An internal error occurred when analyzing this file.
+    
+    The rules 'a11y/useAriaActivedescendantWithTabindex', 'a11y/noNoninteractiveTabindex' caused an infinite loop when applying fixes to the file.
+    
+    This is likely a bug in Biome, not an error in your code. Please consider filing an issue on GitHub with a reproduction of this error.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```
