@@ -1,0 +1,80 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+assertion_line: 251
+expression: snapshot
+---
+
+## Input
+
+```jsx
+<Note type="tip" {...props}>
+```
+
+
+## AST
+
+```
+JsxSingleTagRoot {
+    tag: JsxOpeningElement {
+        l_angle_token: L_ANGLE@0..1 "<" [] [],
+        name: JsxReferenceIdentifier {
+            value_token: JSX_IDENT@1..6 "Note" [] [Whitespace(" ")],
+        },
+        type_arguments: missing (optional),
+        attributes: JsxAttributeList [
+            JsxAttribute {
+                name: JsxName {
+                    value_token: JSX_IDENT@6..10 "type" [] [],
+                },
+                initializer: JsxAttributeInitializerClause {
+                    eq_token: EQ@10..11 "=" [] [],
+                    value: JsxString {
+                        value_token: JSX_STRING_LITERAL@11..17 "\"tip\"" [] [Whitespace(" ")],
+                    },
+                },
+            },
+            JsxSpreadAttribute {
+                l_curly_token: L_CURLY@17..18 "{" [] [],
+                dotdotdot_token: DOT3@18..21 "..." [] [],
+                argument: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@21..26 "props" [] [],
+                    },
+                },
+                r_curly_token: R_CURLY@26..27 "}" [] [],
+            },
+        ],
+        r_angle_token: R_ANGLE@27..28 ">" [] [],
+    },
+    eof_token: EOF@28..28 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSX_SINGLE_TAG_ROOT@0..28
+  0: JSX_OPENING_ELEMENT@0..28
+    0: L_ANGLE@0..1 "<" [] []
+    1: JSX_REFERENCE_IDENTIFIER@1..6
+      0: JSX_IDENT@1..6 "Note" [] [Whitespace(" ")]
+    2: (empty)
+    3: JSX_ATTRIBUTE_LIST@6..27
+      0: JSX_ATTRIBUTE@6..17
+        0: JSX_NAME@6..10
+          0: JSX_IDENT@6..10 "type" [] []
+        1: JSX_ATTRIBUTE_INITIALIZER_CLAUSE@10..17
+          0: EQ@10..11 "=" [] []
+          1: JSX_STRING@11..17
+            0: JSX_STRING_LITERAL@11..17 "\"tip\"" [] [Whitespace(" ")]
+      1: JSX_SPREAD_ATTRIBUTE@17..27
+        0: L_CURLY@17..18 "{" [] []
+        1: DOT3@18..21 "..." [] []
+        2: JS_IDENTIFIER_EXPRESSION@21..26
+          0: JS_REFERENCE_IDENTIFIER@21..26
+            0: IDENT@21..26 "props" [] []
+        3: R_CURLY@26..27 "}" [] []
+    4: R_ANGLE@27..28 ">" [] []
+  1: EOF@28..28 "" [] []
+
+```

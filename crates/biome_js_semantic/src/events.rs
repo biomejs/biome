@@ -339,6 +339,7 @@ impl SemanticEventExtractor {
         JS_SVELTE_SNIPPET_ROOT,
         JS_VUE_SLOT_PROPS_ROOT,
         JS_VUE_GENERIC_ROOT,
+        JSX_SINGLE_TAG_ROOT,
         JS_DIRECTIVE,
         JS_CONSTRUCTOR_CLASS_MEMBER,
         JS_METHOD_CLASS_MEMBER,
@@ -443,7 +444,8 @@ impl SemanticEventExtractor {
             | JS_SVELTE_LEGACY_CONST_ROOT
             | JS_SVELTE_SNIPPET_ROOT
             | JS_VUE_SLOT_PROPS_ROOT
-            | JS_VUE_GENERIC_ROOT => {
+            | JS_VUE_GENERIC_ROOT
+            | JSX_SINGLE_TAG_ROOT => {
                 self.push_scope(
                     node.text_trimmed_range(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
@@ -1047,6 +1049,7 @@ impl SemanticEventExtractor {
             | JS_SVELTE_SNIPPET_ROOT
             | JS_VUE_SLOT_PROPS_ROOT
             | JS_VUE_GENERIC_ROOT
+            | JSX_SINGLE_TAG_ROOT
             | TS_DECLARATION_MODULE
             | JS_FUNCTION_DECLARATION
             | JS_FUNCTION_EXPORT_DEFAULT_DECLARATION

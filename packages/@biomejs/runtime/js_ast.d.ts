@@ -2405,6 +2405,15 @@ export interface JsxShorthandAttribute extends JsAstNode {
 	token(field: "lCurlyToken" | "rCurlyToken"): JsAstToken | undefined;
 	token(field: string): JsAstToken | undefined;
 }
+export interface JsxSingleTagRoot extends JsAstNode {
+	readonly kind: "JSX_SINGLE_TAG_ROOT";
+	readonly tag: AnyJsxSingleTag | undefined;
+	withTag(value: AnyJsxSingleTag): JsxSingleTagRoot;
+	readonly eofToken: string | undefined;
+	withEofToken(value: JsAstToken): JsxSingleTagRoot;
+	token(field: "eofToken"): JsAstToken | undefined;
+	token(field: string): JsAstToken | undefined;
+}
 export interface JsxSpreadAttribute extends JsAstNode {
 	readonly kind: "JSX_SPREAD_ATTRIBUTE";
 	readonly lCurlyToken: string | undefined;
@@ -4209,6 +4218,7 @@ export type AnyJsRoot =
 	| JsSvelteSnippetRoot
 	| JsVueGenericRoot
 	| JsVueSlotPropsRoot
+	| JsxSingleTagRoot
 	| TsDeclarationModule;
 export type AnyJsStatement =
 	| JsBlockStatement
@@ -4281,6 +4291,13 @@ export type AnyJsxObjectName =
 	| JsxMemberName
 	| JsxNamespaceName
 	| JsxReferenceIdentifier;
+export type AnyJsxSingleTag =
+	| JsBogus
+	| JsxClosingElement
+	| JsxClosingFragment
+	| JsxOpeningElement
+	| JsxOpeningFragment
+	| JsxSelfClosingElement;
 export type AnyJsxTag =
 	| AstroImplicitFragment
 	| JsxElement
@@ -4567,6 +4584,7 @@ export interface JsNodeByKind {
 	readonly JSX_REFERENCE_IDENTIFIER: JsxReferenceIdentifier;
 	readonly JSX_SELF_CLOSING_ELEMENT: JsxSelfClosingElement;
 	readonly JSX_SHORTHAND_ATTRIBUTE: JsxShorthandAttribute;
+	readonly JSX_SINGLE_TAG_ROOT: JsxSingleTagRoot;
 	readonly JSX_SPREAD_ATTRIBUTE: JsxSpreadAttribute;
 	readonly JSX_SPREAD_CHILD: JsxSpreadChild;
 	readonly JSX_STRING: JsxString;

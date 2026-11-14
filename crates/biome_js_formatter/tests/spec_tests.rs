@@ -25,4 +25,8 @@ mod formatter {
     mod astro_expression {
         tests_macros::gen_tests! {"tests/specs/astro_expr/**/*.tsx", crate::spec_test::run, "astro_expr"}
     }
+
+    mod mdx_tag {
+        tests_macros::gen_tests! {"tests/specs/mdx_tag/**/*.jsx", crate::spec_test::run, "mdx_tag"}
+    }
 }

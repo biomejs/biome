@@ -7,4 +7,5 @@ pub(crate) mod child;
 pub(crate) mod element_name;
 pub(crate) mod name;
 pub(crate) mod object_name;
+pub(crate) mod single_tag;
 pub(crate) mod tag;
