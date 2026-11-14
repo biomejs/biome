@@ -3003,6 +3003,11 @@ export interface Nursery {
 	 */
 	noBooleanSortComparator?: NoBooleanSortComparatorConfiguration;
 	/**
+	 * Disallow the deprecated Buffer() constructor in Node.js.
+	 * See https://biomejs.dev/linter/rules/no-buffer-constructor
+	 */
+	noBufferConstructor?: NoBufferConstructorConfiguration;
+	/**
 	 * Forbid the use of Bun builtin modules.
 	 * See https://biomejs.dev/linter/rules/no-bun-modules
 	 */
@@ -6746,6 +6751,9 @@ export type NoBaseToStringConfiguration =
 export type NoBooleanSortComparatorConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBooleanSortComparatorOptions;
+export type NoBufferConstructorConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoBufferConstructorOptions;
 export type NoBunModulesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBunModulesOptions;
@@ -9816,6 +9824,10 @@ export interface RuleWithNoBooleanSortComparatorOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoBooleanSortComparatorOptions;
+}
+export interface RuleWithNoBufferConstructorOptions {
+	level: RulePlainConfiguration;
+	options?: NoBufferConstructorOptions;
 }
 export interface RuleWithNoBunModulesOptions {
 	level: RulePlainConfiguration;
@@ -13453,6 +13465,7 @@ export interface NoBaseToStringOptions {
 	ignoredTypeNames?: string[];
 }
 export type NoBooleanSortComparatorOptions = {};
+export type NoBufferConstructorOptions = {};
 export type NoBunModulesOptions = {};
 export type NoChainedComparisonOptions = {};
 export type NoConfusingArraySpliceOptions = {};
@@ -15936,6 +15949,7 @@ export type Category =
 	| "lint/nursery/noAwaitInPromiseMethods"
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noBooleanSortComparator"
+	| "lint/nursery/noBufferConstructor"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noChainedComparison"
 	| "lint/nursery/noColorInvalidHex"

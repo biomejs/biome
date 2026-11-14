@@ -3776,6 +3776,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoBufferConstructorConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoBufferConstructorOptions" }
+			]
+		},
+		"NoBufferConstructorOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoBunModulesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9330,6 +9340,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noBufferConstructor": {
+					"description": "Disallow the deprecated Buffer() constructor in Node.js.\nSee https://biomejs.dev/linter/rules/no-buffer-constructor",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoBufferConstructorConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noBunModules": {
 					"description": "Forbid the use of Bun builtin modules.\nSee https://biomejs.dev/linter/rules/no-bun-modules",
 					"anyOf": [
@@ -12720,6 +12737,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoBooleanSortComparatorOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoBufferConstructorOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoBufferConstructorOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
