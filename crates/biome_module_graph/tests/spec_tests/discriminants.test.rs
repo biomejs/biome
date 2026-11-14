@@ -1144,12 +1144,16 @@ fn discriminants_held_at_the_top_level_follow_exports() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) narrows every read below, giving
-// `Circle` or the first tuple. Biome keeps the declared type, because it
-// doesn't follow `s!` and keys that are spelled differently from the property,
-// loose equality doesn't narrow an object, a read in a closure or inside
-// `for...of` or `switch` never sees the test, and a `const` exported by an
-// `export { ... }` list holds nothing.
+// TypeScript 7.0.2 (`tsc --strict`) narrows every read below
+// (`narrowing-probes/m3-l3/access.ts` L16, L27, L30, L34, L36,
+// `m3-l3/destructure.ts` L23, L26, L42, L44, L46, `m3-l3/more.ts` L14 and
+// L17, and `m3-l3/scope.ts` L12), giving `Circle` or the first tuple, except
+// at `inSwitch`. Biome keeps the declared type: it doesn't follow `s!` and
+// keys that are spelled differently from the property, loose equality
+// doesn't narrow an object yet, a read in a closure or inside `for...of`
+// never sees the test, and a `const` exported by an `export { ... }` list
+// holds nothing. A test inside a `switch` narrows as anywhere else, so
+// `inSwitch` gives `Circle`, as in TypeScript (`m3-l3/more.ts` L17).
 #[test]
 fn discriminant_constants_that_biome_does_not_follow_keep_the_object() {
     assert_reads(
@@ -1192,7 +1196,7 @@ fn discriminant_constants_that_biome_does_not_follow_keep_the_object() {
                 &["[string: a, number]", "[string: b, string]"],
             ),
             ("forOf", "s", &["Circle", "Square"]),
-            ("inSwitch", "s", &["Circle", "Square"]),
+            ("inSwitch", "s", &["Circle"]),
             ("exportList", "s2", &["Circle", "Square"]),
         ],
     );

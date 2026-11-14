@@ -13,8 +13,9 @@
 use super::flow_expressions::collected_member_name;
 use super::{ImportResolution, ResolutionCtx, resolve_local_type_on_demand};
 use crate::db::queries::{
-    BindingTypeInput, FlowSubjectRootInput, FlowSubjectTypeInput, infer_flow_binding_baseline,
-    infer_flow_subject_states, infer_flow_subject_type,
+    BindingTypeInput, FlowSubjectRootInput, FlowSubjectTypeInput, FlowSwitchInput,
+    infer_flow_binding_baseline, infer_flow_subject_states, infer_flow_subject_type,
+    infer_flow_switch_exhaustive,
 };
 use crate::js_module_info::flow::{
     FlowGuard, FlowNode, FlowNodeId, FlowRead, FlowSubject, FlowSubjectId, FlowTest, PropertyKey,
@@ -29,7 +30,7 @@ use biome_js_type_info::{
     may_narrow_by_property, narrow_by_in_operator, narrow_by_instanceof, narrow_by_property,
     narrow_by_type_predicate, narrow_type,
 };
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, TextRange, TextSize};
 use rustc_hash::FxHashMap;
 use std::collections::VecDeque;
 
@@ -97,7 +98,14 @@ pub(in crate::db) fn flow_subject_states<'db>(
         return None;
     }
     let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
-    let states = ctx.solve_subject(root, points, subject, baseline, input.readonly_path(db))?;
+    let states = ctx.solve_subject(
+        root,
+        points,
+        subject,
+        baseline,
+        input.readonly_path(db),
+        input.exhaustive(db),
+    )?;
     Some(points.iter().copied().zip(states).collect())
 }
 
@@ -133,6 +141,7 @@ pub(in crate::db) fn flow_subject_type<'db>(
                 states.subject(db),
                 baseline,
                 states.readonly_path(db),
+                states.exhaustive(db),
             ) {
                 Some(states) => states[0],
                 None => return Some(TypeData::Unknown),
@@ -143,6 +152,17 @@ pub(in crate::db) fn flow_subject_type<'db>(
         return Some(TypeData::Unknown);
     }
     (narrowed != baseline).then_some(narrowed)
+}
+
+pub(in crate::db) fn flow_switch_exhaustive(
+    db: &dyn ModuleDb,
+    module: ModuleInfo,
+    info: &JsModuleInfo,
+    root: usize,
+    switch: u32,
+) -> bool {
+    let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
+    ctx.switch_is_exhaustive(root, switch)
 }
 
 /// Why [`ResolutionCtx::flatten_baseline`] gives no type.
@@ -156,10 +176,11 @@ enum FlatteningError {
 
 /// The state of one solve that its guards share: the subject it narrows, the
 /// subject's declared type at the root's start, whether the subject is a
-/// readonly path, as [`FlowGuard::ReadonlyPath`] requires, and the results of
-/// the property guards, `in` tests, `instanceof` tests, and calls to
-/// type-guard functions applied so far, keyed by guard index and incoming
-/// type.
+/// readonly path, as [`FlowGuard::ReadonlyPath`] requires, the `switch`
+/// statements found exhaustive, as [`FlowGuard::Bypass`] requires, one bit
+/// each, and the results of the property guards, `in` tests, `instanceof`
+/// tests, and calls to type-guard functions applied so far, keyed by guard
+/// index and incoming type.
 struct GuardSolve<'db> {
     /// The subject that the solve narrows.
     subject: FlowSubjectId,
@@ -167,6 +188,7 @@ struct GuardSolve<'db> {
     /// a tested property is a discriminant.
     declared: TypeData<'db>,
     readonly_path: bool,
+    exhaustive: u64,
     properties: FxHashMap<(usize, TypeData<'db>), TypeData<'db>>,
 }
 
@@ -310,6 +332,10 @@ pub(in crate::db) struct LocalFlow<'db> {
     /// path read so far is readonly, keyed by the index of its root and its
     /// subject.
     readonly_paths: FxHashMap<(usize, FlowSubjectId), bool>,
+    /// Whether each `switch` statement asked about so far is exhaustive,
+    /// keyed by the index of its root and its own index there, as
+    /// [`ResolutionCtx::switch_is_exhaustive`] decides it.
+    exhaustive_switches: FxHashMap<(usize, u32), bool>,
 }
 
 impl<'db> ResolutionCtx<'db, '_> {
@@ -386,9 +412,10 @@ impl<'db> ResolutionCtx<'db, '_> {
         let &FlowSubject::Binding(binding) = root.subject(read.subject)? else {
             return None;
         };
+        let start = identifier.range().start();
         let declared = root
             .element_pattern(read.subject)
-            .and_then(|pattern| self.narrowed_element(read, pattern, binding));
+            .and_then(|pattern| self.narrowed_element(read, start, pattern, binding));
         // The read is a candidate only through its pattern when no test of
         // the variable itself reaches it.
         if !root.reads_at(read.subject, read.point) {
@@ -408,6 +435,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             None => self.flow_binding_baseline(binding)?,
         };
+        let exhaustive = self.exhaustive_switches(read, start);
         infer_flow_subject_type(
             self.db,
             FlowSubjectTypeInput::new(
@@ -419,6 +447,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     read.subject,
                     Some(baseline),
                     false,
+                    exhaustive,
                 ),
                 read.point,
             ),
@@ -426,10 +455,11 @@ impl<'db> ResolutionCtx<'db, '_> {
         .or(declared)
     }
 
-    /// Returns the type at `read` of the element declared at `element`, given
-    /// the `pattern` that holds it. The type is the element's property on the
-    /// pattern narrowed at the read, destructured the same way as the
-    /// element's collected type destructures the pattern's declared type.
+    /// Returns the type of the element declared at `element` at `read`,
+    /// whose expression starts at `start`, given the `pattern` that holds it:
+    /// the element's property on the type of the pattern narrowed at the
+    /// read, destructured as the element's collected type destructures the
+    /// pattern's declared type.
     ///
     /// Returns `None` when no test can narrow the pattern, when the pattern
     /// keeps its declared type at the read, and when the property can't be
@@ -439,6 +469,7 @@ impl<'db> ResolutionCtx<'db, '_> {
     fn narrowed_element(
         &mut self,
         read: FlowRead,
+        start: TextSize,
         pattern: FlowSubjectId,
         element: TextRange,
     ) -> Option<TypeData<'db>> {
@@ -447,6 +478,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             return None;
         };
         let baseline = self.flow_binding_baseline(range)?;
+        let exhaustive = self.exhaustive_switches(read, start);
         let narrowed = infer_flow_subject_type(
             self.db,
             FlowSubjectTypeInput::new(
@@ -458,6 +490,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     pattern,
                     Some(baseline),
                     false,
+                    exhaustive,
                 ),
                 read.point,
             ),
@@ -547,6 +580,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         if !readonly_path && root.is_only_readonly_tested(read.subject) {
             return None;
         }
+        let exhaustive = self.exhaustive_switches(read, member.range().start());
         infer_flow_subject_type(
             self.db,
             FlowSubjectTypeInput::new(
@@ -558,10 +592,120 @@ impl<'db> ResolutionCtx<'db, '_> {
                     read.subject,
                     Some(baseline),
                     readonly_path,
+                    exhaustive,
                 ),
                 read.point,
             ),
         )
+    }
+
+    /// Returns the `switch` statements of the root of `read` that are
+    /// exhaustive and whose bypass reaches the read, whose expression starts
+    /// at `start`, one bit each, as [`FlowSubjectRootInput::exhaustive`]
+    /// takes them.
+    ///
+    /// Only the statements whose cases start before `start` count. The read
+    /// of a discriminant lies before its own statement's cases, so deciding
+    /// whether a statement is exhaustive never asks about itself. A
+    /// statement that a loop's back edge brings before the read keeps its
+    /// bypass, which is wider.
+    fn exhaustive_switches(&mut self, read: FlowRead, start: TextSize) -> u64 {
+        let Some(root) = self.js_info.flow.root(read.root) else {
+            return 0;
+        };
+        let mut pending = root.bypassed_switches(read.point);
+        let mut exhaustive = 0;
+        while pending != 0 {
+            let bit = pending.trailing_zeros();
+            pending &= pending - 1;
+            if root
+                .switches
+                .get(bit as usize)
+                .is_some_and(|switch| switch.start <= start)
+                && self.is_exhaustive_switch(read.root, bit)
+            {
+                exhaustive |= 1 << bit;
+            }
+        }
+        exhaustive
+    }
+
+    /// Returns whether the `switch` statement at index `switch` of the root
+    /// at index `root` is exhaustive, through
+    /// [`crate::db::queries::infer_flow_switch_exhaustive`], or decided in
+    /// this context and kept per statement when it evaluates flow locally.
+    fn is_exhaustive_switch(&mut self, root: usize, switch: u32) -> bool {
+        if !self.evaluates_flow_locally() {
+            return infer_flow_switch_exhaustive(
+                self.db,
+                FlowSwitchInput::new(self.db, self.module, root, switch),
+            );
+        }
+        if let Some(&cached) = self
+            .local_flow
+            .as_ref()
+            .and_then(|local| local.exhaustive_switches.get(&(root, switch)))
+        {
+            return cached;
+        }
+        let exhaustive = self.switch_is_exhaustive(root, switch);
+        if let Some(local) = self.local_flow.as_mut() {
+            local.exhaustive_switches.insert((root, switch), exhaustive);
+        }
+        exhaustive
+    }
+
+    /// Returns whether the `switch` statement at index `switch` of the root
+    /// at index `root` is exhaustive, as TypeScript's
+    /// `computeExhaustiveSwitchStatement` decides it: whether every value
+    /// that the type of its discriminant at the statement allows matches a
+    /// case.
+    ///
+    /// That type is the flow-sensitive type of the read of the discriminant,
+    /// or of the operand of `typeof`, when narrowing changes it, so a
+    /// `string` that a test narrowed to `"a" | "b"` before the statement
+    /// counts, and its ordinary type otherwise. The statement is exhaustive
+    /// when the guard of its bypass, which tests that no case matched,
+    /// leaves that type `never`. For `switch (typeof x)` with `x: unknown` or
+    /// `x: any`, as in TypeScript, the cases must test every kind of value.
+    ///
+    /// Returns false when the type is unknown or `never`, as TypeScript's
+    /// `isLiteralType` is false for `never`.
+    pub(super) fn switch_is_exhaustive(&mut self, root: usize, switch: u32) -> bool {
+        let info = self.js_info;
+        let Some(root) = info.flow.root(root) else {
+            return false;
+        };
+        let Some(switch) = root.switches.get(switch as usize) else {
+            return false;
+        };
+        let Some(discriminant) = self
+            .flow_operand_at(switch.discriminant)
+            .or_else(|| self.raw_operand_at(switch.discriminant))
+        else {
+            return false;
+        };
+        let Some(ty) = self.flow_baseline(discriminant) else {
+            return false;
+        };
+        if let (TypeData::AnyKeyword | TypeData::UnknownKeyword, Some(kinds)) =
+            (ty, switch.typeof_kinds)
+        {
+            return kinds == u8::MAX;
+        }
+        if matches!(ty, TypeData::Unknown | TypeData::NeverKeyword) || is_narrowing_invariant(ty) {
+            return false;
+        }
+        let mut solve = GuardSolve {
+            subject: switch.subject,
+            declared: ty,
+            readonly_path: false,
+            exhaustive: 0,
+            properties: FxHashMap::default(),
+        };
+        let mut remaining = MAX_FLOW_STEPS;
+        self.apply_guard(root, switch.guard, &mut solve, ty, &mut remaining)
+            == Some(TypeData::NeverKeyword)
     }
 
     /// Returns whether the property path that `member` reads at `read` is
@@ -754,8 +898,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns the type of `subject` at each of `points`, given its `baseline`
-    /// type at the root's start and whether it is a readonly path, or `None`
-    /// when the walk or the solve exceeds the flow work limit.
+    /// type at the root's start, whether it is a readonly path, and the
+    /// `switch` statements found exhaustive, or `None` when the walk or the
+    /// solve exceeds the flow work limit.
     fn solve_subject(
         &mut self,
         root: &RootFlow,
@@ -763,9 +908,20 @@ impl<'db> ResolutionCtx<'db, '_> {
         subject: FlowSubjectId,
         baseline: TypeData<'db>,
         readonly_path: bool,
+        exhaustive: u64,
     ) -> Option<Vec<TypeData<'db>>> {
         let reaching = ReachingFlow::new(root, points)?;
-        let states = self.solve_flow(root, &reaching, subject, baseline, readonly_path)?;
+        let states = self.solve_flow(
+            root,
+            &reaching,
+            GuardSolve {
+                subject,
+                declared: baseline,
+                readonly_path,
+                exhaustive,
+                properties: FxHashMap::default(),
+            },
+        )?;
         Some(
             reaching
                 .points
@@ -843,17 +999,16 @@ impl<'db> ResolutionCtx<'db, '_> {
         Err(FlatteningError::Exceeded)
     }
 
-    /// Returns the type of `subject` at every node of `reaching`, given its
-    /// `baseline` type at the root's start and whether it is a readonly path,
-    /// or `None` when the solve exceeds the flow work limit.
+    /// Returns the type of the subject that `guards` narrows at every node of
+    /// `reaching`, starting from its declared type at the root's start, or
+    /// `None` when the solve exceeds the flow work limit.
     fn solve_flow(
         &mut self,
         root: &RootFlow,
         reaching: &ReachingFlow,
-        subject: FlowSubjectId,
-        baseline: TypeData<'db>,
-        readonly_path: bool,
+        mut guards: GuardSolve<'db>,
     ) -> Option<Vec<TypeData<'db>>> {
+        let baseline = guards.declared;
         let count = reaching.nodes.len();
         let mut queue = VecDeque::new();
         for (number, node) in (0..).zip(&reaching.nodes) {
@@ -864,12 +1019,6 @@ impl<'db> ResolutionCtx<'db, '_> {
         let mut states = vec![TypeData::NeverKeyword; count];
         let mut queued = vec![false; count];
         let mut remaining = MAX_FLOW_STEPS;
-        let mut guards = GuardSolve {
-            subject,
-            declared: baseline,
-            readonly_path,
-            properties: FxHashMap::default(),
-        };
         while let Some(number) = queue.pop_front() {
             let index = number as usize;
             queued[index] = false;
@@ -1026,6 +1175,13 @@ impl<'db> ResolutionCtx<'db, '_> {
                     return Some(ty);
                 }
                 return self.apply_guard(root, *inner, solve, ty, remaining);
+            }
+            FlowGuard::Bypass { switch, guard } => {
+                if solve.exhaustive & (1u64 << *switch) != 0 {
+                    TypeData::NeverKeyword
+                } else {
+                    return self.apply_guard(root, *guard, solve, ty, remaining);
+                }
             }
             FlowGuard::Both {
                 left,
@@ -1212,6 +1368,8 @@ mod tests {
             pattern_elements: Default::default(),
             readonly_tested: Default::default(),
             only_readonly_tested: Default::default(),
+            switches: Box::default(),
+            bypassed: Box::default(),
         };
         let reaching = ReachingFlow::new(&root, &[2]).unwrap();
         assert_eq!(reaching.nodes, [2, 1, 3, 0]);

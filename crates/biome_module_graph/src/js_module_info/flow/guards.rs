@@ -7,17 +7,18 @@ use biome_js_semantic::{Binding, JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsExpression, AnyJsFormalParameter,
     AnyJsInProperty, AnyJsLiteralExpression, AnyJsMemberExpression, AnyJsOptionalChainExpression,
-    AnyJsParameter, AnyJsVariableDeclaration, JsBinaryOperator, JsCallExpression,
-    JsIdentifierExpression, JsLanguage, JsLogicalOperator, JsModule, JsReferenceIdentifier,
-    JsScript, JsUnaryOperator, JsVariableDeclarator, JsVariableKind, JsVariableStatement,
-    binding_ext::AnyJsBindingDeclaration, unescape_js_identifier,
+    AnyJsParameter, AnyJsSwitchClause, AnyJsVariableDeclaration, JsBinaryOperator,
+    JsCallExpression, JsIdentifierExpression, JsLanguage, JsLogicalOperator, JsModule,
+    JsReferenceIdentifier, JsScript, JsSwitchStatement, JsUnaryOperator, JsVariableDeclarator,
+    JsVariableKind, JsVariableStatement, T, binding_ext::AnyJsBindingDeclaration,
+    unescape_js_identifier,
 };
 use biome_js_type_info::{
     Function, FunctionParameter, RawPredicateTarget, RawTypeData, RawTypeId, ReturnType,
     TypeReference, TypeReferenceQualifier, TypeofKind, raw_predicate_target,
 };
 use biome_rowan::{
-    AstNode, AstSeparatedList, SyntaxKind, SyntaxKindSet, Text, TextRange, WalkEvent,
+    AstNode, AstNodeList, AstSeparatedList, SyntaxKind, SyntaxKindSet, Text, TextRange, WalkEvent,
 };
 use rustc_hash::FxHashMap;
 use std::borrow::Cow;
@@ -112,6 +113,20 @@ pub(crate) enum FlowGuard {
         right: usize,
         sequential: bool,
     },
+    /// The guard at index `guard`, on the path where no case of the `switch`
+    /// statement at index `switch` in [`RootFlow::switches`] matches, which
+    /// gives `never` instead when that statement is exhaustive.
+    ///
+    /// A `switch` is exhaustive when every value that its discriminant can
+    /// have at the statement matches a case, as TypeScript's
+    /// `isExhaustiveSwitchStatement` decides it. Then no value takes this
+    /// path, so it adds nothing to any subject after the statement. Whether a
+    /// statement is exhaustive depends on resolved types, so inference
+    /// decides it at the read, and the solve applies `guard` unless the read
+    /// says so.
+    ///
+    /// [`RootFlow::switches`]: super::RootFlow::switches
+    Bypass { switch: u32, guard: usize },
 }
 
 /// A runtime test whose result a guard assumes.
@@ -587,6 +602,7 @@ fn parameter_name(name: &Text) -> Option<Cow<'_, str>> {
 }
 
 /// A condition decomposed into the arena.
+#[derive(Debug)]
 pub(super) struct DecomposedCondition {
     pub(super) guard: usize,
     /// Subjects whose type the condition may narrow.
@@ -617,6 +633,24 @@ pub(super) struct DecomposedCondition {
     pub(super) instance_tested: Vec<FlowSubjectId>,
 }
 
+impl DecomposedCondition {
+    /// Returns the condition that holds when this condition holds and then
+    /// `next` holds, as `&&` combines its operands: its guard applies `next`
+    /// to the result of this guard.
+    pub(super) fn then(mut self, next: Self, guards: &mut Vec<FlowGuard>) -> Self {
+        guards.push(FlowGuard::Both {
+            left: self.guard,
+            right: next.guard,
+            sequential: true,
+        });
+        self.guard = guards.len() - 1;
+        self.mentions.extend(next.mentions);
+        self.parents.extend(next.parents);
+        self.instance_tested.extend(next.instance_tested);
+        self
+    }
+}
+
 /// Decomposes `expression`, assuming `outcome`, into guards appended to
 /// `guards`. The tests in those guards refer to subjects by their ids in
 /// `subjects`.
@@ -636,33 +670,399 @@ pub(super) fn decompose_condition(
     subjects: &mut FlowSubjectTable,
     guards: &mut Vec<FlowGuard>,
 ) -> DecomposedCondition {
-    let mut decomposer = Decomposer {
-        model,
-        functions,
-        subjects,
-        guards,
-        remaining: MAX_CONDITION_STEPS,
-        mentions: Vec::new(),
-        parents: Vec::new(),
-        instance_tested: Vec::new(),
-        complete: true,
-        aliases: 0,
-        initializers: Vec::new(),
-    };
+    let mut decomposer = Decomposer::new(model, functions, subjects, guards);
     let guard = decomposer.guard(expression.clone(), outcome, 0);
-    let mut parents = std::mem::take(&mut decomposer.parents);
-    let instance_tested = std::mem::take(&mut decomposer.instance_tested);
-    let mentions = if decomposer.complete {
-        decomposer.mentions
+    decomposer.finish(guard, [expression])
+}
+
+/// How the cases of a `switch` statement narrow, which its discriminant
+/// decides, as in TypeScript's `getTypeAtSwitchClause`.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(super) enum SwitchKind {
+    /// The discriminant has the shape of a subject, or is a call in an
+    /// optional chain, as in `switch (x)`, `switch (s.kind)`, or
+    /// `switch (o?.f())`. A case narrows as `discriminant === test` does.
+    Value,
+    /// The discriminant is `typeof` of such an operand, and every case test
+    /// is a string literal, as in `switch (typeof x) { case "string": }`. A
+    /// case narrows as `typeof operand === test` narrows the operand and the
+    /// receivers of its optional chain, but not the object that holds it or
+    /// the pattern that declares it, as in TypeScript. A single case of any
+    /// other kind, such as `` case `string`: `` or `case k:`, makes the
+    /// statement [`Self::Opaque`]. TypeScript also accepts a template
+    /// literal there.
+    Typeof,
+    /// The discriminant is the literal `true` itself, without parentheses. A
+    /// case narrows as a condition does when it is truthy.
+    True,
+    /// Any other discriminant, such as `x!`, `(true)`, or `f()`, whose cases
+    /// narrow nothing.
+    Opaque,
+}
+
+impl SwitchKind {
+    /// Returns how the cases of `statement` narrow.
+    pub(super) fn new(statement: &JsSwitchStatement) -> Self {
+        let Ok(discriminant) = statement.discriminant() else {
+            return Self::Opaque;
+        };
+        // The binder checks the discriminant's kind without skipping
+        // parentheses, so `(true)` narrows nothing.
+        if let AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
+        ) = &discriminant
+        {
+            return if literal
+                .value_token()
+                .is_ok_and(|token| token.kind() == T![true])
+            {
+                Self::True
+            } else {
+                Self::Opaque
+            };
+        }
+        let mut remaining = MAX_CONDITION_STEPS;
+        let Some(discriminant) = omit_parentheses(discriminant, &mut remaining) else {
+            return Self::Opaque;
+        };
+        if let Some(operand) = typeof_operand(&discriminant, &mut remaining) {
+            let only_strings = statement.cases().iter().all(|clause| match clause {
+                AnyJsSwitchClause::JsCaseClause(clause) => matches!(
+                    clause.test(),
+                    Ok(AnyJsExpression::AnyJsLiteralExpression(
+                        AnyJsLiteralExpression::JsStringLiteralExpression(_)
+                    ))
+                ),
+                AnyJsSwitchClause::JsDefaultClause(_) => true,
+            });
+            return if only_strings && has_operand_shape(&operand) == Some(true) {
+                Self::Typeof
+            } else {
+                Self::Opaque
+            };
+        }
+        if has_operand_shape(&discriminant) == Some(true) {
+            Self::Value
+        } else {
+            Self::Opaque
+        }
+    }
+}
+
+/// Returns the operand of `expression`, without parentheses, when
+/// `expression` is a `typeof` expression.
+fn typeof_operand(expression: &AnyJsExpression, remaining: &mut usize) -> Option<AnyJsExpression> {
+    let AnyJsExpression::JsUnaryExpression(unary) = expression else {
+        return None;
+    };
+    if unary.operator().ok()? != JsUnaryOperator::Typeof {
+        return None;
+    }
+    omit_parentheses(unary.argument().ok()?, remaining)
+}
+
+/// Returns the expression whose type decides whether a `switch` statement
+/// of `kind` with the discriminant `discriminant` is exhaustive, without
+/// parentheses: the discriminant of a [`SwitchKind::Value`] statement, or the
+/// operand of a [`SwitchKind::Typeof`] one.
+///
+/// Returns `None` for other kinds, and for a `typeof` discriminant in
+/// parentheses, which TypeScript's `computeExhaustiveSwitchStatement` checks
+/// as a value instead, so that `switch ((typeof x))` is exhaustive only
+/// with a case for every kind.
+pub(super) fn exhaustive_operand(
+    discriminant: &AnyJsExpression,
+    kind: SwitchKind,
+) -> Option<AnyJsExpression> {
+    let mut remaining = MAX_CONDITION_STEPS;
+    match kind {
+        SwitchKind::Value => omit_parentheses(discriminant.clone(), &mut remaining),
+        SwitchKind::Typeof => typeof_operand(discriminant, &mut remaining),
+        SwitchKind::True | SwitchKind::Opaque => None,
+    }
+}
+
+/// Returns whether TypeScript gives the case test `test` of a `switch`
+/// statement of `kind` a unit type that a case of Biome also tests, as
+/// TypeScript's `computeExhaustiveSwitchStatement` requires of every case:
+/// a string, number, bigint, or boolean literal, `null`, or `undefined` for
+/// [`SwitchKind::Value`], and a string literal that names a kind of value for
+/// [`SwitchKind::Typeof`], as `"string"` does.
+///
+/// Returns false for a local variable named `undefined`, which can hold any
+/// value.
+pub(super) fn is_unit_case(
+    discriminant: &AnyJsExpression,
+    test: &AnyJsExpression,
+    kind: SwitchKind,
+    model: &SemanticModel,
+) -> bool {
+    if !matches!(kind, SwitchKind::Value | SwitchKind::Typeof) {
+        return false;
+    }
+    let mut remaining = MAX_CONDITION_STEPS;
+    let (Some(discriminant), Some(test)) = (
+        omit_parentheses(discriminant.clone(), &mut remaining),
+        omit_parentheses(test.clone(), &mut remaining),
+    ) else {
+        return false;
+    };
+    match comparison_step(&discriminant, &test, true, true, &mut remaining) {
+        Some(ConditionStep::Guard {
+            guard: SyntaxGuard::Literal(_) | SyntaxGuard::Typeof(_),
+            ..
+        }) => true,
+        Some(ConditionStep::Guard {
+            guard: SyntaxGuard::Undefined { reference, .. },
+            ..
+        }) => model.binding(&reference).is_none(),
+        _ => false,
+    }
+}
+
+/// One case of a `switch` statement, assumed to match or not.
+#[derive(Clone, Copy)]
+pub(super) struct SwitchCase<'a> {
+    pub(super) discriminant: &'a AnyJsExpression,
+    pub(super) test: &'a AnyJsExpression,
+    /// How the cases of the statement narrow.
+    pub(super) kind: SwitchKind,
+    /// Whether the case is assumed to match.
+    pub(super) matched: bool,
+}
+
+/// Decomposes the case test `test` of a `switch` statement whose
+/// discriminant is `discriminant` and whose cases narrow as `kind` says,
+/// assuming that the case matched or, when `matched` is false, that it did
+/// not, into guards appended to `guards`, as [`decompose_condition`] does.
+///
+/// A case of [`SwitchKind::Value`] and [`SwitchKind::Typeof`] statements
+/// narrows as `discriminant === test` and `typeof operand === test` do, and
+/// fails to match as `!==` does. As in TypeScript's
+/// `narrowTypeBySwitchOptionalChainContainment`, a case that doesn't match
+/// narrows no receiver of an optional chain, so `default` after
+/// `case undefined:` keeps `undefined` in `o` for `switch (o?.k)`. A case of
+/// [`SwitchKind::True`] narrows as its test does when it is truthy. It fails
+/// to match as the test does when it is falsy only when [`is_boolean_valued`]
+/// accepts the test, because a case such as `case x:` with an object `x`
+/// fails when `x` is an object too. TypeScript takes it as falsy anyway.
+///
+/// Returns `None` when the case narrows nothing: for a
+/// [`SwitchKind::Opaque`] statement, a case that fails to match and isn't
+/// boolean, and a case test that a comparison can't use, such as `-1`, a
+/// `const`, an enum member, or a template literal, which TypeScript also
+/// narrows by.
+pub(super) fn decompose_switch_case(
+    case: SwitchCase,
+    model: &SemanticModel,
+    functions: &mut GuardFunctions,
+    subjects: &mut FlowSubjectTable,
+    guards: &mut Vec<FlowGuard>,
+) -> Option<DecomposedCondition> {
+    let SwitchCase {
+        discriminant,
+        test,
+        kind,
+        matched,
+    } = case;
+    let outcome = if matched {
+        FlowOutcome::Truthy
     } else {
-        let Decomposer {
+        FlowOutcome::Falsy
+    };
+    match kind {
+        SwitchKind::Opaque => None,
+        SwitchKind::True => {
+            let mut remaining = MAX_CONDITION_STEPS;
+            (matched || is_boolean_valued(test, &mut remaining))
+                .then(|| decompose_condition(test, outcome, model, functions, subjects, guards))
+        }
+        SwitchKind::Value | SwitchKind::Typeof => {
+            let mut decomposer = Decomposer::new(model, functions, subjects, guards);
+            decomposer.shape_guards = kind == SwitchKind::Value;
+            let step = omit_parentheses(discriminant.clone(), &mut decomposer.remaining)
+                .zip(omit_parentheses(test.clone(), &mut decomposer.remaining))
+                .and_then(|(discriminant, test)| {
+                    comparison_step(
+                        &discriminant,
+                        &test,
+                        true,
+                        matched,
+                        &mut decomposer.remaining,
+                    )
+                });
+            let guard = match step {
+                Some(ConditionStep::Unsupported) => return None,
+                Some(ConditionStep::Guard {
+                    operand,
+                    guard,
+                    positive,
+                    receivers,
+                }) => decomposer.step_guard(
+                    ConditionStep::Guard {
+                        operand,
+                        guard,
+                        positive,
+                        receivers: receivers && matched,
+                    },
+                    outcome,
+                    0,
+                ),
+                Some(step) => decomposer.step_guard(step, outcome, 0),
+                None => {
+                    decomposer.complete = false;
+                    decomposer.push(FlowGuard::Incomplete)
+                }
+            };
+            Some(decomposer.finish(guard, [discriminant, test]))
+        }
+    }
+}
+
+/// Returns whether every value of `expression` that is truthy is `true`, so
+/// that a case of `switch (true)` whose test is `expression` fails to match
+/// only when the test is falsy.
+///
+/// This holds for comparisons, `instanceof`, `in`, `!`, calls, and these in
+/// parentheses, for `a && b` when it holds for `b`, and for `a || b` when it
+/// holds for both. A call counts because only a call to a type-guard
+/// function narrows, and such a function returns a boolean. A falsy `a`
+/// makes `a && b` give `a`, which is never `true`, so `a` need not be a
+/// boolean.
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Other expressions may give a truthy value other than `true`."
+)]
+fn is_boolean_valued(expression: &AnyJsExpression, remaining: &mut usize) -> bool {
+    let Some(left) = remaining.checked_sub(1) else {
+        return false;
+    };
+    *remaining = left;
+    let Some(expression) = omit_parentheses(expression.clone(), remaining) else {
+        return false;
+    };
+    match expression {
+        AnyJsExpression::JsBinaryExpression(binary) => binary.operator().is_ok_and(|operator| {
+            matches!(
+                operator,
+                JsBinaryOperator::LessThan
+                    | JsBinaryOperator::GreaterThan
+                    | JsBinaryOperator::LessThanOrEqual
+                    | JsBinaryOperator::GreaterThanOrEqual
+                    | JsBinaryOperator::Equality
+                    | JsBinaryOperator::StrictEquality
+                    | JsBinaryOperator::Inequality
+                    | JsBinaryOperator::StrictInequality
+            )
+        }),
+        AnyJsExpression::JsInstanceofExpression(_)
+        | AnyJsExpression::JsInExpression(_)
+        | AnyJsExpression::JsCallExpression(_) => true,
+        AnyJsExpression::JsUnaryExpression(unary) => {
+            unary.operator().ok() == Some(JsUnaryOperator::LogicalNot)
+        }
+        AnyJsExpression::JsLogicalExpression(logical) => match logical.operator() {
+            Ok(JsLogicalOperator::LogicalAnd) => logical
+                .right()
+                .is_ok_and(|right| is_boolean_valued(&right, remaining)),
+            Ok(JsLogicalOperator::LogicalOr) => {
+                logical
+                    .left()
+                    .is_ok_and(|left| is_boolean_valued(&left, remaining))
+                    && logical
+                        .right()
+                        .is_ok_and(|right| is_boolean_valued(&right, remaining))
+            }
+            Ok(JsLogicalOperator::NullishCoalescing) | Err(_) => false,
+        },
+        _ => false,
+    }
+}
+
+struct Decomposer<'a, 'raw> {
+    model: &'a SemanticModel,
+    functions: &'a mut GuardFunctions<'raw>,
+    subjects: &'a mut FlowSubjectTable,
+    guards: &'a mut Vec<FlowGuard>,
+    remaining: usize,
+    mentions: Vec<FlowSubjectId>,
+    /// The objects of the [`FlowGuard::Property`] guards and the subjects of
+    /// the [`FlowTest::In`], [`FlowTest::Instanceof`], and object
+    /// [`FlowTest::Predicate`] tests decomposed so far.
+    parents: Vec<FlowSubjectId>,
+    /// The subjects of the [`FlowTest::Instanceof`] tests and of the
+    /// [`FlowTest::Predicate`] tests whose targets have only object types
+    /// decomposed so far.
+    instance_tested: Vec<FlowSubjectId>,
+    complete: bool,
+    /// The number of aliased conditions whose initializers enclose the
+    /// expression being decomposed.
+    aliases: usize,
+    /// Every initializer that an aliased condition has inlined.
+    initializers: Vec<AnyJsExpression>,
+    /// Whether a runtime test of a property or of an element of a pattern
+    /// also narrows the object or the pattern, as [`Self::property_guard`]
+    /// and [`Self::pattern_guard`] describe. False for the cases of
+    /// `switch (typeof x)`, which narrow only the operand of `typeof`.
+    shape_guards: bool,
+}
+
+impl<'a, 'raw> Decomposer<'a, 'raw> {
+    fn new(
+        model: &'a SemanticModel,
+        functions: &'a mut GuardFunctions<'raw>,
+        subjects: &'a mut FlowSubjectTable,
+        guards: &'a mut Vec<FlowGuard>,
+    ) -> Self {
+        Self {
+            model,
+            functions,
             subjects,
+            guards,
+            remaining: MAX_CONDITION_STEPS,
+            mentions: Vec::new(),
+            parents: Vec::new(),
+            instance_tested: Vec::new(),
+            complete: true,
+            aliases: 0,
+            initializers: Vec::new(),
+            shape_guards: true,
+        }
+    }
+
+    /// Returns the condition whose guard is `guard`, with the subjects that
+    /// decomposition found.
+    ///
+    /// When decomposition stopped early, the condition mentions every
+    /// variable and property path that `scanned` read directly instead, and
+    /// those that inlined initializers read and [`narrows_through_aliases`]
+    /// accepts.
+    fn finish<'e>(
+        self,
+        guard: usize,
+        scanned: impl IntoIterator<Item = &'e AnyJsExpression>,
+    ) -> DecomposedCondition {
+        let Self {
+            model,
+            subjects,
+            mut parents,
+            instance_tested,
+            complete,
+            mentions,
             initializers,
             ..
-        } = decomposer;
-        let direct = expression
-            .syntax()
-            .preorder_of_kinds(FALLBACK_KINDS)
+        } = self;
+        if complete {
+            return DecomposedCondition {
+                guard,
+                mentions,
+                parents,
+                instance_tested,
+            };
+        }
+        let direct = scanned
+            .into_iter()
+            .flat_map(|expression| expression.syntax().preorder_of_kinds(FALLBACK_KINDS))
             .map(|event| (event, false));
         let inlined = initializers
             .iter()
@@ -693,42 +1093,14 @@ pub(super) fn decompose_condition(
                 parents.push(pattern);
             }
         }
-        mentions
-    };
-    DecomposedCondition {
-        guard,
-        mentions,
-        parents,
-        instance_tested,
+        DecomposedCondition {
+            guard,
+            mentions,
+            parents,
+            instance_tested,
+        }
     }
-}
 
-struct Decomposer<'a, 'raw> {
-    model: &'a SemanticModel,
-    functions: &'a mut GuardFunctions<'raw>,
-    subjects: &'a mut FlowSubjectTable,
-    guards: &'a mut Vec<FlowGuard>,
-    remaining: usize,
-    mentions: Vec<FlowSubjectId>,
-    /// The objects of the [`FlowGuard::Property`] guards and the subjects of
-    /// the [`FlowTest::In`] and [`FlowTest::Instanceof`] tests and of the
-    /// [`FlowTest::Predicate`] tests whose targets have only object types,
-    /// decomposed so far.
-    parents: Vec<FlowSubjectId>,
-    /// The subjects of the [`FlowTest::Instanceof`] tests and of the
-    /// [`FlowTest::Predicate`] tests whose targets have only object types
-    /// decomposed so far.
-    instance_tested: Vec<FlowSubjectId>,
-    complete: bool,
-    /// The number of aliased conditions whose initializers enclose the
-    /// expression being decomposed.
-    aliases: usize,
-    /// Every initializer inlined from an aliased condition. When decomposition
-    /// stops early, `mentions` also lists the subjects read in them.
-    initializers: Vec<AnyJsExpression>,
-}
-
-impl Decomposer<'_, '_> {
     fn guard(&mut self, expression: AnyJsExpression, outcome: FlowOutcome, depth: usize) -> usize {
         if depth >= MAX_CONDITION_DEPTH {
             self.complete = false;
@@ -738,6 +1110,12 @@ impl Decomposer<'_, '_> {
             self.complete = false;
             return self.push(FlowGuard::Incomplete);
         };
+        self.step_guard(step, outcome, depth)
+    }
+
+    /// Returns the index of the guard of `step`, one step of a condition at
+    /// `depth` assumed to have `outcome`, with its operands decomposed.
+    fn step_guard(&mut self, step: ConditionStep, outcome: FlowOutcome, depth: usize) -> usize {
         let guard = match step {
             ConditionStep::Unsupported => FlowGuard::Keep,
             ConditionStep::Guard {
@@ -880,7 +1258,9 @@ impl Decomposer<'_, '_> {
             },
             None => FlowGuard::Keep,
         };
-        if let Some((test, subject)) = tested {
+        if let Some((test, subject)) = tested
+            && self.shape_guards
+        {
             let property = self.property_guard(operand, subject, test, positive);
             let pattern = self.pattern_guard(subject, test, positive);
             for property in [property, pattern].into_iter().flatten() {
@@ -1787,6 +2167,77 @@ mod tests {
             condition,
             model,
             subjects: subjects.into_subjects(),
+        }
+    }
+
+    /// Returns the kind of the first `switch` statement in `source`.
+    fn switch_kind(source: &str) -> SwitchKind {
+        let parsed = parse(source, JsFileSource::ts(), JsParserOptions::default());
+        assert!(!parsed.has_errors(), "{source}");
+        let statement = parsed
+            .syntax()
+            .descendants()
+            .find_map(JsSwitchStatement::cast)
+            .unwrap();
+        SwitchKind::new(&statement)
+    }
+
+    #[test]
+    fn switch_kinds_follow_the_discriminant() {
+        for (source, kind) in [
+            ("switch (x) { case 1: }", SwitchKind::Value),
+            ("switch ((x)) { case 1: }", SwitchKind::Value),
+            ("switch (o.k) { case 1: }", SwitchKind::Value),
+            ("switch (o?.f()) { case 1: }", SwitchKind::Value),
+            (
+                "switch (typeof x) { case \"a\": default: }",
+                SwitchKind::Typeof,
+            ),
+            ("switch ((typeof (x))) { case \"a\": }", SwitchKind::Typeof),
+            ("switch (typeof x) { case k: }", SwitchKind::Opaque),
+            ("switch (typeof x) { case (\"a\"): }", SwitchKind::Opaque),
+            ("switch (typeof x) { case `a`: }", SwitchKind::Opaque),
+            ("switch (typeof f()) { case \"a\": }", SwitchKind::Opaque),
+            ("switch (true) { case x: }", SwitchKind::True),
+            ("switch ((true)) { case x: }", SwitchKind::Opaque),
+            ("switch (false) { case x: }", SwitchKind::Opaque),
+            ("switch (x!) { case 1: }", SwitchKind::Opaque),
+            ("switch (f()) { case 1: }", SwitchKind::Opaque),
+        ] {
+            assert_eq!(switch_kind(source), kind, "{source}");
+        }
+    }
+
+    #[test]
+    fn boolean_valued_expressions_are_true_whenever_they_are_truthy() {
+        for (source, expected) in [
+            ("a === b", true),
+            ("a < b", true),
+            ("a instanceof B", true),
+            ("\"a\" in b", true),
+            ("!a", true),
+            ("f(a)", true),
+            ("(a !== null)", true),
+            ("a && b === 1", true),
+            ("a === 1 || b === 2", true),
+            ("a", false),
+            ("a && b", false),
+            ("a === 1 || b", false),
+            ("a ?? b === 1", false),
+            ("a + b", false),
+        ] {
+            let parsed = parse(source, JsFileSource::ts(), JsParserOptions::default());
+            let expression = parsed
+                .syntax()
+                .descendants()
+                .find_map(AnyJsExpression::cast)
+                .unwrap();
+            let mut remaining = MAX_CONDITION_STEPS;
+            assert_eq!(
+                is_boolean_valued(&expression, &mut remaining),
+                expected,
+                "{source}"
+            );
         }
     }
 
