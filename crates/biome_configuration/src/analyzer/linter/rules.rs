@@ -504,6 +504,7 @@ pub enum RuleName {
     NoUselessLabel,
     NoUselessLengthCheck,
     NoUselessLoneBlockStatements,
+    NoUselessNestedTernary,
     NoUselessParameterPropertyAssignment,
     NoUselessQualifier,
     NoUselessRecursion,
@@ -1331,6 +1332,7 @@ impl RuleName {
             Self::NoUselessLabel => "noUselessLabel",
             Self::NoUselessLengthCheck => "noUselessLengthCheck",
             Self::NoUselessLoneBlockStatements => "noUselessLoneBlockStatements",
+            Self::NoUselessNestedTernary => "noUselessNestedTernary",
             Self::NoUselessParameterPropertyAssignment => "noUselessParameterPropertyAssignment",
             Self::NoUselessQualifier => "noUselessQualifier",
             Self::NoUselessRecursion => "noUselessRecursion",
@@ -2156,6 +2158,7 @@ impl RuleName {
             Self::NoUselessLabel => RuleGroup::Complexity,
             Self::NoUselessLengthCheck => RuleGroup::Nursery,
             Self::NoUselessLoneBlockStatements => RuleGroup::Complexity,
+            Self::NoUselessNestedTernary => RuleGroup::Nursery,
             Self::NoUselessParameterPropertyAssignment => RuleGroup::Nursery,
             Self::NoUselessQualifier => RuleGroup::Nursery,
             Self::NoUselessRecursion => RuleGroup::Nursery,
@@ -2988,6 +2991,7 @@ impl std::str::FromStr for RuleName {
             "noUselessLabel" => Ok(Self::NoUselessLabel),
             "noUselessLengthCheck" => Ok(Self::NoUselessLengthCheck),
             "noUselessLoneBlockStatements" => Ok(Self::NoUselessLoneBlockStatements),
+            "noUselessNestedTernary" => Ok(Self::NoUselessNestedTernary),
             "noUselessParameterPropertyAssignment" => {
                 Ok(Self::NoUselessParameterPropertyAssignment)
             }
