@@ -151,6 +151,17 @@ one of its own variables or a path on its own `this`. Its parts live in
   runtime test of the argument, as `value is T` does, while `asserts value`
   decomposes the argument as a condition that holds, so
   `assert(value !== null)` excludes `null` from `value`.
+  A runtime test of a property of a subject other than `this`, as in
+  `s.kind === "c"`, `s["kind"] === "c"`, or `t[0] === "a"`, also adds a
+  property guard on that subject, the object that holds the property, unless
+  the property is a private name. The guard is applied after
+  the test of the property itself as `&&` combines its operands. The guard
+  narrows the object as TypeScript narrows a discriminated union, so `s`
+  becomes `Circle` there. Only the immediate object gets one: `o.a.kind`
+  narrows `o.a`, not `o`. A call to a type-guard function adds none, because
+  TypeScript never narrows `s` through `isC(s.kind)`. The decomposed
+  condition lists such objects apart from the subjects it mentions, so the
+  builder knows which subjects only property guards narrow.
   A truthiness test of an aliased condition, a `const` that is not exported,
   has no type annotation, and binds a name to an initializer, as `ok` in
   `const ok = x !== null; if (ok)`, also decomposes that initializer and
@@ -176,7 +187,14 @@ one of its own variables or a path on its own `this`. Its parts live in
   root's `this`, so `super.v = x` cancels `this.v`.
 
 Collection then keeps only the reads that a runtime test of their subject can
-reach, and only for subjects that can narrow. A variable can narrow when it is
+reach, and only for subjects that can narrow. A subject that conditions narrow
+only through property guards is in `RootFlow::property_only`. A property
+guard can narrow only a union with at least two object types, so collection
+drops a variable in it when its collected type shows that it is not one,
+without resolving anything (`raw_may_be_object_union` in
+`biome_js_type_info`): a primitive, a single object type or class written in
+place, a union with at most one object type, or the result of `new`. A
+variable whose type is a name, an import, or inferred from an expression stays. A variable can narrow when it is
 declared in the root, never written, neither untyped nor annotated `any`, and
 not supplied by a destructuring default, which the declared type ignores. A
 property path can narrow when its variable can, or when it starts at a `this`
@@ -185,7 +203,10 @@ runs only when the root reads a tested path.
 Those reads, plus the enclosing expressions that can use a narrowed operand,
 become candidates. A test inside a nested function never reaches reads in the
 enclosing one, and an array or object literal ends the chain of enclosing
-candidates. A root that declares no variable that can narrow and has no `this`
+candidates. A candidate that only reads of one variable in
+`RootFlow::property_only` make a candidate records that variable
+(`ModuleFlow::property_only_candidate`), so inference can skip it as a whole
+when that variable can't narrow. A root that declares no variable that can narrow and has no `this`
 subject gets no graph.
 Other variable types are resolved only when a candidate read is queried,
 because resolving them can be costly.
@@ -217,6 +238,17 @@ It still solves through `infer_flow_subject_states` and
 `infer_flow_subject_type`. Cycle fallback and the import-depth fallback read
 imports differently from the flow queries, so they keep using the queries.
 
+A subject in `RootFlow::property_only` starts from `property_baseline`
+instead of `narrowing_baseline`. It has no baseline, so its reads keep their
+declared types without a solve, unless its flattened type is a union with at
+least two object types (`may_narrow_by_property`). To flatten it, local types
+of the module resolve through the context instead of `infer_local_type`, so in
+complete module inference, which holds all of them, finding that most such
+variables can't narrow costs cache reads. Before evaluating a candidate that
+`ModuleFlow::property_only_candidate` names, both paths check that variable's
+baseline and skip the candidate when there is none, without finding its
+syntax node.
+
 `src/db/type_inference/flow.rs` applies each runtime test with `narrow_type`
 from `biome_js_type_info`. Where branches meet, or a loop returns to an earlier
 point, it keeps every type still possible on a reachable path. A read on a path
@@ -233,6 +265,12 @@ primitives and functions in a falsy or `typeof` test, for example to find that
 no falsy primitive has the members of `interface Foo { a: number }`. Tests of
 primitive types never call it. The comparison itself, including the member
 lookups on wrapper types such as `String`, lives in `biome_js_type_info`.
+A property guard applies `narrow_by_property`, which looks up the property in
+every member of the union with the same resolver and keeps the members whose
+property type can share a value with what the test leaves of the union of
+those types, following TypeScript's `narrowTypeByDiscriminant`. The solve
+memoizes each property guard's result by guard and incoming type, because a
+loop applies the same guard again.
 
 #### Caching
 
@@ -250,8 +288,9 @@ changes; they do not track edits separately for each function.
 Collection, condition decomposition, and the solve each have work limits. A
 root that exceeds a limit while its flow is collected gets no graph, so its
 reads keep their declared types. The limit on finding the reads that a test
-can reach is spent on variables before property paths; when it runs out on
-paths, the root keeps its graph and only its path reads lose narrowing. If decomposing a condition cannot finish
+can reach is spent on variables before property paths and subjects in
+`RootFlow::property_only`; when it runs out on those, the root keeps its graph
+and only their reads lose narrowing. If decomposing a condition cannot finish
 within its work limit, the guard makes the result unknown rather than assuming
 the expression is unaffected. When the shared solve exceeds its work limit or
 meets a query cycle, `infer_flow_subject_type` solves the read's point on its
