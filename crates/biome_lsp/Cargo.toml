@@ -31,7 +31,7 @@ biome_text_edit      = { workspace = true }
 biome_text_size      = { workspace = true, features = ["serde"] }
 camino               = { workspace = true }
 crossbeam            = { workspace = true }
-futures              = "0.3.32"
+futures              = "0.3.34"
 papaya               = { workspace = true }
 parking_lot          = { workspace = true }
 rustc-hash           = { workspace = true }

@@ -62,7 +62,7 @@ enumflags2                = { workspace = true }
 globset                   = { workspace = true }
 phf                       = { workspace = true }
 regex                     = { workspace = true }
-roaring                   = "0.11.3"
+roaring                   = "0.12.0"
 rustc-hash                = { workspace = true }
 ryu-js                    = { workspace = true }
 schemars                  = { workspace = true, optional = true }
@@ -76,7 +76,7 @@ biome_js_parser     = { path = "../biome_js_parser", features = ["tests"] }
 biome_plugin_loader = { path = "../biome_plugin_loader" }
 biome_service       = { path = "../biome_service" }
 biome_test_utils    = { path = "../biome_test_utils", features = ["html_embeds", "module_graph"] }
-criterion           = { package = "codspeed-criterion-compat", version = "=5.0.1" }
+criterion           = { package = "codspeed-criterion-compat", version = "=5.0.3" }
 insta               = { workspace = true, features = ["glob"] }
 salsa               = { workspace = true }
 tests_macros        = { path = "../tests_macros" }

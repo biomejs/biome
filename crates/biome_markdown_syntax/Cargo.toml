@@ -15,7 +15,7 @@ publish              = true
 
 [dependencies]
 biome_rowan = { workspace = true, features = ["serde"] }
-htmlize     = { version = "1.0.6", features = ["unescape"] }
+htmlize     = { version = "1.1.0", features = ["unescape"] }
 schemars    = { workspace = true, optional = true }
 serde       = { workspace = true, features = ["derive"] }
 
