@@ -560,6 +560,7 @@ pub mod use_consistent_font_weight_notation;
 pub mod use_consistent_function_style;
 pub mod use_consistent_graphql_descriptions;
 pub mod use_consistent_heading_level;
+pub mod use_consistent_indexed_object_style;
 pub mod use_consistent_json_file_read;
 pub mod use_consistent_lightness_notation;
 pub mod use_consistent_member_accessibility;

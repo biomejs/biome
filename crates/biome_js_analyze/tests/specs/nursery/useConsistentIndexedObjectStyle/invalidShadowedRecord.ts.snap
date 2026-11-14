@@ -1,0 +1,75 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidShadowedRecord.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+type Record<K, T> = { [key: string]: T };
+
+type Scores = { [name: string]: number };
+
+interface Ranking {
+	[name: string]: number;
+}
+
+```
+
+# Diagnostics
+```
+invalidShadowedRecord.ts:2:21 lint/nursery/useConsistentIndexedObjectStyle ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use a Record type instead of an index signature.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ type Record<K, T> = { [key: string]: T };
+      │                     ^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ type Scores = { [name: string]: number };
+  
+  i Using one style for object types with arbitrary keys makes the code easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidShadowedRecord.ts:4:15 lint/nursery/useConsistentIndexedObjectStyle ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use a Record type instead of an index signature.
+  
+    2 │ type Record<K, T> = { [key: string]: T };
+    3 │ 
+  > 4 │ type Scores = { [name: string]: number };
+      │               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ interface Ranking {
+  
+  i Using one style for object types with arbitrary keys makes the code easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidShadowedRecord.ts:6:1 lint/nursery/useConsistentIndexedObjectStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use a Record type instead of an index signature.
+  
+    4 │ type Scores = { [name: string]: number };
+    5 │ 
+  > 6 │ interface Ranking {
+      │ ^^^^^^^^^^^^^^^^^^^
+  > 7 │ 	[name: string]: number;
+  > 8 │ }
+      │ ^
+    9 │ 
+  
+  i Using one style for object types with arbitrary keys makes the code easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
