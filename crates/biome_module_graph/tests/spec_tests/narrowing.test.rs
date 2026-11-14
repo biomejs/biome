@@ -1493,6 +1493,229 @@ fn consumers_keep_structural_truthiness_and_void_results_uncertain() {
     );
 }
 
+/// Names each member of `ty` by the first line of its formatted type, with an
+/// interface named by its declared name, sorted.
+fn variant_names(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
+    let variants = match ty {
+        InferredTypeData::Union(union) => union.types(db).to_vec(),
+        _ => vec![ty],
+    };
+    let mut names: Vec<_> = variants
+        .into_iter()
+        .map(|ty| {
+            let text = format_inferred_type(db, ty);
+            let line = text.lines().next().unwrap_or_default();
+            let line = line.strip_suffix(" {").unwrap_or(line);
+            line.strip_prefix("interface \"")
+                .and_then(|name| name.strip_suffix('"'))
+                .unwrap_or(line)
+                .to_owned()
+        })
+        .collect();
+    names.sort();
+    names
+}
+
+const OBJECT_TYPES: &str = r#"
+    interface Foo { a: number }
+    interface Len { length: number }
+    interface Fixed { toFixed(): string }
+    interface Callable { (): void }
+    interface CallFoo { (): void; foo: string }
+    interface CallChild extends Callable { foo: string }
+    interface Child extends Foo { b: string }
+    interface Empty {}
+    interface Pad { padStart(n: number): string }
+    interface Str { toString(): string }
+    interface Desc { description?: string }
+    interface ValueOf { valueOf(): number }
+    class K { k = 1 }
+    class L { length = 0 }
+    class E {}
+"#;
+
+/// Asserts the type of `x` at each marker of `source`, which follows
+/// [`OBJECT_TYPES`], by the names of its members, as [`variant_names`] gives
+/// them.
+fn assert_object_reads(source: &str, reads: &[(&str, &[&str])]) {
+    let source = format!("{OBJECT_TYPES}{source}");
+    let (db, module) = narrowing_db(&source);
+    for (marker, expected) in reads {
+        let ty = normalized_type_at(&db, module, &source, marker, "x");
+        assert_eq!(variant_names(&db, ty), *expected, "{marker}");
+    }
+}
+
+// Every expected type is the type that TypeScript 6.0.3 (`tsc --strict`) gives
+// the read, unless a comment gives TypeScript's type: there Biome keeps an
+// object type that a falsy primitive can have, so its type is wider.
+#[test]
+fn falsy_branch_removes_object_types_that_no_falsy_primitive_satisfies() {
+    assert_object_reads(
+        r#"
+        function f1(x: Foo | undefined) { if (!x) /*foo*/x; }
+        function f2(x: {} | undefined) { if (!x) /*empty*/x; }
+        function f3(x: K | 0) { if (!x) /*classZero*/x; }
+        function f4(x: { a?: number } | undefined) { if (!x) /*weak*/x; }
+        function f5(x: Desc | undefined) { if (!x) /*description*/x; }
+        function f6(x: Child | undefined) { if (!x) /*child*/x; }
+        function f7(x: Function | undefined) { if (!x) /*function*/x; }
+        function f8(x: Len | undefined) { if (!x) /*len*/x; }
+        function f9(x: Fixed | undefined) { if (!x) /*fixed*/x; }
+        function f10(x: ValueOf | null) { if (!x) /*valueOf*/x; }
+        function f11(x: Object | undefined) { if (!x) /*object*/x; }
+        function f12(x: Empty | undefined) { if (!x) /*emptyInterface*/x; }
+        function f13(x: E | undefined) { if (!x) /*emptyClass*/x; }
+        function f14<T extends Foo>(x: T | undefined) { if (!x) /*generic*/x; }
+        "#,
+        &[
+            ("foo", &["undefined"]),
+            ("empty", &["Object", "undefined"]),
+            ("classZero", &["number: 0"]),
+            ("weak", &["undefined"]),
+            ("description", &["undefined"]),
+            ("child", &["undefined"]),
+            ("function", &["undefined"]),
+            // TypeScript: `undefined`. `""` has `length`.
+            ("len", &["Len", "undefined"]),
+            // TypeScript: `undefined`. `0` has `toFixed`.
+            ("fixed", &["Fixed", "undefined"]),
+            // TypeScript: `null`. `0` has `valueOf`.
+            ("valueOf", &["ValueOf", "null"]),
+            // TypeScript: `undefined`. Every primitive has the members of
+            // `Object`.
+            ("object", &["instanceof Object", "undefined"]),
+            // TypeScript: `undefined`, because only `{}` written as a type
+            // literal keeps falsy values.
+            ("emptyInterface", &["Empty", "undefined"]),
+            ("emptyClass", &["instanceof E", "undefined"]),
+            // TypeScript: `undefined`. Generics stay unchanged.
+            ("generic", &["instanceof T", "undefined"]),
+        ],
+    );
+}
+
+// Every expected type is the type that TypeScript 6.0.3 (`tsc --strict`) gives
+// the read, unless a comment gives TypeScript's type. A read that TypeScript
+// types as `never` is Unknown.
+#[test]
+fn typeof_removes_or_replaces_object_types() {
+    assert_object_reads(
+        r#"
+        function t1(x: string | Foo) { if (typeof x === "string") /*stringFoo*/x; else /*stringFooElse*/x; }
+        function t2(x: number | Len) { if (typeof x === "string") /*stringLen*/x; else /*stringLenElse*/x; }
+        function t3(x: {}) { if (typeof x === "string") /*stringEmpty*/x; }
+        function t4(x: Empty | number) { if (typeof x === "string") /*stringEmptyInterface*/x; }
+        function t5(x: K | string) { if (typeof x === "string") /*stringClass*/x; else /*stringClassElse*/x; }
+        function t6(x: Callable | string) { if (typeof x === "string") /*stringCallable*/x; }
+        function t7(x: Fixed | number) { if (typeof x === "number") /*numberFixed*/x; else /*numberFixedElse*/x; }
+        function t8(x: Foo | boolean) { if (typeof x === "boolean") /*booleanFoo*/x; else /*booleanFooElse*/x; }
+        function t9(x: Foo | number) { if (typeof x === "boolean") /*booleanNever*/x; }
+        function t10(x: Len | number) { if (typeof x === "symbol") /*symbolLen*/x; else /*symbolLenElse*/x; }
+        function t11(x: Foo | number) { if (typeof x === "bigint") /*bigintFoo*/x; }
+        function t12(x: Foo | undefined) { if (typeof x === "undefined") /*undefinedFoo*/x; }
+        function t13(x: {} | undefined) { if (typeof x === "undefined") /*undefinedEmpty*/x; }
+        function t14(x: Foo | undefined) { if (typeof x !== "undefined") /*notUndefinedFoo*/x; }
+        function t15(x: Foo | (() => void)) { if (typeof x === "function") /*functionFoo*/x; else /*functionFooElse*/x; }
+        function t16(x: Len | string) { if (typeof x === "function") /*functionLen*/x; else /*functionLenElse*/x; }
+        function t17(x: {}) { if (typeof x === "function") /*functionEmpty*/x; }
+        function t18(x: K | (() => void)) { if (typeof x === "function") /*functionClass*/x; else /*functionClassElse*/x; }
+        function t19(x: Date | (() => void)) { if (typeof x === "function") /*functionDate*/x; }
+        function t20(x: CallFoo | string) { if (typeof x === "function") /*functionCallable*/x; else /*functionCallableElse*/x; }
+        function t21(x: CallChild | string) { if (typeof x === "function") /*functionInherited*/x; }
+        function t22(x: string | Foo | null) { if (typeof x !== "object") /*notObjectFoo*/x; else /*notObjectFooElse*/x; }
+        function t23(x: Foo | null) { if (typeof x !== "object") /*notObjectNever*/x; }
+        function t24(x: Date | string) { if (typeof x !== "object") /*notObjectDate*/x; }
+        function t25(x: CallFoo | string) { if (typeof x !== "object") /*notObjectCallFoo*/x; }
+        function t26(x: Callable | null) { if (typeof x !== "object") /*notObjectCallable*/x; }
+        function t27(x: string | Len | null) { if (typeof x !== "object") /*notObjectLen*/x; }
+        function t28(x: L | number) { if (typeof x === "string") /*stringClassLength*/x; }
+        function t29(x: Pad | number) { if (typeof x === "string") /*stringPad*/x; }
+        function t30(x: Desc | number) { if (typeof x === "symbol") /*symbolDescription*/x; }
+        function t31(x: Str | number) { if (typeof x === "bigint") /*bigintString*/x; }
+        function t32(x: E | number) { if (typeof x === "string") /*stringEmptyClass*/x; }
+        "#,
+        &[
+            ("stringFoo", &["string"]),
+            ("stringFooElse", &["Foo"]),
+            ("stringLen", &["string"]),
+            ("stringLenElse", &["Len", "number"]),
+            ("stringEmpty", &["string"]),
+            ("stringEmptyInterface", &["string"]),
+            ("stringClass", &["string"]),
+            ("stringClassElse", &["instanceof K"]),
+            ("stringCallable", &["string"]),
+            ("numberFixed", &["number"]),
+            ("numberFixedElse", &["Fixed"]),
+            ("booleanFoo", &["boolean"]),
+            ("booleanFooElse", &["Foo"]),
+            ("booleanNever", &["unknown"]),
+            ("symbolLen", &["unknown"]),
+            ("symbolLenElse", &["Len", "number"]),
+            ("bigintFoo", &["unknown"]),
+            ("undefinedFoo", &["undefined"]),
+            ("undefinedEmpty", &["undefined"]),
+            ("notUndefinedFoo", &["Foo"]),
+            ("functionFoo", &["sync Function"]),
+            ("functionFooElse", &["Foo"]),
+            ("functionLen", &["instanceof Function"]),
+            ("functionLenElse", &["Len", "string"]),
+            ("functionEmpty", &["instanceof Function"]),
+            ("functionClass", &["sync Function"]),
+            ("functionClassElse", &["instanceof K"]),
+            ("functionDate", &["sync Function"]),
+            ("functionCallable", &["CallFoo"]),
+            // TypeScript: `string`. The false branch of `"function"` keeps
+            // object types.
+            ("functionCallableElse", &["CallFoo", "string"]),
+            ("functionInherited", &["CallChild"]),
+            ("notObjectFoo", &["string"]),
+            ("notObjectFooElse", &["Foo", "null"]),
+            ("notObjectNever", &["unknown"]),
+            ("notObjectDate", &["string"]),
+            ("notObjectCallFoo", &["CallFoo", "string"]),
+            ("notObjectCallable", &["Callable"]),
+            // TypeScript: `string`. Every string has `length`.
+            ("notObjectLen", &["Len", "string"]),
+            // TypeScript: `string`. A class can declare private members,
+            // which no string has, and they are not modelled.
+            ("stringClassLength", &["instanceof L"]),
+            // TypeScript: `string`. `padStart` comes from a newer library
+            // than the generated globals.
+            ("stringPad", &["Pad"]),
+            // TypeScript: `symbol`. `description` comes from a newer library
+            // than the generated globals.
+            ("symbolDescription", &["Desc"]),
+            // TypeScript: `bigint`. The generated globals have no `BigInt`.
+            ("bigintString", &["Str"]),
+            // TypeScript: `string`. A class can declare private members.
+            ("stringEmptyClass", &["instanceof E"]),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) types both `&&` expressions as
+// `1 | undefined`. Both reach the flow path, because `typeof` narrows the left
+// operand, so `falsy_values` gives its part of the value. Biome keeps `Len`,
+// which `""` has.
+#[test]
+fn logical_and_removes_object_types_from_its_falsy_part() {
+    const SOURCE: &str = r#"
+        interface Foo { a: number }
+        interface Len { length: number }
+        function f1(x: Foo | string | undefined) { if (typeof x !== "string") /*foo*/x && 1; }
+        function f2(x: Len | number | undefined) { if (typeof x !== "number") /*len*/x && 1; }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    for (marker, expected) in [
+        ("foo", &["number: 1", "undefined"][..]),
+        ("len", &["Len", "number: 1", "undefined"]),
+    ] {
+        let ty = normalized_type_at(&db, module, SOURCE, marker, "x && 1");
+        assert_eq!(variant_names(&db, ty), expected, "{marker}");
+    }
+}
+
 #[test]
 fn hoisted_initialization_prevents_stale_facts() {
     const SOURCE: &str = r#"
