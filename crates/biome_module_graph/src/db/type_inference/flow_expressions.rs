@@ -5,13 +5,14 @@ use super::ResolutionCtx;
 use super::flow::MAX_FLOW_TYPE_STEPS;
 use crate::db::queries::{ExpressionTypeInput, infer_flow_expression_type};
 use crate::js_module_info::flow::AnyFlowExpression;
-use biome_js_syntax::{AnyJsCallArgument, AnyJsExpression, JsLogicalOperator};
+use biome_js_syntax::{AnyJsCallArgument, AnyJsExpression, AnyJsName, JsLogicalOperator};
 use biome_js_type_info::{
     NarrowingPredicate, RawTypeData, RawTypeId, TypeReference, TypeofExpression, falsy_values,
     interned_types::{Literal, TypeData},
     narrow_type,
 };
 use biome_rowan::{AstNode, AstSeparatedList};
+use std::borrow::Cow;
 
 /// Limits how many [evaluated ancestors](AnyFlowExpression::evaluated_ancestors)
 /// an evaluated expression may have.
@@ -52,9 +53,16 @@ impl<'db> ResolutionCtx<'db, '_> {
                 // is one, is the declared type that a property path narrows.
                 let declared = match object {
                     Some(object) => {
-                        let name = member.member().ok()?.value_token().ok()?;
+                        let name = member.member().ok()?;
+                        let token = name.value_token().ok()?;
+                        // Class members store a private name with its `#`.
+                        let name = if matches!(name, AnyJsName::JsPrivateName(_)) {
+                            Cow::Owned(format!("#{}", token.text_trimmed()))
+                        } else {
+                            Cow::Borrowed(token.text_trimmed())
+                        };
                         let result = self
-                            .resolve_static_member_expression(object, name.text_trimmed())
+                            .resolve_static_member_expression(object, &name)
                             .unwrap_or(TypeData::Unknown);
                         if member.is_optional_chain() {
                             self.optional_chain_result(object, result)
