@@ -1,0 +1,79 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidIgnoreObjects.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+import { computed } from "vue";
+
+const otherLibrary = computed(() => someLib.string().catch(42));
+const nestedName = computed(() => x.z.number().catch(42));
+const promiseMethod = computed(() => Promise.resolve(z));
+</script>
+
+```
+
+# Diagnostics
+```
+invalidIgnoreObjects.vue:5:37 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property runs asynchronous code.
+  
+    3 │ import { computed } from "vue";
+    4 │ 
+  > 5 │ const otherLibrary = computed(() => someLib.string().catch(42));
+      │                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ const nestedName = computed(() => x.z.number().catch(42));
+    7 │ const promiseMethod = computed(() => Promise.resolve(z));
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIgnoreObjects.vue:6:35 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property runs asynchronous code.
+  
+    5 │ const otherLibrary = computed(() => someLib.string().catch(42));
+  > 6 │ const nestedName = computed(() => x.z.number().catch(42));
+      │                                   ^^^^^^^^^^^^^^^^^^^^^^
+    7 │ const promiseMethod = computed(() => Promise.resolve(z));
+    8 │ </script>
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIgnoreObjects.vue:7:38 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property runs asynchronous code.
+  
+    5 │ const otherLibrary = computed(() => someLib.string().catch(42));
+    6 │ const nestedName = computed(() => x.z.number().catch(42));
+  > 7 │ const promiseMethod = computed(() => Promise.resolve(z));
+      │                                      ^^^^^^^^^^^^^^^^^^
+    8 │ </script>
+    9 │ 
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

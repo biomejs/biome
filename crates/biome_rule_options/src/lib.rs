@@ -440,6 +440,7 @@ pub mod no_void;
 pub mod no_void_elements_with_children;
 pub mod no_void_type_return;
 pub mod no_vue_arrow_func_in_watch;
+pub mod no_vue_async_computed;
 pub mod no_vue_boolean_default;
 pub mod no_vue_child_content;
 pub mod no_vue_computed_properties_in_data;

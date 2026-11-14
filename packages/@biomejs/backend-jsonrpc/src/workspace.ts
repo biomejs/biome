@@ -3628,6 +3628,11 @@ export interface Nursery {
 	 */
 	noUselessTypeConversion?: NoUselessTypeConversionConfiguration;
 	/**
+	 * Disallow asynchronous code in Vue computed properties.
+	 * See https://biomejs.dev/linter/rules/no-vue-async-computed
+	 */
+	noVueAsyncComputed?: NoVueAsyncComputedConfiguration;
+	/**
 	 * Disallow default values for Boolean props in Vue components.
 	 * See https://biomejs.dev/linter/rules/no-vue-boolean-default
 	 */
@@ -7146,6 +7151,9 @@ export type NoUselessTypeAssertionConfiguration =
 export type NoUselessTypeConversionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessTypeConversionOptions;
+export type NoVueAsyncComputedConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueAsyncComputedOptions;
 export type NoVueBooleanDefaultConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueBooleanDefaultOptions;
@@ -10512,6 +10520,10 @@ export interface RuleWithNoUselessTypeAssertionOptions {
 export interface RuleWithNoUselessTypeConversionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessTypeConversionOptions;
+}
+export interface RuleWithNoVueAsyncComputedOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueAsyncComputedOptions;
 }
 export interface RuleWithNoVueBooleanDefaultOptions {
 	level: RulePlainConfiguration;
@@ -13891,6 +13903,13 @@ export type NoUselessSpliceOptions = {};
 export type NoUselessSpreadOptions = {};
 export type NoUselessTypeAssertionOptions = {};
 export type NoUselessTypeConversionOptions = {};
+export interface NoVueAsyncComputedOptions {
+	/**
+	 * Names of objects whose `then()`, `catch()`, and `finally()` methods aren't treated as
+	 * asynchronous, such as `z` from the Zod validation library.
+	 */
+	ignoreObjects?: string[];
+}
 export type NoVueBooleanDefaultOptions = {};
 export interface NoVueChildContentOptions {
 	/**
@@ -16155,6 +16174,7 @@ export type Category =
 	| "lint/nursery/noUselessSpread"
 	| "lint/nursery/noUselessTypeAssertion"
 	| "lint/nursery/noUselessTypeConversion"
+	| "lint/nursery/noVueAsyncComputed"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueChildContent"
 	| "lint/nursery/noVueComputedPropertiesInData"

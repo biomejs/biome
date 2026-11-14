@@ -385,6 +385,7 @@ define_categories! {
     "lint/nursery/noUselessSpread": "https://biomejs.dev/linter/rules/no-useless-spread",
     "lint/nursery/noUselessTypeAssertion": "https://biomejs.dev/linter/rules/no-useless-type-assertion",
     "lint/nursery/noUselessTypeConversion": "https://biomejs.dev/linter/rules/no-useless-type-conversion",
+    "lint/nursery/noVueAsyncComputed": "https://biomejs.dev/linter/rules/no-vue-async-computed",
     "lint/nursery/noVueBooleanDefault": "https://biomejs.dev/linter/rules/no-vue-boolean-default",
     "lint/nursery/noVueChildContent": "https://biomejs.dev/linter/rules/no-vue-child-content",
     "lint/nursery/noVueComputedPropertiesInData": "https://biomejs.dev/linter/rules/no-vue-computed-properties-in-data",
