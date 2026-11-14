@@ -1,0 +1,163 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+assertion_line: 122
+expression: invalidFlow.yaml
+---
+# Input
+```yaml
+# should generate diagnostics
+implicit: { : value }
+explicit: { ? : value }
+explicitWithoutValue: { ? }
+pair: [ : value ]
+explicitPair: [ ? : value ]
+noColon: { &anchor }
+noColonPair: [ { !!str } ]
+
+```
+
+# Diagnostics
+```
+invalidFlow.yaml:2:13 lint/nursery/noYamlEmptyMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This map entry has an empty key.
+  
+    1 │ # should generate diagnostics
+  > 2 │ implicit: { : value }
+      │             ^
+    3 │ explicit: { ? : value }
+    4 │ explicitWithoutValue: { ? }
+  
+  i An empty key is usually a mistake. Tools that read this file can reject it, or read it as null or as empty text.
+  
+  i Write a key for this entry, or remove the entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFlow.yaml:3:13 lint/nursery/noYamlEmptyMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This map entry has an empty key.
+  
+    1 │ # should generate diagnostics
+    2 │ implicit: { : value }
+  > 3 │ explicit: { ? : value }
+      │             ^
+    4 │ explicitWithoutValue: { ? }
+    5 │ pair: [ : value ]
+  
+  i An empty key is usually a mistake. Tools that read this file can reject it, or read it as null or as empty text.
+  
+  i Write a key for this entry, or remove the entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFlow.yaml:4:25 lint/nursery/noYamlEmptyMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This map entry has an empty key.
+  
+    2 │ implicit: { : value }
+    3 │ explicit: { ? : value }
+  > 4 │ explicitWithoutValue: { ? }
+      │                         ^
+    5 │ pair: [ : value ]
+    6 │ explicitPair: [ ? : value ]
+  
+  i An empty key is usually a mistake. Tools that read this file can reject it, or read it as null or as empty text.
+  
+  i Write a key for this entry, or remove the entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFlow.yaml:5:9 lint/nursery/noYamlEmptyMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This map entry has an empty key.
+  
+    3 │ explicit: { ? : value }
+    4 │ explicitWithoutValue: { ? }
+  > 5 │ pair: [ : value ]
+      │         ^
+    6 │ explicitPair: [ ? : value ]
+    7 │ noColon: { &anchor }
+  
+  i An empty key is usually a mistake. Tools that read this file can reject it, or read it as null or as empty text.
+  
+  i Write a key for this entry, or remove the entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFlow.yaml:6:17 lint/nursery/noYamlEmptyMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This map entry has an empty key.
+  
+    4 │ explicitWithoutValue: { ? }
+    5 │ pair: [ : value ]
+  > 6 │ explicitPair: [ ? : value ]
+      │                 ^
+    7 │ noColon: { &anchor }
+    8 │ noColonPair: [ { !!str } ]
+  
+  i An empty key is usually a mistake. Tools that read this file can reject it, or read it as null or as empty text.
+  
+  i Write a key for this entry, or remove the entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFlow.yaml:7:12 lint/nursery/noYamlEmptyMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This map entry has an empty key.
+  
+    5 │ pair: [ : value ]
+    6 │ explicitPair: [ ? : value ]
+  > 7 │ noColon: { &anchor }
+      │            ^^^^^^^
+    8 │ noColonPair: [ { !!str } ]
+    9 │ 
+  
+  i An empty key is usually a mistake. Tools that read this file can reject it, or read it as null or as empty text.
+  
+  i Write a key for this entry, or remove the entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFlow.yaml:8:18 lint/nursery/noYamlEmptyMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This map entry has an empty key.
+  
+    6 │ explicitPair: [ ? : value ]
+    7 │ noColon: { &anchor }
+  > 8 │ noColonPair: [ { !!str } ]
+      │                  ^^^^^
+    9 │ 
+  
+  i An empty key is usually a mistake. Tools that read this file can reject it, or read it as null or as empty text.
+  
+  i Write a key for this entry, or remove the entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

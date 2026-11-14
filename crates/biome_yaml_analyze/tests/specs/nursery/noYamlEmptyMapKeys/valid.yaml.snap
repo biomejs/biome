@@ -1,0 +1,30 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+assertion_line: 122
+expression: valid.yaml
+---
+# Input
+```yaml
+# should not generate diagnostics
+name: value
+"": empty double quoted text
+'': empty single quoted text
+? key
+: explicit entry
+? !!str tagged
+: explicit tagged entry
+&anchor anchored: value
+*anchor : alias key
+!!str tagged: value
+flow: { name: value, "": empty, ? key : value, *anchor : alias }
+pairs: [ name: value, "": empty ]
+? [a, b]
+: collection key
+? |
+  block text
+: block scalar key
+nested:
+  key: value
+emptyValue:
+
+```

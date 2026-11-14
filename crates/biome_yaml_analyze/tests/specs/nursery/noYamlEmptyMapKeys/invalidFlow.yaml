@@ -1,0 +1,8 @@
+# should generate diagnostics
+implicit: { : value }
+explicit: { ? : value }
+explicitWithoutValue: { ? }
+pair: [ : value ]
+explicitPair: [ ? : value ]
+noColon: { &anchor }
+noColonPair: [ { !!str } ]
