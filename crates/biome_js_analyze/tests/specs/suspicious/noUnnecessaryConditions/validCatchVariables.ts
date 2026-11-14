@@ -1,0 +1,44 @@
+// should not generate diagnostics
+// A variable that `catch` declares has type `unknown`, as in TypeScript,
+// wherever the `catch` clause is, so it can be nullish and these checks are
+// needed.
+
+declare function run(): void;
+
+function nullishCoalescing() {
+	try {
+		run();
+	} catch (error) {
+		return error ?? "fallback";
+	}
+}
+
+function comparison() {
+	try {
+		run();
+	} catch (error) {
+		if (error === undefined) {
+			return 1;
+		}
+	}
+}
+
+function optionalChain() {
+	try {
+		run();
+	} catch (error) {
+		return error?.toString();
+	}
+}
+
+class Runner {
+	method() {
+		try {
+			run();
+		} catch (error) {
+			if (error === undefined) {
+				return 1;
+			}
+		}
+	}
+}

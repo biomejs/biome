@@ -4,11 +4,13 @@ use crate::db::queries::{
     substitute_types_in_root_body,
 };
 use crate::{ModuleDb, module_for_key};
+use biome_js_type_info::TypeOperator;
 use biome_js_type_info::interned_types::{
     InternedExtendsType as InferredExtendsType, InternedMappedType as InferredMappedType,
     Literal as InferredLiteral, LocalTypeHandle, ReturnType as InferredReturnType,
-    TypeData as InferredTypeData, TypeMember as InferredTypeMember,
-    TypeMemberKind as InferredTypeMemberKind, TypeSubstitution as InferredTypeSubstitution,
+    TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
+    TypeMember as InferredTypeMember, TypeMemberKind as InferredTypeMemberKind,
+    TypeSubstitution as InferredTypeSubstitution,
 };
 use rustc_hash::{FxHashSet, FxHasher};
 use std::hash::{Hash, Hasher};
@@ -502,17 +504,13 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
             return Some(member_ty);
         }
 
+        if let Some(apparent) = apparent_type(db, resolver, ty) {
+            state.ty = apparent;
+            pending.push(state);
+            continue;
+        }
+
         match ty {
-            InferredTypeData::Literal(literal)
-                if matches!(literal.literal(db), InferredLiteral::RegExp(_)) =>
-            {
-                state.ty = InferredTypeData::instance_of(
-                    db,
-                    InferredTypeData::regexp_class(),
-                    Box::default(),
-                );
-                pending.push(state);
-            }
             InferredTypeData::Class(class) => {
                 if let Some(mut extends) = class.extends(db) {
                     if matches!(
@@ -611,6 +609,115 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
     }
 
     collected_type_result(db, found)
+}
+
+/// Returns the type whose members a value of the resolved type `ty` has, as
+/// TypeScript's apparent type gives them, when `ty` has no members of its own,
+/// or `None` for other types:
+///
+/// - a primitive or a literal of one has the members of its wrapper, so
+///   `string` and `"a"` have those of `String`, and `s.length` is `number`.
+///   `bigint` has none, because Biome has no `BigInt` global;
+/// - a regular expression literal has the members of `RegExp`;
+/// - `readonly T[]` has the members of `ReadonlyArray<T>`, and a `readonly`
+///   tuple those of `ReadonlyArray` of the union of its element types, so
+///   neither has the methods that change an array. Another `readonly` type has
+///   the members of its operand.
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Only primitives, literals, and readonly types have an apparent type."
+)]
+fn apparent_type<'db>(
+    db: &'db dyn ModuleDb,
+    resolver: &mut impl MemberLookupResolver<'db>,
+    ty: InferredTypeData<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let wrapper = match ty {
+        InferredTypeData::Boolean => InferredTypeData::boolean_class(),
+        InferredTypeData::Number => InferredTypeData::number_class(),
+        InferredTypeData::String => InferredTypeData::string_class(),
+        InferredTypeData::Symbol => InferredTypeData::symbol_class(),
+        InferredTypeData::Literal(literal) => match literal.literal(db) {
+            InferredLiteral::Boolean(_) => InferredTypeData::boolean_class(),
+            InferredLiteral::Number(_) => InferredTypeData::number_class(),
+            InferredLiteral::RegExp(_) => InferredTypeData::regexp_class(),
+            InferredLiteral::String(_) | InferredLiteral::Template(_) => {
+                InferredTypeData::string_class()
+            }
+            InferredLiteral::BigInt(_) | InferredLiteral::Object(_) => return None,
+        },
+        InferredTypeData::TypeOperator(operator)
+            if operator.operator(db) == TypeOperator::Readonly =>
+        {
+            let operand = resolver
+                .resolve_type(db, operator.ty(db))
+                .expand_canonical_global(db);
+            let element = match operand {
+                InferredTypeData::InstanceOf(instance)
+                    if resolver
+                        .resolve_type(db, instance.ty(db))
+                        .is_array_class(db) =>
+                {
+                    instance
+                        .type_parameters(db)
+                        .first()
+                        .copied()
+                        .unwrap_or(InferredTypeData::Unknown)
+                }
+                InferredTypeData::Tuple(tuple) => {
+                    readonly_tuple_element_type(db, resolver, tuple.elements(db))
+                }
+                operand => return Some(operand),
+            };
+            return Some(InferredTypeData::instance_of(
+                db,
+                InferredTypeData::readonly_array_interface(),
+                Box::new([element]),
+            ));
+        }
+        _ => return None,
+    };
+    Some(InferredTypeData::instance_of(db, wrapper, Box::default()))
+}
+
+/// Returns the type of the elements of a `readonly` tuple with `elements`,
+/// as `ReadonlyArray` holds them: the union of their types, with `undefined`
+/// for an optional element, and the element type of the array that a rest
+/// element spreads, or Unknown when that is not an array.
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "A rest element spreads an array or a value Biome can't take elements from."
+)]
+fn readonly_tuple_element_type<'db>(
+    db: &'db dyn ModuleDb,
+    resolver: &mut impl MemberLookupResolver<'db>,
+    elements: &[InferredTupleElementType<'db>],
+) -> InferredTypeData<'db> {
+    let mut types = Vec::with_capacity(elements.len());
+    for element in elements {
+        if !element.is_rest {
+            types.push(element.ty);
+            if element.is_optional {
+                types.push(InferredTypeData::Undefined);
+            }
+            continue;
+        }
+        types.push(match resolver.resolve_type(db, element.ty) {
+            InferredTypeData::InstanceOf(instance)
+                if resolver
+                    .resolve_type(db, instance.ty(db))
+                    .is_array_class(db) =>
+            {
+                instance
+                    .type_parameters(db)
+                    .first()
+                    .copied()
+                    .unwrap_or(InferredTypeData::Unknown)
+            }
+            _ => InferredTypeData::Unknown,
+        });
+    }
+    InferredTypeData::union_from_types(db, types)
 }
 
 /// Maximum number of union members a distributive conditional is split into

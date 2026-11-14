@@ -1,0 +1,85 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidPrimitiveAndReadonlyMembers.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// A string has the members of `String`, and a `readonly` array or tuple has
+// the members of `ReadonlyArray`, as in TypeScript, so a check of them that
+// can't fail is reported.
+
+function stringLength(text: string) {
+	if (text.length === undefined) {
+		return 1;
+	}
+}
+
+function readonlyTuple(pair: readonly [string, number]) {
+	if (pair[0] === null) {
+		return 1;
+	}
+}
+
+function readonlyArrayLength(items: readonly string[]) {
+	if (items.length === null) {
+		return 1;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidPrimitiveAndReadonlyMembers.ts:7:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━
+
+  ! This comparison always has the same result.
+  
+    6 │ function stringLength(text: string) {
+  > 7 │ 	if (text.length === undefined) {
+      │ 	    ^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 		return 1;
+    9 │ 	}
+  
+  i The operands' types make the outcome statically known.
+  
+  i Remove the comparison, or compare the values you meant to compare.
+  
+
+```
+
+```
+invalidPrimitiveAndReadonlyMembers.ts:13:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━
+
+  ! This comparison always has the same result.
+  
+    12 │ function readonlyTuple(pair: readonly [string, number]) {
+  > 13 │ 	if (pair[0] === null) {
+       │ 	    ^^^^^^^^^^^^^^^^
+    14 │ 		return 1;
+    15 │ 	}
+  
+  i The operands' types make the outcome statically known.
+  
+  i Remove the comparison, or compare the values you meant to compare.
+  
+
+```
+
+```
+invalidPrimitiveAndReadonlyMembers.ts:19:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━
+
+  ! This comparison always has the same result.
+  
+    18 │ function readonlyArrayLength(items: readonly string[]) {
+  > 19 │ 	if (items.length === null) {
+       │ 	    ^^^^^^^^^^^^^^^^^^^^^
+    20 │ 		return 1;
+    21 │ 	}
+  
+  i The operands' types make the outcome statically known.
+  
+  i Remove the comparison, or compare the values you meant to compare.
+  
+
+```
