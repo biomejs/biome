@@ -74,7 +74,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoLateCurrentTargetAccess {
-        version: "next",
+        version: "2.6.8",
         name: "noLateCurrentTargetAccess",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-late-current-target-access").inspired()],

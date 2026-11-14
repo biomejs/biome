@@ -53,7 +53,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseCalledWith {
-        version: "next",
+        version: "2.6.8",
         name: "useCalledWith",
         language: "js",
         recommended: false,

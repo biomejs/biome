@@ -45,7 +45,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseExpectToHaveBeenCalledTimes {
-        version: "next",
+        version: "2.6.8",
         name: "useExpectToHaveBeenCalledTimes",
         language: "js",
         recommended: false,

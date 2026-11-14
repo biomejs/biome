@@ -54,7 +54,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoYamlEmptyMapKeys {
-        version: "next",
+        version: "2.6.8",
         name: "noYamlEmptyMapKeys",
         language: "yaml",
         sources: &[RuleSource::EslintYml("no-empty-key").same()],

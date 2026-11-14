@@ -56,7 +56,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseSpyOn {
-        version: "next",
+        version: "2.6.8",
         name: "useSpyOn",
         language: "js",
         recommended: false,
