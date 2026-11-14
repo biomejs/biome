@@ -6,3 +6,4 @@
 .b::after {
     content: "useless \'"
 }
+.b::after { content: "\#{foo}"; }
