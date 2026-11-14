@@ -46,11 +46,12 @@ pub(crate) use scanner::FlowRootScanner;
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::{JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
-    JsArrayBindingPattern, JsArrayBindingPatternElement, JsArrayBindingPatternElementList,
-    JsArrayBindingPatternRestElement, JsIdentifierBinding, JsLanguage, JsObjectBindingPattern,
+    AnyJsClass, JsArrayBindingPattern, JsArrayBindingPatternElement,
+    JsArrayBindingPatternElementList, JsArrayBindingPatternRestElement, JsGetterObjectMember,
+    JsIdentifierBinding, JsLanguage, JsMethodObjectMember, JsObjectBindingPattern,
     JsObjectBindingPatternProperty, JsObjectBindingPatternPropertyList, JsObjectBindingPatternRest,
-    JsObjectBindingPatternShorthandProperty, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode,
-    JsThisExpression,
+    JsObjectBindingPatternShorthandProperty, JsReferenceIdentifier, JsSetterObjectMember,
+    JsSyntaxNode, JsThisExpression,
 };
 use biome_js_type_info::{
     RawTypeData, RawTypeId, TypeReference, TypeofExpression, TypeofKind,
@@ -134,6 +135,15 @@ fn subject_root(subjects: &[FlowSubject], mut subject: FlowSubjectId) -> Option<
     }
 }
 
+/// Classes and object literal methods and accessors. Biome types a `this`
+/// inside them as an instance of the class or as the object, even in the
+/// decorators and `extends` clause of a class and in the computed key of a
+/// method or accessor, where `this` is the one of the code around them.
+const OTHER_THIS_KINDS: SyntaxKindSet<JsLanguage> = AnyJsClass::KIND_SET
+    .union(JsMethodObjectMember::KIND_SET)
+    .union(JsGetterObjectMember::KIND_SET)
+    .union(JsSetterObjectMember::KIND_SET);
+
 /// The subjects of one execution root under construction, each stored once.
 ///
 /// The builder records reads and the condition decomposer records runtime
@@ -208,15 +218,7 @@ impl FlowSubjectTable {
             if node == *root {
                 return self.intern(FlowSubject::This);
             }
-            if matches!(
-                node.kind(),
-                JsSyntaxKind::JS_CLASS_DECLARATION
-                    | JsSyntaxKind::JS_CLASS_EXPRESSION
-                    | JsSyntaxKind::JS_CLASS_EXPORT_DEFAULT_DECLARATION
-                    | JsSyntaxKind::JS_METHOD_OBJECT_MEMBER
-                    | JsSyntaxKind::JS_GETTER_OBJECT_MEMBER
-                    | JsSyntaxKind::JS_SETTER_OBJECT_MEMBER
-            ) {
+            if OTHER_THIS_KINDS.matches(node.kind()) {
                 return None;
             }
         }
@@ -249,7 +251,7 @@ impl FlowSubjectTable {
             self.non_elements.insert(range);
             return None;
         };
-        let pattern = self.intern(FlowSubject::Pattern(pattern.text_trimmed_range()))?;
+        let pattern = self.intern(FlowSubject::Pattern(pattern.range()))?;
         for (element, key) in elements {
             self.pattern_elements.insert(element, (pattern, key));
         }

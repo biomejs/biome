@@ -1,19 +1,24 @@
-use super::subjects::{identifier_key, index_key, literal_key, member_name_key, subject_of};
+use super::subjects::{
+    AnyPatternElement, array_element_key, identifier_key, literal_key, member_name_key, subject_of,
+};
 use super::{FlowSubject, FlowSubjectId, FlowSubjectTable, PropertyKey, subject_root};
 use crate::js_module_info::TsBindingReferenceExt;
 use biome_js_semantic::{Binding, JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsExpression, AnyJsFormalParameter,
-    AnyJsInProperty, AnyJsLiteralExpression, AnyJsOptionalChainExpression, AnyJsParameter,
-    AnyJsVariableDeclaration, JsBinaryOperator, JsCallExpression, JsLogicalOperator,
-    JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, JsUnaryOperator, JsVariableDeclarator,
-    JsVariableKind, binding_ext::AnyJsBindingDeclaration, unescape_js_identifier,
+    AnyJsInProperty, AnyJsLiteralExpression, AnyJsMemberExpression, AnyJsOptionalChainExpression,
+    AnyJsParameter, AnyJsVariableDeclaration, JsBinaryOperator, JsCallExpression,
+    JsIdentifierExpression, JsLanguage, JsLogicalOperator, JsModule, JsReferenceIdentifier,
+    JsScript, JsUnaryOperator, JsVariableDeclarator, JsVariableKind, JsVariableStatement,
+    binding_ext::AnyJsBindingDeclaration, unescape_js_identifier,
 };
 use biome_js_type_info::{
     Function, FunctionParameter, RawPredicateTarget, RawTypeData, RawTypeId, ReturnType,
     TypeReference, TypeReferenceQualifier, TypeofKind, raw_predicate_target,
 };
-use biome_rowan::{AstNode, AstSeparatedList, SyntaxKind, Text, TextRange};
+use biome_rowan::{
+    AstNode, AstSeparatedList, SyntaxKind, SyntaxKindSet, Text, TextRange, WalkEvent,
+};
 use rustc_hash::FxHashMap;
 use std::borrow::Cow;
 
@@ -22,8 +27,13 @@ use std::borrow::Cow;
 const MAX_CONDITION_DEPTH: usize = 32;
 /// Limits the syntax steps spent decomposing one condition.
 const MAX_CONDITION_STEPS: usize = 16_384;
-/// Limits the descendants scanned for subjects when decomposition stops early.
+/// Limits the identifiers and member accesses scanned for subjects when
+/// decomposition stops early.
 const MAX_FALLBACK_NODES: usize = 1024;
+/// The expressions that the scan for subjects reads when decomposition stops
+/// early: those with the shape of a subject.
+const FALLBACK_KINDS: SyntaxKindSet<JsLanguage> =
+    JsIdentifierExpression::KIND_SET.union(AnyJsMemberExpression::KIND_SET);
 /// Limits the aliased conditions inlined into one another, as TypeScript
 /// does. In `const c2 = c1; ...; const c6 = c5; if (c6)`, the test inlines
 /// `c6` to `c2` and tests only the truthiness of `c1`.
@@ -650,24 +660,25 @@ pub(super) fn decompose_condition(
             initializers,
             ..
         } = decomposer;
-        let direct = expression.syntax().descendants().map(|node| (node, false));
+        let direct = expression
+            .syntax()
+            .preorder_of_kinds(FALLBACK_KINDS)
+            .map(|event| (event, false));
         let inlined = initializers
             .iter()
-            .flat_map(|initializer| initializer.syntax().descendants())
-            .map(|node| (node, true));
+            .flat_map(|initializer| initializer.syntax().preorder_of_kinds(FALLBACK_KINDS))
+            .map(|event| (event, true));
+        let entered = direct
+            .chain(inlined)
+            .filter_map(|(event, inlined)| match event {
+                WalkEvent::Enter(node) => Some((node, inlined)),
+                WalkEvent::Leave(_) => None,
+            });
         let mut mentions = Vec::new();
-        for (node, inlined) in direct.chain(inlined).take(MAX_FALLBACK_NODES) {
+        for (node, inlined) in entered.take(MAX_FALLBACK_NODES) {
             let Some(expression) = AnyJsExpression::cast(node) else {
                 continue;
             };
-            if !matches!(
-                expression,
-                AnyJsExpression::JsIdentifierExpression(_)
-                    | AnyJsExpression::JsStaticMemberExpression(_)
-                    | AnyJsExpression::JsComputedMemberExpression(_)
-            ) {
-                continue;
-            }
             let Some(subject) = subject_of(&expression, model, subjects) else {
                 continue;
             };
@@ -1044,27 +1055,22 @@ impl Decomposer<'_, '_> {
                     return None;
                 }
                 let key = identifier_key(&binding.tree().name_token().ok()?)?;
-                (pattern_declarator(property.syntax())?, Some(key))
+                (pattern_declarator(&property.into())?, Some(key))
             }
             AnyJsBindingDeclaration::JsObjectBindingPatternProperty(property) => {
                 if property.init().is_some() {
                     return None;
                 }
                 let key = member_name_key(&property.member().ok()?)?;
-                (pattern_declarator(property.syntax())?, Some(key))
+                (pattern_declarator(&property.into())?, Some(key))
             }
             AnyJsBindingDeclaration::JsArrayBindingPatternElement(element) => {
                 if element.init().is_some() {
                     return None;
                 }
                 // Holes count, so `k` holds `t[1]` in `const [, k] = t`.
-                let index = element
-                    .syntax()
-                    .parent()?
-                    .children()
-                    .position(|sibling| sibling == *element.syntax())?;
-                let key = index_key(index)?;
-                (pattern_declarator(element.syntax())?, Some(key))
+                let key = array_element_key(&element)?;
+                (pattern_declarator(&element.into())?, Some(key))
             }
             _ => return None,
         };
@@ -1313,14 +1319,12 @@ fn const_initializer(declarator: &JsVariableDeclarator) -> Option<AnyJsExpressio
     declarator.initializer()?.expression().ok()
 }
 
-/// Returns the variable declarator that binds the pattern containing
-/// `element`, a property or an element of an object or array binding pattern.
-///
-/// Returns `None` when that pattern is nested in another pattern or belongs to
-/// a parameter.
-fn pattern_declarator(element: &JsSyntaxNode) -> Option<JsVariableDeclarator> {
+/// Returns the declarator whose binding is the pattern that holds `element`,
+/// or `None` when that pattern is nested in another one or belongs to a
+/// parameter.
+fn pattern_declarator(element: &AnyPatternElement) -> Option<JsVariableDeclarator> {
     // An element's parent is its list, inside the pattern.
-    JsVariableDeclarator::cast(element.grand_parent()?.parent()?)
+    JsVariableDeclarator::cast(element.syntax().grand_parent()?.parent()?)
 }
 
 /// Returns whether `expression` is part of an optional chain, as `s?.kind`
@@ -1334,17 +1338,14 @@ fn is_optional_chain(expression: &AnyJsExpression) -> bool {
 /// of a module or script, not in a block, a loop head, or a namespace.
 fn is_top_level_statement(declaration: &AnyJsVariableDeclaration) -> bool {
     declaration
-        .syntax()
-        .parent()
-        .filter(|statement| statement.kind() == JsSyntaxKind::JS_VARIABLE_STATEMENT)
-        .and_then(|statement| statement.grand_parent())
-        .is_some_and(|body| {
-            matches!(
-                body.kind(),
-                JsSyntaxKind::JS_MODULE | JsSyntaxKind::JS_SCRIPT
-            )
-        })
+        .parent::<JsVariableStatement>()
+        .and_then(|statement| statement.syntax().grand_parent())
+        .is_some_and(|body| FILE_KINDS.matches(body.kind()))
 }
+
+/// Modules and scripts, whose item lists hold the statements at the top level
+/// of a file.
+const FILE_KINDS: SyntaxKindSet<JsLanguage> = JsModule::KIND_SET.union(JsScript::KIND_SET);
 
 enum SyntaxGuard {
     Truthy,

@@ -10,24 +10,75 @@ use super::{FlowSubject, FlowSubjectId, FlowSubjectTable, PropertyKey};
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
-    AnyJsArrayBindingPatternElement, AnyJsBindingPattern, AnyJsClassMember, AnyJsExpression,
-    AnyJsGetter, AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember,
-    AnyJsObjectMemberName, AnyJsParameter, AnyJsSetter, JsArrayBindingPatternElement,
-    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsFormalParameter,
-    JsIdentifierBinding, JsMethodClassMember, JsMethodObjectMember, JsObjectBindingPatternProperty,
-    JsObjectBindingPatternShorthandProperty, JsObjectExpression, JsParameters,
-    JsPropertyClassMember, JsRestParameter, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
-    JsVariableDeclarator, binding_ext::AnyJsBindingDeclaration, inner_string_text,
-    unescape_js_identifier,
+    AnyJsArrayBindingPatternElement, AnyJsBindingPattern, AnyJsClass, AnyJsClassMember,
+    AnyJsExpression, AnyJsGetter, AnyJsLiteralExpression, AnyJsName,
+    AnyJsObjectBindingPatternMember, AnyJsObjectMemberName, AnyJsParameter, AnyJsSetter,
+    JsArrayBindingPatternElement, JsArrowFunctionExpression, JsFormalParameter, JsFunctionBody,
+    JsIdentifierBinding, JsInitializerClause, JsLanguage, JsMethodClassMember,
+    JsMethodObjectMember, JsObjectBindingPatternProperty, JsObjectBindingPatternShorthandProperty,
+    JsObjectExpression, JsParameters, JsPropertyClassMember, JsRestParameter, JsSyntaxKind,
+    JsSyntaxNode, JsSyntaxToken, JsVariableDeclarator, binding_ext::AnyJsBindingDeclaration,
+    inner_string_text, unescape_js_identifier,
 };
 use biome_rowan::{
-    AstNode, AstNodeList, AstSeparatedList, SyntaxResult, Text, TextRange, TokenText,
+    AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, Text, TextRange, TokenText,
+    declare_node_union,
 };
 use std::borrow::Cow;
 
 /// The value of JavaScript's `Number.MAX_SAFE_INTEGER`, 2^53 - 1: the largest
 /// integer `n` such that a number represents both `n` and `n + 1` exactly.
 const MAX_SAFE_INTEGER: u64 = (1 << 53) - 1;
+
+declare_node_union! {
+    /// A property or an element of an object or array binding pattern that
+    /// can bind a variable, as `kind`, `kind: k`, and `k` in
+    /// `{ kind, kind: k }` and `[k]`, but not a rest element or a hole.
+    pub(super) AnyPatternElement = JsObjectBindingPatternShorthandProperty
+        | JsObjectBindingPatternProperty
+        | JsArrayBindingPatternElement
+}
+
+declare_node_union! {
+    /// A node that can hold a binding pattern directly: a variable declarator,
+    /// a parameter, or a property or an element of an enclosing pattern.
+    AnyPatternOwner = JsVariableDeclarator
+        | JsFormalParameter
+        | JsRestParameter
+        | JsObjectBindingPatternProperty
+        | JsArrayBindingPatternElement
+}
+
+declare_node_union! {
+    /// A class or object member whose body, or initializer for a field, runs
+    /// with the `this` of its class or object.
+    AnyThisMember = JsMethodClassMember
+        | JsPropertyClassMember
+        | JsMethodObjectMember
+        | AnyJsGetter
+        | AnyJsSetter
+}
+
+declare_node_union! {
+    /// A class or an object literal, whose members share its `this`.
+    AnyMemberOwner = AnyJsClass | JsObjectExpression
+}
+
+/// The children of a member that run with the member's `this`: its body, its
+/// parameters, the parameter of a setter, and the initializer of a field.
+const MEMBER_BODY_KINDS: SyntaxKindSet<JsLanguage> = JsFunctionBody::KIND_SET
+    .union(JsParameters::KIND_SET)
+    .union(JsFormalParameter::KIND_SET)
+    .union(JsInitializerClause::KIND_SET);
+
+/// The nodes that end the walk of [`this_can_narrow`] before it finds the
+/// member whose `this` the root has: execution roots, which have a `this` of
+/// their own, other class members, and classes, reached from their decorators
+/// or `extends` clause. The walk checks arrow functions and the members of
+/// [`AnyThisMember`] first.
+const THIS_BOUNDARY_KINDS: SyntaxKindSet<JsLanguage> = AnyJsControlFlowRoot::KIND_SET
+    .union(AnyJsClassMember::KIND_SET)
+    .union(AnyJsClass::KIND_SET);
 
 /// Returns the id of the subject that `expression` reads, adding the subject
 /// and every prefix of its path to `subjects` on first use.
@@ -223,23 +274,15 @@ fn decimal_integer_key(token: &JsSyntaxToken) -> Option<PropertyKey> {
 pub(super) fn narrowing_pattern(
     binding: &Binding,
     model: &SemanticModel,
-) -> Option<(JsSyntaxNode, Vec<(TextRange, PropertyKey)>)> {
-    let declaration = binding.tree().declaration()?;
-    let element = match &declaration {
-        AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(property) => {
-            property.syntax()
-        }
-        AnyJsBindingDeclaration::JsObjectBindingPatternProperty(property) => property.syntax(),
-        AnyJsBindingDeclaration::JsArrayBindingPatternElement(element) => element.syntax(),
-        _ => return None,
-    };
+) -> Option<(AnyJsBindingPattern, Vec<(TextRange, PropertyKey)>)> {
+    let element = AnyPatternElement::from_declaration(binding.tree().declaration()?)?;
     // An element's parent is its list, inside the pattern.
-    let list = element.parent()?;
-    let pattern = list.parent()?;
+    let list = element.syntax().parent()?;
+    let pattern = AnyJsBindingPattern::cast(list.parent()?)?;
     let elements: Vec<_> = list
         .children()
         .enumerate()
-        .filter_map(|(index, element)| pattern_element(&element, index))
+        .filter_map(|(index, element)| pattern_element(&AnyPatternElement::cast(element)?, index))
         .collect();
     (elements.len() >= 2
         && elements.iter().any(|(range, _)| *range == binding.range())
@@ -247,43 +290,61 @@ pub(super) fn narrowing_pattern(
     .then_some((pattern, elements))
 }
 
-/// Returns the range of the variable that `element`, at `index` in its
-/// pattern, binds, with the key of the property it reads: the property that
-/// an object element's key names, or `index` for an array element.
-///
-/// Returns `None` for a rest element, an element with a default, a nested
-/// pattern, and a key that names no property.
-fn pattern_element(element: &JsSyntaxNode, index: usize) -> Option<(TextRange, PropertyKey)> {
-    if let Some(property) = JsObjectBindingPatternShorthandProperty::cast_ref(element) {
-        if property.init().is_some() {
-            return None;
+impl AnyPatternElement {
+    /// Returns the pattern element that `declaration` is, or `None` when it
+    /// is another declaration.
+    fn from_declaration(declaration: AnyJsBindingDeclaration) -> Option<Self> {
+        match declaration {
+            AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(property) => {
+                Some(property.into())
+            }
+            AnyJsBindingDeclaration::JsObjectBindingPatternProperty(property) => {
+                Some(property.into())
+            }
+            AnyJsBindingDeclaration::JsArrayBindingPatternElement(element) => Some(element.into()),
+            _ => None,
         }
-        let binding = property.identifier().ok()?;
-        let binding = binding.as_js_identifier_binding()?;
-        return Some((
-            binding.range(),
-            identifier_key(&binding.name_token().ok()?)?,
-        ));
     }
-    if let Some(property) = JsObjectBindingPatternProperty::cast_ref(element) {
-        if property.init().is_some() {
-            return None;
+}
+
+/// Returns the variable that `element`, at `index` in its pattern, binds with
+/// the key of the property it reads, as [`narrowing_pattern`] describes, or
+/// `None` for an element with a default, a nested pattern, and a key that
+/// names no property.
+fn pattern_element(element: &AnyPatternElement, index: usize) -> Option<(TextRange, PropertyKey)> {
+    match element {
+        AnyPatternElement::JsObjectBindingPatternShorthandProperty(property) => {
+            if property.init().is_some() {
+                return None;
+            }
+            let binding = property.identifier().ok()?;
+            let binding = binding.as_js_identifier_binding()?;
+            Some((
+                binding.range(),
+                identifier_key(&binding.name_token().ok()?)?,
+            ))
         }
-        let AnyJsBindingPattern::AnyJsBinding(binding) = property.pattern().ok()? else {
-            return None;
-        };
-        let binding = binding.as_js_identifier_binding()?;
-        return Some((binding.range(), member_name_key(&property.member().ok()?)?));
+        AnyPatternElement::JsObjectBindingPatternProperty(property) => {
+            if property.init().is_some() {
+                return None;
+            }
+            let AnyJsBindingPattern::AnyJsBinding(binding) = property.pattern().ok()? else {
+                return None;
+            };
+            let binding = binding.as_js_identifier_binding()?;
+            Some((binding.range(), member_name_key(&property.member().ok()?)?))
+        }
+        AnyPatternElement::JsArrayBindingPatternElement(element) => {
+            if element.init().is_some() {
+                return None;
+            }
+            let AnyJsBindingPattern::AnyJsBinding(binding) = element.pattern().ok()? else {
+                return None;
+            };
+            let binding = binding.as_js_identifier_binding()?;
+            Some((binding.range(), index_key(index)?))
+        }
     }
-    let element = JsArrayBindingPatternElement::cast_ref(element)?;
-    if element.init().is_some() {
-        return None;
-    }
-    let AnyJsBindingPattern::AnyJsBinding(binding) = element.pattern().ok()? else {
-        return None;
-    };
-    let binding = binding.as_js_identifier_binding()?;
-    Some((binding.range(), index_key(index)?))
 }
 
 /// Spells the array indices that [`index_key`] names without building a string.
@@ -300,6 +361,20 @@ pub(super) fn index_key(index: usize) -> Option<PropertyKey> {
         .map(|name| PropertyKey::Name(Text::from(*name)))
 }
 
+/// Returns the key that names `element` in the array that its pattern
+/// destructures, from its index in the pattern, counting holes, as
+/// [`index_key`] does: `k` reads `t[1]` in `[, k]`.
+pub(super) fn array_element_key(element: &JsArrayBindingPatternElement) -> Option<PropertyKey> {
+    // Elements from index 16 on have no key, so the walk stops before them.
+    let index = element
+        .syntax()
+        .parent()?
+        .children()
+        .take(INDEX_NAMES.len())
+        .position(|sibling| sibling == *element.syntax())?;
+    index_key(index)
+}
+
 /// Returns whether the declaration of the destructuring `pattern` lets a test
 /// of one element narrow the others, as [`narrowing_pattern`] requires.
 ///
@@ -307,39 +382,34 @@ pub(super) fn index_key(index: usize) -> Option<PropertyKey> {
 /// variables are never written, so the values that the pattern binds can't
 /// change after the destructuring. No enclosing pattern may supply a default,
 /// because the declared types of the elements ignore it.
-fn has_constant_declaration(pattern: &JsSyntaxNode, model: &SemanticModel) -> bool {
-    let mut pattern = pattern.clone();
+fn has_constant_declaration(pattern: &AnyJsBindingPattern, model: &SemanticModel) -> bool {
+    let mut pattern = pattern.syntax().clone();
     let root = loop {
-        let Some(parent) = pattern.parent() else {
+        let Some(owner) = pattern.parent().and_then(AnyPatternOwner::cast) else {
             return false;
         };
-        if let Some(declarator) = JsVariableDeclarator::cast_ref(&parent) {
-            let is_const = declarator
-                .declaration()
-                .is_some_and(|declaration| declaration.is_const());
-            if !is_const {
-                return false;
+        let has_default = match &owner {
+            AnyPatternOwner::JsVariableDeclarator(declarator) => {
+                let is_const = declarator
+                    .declaration()
+                    .is_some_and(|declaration| declaration.is_const());
+                if !is_const {
+                    return false;
+                }
+                break pattern;
             }
-            break pattern;
-        }
-        if JsFormalParameter::can_cast(parent.kind()) || JsRestParameter::can_cast(parent.kind()) {
-            break pattern;
-        }
-        // A nested pattern is the value of a property or an element of the
-        // enclosing pattern. That property or element sits in a list inside
-        // the enclosing pattern.
-        let has_default = if let Some(property) = JsObjectBindingPatternProperty::cast_ref(&parent)
-        {
-            property.init().is_some()
-        } else if let Some(element) = JsArrayBindingPatternElement::cast_ref(&parent) {
-            element.init().is_some()
-        } else {
-            return false;
+            AnyPatternOwner::JsFormalParameter(_) | AnyPatternOwner::JsRestParameter(_) => {
+                break pattern;
+            }
+            // A nested pattern is the value of a property or an element of the
+            // enclosing pattern, whose parent is its list.
+            AnyPatternOwner::JsObjectBindingPatternProperty(property) => property.init().is_some(),
+            AnyPatternOwner::JsArrayBindingPatternElement(element) => element.init().is_some(),
         };
         if has_default {
             return false;
         }
-        let Some(enclosing) = parent.grand_parent() else {
+        let Some(enclosing) = owner.syntax().grand_parent() else {
             return false;
         };
         pattern = enclosing;
@@ -462,44 +532,24 @@ pub(super) fn this_can_narrow(root: &AnyJsControlFlowRoot) -> bool {
     for node in root.syntax().ancestors() {
         // Parameters, the body, and a field initializer run with the member's
         // `this`, unlike its decorators and computed key.
-        let in_body = child.as_ref().is_none_or(|child| {
-            matches!(
-                child.kind(),
-                JsSyntaxKind::JS_FUNCTION_BODY
-                    | JsSyntaxKind::JS_PARAMETERS
-                    | JsSyntaxKind::JS_FORMAL_PARAMETER
-                    | JsSyntaxKind::JS_INITIALIZER_CLAUSE
-            )
-        });
-        match node.kind() {
-            JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION => {}
-            JsSyntaxKind::JS_METHOD_CLASS_MEMBER
-            | JsSyntaxKind::JS_GETTER_CLASS_MEMBER
-            | JsSyntaxKind::JS_SETTER_CLASS_MEMBER
-            | JsSyntaxKind::JS_PROPERTY_CLASS_MEMBER
-            | JsSyntaxKind::JS_METHOD_OBJECT_MEMBER
-            | JsSyntaxKind::JS_GETTER_OBJECT_MEMBER
-            | JsSyntaxKind::JS_SETTER_OBJECT_MEMBER => {
-                return in_body
-                    && !is_static(&node)
-                    && !has_this_parameter(&node)
-                    // A member's parent is its list, inside the class or object.
-                    && node
-                        .grand_parent()
-                        .is_some_and(|owner| types_this_of_members(&owner));
-            }
-            kind if AnyJsControlFlowRoot::can_cast(kind)
-                || AnyJsClassMember::can_cast(kind)
-                || matches!(
-                    kind,
-                    JsSyntaxKind::JS_CLASS_DECLARATION
-                        | JsSyntaxKind::JS_CLASS_EXPRESSION
-                        | JsSyntaxKind::JS_CLASS_EXPORT_DEFAULT_DECLARATION
-                ) =>
-            {
-                return false;
-            }
-            _ => {}
+        let in_body = child
+            .as_ref()
+            .is_none_or(|child| MEMBER_BODY_KINDS.matches(child.kind()));
+        if let Some(member) = AnyThisMember::cast_ref(&node) {
+            return in_body
+                && !is_static(&member)
+                && !has_this_parameter(&member)
+                // A member's parent is its list, inside the class or object.
+                && node
+                    .grand_parent()
+                    .and_then(AnyMemberOwner::cast)
+                    .is_some_and(|owner| types_this_of_members(&owner));
+        }
+        // An arrow function has the `this` of the code around it.
+        if !JsArrowFunctionExpression::can_cast(node.kind())
+            && THIS_BOUNDARY_KINDS.matches(node.kind())
+        {
+            return false;
         }
         child = Some(node);
     }
@@ -515,8 +565,9 @@ pub(super) fn this_can_narrow(root: &AnyJsControlFlowRoot) -> bool {
 /// at the nearest variable declaration around `owner`. Without such a name, it
 /// types `this` from an enclosing class or object literal, or not at all: in
 /// `class K { m() { use({ n() { this } }) } }`, it types `this` as `K`.
-fn types_this_of_members(owner: &JsSyntaxNode) -> bool {
+fn types_this_of_members(owner: &AnyMemberOwner) -> bool {
     let declarator = owner
+        .syntax()
         .ancestors()
         .skip(1)
         .find_map(JsVariableDeclarator::cast);
@@ -526,7 +577,7 @@ fn types_this_of_members(owner: &JsSyntaxNode) -> bool {
     let initializes_declarator = || {
         initializer
             .as_ref()
-            .is_some_and(|initializer| initializer.syntax() == owner)
+            .is_some_and(|initializer| initializer.syntax() == owner.syntax())
             && declarator
                 .as_ref()
                 .and_then(|declarator| declarator.id().ok())
@@ -535,50 +586,51 @@ fn types_this_of_members(owner: &JsSyntaxNode) -> bool {
                         .is_some_and(|binding| binding.as_js_identifier_binding().is_some())
                 })
     };
-    if let Some(class) = JsClassExpression::cast_ref(owner) {
-        if matches!(initializer, Some(AnyJsExpression::JsClassExpression(_))) {
-            initializes_declarator()
-        } else {
+    match owner {
+        AnyMemberOwner::AnyJsClass(AnyJsClass::JsClassExpression(class)) => {
+            if matches!(initializer, Some(AnyJsExpression::JsClassExpression(_))) {
+                initializes_declarator()
+            } else {
+                class.id().is_some()
+            }
+        }
+        AnyMemberOwner::AnyJsClass(AnyJsClass::JsClassExportDefaultDeclaration(class)) => {
             class.id().is_some()
         }
-    } else if let Some(class) = JsClassExportDefaultDeclaration::cast_ref(owner) {
-        class.id().is_some()
-    } else {
-        JsClassDeclaration::can_cast(owner.kind())
-            || (JsObjectExpression::can_cast(owner.kind()) && initializes_declarator())
+        AnyMemberOwner::AnyJsClass(AnyJsClass::JsClassDeclaration(_)) => true,
+        AnyMemberOwner::JsObjectExpression(_) => initializes_declarator(),
     }
 }
 
 /// Returns whether the class or object `member` is declared `static`.
-fn is_static(member: &JsSyntaxNode) -> bool {
-    if let Some(method) = JsMethodClassMember::cast_ref(member) {
-        method
+fn is_static(member: &AnyThisMember) -> bool {
+    match member {
+        AnyThisMember::JsMethodClassMember(method) => method
             .modifiers()
             .iter()
-            .any(|modifier| modifier.as_js_static_modifier().is_some())
-    } else if let Some(property) = JsPropertyClassMember::cast_ref(member) {
-        property
+            .any(|modifier| modifier.as_js_static_modifier().is_some()),
+        AnyThisMember::JsPropertyClassMember(property) => property
             .modifiers()
             .iter()
-            .any(|modifier| modifier.as_js_static_modifier().is_some())
-    } else if let Some(getter) = AnyJsGetter::cast_ref(member) {
-        getter.is_static()
-    } else {
-        AnyJsSetter::cast_ref(member).is_some_and(|setter| setter.is_static())
+            .any(|modifier| modifier.as_js_static_modifier().is_some()),
+        AnyThisMember::JsMethodObjectMember(_) => false,
+        AnyThisMember::AnyJsGetter(getter) => getter.is_static(),
+        AnyThisMember::AnyJsSetter(setter) => setter.is_static(),
     }
 }
 
-/// Returns whether the class or object method `member` declares a `this`
-/// parameter, as in `m(this: Other) {}`.
-fn has_this_parameter(member: &JsSyntaxNode) -> bool {
-    let parameters: Option<SyntaxResult<JsParameters>> =
-        if let Some(method) = JsMethodClassMember::cast_ref(member) {
-            Some(method.parameters())
-        } else {
-            JsMethodObjectMember::cast_ref(member).map(|method| method.parameters())
-        };
+/// Returns whether the class or object `member` is a method that declares a
+/// `this` parameter, as in `m(this: Other) {}`.
+fn has_this_parameter(member: &AnyThisMember) -> bool {
+    let parameters = match member {
+        AnyThisMember::JsMethodClassMember(method) => method.parameters(),
+        AnyThisMember::JsMethodObjectMember(method) => method.parameters(),
+        AnyThisMember::JsPropertyClassMember(_)
+        | AnyThisMember::AnyJsGetter(_)
+        | AnyThisMember::AnyJsSetter(_) => return false,
+    };
     parameters
-        .and_then(Result::ok)
+        .ok()
         .and_then(|parameters| parameters.items().iter().next())
         .is_some_and(|first| matches!(first, Ok(AnyJsParameter::TsThisParameter(_))))
 }
