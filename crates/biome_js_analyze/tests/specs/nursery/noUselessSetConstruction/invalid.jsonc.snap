@@ -1,0 +1,2540 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsonc
+---
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(other))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:122 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(other))
+      │                                                                                                                          ^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.union(new·Set(other))
+      │                                                                                                                          --------     - 
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(other.keys()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:122 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(other.keys()))
+      │                                                                                                                          ^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.union(new·Set(other.keys()))
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.union(other)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(other.values()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:122 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(other.values()))
+      │                                                                                                                          ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.union(new·Set(other.values()))
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.union(other)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(records.keys()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:122 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(records.keys()))
+      │                                                                                                                          ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.union(new·Set(records.keys()))
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.union(records)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).union(other)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).union(other)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected).union(other)
+      │                                                                                                           --------        -             
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.keys()).union(other)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.keys()).union(other)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected.keys()).union(other)
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.union(other)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.values()).union(records)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.values()).union(records)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected.values()).union(records)
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.union(records)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(new Set(other))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:129 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use intersection().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(new Set(other))
+      │                                                                                                                                 ^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.intersection(new·Set(other))
+      │                                                                                                                                 --------     - 
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(new Set(other.keys()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:129 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use intersection().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(new Set(other.keys()))
+      │                                                                                                                                 ^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.intersection(new·Set(other.keys()))
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.intersection(other)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(new Set(other.values()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:129 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use intersection().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(new Set(other.values()))
+      │                                                                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.intersection(new·Set(other.values()))
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.intersection(other)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(new Set(records.keys()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:129 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use intersection().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(new Set(records.keys()))
+      │                                                                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.intersection(new·Set(records.keys()))
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.intersection(records)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).intersection(other)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use intersection().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).intersection(other)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected).intersection(other)
+      │                                                                                                           --------        -                    
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.keys()).intersection(other)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use intersection().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.keys()).intersection(other)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected.keys()).intersection(other)
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.intersection(other)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.values()).intersection(records)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use intersection().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.values()).intersection(records)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected.values()).intersection(records)
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.intersection(records)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(new Set(other))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:127 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use difference().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(new Set(other))
+      │                                                                                                                               ^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.difference(new·Set(other))
+      │                                                                                                                               --------     - 
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(new Set(other.keys()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:127 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use difference().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(new Set(other.keys()))
+      │                                                                                                                               ^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.difference(new·Set(other.keys()))
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.difference(other)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(new Set(other.values()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:127 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use difference().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(new Set(other.values()))
+      │                                                                                                                               ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.difference(new·Set(other.values()))
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.difference(other)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(new Set(records.keys()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:127 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use difference().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(new Set(records.keys()))
+      │                                                                                                                               ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.difference(new·Set(records.keys()))
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.difference(records)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).difference(other)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use difference().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).difference(other)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected).difference(other)
+      │                                                                                                           --------        -                  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.keys()).difference(other)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use difference().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.keys()).difference(other)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected.keys()).difference(other)
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.difference(other)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.values()).difference(records)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use difference().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.values()).difference(records)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected.values()).difference(records)
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.difference(records)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(new Set(other))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:136 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use symmetricDifference().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(new Set(other))
+      │                                                                                                                                        ^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.symmetricDifference(new·Set(other))
+      │                                                                                                                                        --------     - 
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(new Set(other.keys()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:136 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use symmetricDifference().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(new Set(other.keys()))
+      │                                                                                                                                        ^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.symmetricDifference(new·Set(other.keys()))
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.symmetricDifference(other)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(new Set(other.values()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:136 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use symmetricDifference().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(new Set(other.values()))
+      │                                                                                                                                        ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.symmetricDifference(new·Set(other.values()))
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.symmetricDifference(other)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(new Set(records.keys()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:136 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use symmetricDifference().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(new Set(records.keys()))
+      │                                                                                                                                        ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.symmetricDifference(new·Set(records.keys()))
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.symmetricDifference(records)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).symmetricDifference(other)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use symmetricDifference().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).symmetricDifference(other)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected).symmetricDifference(other)
+      │                                                                                                           --------        -                           
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.keys()).symmetricDifference(other)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use symmetricDifference().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.keys()).symmetricDifference(other)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected.keys()).symmetricDifference(other)
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.symmetricDifference(other)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.values()).symmetricDifference(records)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use symmetricDifference().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.values()).symmetricDifference(records)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected.values()).symmetricDifference(records)
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.symmetricDifference(records)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(new Set(other))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:127 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isSubsetOf().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(new Set(other))
+      │                                                                                                                               ^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isSubsetOf(new·Set(other))
+      │                                                                                                                               --------     - 
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(new Set(other.keys()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:127 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isSubsetOf().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(new Set(other.keys()))
+      │                                                                                                                               ^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isSubsetOf(new·Set(other.keys()))
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isSubsetOf(other)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(new Set(other.values()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:127 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isSubsetOf().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(new Set(other.values()))
+      │                                                                                                                               ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isSubsetOf(new·Set(other.values()))
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isSubsetOf(other)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(new Set(records.keys()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:127 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isSubsetOf().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(new Set(records.keys()))
+      │                                                                                                                               ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isSubsetOf(new·Set(records.keys()))
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isSubsetOf(records)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).isSubsetOf(other)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isSubsetOf().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).isSubsetOf(other)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected).isSubsetOf(other)
+      │                                                                                                           --------        -                  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.keys()).isSubsetOf(other)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isSubsetOf().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.keys()).isSubsetOf(other)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected.keys()).isSubsetOf(other)
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isSubsetOf(other)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.values()).isSubsetOf(records)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isSubsetOf().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.values()).isSubsetOf(records)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected.values()).isSubsetOf(records)
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isSubsetOf(records)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(new Set(other))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:129 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isSupersetOf().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(new Set(other))
+      │                                                                                                                                 ^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isSupersetOf(new·Set(other))
+      │                                                                                                                                 --------     - 
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(new Set(other.keys()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:129 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isSupersetOf().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(new Set(other.keys()))
+      │                                                                                                                                 ^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isSupersetOf(new·Set(other.keys()))
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isSupersetOf(other)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(new Set(other.values()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:129 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isSupersetOf().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(new Set(other.values()))
+      │                                                                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isSupersetOf(new·Set(other.values()))
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isSupersetOf(other)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(new Set(records.keys()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:129 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isSupersetOf().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(new Set(records.keys()))
+      │                                                                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isSupersetOf(new·Set(records.keys()))
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isSupersetOf(records)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).isSupersetOf(other)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isSupersetOf().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).isSupersetOf(other)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected).isSupersetOf(other)
+      │                                                                                                           --------        -                    
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.keys()).isSupersetOf(other)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isSupersetOf().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.keys()).isSupersetOf(other)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected.keys()).isSupersetOf(other)
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isSupersetOf(other)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.values()).isSupersetOf(records)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isSupersetOf().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.values()).isSupersetOf(records)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected.values()).isSupersetOf(records)
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isSupersetOf(records)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(new Set(other))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:131 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isDisjointFrom().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(new Set(other))
+      │                                                                                                                                   ^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isDisjointFrom(new·Set(other))
+      │                                                                                                                                   --------     - 
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(new Set(other.keys()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:131 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isDisjointFrom().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(new Set(other.keys()))
+      │                                                                                                                                   ^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isDisjointFrom(new·Set(other.keys()))
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isDisjointFrom(other)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(new Set(other.values()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:131 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isDisjointFrom().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(new Set(other.values()))
+      │                                                                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isDisjointFrom(new·Set(other.values()))
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isDisjointFrom(other)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(new Set(records.keys()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:131 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isDisjointFrom().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(new Set(records.keys()))
+      │                                                                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isDisjointFrom(new·Set(records.keys()))
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isDisjointFrom(records)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).isDisjointFrom(other)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isDisjointFrom().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).isDisjointFrom(other)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected).isDisjointFrom(other)
+      │                                                                                                           --------        -                      
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.keys()).isDisjointFrom(other)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isDisjointFrom().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.keys()).isDisjointFrom(other)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected.keys()).isDisjointFrom(other)
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isDisjointFrom(other)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.values()).isDisjointFrom(records)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isDisjointFrom().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.values()).isDisjointFrom(records)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected.values()).isDisjointFrom(records)
+      2 │ + const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isDisjointFrom(records)
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.union(other))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.union(other))
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected.union(other))
+      │                                                                                                           --------                    - 
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.intersection(other))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use intersection().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.intersection(other))
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected.intersection(other))
+      │                                                                                                           --------                           - 
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.difference(other))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use difference().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.difference(other))
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected.difference(other))
+      │                                                                                                           --------                         - 
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.symmetricDifference(other))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use symmetricDifference().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.symmetricDifference(other))
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected.symmetricDifference(other))
+      │                                                                                                           --------                                  - 
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); const alias = other; selected.union(new Set(alias))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:143 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); const alias = other; selected.union(new Set(alias))
+      │                                                                                                                                               ^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·const·alias·=·other;·selected.union(new·Set(alias))
+      │                                                                                                                                               --------     - 
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set((condition ? other : selected)))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:122 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set((condition ? other : selected)))
+      │                                                                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.union(new·Set((condition·?·other·:·selected)))
+      │                                                                                                                          ------- -                            -  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set((condition ? other : selected)).union(records)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set((condition ? other : selected)).union(records)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set((condition·?·other·:·selected)).union(records)
+      │                                                                                                           ------- -                            -                
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(((records)).keys()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:122 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(((records)).keys()))
+      │                                                                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.union(new·Set(((records)).keys()))
+      │                                                                                                                          -------  -       --------   
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(other /* retained */))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:122 lint/nursery/noUselessSetConstruction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(other /* retained */))
+      │                                                                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(/* wrapper comment */ other))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:122 lint/nursery/noUselessSetConstruction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(/* wrapper comment */ other))
+      │                                                                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(records./* method comment */keys()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:122 lint/nursery/noUselessSetConstruction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(records./* method comment */keys()))
+      │                                                                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(/* receiver comment */ selected).union(other)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(/* receiver comment */ selected).union(other)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(/* result comment */ selected.union(other))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(/* result comment */ selected.union(other))
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.union(/* retained */ other)).has(2)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.union(/* retained */ other)).has(2)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected.union(/*·retained·*/·other)).has(2)
+      │                                                                                                           --------                                   -        
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.union(other)).intersection(records)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.union(other)).intersection(records)
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected.union(other)).intersection(records)
+      │                                                                                                           --------                    -                       
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new new Set(selected.union(other))()
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:111 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new new Set(selected.union(other))()
+      │                                                                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·new·Set(selected.union(other))()
+      │                                                                                                               -------                         
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new new Set(selected.union(other)).constructor()
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:111 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new new Set(selected.union(other)).constructor()
+      │                                                                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·new·Set(selected.union(other)).constructor()
+      │                                                                                                               -------                                     
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new (new Set(selected.union(other))).constructor()
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:112 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new (new Set(selected.union(other))).constructor()
+      │                                                                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·(new·Set(selected.union(other))).constructor()
+      │                                                                                                                --------                    -                
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new new Set(selected.union(other)).constructor.prototype.constructor()
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:111 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new new Set(selected.union(other)).constructor.prototype.constructor()
+      │                                                                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·new·Set(selected.union(other)).constructor.prototype.constructor()
+      │                                                                                                               -------                                                           
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(new Set(selected).union(new Set(other)))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(new Set(selected).union(new Set(other)))
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(new·Set(selected).union(new·Set(other)))
+      │                                                                                                                   --------                             -  
+
+```
+
+```
+invalid.jsonc:2:139 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(new Set(selected).union(new Set(other)))
+      │                                                                                                                                           ^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(new·Set(selected).union(new·Set(other)))
+      │                                                                                                                                           --------     -  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.union(getOther()))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.union(getOther()))
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected.union(getOther()))
+      │                                                                                                           --------                        -  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.union((selected.clear(), other)))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.union((selected.clear(), other)))
+      │                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set(selected.union((selected.clear(),·other)))
+      │                                                                                                           --------                                       -  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); function result() { return new Set(selected.union(other)) }
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:134 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); function result() { return new Set(selected.union(other)) }
+      │                                                                                                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·function·result()·{·return·new·Set(selected.union(other))·}
+      │                                                                                                                                      --------                    -   
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); function result() { throw new Set(selected.union(other)) }
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:133 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); function result() { throw new Set(selected.union(other)) }
+      │                                                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·function·result()·{·throw·new·Set(selected.union(other))·}
+      │                                                                                                                                     --------                    -   
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); for (const item of new Set(selected.union(other))) {}
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:126 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); for (const item of new Set(selected.union(other))) {}
+      │                                                                                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·for·(const·item·of·new·Set(selected.union(other)))·{}
+      │                                                                                                                              --------                    -     
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); const alias = selected; new Set(alias).union(other)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:131 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); const alias = selected; new Set(alias).union(other)
+      │                                                                                                                                   ^^^^^^^^^^^^^^
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·const·alias·=·selected;·new·Set(alias).union(other)
+      │                                                                                                                                   --------     -             
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); const alias = selected; new Set(alias.union(other))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:131 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); const alias = selected; new Set(alias.union(other))
+      │                                                                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·const·alias·=·selected;·new·Set(alias.union(other))
+      │                                                                                                                                   --------                 - 
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(selected))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:122 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(selected))
+      │                                                                                                                          ^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.union(new·Set(selected))
+      │                                                                                                                          --------        - 
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(new Set(selected))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:129 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use intersection().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(new Set(selected))
+      │                                                                                                                                 ^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.intersection(new·Set(selected))
+      │                                                                                                                                 --------        - 
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(new Set(selected))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:127 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use difference().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(new Set(selected))
+      │                                                                                                                               ^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.difference(new·Set(selected))
+      │                                                                                                                               --------        - 
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(new Set(selected))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:136 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use symmetricDifference().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(new Set(selected))
+      │                                                                                                                                        ^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.symmetricDifference(new·Set(selected))
+      │                                                                                                                                        --------        - 
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(new Set(selected))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:127 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isSubsetOf().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(new Set(selected))
+      │                                                                                                                               ^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isSubsetOf(new·Set(selected))
+      │                                                                                                                               --------        - 
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(new Set(selected))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:129 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isSupersetOf().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(new Set(selected))
+      │                                                                                                                                 ^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isSupersetOf(new·Set(selected))
+      │                                                                                                                                 --------        - 
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(new Set(selected))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:131 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use isDisjointFrom().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(new Set(selected))
+      │                                                                                                                                   ^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.isDisjointFrom(new·Set(selected))
+      │                                                                                                                                   --------        - 
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(condition ? other : selected))
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:122 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(condition ? other : selected))
+      │                                                                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.union(new·Set(condition·?·other·:·selected))
+      │                                                                                                                          --------                            - 
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new new Set(selected.union(other))`x`
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:111 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new new Set(selected.union(other))`x`
+      │                                                                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·new·Set(selected.union(other))`x`
+      │                                                                                                               -------                          
+
+```

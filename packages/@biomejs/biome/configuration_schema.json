@@ -8219,6 +8219,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUselessSetConstructionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUselessSetConstructionOptions" }
+			]
+		},
+		"NoUselessSetConstructionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUselessSpliceConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -10202,6 +10212,13 @@
 					"description": "Disallow functions that return a call to themselves when a loop can do the same work.\nSee https://biomejs.dev/linter/rules/no-useless-recursion",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUselessRecursionConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessSetConstruction": {
+					"description": "Disallow creating a Set that a Set method such as union() doesn't need.\nSee https://biomejs.dev/linter/rules/no-useless-set-construction",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUselessSetConstructionConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -16755,6 +16772,19 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUselessReturnOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUselessSetConstructionOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUselessSetConstructionOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
