@@ -292,6 +292,11 @@ impl Suppression for HtmlSuppressionService {
     fn parse_snippet(&self, _range: TextRange) -> Vec<SuppressionComment<'_, Self::Diagnostic>> {
         Vec::new()
     }
+
+    #[cfg(feature = "html_embeds")]
+    fn has_snippet_comments(&self) -> bool {
+        !self.snippets.is_empty()
+    }
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]

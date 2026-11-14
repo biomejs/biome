@@ -1045,6 +1045,31 @@ pub fn validate_eof_token<L: Language>(syntax: SyntaxNode<L>) {
 }
 
 /// Validator to run in our parser's spec tests to make sure that
+/// [SyntaxNode::borrowed_tokens_with_comments] returns, for every node of the
+/// tree, the tokens of the node with a comment in their trivia, as found by
+/// reading every token's trivia through the cursor API.
+pub fn validate_borrowed_tokens_with_comments<L: Language>(syntax: &SyntaxNode<L>) {
+    for node in syntax.descendants() {
+        let actual: Vec<_> = node
+            .borrowed_tokens_with_comments()
+            .map(|token| token.text_range())
+            .collect();
+        let expected: Vec<_> = node
+            .descendants_tokens(Direction::Next)
+            .filter(|token| {
+                token
+                    .leading_trivia()
+                    .pieces()
+                    .chain(token.trailing_trivia().pieces())
+                    .any(|piece| piece.is_comments())
+            })
+            .map(|token| token.text_range())
+            .collect();
+        assert_eq!(actual, expected, "wrong tokens with comments for {node:#?}");
+    }
+}
+
+/// Validator to run in our parser's spec tests to make sure that
 /// [SyntaxNode::text_trimmed_range] agrees, for every node of the tree, with
 /// a reference that walks the tokens: it skips tokens with empty text from
 /// the node's first token forward and from its last token backward, leaving

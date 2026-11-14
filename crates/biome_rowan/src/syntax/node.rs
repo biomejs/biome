@@ -1,6 +1,6 @@
 use crate::green::GreenElement;
 use crate::syntax::SyntaxTrivia;
-use crate::syntax::borrowed_token::BorrowedTokensIterator;
+use crate::syntax::borrowed_token::{BorrowedTokensIterator, BorrowedTokensWithCommentsIterator};
 use crate::syntax::element::{SyntaxElement, SyntaxElementKey};
 use crate::{
     AstNode, Direction, GreenNode, Language, NodeOrToken, SyntaxKind, SyntaxKindSet, SyntaxList,
@@ -581,6 +581,36 @@ impl<L: Language> SyntaxNode<L> {
     /// ```
     pub fn borrowed_tokens(&self) -> BorrowedTokensIterator<'_, L> {
         BorrowedTokensIterator::new(self.raw.green(), self.raw.text_range().start())
+    }
+
+    /// Returns the tokens in this node's subtree whose leading or trailing
+    /// trivia contains a comment, in source order.
+    ///
+    /// This is [Self::borrowed_tokens] without the tokens that have no
+    /// comments, but it never enters a subtree without comments, so it
+    /// visits far fewer tokens when comments are sparse.
+    ///
+    /// ```
+    /// use biome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+    /// use biome_rowan::*;
+    /// let node = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |builder| {
+    ///     builder.token(RawLanguageKind::LET_TOKEN, "let");
+    ///     builder.token_with_trivia(
+    ///         RawLanguageKind::SEMICOLON_TOKEN,
+    ///         "; // a",
+    ///         &[],
+    ///         &[TriviaPiece::whitespace(1), TriviaPiece::single_line_comment(4)],
+    ///     );
+    /// });
+    /// let mut tokens = node.borrowed_tokens_with_comments();
+    ///
+    /// let token = tokens.next().unwrap();
+    /// assert_eq!(token.kind(), RawLanguageKind::SEMICOLON_TOKEN);
+    /// assert_eq!(token.text_range(), TextRange::new(3.into(), 9.into()));
+    /// assert!(tokens.next().is_none());
+    /// ```
+    pub fn borrowed_tokens_with_comments(&self) -> BorrowedTokensWithCommentsIterator<'_, L> {
+        BorrowedTokensWithCommentsIterator::new(self.raw.green(), self.raw.text_range().start())
     }
 
     /// Find a token in the subtree corresponding to this node, which covers the offset.
