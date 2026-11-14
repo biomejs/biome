@@ -55,11 +55,13 @@
         "grit-util",
         "getrandom",
         "rand",
-      	// Needs to be updated manually
+        // Needs to be updated manually. `js-sys` is released in lockstep with
+        // `wasm-bindgen` and requires an exact `wasm-bindgen` version.
         "wasm-bindgen-cli",
-        "wasm-bindgen"
-			]
-		},
+        "wasm-bindgen",
+        "js-sys"
+      ]
+    },
     {
       "minimumReleaseAge": "3 days",
       "groupName": "@biomejs packages",
