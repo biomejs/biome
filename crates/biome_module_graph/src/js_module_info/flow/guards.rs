@@ -1,12 +1,12 @@
 use super::subjects::subject_of;
-use super::{FlowSubjectId, FlowSubjectTable};
+use super::{FlowSubject, FlowSubjectId, FlowSubjectTable};
 use crate::js_module_info::TsBindingReferenceExt;
 use biome_js_semantic::{Binding, JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsExpression, AnyJsFormalParameter,
-    AnyJsLiteralExpression, AnyJsOptionalChainExpression, AnyJsParameter, JsBinaryOperator,
-    JsCallExpression, JsLogicalOperator, JsReferenceIdentifier, JsUnaryOperator,
-    binding_ext::AnyJsBindingDeclaration, unescape_js_identifier,
+    AnyJsLiteralExpression, AnyJsOptionalChainExpression, AnyJsParameter, AnyJsVariableDeclaration,
+    JsBinaryOperator, JsCallExpression, JsLogicalOperator, JsReferenceIdentifier, JsSyntaxKind,
+    JsUnaryOperator, JsVariableKind, binding_ext::AnyJsBindingDeclaration, unescape_js_identifier,
 };
 use biome_js_type_info::{
     Function, FunctionParameter, RawPrimitiveTarget, RawTypeData, RawTypeId, ReturnType,
@@ -23,6 +23,10 @@ const MAX_CONDITION_DEPTH: usize = 32;
 const MAX_CONDITION_STEPS: usize = 16_384;
 /// Limits the descendants scanned for subjects when decomposition stops early.
 const MAX_FALLBACK_NODES: usize = 1024;
+/// Limits the aliased conditions inlined into one another, as TypeScript
+/// does. In `const c2 = c1; ...; const c6 = c5; if (c6)`, the test inlines
+/// `c6` to `c2` and tests only the truthiness of `c1`.
+const MAX_INLINED_ALIASES: usize = 5;
 
 /// The result of a condition that a flow path has observed.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -473,12 +477,20 @@ pub(super) struct DecomposedCondition {
     /// Subjects whose type the condition may refine.
     ///
     /// When decomposition stops early, this conservatively lists every
-    /// variable and property path read directly in the condition.
+    /// variable and property path read directly in the condition, and every
+    /// subject read directly in an inlined initializer that
+    /// [`narrows_through_aliases`] accepts.
     pub(super) mentions: Vec<FlowSubjectId>,
 }
 
 /// Decomposes `expression`, assuming `outcome`, into guards appended to
 /// `guards`, whose tests refer to subjects by their ids in `subjects`.
+///
+/// A truthiness test of a `const` without a type annotation, such as `ok` in
+/// `const ok = x !== null; if (ok) x`, is an aliased condition: it also
+/// applies the condition that initializes the `const`, as TypeScript does,
+/// to the subjects that [`narrows_through_aliases`] accepts. Aliases inline
+/// into one another up to [`MAX_INLINED_ALIASES`] levels.
 pub(super) fn decompose_condition(
     expression: &AnyJsExpression,
     outcome: FlowOutcome,
@@ -495,26 +507,39 @@ pub(super) fn decompose_condition(
         remaining: MAX_CONDITION_STEPS,
         mentions: Vec::new(),
         complete: true,
+        aliases: 0,
+        initializers: Vec::new(),
     };
     let guard = decomposer.guard(expression.clone(), outcome, 0);
     let mentions = if decomposer.complete {
         decomposer.mentions
     } else {
-        let subjects = decomposer.subjects;
-        expression
-            .syntax()
-            .descendants()
+        let Decomposer {
+            subjects,
+            initializers,
+            ..
+        } = decomposer;
+        let direct = expression.syntax().descendants().map(|node| (node, false));
+        let inlined = initializers
+            .iter()
+            .flat_map(|initializer| initializer.syntax().descendants())
+            .map(|node| (node, true));
+        direct
+            .chain(inlined)
             .take(MAX_FALLBACK_NODES)
-            .filter_map(AnyJsExpression::cast)
-            .filter(|expression| {
-                matches!(
+            .filter_map(|(node, inlined)| {
+                let expression = AnyJsExpression::cast(node)?;
+                if !matches!(
                     expression,
                     AnyJsExpression::JsIdentifierExpression(_)
                         | AnyJsExpression::JsStaticMemberExpression(_)
                         | AnyJsExpression::JsComputedMemberExpression(_)
-                )
+                ) {
+                    return None;
+                }
+                let subject = subject_of(&expression, model, subjects)?;
+                (!inlined || narrows_through_aliases(subjects, subject, model)).then_some(subject)
             })
-            .filter_map(|expression| subject_of(&expression, model, subjects))
             .collect()
     };
     DecomposedCondition { guard, mentions }
@@ -528,6 +553,11 @@ struct Decomposer<'a, 'raw> {
     remaining: usize,
     mentions: Vec<FlowSubjectId>,
     complete: bool,
+    /// The number of aliased conditions whose initializers enclose the
+    /// expression being decomposed.
+    aliases: usize,
+    /// Every initializer that an aliased condition has inlined.
+    initializers: Vec<AnyJsExpression>,
 }
 
 impl Decomposer<'_, '_> {
@@ -547,7 +577,28 @@ impl Decomposer<'_, '_> {
                 guard,
                 positive,
                 receivers,
-            } => self.test(&operand, guard, positive, receivers),
+            } => {
+                let initializer = if matches!(guard, SyntaxGuard::Truthy) {
+                    self.aliased_condition(&operand)
+                } else {
+                    None
+                };
+                let test = self.test(&operand, guard, positive, receivers);
+                match initializer {
+                    Some(initializer) => {
+                        let left = self.push(test);
+                        self.aliases += 1;
+                        let right = self.guard(initializer, outcome, depth + 1);
+                        self.aliases -= 1;
+                        FlowGuard::Both {
+                            left,
+                            right,
+                            sequential: true,
+                        }
+                    }
+                    None => test,
+                }
+            }
             ConditionStep::Call { call, positive } => {
                 let guard =
                     match self
@@ -626,7 +677,7 @@ impl Decomposer<'_, '_> {
         let guard = match test
             .and_then(|test| Some((test, subject_of(operand, self.model, self.subjects)?)))
         {
-            Some((test, subject)) => {
+            Some((test, subject)) if self.may_test(subject) => {
                 self.mentions.push(subject);
                 FlowGuard::Test {
                     subject,
@@ -634,7 +685,7 @@ impl Decomposer<'_, '_> {
                     positive,
                 }
             }
-            None => FlowGuard::Keep,
+            _ => FlowGuard::Keep,
         };
         if receivers {
             self.receiver_tests(chain, guard)
@@ -648,7 +699,9 @@ impl Decomposer<'_, '_> {
     fn receiver_tests(&mut self, receivers: Vec<AnyJsExpression>, guard: FlowGuard) -> FlowGuard {
         let mut guard = guard;
         for receiver in receivers {
-            let Some(subject) = subject_of(&receiver, self.model, self.subjects) else {
+            let Some(subject) = subject_of(&receiver, self.model, self.subjects)
+                .filter(|subject| self.may_test(*subject))
+            else {
                 continue;
             };
             self.mentions.push(subject);
@@ -667,10 +720,128 @@ impl Decomposer<'_, '_> {
         guard
     }
 
+    /// Returns the initializer that a truthiness test of `operand` inlines
+    /// when `operand` names an aliased condition: a `const` that is not
+    /// exported, has no type annotation, and binds an identifier, not a
+    /// pattern, to an initializer. TypeScript inlines nothing else.
+    ///
+    /// Returns `None` once [`MAX_INLINED_ALIASES`] initializers enclose
+    /// `operand`, as TypeScript stops there too.
+    fn aliased_condition(&mut self, operand: &AnyJsExpression) -> Option<AnyJsExpression> {
+        if self.aliases >= MAX_INLINED_ALIASES {
+            return None;
+        }
+        let AnyJsExpression::JsIdentifierExpression(identifier) = operand else {
+            return None;
+        };
+        let binding = self.model.binding(&identifier.name().ok()?)?;
+        // TypeScript gives an `export const` a local symbol that is not a
+        // `const`, so it never inlines one. Biome also skips a `const`
+        // exported by a specifier, which TypeScript inlines.
+        if binding.is_exported() {
+            return None;
+        }
+        let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) =
+            binding.tree().declaration()?
+        else {
+            return None;
+        };
+        if declarator.variable_annotation().is_some()
+            || declarator.declaration()?.variable_kind().ok()? != JsVariableKind::Const
+        {
+            return None;
+        }
+        let initializer = declarator.initializer()?.expression().ok()?;
+        self.initializers.push(initializer.clone());
+        Some(initializer)
+    }
+
+    /// Returns whether a test may narrow `subject`, which holds outside
+    /// inlined initializers and, inside one, for the subjects that
+    /// [`narrows_through_aliases`] accepts.
+    fn may_test(&self, subject: FlowSubjectId) -> bool {
+        self.aliases == 0 || narrows_through_aliases(self.subjects, subject, self.model)
+    }
+
     fn push(&mut self, guard: FlowGuard) -> usize {
         self.guards.push(guard);
         self.guards.len() - 1
     }
+}
+
+/// Returns whether the condition inlined from an aliased condition may narrow
+/// `subject`, an id in `subjects`.
+///
+/// TypeScript applies an inlined condition only to a reference whose value
+/// cannot change between the declaration of the alias and its test
+/// (`isConstantReference`): a variable that is never written and is declared
+/// by `const`, as a parameter or a catch variable, or by `let` unless the
+/// `let` statement is at the top level of a script, where other scripts can
+/// write it. Biome cannot tell a script from a module, so it rejects a `let`
+/// statement at the top level of any file.
+///
+/// Biome also rejects every exported variable, `this`, and every property
+/// path, where TypeScript accepts a `const` exported by an `export { ... }`
+/// list, `this`, and a readonly property. An alias declared in an enclosing
+/// function would read another `this` than the root's.
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Only parameters, catch variables, and `const` and `let` declarations qualify."
+)]
+fn narrows_through_aliases(
+    subjects: &FlowSubjectTable,
+    subject: FlowSubjectId,
+    model: &SemanticModel,
+) -> bool {
+    let Some(FlowSubject::Binding(range)) = subjects.as_slice().get(subject as usize) else {
+        return false;
+    };
+    let Some(binding) = model.as_binding_by_range(*range) else {
+        return false;
+    };
+    if binding.is_exported() || binding.all_writes().next().is_some() {
+        return false;
+    }
+    let Some(declaration) = binding.tree().declaration() else {
+        return false;
+    };
+    match declaration
+        .parent_binding_pattern_declaration()
+        .unwrap_or(declaration)
+    {
+        AnyJsBindingDeclaration::JsFormalParameter(_)
+        | AnyJsBindingDeclaration::JsRestParameter(_)
+        | AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
+        | AnyJsBindingDeclaration::TsPropertyParameter(_)
+        | AnyJsBindingDeclaration::JsCatchDeclaration(_) => true,
+        AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
+            let Some(declaration) = declarator.declaration() else {
+                return false;
+            };
+            match declaration.variable_kind() {
+                Ok(JsVariableKind::Const) => true,
+                Ok(JsVariableKind::Let) => !is_top_level_statement(&declaration),
+                Ok(JsVariableKind::Var | JsVariableKind::Using) | Err(_) => false,
+            }
+        }
+        _ => false,
+    }
+}
+
+/// Returns whether `declaration` is a variable statement directly in the body
+/// of a module or script, not in a block, a loop head, or a namespace.
+fn is_top_level_statement(declaration: &AnyJsVariableDeclaration) -> bool {
+    declaration
+        .syntax()
+        .parent()
+        .filter(|statement| statement.kind() == JsSyntaxKind::JS_VARIABLE_STATEMENT)
+        .and_then(|statement| statement.grand_parent())
+        .is_some_and(|body| {
+            matches!(
+                body.kind(),
+                JsSyntaxKind::JS_MODULE | JsSyntaxKind::JS_SCRIPT
+            )
+        })
 }
 
 enum SyntaxGuard {
@@ -1026,16 +1197,21 @@ mod tests {
     /// Decomposes the `if` test `source` in a function with the parameters
     /// `value` and `other`.
     fn decomposed(source: &str, outcome: FlowOutcome) -> Decomposed {
-        let parsed = parse(
+        decomposed_last(
             &format!("function f(value, other) {{ if ({source}) {{}} }}"),
-            JsFileSource::ts(),
-            JsParserOptions::default(),
-        );
+            outcome,
+        )
+    }
+
+    /// Decomposes the test of the last `if` statement in the module `program`.
+    fn decomposed_last(program: &str, outcome: FlowOutcome) -> Decomposed {
+        let parsed = parse(program, JsFileSource::ts(), JsParserOptions::default());
         let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
         let test = parsed
             .syntax()
             .descendants()
-            .find_map(JsIfStatement::cast)
+            .filter_map(JsIfStatement::cast)
+            .last()
             .unwrap()
             .test()
             .unwrap();
@@ -1102,6 +1278,18 @@ mod tests {
 
     fn mentioned_names(source: &str, outcome: FlowOutcome) -> Vec<String> {
         decompose(source, outcome).1
+    }
+
+    /// Names the subjects that the test of the last `if` statement in the
+    /// module `program` mentions.
+    fn mentioned_names_in(program: &str, outcome: FlowOutcome) -> Vec<String> {
+        let decomposed = decomposed_last(program, outcome);
+        decomposed
+            .condition
+            .mentions
+            .iter()
+            .map(|subject| subject_name(&decomposed.model, &decomposed.subjects, *subject))
+            .collect()
     }
 
     /// Decomposes the `if` test `source` and names the subjects that its
@@ -1346,6 +1534,218 @@ mod tests {
                 "other",
                 "value"
             ]
+        );
+    }
+
+    #[test]
+    fn aliased_conditions_inline_their_initializers() {
+        use FlowOutcome::{Falsy, Truthy};
+        let alias = "function f(value, other) { const ok = value !== null && other;";
+        for (test, outcome, expected) in [
+            ("ok", Truthy, vec!["ok", "value", "other"]),
+            ("ok", Falsy, vec!["ok", "value", "other"]),
+            ("!ok", Truthy, vec!["ok", "value", "other"]),
+            ("((ok))", Truthy, vec!["ok", "value", "other"]),
+            ("ok && other", Truthy, vec!["ok", "value", "other", "other"]),
+            ("ok || other", Falsy, vec!["ok", "value", "other", "other"]),
+            // Only truthiness tests the alias as a condition.
+            ("ok", FlowOutcome::Nullish, vec!["ok"]),
+            ("ok === true", Truthy, vec!["ok"]),
+        ] {
+            assert_eq!(
+                mentioned_names_in(&format!("{alias} if ({test}) {{}} }}"), outcome),
+                expected,
+                "{test}"
+            );
+        }
+
+        let Decomposed {
+            guards, condition, ..
+        } = decomposed_last("function f(value) { const ok = value; if (ok) {} }", Falsy);
+        let FlowGuard::Both {
+            left,
+            right,
+            sequential: true,
+        } = guards[condition.guard]
+        else {
+            panic!("{guards:?}");
+        };
+        for guard in [left, right] {
+            assert!(
+                matches!(
+                    guards[guard],
+                    FlowGuard::Test {
+                        test: FlowTest::Truthy,
+                        positive: false,
+                        ..
+                    }
+                ),
+                "{guards:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn only_unannotated_const_variables_with_initializers_are_aliases() {
+        for declaration in [
+            "const ok: boolean = value !== null;",
+            "let ok = value !== null;",
+            "var ok = value !== null;",
+            "const ok;",
+            "const { ok } = { ok: value !== null };",
+            "const [ok] = [value !== null];",
+        ] {
+            assert_eq!(
+                mentioned_names_in(
+                    &format!("function f(value) {{ {declaration} if (ok) {{}} }}"),
+                    FlowOutcome::Truthy
+                ),
+                ["ok"],
+                "{declaration}"
+            );
+        }
+        for program in [
+            "const value = get(); export const ok = value !== null; if (ok) {}",
+            "const value = get(); const ok = value !== null; export { ok }; if (ok) {}",
+        ] {
+            assert_eq!(
+                mentioned_names_in(program, FlowOutcome::Truthy),
+                ["ok"],
+                "{program}"
+            );
+        }
+    }
+
+    #[test]
+    fn inlined_initializers_test_only_variables_that_cannot_change() {
+        for (program, expected) in [
+            (
+                "function f(value) { const ok = value; if (ok) {} }",
+                vec!["ok", "value"],
+            ),
+            (
+                "const g = value => { const ok = value; if (ok) {} };",
+                vec!["ok", "value"],
+            ),
+            (
+                "function f({ a }) { const { b } = a; const ok = a && b; if (ok) {} }",
+                vec!["ok", "a", "b"],
+            ),
+            (
+                "function f() { let l = get(); const ok = l; if (ok) {} }",
+                vec!["ok", "l"],
+            ),
+            (
+                "try {} catch (error) { const ok = error; if (ok) {} }",
+                vec!["ok", "error"],
+            ),
+            ("const c = get(); const ok = c; if (ok) {}", vec!["ok", "c"]),
+            (
+                "{ let l = get(); const ok = l; if (ok) {} }",
+                vec!["ok", "l"],
+            ),
+            (
+                "for (let l = get(); ; ) { const ok = l; if (ok) {} }",
+                vec!["ok", "l"],
+            ),
+            (
+                "class K { constructor(private value) { const ok = value; if (ok) {} } }",
+                vec!["ok", "value"],
+            ),
+            // A receiver can narrow when its property path cannot.
+            (
+                "function f(value) { const ok = value?.a; if (ok) {} }",
+                vec!["ok", "value"],
+            ),
+            // A top-level `let` of a script can change in another script.
+            ("let l = get(); const ok = l; if (ok) {}", vec!["ok"]),
+            (
+                "export const c = get(); const ok = c; if (ok) {}",
+                vec!["ok"],
+            ),
+            (
+                "const c = get(); export { c }; const ok = c; if (ok) {}",
+                vec!["ok"],
+            ),
+            (
+                "function f() { let l = get(); l = get(); const ok = l; if (ok) {} }",
+                vec!["ok"],
+            ),
+            (
+                "function f(value) { const ok = value; if (ok) {} value = get(); }",
+                vec!["ok"],
+            ),
+            (
+                "function f() { var v = get(); const ok = v; if (ok) {} }",
+                vec!["ok"],
+            ),
+            ("function g() {} const ok = g; if (ok) {}", vec!["ok"]),
+            (
+                "import { i } from \"i\"; const ok = i; if (ok) {}",
+                vec!["ok"],
+            ),
+            (
+                "function f(value) { const ok = value.a !== null; if (ok) {} }",
+                vec!["ok"],
+            ),
+            (
+                "function f(value) { const ok = value['a']; if (ok) {} }",
+                vec!["ok"],
+            ),
+            ("const ok = global; if (ok) {}", vec!["ok"]),
+        ] {
+            assert_eq!(
+                mentioned_names_in(program, FlowOutcome::Truthy),
+                expected,
+                "{program}"
+            );
+        }
+    }
+
+    #[test]
+    fn aliased_conditions_inline_up_to_five_levels() {
+        let chain = "const c1 = value !== null; const c2 = c1; const c3 = !!c2; \
+            const c4 = c3; const c5 = c4 && other; const c6 = c5;";
+        for (test, expected) in [
+            ("c5", vec!["c5", "c4", "c3", "c2", "c1", "value", "other"]),
+            ("c6", vec!["c6", "c5", "c4", "c3", "c2", "c1", "other"]),
+        ] {
+            assert_eq!(
+                mentioned_names_in(
+                    &format!("function f(value, other) {{ {chain} if ({test}) {{}} }}"),
+                    FlowOutcome::Truthy
+                ),
+                expected,
+                "{test}"
+            );
+        }
+        // The limit counts the aliases that enclose a test, not every alias
+        // that a condition inlines.
+        assert_eq!(
+            mentioned_names_in(
+                "function f(value, other) { const a = value; const b = other; \
+                const c = a && b; if (c && c) {} }",
+                FlowOutcome::Truthy
+            ),
+            [
+                "c", "a", "value", "b", "other", "c", "a", "value", "b", "other"
+            ]
+        );
+    }
+
+    #[test]
+    fn incomplete_initializers_mention_the_subjects_they_may_narrow() {
+        let program =
+            "function f(value, other) { const ok = value.a === null || other ===; if (ok) {} }";
+        assert!(
+            decomposed_last(program, FlowOutcome::Truthy)
+                .guards
+                .contains(&FlowGuard::Incomplete)
+        );
+        // `value.a` is a property path, which an inlined test never narrows.
+        assert_eq!(
+            mentioned_names_in(program, FlowOutcome::Truthy),
+            ["ok", "value", "other"]
         );
     }
 }

@@ -151,6 +151,18 @@ one of its own variables or a path on its own `this`. Its parts live in
   runtime test of the argument, as `value is T` does, while `asserts value`
   decomposes the argument as a condition that holds, so
   `assert(value !== null)` excludes `null` from `value`.
+  A truthiness test of an aliased condition, a `const` that is not exported,
+  has no type annotation, and binds a name to an initializer, as `ok` in
+  `const ok = x !== null; if (ok)`, also decomposes that initializer and
+  combines it with the test of `ok` as `&&` combines its operands. Inside an
+  inlined initializer, only a test of a variable whose value cannot change
+  between the `const` and the test is kept, following TypeScript's
+  `isConstantReference`: a test of a property path, of `this`, of an exported
+  variable, or of a variable declared by a `let` statement at the top level
+  of a file becomes `Keep`. Inlining stops
+  once five aliased conditions enclose a test, where TypeScript stops too, so
+  a deeper `const` tests only its own truthiness. When decomposition stops
+  early, the subjects that inlined initializers read are mentioned too.
 - `writes.rs` finds the property paths that a root may write. The graph has
   no write points, so a written path does not narrow anywhere in its root.
   The scan visits the root's own code, including function and arrow
