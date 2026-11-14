@@ -1,0 +1,171 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import { useQuery } from "@tanstack/react-query";
+
+function useAsConst(dep: string) {
+	return useQuery({
+		queryKey: ["thing"] as const,
+		queryFn: () => dep,
+	});
+}
+
+function useKeyVariable(dep: string) {
+	const key = ["thing"];
+	return useQuery({
+		queryKey: key,
+		queryFn: () => dep,
+	});
+}
+
+const useFactory = (num: number) =>
+	useQuery({
+		queryKey: keys.foo(),
+		queryFn: () => Promise.resolve(num),
+	});
+
+function useNonNull(data?: { address: string }) {
+	return useQuery({
+		queryKey: ["query"],
+		queryFn: () => sendQuery(data!.address),
+	});
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:6:3 lint/nursery/useTanstackQueryExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query key doesn't include all the values that the query function uses.
+  
+    4 │ function useAsConst(dep: string) {
+    5 │ 	return useQuery({
+  > 6 │ 		queryKey: ["thing"] as const,
+      │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 		queryFn: () => dep,
+    8 │ 	});
+  
+  i The query function uses dep here, but the query key doesn't include it.
+  
+    5 │ 	return useQuery({
+    6 │ 		queryKey: ["thing"] as const,
+  > 7 │ 		queryFn: () => dep,
+      │ 		               ^^^
+    8 │ 	});
+    9 │ }
+  
+  i TanStack Query saves the result of a query under its key, and fetches the data again when the key changes. When one of these values changes, the query doesn't fetch new data and keeps returning the data that belongs to the old value.
+  
+  i Add the missing values to the query key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the missing values to the query key.
+  
+    6 │ → → queryKey:·["thing",·dep]·as·const,
+      │                       +++++           
+
+```
+
+```
+invalid.ts:14:3 lint/nursery/useTanstackQueryExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query key doesn't include all the values that the query function uses.
+  
+    12 │ 	const key = ["thing"];
+    13 │ 	return useQuery({
+  > 14 │ 		queryKey: key,
+       │ 		^^^^^^^^^^^^^
+    15 │ 		queryFn: () => dep,
+    16 │ 	});
+  
+  i The query function uses dep here, but the query key doesn't include it.
+  
+    13 │ 	return useQuery({
+    14 │ 		queryKey: key,
+  > 15 │ 		queryFn: () => dep,
+       │ 		               ^^^
+    16 │ 	});
+    17 │ }
+  
+  i TanStack Query saves the result of a query under its key, and fetches the data again when the key changes. When one of these values changes, the query doesn't fetch new data and keeps returning the data that belongs to the old value.
+  
+  i Add the missing values to the query key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the missing values to the query key.
+  
+    12 │ → const·key·=·["thing",·dep];
+       │                       +++++  
+
+```
+
+```
+invalid.ts:21:3 lint/nursery/useTanstackQueryExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query key doesn't include all the values that the query function uses.
+  
+    19 │ const useFactory = (num: number) =>
+    20 │ 	useQuery({
+  > 21 │ 		queryKey: keys.foo(),
+       │ 		^^^^^^^^^^^^^^^^^^^^
+    22 │ 		queryFn: () => Promise.resolve(num),
+    23 │ 	});
+  
+  i The query function uses num here, but the query key doesn't include it.
+  
+    20 │ 	useQuery({
+    21 │ 		queryKey: keys.foo(),
+  > 22 │ 		queryFn: () => Promise.resolve(num),
+       │ 		                               ^^^
+    23 │ 	});
+    24 │ 
+  
+  i TanStack Query saves the result of a query under its key, and fetches the data again when the key changes. When one of these values changes, the query doesn't fetch new data and keeps returning the data that belongs to the old value.
+  
+  i Add the missing values to the query key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:27:3 lint/nursery/useTanstackQueryExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query key doesn't include all the values that the query function uses.
+  
+    25 │ function useNonNull(data?: { address: string }) {
+    26 │ 	return useQuery({
+  > 27 │ 		queryKey: ["query"],
+       │ 		^^^^^^^^^^^^^^^^^^^
+    28 │ 		queryFn: () => sendQuery(data!.address),
+    29 │ 	});
+  
+  i The query function uses data!.address here, but the query key doesn't include it.
+  
+    26 │ 	return useQuery({
+    27 │ 		queryKey: ["query"],
+  > 28 │ 		queryFn: () => sendQuery(data!.address),
+       │ 		                         ^^^^^^^^^^^^^
+    29 │ 	});
+    30 │ }
+  
+  i TanStack Query saves the result of a query under its key, and fetches the data again when the key changes. When one of these values changes, the query doesn't fetch new data and keeps returning the data that belongs to the old value.
+  
+  i Add the missing values to the query key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the missing values to the query key.
+  
+    27 │ → → queryKey:·["query",·data!.address],
+       │                       +++++++++++++++  
+
+```

@@ -4424,6 +4424,11 @@ export interface Nursery {
 	 */
 	useTailwindVariablesShorthand?: UseTailwindVariablesShorthandConfiguration;
 	/**
+	 * Require query keys to include every value that the query function uses.
+	 * See https://biomejs.dev/linter/rules/use-tanstack-query-exhaustive-dependencies
+	 */
+	useTanstackQueryExhaustiveDependencies?: UseTanstackQueryExhaustiveDependenciesConfiguration;
+	/**
 	 * Enforce a consistent property order in the options of TanStack Query infinite query functions.
 	 * See https://biomejs.dev/linter/rules/use-tanstack-query-infinite-query-property-order
 	 */
@@ -7739,6 +7744,9 @@ export type UseTailwindStaticClassStringsConfiguration =
 export type UseTailwindVariablesShorthandConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTailwindVariablesShorthandOptions;
+export type UseTanstackQueryExhaustiveDependenciesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTanstackQueryExhaustiveDependenciesOptions;
 export type UseTanstackQueryInfiniteQueryPropertyOrderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTanstackQueryInfiniteQueryPropertyOrderOptions;
@@ -11566,6 +11574,14 @@ export interface RuleWithUseTailwindVariablesShorthandOptions {
 	level: RulePlainConfiguration;
 	options?: UseTailwindVariablesShorthandOptions;
 }
+export interface RuleWithUseTanstackQueryExhaustiveDependenciesOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseTanstackQueryExhaustiveDependenciesOptions;
+}
 export interface RuleWithUseTanstackQueryInfiniteQueryPropertyOrderOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -14690,6 +14706,18 @@ export type UseTailwindShorthandClassesOptions = {};
 export type UseTailwindSortedClassesOptions = {};
 export type UseTailwindStaticClassStringsOptions = {};
 export type UseTailwindVariablesShorthandOptions = {};
+export interface UseTanstackQueryExhaustiveDependenciesOptions {
+	/**
+	 * Names of TypeScript types. The query function can use a variable or parameter declared
+	 * with one of these types, such as `client: ApiClient`, without adding it to the query key.
+	 */
+	ignoredTypes?: string[];
+	/**
+	 * Names of variables that the query function can use without adding them to the query
+	 * key. This also covers the properties read from these variables.
+	 */
+	ignoredVariables?: string[];
+}
 export type UseTanstackQueryInfiniteQueryPropertyOrderOptions = {};
 export type UseTanstackQueryMutationPropertyOrderOptions = {};
 export type UseTanstackQueryStableQueryClientOptions = {};
@@ -16712,6 +16740,7 @@ export type Category =
 	| "lint/nursery/useTailwindSortedClasses"
 	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTailwindVariablesShorthand"
+	| "lint/nursery/useTanstackQueryExhaustiveDependencies"
 	| "lint/nursery/useTanstackQueryInfiniteQueryPropertyOrder"
 	| "lint/nursery/useTanstackQueryMutationPropertyOrder"
 	| "lint/nursery/useTanstackQueryStableQueryClient"

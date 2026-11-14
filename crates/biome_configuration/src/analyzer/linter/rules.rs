@@ -829,6 +829,7 @@ pub enum RuleName {
     UseTailwindSortedClasses,
     UseTailwindStaticClassStrings,
     UseTailwindVariablesShorthand,
+    UseTanstackQueryExhaustiveDependencies,
     UseTanstackQueryInfiniteQueryPropertyOrder,
     UseTanstackQueryMutationPropertyOrder,
     UseTanstackQueryStableQueryClient,
@@ -1679,6 +1680,9 @@ impl RuleName {
             Self::UseTailwindSortedClasses => "useTailwindSortedClasses",
             Self::UseTailwindStaticClassStrings => "useTailwindStaticClassStrings",
             Self::UseTailwindVariablesShorthand => "useTailwindVariablesShorthand",
+            Self::UseTanstackQueryExhaustiveDependencies => {
+                "useTanstackQueryExhaustiveDependencies"
+            }
             Self::UseTanstackQueryInfiniteQueryPropertyOrder => {
                 "useTanstackQueryInfiniteQueryPropertyOrder"
             }
@@ -2527,6 +2531,7 @@ impl RuleName {
             Self::UseTailwindSortedClasses => RuleGroup::Nursery,
             Self::UseTailwindStaticClassStrings => RuleGroup::Nursery,
             Self::UseTailwindVariablesShorthand => RuleGroup::Nursery,
+            Self::UseTanstackQueryExhaustiveDependencies => RuleGroup::Nursery,
             Self::UseTanstackQueryInfiniteQueryPropertyOrder => RuleGroup::Nursery,
             Self::UseTanstackQueryMutationPropertyOrder => RuleGroup::Nursery,
             Self::UseTanstackQueryStableQueryClient => RuleGroup::Nursery,
@@ -3384,6 +3389,9 @@ impl std::str::FromStr for RuleName {
             "useTailwindSortedClasses" => Ok(Self::UseTailwindSortedClasses),
             "useTailwindStaticClassStrings" => Ok(Self::UseTailwindStaticClassStrings),
             "useTailwindVariablesShorthand" => Ok(Self::UseTailwindVariablesShorthand),
+            "useTanstackQueryExhaustiveDependencies" => {
+                Ok(Self::UseTanstackQueryExhaustiveDependencies)
+            }
             "useTanstackQueryInfiniteQueryPropertyOrder" => {
                 Ok(Self::UseTanstackQueryInfiniteQueryPropertyOrder)
             }

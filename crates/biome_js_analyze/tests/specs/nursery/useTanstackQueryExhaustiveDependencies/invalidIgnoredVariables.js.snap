@@ -1,0 +1,52 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidIgnoredVariables.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { useQuery } from "@tanstack/react-query";
+
+function useThing(svc, other) {
+	return useQuery({
+		queryKey: ["thing"],
+		queryFn: () => ({ svcPart: svc.part, otherX: other.x }),
+	});
+}
+
+```
+
+# Diagnostics
+```
+invalidIgnoredVariables.js:6:3 lint/nursery/useTanstackQueryExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  × This query key doesn't include all the values that the query function uses.
+  
+    4 │ function useThing(svc, other) {
+    5 │ 	return useQuery({
+  > 6 │ 		queryKey: ["thing"],
+      │ 		^^^^^^^^^^^^^^^^^^^
+    7 │ 		queryFn: () => ({ svcPart: svc.part, otherX: other.x }),
+    8 │ 	});
+  
+  i The query function uses other.x here, but the query key doesn't include it.
+  
+    5 │ 	return useQuery({
+    6 │ 		queryKey: ["thing"],
+  > 7 │ 		queryFn: () => ({ svcPart: svc.part, otherX: other.x }),
+      │ 		                                             ^^^^^^^
+    8 │ 	});
+    9 │ }
+  
+  i TanStack Query saves the result of a query under its key, and fetches the data again when the key changes. When one of these values changes, the query doesn't fetch new data and keeps returning the data that belongs to the old value.
+  
+  i Add the missing values to the query key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the missing values to the query key.
+  
+    6 │ → → queryKey:·["thing",·other.x],
+      │                       +++++++++  
+
+```
