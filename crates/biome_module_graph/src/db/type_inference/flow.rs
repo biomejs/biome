@@ -304,7 +304,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 TypeData::TypeofValue(wrapper) => pending.push(wrapper.ty(self.db)),
                 TypeData::InstanceOf(instance) => {
                     let target = resolve_local_type_on_demand(self.db, instance.ty(self.db));
-                    if target.should_flatten_instance(instance.type_parameters(self.db)) {
+                    if target.should_flatten_instance(self.db, instance.type_parameters(self.db)) {
                         pending.push(target);
                     } else {
                         types.push(ty);

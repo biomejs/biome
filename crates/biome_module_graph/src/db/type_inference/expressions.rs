@@ -1000,7 +1000,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             };
             let type_parameters = instance.type_parameters(self.db);
             callee = self.resolve_inferred_type(instance.ty(self.db));
-            if !callee.should_flatten_instance(type_parameters) {
+            if !callee.should_flatten_instance(self.db, type_parameters) {
                 instances.push(type_parameters.to_vec().into_boxed_slice());
             }
         }
@@ -3065,7 +3065,9 @@ impl<'db> ResolutionCtx<'db, '_> {
                 FilterAction::Retained => match ty {
                     InferredTypeData::InstanceOf(instance) => {
                         let target = self.resolve_inferred_type(instance.ty(self.db));
-                        if target.should_flatten_instance(instance.type_parameters(self.db)) {
+                        if target
+                            .should_flatten_instance(self.db, instance.type_parameters(self.db))
+                        {
                             pending.push(target);
                         } else {
                             types.push(ty);

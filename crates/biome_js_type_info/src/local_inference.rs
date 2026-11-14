@@ -13,25 +13,26 @@ use biome_js_syntax::{
     AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter, AnyJsFunction,
     AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember,
     AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyJsTemplateElement,
-    AnyTsModuleName, AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
-    AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern, JsArrayExpression,
-    JsArrowFunctionExpression, JsAssignmentExpression, JsBinaryExpression, JsBinaryOperator,
-    JsCallArgumentList, JsCallArguments, JsCallExpression, JsClassDeclaration,
-    JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList, JsConstructorParameters,
-    JsExtendsClause, JsForInStatement, JsForOfStatement, JsForVariableDeclaration,
-    JsFormalParameter, JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression,
-    JsGetterObjectMember, JsInitializerClause, JsLogicalExpression, JsLogicalOperator,
-    JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern, JsObjectExpression,
-    JsParameterList, JsParameters, JsParenthesizedExpression, JsPropertyClassMember,
-    JsPropertyObjectMember, JsReferenceIdentifier, JsRestParameter, JsReturnStatement,
-    JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsTemplateExpression,
-    JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration, JsVariableDeclarator,
-    TsConditionalType, TsDeclareFunctionDeclaration, TsExternalModuleDeclaration, TsInferType,
-    TsInstantiationExpression, TsInterfaceDeclaration, TsMappedType, TsMethodSignatureTypeMember,
-    TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
-    TsSatisfiesExpression, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
-    TsTypeMemberList, TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text,
-    unescape_js_string,
+    AnyTsModuleName, AnyTsName, AnyTsReturnType, AnyTsTemplateElement, AnyTsTupleTypeElement,
+    AnyTsType, AnyTsTypeMember, AnyTsTypePredicateParameterName, ClassMemberName,
+    JsArrayBindingPattern, JsArrayExpression, JsArrowFunctionExpression, JsAssignmentExpression,
+    JsBinaryExpression, JsBinaryOperator, JsCallArgumentList, JsCallArguments, JsCallExpression,
+    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList,
+    JsConstructorParameters, JsExtendsClause, JsForInStatement, JsForOfStatement,
+    JsForVariableDeclaration, JsFormalParameter, JsFunctionBody, JsFunctionDeclaration,
+    JsFunctionExpression, JsGetterObjectMember, JsInitializerClause, JsLogicalExpression,
+    JsLogicalOperator, JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern,
+    JsObjectExpression, JsParameterList, JsParameters, JsParenthesizedExpression,
+    JsPropertyClassMember, JsPropertyObjectMember, JsReferenceIdentifier, JsRestParameter,
+    JsReturnStatement, JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+    JsTemplateExpression, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
+    JsVariableDeclarator, TsConditionalType, TsDeclareFunctionDeclaration,
+    TsExternalModuleDeclaration, TsInferType, TsInstantiationExpression, TsInterfaceDeclaration,
+    TsMappedType, TsMethodSignatureTypeMember, TsModuleDeclaration,
+    TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
+    TsSatisfiesExpression, TsTemplateLiteralType, TsTypeAliasDeclaration, TsTypeAnnotation,
+    TsTypeArguments, TsTypeList, TsTypeMemberList, TsTypeParameter, TsTypeParameters, TsTypeofType,
+    inner_string_text, unescape_js_string,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxResult, Text, TextRange, TokenText};
 use rustc_hash::FxHashMap;
@@ -47,9 +48,9 @@ use crate::{
     GenericTypeParameter, IndexedAccessType, Interface, Intersection, Literal, MappedType,
     MappedTypeKeys, MappedTypeModifier, Module, NamedFunctionParameter, Namespace, Object,
     ObjectKind, Path, PatternFunctionParameter, PredicateReturnType, RawTypeCollector, RawTypeId,
-    ReturnType, ScopeId, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember,
-    TypeMemberAccessibility, TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference,
-    TypeReferenceQualifier, TypeofAdditionExpression, TypeofAwaitExpression,
+    ReturnType, ScopeId, TemplateLiteral, Tuple, TupleElementType, TypeData, TypeInstance,
+    TypeMember, TypeMemberAccessibility, TypeMemberKind, TypeOperator, TypeOperatorType,
+    TypeReference, TypeReferenceQualifier, TypeofAdditionExpression, TypeofAwaitExpression,
     TypeofBitwiseNotExpression, TypeofCallArgumentExpression, TypeofCallExpression,
     TypeofComputedMemberExpression, TypeofConditionalExpression, TypeofDestructureExpression,
     TypeofExpression, TypeofIndexExpression, TypeofIterableValueOfExpression,
@@ -812,7 +813,7 @@ impl TypeData {
             AnyTsType::TsStringType(_) => Self::reference(GLOBAL_STRING_KEYWORD_ID),
             AnyTsType::TsSymbolType(_) => Self::Symbol,
             AnyTsType::TsTemplateLiteralType(ty) => {
-                Self::Literal(Box::new(Literal::Template(ty.to_string().into())))
+                Self::from_ts_template_literal_type(collector, scope_id, ty)
             }
             AnyTsType::TsThisType(_) => Self::ThisKeyword,
             AnyTsType::TsTupleType(ty) => {
@@ -1340,6 +1341,44 @@ impl TypeData {
             Some(text) => Self::Literal(Box::new(Literal::String(StringLiteral::from(text)))),
             None => Self::string(),
         }
+    }
+
+    /// Creates a template literal type. A template without placeholders is a
+    /// string literal type.
+    pub fn from_ts_template_literal_type(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        ty: &TsTemplateLiteralType,
+    ) -> Self {
+        let mut texts = Vec::new();
+        let mut types = Vec::new();
+        let mut text = String::new();
+        for element in ty.elements() {
+            match element {
+                AnyTsTemplateElement::TsTemplateChunkElement(chunk) => {
+                    let Ok(token) = chunk.template_chunk_token() else {
+                        return Self::unknown();
+                    };
+                    text.push_str(token.text_trimmed());
+                }
+                AnyTsTemplateElement::TsTemplateElement(element) => {
+                    let Ok(ty) = element.ty() else {
+                        return Self::unknown();
+                    };
+                    texts.push(Text::from(std::mem::take(&mut text)));
+                    types.push(TypeReference::from_any_ts_type(collector, scope_id, &ty));
+                }
+            }
+        }
+
+        if types.is_empty() {
+            return Literal::String(text.into()).into();
+        }
+        texts.push(text.into());
+        Self::Literal(Box::new(Literal::Template(TemplateLiteral {
+            texts: texts.into(),
+            types: types.into(),
+        })))
     }
 
     pub fn from_js_unary_expression(

@@ -22,14 +22,18 @@ use crate::generated::global_types::ids::{
 use crate::interned_types::{
     FunctionParameter, InternedClass, InternedConstructor, InternedExtendsType, InternedFunction,
     InternedGenericTypeParameter, InternedIntersection, InternedLiteral, InternedTuple,
-    InternedTypeInstance, InternedUnion, Literal, ReturnType, TupleElementType, TypeData, TypeDb,
-    TypeMember, TypeMemberKind,
+    InternedTypeInstance, InternedUnion, Literal, ReturnType, TemplateLiteral, TupleElementType,
+    TypeData, TypeDb, TypeMember, TypeMemberKind, placeholder_text,
 };
-use crate::literal::StringLiteral;
+use crate::literal::{
+    NumberLiteral, StringLiteral, bigint_literal_from_string, is_number_string,
+    number_from_canonical_string,
+};
 use crate::type_operations::keyof;
 use crate::type_transform::TypeSubstitution;
 use crate::{GlobalTypeId, TypeOperator};
 use biome_js_syntax::numbers::canonicalize_js_bigint_literal;
+use biome_rowan::Text;
 use rustc_hash::FxHashSet;
 
 /// Maximum number of type pairs compared while evaluating one conditional.
@@ -596,7 +600,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 },
                 TypeData::InstanceOf(instance)
                     if instance.type_parameters(self.db).is_empty()
-                        && instance.ty(self.db).should_flatten_instance(&[]) =>
+                        && instance.ty(self.db).should_flatten_instance(self.db, &[]) =>
                 {
                     instance.ty(self.db)
                 }
@@ -610,12 +614,53 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                         None => return resolved,
                     }
                 }
+                // Placeholders may only become literals or unions once they
+                // are resolved, so the template may not be canonical yet.
+                TypeData::Literal(literal)
+                    if let Literal::Template(template) = literal.literal(self.db) =>
+                {
+                    let mut types = None;
+                    for (index, ty) in template.types.iter().enumerate() {
+                        let resolved_ty = self.resolve_placeholder(*ty);
+                        if resolved_ty != *ty {
+                            types.get_or_insert_with(|| template.types.clone())[index] =
+                                resolved_ty;
+                        }
+                    }
+                    match types {
+                        Some(types) => {
+                            TypeData::template_literal(self.db, template.texts.clone(), types)
+                        }
+                        None => return resolved,
+                    }
+                }
                 _ => return resolved,
             };
             if next == ty {
                 return next;
             }
             ty = next;
+        }
+        ty
+    }
+
+    /// Resolves the type of a template placeholder far enough to tell whether
+    /// it becomes text or distributes the template.
+    ///
+    /// Unlike [`Self::resolve`], this doesn't resolve nested templates, so a
+    /// template that refers to itself can't recurse indefinitely.
+    fn resolve_placeholder(&mut self, mut ty: TypeData<'db>) -> TypeData<'db> {
+        for _ in 0..MAX_MEMBER_LOOKUP_DEPTH {
+            ty = (self.resolve)(ty).expand_global_local(self.db);
+            match ty {
+                TypeData::InstanceOf(instance)
+                    if instance.type_parameters(self.db).is_empty()
+                        && instance.ty(self.db).should_flatten_instance(self.db, &[]) =>
+                {
+                    ty = instance.ty(self.db);
+                }
+                _ => break,
+            }
         }
         ty
     }
@@ -839,6 +884,11 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         let (target, target_is_readonly) = strip_readonly(self.db, target);
         if target == TypeData::NeverKeyword {
             return Assignability::NotAssignable;
+        }
+        if let TypeData::Literal(literal) = target
+            && let Literal::Template(template) = literal.literal(self.db)
+        {
+            return self.is_assignable_to_template(source, template);
         }
 
         match (
@@ -1265,6 +1315,315 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             }
         }
         has_empty_object && has_null && has_undefined
+    }
+
+    /// Matches a source type against a template literal type.
+    ///
+    /// The source must be a string literal or another template. Like
+    /// TypeScript, each placeholder matches the shortest text up to the
+    /// target's next text, and the last placeholder matches the rest:
+    ///
+    /// ```ts
+    /// type Split<S> = S extends `${infer T} as ${infer A}` ? [T, A] : never;
+    /// type X = Split<"a as b as c">; // ["a", "b as c"]
+    /// ```
+    ///
+    /// Then each matched part must be valid for its placeholder, as described
+    /// in [`Self::is_placeholder_assignable`].
+    fn is_assignable_to_template(
+        &mut self,
+        source: TypeData<'db>,
+        target: &'db TemplateLiteral<'db>,
+    ) -> Assignability {
+        let (source_texts, source_types) = match source {
+            TypeData::Literal(literal) => match literal.literal(self.db) {
+                Literal::String(string) => (std::slice::from_ref(string.as_ref()), &[][..]),
+                Literal::Template(template) => (&template.texts[..], &template.types[..]),
+                _ => return Assignability::NotAssignable,
+            },
+            // Only a template without text whose placeholders accept every
+            // string can accept `string`.
+            TypeData::String => {
+                let is_narrower = target.texts.iter().any(|text| !text.is_empty())
+                    || target
+                        .types
+                        .iter()
+                        .any(|ty| matches!(ty, TypeData::Number | TypeData::BigInt));
+                return if is_narrower {
+                    Assignability::NotAssignable
+                } else {
+                    Assignability::Undetermined
+                };
+            }
+            source => {
+                return if primitive_kind(self.db, source).is_some() || self.is_object_like(source) {
+                    Assignability::NotAssignable
+                } else {
+                    Assignability::Undetermined
+                };
+            }
+        };
+        // Splitting treats placeholders as opaque, which is only right for
+        // placeholders that stay in TypeScript's canonical form. Others, such as
+        // generics or the unions of templates with too many variants to
+        // distribute, could become text or variants that split differently.
+        // Both templates were resolved already, so their placeholders are too.
+        let is_pattern = |ty: &TypeData<'db>| {
+            matches!(
+                ty,
+                TypeData::String
+                    | TypeData::Number
+                    | TypeData::BigInt
+                    | TypeData::AnyKeyword
+                    | TypeData::Intersection(_)
+            )
+        };
+        if !source_types.iter().all(is_pattern)
+            || !target
+                .types
+                .iter()
+                .all(|ty| is_pattern(ty) || self.infer_type(*ty).is_some())
+        {
+            return Assignability::Undetermined;
+        }
+        // Texts are compared as written, so escape sequences could hide equal
+        // text. TypeScript also splits a character outside the Basic
+        // Multilingual Plane between adjacent placeholders, which this doesn't.
+        let has_adjacent_placeholders = target.texts[1..target.texts.len() - 1]
+            .iter()
+            .any(|text| text.is_empty());
+        if source_texts.iter().chain(&target.texts).any(|text| {
+            text.contains('\\')
+                || (has_adjacent_placeholders && text.chars().any(|c| c.len_utf16() > 1))
+        }) {
+            return Assignability::Undetermined;
+        }
+
+        let Some(parts) = match_template_parts(self.db, source_texts, source_types, &target.texts)
+        else {
+            return Assignability::NotAssignable;
+        };
+        self.all_placeholders_assignable(parts.into_iter().zip(target.types.iter().copied()))
+    }
+
+    /// Returns whether `part`, the part of a source matched by a placeholder
+    /// of a template literal type, is valid for that placeholder.
+    ///
+    /// Besides values assignable to the placeholder, a string literal is
+    /// valid for `${number}` if JavaScript converts it to a finite number, and
+    /// for `${bigint}` if it spells an integer. Matching an `infer`
+    /// placeholder binds it to the part, as described in
+    /// [`Self::infer_from_placeholder`].
+    fn is_placeholder_assignable(
+        &mut self,
+        part: TypeData<'db>,
+        placeholder: TypeData<'db>,
+    ) -> Assignability {
+        let placeholder = self.resolve(placeholder);
+        if let Some(generic) = self.infer_type(placeholder) {
+            return self.infer_from_placeholder(generic, part);
+        }
+        match placeholder {
+            TypeData::String | TypeData::AnyKeyword => return Assignability::Assignable,
+            // Patterns such as `string & {}` are intersections with `{}`.
+            TypeData::Intersection(intersection) => {
+                let mut members = Vec::new();
+                for ty in intersection.types(self.db) {
+                    let ty = self.resolve(*ty);
+                    if !self.is_empty_object(ty) {
+                        members.push((part, ty));
+                    }
+                }
+                return self.all_placeholders_assignable(members);
+            }
+            TypeData::Union(union) => {
+                let mut result = Assignability::NotAssignable;
+                for ty in union.types(self.db) {
+                    match self.is_placeholder_assignable(part, *ty) {
+                        Assignability::Assignable => return Assignability::Assignable,
+                        Assignability::NotAssignable => {}
+                        Assignability::Undetermined => result = Assignability::Undetermined,
+                    }
+                }
+                return result;
+            }
+            _ => {}
+        }
+
+        let TypeData::Literal(literal) = part else {
+            return self.is_assignable(part, placeholder);
+        };
+        match literal.literal(self.db) {
+            Literal::String(value) => {
+                let value = value.as_str();
+                match placeholder {
+                    TypeData::Number => is_number_string(value).into(),
+                    TypeData::BigInt => bigint_literal_from_string(value).is_some().into(),
+                    TypeData::Boolean => matches!(value, "true" | "false").into(),
+                    // Literal, `null`, and `undefined` placeholders match the
+                    // text they produce.
+                    _ => match placeholder_text(self.db, placeholder) {
+                        Some(text) => (text == value).into(),
+                        None => self.is_assignable(part, placeholder),
+                    },
+                }
+            }
+            // A part spanning a single source placeholder, such as `${number}`,
+            // is valid if the type of that placeholder is.
+            Literal::Template(template) if matches!(&template.texts[..], [before, after] if before.is_empty() && after.is_empty()) =>
+            {
+                let source = template.types[0];
+                self.any_assignable([(part, placeholder), (source, placeholder)])
+            }
+            _ => self.is_assignable(part, placeholder),
+        }
+    }
+
+    /// Binds an `infer` placeholder of a template literal type to the part of
+    /// the source it matched.
+    ///
+    /// Like TypeScript, a string literal matched by a placeholder constrained
+    /// to numbers, bigints, or booleans infers the literal it spells:
+    ///
+    /// ```ts
+    /// type ToNumber<S> = S extends `${infer N extends number}` ? N : never;
+    /// type X = ToNumber<"42">;  // 42
+    /// type Y = ToNumber<"042">; // number
+    /// ```
+    ///
+    /// An inference that violates the constraint binds the constraint instead,
+    /// which the part must then match as a placeholder. This is why `"042"`,
+    /// which isn't how JavaScript prints any number, infers `number`.
+    fn infer_from_placeholder(
+        &mut self,
+        generic: InternedGenericTypeParameter<'db>,
+        part: TypeData<'db>,
+    ) -> Assignability {
+        let Some(constraint) = generic.constraint(self.db) else {
+            return self.bind(generic, part, InferencePosition::Covariant);
+        };
+        let Some(inferred) = self.placeholder_inference(constraint, part) else {
+            return Assignability::Undetermined;
+        };
+        match self.is_assignable(inferred, constraint) {
+            Assignability::Assignable => self.bind(generic, inferred, InferencePosition::Covariant),
+            Assignability::NotAssignable => {
+                self.candidates.push(InferenceCandidate {
+                    generic,
+                    ty: constraint,
+                    position: InferencePosition::Covariant,
+                    priority: InferencePriority::Direct,
+                });
+                self.is_placeholder_assignable(part, constraint)
+            }
+            Assignability::Undetermined => Assignability::Undetermined,
+        }
+    }
+
+    /// Returns whether each part is valid for its placeholder, as described in
+    /// [`Self::is_placeholder_assignable`].
+    fn all_placeholders_assignable(
+        &mut self,
+        pairs: impl IntoIterator<Item = (TypeData<'db>, TypeData<'db>)>,
+    ) -> Assignability {
+        let mut result = Assignability::Assignable;
+        for (part, placeholder) in pairs {
+            match self.is_placeholder_assignable(part, placeholder) {
+                Assignability::Assignable => {}
+                Assignability::NotAssignable => return Assignability::NotAssignable,
+                Assignability::Undetermined => result = Assignability::Undetermined,
+            }
+        }
+        result
+    }
+
+    /// Returns the type that an `infer` placeholder with the given
+    /// constraint infers from `part`.
+    ///
+    /// For a string literal part, this picks the constraint member that the
+    /// literal can spell, preferring `string` over string literals, numbers
+    /// over number literals, and so on, as TypeScript does. Numbers and bigints
+    /// are only inferred from their canonical spelling, such as `"42"` but not
+    /// `"042"`.
+    fn placeholder_inference(
+        &mut self,
+        constraint: TypeData<'db>,
+        part: TypeData<'db>,
+    ) -> Option<TypeData<'db>> {
+        let TypeData::Literal(literal) = part else {
+            return Some(part);
+        };
+        let Literal::String(value) = literal.literal(self.db) else {
+            return Some(part);
+        };
+        let value = value.as_str();
+        let members = match self.resolve(constraint) {
+            TypeData::AnyKeyword => return Some(part),
+            TypeData::Union(union) => union.types(self.db).to_vec(),
+            constraint => Vec::from([constraint]),
+        };
+
+        let db = self.db;
+        let literal = |literal| TypeData::Literal(InternedLiteral::new(db, literal));
+        let number = number_from_canonical_string(value);
+        let bigint = bigint_literal_from_string(value)
+            .filter(|canonical| canonical.strip_suffix('n') == Some(value));
+        let mut inferred: Option<(u8, TypeData<'db>)> = None;
+        for member in members {
+            let member = self.resolve(member);
+            let candidate = match member {
+                TypeData::String => Some((0, part)),
+                TypeData::Literal(member_literal) => match member_literal.literal(db) {
+                    Literal::Template(_) => match self.is_assignable(part, member) {
+                        Assignability::Assignable => Some((1, part)),
+                        Assignability::NotAssignable => None,
+                        Assignability::Undetermined => return None,
+                    },
+                    Literal::String(string) => (string.as_str() == value).then_some((2, member)),
+                    Literal::Number(literal) if number.is_some() => {
+                        (literal.to_f64() == number).then_some((4, member))
+                    }
+                    Literal::BigInt(literal) => bigint
+                        .as_deref()
+                        .is_some_and(|bigint| {
+                            canonicalize_js_bigint_literal(literal.text()).as_deref()
+                                == Some(bigint)
+                        })
+                        .then_some((6, member)),
+                    Literal::Boolean(boolean) => {
+                        (boolean.as_bool().to_string() == value).then_some((8, member))
+                    }
+                    _ => None,
+                },
+                TypeData::Number => number.map(|_| {
+                    (
+                        3,
+                        literal(Literal::Number(NumberLiteral::new(Text::from(
+                            value.to_string(),
+                        )))),
+                    )
+                }),
+                TypeData::BigInt => bigint
+                    .as_ref()
+                    .map(|bigint| (5, literal(Literal::BigInt(Text::from(bigint.clone()))))),
+                TypeData::Boolean => match value {
+                    "true" | "false" => {
+                        Some((7, literal(Literal::Boolean((value == "true").into()))))
+                    }
+                    _ => None,
+                },
+                TypeData::Undefined => (value == "undefined").then_some((9, member)),
+                TypeData::Null => (value == "null").then_some((10, member)),
+                member if is_unresolved(db, member) => return None,
+                _ => None,
+            };
+            if let Some((rank, ty)) = candidate
+                && inferred.is_none_or(|(best, _)| rank < best)
+            {
+                inferred = Some((rank, ty));
+            }
+        }
+        Some(inferred.map_or(part, |(_, ty)| ty))
     }
 
     fn is_primitive_assignable_to_object(
@@ -2222,6 +2581,91 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
     }
 }
 
+/// Splits a source string literal or template, given by the texts around its
+/// placeholders and their types, into the parts matched by the placeholders of
+/// a template literal type with `target_texts`.
+///
+/// Each placeholder matches the shortest text up to the target's next text,
+/// and the last placeholder matches the rest. A placeholder directly followed
+/// by another one matches a single character. A part that spans placeholders
+/// of the source is a template itself.
+///
+/// Returns `None` if the source doesn't contain the target's texts in order.
+fn match_template_parts<'db>(
+    db: &'db dyn TypeDb,
+    source_texts: &[Text],
+    source_types: &[TypeData<'db>],
+    target_texts: &[Text],
+) -> Option<Vec<TypeData<'db>>> {
+    let last_source = source_texts.len() - 1;
+    let last_target = target_texts.len() - 1;
+    let source_start = source_texts[0].text();
+    let source_end = source_texts[last_source].text();
+    let target_start = target_texts[0].text();
+    let target_end = target_texts[last_target].text();
+    if (last_source == 0 && source_start.len() < target_start.len() + target_end.len())
+        || !source_start.starts_with(target_start)
+        || !source_end.ends_with(target_end)
+    {
+        return None;
+    }
+
+    // The target's end text was matched already, so the last source text
+    // is cut short.
+    let remaining_end = &source_end[..source_end.len() - target_end.len()];
+    let source_text = |index: usize| {
+        if index < last_source {
+            source_texts[index].text()
+        } else {
+            remaining_end
+        }
+    };
+    let mut parts = Vec::with_capacity(last_target);
+    let mut start = (0, target_start.len());
+    let mut push_part = |start: &mut (usize, usize), end: (usize, usize)| {
+        let ((start_index, start_offset), (end_index, end_offset)) = (*start, end);
+        let part = if start_index == end_index {
+            let text = &source_text(end_index)[start_offset..end_offset];
+            TypeData::Literal(InternedLiteral::new(db, Literal::String(text.into())))
+        } else {
+            let texts = std::iter::once(&source_texts[start_index].text()[start_offset..])
+                .chain(
+                    source_texts[start_index + 1..end_index]
+                        .iter()
+                        .map(Text::text),
+                )
+                .chain(std::iter::once(&source_text(end_index)[..end_offset]))
+                .map(|text| Text::from(text.to_string()))
+                .collect();
+            TypeData::template_literal(db, texts, source_types[start_index..end_index].into())
+        };
+        parts.push(part);
+        *start = end;
+    };
+
+    for delimiter in &target_texts[1..last_target] {
+        let (index, offset) = start;
+        if !delimiter.is_empty() {
+            let end = (index..=last_source).find_map(|index| {
+                let from = if index == start.0 { offset } else { 0 };
+                source_text(index)[from..]
+                    .find(delimiter.text())
+                    .map(|found| (index, from + found))
+            })?;
+            push_part(&mut start, end);
+            start.1 += delimiter.len();
+        } else if let Some(next) = source_text(index)[offset..].chars().next() {
+            push_part(&mut start, (index, offset + next.len_utf8()));
+        } else if index < last_source {
+            push_part(&mut start, (index + 1, 0));
+        } else {
+            return None;
+        }
+    }
+    push_part(&mut start, (last_source, source_text(last_source).len()));
+    Some(parts)
+}
+
 /// Returns the type of a member as seen when reading it.
 fn member_type<'db>(db: &'db dyn TypeDb, member: &TypeMember<'db>) -> TypeData<'db> {
     let ty = member.ty.expand_global_local(db);
@@ -2365,15 +2809,16 @@ struct PrimitiveKind {
 }
 
 impl PrimitiveKind {
-    /// Checks whether a value of this kind is assignable to `target`.
+    /// Checks whether a value of this kind is assignable to `target`, which
+    /// isn't a template literal type.
     ///
     /// Two different types are compared here, since identical types were
     /// already accepted, and literals of one primitive were already compared
     /// by value. So a literal is assignable only to its primitive.
-    /// Whether a string matches a template literal type such as `` `a${string}` ``
-    /// is not evaluated.
+    /// Whether a template literal type is assignable to a string literal is
+    /// not evaluated.
     fn is_assignable_to(self, target: Self) -> Assignability {
-        if target.is_template || self.is_template && target.is_literal {
+        if self.is_template && target.is_literal {
             return if self.primitive == target.primitive {
                 Assignability::Undetermined
             } else {

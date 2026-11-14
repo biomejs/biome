@@ -3,8 +3,9 @@ use crate::{
     CallArgumentType, Class, DestructureField, ExtendsType, Function, FunctionParameter,
     FunctionParameterBinding, GenericTypeParameter, ImportSymbol, Interface, Literal,
     MergedReference, NamedFunctionParameter, Object, ObjectLiteral, PatternFunctionParameter,
-    RawTypeId, ReturnType, TypeData, TypeImportQualifier, TypeInstance, TypeMember, TypeMemberKind,
-    TypeReference, TypeReferenceQualifier, TypeofAwaitExpression, TypeofExpression, Union,
+    RawTypeId, ReturnType, TemplateLiteral, TypeData, TypeImportQualifier, TypeInstance,
+    TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeofAwaitExpression,
+    TypeofExpression, Union,
 };
 use biome_formatter::rowan::RowanSource;
 use biome_formatter::rowan::prelude::*;
@@ -929,8 +930,21 @@ impl Format<FormatTypeContext> for Literal {
                 ]
             ),
             Self::String(lit) => write!(f, [token("string:"), space(), text(lit.as_str(), None)]),
-            Self::Template(tmpl) => write!(f, [token("string:"), space(), text(tmpl, None)]),
+            Self::Template(template) => write!(f, [template]),
         }
+    }
+}
+
+impl Format<FormatTypeContext> for TemplateLiteral {
+    fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
+        write!(f, [token("template:"), space(), token("`")])?;
+        for (index, chunk) in self.texts.iter().enumerate() {
+            write!(f, [text(chunk, None)])?;
+            if let Some(ty) = self.types.get(index) {
+                write!(f, [token("${"), ty, token("}")])?;
+            }
+        }
+        write!(f, [token("`")])
     }
 }
 

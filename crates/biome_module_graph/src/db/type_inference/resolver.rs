@@ -1034,7 +1034,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
                     let target = self
                         .resolve_inferred_typeof_expression(expression.expression(self.db))
                         .unwrap_or(InferredTypeData::Unknown);
-                    if target.should_flatten_instance(instance.type_parameters(self.db)) {
+                    if target.should_flatten_instance(self.db, instance.type_parameters(self.db)) {
                         ty = target;
                     } else {
                         return InferredTypeData::instance_of(

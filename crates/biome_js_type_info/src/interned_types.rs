@@ -24,7 +24,10 @@ use crate::{
         SYMBOL_ID_GLOBAL_TYPE_ID, WEAK_MAP_ID_GLOBAL_TYPE_ID,
     },
     globals_ids::GlobalTypeId,
-    literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral},
+    literal::{
+        BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral, bigint_literal_to_js_string,
+        number_to_js_string,
+    },
     type_data as raw,
 };
 
@@ -35,6 +38,9 @@ pub type ReferenceResolver<'db, 'resolver> =
     dyn FnMut(&raw::TypeReference) -> TypeData<'db> + 'resolver;
 const MAX_GENERIC_REPLACEMENT_STEPS: usize = 64;
 const MAX_OBJECT_RELATION_DEPTH: usize = 50;
+
+/// Maximum number of variants a template literal type is distributed into.
+const MAX_TEMPLATE_LITERAL_VARIANTS: usize = 64;
 
 /// Expands `local` and any supporting-type handle that it resolves to.
 ///
@@ -667,8 +673,12 @@ impl<'db> TypeData<'db> {
         }
     }
 
-    pub fn should_flatten_instance(self, type_parameters: &[Self]) -> bool {
+    pub fn should_flatten_instance(self, db: &'db dyn TypeDb, type_parameters: &[Self]) -> bool {
         match self {
+            // Template literals may refer to generics.
+            Self::Literal(literal) if matches!(literal.literal(db), Literal::Template(_)) => {
+                type_parameters.is_empty()
+            }
             Self::AnyKeyword
             | Self::BigInt
             | Self::Boolean
@@ -882,6 +892,94 @@ impl<'db> TypeData<'db> {
     /// a union.
     pub fn union_from_types(db: &'db dyn TypeDb, types: Vec<Self>) -> Self {
         UnionBuilder::new(db).add_all(types).build()
+    }
+
+    /// Builds the type of a template literal from the texts around its
+    /// placeholders and their types. `texts` must have one more element than
+    /// `types`.
+    ///
+    /// Like TypeScript, this returns the template in canonical form:
+    ///
+    /// - Placeholders of literal, `null`, and `undefined` types become part of
+    ///   the text, and nested templates are spliced in. A template left without
+    ///   placeholders is a string literal, and `` `${string}` `` is `string`.
+    /// - Placeholders of union and `boolean` types are distributed, so
+    ///   `` `a${"x" | "y"}` `` is `"ax" | "ay"`. Templates that would distribute
+    ///   into too many variants are left as they are. A template with a `never`
+    ///   placeholder is `never`.
+    pub fn template_literal(db: &'db dyn TypeDb, texts: Box<[Text]>, types: Box<[Self]>) -> Self {
+        debug_assert_eq!(texts.len(), types.len() + 1);
+        if types.contains(&Self::NeverKeyword) {
+            return Self::NeverKeyword;
+        }
+        if let Some(index) = types
+            .iter()
+            .position(|ty| matches!(ty, Self::Union(_) | Self::Boolean))
+        {
+            let variant_count = types.iter().try_fold(1_usize, |count, ty| {
+                let members = match ty {
+                    Self::Union(union) => union.types(db).len(),
+                    Self::Boolean => 2,
+                    _ => 1,
+                };
+                count
+                    .checked_mul(members)
+                    .filter(|count| *count <= MAX_TEMPLATE_LITERAL_VARIANTS)
+            });
+            if variant_count.is_some() {
+                let members = match types[index] {
+                    Self::Union(union) => union.types(db).to_vec(),
+                    _ => Vec::from([
+                        Literal::Boolean(false.into()),
+                        Literal::Boolean(true.into()),
+                    ])
+                    .into_iter()
+                    .map(|literal| Self::Literal(InternedLiteral::new(db, literal)))
+                    .collect(),
+                };
+                let variants = members
+                    .into_iter()
+                    .map(|member| {
+                        let mut types = types.clone();
+                        types[index] = member;
+                        Self::template_literal(db, texts.clone(), types)
+                    })
+                    .collect();
+                return Self::union_from_types(db, variants);
+            }
+        }
+
+        let is_canonical = types.iter().all(|ty| match ty {
+            Self::Literal(literal) => !matches!(
+                literal.literal(db),
+                Literal::BigInt(_)
+                    | Literal::Boolean(_)
+                    | Literal::Number(_)
+                    | Literal::String(_)
+                    | Literal::Template(_)
+            ),
+            Self::Null | Self::Undefined => false,
+            _ => true,
+        });
+        let (texts, types) = if is_canonical {
+            (texts, types)
+        } else {
+            fold_template_placeholders(db, &texts, &types)
+        };
+
+        match (texts.as_ref(), types.as_ref()) {
+            ([text], []) => Self::Literal(InternedLiteral::new(
+                db,
+                Literal::String(text.clone().into()),
+            )),
+            ([before, after], [Self::String]) if before.is_empty() && after.is_empty() => {
+                Self::String
+            }
+            _ => Self::Literal(InternedLiteral::new(
+                db,
+                Literal::Template(TemplateLiteral { texts, types }),
+            )),
+        }
     }
 
     /// Builds the smallest type that represents a list of intersection variants.
@@ -1261,10 +1359,17 @@ impl<'db> TypeData<'db> {
                 convert_references(db, &extends.infer_types, resolve_reference),
                 extends.distributive,
             )),
-            raw::TypeData::Literal(literal) => Self::Literal(InternedLiteral::new(
-                db,
-                convert_literal(db, literal.as_ref(), resolve_reference),
-            )),
+            raw::TypeData::Literal(literal) => match literal.as_ref() {
+                raw::Literal::Template(template) => Self::template_literal(
+                    db,
+                    template.texts.clone(),
+                    convert_references(db, &template.types, resolve_reference),
+                ),
+                literal => Self::Literal(InternedLiteral::new(
+                    db,
+                    convert_literal(db, literal, resolve_reference),
+                )),
+            },
             raw::TypeData::InstanceOf(instance) => Self::instance_of(
                 db,
                 resolve_reference(&instance.ty),
@@ -1408,11 +1513,11 @@ impl<'db> TypeDataSlots<'db> {
                 ]);
                 result.slots.extend_from_slice(extends.infer_types(db));
             }
-            TypeData::Literal(literal) => {
-                if let Literal::Object(members) = literal.literal(db) {
-                    result.push_type_members_slots(members);
-                }
-            }
+            TypeData::Literal(literal) => match literal.literal(db) {
+                Literal::Object(members) => result.push_type_members_slots(members),
+                Literal::Template(template) => result.slots.extend_from_slice(&template.types),
+                _ => {}
+            },
             TypeData::InstanceOf(instance) => {
                 result.slots.push(instance.ty(db));
                 result.slots.extend_from_slice(instance.type_parameters(db));
@@ -1787,20 +1892,22 @@ impl<'db> TypeDataSlotReplacements<'db> {
                 self.take_types(extends.infer_types(db).len())?,
                 extends.distributive(db),
             )),
-            TypeData::Literal(literal) => TypeData::Literal(InternedLiteral::new(
-                db,
-                match literal.literal(db) {
-                    Literal::Object(members) => {
-                        Literal::Object(self.rebuild_type_members(members)?)
-                    }
-                    literal @ (Literal::BigInt(_)
-                    | Literal::Boolean(_)
-                    | Literal::Number(_)
-                    | Literal::RegExp(_)
-                    | Literal::String(_)
-                    | Literal::Template(_)) => literal.clone(),
-                },
-            )),
+            TypeData::Literal(literal) => match literal.literal(db) {
+                Literal::Object(members) => TypeData::Literal(InternedLiteral::new(
+                    db,
+                    Literal::Object(self.rebuild_type_members(members)?),
+                )),
+                Literal::Template(template) => TypeData::template_literal(
+                    db,
+                    template.texts.clone(),
+                    self.take_types(template.types.len())?,
+                ),
+                Literal::BigInt(_)
+                | Literal::Boolean(_)
+                | Literal::Number(_)
+                | Literal::RegExp(_)
+                | Literal::String(_) => parent,
+            },
             TypeData::InstanceOf(instance) => TypeData::instance_of(
                 db,
                 self.take_type()?,
@@ -2120,7 +2227,69 @@ pub enum Literal<'db> {
     Object(Box<[TypeMember<'db>]>),
     RegExp(RegexpLiteral),
     String(StringLiteral),
-    Template(Text),
+    Template(TemplateLiteral<'db>),
+}
+
+/// Template literal used as a type, such as `` `on${string}` ``.
+///
+/// Build these with [`TypeData::template_literal`], which keeps them in the
+/// canonical form that template matching relies on.
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
+pub struct TemplateLiteral<'db> {
+    /// The text before, between, and after the placeholders, as written in
+    /// the source. There is one more text than there are placeholders.
+    pub texts: Box<[Text]>,
+    /// The type of each placeholder.
+    pub types: Box<[TypeData<'db>]>,
+}
+
+/// Returns the texts and types of a template with its literal placeholders
+/// folded into the text and its nested templates spliced in.
+fn fold_template_placeholders<'db>(
+    db: &'db dyn TypeDb,
+    texts: &[Text],
+    types: &[TypeData<'db>],
+) -> (Box<[Text]>, Box<[TypeData<'db>]>) {
+    let mut folded_texts = Vec::with_capacity(texts.len());
+    let mut folded_types = Vec::with_capacity(types.len());
+    let mut text = texts[0].to_string();
+    for (ty, next_text) in types.iter().zip(&texts[1..]) {
+        if let TypeData::Literal(literal) = ty
+            && let Literal::Template(nested) = literal.literal(db)
+        {
+            text.push_str(&nested.texts[0]);
+            for (nested_ty, nested_text) in nested.types.iter().zip(&nested.texts[1..]) {
+                folded_texts.push(Text::from(std::mem::take(&mut text)));
+                folded_types.push(*nested_ty);
+                text.push_str(nested_text);
+            }
+        } else if let Some(value) = placeholder_text(db, *ty) {
+            text.push_str(&value);
+        } else {
+            folded_texts.push(Text::from(std::mem::take(&mut text)));
+            folded_types.push(*ty);
+        }
+        text.push_str(next_text);
+    }
+    folded_texts.push(Text::from(text));
+    (folded_texts.into(), folded_types.into())
+}
+
+/// Returns the text that a template placeholder of type `ty` always produces,
+/// such as `"1"` for the number literal `1.0`.
+pub(crate) fn placeholder_text<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> Option<String> {
+    match ty {
+        TypeData::Null => Some("null".to_string()),
+        TypeData::Undefined => Some("undefined".to_string()),
+        TypeData::Literal(literal) => match literal.literal(db) {
+            Literal::BigInt(text) => bigint_literal_to_js_string(text),
+            Literal::Boolean(boolean) => Some(boolean.as_bool().to_string()),
+            Literal::Number(number) => number.to_f64().map(number_to_js_string),
+            Literal::String(string) => Some(string.as_str().to_string()),
+            Literal::Object(_) | Literal::RegExp(_) | Literal::Template(_) => None,
+        },
+        _ => None,
+    }
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
@@ -3142,7 +3311,10 @@ fn convert_literal<'db>(
         )),
         raw::Literal::RegExp(regexp) => Literal::RegExp(regexp.clone()),
         raw::Literal::String(string) => Literal::String(string.clone()),
-        raw::Literal::Template(text) => Literal::Template(text.clone()),
+        raw::Literal::Template(template) => Literal::Template(TemplateLiteral {
+            texts: template.texts.clone(),
+            types: convert_references(db, &template.types, resolve_reference),
+        }),
     }
 }
 
