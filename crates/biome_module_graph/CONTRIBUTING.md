@@ -124,20 +124,25 @@ costly.
 
 #### Tracked solve
 
-Lookups skip flow for any expression that is not a candidate. For a candidate
-read, `infer_flow_binding_baseline` resolves the variable's declared type once.
-`infer_flow_binding_states` then applies the guards on every path to all reads
-of the variable in one root in a single solve, and `infer_flow_binding_type`
-takes the result at the read's incoming flow point. Both solve queries take the
-type that narrowing starts from as part of their key.
+Lookups skip flow for any expression that is not a candidate. Collection keeps
+a table of subjects for each root, where a subject is what a runtime test
+checks; every subject is a variable. Guards, the subjects each condition may
+narrow, and reads refer to a subject by its id in that table, so a test and a
+read of the same subject match. For a candidate read,
+`infer_flow_binding_baseline` resolves the variable's declared type once.
+`infer_flow_subject_states` then applies the guards on every path to all reads
+of the subject in one root in a single solve, and `infer_flow_subject_type`
+takes the result at the read's incoming flow point. Both queries take the
+declared type as part of their key, so reads of a subject share one solve when
+they start from the same type.
 
 Complete module inference evaluates flow candidates in its own resolution
 context instead of through `infer_flow_expression_type` and
 `infer_flow_binding_baseline`. When it reaches expressions, that context has
 resolved every raw type of the module, so a variable's declared type costs a
 cache read there, while the queries would resolve it again in a fresh context.
-It still solves through `infer_flow_binding_states` and
-`infer_flow_binding_type`. Cycle fallback and the import-depth fallback read
+It still solves through `infer_flow_subject_states` and
+`infer_flow_subject_type`. Cycle fallback and the import-depth fallback read
 imports differently from the flow queries, so they keep using the queries.
 
 `src/db/type_inference/flow.rs` applies each runtime test with `narrow_type`
@@ -167,7 +172,7 @@ root that exceeds a limit while its flow is collected gets no graph, so its
 reads keep their declared types. If decomposing a condition cannot finish
 within its work limit, the guard makes the result unknown rather than assuming
 the expression is unaffected. When the shared solve exceeds its work limit or
-meets a query cycle, `infer_flow_binding_type` solves the read's point on its
+meets a query cycle, `infer_flow_subject_type` solves the read's point on its
 own, so a read never loses precision because other reads share its root. If
 that solve also exhausts its work limit or a query cycle occurs, the result is
 unknown. Callers must respect that result rather than replace it with a more

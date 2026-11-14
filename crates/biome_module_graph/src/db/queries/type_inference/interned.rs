@@ -5,7 +5,7 @@
 //! cached by interning.
 
 use crate::ModuleInfo;
-use crate::js_module_info::flow::FlowNodeId;
+use crate::js_module_info::flow::{FlowNodeId, FlowSubjectId};
 use biome_js_type_info::interned_types::{
     CallArgumentType as InferredCallArgumentType, LocalTypeId as InferredLocalTypeId,
     TypeData as InferredTypeData, TypeSubstitution as InferredTypeSubstitution,
@@ -36,34 +36,38 @@ pub struct BindingTypeInput<'db> {
     pub range: TextRange,
 }
 
-/// Identifies a binding within one execution root, together with the type
+/// Identifies a subject within one execution root, together with the type
 /// that narrowing starts from.
 ///
-/// Reads of the binding in that root share this key, and with it one solve of
+/// Reads of the subject in that root share this key, and with it one solve of
 /// the root's flow, when they start from the same type, whether a lookup or
 /// complete module inference resolved that type.
 #[salsa::interned]
 #[derive(Debug)]
-pub(crate) struct FlowBindingRootInput<'db> {
+pub(crate) struct FlowSubjectRootInput<'db> {
     #[returns(copy)]
-    pub binding: BindingTypeInput<'db>,
-    /// Index of the execution root in the binding module's collected flow.
+    pub module: ModuleInfo,
+    /// Index of the execution root in the module's collected flow.
     #[returns(copy)]
     pub root: usize,
-    /// The type that narrowing starts from: the binding's declared type
-    /// flattened for narrowing, or `None` when no runtime test can change
-    /// that type. Lookups take it from [`super::infer_flow_binding_baseline`].
+    /// Id of the subject in that root's subject table.
+    #[returns(copy)]
+    pub subject: FlowSubjectId,
+    /// The type that narrowing starts from, as
+    /// [`super::infer_flow_binding_baseline`] reports it for a variable: the
+    /// subject's declared type flattened for narrowing, or `None` when no
+    /// runtime test can change that type.
     #[returns(copy)]
     pub baseline: Option<InferredTypeData<'db>>,
 }
 
-/// Identifies a binding's incoming state at one point of its execution root.
+/// Identifies a subject's incoming state at one point of its execution root.
 #[salsa::interned]
 #[derive(Debug)]
-pub(crate) struct FlowBindingTypeInput<'db> {
-    /// The binding, its root, and the type that narrowing starts from.
+pub(crate) struct FlowSubjectTypeInput<'db> {
+    /// The subject, its root, and the type that narrowing starts from.
     #[returns(copy)]
-    pub states: FlowBindingRootInput<'db>,
+    pub states: FlowSubjectRootInput<'db>,
     /// Node index in that root's flow graph.
     #[returns(copy)]
     pub point: FlowNodeId,

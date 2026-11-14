@@ -20,7 +20,7 @@ mod qualifiers;
 mod resolver;
 
 pub(in crate::db) use flow::{
-    flow_binding_baseline, flow_binding_states, flow_binding_type, flow_expression_type,
+    flow_binding_baseline, flow_expression_type, flow_subject_states, flow_subject_type,
 };
 pub(in crate::db) use imports::{
     ExportOriginResult, collect_namespace_export_names, find_export_origin,
