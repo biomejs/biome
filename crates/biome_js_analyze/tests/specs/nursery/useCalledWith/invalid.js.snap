@@ -1,0 +1,439 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+expect(fn).toBeCalled();
+expect(fn).toHaveBeenCalled();
+expect(fn).toHaveBeenCalledOnce();
+
+// Modifiers other than `not`
+expect(fn).resolves.toBeCalled();
+expect(fn).rejects.toHaveBeenCalled();
+await expect(fn).resolves.toHaveBeenCalledOnce();
+
+// Variants of `expect`
+expect.soft(fn).toHaveBeenCalled();
+expect.poll(() => fn).toHaveBeenCalled();
+
+// Computed member access
+expect(fn)["toBeCalled"]();
+expect(fn)[`toHaveBeenCalled`]();
+expect(fn)["resolves"].toHaveBeenCalled();
+
+// Parentheses and comments
+(expect(fn)).toHaveBeenCalled();
+(expect(fn).toHaveBeenCalled)();
+expect(fn) /* comment */ .toHaveBeenCalled();
+expect(fn)
+	.toBeCalled();
+
+// Arguments are ignored by these matchers
+expect(fn).toHaveBeenCalled(1, 2);
+
+// Inside tests
+it("calls the function", () => {
+	expect(mockApi).toHaveBeenCalledOnce();
+});
+test("calls the method", async () => {
+	expect(object.method).toHaveBeenCalled();
+	expect(jest.fn()).toBeCalled();
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:2:12 lint/nursery/useCalledWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toBeCalled() doesn't check the arguments that the function was called with.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ expect(fn).toBeCalled();
+      │            ^^^^^^^^^^
+    3 │ expect(fn).toHaveBeenCalled();
+    4 │ expect(fn).toHaveBeenCalledOnce();
+  
+  i The test passes even when the function receives the wrong arguments.
+  
+  i Use toBeCalledWith() and pass the expected arguments. For an argument that is hard to predict, pass expect.anything().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:12 lint/nursery/useCalledWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalled() doesn't check the arguments that the function was called with.
+  
+    1 │ /* should generate diagnostics */
+    2 │ expect(fn).toBeCalled();
+  > 3 │ expect(fn).toHaveBeenCalled();
+      │            ^^^^^^^^^^^^^^^^
+    4 │ expect(fn).toHaveBeenCalledOnce();
+    5 │ 
+  
+  i The test passes even when the function receives the wrong arguments.
+  
+  i Use toHaveBeenCalledWith() and pass the expected arguments. For an argument that is hard to predict, pass expect.anything().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:12 lint/nursery/useCalledWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalledOnce() doesn't check the arguments that the function was called with.
+  
+    2 │ expect(fn).toBeCalled();
+    3 │ expect(fn).toHaveBeenCalled();
+  > 4 │ expect(fn).toHaveBeenCalledOnce();
+      │            ^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ // Modifiers other than `not`
+  
+  i The test passes even when the function receives the wrong arguments.
+  
+  i Use toHaveBeenCalledExactlyOnceWith() and pass the expected arguments. For an argument that is hard to predict, pass expect.anything().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:21 lint/nursery/useCalledWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toBeCalled() doesn't check the arguments that the function was called with.
+  
+    6 │ // Modifiers other than `not`
+  > 7 │ expect(fn).resolves.toBeCalled();
+      │                     ^^^^^^^^^^
+    8 │ expect(fn).rejects.toHaveBeenCalled();
+    9 │ await expect(fn).resolves.toHaveBeenCalledOnce();
+  
+  i The test passes even when the function receives the wrong arguments.
+  
+  i Use toBeCalledWith() and pass the expected arguments. For an argument that is hard to predict, pass expect.anything().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:20 lint/nursery/useCalledWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalled() doesn't check the arguments that the function was called with.
+  
+     6 │ // Modifiers other than `not`
+     7 │ expect(fn).resolves.toBeCalled();
+   > 8 │ expect(fn).rejects.toHaveBeenCalled();
+       │                    ^^^^^^^^^^^^^^^^
+     9 │ await expect(fn).resolves.toHaveBeenCalledOnce();
+    10 │ 
+  
+  i The test passes even when the function receives the wrong arguments.
+  
+  i Use toHaveBeenCalledWith() and pass the expected arguments. For an argument that is hard to predict, pass expect.anything().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:27 lint/nursery/useCalledWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalledOnce() doesn't check the arguments that the function was called with.
+  
+     7 │ expect(fn).resolves.toBeCalled();
+     8 │ expect(fn).rejects.toHaveBeenCalled();
+   > 9 │ await expect(fn).resolves.toHaveBeenCalledOnce();
+       │                           ^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ // Variants of `expect`
+  
+  i The test passes even when the function receives the wrong arguments.
+  
+  i Use toHaveBeenCalledExactlyOnceWith() and pass the expected arguments. For an argument that is hard to predict, pass expect.anything().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:17 lint/nursery/useCalledWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalled() doesn't check the arguments that the function was called with.
+  
+    11 │ // Variants of `expect`
+  > 12 │ expect.soft(fn).toHaveBeenCalled();
+       │                 ^^^^^^^^^^^^^^^^
+    13 │ expect.poll(() => fn).toHaveBeenCalled();
+    14 │ 
+  
+  i The test passes even when the function receives the wrong arguments.
+  
+  i Use toHaveBeenCalledWith() and pass the expected arguments. For an argument that is hard to predict, pass expect.anything().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:23 lint/nursery/useCalledWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalled() doesn't check the arguments that the function was called with.
+  
+    11 │ // Variants of `expect`
+    12 │ expect.soft(fn).toHaveBeenCalled();
+  > 13 │ expect.poll(() => fn).toHaveBeenCalled();
+       │                       ^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ // Computed member access
+  
+  i The test passes even when the function receives the wrong arguments.
+  
+  i Use toHaveBeenCalledWith() and pass the expected arguments. For an argument that is hard to predict, pass expect.anything().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:12 lint/nursery/useCalledWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toBeCalled() doesn't check the arguments that the function was called with.
+  
+    15 │ // Computed member access
+  > 16 │ expect(fn)["toBeCalled"]();
+       │            ^^^^^^^^^^^^
+    17 │ expect(fn)[`toHaveBeenCalled`]();
+    18 │ expect(fn)["resolves"].toHaveBeenCalled();
+  
+  i The test passes even when the function receives the wrong arguments.
+  
+  i Use toBeCalledWith() and pass the expected arguments. For an argument that is hard to predict, pass expect.anything().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:13 lint/nursery/useCalledWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalled() doesn't check the arguments that the function was called with.
+  
+    15 │ // Computed member access
+    16 │ expect(fn)["toBeCalled"]();
+  > 17 │ expect(fn)[`toHaveBeenCalled`]();
+       │             ^^^^^^^^^^^^^^^^
+    18 │ expect(fn)["resolves"].toHaveBeenCalled();
+    19 │ 
+  
+  i The test passes even when the function receives the wrong arguments.
+  
+  i Use toHaveBeenCalledWith() and pass the expected arguments. For an argument that is hard to predict, pass expect.anything().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:24 lint/nursery/useCalledWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalled() doesn't check the arguments that the function was called with.
+  
+    16 │ expect(fn)["toBeCalled"]();
+    17 │ expect(fn)[`toHaveBeenCalled`]();
+  > 18 │ expect(fn)["resolves"].toHaveBeenCalled();
+       │                        ^^^^^^^^^^^^^^^^
+    19 │ 
+    20 │ // Parentheses and comments
+  
+  i The test passes even when the function receives the wrong arguments.
+  
+  i Use toHaveBeenCalledWith() and pass the expected arguments. For an argument that is hard to predict, pass expect.anything().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:14 lint/nursery/useCalledWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalled() doesn't check the arguments that the function was called with.
+  
+    20 │ // Parentheses and comments
+  > 21 │ (expect(fn)).toHaveBeenCalled();
+       │              ^^^^^^^^^^^^^^^^
+    22 │ (expect(fn).toHaveBeenCalled)();
+    23 │ expect(fn) /* comment */ .toHaveBeenCalled();
+  
+  i The test passes even when the function receives the wrong arguments.
+  
+  i Use toHaveBeenCalledWith() and pass the expected arguments. For an argument that is hard to predict, pass expect.anything().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:13 lint/nursery/useCalledWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalled() doesn't check the arguments that the function was called with.
+  
+    20 │ // Parentheses and comments
+    21 │ (expect(fn)).toHaveBeenCalled();
+  > 22 │ (expect(fn).toHaveBeenCalled)();
+       │             ^^^^^^^^^^^^^^^^
+    23 │ expect(fn) /* comment */ .toHaveBeenCalled();
+    24 │ expect(fn)
+  
+  i The test passes even when the function receives the wrong arguments.
+  
+  i Use toHaveBeenCalledWith() and pass the expected arguments. For an argument that is hard to predict, pass expect.anything().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:27 lint/nursery/useCalledWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalled() doesn't check the arguments that the function was called with.
+  
+    21 │ (expect(fn)).toHaveBeenCalled();
+    22 │ (expect(fn).toHaveBeenCalled)();
+  > 23 │ expect(fn) /* comment */ .toHaveBeenCalled();
+       │                           ^^^^^^^^^^^^^^^^
+    24 │ expect(fn)
+    25 │ 	.toBeCalled();
+  
+  i The test passes even when the function receives the wrong arguments.
+  
+  i Use toHaveBeenCalledWith() and pass the expected arguments. For an argument that is hard to predict, pass expect.anything().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:3 lint/nursery/useCalledWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toBeCalled() doesn't check the arguments that the function was called with.
+  
+    23 │ expect(fn) /* comment */ .toHaveBeenCalled();
+    24 │ expect(fn)
+  > 25 │ 	.toBeCalled();
+       │ 	 ^^^^^^^^^^
+    26 │ 
+    27 │ // Arguments are ignored by these matchers
+  
+  i The test passes even when the function receives the wrong arguments.
+  
+  i Use toBeCalledWith() and pass the expected arguments. For an argument that is hard to predict, pass expect.anything().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:12 lint/nursery/useCalledWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalled() doesn't check the arguments that the function was called with.
+  
+    27 │ // Arguments are ignored by these matchers
+  > 28 │ expect(fn).toHaveBeenCalled(1, 2);
+       │            ^^^^^^^^^^^^^^^^
+    29 │ 
+    30 │ // Inside tests
+  
+  i The test passes even when the function receives the wrong arguments.
+  
+  i Use toHaveBeenCalledWith() and pass the expected arguments. For an argument that is hard to predict, pass expect.anything().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:18 lint/nursery/useCalledWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalledOnce() doesn't check the arguments that the function was called with.
+  
+    30 │ // Inside tests
+    31 │ it("calls the function", () => {
+  > 32 │ 	expect(mockApi).toHaveBeenCalledOnce();
+       │ 	                ^^^^^^^^^^^^^^^^^^^^
+    33 │ });
+    34 │ test("calls the method", async () => {
+  
+  i The test passes even when the function receives the wrong arguments.
+  
+  i Use toHaveBeenCalledExactlyOnceWith() and pass the expected arguments. For an argument that is hard to predict, pass expect.anything().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:24 lint/nursery/useCalledWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalled() doesn't check the arguments that the function was called with.
+  
+    33 │ });
+    34 │ test("calls the method", async () => {
+  > 35 │ 	expect(object.method).toHaveBeenCalled();
+       │ 	                      ^^^^^^^^^^^^^^^^
+    36 │ 	expect(jest.fn()).toBeCalled();
+    37 │ });
+  
+  i The test passes even when the function receives the wrong arguments.
+  
+  i Use toHaveBeenCalledWith() and pass the expected arguments. For an argument that is hard to predict, pass expect.anything().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:36:20 lint/nursery/useCalledWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toBeCalled() doesn't check the arguments that the function was called with.
+  
+    34 │ test("calls the method", async () => {
+    35 │ 	expect(object.method).toHaveBeenCalled();
+  > 36 │ 	expect(jest.fn()).toBeCalled();
+       │ 	                  ^^^^^^^^^^
+    37 │ });
+    38 │ 
+  
+  i The test passes even when the function receives the wrong arguments.
+  
+  i Use toBeCalledWith() and pass the expected arguments. For an argument that is hard to predict, pass expect.anything().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

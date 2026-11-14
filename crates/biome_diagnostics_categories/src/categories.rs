@@ -458,6 +458,7 @@ define_categories! {
     "lint/nursery/useBigintLiterals": "https://biomejs.dev/linter/rules/use-bigint-literals",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
     "lint/nursery/useBlockStatementOverIife": "https://biomejs.dev/linter/rules/use-block-statement-over-iife",
+    "lint/nursery/useCalledWith": "https://biomejs.dev/linter/rules/use-called-with",
     "lint/nursery/useCapitalizedConstructors": "https://biomejs.dev/linter/rules/use-capitalized-constructors",
     "lint/nursery/useCatchErrorName": "https://biomejs.dev/linter/rules/use-catch-error-name",
     "lint/nursery/useConsistentBlockLang": "https://biomejs.dev/linter/rules/use-consistent-block-lang",

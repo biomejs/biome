@@ -2506,6 +2506,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useCalledWith",
+        TypeId::of::<biome_rule_options::use_called_with::UseCalledWithOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useCapitalizedConstructors",
         TypeId::of::<
             biome_rule_options::use_capitalized_constructors::UseCapitalizedConstructorsOptions,

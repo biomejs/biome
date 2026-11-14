@@ -541,6 +541,7 @@ pub mod use_biome_ignore_folder;
 pub mod use_block_statement_over_iife;
 pub mod use_block_statements;
 pub mod use_button_type;
+pub mod use_called_with;
 pub mod use_capitalized_constructors;
 pub mod use_catch_error_name;
 pub mod use_collapsed_else_if;

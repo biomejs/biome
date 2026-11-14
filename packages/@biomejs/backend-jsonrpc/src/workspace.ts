@@ -3978,6 +3978,11 @@ export interface Nursery {
 	 */
 	useBlockStatementOverIife?: UseBlockStatementOverIifeConfiguration;
 	/**
+	 * Enforce using toHaveBeenCalledWith() to check the arguments of a function call.
+	 * See https://biomejs.dev/linter/rules/use-called-with
+	 */
+	useCalledWith?: UseCalledWithConfiguration;
+	/**
 	 * Require constructor names to begin with a capital letter.
 	 * See https://biomejs.dev/linter/rules/use-capitalized-constructors
 	 */
@@ -7341,6 +7346,9 @@ export type UseBigintLiteralsConfiguration =
 export type UseBlockStatementOverIifeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseBlockStatementOverIifeOptions;
+export type UseCalledWithConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseCalledWithOptions;
 export type UseCapitalizedConstructorsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseCapitalizedConstructorsOptions;
@@ -10825,6 +10833,10 @@ export interface RuleWithUseBlockStatementOverIifeOptions {
 	level: RulePlainConfiguration;
 	options?: UseBlockStatementOverIifeOptions;
 }
+export interface RuleWithUseCalledWithOptions {
+	level: RulePlainConfiguration;
+	options?: UseCalledWithOptions;
+}
 export interface RuleWithUseCapitalizedConstructorsOptions {
 	level: RulePlainConfiguration;
 	options?: UseCapitalizedConstructorsOptions;
@@ -14003,6 +14015,7 @@ export type UseAwaitThenableOptions = {};
 export type UseBetterDomTraversingOptions = {};
 export type UseBigintLiteralsOptions = {};
 export type UseBlockStatementOverIifeOptions = {};
+export type UseCalledWithOptions = {};
 export type UseCapitalizedConstructorsOptions = {};
 export interface UseCatchErrorNameOptions {
 	/**
@@ -16189,6 +16202,7 @@ export type Category =
 	| "lint/nursery/useBigintLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useBlockStatementOverIife"
+	| "lint/nursery/useCalledWith"
 	| "lint/nursery/useCapitalizedConstructors"
 	| "lint/nursery/useCatchErrorName"
 	| "lint/nursery/useConsistentBlockLang"
