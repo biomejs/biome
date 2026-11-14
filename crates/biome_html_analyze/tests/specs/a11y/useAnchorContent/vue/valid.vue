@@ -22,4 +22,5 @@
   <!-- Custom components may render accessible content -->
   <a><Image alt="description" /></a>
   <a><CustomIcon /></a>
+  <a><CustomIcon></CustomIcon></a>
 </template>
