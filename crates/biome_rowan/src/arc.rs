@@ -149,6 +149,30 @@ impl<T: ?Sized> Deref for Arc<T> {
     }
 }
 
+#[expect(dead_code)]
+impl<T: ?Sized> Arc<T> {
+    /// Provides mutable access to the contents _if_ the `Arc` is uniquely owned.
+    #[inline]
+    pub(crate) fn get_mut(this: &mut Self) -> Option<&mut T> {
+        if this.is_unique() {
+            unsafe {
+                // See make_mut() for documentation of the threadsafety here.
+                Some(&mut (*this.ptr()).data)
+            }
+        } else {
+            None
+        }
+    }
+
+    /// Whether or not the `Arc` is uniquely owned (is the refcount 1?).
+    pub(crate) fn is_unique(&self) -> bool {
+        // See the extensive discussion in [1] for why this needs to be Acquire.
+        //
+        // [1] https://github.com/servo/servo/issues/21186
+        self.inner().count.load(Acquire) == 1
+    }
+}
+
 impl<T: ?Sized> Drop for Arc<T> {
     #[inline]
     fn drop(&mut self) {
