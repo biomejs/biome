@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: non-playwright-methods.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+type Query = PromiseLike<{ data: string[] }> & {
+    or(filter: string): Query;
+    is(column: string, value: null): Query;
+};
+
+export async function open(query: Query): Promise<string[]> {
+    const { data } = await query.is('deleted_at', null).or('a.eq.1,b.eq.2');
+    return data;
+}
+
+await query.or('a.eq.1');
+await knex('users').first();
+await collection.last();
+await list.nth(0);
+await stream.and(otherStream);
+
+```
