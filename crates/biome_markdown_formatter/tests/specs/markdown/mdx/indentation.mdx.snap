@@ -1,0 +1,51 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/mdx/indentation.mdx
+---
+
+# Input
+
+```mdx
+   <Note>
+
+  {props.x}
+
+</Note>
+
+   <A>  {b}  </A>
+
+- item
+
+      <Tip />
+
+  More text
+
+- last
+
+  <Tip /> {a}
+
+```
+
+
+# Formatted
+
+```mdx
+<Note>
+
+{props.x}
+
+</Note>
+
+<A> {b} </A>
+
+- item
+
+  <Tip />
+
+  More text
+
+- last
+
+  <Tip /> {a}
+
+```

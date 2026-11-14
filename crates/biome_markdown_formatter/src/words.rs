@@ -240,6 +240,17 @@ impl DelimitedInline {
     }
 }
 
+impl ProseAtom {
+    const fn is_mdx_construct(&self) -> bool {
+        matches!(
+            self,
+            Self::InlineElement(
+                AnyMdInline::MdxInlineExpression(_) | AnyMdInline::MdxJsxInlineTag(_)
+            )
+        )
+    }
+}
+
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq)]
 enum WordGroupEscape {
     /// Print the word group normally.
@@ -422,6 +433,12 @@ fn last_significant_character_in_inline(item: &AnyMdInline) -> BoundaryCharacter
 impl WordGroup {
     fn push(&mut self, atom: ProseAtom) {
         self.atoms.push(atom);
+    }
+
+    /// Returns whether the group holds only inline MDX expressions and tags,
+    /// as `{count}` or `<A />` do.
+    pub(crate) fn is_mdx_construct_only(&self) -> bool {
+        self.atoms.iter().all(ProseAtom::is_mdx_construct)
     }
 
     fn is_empty(&self) -> bool {

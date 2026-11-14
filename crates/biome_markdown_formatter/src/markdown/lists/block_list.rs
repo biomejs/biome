@@ -370,6 +370,9 @@ impl PreviousBlock {
             ) || block
                 .as_any_md_container_block()
                 .is_some_and(|container| container.as_md_quote().is_some())
+                // MDX requires a blank line after an ESM block. Block tags and
+                // expressions keep theirs like HTML blocks.
+                || block.is_mdx_block()
         })
     }
 }

@@ -185,6 +185,9 @@ lang_md        = [
   "dep:biome_markdown_parser",
   "dep:biome_markdown_syntax"
 ]
+# MDX is still in development: it isn't part of `stable`, and the feature is
+# removed once MDX ships.
+lang_mdx       = ["biome_languages/lang_mdx", "biome_markdown_parser/lang_mdx", "md_embeds"]
 lang_scss      = ["biome_css_syntax/scss"]
 lang_yaml      = [
   "biome_configuration/lang_yaml",

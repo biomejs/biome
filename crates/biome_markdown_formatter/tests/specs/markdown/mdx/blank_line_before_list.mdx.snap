@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/mdx/blank_line_before_list.mdx
+---
+
+# Input
+
+```mdx
+import a from "a";
+
+- one
+
+<A />
+
+- two
+
+{a}
+
+- three
+
+```
+
+
+# Formatted
+
+```mdx
+import a from "a";
+
+- one
+
+<A />
+
+- two
+
+{a}
+
+- three
+
+```

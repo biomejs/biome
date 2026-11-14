@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/mdx/markdown_around_constructs.mdx
+---
+
+# Input
+
+```mdx
+<Note>
+
+Some *text* {x}.
+
+* item <B />
+
+</Note>
+
+```
+
+
+# Formatted
+
+```mdx
+<Note>
+
+Some _text_ {x}.
+
+- item <B />
+
+</Note>
+
+```
