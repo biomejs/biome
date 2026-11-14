@@ -1,0 +1,44 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: svelte/comments/comment-after-block-delimiter-suppressed.svelte
+---
+
+# Input
+
+```svelte
+{#if a}<!-- comment -->
+<!-- biome-ignore format: reason -->
+<span>  a  </span>
+{/if}
+{#if b}<!-- comment --><!-- biome-ignore format: reason --><span>  b  </span>{/if}
+{#if c}<!-- biome-ignore format: reason --><span>  c  </span>{/if}
+<div><!-- comment -->
+<!-- biome-ignore format: reason -->
+<span>  d  </span>
+</div>
+
+```
+
+
+# Formatted
+
+```svelte
+{#if a}
+	<!-- comment -->
+	<!-- biome-ignore format: reason -->
+	<span>  a  </span>
+{/if}
+{#if b}
+	<!-- comment --><!-- biome-ignore format: reason --><span>  b  </span>
+{/if}
+{#if c}
+	<!-- biome-ignore format: reason --><span>  c  </span>
+{/if}
+<div>
+	<!-- comment -->
+	<!-- biome-ignore format: reason -->
+	<span>  d  </span>
+</div>
+
+```
