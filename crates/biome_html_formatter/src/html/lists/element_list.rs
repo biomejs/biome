@@ -389,7 +389,7 @@ impl FormatHtmlElementList {
         let svelte_block_boundary = SvelteBlockBoundary::for_list(list);
         let (opening_token, closing_token) = match &svelte_block_boundary {
             Some(boundary) => (
-                boundary.empty_list_preceding_token.clone(),
+                boundary.preceding_token.clone(),
                 Some(boundary.token.clone()),
             ),
             None => {
@@ -1224,9 +1224,9 @@ impl FormatHtmlElementList {
 struct SvelteBlockBoundary {
     /// The `{:` or `{/` token.
     token: HtmlSyntaxToken,
-    /// The token before the list, e.g. the `}` of `{#if a}`, if the list is empty. A comment on the
-    /// same line as it is in its trailing trivia, e.g. in `{#if a}<!-- comment -->{/if}`.
-    empty_list_preceding_token: Option<HtmlSyntaxToken>,
+    /// The token before the list, e.g. the `}` of `{#if a}`. A comment on the same line as it is in
+    /// its trailing trivia, e.g. in `{#if a}<!-- comment --><span>a</span>{/if}`.
+    preceding_token: Option<HtmlSyntaxToken>,
 }
 
 impl SvelteBlockBoundary {
@@ -1237,11 +1237,7 @@ impl SvelteBlockBoundary {
             return None;
         }
 
-        let empty_list_preceding_token = if list.syntax().first_token().is_none() {
-            list.syntax().prev_token()
-        } else {
-            None
-        };
+        let preceding_token = list.syntax().prev_token();
         let token = list.syntax().next_token()?;
 
         matches!(
@@ -1250,14 +1246,14 @@ impl SvelteBlockBoundary {
         )
         .then_some(Self {
             token,
-            empty_list_preceding_token,
+            preceding_token,
         })
     }
 
     fn has_comments(&self) -> bool {
         self.token.has_leading_comments()
             || self
-                .empty_list_preceding_token
+                .preceding_token
                 .as_ref()
                 .is_some_and(|token| token.has_trailing_comments())
     }
