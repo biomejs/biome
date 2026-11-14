@@ -1135,17 +1135,15 @@ impl FormatHtmlElementList {
                             last_nontext_had_trailing_line = needs_trailing_line_in_inner;
                         }
 
-                        // A single-brace expression cannot lend its closing token to the
-                        // next child, so a sibling break would insert rendered whitespace.
+                        // The next sibling can only break before itself if we lend it our closing
+                        // token, so the break lands inside a tag (`</a\n><b>`). Blocks, render tags,
+                        // single-brace expressions and self-closing elements have nothing to lend,
+                        // and breaking after them would render as whitespace.
+                        let lends_closing_r_angle = next_can_borrow
+                            && matches!(non_text, AnyHtmlElement::HtmlElement(_))
+                            && non_text.closing_r_angle_token().is_some();
                         if next_is_adjacent_inline
-                            && !matches!(
-                                non_text,
-                                AnyHtmlElement::AnyHtmlContent(
-                                    AnyHtmlContent::AnyHtmlTextExpression(
-                                        AnyHtmlTextExpression::HtmlSingleTextExpression(_)
-                                    )
-                                )
-                            )
+                            && (lends_closing_r_angle || r_double_curly_borrowed)
                         {
                             prev_inline_group_id = Some(non_text_group_id);
                         } else {
