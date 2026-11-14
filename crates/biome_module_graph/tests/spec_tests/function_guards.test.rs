@@ -811,10 +811,9 @@ fn predicate_targets_narrow_unknown_to_the_target() {
     }
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `any` in the `then` branch of an
-// `any` target and `unknown` in the `then` branch of an `unknown` target.
-// Both `else` branches are `never`. Biome supports neither target, so both
-// branches keep the declared type.
+// TypeScript 7.0.2 (`tsc --strict`) keeps `unknown` in the `then` branch of
+// both targets and gives `never` in the `else` branch of `unknown`. Biome
+// supports neither target, so both branches keep the declared type.
 #[test]
 fn any_and_unknown_predicate_targets_preserve_unknown_and_indeterminate_classifications() {
     for target in ["any", "unknown"] {
@@ -948,11 +947,12 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert_no_whole_module_inference(&db, &db.take_salsa_events());
 }
 
-// The `else` branch keeps a member that differs from the target only by
-// `readonly`. Biome records `readonly`, so the two are different types, but
-// its subtype relation ignores `readonly`, so it can't tell which of the two
-// TypeScript's strict subtype relation prefers. A comment gives the type
-// that TypeScript 7.0.2 (`tsc --strict`) gives where it differs.
+// Biome records `readonly`, so two object types that differ only by it are
+// different types. Its subtype relation ignores `readonly`, so it can't tell
+// which of the two TypeScript's strict subtype relation prefers, and the
+// `else` branch keeps both members of each pair. A comment gives the type
+// that TypeScript 7.0.2 (`tsc --strict`) gives where it differs
+// (`narrowing-probes/m3-l8/identity.ts` L6 and L7).
 #[test]
 fn object_targets_that_differ_only_by_readonly_keep_both_members_in_the_else_branch() {
     assert_reads(
@@ -972,9 +972,12 @@ fn object_targets_that_differ_only_by_readonly_keep_both_members_in_the_else_bra
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
-// A branch that no value reaches is `never` in TypeScript, which Biome reads
-// as Unknown.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
+// (`narrowing-probes/m3/predicates.ts` L17 to L21, L23 to L25, L27, L30 to
+// L33, L35, L38, `narrowing-probes/m3-l7/spec.ts` L35, L36, L38, L39, L41,
+// L42, L45 to L47, L60, L62 to L64, and `narrowing-probes/m3-l7/widened.ts`
+// L15). A branch that no value reaches is `never` in TypeScript, which Biome
+// reads as Unknown.
 #[test]
 fn object_targets_narrow_both_branches() {
     assert_reads(
@@ -1081,7 +1084,10 @@ fn object_targets_narrow_both_branches() {
 
 // Biome keeps the declared type in both branches of every read below, or in
 // the `else` branch where it narrows only the `then` branch. A comment gives
-// the type that TypeScript 7.0.2 (`tsc --strict`) gives where it differs.
+// the type that TypeScript 7.0.2 (`tsc --strict`) gives where it differs
+// (`narrowing-probes/m3/predicates.ts` L22, L28, L29, L34, L37, and
+// `narrowing-probes/m3-l7/spec.ts` L37, L43, L44, L61, and
+// `narrowing-probes/m3-l7/widened.ts` L9 to L11).
 #[test]
 fn object_targets_keep_the_declared_type_where_biome_cannot_tell() {
     assert_reads(
@@ -1162,7 +1168,9 @@ fn object_targets_keep_the_declared_type_where_biome_cannot_tell() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
+// (`narrowing-probes/m3-l7/spec.ts` L48 to L52, L66, L67, and
+// `narrowing-probes/m3-l7/flow.ts` L6 to L12).
 #[test]
 fn object_targets_narrow_through_the_flow() {
     assert_reads(
@@ -1211,9 +1219,10 @@ fn object_targets_narrow_through_the_flow() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
-// The `then` branch gets `"a"` and `string`, whose union in TypeScript is
-// `string`, so the `else` branch keeps `"a"`.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
+// (`narrowing-probes/m3-l7/widened.ts` L12, L13). Its union of `"a"` and `string`, the
+// types that the `then` branch gets, is `string`, so the `else` branch keeps
+// `"a"`.
 #[test]
 fn primitive_targets_keep_the_literals_that_the_then_branch_absorbs() {
     assert_reads(
@@ -1230,8 +1239,9 @@ fn primitive_targets_keep_the_literals_that_the_then_branch_absorbs() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
-// except where a comment gives TypeScript's type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
+// (`narrowing-probes/m3-l7/mods/index.ts` L5 to L8), except where a comment
+// gives TypeScript's type.
 #[test]
 fn object_targets_resolve_types_of_other_modules() {
     let files = [
@@ -1397,7 +1407,7 @@ fn typeof_targets_narrow_like_the_values_they_query() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) narrows both reads to `string`, although
+// TypeScript 7.0.2 (`tsc --strict`) narrows both reads to `string`, although
 // a direct `eval` can reassign the guard or set `value` to `null`. Biome
 // deliberately copies this unsound narrowing; `NARROWING.md` lists it among
 // the deliberate choices.

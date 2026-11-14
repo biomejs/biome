@@ -129,9 +129,8 @@ fn property_paths_narrow_like_variables() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
-// because a path read starts from the property's type on the object's narrowed
-// type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type:
+// a path read starts from the property's type on the object's narrowed type.
 #[test]
 fn path_reads_start_from_the_narrowed_object() {
     use InferredTypeData::{Number, String};
@@ -154,11 +153,11 @@ fn path_reads_start_from_the_narrowed_object() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) narrows each read below to `string`,
-// because a call that may write `o.v`, a write through another variable, a
-// write inside a callback, and a write to a longer path never cancel property
-// narrowing. Biome copies this unsound narrowing; `NARROWING.md` lists it among
-// the deliberate choices.
+// TypeScript 7.0.2 (`tsc --strict`) narrows each read below to `string`: a call
+// that may write `o.v`, a write through another variable, a write inside a
+// callback, and a write to a longer path never cancel property narrowing.
+// Biome copies this unsound narrowing; `NARROWING.md` lists it among the
+// deliberate choices.
 #[test]
 fn calls_aliases_and_callbacks_keep_property_narrowing() {
     use InferredTypeData::String;
@@ -302,10 +301,10 @@ fn writes_to_the_path_a_prefix_or_any_property_cancel_narrowing() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at `arrow` and
-// `declaration`, because property narrowing never reaches a function created
-// later. It gives `string` at `iife` and `enclosing`, where Biome is wider. The
-// body of a function called where it is defined does not continue the outer
-// flow, and a path narrows only in the execution root that declares its
+// `declaration`: property narrowing never reaches a function created later.
+// It gives `string` at `iife` and `enclosing`, where Biome is wider: the body
+// of a function called where it is defined does not continue the outer flow
+// yet, and a path narrows only in the execution root that declares its
 // variable.
 #[test]
 fn reads_in_nested_functions_see_no_property_facts() {
@@ -367,9 +366,8 @@ fn type_guards_and_assertions_narrow_properties() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every expression below the expected
-// type, because a call or member access on a narrowed path uses the narrowed
-// type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every call below the expected type:
+// a narrowed method is called with the narrowed type.
 #[test]
 fn narrowed_callees_resolve_their_calls() {
     use InferredTypeData::{Number, String};
@@ -401,10 +399,10 @@ fn narrowed_callees_resolve_their_calls() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
-// because an element access with a string or integer literal key reads the
-// same property as a named access. `o["a"]` and `o.a` share their narrowing,
-// and so do `t[0]` and `t["0"]`.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type:
+// an element access with a string or integer literal key reads the same
+// property as a named access, so `o["a"]` and `o.a` share their narrowing, and
+// so do `t[0]` and `t["0"]`.
 #[test]
 fn literal_keys_read_the_same_property_as_names() {
     use InferredTypeData::{Null, Number, String};
@@ -460,9 +458,9 @@ fn literal_keys_read_the_same_property_as_names() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) narrows every read below to `string`,
-// because a write through a literal key writes only the property it names, and
-// a call such as `a.shift()` never cancels narrowing.
+// TypeScript 7.0.2 (`tsc --strict`) narrows every read below to `string`: a
+// write through a literal key writes only the property it names, and a call
+// such as `a.shift()` never cancels narrowing.
 #[test]
 fn literal_key_writes_keep_other_properties() {
     use InferredTypeData::String;
@@ -562,12 +560,12 @@ fn literal_key_writes_cancel_their_path() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives the type in the comment after each
-// read. Two keys match only when both are literals that name the same
-// property. `-0` is not a literal, and `"01"` names a different property than
-// `1`. An integer literal above 2^53 - 1 names the property of the nearest
-// number, so `9007199254740993` names `"9007199254740992"`. TypeScript also
-// matches other spellings of a key, such as `0x0`, `1e0`, a template literal,
-// and an escape. Biome does not, so its type is wider for those reads.
+// read. Two keys match only when they name the same property: `-0` is not a
+// literal, `"01"` names another property than `1`, and an integer literal
+// above 2^53 - 1 names the property of the nearest number, so
+// `9007199254740993` names `"9007199254740992"`. TypeScript also matches other
+// spellings of a key, such as `0x0`, `1e0`, a template literal, and an escape;
+// Biome does not, so it is wider there.
 #[test]
 fn keys_that_name_other_properties_do_not_match() {
     use InferredTypeData::{Null, String};
@@ -663,8 +661,8 @@ fn complete_module_tables_agree_with_path_reads() {
     }
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
-// Paths on `this` narrow like paths on a variable in class methods and
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type:
+// paths on `this` narrow like paths on a variable in class methods and
 // accessors, in object literal methods, and in arrow functions inside them or
 // inside a field initializer.
 #[test]
@@ -717,10 +715,9 @@ fn paths_on_this_narrow_like_paths_on_variables() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives the expected type at each read,
-// because narrowing never reaches an arrow function created after the test,
-// and an object literal method or class method inside the method has its own
-// `this`.
+// TypeScript 7.0.2 (`tsc --strict`) gives the expected type at each read:
+// narrowing never reaches an arrow function created after the test, and an
+// object literal method or class method inside the method has its own `this`.
 #[test]
 fn reads_in_nested_functions_see_no_facts_about_this() {
     use InferredTypeData::{Null, Number, String};
@@ -812,15 +809,14 @@ fn static_members_keep_paths_on_this_unnarrowed() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) narrows every read below to `string`,
-// because an object literal method takes `this` from the object or from its
-// contextual type, and a function or method with a `this` parameter takes it
-// from the parameter. Biome finds the object or class only through a variable
-// it initializes or a class name. Otherwise it types `this` from the enclosing
-// class or object literal, or not at all, so `argument` and `classArgument`
-// read the field of `K`, `nested` reads the field of `o`, and `module` reads
-// `unknown`. Biome also ignores `this` parameters, so `function` reads
-// `unknown`. It narrows no path on `this` in any of these places.
+// TypeScript 7.0.2 (`tsc --strict`) narrows every read below to `string`: an
+// object literal method takes `this` from the object, or from its contextual
+// type, and a function or method with a `this` parameter from the parameter.
+// Biome finds the object or class only through a variable it initializes or a
+// class name. Otherwise it types `this` from the enclosing class or object
+// literal, so `argument` and `classArgument` read the field of `K` and
+// `nested` the field of `o`, or not at all, and it ignores `this` parameters.
+// It narrows no path on `this` there.
 #[test]
 fn paths_on_this_stay_unnarrowed_where_biome_types_this_otherwise() {
     use InferredTypeData::{Null, Number, String, Unknown};
@@ -852,11 +848,10 @@ fn paths_on_this_stay_unnarrowed_where_biome_types_this_otherwise() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) narrows every read below to `string`,
-// because a write to `this.x` in another method, in a callback, or in a
-// function called through `.call(this)` never cancels its narrowing. Biome
-// copies this unsound narrowing; `NARROWING.md` lists it among the deliberate
-// choices.
+// TypeScript 7.0.2 (`tsc --strict`) narrows every read below to `string`: a
+// write to `this.x` in another method, in a callback, or in a function called
+// through `.call(this)` never cancels its narrowing. Biome copies this unsound
+// narrowing; `NARROWING.md` lists it among the deliberate choices.
 #[test]
 fn writes_to_this_in_other_functions_keep_narrowing() {
     use InferredTypeData::String;

@@ -463,7 +463,7 @@ fn assertions_respect_binding_identity_writes_and_existing_subject_restrictions(
     assert_no_whole_module_inference(&db, &db.take_salsa_events());
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) narrows the read to `string`, although
+// TypeScript 7.0.2 (`tsc --strict`) narrows the read to `string`, although
 // the direct `eval` sets `value` to `null`. Biome deliberately copies this
 // unsound narrowing; `NARROWING.md` lists it among the deliberate choices.
 #[test]
@@ -527,8 +527,8 @@ fn optional_and_nested_assertion_calls_preserve_incoming_types() {
     }
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `string | null` in each row without
-// a comment. A row comment gives TypeScript's type where Biome differs.
+// A comment gives the type that TypeScript 7.0.2 (`tsc --strict`) gives
+// where it differs.
 #[test]
 fn unsupported_assertion_signatures_and_never_returns_do_not_add_facts() {
     use InferredTypeData::{Null, String};
@@ -560,7 +560,7 @@ fn unsupported_assertion_signatures_and_never_returns_do_not_add_facts() {
     }
 }
 
-// Every expected type is the type that TypeScript 6.0.3 (`tsc --strict`) gives
+// Every expected type is the type that TypeScript 7.0.2 (`tsc --strict`) gives
 // the same read. TypeScript reports TS2775 for an assertion call whose callee
 // is a variable without a type annotation and does not narrow the argument,
 // whether the variable holds an arrow or a function expression. A type
@@ -695,8 +695,9 @@ fn alias_assertion_targets_narrow_like_the_types_they_name() {
     }
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected
-// type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
+// (`narrowing-probes/m3/predicates.ts` L26, `narrowing-probes/m3-l7/spec.ts`
+// L55 to L57, L68, and `narrowing-probes/m3-l7/unknown.ts` L27).
 #[test]
 fn object_and_union_assertion_targets_narrow_the_following_reads() {
     const SOURCE: &str = r#"

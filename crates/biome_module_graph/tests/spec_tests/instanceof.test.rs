@@ -102,10 +102,13 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
-// An `else` branch that no value reaches is `never` in TypeScript, which Biome
-// reads as Unknown. `x instanceof A` with a primitive member is an error in
-// TypeScript (TS2358) only when no member is an object type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
+// (`narrowing-probes/m3/instanceof.ts` L9, L11 to L15, L17 to L24, L26 to
+// L31, L34, L35, and `narrowing-probes/m3-l6/spec.ts` L18 to L22, L28,
+// L36 to L42, L44 to L47, L51 to L56, L60 to L62). An `else` branch that no
+// value reaches is `never` in TypeScript, which Biome reads as Unknown.
+// `x instanceof A` with a primitive member is an error in TypeScript (TS2358)
+// only when no member is an object type.
 #[test]
 fn instanceof_narrows_by_declarations() {
     assert_reads(
@@ -265,9 +268,9 @@ fn instanceof_narrows_by_declarations() {
 /// How [`variant_names`] names `() => void`.
 const VOID_FUNCTION: &str = "sync Function { accepts: { params: [] type_args: [] } returns: void }";
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
-// An `else` branch that no value reaches is `never` in TypeScript, which Biome
-// reads as Unknown.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
+// (`narrowing-probes/m3/instanceof.ts` L19, L35, `narrowing-probes/m3-l6/spec.ts`
+// L30, L32 to L35, L48, L49, and `narrowing-probes/m3-l6/more.ts` L7 to L16).
 #[test]
 fn instanceof_narrows_through_the_flow() {
     assert_reads(
@@ -351,7 +354,9 @@ fn instanceof_narrows_through_the_flow() {
 }
 
 // Biome keeps the declared type of every read below. A comment gives the type
-// that TypeScript 7.0.2 (`tsc --strict`) gives where it differs.
+// that TypeScript 7.0.2 (`tsc --strict`) gives where it differs
+// (`narrowing-probes/m3/instanceof.ts` L10, L16, L25, L32, and
+// `narrowing-probes/m3-l6/spec.ts` L23 to L27, L43, L57, L58).
 #[test]
 fn instanceof_keeps_the_declared_type_where_biome_cannot_tell() {
     assert_reads(
@@ -414,8 +419,9 @@ fn instanceof_keeps_the_declared_type_where_biome_cannot_tell() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
-// except where a comment gives TypeScript's type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
+// (`narrowing-probes/m3-l6/mods/index.ts` L6, L7, L9), except where a comment
+// gives TypeScript's type.
 #[test]
 fn instanceof_compares_classes_of_other_modules() {
     let files = [

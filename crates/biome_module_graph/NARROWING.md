@@ -1,7 +1,7 @@
 # Narrowing reference
 
 This file describes what flow-sensitive narrowing in Biome's type inference
-does, compared with TypeScript 6.0.3 run with `--strict`. It is the live
+does, compared with TypeScript 7.0.2 run with `--strict`. It is the live
 checklist of TypeScript's narrowing behaviour: a pull request that changes
 narrowing updates the rows it affects in the same pull request, including the
 deliberate choices below.

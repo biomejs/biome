@@ -58,8 +58,8 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[InferredTypeData<'static>]
     }
 }
 
-// Testing a `const` also tests the condition that initializes it. TypeScript
-// 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type:
+// testing a `const` tests the condition that initializes it.
 #[test]
 fn aliased_conditions_narrow_like_their_initializers() {
     use InferredTypeData::{Null, Number, String};
@@ -109,8 +109,8 @@ fn aliased_conditions_narrow_like_their_initializers() {
     );
 }
 
-// The inlined `x?.y` shows that `x` is not nullish, as `if (x?.y)` does.
-// TypeScript 7.0.2 (`tsc --strict`) gives `x` the type `{ y: string }`.
+// TypeScript 7.0.2 (`tsc --strict`) gives `x` the type `{ y: string }`: the
+// inlined `x?.y` shows that `x` is not nullish, as `if (x?.y)` does.
 #[test]
 fn aliased_conditions_narrow_optional_chain_receivers() {
     const SOURCE: &str = r#"
@@ -246,9 +246,9 @@ fn other_declarations_are_not_aliases() {
     );
 }
 
-// An inlined condition narrows only a variable that cannot change between the
-// alias and its test. TypeScript 7.0.2 (`tsc --strict`) gives every read below
-// `string | null`, except where a comment says otherwise.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below `string | null`,
+// except where a comment says otherwise: an inlined condition narrows only a
+// variable that cannot change between the alias and its test.
 #[test]
 fn inlined_conditions_narrow_only_variables_that_cannot_change() {
     use InferredTypeData::{Null, String};
@@ -382,7 +382,7 @@ fn assert_named_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
 // (`narrowing-probes/m3/readonly.ts` L5, L6, L8, L11, L14, L16, L17, L21,
 // L22, and `m3-l9/spec.ts` L5 to L23): an inlined condition narrows a
 // property path when every property along it is readonly. TypeScript also
@@ -443,7 +443,7 @@ fn readonly_property_paths_narrow_through_aliased_conditions() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
 // (`narrowing-probes/m3-l9/named.ts`): a readonly path narrows through an
 // aliased condition by `instanceof`, by a test of a discriminant, by `in`,
 // and as the receiver of an optional chain.
@@ -475,7 +475,7 @@ fn readonly_objects_narrow_through_aliased_conditions() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below `string | null`
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below `string | null`
 // (`narrowing-probes/m3/readonly.ts` L7, L10, L12, L23, and `m3-l9/spec.ts`
 // L31 to L39 and L41): the path, or an object on it, can change between the
 // alias and its test, or the read is outside the branch. A property of an
@@ -510,7 +510,7 @@ fn mutable_property_paths_keep_their_declared_types() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below `string`
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below `string`
 // (`narrowing-probes/m3/readonly.ts` L9, L13, and `m3-l9/spec.ts` L47, L48,
 // L50 to L54 and L57 to L62). Biome keeps the declared type
 // where it can't tell that the path is readonly, as the comments say.
@@ -571,7 +571,7 @@ fn paths_that_biome_cannot_prove_readonly_keep_their_declared_types() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below `string | null`
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below `string | null`
 // (`narrowing-probes/m3-l9/spec.ts` L68 to L71, which gives `string` for
 // `outerThis`): the type of the object at the read, or a declaration that
 // Biome doesn't see, has a property that isn't readonly, although Biome's
@@ -604,7 +604,7 @@ fn readonly_paths_never_narrow_where_typescript_sees_a_mutable_property() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives `string | null` at the read
+// TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at the read
 // (`narrowing-probes/m3-l9/aug2/`): the augmentation declares `v` on `X`
 // without `readonly`, which hides the readonly `v` that `X` inherits.
 #[test]
@@ -643,7 +643,7 @@ fn readonly_paths_never_narrow_through_properties_that_an_augmentation_can_hide(
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) reports TS2540 for the write and gives
+// TypeScript 7.0.2 (`tsc --strict`) reports TS2540 for the write and gives
 // `never` at the read, because the write assigns `null` after the alias.
 // Biome keeps the declared type: a path that the function writes never
 // narrows.
