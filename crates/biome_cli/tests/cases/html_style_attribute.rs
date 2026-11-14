@@ -132,3 +132,36 @@ fn does_not_lint_component_style_props_as_css() {
         result,
     ));
 }
+
+#[test]
+fn parses_html_quote_entities_in_style_attributes() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+
+    let config = Utf8Path::new("biome.json");
+    fs.insert(config.into(), LINTER_CONFIG.as_bytes());
+
+    let html_file = Utf8Path::new("index.html");
+    fs.insert(
+        html_file.into(),
+        r#"<p style="font-family: RotisSansCyrillic, &quot;Rotis Sans Cyrillic&quot;, &#39;Open Sans&#39;, &quot;Mixed&#34;, &quot;&#34;, sans-serif; font-size: 10px">test</p>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", html_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "parses_html_quote_entities_in_style_attributes",
+        fs,
+        console,
+        result,
+    ));
+}

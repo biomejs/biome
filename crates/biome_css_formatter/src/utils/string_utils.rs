@@ -4,7 +4,7 @@ use crate::context::CssFormatOptions;
 use crate::prelude::*;
 use biome_css_syntax::CssLanguage;
 use biome_css_syntax::CssSyntaxKind::{CSS_STRING_LITERAL, CSS_URL_VALUE_RAW_LITERAL, IDENT};
-use biome_css_syntax::CssSyntaxToken;
+use biome_css_syntax::{CssSyntaxToken, html_quote_entity_at};
 use biome_formatter::QuoteStyle;
 use biome_formatter::token::string::normalize_string;
 use biome_formatter::{
@@ -108,6 +108,10 @@ impl Format<CssFormatContext> for FormatLiteralStringToken<'_> {
         // metavariables may contain the same quotes.
         let range = self.token.text_trimmed_range();
         if f.context().metavariable_ranges_in(range).next().is_some() {
+            return self.token.format().fmt(f);
+        }
+
+        if html_quote_entity_at(self.token.text_trimmed()).is_some() {
             return self.token.format().fmt(f);
         }
 
