@@ -685,6 +685,7 @@ pub enum RuleName {
     UseTailwindShorthandClasses,
     UseTailwindSortedClasses,
     UseTailwindStaticClassStrings,
+    UseTanstackQueryExhaustiveDependencies,
     UseTemplate,
     UseTestHooksInOrder,
     UseTestHooksOnTop,
@@ -1343,6 +1344,9 @@ impl RuleName {
             Self::UseTailwindShorthandClasses => "useTailwindShorthandClasses",
             Self::UseTailwindSortedClasses => "useTailwindSortedClasses",
             Self::UseTailwindStaticClassStrings => "useTailwindStaticClassStrings",
+            Self::UseTanstackQueryExhaustiveDependencies => {
+                "useTanstackQueryExhaustiveDependencies"
+            }
             Self::UseTemplate => "useTemplate",
             Self::UseTestHooksInOrder => "useTestHooksInOrder",
             Self::UseTestHooksOnTop => "useTestHooksOnTop",
@@ -1997,6 +2001,7 @@ impl RuleName {
             Self::UseTailwindShorthandClasses => RuleGroup::Nursery,
             Self::UseTailwindSortedClasses => RuleGroup::Nursery,
             Self::UseTailwindStaticClassStrings => RuleGroup::Nursery,
+            Self::UseTanstackQueryExhaustiveDependencies => RuleGroup::Nursery,
             Self::UseTemplate => RuleGroup::Style,
             Self::UseTestHooksInOrder => RuleGroup::Style,
             Self::UseTestHooksOnTop => RuleGroup::Style,
@@ -2660,6 +2665,9 @@ impl std::str::FromStr for RuleName {
             "useTailwindShorthandClasses" => Ok(Self::UseTailwindShorthandClasses),
             "useTailwindSortedClasses" => Ok(Self::UseTailwindSortedClasses),
             "useTailwindStaticClassStrings" => Ok(Self::UseTailwindStaticClassStrings),
+            "useTanstackQueryExhaustiveDependencies" => {
+                Ok(Self::UseTanstackQueryExhaustiveDependencies)
+            }
             "useTemplate" => Ok(Self::UseTemplate),
             "useTestHooksInOrder" => Ok(Self::UseTestHooksInOrder),
             "useTestHooksOnTop" => Ok(Self::UseTestHooksOnTop),

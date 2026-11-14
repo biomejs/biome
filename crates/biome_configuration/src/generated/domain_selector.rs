@@ -159,10 +159,10 @@ static TAILWIND_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     ]
 });
 static TANSTACKQUERY_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
-    vec![RuleFilter::Rule(
-        "nursery",
-        "noTanstackQueryRestDestructuring",
-    )]
+    vec![
+        RuleFilter::Rule("nursery", "noTanstackQueryRestDestructuring"),
+        RuleFilter::Rule("nursery", "useTanstackQueryExhaustiveDependencies"),
+    ]
 });
 static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![

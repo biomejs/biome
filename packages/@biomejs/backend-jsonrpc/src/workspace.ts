@@ -3703,6 +3703,11 @@ export interface Nursery {
 	 */
 	useTailwindStaticClassStrings?: UseTailwindStaticClassStringsConfiguration;
 	/**
+	 * Succinct description of the rule.
+	 * See https://biomejs.dev/linter/rules/use-tanstack-query-exhaustive-dependencies
+	 */
+	useTanstackQueryExhaustiveDependencies?: UseTanstackQueryExhaustiveDependenciesConfiguration;
+	/**
 	 * Require Markdown documents to start with a top-level heading.
 	 * See https://biomejs.dev/linter/rules/use-top-level-heading
 	 */
@@ -6356,6 +6361,9 @@ export type UseTailwindSortedClassesConfiguration =
 export type UseTailwindStaticClassStringsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTailwindStaticClassStringsOptions;
+export type UseTanstackQueryExhaustiveDependenciesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTanstackQueryExhaustiveDependenciesOptions;
 export type UseTopLevelHeadingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTopLevelHeadingOptions;
@@ -9269,6 +9277,10 @@ export interface RuleWithUseTailwindStaticClassStringsOptions {
 	level: RulePlainConfiguration;
 	options?: UseTailwindStaticClassStringsOptions;
 }
+export interface RuleWithUseTanstackQueryExhaustiveDependenciesOptions {
+	level: RulePlainConfiguration;
+	options?: UseTanstackQueryExhaustiveDependenciesOptions;
+}
 export interface RuleWithUseTopLevelHeadingOptions {
 	level: RulePlainConfiguration;
 	options?: UseTopLevelHeadingOptions;
@@ -11691,6 +11703,7 @@ export type UseSvelteShorthandDirectiveOptions = {};
 export type UseTailwindShorthandClassesOptions = {};
 export type UseTailwindSortedClassesOptions = {};
 export type UseTailwindStaticClassStringsOptions = {};
+export type UseTanstackQueryExhaustiveDependenciesOptions = {};
 export type UseTopLevelHeadingOptions = {};
 export type UseUnaryMinusOptions = {};
 export interface UseValidTestTitleOptions {
@@ -13129,15 +13142,15 @@ export type Category =
 	| "lint/nursery/noBooleanSortComparator"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDanglingUnderscore"
-	| "lint/nursery/noConsoleSpaces"
-	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noConsoleSpaces"
+	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
@@ -13313,6 +13326,7 @@ export type Category =
 	| "lint/nursery/useTailwindShorthandClasses"
 	| "lint/nursery/useTailwindSortedClasses"
 	| "lint/nursery/useTailwindStaticClassStrings"
+	| "lint/nursery/useTanstackQueryExhaustiveDependencies"
 	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useUnaryMinus"
 	| "lint/nursery/useUniqueArgumentNames"
@@ -13329,9 +13343,9 @@ export type Category =
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVueToggleInsideTransition"
 	| "lint/nursery/useVueTypedRef"
+	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useVueValidVFor"
 	| "lint/nursery/useVueValidVModel"
-	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useWhileLoopCondition"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
