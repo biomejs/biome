@@ -283,9 +283,8 @@ fn inlined_conditions_narrow_only_variables_that_cannot_change() {
             ("writtenBetween", "y", &[String, Null]),
             ("writtenAfter", "x", &[String, Null]),
             ("mutable", "o.v", &[String, Null]),
-            // TypeScript gives `string` because it inlines for a readonly
-            // property.
-            ("readonly", "o.v", &[String, Null]),
+            // A readonly property cannot change either.
+            ("readonly", "o.v", &[String]),
         ],
     );
 }
@@ -338,5 +337,323 @@ fn aliases_inside_and_around_nested_functions() {
             ("readInClosure", "x", &[String, Null]),
             ("nested", "y", &[String]),
         ],
+    );
+}
+
+/// Names each member of `ty`, sorted: an interface by its name, and any other
+/// type by its formatted text on one line.
+fn member_names(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
+    let members = match ty {
+        InferredTypeData::Union(union) => union.types(db).to_vec(),
+        _ => vec![ty],
+    };
+    let mut names: Vec<_> = members
+        .into_iter()
+        .map(|ty| {
+            let text = format_inferred_type(db, ty);
+            match text
+                .lines()
+                .next()
+                .and_then(|line| line.strip_prefix("interface \""))
+                .and_then(|name| name.split('"').next())
+            {
+                Some(name) => name.to_owned(),
+                None => text.lines().map(str::trim).collect::<Vec<_>>().join(" "),
+            }
+        })
+        .collect();
+    names.sort();
+    names
+}
+
+/// Asserts the type of each `(marker, expression, expected)` read in `source`
+/// by the names of its members, as [`member_names`] gives them.
+fn assert_named_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
+    let (db, module) = narrowing_db(source);
+    let mismatches: Vec<_> = reads
+        .iter()
+        .filter_map(|(marker, expression, expected)| {
+            let ty = normalized_type_at(&db, module, source, marker, expression);
+            let actual = member_names(&db, ty);
+            (actual != *expected)
+                .then(|| format!("{marker}: expected {expected:?}, got {actual:?}"))
+        })
+        .collect();
+    assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
+// (`narrowing-probes/m3/readonly.ts` L5, L6, L8, L11, L14, L16, L17, L21,
+// L22, and `m3-l9/spec.ts` L5 to L23): an inlined condition narrows a
+// property path when every property along it is readonly. TypeScript also
+// narrows an element of a readonly tuple (`readonly.ts` L15), which Biome
+// types as Unknown even without a condition.
+#[test]
+fn readonly_property_paths_narrow_through_aliased_conditions() {
+    use InferredTypeData::{Null, Number, String};
+    const SOURCE: &str = r#"
+        declare function isString(value: unknown): value is string;
+        interface RI { readonly v: string | null }
+        class R { readonly v: string | null = null; m() { const ok = this.v !== null; if (ok) /*this*/this.v; } }
+        class P { readonly #v: string | null = null; m() { const ok = this.#v !== null; if (ok) /*private*/this.#v; } }
+        class A { readonly v: string | null = null; m() { const g = () => { const ok = this.v !== null; if (ok) /*arrow*/this.v; }; } }
+        function property(o: { readonly v: string | null }) { const ok = o.v !== null; if (ok) /*property*/o.v; }
+        function asConst() { const o = { v: "a" as string | null } as const; const ok = o.v !== null; if (ok) /*asConst*/o.v; }
+        function nested(o: { readonly a: { readonly v: string | null } }) { const ok = o.a.v !== null; if (ok) /*nested*/o.a.v; }
+        function mapped(o: Readonly<{ v: string | null }>) { const ok = o.v !== null; if (ok) /*mapped*/o.v; }
+        function element(o: { readonly v: string | null }) { const ok = o["v"] !== null; if (ok) /*element*/o.v; }
+        function intersection(o: { readonly v: string | null } & { w: 1 }) { const ok = o.v !== null; if (ok) /*intersection*/o.v; }
+        function typeOf(o: { readonly v: string | number }) { const ok = typeof o.v === "string"; if (ok) /*typeof*/o.v; else /*typeofElse*/o.v; }
+        function iface(o: RI) { const ok = o.v !== null; if (ok) /*interface*/o.v; }
+        function negated(o: { readonly v: string | null }) { const ok = o.v !== null; if (!ok) /*negated*/o.v; }
+        function and(o: { readonly v: string | null; readonly w: string | null }) { const ok = o.v !== null && o.w !== null; if (ok) { /*andV*/o.v; /*andW*/o.w; } }
+        function or(o: { readonly v: string | null }, q: boolean) { const ok = o.v !== null || q; if (ok) /*or*/o.v; else /*orElse*/o.v; }
+        function chained(o: { readonly v: string | null }) { const a = o.v !== null; const b = a; if (b) /*chained*/o.v; }
+        function optional(o: { readonly v?: string }) { const ok = o.v !== undefined; if (ok) /*optional*/o.v; }
+        function nullable(o: { readonly v: string | null } | null) { const ok = o?.v !== null && o !== null; if (ok) /*nullable*/o.v; }
+        function predicate(o: { readonly v: string | number }) { const ok = isString(o.v); if (ok) /*predicate*/o.v; }
+        function truthy(o: { readonly v: string | null }) { const ok = !!o.v; if (ok) /*truthy*/o.v; }
+    "#;
+    assert_reads(
+        SOURCE,
+        &[
+            ("this", "this.v", &[String]),
+            ("private", "this.#v", &[String]),
+            ("arrow", "this.v", &[String]),
+            ("property", "o.v", &[String]),
+            ("asConst", "o.v", &[String]),
+            ("nested", "o.a.v", &[String]),
+            ("mapped", "o.v", &[String]),
+            ("element", "o.v", &[String]),
+            ("intersection", "o.v", &[String]),
+            ("typeof", "o.v", &[String]),
+            ("typeofElse", "o.v", &[Number]),
+            ("interface", "o.v", &[String]),
+            ("negated", "o.v", &[Null]),
+            ("andV", "o.v", &[String]),
+            ("andW", "o.w", &[String]),
+            ("or", "o.v", &[String, Null]),
+            ("orElse", "o.v", &[Null]),
+            ("chained", "o.v", &[String]),
+            ("optional", "o.v", &[String]),
+            ("nullable", "o.v", &[String]),
+            ("predicate", "o.v", &[String]),
+            ("truthy", "o.v", &[String]),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
+// (`narrowing-probes/m3-l9/named.ts`): a readonly path narrows through an
+// aliased condition by `instanceof`, by a test of a discriminant, by `in`,
+// and as the receiver of an optional chain.
+#[test]
+fn readonly_objects_narrow_through_aliased_conditions() {
+    const SOURCE: &str = r#"
+        interface X { kind: "x"; y: 1 }
+        interface Z { kind: "z"; w: 2 }
+        interface V { readonly v: string | null }
+        function instance(o: { readonly v: Date | string }) { const ok = o.v instanceof Date; if (ok) /*instanceof*/o.v; }
+        function discriminant(o: { readonly a: X | Z }) { const ok = o.a.kind === "x"; if (ok) /*discriminant*/o.a; }
+        function held(o: { readonly a: X | Z }) { const k = o.a.kind; const ok = k === "x"; if (ok) /*held*/o.a; }
+        function inOperator(o: { readonly a: X | Z }) { const ok = "y" in o.a; if (ok) /*in*/o.a; }
+        function receiver(o: { readonly a?: V }) { const ok = o.a?.v === "x"; if (ok) /*receiver*/o.a; }
+        function mutableDiscriminant(o: { a: X | Z }) { const ok = o.a.kind === "x"; if (ok) /*mutableDiscriminant*/o.a; }
+        function mutableReceiver(o: { a?: V }) { const ok = o.a?.v === "x"; if (ok) /*mutableReceiver*/o.a; }
+    "#;
+    assert_named_reads(
+        SOURCE,
+        &[
+            ("instanceof", "o.v", &["instanceof Date"]),
+            ("discriminant", "o.a", &["X"]),
+            ("held", "o.a", &["X"]),
+            ("in", "o.a", &["X"]),
+            ("receiver", "o.a", &["V"]),
+            ("mutableDiscriminant", "o.a", &["X", "Z"]),
+            ("mutableReceiver", "o.a", &["V", "undefined"]),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below `string | null`
+// (`narrowing-probes/m3/readonly.ts` L7, L10, L12, L23, and `m3-l9/spec.ts`
+// L31 to L39 and L41): the path, or an object on it, can change between the
+// alias and its test, or the read is outside the branch. A property of an
+// intersection is readonly only when every operand that declares it declares
+// it readonly.
+#[test]
+fn mutable_property_paths_keep_their_declared_types() {
+    use InferredTypeData::{Null, String};
+    const SOURCE: &str = r#"
+        class GS { get v(): string | null { return null; } set v(x) {} }
+        class K { #v: string | null = null; m() { const ok = this.#v !== null; if (ok) /*private*/this.#v; } }
+        function mutable(o: { v: string | null }) { const ok = o.v !== null; if (ok) /*mutable*/o.v; }
+        function getterSetter(g: GS) { const ok = g.v !== null; if (ok) /*getterSetter*/g.v; }
+        function mutableObject(o: { a: { readonly v: string | null } }) { const ok = o.a.v !== null; if (ok) /*mutableObject*/o.a.v; }
+        function letAlias(o: { readonly v: string | null }) { let ok = o.v !== null; if (ok) /*let*/o.v; }
+        function indexSignature(o: { readonly [k: string]: string | null }) { const ok = o.a !== null; if (ok) /*index*/o.a; }
+        function after(o: { readonly v: string | null }) { const ok = o.v !== null; if (ok) {} /*after*/o.v; }
+        function mixedIntersection(o: { readonly v: string | null } & { v: string | null }) { const ok = o.v !== null; if (ok) /*intersection*/o.v; }
+    "#;
+    assert_reads(
+        SOURCE,
+        &[
+            ("private", "this.#v", &[String, Null]),
+            ("mutable", "o.v", &[String, Null]),
+            ("getterSetter", "g.v", &[String, Null]),
+            ("mutableObject", "o.a.v", &[String, Null]),
+            ("let", "o.v", &[String, Null]),
+            ("index", "o.a", &[String, Null]),
+            ("after", "o.v", &[String, Null]),
+            ("intersection", "o.v", &[String, Null]),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below `string`
+// (`narrowing-probes/m3/readonly.ts` L9, L13, and `m3-l9/spec.ts` L47, L48,
+// L50 to L54 and L57 to L62). Biome keeps the declared type
+// where it can't tell that the path is readonly, as the comments say.
+#[test]
+fn paths_that_biome_cannot_prove_readonly_keep_their_declared_types() {
+    use InferredTypeData::{Null, String};
+    const SOURCE: &str = r#"
+        class G { get v(): string | null { return null; } }
+        class Base { readonly v: string | null = null }
+        class Sub extends Base {}
+        class Derived extends Base { v: string | null = null }
+        type DA = { kind: "a"; readonly v: string | null };
+        type DB = { kind: "b"; v: string | null };
+        const C = class { static readonly v: string | null = null };
+        function getter(g: G) { const ok = g.v !== null; if (ok) /*getter*/g.v; }
+        function oneReadonlyMember(o: { readonly v: string | null } | { v: string | null }) { const ok = o.v !== null; if (ok) /*oneReadonly*/o.v; }
+        function inherited(o: Sub) { const ok = o.v !== null; if (ok) /*inherited*/o.v; }
+        function generic<T extends { readonly v: string | null }>(o: T) { const ok = o.v !== null; if (ok) /*generic*/o.v; }
+        function asConstArray() { const t = [("a" as string | null)] as const; const ok = t[0] !== null; if (ok) /*asConstArray*/t[0]; }
+        function staticField() { const ok = C.v !== null; if (ok) /*static*/C.v; }
+        function discriminated(o: DA | DB) { if (o.kind === "a") { const ok = o.v !== null; if (ok) /*discriminated*/o.v; } }
+        function unionStep(o: { readonly a: { readonly v: string | null } } | { readonly a: { v: string | null } }) { const ok = o.a.v !== null; if (ok) /*unionStep*/o.a.v; }
+        class GT { get v(): string | null { return null; } m() { const ok = this.v !== null; if (ok) /*thisGetter*/this.v; } }
+        class Outer { readonly v: string | null = null; m() { const ok = this.v !== null; const g = () => { if (ok) /*outerAlias*/this.v; }; } }
+        function testedElsewhere(o: Base) { const ok = o.v !== null; if (ok) /*testedElsewhere*/o.v; if (o instanceof Derived) {} }
+    "#;
+    assert_reads(
+        SOURCE,
+        &[
+            // A setter may change a getter's value, and Biome doesn't
+            // collect setters.
+            ("getter", "g.v", &[String, Null]),
+            ("thisGetter", "this.v", &[String, Null]),
+            // TypeScript needs a readonly property in one member, which a
+            // write through another member could change.
+            ("oneReadonly", "o.v", &[String, Null]),
+            ("unionStep", "o.a.v", &[String, Null]),
+            // Biome can't look up a property of a generic.
+            ("generic", "o.v", &[String, Null]),
+            // An inherited property can be hidden by a declaration that
+            // Biome doesn't see.
+            ("inherited", "o.v", &[String, Null]),
+            // Biome types an array under `as const` as a tuple whose
+            // elements are not readonly, and doesn't record `static
+            // readonly`.
+            ("asConstArray", "t[0]", &[String, Null]),
+            ("static", "C.v", &[String, Null]),
+            // Biome decides readonly from the declared type of `o`, where
+            // TypeScript uses its type at the read.
+            ("discriminated", "o.v", &[String, Null]),
+            // An aliased condition narrows `this` only in the function that
+            // declares it.
+            ("outerAlias", "this.v", &[String, Null]),
+            // A test that can replace the type of `o` anywhere in the
+            // function keeps every read of its paths from narrowing.
+            ("testedElsewhere", "o.v", &[String, Null]),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below `string | null`
+// (`narrowing-probes/m3-l9/spec.ts` L68 to L71, which gives `string` for
+// `outerThis`): the type of the object at the read, or a declaration that
+// Biome doesn't see, has a property that isn't readonly, although Biome's
+// declared type has a readonly one. `outerThis` keeps `string | null` in
+// Biome too, because an aliased condition that an enclosing function declares
+// reads that function's `this`.
+#[test]
+fn readonly_paths_never_narrow_where_typescript_sees_a_mutable_property() {
+    use InferredTypeData::{Null, String};
+    const SOURCE: &str = r#"
+        class Base { readonly v: string | null = null }
+        class Derived extends Base { v: string | null = null }
+        declare function isMutable(x: unknown): x is { v: string | null };
+        interface RB { readonly v: string | null }
+        interface Merged { v: string | null }
+        interface Merged extends RB {}
+        function replacedByInstanceof(o: Base) { const ok = o.v !== null; if (o instanceof Derived) { if (ok) /*instanceof*/o.v; } }
+        function replacedByPredicate(o: { readonly v: string | null }) { const ok = o.v !== null; if (isMutable(o)) { if (ok) /*predicate*/o.v; } }
+        function merged(o: Merged) { const ok = o.v !== null; if (ok) /*merged*/o.v; }
+        function outerThis(this: { readonly v: string | null }) { const ok = this.v !== null; class K { readonly v: string | null = null; m() { if (ok) /*outerThis*/this.v; } } }
+    "#;
+    assert_reads(
+        SOURCE,
+        &[
+            ("instanceof", "o.v", &[String, Null]),
+            ("predicate", "o.v", &[String, Null]),
+            ("merged", "o.v", &[String, Null]),
+            ("outerThis", "this.v", &[String, Null]),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) gives `string | null` at the read
+// (`narrowing-probes/m3-l9/aug2/`): the augmentation declares `v` on `X`
+// without `readonly`, which hides the readonly `v` that `X` inherits.
+#[test]
+fn readonly_paths_never_narrow_through_properties_that_an_augmentation_can_hide() {
+    use InferredTypeData::{Null, String};
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/shapes.ts".into(),
+        "export interface RB { readonly v: string | null }\nexport interface X extends RB {}\n",
+    );
+    fs.insert(
+        "/src/augment.ts".into(),
+        "import \"./shapes\";\ndeclare module \"./shapes\" { interface X { v: string | null } }\n",
+    );
+    const SOURCE: &str = r#"
+        import "./augment";
+        import type { X } from "./shapes";
+        function f(o: X) { const ok = o.v !== null; if (ok) /*read*/o.v; }
+    "#;
+    fs.insert("/src/index.ts".into(), SOURCE);
+    let db = build_js_test_module_db(
+        &fs,
+        &["/src/shapes.ts", "/src/augment.ts", "/src/index.ts"],
+        true,
+    );
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let ty = normalized_type_at(&db, module, SOURCE, "read", "o.v");
+    let actual = match ty {
+        InferredTypeData::Union(union) => union.types(&db).to_vec(),
+        _ => vec![ty],
+    };
+    assert!(
+        actual.len() == 2 && actual.contains(&String) && actual.contains(&Null),
+        "{}",
+        format_inferred_type(&db, ty)
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) reports TS2540 for the write and gives
+// `never` at the read, because the write assigns `null` after the alias.
+// Biome keeps the declared type: a path that the function writes never
+// narrows.
+#[test]
+fn written_readonly_paths_keep_their_declared_types() {
+    use InferredTypeData::{Null, String};
+    assert_reads(
+        r#"
+        function written(o: { readonly v: string | null }) { const ok = o.v !== null; o.v = null; if (ok) /*written*/o.v; }
+        "#,
+        &[("written", "o.v", &[String, Null])],
     );
 }

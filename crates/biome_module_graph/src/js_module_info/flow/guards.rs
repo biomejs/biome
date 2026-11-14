@@ -1,5 +1,5 @@
 use super::subjects::{identifier_key, index_key, literal_key, member_name_key, subject_of};
-use super::{FlowSubject, FlowSubjectId, FlowSubjectTable, PropertyKey};
+use super::{FlowSubject, FlowSubjectId, FlowSubjectTable, PropertyKey, subject_root};
 use crate::js_module_info::TsBindingReferenceExt;
 use biome_js_semantic::{Binding, JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
@@ -82,6 +82,18 @@ pub(crate) enum FlowGuard {
         /// because no write changes the values it destructured.
         aliased: bool,
     },
+    /// The guard at this index, which applies only to a subject whose path is
+    /// readonly: each property along the path is one that every member of
+    /// the declared type of its object, other than `null` and `undefined`,
+    /// declares itself as readonly. A runtime test of a property path inside
+    /// an inlined aliased condition is wrapped this way, because TypeScript
+    /// applies such a test to a path only when no assignment through the
+    /// path can change it between the `const` and its test.
+    ///
+    /// Whether the path is readonly depends on resolved types, so inference
+    /// decides it at the read, and the solve applies the wrapped guard only
+    /// when the read says so.
+    ReadonlyPath(usize),
     /// The operands of `&&` or `||`. A sequential pair applies `right` to the
     /// result of `left`; otherwise both apply to the incoming type and their
     /// results are joined.
@@ -599,12 +611,13 @@ pub(super) struct DecomposedCondition {
 /// `guards`. The tests in those guards refer to subjects by their ids in
 /// `subjects`.
 ///
-/// A truthiness test of an aliased condition, a `const` without a type
-/// annotation, also tests the initializer of the `const`, as TypeScript does.
-/// For example, `if (ok) x` after `const ok = x !== null` reads `x` as not
-/// null. The inlined condition narrows only variables that cannot change
-/// between the alias and its test (see [`narrows_through_aliases`]).
-/// Aliases inline into one another up to [`MAX_INLINED_ALIASES`] levels.
+/// A truthiness test of a `const` without a type annotation, such as `ok` in
+/// `const ok = x !== null; if (ok) x`, is an aliased condition: it also
+/// applies the condition that initializes the `const`, as TypeScript does,
+/// to the subjects that [`narrows_through_aliases`] accepts, and to the
+/// property paths that [`narrows_through_aliases_when_readonly`] accepts when
+/// they are readonly. Aliases inline into one another up to
+/// [`MAX_INLINED_ALIASES`] levels.
 pub(super) fn decompose_condition(
     expression: &AnyJsExpression,
     outcome: FlowOutcome,
@@ -826,30 +839,34 @@ impl Decomposer<'_, '_> {
         let tested =
             test.and_then(|test| Some((test, subject_of(operand, self.model, self.subjects)?)));
         let mut guard = match tested {
-            Some((test, subject)) if self.may_test(subject) => {
-                // `in` narrows only a union with two object types, as a test
-                // of a property narrows its object. `instanceof` and a
-                // type-guard function whose target has only object types
-                // narrow only a type with an object type or `unknown`.
-                match test {
-                    FlowTest::In(_) => self.parents.push(subject),
-                    FlowTest::Instanceof(_)
-                    | FlowTest::Predicate {
-                        object_target: true,
-                        ..
-                    } => {
-                        self.parents.push(subject);
-                        self.instance_tested.push(subject);
+            Some((test, subject)) => match self.testable(subject) {
+                Testable::Never => FlowGuard::Keep,
+                testable => {
+                    // `in` narrows only a union with two object types, as a
+                    // test of a property narrows its object, and `instanceof`
+                    // and a target with only object types only a type with an
+                    // object type or `unknown`.
+                    match test {
+                        FlowTest::In(_) => self.parents.push(subject),
+                        FlowTest::Instanceof(_)
+                        | FlowTest::Predicate {
+                            object_target: true,
+                            ..
+                        } => {
+                            self.parents.push(subject);
+                            self.instance_tested.push(subject);
+                        }
+                        _ => self.mentions.push(subject),
                     }
-                    _ => self.mentions.push(subject),
+                    let guard = FlowGuard::Test {
+                        subject,
+                        test,
+                        positive,
+                    };
+                    self.applied_when(guard, testable)
                 }
-                FlowGuard::Test {
-                    subject,
-                    test,
-                    positive,
-                }
-            }
-            _ => FlowGuard::Keep,
+            },
+            None => FlowGuard::Keep,
         };
         if let Some((test, subject)) = tested {
             let property = self.property_guard(operand, subject, test, positive);
@@ -873,12 +890,12 @@ impl Decomposer<'_, '_> {
 
     /// Returns the guard that a runtime test of `operand`, whose subject is
     /// `subject`, applies to the object that holds the tested property, as
-    /// `s.kind === "c"` applies to `s`. The tested property is `subject`
-    /// itself when `subject` is a named property. When `operand` names a
-    /// `const` that holds a property, the tested property is the held one, so
-    /// `k === "c"` also applies to `s` after `const k = s.kind`. See
-    /// [`Self::held_property`] for the declarations that hold a property. The
-    /// object must be a subject other than `this` that a test may narrow.
+    /// `s.kind === "c"` applies to `s`. The property is `subject` itself when
+    /// it is a named property, or the property whose value a variable holds,
+    /// as [`Self::held_property`] describes, so `k === "c"` also applies to
+    /// `s` after `const k = s.kind`. The object must be a subject other than
+    /// `this` that a test may narrow. Inside an inlined aliased condition, a
+    /// guard on a property path is wrapped in [`FlowGuard::ReadonlyPath`].
     ///
     /// Returns `None` for a call to a type-guard function, for `in`, and for
     /// `instanceof`, because TypeScript never narrows `s` through
@@ -920,19 +937,23 @@ impl Decomposer<'_, '_> {
         if matches!(
             self.subjects.as_slice().get(object as usize)?,
             FlowSubject::This
-        ) || !self.may_test(object)
-        {
+        ) {
+            return None;
+        }
+        let testable = self.testable(object);
+        if testable == Testable::Never {
             return None;
         }
         self.parents.push(object);
-        Some(FlowGuard::Property {
+        let guard = FlowGuard::Property {
             object,
             key,
             test,
             positive,
             optional_chain,
             aliased,
-        })
+        };
+        Some(self.applied_when(guard, testable))
     }
 
     /// Returns the guard that a runtime test of the variable `subject`
@@ -1089,17 +1110,21 @@ impl Decomposer<'_, '_> {
     fn receiver_tests(&mut self, receivers: Vec<AnyJsExpression>, guard: FlowGuard) -> FlowGuard {
         let mut guard = guard;
         for receiver in receivers {
-            let Some(subject) = subject_of(&receiver, self.model, self.subjects)
-                .filter(|subject| self.may_test(*subject))
-            else {
+            let Some(subject) = subject_of(&receiver, self.model, self.subjects) else {
                 continue;
             };
+            let testable = self.testable(subject);
+            if testable == Testable::Never {
+                continue;
+            }
             self.mentions.push(subject);
-            let left = self.push(FlowGuard::Test {
+            let test = FlowGuard::Test {
                 subject,
                 test: FlowTest::Nullish,
                 positive: false,
-            });
+            };
+            let test = self.applied_when(test, testable);
+            let left = self.push(test);
             let right = self.push(guard);
             guard = FlowGuard::Both {
                 left,
@@ -1140,18 +1165,44 @@ impl Decomposer<'_, '_> {
         Some(initializer)
     }
 
-    /// Returns whether a test may narrow `subject`. Outside inlined
-    /// initializers, every subject qualifies. Inside one, only a variable that
-    /// cannot change between the alias and its test qualifies (see
-    /// [`narrows_through_aliases`]).
-    fn may_test(&self, subject: FlowSubjectId) -> bool {
-        self.aliases == 0 || narrows_through_aliases(self.subjects, subject, self.model)
+    /// Returns whether a test may narrow `subject`: always outside inlined
+    /// initializers, and inside one, always for the subjects that
+    /// [`narrows_through_aliases`] accepts and only when the path is readonly
+    /// for those that [`narrows_through_aliases_when_readonly`] accepts.
+    fn testable(&self, subject: FlowSubjectId) -> Testable {
+        if self.aliases == 0 || narrows_through_aliases(self.subjects, subject, self.model) {
+            Testable::Always
+        } else if narrows_through_aliases_when_readonly(self.subjects, subject, self.model) {
+            Testable::WhenReadonly
+        } else {
+            Testable::Never
+        }
+    }
+
+    /// Returns `guard`, wrapped in [`FlowGuard::ReadonlyPath`] when it may
+    /// narrow its subject only when the subject's path is readonly.
+    fn applied_when(&mut self, guard: FlowGuard, testable: Testable) -> FlowGuard {
+        match testable {
+            Testable::WhenReadonly => FlowGuard::ReadonlyPath(self.push(guard)),
+            Testable::Always | Testable::Never => guard,
+        }
     }
 
     fn push(&mut self, guard: FlowGuard) -> usize {
         self.guards.push(guard);
         self.guards.len() - 1
     }
+}
+
+/// Whether a runtime test may narrow a subject, as [`Decomposer::testable`]
+/// decides it.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum Testable {
+    Never,
+    Always,
+    /// Only when the subject's path is readonly, as
+    /// [`FlowGuard::ReadonlyPath`] describes.
+    WhenReadonly,
 }
 
 /// Returns whether the condition inlined from an aliased condition may narrow
@@ -1162,29 +1213,63 @@ impl Decomposer<'_, '_> {
 /// and is declared by `const`, as a parameter or a catch variable, or by a
 /// `let` statement that is not at the top level of the file.
 ///
-/// Biome also rejects every exported variable, `this`, and every property
-/// path, where TypeScript accepts a `const` exported by an `export { ... }`
-/// list, `this`, and a readonly property. An alias declared in an enclosing
-/// function would read another `this` than the root's. A destructuring
-/// pattern is accepted, as in TypeScript, because the table stores only
-/// patterns declared by a `const` or by a parameter whose variables are
-/// never written.
-#[expect(
-    clippy::wildcard_enum_match_arm,
-    reason = "Only parameters, catch variables, and `const` and `let` declarations qualify."
-)]
+/// Biome also rejects every exported variable, where TypeScript accepts a
+/// `const` exported by an `export { ... }` list. A destructuring pattern is
+/// accepted, as in TypeScript, because the table stores only patterns that a
+/// `const` or a parameter whose variables are never written declares. `this`
+/// is rejected, because no read of `this` itself narrows, and so is every
+/// property path, which [`narrows_through_aliases_when_readonly`] decides.
 fn narrows_through_aliases(
     subjects: &FlowSubjectTable,
     subject: FlowSubjectId,
     model: &SemanticModel,
 ) -> bool {
-    let range = match subjects.as_slice().get(subject as usize) {
-        Some(FlowSubject::Binding(range)) => range,
+    match subjects.as_slice().get(subject as usize) {
+        Some(FlowSubject::Binding(range)) => is_constant_binding(*range, model),
         // The table stores only patterns whose values can't change.
-        Some(FlowSubject::Pattern(_)) => return true,
-        Some(FlowSubject::This | FlowSubject::Member { .. }) | None => return false,
-    };
-    let Some(binding) = model.as_binding_by_range(*range) else {
+        Some(FlowSubject::Pattern(_)) => true,
+        Some(FlowSubject::This | FlowSubject::Member { .. }) | None => false,
+    }
+}
+
+/// Returns whether the condition inlined from an aliased condition may narrow
+/// the property path `subject`, an id in `subjects`, when the path is
+/// readonly, as [`FlowGuard::ReadonlyPath`] describes.
+///
+/// TypeScript's `isConstantReference` accepts a property access whose object
+/// is itself such a reference and whose property is readonly. So the path
+/// must start at a variable that [`narrows_through_aliases`] accepts, or at
+/// `this`. The table stores `this` only for a `this` in the root's own code,
+/// so `this` qualifies only for an aliased condition that the root declares.
+/// TypeScript also accepts one that an enclosing method declares and an arrow
+/// function inside it tests, and one that reads another function's `this`.
+fn narrows_through_aliases_when_readonly(
+    subjects: &FlowSubjectTable,
+    subject: FlowSubjectId,
+    model: &SemanticModel,
+) -> bool {
+    if !matches!(
+        subjects.as_slice().get(subject as usize),
+        Some(FlowSubject::Member { .. })
+    ) {
+        return false;
+    }
+    match subject_root(subjects.as_slice(), subject) {
+        Some(FlowSubject::This) => true,
+        Some(FlowSubject::Binding(range)) => is_constant_binding(*range, model),
+        Some(FlowSubject::Pattern(_) | FlowSubject::Member { .. }) | None => false,
+    }
+}
+
+/// Returns whether the variable declared at `range` keeps its value between
+/// an aliased condition and its test, as [`narrows_through_aliases`]
+/// describes.
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Only parameters, catch variables, and `const` and `let` declarations qualify."
+)]
+fn is_constant_binding(range: TextRange, model: &SemanticModel) -> bool {
+    let Some(binding) = model.as_binding_by_range(range) else {
         return false;
     };
     if binding.is_exported() || binding.all_writes().next().is_some() {
@@ -1999,9 +2084,11 @@ mod tests {
             subjects,
             ..
         } = decomposed_last(program, outcome);
+        let readonly = readonly_guards(&guards);
         guards
             .iter()
-            .filter_map(|guard| match guard {
+            .enumerate()
+            .filter_map(|(index, guard)| match guard {
                 FlowGuard::Property {
                     object,
                     key: PropertyKey::Name(key),
@@ -2009,11 +2096,28 @@ mod tests {
                     aliased,
                     ..
                 } => Some(format!(
-                    "{}{}[{key}]{}",
+                    "{}{}{}[{key}]{}",
+                    if readonly.contains(&index) {
+                        "readonly "
+                    } else {
+                        ""
+                    },
                     if *optional_chain { "?" } else { "" },
                     subject_name(&model, &subjects, *object),
                     if *aliased { "~" } else { "" },
                 )),
+                _ => None,
+            })
+            .collect()
+    }
+
+    /// Returns the indices of the guards that a [`FlowGuard::ReadonlyPath`]
+    /// in `guards` wraps.
+    fn readonly_guards(guards: &[FlowGuard]) -> Vec<usize> {
+        guards
+            .iter()
+            .filter_map(|guard| match guard {
+                FlowGuard::ReadonlyPath(inner) => Some(*inner),
                 _ => None,
             })
             .collect()
@@ -2428,14 +2532,15 @@ mod tests {
                 "function f(value) { const ok = value.kind === 'a'; if (ok) {} }",
                 vec!["value[kind]~"],
             ),
-            // A property path can change between the `const` and the test.
+            // A property path can change between the `const` and the test
+            // unless it is readonly.
             (
                 "function f(value) { const k = value.a.kind; const ok = k === 'a'; if (ok) {} }",
-                vec![],
+                vec!["readonly value.a[kind]~"],
             ),
             (
                 "function f(value) { const { kind } = value.a; const ok = kind === 'a'; if (ok) {} }",
-                vec![],
+                vec!["readonly value.a[kind]~"],
             ),
             // Outside aliased conditions, a property path holds its property.
             (
@@ -2938,10 +3043,11 @@ mod tests {
                 "class K { constructor(private value) { const ok = value; if (ok) {} } }",
                 vec!["ok", "value"],
             ),
-            // A receiver can narrow when its property path cannot.
+            // A property path narrows only when it is readonly, which
+            // inference decides, while its receiver always narrows.
             (
                 "function f(value) { const ok = value?.a; if (ok) {} }",
-                vec!["ok", "value"],
+                vec!["ok", "value.a", "value"],
             ),
             // A top-level `let` of a script can change in another script.
             ("let l = get(); const ok = l; if (ok) {}", vec!["ok"]),
@@ -2972,10 +3078,15 @@ mod tests {
             ),
             (
                 "function f(value) { const ok = value.a !== null; if (ok) {} }",
-                vec!["ok"],
+                vec!["ok", "value.a"],
             ),
             (
                 "function f(value) { const ok = value['a']; if (ok) {} }",
+                vec!["ok", "value.a"],
+            ),
+            // The path of a variable that can change never narrows.
+            (
+                "function f(value) { const ok = value.a; if (ok) {} value = get(); }",
                 vec!["ok"],
             ),
             ("const ok = global; if (ok) {}", vec!["ok"]),
@@ -2985,6 +3096,111 @@ mod tests {
                 expected,
                 "{program}"
             );
+        }
+    }
+
+    /// Names the subjects of the runtime tests and the objects of the
+    /// property guards that a [`FlowGuard::ReadonlyPath`] wraps, in the
+    /// guards that decomposing the test of the last `if` statement in
+    /// `program` produces. `this` is a subject in the first method or arrow
+    /// function of `program` whose `this` can narrow.
+    fn readonly_names_in(program: &str) -> Vec<String> {
+        let parsed = parse(program, JsFileSource::ts(), JsParserOptions::default());
+        let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
+        let test = parsed
+            .syntax()
+            .descendants()
+            .filter_map(JsIfStatement::cast)
+            .last()
+            .unwrap()
+            .test()
+            .unwrap();
+        let mut subjects = match parsed
+            .syntax()
+            .descendants()
+            .filter_map(biome_js_control_flow::AnyJsControlFlowRoot::cast)
+            .find(super::super::subjects::this_can_narrow)
+        {
+            Some(root) => FlowSubjectTable::new(&root, true),
+            None => FlowSubjectTable::default(),
+        };
+        let mut guards = Vec::new();
+        let raw_binding_types = FxHashMap::default();
+        let mut functions = GuardFunctions::new(&[], &raw_binding_types);
+        decompose_condition(
+            &test,
+            FlowOutcome::Truthy,
+            &model,
+            &mut functions,
+            &mut subjects,
+            &mut guards,
+        );
+        let subjects = subjects.into_subjects();
+        readonly_guards(&guards)
+            .into_iter()
+            .map(|inner| match &guards[inner] {
+                FlowGuard::Test { subject, .. } => subject_name(&model, &subjects, *subject),
+                FlowGuard::Property {
+                    object,
+                    key: PropertyKey::Name(key),
+                    ..
+                } => format!("{}[{key}]", subject_name(&model, &subjects, *object)),
+                guard => panic!("{program}: {guard:?}"),
+            })
+            .collect()
+    }
+
+    #[test]
+    fn inlined_tests_of_paths_apply_only_to_readonly_paths() {
+        for (program, expected) in [
+            (
+                "function f(value) { const ok = value.a !== null; if (ok) {} }",
+                vec!["value.a"],
+            ),
+            (
+                "function f(value) { const ok = typeof value.a.b === 'string'; if (ok) {} }",
+                vec!["value.a.b", "value.a[b]"],
+            ),
+            // The receivers of an optional chain that are paths, and the
+            // object of a property guard that is a path.
+            (
+                "function f(value) { const ok = value.a?.b; if (ok) {} }",
+                vec!["value.a.b", "value.a[b]", "value.a"],
+            ),
+            (
+                "function f(value) { const ok = value.a.kind === 'x'; if (ok) {} }",
+                vec!["value.a.kind", "value.a[kind]"],
+            ),
+            (
+                "function f(value) { const ok = 'x' in value.a; if (ok) {} }",
+                vec!["value.a"],
+            ),
+            (
+                "class K { m() { const ok = this.v !== null; if (ok) {} } }",
+                vec!["this.v"],
+            ),
+            (
+                "class K { m() { const g = () => { const ok = this.#v; if (ok) {} }; } }",
+                vec!["this.#v"],
+            ),
+            // A `this` in an enclosing function can be another function's.
+            (
+                "function outer() { const ok = this.v; class K { m() { if (ok) {} } } }",
+                vec![],
+            ),
+            // Variables, and tests outside aliased conditions, always narrow.
+            (
+                "function f(value) { const ok = value !== null; if (ok) {} }",
+                vec![],
+            ),
+            ("function f(value) { if (value.a !== null) {} }", vec![]),
+            // A path on a variable that can change never narrows.
+            (
+                "function f(value) { const ok = value.a; value = null; if (ok) {} }",
+                vec![],
+            ),
+        ] {
+            assert_eq!(readonly_names_in(program), expected, "{program}");
         }
     }
 

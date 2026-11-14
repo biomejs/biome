@@ -1029,6 +1029,17 @@ mod tests {
                     let negation = if *positive { "" } else { "!" };
                     facts.push(format!("{negation}{object}[{key}]:{test}"));
                 }
+                // A test that applies only to a readonly path is written
+                // `readonly(Test)`.
+                FlowGuard::ReadonlyPath(inner) => {
+                    let mut inner_facts = Vec::new();
+                    self.facts(*inner, &mut inner_facts);
+                    facts.extend(
+                        inner_facts
+                            .into_iter()
+                            .map(|fact| format!("readonly({fact})")),
+                    );
+                }
                 FlowGuard::Both { left, right, .. } => {
                     self.facts(*left, facts);
                     self.facts(*right, facts);

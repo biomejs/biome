@@ -80,7 +80,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     }
                     None => return None,
                 };
-                match self.narrow_path(member.range(), declared) {
+                match self.narrow_path(&AnyJsExpression::from(member.clone()), declared) {
                     Some(narrowed) => Some(narrowed),
                     None => object.is_some().then_some(declared),
                 }
@@ -108,7 +108,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                         result
                     }
                 };
-                match self.narrow_path(member.range(), declared) {
+                match self.narrow_path(&AnyJsExpression::from(member.clone()), declared) {
                     Some(narrowed) => Some(narrowed),
                     None => (object.is_some() || key.is_some()).then_some(declared),
                 }
@@ -315,7 +315,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         )
     }
 
-    fn raw_operand(&mut self, expression: &AnyJsExpression) -> Option<TypeData<'db>> {
+    pub(super) fn raw_operand(&mut self, expression: &AnyJsExpression) -> Option<TypeData<'db>> {
         let reference = self
             .js_info
             .raw_expressions
@@ -328,7 +328,7 @@ impl<'db> ResolutionCtx<'db, '_> {
 /// Returns the member name that local inference collected for `member`, or
 /// `None` when it collected no static member expression for `member`. The
 /// name spells a private name with its `#`, as class members store it.
-fn collected_member_name<'a>(
+pub(super) fn collected_member_name<'a>(
     js_info: &'a JsModuleInfo,
     member: &JsStaticMemberExpression,
 ) -> Option<&'a str> {

@@ -10,6 +10,7 @@
 //! Likewise, the declared type of an element of a destructuring pattern at a
 //! read is its field on the pattern narrowed there.
 
+use super::flow_expressions::collected_member_name;
 use super::{ImportResolution, ResolutionCtx, resolve_local_type_on_demand};
 use crate::db::queries::{
     BindingTypeInput, FlowSubjectRootInput, FlowSubjectTypeInput, infer_flow_binding_baseline,
@@ -20,13 +21,13 @@ use crate::js_module_info::flow::{
     RootFlow, guard_signature,
 };
 use crate::{JsModuleInfo, ModuleDb, ModuleInfo};
-use biome_js_syntax::JsIdentifierExpression;
+use biome_js_syntax::{AnyJsExpression, JsIdentifierExpression};
 use biome_js_type_info::interned_types::{Literal, TypeData};
 use biome_js_type_info::{
     NarrowingPredicate, PropertyTest, RawTypeData, RawTypeId, TypeId, TypeReference,
-    TypeofExpression, is_narrowing_invariant, may_narrow_by_instanceof, may_narrow_by_property,
-    narrow_by_in_operator, narrow_by_instanceof, narrow_by_property, narrow_by_type_predicate,
-    narrow_type,
+    TypeofExpression, has_readonly_property, is_narrowing_invariant, may_narrow_by_instanceof,
+    may_narrow_by_property, narrow_by_in_operator, narrow_by_instanceof, narrow_by_property,
+    narrow_by_type_predicate, narrow_type,
 };
 use biome_rowan::{AstNode, TextRange};
 use rustc_hash::FxHashMap;
@@ -96,7 +97,7 @@ pub(in crate::db) fn flow_subject_states<'db>(
         return None;
     }
     let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
-    let states = ctx.solve_subject(root, points, subject, baseline)?;
+    let states = ctx.solve_subject(root, points, subject, baseline, input.readonly_path(db))?;
     Some(points.iter().copied().zip(states).collect())
 }
 
@@ -126,7 +127,13 @@ pub(in crate::db) fn flow_subject_type<'db>(
         Some(narrowed) => narrowed,
         None => {
             let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
-            match ctx.solve_subject(root, &[point], states.subject(db), baseline) {
+            match ctx.solve_subject(
+                root,
+                &[point],
+                states.subject(db),
+                baseline,
+                states.readonly_path(db),
+            ) {
                 Some(states) => states[0],
                 None => return Some(TypeData::Unknown),
             }
@@ -148,17 +155,18 @@ enum FlatteningError {
 }
 
 /// The state of one solve that its guards share: the subject it narrows, the
-/// subject's declared type at the root's start, and the results of the
-/// property guards, `in` tests, `instanceof` tests, and calls to type-guard
-/// functions applied so far, keyed by guard index and incoming type.
+/// subject's declared type at the root's start, whether the subject is a
+/// readonly path, as [`FlowGuard::ReadonlyPath`] requires, and the results of
+/// the property guards, `in` tests, `instanceof` tests, and calls to
+/// type-guard functions applied so far, keyed by guard index and incoming
+/// type.
 struct GuardSolve<'db> {
     /// The subject that the solve narrows.
     subject: FlowSubjectId,
     /// The subject's declared type at the root's start, which decides whether
     /// a tested property is a discriminant.
     declared: TypeData<'db>,
-    /// The results of the property guards applied so far, keyed by guard
-    /// index and incoming type.
+    readonly_path: bool,
     properties: FxHashMap<(usize, TypeData<'db>), TypeData<'db>>,
 }
 
@@ -298,6 +306,10 @@ pub(in crate::db) struct LocalFlow<'db> {
     expressions: FxHashMap<TextRange, Option<TypeData<'db>>>,
     /// The type that narrowing starts from for each binding read so far.
     baselines: FxHashMap<TextRange, Option<TypeData<'db>>>,
+    /// Whether each property path read so far is readonly, keyed by the
+    /// index of its root and its subject, as
+    /// [`ResolutionCtx::is_readonly_path`] decides it.
+    readonly_paths: FxHashMap<(usize, FlowSubjectId), bool>,
 }
 
 impl<'db> ResolutionCtx<'db, '_> {
@@ -406,6 +418,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     read.root,
                     read.subject,
                     Some(baseline),
+                    false,
                 ),
                 read.point,
             ),
@@ -438,7 +451,14 @@ impl<'db> ResolutionCtx<'db, '_> {
             self.db,
             FlowSubjectTypeInput::new(
                 self.db,
-                FlowSubjectRootInput::new(self.db, self.module, read.root, pattern, Some(baseline)),
+                FlowSubjectRootInput::new(
+                    self.db,
+                    self.module,
+                    read.root,
+                    pattern,
+                    Some(baseline),
+                    false,
+                ),
                 read.point,
             ),
         )?;
@@ -498,8 +518,12 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns the narrowed type of the property path read by the member
-    /// expression at `member`, given its `declared` type there: the type of
-    /// the member access with its object's narrowed type.
+    /// expression `member`, given its `declared` type there: the type of the
+    /// member access with its object's narrowed type.
+    ///
+    /// The runtime tests that aliased conditions apply to the path narrow it
+    /// only when the path is readonly, as [`Self::is_readonly_path`] decides
+    /// once the declared type can narrow.
     ///
     /// Returns `None` when collection kept no flow for the read, when no
     /// runtime test can change `declared`, or when narrowing leaves it
@@ -507,16 +531,22 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// solve.
     pub(super) fn narrow_path(
         &mut self,
-        member: TextRange,
+        member: &AnyJsExpression,
         declared: TypeData<'db>,
     ) -> Option<TypeData<'db>> {
-        let read = self.js_info.flow.read(member)?;
-        let root = self.js_info.flow.root(read.root)?;
+        let info = self.js_info;
+        let read = info.flow.read(member.range())?;
+        let root = info.flow.root(read.root)?;
         let baseline = if root.is_property_only(read.subject) {
             self.property_baseline(declared, root.is_instance_tested(read.subject))
         } else {
             self.narrowing_baseline(declared)
         }?;
+        let readonly_path =
+            root.is_readonly_tested(read.subject) && self.is_readonly_path(read, member);
+        if !readonly_path && root.is_only_readonly_tested(read.subject) {
+            return None;
+        }
         infer_flow_subject_type(
             self.db,
             FlowSubjectTypeInput::new(
@@ -527,10 +557,75 @@ impl<'db> ResolutionCtx<'db, '_> {
                     read.root,
                     read.subject,
                     Some(baseline),
+                    readonly_path,
                 ),
                 read.point,
             ),
         )
+    }
+
+    /// Returns whether the property path that `member` reads, at `read`, is
+    /// readonly, as [`FlowGuard::ReadonlyPath`] requires: whether, at every
+    /// step of the path, the declared type of the object, the type of its
+    /// expression without narrowing, declares the property readonly in every
+    /// member other than `null` and `undefined`, as [`has_readonly_property`]
+    /// decides it. Every read of a path gives the same answer, so the answer
+    /// is kept per root and subject when this context evaluates flow locally.
+    ///
+    /// Returns false when the syntax of `member` doesn't match the path of
+    /// the subject, and when the declared type of an object is unknown.
+    fn is_readonly_path(&mut self, read: FlowRead, member: &AnyJsExpression) -> bool {
+        let key = (read.root, read.subject);
+        if let Some(&cached) = self
+            .local_flow
+            .as_ref()
+            .and_then(|local| local.readonly_paths.get(&key))
+        {
+            return cached;
+        }
+        let is_readonly = self.readonly_path_steps(read, member).unwrap_or(false);
+        if let Some(local) = self.local_flow.as_mut() {
+            local.readonly_paths.insert(key, is_readonly);
+        }
+        is_readonly
+    }
+
+    /// Checks the steps of the path as [`Self::is_readonly_path`] describes,
+    /// from the last property to the first, or returns `None` when the syntax
+    /// of `member` doesn't match the path.
+    fn readonly_path_steps(&mut self, read: FlowRead, member: &AnyJsExpression) -> Option<bool> {
+        let info = self.js_info;
+        let root = info.flow.root(read.root)?;
+        let mut subject = read.subject;
+        let mut expression = member.clone();
+        while let FlowSubject::Member { object, key } = root.subject(subject)? {
+            let (object_expression, name) = match (&expression, key) {
+                (AnyJsExpression::JsStaticMemberExpression(member), PropertyKey::Name(name)) => {
+                    (member.object().ok()?, name.text())
+                }
+                // Class members store a private name with its `#`, which the
+                // subject's key lacks.
+                (AnyJsExpression::JsStaticMemberExpression(member), PropertyKey::Private(_)) => {
+                    (member.object().ok()?, collected_member_name(info, member)?)
+                }
+                (AnyJsExpression::JsComputedMemberExpression(member), PropertyKey::Name(name)) => {
+                    (member.object().ok()?, name.text())
+                }
+                _ => return None,
+            };
+            let mut object_expression = object_expression;
+            while let AnyJsExpression::JsParenthesizedExpression(parenthesized) = object_expression
+            {
+                object_expression = parenthesized.expression().ok()?;
+            }
+            let declared = self.raw_operand(&object_expression)?;
+            if !has_readonly_property(self.db, declared, name, self.narrowing_resolver()) {
+                return Some(false);
+            }
+            subject = *object;
+            expression = object_expression;
+        }
+        Some(true)
     }
 
     /// Returns the type that narrowing of a subject whose declared type is
@@ -655,17 +750,18 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns the type of `subject` at each of `points`, given its `baseline`
-    /// type at the root's start, or `None` when the walk or the solve exceeds
-    /// the flow work limit.
+    /// type at the root's start and whether it is a readonly path, or `None`
+    /// when the walk or the solve exceeds the flow work limit.
     fn solve_subject(
         &mut self,
         root: &RootFlow,
         points: &[FlowNodeId],
         subject: FlowSubjectId,
         baseline: TypeData<'db>,
+        readonly_path: bool,
     ) -> Option<Vec<TypeData<'db>>> {
         let reaching = ReachingFlow::new(root, points)?;
-        let states = self.solve_flow(root, &reaching, subject, baseline)?;
+        let states = self.solve_flow(root, &reaching, subject, baseline, readonly_path)?;
         Some(
             reaching
                 .points
@@ -744,14 +840,15 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns the type of `subject` at every node of `reaching`, given its
-    /// `baseline` type at the root's start, or `None` when the solve exceeds
-    /// the flow work limit.
+    /// `baseline` type at the root's start and whether it is a readonly path,
+    /// or `None` when the solve exceeds the flow work limit.
     fn solve_flow(
         &mut self,
         root: &RootFlow,
         reaching: &ReachingFlow,
         subject: FlowSubjectId,
         baseline: TypeData<'db>,
+        readonly_path: bool,
     ) -> Option<Vec<TypeData<'db>>> {
         let count = reaching.nodes.len();
         let mut queue = VecDeque::new();
@@ -766,6 +863,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         let mut guards = GuardSolve {
             subject,
             declared: baseline,
+            readonly_path,
             properties: FxHashMap::default(),
         };
         while let Some(number) = queue.pop_front() {
@@ -919,6 +1017,12 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             // Collection emits property guards only for named properties.
             FlowGuard::Property { .. } => ty,
+            FlowGuard::ReadonlyPath(inner) => {
+                if !solve.readonly_path {
+                    return Some(ty);
+                }
+                return self.apply_guard(root, *inner, solve, ty, remaining);
+            }
             FlowGuard::Both {
                 left,
                 right,
@@ -1102,6 +1206,8 @@ mod tests {
             property_only: Default::default(),
             instance_tested: Default::default(),
             pattern_elements: Default::default(),
+            readonly_tested: Default::default(),
+            only_readonly_tested: Default::default(),
         };
         let reaching = ReachingFlow::new(&root, &[2]).unwrap();
         assert_eq!(reaching.nodes, [2, 1, 3, 0]);

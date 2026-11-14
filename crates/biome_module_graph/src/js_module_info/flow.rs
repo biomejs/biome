@@ -53,8 +53,8 @@ use biome_js_syntax::{
     JsThisExpression,
 };
 use biome_js_type_info::{
-    RawTypeData, RawTypeId, TypeReference, TypeofExpression, is_raw_narrowing_invariant,
-    raw_may_be_object_union, raw_may_narrow_by_instanceof,
+    RawTypeData, RawTypeId, TypeReference, TypeofExpression, TypeofKind,
+    is_raw_narrowing_invariant, raw_may_be_object_union, raw_may_narrow_by_instanceof,
 };
 use biome_rowan::{AstNode, AstPtr, SyntaxKindSet, Text, TextRange};
 use builder::{BuiltRoot, build_root};
@@ -198,27 +198,29 @@ impl FlowSubjectTable {
     /// computed key of an object literal method or accessor inside it. That
     /// `this` is the root's own, but Biome types it as an instance of the
     /// class or as the object.
+    ///
+    /// Also returns `None` for a `this` outside the root, which the
+    /// initializer of an aliased condition that an enclosing function
+    /// declares can contain: it can be the `this` of another function.
     fn this(&mut self, expression: &JsThisExpression) -> Option<FlowSubjectId> {
         let root = self.this_root.as_ref()?;
-        let in_member_owner = expression
-            .syntax()
-            .ancestors()
-            .take_while(|node| node != root)
-            .any(|node| {
-                matches!(
-                    node.kind(),
-                    JsSyntaxKind::JS_CLASS_DECLARATION
-                        | JsSyntaxKind::JS_CLASS_EXPRESSION
-                        | JsSyntaxKind::JS_CLASS_EXPORT_DEFAULT_DECLARATION
-                        | JsSyntaxKind::JS_METHOD_OBJECT_MEMBER
-                        | JsSyntaxKind::JS_GETTER_OBJECT_MEMBER
-                        | JsSyntaxKind::JS_SETTER_OBJECT_MEMBER
-                )
-            });
-        if in_member_owner {
-            return None;
+        for node in expression.syntax().ancestors() {
+            if node == *root {
+                return self.intern(FlowSubject::This);
+            }
+            if matches!(
+                node.kind(),
+                JsSyntaxKind::JS_CLASS_DECLARATION
+                    | JsSyntaxKind::JS_CLASS_EXPRESSION
+                    | JsSyntaxKind::JS_CLASS_EXPORT_DEFAULT_DECLARATION
+                    | JsSyntaxKind::JS_METHOD_OBJECT_MEMBER
+                    | JsSyntaxKind::JS_GETTER_OBJECT_MEMBER
+                    | JsSyntaxKind::JS_SETTER_OBJECT_MEMBER
+            ) {
+                return None;
+            }
         }
-        self.intern(FlowSubject::This)
+        None
     }
 
     /// Returns the destructuring pattern that a runtime test of the variable
@@ -332,6 +334,13 @@ pub(crate) struct RootFlow {
     /// also a read point of the pattern, so that the declared type of the
     /// element at the read is its property on the narrowed pattern.
     pub(crate) pattern_elements: FxHashMap<FlowSubjectId, FlowSubjectId>,
+    /// The subjects with reads that a [`FlowGuard::ReadonlyPath`] guard
+    /// tests, or narrows as the object of a property guard. Inference decides
+    /// at a read of such a subject whether its path is readonly.
+    pub(crate) readonly_tested: FxHashSet<FlowSubjectId>,
+    /// The subjects in [`Self::readonly_tested`] that no other guard tests or
+    /// narrows, which need no solve when their path is not readonly.
+    pub(crate) only_readonly_tested: FxHashSet<FlowSubjectId>,
 }
 
 impl RootFlow {
@@ -358,6 +367,18 @@ impl RootFlow {
     /// [`Self::is_property_only`] accepts.
     pub(crate) fn is_instance_tested(&self, subject: FlowSubjectId) -> bool {
         self.instance_tested.contains(&subject)
+    }
+
+    /// Returns whether a [`FlowGuard::ReadonlyPath`] guard may narrow
+    /// `subject`, as [`Self::readonly_tested`] describes.
+    pub(crate) fn is_readonly_tested(&self, subject: FlowSubjectId) -> bool {
+        self.readonly_tested.contains(&subject)
+    }
+
+    /// Returns whether only [`FlowGuard::ReadonlyPath`] guards may narrow
+    /// `subject`, as [`Self::only_readonly_tested`] describes.
+    pub(crate) fn is_only_readonly_tested(&self, subject: FlowSubjectId) -> bool {
+        self.only_readonly_tested.contains(&subject)
     }
 
     /// Returns the [`FlowSubject::Pattern`] that holds the element `subject`
@@ -700,6 +721,8 @@ impl RootCollector<'_> {
                 }
             }
         }
+        let (mut readonly_tested, mut only_readonly_tested) =
+            readonly_tested_subjects(&mut guards, subjects.as_slice());
         let narrowable: FxHashSet<FlowSubjectId> = tested
             .iter()
             .copied()
@@ -854,6 +877,8 @@ impl RootCollector<'_> {
                 .filter(|subject| read_points.contains_key(subject))
                 .collect();
             instance_tested.retain(|subject| property_only.contains(subject));
+            readonly_tested.retain(|subject| read_points.contains_key(subject));
+            only_readonly_tested.retain(|subject| readonly_tested.contains(subject));
             flow.roots.push(RootFlow {
                 nodes: nodes.into_boxed_slice(),
                 guards: guards.into_boxed_slice(),
@@ -861,6 +886,8 @@ impl RootCollector<'_> {
                 property_only,
                 instance_tested,
                 pattern_elements,
+                readonly_tested,
+                only_readonly_tested,
                 read_points: read_points
                     .into_iter()
                     .map(|(subject, mut points)| {
@@ -989,6 +1016,94 @@ impl RootCollector<'_> {
         }
         Some(reachable)
     }
+}
+
+/// Replaces with [`FlowGuard::Keep`] the [`FlowGuard::ReadonlyPath`] guards of
+/// `guards` whose path has an object that a test of the root can give a type
+/// with members that its declared type lacks, and returns the subjects of the
+/// other such guards, then those of them that no other guard tests or
+/// narrows. `subjects` are the root's subjects, each at the index of its id.
+///
+/// Inference decides whether a path is readonly from the declared types of the
+/// objects along it, while TypeScript decides it from their types at the
+/// read. Both agree while the tests of those objects only remove members
+/// from their types. `instanceof`, a type-guard function, and `typeof` with a
+/// primitive kind or `"function"` can replace a member with another type, as
+/// `o instanceof Derived` replaces `Base` with `Derived`, whose property can be
+/// mutable where `Base` declares it readonly. Biome keeps some members that
+/// TypeScript replaces in these tests, so it would see a readonly property
+/// where TypeScript doesn't.
+fn readonly_tested_subjects(
+    guards: &mut [FlowGuard],
+    subjects: &[FlowSubject],
+) -> (FxHashSet<FlowSubjectId>, FxHashSet<FlowSubjectId>) {
+    let tested = |guard: &FlowGuard| match guard {
+        FlowGuard::Test { subject, .. } => Some(*subject),
+        FlowGuard::Property { object, .. } => Some(*object),
+        FlowGuard::Keep
+        | FlowGuard::Incomplete
+        | FlowGuard::ReadonlyPath(_)
+        | FlowGuard::Both { .. } => None,
+    };
+    let mut replaced = FxHashSet::default();
+    let mut wrapped = FxHashSet::default();
+    for guard in guards.iter() {
+        match guard {
+            FlowGuard::Test {
+                subject,
+                test:
+                    FlowTest::Instanceof(_)
+                    | FlowTest::Predicate { .. }
+                    | FlowTest::Typeof(
+                        TypeofKind::BigInt
+                        | TypeofKind::Boolean
+                        | TypeofKind::Function
+                        | TypeofKind::Number
+                        | TypeofKind::String
+                        | TypeofKind::Symbol,
+                    ),
+                ..
+            } => {
+                replaced.insert(*subject);
+            }
+            FlowGuard::ReadonlyPath(inner) => {
+                wrapped.insert(*inner);
+            }
+            _ => {}
+        }
+    }
+    let has_replaced_object = |mut subject: FlowSubjectId| {
+        while let Some(FlowSubject::Member { object, .. }) = subjects.get(subject as usize) {
+            // A table stores an object before its members, so a later object
+            // means the table is malformed, and the guard is dropped.
+            if replaced.contains(object) || *object >= subject {
+                return true;
+            }
+            subject = *object;
+        }
+        false
+    };
+    let mut readonly_tested = FxHashSet::default();
+    for index in 0..guards.len() {
+        let FlowGuard::ReadonlyPath(inner) = guards[index] else {
+            continue;
+        };
+        match guards.get(inner).and_then(tested) {
+            Some(subject) if !has_replaced_object(subject) => {
+                readonly_tested.insert(subject);
+            }
+            _ => guards[index] = FlowGuard::Keep,
+        }
+    }
+    let mut only_readonly_tested = readonly_tested.clone();
+    for (index, guard) in guards.iter().enumerate() {
+        if !wrapped.contains(&index)
+            && let Some(subject) = tested(guard)
+        {
+            only_readonly_tested.remove(&subject);
+        }
+    }
+    (readonly_tested, only_readonly_tested)
 }
 
 /// Binding patterns, with their elements and lists, which can enclose a binding.
