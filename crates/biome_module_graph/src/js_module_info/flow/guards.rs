@@ -909,8 +909,9 @@ mod tests {
         (guards, names)
     }
 
-    /// Returns the name of the variable that `subject` starts at, followed by
-    /// the names along its path, as in `value.length`.
+    /// Returns the name of the variable that `subject` starts at, or `this`,
+    /// followed by the names along its path, as in `value.length` or
+    /// `this.#a`.
     fn subject_name(
         model: &SemanticModel,
         subjects: &[FlowSubject],
@@ -925,10 +926,15 @@ mod tests {
                 .unwrap()
                 .text_trimmed()
                 .to_owned(),
+            FlowSubject::This => "this".to_owned(),
             FlowSubject::Member {
                 object,
                 key: PropertyKey::Name(name),
             } => format!("{}.{name}", subject_name(model, subjects, *object)),
+            FlowSubject::Member {
+                object,
+                key: PropertyKey::Private(name),
+            } => format!("{}.#{name}", subject_name(model, subjects, *object)),
         }
     }
 

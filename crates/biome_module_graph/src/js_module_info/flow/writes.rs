@@ -33,11 +33,15 @@ use rustc_hash::FxHashSet;
 /// initializers, decorators, computed keys, and the parameters of nested
 /// functions. It skips the bodies of other functions, methods, accessors, and
 /// constructors. A write through another variable that holds the same object,
-/// as in `a.v = x` after `const a = o`, does not write `o.v`. Wherever the
-/// scan differs from TypeScript, it counts more writes: TypeScript ignores,
-/// for example, writes in `async` and generator functions called where they
-/// are defined, in field initializers and parameter defaults, and through
-/// `as` and `satisfies`.
+/// as in `a.v = x` after `const a = o`, does not write `o.v`. Every `this`
+/// and `super` that the scan finds stands for the root's `this`, so
+/// `super.v = x`, which sets `v` on `this` or calls a setter of a parent class
+/// with `this` as its receiver, writes `this.v`. Wherever the scan differs
+/// from TypeScript, it counts more writes: TypeScript ignores, for example,
+/// writes in `async` and generator functions called where they are defined,
+/// in field initializers and parameter defaults, through `as` and
+/// `satisfies`, through `super`, and to `this` in a static block, whose
+/// `this` is another object.
 pub(super) struct WrittenPaths {
     /// Subjects that an assignment or `delete` writes directly.
     written: FxHashSet<FlowSubjectId>,
@@ -126,12 +130,7 @@ impl WrittenPaths {
         let Some(object) = self.object(object, model, subjects) else {
             return;
         };
-        let key = match name {
-            // A private name is never part of a subject's path.
-            Ok(AnyJsName::JsPrivateName(_)) => return,
-            Ok(name) => property_key(&name),
-            Err(_) => None,
-        };
+        let key = name.ok().as_ref().and_then(property_key);
         self.property(object, key, subjects);
     }
 
@@ -196,12 +195,13 @@ impl WrittenPaths {
     /// Returns the subject that `expression`, the object of a written
     /// property, refers to, or `None` when no stored subject starts with it.
     ///
-    /// A key along the object that is not a literal, as in `o[k].v`, can name
-    /// any property, so it records a write of every property of the object
-    /// before it and returns `None`.
+    /// `this` and `super` refer to the root's `this`. A key along the object
+    /// that is not a literal, as in `o[k].v`, can name any property, so it
+    /// records a write of every property of the object before it and returns
+    /// `None`.
     #[expect(
         clippy::wildcard_enum_match_arm,
-        reason = "Only variables and member accesses lead to a subject."
+        reason = "Only variables, `this`, `super`, and member accesses lead to a subject."
     )]
     fn object(
         &mut self,
@@ -213,17 +213,17 @@ impl WrittenPaths {
         // key that can name any property.
         let mut keys = Vec::new();
         let mut expression = expression;
-        let reference = loop {
+        let mut subject = loop {
             match omit_wrappers(expression)? {
                 AnyJsExpression::JsIdentifierExpression(identifier) => {
-                    break identifier.name().ok()?;
+                    let binding = model.binding(&identifier.name().ok()?)?;
+                    break subjects.get(&FlowSubject::Binding(binding.range()))?;
+                }
+                AnyJsExpression::JsThisExpression(_) | AnyJsExpression::JsSuperExpression(_) => {
+                    break subjects.get(&FlowSubject::This)?;
                 }
                 AnyJsExpression::JsStaticMemberExpression(member) => {
-                    match member.member() {
-                        Ok(AnyJsName::JsPrivateName(_)) => return None,
-                        Ok(name) => keys.push(property_key(&name)),
-                        Err(_) => keys.push(None),
-                    }
+                    keys.push(member.member().ok().as_ref().and_then(property_key));
                     expression = member.object().ok()?;
                 }
                 AnyJsExpression::JsComputedMemberExpression(member) => {
@@ -233,8 +233,6 @@ impl WrittenPaths {
                 _ => return None,
             }
         };
-        let binding = model.binding(&reference)?;
-        let mut subject = subjects.get(&FlowSubject::Binding(binding.range()))?;
         for key in keys.into_iter().rev() {
             match key {
                 Some(key) => {
@@ -335,17 +333,24 @@ mod tests {
         cancelled_among(&PATHS, body)
     }
 
-    /// Returns the paths among `paths` that the function root
-    /// `function f(o, q, k, xs, t) { ... }` with `body` cancels.
+    /// Returns the paths among `paths` that the method root
+    /// `m(o, q, k, xs, t) { ... }` with `body` cancels. The method's class
+    /// declares a private field `#p`, and paths on `this` can narrow in it.
     fn cancelled_among(paths: &[&'static str], body: &str) -> Vec<&'static str> {
         let source = format!(
-            "function f(o, q, k, xs, t) {{ {}; {body} }}",
+            "class K extends Object {{ #p; m(o, q, k, xs, t) {{ {}; {body} }} }}",
             paths.join("; ")
         );
         let parsed = parse(&source, JsFileSource::ts(), JsParserOptions::default());
         assert!(!parsed.has_errors(), "{source}");
         let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
-        let mut subjects = FlowSubjectTable::default();
+        let root = parsed
+            .syntax()
+            .descendants()
+            .filter_map(AnyJsControlFlowRoot::cast)
+            .find(|root| root.syntax().kind() == JsSyntaxKind::JS_METHOD_CLASS_MEMBER)
+            .unwrap();
+        let mut subjects = FlowSubjectTable::new(&root, true);
         let ids: Vec<_> = parsed
             .syntax()
             .descendants()
@@ -355,12 +360,6 @@ mod tests {
                 subject_of(&statement.expression().unwrap(), &model, &mut subjects).unwrap()
             })
             .collect();
-        let root = parsed
-            .syntax()
-            .descendants()
-            .filter_map(AnyJsControlFlowRoot::cast)
-            .find(|root| root.syntax().kind() == JsSyntaxKind::JS_FUNCTION_DECLARATION)
-            .unwrap();
         let written = WrittenPaths::new(&root, &model, &subjects);
         paths
             .iter()
@@ -512,6 +511,69 @@ mod tests {
             "o.w.v = null",
         ] {
             assert_eq!(cancelled(body), Vec::<&str>::new(), "{body}");
+        }
+    }
+
+    const THIS_PATHS: [&str; 5] = ["this.v", "this.v.w", "this.#p", "this.w", "o.v"];
+
+    #[test]
+    fn writes_through_this_or_super_cancel_paths_on_this() {
+        for body in [
+            "this.v = null",
+            "(this).v = null",
+            "this['v'] = null",
+            "this.v ??= null",
+            "this.v++",
+            "[this.v] = xs",
+            "delete this.v",
+            "super.v = null",
+            "super['v'] = null",
+            "(() => { this.v = null; })()",
+            // TypeScript also counts a function called where it is defined,
+            // although its `this` is another value.
+            "(function () { this.v = null; })()",
+            "class C { static { this.v = null; } }",
+        ] {
+            assert_eq!(
+                cancelled_among(&THIS_PATHS, body),
+                ["this.v", "this.v.w"],
+                "{body}"
+            );
+        }
+        assert_eq!(
+            cancelled_among(&THIS_PATHS, "this.v.w = null"),
+            ["this.v.w"]
+        );
+        assert_eq!(cancelled_among(&THIS_PATHS, "this.#p = null"), ["this.#p"]);
+        // A string key names a property, never a private name.
+        assert_eq!(
+            cancelled_among(&THIS_PATHS, "this['#p'] = null"),
+            Vec::<&str>::new()
+        );
+        for body in ["this[k] = null", "super[k] = null", "delete this[k]"] {
+            assert_eq!(
+                cancelled_among(&THIS_PATHS, body),
+                ["this.v", "this.v.w", "this.#p", "this.w"],
+                "{body}"
+            );
+        }
+    }
+
+    #[test]
+    fn writes_to_this_in_callbacks_and_other_members_keep_narrowing() {
+        for body in [
+            "[1].forEach(() => { this.v = null; })",
+            "const g = () => { this.v = null; }",
+            "(function () { this.v = null; }).call(this)",
+            "class C { m() { this.v = null; } }",
+            "const self = this; self.v = null",
+            "o.w = null",
+        ] {
+            assert_eq!(
+                cancelled_among(&THIS_PATHS, body),
+                Vec::<&str>::new(),
+                "{body}"
+            );
         }
     }
 

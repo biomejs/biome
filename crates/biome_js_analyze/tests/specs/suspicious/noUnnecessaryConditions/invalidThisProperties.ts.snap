@@ -1,0 +1,155 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidThisProperties.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// A property of `this` narrows like a property of a variable in a method, in
+// an arrow function in a field initializer, and in an object literal method:
+// after the test, `this.timer` and `this.#pending` cannot be nullish at the
+// optional chains, as in TypeScript.
+
+interface Timer {
+	cancel(): void;
+}
+
+class Scheduler {
+	timer: Timer | null = null;
+	#pending: Timer | undefined;
+
+	stop() {
+		if (this.timer) {
+			this.timer?.cancel();
+		}
+	}
+
+	flush() {
+		if (this.#pending === undefined) {
+			return;
+		}
+		this.#pending?.cancel();
+	}
+
+	onIdle = () => {
+		if (this.timer !== null) {
+			this.timer?.cancel();
+		}
+	};
+}
+
+const scheduler = {
+	timer: null as Timer | null,
+	stop() {
+		if (this.timer) {
+			this.timer?.cancel();
+		}
+	},
+};
+
+```
+
+# Diagnostics
+```
+invalidThisProperties.ts:17:4 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    15 │ 	stop() {
+    16 │ 		if (this.timer) {
+  > 17 │ 			this.timer?.cancel();
+       │ 			^^^^^^^^^^
+    18 │ 		}
+    19 │ 	}
+  
+  i Replace ?. with ..
+  
+    15 │ 	stop() {
+    16 │ 		if (this.timer) {
+  > 17 │ 			this.timer?.cancel();
+       │ 			          ^^
+    18 │ 		}
+    19 │ 	}
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidThisProperties.ts:25:3 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    23 │ 			return;
+    24 │ 		}
+  > 25 │ 		this.#pending?.cancel();
+       │ 		^^^^^^^^^^^^^
+    26 │ 	}
+    27 │ 
+  
+  i Replace ?. with ..
+  
+    23 │ 			return;
+    24 │ 		}
+  > 25 │ 		this.#pending?.cancel();
+       │ 		             ^^
+    26 │ 	}
+    27 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidThisProperties.ts:30:4 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    28 │ 	onIdle = () => {
+    29 │ 		if (this.timer !== null) {
+  > 30 │ 			this.timer?.cancel();
+       │ 			^^^^^^^^^^
+    31 │ 		}
+    32 │ 	};
+  
+  i Replace ?. with ..
+  
+    28 │ 	onIdle = () => {
+    29 │ 		if (this.timer !== null) {
+  > 30 │ 			this.timer?.cancel();
+       │ 			          ^^
+    31 │ 		}
+    32 │ 	};
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidThisProperties.ts:39:4 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    37 │ 	stop() {
+    38 │ 		if (this.timer) {
+  > 39 │ 			this.timer?.cancel();
+       │ 			^^^^^^^^^^
+    40 │ 		}
+    41 │ 	},
+  
+  i Replace ?. with ..
+  
+    37 │ 	stop() {
+    38 │ 		if (this.timer) {
+  > 39 │ 			this.timer?.cancel();
+       │ 			          ^^
+    40 │ 		}
+    41 │ 	},
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```

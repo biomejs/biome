@@ -659,3 +659,326 @@ fn complete_module_tables_agree_with_path_reads() {
         );
     }
 }
+
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type:
+// paths on `this` narrow like paths on a variable in class methods and
+// accessors, in object literal methods, and in arrow functions inside them or
+// inside a field initializer.
+#[test]
+fn paths_on_this_narrow_like_paths_on_variables() {
+    use InferredTypeData::{Number, String};
+    const SOURCE: &str = r#"
+        function isString(v: unknown): v is string { return typeof v === "string"; }
+        class K {
+            x: string | null = null;
+            #y: string | null = null;
+            n: string | number = 0;
+            get g(): string | null { return null; }
+            m() {
+                if (this.x) { /*field*/this.x; }
+                if (this.#y) { /*private*/this.#y; }
+                if (this.g) { /*getter*/this.g; }
+                if (this["x"]) { /*element*/this.x; }
+                if (typeof this.n === "string") { /*typeof*/this.n; } else { /*typeofElse*/this.n; }
+                if (isString(this.n)) { /*guard*/this.n; }
+            }
+            get accessor(): string {
+                if (this.x !== null) { return /*accessor*/this.x; }
+                return "";
+            }
+            arrow() {
+                const g = () => { if (this.x) { /*arrow*/this.x; } };
+            }
+            fieldArrow = () => { if (this.x) { /*fieldArrow*/this.x; } };
+        }
+        const obj = {
+            x: null as string | null,
+            m() { if (this.x) { /*object*/this.x; } },
+        };
+    "#;
+    assert_reads(
+        SOURCE,
+        &[
+            ("field", "this.x", &[String]),
+            ("private", "this.#y", &[String]),
+            ("getter", "this.g", &[String]),
+            ("element", "this.x", &[String]),
+            ("typeof", "this.n", &[String]),
+            ("typeofElse", "this.n", &[Number]),
+            ("guard", "this.n", &[String]),
+            ("accessor", "this.x", &[String]),
+            ("arrow", "this.x", &[String]),
+            ("fieldArrow", "this.x", &[String]),
+            ("object", "this.x", &[String]),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) gives the expected type at each read:
+// narrowing never reaches an arrow function created after the test, and an
+// object literal method or class method inside the method has its own `this`.
+#[test]
+fn reads_in_nested_functions_see_no_facts_about_this() {
+    use InferredTypeData::{Null, Number, String};
+    const SOURCE: &str = r#"
+        class K {
+            x: string | null = null;
+            m() {
+                if (this.x) {
+                    const g = () => /*later*/this.x;
+                    const o = { x: 1 as number | null, n() { return /*object*/this.x; } };
+                    class F { x: number | null = null; n() { return /*class*/this.x; } }
+                }
+            }
+        }
+    "#;
+    assert_reads(
+        SOURCE,
+        &[
+            ("later", "this.x", &[String, Null]),
+            ("object", "this.x", &[Number, Null]),
+            ("class", "this.x", &[Number, Null]),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) gives the type in the comment after each
+// read. In a constructor, and in an arrow function called where the
+// constructor defines it, TypeScript reads a field without an initializer at
+// its declared type after a test that leaves `undefined` possible (TS2565).
+// Biome narrows no path on `this` in a constructor or in an arrow function
+// created there, so it is wider where TypeScript narrows.
+#[test]
+fn constructors_keep_paths_on_this_unnarrowed() {
+    use InferredTypeData::{Null, String};
+    const SOURCE: &str = r#"
+        class WithInitializer {
+            x: string | null = null;
+            constructor() {
+                if (this.x !== null) { /*initializer*/this.x; } // string
+                const g = () => { if (this.x) { /*arrow*/this.x; } }; // string
+            }
+        }
+        class WithoutInitializer {
+            x: string | null;
+            constructor() {
+                if (this.x !== null) { /*withoutInitializer*/this.x; } // string | null
+                (() => { if (this.x !== null) { /*iife*/this.x; } })(); // string | null
+                this.x = null;
+            }
+        }
+    "#;
+    assert_reads(
+        SOURCE,
+        &[
+            ("initializer", "this.x", &[String, Null]),
+            ("arrow", "this.x", &[String, Null]),
+            ("withoutInitializer", "this.x", &[String, Null]),
+            ("iife", "this.x", &[String, Null]),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) narrows `staticMethod` and `staticBlock` to
+// `string`, and reports TS2339 at `instanceField`, because `this` in a static
+// method or static block is the class. Biome types `this` there as an instance
+// of the class, so it cannot read the type of `this.s`, and it reads `this.x`
+// from the instance. It narrows no path on `this` there.
+#[test]
+fn static_members_keep_paths_on_this_unnarrowed() {
+    use InferredTypeData::{Null, String, Unknown};
+    const SOURCE: &str = r#"
+        class S {
+            static s: string | null = null;
+            x: string | null = null;
+            static m() {
+                if (this.s) { /*staticMethod*/this.s; }
+                if (this.x) { /*instanceField*/this.x; }
+            }
+            static { if (this.s) { /*staticBlock*/this.s; } }
+        }
+    "#;
+    assert_reads(
+        SOURCE,
+        &[
+            ("staticMethod", "this.s", &[Unknown]),
+            ("instanceField", "this.x", &[String, Null]),
+            ("staticBlock", "this.s", &[Unknown]),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) narrows every read below to `string`: an
+// object literal method takes `this` from the object, or from its contextual
+// type, and a function or method with a `this` parameter from the parameter.
+// Biome finds the object or class only through a variable it initializes or a
+// class name. Otherwise it types `this` from the enclosing class or object
+// literal, so `argument` and `classArgument` read the field of `K` and
+// `nested` the field of `o`, or not at all, and it ignores `this` parameters.
+// It narrows no path on `this` there.
+#[test]
+fn paths_on_this_stay_unnarrowed_where_biome_types_this_otherwise() {
+    use InferredTypeData::{Null, Number, String, Unknown};
+    const SOURCE: &str = r#"
+        declare function use(o: { x: string | null; n(): void }): void;
+        declare function take(c: unknown): void;
+        class K {
+            x: number | null = null;
+            m() {
+                use({ x: null, n() { if (this.x) { /*argument*/this.x; } } });
+                const o = { x: null as number | null, inner: { x: null as string | null, n() { if (this.x) { /*nested*/this.x; } } } };
+                take(class { x: string | null = null; n() { if (this.x) { /*classArgument*/this.x; } } });
+            }
+        }
+        use({ x: null, n() { if (this.x) { /*module*/this.x; } } });
+        function f(this: { x: string | null }) { if (this.x) { /*function*/this.x; } }
+        class T { x: string | null = null; m(this: T) { if (this.x) { /*thisParameter*/this.x; } } }
+    "#;
+    assert_reads(
+        SOURCE,
+        &[
+            ("argument", "this.x", &[Number, Null]),
+            ("nested", "this.x", &[Number, Null]),
+            ("classArgument", "this.x", &[Number, Null]),
+            ("module", "this.x", &[Unknown]),
+            ("function", "this.x", &[Unknown]),
+            ("thisParameter", "this.x", &[String, Null]),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) narrows every read below to `string`: a
+// write to `this.x` in another method, in a callback, or in a function called
+// through `.call(this)` never cancels its narrowing. Biome copies this unsound
+// narrowing; `NARROWING.md` lists it among the deliberate choices.
+#[test]
+fn writes_to_this_in_other_functions_keep_narrowing() {
+    use InferredTypeData::String;
+    const SOURCE: &str = r#"
+        class K {
+            x: string | null = null;
+            reset() { this.x = null; }
+            method() { if (this.x) { this.reset(); /*method*/this.x; } }
+            callback() { if (this.x) { [1].forEach(() => { this.x = null; }); /*callback*/this.x; } }
+            call() {
+                if (this.x) { (function (this: K) { this.x = null; }).call(this); /*call*/this.x; }
+            }
+        }
+    "#;
+    assert_reads(
+        SOURCE,
+        &[
+            ("method", "this.x", &[String]),
+            ("callback", "this.x", &[String]),
+            ("call", "this.x", &[String]),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) gives the type in the comment after each
+// read. Every write cancels the narrowing of the path it writes, so Biome reads
+// it at its declared type. Where TypeScript differs, it narrows the path at the
+// write itself, which Biome does not model yet, or ignores a write through
+// `super`, which can set `this.x` through a setter of the parent class. A
+// write to another path, at `other` and `superOther`, keeps the narrowing.
+#[test]
+fn writes_to_this_in_the_same_root_cancel_narrowing() {
+    use InferredTypeData::{Null, String};
+    const SOURCE: &str = r#"
+        declare function get(): string | null;
+        class K {
+            x: string | null = null;
+            #y: string | null = null;
+            p: { y: string | null } = { y: null };
+            assigned() { if (this.x) { this.x = get(); /*assigned*/this.x; } } // string | null
+            privateName() { if (this.#y) { this.#y = get(); /*privateName*/this.#y; } } // string | null
+            prefix() { if (this.p.y) { this.p = { y: null }; /*prefix*/this.p.y; } } // string | null
+            other() { if (this.x) { this.p.y = null; this.#y = null; /*other*/this.x; } } // string
+            arrowIife() { if (this.x) { (() => { this.x = null; })(); /*arrowIife*/this.x; } } // null
+            functionIife() {
+                if (this.x) { (function (this: any) { this.x = null; })(); /*functionIife*/this.x; } // null
+            }
+        }
+        class P {
+            get x(): string | null { return null; }
+            set x(v: string | null) {}
+        }
+        class C extends P {
+            y: string | null = null;
+            m() { if (this.x) { super.x = null; /*super*/this.x; } } // string
+            n() { if (this.y) { super.x = null; /*superOther*/this.y; } } // string
+        }
+    "#;
+    assert_reads(
+        SOURCE,
+        &[
+            ("assigned", "this.x", &[String, Null]),
+            ("privateName", "this.#y", &[String, Null]),
+            ("prefix", "this.p.y", &[String, Null]),
+            ("arrowIife", "this.x", &[String, Null]),
+            ("functionIife", "this.x", &[String, Null]),
+            ("super", "this.x", &[String, Null]),
+            ("other", "this.x", &[String]),
+            ("superOther", "this.y", &[String]),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) gives the type in the comment after each
+// read. A private name narrows on any object, as `o.#v` does. TypeScript also
+// treats `this["#x"]` as the same reference as `this.#x`, although they are
+// different properties; Biome keeps them apart, so it is wider there.
+#[test]
+fn private_names_narrow_and_differ_from_string_keys() {
+    use InferredTypeData::{Null, String};
+    const SOURCE: &str = r##"
+        class P {
+            #v: string | null = null;
+            static f(o: P | null) {
+                if (o && o.#v) { /*narrowedObject*/o.#v; } // string
+            }
+        }
+        class Q {
+            #x: string | null = null;
+            "#x": string | null = null;
+            m() {
+                if (this.#x) { /*fromPrivate*/this["#x"]; } // string
+                if (this["#x"]) { /*fromString*/this.#x; } // string
+            }
+        }
+    "##;
+    assert_reads(
+        SOURCE,
+        &[
+            ("narrowedObject", "o.#v", &[String]),
+            ("fromPrivate", r##"this["#x"]"##, &[String, Null]),
+            ("fromString", "this.#x", &[String, Null]),
+        ],
+    );
+}
+
+#[test]
+fn complete_module_tables_agree_with_reads_of_paths_on_this() {
+    const SOURCE: &str = r#"
+        class K {
+            x: string | null = null;
+            #y: string | null = null;
+            m() {
+                if (this.x !== null && this.#y !== null) {
+                    /*read*/this.x;
+                    /*private*/this.#y;
+                }
+            }
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    for (marker, expression) in [("read", "this.x"), ("private", "this.#y")] {
+        let range = marked_range(SOURCE, marker, expression);
+        let ty = infer_expression_type(&db, ExpressionTypeInput::new(&db, module, range)).unwrap();
+        assert_eq!(normalize_type(&db, module, ty), InferredTypeData::String);
+        assert_eq!(
+            infer_module_types(&db, module).unwrap().expressions[&range],
+            ty
+        );
+    }
+}

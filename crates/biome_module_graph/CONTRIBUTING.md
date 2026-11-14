@@ -69,14 +69,16 @@ queries do everything that needs a resolved type.
 
 When type inference is enabled, collection (`src/js_module_info/flow.rs`)
 builds a graph of the possible paths through each execution root that tests
-one of its own variables. Its parts live in `src/js_module_info/flow/`:
+one of its own variables or a path on its own `this`. Its parts live in
+`src/js_module_info/flow/`:
 
 - `scanner.rs` selects roots while the module visitor walks the syntax tree,
   so collection never walks the whole module again. A root is selected when
   its own code contains a condition or, in a module with an `asserts`
-  annotation, a standalone call. The scanner rejects a root when its own code
-  contains a `with` statement or bogus syntax, and a root over its node or
-  depth limit. Declaration files (`.d.ts`, `.d.mts`, `.d.cts`, in any letter
+  annotation, a standalone call. It also records whether the root's own code
+  uses `this`, so a root whose only subjects are paths on `this` still gets a
+  graph. The scanner rejects a root when its own code contains a `with`
+  statement or bogus syntax, and a root over its node or depth limit. Declaration files (`.d.ts`, `.d.mts`, `.d.cts`, in any letter
   case) contain no code that runs, so the visitor does not look for roots in
   them.
 - `builder.rs` builds the graph of one selected root from start, join, and
@@ -100,17 +102,31 @@ one of its own variables. Its parts live in `src/js_module_info/flow/`:
   narrower than the state at any point inside or after it. Replacing a region
   with a model of its statement only makes narrowing more precise.
 - `subjects.rs` maps an expression to the subject it reads or tests: a
-  variable, or a property path that starts at one, such as `o.v`, `a.b.c`, or
-  `t[0]`. A static member access with a named property extends a path, and so
-  does an element access whose key spells its property's name: a string
+  variable or `this`, or a property path that starts at one, such as `o.v`,
+  `a.b.c`, `t[0]`, or `this.#v`. A static member access with a named property
+  or a private name extends a path, and so does an element access whose key
+  spells its property's name: a string
   literal without escapes, or a decimal integer literal from 0 to 2^53 - 1
   without leading zeros or separators. JavaScript converts a number key to a
   string, and such an integer converts to its own digits, so `o["v"]` is the
   same subject as `o.v`, and `t[0]` the same as `t["0"]`. Any other key, such
-  as `k`, `-0`, or `0x0`, ends the subject. Parentheses are skipped, and `o?.v` is the same subject
-  as `o.v`. Each root stores its subjects in a table, a path after its
-  prefixes, so the builder and the decomposer give a read and a test of the
-  same subject the same id.
+  as `k`, `-0`, or `0x0`, ends the subject. A private name gets a key of its
+  own, so `o.#v` is never the same subject as `o["#v"]`. Parentheses are
+  skipped, and `o?.v` is the same subject as `o.v`. Each root stores its
+  subjects in a table, a path after its prefixes, so the builder and the
+  decomposer give a read and a test of the same subject the same id.
+- `this` is a subject only in a root where `this_can_narrow` in `subjects.rs`
+  holds: where Biome types `this` as TypeScript does and TypeScript narrows
+  its properties as those of a variable. That is a class method or accessor
+  that is not `static` and has no `this` parameter, an object literal method
+  or accessor, or an arrow function whose `this` comes from one of them or
+  from a field initializer, when Biome can name the class or object. A
+  constructor has no `this` subject, and neither does an arrow function whose
+  `this` comes from a constructor. There, TypeScript reads a field without an
+  initializer at its declared type after a test that leaves `undefined`
+  possible (TS2565), and an arrow function called where it is defined
+  continues the constructor's flow. Each root has its own `this`, so a test
+  of `this.v` never reaches a read in a nested function.
 - `guards.rs` decomposes every condition into guards on subjects, combined
   the way `!`, `&&`, and `||` combine them. For example,
   `typeof value === "string"` becomes a runtime test of `value`, and
@@ -133,18 +149,21 @@ one of its own variables. Its parts live in `src/js_module_info/flow/`:
   extends it. A write through an element access whose key `subjects.rs`
   accepts, as in `o["v"] = x`, writes the path that the key names, and a
   write through any other key, as in `o[k] = x`, cancels every path below its
-  object.
+  object. Every `this` and `super` along a written target stands for the
+  root's `this`, so `super.v = x` cancels `this.v`.
 
 Collection then keeps only the reads that a runtime test of their subject can
 reach, and only for subjects that can narrow. A variable can narrow when it is
 declared in the root, never written, neither untyped nor annotated `any`, and
 not supplied by a destructuring default, which the declared type ignores. A
-property path can narrow when its variable can and the write scan finds no
-write that cancels it; the scan runs only when the root reads a tested path.
+property path can narrow when its variable can, or when it starts at a `this`
+that is a subject, and the write scan finds no write that cancels it; the scan
+runs only when the root reads a tested path.
 Those reads, plus the enclosing expressions that can use a narrowed operand,
 become candidates. A test inside a nested function never reaches reads in the
 enclosing one, and an array or object literal ends the chain of enclosing
-candidates. A root that declares no variable that can narrow gets no graph.
+candidates. A root that declares no variable that can narrow and has no `this`
+subject gets no graph.
 Other variable types are resolved only when a candidate read is queried,
 because resolving them can be costly.
 

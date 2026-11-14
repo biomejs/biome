@@ -1,0 +1,56 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validThisPropertyWrites.ts
+---
+# Input
+```ts
+// should not generate diagnostics
+// Each optional chain on `this.timer` stays necessary. A write to `this.timer`
+// in the method itself stops its narrowing: TypeScript also types it as
+// `Timer | null` in `restart`. A write through `super` can set it through a
+// setter of the parent class, so Biome also stops the narrowing in `replace`,
+// where TypeScript gives `Timer`. Biome does not narrow properties of `this`
+// in a constructor, where TypeScript gives `Timer` because the field has an
+// initializer.
+
+interface Timer {
+	cancel(): void;
+}
+
+declare function next(): Timer | null;
+
+class Scheduler {
+	timer: Timer | null = null;
+
+	constructor() {
+		if (this.timer !== null) {
+			this.timer?.cancel();
+		}
+	}
+
+	restart() {
+		if (this.timer !== null) {
+			this.timer = next();
+			this.timer?.cancel();
+		}
+	}
+}
+
+class Base {
+	get timer(): Timer | null {
+		return null;
+	}
+
+	set timer(value: Timer | null) {}
+}
+
+class Child extends Base {
+	replace() {
+		if (this.timer !== null) {
+			super.timer = next();
+			this.timer?.cancel();
+		}
+	}
+}
+
+```

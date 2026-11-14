@@ -7,19 +7,21 @@
 //! to resolved types without inspecting syntax again.
 //!
 //! A subject is what a runtime test checks and a read narrows: a variable, or
-//! a property path that starts at a variable, such as `o.v`, `a.b.c`, or
-//! `t[0]`. Guards and reads refer to a subject by its id in the root's subject
-//! table, so a test and a read of the same subject match without comparing
-//! syntax.
+//! a property path that starts at a variable or at `this`, such as `o.v`,
+//! `a.b.c`, `t[0]`, or `this.#cache`. Guards and reads refer to a subject by
+//! its id in the root's subject table, so a test and a read of the same subject
+//! match without comparing syntax.
 //!
 //! An execution root is a body analyzed independently, such as a module,
 //! function, or method. Only `let`, `const`, and parameter bindings that are
 //! never reassigned and are read in the root that declares them participate,
-//! so refinements cannot cross closure boundaries. A property path narrows
-//! only when its variable does and the root never writes the path, one of its
-//! prefixes, or a property of one of its prefixes through a key that is not a
-//! literal. The graph does not invalidate facts on writes or calls, which is
-//! why written subjects are excluded.
+//! so refinements cannot cross closure boundaries. Each root has its own
+//! `this`, and paths on it narrow only where Biome types `this` as TypeScript
+//! does, as [`subjects::this_can_narrow`] describes. A property path narrows
+//! only when its variable or `this` does and the root never writes the path,
+//! one of its prefixes, or a property of one of its prefixes through a key that
+//! is not a literal. The graph does not invalidate facts on writes or calls,
+//! which is why written subjects are excluded.
 
 mod builder;
 mod expressions;
@@ -36,7 +38,8 @@ use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::{JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
     JsArrayBindingPatternElement, JsIdentifierBinding, JsObjectBindingPatternProperty,
-    JsObjectBindingPatternShorthandProperty, JsReferenceIdentifier, JsSyntaxKind,
+    JsObjectBindingPatternShorthandProperty, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode,
+    JsThisExpression,
 };
 use biome_js_type_info::{RawTypeData, TypeReference, is_raw_narrowing_invariant};
 use biome_rowan::{AstNode, AstPtr, Text, TextRange};
@@ -58,6 +61,9 @@ pub(crate) type FlowSubjectId = u32;
 pub(crate) enum FlowSubject {
     /// The variable declared at this range.
     Binding(TextRange),
+    /// The `this` of the execution root. A table stores it only in a root
+    /// where [`subjects::this_can_narrow`] holds.
+    This,
     /// The property `key` of the subject `object`, as in `o.v` or `o["v"]`.
     ///
     /// A table stores `object` before its members, so `object` is always a
@@ -76,16 +82,21 @@ pub(crate) enum PropertyKey {
     /// `o.\u0076`, and `o["v"]` read the same property, and so do `t[0]` and
     /// `t["0"]`.
     Name(Text),
+    /// A private name, such as `#v` in `o.#v`, without its `#` and with its
+    /// escapes decoded. It never matches a [`Self::Name`], so `o["#v"]`, which
+    /// reads a property whose name starts with `#`, is another subject.
+    Private(Text),
 }
 
-/// Returns the range of the variable that the path of `subject` starts at,
-/// given the `subjects` of its root, each at the index of its id.
+/// Returns the subject that the path of `subject` starts at, a
+/// [`FlowSubject::Binding`] or [`FlowSubject::This`], given the `subjects` of
+/// its root, each at the index of its id.
 ///
 /// Returns `None` when `subjects` has no such subject.
-fn subject_binding(subjects: &[FlowSubject], mut subject: FlowSubjectId) -> Option<TextRange> {
+fn subject_root(subjects: &[FlowSubject], mut subject: FlowSubjectId) -> Option<&FlowSubject> {
     loop {
         match subjects.get(subject as usize)? {
-            FlowSubject::Binding(range) => return Some(*range),
+            root @ (FlowSubject::Binding(_) | FlowSubject::This) => return Some(root),
             FlowSubject::Member { object, .. } => {
                 if *object >= subject {
                     return None;
@@ -100,14 +111,26 @@ fn subject_binding(subjects: &[FlowSubject], mut subject: FlowSubjectId) -> Opti
 ///
 /// The builder records reads and the condition decomposer records runtime
 /// tests through the same table, so a read and a test of the same subject get
-/// the same id.
+/// the same id. A table made with [`Default`] stores no [`FlowSubject::This`].
 #[derive(Default)]
 struct FlowSubjectTable {
     subjects: Vec<FlowSubject>,
     ids: FxHashMap<FlowSubject, FlowSubjectId>,
+    /// The execution root whose `this` can be a subject, or `None` when
+    /// [`subjects::this_can_narrow`] does not hold for it.
+    this_root: Option<JsSyntaxNode>,
 }
 
 impl FlowSubjectTable {
+    /// Returns an empty table for the execution root `root`, which stores its
+    /// `this` when `this_can_narrow` holds.
+    fn new(root: &AnyJsControlFlowRoot, this_can_narrow: bool) -> Self {
+        Self {
+            this_root: this_can_narrow.then(|| root.syntax().clone()),
+            ..Self::default()
+        }
+    }
+
     /// Returns the id of `subject`, or `None` when the table does not store it.
     fn get(&self, subject: &FlowSubject) -> Option<FlowSubjectId> {
         self.ids.get(subject).copied()
@@ -130,6 +153,38 @@ impl FlowSubjectTable {
     ) -> Option<FlowSubjectId> {
         let binding = model.binding(reference)?;
         self.intern(FlowSubject::Binding(binding.range()))
+    }
+
+    /// Returns the id of the `this` that `expression` reads, adding it to the
+    /// table on first use.
+    ///
+    /// Returns `None` when the table's root cannot narrow its `this`, when the
+    /// table has used every [`FlowSubjectId`], and for a `this` in the
+    /// decorators or `extends` clause of a class inside the root, or in the
+    /// computed key of an object literal method or accessor inside it. That
+    /// `this` is the root's own, but Biome types it as an instance of the
+    /// class or as the object.
+    fn this(&mut self, expression: &JsThisExpression) -> Option<FlowSubjectId> {
+        let root = self.this_root.as_ref()?;
+        let in_member_owner = expression
+            .syntax()
+            .ancestors()
+            .take_while(|node| node != root)
+            .any(|node| {
+                matches!(
+                    node.kind(),
+                    JsSyntaxKind::JS_CLASS_DECLARATION
+                        | JsSyntaxKind::JS_CLASS_EXPRESSION
+                        | JsSyntaxKind::JS_CLASS_EXPORT_DEFAULT_DECLARATION
+                        | JsSyntaxKind::JS_METHOD_OBJECT_MEMBER
+                        | JsSyntaxKind::JS_GETTER_OBJECT_MEMBER
+                        | JsSyntaxKind::JS_SETTER_OBJECT_MEMBER
+                )
+            });
+        if in_member_owner {
+            return None;
+        }
+        self.intern(FlowSubject::This)
     }
 
     fn intern(&mut self, subject: FlowSubject) -> Option<FlowSubjectId> {
@@ -194,10 +249,15 @@ impl RootFlow {
     }
 
     /// Returns the range of the variable that the path of `subject` starts
-    /// at, which is the variable itself for a [`FlowSubject::Binding`], or
-    /// `None` when the root has no such subject.
+    /// at, which is the variable itself for a [`FlowSubject::Binding`].
+    ///
+    /// Returns `None` for `this` and a path on it, and when the root has no
+    /// such subject.
     pub(crate) fn subject_binding(&self, subject: FlowSubjectId) -> Option<TextRange> {
-        subject_binding(&self.subjects, subject)
+        match subject_root(&self.subjects, subject)? {
+            FlowSubject::Binding(range) => Some(*range),
+            FlowSubject::This | FlowSubject::Member { .. } => None,
+        }
     }
 }
 
@@ -260,7 +320,12 @@ impl ModuleFlow {
             functions: GuardFunctions::new(raw_types, raw_binding_types),
         };
         for selected in roots.selected() {
-            collector.add_root(&mut flow, &selected.root, roots.bindings(selected));
+            collector.add_root(
+                &mut flow,
+                &selected.root,
+                roots.bindings(selected),
+                selected.has_this,
+            );
         }
         flow
     }
@@ -296,19 +361,23 @@ struct RootCollector<'a> {
 }
 
 impl RootCollector<'_> {
+    /// Collects the flow of `root`, which declares `bindings` in its own code
+    /// and uses `this` there when `has_this` is true.
     fn add_root(
         &mut self,
         flow: &mut ModuleFlow,
         root: &AnyJsControlFlowRoot,
         bindings: &[JsIdentifierBinding],
+        has_this: bool,
     ) {
         let eligible: FxHashSet<TextRange> = bindings
             .iter()
             .filter_map(|binding| self.eligible_range(binding))
             .collect();
-        // Only bindings declared by the root itself can narrow in it, so
-        // without one the graph would keep no reads.
-        if eligible.is_empty() {
+        let this_can_narrow = has_this && subjects::this_can_narrow(root);
+        // Only bindings declared by the root itself and its own `this` can
+        // narrow in it, so without either the graph would keep no reads.
+        if eligible.is_empty() && !this_can_narrow {
             return;
         }
         let Some(BuiltRoot {
@@ -317,7 +386,7 @@ impl RootCollector<'_> {
             subjects,
             mentions,
             reads,
-        }) = build_root(root, self.model, &mut self.functions)
+        }) = build_root(root, self.model, &mut self.functions, this_can_narrow)
         else {
             return;
         };
@@ -339,11 +408,14 @@ impl RootCollector<'_> {
             .iter()
             .copied()
             .filter(|subject| {
-                subject_binding(subjects.as_slice(), *subject)
-                    .is_some_and(|binding| eligible.contains(&binding))
-                    && written
-                        .as_ref()
-                        .is_none_or(|written| !written.cancels(subjects.as_slice(), *subject))
+                // The table stores `this` only when it can narrow.
+                subject_root(subjects.as_slice(), *subject).is_some_and(|root| match root {
+                    FlowSubject::Binding(binding) => eligible.contains(binding),
+                    FlowSubject::This => true,
+                    FlowSubject::Member { .. } => false,
+                }) && written
+                    .as_ref()
+                    .is_none_or(|written| !written.cancels(subjects.as_slice(), *subject))
             })
             .collect();
         let reads: Vec<_> = reads
@@ -682,6 +754,39 @@ mod tests {
         let flow = collect(budget);
         assert!(!flow.is_candidate(v));
         assert!(!collect(budget - 1).is_candidate(x));
+    }
+
+    #[test]
+    fn paths_on_this_narrow_outside_constructors_and_static_members() {
+        const SOURCE: &str = r#"
+            class K {
+                x: string | null = null;
+                static s: string | null = null;
+                m() { if (this.x) { /*method*/this.x; } }
+                constructor() {
+                    if (this.x) { /*constructor*/this.x; }
+                    const g = () => { if (this.x) { /*arrow*/this.x; } };
+                }
+                static n() { if (this.s) { /*static*/this.s; } }
+                static { if (this.s) { /*block*/this.s; } }
+                f = () => { if (this.x) { /*field*/this.x; } };
+            }
+        "#;
+        let info = module(SOURCE);
+        for (marker, expression, expected) in [
+            ("method", "this.x", true),
+            ("constructor", "this.x", false),
+            ("arrow", "this.x", false),
+            ("static", "this.s", false),
+            ("block", "this.s", false),
+            ("field", "this.x", true),
+        ] {
+            assert_eq!(
+                info.flow.is_candidate(marked(SOURCE, marker, expression)),
+                expected,
+                "{marker}"
+            );
+        }
     }
 
     #[test]

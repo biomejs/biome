@@ -194,8 +194,8 @@ pub(crate) fn infer_flow_subject_type<'db>(
 }
 
 /// Attributes the flow queries of a subject to the declaration of the
-/// variable that its path starts at, or to the whole module when collection
-/// has no such subject.
+/// variable that its path starts at, or to the whole module for a path on
+/// `this` and when collection has no such subject.
 fn flow_subject_origin(
     db: &dyn ModuleDb,
     input: FlowSubjectRootInput<'_>,
