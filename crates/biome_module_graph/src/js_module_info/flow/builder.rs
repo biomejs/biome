@@ -44,6 +44,10 @@ type Build<T> = Result<T, Unsupported>;
 
 /// Builds the flow of `root`, excluding nested execution roots.
 ///
+/// Reads and runtime tests of paths on `this`, such as `this.v`, are recorded
+/// only when `this_can_narrow` is true, which the caller computes for `root`
+/// with [`this_can_narrow`].
+///
 /// `root` must be selected by a [`FlowRootScanner`], which rejects the roots
 /// that the builder cannot build, such as a root with a `with` statement.
 /// Expression-bodied arrows are supported. Parameter initializers, class
@@ -68,10 +72,12 @@ type Build<T> = Result<T, Unsupported>;
 /// an `if` test.
 ///
 /// [`FlowRootScanner`]: super::FlowRootScanner
+/// [`this_can_narrow`]: super::subjects::this_can_narrow
 pub(super) fn build_root(
     root: &AnyJsControlFlowRoot,
     model: &SemanticModel,
     functions: &mut GuardFunctions,
+    this_can_narrow: bool,
 ) -> Option<BuiltRoot> {
     if !has_complete_statements(root) {
         return None;
@@ -81,7 +87,7 @@ pub(super) fn build_root(
         functions,
         nodes: vec![FlowNode::Start],
         guards: Vec::new(),
-        subjects: FlowSubjectTable::default(),
+        subjects: FlowSubjectTable::new(root, this_can_narrow),
         mentions: Vec::new(),
         reads: Vec::new(),
         jumps: Vec::new(),
@@ -847,7 +853,10 @@ mod tests {
         build_parsed(source, kind)
     }
 
-    /// Builds like [`build`], also accepting sources with syntax errors.
+    /// Builds like [`build`], also accepting sources with syntax errors, and
+    /// records paths on `this` where [`this_can_narrow`] holds.
+    ///
+    /// [`this_can_narrow`]: super::super::subjects::this_can_narrow
     fn build_parsed(source: &str, kind: JsSyntaxKind) -> Built {
         let parsed = parse(source, JsFileSource::ts(), JsParserOptions::default());
         let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
@@ -864,6 +873,7 @@ mod tests {
                 &root,
                 &model,
                 &mut GuardFunctions::new(&[], &raw_binding_types),
+                super::super::subjects::this_can_narrow(&root),
             ),
         }
     }
@@ -955,15 +965,21 @@ mod tests {
     }
 
     impl Built {
-        /// Returns the source of the variable that `subject` starts at,
-        /// followed by the names along its path, as in `o.v`.
+        /// Returns the source of the variable that `subject` starts at, or
+        /// `this`, followed by the names along its path, as in `o.v` or
+        /// `this.#w`.
         fn subject_name(&self, subject: FlowSubjectId) -> String {
             match &self.root().subjects.as_slice()[subject as usize] {
                 FlowSubject::Binding(binding) => self.source[*binding].to_owned(),
+                FlowSubject::This => "this".to_owned(),
                 FlowSubject::Member {
                     object,
                     key: PropertyKey::Name(name),
                 } => format!("{}.{name}", self.subject_name(*object)),
+                FlowSubject::Member {
+                    object,
+                    key: PropertyKey::Private(name),
+                } => format!("{}.#{name}", self.subject_name(*object)),
             }
         }
     }
@@ -1145,6 +1161,17 @@ mod tests {
         assert!(contains(&built.paths("o.v.w", 0), "o.v:Truthy"));
         assert!(contains(&built.paths("(o).v", 0), "o.v:Truthy"));
         assert!(contains(&built.paths("o.v", 2), "o.v:Nullish"));
+    }
+
+    #[test]
+    fn paths_on_this_are_read_and_tested_where_this_can_narrow() {
+        const SOURCE: &str = "class K { #w; m() { if (this.v) read(this.v); if (this.#w) read(this.#w); } constructor() { if (this.v) read(this.v); } }";
+        let method = build(SOURCE, JsSyntaxKind::JS_METHOD_CLASS_MEMBER);
+        assert!(contains(&method.paths("this.v", 1), "this.v:Truthy"));
+        assert!(contains(&method.paths("this.#w", 1), "this.#w:Truthy"));
+        let constructor = build(SOURCE, JsSyntaxKind::JS_CONSTRUCTOR_CLASS_MEMBER);
+        assert_eq!(constructor.point("this.v", 3), None);
+        assert!(constructor.root().mentions.is_empty());
     }
 
     #[test]

@@ -75,6 +75,10 @@ pub(super) struct SelectedRoot {
     pub(super) root: AnyJsControlFlowRoot,
     /// The range of the root's bindings in [`FlowRootScanner::kept_bindings`].
     bindings: Range<usize>,
+    /// Whether the root's own code, outside nested roots and types, contains
+    /// a `this` expression, so paths on its `this` may narrow without any
+    /// variable of its own.
+    pub(super) has_this: bool,
 }
 
 impl FlowRootScanner {
@@ -98,6 +102,7 @@ impl FlowRootScanner {
                 depth: self.depth,
                 has_condition: false,
                 has_call_statement: false,
+                has_this: false,
                 is_unsupported: false,
             });
         }
@@ -139,6 +144,8 @@ impl FlowRootScanner {
             self.type_region = Some(self.depth);
         } else if AnyFlowConditionSource::can_cast(kind) {
             root.has_condition = true;
+        } else if kind == JsSyntaxKind::JS_THIS_EXPRESSION {
+            root.has_this = true;
         } else if let Some(binding) = JsIdentifierBinding::cast_ref(node) {
             self.bindings.push(binding);
         } else if kind == JsSyntaxKind::JS_EXPRESSION_STATEMENT {
@@ -175,6 +182,7 @@ impl FlowRootScanner {
             let selected = SelectedRoot {
                 root: node,
                 bindings: start..self.kept_bindings.len(),
+                has_this: root.has_this,
             };
             if root.has_condition {
                 self.selected.push(selected);
@@ -216,6 +224,8 @@ struct OpenRoot {
     /// Whether the root's own code has an expression statement that is a call,
     /// possibly in parentheses.
     has_call_statement: bool,
+    /// Whether the root's own code reads `this`.
+    has_this: bool,
     is_unsupported: bool,
 }
 
@@ -285,6 +295,33 @@ mod tests {
         assert_eq!(
             selected("function f(x) { if (x) read(x); }"),
             ["function f(x) { if (x) read(x); }"]
+        );
+    }
+
+    #[test]
+    fn selected_roots_record_whether_their_own_code_reads_this() {
+        const SOURCE: &str = "class K { m() { if (this.x) read(this.x); const g = (a) => { if (a) read(a); }; } n(a) { if (a) read(a); const h = () => this; } k(a): this { if (a) read(a); return a; } }";
+        let parsed = parse(SOURCE, JsFileSource::ts(), JsParserOptions::default());
+        assert!(!parsed.has_errors());
+        let has_this: Vec<(String, bool)> = scan(&parsed.tree())
+            .selected()
+            .map(|selected| {
+                let text = selected.root.syntax().text_trimmed().to_string();
+                (
+                    text[..text.find('{').unwrap()].trim().to_owned(),
+                    selected.has_this,
+                )
+            })
+            .collect();
+        // A `this` in a nested root or in a type does not count.
+        assert_eq!(
+            has_this,
+            [
+                ("(a) =>".to_owned(), false),
+                ("m()".to_owned(), true),
+                ("n(a)".to_owned(), false),
+                ("k(a): this".to_owned(), false),
+            ]
         );
     }
 
