@@ -4,9 +4,9 @@ use crate::js_module_info::TsBindingReferenceExt;
 use biome_js_semantic::{Binding, JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsExpression, AnyJsFormalParameter,
-    AnyJsLiteralExpression, AnyJsParameter, JsBinaryOperator, JsCallExpression, JsLogicalOperator,
-    JsReferenceIdentifier, JsUnaryOperator, binding_ext::AnyJsBindingDeclaration,
-    unescape_js_identifier,
+    AnyJsLiteralExpression, AnyJsOptionalChainExpression, AnyJsParameter, JsBinaryOperator,
+    JsCallExpression, JsLogicalOperator, JsReferenceIdentifier, JsUnaryOperator,
+    binding_ext::AnyJsBindingDeclaration, unescape_js_identifier,
 };
 use biome_js_type_info::{
     Function, FunctionParameter, RawPrimitiveTarget, RawTypeData, RawTypeId, ReturnType,
@@ -443,6 +443,7 @@ pub(super) fn decompose_assertion(
             guards,
         )),
         GuardKind::TypeAssertion => {
+            chain_receivers(&argument, &mut remaining)?;
             let subject = subject_of(&argument, model, subjects)?;
             guards.push(FlowGuard::Test {
                 subject,
@@ -542,19 +543,29 @@ impl Decomposer<'_, '_> {
         let guard = match step {
             ConditionStep::Unsupported => FlowGuard::Keep,
             ConditionStep::Guard {
-                subject,
+                operand,
                 guard,
                 positive,
-            } => self.test(&subject, guard, positive),
+                receivers,
+            } => self.test(&operand, guard, positive, receivers),
             ConditionStep::Call { call, positive } => {
-                match self
-                    .functions
-                    .tested_argument(&call, self.model, &mut self.remaining)
+                let guard =
+                    match self
+                        .functions
+                        .tested_argument(&call, self.model, &mut self.remaining)
+                    {
+                        Some((subject, function)) => {
+                            self.test(&subject, SyntaxGuard::Predicate(function), positive, false)
+                        }
+                        None => FlowGuard::Keep,
+                    };
+                // A truthy result shows that an optional call ran.
+                if positive
+                    && let Some(receivers) = chain_receivers(&call.into(), &mut self.remaining)
                 {
-                    Some((subject, function)) => {
-                        self.test(&subject, SyntaxGuard::Predicate(function), positive)
-                    }
-                    None => FlowGuard::Keep,
+                    self.receiver_tests(receivers, guard)
+                } else {
+                    guard
                 }
             }
             ConditionStep::Negated { argument, outcome } => {
@@ -578,33 +589,82 @@ impl Decomposer<'_, '_> {
         self.push(guard)
     }
 
-    fn test(&mut self, subject: &AnyJsExpression, guard: SyntaxGuard, positive: bool) -> FlowGuard {
+    /// Returns the guard for `guard` applied to `operand`: a runtime test of
+    /// `operand` when it is a subject, combined with the tests that
+    /// [`Self::receiver_tests`] adds when `receivers` holds.
+    ///
+    /// Returns [`FlowGuard::Keep`] when [`chain_receivers`] returns `None`
+    /// for `operand`.
+    fn test(
+        &mut self,
+        operand: &AnyJsExpression,
+        guard: SyntaxGuard,
+        positive: bool,
+        receivers: bool,
+    ) -> FlowGuard {
         let test = match guard {
-            SyntaxGuard::Truthy => FlowTest::Truthy,
-            SyntaxGuard::Nullish => FlowTest::Nullish,
-            SyntaxGuard::Typeof(kind) => FlowTest::Typeof(kind),
+            SyntaxGuard::Truthy => Some(FlowTest::Truthy),
+            SyntaxGuard::Nullish => Some(FlowTest::Nullish),
+            SyntaxGuard::Typeof(kind) => Some(FlowTest::Typeof(kind)),
             SyntaxGuard::Literal(AnyJsLiteralExpression::JsNullLiteralExpression(_)) => {
-                FlowTest::Null
+                Some(FlowTest::Null)
             }
-            SyntaxGuard::Literal(literal) => FlowTest::Literal(literal.range()),
+            SyntaxGuard::Literal(literal) => Some(FlowTest::Literal(literal.range())),
+            SyntaxGuard::LooseLiteral => None,
             // A local variable named `undefined` can hold any value.
             SyntaxGuard::Undefined { reference, .. }
                 if self.model.binding(&reference).is_some() =>
             {
                 return FlowGuard::Keep;
             }
-            SyntaxGuard::Undefined { strict, .. } => FlowTest::Undefined { strict },
-            SyntaxGuard::Predicate(function) => FlowTest::Predicate(function),
+            SyntaxGuard::Undefined { strict, .. } => Some(FlowTest::Undefined { strict }),
+            SyntaxGuard::Predicate(function) => Some(FlowTest::Predicate(function)),
         };
-        let Some(subject) = subject_of(subject, self.model, self.subjects) else {
+        let Some(chain) = chain_receivers(operand, &mut self.remaining) else {
             return FlowGuard::Keep;
         };
-        self.mentions.push(subject);
-        FlowGuard::Test {
-            subject,
-            test,
-            positive,
+        let guard = match test
+            .and_then(|test| Some((test, subject_of(operand, self.model, self.subjects)?)))
+        {
+            Some((test, subject)) => {
+                self.mentions.push(subject);
+                FlowGuard::Test {
+                    subject,
+                    test,
+                    positive,
+                }
+            }
+            None => FlowGuard::Keep,
+        };
+        if receivers {
+            self.receiver_tests(chain, guard)
+        } else {
+            guard
         }
+    }
+
+    /// Returns `guard` combined, as `&&` combines its operands, with a test
+    /// that each of `receivers` that is a subject is not nullish.
+    fn receiver_tests(&mut self, receivers: Vec<AnyJsExpression>, guard: FlowGuard) -> FlowGuard {
+        let mut guard = guard;
+        for receiver in receivers {
+            let Some(subject) = subject_of(&receiver, self.model, self.subjects) else {
+                continue;
+            };
+            self.mentions.push(subject);
+            let left = self.push(FlowGuard::Test {
+                subject,
+                test: FlowTest::Nullish,
+                positive: false,
+            });
+            let right = self.push(guard);
+            guard = FlowGuard::Both {
+                left,
+                right,
+                sequential: true,
+            };
+        }
+        guard
     }
 
     fn push(&mut self, guard: FlowGuard) -> usize {
@@ -618,6 +678,9 @@ enum SyntaxGuard {
     Nullish,
     Typeof(TypeofKind),
     Literal(AnyJsLiteralExpression),
+    /// Loose equality with a primitive literal other than `null`, which
+    /// narrows only the receivers of an optional chain.
+    LooseLiteral,
     Undefined {
         reference: JsReferenceIdentifier,
         strict: bool,
@@ -629,12 +692,15 @@ enum SyntaxGuard {
 /// One syntax step, with child expressions left undecomposed.
 enum ConditionStep {
     Unsupported,
-    /// A runtime test of `subject`, an expression with the shape of a
-    /// subject.
+    /// A runtime test of `operand`, an expression that [`has_operand_shape`]
+    /// accepts.
     Guard {
-        subject: AnyJsExpression,
+        operand: AnyJsExpression,
         guard: SyntaxGuard,
         positive: bool,
+        /// Whether the result shows that `operand` is not `undefined`, so the
+        /// receivers of an optional chain are not nullish either.
+        receivers: bool,
     },
     /// A call that may report a type guard's test.
     Call {
@@ -674,9 +740,13 @@ fn condition_step(
             FlowOutcome::Nullish | FlowOutcome::NonNullish => SyntaxGuard::Nullish,
         };
         return Some(ConditionStep::Guard {
-            subject: expression,
+            operand: expression,
             guard,
             positive,
+            // TypeScript narrows no receiver for either outcome of the left
+            // operand of `??`, although a value that is not nullish shows that
+            // the chain ran.
+            receivers: outcome == FlowOutcome::Truthy,
         });
     }
     if matches!(outcome, FlowOutcome::Nullish | FlowOutcome::NonNullish) {
@@ -751,8 +821,8 @@ fn comparison_step(
     positive: bool,
     remaining: &mut usize,
 ) -> Option<ConditionStep> {
-    let (subject, guard) = match subject {
-        subject if has_subject_shape(subject)? => {
+    let (operand, guard) = match subject {
+        subject if has_operand_shape(subject)? => {
             let guard = match value {
                 AnyJsExpression::AnyJsLiteralExpression(literal) => {
                     literal.value_token().ok()?;
@@ -768,6 +838,12 @@ fn comparison_step(
                             if strict =>
                         {
                             SyntaxGuard::Literal(literal.clone())
+                        }
+                        AnyJsLiteralExpression::JsBooleanLiteralExpression(_)
+                        | AnyJsLiteralExpression::JsStringLiteralExpression(_)
+                        | AnyJsLiteralExpression::JsNumberLiteralExpression(_)
+                        | AnyJsLiteralExpression::JsBigintLiteralExpression(_) => {
+                            SyntaxGuard::LooseLiteral
                         }
                         _ => return Some(ConditionStep::Unsupported),
                     }
@@ -807,18 +883,41 @@ fn comparison_step(
                 _ => return Some(ConditionStep::Unsupported),
             };
             let argument = omit_parentheses(argument, remaining)?;
-            if !has_subject_shape(&argument)? {
+            if !has_operand_shape(&argument)? {
                 return Some(ConditionStep::Unsupported);
             }
             (argument, SyntaxGuard::Typeof(kind))
         }
         _ => return Some(ConditionStep::Unsupported),
     };
+    // TypeScript narrows the receivers of an optional chain in the branch
+    // where the operand cannot be `undefined`: where it equals a primitive
+    // literal or, strictly, `null`, where it differs from `undefined` or,
+    // loosely, from `null`, and where its `typeof` is not `"undefined"`.
+    let receivers = match &guard {
+        SyntaxGuard::Literal(_) | SyntaxGuard::LooseLiteral => positive,
+        SyntaxGuard::Nullish | SyntaxGuard::Undefined { .. } => !positive,
+        SyntaxGuard::Typeof(kind) => positive == (*kind != TypeofKind::Undefined),
+        SyntaxGuard::Truthy | SyntaxGuard::Predicate(_) => false,
+    };
     Some(ConditionStep::Guard {
-        subject,
+        operand,
         guard,
         positive,
+        receivers,
     })
+}
+
+/// Returns whether `expression` can be the operand of a comparison: an
+/// expression with the shape of a subject, or a call in an optional chain,
+/// such as `o?.f()`, whose receivers the comparison can narrow.
+///
+/// Returns `None` when [`has_subject_shape`] does.
+fn has_operand_shape(expression: &AnyJsExpression) -> Option<bool> {
+    Some(
+        has_subject_shape(expression)?
+            || matches!(expression, AnyJsExpression::JsCallExpression(call) if call.is_optional_chain()),
+    )
 }
 
 /// Returns whether `expression` has the shape of a subject: an identifier or a
@@ -850,6 +949,48 @@ fn has_subject_shape(expression: &AnyJsExpression) -> Option<bool> {
     }
 }
 
+/// Returns the receivers of `operand` when it is part of an optional chain:
+/// the objects and callees that the chain evaluates before `operand`,
+/// outermost first, down to the object of its innermost `?.`. They are `o.f`
+/// and `o` in `o?.f()`, and `a.b?.c` and `a.b`, but not `a`, in `a.b?.c.d`.
+/// The chain gives `undefined` when one of them is nullish. An expression
+/// outside an optional chain has none.
+///
+/// Parentheses end a chain, so `(o)?.v` has the receiver `(o)`, and
+/// `(o?.v).w` is not part of an optional chain.
+///
+/// Returns `None` when the chain starts at a parenthesized optional chain, as
+/// `(o?.v)?.w` and `(o?.v).w` do, and when the walk runs out of work or meets
+/// missing syntax. A test of such an operand narrows nothing. TypeScript
+/// narrows `o.v` there, and the paths that extend it, but not `o`, except in
+/// the truthiness of a condition. A read through `o?.v` then adds `undefined`
+/// back from `o`, while a read in Biome keeps the narrowed type of its path.
+fn chain_receivers(
+    operand: &AnyJsExpression,
+    remaining: &mut usize,
+) -> Option<Vec<AnyJsExpression>> {
+    let mut receivers = Vec::new();
+    // The number of receivers down to the object of the innermost `?.`.
+    let mut in_chain = 0;
+    let mut expression = operand.clone();
+    while let Some(link) = AnyJsOptionalChainExpression::cast_ref(expression.syntax()) {
+        *remaining = remaining.checked_sub(1)?;
+        let object = link.object().ok()?;
+        receivers.push(object.clone());
+        if link.is_optional() {
+            in_chain = receivers.len();
+        }
+        expression = object;
+    }
+    if matches!(expression, AnyJsExpression::JsParenthesizedExpression(_))
+        && omit_parentheses(expression, remaining)?.is_optional_chain()
+    {
+        return None;
+    }
+    receivers.truncate(in_chain);
+    Some(receivers)
+}
+
 fn omit_parentheses(
     mut expression: AnyJsExpression,
     remaining: &mut usize,
@@ -873,8 +1014,18 @@ mod tests {
     use biome_js_syntax::JsIfStatement;
     use biome_languages::JsFileSource;
 
-    /// Decomposes the `if` test `source` and names the mentioned subjects.
-    fn decompose(source: &str, outcome: FlowOutcome) -> (Vec<FlowGuard>, Vec<String>) {
+    /// A decomposed `if` test, with the semantic model and the subject table
+    /// that name its subjects.
+    struct Decomposed {
+        guards: Vec<FlowGuard>,
+        condition: DecomposedCondition,
+        model: SemanticModel,
+        subjects: Vec<FlowSubject>,
+    }
+
+    /// Decomposes the `if` test `source` in a function with the parameters
+    /// `value` and `other`.
+    fn decomposed(source: &str, outcome: FlowOutcome) -> Decomposed {
         let parsed = parse(
             &format!("function f(value, other) {{ if ({source}) {{}} }}"),
             JsFileSource::ts(),
@@ -900,13 +1051,24 @@ mod tests {
             &mut subjects,
             &mut guards,
         );
-        let subjects = subjects.into_subjects();
-        let names = condition
+        Decomposed {
+            guards,
+            condition,
+            model,
+            subjects: subjects.into_subjects(),
+        }
+    }
+
+    /// Decomposes the `if` test `source` and names the mentioned subjects.
+    fn decompose(source: &str, outcome: FlowOutcome) -> (Vec<FlowGuard>, Vec<String>) {
+        let decomposed = decomposed(source, outcome);
+        let names = decomposed
+            .condition
             .mentions
             .iter()
-            .map(|subject| subject_name(&model, &subjects, *subject))
+            .map(|subject| subject_name(&decomposed.model, &decomposed.subjects, *subject))
             .collect();
-        (guards, names)
+        (decomposed.guards, names)
     }
 
     /// Returns the name of the variable that `subject` starts at, or `this`,
@@ -942,6 +1104,153 @@ mod tests {
         decompose(source, outcome).1
     }
 
+    /// Decomposes the `if` test `source` and names the subjects that its
+    /// receiver tests check, outermost guard first, followed by the main
+    /// guard that they wrap.
+    fn receiver_names(source: &str, outcome: FlowOutcome) -> (Vec<String>, FlowGuard) {
+        let Decomposed {
+            guards,
+            condition,
+            model,
+            subjects,
+        } = decomposed(source, outcome);
+        let mut names = Vec::new();
+        let mut guard = &guards[condition.guard];
+        while let FlowGuard::Both {
+            left,
+            right,
+            sequential: true,
+        } = guard
+            && let FlowGuard::Test {
+                subject,
+                test: FlowTest::Nullish,
+                positive: false,
+            } = &guards[*left]
+        {
+            names.push(subject_name(&model, &subjects, *subject));
+            guard = &guards[*right];
+        }
+        (names, guard.clone())
+    }
+
+    #[test]
+    fn receiver_tests_follow_the_kind_of_test() {
+        use FlowOutcome::{Falsy, NonNullish, Nullish, Truthy};
+        for (source, outcome, expected) in [
+            ("value?.a", Truthy, vec!["value"]),
+            ("value?.a", Falsy, vec![]),
+            ("!value?.a", Falsy, vec!["value"]),
+            // TypeScript narrows no receiver for the outcomes of `??`.
+            ("value?.a", Nullish, vec![]),
+            ("value?.a", NonNullish, vec![]),
+            ("value?.f()", Truthy, vec!["value", "value.f"]),
+            ("value?.f()", Falsy, vec![]),
+            ("value?.a === 1", Truthy, vec!["value"]),
+            ("value?.a === 1", Falsy, vec![]),
+            ("value?.a !== 'x'", Truthy, vec![]),
+            ("value?.a !== 'x'", Falsy, vec!["value"]),
+            ("value?.a == true", Truthy, vec!["value"]),
+            ("value?.a != 1n", Truthy, vec![]),
+            ("value?.a != 1n", Falsy, vec!["value"]),
+            ("value?.a === null", Truthy, vec!["value"]),
+            ("value?.a !== null", Truthy, vec![]),
+            ("value?.a == null", Truthy, vec![]),
+            ("null != value?.a", Truthy, vec!["value"]),
+            ("value?.a === undefined", Truthy, vec![]),
+            ("value?.a === undefined", Falsy, vec!["value"]),
+            ("value?.a != undefined", Truthy, vec!["value"]),
+            ("typeof value?.a === 'string'", Truthy, vec!["value"]),
+            ("typeof value?.a === 'string'", Falsy, vec![]),
+            ("typeof value?.a == 'undefined'", Truthy, vec![]),
+            ("typeof value?.a !== 'undefined'", Truthy, vec!["value"]),
+            ("value?.f() === true", Truthy, vec!["value", "value.f"]),
+            (
+                "typeof value?.f() === 'boolean'",
+                Truthy,
+                vec!["value", "value.f"],
+            ),
+            ("value?.a === other", Truthy, vec![]),
+            ("value?.a === -1", Truthy, vec![]),
+            ("value?.a instanceof other", Truthy, vec![]),
+            ("value.a", Truthy, vec![]),
+        ] {
+            assert_eq!(receiver_names(source, outcome).0, expected, "{source}");
+        }
+    }
+
+    #[test]
+    fn receiver_tests_walk_the_optional_chain() {
+        for (source, expected) in [
+            ("value?.a?.b", vec!["value", "value.a"]),
+            ("value?.a.b", vec!["value", "value.a"]),
+            // `value.a` is evaluated before the chain starts.
+            ("value.a?.b.c", vec!["value.a", "value.a.b"]),
+            ("value?.f()?.a", vec!["value", "value.f"]),
+            ("value()?.a", vec![]),
+            ("value?.[other]", vec!["value"]),
+            ("value?.[0]?.['a']", vec!["value", "value.0"]),
+            // Parentheses end the chain.
+            ("(value)?.a", vec!["value"]),
+            ("((value).a)?.b", vec!["value.a"]),
+            ("value?.a!.b", vec![]),
+        ] {
+            assert_eq!(
+                receiver_names(source, FlowOutcome::Truthy).0,
+                expected,
+                "{source}"
+            );
+        }
+    }
+
+    #[test]
+    fn receiver_tests_wrap_the_main_test() {
+        let (receivers, main) = receiver_names("value?.a === 1", FlowOutcome::Truthy);
+        assert_eq!(receivers, ["value"]);
+        assert!(matches!(
+            main,
+            FlowGuard::Test {
+                test: FlowTest::Literal(_),
+                positive: true,
+                ..
+            }
+        ));
+        assert_eq!(
+            mentioned_names("value?.a === 1", FlowOutcome::Truthy),
+            ["value.a", "value"]
+        );
+        // Loose equality with a literal tests only the receivers.
+        let (receivers, main) = receiver_names("value?.a == 1", FlowOutcome::Truthy);
+        assert_eq!(receivers, ["value"]);
+        assert_eq!(main, FlowGuard::Keep);
+        assert_eq!(
+            mentioned_names("value?.a == 1", FlowOutcome::Truthy),
+            ["value"]
+        );
+        // A call that is not a type guard keeps its own result untested.
+        let (receivers, main) = receiver_names("value?.f()", FlowOutcome::Truthy);
+        assert_eq!(receivers, ["value", "value.f"]);
+        assert_eq!(main, FlowGuard::Keep);
+    }
+
+    #[test]
+    fn chains_that_start_at_a_parenthesized_chain_narrow_nothing() {
+        for (source, outcome) in [
+            ("(value?.a)?.b", FlowOutcome::Truthy),
+            ("(value?.a)?.b?.c", FlowOutcome::Truthy),
+            ("((value?.a))?.b === 1", FlowOutcome::Truthy),
+            ("(value?.a).b !== undefined", FlowOutcome::Truthy),
+            ("typeof (value?.f())?.b === 'string'", FlowOutcome::Truthy),
+            ("(value?.f)()", FlowOutcome::Truthy),
+        ] {
+            let (guards, names) = decompose(source, outcome);
+            assert_eq!(names, Vec::<String>::new(), "{source}");
+            assert!(
+                guards.iter().all(|guard| *guard == FlowGuard::Keep),
+                "{source}: {guards:?}"
+            );
+        }
+    }
+
     #[test]
     fn mentions_match_supported_condition_shapes() {
         for (source, outcome, expected) in [
@@ -968,7 +1277,9 @@ mod tests {
             ("value || other", FlowOutcome::Falsy, vec!["value", "other"]),
             ("value", FlowOutcome::Nullish, vec!["value"]),
             ("value.length", FlowOutcome::Truthy, vec!["value.length"]),
-            ("(value?.a).b", FlowOutcome::Falsy, vec!["value.a.b"]),
+            ("((value).a).b", FlowOutcome::Falsy, vec!["value.a.b"]),
+            // The chain starts at a parenthesized optional chain.
+            ("(value?.a).b", FlowOutcome::Falsy, vec![]),
             ("value.a", FlowOutcome::NonNullish, vec!["value.a"]),
             ("value.a !== null", FlowOutcome::Truthy, vec!["value.a"]),
             ("undefined == value.a", FlowOutcome::Falsy, vec!["value.a"]),

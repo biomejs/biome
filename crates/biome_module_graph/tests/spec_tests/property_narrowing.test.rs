@@ -982,3 +982,238 @@ fn complete_module_tables_agree_with_reads_of_paths_on_this() {
         );
     }
 }
+
+/// Asserts that each `(marker, expression, nullable)` read in `source` has a
+/// known type that includes `undefined` exactly when `nullable` holds.
+fn assert_undefined_in_reads(source: &str, reads: &[(&str, &str, bool)]) {
+    let (db, module) = narrowing_db(source);
+    for (marker, expression, nullable) in reads {
+        let ty = normalized_type_at(&db, module, source, marker, expression);
+        assert_ne!(ty, InferredTypeData::Unknown, "{marker}");
+        assert_eq!(
+            contains_inferred_undefined(&db, ty),
+            *nullable,
+            "{marker}: {}",
+            format_inferred_type(&db, ty)
+        );
+    }
+}
+
+/// The object type that the tests of optional chain receivers read.
+const RECEIVER: &str = r#"
+    type X = { y: string | null; n: number; f(): boolean; z?: { w: string }; g?: () => X | undefined };
+"#;
+
+// TypeScript 6.0.3 (`tsc --strict`) gives each read `X` where the expected
+// value is `false` and `X | undefined` where it is `true`: a test of an
+// optional chain shows that its receiver is not nullish in the branch where
+// the chain cannot be `undefined`, and in no branch of `??`.
+#[test]
+fn optional_chain_receivers_follow_the_kind_of_test() {
+    let source = format!(
+        "{RECEIVER}{}",
+        r#"
+        function truthy(x: X | undefined) { if (x?.y) /*truthy*/x; else /*falsy*/x; }
+        function and(x: X | undefined) { x?.y && /*and*/x; }
+        function negated(x: X | undefined) { if (!x?.y) return; /*negated*/x; }
+        function grouped(x: X | undefined) { if ((x?.y)) /*grouped*/x; if ((x)?.y) /*receiver*/x; }
+        function either(x: X | undefined) { if (x?.y || x?.n) /*either*/x; }
+        function strict(x: X | undefined) { if (x?.n === 1) /*strict*/x; else /*strictElse*/x; }
+        function notStrict(x: X | undefined) { if (x?.n !== 1) /*notStrict*/x; else /*notStrictElse*/x; }
+        function loose(x: X | undefined) { if (x?.n == 1) /*loose*/x; else /*looseElse*/x; }
+        function notLoose(x: X | undefined) { if (x?.n != 1) /*notLoose*/x; else /*notLooseElse*/x; }
+        function isNull(x: X | undefined) { if (x?.y === null) /*null*/x; else /*nullElse*/x; }
+        function notNull(x: X | undefined) { if (x?.y !== null) /*notNull*/x; else /*notNullElse*/x; }
+        function looseNull(x: X | undefined) { if (x?.y == null) /*looseNull*/x; else /*looseNullElse*/x; }
+        function notLooseNull(x: X | undefined) { if (x?.y != null) /*notLooseNull*/x; else /*notLooseNullElse*/x; }
+        function isUndefined(x: X | undefined) { if (x?.n === undefined) /*undefined*/x; else /*undefinedElse*/x; }
+        function notUndefined(x: X | undefined) { if (x?.n !== undefined) /*notUndefined*/x; else /*notUndefinedElse*/x; }
+        function looseUndefined(x: X | undefined) { if (x?.n == undefined) /*looseUndefined*/x; else /*looseUndefinedElse*/x; }
+        function typeOf(x: X | undefined) { if (typeof x?.n === "number") /*typeof*/x; else /*typeofElse*/x; }
+        function typeOfUndefined(x: X | undefined) { if (typeof x?.n === "undefined") /*typeofUndefined*/x; else /*typeofUndefinedElse*/x; }
+        function typeOfObject(x: X | undefined) { if (typeof x?.y !== "object") /*typeofObject*/x; else /*typeofObjectElse*/x; }
+        function call(x: X | undefined) {
+            if (x?.f()) /*call*/x;
+            if (x?.f() === true) /*callStrict*/x;
+            if (typeof x?.f() == "boolean") /*callTypeof*/x;
+        }
+        function nullish(x: X | undefined) { x?.f() ?? /*nullish*/x; if (x?.y ?? false) /*coalesced*/x; }
+    "#
+    );
+    assert_undefined_in_reads(
+        &source,
+        &[
+            ("truthy", "x", false),
+            ("falsy", "x", true),
+            ("and", "x", false),
+            ("negated", "x", false),
+            ("grouped", "x", false),
+            ("receiver", "x", false),
+            ("either", "x", false),
+            ("strict", "x", false),
+            ("strictElse", "x", true),
+            ("notStrict", "x", true),
+            ("notStrictElse", "x", false),
+            ("loose", "x", false),
+            ("looseElse", "x", true),
+            ("notLoose", "x", true),
+            ("notLooseElse", "x", false),
+            ("null", "x", false),
+            ("nullElse", "x", true),
+            ("notNull", "x", true),
+            ("notNullElse", "x", false),
+            ("looseNull", "x", true),
+            ("looseNullElse", "x", false),
+            ("notLooseNull", "x", false),
+            ("notLooseNullElse", "x", true),
+            ("undefined", "x", true),
+            ("undefinedElse", "x", false),
+            ("notUndefined", "x", false),
+            ("notUndefinedElse", "x", true),
+            ("looseUndefined", "x", true),
+            ("looseUndefinedElse", "x", false),
+            ("typeof", "x", false),
+            ("typeofElse", "x", true),
+            ("typeofUndefined", "x", true),
+            ("typeofUndefinedElse", "x", false),
+            ("typeofObject", "x", true),
+            ("typeofObjectElse", "x", false),
+            ("call", "x", false),
+            ("callStrict", "x", false),
+            ("callTypeof", "x", false),
+            ("nullish", "x", true),
+            ("coalesced", "x", true),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below a type without
+// `undefined` (`X`, `{ w: string }`, `C`, `() => X | undefined`,
+// `Record<string, string>`, or `string`), except at `callResult`, where
+// `get()` is a call, not a subject, and keeps `X | undefined`: every receiver
+// along the chain that is a subject narrows, including callees and receivers
+// after a call.
+#[test]
+fn optional_chain_receivers_narrow_along_the_chain() {
+    let source = format!(
+        "{RECEIVER}{}",
+        r#"
+        type C = { c?: X };
+        type B = { b?: C };
+        function links(x: X | undefined) { if (x?.z?.w) { /*links*/x; /*linksInner*/x.z; } }
+        function path(a: { b?: X }) { if (a.b?.y) /*path*/a.b; }
+        function deepPath(a: B) { if (a.b?.c?.y) { /*deepPath*/a.b; /*deepPathInner*/a.b.c; } }
+        function callLinks(x: X | undefined) { if (x?.g?.()?.n) { /*callLinks*/x; /*callee*/x.g; } }
+        function callResult(get: () => X | undefined) { if (get()?.y) /*callResult*/get(); }
+        function keyed(x: Record<string, string> | undefined, k: string) {
+            if (x?.[k]) /*keyed*/x;
+            if (x?.["a"]) /*literalKey*/x;
+        }
+    "#
+    );
+    assert_undefined_in_reads(
+        &source,
+        &[
+            ("links", "x", false),
+            ("linksInner", "x.z", false),
+            ("path", "a.b", false),
+            ("deepPath", "a.b", false),
+            ("deepPathInner", "a.b.c", false),
+            ("callLinks", "x", false),
+            ("callee", "x.g", false),
+            ("callResult", "get()", true),
+            ("keyed", "x", false),
+            ("literalKey", "x", false),
+        ],
+    );
+
+    use InferredTypeData::String;
+    const PRIMITIVE: &str = r#"
+        function primitive(s: string | undefined) {
+            if (s?.length) /*length*/s;
+            if (s?.length === 0) /*empty*/s;
+            if (typeof s?.at(0) === "string") /*at*/s;
+        }
+    "#;
+    assert_reads(
+        PRIMITIVE,
+        &[
+            ("length", "s", &[String]),
+            ("empty", "s", &[String]),
+            ("at", "s", &[String]),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) narrows `x` at `parenthesizedReceiver`,
+// because `(x)` is the receiver of the chain. Parentheses around an optional
+// chain end the outer chain: in a comparison, TypeScript narrows `x.z` but not
+// `x`, so `x?.z` adds `undefined` back from `x`, and gives `X | undefined` and
+// `{ w: string } | undefined` at `chain` and `chainInner`, and
+// `X | undefined` and `C | undefined` at `chainPath` and `chainPathInner`. As
+// the truthiness of a condition, `(x?.z)?.w` narrows `x` to `X` and `x?.z` to
+// `{ w: string }` in TypeScript. Biome narrows nothing for a chain that starts
+// at a parenthesized optional chain, so it is deliberately wider at `truthy`
+// and `truthyInner`.
+#[test]
+fn optional_chain_receivers_stop_at_parentheses() {
+    let source = format!(
+        "{RECEIVER}{}",
+        r#"
+        type C = { c?: X };
+        type B = { b?: C };
+        function parenthesizedReceiver(x: X | undefined) { if ((x)?.n === 1) /*parenthesizedReceiver*/x; }
+        function parenthesizedChain(x: X | undefined) {
+            if ((x?.z)?.w === "a") { /*chain*/x; /*chainInner*/x?.z; }
+            if ((x?.z)?.w) { /*truthy*/x; /*truthyInner*/x?.z; }
+        }
+        function parenthesizedPath(x: { a?: B } | undefined) {
+            if ((x?.a)?.b?.c === undefined) {} else { /*chainPath*/x?.a?.b?.c; /*chainPathInner*/x?.a?.b; }
+        }
+    "#
+    );
+    assert_undefined_in_reads(
+        &source,
+        &[
+            ("parenthesizedReceiver", "x", false),
+            ("chain", "x", true),
+            ("chainInner", "x?.z", true),
+            ("chainPath", "x?.a?.b?.c", true),
+            ("chainPathInner", "x?.a?.b", true),
+            // TypeScript gives `X` and `{ w: string }`.
+            ("truthy", "x", true),
+            ("truthyInner", "x?.z", true),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) gives `X | undefined` at `assigned`,
+// `undefined` at `cleared`, and `X` at `later` and `extension`. A write to a
+// receiver cancels its narrowing in the whole function, as for any other
+// path, so Biome is deliberately wider at `cleared` and `later`, where
+// TypeScript narrows at the write itself or before it. A write to a longer
+// path, such as `a.b.y`, keeps `a.b` narrowed.
+#[test]
+fn writes_cancel_receiver_narrowing() {
+    let source = format!(
+        "{RECEIVER}{}",
+        r#"
+        declare function get(): X | undefined;
+        function assigned(a: { b?: X }) { if (a.b?.y) { a.b = get(); /*assigned*/a.b; } }
+        function cleared(a: { b?: X }) { if (a.b?.y) { a.b = undefined; /*cleared*/a.b; } }
+        function later(a: { b?: X }) { if (a.b?.y) { /*later*/a.b; } a.b = undefined; }
+        function extension(a: { b?: X }) { if (a.b?.y) { a.b.y = null; /*extension*/a.b; } }
+    "#
+    );
+    assert_undefined_in_reads(
+        &source,
+        &[
+            ("assigned", "a.b", true),
+            // TypeScript gives `undefined`.
+            ("cleared", "a.b", true),
+            // TypeScript gives `X`.
+            ("later", "a.b", true),
+            ("extension", "a.b", false),
+        ],
+    );
+}

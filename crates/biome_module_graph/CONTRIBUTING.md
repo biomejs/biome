@@ -130,7 +130,18 @@ one of its own variables or a path on its own `this`. Its parts live in
 - `guards.rs` decomposes every condition into guards on subjects, combined
   the way `!`, `&&`, and `||` combine them. For example,
   `typeof value === "string"` becomes a runtime test of `value`, and
-  `o.v !== null` a runtime test of `o.v`. A call to a local type-guard
+  `o.v !== null` a runtime test of `o.v`. When the tested operand is part of
+  an optional chain and the test's result shows that the operand is not
+  `undefined`, as the true branch of `x?.y === 1` does, the guard also tests
+  each receiver of the chain that is a subject as not nullish, such as `x`
+  and `x.y` in `x?.y?.z`, combined with the main test as `&&` combines its
+  operands. Which branches narrow the receivers follows TypeScript's
+  `narrowTypeByOptionalChainContainment`: neither outcome of `??` does, for
+  example. Parentheses end a chain, and a test of a chain that starts at a
+  parenthesized optional chain, such as `(x?.y)?.z === 1`, narrows nothing:
+  TypeScript narrows `x.y` there but not `x`, so a read of `x?.y` adds
+  `undefined` back from `x`, while a narrowed path in Biome would keep its
+  narrowed type at that read. A call to a local type-guard
   function becomes a runtime test of its argument: collection selects the
   tested argument from the function's collected signature, and inference
   later resolves only the target of its type predicate. Neither step infers

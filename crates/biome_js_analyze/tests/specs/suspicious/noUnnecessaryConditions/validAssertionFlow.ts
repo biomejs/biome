@@ -22,11 +22,6 @@ function beforeAndDuringArguments(value: string | null) {
 	assertString(value, value?.length);
 }
 
-function bareArgument(value: string | null) {
-	assert(value?.length);
-	return value?.length;
-}
-
 function conditionalEffect(value: string | null, flag: boolean) {
 	if (flag) assertString(value);
 	return value?.length;
