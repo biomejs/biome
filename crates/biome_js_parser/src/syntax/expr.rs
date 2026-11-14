@@ -1359,9 +1359,20 @@ fn parse_primary_expression(p: &mut JsParser, context: ExpressionContext) -> Par
             p.bump_any();
 
             if p.eat(T![.]) {
-                if p.eat(T![defer]) || p.eat(T![source]) {
-                    // Parse the call arguments
-                    parse_import_call_expression(p, context, m)
+                if p.at(T![defer]) || p.at(T![source]) {
+                    let phase = p.cur_range();
+                    p.bump_any();
+                    if p.at(T!['(']) {
+                        // Parse the call arguments
+                        parse_import_call_expression(p, context, m)
+                    } else {
+                        let err = p.err_builder(
+                            format!("Expected `(` after `import.{}`", p.text(phase)),
+                            phase,
+                        );
+                        p.error(err);
+                        m.complete(p, JS_BOGUS_EXPRESSION)
+                    }
                 } else if p.at(T![ident]) && p.text(p.cur_range()) == "meta" {
                     p.bump_remap(META);
                     m.complete(p, JS_IMPORT_META_EXPRESSION)
