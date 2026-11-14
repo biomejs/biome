@@ -1,0 +1,34 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write file.mdx
+```
+
+## `biome.json`
+
+```json
+{ "markdown": { "formatter": { "formatEmbeds": false } } }
+```
+
+## `file.mdx`
+
+```mdx
+import { Chart } from "./chart.js";
+
+<Chart data={[1, 2]} />
+
+```js
+const   example = 1
+```
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

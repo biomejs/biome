@@ -881,12 +881,41 @@ impl<Context> std::fmt::Debug for FormatLabelled<'_, Context> {
 /// let mut formatted = format!(SimpleFormatContext::default(), [paragraph])?;
 /// formatted.format_embedded(|embedded_key| (embedded_key == key).then(|| replacement.clone()));
 /// assert_eq!("<p>a + b</p>", formatted.print()?.as_code());
+///
+/// // A single-line element keeps the host formatter's output when the
+/// // replacement breaks.
+/// let single_line = format_with(|f| {
+///     let embedded = FormatEmbedded::new(key, &token("a  +  b"), f)?
+///         .with_layout(EmbeddedLayout::SingleLine);
+///     write!(f, [token("<p>"), embedded, token("</p>")])
+/// });
+/// let breaking = format!(
+///     SimpleFormatContext::default(),
+///     [token("a +"), hard_line_break(), token("b")]
+/// )?
+/// .into_document();
+/// let mut formatted = format!(SimpleFormatContext::default(), [single_line])?;
+/// formatted.format_embedded(|embedded_key| (embedded_key == key).then(|| breaking.clone()));
+/// assert_eq!("<p>a  +  b</p>", formatted.print()?.as_code());
 /// # Ok(())
 /// # }
 /// ```
 pub struct FormatEmbedded<S: Source> {
     key: S::EmbeddedKey,
     content: Interned<S>,
+    layout: EmbeddedLayout,
+}
+
+/// Where the code that replaces an embedded element may be printed.
+#[derive(Debug, Clone, Copy, Default, Eq, PartialEq)]
+pub enum EmbeddedLayout {
+    /// The replacement may span lines.
+    #[default]
+    Free,
+    /// The replacement must fit on one line. A replacement that has a line
+    /// break, or a group that must break, isn't used, and the element prints
+    /// the host formatter's content instead.
+    SingleLine,
 }
 
 impl<S: Source> FormatEmbedded<S> {
@@ -909,7 +938,15 @@ impl<S: Source> FormatEmbedded<S> {
         Ok(Self {
             key,
             content: Interned::new(buffer.into_vec()),
+            layout: EmbeddedLayout::Free,
         })
+    }
+
+    /// Sets where the code that replaces the element may be printed. See
+    /// [EmbeddedLayout].
+    pub fn with_layout(mut self, layout: EmbeddedLayout) -> Self {
+        self.layout = layout;
+        self
     }
 }
 
@@ -922,7 +959,7 @@ where
         // `Document::replace_embedded` replaces the element that follows the
         // start tag, so the content must stay a single interned element.
         f.write_elements([
-            FormatElement::Tag(StartEmbedded(self.key.clone())),
+            FormatElement::Tag(StartEmbedded(self.key.clone(), self.layout)),
             FormatElement::Interned(self.content.clone()),
             FormatElement::Tag(EndEmbedded),
         ])
