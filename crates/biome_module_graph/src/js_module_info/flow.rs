@@ -129,7 +129,7 @@ impl ModuleFlow {
             raw_types,
             raw_binding_types,
             relevance_budget,
-            functions: GuardFunctions::new(raw_types, raw_binding_types, roots.has_dynamic_scope()),
+            functions: GuardFunctions::new(raw_types, raw_binding_types),
         };
         for selected in roots.selected() {
             collector.add_root(&mut flow, &selected.root, roots.bindings(selected));
@@ -358,15 +358,14 @@ mod tests {
     }
 
     #[test]
-    fn dynamic_scope_references_in_nested_functions_disable_enclosing_flow() {
-        for (closure, expected) in [("value", true), ("eval('value = null')", false)] {
+    fn eval_and_arguments_in_nested_functions_keep_enclosing_flow() {
+        for closure in ["eval('value = null')", "arguments"] {
             let source = format!(
                 "function f(value: string | null) {{ const g = () => {closure}; if (value !== null) {{ /*read*/value; }} }}"
             );
             let info = module(&source);
-            assert_eq!(
+            assert!(
                 info.flow.is_candidate(marked(&source, "read", "value")),
-                expected,
                 "{closure}"
             );
         }
@@ -427,7 +426,7 @@ mod tests {
         let mut roots = super::FlowRootScanner::default();
         for event in info.semantic_model.root().syntax().preorder() {
             match event {
-                WalkEvent::Enter(node) => roots.enter(&node, &info.semantic_model),
+                WalkEvent::Enter(node) => roots.enter(&node),
                 WalkEvent::Leave(node) => roots.leave(&node),
             }
         }

@@ -492,15 +492,6 @@ fn unwritten_let_and_const_subjects_narrow_but_writes_captures_and_var_do_not() 
         let ty = normalized_type_at(&db, module, SOURCE, marker, expression);
         assert_variants(&db, ty, expected, marker);
     }
-    const DYNAMIC: &str = r#"
-        declare function guard(input: unknown): input is string;
-        function dynamic(value: string | number) {
-            if (guard(value)) { eval("value = 0"); /*eval*/value; }
-        }
-    "#;
-    let (db, module) = guard_db(DYNAMIC);
-    let ty = normalized_type_at(&db, module, DYNAMIC, "eval", "value");
-    assert_variants(&db, ty, &[String, Number], "eval");
 }
 
 #[test]
@@ -865,9 +856,12 @@ fn typeof_targets_narrow_like_the_values_they_query() {
     }
 }
 
+// TypeScript 6.0.3 (`tsc --strict`) narrows both reads to `string`, although
+// a direct `eval` can reassign the guard or set `value` to `null`. Biome
+// deliberately copies this unsound narrowing; `NARROWING.md` lists it among
+// the deliberate choices.
 #[test]
-fn guards_in_modules_that_read_eval_do_not_refine() {
-    use InferredTypeData::{Number, String};
+fn guards_narrow_in_modules_that_call_eval() {
     for declaration in [
         "let guard = (input: unknown): input is string => typeof input === 'string';",
         "function guard(input: unknown): input is string { return typeof input === 'string'; }",
@@ -876,14 +870,24 @@ fn guards_in_modules_that_read_eval_do_not_refine() {
             r#"
                 {declaration}
                 function loosen() {{ eval("guard = () => true"); }}
-                function inspect(value: string | number) {{
+                function inspect(value: string | null) {{
                     if (guard(value)) {{ /*then*/value; }}
+                }}
+                function dynamic(value: string | null) {{
+                    if (guard(value)) {{ eval("value = null"); /*eval*/value; }}
                 }}
             "#
         );
         let (db, module) = guard_db(&source);
-        let ty = normalized_type_at(&db, module, &source, "then", "value");
-        assert_variants(&db, ty, &[String, Number], declaration);
+        for marker in ["then", "eval"] {
+            let ty = normalized_type_at(&db, module, &source, marker, "value");
+            assert_variants(
+                &db,
+                ty,
+                &[InferredTypeData::String],
+                &format!("{declaration}: {marker}"),
+            );
+        }
     }
 }
 

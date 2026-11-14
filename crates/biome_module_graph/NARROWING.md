@@ -57,13 +57,16 @@ sound alternative loses narrowing that idiomatic code relies on and the
 unsound case needs unusual code. When a sound result keeps TypeScript's
 precision, Biome uses it instead.
 
-Each place where Biome deliberately differs from TypeScript has a row here.
-Do not change these results to match TypeScript without revisiting the row.
+Each deliberate choice has a row here: a place where Biome differs from
+TypeScript, or unsound narrowing that Biome copies from TypeScript. Do not
+change these results, to match TypeScript or to make them sound, without
+revisiting the row.
 
 | Behaviour | Example | TypeScript | Biome | Reason |
 | --- | --- | --- | --- | --- |
 | `??` used as a condition | `x: string \| null \| undefined; y: boolean;`<br>`if (x ?? y) {} else { x }` | `null \| undefined` | `string \| null \| undefined`: `??` in a condition narrows neither operand in either branch | `x` is `""` in the `else` branch when `x` is `""` and `y` is false, because `""` is not nullish. The pattern is rare, so the sound result loses little. |
 | Falsy part of a broad `number` in the value of `&&` | `n: number; s: string;`<br>`n && s` | `string \| 0` | `number \| string` | `-0` and `NaN` are falsy numbers too, so `0` is wrong at runtime. A `string` or `bigint` left operand still contributes `""` or `0n`, its only falsy value. |
+| `eval` and the `arguments` object do not stop narrowing | `x: string \| null;`<br>`if (x !== null) { eval("x = null"); x }`<br>`if (x !== null) { arguments[0] = null; x }` | `string` | `string`, the same as TypeScript | A direct `eval` can write any variable it can see, including a type-guard function. In a function that is not in strict mode and has no default, rest, or destructured parameter, `arguments[0] = null` also writes the first parameter. Either way, `x` can be `null` at the read. Excluding them would stop narrowing in every function that reads `arguments`, even only `arguments.length`, or that contains a direct `eval`, while code that writes a narrowed variable this way is rare. |
 
 ## Limits
 
@@ -83,10 +86,6 @@ These limits apply to every *Supported* and *Partial* row below:
   TypeScript declaration statement other than a type alias, an interface, or a
   function overload signature, or a syntax error. Execution roots that are very
   large or deeply nested get no narrowing either.
-- An execution root that may read the global `eval` or the implicit `arguments`
-  object, directly or in a nested function, gets no narrowing. When any
-  execution root of a module may do so, no call to a type-guard function in
-  that module narrows.
 
 ## Behaviour
 

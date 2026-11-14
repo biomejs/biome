@@ -461,18 +461,24 @@ fn assertions_respect_binding_identity_writes_and_existing_subject_restrictions(
         assert_variants(&db, ty, expected, marker);
     }
     assert_no_whole_module_inference(&db, &db.take_salsa_events());
-    // A direct `eval` can write any variable in scope, including the guard.
-    const DYNAMIC: &str = r#"
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) narrows the read to `string`, although
+// the direct `eval` sets `value` to `null`. Biome deliberately copies this
+// unsound narrowing; `NARROWING.md` lists it among the deliberate choices.
+#[test]
+fn assertions_narrow_despite_a_following_eval() {
+    const SOURCE: &str = r#"
         declare function assertString(input: unknown): asserts input is string;
-        function dynamic(value: string | number) {
+        function dynamic(value: string | null) {
             assertString(value);
-            \u0065val('value = 0');
+            eval("value = null");
             /*eval*/value;
         }
     "#;
-    let (db, module) = assertion_db(DYNAMIC);
-    let ty = normalized_type_at(&db, module, DYNAMIC, "eval", "value");
-    assert_variants(&db, ty, &[String, Number], "eval");
+    let (db, module) = assertion_db(SOURCE);
+    let ty = normalized_type_at(&db, module, SOURCE, "eval", "value");
+    assert_variants(&db, ty, &[InferredTypeData::String], "eval");
 }
 
 #[test]
