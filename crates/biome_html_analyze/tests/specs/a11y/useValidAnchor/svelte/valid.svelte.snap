@@ -12,5 +12,6 @@ expression: valid.svelte
 <Link href="https://example.com">ok</Link>
 <Link href="#">ok</Link>
 <a {href}>test</a>
+<a {...spread}>test</a>
 
 ```
