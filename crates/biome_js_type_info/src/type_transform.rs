@@ -216,6 +216,15 @@ enum TypeTransformEvent<'db> {
     Exit {
         source: TypeData<'db>,
         transformed: TypeData<'db>,
+        /// Remaining steps before `source` was entered.
+        remaining_steps: usize,
+        checkpoint: usize,
+        /// Number of active types reused before `source` was entered.
+        active_reuses: usize,
+        /// Number of expanded types entered before `source`.
+        expansions: usize,
+        /// Whether `transformed` differs from `source`.
+        expanded: bool,
     },
 }
 
@@ -230,6 +239,43 @@ pub(crate) trait TypeTransform<'db> {
 
     /// Transforms a type after its slots have been transformed.
     fn leave(&mut self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeData<'db>;
+
+    /// Returns a result recorded by [`Self::record`] for `ty`, together with
+    /// the number of steps transforming `ty` consumed, so the transformer can
+    /// charge those steps instead of visiting `ty` again.
+    ///
+    /// `available_steps` returns the steps left for `ty` after reserving one
+    /// for each type queued after it. A result that needs more must be
+    /// declined: visiting `ty` would stop partway, so reusing it could change
+    /// the operation's state differently.
+    fn reuse(
+        &mut self,
+        _ty: TypeData<'db>,
+        _available_steps: impl FnOnce() -> usize,
+    ) -> Option<(TypeData<'db>, usize)> {
+        None
+    }
+
+    /// Returns operation state that is passed to [`Self::record`] once the
+    /// type being entered has been transformed.
+    fn checkpoint(&self) -> usize {
+        0
+    }
+
+    /// Receives the result of a type whose slots were transformed, the steps
+    /// that consumed, and the [`Self::checkpoint`] taken when it was entered.
+    ///
+    /// Only results that transforming the type again would reproduce are
+    /// passed: every type visited inside it was entered as it is, and none was
+    /// reused because it was active.
+    fn record(
+        &mut self,
+        _source: TypeData<'db>,
+        _result: TypeData<'db>,
+        _steps: usize,
+        _checkpoint: usize,
+    ) {
+    }
 }
 
 pub(crate) struct TypeDataTransformer {
@@ -247,7 +293,14 @@ impl TypeDataTransformer {
     ///
     /// Each visited type consumes one step. Reusing this transformer shares the
     /// remaining steps across roots. A type already being transformed is reused
-    /// without consuming another step.
+    /// without consuming another step. A result supplied by
+    /// [`TypeTransform::reuse`] consumes the steps recorded with it.
+    ///
+    /// Results are only reused while no type being transformed was replaced
+    /// when it was entered. Such a replacement, like a global expanded to its
+    /// definition, can contain one of its own ancestors. Without one, no
+    /// ancestor can reappear below itself, so visiting a recorded type again
+    /// would consume exactly its recorded steps.
     ///
     /// Slot extraction and reconstruction must agree on slot count and order.
     pub(crate) fn transform<'db>(
@@ -259,17 +312,36 @@ impl TypeDataTransformer {
         let mut stack = Vec::from([TypeTransformEvent::Enter(root)]);
         let mut results = Vec::new();
         let mut active = FxHashSet::default();
+        // A type reused while it is active stands in for its own
+        // transformation, so results that depend on it are not recorded.
+        let mut active_reuses = 0;
+        // Types entered as a different type, in total and among the active
+        // types.
+        let mut expansions = 0;
+        let mut active_expansions = 0;
 
         while let Some(event) = stack.pop() {
             match event {
                 TypeTransformEvent::Enter(source) => {
                     if active.contains(&source) {
+                        active_reuses += 1;
                         results.push(source);
+                        continue;
+                    }
+                    if active_expansions == 0
+                        && let Some((reused, steps)) = operation.reuse(source, || {
+                            self.remaining_steps.saturating_sub(queued_entries(&stack))
+                        })
+                    {
+                        self.remaining_steps -= steps;
+                        results.push(reused);
                         continue;
                     }
                     if self.remaining_steps == 0 {
                         return TypeTransformResult::LimitExceeded;
                     }
+                    let remaining_steps = self.remaining_steps;
+                    let checkpoint = operation.checkpoint();
                     self.remaining_steps -= 1;
 
                     let transformed = match operation.enter(db, source) {
@@ -288,21 +360,28 @@ impl TypeDataTransformer {
 
                     active.insert(source);
                     active.insert(transformed);
-                    let queued_entries = stack
-                        .iter()
-                        .filter(|event| matches!(event, TypeTransformEvent::Enter(_)))
-                        .count();
-                    let available_steps = self.remaining_steps.saturating_sub(queued_entries);
+                    let available_steps =
+                        self.remaining_steps.saturating_sub(queued_entries(&stack));
                     let new_types = slots.iter().filter(|ty| !active.contains(ty)).count();
                     if new_types > available_steps {
                         return TypeTransformResult::LimitExceeded;
                     }
 
-                    let rebuilder = slots.into_rebuilder();
+                    let expanded = transformed != source;
                     stack.push(TypeTransformEvent::Exit {
                         source,
                         transformed,
+                        remaining_steps,
+                        checkpoint,
+                        active_reuses,
+                        expansions,
+                        expanded,
                     });
+                    if expanded {
+                        expansions += 1;
+                        active_expansions += 1;
+                    }
+                    let rebuilder = slots.into_rebuilder();
                     let rebuild_index = stack.len();
                     stack.extend(
                         rebuilder
@@ -336,9 +415,30 @@ impl TypeDataTransformer {
                 TypeTransformEvent::Exit {
                     source,
                     transformed,
+                    remaining_steps,
+                    checkpoint,
+                    active_reuses: active_reuses_at_entry,
+                    expansions: expansions_at_entry,
+                    expanded,
                 } => {
                     active.remove(&source);
                     active.remove(&transformed);
+                    if expanded {
+                        active_expansions -= 1;
+                    }
+                    // The rebuild that ran just before this event pushed the
+                    // result of `source`.
+                    if active_reuses == active_reuses_at_entry
+                        && expansions == expansions_at_entry
+                        && let Some(result) = results.last()
+                    {
+                        operation.record(
+                            source,
+                            *result,
+                            remaining_steps - self.remaining_steps,
+                            checkpoint,
+                        );
+                    }
                 }
             }
         }
@@ -348,6 +448,14 @@ impl TypeDataTransformer {
             _ => TypeTransformResult::InvalidRebuild,
         }
     }
+}
+
+/// Counts the types queued to be entered.
+fn queued_entries(stack: &[TypeTransformEvent<'_>]) -> usize {
+    stack
+        .iter()
+        .filter(|event| matches!(event, TypeTransformEvent::Enter(_)))
+        .count()
 }
 
 /// Replaces generic references using several substitutions at once.
@@ -538,13 +646,45 @@ impl<'db> TypeTransform<'db> for TypeSubstituter<'_, 'db> {
 /// The resolver is generic so that resolving each visited type is a direct,
 /// inlinable call. Nested normalizations reborrow the same resolver, so they
 /// use the same `TypeNormalizer<R>` type rather than a new instantiation.
-struct TypeNormalizer<'a, R> {
+struct TypeNormalizer<'a, 'db, R> {
     resolve: &'a mut R,
-    /// Remaining conditional instantiations, shared with nested normalizations.
-    remaining_instantiations: &'a mut usize,
+    /// Conditional instantiations, shared with nested normalizations.
+    instantiations: &'a mut InstantiationBudget,
+    /// Results reused across normalizations, if the caller provided a cache.
+    cache: Option<&'a mut TypeNormalizationCache<'db>>,
 }
 
-impl<'db, R> TypeNormalizer<'_, R>
+/// Conditional instantiations left to one normalization.
+struct InstantiationBudget {
+    remaining: usize,
+    /// Whether an instantiation was skipped because none were left. Types
+    /// normalized after that may keep conditionals a fresh normalization
+    /// would evaluate.
+    exhausted: bool,
+}
+
+/// Normalized types recorded by normalizations that share a resolver.
+///
+/// Normalizing a type again with the same resolver produces the same type, so
+/// a nested type that was already normalized is not visited again. Each entry
+/// keeps the steps and conditional instantiations its normalization used, and
+/// a reuse is charged the same amounts. A normalization therefore exhausts its
+/// budgets exactly when it would without the cache.
+///
+/// The cache is only valid for one resolver whose results don't change. A
+/// resolver that reads types still being inferred must not use it.
+#[derive(Default)]
+pub struct TypeNormalizationCache<'db> {
+    entries: rustc_hash::FxHashMap<TypeData<'db>, CachedNormalization<'db>>,
+}
+
+struct CachedNormalization<'db> {
+    ty: TypeData<'db>,
+    steps: usize,
+    instantiations: usize,
+}
+
+impl<'db, R> TypeNormalizer<'_, 'db, R>
 where
     R: FnMut(TypeData<'db>) -> TypeData<'db>,
 {
@@ -553,17 +693,19 @@ where
     /// Once the instantiation budget is exhausted, `ty` is returned as is. Its
     /// remaining conditionals stay unevaluated.
     fn normalize_instantiation(&mut self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeData<'db> {
-        if *self.remaining_instantiations == 0 {
+        if self.instantiations.remaining == 0 {
+            self.instantiations.exhausted = true;
             return ty;
         }
-        *self.remaining_instantiations -= 1;
+        self.instantiations.remaining -= 1;
         TypeDataTransformer::new(MAX_TYPE_NORMALIZATION_STEPS)
             .transform(
                 ty,
                 db,
                 &mut TypeNormalizer {
                     resolve: &mut *self.resolve,
-                    remaining_instantiations: &mut *self.remaining_instantiations,
+                    instantiations: &mut *self.instantiations,
+                    cache: self.cache.as_deref_mut(),
                 },
             )
             .map_or(ty, |ty| ty)
@@ -724,10 +866,55 @@ where
     }
 }
 
-impl<'db, R> TypeTransform<'db> for TypeNormalizer<'_, R>
+impl<'db, R> TypeTransform<'db> for TypeNormalizer<'_, 'db, R>
 where
     R: FnMut(TypeData<'db>) -> TypeData<'db>,
 {
+    fn reuse(
+        &mut self,
+        ty: TypeData<'db>,
+        available_steps: impl FnOnce() -> usize,
+    ) -> Option<(TypeData<'db>, usize)> {
+        let cached = self.cache.as_deref()?.entries.get(&ty)?;
+        // Without enough instantiations left, normalizing `ty` again would
+        // leave some of its conditionals unevaluated.
+        let remaining = self
+            .instantiations
+            .remaining
+            .checked_sub(cached.instantiations)?;
+        if cached.steps > available_steps() {
+            return None;
+        }
+        self.instantiations.remaining = remaining;
+        Some((cached.ty, cached.steps))
+    }
+
+    fn checkpoint(&self) -> usize {
+        self.instantiations.remaining
+    }
+
+    fn record(
+        &mut self,
+        source: TypeData<'db>,
+        result: TypeData<'db>,
+        steps: usize,
+        remaining_instantiations: usize,
+    ) {
+        if self.instantiations.exhausted {
+            return;
+        }
+        if let Some(cache) = self.cache.as_deref_mut() {
+            cache.entries.insert(
+                source,
+                CachedNormalization {
+                    ty: result,
+                    steps,
+                    instantiations: remaining_instantiations - self.instantiations.remaining,
+                },
+            );
+        }
+    }
+
     fn enter(&mut self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeTransformAction<'db> {
         let ty = (self.resolve)(ty);
         // A generic parameter is kept as it is. Rebuilding its constraint or
@@ -833,15 +1020,33 @@ impl<'db> TypeData<'db> {
     pub fn normalize_nested_types(
         self,
         db: &'db dyn TypeDb,
-        mut resolve: impl FnMut(Self) -> Self,
+        resolve: impl FnMut(Self) -> Self,
     ) -> TypeTransformResult<Self> {
-        let mut remaining_instantiations = MAX_CONDITIONAL_INSTANTIATIONS;
+        self.normalize_nested_types_with_cache(db, resolve, None)
+    }
+
+    /// Normalizes nested types like [`Self::normalize_nested_types`], reusing
+    /// nested types normalized earlier with the same `cache`.
+    ///
+    /// Every normalization that uses `cache` must use an equivalent resolver.
+    /// See [`TypeNormalizationCache`].
+    pub fn normalize_nested_types_with_cache(
+        self,
+        db: &'db dyn TypeDb,
+        mut resolve: impl FnMut(Self) -> Self,
+        cache: Option<&mut TypeNormalizationCache<'db>>,
+    ) -> TypeTransformResult<Self> {
+        let mut instantiations = InstantiationBudget {
+            remaining: MAX_CONDITIONAL_INSTANTIATIONS,
+            exhausted: false,
+        };
         TypeDataTransformer::new(MAX_TYPE_NORMALIZATION_STEPS).transform(
             self,
             db,
             &mut TypeNormalizer {
                 resolve: &mut resolve,
-                remaining_instantiations: &mut remaining_instantiations,
+                instantiations: &mut instantiations,
+                cache,
             },
         )
     }
@@ -967,8 +1172,8 @@ impl<'db> TypeData<'db> {
 mod tests {
     use super::*;
     use crate::interned_types::{
-        InternedFunction, InternedGenericTypeParameter, InternedIndexedAccessType,
-        InternedTypeofType, ReturnType,
+        InternedExtendsType, InternedFunction, InternedGenericTypeParameter,
+        InternedIndexedAccessType, InternedTuple, InternedTypeofType, ReturnType, TupleElementType,
     };
     use biome_rowan::Text;
 
@@ -1249,6 +1454,166 @@ mod tests {
         assert_eq!(
             function.normalize_nested_types(&db, |ty| ty).unwrap(),
             function
+        );
+    }
+
+    fn normalize_with<'db>(
+        db: &'db TestDb,
+        ty: TypeData<'db>,
+        cache: Option<&mut TypeNormalizationCache<'db>>,
+    ) -> TypeTransformResult<TypeData<'db>> {
+        ty.normalize_nested_types_with_cache(db, |ty| ty, cache)
+    }
+
+    #[test]
+    fn cached_normalization_matches_uncached_normalization() {
+        let db = TestDb::default();
+        let typeof_type = |ty| TypeData::TypeofType(InternedTypeofType::new(&db, ty));
+        let nested = typeof_type(typeof_type(TypeData::Number));
+        let union = TypeData::union_from_types(&db, vec![nested, typeof_type(TypeData::String)]);
+        let mut cache = TypeNormalizationCache::default();
+        for ty in [nested, union] {
+            assert_eq!(
+                normalize_with(&db, ty, Some(&mut cache)),
+                normalize_with(&db, ty, None)
+            );
+        }
+    }
+
+    #[test]
+    fn cached_normalization_charges_recorded_steps() {
+        let db = TestDb::default();
+        let typeof_type = |ty| TypeData::TypeofType(InternedTypeofType::new(&db, ty));
+        // Each `typeof` wrapper and the innermost `string` consume one step,
+        // so `inner` uses the whole budget and `outer` exceeds it.
+        let mut inner = TypeData::String;
+        for _ in 1..MAX_TYPE_NORMALIZATION_STEPS {
+            inner = typeof_type(inner);
+        }
+        let outer = typeof_type(inner);
+        let mut cache = TypeNormalizationCache::default();
+        assert_eq!(
+            normalize_with(&db, inner, Some(&mut cache)),
+            TypeTransformResult::Transformed(TypeData::String)
+        );
+        assert_eq!(
+            normalize_with(&db, outer, None),
+            TypeTransformResult::LimitExceeded
+        );
+        assert_eq!(
+            normalize_with(&db, outer, Some(&mut cache)),
+            TypeTransformResult::LimitExceeded
+        );
+    }
+
+    /// Returns `string extends infer X ? (X extends string ? number : boolean)
+    /// : never` with an `X` named `name`. The inner conditional can't be
+    /// evaluated before `X` is replaced, so normalizing the outer one to
+    /// `number` uses one conditional instantiation.
+    fn infer_conditional<'db>(db: &'db TestDb, name: String) -> TypeData<'db> {
+        let infer = TypeData::Generic(InternedGenericTypeParameter::new(
+            db,
+            false,
+            None,
+            None,
+            Text::from(name),
+        ));
+        TypeData::Extends(InternedExtendsType::new(
+            db,
+            TypeData::String,
+            infer,
+            TypeData::Extends(InternedExtendsType::new(
+                db,
+                infer,
+                TypeData::String,
+                TypeData::Number,
+                TypeData::Boolean,
+                Box::default(),
+                false,
+            )),
+            TypeData::NeverKeyword,
+            Box::from([infer]),
+            false,
+        ))
+    }
+
+    fn tuple<'db>(
+        db: &'db TestDb,
+        types: impl IntoIterator<Item = TypeData<'db>>,
+    ) -> TypeData<'db> {
+        TypeData::Tuple(InternedTuple::new(
+            db,
+            types
+                .into_iter()
+                .map(|ty| TupleElementType {
+                    ty,
+                    name: None,
+                    is_optional: false,
+                    is_rest: false,
+                })
+                .collect::<Box<_>>(),
+            false,
+        ))
+    }
+
+    fn infer_conditionals<'db>(db: &'db TestDb, prefix: &str, count: usize) -> TypeData<'db> {
+        tuple(
+            db,
+            (0..count).map(|index| infer_conditional(db, format!("{prefix}{index}"))),
+        )
+    }
+
+    #[test]
+    fn cached_normalization_is_not_reused_without_enough_instantiations() {
+        let db = TestDb::default();
+        let reused = infer_conditionals(&db, "Reused", 4);
+        let mut cache = TypeNormalizationCache::default();
+        assert_eq!(
+            normalize_with(&db, reused, Some(&mut cache)),
+            TypeTransformResult::Transformed(tuple(&db, [TypeData::Number; 4]))
+        );
+        // The conditionals before `reused` leave three instantiations for its
+        // four conditionals.
+        let filler = infer_conditionals(&db, "Filler", MAX_CONDITIONAL_INSTANTIATIONS - 3);
+        let root = tuple(&db, [filler, reused]);
+        assert_eq!(
+            normalize_with(&db, root, Some(&mut cache)),
+            normalize_with(&db, root, None)
+        );
+    }
+
+    #[test]
+    fn cached_normalization_skips_results_after_instantiations_run_out() {
+        let db = TestDb::default();
+        let filler = infer_conditionals(&db, "Filler", MAX_CONDITIONAL_INSTANTIATIONS);
+        let late = infer_conditionals(&db, "Late", 2);
+        let mut cache = TypeNormalizationCache::default();
+        // `late` is left unevaluated here because no instantiations remain.
+        normalize_with(&db, tuple(&db, [filler, late]), Some(&mut cache)).unwrap();
+        assert_eq!(
+            normalize_with(&db, late, Some(&mut cache)),
+            TypeTransformResult::Transformed(tuple(&db, [TypeData::Number; 2]))
+        );
+    }
+
+    #[test]
+    fn cached_normalization_skips_results_that_reuse_an_active_type() {
+        let db = TestDb::default();
+        // The resolver expands `handle` to `[inner]`, and `inner` contains
+        // `handle`. Normalizing `handle` reaches `handle` again inside `inner`
+        // and keeps it unexpanded there, which normalizing `inner` on its own
+        // would not.
+        let handle = TypeData::Symbol;
+        let inner = tuple(&db, [handle, TypeData::String]);
+        let expanded = tuple(&db, [inner]);
+        let resolve = |ty| if ty == handle { expanded } else { ty };
+        let mut cache = TypeNormalizationCache::default();
+        handle
+            .normalize_nested_types_with_cache(&db, resolve, Some(&mut cache))
+            .unwrap();
+        assert_eq!(
+            inner.normalize_nested_types_with_cache(&db, resolve, Some(&mut cache)),
+            inner.normalize_nested_types(&db, resolve)
         );
     }
 

@@ -5,7 +5,7 @@ use super::{
         evaluate_mapped_type_with_resolver, find_member_key_type_with_resolver,
         find_member_type_with_resolver, substitutions_for_instance,
     },
-    normalize_structural_type,
+    normalize_structural_type_with_cache,
     resolver::ResolutionCtx,
 };
 use crate::db::queries::{
@@ -96,7 +96,8 @@ impl<'db> MemberLookupResolver<'db> for ResolutionCtx<'db, '_> {
             ty
         };
         let ty = apply_substitutions(db, ty, substitutions);
-        let Ok(ty) = normalize_structural_type(db, ty, |ty| ty) else {
+        let Ok(ty) = normalize_structural_type_with_cache(db, ty, &mut self.member_normalizations)
+        else {
             return InferredTypeData::Unknown;
         };
         self.member_type(ty, is_optional)

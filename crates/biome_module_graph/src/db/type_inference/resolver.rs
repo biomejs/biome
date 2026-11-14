@@ -35,7 +35,8 @@ use biome_js_type_info::{
         InternedModule as InferredModule, InternedNamespace as InferredNamespace,
         InternedTypeofValue, Literal as InferredLiteral, LocalTypeHandle, LocalTypeId, ModuleKey,
         TypeData as InferredTypeData, TypeMember as InferredTypeMember,
-        TypeMemberKind as InferredTypeMemberKind, TypeSubstitution as InferredTypeSubstitution,
+        TypeMemberKind as InferredTypeMemberKind, TypeNormalizationCache,
+        TypeSubstitution as InferredTypeSubstitution,
     },
 };
 use biome_rowan::{Text, TextRange};
@@ -253,6 +254,11 @@ pub(in crate::db) struct ResolutionCtx<'db, 'a> {
     /// Flow results this context evaluates itself, or `None` when flow
     /// candidates go through the flow queries.
     pub(in crate::db::type_inference) local_flow: Option<Box<LocalFlow<'db>>>,
+    /// Nested types normalized while finalizing member types. Members of an
+    /// instance embed its type arguments, so lookups on related instances,
+    /// such as successive calls of a builder chain, normalize the same
+    /// arguments again.
+    pub(in crate::db::type_inference) member_normalizations: TypeNormalizationCache<'db>,
 }
 
 pub(in crate::db) fn resolve_raw_types<'db>(
@@ -344,6 +350,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
             in_progress_reads: Cell::new(0),
             member_lookups: FxHashMap::default(),
             local_flow: None,
+            member_normalizations: TypeNormalizationCache::default(),
         }
     }
 
