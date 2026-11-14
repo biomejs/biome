@@ -2,8 +2,13 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{CssPseudoElementFunctionSelector, CssTypeSelector};
+use biome_css_syntax::{
+    AnyCssAtRule, CssCompoundSelector, CssNestedQualifiedRule, CssPseudoElementFunctionSelector,
+    CssQualifiedRule, CssRelativeSelector, CssSyntaxKind, CssTypeSelector, ScssEachAtRule,
+    ScssForAtRule, ScssIfAtRule, ScssIncludeAtRule, ScssMixinAtRule, ScssWhileAtRule,
+};
 use biome_diagnostics::Severity;
+use biome_languages::CssFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::no_unknown_type_selector::NoUnknownTypeSelectorOptions;
 
@@ -38,6 +43,68 @@ fn is_in_view_transition_pseudo_element(type_selector: &CssTypeSelector) -> bool
         })
 }
 
+/// Returns whether the type selector is the whole selector `from` or `to` of a rule placed
+/// directly in a mixin body or an `@include` content block, where it becomes a keyframe selector
+/// once Sass places it inside `@keyframes`.
+///
+/// Control-flow at-rules such as `@if` between the rule and the block don't change where Sass puts
+/// the rule. An enclosing style rule or another at-rule, such as `@media`, does.
+fn is_keyframe_selector_in_scss_block(type_selector: &CssTypeSelector, name: &str) -> bool {
+    if !(name.eq_ignore_ascii_case("from") || name.eq_ignore_ascii_case("to"))
+        || type_selector.namespace().is_some()
+    {
+        return false;
+    }
+    // Equal ranges rule out sibling selectors and combinators without allocating child nodes.
+    let range = type_selector.syntax().text_trimmed_range();
+    let Some(mut selector) = type_selector.syntax().parent().filter(|node| {
+        CssCompoundSelector::can_cast(node.kind()) && node.text_trimmed_range() == range
+    }) else {
+        return false;
+    };
+    if let Some(relative) = selector
+        .parent()
+        .filter(|node| CssRelativeSelector::can_cast(node.kind()))
+    {
+        if relative.text_trimmed_range() != range {
+            return false;
+        }
+        selector = relative;
+    }
+    let Some(rule) = selector
+        .grand_parent()
+        .filter(|rule| is_style_rule(rule.kind()))
+    else {
+        return false;
+    };
+    rule.ancestors()
+        .skip(1)
+        .find_map(|node| {
+            let kind = node.kind();
+            if ScssMixinAtRule::can_cast(kind) || ScssIncludeAtRule::can_cast(kind) {
+                Some(true)
+            } else if is_style_rule(kind)
+                || (AnyCssAtRule::can_cast(kind) && !is_control_flow(kind))
+            {
+                Some(false)
+            } else {
+                None
+            }
+        })
+        .unwrap_or(false)
+}
+
+fn is_control_flow(kind: CssSyntaxKind) -> bool {
+    ScssIfAtRule::can_cast(kind)
+        || ScssEachAtRule::can_cast(kind)
+        || ScssForAtRule::can_cast(kind)
+        || ScssWhileAtRule::can_cast(kind)
+}
+
+fn is_style_rule(kind: CssSyntaxKind) -> bool {
+    CssQualifiedRule::can_cast(kind) || CssNestedQualifiedRule::can_cast(kind)
+}
+
 declare_lint_rule! {
     /// Disallow unrecognized element names in type selectors.
     ///
@@ -54,6 +121,10 @@ declare_lint_rule! {
     ///
     /// Type selector names containing SCSS interpolation are ignored because the emitted name cannot
     /// be determined statically.
+    ///
+    /// `from` and `to` aren't reported as the whole selector of a rule directly inside a `@mixin`
+    /// body or an `@include` block, because Sass can place them inside `@keyframes`, where they are
+    /// keyframe selectors.
     ///
     /// ## Examples
     ///
@@ -115,10 +186,15 @@ impl Rule for NoUnknownTypeSelector {
             .value_token()
             .ok()?
             .token_text_trimmed();
-        if !is_known_type_selector(&type_selector) {
-            return Some(css_type_selector.clone());
+        if is_known_type_selector(&type_selector) {
+            return None;
         }
-        None
+        if ctx.source_type::<CssFileSource>().is_scss()
+            && is_keyframe_selector_in_scss_block(css_type_selector, &type_selector)
+        {
+            return None;
+        }
+        Some(css_type_selector.clone())
     }
 
     fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
