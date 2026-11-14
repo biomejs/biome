@@ -18,7 +18,8 @@
 // The core type is `NodeData` -- a heap-allocated reference counted object,
 // which points to a green node or a green token, and to the parent `NodeData`.
 // Publicly-exposed `SyntaxNode` and `SyntaxToken` own a reference to
-// `NodeData`.
+// `NodeData` through a `NodeRc`, whose blocks come from a per-thread pool
+// (see `node_rc`).
 //
 // `NodeData`s are transient, and are created and destroyed during tree
 // traversals. In general, only currently referenced nodes and their ancestors
@@ -41,15 +42,17 @@
 
 mod element;
 mod node;
+mod node_rc;
 mod token;
 mod trivia;
 
+use std::ptr;
 use std::{iter, ops};
-use std::{ptr, rc::Rc};
 
 pub(crate) use trivia::{SyntaxTrivia, SyntaxTriviaPiecesIterator};
 
 use crate::cursor::node::Siblings;
+use crate::cursor::node_rc::NodeRc;
 pub(crate) use crate::cursor::token::SyntaxToken;
 use crate::green::{self, GreenElement, GreenNodeData, GreenTokenData};
 use crate::{
@@ -93,7 +96,7 @@ enum NodeKind {
     },
     Child {
         green: WeakGreenElement,
-        parent: Rc<NodeData>,
+        parent: NodeRc,
     },
 }
 
@@ -140,16 +143,23 @@ impl WeakGreenElement {
 
 impl NodeData {
     #[inline]
-    fn new(kind: NodeKind, slot: u32, offset: TextSize) -> Rc<Self> {
-        let res = Self {
+    fn new(kind: NodeKind, slot: u32, offset: TextSize) -> Self {
+        Self {
             #[cfg(feature = "countme")]
             _c: countme::Count::new(),
             kind,
             slot,
             offset,
-        };
+        }
+    }
 
-        Rc::new(res)
+    /// Drops the node and returns the reference it held to its parent, if any.
+    #[inline]
+    fn into_parent(self) -> Option<NodeRc> {
+        match self.kind {
+            NodeKind::Child { parent, .. } => Some(parent),
+            NodeKind::Root { .. } => None,
+        }
     }
 
     #[inline]
@@ -280,9 +290,11 @@ impl NodeData {
             ))
         })
     }
+}
 
-    fn into_green(self: Rc<Self>) -> GreenElement {
-        match Rc::try_unwrap(self) {
+impl NodeRc {
+    fn into_green(self) -> GreenElement {
+        match Self::try_unwrap(self) {
             Ok(data) => match data.kind {
                 NodeKind::Root { green } => green,
                 NodeKind::Child { green, .. } => green.to_owned(),
@@ -293,15 +305,15 @@ impl NodeData {
 
     /// Return a clone of this subtree detached from its parent
     #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
-    fn detach(self: Rc<Self>) -> Rc<Self> {
+    fn detach(self) -> Self {
         match &self.kind {
-            NodeKind::Child { green, .. } => Self::new(
+            NodeKind::Child { green, .. } => Self::new(NodeData::new(
                 NodeKind::Root {
                     green: green.to_owned(),
                 },
                 0,
                 0.into(),
-            ),
+            )),
             // If this node is already detached, increment the reference count and return a clone
             NodeKind::Root { .. } => self.clone(),
         }
@@ -310,7 +322,7 @@ impl NodeData {
     /// Return a clone of this node with the specified range of slots replaced
     /// with the elements of the provided iterator
     #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
-    fn splice_slots<R, I>(mut self: Rc<Self>, range: R, replace_with: I) -> Rc<Self>
+    fn splice_slots<R, I>(mut self, range: R, replace_with: I) -> Self
     where
         R: ops::RangeBounds<usize>,
         I: Iterator<Item = Option<green::GreenElement>>,
@@ -322,14 +334,14 @@ impl NodeData {
 
         // Try to reuse the underlying memory allocation if self is the only
         // outstanding reference to this NodeData
-        match Rc::get_mut(&mut self) {
+        match self.get_mut() {
             Some(node) => {
                 node.kind = NodeKind::Root { green };
                 node.slot = 0;
                 node.offset = TextSize::from(0);
                 self
             }
-            None => Self::new(NodeKind::Root { green }, 0, 0.into()),
+            None => Self::new(NodeData::new(NodeKind::Root { green }, 0, 0.into())),
         }
     }
 
@@ -339,11 +351,7 @@ impl NodeData {
     ///
     /// Returns `None` if `prev_elem` is not a descendant of this node
     #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
-    fn replace_child(
-        mut self: Rc<Self>,
-        prev_elem: SyntaxElement,
-        next_elem: SyntaxElement,
-    ) -> Option<Rc<Self>> {
+    fn replace_child(mut self, prev_elem: SyntaxElement, next_elem: SyntaxElement) -> Option<Self> {
         let mut green = next_elem.into_green();
         let mut elem = prev_elem;
 
@@ -365,14 +373,14 @@ impl NodeData {
 
         // Try to reuse the underlying memory allocation if self is the only
         // outstanding reference to this NodeData
-        let result = match Rc::get_mut(&mut self) {
+        let result = match self.get_mut() {
             Some(node) => {
                 node.kind = NodeKind::Root { green };
                 node.slot = 0;
                 node.offset = TextSize::from(0);
                 self
             }
-            None => Self::new(NodeKind::Root { green }, 0, 0.into()),
+            None => Self::new(NodeData::new(NodeKind::Root { green }, 0, 0.into())),
         };
 
         Some(result)

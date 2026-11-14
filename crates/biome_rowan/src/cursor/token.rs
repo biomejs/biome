@@ -1,17 +1,17 @@
+use crate::cursor::node_rc::NodeRc;
 use crate::cursor::{NodeData, SyntaxElement, SyntaxNode, SyntaxTrivia};
 use crate::green::GreenElementRef;
 use crate::{Direction, GreenToken, GreenTokenData, RawSyntaxKind, TokenText, green};
 use biome_text_size::{TextRange, TextSize};
 use std::hash::{Hash, Hasher};
 use std::ptr::NonNull;
-use std::rc::Rc;
 use std::{fmt, iter};
 
 use super::{GreenElement, NodeKind, WeakGreenElement};
 
 #[derive(Clone, Debug)]
 pub(crate) struct SyntaxToken {
-    ptr: Rc<NodeData>,
+    ptr: NodeRc,
 }
 
 impl SyntaxToken {
@@ -22,26 +22,26 @@ impl SyntaxToken {
         offset: TextSize,
     ) -> Self {
         Self {
-            ptr: NodeData::new(
+            ptr: NodeRc::new(NodeData::new(
                 NodeKind::Child {
                     green: WeakGreenElement::new(GreenElementRef::Token(green)),
                     parent: parent.ptr,
                 },
                 index,
                 offset,
-            ),
+            )),
         }
     }
 
     pub(crate) fn new_detached(green: GreenToken) -> Self {
         Self {
-            ptr: NodeData::new(
+            ptr: NodeRc::new(NodeData::new(
                 NodeKind::Root {
                     green: GreenElement::Token(green),
                 },
                 0,
                 TextSize::from(0),
-            ),
+            )),
         }
     }
 
@@ -64,7 +64,7 @@ impl SyntaxToken {
 
     #[inline]
     pub(super) fn data(&self) -> &NodeData {
-        self.ptr.as_ref()
+        &self.ptr
     }
 
     #[inline]
