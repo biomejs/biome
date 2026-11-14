@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_formatter::{Expand, FormatContext, format_args, write};
+use biome_formatter::{format_args, write};
 use biome_json_syntax::{JsonArrayValue, JsonArrayValueFields};
+use biome_rowan::AstSeparatedList;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsonArrayValue;
@@ -13,7 +14,9 @@ impl FormatNodeRule<JsonArrayValue> for FormatJsonArrayValue {
         } = node.as_fields();
 
         let should_expand = f.comments().has_dangling_comments(node.syntax())
-            || f.context().options().expand() == Expand::Always;
+            || f.options()
+                .expand()
+                .should_expand_for_length(elements.len());
         let delimiter_spacing = f.options().delimiter_spacing().value();
 
         write!(
