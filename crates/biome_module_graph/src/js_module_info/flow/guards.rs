@@ -60,6 +60,10 @@ pub(crate) enum FlowGuard {
     /// `object` itself when the property is a discriminant, as a test of
     /// `s.kind` narrows `s`. The same test of the property's own subject is a
     /// separate [`Self::Test`]. `test` is never [`FlowTest::Predicate`].
+    ///
+    /// `object` is a [`FlowSubject::Pattern`] for a test of one of its
+    /// elements, as `kind === "c"` tests `{ kind, v }` in
+    /// `const { kind, v } = s`.
     Property {
         object: FlowSubjectId,
         key: PropertyKey,
@@ -72,9 +76,10 @@ pub(crate) enum FlowGuard {
         /// property before the condition, as in
         /// `const k = s.kind; if (k === "c")` or in an aliased condition such
         /// as `const ok = s.kind === "c"; if (ok)`. A write to the property
-        /// between the `const` and the test can make `object` differ from
-        /// what the test shows, so collection replaces such a guard with
-        /// [`Self::Keep`] when the root writes the property.
+        /// between the two can make `object` differ from what the test shows,
+        /// so collection replaces such a guard with [`Self::Keep`] when the
+        /// root writes the property. A guard on a pattern is never aliased,
+        /// because no write changes the values it destructured.
         aliased: bool,
     },
     /// The operands of `&&` or `||`. A sequential pair applies `right` to the
@@ -505,9 +510,11 @@ pub(super) struct DecomposedCondition {
     /// variable cannot change between the alias and its test. See
     /// [`narrows_through_aliases`] for the variables that qualify.
     pub(super) mentions: Vec<FlowSubjectId>,
-    /// The objects of the condition's [`FlowGuard::Property`] guards, such as
-    /// `s` in `s.kind === "c"`. The condition may narrow such a subject only
-    /// through those guards, unless `mentions` also lists it.
+    /// Subjects whose type the condition may refine only through
+    /// [`FlowGuard::Property`], such as `s` in `s.kind === "c"`, unless
+    /// `mentions` also lists them. When decomposition stops early, this also
+    /// lists the pattern of every variable in `mentions` that is an element
+    /// of a destructuring pattern that a test of the variable narrows.
     pub(super) parents: Vec<FlowSubjectId>,
 }
 
@@ -542,7 +549,7 @@ pub(super) fn decompose_condition(
         initializers: Vec::new(),
     };
     let guard = decomposer.guard(expression.clone(), outcome, 0);
-    let parents = std::mem::take(&mut decomposer.parents);
+    let mut parents = std::mem::take(&mut decomposer.parents);
     let mentions = if decomposer.complete {
         decomposer.mentions
     } else {
@@ -556,23 +563,34 @@ pub(super) fn decompose_condition(
             .iter()
             .flat_map(|initializer| initializer.syntax().descendants())
             .map(|node| (node, true));
-        direct
-            .chain(inlined)
-            .take(MAX_FALLBACK_NODES)
-            .filter_map(|(node, inlined)| {
-                let expression = AnyJsExpression::cast(node)?;
-                if !matches!(
-                    expression,
-                    AnyJsExpression::JsIdentifierExpression(_)
-                        | AnyJsExpression::JsStaticMemberExpression(_)
-                        | AnyJsExpression::JsComputedMemberExpression(_)
-                ) {
-                    return None;
-                }
-                let subject = subject_of(&expression, model, subjects)?;
-                (!inlined || narrows_through_aliases(subjects, subject, model)).then_some(subject)
-            })
-            .collect()
+        let mut mentions = Vec::new();
+        for (node, inlined) in direct.chain(inlined).take(MAX_FALLBACK_NODES) {
+            let Some(expression) = AnyJsExpression::cast(node) else {
+                continue;
+            };
+            if !matches!(
+                expression,
+                AnyJsExpression::JsIdentifierExpression(_)
+                    | AnyJsExpression::JsStaticMemberExpression(_)
+                    | AnyJsExpression::JsComputedMemberExpression(_)
+            ) {
+                continue;
+            }
+            let Some(subject) = subject_of(&expression, model, subjects) else {
+                continue;
+            };
+            if inlined && !narrows_through_aliases(subjects, subject, model) {
+                continue;
+            }
+            mentions.push(subject);
+            // A test of an element of a pattern also narrows the pattern.
+            if let Some(&FlowSubject::Binding(range)) = subjects.as_slice().get(subject as usize)
+                && let Some((pattern, _)) = subjects.pattern(range, model)
+            {
+                parents.push(pattern);
+            }
+        }
+        mentions
     };
     DecomposedCondition {
         guard,
@@ -729,16 +747,18 @@ impl Decomposer<'_, '_> {
             }
             _ => FlowGuard::Keep,
         };
-        if let Some((test, subject)) = tested
-            && let Some(property) = self.property_guard(operand, subject, test, positive)
-        {
-            let left = self.push(guard);
-            let right = self.push(property);
-            guard = FlowGuard::Both {
-                left,
-                right,
-                sequential: true,
-            };
+        if let Some((test, subject)) = tested {
+            let property = self.property_guard(operand, subject, test, positive);
+            let pattern = self.pattern_guard(subject, test, positive);
+            for property in [property, pattern].into_iter().flatten() {
+                let left = self.push(guard);
+                let right = self.push(property);
+                guard = FlowGuard::Both {
+                    left,
+                    right,
+                    sequential: true,
+                };
+            }
         }
         if receivers {
             self.receiver_tests(chain, guard)
@@ -786,7 +806,9 @@ impl Decomposer<'_, '_> {
                     let (object, key, optional_chain) = self.held_property(operand)?;
                     (object, key, optional_chain, true)
                 }
-                FlowSubject::This | FlowSubject::Member { .. } => return None,
+                FlowSubject::This | FlowSubject::Member { .. } | FlowSubject::Pattern(_) => {
+                    return None;
+                }
             };
         if matches!(
             self.subjects.as_slice().get(object as usize)?,
@@ -803,6 +825,42 @@ impl Decomposer<'_, '_> {
             positive,
             optional_chain,
             aliased,
+        })
+    }
+
+    /// Returns the guard that a runtime test of the variable `subject`
+    /// applies to the destructuring pattern that holds the variable as an
+    /// element, as `kind === "c"` applies to `{ kind, v }` in
+    /// `const { kind, v } = s`, when [`subjects::narrowing_pattern`] accepts
+    /// the pattern.
+    ///
+    /// Returns `None` for a call to a type-guard function, as for
+    /// [`Self::property_guard`]. Inside an inlined aliased condition, every
+    /// such pattern can be tested, because its values don't change after the
+    /// destructuring.
+    ///
+    /// [`subjects::narrowing_pattern`]: super::subjects::narrowing_pattern
+    fn pattern_guard(
+        &mut self,
+        subject: FlowSubjectId,
+        test: FlowTest,
+        positive: bool,
+    ) -> Option<FlowGuard> {
+        if matches!(test, FlowTest::Predicate(_)) {
+            return None;
+        }
+        let &FlowSubject::Binding(range) = self.subjects.as_slice().get(subject as usize)? else {
+            return None;
+        };
+        let (pattern, key) = self.subjects.pattern(range, self.model)?;
+        self.parents.push(pattern);
+        Some(FlowGuard::Property {
+            object: pattern,
+            key,
+            test,
+            positive,
+            optional_chain: false,
+            aliased: false,
         })
     }
 
@@ -994,13 +1052,13 @@ impl Decomposer<'_, '_> {
 /// and is declared by `const`, as a parameter or a catch variable, or by a
 /// `let` statement that is not at the top level of the file.
 ///
-/// TypeScript applies the same rule, with these differences:
-/// - TypeScript rejects a top-level `let` only in a script, because other
-///   scripts can write it. Biome cannot tell a script from a module.
-/// - TypeScript accepts a `const` exported by an `export { ... }` list.
-/// - TypeScript accepts `this` and a readonly property. Biome rejects `this`
-///   because an alias declared in an enclosing function can read a different
-///   `this` from the execution root's.
+/// Biome also rejects every exported variable, `this`, and every property
+/// path, where TypeScript accepts a `const` exported by an `export { ... }`
+/// list, `this`, and a readonly property. An alias declared in an enclosing
+/// function would read another `this` than the root's. A destructuring
+/// pattern is accepted, as in TypeScript, because the table stores only
+/// patterns that a `const` or a parameter whose variables are never written
+/// declares.
 #[expect(
     clippy::wildcard_enum_match_arm,
     reason = "Only parameters, catch variables, and `const` and `let` declarations qualify."
@@ -1010,8 +1068,11 @@ fn narrows_through_aliases(
     subject: FlowSubjectId,
     model: &SemanticModel,
 ) -> bool {
-    let Some(FlowSubject::Binding(range)) = subjects.as_slice().get(subject as usize) else {
-        return false;
+    let range = match subjects.as_slice().get(subject as usize) {
+        Some(FlowSubject::Binding(range)) => range,
+        // The table stores only patterns whose values can't change.
+        Some(FlowSubject::Pattern(_)) => return true,
+        Some(FlowSubject::This | FlowSubject::Member { .. }) | None => return false,
     };
     let Some(binding) = model.as_binding_by_range(*range) else {
         return false;
@@ -1514,6 +1575,14 @@ mod tests {
                 .text_trimmed()
                 .to_owned(),
             FlowSubject::This => "this".to_owned(),
+            FlowSubject::Pattern(range) => model
+                .root()
+                .syntax()
+                .covering_element(*range)
+                .into_node()
+                .unwrap()
+                .text_trimmed()
+                .to_string(),
             FlowSubject::Member {
                 object,
                 key: PropertyKey::Name(name),
@@ -1794,6 +1863,101 @@ mod tests {
                 _ => None,
             })
             .collect()
+    }
+
+    #[test]
+    fn tests_of_destructured_elements_test_their_pattern() {
+        for (program, expected) in [
+            (
+                "function f(value) { const { kind, v } = value; if (kind === 'a') {} }",
+                vec!["value[kind]~", "{ kind, v }[kind]"],
+            ),
+            (
+                "function f({ kind, v }) { if (kind === 'a') {} }",
+                vec!["{ kind, v }[kind]"],
+            ),
+            (
+                "function f({ kind: k, v }) { if (k === 'a') {} }",
+                vec!["{ kind: k, v }[kind]"],
+            ),
+            (
+                "function f(...[k, x]) { if (x === 1) {} }",
+                vec!["[k, x][1]"],
+            ),
+            (
+                "function f(t) { const [k, , x] = t; if (x === 'a') {} }",
+                vec!["t[2]~", "[k, , x][2]"],
+            ),
+            (
+                "function f(w) { const { a: { kind, v } } = w; if (kind === 'a') {} }",
+                vec!["{ kind, v }[kind]"],
+            ),
+            (
+                "function f(w) { const [{ kind, v }] = w; if (kind === 'a') {} }",
+                vec!["{ kind, v }[kind]"],
+            ),
+            (
+                "function f(value) { for (const { kind, v } of value) { if (kind === 'a') {} } }",
+                vec!["{ kind, v }[kind]"],
+            ),
+            (
+                "function f({ kind, v } = d) { if (kind === 'a') {} }",
+                vec!["{ kind, v }[kind]"],
+            ),
+            // A pattern's values don't change, so its guard is never aliased.
+            (
+                "function f({ kind, v }) { const ok = kind === 'a'; if (ok) {} }",
+                vec!["{ kind, v }[kind]"],
+            ),
+            (
+                "function f({ kind, v }) { if (typeof kind === 'string' || !v) {} }",
+                vec!["{ kind, v }[kind]", "{ kind, v }[v]"],
+            ),
+            // The pattern needs two elements without a default that are not
+            // rest elements.
+            (
+                "function f(value) { const { kind, v = 1 } = value; if (kind === 'a') {} }",
+                vec!["value[kind]~"],
+            ),
+            (
+                "function f(value) { const { kind, ...rest } = value; if (kind === 'a') {} }",
+                vec!["value[kind]~"],
+            ),
+            (
+                "function f(value) { const { kind = 'a', v } = value; if (kind === 'a') {} }",
+                vec![],
+            ),
+            (
+                "function f(value) { let { kind, v } = value; if (kind === 'a') {} }",
+                vec![],
+            ),
+            (
+                "function f(value) { var { kind, v } = value; if (kind === 'a') {} }",
+                vec![],
+            ),
+            (
+                "function f({ kind, v }) { v = 1; if (kind === 'a') {} }",
+                vec![],
+            ),
+            (
+                "function f({ kind, inner: [v] }) { v = 1; if (kind === 'a') {} }",
+                vec![],
+            ),
+            (
+                "function f(w) { const { a: { kind, v } = d } = w; if (kind === 'a') {} }",
+                vec![],
+            ),
+            (
+                "function f() { try {} catch ({ kind, v }) { if (kind === 'a') {} } }",
+                vec![],
+            ),
+        ] {
+            assert_eq!(
+                property_names_in(program, FlowOutcome::Truthy),
+                expected,
+                "{program}"
+            );
+        }
     }
 
     #[test]

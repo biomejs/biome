@@ -7,6 +7,8 @@
 //! reaches the read. A variable starts from its declared type. The declared
 //! type of a property path at a read is the type of the member access there,
 //! given the narrowed type of its object, as TypeScript types property reads.
+//! Likewise, the declared type of an element of a destructuring pattern at a
+//! read is its field on the pattern narrowed there.
 
 use super::{ImportResolution, ResolutionCtx, resolve_local_type_on_demand};
 use crate::db::queries::{
@@ -14,15 +16,16 @@ use crate::db::queries::{
     infer_flow_subject_states, infer_flow_subject_type,
 };
 use crate::js_module_info::flow::{
-    FlowGuard, FlowNode, FlowNodeId, FlowSubject, FlowSubjectId, FlowTest, PropertyKey, RootFlow,
-    guard_signature,
+    FlowGuard, FlowNode, FlowNodeId, FlowRead, FlowSubject, FlowSubjectId, FlowTest, PropertyKey,
+    RootFlow, guard_signature,
 };
 use crate::{JsModuleInfo, ModuleDb, ModuleInfo};
 use biome_js_syntax::JsIdentifierExpression;
 use biome_js_type_info::interned_types::{Literal, TypeData};
 use biome_js_type_info::{
-    NarrowingPredicate, PropertyTest, TypeId, TypeofKind, is_narrowing_invariant,
-    may_narrow_by_property, narrow_by_property, narrow_type,
+    NarrowingPredicate, PropertyTest, RawTypeData, RawTypeId, TypeId, TypeReference,
+    TypeofExpression, TypeofKind, is_narrowing_invariant, may_narrow_by_property,
+    narrow_by_property, narrow_type,
 };
 use biome_rowan::{AstNode, TextRange};
 use rustc_hash::FxHashMap;
@@ -61,11 +64,12 @@ pub(in crate::db) fn flow_binding_baseline<'db>(
     info: &JsModuleInfo,
     range: TextRange,
 ) -> Option<TypeData<'db>> {
-    // The declared type is resolved from the raw binding type, not through a
-    // declaration query, because declaration queries can erase a cyclic
-    // object's shape. The raw type still lets flow detect an impossible branch
-    // and return an unknown override.
-    let reference = info.raw_binding_types.get(&range)?;
+    // Declaration queries can erase a cyclic object's shape. The raw baseline
+    // still lets flow detect an impossible branch and return an unknown override.
+    let reference = info
+        .raw_binding_types
+        .get(&range)
+        .or_else(|| info.flow.pattern_type(range))?;
     let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
     let declared = ctx.resolve(reference);
     ctx.binding_baseline(range, declared)
@@ -343,6 +347,13 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     /// Returns the narrowed type of the variable read at `identifier`.
     ///
+    /// When the variable is an element of a destructuring pattern that a test
+    /// narrows at the read, as `v` in `const { kind, v } = s` after
+    /// `kind === "c"`, its declared type there is its property on the
+    /// narrowed pattern, as [`Self::narrowed_element`] gives it, and its own
+    /// tests narrow it from that type, as the tests of a property path narrow
+    /// it from its type on the narrowed object.
+    ///
     /// Returns `None` when collection kept no flow for the read, when no
     /// runtime test can change the variable's type, or when narrowing leaves
     /// it unchanged.
@@ -352,19 +363,32 @@ impl<'db> ResolutionCtx<'db, '_> {
     ) -> Option<TypeData<'db>> {
         let info = self.js_info;
         let read = info.flow.read(identifier.range())?;
-        let &FlowSubject::Binding(binding) = info.flow.root(read.root)?.subject(read.subject)?
-        else {
+        let root = info.flow.root(read.root)?;
+        let &FlowSubject::Binding(binding) = root.subject(read.subject)? else {
             return None;
         };
-        let baseline = if self.evaluates_flow_locally() {
-            self.local_binding_baseline(binding)
-        } else {
-            infer_flow_binding_baseline(
-                self.db,
-                BindingTypeInput::new(self.db, self.module, binding),
-            )
+        let declared = root
+            .element_pattern(read.subject)
+            .and_then(|pattern| self.narrowed_element(read, pattern, binding));
+        // The read is a candidate only through its pattern when no test of
+        // the variable itself reaches it.
+        if !root.reads_at(read.subject, read.point) {
+            return declared;
+        }
+        let baseline = match declared {
+            Some(declared) => {
+                let baseline = if root.is_property_only(read.subject) {
+                    self.property_baseline(declared)
+                } else {
+                    self.narrowing_baseline(declared)
+                };
+                match baseline {
+                    Some(baseline) => baseline,
+                    None => return Some(declared),
+                }
+            }
+            None => self.flow_binding_baseline(binding)?,
         };
-        let baseline = baseline?;
         infer_flow_subject_type(
             self.db,
             FlowSubjectTypeInput::new(
@@ -379,25 +403,83 @@ impl<'db> ResolutionCtx<'db, '_> {
                 read.point,
             ),
         )
+        .or(declared)
     }
 
-    /// Returns the type that narrowing of the binding declared at `binding`
-    /// starts from, as [`crate::db::queries::infer_flow_binding_baseline`]
-    /// returns it, but resolved in this context.
+    /// Returns the type of the element declared at `element` at `read`,
+    /// given the `pattern` that holds it: the element's property on the type
+    /// of the pattern narrowed at the read, destructured as the element's
+    /// collected type destructures the pattern's declared type.
+    ///
+    /// Returns `None` when no test can narrow the pattern, when the pattern
+    /// keeps its declared type at the read, and when the property can't be
+    /// read, so the element keeps its declared type. Returns `Unknown` when
+    /// the narrowing of the pattern exceeds a work limit or meets a cycle,
+    /// and when no value of the pattern reaches the read.
+    fn narrowed_element(
+        &mut self,
+        read: FlowRead,
+        pattern: FlowSubjectId,
+        element: TextRange,
+    ) -> Option<TypeData<'db>> {
+        let info = self.js_info;
+        let &FlowSubject::Pattern(range) = info.flow.root(read.root)?.subject(pattern)? else {
+            return None;
+        };
+        let baseline = self.flow_binding_baseline(range)?;
+        let narrowed = infer_flow_subject_type(
+            self.db,
+            FlowSubjectTypeInput::new(
+                self.db,
+                FlowSubjectRootInput::new(self.db, self.module, read.root, pattern, Some(baseline)),
+                read.point,
+            ),
+        )?;
+        if narrowed == TypeData::Unknown {
+            return Some(TypeData::Unknown);
+        }
+        let TypeReference::Resolved(RawTypeId::Local(id)) = info.raw_binding_types.get(&element)?
+        else {
+            return None;
+        };
+        let RawTypeData::TypeofExpression(expression) = info.raw_types.get(id.index())? else {
+            return None;
+        };
+        let TypeofExpression::Destructure(destructure) = expression.as_ref() else {
+            return None;
+        };
+        self.resolve_destructure_field(narrowed, &destructure.destructure_field)
+    }
+
+    /// Returns the type that narrowing of the binding or the pattern at
+    /// `range` starts from, through
+    /// [`crate::db::queries::infer_flow_binding_baseline`], or resolved in
+    /// this context when it evaluates flow locally.
+    fn flow_binding_baseline(&mut self, range: TextRange) -> Option<TypeData<'db>> {
+        if self.evaluates_flow_locally() {
+            self.local_binding_baseline(range)
+        } else {
+            infer_flow_binding_baseline(self.db, BindingTypeInput::new(self.db, self.module, range))
+        }
+    }
+
+    /// Returns the type that narrowing of the binding declared at `binding`,
+    /// or of the pattern at that range, starts from, as
+    /// [`crate::db::queries::infer_flow_binding_baseline`] returns it, but
+    /// resolved in this context.
     fn local_binding_baseline(&mut self, binding: TextRange) -> Option<TypeData<'db>> {
         if let Some(baseline) = self.local_flow.as_ref()?.baselines.get(&binding) {
             return *baseline;
         }
-        // The declared type is resolved from the raw binding type, not through
-        // a declaration query, so a cyclic object keeps its shape, as in
-        // `flow_binding_baseline`.
-        let baseline = self
-            .js_info
+        // As in `flow_binding_baseline`, the raw binding type gives the
+        // declared type.
+        let info = self.js_info;
+        let baseline = info
             .raw_binding_types
             .get(&binding)
-            .cloned()
+            .or_else(|| info.flow.pattern_type(binding))
             .and_then(|reference| {
-                let declared = self.resolve(&reference);
+                let declared = self.resolve(reference);
                 self.binding_baseline(binding, declared)
             });
         self.local_flow
@@ -458,20 +540,54 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
-    /// Returns the type that narrowing of the binding declared at `binding`
-    /// starts from, given its `declared` type: [`Self::property_baseline`]
-    /// when conditions narrow the binding only through tests of its
-    /// properties, and [`Self::narrowing_baseline`] otherwise.
+    /// Returns the type that narrowing of the binding declared at `binding`,
+    /// or of the pattern at that range, starts from, given its `declared`
+    /// type: [`Self::pattern_baseline`] for a pattern,
+    /// [`Self::property_baseline`] when conditions narrow the binding only
+    /// through tests of its properties, and [`Self::narrowing_baseline`]
+    /// otherwise.
     fn binding_baseline(
         &mut self,
         binding: TextRange,
         declared: TypeData<'db>,
     ) -> Option<TypeData<'db>> {
-        if self.js_info.flow.is_property_only_binding(binding) {
+        let flow = &self.js_info.flow;
+        if flow.pattern_type(binding).is_some() {
+            self.pattern_baseline(declared)
+        } else if flow.is_property_only_binding(binding) {
             self.property_baseline(declared)
         } else {
             self.narrowing_baseline(declared)
         }
+    }
+
+    /// Returns the type that narrowing of a destructuring pattern starts
+    /// from, given its `declared` type, the value it destructures: the
+    /// [`Self::property_baseline`] of `declared` without `null` and
+    /// `undefined`, which destructuring rejects. So in
+    /// `if (!s) return; const { kind, v } = s;`, the pattern narrows even
+    /// when the collected type of `s` there still includes `undefined`.
+    fn pattern_baseline(&mut self, declared: TypeData<'db>) -> Option<TypeData<'db>> {
+        let flattened = match self.flatten_baseline(declared, true) {
+            Ok(flattened) => flattened,
+            Err(FlatteningError::Exceeded) => return Some(TypeData::Unknown),
+            Err(FlatteningError::Cycle) => return None,
+        };
+        let baseline = if let TypeData::Union(union) = flattened {
+            TypeData::union_from_types(
+                self.db,
+                union
+                    .types(self.db)
+                    .iter()
+                    .copied()
+                    .filter(|member| !matches!(member, TypeData::Null | TypeData::Undefined))
+                    .collect(),
+            )
+        } else {
+            flattened
+        };
+        (!is_narrowing_invariant(baseline) && may_narrow_by_property(self.db, baseline))
+            .then_some(baseline)
     }
 
     /// Returns the type that narrowing of a subject in
@@ -859,6 +975,7 @@ mod tests {
             subjects: Box::default(),
             read_points: Default::default(),
             property_only: Default::default(),
+            pattern_elements: Default::default(),
         };
         let reaching = ReachingFlow::new(&root, &[2]).unwrap();
         assert_eq!(reaching.nodes, [2, 1, 3, 0]);

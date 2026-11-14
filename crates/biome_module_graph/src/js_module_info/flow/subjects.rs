@@ -1,5 +1,6 @@
 //! Maps the expressions that read or test a value to the subjects of an
-//! execution root.
+//! execution root, and finds the destructuring patterns that a test of one of
+//! their elements narrows.
 //!
 //! Reads and runtime tests go through [`subject_of`], so a test and a read of
 //! the same subject get the same id even when their syntax differs, as in
@@ -7,15 +8,21 @@
 
 use super::{FlowSubject, FlowSubjectId, FlowSubjectTable, PropertyKey};
 use biome_js_control_flow::AnyJsControlFlowRoot;
-use biome_js_semantic::SemanticModel;
+use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
-    AnyJsClassMember, AnyJsExpression, AnyJsGetter, AnyJsLiteralExpression, AnyJsName,
-    AnyJsObjectMemberName, AnyJsParameter, AnyJsSetter, JsClassDeclaration,
-    JsClassExportDefaultDeclaration, JsClassExpression, JsMethodClassMember, JsMethodObjectMember,
-    JsObjectExpression, JsParameters, JsPropertyClassMember, JsSyntaxKind, JsSyntaxNode,
-    JsSyntaxToken, JsVariableDeclarator, inner_string_text, unescape_js_identifier,
+    AnyJsArrayBindingPatternElement, AnyJsBindingPattern, AnyJsClassMember, AnyJsExpression,
+    AnyJsGetter, AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember,
+    AnyJsObjectMemberName, AnyJsParameter, AnyJsSetter, JsArrayBindingPatternElement,
+    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsFormalParameter,
+    JsIdentifierBinding, JsMethodClassMember, JsMethodObjectMember, JsObjectBindingPatternProperty,
+    JsObjectBindingPatternShorthandProperty, JsObjectExpression, JsParameters,
+    JsPropertyClassMember, JsRestParameter, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+    JsVariableDeclarator, binding_ext::AnyJsBindingDeclaration, inner_string_text,
+    unescape_js_identifier,
 };
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxResult, Text, TokenText};
+use biome_rowan::{
+    AstNode, AstNodeList, AstSeparatedList, SyntaxResult, Text, TextRange, TokenText,
+};
 use std::borrow::Cow;
 
 /// The value of JavaScript's `Number.MAX_SAFE_INTEGER`, 2^53 - 1: the largest
@@ -190,6 +197,210 @@ fn decimal_integer_key(token: &JsSyntaxToken) -> Option<PropertyKey> {
             .parse::<u64>()
             .is_ok_and(|value| value <= MAX_SAFE_INTEGER))
     .then(|| PropertyKey::Name(Text::from(token.token_text_trimmed())))
+}
+
+/// Returns the destructuring pattern that a runtime test of `binding` narrows,
+/// with the elements of that pattern whose reads the narrowing reaches, or
+/// `None` when no such pattern holds `binding`.
+///
+/// This follows TypeScript's `getNarrowedTypeOfSymbol`. The pattern's
+/// declaration, found through the enclosing patterns, is a `const`
+/// declarator, as in `const { kind, v } = s` or `for (const [k, x] of xs)`,
+/// or a parameter, as in `({ kind, v }: S) => {}` or `(...[k, x]: T) => {}`,
+/// and none of the declaration's variables is written. No enclosing pattern
+/// supplies a default, as `{ a: { kind, v } = d }` does, because the declared
+/// types of the elements ignore it.
+///
+/// The returned elements are the direct elements of the pattern that are
+/// neither rest elements nor have a default, such as `kind` and `v` in
+/// `{ kind, v }` or `k` and `x` in `[k, , x]`, each as the range of its
+/// variable with the key of the property it reads: the key that
+/// [`member_name_key`] or [`identifier_key`] gives, or its decimal index in an
+/// array pattern, counting holes. `binding` must be one of them, and there
+/// must be at least two, so that a test of one can narrow another.
+/// TypeScript counts every element, but with a single such element the
+/// pattern narrows nothing that the test of that element doesn't.
+pub(super) fn narrowing_pattern(
+    binding: &Binding,
+    model: &SemanticModel,
+) -> Option<(JsSyntaxNode, Vec<(TextRange, PropertyKey)>)> {
+    let declaration = binding.tree().declaration()?;
+    let element = match &declaration {
+        AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(property) => {
+            property.syntax()
+        }
+        AnyJsBindingDeclaration::JsObjectBindingPatternProperty(property) => property.syntax(),
+        AnyJsBindingDeclaration::JsArrayBindingPatternElement(element) => element.syntax(),
+        _ => return None,
+    };
+    // An element's parent is its list, inside the pattern.
+    let list = element.parent()?;
+    let pattern = list.parent()?;
+    let elements: Vec<_> = list
+        .children()
+        .enumerate()
+        .filter_map(|(index, element)| pattern_element(&element, index))
+        .collect();
+    (elements.len() >= 2
+        && elements.iter().any(|(range, _)| *range == binding.range())
+        && has_constant_declaration(&pattern, model))
+    .then_some((pattern, elements))
+}
+
+/// Returns the variable that `element`, at `index` in its pattern, binds with
+/// the key of the property it reads, as [`narrowing_pattern`] describes, or
+/// `None` for a rest element, an element with a default, a nested pattern,
+/// and a key that names no property.
+fn pattern_element(element: &JsSyntaxNode, index: usize) -> Option<(TextRange, PropertyKey)> {
+    if let Some(property) = JsObjectBindingPatternShorthandProperty::cast_ref(element) {
+        if property.init().is_some() {
+            return None;
+        }
+        let binding = property.identifier().ok()?;
+        let binding = binding.as_js_identifier_binding()?;
+        return Some((
+            binding.range(),
+            identifier_key(&binding.name_token().ok()?)?,
+        ));
+    }
+    if let Some(property) = JsObjectBindingPatternProperty::cast_ref(element) {
+        if property.init().is_some() {
+            return None;
+        }
+        let AnyJsBindingPattern::AnyJsBinding(binding) = property.pattern().ok()? else {
+            return None;
+        };
+        let binding = binding.as_js_identifier_binding()?;
+        return Some((binding.range(), member_name_key(&property.member().ok()?)?));
+    }
+    let element = JsArrayBindingPatternElement::cast_ref(element)?;
+    if element.init().is_some() {
+        return None;
+    }
+    let AnyJsBindingPattern::AnyJsBinding(binding) = element.pattern().ok()? else {
+        return None;
+    };
+    let binding = binding.as_js_identifier_binding()?;
+    Some((
+        binding.range(),
+        PropertyKey::Name(Text::from(index.to_string())),
+    ))
+}
+
+/// Returns whether the values that the destructuring `pattern` binds can't
+/// change after the destructuring, as [`narrowing_pattern`] requires: its
+/// declaration is a `const` declarator or a parameter, no enclosing pattern
+/// supplies a default, and no variable of the declaration is written.
+fn has_constant_declaration(pattern: &JsSyntaxNode, model: &SemanticModel) -> bool {
+    let mut pattern = pattern.clone();
+    let root = loop {
+        let Some(parent) = pattern.parent() else {
+            return false;
+        };
+        if let Some(declarator) = JsVariableDeclarator::cast_ref(&parent) {
+            let is_const = declarator
+                .declaration()
+                .is_some_and(|declaration| declaration.is_const());
+            if !is_const {
+                return false;
+            }
+            break pattern;
+        }
+        if JsFormalParameter::can_cast(parent.kind()) || JsRestParameter::can_cast(parent.kind()) {
+            break pattern;
+        }
+        // A nested pattern is the value of a property or an element of the
+        // enclosing pattern, whose parent is its list.
+        let has_default = if let Some(property) = JsObjectBindingPatternProperty::cast_ref(&parent)
+        {
+            property.init().is_some()
+        } else if let Some(element) = JsArrayBindingPatternElement::cast_ref(&parent) {
+            element.init().is_some()
+        } else {
+            return false;
+        };
+        if has_default {
+            return false;
+        }
+        let Some(enclosing) = parent.grand_parent() else {
+            return false;
+        };
+        pattern = enclosing;
+    };
+    // TypeScript checks every variable of a parameter, as
+    // `isSomeSymbolAssigned` does. A `const` variable is never written.
+    let Some(root) = AnyJsBindingPattern::cast(root) else {
+        return false;
+    };
+    let mut written = false;
+    visit_pattern_bindings(&root, &mut |binding| {
+        written |= model.as_binding(binding).all_writes().next().is_some();
+    });
+    !written
+}
+
+/// Calls `visit` with each variable that `pattern` binds, including those of
+/// nested patterns but not those declared inside its defaults.
+fn visit_pattern_bindings(
+    pattern: &AnyJsBindingPattern,
+    visit: &mut impl FnMut(&JsIdentifierBinding),
+) {
+    match pattern {
+        AnyJsBindingPattern::AnyJsBinding(binding) => {
+            if let Some(binding) = binding.as_js_identifier_binding() {
+                visit(binding);
+            }
+        }
+        AnyJsBindingPattern::JsArrayBindingPattern(pattern) => {
+            for element in pattern.elements().iter().flatten() {
+                let element = match element {
+                    AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(element) => {
+                        element.pattern()
+                    }
+                    AnyJsArrayBindingPatternElement::JsArrayBindingPatternRestElement(element) => {
+                        element.pattern()
+                    }
+                    AnyJsArrayBindingPatternElement::JsArrayHole(_) => continue,
+                };
+                if let Ok(element) = element {
+                    visit_pattern_bindings(&element, visit);
+                }
+            }
+        }
+        AnyJsBindingPattern::JsObjectBindingPattern(pattern) => {
+            for property in pattern.properties().iter().flatten() {
+                match property {
+                    AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(property) => {
+                        if let Ok(element) = property.pattern() {
+                            visit_pattern_bindings(&element, visit);
+                        }
+                    }
+                    AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(
+                        property,
+                    ) => {
+                        if let Some(binding) = property
+                            .identifier()
+                            .ok()
+                            .and_then(|binding| binding.as_js_identifier_binding().cloned())
+                        {
+                            visit(&binding);
+                        }
+                    }
+                    AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(rest) => {
+                        if let Some(binding) = rest
+                            .binding()
+                            .ok()
+                            .and_then(|binding| binding.as_js_identifier_binding().cloned())
+                        {
+                            visit(&binding);
+                        }
+                    }
+                    AnyJsObjectBindingPatternMember::JsBogusBinding(_)
+                    | AnyJsObjectBindingPatternMember::JsMetavariable(_) => {}
+                }
+            }
+        }
+    }
 }
 
 /// Returns whether paths on the `this` of `root`, such as `this.v`, can narrow
@@ -405,7 +616,7 @@ mod tests {
 
     fn path(source: &str, subjects: &[FlowSubject], id: FlowSubjectId) -> String {
         match &subjects[id as usize] {
-            FlowSubject::Binding(range) => source[*range].to_owned(),
+            FlowSubject::Binding(range) | FlowSubject::Pattern(range) => source[*range].to_owned(),
             FlowSubject::This => "this".to_owned(),
             // A name that starts with `#` is printed as a string key, so it
             // differs from a private name.

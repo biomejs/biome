@@ -1321,3 +1321,394 @@ fn held_discriminants_of_objects_that_are_not_unions_skip_the_solve() {
         );
     }
 }
+
+/// Discriminated unions shared by the tests of destructured elements.
+const DESTRUCTURED: &str = r#"
+    type S = { kind: "c"; v: number } | { kind: "s"; v: string };
+    type R = { ok: true; v: number } | { ok: false; v: string };
+    type N = { e: null; v: number } | { e: Error; v: undefined };
+    type K = { k: "a"; v: 1 } | { k: 1; v: 2 };
+    declare const g: S;
+"#;
+
+/// Asserts the reads of `source`, which follows [`DESTRUCTURED`], as
+/// [`assert_reads`] does.
+fn assert_element_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
+    assert_reads(&format!("{DESTRUCTURED}{source}"), reads);
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
+// (`narrowing-probes/m3/destructure.ts` L5, L6, L10, L13 to L15, L20, L21,
+// L22, L24, L25, L27, L28, L30, `m3-l4/patterns.ts` L13, L14, L17, L19 to
+// L23, L26, L28, L30, L32, L35, L38, L39, L42, L45, L46, and `m3-l4/more.ts`
+// L10, L13 to L15, L18, L20 to L22): a test of one element of a destructuring pattern narrows
+// the value the pattern destructures, and another element of the same
+// pattern reads its property on the narrowed value.
+#[test]
+fn tests_of_destructured_elements_narrow_the_other_elements() {
+    assert_element_reads(
+        r#"
+        interface IC { kind: "c"; v: number }
+        interface IS { kind: "s"; v: string }
+        declare function make(): S;
+        function declarator(s: S) { const { kind, v } = s; if (kind === "c") /*declarator*/v; else /*declaratorElse*/v; }
+        function parameter({ kind, v }: S) { if (kind === "c") /*parameter*/v; else /*parameterElse*/v; }
+        function renamed(s: S) { const { kind: k, v } = s; if (k === "c") /*renamed*/v; }
+        function nested(w: { a: S }) { const { a: { kind, v } } = w; if (kind === "c") /*nested*/v; }
+        function array(t: ["a", number] | ["b", string]) { const [k, x] = t; if (k === "a") /*array*/x; }
+        function hole(t: ["a", 0, number] | ["b", 0, string]) { const [k, , x] = t; if (k === "a") /*hole*/x; }
+        function arrayInObject(w: { t: ["a", number] | ["b", string] }) { const { t: [k, x] } = w; if (k === "a") /*arrayInObject*/x; }
+        function rest(...[k, x]: ["a", number] | ["b", string]) { if (k === "a") /*rest*/x; else /*restElse*/x; }
+        function restArity(...[k, x, y]: ["a", number] | ["b", string, boolean]) { if (k === "b") /*restArity*/y; }
+        function moduleConst() { const { kind, v } = g; if (kind === "c") /*moduleConst*/v; }
+        function path(w: { s: S }) { const { kind, v } = w.s; if (kind === "c") /*path*/v; }
+        function cast(s: S) { const { kind, v } = s as S; if (kind === "c") /*cast*/v; }
+        function computed(s: S) { const { ["kind"]: kind, v } = s; if (kind === "c") /*computed*/v; }
+        function annotated(s: S) { const { kind, v }: S = s; if (kind === "c") /*annotated*/v; }
+        function parameterDefault({ kind, v }: S = g) { if (kind === "c") /*parameterDefault*/v; }
+        function earlyReturn({ kind, v }: S = g) { if (kind !== "c") return; /*earlyReturn*/v; }
+        function returned(s: S) { const { kind, v } = s; if (kind === "c") return; /*returned*/v; }
+        function tested(s: S) { const { kind, v } = s; if (kind === "c") /*tested*/kind; }
+        function truthy(r: R) { const { ok, v } = r; if (ok) /*truthy*/v; else /*falsy*/v; }
+        function typeOf(o: K) { const { k, v } = o; if (typeof k === "string") /*typeof*/v; else /*typeofElse*/v; }
+        function notEqual(s: S) { const { kind, v } = s; if (kind !== "c") /*notEqual*/v; else /*notEqualElse*/v; }
+        function isNull(n: N) { const { e, v } = n; if (e === null) /*null*/v; else /*notNull*/v; }
+        function looseNull(n: N) { const { e, v } = n; if (e == null) /*looseNull*/v; if (e != undefined) /*looseNotNull*/v; }
+        function propertyWrite(s: S) { const { kind, v } = s; s.kind = "s"; if (kind === "c") /*propertyWrite*/v; }
+        function objectWrite(s: S, o: S) { const { kind, v } = s; s = o; if (kind === "c") /*objectWrite*/v; }
+        function writeBetween(s: S) { const { kind, v } = s; if (kind === "c") { s.v = "x" as any; /*writeBetween*/v; } }
+        const arrow = ({ kind, v }: S) => kind === "c" ? /*arrow*/v : 0;
+        function callback(xs: S[]) { xs.forEach(({ kind, v }) => { if (kind === "c") /*callback*/v; }); }
+        function interfaces(s: IC | IS) { const { kind, v } = s; if (kind === "c") /*interfaces*/v; }
+        function call() { const { kind, v } = make(); if (kind === "c") /*call*/v; }
+        function and(s: S) { const { kind, v } = s; kind === "c" && /*and*/v; }
+        function loop(s: S) { const { kind, v } = s; while (kind === "c") { /*loop*/v; } }
+        function nestedDeclaration({ kind, v }: S) { function h() { kind; } if (kind === "c") /*nestedDeclaration*/v; }
+        function forOf(shapes: S[]) { for (const { kind, v } of shapes) { kind === "c" && /*forOf*/v; } }
+        export const { kind: exported, v: exportedValue } = g;
+        if (exported === "c") /*exported*/exportedValue;
+        "#,
+        &[
+            ("declarator", "v", &["number"]),
+            ("declaratorElse", "v", &["string"]),
+            ("parameter", "v", &["number"]),
+            ("parameterElse", "v", &["string"]),
+            ("renamed", "v", &["number"]),
+            ("nested", "v", &["number"]),
+            ("array", "x", &["number"]),
+            ("hole", "x", &["number"]),
+            ("arrayInObject", "x", &["number"]),
+            ("rest", "x", &["number"]),
+            ("restElse", "x", &["string"]),
+            ("restArity", "y", &["boolean"]),
+            ("moduleConst", "v", &["number"]),
+            ("path", "v", &["number"]),
+            ("cast", "v", &["number"]),
+            ("computed", "v", &["number"]),
+            ("annotated", "v", &["number"]),
+            ("parameterDefault", "v", &["number"]),
+            ("earlyReturn", "v", &["number"]),
+            ("returned", "v", &["string"]),
+            ("tested", "kind", &["string: c"]),
+            ("truthy", "v", &["number"]),
+            ("falsy", "v", &["string"]),
+            ("typeof", "v", &["number: 1"]),
+            ("typeofElse", "v", &["number: 2"]),
+            ("notEqual", "v", &["string"]),
+            ("notEqualElse", "v", &["number"]),
+            ("null", "v", &["number"]),
+            ("notNull", "v", &["undefined"]),
+            ("looseNull", "v", &["number"]),
+            ("looseNotNull", "v", &["undefined"]),
+            ("propertyWrite", "v", &["number"]),
+            ("objectWrite", "v", &["number"]),
+            ("writeBetween", "v", &["number"]),
+            ("arrow", "v", &["number"]),
+            ("callback", "v", &["number"]),
+            ("interfaces", "v", &["number"]),
+            ("call", "v", &["number"]),
+            ("and", "v", &["number"]),
+            ("loop", "v", &["number"]),
+            ("nestedDeclaration", "v", &["number"]),
+            ("forOf", "v", &["number"]),
+            ("exported", "exportedValue", &["number"]),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
+// (`narrowing-probes/m3/destructure.ts` L22, and `m3-l4/patterns.ts` L17):
+// an aliased condition narrows the pattern when its declaration is a `const`
+// or a parameter whose variables are never written.
+#[test]
+fn aliased_conditions_narrow_destructured_elements() {
+    assert_element_reads(
+        r#"
+        function declarator(s: S) { const { kind, v } = s; const ok = kind === "c"; if (ok) /*declarator*/v; }
+        function parameter({ kind, v }: S) { const ok = kind === "c"; if (ok) /*parameter*/v; }
+        function twice({ kind, v }: S) { const ok = kind === "c"; const again = ok; if (again) /*twice*/v; }
+        "#,
+        &[
+            ("declarator", "v", &["number"]),
+            ("parameter", "v", &["number"]),
+            ("twice", "v", &["number"]),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
+// (`narrowing-probes/m3-l4/patterns.ts` L35, L43, L44, and `m3-l4/more.ts`
+// L11). A destructured element that is tested itself starts from its
+// property on the narrowed pattern, and so does an optional property, which
+// keeps `undefined`. Destructuring throws on `null` and `undefined`, so the
+// pattern narrows as if its initializer had neither.
+#[test]
+fn destructured_elements_start_from_the_narrowed_pattern() {
+    assert_element_reads(
+        r#"
+        type I = { kind: "a"; v: string | null } | { kind: "b"; v: number };
+        type O = { kind: "c"; v?: number } | { kind: "s"; v: string };
+        function tested(i: I) { const { kind, v } = i; if (kind === "a" && v !== null) /*tested*/v; }
+        function optional(o: O) { const { kind, v } = o; if (kind === "c") /*optional*/v; }
+        function narrowedInitializer(s: S | undefined) { if (!s) return; const { kind, v } = s; if (kind === "c") /*narrowedInitializer*/v; }
+        function nullish(s: S | undefined) { const { kind, v } = s ?? g; if (kind === "c") /*nullish*/v; }
+        "#,
+        &[
+            ("tested", "v", &["string"]),
+            ("optional", "v", &["number", "undefined"]),
+            ("narrowedInitializer", "v", &["number"]),
+            ("nullish", "v", &["number"]),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) keeps every read below as declared
+// (`narrowing-probes/m3/destructure.ts` L7, L8, L18, L19, L29,
+// `m3/literals.ts` L7, `m3-l4/patterns.ts` L15, L16, L18, L40, L41, L47,
+// L49, and `m3-l4/more.ts` L12, L16, L23 to L25). Only a direct element of a
+// pattern with at least two elements, without a default and not a rest
+// element, narrows the other elements, and only when its declaration is a
+// `const` or a parameter whose variables are never written, and when the
+// tested element is a discriminant.
+#[test]
+fn destructured_elements_that_do_not_narrow_each_other() {
+    assert_element_reads(
+        r#"
+        type W = { kind: "c"; a: { v: number } } | { kind: "s"; a: { v: string } };
+        function mutable(s: S) { let { kind, v } = s; if (kind === "c") /*mutable*/v; }
+        function readDefault(s: S) { const { kind, v = 0 } = s; if (kind === "c") /*readDefault*/v; }
+        function testedDefault(s: S) { const { kind = "c", v } = s; if (kind === "c") /*testedDefault*/v; }
+        function restElement(s: S) { const { kind, ...rest } = s; if (kind === "c") /*restElement*/rest; }
+        function notDiscriminant(s: S) { const { kind, v } = s; if (typeof v === "number") /*notDiscriminant*/kind; }
+        function written({ kind, v }: S, flag: boolean) { if (flag) kind = "s"; if (kind === "c") /*written*/v; }
+        function writtenInClosure({ kind, v }: S) { const h = () => { v = "x"; }; if (kind === "c") /*writtenInClosure*/v; }
+        function writtenAfter({ kind, v }: S) { if (kind === "c") /*writtenAfter*/v; v = 2; }
+        function aliasedWritten({ kind, v }: S, w: boolean) { const ok = kind === "c"; if (w) v = 1; if (ok) /*aliasedWritten*/v; }
+        function both(s: S) { const { kind, v } = s; if (kind === "c" || kind === "s") /*both*/v; }
+        function sibling(w: { a: S; b: "x" | "y" }) { const { a: { kind, v }, b } = w; if (b === "x") /*sibling*/v; }
+        function innerSingle(w: W) { const { kind, a: { v } } = w; if (kind === "c") /*innerSingle*/v; }
+        function alias(s: S) { const { kind, v } = s; const k = kind; if (k === "c") /*alias*/v; }
+        function arrayLiteral(s: S) { const [a, b] = [s.kind, s.v] as const; if (a === "c") /*arrayLiteral*/b; }
+        function alwaysTruthy(s: S) { const { kind, v } = s; if (kind) /*alwaysTruthy*/v; }
+        function typeofString(s: S) { const { kind, v } = s; if (typeof kind === "string") /*typeofString*/v; }
+        function flag(s: S) { let ok = false; const { kind, v } = s; if (kind === "c") ok = true; if (ok) /*flag*/v; }
+        function single(s: S) { const { kind } = s; const { v } = s; if (kind === "c") /*single*/v; }
+        function notUnion(o: { a: string | null; b: number | string }) { const { a, b } = o; if (a) /*notUnion*/b; }
+        "#,
+        &[
+            ("mutable", "v", &["number", "string"]),
+            ("readDefault", "v", &["number", "string"]),
+            ("testedDefault", "v", &["number", "string"]),
+            // Biome types the rest of a union as an empty object, with or
+            // without the test, where TypeScript gives a union.
+            ("restElement", "rest", &["[]"]),
+            ("notDiscriminant", "kind", &["string: c", "string: s"]),
+            ("written", "v", &["number", "string"]),
+            ("writtenInClosure", "v", &["number", "string"]),
+            ("writtenAfter", "v", &["number", "string"]),
+            ("aliasedWritten", "v", &["number", "string"]),
+            ("both", "v", &["number", "string"]),
+            ("sibling", "v", &["number", "string"]),
+            ("innerSingle", "v", &["number", "string"]),
+            ("alias", "v", &["number", "string"]),
+            ("arrayLiteral", "b", &["number", "string"]),
+            ("alwaysTruthy", "v", &["number", "string"]),
+            ("typeofString", "v", &["number", "string"]),
+            ("flag", "v", &["number", "string"]),
+            ("single", "v", &["number", "string"]),
+            ("notUnion", "b", &["number", "string"]),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) gives `number` at every read below
+// (`narrowing-probes/m3/destructure.ts` L11, L23, `m3-l4/patterns.ts` L24,
+// L25, L27, L29, L31, L33). Biome keeps the declared type: loose `==` with a
+// literal doesn't narrow an object yet, an element under a default of an
+// enclosing pattern never narrows because its declared type ignores the
+// default, an `if` inside `for...of` and a read in a closure never see the
+// test, and a written parameter variable never narrows, while TypeScript
+// narrows `v` by the assignment `v = 1`. Biome also gives an element
+// destructured from `s!`, a parameter destructured in a function that a
+// variable annotation types, and the parameters of a function typed by a
+// rest parameter whose type is a union of tuples the declared type
+// `unknown`, which no test narrows.
+#[test]
+fn destructured_elements_that_biome_does_not_narrow_yet() {
+    assert_element_reads(
+        r#"
+        function loose(s: S) { const { kind, v } = s; if (kind == "c") /*loose*/v; }
+        function enclosingDefault(w: { a?: S }) { const { a: { kind, v } = g } = w; if (kind === "c") /*enclosingDefault*/v; }
+        function forOf(shapes: S[]) { for (const { kind, v } of shapes) { if (kind === "c") /*forOf*/v; } }
+        function closure(s: S) { const { kind, v } = s; const h = () => { if (kind === "c") /*closure*/v; }; }
+        function assigned({ kind, v }: S) { v = 1; if (kind === "c") /*assigned*/v; }
+        function nonNull(s: S | undefined) { const { kind, v } = s!; if (kind === "c") /*nonNull*/v; }
+        const contextual: (s: S) => void = ({ kind, v }) => { if (kind === "c") /*contextual*/v; };
+        const dependent: (...args: ["a", number] | ["b", string]) => void = (k, x) => { if (k === "a") /*dependent*/x; };
+        "#,
+        &[
+            ("loose", "v", &["number", "string"]),
+            ("enclosingDefault", "v", &["number", "string"]),
+            ("forOf", "v", &["number", "string"]),
+            ("closure", "v", &["number", "string"]),
+            ("assigned", "v", &["number", "string"]),
+            ("nonNull", "v", &["unknown"]),
+            ("contextual", "v", &["unknown"]),
+            ("dependent", "x", &["unknown"]),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) gives `number` at both reads
+// (`narrowing-probes/m3-l4/between.ts` L6, L7), although a default or a
+// computed key between the two elements can run code that changes `s` after
+// `kind` is read and before `v` is, so `v` can be a string at the read.
+// Biome narrows the same way, as `NARROWING.md` records.
+#[test]
+fn code_between_destructured_elements_keeps_the_narrowing() {
+    assert_element_reads(
+        r#"
+        type SX = { kind: "c"; x?: number; v: number } | { kind: "s"; x?: number; v: string };
+        declare function mutate(): number;
+        declare function key(): "x";
+        function between(s: SX) { const { kind, x = mutate(), v } = s; if (kind === "c") /*between*/v; }
+        function computedBetween(s: SX) { const { kind, [key()]: x, v } = s; if (kind === "c") /*computedBetween*/v; }
+        "#,
+        &[
+            ("between", "v", &["number"]),
+            ("computedBetween", "v", &["number"]),
+        ],
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) reports the comparison and gives `never`
+// at the read (`narrowing-probes/m3-l4/more.ts` L26): no member is left, so
+// Biome reads the element as Unknown.
+#[test]
+fn impossible_tests_of_destructured_elements_read_as_unknown() {
+    let source = format!(
+        "{DESTRUCTURED}{}",
+        r#"
+        function impossible(s: S) { const { kind, v } = s; if (kind === "c" && kind === "s") /*impossible*/v; }
+        "#
+    );
+    let (db, module) = narrowing_db(&source);
+    let ty = normalized_type_at(&db, module, &source, "impossible", "v");
+    assert_eq!(
+        ty,
+        InferredTypeData::Unknown,
+        "{}",
+        format_inferred_type(&db, ty)
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) keeps `b` as declared: a test of an
+// element narrows only a pattern whose value is a union. Collection drops
+// the read of `b` when the annotation shows that the value is not a union,
+// without resolving anything. Otherwise the read checks the pattern's
+// declared type once, and solves the pattern only when it is a union.
+#[test]
+fn destructured_elements_of_values_that_are_not_unions_skip_the_solve() {
+    for (source, candidate, solves) in [
+        (
+            "function f({ a, b }: { a: string | null; b: number }) { if (a) { /*read*/b; } }",
+            false,
+            0,
+        ),
+        (
+            "type O = { a: string | null; b: number }; function f({ a, b }: O) { if (a) { /*read*/b; } }",
+            true,
+            0,
+        ),
+        (
+            r#"type S = { k: "a"; b: 1 } | { k: "b"; b: 2 }; function f({ k, b }: S) { if (k === "a") { /*read*/b; } }"#,
+            true,
+            1,
+        ),
+    ] {
+        let (db, module) = narrowing_db(source);
+        let range = marked_range(source, "read", "b");
+        db.clear_salsa_events();
+        let ty = infer_expression_type(&db, ExpressionTypeInput::new(&db, module, range));
+        let events = db.take_salsa_events();
+        assert!(ty.is_some(), "{source}");
+        assert_eq!(
+            function_query_will_execute_count_by_name(
+                &db,
+                "infer_flow_expression_type_impl",
+                &events
+            ) > 0,
+            candidate,
+            "{source}"
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, "infer_flow_subject_states", &events),
+            solves,
+            "{source}"
+        );
+    }
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) gives `number` and `string`
+// (`narrowing-probes/m3/destructure.ts` L6). Complete module inference
+// narrows the elements from the pattern's declared type that its own context
+// resolved, as lookups do, and both reads share one solve of the pattern.
+#[test]
+fn complete_module_inference_narrows_destructured_elements_as_lookups_do() {
+    use InferredTypeData::{Number, String};
+    const SOURCE: &str = r#"
+        type S = { kind: "c"; v: number } | { kind: "s"; v: string };
+        function f({ kind, v }: S) { if (kind === "c") /*number*/v; else /*string*/v; }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    let reads = [("number", Number), ("string", String)]
+        .map(|(marker, expected)| (marked_range(SOURCE, marker, "v"), expected));
+
+    db.clear_salsa_events();
+    let complete = infer_module_types(&db, module).unwrap();
+    for (range, expected) in reads {
+        assert_eq!(complete.expressions[&range], expected);
+    }
+    let events = db.take_salsa_events();
+    for query in [
+        "infer_flow_expression_type_impl",
+        "infer_flow_binding_baseline",
+    ] {
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, query, &events),
+            0,
+            "{query}"
+        );
+    }
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, "infer_flow_subject_states", &events),
+        1
+    );
+
+    for (range, expected) in reads {
+        assert_eq!(
+            infer_expression_type(&db, ExpressionTypeInput::new(&db, module, range)),
+            Some(expected)
+        );
+    }
+}
