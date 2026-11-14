@@ -6,7 +6,7 @@ use biome_console::markup;
 use biome_rule_options::no_tailwind_raw_colors::NoTailwindRawColorsOptions;
 use biome_tailwind_logic::no_tailwind_raw_colors::{RawColor, raw_colors};
 use biome_tailwind_logic::syntax_service::TailwindSyntax;
-use biome_tailwind_logic::use_tailwind_sorted_classes::TailwindDesignSystem;
+use biome_tailwind_logic::tailwind_v4::TailwindDesignSystem;
 use std::sync::Arc;
 
 declare_lint_rule! {

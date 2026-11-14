@@ -7170,6 +7170,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoTailwindConflictingClassesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTailwindConflictingClassesOptions" }
+			]
+		},
+		"NoTailwindConflictingClassesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoTailwindLegacyUtilitiesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9983,6 +9993,13 @@
 					"description": "Disallow arbitrary values in Tailwind CSS utility classes.\nSee https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoTailwindArbitraryValueConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noTailwindConflictingClasses": {
+					"description": "Disallow Tailwind CSS classes that set the same CSS properties on an element.\nSee https://biomejs.dev/linter/rules/no-tailwind-conflicting-classes",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTailwindConflictingClassesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -15869,6 +15886,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoTailwindArbitraryValueOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoTailwindConflictingClassesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTailwindConflictingClassesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

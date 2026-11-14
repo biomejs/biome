@@ -316,7 +316,7 @@ fn is_identifier_one_of(value: &AnyCssValue, accepted: &[&str]) -> bool {
     })
 }
 
-fn starts_with_var_function(list: &CssGenericComponentValueList) -> bool {
+pub(super) fn starts_with_var_function(list: &CssGenericComponentValueList) -> bool {
     list.iter().next().is_some_and(|component| match component {
         AnyCssGenericComponentValue::AnyCssValue(value) => is_var_function(&value),
         AnyCssGenericComponentValue::CssGenericDelimiter(_) => false,

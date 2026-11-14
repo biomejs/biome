@@ -6,7 +6,8 @@ use biome_html_syntax::HtmlAttribute;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_tailwind_sorted_classes::UseTailwindSortedClassesOptions;
 use biome_tailwind_logic::syntax_service::TailwindSyntax;
-use biome_tailwind_logic::use_tailwind_sorted_classes::{TailwindDesignSystem, sort_class_list};
+use biome_tailwind_logic::tailwind_v4::TailwindDesignSystem;
+use biome_tailwind_logic::use_tailwind_sorted_classes::sort_class_list;
 use std::sync::Arc;
 
 use crate::HtmlRuleAction;

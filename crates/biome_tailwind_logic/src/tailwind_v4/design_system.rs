@@ -1,12 +1,12 @@
 //! Additions to the default Tailwind CSS configuration, read from the user's
 //! stylesheet (the `tailwind.stylesheet` option).
 //!
-//! The sorter consults a [TailwindDesignSystem] before its generated defaults:
-//! theme values make classes like `bg-brand` known, `@utility` rules add
-//! static utilities, `@custom-variant` rules add variants, and breakpoint and
-//! container values change how size variants compare. The roots of `@utility`
-//! rules that take a value, such as `slide-in-from-top-*`, tell the parser how
-//! to split classes like `slide-in-from-top-4`.
+//! Candidate resolution consults a [TailwindDesignSystem] before the generated
+//! defaults: theme values make classes like `bg-brand` known, `@utility` rules
+//! add static utilities, `@custom-variant` rules add variants, and breakpoint
+//! and container values change how size variants compare. The roots of
+//! `@utility` rules that take a value, such as `slide-in-from-top-*`, tell the
+//! parser how to split classes like `slide-in-from-top-4`.
 
 use std::sync::{Arc, LazyLock};
 
@@ -22,8 +22,9 @@ use rustc_hash::{FxHashMap, FxHashSet};
 use super::tailwind_preset_v4::PROPERTY_INDEX;
 use super::tailwind_preset_v4_types::{CssDataType, ThemeNamespace};
 
-/// The parts of a user's Tailwind CSS configuration that change how classes
-/// sort. The default value describes the default configuration.
+/// The parts of a user's Tailwind CSS configuration that change which classes
+/// Tailwind knows and the CSS it generates for them. The default value
+/// describes the default configuration.
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct TailwindDesignSystem {
     theme: FxHashMap<ThemeNamespace, ThemeValues>,
@@ -63,6 +64,9 @@ pub(super) struct CustomUtility {
     pub(super) signature: Box<[u16]>,
     /// The number of declarations, Tailwind's tie-break after the signature.
     pub(super) count: u8,
+    /// See [declared_properties]. `None` as well when the stylesheet declares
+    /// the name more than once.
+    pub(super) properties: Option<Arc<[Box<str>]>>,
 }
 
 /// A utility declared with `@utility <name>-*`.
@@ -70,11 +74,16 @@ pub(super) struct CustomUtility {
 pub(super) struct CustomFunctionalUtility {
     /// The declarations, including those of nested rules, in source order.
     pub(super) declarations: Box<[CustomDeclaration]>,
+    /// Whether the rule holds only plain declarations, with no nested rule or
+    /// at-rule such as `@apply`.
+    pub(super) has_only_declarations: bool,
 }
 
 /// A declaration of a [CustomFunctionalUtility].
 #[derive(Debug, Eq, PartialEq)]
 pub(super) struct CustomDeclaration {
+    /// The property name, such as `tab-size` or `--tw-enter-opacity`.
+    pub(super) name: Box<str>,
     /// The index of the property in Tailwind's property order, or `None` for
     /// a custom property or a property outside the order.
     pub(super) property: Option<u16>,
@@ -208,12 +217,15 @@ impl TailwindDesignSystem {
     }
 
     /// Records a static utility declared with `@utility`, given the property
-    /// names of its declarations and their count.
+    /// names of its declarations and their count. `declared` holds
+    /// the property names, custom properties included, of a rule that holds
+    /// only plain declarations, and is `None` for any other rule.
     pub fn add_utility<'a>(
         &mut self,
         name: &str,
         properties: impl IntoIterator<Item = &'a str>,
         declaration_count: usize,
+        declared: Option<&[&str]>,
     ) {
         let mut signature: Vec<u16> = properties
             .into_iter()
@@ -226,6 +238,13 @@ impl TailwindDesignSystem {
             CustomUtility {
                 signature: signature.into_boxed_slice(),
                 count: u8::try_from(declaration_count).unwrap_or(u8::MAX),
+                // Tailwind compiles every declaration of a name, so the
+                // properties of one don't describe the class.
+                properties: if self.utilities.contains_key(name) {
+                    None
+                } else {
+                    declared.and_then(|names| declared_properties(names.iter().copied()))
+                },
             },
         );
     }
@@ -314,6 +333,27 @@ impl TailwindDesignSystem {
         self.theme_variables.contains(name.as_str())
     }
 
+    /// Whether the theme pairs `key` of `namespace` with a value for
+    /// `property`, as `--text-lg--line-height` does for `line-height`. A
+    /// utility that takes `key` sets `property` too.
+    pub(super) fn theme_pairs(&self, namespace: ThemeNamespace, key: &str, property: &str) -> bool {
+        if !self.theme_variables.is_empty() {
+            let name = format!("--{}-{key}--{property}", namespace.css_name());
+            if self.theme_variables.contains(name.as_str()) {
+                return true;
+            }
+        }
+        // The default theme only pairs its font sizes, each with a line
+        // height.
+        namespace == ThemeNamespace::Text
+            && property == "line-height"
+            && namespace.keys().contains(key)
+            && !self
+                .theme
+                .get(&namespace)
+                .is_some_and(|values| values.reset)
+    }
+
     pub(super) fn has_utilities(&self) -> bool {
         !self.utilities.is_empty()
     }
@@ -345,10 +385,15 @@ impl From<&TailwindStylesheet> for TailwindDesignSystem {
             }
         }
         for utility in &stylesheet.utilities {
+            let declared: Option<Vec<&str>> = utility
+                .declared_properties
+                .as_ref()
+                .map(|names| names.iter().map(|name| name.text()).collect());
             design.add_utility(
                 utility.name.text(),
                 utility.properties.iter().map(|property| property.text()),
                 utility.declaration_count,
+                declared.as_deref(),
             );
         }
         for variant in &stylesheet.custom_variants {
@@ -390,6 +435,7 @@ impl From<&TailwindFunctionalUtility> for CustomFunctionalUtility {
             .declarations
             .iter()
             .map(|declaration| CustomDeclaration {
+                name: declaration.property.text().into(),
                 property: PROPERTY_INDEX.get(declaration.property.text()).copied(),
                 functions: declaration
                     .functions
@@ -405,8 +451,28 @@ impl From<&TailwindFunctionalUtility> for CustomFunctionalUtility {
                     .collect(),
             })
             .collect();
-        Self { declarations }
+        Self {
+            declarations,
+            has_only_declarations: utility.has_only_declarations,
+        }
     }
+}
+
+/// The property names a utility declared with `@utility` sets, in ascending
+/// order, given those of its declarations. Tailwind compiles a rule that holds
+/// only plain declarations to exactly these, outside any selector or at-rule.
+///
+/// Returns `None` when the utility sets no property, or sets one more than
+/// once: Tailwind-based tools compare the declarations themselves, so a set of
+/// names can't stand in for them.
+pub(super) fn declared_properties<'a>(
+    names: impl IntoIterator<Item = &'a str>,
+) -> Option<Arc<[Box<str>]>> {
+    let mut names: Vec<Box<str>> = names.into_iter().map(Box::from).collect();
+    names.sort_unstable();
+    let len = names.len();
+    names.dedup();
+    (len > 0 && names.len() == len).then(|| names.into())
 }
 
 impl ValueArgument {
@@ -530,6 +596,7 @@ mod tests {
             .map(|name| TailwindFunctionalUtility {
                 name: name.into(),
                 declarations: Box::default(),
+                has_only_declarations: true,
             })
             .into();
         let design = TailwindDesignSystem::from(&TailwindStylesheet {

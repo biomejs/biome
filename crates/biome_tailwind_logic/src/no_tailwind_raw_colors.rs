@@ -10,7 +10,7 @@ use biome_tailwind_syntax::{
 use color::{DynamicColor, Oklab, parse_color};
 use smallvec::SmallVec;
 
-use crate::use_tailwind_sorted_classes::{THEME_COLOR_VALUES, TailwindDesignSystem};
+use crate::tailwind_v4::{THEME_COLOR_VALUES, TailwindDesignSystem};
 
 /// A class that sets a default palette color, such as `bg-pink-500`, or
 /// `black` or `white` when the options forbid them.
@@ -262,7 +262,7 @@ fn is_palette_color(value: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::{COLOR_UTILITIES, PALETTE_COLORS, PALETTE_SHADES, raw_colors};
-    use crate::use_tailwind_sorted_classes::{THEME_COLOR_VALUES, TailwindDesignSystem};
+    use crate::tailwind_v4::{THEME_COLOR_VALUES, TailwindDesignSystem};
     use biome_console::markup;
     use biome_rule_options::no_tailwind_raw_colors::NoTailwindRawColorsOptions;
     use biome_tailwind_parser::parse_tailwind;
