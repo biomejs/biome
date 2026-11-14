@@ -3347,6 +3347,11 @@ export interface Nursery {
 	 */
 	useConsistentHeadingLevel?: UseConsistentHeadingLevelConfiguration;
 	/**
+	 * Require a consistent style for object types with arbitrary keys.
+	 * See https://biomejs.dev/linter/rules/use-consistent-indexed-object-style
+	 */
+	useConsistentIndexedObjectStyle?: UseConsistentIndexedObjectStyleConfiguration;
+	/**
 	 * Enforce a consistent way of reading JSON files before passing them to JSON.parse().
 	 * See https://biomejs.dev/linter/rules/use-consistent-json-file-read
 	 */
@@ -5937,6 +5942,9 @@ export type UseConsistentFunctionStyleConfiguration =
 export type UseConsistentHeadingLevelConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentHeadingLevelOptions;
+export type UseConsistentIndexedObjectStyleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentIndexedObjectStyleOptions;
 export type UseConsistentJsonFileReadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentJsonFileReadOptions;
@@ -8540,6 +8548,14 @@ export interface RuleWithUseConsistentHeadingLevelOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentHeadingLevelOptions;
 }
+export interface RuleWithUseConsistentIndexedObjectStyleOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseConsistentIndexedObjectStyleOptions;
+}
 export interface RuleWithUseConsistentJsonFileReadOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -10922,6 +10938,12 @@ export interface UseConsistentFunctionStyleOptions {
 	style?: FunctionStyle;
 }
 export type UseConsistentHeadingLevelOptions = {};
+export interface UseConsistentIndexedObjectStyleOptions {
+	/**
+	 * The style that object types with arbitrary keys must use.
+	 */
+	style?: IndexedObjectStyle;
+}
 export interface UseConsistentJsonFileReadOptions {
 	/**
 	 * Whether JSON files should be read as strings or as `Buffer`s before they are passed to `JSON.parse()`.
@@ -12017,6 +12039,7 @@ export interface BlockLangOptions {
  * The required form for function definitions: `"expression"` or `"declaration"`.
  */
 export type FunctionStyle = "expression" | "declaration";
+export type IndexedObjectStyle = "record" | "indexSignature";
 export type JsonFileReadAs = "string" | "buffer";
 export type NormalizationForm = "NFC" | "NFD" | "NFKC" | "NFKD";
 export type UseLogicalPropertiesDirection = "ltr" | "rtl";
@@ -12621,6 +12644,7 @@ export type Category =
 	| "lint/nursery/useConsistentBlockLang"
 	| "lint/nursery/useConsistentFunctionStyle"
 	| "lint/nursery/useConsistentHeadingLevel"
+	| "lint/nursery/useConsistentIndexedObjectStyle"
 	| "lint/nursery/useConsistentJsonFileRead"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentObjectKeys"

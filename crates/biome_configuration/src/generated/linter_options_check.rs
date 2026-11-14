@@ -2000,6 +2000,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::use_consistent_heading_level::UseConsistentHeadingLevelOptions,
         >(),
     ));
+    result.push(("nursery", "useConsistentIndexedObjectStyle", TypeId::of::<biome_rule_options::use_consistent_indexed_object_style::UseConsistentIndexedObjectStyleOptions>()));
     result.push((
         "nursery",
         "useConsistentJsonFileRead",
