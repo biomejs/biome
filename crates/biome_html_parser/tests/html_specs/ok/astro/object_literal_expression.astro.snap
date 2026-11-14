@@ -19,9 +19,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
-    processing_instruction: missing (optional),
-    directive: missing (optional),
-    html: HtmlElementList [
+    items: HtmlRootItemList [
         HtmlSingleTextExpression {
             l_curly_token: L_CURLY@0..1 "{" [] [],
             expression: HtmlTextExpression {
@@ -82,9 +80,7 @@ HtmlRoot {
 0: HTML_ROOT@0..58
   0: (empty)
   1: (empty)
-  2: (empty)
-  3: (empty)
-  4: HTML_ELEMENT_LIST@0..57
+  2: HTML_ROOT_ITEM_LIST@0..57
     0: HTML_SINGLE_TEXT_EXPRESSION@0..10
       0: L_CURLY@0..1 "{" [] []
       1: HTML_TEXT_EXPRESSION@1..9
@@ -119,6 +115,6 @@ HtmlRoot {
               2: R_CURLY@53..55 "}" [] [Whitespace(" ")]
       3: SLASH@55..56 "/" [] []
       4: R_ANGLE@56..57 ">" [] []
-  5: EOF@57..58 "" [Newline("\n")] []
+  3: EOF@57..58 "" [Newline("\n")] []
 
 ```

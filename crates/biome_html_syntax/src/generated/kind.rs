@@ -334,6 +334,7 @@ pub enum HtmlSyntaxKind {
     HTML_UNKNOWN_TAG,
     HTML_COMPONENT_LITERAL,
     HTML_ROOT,
+    HTML_ROOT_ITEM_LIST,
     HTML_DIRECTIVE,
     HTML_SELF_CLOSING_TAG,
     HTML_ELEMENT,
@@ -519,7 +520,8 @@ impl HtmlSyntaxKind {
     pub const fn is_list(self) -> bool {
         matches!(
             self,
-            HTML_ELEMENT_LIST
+            HTML_ROOT_ITEM_LIST
+                | HTML_ELEMENT_LIST
                 | HTML_ATTRIBUTE_LIST
                 | SVELTE_BINDING_LIST
                 | SVELTE_ELSE_IF_CLAUSE_LIST

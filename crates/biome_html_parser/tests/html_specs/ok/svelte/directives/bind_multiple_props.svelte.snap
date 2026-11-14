@@ -18,9 +18,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
-    processing_instruction: missing (optional),
-    directive: missing (optional),
-    html: HtmlElementList [
+    items: HtmlRootItemList [
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@0..1 "<" [] [],
             name: HtmlTagName {
@@ -182,9 +180,7 @@ HtmlRoot {
 0: HTML_ROOT@0..164
   0: (empty)
   1: (empty)
-  2: (empty)
-  3: (empty)
-  4: HTML_ELEMENT_LIST@0..163
+  2: HTML_ROOT_ITEM_LIST@0..163
     0: HTML_SELF_CLOSING_ELEMENT@0..79
       0: L_ANGLE@0..1 "<" [] []
       1: HTML_TAG_NAME@1..7
@@ -290,6 +286,6 @@ HtmlRoot {
         2: HTML_TAG_NAME@157..162
           0: VIDEO_KW@157..162 "video" [] []
         3: R_ANGLE@162..163 ">" [] []
-  5: EOF@163..164 "" [Newline("\n")] []
+  3: EOF@163..164 "" [Newline("\n")] []
 
 ```

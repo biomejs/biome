@@ -185,6 +185,7 @@
 use crate::utils::children::DisplayHtmlChildSequence;
 use crate::{
     html::auxiliary::{
+        directive::{FormatHtmlDirective, FormatHtmlDirectiveOptions},
         double_text_expression::{
             FormatHtmlDoubleTextExpression, FormatHtmlDoubleTextExpressionOptions,
         },
@@ -193,9 +194,8 @@ use crate::{
     },
     prelude::*,
     utils::{
-        children::{HtmlChild, HtmlChildrenIterator, html_split_children},
+        children::{HtmlChild, HtmlChildElement, HtmlChildrenIterator, html_split_children},
         css_display::CssDisplay,
-        metadata::get_element_css_display,
     },
 };
 #[cfg(debug_assertions)]
@@ -204,7 +204,7 @@ use biome_formatter::{FormatRuleWithOptions, GroupId, rowan::prelude::*};
 use biome_formatter::{format_args, write};
 use biome_html_syntax::{
     AnyHtmlContent, AnyHtmlElement, AnyHtmlTextExpression, HtmlClosingElement,
-    HtmlClosingElementFields, HtmlElement, HtmlElementList, HtmlRoot, HtmlSyntaxKind,
+    HtmlClosingElementFields, HtmlElement, HtmlElementList, HtmlRootItemList, HtmlSyntaxKind,
     HtmlSyntaxToken,
 };
 use biome_rowan::AstNode;
@@ -355,7 +355,7 @@ impl FormatHtmlElementList {
                 HtmlChild::NonText(element) => {
                     meta.has_non_text_child = true;
                     // Check if this is a block element
-                    let display = get_element_css_display(element);
+                    let display = element.css_display();
                     if display.is_block_like() {
                         meta.has_block_element = true;
                         block_element_count += 1;
@@ -379,13 +379,20 @@ impl FormatHtmlElementList {
         meta
     }
 
+    pub(crate) fn fmt_root_items(
+        &self,
+        list: &HtmlRootItemList,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        let children = html_split_children(list.iter(), None, None, f)?;
+        self.fmt_split_children(children, true, f)
+    }
+
     pub(crate) fn fmt_children(
         &self,
         list: &HtmlElementList,
         f: &mut HtmlFormatter,
     ) -> FormatResult<()> {
-        let is_root = list.parent::<HtmlRoot>().is_some();
-
         let svelte_block_boundary = SvelteBlockBoundary::for_list(list);
         let (opening_token, closing_token) = match &svelte_block_boundary {
             Some(boundary) => (
@@ -430,6 +437,15 @@ impl FormatHtmlElementList {
             }
         }
 
+        self.fmt_split_children(children, false, f)
+    }
+
+    fn fmt_split_children(
+        &self,
+        children: Vec<HtmlChild>,
+        is_root: bool,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
         #[cfg(debug_assertions)]
         if std::env::var("DEBUG_HTML_FORMATTER_CHILDREN").is_ok() {
             EnvConsole::new(ColorMode::Auto).error(markup! {
@@ -637,7 +653,7 @@ impl FormatHtmlElementList {
 
                         match children_iter.peek() {
                             Some(HtmlChild::NonText(non_text)) => {
-                                let css_display = get_element_css_display(non_text);
+                                let css_display = non_text.css_display();
                                 // not allowed to add whitespace if the next one is externally whitespace sensitive
                                 // ```html
                                 // <a>link</a>more text
@@ -690,7 +706,7 @@ impl FormatHtmlElementList {
                         let next = children_iter.peek();
                         if let Some(HtmlChild::NonText(next_non_text)) = next {
                             // when a comment is followed by a block element, we need to add a line break.
-                            let next_css_display = get_element_css_display(next_non_text);
+                            let next_css_display = next_non_text.css_display();
                             if !next_css_display.is_externally_whitespace_sensitive(f) {
                                 write!(f, [hard_line_break()])?;
                             }
@@ -708,15 +724,15 @@ impl FormatHtmlElementList {
                         // </p>
                         // ```
                         if let Some(HtmlChild::NonText(last_elem)) = last
-                            && is_br_element(last_elem)
+                            && last_elem.as_element().is_some_and(is_br_element)
                         {
                             write!(f, [hard_line_break()])?;
                         } else if let Some(HtmlChild::NonText(last_elem)) = last
                             && let Some(HtmlChild::NonText(next)) = children_iter.peek()
                         {
                             // Whitespace between two elements
-                            let last_css_display = get_element_css_display(last_elem);
-                            let next_css_display = get_element_css_display(next);
+                            let last_css_display = last_elem.css_display();
+                            let next_css_display = next.css_display();
                             if last_css_display.is_externally_whitespace_sensitive(f)
                                 && next_css_display.is_externally_whitespace_sensitive(f)
                             {
@@ -727,7 +743,7 @@ impl FormatHtmlElementList {
                             }
                         } else if let Some(HtmlChild::NonText(last_elem)) = last {
                             // Whitespace AFTER an element (followed by text or end)
-                            let last_css_display = get_element_css_display(last_elem);
+                            let last_css_display = last_elem.css_display();
                             if last_nontext_had_trailing_line {
                                 // The element's group already printed this whitespace as a line
                             } else if force_multiline
@@ -809,7 +825,7 @@ impl FormatHtmlElementList {
                     // Any non-text child (elements)
                     HtmlChild::NonText(non_text) => {
                         let non_text_group_id = f.group_id("non text child");
-                        let css_display = get_element_css_display(non_text);
+                        let css_display = non_text.css_display();
 
                         // Check if this inline element was preceded by whitespace (text context).
                         // If so, we need to wrap it in an outer group with `line` before it.
@@ -844,7 +860,7 @@ impl FormatHtmlElementList {
                         // conditional line breaks.
                         let next_is_adjacent_inline =
                             if let Some(HtmlChild::NonText(non_text_next)) = children_iter.peek() {
-                                let next_css_display = get_element_css_display(non_text_next);
+                                let next_css_display = non_text_next.css_display();
                                 css_display.is_externally_whitespace_sensitive(f)
                                     && next_css_display.is_externally_whitespace_sensitive(f)
                             } else {
@@ -856,7 +872,10 @@ impl FormatHtmlElementList {
                         let next_word_borrows_r_angle =
                             matches!(children_iter.peek(), Some(HtmlChild::Word(_)))
                                 && css_display.is_externally_whitespace_sensitive(f)
-                                && matches!(non_text, AnyHtmlElement::HtmlElement(_))
+                                && matches!(
+                                    non_text.as_element(),
+                                    Some(AnyHtmlElement::HtmlElement(_))
+                                )
                                 && non_text.closing_r_angle_token().is_some();
 
                         let line_mode = match children_iter.peek() {
@@ -882,7 +901,7 @@ impl FormatHtmlElementList {
                             }
 
                             Some(HtmlChild::NonText(non_text_next)) => {
-                                let next_css_display = get_element_css_display(non_text_next);
+                                let next_css_display = non_text_next.css_display();
                                 if css_display.is_externally_whitespace_sensitive(f)
                                     && next_css_display.is_externally_whitespace_sensitive(f)
                                 {
@@ -916,8 +935,7 @@ impl FormatHtmlElementList {
                             ) => None,
 
                             Some(HtmlChild::Verbatim(verbatim_element)) => {
-                                let verbatim_css_display =
-                                    get_element_css_display(verbatim_element);
+                                let verbatim_css_display = verbatim_element.css_display();
                                 if css_display.is_externally_whitespace_sensitive(f)
                                     && verbatim_css_display.is_externally_whitespace_sensitive(f)
                                 {
@@ -970,15 +988,23 @@ impl FormatHtmlElementList {
                         let next_can_borrow = next_is_adjacent_inline
                             && matches!(
                                 children_iter.peek(),
-                                Some(HtmlChild::NonText(AnyHtmlElement::HtmlElement(_)))
+                                Some(HtmlChild::NonText(element))
+                                    if matches!(
+                                        element.as_element(),
+                                        Some(AnyHtmlElement::HtmlElement(_))
+                                    )
                             );
                         let next_can_borrow_interpolation_end = next_is_adjacent_inline
                             && matches!(
                                 children_iter.peek(),
-                                Some(HtmlChild::NonText(
-                                    AnyHtmlElement::HtmlElement(_)
-                                        | AnyHtmlElement::HtmlSelfClosingElement(_)
-                                ))
+                                Some(HtmlChild::NonText(element))
+                                    if matches!(
+                                        element.as_element(),
+                                        Some(
+                                            AnyHtmlElement::HtmlElement(_)
+                                                | AnyHtmlElement::HtmlSelfClosingElement(_)
+                                        )
+                                    )
                             );
 
                         let r_double_curly_borrowed = next_can_borrow_interpolation_end
@@ -987,11 +1013,11 @@ impl FormatHtmlElementList {
                             if let Some(token) = &current_borrowed_interpolation_end {
                                 write!(f, [token.format()])?;
                             }
-                            if let AnyHtmlElement::AnyHtmlContent(
+                            if let Some(AnyHtmlElement::AnyHtmlContent(
                                 AnyHtmlContent::AnyHtmlTextExpression(
                                     AnyHtmlTextExpression::HtmlDoubleTextExpression(expression),
                                 ),
-                            ) = non_text
+                            )) = non_text.as_element()
                             {
                                 FormatNodeRule::fmt_fields(
                                     &FormatHtmlDoubleTextExpression::default().with_options(
@@ -1085,8 +1111,8 @@ impl FormatHtmlElementList {
 
                             // Only propagate breaks from block-like elements.
                             // Inline elements can break internally without forcing the parent to multiline.
-                            let internally_sensitive = get_element_css_display(non_text)
-                                .is_internally_whitespace_sensitive(f);
+                            let internally_sensitive =
+                                non_text.css_display().is_internally_whitespace_sensitive(f);
                             if !internally_sensitive && memoized.inspect(f)?.will_break() {
                                 force_multiline = true;
                             }
@@ -1139,12 +1165,12 @@ impl FormatHtmlElementList {
                         // next child, so a sibling break would insert rendered whitespace.
                         if next_is_adjacent_inline
                             && !matches!(
-                                non_text,
-                                AnyHtmlElement::AnyHtmlContent(
+                                non_text.as_element(),
+                                Some(AnyHtmlElement::AnyHtmlContent(
                                     AnyHtmlContent::AnyHtmlTextExpression(
                                         AnyHtmlTextExpression::HtmlSingleTextExpression(_)
                                     )
-                                )
+                                ))
                             )
                         {
                             prev_inline_group_id = Some(non_text_group_id);
@@ -1153,12 +1179,12 @@ impl FormatHtmlElementList {
                         }
 
                         if r_double_curly_borrowed {
-                            borrowed_sibling_interpolation_end = match non_text {
-                                AnyHtmlElement::AnyHtmlContent(
+                            borrowed_sibling_interpolation_end = match non_text.as_element() {
+                                Some(AnyHtmlElement::AnyHtmlContent(
                                     AnyHtmlContent::AnyHtmlTextExpression(
                                         AnyHtmlTextExpression::HtmlDoubleTextExpression(expression),
                                     ),
-                                ) => expression.r_double_curly_token().ok(),
+                                )) => expression.r_double_curly_token().ok(),
                                 _ => None,
                             };
                         } else if next_can_borrow || next_word_borrows_r_angle {
@@ -1259,12 +1285,14 @@ impl SvelteBlockBoundary {
     }
 }
 
-/// Check if an element is a self-closing element or `<br>`
-fn is_self_closing_or_br(element: &AnyHtmlElement) -> bool {
-    matches!(element, AnyHtmlElement::HtmlSelfClosingElement(_)) || is_br_element(element)
+/// Returns whether a child is a self-closing element or `<br>`.
+fn is_self_closing_or_br(element: &HtmlChildElement) -> bool {
+    element.as_element().is_some_and(|element| {
+        matches!(element, AnyHtmlElement::HtmlSelfClosingElement(_)) || is_br_element(element)
+    })
 }
 
-/// Check if an element is a `<br>` element
+/// Returns whether an element is `<br>`.
 fn is_br_element(element: &AnyHtmlElement) -> bool {
     element
         .name()
@@ -1274,12 +1302,13 @@ fn is_br_element(element: &AnyHtmlElement) -> bool {
 fn has_single_interpolation_child(children: &[HtmlChild]) -> bool {
     let mut meaningful_children = children.iter().filter(|child| !child.is_any_whitespace());
 
-    let Some(HtmlChild::NonText(AnyHtmlElement::AnyHtmlContent(
-        AnyHtmlContent::AnyHtmlTextExpression(
-            AnyHtmlTextExpression::HtmlDoubleTextExpression(_)
-            | AnyHtmlTextExpression::HtmlSingleTextExpression(_),
-        ),
-    ))) = meaningful_children.next()
+    let Some(HtmlChild::NonText(element)) = meaningful_children.next() else {
+        return false;
+    };
+    let Some(AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::AnyHtmlTextExpression(
+        AnyHtmlTextExpression::HtmlDoubleTextExpression(_)
+        | AnyHtmlTextExpression::HtmlSingleTextExpression(_),
+    ))) = element.as_element()
     else {
         return false;
     };
@@ -1297,11 +1326,13 @@ fn has_single_double_text_expression_child(children: &[HtmlChild]) -> bool {
     is_double_text_expression(element) && meaningful_children.next().is_none()
 }
 
-fn is_double_text_expression(element: &AnyHtmlElement) -> bool {
+fn is_double_text_expression(element: &HtmlChildElement) -> bool {
     matches!(
-        element,
-        AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::AnyHtmlTextExpression(
-            AnyHtmlTextExpression::HtmlDoubleTextExpression(_)
+        element.as_element(),
+        Some(AnyHtmlElement::AnyHtmlContent(
+            AnyHtmlContent::AnyHtmlTextExpression(AnyHtmlTextExpression::HtmlDoubleTextExpression(
+                _
+            ))
         ))
     )
 }
@@ -1323,24 +1354,15 @@ fn format_partial_closing_tag(
     )
 }
 
-/// Helper to format an AnyHtmlElement with sibling borrowing options.
-///
-/// This is used when formatting adjacent inline elements to implement Prettier's
-/// `>` borrowing pattern where the closing `>` from one element is printed at the
-/// start of the next element's opening tag group.
-///
-/// # Arguments
-/// * `element` - The element to format
-/// * `borrowed_sibling_r_angle` - The `>` token borrowed from the previous sibling's closing tag
-/// * `closing_r_angle_borrowed` - Whether this element's closing `>` should be borrowed by the next sibling
+/// Formats a child while allowing adjacent tag elements to lend their closing
+/// angle token to the next sibling.
 fn format_element_with_borrowing(
-    element: &AnyHtmlElement,
+    element: &HtmlChildElement,
     borrowed_sibling_r_angle: Option<HtmlSyntaxToken>,
     closing_r_angle_borrowed: bool,
 ) -> impl Format<HtmlFormatContext> + '_ {
-    format_with(move |f| {
-        // Only HtmlElement supports the borrowing pattern (has opening/closing tags)
-        if let AnyHtmlElement::HtmlElement(html_element) = element {
+    format_with(move |f| match element {
+        HtmlChildElement::Element(AnyHtmlElement::HtmlElement(html_element)) => {
             FormatNodeRule::fmt(
                 &FormatHtmlElement::default().with_options(FormatHtmlElementOptions {
                     closing_r_angle_borrowed,
@@ -1350,7 +1372,8 @@ fn format_element_with_borrowing(
                 html_element,
                 f,
             )
-        } else if let AnyHtmlElement::HtmlSelfClosingElement(self_closing_element) = element {
+        }
+        HtmlChildElement::Element(AnyHtmlElement::HtmlSelfClosingElement(self_closing_element)) => {
             FormatNodeRule::fmt(
                 &FormatHtmlSelfClosingElement::default().with_options(
                     FormatHtmlSelfClosingElementOptions {
@@ -1360,9 +1383,14 @@ fn format_element_with_borrowing(
                 self_closing_element,
                 f,
             )
-        } else {
-            // For other element types, use default formatting.
-            write!(f, [element.format()])
         }
+        HtmlChildElement::Element(element) => write!(f, [element.format()]),
+        HtmlChildElement::Directive(directive) => FormatNodeRule::fmt(
+            &FormatHtmlDirective::default().with_options(FormatHtmlDirectiveOptions {
+                comments_as_children: true,
+            }),
+            directive,
+            f,
+        ),
     })
 }

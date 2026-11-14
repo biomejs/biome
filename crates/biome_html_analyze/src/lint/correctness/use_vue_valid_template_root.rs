@@ -64,7 +64,7 @@ impl Rule for UseVueValidTemplateRoot {
         let root = ctx.query();
 
         // Find top-level `<template>` elements only
-        let element = root.html().into_iter().find(|el| {
+        let element = root.elements().find(|el| {
             if let Some(element) = el.clone().as_any_html_tag_element() {
                 return element.tag_name_kind() == Some(T![template]);
             }

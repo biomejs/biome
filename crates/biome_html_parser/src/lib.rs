@@ -62,10 +62,10 @@ impl HtmlParse {
     /// use biome_html_syntax::HtmlSyntaxKind;
     /// // let parse = parse_html(r#"<html></html>"#);
     ///
-    /// // Get the root value
-    /// // let root_value = parse.tree().html()?;
+    /// // Get the ordered root items
+    /// // let root_items = parse.tree().items();
     ///
-    /// // assert_eq!(root_value.syntax().kind(), HtmlSyntaxKind::HTML_ELEMENT);
+    /// // assert_eq!(root_items.syntax().kind(), HtmlSyntaxKind::HTML_ROOT_ITEM_LIST);
     ///
     /// # Ok(())
     /// # }

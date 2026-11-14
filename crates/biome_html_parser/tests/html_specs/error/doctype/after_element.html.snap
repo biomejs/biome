@@ -1,0 +1,214 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```html
+<script>console.log("ready");</script>
+<!doctype html>
+<html lang="en"></html>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    items: HtmlRootItemList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: SCRIPT_KW@1..7 "script" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@7..8 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlEmbeddedContent {
+                    value_token: HTML_LITERAL@8..29 "console.log(\"ready\");" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@29..30 "<" [] [],
+                slash_token: SLASH@30..31 "/" [] [],
+                name: HtmlTagName {
+                    value_token: SCRIPT_KW@31..37 "script" [] [],
+                },
+                r_angle_token: R_ANGLE@37..38 ">" [] [],
+            },
+        },
+        HtmlBogusElement {
+            items: [
+                HtmlBogus {
+                    items: [
+                        L_ANGLE@38..40 "<" [Newline("\n")] [],
+                        HtmlBogus {
+                            items: [
+                                HtmlBogusElement {
+                                    items: [
+                                        BANG@40..41 "!" [] [],
+                                        HTML_LITERAL@41..54 "doctype html>" [] [],
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                HtmlElementList [
+                    HtmlElement {
+                        opening_element: HtmlOpeningElement {
+                            l_angle_token: L_ANGLE@54..56 "<" [Newline("\n")] [],
+                            name: HtmlTagName {
+                                value_token: HTML_KW@56..61 "html" [] [Whitespace(" ")],
+                            },
+                            attributes: HtmlAttributeList [
+                                HtmlAttribute {
+                                    name: HtmlAttributeName {
+                                        value_token: HTML_LITERAL@61..65 "lang" [] [],
+                                    },
+                                    initializer: HtmlAttributeInitializerClause {
+                                        eq_token: EQ@65..66 "=" [] [],
+                                        value: HtmlString {
+                                            value_token: HTML_STRING_LITERAL@66..70 "\"en\"" [] [],
+                                        },
+                                    },
+                                },
+                            ],
+                            r_angle_token: R_ANGLE@70..71 ">" [] [],
+                        },
+                        children: HtmlElementList [],
+                        closing_element: HtmlClosingElement {
+                            l_angle_token: L_ANGLE@71..72 "<" [] [],
+                            slash_token: SLASH@72..73 "/" [] [],
+                            name: HtmlTagName {
+                                value_token: HTML_KW@73..77 "html" [] [],
+                            },
+                            r_angle_token: R_ANGLE@77..78 ">" [] [],
+                        },
+                    },
+                ],
+            ],
+        },
+    ],
+    eof_token: EOF@78..79 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..79
+  0: (empty)
+  1: (empty)
+  2: HTML_ROOT_ITEM_LIST@0..78
+    0: HTML_ELEMENT@0..38
+      0: HTML_OPENING_ELEMENT@0..8
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..7
+          0: SCRIPT_KW@1..7 "script" [] []
+        2: HTML_ATTRIBUTE_LIST@7..7
+        3: R_ANGLE@7..8 ">" [] []
+      1: HTML_ELEMENT_LIST@8..29
+        0: HTML_EMBEDDED_CONTENT@8..29
+          0: HTML_LITERAL@8..29 "console.log(\"ready\");" [] []
+      2: HTML_CLOSING_ELEMENT@29..38
+        0: L_ANGLE@29..30 "<" [] []
+        1: SLASH@30..31 "/" [] []
+        2: HTML_TAG_NAME@31..37
+          0: SCRIPT_KW@31..37 "script" [] []
+        3: R_ANGLE@37..38 ">" [] []
+    1: HTML_BOGUS_ELEMENT@38..78
+      0: HTML_BOGUS@38..54
+        0: L_ANGLE@38..40 "<" [Newline("\n")] []
+        1: HTML_BOGUS@40..54
+          0: HTML_BOGUS_ELEMENT@40..54
+            0: BANG@40..41 "!" [] []
+            1: HTML_LITERAL@41..54 "doctype html>" [] []
+      1: HTML_ELEMENT_LIST@54..78
+        0: HTML_ELEMENT@54..78
+          0: HTML_OPENING_ELEMENT@54..71
+            0: L_ANGLE@54..56 "<" [Newline("\n")] []
+            1: HTML_TAG_NAME@56..61
+              0: HTML_KW@56..61 "html" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@61..70
+              0: HTML_ATTRIBUTE@61..70
+                0: HTML_ATTRIBUTE_NAME@61..65
+                  0: HTML_LITERAL@61..65 "lang" [] []
+                1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@65..70
+                  0: EQ@65..66 "=" [] []
+                  1: HTML_STRING@66..70
+                    0: HTML_STRING_LITERAL@66..70 "\"en\"" [] []
+            3: R_ANGLE@70..71 ">" [] []
+          1: HTML_ELEMENT_LIST@71..71
+          2: HTML_CLOSING_ELEMENT@71..78
+            0: L_ANGLE@71..72 "<" [] []
+            1: SLASH@72..73 "/" [] []
+            2: HTML_TAG_NAME@73..77
+              0: HTML_KW@73..77 "html" [] []
+            3: R_ANGLE@77..78 ">" [] []
+  3: EOF@78..79 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+after_element.html:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an element name but instead found '!'.
+  
+    1 │ <script>console.log("ready");</script>
+  > 2 │ <!doctype html>
+      │  ^
+    3 │ <html lang="en"></html>
+    4 │ 
+  
+  i Expected an element name here.
+  
+    1 │ <script>console.log("ready");</script>
+  > 2 │ <!doctype html>
+      │  ^
+    3 │ <html lang="en"></html>
+    4 │ 
+  
+after_element.html:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+    1 │ <script>console.log("ready");</script>
+    2 │ <!doctype html>
+  > 3 │ <html lang="en"></html>
+      │ ^
+    4 │ 
+  
+  i Expected an attribute here.
+  
+    1 │ <script>console.log("ready");</script>
+    2 │ <!doctype html>
+  > 3 │ <html lang="en"></html>
+      │ ^
+    4 │ 
+  
+after_element.html:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a closing tag but instead found the end of the file.
+  
+    2 │ <!doctype html>
+    3 │ <html lang="en"></html>
+  > 4 │ 
+      │ 
+  
+  i Expected a closing tag here.
+  
+    2 │ <!doctype html>
+    3 │ <html lang="en"></html>
+  > 4 │ 
+      │ 
+  
+```

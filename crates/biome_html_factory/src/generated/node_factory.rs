@@ -622,23 +622,19 @@ pub fn html_processing_instruction(
         ],
     ))
 }
-pub fn html_root(html: HtmlElementList, eof_token: SyntaxToken) -> HtmlRootBuilder {
+pub fn html_root(items: HtmlRootItemList, eof_token: SyntaxToken) -> HtmlRootBuilder {
     HtmlRootBuilder {
-        html,
+        items,
         eof_token,
         bom_token: None,
         frontmatter: None,
-        processing_instruction: None,
-        directive: None,
     }
 }
 pub struct HtmlRootBuilder {
-    html: HtmlElementList,
+    items: HtmlRootItemList,
     eof_token: SyntaxToken,
     bom_token: Option<SyntaxToken>,
     frontmatter: Option<AnyAstroFrontmatterElement>,
-    processing_instruction: Option<HtmlProcessingInstruction>,
-    directive: Option<HtmlDirective>,
 }
 impl HtmlRootBuilder {
     pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
@@ -649,17 +645,6 @@ impl HtmlRootBuilder {
         self.frontmatter = Some(frontmatter);
         self
     }
-    pub fn with_processing_instruction(
-        mut self,
-        processing_instruction: HtmlProcessingInstruction,
-    ) -> Self {
-        self.processing_instruction = Some(processing_instruction);
-        self
-    }
-    pub fn with_directive(mut self, directive: HtmlDirective) -> Self {
-        self.directive = Some(directive);
-        self
-    }
     pub fn build(self) -> HtmlRoot {
         HtmlRoot::unwrap_cast(SyntaxNode::new_detached(
             HtmlSyntaxKind::HTML_ROOT,
@@ -667,11 +652,7 @@ impl HtmlRootBuilder {
                 self.bom_token.map(|token| SyntaxElement::Token(token)),
                 self.frontmatter
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
-                self.processing_instruction
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                self.directive
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Node(self.html.into_syntax())),
+                Some(SyntaxElement::Node(self.items.into_syntax())),
                 Some(SyntaxElement::Token(self.eof_token)),
             ],
         ))
@@ -2101,6 +2082,18 @@ where
 {
     HtmlElementList::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::HTML_ELEMENT_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn html_root_item_list<I>(items: I) -> HtmlRootItemList
+where
+    I: IntoIterator<Item = AnyHtmlRootItem>,
+    I::IntoIter: ExactSizeIterator,
+{
+    HtmlRootItemList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_ROOT_ITEM_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),

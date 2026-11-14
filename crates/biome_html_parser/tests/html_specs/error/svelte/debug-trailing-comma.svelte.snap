@@ -17,9 +17,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
-    processing_instruction: missing (optional),
-    directive: missing (optional),
-    html: HtmlElementList [
+    items: HtmlRootItemList [
         SvelteDebugBlock {
             sv_curly_at_token: SV_CURLY_AT@0..2 "{@" [] [],
             debug_token: DEBUG_KW@2..8 "debug" [] [Whitespace(" ")],
@@ -43,9 +41,7 @@ HtmlRoot {
 0: HTML_ROOT@0..20
   0: (empty)
   1: (empty)
-  2: (empty)
-  3: (empty)
-  4: HTML_ELEMENT_LIST@0..19
+  2: HTML_ROOT_ITEM_LIST@0..19
     0: SVELTE_DEBUG_BLOCK@0..19
       0: SV_CURLY_AT@0..2 "{@" [] []
       1: DEBUG_KW@2..8 "debug" [] [Whitespace(" ")]
@@ -55,7 +51,7 @@ HtmlRoot {
         1: COMMA@17..18 "," [] []
         2: (empty)
       3: R_CURLY@18..19 "}" [] []
-  5: EOF@19..20 "" [Newline("\n")] []
+  3: EOF@19..20 "" [Newline("\n")] []
 
 ```
 

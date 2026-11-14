@@ -27,9 +27,7 @@ HtmlRoot {
         },
         r_fence_token: FENCE@49..52 "---" [] [],
     },
-    processing_instruction: missing (optional),
-    directive: missing (optional),
-    html: HtmlElementList [
+    items: HtmlRootItemList [
         HtmlElement {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@52..54 "<" [Newline("\n")] [],
@@ -72,9 +70,7 @@ HtmlRoot {
     1: ASTRO_EMBEDDED_CONTENT@3..49
       0: HTML_LITERAL@3..49 "const unsafe = /[/\"]/;\nconst title = \"Home\";\n" [Newline("\n")] []
     2: FENCE@49..52 "---" [] []
-  2: (empty)
-  3: (empty)
-  4: HTML_ELEMENT_LIST@52..69
+  2: HTML_ROOT_ITEM_LIST@52..69
     0: HTML_ELEMENT@52..69
       0: HTML_OPENING_ELEMENT@52..57
         0: L_ANGLE@52..54 "<" [Newline("\n")] []
@@ -94,6 +90,6 @@ HtmlRoot {
         2: HTML_TAG_NAME@66..68
           0: H1_KW@66..68 "h1" [] []
         3: R_ANGLE@68..69 ">" [] []
-  5: EOF@69..70 "" [Newline("\n")] []
+  3: EOF@69..70 "" [Newline("\n")] []
 
 ```
