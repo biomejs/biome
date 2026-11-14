@@ -1,14 +1,14 @@
 /* should generate diagnostics */
-%a%b .placeholder-target {}
-.placeholder-target {}
+%a%b .placeholder-target { color: red; }
+.placeholder-target { color: red; }
 
-.card%a%b .mixed-target {}
-.mixed-target {}
+.card%a%b .mixed-target { color: red; }
+.mixed-target { color: red; }
 
 %a%b {
-  .nested-target {}
+  .nested-target { color: red; }
 }
-.nested-target {}
+.nested-target { color: red; }
 
-.parent .normal-target {}
-.normal-target {}
+.parent .normal-target { color: red; }
+.normal-target { color: red; }

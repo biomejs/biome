@@ -4,18 +4,23 @@ use rustc_hash::{FxHashMap, FxHashSet};
 
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_css_semantic::model::{ResolvedSelector, Rule as CssSemanticRule, RuleId, Specificity};
+use biome_css_semantic::model::{
+    AnyRuleStart, ResolvedSelector, Rule as CssSemanticRule, RuleId, SimpleSelector,
+    SimpleSelectorKind, Specificity,
+};
 use biome_css_syntax::{
-    AnyCssRoot, CssContainerAtRule, CssLanguage, CssLayerAtRule, CssMediaAtRule, CssScopeAtRule,
-    CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxKind, ScssAtRootAtRule, ScssEachAtRule,
+    AnyCssRoot, CssContainerAtRule, CssDeclaration, CssLanguage, CssLayerAtRule, CssMediaAtRule,
+    CssRelativeSelectorList, CssScopeAtRule, CssSelectorList, CssStartingStyleAtRule,
+    CssSupportsAtRule, CssSupportsFeatureDeclaration, ScssAtRootAtRule, ScssEachAtRule,
     ScssElseClause, ScssForAtRule, ScssFunctionAtRule, ScssIfAtRule, ScssIncludeAtRule,
     ScssMixinAtRule, ScssWhileAtRule,
 };
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, SyntaxKindSet, TextRange, TokenText};
+use biome_rowan::{AstNode, SyntaxKindSet, TextRange, WalkEvent};
 use biome_rule_options::no_descending_specificity::NoDescendingSpecificityOptions;
 
 use crate::services::semantic::Semantic;
+use crate::utils::is_pseudo_elements;
 
 const INDEPENDENT_AT_RULE_KINDS: SyntaxKindSet<CssLanguage> = CssContainerAtRule::KIND_SET
     .union(CssMediaAtRule::KIND_SET)
@@ -46,7 +51,11 @@ declare_lint_rule! {
     ///
     /// The rule reports likely conflicts between selectors that end with the same target under the
     /// same surrounding rules, such as `@media` or `@layer`. It cannot determine every case where
-    /// two selectors match the same element.
+    /// two selectors match the same element. Nested selectors are combined with their parent
+    /// selectors before comparison, so `nav { a { &:hover {} } }` behaves like `nav a:hover {}`.
+    ///
+    /// Rules without declarations, such as a rule that only contains a comment or nested rules,
+    /// are ignored. These rules set no styles, so their position doesn't matter.
     ///
     /// ## SCSS limitations
     ///
@@ -54,6 +63,10 @@ declare_lint_rule! {
     /// SCSS block, but not selectors across mixin or include boundaries, or across mutually exclusive
     /// control-flow branches. Selectors containing interpolation or placeholders are ignored because
     /// their emitted selector and specificity depend on SCSS evaluation.
+    ///
+    /// In SCSS, an `@include` inserts the contents of a mixin. The rule can't see what the mixin
+    /// contains, so it treats every `@include` as a declaration. Stylelint does this only for an
+    /// `@include` with a `{ ... }` block, so this rule can report selectors that Stylelint doesn't.
     ///
     /// ## Examples
     ///
@@ -110,8 +123,8 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```css
-    /// a:hover { color: red; }
     /// a { color: red; }
+    /// a:hover { color: red; }
     /// ```
     ///
     /// ```css
@@ -168,6 +181,7 @@ impl Rule for NoDescendingSpecificity {
         let mut visited_rules = FxHashSet::default();
         let mut visited_selectors = SelectorContexts::default();
         let mut descending_selectors = BTreeMap::new();
+        let mut key = String::new();
 
         let mut rules = model
             .rules()
@@ -181,6 +195,21 @@ impl Rule for NoDescendingSpecificity {
             }
 
             let rule_node = rule.node(&root);
+            let child_at_rule_context =
+                if INDEPENDENT_AT_RULE_KINDS.matches(rule_node.syntax().kind()) {
+                    Some(rule.id())
+                } else {
+                    at_rule_context
+                };
+            for child_id in rule.child_ids().iter().rev() {
+                if let Some(child_rule) = model.get_rule_by_id(child_id) {
+                    rules.push((child_rule, child_at_rule_context));
+                }
+            }
+
+            if rule.selectors().is_empty() || !has_declarations(&rule, &rule_node) {
+                continue;
+            }
             find_descending_selector(
                 &rule,
                 SelectorContext {
@@ -198,20 +227,8 @@ impl Rule for NoDescendingSpecificity {
                 },
                 &mut visited_selectors,
                 &mut descending_selectors,
+                &mut key,
             );
-
-            let child_at_rule_context = if INDEPENDENT_AT_RULE_KINDS
-                .matches(rule_node.syntax().kind())
-            {
-                Some(rule.id())
-            } else {
-                at_rule_context
-            };
-            for child_id in rule.child_ids().iter().rev() {
-                if let Some(child_rule) = model.get_rule_by_id(child_id) {
-                    rules.push((child_rule, child_at_rule_context));
-                }
-            }
         }
         descending_selectors
             .into_values()
@@ -254,37 +271,72 @@ struct SelectorContext {
     scss: Option<TextRange>,
 }
 
-type TailSelector = Vec<(CssSyntaxKind, TokenText)>;
-type SelectorContexts =
-    FxHashMap<SelectorContext, FxHashMap<TailSelector, (TextRange, Specificity)>>;
-
-/// Returns the last top-level compound selector from a resolved selector.
+type SelectorContexts = FxHashMap<SelectorContext, FxHashMap<String, (TextRange, Specificity)>>;
+/// Builds a key that identifies the element a selector styles, so selectors that style the same
+/// element can be compared. The key is built from the selector's last compound (`li:hover` in
+/// `.a ul li:hover`), with pseudo-classes removed, its parts sorted, and element names lowercased:
+///  - The parts are sorted because `.a.b` and `.b.a` match the same elements, and element names
+///    are lowercased because `A` and `a` do too. Each pair needs the same key.
+///  - Pseudo-elements stay, even single-colon ones such as `:before`, because they style a
+///    different element.
 ///
-/// Combinators inside functional pseudo-classes, such as `>` in `:has(.a > .b)`, remain part of
-/// the compound selector.
-fn tail_selector(selector: &ResolvedSelector) -> Option<TailSelector> {
-    let mut delimiter_depth = 0usize;
-    let mut tail_start = 0;
+/// Returns `false` when nothing is left, as for `:hover`.
+///
+/// ```css
+/// .a ul li:hover {}
+///       ^^
+/// ```
+fn subject_key<'a>(
+    selector: &'a ResolvedSelector,
+    parts: &mut Vec<SimpleSelector<'a>>,
+    key: &mut String,
+) -> bool {
+    let Some(subject) = selector.subject() else {
+        return false;
+    };
+    parts.extend(subject.simple_selectors().filter(|part| {
+        part.kind() != SimpleSelectorKind::PseudoClass
+            || part.name().is_some_and(is_pseudo_elements)
+    }));
+    parts.sort_unstable();
+    for part in parts.iter() {
+        part.write_normalized(key);
+    }
+    !key.is_empty()
+}
 
-    for (index, (kind, _)) in selector.tokens().enumerate() {
-        match kind {
-            CssSyntaxKind::L_PAREN | CssSyntaxKind::L_BRACK => delimiter_depth += 1,
-            CssSyntaxKind::R_PAREN | CssSyntaxKind::R_BRACK => {
-                delimiter_depth = delimiter_depth.saturating_sub(1);
-            }
-            _ if delimiter_depth == 0 && ResolvedSelector::is_combinator(*kind) => {
-                tail_start = index + 1;
-            }
-            _ => {}
+/// Returns whether the rule has declarations, directly, inside SCSS control flow such as `@if`,
+/// or inside a nested at-rule such as `@media`. Declarations in a nested rule don't count, because
+/// that rule is checked on its own. An SCSS `@include` counts as a declaration, because the rule
+/// can't see what the mixin it inserts contains. Rules without declarations set no styles, so
+/// their order doesn't matter.
+fn has_declarations(rule: &CssSemanticRule, rule_node: &AnyRuleStart) -> bool {
+    if !rule.declarations().is_empty() {
+        return true;
+    }
+    let node = rule_node.syntax();
+    let mut events = node.preorder();
+    while let Some(event) = events.next() {
+        let WalkEvent::Enter(child) = event else {
+            continue;
+        };
+        let kind = child.kind();
+        if CssDeclaration::can_cast(kind) || ScssIncludeAtRule::can_cast(kind) {
+            return true;
+        }
+        // Selectors can't contain declarations, `@supports` conditions only test them, and nested
+        // rules declare for themselves.
+        if CssSupportsFeatureDeclaration::can_cast(kind)
+            || CssSelectorList::can_cast(kind)
+            || CssRelativeSelectorList::can_cast(kind)
+            || (child != *node
+                && AnyRuleStart::can_cast(kind)
+                && !INDEPENDENT_AT_RULE_KINDS.matches(kind))
+        {
+            events.skip_subtree();
         }
     }
-
-    let tail = selector
-        .tokens()
-        .skip(tail_start)
-        .cloned()
-        .collect::<Vec<_>>();
-    (!tail.is_empty()).then_some(tail)
+    false
 }
 
 /// Checks selectors against the highest preceding specificity with the same tail selector in the same at-rule context.
@@ -294,21 +346,24 @@ fn find_descending_selector(
     context: SelectorContext,
     visited_selectors: &mut SelectorContexts,
     descending_selectors: &mut BTreeMap<TextRange, DescendingSelector>,
+    key: &mut String,
 ) {
     let visited_selectors = visited_selectors.entry(context).or_default();
+    let mut parts = Vec::new();
 
     for selector in rule.selectors() {
         let resolved_selector = selector.resolved();
-        let resolved_selector_text = resolved_selector.to_string();
         // SCSS placeholders may not emit CSS, and interpolation prevents static specificity.
-        if resolved_selector_text.contains('%') || resolved_selector_text.contains("#{") {
+        if resolved_selector.requires_scss_evaluation() {
             continue;
         }
-        let Some(tail_selector) = tail_selector(resolved_selector) else {
+        key.clear();
+        parts.clear();
+        if !subject_key(resolved_selector, &mut parts, key) {
             continue;
-        };
+        }
 
-        if let Some(seen) = visited_selectors.get_mut(&tail_selector) {
+        if let Some(seen) = visited_selectors.get_mut(key.as_str()) {
             let (last_text_range, last_specificity) = *seen;
             let specificity = selector.specificity();
             if last_specificity > specificity {
@@ -330,10 +385,7 @@ fn find_descending_selector(
                 *seen = (selector.range(), specificity);
             }
         } else {
-            visited_selectors.insert(
-                tail_selector,
-                (selector.range(), selector.specificity()),
-            );
+            visited_selectors.insert(key.clone(), (selector.range(), selector.specificity()));
         }
     }
 }
