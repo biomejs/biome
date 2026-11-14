@@ -10,12 +10,12 @@ use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsClassMember, AnyJsExpression, AnyJsGetter, AnyJsLiteralExpression, AnyJsName,
-    AnyJsParameter, AnyJsSetter, JsClassDeclaration, JsClassExportDefaultDeclaration,
-    JsClassExpression, JsMethodClassMember, JsMethodObjectMember, JsObjectExpression, JsParameters,
-    JsPropertyClassMember, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator,
-    unescape_js_identifier,
+    AnyJsObjectMemberName, AnyJsParameter, AnyJsSetter, JsClassDeclaration,
+    JsClassExportDefaultDeclaration, JsClassExpression, JsMethodClassMember, JsMethodObjectMember,
+    JsObjectExpression, JsParameters, JsPropertyClassMember, JsSyntaxKind, JsSyntaxNode,
+    JsSyntaxToken, JsVariableDeclarator, inner_string_text, unescape_js_identifier,
 };
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxResult, Text};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxResult, Text, TokenText};
 use std::borrow::Cow;
 
 /// The value of JavaScript's `Number.MAX_SAFE_INTEGER`, 2^53 - 1: the largest
@@ -89,12 +89,50 @@ pub(super) fn property_key(name: &AnyJsName) -> Option<PropertyKey> {
         AnyJsName::JsPrivateName(name) => (name.value_token(), PropertyKey::Private),
         AnyJsName::JsMetavariable(_) => return None,
     };
-    let token = token.ok()?;
+    identifier_text(&token.ok()?).map(key)
+}
+
+/// Returns the key of the property that the identifier `token` names, with
+/// its escapes decoded, as the shorthand property `{ \u006bind }` names
+/// `kind`.
+///
+/// Returns `None` for a name whose escape is malformed.
+pub(super) fn identifier_key(token: &JsSyntaxToken) -> Option<PropertyKey> {
+    identifier_text(token).map(PropertyKey::Name)
+}
+
+/// Returns the text of the identifier `token` with its escapes decoded, or
+/// `None` when an escape is malformed.
+fn identifier_text(token: &JsSyntaxToken) -> Option<Text> {
     let text = match unescape_js_identifier(token.text_trimmed()) {
         Cow::Borrowed(_) => Text::from(token.token_text_trimmed()),
         Cow::Owned(decoded) => Text::from(decoded),
     };
-    (!text.contains('\\')).then(|| key(text))
+    (!text.contains('\\')).then_some(text)
+}
+
+/// Returns the key of the property that the name of a property in an object
+/// binding pattern names, as `kind` and `"kind"` in `{ kind: k }` and
+/// `{ "kind": k }` do.
+///
+/// An identifier has its escapes decoded, as [`identifier_key`] decodes them.
+/// A string literal, a number literal, and the expression of a computed name
+/// must spell the property's name, as [`literal_key`] requires, so
+/// `{ "\u006bind": k }`, `{ 0x0: k }`, and ``{ [`kind`]: k }`` give `None`.
+pub(super) fn member_name_key(name: &AnyJsObjectMemberName) -> Option<PropertyKey> {
+    match name {
+        AnyJsObjectMemberName::JsLiteralMemberName(name) => {
+            let token = name.value().ok()?;
+            match token.kind() {
+                JsSyntaxKind::IDENT => identifier_key(&token),
+                JsSyntaxKind::JS_STRING_LITERAL => string_key(inner_string_text(&token)),
+                JsSyntaxKind::JS_NUMBER_LITERAL => decimal_integer_key(&token),
+                _ => None,
+            }
+        }
+        AnyJsObjectMemberName::JsComputedMemberName(name) => literal_key(&name.expression().ok()?),
+        AnyJsObjectMemberName::JsMetavariable(_) => None,
+    }
 }
 
 /// Returns the key of the property that the element access key `key` names
@@ -120,25 +158,32 @@ pub(super) fn literal_key(key: &AnyJsExpression) -> Option<PropertyKey> {
     match key {
         AnyJsExpression::AnyJsLiteralExpression(
             AnyJsLiteralExpression::JsStringLiteralExpression(string),
-        ) => {
-            let text = string.inner_string_text().ok()?;
-            (!text.contains('\\')).then(|| PropertyKey::Name(text.into()))
-        }
+        ) => string_key(string.inner_string_text().ok()?),
         AnyJsExpression::AnyJsLiteralExpression(
             AnyJsLiteralExpression::JsNumberLiteralExpression(number),
-        ) => {
-            let token = number.value_token().ok()?;
-            let text = token.text_trimmed();
-            let is_decimal_integer = text.bytes().all(|byte| byte.is_ascii_digit())
-                && (text == "0" || !text.starts_with('0'));
-            (is_decimal_integer
-                && text
-                    .parse::<u64>()
-                    .is_ok_and(|value| value <= MAX_SAFE_INTEGER))
-            .then(|| PropertyKey::Name(Text::from(token.token_text_trimmed())))
-        }
+        ) => decimal_integer_key(&number.value_token().ok()?),
         _ => None,
     }
+}
+
+/// Returns the key that the text of a string literal, without its quotes,
+/// names, or `None` when it has an escape, which would need decoding.
+fn string_key(text: TokenText) -> Option<PropertyKey> {
+    (!text.contains('\\')).then(|| PropertyKey::Name(text.into()))
+}
+
+/// Returns the key that the number literal `token` names when it is a
+/// decimal integer from `0` to 2^53 - 1 without leading zeros or separators,
+/// whose spelling is the property's name, as [`literal_key`] describes.
+fn decimal_integer_key(token: &JsSyntaxToken) -> Option<PropertyKey> {
+    let text = token.text_trimmed();
+    let is_decimal_integer =
+        text.bytes().all(|byte| byte.is_ascii_digit()) && (text == "0" || !text.starts_with('0'));
+    (is_decimal_integer
+        && text
+            .parse::<u64>()
+            .is_ok_and(|value| value <= MAX_SAFE_INTEGER))
+    .then(|| PropertyKey::Name(Text::from(token.token_text_trimmed())))
 }
 
 /// Returns whether paths on the `this` of `root`, such as `this.v`, can narrow

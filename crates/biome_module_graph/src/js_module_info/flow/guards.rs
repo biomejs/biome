@@ -1,4 +1,4 @@
-use super::subjects::subject_of;
+use super::subjects::{identifier_key, member_name_key, subject_of};
 use super::{FlowSubject, FlowSubjectId, FlowSubjectTable, PropertyKey};
 use crate::js_module_info::TsBindingReferenceExt;
 use biome_js_semantic::{Binding, JsDeclarationKind, SemanticModel};
@@ -6,7 +6,8 @@ use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsExpression, AnyJsFormalParameter,
     AnyJsLiteralExpression, AnyJsOptionalChainExpression, AnyJsParameter, AnyJsVariableDeclaration,
     JsBinaryOperator, JsCallExpression, JsLogicalOperator, JsReferenceIdentifier, JsSyntaxKind,
-    JsUnaryOperator, JsVariableKind, binding_ext::AnyJsBindingDeclaration, unescape_js_identifier,
+    JsSyntaxNode, JsUnaryOperator, JsVariableDeclarator, JsVariableKind,
+    binding_ext::AnyJsBindingDeclaration, unescape_js_identifier,
 };
 use biome_js_type_info::{
     Function, FunctionParameter, RawPrimitiveTarget, RawTypeData, RawTypeId, ReturnType,
@@ -67,6 +68,14 @@ pub(crate) enum FlowGuard {
         /// Whether the test reads the property through an optional chain, as
         /// `s?.kind` does, which gives `undefined` when `s` is nullish.
         optional_chain: bool,
+        /// Whether the test checks a value that a `const` read from the
+        /// property before the condition, as in
+        /// `const k = s.kind; if (k === "c")` or in an aliased condition such
+        /// as `const ok = s.kind === "c"; if (ok)`. A write to the property
+        /// between the two can make `object` differ from what the test shows,
+        /// so collection replaces such a guard with [`Self::Keep`] when the
+        /// root writes the property.
+        aliased: bool,
     },
     /// The operands of `&&` or `||`. A sequential pair applies `right` to the
     /// result of `left`; otherwise both apply to the incoming type and their
@@ -738,9 +747,13 @@ impl Decomposer<'_, '_> {
         }
     }
 
-    /// Returns the guard that a runtime test of `operand` applies to the
-    /// object that holds the tested property, as `s.kind === "c"` applies to
-    /// `s`. `subject` is the subject of `operand`.
+    /// Returns the guard that a runtime test of `operand`, whose subject is
+    /// `subject`, applies to the object that holds the tested property, as
+    /// `s.kind === "c"` applies to `s`. The property is `subject` itself when
+    /// it is a named property, or the property whose value a variable holds,
+    /// as [`Self::held_property`] describes, so `k === "c"` also applies to
+    /// `s` after `const k = s.kind`. The object must be a subject other than
+    /// `this` that a test may narrow.
     ///
     /// Returns `None` unless `subject` is a property, other than a private
     /// one, of a subject other than `this` that a test may narrow. Also
@@ -757,16 +770,28 @@ impl Decomposer<'_, '_> {
         if matches!(test, FlowTest::Predicate(_)) {
             return None;
         }
-        let subjects = self.subjects.as_slice();
-        let FlowSubject::Member {
-            object,
-            key: key @ PropertyKey::Name(_),
-        } = subjects.get(subject as usize)?
-        else {
-            return None;
-        };
-        let (object, key) = (*object, key.clone());
-        if matches!(subjects.get(object as usize)?, FlowSubject::This) || !self.may_test(object) {
+        let (object, key, optional_chain, aliased) =
+            match self.subjects.as_slice().get(subject as usize)? {
+                FlowSubject::Member {
+                    object,
+                    key: key @ PropertyKey::Name(_),
+                } => (
+                    *object,
+                    key.clone(),
+                    is_optional_chain(operand),
+                    self.aliases > 0,
+                ),
+                FlowSubject::Binding(_) => {
+                    let (object, key, optional_chain) = self.held_property(operand)?;
+                    (object, key, optional_chain, true)
+                }
+                FlowSubject::This | FlowSubject::Member { .. } => return None,
+            };
+        if matches!(
+            self.subjects.as_slice().get(object as usize)?,
+            FlowSubject::This
+        ) || !self.may_test(object)
+        {
             return None;
         }
         self.parents.push(object);
@@ -775,9 +800,114 @@ impl Decomposer<'_, '_> {
             key,
             test,
             positive,
-            optional_chain: AnyJsOptionalChainExpression::cast_ref(operand.syntax())
-                .is_some_and(|chain| chain.is_optional_chain()),
+            optional_chain,
+            aliased,
         })
+    }
+
+    /// Returns the object and the key of the property whose value `operand`
+    /// holds, with whether it reads the property through an optional chain,
+    /// when `operand` names a `const` that holds a property of a subject.
+    ///
+    /// This follows TypeScript's `getCandidateDiscriminantPropertyAccess`.
+    /// The `const` is not exported and has no type annotation, as for an
+    /// aliased condition, and it is declared in one of these ways:
+    ///
+    /// - Its initializer is a member access whose object is a subject, as in
+    ///   `const k = s.kind`, `s?.kind`, `s["kind"]`, or `t[0]`.
+    /// - It is a property or an element of a destructuring pattern that the
+    ///   declarator binds directly, without a default, as in
+    ///   `const { kind } = s`, `const { kind: k } = s`, or `const [k] = t`,
+    ///   and the declarator's initializer is a subject, as `s` or `w.s` is.
+    ///   Such a `const` never reads its property through an optional chain.
+    ///
+    /// A rest element holds nothing. TypeScript takes `ok` in
+    /// `const { ...ok } = r` as `r.ok`, although `ok` holds an object.
+    ///
+    /// Parentheses around the initializer don't matter. `s!.kind`, `s!`, and
+    /// `s as S` are not subjects, so they hold nothing, although TypeScript
+    /// accepts `s!.kind`. A chain that starts at a parenthesized optional
+    /// chain holds nothing either, as [`chain_receivers`] describes. For a
+    /// pattern, the path of the property is added to the subject table, so
+    /// that collection can find writes to it.
+    fn held_property(
+        &mut self,
+        operand: &AnyJsExpression,
+    ) -> Option<(FlowSubjectId, PropertyKey, bool)> {
+        let AnyJsExpression::JsIdentifierExpression(identifier) = operand else {
+            return None;
+        };
+        let binding = self.model.binding(&identifier.name().ok()?)?;
+        // As for aliased conditions, TypeScript holds nothing in an
+        // `export const`, and Biome also skips a `const` exported by a
+        // specifier, which TypeScript accepts.
+        if binding.is_exported() {
+            return None;
+        }
+        let (declarator, key) = match binding.tree().declaration()? {
+            AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => (declarator, None),
+            AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(property) => {
+                if property.init().is_some() {
+                    return None;
+                }
+                let key = identifier_key(&binding.tree().name_token().ok()?)?;
+                (pattern_declarator(property.syntax())?, Some(key))
+            }
+            AnyJsBindingDeclaration::JsObjectBindingPatternProperty(property) => {
+                if property.init().is_some() {
+                    return None;
+                }
+                let key = member_name_key(&property.member().ok()?)?;
+                (pattern_declarator(property.syntax())?, Some(key))
+            }
+            AnyJsBindingDeclaration::JsArrayBindingPatternElement(element) => {
+                if element.init().is_some() {
+                    return None;
+                }
+                // Holes count, so `k` holds `t[1]` in `const [, k] = t`.
+                let index = element
+                    .syntax()
+                    .parent()?
+                    .children()
+                    .position(|sibling| sibling == *element.syntax())?;
+                let key = PropertyKey::Name(Text::from(index.to_string()));
+                (pattern_declarator(element.syntax())?, Some(key))
+            }
+            _ => return None,
+        };
+        let initializer = omit_parentheses(const_initializer(&declarator)?, &mut self.remaining)?;
+        chain_receivers(&initializer, &mut self.remaining)?;
+        match key {
+            None => {
+                if !matches!(
+                    initializer,
+                    AnyJsExpression::JsStaticMemberExpression(_)
+                        | AnyJsExpression::JsComputedMemberExpression(_)
+                ) {
+                    return None;
+                }
+                let subject = subject_of(&initializer, self.model, self.subjects)?;
+                let FlowSubject::Member {
+                    object,
+                    key: key @ PropertyKey::Name(_),
+                } = self.subjects.as_slice().get(subject as usize)?
+                else {
+                    return None;
+                };
+                Some((*object, key.clone(), is_optional_chain(&initializer)))
+            }
+            Some(key) => {
+                if !has_subject_shape(&initializer)? {
+                    return None;
+                }
+                let object = subject_of(&initializer, self.model, self.subjects)?;
+                self.subjects.intern(FlowSubject::Member {
+                    object,
+                    key: key.clone(),
+                })?;
+                Some((object, key, false))
+            }
+        }
     }
 
     /// Returns `guard` preceded by a test that each of `receivers` is not
@@ -833,12 +963,7 @@ impl Decomposer<'_, '_> {
         else {
             return None;
         };
-        if declarator.variable_annotation().is_some()
-            || declarator.declaration()?.variable_kind().ok()? != JsVariableKind::Const
-        {
-            return None;
-        }
-        let initializer = declarator.initializer()?.expression().ok()?;
+        let initializer = const_initializer(&declarator)?;
         self.initializers.push(initializer.clone());
         Some(initializer)
     }
@@ -914,6 +1039,33 @@ fn narrows_through_aliases(
         }
         _ => false,
     }
+}
+
+/// Returns the initializer of `declarator` when it declares a `const` without
+/// a type annotation, which TypeScript requires of an aliased condition and of
+/// a `const` that holds a property.
+fn const_initializer(declarator: &JsVariableDeclarator) -> Option<AnyJsExpression> {
+    if declarator.variable_annotation().is_some()
+        || declarator.declaration()?.variable_kind().ok()? != JsVariableKind::Const
+    {
+        return None;
+    }
+    declarator.initializer()?.expression().ok()
+}
+
+/// Returns the declarator whose binding is the pattern that holds `element`,
+/// a property or an element of an object or array binding pattern, or `None`
+/// when that pattern is nested in another one or belongs to a parameter.
+fn pattern_declarator(element: &JsSyntaxNode) -> Option<JsVariableDeclarator> {
+    // An element's parent is its list, inside the pattern.
+    JsVariableDeclarator::cast(element.grand_parent()?.parent()?)
+}
+
+/// Returns whether `expression` is part of an optional chain, as `s?.kind`
+/// and `w?.s.kind` are.
+fn is_optional_chain(expression: &AnyJsExpression) -> bool {
+    AnyJsOptionalChainExpression::cast_ref(expression.syntax())
+        .is_some_and(|chain| chain.is_optional_chain())
 }
 
 /// Returns whether `declaration` is a variable statement directly in the body
@@ -1606,43 +1758,451 @@ mod tests {
         );
     }
 
+    /// Decomposes the test of the last `if` statement in the module
+    /// `program` and names the objects of its [`FlowGuard::Property`] guards
+    /// as [`property_names`] does, with a `~` after the key of a guard that a
+    /// `const` holds.
+    fn property_names_in(program: &str, outcome: FlowOutcome) -> Vec<String> {
+        let Decomposed {
+            guards,
+            model,
+            subjects,
+            ..
+        } = decomposed_last(program, outcome);
+        guards
+            .iter()
+            .filter_map(|guard| match guard {
+                FlowGuard::Property {
+                    object,
+                    key: PropertyKey::Name(key),
+                    optional_chain,
+                    aliased,
+                    ..
+                } => Some(format!(
+                    "{}{}[{key}]{}",
+                    if *optional_chain { "?" } else { "" },
+                    subject_name(&model, &subjects, *object),
+                    if *aliased { "~" } else { "" },
+                )),
+                _ => None,
+            })
+            .collect()
+    }
+
+    #[test]
+    fn tests_of_constants_that_hold_a_property_test_its_object() {
+        use FlowOutcome::{Falsy, Truthy};
+        for (declaration, test, outcome, expected) in [
+            (
+                "const k = value.kind;",
+                "k === 'a'",
+                Truthy,
+                vec!["value[kind]~"],
+            ),
+            (
+                "const k = value.kind;",
+                "k !== 'a'",
+                Falsy,
+                vec!["value[kind]~"],
+            ),
+            (
+                "const k = value?.kind;",
+                "k === 'a'",
+                Truthy,
+                vec!["?value[kind]~"],
+            ),
+            (
+                "const k = value['kind'];",
+                "k === 'a'",
+                Truthy,
+                vec!["value[kind]~"],
+            ),
+            (
+                "const k = value[0];",
+                "k === 'a'",
+                Truthy,
+                vec!["value[0]~"],
+            ),
+            (
+                "const k = (value.kind);",
+                "k === 'a'",
+                Truthy,
+                vec!["value[kind]~"],
+            ),
+            (
+                "const k = (value).kind;",
+                "k === 'a'",
+                Truthy,
+                vec!["value[kind]~"],
+            ),
+            (
+                "const k = value.a.kind;",
+                "k === 'a'",
+                Truthy,
+                vec!["value.a[kind]~"],
+            ),
+            (
+                "const k = value?.a.kind;",
+                "k === 'a'",
+                Truthy,
+                vec!["?value.a[kind]~"],
+            ),
+            (
+                "const k = value.kind;",
+                "typeof k === 'string'",
+                Truthy,
+                vec!["value[kind]~"],
+            ),
+            (
+                "const k = value.kind;",
+                "k === null",
+                Truthy,
+                vec!["value[kind]~"],
+            ),
+            (
+                "const k = value.kind;",
+                "k == undefined",
+                Truthy,
+                vec!["value[kind]~"],
+            ),
+            (
+                "const k = value.kind;",
+                "'a' === k",
+                Truthy,
+                vec!["value[kind]~"],
+            ),
+            (
+                "const { kind } = value;",
+                "kind === 'a'",
+                Truthy,
+                vec!["value[kind]~"],
+            ),
+            (
+                "const { kind: k } = value;",
+                "k === 'a'",
+                Truthy,
+                vec!["value[kind]~"],
+            ),
+            (
+                "const { kind: k, other: o = 1 } = value;",
+                "k === 'a'",
+                Truthy,
+                vec!["value[kind]~"],
+            ),
+            (
+                "const { 'kind': k } = value;",
+                "k === 'a'",
+                Truthy,
+                vec!["value[kind]~"],
+            ),
+            (
+                "const { ['kind']: k } = value;",
+                "k === 'a'",
+                Truthy,
+                vec!["value[kind]~"],
+            ),
+            (
+                "const { 0: k } = value;",
+                "k === 'a'",
+                Truthy,
+                vec!["value[0]~"],
+            ),
+            (
+                "const { type: k } = value;",
+                "k === 'a'",
+                Truthy,
+                vec!["value[type]~"],
+            ),
+            (
+                "const { default: k } = value;",
+                "k === 'a'",
+                Truthy,
+                vec!["value[default]~"],
+            ),
+            (
+                "const { type } = value;",
+                "type === 'a'",
+                Truthy,
+                vec!["value[type]~"],
+            ),
+            (
+                "const { \\u006bind } = value;",
+                "kind === 'a'",
+                Truthy,
+                vec!["value[kind]~"],
+            ),
+            (
+                "const { \\u006bind: k } = value;",
+                "k === 'a'",
+                Truthy,
+                vec!["value[kind]~"],
+            ),
+            (
+                "const { kind } = (value);",
+                "kind === 'a'",
+                Truthy,
+                vec!["value[kind]~"],
+            ),
+            (
+                "const { kind } = value.a;",
+                "kind === 'a'",
+                Truthy,
+                vec!["value.a[kind]~"],
+            ),
+            (
+                "const { kind } = value['a'];",
+                "kind === 'a'",
+                Truthy,
+                vec!["value.a[kind]~"],
+            ),
+            ("const [k] = value;", "k === 'a'", Truthy, vec!["value[0]~"]),
+            (
+                "const [, k] = value;",
+                "k === 'a'",
+                Truthy,
+                vec!["value[1]~"],
+            ),
+            (
+                "const [k, ...rest] = value;",
+                "k === 'a'",
+                Truthy,
+                vec!["value[0]~"],
+            ),
+            // A truthiness test also inlines the initializer as an aliased
+            // condition, whose test of the property adds a guard of its own.
+            (
+                "const k = value.kind;",
+                "k",
+                Truthy,
+                vec!["value[kind]~", "value[kind]~"],
+            ),
+            (
+                "const { kind } = value;",
+                "kind",
+                Truthy,
+                vec!["value[kind]~"],
+            ),
+            // Nothing else holds a property.
+            ("const k: string = value.kind;", "k === 'a'", Truthy, vec![]),
+            ("let k = value.kind;", "k === 'a'", Truthy, vec![]),
+            (
+                "const k = value.kind as string;",
+                "k === 'a'",
+                Truthy,
+                vec![],
+            ),
+            ("const k = value!.kind;", "k === 'a'", Truthy, vec![]),
+            ("const k = value.#kind;", "k === 'a'", Truthy, vec![]),
+            ("const k = value[other];", "k === 'a'", Truthy, vec![]),
+            (
+                "const k = value['\\u006bind'];",
+                "k === 'a'",
+                Truthy,
+                vec![],
+            ),
+            ("const k = value[0x0];", "k === 'a'", Truthy, vec![]),
+            ("const k = (value?.a)?.kind;", "k === 'a'", Truthy, vec![]),
+            ("const k = this.kind;", "k === 'a'", Truthy, vec![]),
+            ("const k = value;", "k === 'a'", Truthy, vec![]),
+            ("const k = value.kind;", "k == 'a'", Truthy, vec![]),
+            ("const k = value.kind;", "check(k)", Truthy, vec![]),
+            (
+                "const { kind = 'a' } = value;",
+                "kind === 'a'",
+                Truthy,
+                vec![],
+            ),
+            (
+                "const { kind: k = 'a' } = value;",
+                "k === 'a'",
+                Truthy,
+                vec![],
+            ),
+            ("const [k = 'a'] = value;", "k === 'a'", Truthy, vec![]),
+            ("const { ...kind } = value;", "kind", Truthy, vec![]),
+            ("const [...k] = value;", "k", Truthy, vec![]),
+            (
+                "const { a: { kind } } = value;",
+                "kind === 'a'",
+                Truthy,
+                vec![],
+            ),
+            ("const [{ kind }] = value;", "kind === 'a'", Truthy, vec![]),
+            (
+                "const { kind }: { kind: string } = value;",
+                "kind === 'a'",
+                Truthy,
+                vec![],
+            ),
+            ("let { kind } = value;", "kind === 'a'", Truthy, vec![]),
+            ("const { kind } = value!;", "kind === 'a'", Truthy, vec![]),
+            (
+                "const { kind } = value as any;",
+                "kind === 'a'",
+                Truthy,
+                vec![],
+            ),
+            (
+                "const { kind } = check(value);",
+                "kind === 'a'",
+                Truthy,
+                vec![],
+            ),
+            ("const { kind } = this;", "kind === 'a'", Truthy, vec![]),
+            (
+                "const { '\\u006bind': k } = value;",
+                "k === 'a'",
+                Truthy,
+                vec![],
+            ),
+            ("const { 0x0: k } = value;", "k === 'a'", Truthy, vec![]),
+            (
+                "const { [`kind`]: k } = value;",
+                "k === 'a'",
+                Truthy,
+                vec![],
+            ),
+        ] {
+            let program = format!(
+                "declare function check(v: unknown): v is string; \
+                function f(value, other) {{ {declaration} if ({test}) {{}} }}"
+            );
+            assert_eq!(
+                property_names_in(&program, outcome),
+                expected,
+                "{declaration} {test}"
+            );
+        }
+        for program in [
+            "const value = get(); export const k = value.kind; if (k === 'a') {}",
+            "const value = get(); const k = value.kind; export { k }; if (k === 'a') {}",
+            "const value = get(); export const { kind } = value; if (kind === 'a') {}",
+            "function f(value) { for (const { kind } of value) { if (kind === 'a') {} } }",
+            "function f({ kind }) { if (kind === 'a') {} }",
+        ] {
+            assert_eq!(
+                property_names_in(program, Truthy),
+                Vec::<String>::new(),
+                "{program}"
+            );
+        }
+    }
+
+    #[test]
+    fn held_properties_narrow_through_aliased_conditions_objects_that_cannot_change() {
+        for (program, expected) in [
+            (
+                "function f(value) { const k = value.kind; const ok = k === 'a'; if (ok) {} }",
+                vec!["value[kind]~"],
+            ),
+            (
+                "function f(value) { const { kind } = value; const ok = kind === 'a'; if (ok) {} }",
+                vec!["value[kind]~"],
+            ),
+            (
+                "function f(value) { const ok = value.kind === 'a'; if (ok) {} }",
+                vec!["value[kind]~"],
+            ),
+            // A property path can change between the `const` and the test.
+            (
+                "function f(value) { const k = value.a.kind; const ok = k === 'a'; if (ok) {} }",
+                vec![],
+            ),
+            (
+                "function f(value) { const { kind } = value.a; const ok = kind === 'a'; if (ok) {} }",
+                vec![],
+            ),
+            // Outside aliased conditions, a property path holds its property.
+            (
+                "function f(value) { const k = value.a.kind; if (k === 'a') {} }",
+                vec!["value.a[kind]~"],
+            ),
+            // A test of the property itself is not held.
+            (
+                "function f(value) { if (value.kind === 'a') {} }",
+                vec!["value[kind]"],
+            ),
+        ] {
+            assert_eq!(
+                property_names_in(program, FlowOutcome::Truthy),
+                expected,
+                "{program}"
+            );
+        }
+    }
+
+    #[test]
+    fn held_properties_of_patterns_are_subjects_for_the_write_scan() {
+        let Decomposed {
+            subjects, model, ..
+        } = decomposed_last(
+            "function f(value) { const { kind } = value; if (kind === 'a') {} }",
+            FlowOutcome::Truthy,
+        );
+        let names: Vec<_> = (0..)
+            .zip(&subjects)
+            .map(|(id, _)| subject_name(&model, &subjects, id))
+            .collect();
+        assert!(names.contains(&"value.kind".to_owned()), "{names:?}");
+    }
+
     #[test]
     fn tests_of_properties_of_this_add_no_property_guard() {
-        let program = "class K { kind: string; m() { if (this.kind === 'a') {} } }";
-        let parsed = parse(program, JsFileSource::ts(), JsParserOptions::default());
-        let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
-        let test = parsed
-            .syntax()
-            .descendants()
-            .find_map(JsIfStatement::cast)
-            .unwrap()
-            .test()
-            .unwrap();
-        let method = parsed
-            .syntax()
-            .descendants()
-            .filter_map(biome_js_control_flow::AnyJsControlFlowRoot::cast)
-            .find(super::super::subjects::this_can_narrow)
-            .unwrap();
-        let mut guards = Vec::new();
-        let raw_binding_types = FxHashMap::default();
-        let mut functions = GuardFunctions::new(&[], &raw_binding_types);
-        let mut subjects = FlowSubjectTable::new(&method, true);
-        let condition = decompose_condition(
-            &test,
-            FlowOutcome::Truthy,
-            &model,
-            &mut functions,
-            &mut subjects,
-            &mut guards,
-        );
-        assert!(condition.parents.is_empty());
-        assert!(
-            guards
+        for (body, expected) in [
+            ("if (this.kind === 'a') {}", vec![]),
+            ("const k = this.kind; if (k === 'a') {}", vec![]),
+            ("const { kind } = this; if (kind === 'a') {}", vec![]),
+            // A path on `this` is an object that a test can narrow.
+            ("const k = this.s.kind; if (k === 'a') {}", vec!["this.s"]),
+            (
+                "const { kind } = this.s; if (kind === 'a') {}",
+                vec!["this.s"],
+            ),
+        ] {
+            let program = format!("class K {{ kind: string; s: any; m() {{ {body} }} }}");
+            let parsed = parse(&program, JsFileSource::ts(), JsParserOptions::default());
+            let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
+            let test = parsed
+                .syntax()
+                .descendants()
+                .find_map(JsIfStatement::cast)
+                .unwrap()
+                .test()
+                .unwrap();
+            let method = parsed
+                .syntax()
+                .descendants()
+                .filter_map(biome_js_control_flow::AnyJsControlFlowRoot::cast)
+                .find(super::super::subjects::this_can_narrow)
+                .unwrap();
+            let mut guards = Vec::new();
+            let raw_binding_types = FxHashMap::default();
+            let mut functions = GuardFunctions::new(&[], &raw_binding_types);
+            let mut subjects = FlowSubjectTable::new(&method, true);
+            let condition = decompose_condition(
+                &test,
+                FlowOutcome::Truthy,
+                &model,
+                &mut functions,
+                &mut subjects,
+                &mut guards,
+            );
+            let subjects = subjects.into_subjects();
+            let parents: Vec<_> = condition
+                .parents
                 .iter()
-                .all(|guard| !matches!(guard, FlowGuard::Property { .. })),
-            "{guards:?}"
-        );
+                .map(|subject| subject_name(&model, &subjects, *subject))
+                .collect();
+            assert_eq!(parents, expected, "{body}");
+            assert_eq!(
+                guards
+                    .iter()
+                    .filter(|guard| matches!(guard, FlowGuard::Property { .. }))
+                    .count(),
+                expected.len(),
+                "{body}: {guards:?}"
+            );
+        }
     }
 
     #[test]
