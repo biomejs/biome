@@ -330,7 +330,10 @@ impl<'l, 'a> GlobalBuilder<'l, 'a> {
             if let Some(index) = self.lowerer.ids.value_slot(&join_path(&member_path)) {
                 members.push(LoweredTypeMember {
                     name: group.name().clone(),
-                    kind: LoweredMemberKind::Named { optional: false },
+                    kind: LoweredMemberKind::Named {
+                        optional: false,
+                        readonly: false,
+                    },
                     type_reference: self.global_reference(index),
                 });
             }
@@ -344,7 +347,10 @@ impl<'l, 'a> GlobalBuilder<'l, 'a> {
             {
                 members.push(LoweredTypeMember {
                     name: slot.declared_name().clone(),
-                    kind: LoweredMemberKind::Named { optional: false },
+                    kind: LoweredMemberKind::Named {
+                        optional: false,
+                        readonly: false,
+                    },
                     type_reference: self.global_reference(index),
                 });
             }
@@ -418,7 +424,10 @@ impl<'l, 'a> GlobalBuilder<'l, 'a> {
         match member {
             AnyTsTypeMember::TsPropertySignatureTypeMember(property) => {
                 let optional = property.optional_token().is_some();
-                let Some(key) = self.lower_member_key(property.name()?, optional, statics)? else {
+                let readonly = property.readonly_token().is_some();
+                let Some(key) =
+                    self.lower_member_key(property.name()?, optional, readonly, statics)?
+                else {
                     return Ok(());
                 };
                 let ty = if let Some(annotation) = property.type_annotation() {
@@ -431,7 +440,8 @@ impl<'l, 'a> GlobalBuilder<'l, 'a> {
                 list.push_property(key, ty);
             }
             AnyTsTypeMember::TsGetterSignatureTypeMember(getter) => {
-                let Some(key) = self.lower_member_key(getter.name()?, false, statics)? else {
+                let Some(key) = self.lower_member_key(getter.name()?, false, false, statics)?
+                else {
                     return Ok(());
                 };
                 let ty = match getter.type_annotation() {
@@ -441,7 +451,8 @@ impl<'l, 'a> GlobalBuilder<'l, 'a> {
                 list.push_property(key, ty);
             }
             AnyTsTypeMember::TsSetterSignatureTypeMember(setter) => {
-                let Some(key) = self.lower_member_key(setter.name()?, false, statics)? else {
+                let Some(key) = self.lower_member_key(setter.name()?, false, false, statics)?
+                else {
                     return Ok(());
                 };
                 if list.contains(&key) {
@@ -460,7 +471,8 @@ impl<'l, 'a> GlobalBuilder<'l, 'a> {
             }
             AnyTsTypeMember::TsMethodSignatureTypeMember(method) => {
                 let optional = method.optional_token().is_some();
-                let Some(key) = self.lower_member_key(method.name()?, optional, statics)? else {
+                let Some(key) = self.lower_member_key(method.name()?, optional, false, statics)?
+                else {
                     return Ok(());
                 };
                 let return_type = match method.return_type_annotation() {
@@ -554,10 +566,14 @@ impl<'l, 'a> GlobalBuilder<'l, 'a> {
     }
 
     /// Returns `None` when a computed key can't be represented.
+    ///
+    /// `readonly` applies only to named instance members: static members and
+    /// computed keys don't record it.
     fn lower_member_key(
         &mut self,
         name: AnyJsObjectMemberName,
         optional: bool,
+        readonly: bool,
         statics: bool,
     ) -> Result<Option<MemberKey>> {
         let key = match name {
@@ -576,7 +592,7 @@ impl<'l, 'a> GlobalBuilder<'l, 'a> {
                 let kind = if statics {
                     LoweredMemberKind::NamedStatic
                 } else {
-                    LoweredMemberKind::Named { optional }
+                    LoweredMemberKind::Named { optional, readonly }
                 };
                 MemberKey {
                     name: lower_object_member_name(name)?,

@@ -888,14 +888,15 @@ pub fn may_narrow_by_instanceof(db: &dyn TypeDb, declared: InferredTypeData) -> 
 ///
 /// `ty` is returned unchanged in these cases:
 ///
-/// - A comparison of two members can't tell whether either is a subtype of
-///   the other, as for generics, classes that can declare private members,
-///   and literal types that TypeScript may widen. [`is_subtype`] describes
-///   these comparisons.
-/// - `ty` is a union with `unknown`.
-/// - Biome may reach two classes with the same contents as one.
-/// - `target` has `any` or an undetermined member.
-/// - The comparisons run out of their budget of 256 visited types and pairs.
+/// TypeScript's strict subtype relation decides which of two members that
+/// are subtypes of each other the true branch keeps, and it depends on
+/// modifiers that Biome doesn't compare, such as `readonly`. So the false
+/// branch keeps such a member unless it is the same type as the member of
+/// `target`: with `interface Same { a: number }` and the target `Foo`,
+/// `Same | Bar` keeps `Same` in both branches, where TypeScript removes it
+/// from the false branch. The false branch also keeps a member when Biome
+/// can tell only that a member of `target` is a subtype of it, and so does
+/// it keep `unknown`, and every member when the true branch is empty.
 ///
 /// `resolve` resolves handles as for [`narrow_type`].
 pub fn narrow_by_type_predicate<'db>(
@@ -1232,7 +1233,9 @@ fn member_property<'db>(
         return Some(MemberProperty::Primitive);
     }
     let (ty, is_optional) = match find_property(db, member, name, resolve) {
-        PropertyLookup::Found { ty, is_optional } => (ty, is_optional),
+        PropertyLookup::Found {
+            ty, is_optional, ..
+        } => (ty, is_optional),
         PropertyLookup::Missing => return Some(MemberProperty::Missing),
         PropertyLookup::Unknown => return Some(MemberProperty::Unknown),
     };
@@ -1805,8 +1808,9 @@ mod tests {
     use crate::interned_types::{
         InternedClass, InternedConstructor, InternedFunction, InternedGenericTypeParameter,
         InternedInterface, InternedIntersection, InternedObject, InternedTuple,
-        InternedTypeInstance, InternedTypeofType, InternedUnion, LocalTypeHandle, LocalTypeId,
-        ModuleKey, ReturnType, TupleElementType, TypeMember, TypeMemberKind,
+        InternedTypeInstance, InternedTypeOperatorType, InternedTypeofType, InternedUnion,
+        LocalTypeHandle, LocalTypeId, ModuleKey, ReturnType, TupleElementType, TypeMember,
+        TypeMemberKind,
     };
     use crate::literal::NumberLiteral;
     use salsa::plumbing::AsId;
@@ -3310,6 +3314,112 @@ mod tests {
                 "{name}"
             );
         }
+    }
+
+    /// Returns `is_optional` and `is_readonly` of the property `name` of `ty`,
+    /// or `None` when [`find_property`] doesn't find it.
+    fn property_modifiers<'db>(
+        db: &'db TestDb,
+        ty: InferredTypeData<'db>,
+        name: &str,
+    ) -> Option<(bool, bool)> {
+        match find_property(db, ty, name, &mut |ty| ty) {
+            PropertyLookup::Found {
+                is_optional,
+                is_readonly,
+                ..
+            } => Some((is_optional, is_readonly)),
+            PropertyLookup::Missing | PropertyLookup::Unknown => None,
+        }
+    }
+
+    #[test]
+    fn find_property_reports_readonly_properties() {
+        let db = &TestDb::default();
+        let number = InferredTypeData::Number;
+        let kinds = [
+            TypeMemberKind::ReadonlyNamed(Text::new_static("readonly")),
+            TypeMemberKind::ReadonlyNamedOptional(Text::new_static("readonlyOptional")),
+            TypeMemberKind::Named(Text::new_static("mutable")),
+            TypeMemberKind::NamedOptional(Text::new_static("mutableOptional")),
+            TypeMemberKind::ConstAssertedNamed(Text::new_static("constant")),
+            TypeMemberKind::ConstAssertedNamedOptional(Text::new_static("constantOptional")),
+            TypeMemberKind::Getter(Text::new_static("getter")),
+            TypeMemberKind::ConstAssertedGetter(Text::new_static("constantGetter")),
+        ];
+        let members = kinds
+            .into_iter()
+            .map(|kind| TypeMember {
+                ty: if matches!(
+                    kind,
+                    TypeMemberKind::Getter(_) | TypeMemberKind::ConstAssertedGetter(_)
+                ) {
+                    method(db, "get", number)
+                } else {
+                    number
+                },
+                kind,
+            })
+            .collect::<Vec<_>>();
+        let expected = [
+            ("readonly", Some((false, true))),
+            ("readonlyOptional", Some((true, true))),
+            ("mutable", Some((false, false))),
+            ("mutableOptional", Some((true, false))),
+            ("constant", Some((false, true))),
+            ("constantOptional", Some((true, true))),
+            // Biome doesn't collect setters, so a getter may have one.
+            ("getter", Some((false, false))),
+            ("constantGetter", Some((false, false))),
+            // A member of `Object`.
+            ("toString", Some((false, false))),
+            ("missing", None),
+        ];
+        let shapes = [
+            object(db, members.clone()),
+            interface(db, &[], members.clone()),
+            // Inherited members keep their modifiers.
+            interface(db, &[interface(db, &[], members.clone())], Vec::new()),
+            class_instance(db, members),
+        ];
+        for ty in shapes {
+            for (name, modifiers) in expected {
+                assert_eq!(property_modifiers(db, ty, name), modifiers, "{name}");
+            }
+        }
+    }
+
+    #[test]
+    fn find_property_reports_elements_of_readonly_tuples_as_readonly() {
+        let db = &TestDb::default();
+        let tuple = InferredTypeData::Tuple(InternedTuple::new(
+            db,
+            Box::from([
+                TupleElementType {
+                    ty: InferredTypeData::String,
+                    name: None,
+                    is_optional: false,
+                    is_rest: false,
+                },
+                TupleElementType {
+                    ty: InferredTypeData::Number,
+                    name: None,
+                    is_optional: true,
+                    is_rest: false,
+                },
+            ]),
+            false,
+        ));
+        let readonly = InferredTypeData::TypeOperator(InternedTypeOperatorType::new(
+            db,
+            tuple,
+            crate::TypeOperator::Readonly,
+        ));
+        assert_eq!(property_modifiers(db, tuple, "0"), Some((false, false)));
+        assert_eq!(property_modifiers(db, tuple, "1"), Some((true, false)));
+        assert_eq!(property_modifiers(db, readonly, "0"), Some((false, true)));
+        assert_eq!(property_modifiers(db, readonly, "1"), Some((true, true)));
+        assert_eq!(property_modifiers(db, readonly, "2"), None);
     }
 
     /// Narrows `ty` by `name in ty`, with a resolver that returns its input.

@@ -948,6 +948,31 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert_no_whole_module_inference(&db, &db.take_salsa_events());
 }
 
+// Biome records `readonly`, so two object types that differ only by it are
+// different types. Its subtype relation ignores `readonly`, so it can't tell
+// which of the two TypeScript's strict subtype relation prefers, and the
+// `else` branch keeps both members of each pair. A comment gives the type
+// that TypeScript 6.0.3 (`tsc --strict`) gives where it differs
+// (`narrowing-probes/m3-l8/identity.ts` L6 and L7).
+#[test]
+fn object_targets_that_differ_only_by_readonly_keep_both_members_in_the_else_branch() {
+    assert_reads(
+        r#"
+        declare function isFrozenA1(v: unknown): v is { readonly a: 1 };
+        function r1(x: { a: 1 } | Bar) { if (isFrozenA1(x)) /*r1*/x; else /*r1Else*/x; }
+        function r2(x: { readonly a: 1 } | Bar) { if (isA1(x)) /*r2*/x; else /*r2Else*/x; }
+        "#,
+        &[
+            ("r1", "x", &[r#"["a": number: 1]"#]),
+            // `Bar`
+            ("r1Else", "x", &["Bar", r#"["a": number: 1]"#]),
+            // `{ a: 1 }`
+            ("r2", "x", &[r#"[readonly "a": number: 1]"#]),
+            ("r2Else", "x", &["Bar", r#"[readonly "a": number: 1]"#]),
+        ],
+    );
+}
+
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 // A branch that no value reaches is `never` in TypeScript, which Biome reads
 // as Unknown.

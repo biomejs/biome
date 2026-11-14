@@ -495,6 +495,105 @@ fn test_normalize_mapped_types() {
     assert_function_query_was_not_run(&db, infer_module_types, module, &db.take_salsa_events());
 }
 
+/// Returns the name, whether it is optional, and whether it is readonly, of
+/// each named member of the object `ty`.
+fn readonly_member_summaries<'db>(
+    db: &'db TestModuleDb,
+    ty: InferredTypeData<'db>,
+) -> Vec<(String, bool, bool)> {
+    let InferredTypeData::Object(object) = ty else {
+        panic!("expected an object, got {}", format_inferred_type(db, ty));
+    };
+    object
+        .members(db)
+        .iter()
+        .filter_map(|member| {
+            let name = member.kind.name()?;
+            Some((
+                name.text().to_owned(),
+                member.kind.is_optional(),
+                member.kind.is_readonly(),
+            ))
+        })
+        .collect()
+}
+
+#[test]
+fn test_utility_and_mapped_types_record_readonly_properties() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        type Source = { readonly A: number; B?: string; readonly C?: boolean };
+        declare const frozen: Readonly<{ A: number; B?: string; method(): void }>;
+        declare const partial: Partial<Source>;
+        declare const required: Required<Source>;
+        declare const picked: Pick<Source, "A" | "B">;
+        declare const homomorphic: { [K in keyof Source]: Source[K] };
+        declare const added: { +readonly [K in keyof Source]: Source[K] };
+        declare const removed: { -readonly [K in keyof Source]: Source[K] };
+        declare const literalKeys: { readonly [K in "X" | "Y"]: number };
+        declare const plainLiteralKeys: { [K in "X"]: number };
+        const constant = { A: 1 } as const;
+        declare const constantMapped: { [K in keyof typeof constant]: number };
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    // Each entry is a member's name, whether it is optional, and whether it
+    // is readonly. Without a `readonly` modifier, a mapped type over
+    // `keyof T` keeps the readonly properties of `T`, including those of an
+    // object under an `as const` assertion.
+    for (name, expected) in [
+        (
+            "frozen",
+            &[
+                ("A", false, true),
+                ("B", true, true),
+                ("method", false, true),
+            ][..],
+        ),
+        (
+            "partial",
+            &[("A", true, true), ("B", true, false), ("C", true, true)],
+        ),
+        (
+            "required",
+            &[("A", false, true), ("B", false, false), ("C", false, true)],
+        ),
+        ("picked", &[("A", false, true), ("B", true, false)]),
+        (
+            "homomorphic",
+            &[("A", false, true), ("B", true, false), ("C", true, true)],
+        ),
+        (
+            "added",
+            &[("A", false, true), ("B", true, true), ("C", true, true)],
+        ),
+        (
+            "removed",
+            &[("A", false, false), ("B", true, false), ("C", true, false)],
+        ),
+        ("literalKeys", &[("X", false, true), ("Y", false, true)]),
+        ("plainLiteralKeys", &[("X", false, false)]),
+        ("constantMapped", &[("A", false, true)]),
+    ] {
+        let ty = projected_binding(&db, module, name);
+        let expected: Vec<_> = expected
+            .iter()
+            .map(|(member, is_optional, is_readonly)| {
+                ((*member).to_owned(), *is_optional, *is_readonly)
+            })
+            .collect();
+        assert_eq!(readonly_member_summaries(&db, ty), expected, "{name}");
+    }
+    assert_inferred_type_snapshot(
+        "test_utility_and_mapped_types_record_readonly_properties",
+        &db,
+        &fs,
+    );
+}
+
 #[test]
 fn test_mapped_type_alias_members_are_found_after_instantiation() {
     let fs = MemoryFileSystem::default();

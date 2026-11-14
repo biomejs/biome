@@ -251,9 +251,16 @@ pub(crate) fn primitive_can_satisfy<'db>(
 pub(crate) enum PropertyLookup<'db> {
     /// The property exists. `ty` is its type as a read sees it, with the
     /// type arguments of the object substituted but its handles unresolved.
+    /// `is_readonly` tells whether the property can't be assigned through
+    /// the object's type, as [`TypeMemberKind::is_readonly`] describes.
     Found {
         ty: TypeData<'db>,
         is_optional: bool,
+        #[cfg_attr(
+            not(test),
+            expect(dead_code, reason = "no narrowing reads readonly properties, only tests do")
+        )]
+        is_readonly: bool,
     },
     /// The type has no such property.
     Missing,
@@ -268,9 +275,15 @@ pub(crate) enum PropertyLookup<'db> {
 ///
 /// A tuple without rest elements has a property for each element, named by
 /// its index in decimal, such as `"0"`, which is optional when the element
-/// is. A tuple has no property for an index past its last element. Other
-/// names of tuple properties, such as `length`, give `Unknown`, and so do
-/// arrays, primitives, functions, and unresolved types.
+/// is, and readonly when the tuple is, as `readonly [string]` is. A tuple has
+/// no property for an index past its last element. Other names of tuple
+/// properties, such as `length`, give `Unknown`, and so do arrays,
+/// primitives, functions, and unresolved types.
+///
+/// A found property is readonly when it is declared `readonly`, when it
+/// belongs to an object under an `as const` assertion, or when a mapped type
+/// such as `Readonly<T>` makes it readonly. A getter is never readonly,
+/// because Biome doesn't collect setters.
 pub(crate) fn find_property<'db>(
     db: &'db dyn TypeDb,
     ty: TypeData<'db>,
@@ -278,27 +291,32 @@ pub(crate) fn find_property<'db>(
     resolve: &mut TypeResolver<'db, '_>,
 ) -> PropertyLookup<'db> {
     let mut check = AssignabilityCheck::new(db, resolve, &[]);
-    let (resolved, _) = strip_readonly(db, check.resolve(ty));
+    let (resolved, is_readonly) = strip_readonly(db, check.resolve(ty));
     if let TypeData::Tuple(tuple) = resolved {
-        return tuple_element(db, tuple, name);
+        return tuple_element(db, tuple, name, is_readonly);
     }
     match check.find_apparent_member(resolved, name) {
-        MemberLookup::Found { ty, is_optional } => PropertyLookup::Found { ty, is_optional },
+        MemberLookup::Found {
+            ty,
+            is_optional,
+            is_readonly,
+        } => PropertyLookup::Found {
+            ty,
+            is_optional,
+            is_readonly,
+        },
         MemberLookup::Missing => PropertyLookup::Missing,
         MemberLookup::Unknown => PropertyLookup::Unknown,
     }
 }
 
-/// Looks up the element of `tuple` at the decimal index `name`, returning
-/// `Missing` for an index past the last element.
-///
-/// Returns `Unknown` for a name that is not the canonical spelling of an
-/// index, for an inferred array, and when a rest element comes at or before
-/// the index.
+/// Returns the property `name` of `tuple`, as [`find_property`] describes,
+/// where `is_readonly` tells whether the tuple is readonly.
 fn tuple_element<'db>(
     db: &'db dyn TypeDb,
     tuple: InternedTuple<'db>,
     name: &str,
+    is_readonly: bool,
 ) -> PropertyLookup<'db> {
     // An inferred array, such as the type of `[1, 2]`, has no fixed length.
     if tuple.is_inferred_array(db) {
@@ -320,6 +338,7 @@ fn tuple_element<'db>(
             return PropertyLookup::Found {
                 ty: element.ty,
                 is_optional: element.is_optional,
+                is_readonly,
             };
         }
     }
@@ -896,6 +915,10 @@ enum MemberLookup<'db> {
     Found {
         ty: TypeData<'db>,
         is_optional: bool,
+        /// Whether the member is readonly, as [`TypeMemberKind::is_readonly`]
+        /// describes. Comparisons ignore it, as TypeScript's assignability
+        /// does.
+        is_readonly: bool,
     },
     Missing,
     Unknown,
@@ -1867,6 +1890,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 MemberLookup::Found {
                     ty: source_ty,
                     is_optional: source_is_optional,
+                    ..
                 } => {
                     may_share_member = true;
                     if source_is_optional && !target_is_optional {
@@ -2005,6 +2029,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 return MemberLookup::Found {
                     ty: member_type(self.db, member),
                     is_optional: member.kind.is_optional(),
+                    is_readonly: member.kind.is_readonly(),
                 };
             }
             // A member keyed by a well-known symbol, such as `[Symbol.iterator]`
@@ -2541,6 +2566,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 MemberLookup::Found {
                     ty: source_ty,
                     is_optional: source_is_optional,
+                    ..
                 } => found.push((
                     name,
                     source_ty,
@@ -2951,6 +2977,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 Some(ty) => MemberLookup::Found {
                     ty,
                     is_optional: member.kind.is_optional(),
+                    is_readonly: member.kind.is_readonly(),
                 },
                 None => MemberLookup::Unknown,
             };
@@ -3057,7 +3084,9 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 | TypeMemberKind::Named(own_name)
                 | TypeMemberKind::ConstAssertedNamed(own_name)
                 | TypeMemberKind::NamedOptional(own_name)
-                | TypeMemberKind::ConstAssertedNamedOptional(own_name) => {
+                | TypeMemberKind::ConstAssertedNamedOptional(own_name)
+                | TypeMemberKind::ReadonlyNamed(own_name)
+                | TypeMemberKind::ReadonlyNamedOptional(own_name) => {
                     if own_name.text() == name {
                         return if member.kind.is_optional() {
                             PropertyPresence::Optional

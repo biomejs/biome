@@ -386,6 +386,12 @@ impl Format<FormatTypeContext> for TypeMember {
 
 impl Format<FormatTypeContext> for TypeMemberKind {
     fn fmt(&self, formatter: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
+        if matches!(
+            self,
+            Self::ReadonlyNamed(_) | Self::ReadonlyNamedOptional(_)
+        ) {
+            write!(formatter, [token("readonly"), space()])?;
+        }
         match self {
             Self::CallSignature | Self::ConstAssertedCallSignature => {
                 write!(formatter, [token("()")])
@@ -419,11 +425,13 @@ impl Format<FormatTypeContext> for TypeMemberKind {
                     [token("computed"), space(), token("["), key_type, token("]")]
                 )
             }
-            Self::Named(name) | Self::ConstAssertedNamed(name) => {
+            Self::Named(name) | Self::ConstAssertedNamed(name) | Self::ReadonlyNamed(name) => {
                 let quoted = std::format!("\"{name}\"");
                 write!(formatter, [text(&quoted, None)])
             }
-            Self::NamedOptional(name) | Self::ConstAssertedNamedOptional(name) => {
+            Self::NamedOptional(name)
+            | Self::ConstAssertedNamedOptional(name)
+            | Self::ReadonlyNamedOptional(name) => {
                 let quoted = std::format!("\"{name}\"?");
                 write!(formatter, [text(&quoted, None)])
             }

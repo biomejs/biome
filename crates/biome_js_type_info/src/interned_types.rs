@@ -1499,7 +1499,9 @@ impl<'db> TypeDataSlots<'db> {
             | TypeMemberKind::Getter(_)
             | TypeMemberKind::Named(_)
             | TypeMemberKind::NamedOptional(_)
-            | TypeMemberKind::NamedStatic(_) => {}
+            | TypeMemberKind::NamedStatic(_)
+            | TypeMemberKind::ReadonlyNamed(_)
+            | TypeMemberKind::ReadonlyNamedOptional(_) => {}
         }
         self.slots.push(member.ty);
     }
@@ -1966,6 +1968,10 @@ impl<'db> TypeDataSlotReplacements<'db> {
             TypeMemberKind::Named(name) => TypeMemberKind::Named(name.clone()),
             TypeMemberKind::NamedOptional(name) => TypeMemberKind::NamedOptional(name.clone()),
             TypeMemberKind::NamedStatic(name) => TypeMemberKind::NamedStatic(name.clone()),
+            TypeMemberKind::ReadonlyNamed(name) => TypeMemberKind::ReadonlyNamed(name.clone()),
+            TypeMemberKind::ReadonlyNamedOptional(name) => {
+                TypeMemberKind::ReadonlyNamedOptional(name.clone())
+            }
         })
     }
 
@@ -2261,17 +2267,10 @@ impl TypeMember<'_> {
     /// `"1"`. Names that need escape handling are unsupported too; see
     /// [`requires_escape_handling`].
     pub(crate) fn projected_key(&self) -> ProjectedKey<'_> {
-        let name = match &self.kind {
-            TypeMemberKind::Named(name)
-            | TypeMemberKind::NamedOptional(name)
-            | TypeMemberKind::Getter(name)
-            | TypeMemberKind::ConstAssertedNamed(name)
-            | TypeMemberKind::ConstAssertedNamedOptional(name)
-            | TypeMemberKind::ConstAssertedGetter(name) => name,
-            TypeMemberKind::CallSignature | TypeMemberKind::ConstAssertedCallSignature => {
-                return ProjectedKey::NoKey;
-            }
-            _ => return ProjectedKey::Unsupported,
+        let name = match self.kind.property_name() {
+            Some(name) => name,
+            None if self.kind.is_call_signature() => return ProjectedKey::NoKey,
+            None => return ProjectedKey::Unsupported,
         };
         if requires_escape_handling(name.text())
             || name
@@ -2319,6 +2318,10 @@ pub enum TypeMemberKind<'db> {
     Named(Text),
     NamedOptional(Text),
     NamedStatic(Text),
+    /// See [`crate::TypeMemberKind::ReadonlyNamed`].
+    ReadonlyNamed(Text),
+    /// See [`crate::TypeMemberKind::ReadonlyNamedOptional`].
+    ReadonlyNamedOptional(Text),
 }
 
 impl<'db> TypeMemberKind<'db> {
@@ -2336,7 +2339,9 @@ impl<'db> TypeMemberKind<'db> {
             | Self::NamedOptional(own_name)
             | Self::ConstAssertedNamedOptional(own_name)
             | Self::NamedStatic(own_name)
-            | Self::ConstAssertedNamedStatic(own_name) => own_name.text() == name,
+            | Self::ConstAssertedNamedStatic(own_name)
+            | Self::ReadonlyNamed(own_name)
+            | Self::ReadonlyNamedOptional(own_name) => own_name.text() == name,
             Self::CallSignature
             | Self::ComputedValue(_)
             | Self::ComputedStatic(_)
@@ -2376,7 +2381,27 @@ impl<'db> TypeMemberKind<'db> {
     pub fn is_optional(&self) -> bool {
         matches!(
             self,
-            Self::NamedOptional(_) | Self::ConstAssertedNamedOptional(_)
+            Self::NamedOptional(_)
+                | Self::ConstAssertedNamedOptional(_)
+                | Self::ReadonlyNamedOptional(_)
+        )
+    }
+
+    /// Returns whether this member is a property that can't be assigned
+    /// through its type, as [`crate::TypeMemberKind::is_readonly`] describes.
+    pub fn is_readonly(&self) -> bool {
+        matches!(
+            self,
+            Self::ReadonlyNamed(_)
+                | Self::ReadonlyNamedOptional(_)
+                | Self::ConstAssertedComputedValue(_)
+                | Self::ConstAssertedComputedStatic(_)
+                | Self::ConstAssertedComputedValueNamed(_, _)
+                | Self::ConstAssertedComputedStaticNamed(_, _)
+                | Self::ConstAssertedIndexSignature(_)
+                | Self::ConstAssertedNamed(_)
+                | Self::ConstAssertedNamedOptional(_)
+                | Self::ConstAssertedNamedStatic(_)
         )
     }
 
@@ -2401,6 +2426,7 @@ impl<'db> TypeMemberKind<'db> {
         match self {
             Self::Named(name) => Self::NamedOptional(name),
             Self::ConstAssertedNamed(name) => Self::ConstAssertedNamedOptional(name),
+            Self::ReadonlyNamed(name) => Self::ReadonlyNamedOptional(name),
             other => other,
         }
     }
@@ -2409,6 +2435,17 @@ impl<'db> TypeMemberKind<'db> {
         match self {
             Self::NamedOptional(name) => Self::Named(name),
             Self::ConstAssertedNamedOptional(name) => Self::ConstAssertedNamed(name),
+            Self::ReadonlyNamedOptional(name) => Self::ReadonlyNamed(name),
+            other => other,
+        }
+    }
+
+    /// Marks a named instance property as readonly, as
+    /// [`crate::TypeMemberKind::with_readonly`] does.
+    pub fn with_readonly(self) -> Self {
+        match self {
+            Self::Named(name) => Self::ReadonlyNamed(name),
+            Self::NamedOptional(name) => Self::ReadonlyNamedOptional(name),
             other => other,
         }
     }
@@ -2441,7 +2478,44 @@ impl<'db> TypeMemberKind<'db> {
             | Self::ComputedStaticNamed(name, _)
             | Self::Named(name)
             | Self::NamedOptional(name)
-            | Self::NamedStatic(name) => Some(name.clone()),
+            | Self::NamedStatic(name)
+            | Self::ReadonlyNamed(name)
+            | Self::ReadonlyNamedOptional(name) => Some(name.clone()),
+        }
+    }
+
+    /// Returns the name of an instance property or getter, the members that
+    /// `keyof` lists and that `"name" in value` tests, whether they are
+    /// optional, readonly, or from an `as const` object.
+    ///
+    /// Static members, constructors, signatures, and members with computed
+    /// keys return `None`, even when they have a name.
+    pub fn property_name(&self) -> Option<&Text> {
+        match self {
+            Self::Getter(name)
+            | Self::ConstAssertedGetter(name)
+            | Self::Named(name)
+            | Self::ConstAssertedNamed(name)
+            | Self::NamedOptional(name)
+            | Self::ConstAssertedNamedOptional(name)
+            | Self::ReadonlyNamed(name)
+            | Self::ReadonlyNamedOptional(name) => Some(name),
+            Self::CallSignature
+            | Self::ComputedValue(_)
+            | Self::ComputedStatic(_)
+            | Self::ComputedValueNamed(_, _)
+            | Self::ComputedStaticNamed(_, _)
+            | Self::ConstAssertedCallSignature
+            | Self::ConstAssertedComputedValue(_)
+            | Self::ConstAssertedComputedStatic(_)
+            | Self::ConstAssertedComputedValueNamed(_, _)
+            | Self::ConstAssertedComputedStaticNamed(_, _)
+            | Self::ConstAssertedConstructor
+            | Self::ConstAssertedIndexSignature(_)
+            | Self::ConstAssertedNamedStatic(_)
+            | Self::Constructor
+            | Self::IndexSignature(_)
+            | Self::NamedStatic(_) => None,
         }
     }
 
@@ -2882,7 +2956,13 @@ impl<'db> InternedIndexedAccessType<'db> {
         };
         members
             .iter()
-            .map(|member| matches!(member.kind, TypeMemberKind::Named(_)).then_some(member.ty))
+            .map(|member| {
+                matches!(
+                    member.kind,
+                    TypeMemberKind::Named(_) | TypeMemberKind::ReadonlyNamed(_)
+                )
+                .then_some(member.ty)
+            })
             .collect()
     }
 }
@@ -3047,6 +3127,10 @@ fn convert_type_member_kind<'db>(
         raw::TypeMemberKind::Named(name) => TypeMemberKind::Named(name.clone()),
         raw::TypeMemberKind::NamedOptional(name) => TypeMemberKind::NamedOptional(name.clone()),
         raw::TypeMemberKind::NamedStatic(name) => TypeMemberKind::NamedStatic(name.clone()),
+        raw::TypeMemberKind::ReadonlyNamed(name) => TypeMemberKind::ReadonlyNamed(name.clone()),
+        raw::TypeMemberKind::ReadonlyNamedOptional(name) => {
+            TypeMemberKind::ReadonlyNamedOptional(name.clone())
+        }
     }
 }
 

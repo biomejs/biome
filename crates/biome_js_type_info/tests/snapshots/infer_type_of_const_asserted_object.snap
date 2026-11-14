@@ -1,0 +1,57 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+({
+	value: "a",
+	nested: { flag: true },
+	get size() {
+		return 1;
+	},
+}) as const;
+
+```
+
+## Result
+
+```
+Object {
+  prototype: No prototype
+  members: [
+    "value": Local TypeId(0),
+    "nested": Local TypeId(5),
+    get "size": Local TypeId(4)
+  ]
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => string: a
+
+Module TypeId(1) => bool: true
+
+Module TypeId(2) => Object {
+  prototype: No prototype
+  members: ["flag": Local TypeId(1)]
+}
+
+Module TypeId(3) => number: 1
+
+Module TypeId(4) => sync Function "size" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Local TypeId(3)
+}
+
+Module TypeId(5) => Object {
+  prototype: No prototype
+  members: ["flag": Local TypeId(1)]
+}
+```
