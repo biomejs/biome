@@ -48,7 +48,3 @@ NotChildren.forEach(bar);
 
 const CB = [];
 CB.forEach((element) => console.log(element));
-
-function shadowed(Map) {
-	new Map().forEach((value) => console.log(value));
-}

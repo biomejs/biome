@@ -1,15 +1,14 @@
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsStatement, JsArrowFunctionExpression, JsCallExpression,
-    JsClassExpression, JsComputedMemberExpression, JsExpressionStatement, JsFunctionExpression,
-    JsLanguage, JsObjectExpression, JsParenthesizedExpression, JsReturnStatement, JsStatementList,
-    JsStaticMemberExpression, JsSyntaxKind, JsSyntaxToken, JsUnaryExpression, T, TsAsExpression,
-    TsNonNullAssertionExpression, TsSatisfiesExpression, TsTypeAssertionExpression,
+    AnyJsExpression, AnyJsStatement, JsCallExpression, JsComputedMemberExpression,
+    JsExpressionStatement, JsLanguage, JsParenthesizedExpression, JsReturnStatement,
+    JsStatementList, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxToken, JsUnaryExpression, T,
+    TsAsExpression, TsNonNullAssertionExpression, TsSatisfiesExpression, TsTypeAssertionExpression,
 };
 use biome_parser::{TokenSet, token_set};
 use biome_rowan::{
@@ -18,7 +17,10 @@ use biome_rowan::{
 };
 use biome_rule_options::no_return_array_push::NoReturnArrayPushOptions;
 
-use crate::JsRuleAction;
+use crate::{
+    JsRuleAction, services::semantic::Semantic,
+    utils::indexed_collection::is_known_non_indexed_collection,
+};
 
 declare_lint_rule! {
     /// Disallow using the return value of `Array.prototype.push()` and `Array.prototype.unshift()`.
@@ -39,9 +41,10 @@ declare_lint_rule! {
     /// The rule also ignores `push()` calls on objects that are commonly not arrays:
     /// `stream`, `router`, `this`, `this.stream`, `this.router`, `this.$router`,
     /// `process.stdin`, `process.stdout`, and `process.stderr`.
-    /// It ignores `push()` and `unshift()` calls on values that are written in a way that shows they
-    /// aren't arrays: objects (`{}`), functions, classes, template strings, and `new` expressions
-    /// other than `new Array()`.
+    /// It ignores `push()` and `unshift()` calls on values that are known not to be arrays:
+    /// literals such as strings, objects (`{}`), functions, classes, template strings,
+    /// `new` expressions other than `new Array()` and typed arrays such as `new Uint8Array()`,
+    /// and variables whose type annotation or `const` value is one of those, such as a `Map` or a `Set`.
     ///
     /// ## Examples
     ///
@@ -104,7 +107,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoReturnArrayPush {
-    type Query = Ast<JsCallExpression>;
+    type Query = Semantic<JsCallExpression>;
     /// The outermost expression around the call that has the same value:
     /// the call itself, or the parentheses and TypeScript type assertions that wrap it.
     type State = AnyJsExpression;
@@ -123,7 +126,7 @@ impl Rule for NoReturnArrayPush {
         if method == "push" && is_ignored_push_receiver(&member.object().ok()?) {
             return None;
         }
-        if is_known_non_array(&member.object().ok()?.omit_parentheses()) {
+        if is_known_non_indexed_collection(&member.object().ok()?, ctx.model()) {
             return None;
         }
 
@@ -238,12 +241,6 @@ const VALUE_PRESERVING_WRAPPERS: SyntaxKindSet<JsLanguage> = JsParenthesizedExpr
     .union(TsNonNullAssertionExpression::KIND_SET)
     .union(TsTypeAssertionExpression::KIND_SET);
 
-/// Receivers whose syntax shows that they aren't arrays.
-const NON_ARRAY_RECEIVERS: SyntaxKindSet<JsLanguage> = JsArrowFunctionExpression::KIND_SET
-    .union(JsClassExpression::KIND_SET)
-    .union(JsFunctionExpression::KIND_SET)
-    .union(JsObjectExpression::KIND_SET);
-
 /// Tokens that can't start an expression statement without changing how the code is parsed.
 const UNSAFE_STATEMENT_STARTS: TokenSet<JsSyntaxKind> = token_set![
     T!['('],
@@ -304,33 +301,6 @@ fn is_ignored_push_receiver(receiver: &AnyJsExpression) -> bool {
         }
         _ => false,
     }
-}
-
-/// Returns `true` if the syntax of `receiver` shows that it isn't an array,
-/// such as an object literal or `new Foo()`.
-fn is_known_non_array(receiver: &AnyJsExpression) -> bool {
-    if NON_ARRAY_RECEIVERS.matches(receiver.syntax().kind()) {
-        return true;
-    }
-    let new_expression = match receiver {
-        // A tagged template can return anything, but a plain template is always a string.
-        AnyJsExpression::JsTemplateExpression(template) => return template.tag().is_none(),
-        AnyJsExpression::JsNewExpression(new_expression) => new_expression,
-        _ => return false,
-    };
-    // `new Array()` creates an array.
-    !new_expression
-        .callee()
-        .ok()
-        .and_then(|callee| {
-            callee
-                .omit_parentheses()
-                .as_js_identifier_expression()?
-                .name()
-                .ok()
-        })
-        .and_then(|name| name.value_token().ok())
-        .is_some_and(|name| name.text_trimmed() == "Array")
 }
 
 /// Returns `true` if the parent of `expression` reads a property of it, as in `expression.foo` or `expression[0]`.

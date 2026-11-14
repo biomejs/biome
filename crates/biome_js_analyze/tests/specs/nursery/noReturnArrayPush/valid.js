@@ -100,3 +100,6 @@ const f31 = () => ({}).push(value);
 const f32 = () => new Stack().push(value);
 const f33 = () => `${a}`.push(value);
 const f34 = () => (function () {}).unshift(value);
+const set = new Set();
+const f35 = () => set.push(value);
+const f36 = () => "text".push(value);

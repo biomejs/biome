@@ -9,3 +9,5 @@ const onClick = () => router.push(`/${region}/customers/${String(result.data)}` 
 function f1() {
 	return (array.push(value) as Foo).bar;
 }
+const f2 = (map: Map<string, string>) => map.push(value);
+const f3 = () => ({} as Stack).push(value);

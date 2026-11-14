@@ -4,22 +4,20 @@ use biome_diagnostics::Severity;
 use biome_js_semantic::{Binding, ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyJsClass, AnyJsExpression, AnyJsFunction, AnyJsIdentifierReference, AnyJsLiteralExpression,
-    AnyTsType, AnyTsVariableAnnotation, JsArrowFunctionExpression, JsAssignmentOperator,
-    JsBinaryOperator, JsBlockStatement, JsCallExpression, JsClassExpression,
-    JsComputedMemberExpression, JsForStatement, JsFormalParameter, JsFunctionExpression,
-    JsGetterObjectMember, JsIdentifierBinding, JsIdentifierExpression, JsLanguage,
-    JsLogicalOperator, JsMethodObjectMember, JsObjectExpression, JsParenthesizedExpression,
+    AnyTsType, JsAssignmentOperator, JsBinaryOperator, JsBlockStatement, JsCallExpression,
+    JsComputedMemberExpression, JsForStatement, JsGetterObjectMember, JsIdentifierExpression,
+    JsLanguage, JsLogicalOperator, JsMethodObjectMember, JsParenthesizedExpression,
     JsPostUpdateOperator, JsPreUpdateOperator, JsReferenceIdentifier, JsSetterObjectMember,
     JsSyntaxToken, JsTemplateExpression, JsUnaryExpression, JsUnaryOperator, JsVariableDeclarator,
-    JsVariableStatement, T, TsBigintLiteralType, TsBigintType, TsBooleanLiteralType, TsBooleanType,
-    TsConstructorType, TsFunctionType, TsNeverType, TsNullLiteralType, TsNumberLiteralType,
-    TsNumberType, TsObjectType, TsStringLiteralType, TsStringType, TsSymbolType,
-    TsTemplateLiteralType, TsUndefinedType, TsVoidType, global_identifier,
+    JsVariableStatement, T, global_identifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxKindSet, TextRange};
 use biome_rule_options::use_iterator_zip::UseIteratorZipOptions;
 
-use crate::services::semantic::Semantic;
+use crate::{
+    services::semantic::Semantic,
+    utils::indexed_collection::{binding_type_annotation, is_known_non_indexed_collection_binding},
+};
 
 declare_lint_rule! {
     /// Prefer `Iterator.zip()` over reading several arrays with the same index.
@@ -163,7 +161,7 @@ impl Rule for UseIteratorZip {
             }
             let binding = model.binding(&array);
             if binding.as_ref().is_some_and(|binding| {
-                is_declared_in(binding, body) || is_known_non_indexed(binding)
+                is_declared_in(binding, body) || is_known_non_zippable(binding, model)
             }) {
                 return None;
             }
@@ -252,63 +250,6 @@ const CAPTURING_KINDS: SyntaxKindSet<JsLanguage> = AnyJsFunction::KIND_SET
 /// Expressions that call their operand instead of reading its value.
 const CALLING_KINDS: SyntaxKindSet<JsLanguage> =
     JsCallExpression::KIND_SET.union(JsTemplateExpression::KIND_SET);
-
-/// Type annotations for values that are neither arrays nor typed arrays.
-const NON_INDEXED_TYPE_KINDS: SyntaxKindSet<JsLanguage> = TsStringType::KIND_SET
-    .union(TsNumberType::KIND_SET)
-    .union(TsBooleanType::KIND_SET)
-    .union(TsBigintType::KIND_SET)
-    .union(TsSymbolType::KIND_SET)
-    .union(TsNeverType::KIND_SET)
-    .union(TsVoidType::KIND_SET)
-    .union(TsUndefinedType::KIND_SET)
-    .union(TsNullLiteralType::KIND_SET)
-    .union(TsStringLiteralType::KIND_SET)
-    .union(TsNumberLiteralType::KIND_SET)
-    .union(TsBooleanLiteralType::KIND_SET)
-    .union(TsBigintLiteralType::KIND_SET)
-    .union(TsTemplateLiteralType::KIND_SET)
-    .union(TsObjectType::KIND_SET)
-    .union(TsFunctionType::KIND_SET)
-    .union(TsConstructorType::KIND_SET);
-
-/// Expressions whose value is neither an array nor a typed array.
-const NON_INDEXED_VALUE_KINDS: SyntaxKindSet<JsLanguage> = AnyJsLiteralExpression::KIND_SET
-    .union(JsObjectExpression::KIND_SET)
-    .union(JsFunctionExpression::KIND_SET)
-    .union(JsArrowFunctionExpression::KIND_SET)
-    .union(JsClassExpression::KIND_SET);
-
-/// Built-in collection types that can't be read with `collection[index]`.
-///
-/// Sorted for binary search.
-const NON_INDEXED_COLLECTION_TYPES: &[&str] = &[
-    "Map",
-    "ReadonlyMap",
-    "ReadonlySet",
-    "Set",
-    "WeakMap",
-    "WeakSet",
-];
-
-/// Constructors that create an array or a typed array.
-///
-/// Sorted for binary search.
-const INDEXED_COLLECTION_CONSTRUCTORS: &[&str] = &[
-    "Array",
-    "BigInt64Array",
-    "BigUint64Array",
-    "Float16Array",
-    "Float32Array",
-    "Float64Array",
-    "Int16Array",
-    "Int32Array",
-    "Int8Array",
-    "Uint16Array",
-    "Uint32Array",
-    "Uint8Array",
-    "Uint8ClampedArray",
-];
 
 /// Returns `true` if `expression` is the number literal `value`.
 fn is_number(expression: &AnyJsExpression, value: f64) -> bool {
@@ -639,104 +580,15 @@ fn is_declared_in(binding: &Binding, body: &JsBlockStatement) -> bool {
         .contains_range(binding.syntax().text_trimmed_range())
 }
 
-/// Returns `true` if the variable declared by `binding` is known to hold something other
-/// than an array or a typed array.
+/// Returns `true` if the variable declared by `binding` is known to hold something that
+/// `Iterator.zip()` doesn't accept, or may not accept.
 ///
-/// Only the type annotation of the variable and the initializer of a `const` are inspected,
-/// so `false` doesn't prove that the variable holds an array.
-fn is_known_non_indexed(binding: &Binding) -> bool {
-    let Some(parent) =
-        JsIdentifierBinding::cast(binding.syntax()).and_then(|id| id.syntax().parent())
-    else {
-        return false;
-    };
-
-    if let Some(parameter) = JsFormalParameter::cast_ref(&parent) {
-        return parameter
-            .type_annotation()
-            .and_then(|annotation| annotation.ty().ok())
-            .is_some_and(|ty| is_non_indexed_type(&ty));
-    }
-
-    let Some(declarator) = JsVariableDeclarator::cast(parent) else {
-        return false;
-    };
-    if let Some(AnyTsVariableAnnotation::TsTypeAnnotation(annotation)) =
-        declarator.variable_annotation()
-        && annotation.ty().is_ok_and(|ty| is_non_indexed_type(&ty))
-    {
+/// Besides values that aren't arrays or typed arrays, this includes variables with an object type
+/// annotation such as `{ length: number }`, which also matches objects that can't be looped over.
+fn is_known_non_zippable(binding: &Binding, model: &SemanticModel) -> bool {
+    if is_known_non_indexed_collection_binding(binding, model) {
         return true;
     }
-
-    declarator
-        .declaration()
-        .is_some_and(|declaration| declaration.is_const())
-        && declarator
-            .initializer()
-            .and_then(|initializer| initializer.expression().ok())
-            .is_some_and(is_non_indexed_value)
-}
-
-/// Returns `true` if a value of type `ty` is neither an array nor a typed array.
-fn is_non_indexed_type(ty: &AnyTsType) -> bool {
-    if NON_INDEXED_TYPE_KINDS.matches(ty.syntax().kind()) {
-        return true;
-    }
-
-    ty.as_ts_reference_type()
-        .and_then(|reference| reference.name().ok())
-        .and_then(|name| name.as_js_reference_identifier()?.value_token().ok())
-        .is_some_and(|name| {
-            NON_INDEXED_COLLECTION_TYPES
-                .binary_search(&name.text_trimmed())
-                .is_ok()
-        })
-}
-
-/// Returns `true` if `value` creates something other than an array or a typed array.
-fn is_non_indexed_value(value: AnyJsExpression) -> bool {
-    let value = value.omit_parentheses();
-    if NON_INDEXED_VALUE_KINDS.matches(value.syntax().kind()) {
-        return true;
-    }
-
-    match value {
-        AnyJsExpression::JsTemplateExpression(template) => template.tag().is_none(),
-        AnyJsExpression::JsNewExpression(new) => !new
-            .callee()
-            .ok()
-            .map(AnyJsExpression::omit_parentheses)
-            .as_ref()
-            .and_then(|callee| callee.as_js_identifier_expression())
-            .and_then(|callee| callee.name().ok())
-            .and_then(|callee| callee.value_token().ok())
-            .is_some_and(|callee| {
-                INDEXED_COLLECTION_CONSTRUCTORS
-                    .binary_search(&callee.text_trimmed())
-                    .is_ok()
-            }),
-        _ => false,
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{INDEXED_COLLECTION_CONSTRUCTORS, NON_INDEXED_COLLECTION_TYPES};
-
-    #[test]
-    fn name_lists_are_sorted() {
-        for names in [
-            NON_INDEXED_COLLECTION_TYPES,
-            INDEXED_COLLECTION_CONSTRUCTORS,
-        ] {
-            for pair in names.windows(2) {
-                assert!(
-                    pair[0] < pair[1],
-                    "{} must come before {}",
-                    pair[1],
-                    pair[0]
-                );
-            }
-        }
-    }
+    binding_type_annotation(binding)
+        .is_some_and(|annotation| matches!(annotation.ty(), Ok(AnyTsType::TsObjectType(_))))
 }

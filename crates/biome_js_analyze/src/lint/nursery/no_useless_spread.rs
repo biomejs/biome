@@ -20,7 +20,10 @@ use biome_rowan::{
 };
 use biome_rule_options::no_useless_spread::NoUselessSpreadOptions;
 
-use crate::{JsRuleAction, services::semantic::Semantic};
+use crate::{
+    JsRuleAction, services::semantic::Semantic,
+    utils::indexed_collection::TYPED_ARRAY_CONSTRUCTORS,
+};
 
 declare_lint_rule! {
     /// Disallow spread syntax that has no effect.
@@ -363,7 +366,7 @@ impl IterableConsumer {
             "Promise" => matches!(method.text_trimmed(), "all" | "allSettled" | "any" | "race"),
             "Object" => method.text_trimmed() == "fromEntries",
             "Array" => method.text_trimmed() == "from",
-            name => method.text_trimmed() == "from" && TYPED_ARRAYS.binary_search(&name).is_ok(),
+            name => method.text_trimmed() == "from" && TYPED_ARRAY_CONSTRUCTORS.binary_search(&name).is_ok(),
         };
         accepts_iterable.then_some(Self::Function(call.callee().ok()?))
     }
@@ -420,22 +423,6 @@ impl biome_console::fmt::Display for TrimmedText<'_> {
         Ok(())
     }
 }
-
-/// Built-in constructors of typed arrays. Sorted for binary search.
-const TYPED_ARRAYS: &[&str] = &[
-    "BigInt64Array",
-    "BigUint64Array",
-    "Float16Array",
-    "Float32Array",
-    "Float64Array",
-    "Int16Array",
-    "Int32Array",
-    "Int8Array",
-    "Uint16Array",
-    "Uint32Array",
-    "Uint8Array",
-    "Uint8ClampedArray",
-];
 
 /// Array methods that return a new array. Sorted for binary search.
 const ARRAY_COPY_METHODS: &[&str] = &[
@@ -1016,16 +1003,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn name_lists_are_sorted() {
-        for names in [TYPED_ARRAYS, ARRAY_COPY_METHODS] {
-            for pair in names.windows(2) {
-                assert!(
-                    pair[0].cmp(pair[1]).is_lt(),
-                    "{} must come before {}",
-                    pair[1],
-                    pair[0]
-                );
-            }
+    fn array_copy_methods_are_sorted() {
+        for pair in ARRAY_COPY_METHODS.windows(2) {
+            assert!(
+                pair[0].cmp(pair[1]).is_lt(),
+                "{} must come before {}",
+                pair[1],
+                pair[0]
+            );
         }
     }
 }
