@@ -2,6 +2,7 @@ use crate::services::semantic::Semantic;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_js_semantic::JsDeclarationKind;
 use biome_js_syntax::{TsInterfaceDeclaration, binding_ext::AnyJsBindingDeclaration};
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_unsafe_declaration_merging::NoUnsafeDeclarationMergingOptions;
@@ -68,8 +69,15 @@ impl Rule for NoUnsafeDeclarationMerging {
             .ok()?;
         let scope = model.scope(ts_interface.syntax()).parent()?;
         for binding in scope.bindings() {
+            // Only a class declaration can be reported. The model records the
+            // binding of every class declaration as a class, except one
+            // without a name token, which the check below rejects anyway.
+            // Other bindings are skipped without locating their node.
+            if binding.declaration_kind() != JsDeclarationKind::Class {
+                continue;
+            }
             if let Some(AnyJsBindingDeclaration::JsClassDeclaration(class)) =
-                binding.tree().declaration()
+                binding.tree_near(ts_interface.syntax()).declaration()
             {
                 // This is not unsafe of merging an interface and an ambient class.
                 if !class.is_ambient()
