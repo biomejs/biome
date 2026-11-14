@@ -316,6 +316,93 @@ fn tuple_element<'db>(
     PropertyLookup::Missing
 }
 
+/// Whether the values of a type have a property, as [`property_presence`]
+/// decides it for the `in` operator.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum PropertyPresence {
+    /// The type declares the property, so every value has it.
+    Required,
+    /// The type declares the property as optional.
+    Optional,
+    /// The type declares no such property, but one of its index signatures
+    /// accepts the name, as `[key: string]: number` accepts `"a"`.
+    Indexed,
+    /// No value has the property, because TypeScript treats an object type
+    /// as closed: a value has no property that its type doesn't declare.
+    Missing,
+    /// The available type information can't tell.
+    Unknown,
+}
+
+/// Returns whether the values of the normalized type `ty`, which is not a
+/// union, have the property `name`, as TypeScript's `isTypePresencePossible`
+/// decides it for `name in value`.
+///
+/// The property is looked up with inheritance and then on `Object`, as a
+/// property access reads it. An index signature counts only when no type
+/// declares the property, and a numeric index signature accepts only a name
+/// that is a decimal integer.
+///
+/// [`PropertyPresence::Missing`] requires a member list that Biome knows to
+/// be complete, so these types give [`PropertyPresence::Unknown`] instead:
+///
+/// - an instance of a class, because Biome doesn't collect the setters and
+///   index signatures of classes;
+/// - a built-in class or interface, such as `Array` or `Error`, because
+///   Biome's built-in types come from the ES2015 library files, which lack
+///   members that newer ones add, such as `at` of arrays or `cause` of
+///   errors;
+/// - a type with a call or construct signature, whose values also have the
+///   members of `Function`;
+/// - an object type with a member that Biome doesn't collect, such as a
+///   setter or a spread, or with a computed key that Biome can't name;
+/// - a type with a member whose name may spell `name` differently, because
+///   Biome keeps names as written: a name with an escape, as `"\u0061"`
+///   spells `a`, or a number other than a decimal integer, as `1.0` spells
+///   `1`.
+///
+/// `null` and `undefined` are missing every property. Primitives, functions,
+/// tuples, arrays, intersections, generics, and unresolved types give
+/// [`PropertyPresence::Unknown`].
+pub(crate) fn property_presence<'db>(
+    db: &'db dyn TypeDb,
+    ty: TypeData<'db>,
+    name: &str,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> PropertyPresence {
+    let mut check = AssignabilityCheck::new(db, resolve, &[]);
+    if matches!(check.resolve(ty), TypeData::Null | TypeData::Undefined) {
+        return PropertyPresence::Missing;
+    }
+    match check.declared_presence(ty, name, 0, &mut FxHashSet::default()) {
+        presence @ (PropertyPresence::Missing | PropertyPresence::Indexed) => {
+            let object = TypeData::instance_of(
+                db,
+                TypeData::GlobalType(OBJECT_ID_GLOBAL_TYPE_ID),
+                Box::default(),
+            );
+            match check.find_member(object, name, 0, &mut FxHashSet::default()) {
+                MemberLookup::Found { .. } => PropertyPresence::Required,
+                MemberLookup::Missing => presence,
+                MemberLookup::Unknown => PropertyPresence::Unknown,
+            }
+        }
+        presence => presence,
+    }
+}
+
+/// Returns whether `name` is a decimal integer from `0` to 2^53 - 1 without
+/// leading zeros, the spelling that such a number has as a property name.
+fn is_decimal_integer_name(name: &str) -> bool {
+    const MAX_SAFE_INTEGER: u64 = (1 << 53) - 1;
+    !name.is_empty()
+        && name.bytes().all(|byte| byte.is_ascii_digit())
+        && (name == "0" || !name.starts_with('0'))
+        && name
+            .parse::<u64>()
+            .is_ok_and(|value| value <= MAX_SAFE_INTEGER)
+}
+
 /// Resolves the handles of the normalized type `ty` and removes the wrappers
 /// that don't change its values, such as an alias without type arguments or
 /// a `typeof` type, as assignability checks do before comparing types.
@@ -2542,6 +2629,136 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             }
         }
         result
+    }
+
+    /// Returns whether `ty` or a type it inherits from declares the property
+    /// `name`, or has an index signature that accepts it, without looking at
+    /// `Object`, as [`property_presence`] describes.
+    ///
+    /// `depth` and `visited` limit the walk as for [`Self::find_member`].
+    fn declared_presence(
+        &mut self,
+        ty: TypeData<'db>,
+        name: &str,
+        depth: usize,
+        visited: &mut FxHashSet<TypeData<'db>>,
+    ) -> PropertyPresence {
+        if depth > MAX_MEMBER_LOOKUP_DEPTH {
+            return PropertyPresence::Unknown;
+        }
+        let ty = self.resolve(ty);
+        if !visited.insert(ty) {
+            return PropertyPresence::Missing;
+        }
+        let (target, is_instance) = match ty {
+            TypeData::InstanceOf(instance) => (self.resolve(instance.ty(self.db)), true),
+            ty => (ty, false),
+        };
+        // Resolution keeps built-in classes and interfaces as handles.
+        let is_builtin = matches!(target, TypeData::GlobalType(_));
+        let (members, parents, is_class, mut is_complete) =
+            match target.expand_canonical_global(self.db) {
+                TypeData::Object(object) => (
+                    object.members(self.db).as_ref(),
+                    object.prototype(self.db).into_iter().collect::<Vec<_>>(),
+                    false,
+                    !object.has_unknown_members(self.db),
+                ),
+                TypeData::Literal(literal) => match literal.literal(self.db) {
+                    Literal::Object(members) => (members.as_ref(), Vec::new(), false, true),
+                    _ => return PropertyPresence::Unknown,
+                },
+                TypeData::Interface(interface) => (
+                    interface.members(self.db).as_ref(),
+                    interface.extends(self.db).to_vec(),
+                    false,
+                    !is_builtin,
+                ),
+                TypeData::Class(class) if is_instance => (
+                    class.members(self.db).as_ref(),
+                    class.extends(self.db).into_iter().collect(),
+                    true,
+                    false,
+                ),
+                _ => return PropertyPresence::Unknown,
+            };
+        let mut is_indexed = false;
+        for member in members {
+            match &member.kind {
+                TypeMemberKind::Getter(own_name)
+                | TypeMemberKind::ConstAssertedGetter(own_name)
+                | TypeMemberKind::Named(own_name)
+                | TypeMemberKind::ConstAssertedNamed(own_name)
+                | TypeMemberKind::NamedOptional(own_name)
+                | TypeMemberKind::ConstAssertedNamedOptional(own_name) => {
+                    if own_name.text() == name {
+                        return if member.kind.is_optional() {
+                            PropertyPresence::Optional
+                        } else {
+                            PropertyPresence::Required
+                        };
+                    }
+                    let own_name = own_name.text();
+                    if own_name.contains('\\')
+                        || (own_name.starts_with(|c: char| c.is_ascii_digit() || c == '.')
+                            && !is_decimal_integer_name(own_name))
+                    {
+                        is_complete = false;
+                    }
+                }
+                TypeMemberKind::IndexSignature(key)
+                | TypeMemberKind::ConstAssertedIndexSignature(key) => match self.resolve(*key) {
+                    TypeData::String => is_indexed = true,
+                    TypeData::Number if is_decimal_integer_name(name) => is_indexed = true,
+                    // A name such as `1.5` or `NaN` may also be numeric.
+                    TypeData::Number if name.parse::<f64>().is_ok() => is_complete = false,
+                    TypeData::Number | TypeData::Symbol => {}
+                    _ => is_complete = false,
+                },
+                // Values with a call signature also have the members of
+                // `Function`.
+                TypeMemberKind::CallSignature
+                | TypeMemberKind::ConstAssertedCallSignature
+                | TypeMemberKind::ComputedValue(_)
+                | TypeMemberKind::ConstAssertedComputedValue(_) => is_complete = false,
+                // In an object type, unlike a class, this is a construct
+                // signature, which also adds the members of `Function`.
+                TypeMemberKind::Constructor | TypeMemberKind::ConstAssertedConstructor => {
+                    is_complete &= is_class;
+                }
+                // Well-known symbols name no property that a string names,
+                // and static members belong to the class, not its instances.
+                TypeMemberKind::ComputedValueNamed(..)
+                | TypeMemberKind::ConstAssertedComputedValueNamed(..)
+                | TypeMemberKind::ComputedStatic(_)
+                | TypeMemberKind::ComputedStaticNamed(..)
+                | TypeMemberKind::ConstAssertedComputedStatic(_)
+                | TypeMemberKind::ConstAssertedComputedStaticNamed(..)
+                | TypeMemberKind::NamedStatic(_)
+                | TypeMemberKind::ConstAssertedNamedStatic(_) => {}
+            }
+        }
+        for parent in parents {
+            // An `extends` clause refers to the parent class, but instance
+            // members are looked up on an instance of it.
+            let parent = match self.resolve(parent) {
+                class @ TypeData::Class(_) => TypeData::instance_of(self.db, class, Box::default()),
+                parent => parent,
+            };
+            match self.declared_presence(parent, name, depth + 1, visited) {
+                found @ (PropertyPresence::Required | PropertyPresence::Optional) => return found,
+                PropertyPresence::Indexed => is_indexed = true,
+                PropertyPresence::Missing => {}
+                PropertyPresence::Unknown => is_complete = false,
+            }
+        }
+        if is_indexed {
+            PropertyPresence::Indexed
+        } else if is_complete {
+            PropertyPresence::Missing
+        } else {
+            PropertyPresence::Unknown
+        }
     }
 
     /// Returns the substitutions that replace declared type parameters with an

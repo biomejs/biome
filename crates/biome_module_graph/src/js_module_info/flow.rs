@@ -307,11 +307,13 @@ pub(crate) struct RootFlow {
     pub(crate) subjects: Box<[FlowSubject]>,
     /// The points of each subject's reads, sorted and without duplicates.
     pub(crate) read_points: FxHashMap<FlowSubjectId, Box<[FlowNodeId]>>,
-    /// The subjects with reads that conditions narrow only through
-    /// [`FlowGuard::Property`], such as `s` when the only condition that
-    /// mentions it is `s.kind === "c"`. Such a test narrows only a union, so
-    /// these subjects need no solve when their declared type is not one.
-    /// Every [`FlowSubject::Pattern`] with reads is one.
+    /// The subjects with reads that conditions narrow only through tests of
+    /// their properties: [`FlowGuard::Property`], such as `s` when the only
+    /// condition that mentions it is `s.kind === "c"`, and `in`, which
+    /// [`FlowTest::In`] applies to `x` in `"a" in x`. Such a test narrows only
+    /// a union with two object types, so these subjects need no solve when
+    /// their declared type is not one. Every [`FlowSubject::Pattern`] with
+    /// reads is one.
     pub(crate) property_only: FxHashSet<FlowSubjectId>,
     /// The [`FlowSubject::Pattern`] of each element whose reads a test of the
     /// pattern can reach, keyed by the element's subject. Each such read is
@@ -333,8 +335,8 @@ impl RootFlow {
         self.read_points(subject).binary_search(&point).is_ok()
     }
 
-    /// Returns whether conditions narrow `subject` only through
-    /// [`FlowGuard::Property`] guards and the root has reads of `subject`.
+    /// Returns whether conditions narrow `subject` only through tests of its
+    /// properties, as [`Self::property_only`] describes.
     pub(crate) fn is_property_only(&self, subject: FlowSubjectId) -> bool {
         self.property_only.contains(&subject)
     }
@@ -459,7 +461,8 @@ impl ModuleFlow {
     }
 
     /// Returns whether conditions narrow the binding declared at `range` only
-    /// through [`FlowGuard::Property`] guards.
+    /// through tests of its properties, as [`RootFlow::property_only`]
+    /// describes.
     pub(crate) fn is_property_only_binding(&self, range: TextRange) -> bool {
         self.property_only_bindings.contains(&range)
     }
@@ -1204,6 +1207,34 @@ mod tests {
         // The annotation of `o` shows that it is not a union, so its read is
         // dropped without resolving anything.
         assert!(!info.flow.is_candidate(marked(SOURCE, "o", "o")));
+    }
+
+    #[test]
+    fn subjects_of_in_are_property_only_subjects() {
+        const SOURCE: &str = r#"
+            function f(x: { a: 1 } | { b: 2 }, y: { a: 1 } | { b: 2 } | null, z: string | { a: 1 }) {
+                if ("a" in x) { /*x*/x; }
+                if (y && "a" in y) { /*y*/y; }
+                if ("a" in z) { /*z*/z; }
+            }
+        "#;
+        let info = module(SOURCE);
+        let read = info.flow.read(marked(SOURCE, "x", "x")).unwrap();
+        let root = info.flow.root(read.root).unwrap();
+        // `x` is tested only by `in`, while `y` is also tested itself.
+        assert!(root.is_property_only(read.subject));
+        let Some(&super::FlowSubject::Binding(binding)) = root.subject(read.subject) else {
+            panic!("`x` must be a binding subject");
+        };
+        assert_eq!(
+            info.flow.property_only_candidate(marked(SOURCE, "x", "x")),
+            Some(binding)
+        );
+        let read = info.flow.read(marked(SOURCE, "y", "y")).unwrap();
+        assert!(!root.is_property_only(read.subject));
+        // The annotation of `z` shows that it has one object type, so its read
+        // is dropped without resolving anything.
+        assert!(!info.flow.is_candidate(marked(SOURCE, "z", "z")));
     }
 
     #[test]

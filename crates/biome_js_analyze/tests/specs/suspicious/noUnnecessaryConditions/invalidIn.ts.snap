@@ -1,0 +1,110 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidIn.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// `in` keeps the union members that declare the property, so a read of
+// another property takes its type from those members, as in TypeScript.
+
+interface Loaded {
+	data: { size: number };
+}
+
+interface Failed {
+	data: null;
+	error: string;
+}
+
+type Result = Loaded | Failed;
+
+function present(result: Result) {
+	if ("error" in result) {
+		if (result.data) {
+			return 1;
+		}
+	}
+}
+
+function absent(result: Result) {
+	if (!("error" in result)) {
+		return result.data?.size;
+	}
+}
+
+function operand(result: Result) {
+	return !("error" in result) && result.data?.size;
+}
+
+```
+
+# Diagnostics
+```
+invalidIn.ts:18:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    16 │ function present(result: Result) {
+    17 │ 	if ("error" in result) {
+  > 18 │ 		if (result.data) {
+       │ 		    ^^^^^^^^^^^
+    19 │ 			return 1;
+    20 │ 		}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
+
+```
+
+```
+invalidIn.ts:26:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    24 │ function absent(result: Result) {
+    25 │ 	if (!("error" in result)) {
+  > 26 │ 		return result.data?.size;
+       │ 		       ^^^^^^^^^^^
+    27 │ 	}
+    28 │ }
+  
+  i Replace ?. with ..
+  
+    24 │ function absent(result: Result) {
+    25 │ 	if (!("error" in result)) {
+  > 26 │ 		return result.data?.size;
+       │ 		                  ^^
+    27 │ 	}
+    28 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidIn.ts:31:33 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    30 │ function operand(result: Result) {
+  > 31 │ 	return !("error" in result) && result.data?.size;
+       │ 	                               ^^^^^^^^^^^
+    32 │ }
+    33 │ 
+  
+  i Replace ?. with ..
+  
+    30 │ function operand(result: Result) {
+  > 31 │ 	return !("error" in result) && result.data?.size;
+       │ 	                                          ^^
+    32 │ }
+    33 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
