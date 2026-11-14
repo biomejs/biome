@@ -1,0 +1,149 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidLiteralKeys.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// An element access with a string or integer literal key reads the same
+// property as a named access, so after each test the receiver of the optional
+// chain cannot be nullish, as in TypeScript. A write through a literal key
+// writes only the property it names, so `keepOther` keeps the narrowing of
+// `options.timer`.
+
+interface Timer {
+	cancel(): void;
+}
+
+function stop(options: { timer: Timer | null }) {
+	if (options["timer"]) {
+		options.timer?.cancel();
+	}
+}
+
+function contentLength(headers: Record<string, string | undefined>) {
+	if (headers["content-type"] !== undefined) {
+		return headers["content-type"]?.length;
+	}
+	return 0;
+}
+
+function first(pair: [Timer | null, number]) {
+	if (pair[0]) {
+		pair[0]?.cancel();
+	}
+}
+
+function keepOther(options: { timer: Timer | null; next: Timer | null }) {
+	if (options.timer !== null) {
+		options["next"] = null;
+		options.timer?.cancel();
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidLiteralKeys.ts:14:3 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    12 │ function stop(options: { timer: Timer | null }) {
+    13 │ 	if (options["timer"]) {
+  > 14 │ 		options.timer?.cancel();
+       │ 		^^^^^^^^^^^^^
+    15 │ 	}
+    16 │ }
+  
+  i Replace ?. with ..
+  
+    12 │ function stop(options: { timer: Timer | null }) {
+    13 │ 	if (options["timer"]) {
+  > 14 │ 		options.timer?.cancel();
+       │ 		             ^^
+    15 │ 	}
+    16 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidLiteralKeys.ts:20:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    18 │ function contentLength(headers: Record<string, string | undefined>) {
+    19 │ 	if (headers["content-type"] !== undefined) {
+  > 20 │ 		return headers["content-type"]?.length;
+       │ 		       ^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 	}
+    22 │ 	return 0;
+  
+  i Replace ?. with ..
+  
+    18 │ function contentLength(headers: Record<string, string | undefined>) {
+    19 │ 	if (headers["content-type"] !== undefined) {
+  > 20 │ 		return headers["content-type"]?.length;
+       │ 		                              ^^
+    21 │ 	}
+    22 │ 	return 0;
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidLiteralKeys.ts:27:3 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    25 │ function first(pair: [Timer | null, number]) {
+    26 │ 	if (pair[0]) {
+  > 27 │ 		pair[0]?.cancel();
+       │ 		^^^^^^^
+    28 │ 	}
+    29 │ }
+  
+  i Replace ?. with ..
+  
+    25 │ function first(pair: [Timer | null, number]) {
+    26 │ 	if (pair[0]) {
+  > 27 │ 		pair[0]?.cancel();
+       │ 		       ^^
+    28 │ 	}
+    29 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidLiteralKeys.ts:34:3 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    32 │ 	if (options.timer !== null) {
+    33 │ 		options["next"] = null;
+  > 34 │ 		options.timer?.cancel();
+       │ 		^^^^^^^^^^^^^
+    35 │ 	}
+    36 │ }
+  
+  i Replace ?. with ..
+  
+    32 │ 	if (options.timer !== null) {
+    33 │ 		options["next"] = null;
+  > 34 │ 		options.timer?.cancel();
+       │ 		             ^^
+    35 │ 	}
+    36 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```

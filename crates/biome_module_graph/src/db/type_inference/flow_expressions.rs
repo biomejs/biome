@@ -67,7 +67,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     }
                     None => return None,
                 };
-                match self.narrow_path(member, declared) {
+                match self.narrow_path(member.range(), declared) {
                     Some(narrowed) => Some(narrowed),
                     None => object.is_some().then_some(declared),
                 }
@@ -77,19 +77,28 @@ impl<'db> ResolutionCtx<'db, '_> {
                 let member_expression = member.member().ok()?;
                 let object = self.flow_operand(&object_expression);
                 let key = self.flow_operand(&member_expression);
-                if object.is_none() && key.is_none() {
-                    return None;
-                }
-                let object = object.or_else(|| self.raw_operand(&object_expression))?;
-                let key = key.or_else(|| self.raw_operand(&member_expression))?;
-                let result = self
-                    .resolve_computed_member_expression(object, key)
-                    .unwrap_or(TypeData::Unknown);
-                Some(if member.is_optional_chain() {
-                    self.optional_chain_result(object, result)
+                // As for a static member, the type of the access is the
+                // declared type that a property path with a literal key
+                // narrows.
+                let declared = if object.is_none() && key.is_none() {
+                    self.js_info.flow.read(member.range())?;
+                    self.raw_operand(&AnyJsExpression::from(member.clone()))?
                 } else {
-                    result
-                })
+                    let object = object.or_else(|| self.raw_operand(&object_expression))?;
+                    let key = key.or_else(|| self.raw_operand(&member_expression))?;
+                    let result = self
+                        .resolve_computed_member_expression(object, key)
+                        .unwrap_or(TypeData::Unknown);
+                    if member.is_optional_chain() {
+                        self.optional_chain_result(object, result)
+                    } else {
+                        result
+                    }
+                };
+                match self.narrow_path(member.range(), declared) {
+                    Some(narrowed) => Some(narrowed),
+                    None => (object.is_some() || key.is_some()).then_some(declared),
+                }
             }
             AnyFlowExpression::JsLogicalExpression(logical) => {
                 let left_expression = logical.left().ok()?;

@@ -18,7 +18,7 @@ use crate::js_module_info::flow::{
     guard_signature,
 };
 use crate::{JsModuleInfo, ModuleDb, ModuleInfo};
-use biome_js_syntax::{JsIdentifierExpression, JsStaticMemberExpression};
+use biome_js_syntax::JsIdentifierExpression;
 use biome_js_type_info::interned_types::{Literal, TypeData};
 use biome_js_type_info::{NarrowingPredicate, TypeofKind, is_narrowing_invariant, narrow_type};
 use biome_rowan::{AstNode, TextRange};
@@ -353,9 +353,9 @@ impl<'db> ResolutionCtx<'db, '_> {
         baseline
     }
 
-    /// Returns the narrowed type of the property path read at `member`, given
-    /// its `declared` type there: the type of the member access with its
-    /// object's narrowed type.
+    /// Returns the narrowed type of the property path read by the member
+    /// expression at `member`, given its `declared` type there: the type of
+    /// the member access with its object's narrowed type.
     ///
     /// Returns `None` when collection kept no flow for the read, when no
     /// runtime test can change `declared`, or when narrowing leaves it
@@ -363,10 +363,10 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// solve.
     pub(super) fn narrow_path(
         &mut self,
-        member: &JsStaticMemberExpression,
+        member: TextRange,
         declared: TypeData<'db>,
     ) -> Option<TypeData<'db>> {
-        let read = self.js_info.flow.read(member.range())?;
+        let read = self.js_info.flow.read(member)?;
         let baseline = self.narrowing_baseline(declared);
         infer_flow_subject_type(
             self.db,
