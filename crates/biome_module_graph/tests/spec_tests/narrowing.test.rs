@@ -2122,18 +2122,6 @@ fn unmodelled_statements_elsewhere_keep_narrowing() {
     const SOURCE: &str = r#"
         declare const items: (string | null)[];
         declare function check(): boolean;
-        function switches(value: string | null, kind: number) {
-            switch (kind) {
-                case 1:
-                    check();
-                    break;
-                default:
-                    check();
-            }
-            if (value !== null) {
-                /*switch*/value;
-            }
-        }
         function tries(value: string | null) {
             try {
                 check();
@@ -2173,7 +2161,7 @@ fn unmodelled_statements_elsewhere_keep_narrowing() {
         }
     "#;
     let (db, module) = narrowing_db(SOURCE);
-    for marker in ["switch", "try", "forOf", "class", "enum"] {
+    for marker in ["try", "forOf", "class", "enum"] {
         let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
         assert_variants(&db, ty, &[InferredTypeData::String], marker);
     }
@@ -2184,7 +2172,7 @@ fn unmodelled_statements_elsewhere_keep_narrowing() {
 fn reads_inside_unmodelled_statements_keep_the_facts_from_before_them() {
     const SOURCE: &str = r#"
         declare const items: (string | null)[];
-        function reads(value: string | null, kind: number) {
+        function reads(value: string | null) {
             if (value === null) {
                 return;
             }
@@ -2194,13 +2182,6 @@ fn reads_inside_unmodelled_statements_keep_the_facts_from_before_them() {
                 /*catch*/value;
             } finally {
                 /*finally*/value;
-            }
-            switch (kind) {
-                case 1:
-                    /*case*/value;
-                    break;
-                default:
-                    /*default*/value;
             }
             for (const item of items) {
                 /*forOf*/value;
@@ -2212,24 +2193,22 @@ fn reads_inside_unmodelled_statements_keep_the_facts_from_before_them() {
         }
     "#;
     let (db, module) = narrowing_db(SOURCE);
-    for marker in [
-        "try", "catch", "finally", "case", "default", "forOf", "forIn", "after",
-    ] {
+    for marker in ["try", "catch", "finally", "forOf", "forIn", "after"] {
         let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
         assert_variants(&db, ty, &[InferredTypeData::String], marker);
     }
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) narrows `tryAfterReturn`, `afterTry`, and
-// `caseIf` to `string`, and gives `string | null` at `finally`. Biome does not
-// model the control flow inside a `try` or `switch` statement yet, so an `if`
-// or `return` inside one narrows nothing, and Biome deliberately keeps the
-// wider declared type at every read.
+// TypeScript 7.0.2 (`tsc --strict`) narrows `tryAfterReturn` and `afterTry`
+// to `string`, and gives `string | null` at `finally`. Biome does not model
+// the control flow inside a `try` statement yet, so an `if` or `return`
+// inside one narrows nothing, and Biome deliberately keeps the wider
+// declared type at every read.
 #[test]
 fn conditions_inside_unmodelled_statements_do_not_narrow_yet() {
     use InferredTypeData::{Null, String};
     const SOURCE: &str = r#"
-        function wider(value: string | null, kind: number) {
+        function wider(value: string | null) {
             try {
                 if (value === null) {
                     return;
@@ -2239,16 +2218,10 @@ fn conditions_inside_unmodelled_statements_do_not_narrow_yet() {
                 /*finally*/value;
             }
             /*afterTry*/value;
-            switch (kind) {
-                case 1:
-                    if (value !== null) {
-                        /*caseIf*/value;
-                    }
-            }
         }
     "#;
     let (db, module) = narrowing_db(SOURCE);
-    for marker in ["tryAfterReturn", "finally", "afterTry", "caseIf"] {
+    for marker in ["tryAfterReturn", "finally", "afterTry"] {
         let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
         assert_variants(&db, ty, &[String, Null], marker);
     }

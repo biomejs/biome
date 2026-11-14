@@ -7,13 +7,14 @@
 
 use super::{
     BindingTypeInput, BindingTypeWithImportBudgetInput, ExpressionTypeInput, FlowSubjectRootInput,
-    FlowSubjectTypeInput, LocalTypeInput, LocalTypeWithImportBudgetInput,
+    FlowSubjectTypeInput, FlowSwitchInput, LocalTypeInput, LocalTypeWithImportBudgetInput,
 };
 use crate::ModuleDb;
 use crate::db::type_inference::{
     ImportResolution, ResolutionCtx, find_member_type_on_demand as find_member_type_impl,
     find_value_member_type_on_demand as find_value_member_type_impl, flow_binding_baseline,
-    flow_expression_type, flow_subject_states, flow_subject_type, resolve_local_type_on_demand,
+    flow_expression_type, flow_subject_states, flow_subject_type, flow_switch_exhaustive,
+    resolve_local_type_on_demand,
 };
 use crate::js_module_info::flow::FlowNodeId;
 use crate::module_graph::ModuleInfoKind;
@@ -193,6 +194,39 @@ pub(crate) fn infer_flow_subject_type<'db>(
                 return None;
             }
             flow_subject_type(db, module, info, input)
+        },
+    )
+}
+
+/// Decides whether one `switch` statement of an execution root is
+/// exhaustive, so that the path on which none of its cases matches adds
+/// nothing to the reads after it, as TypeScript's
+/// `isExhaustiveSwitchStatement` decides it.
+///
+/// Lookups of the reads that the statement's bypass reaches share the
+/// answer; complete module inference decides it in its own context instead.
+///
+/// Returns false for an unavailable root or statement, when the type of the
+/// discriminant at the statement can't be decided, and when a query cycle
+/// passes through this lookup, so the bypass then keeps its guard.
+#[salsa::tracked(returns(copy), cycle_result=infer_flow_switch_exhaustive_cycle_result)]
+pub(crate) fn infer_flow_switch_exhaustive<'db>(
+    db: &'db dyn ModuleDb,
+    input: FlowSwitchInput<'db>,
+) -> bool {
+    let module = input.module(db);
+    execute_query(
+        TypeInferenceQueryKind::Lookups,
+        TypeInferenceProfileOrigin::document(module),
+        "infer_flow_switch_exhaustive",
+        || {
+            let ModuleInfoKind::Js(info) = module.kind(db) else {
+                return false;
+            };
+            if !info.infer_types {
+                return false;
+            }
+            flow_switch_exhaustive(db, module, info, input.root(db), input.switch(db))
         },
     )
 }
@@ -380,6 +414,14 @@ fn infer_flow_subject_states_cycle_result<'db>(
     _input: FlowSubjectRootInput<'db>,
 ) -> Option<Box<[(FlowNodeId, InferredTypeData<'db>)]>> {
     None
+}
+
+fn infer_flow_switch_exhaustive_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: FlowSwitchInput<'db>,
+) -> bool {
+    false
 }
 
 fn infer_flow_subject_type_cycle_result<'db>(

@@ -1,18 +1,23 @@
 use super::guards::{
-    DecomposedCondition, FlowGuard, FlowOutcome, GuardFunctions, decompose_assertion,
-    decompose_condition,
+    DecomposedCondition, FlowGuard, FlowOutcome, GuardFunctions, SwitchCase, SwitchKind,
+    decompose_assertion, decompose_condition, decompose_switch_case, exhaustive_operand,
+    is_unit_case,
 };
 use super::subjects::subject_of;
-use super::{AnyFlowExpression, FlowNode, FlowNodeId, FlowSubjectId, FlowSubjectTable};
+use super::{
+    AnyFlowExpression, FlowNode, FlowNodeId, FlowSubjectId, FlowSubjectTable, FlowSwitch, FlowTest,
+    MAX_SWITCHES, typeof_kind_bit,
+};
 use biome_js_control_flow::{AnyJsControlFlowRoot, is_truthy_literal};
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsClassMember, AnyJsExpression, AnyJsFunction, AnyJsFunctionBody, AnyJsStatement, AnyTsType,
-    JsDoWhileStatement, JsForStatement, JsIdentifierExpression, JsIfStatement, JsLanguage,
-    JsSyntaxNode, JsWhileStatement, T,
+    AnyJsClassMember, AnyJsExpression, AnyJsFunction, AnyJsFunctionBody, AnyJsStatement,
+    AnyJsSwitchClause, AnyTsType, JsDoWhileStatement, JsForStatement, JsIdentifierExpression,
+    JsIfStatement, JsLanguage, JsSwitchStatement, JsSyntaxNode, JsWhileStatement, T,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, TokenText};
 use rustc_hash::FxHashSet;
+use std::ops::Range;
 
 const MAX_SYNTAX_NODES: usize = 16_384;
 /// Limits how deeply syntax can nest below the execution root that gets flow.
@@ -54,6 +59,17 @@ pub(super) struct BuiltRoot {
     pub(super) instance_mentions: FxHashSet<(FlowNodeId, FlowSubjectId)>,
     /// Reachable reads of subjects with their incoming flow.
     pub(super) reads: Vec<BuiltRead>,
+    /// The `switch` statements that the root's [`FlowGuard::Bypass`] guards
+    /// stand for, in the order of their `switch` index.
+    pub(super) switches: Vec<BuiltSwitch>,
+}
+
+/// A `switch` statement whose [`FlowGuard::Bypass`] gives `never` when the
+/// statement is exhaustive.
+pub(super) struct BuiltSwitch {
+    pub(super) switch: FlowSwitch,
+    /// The condition node of the path on which no case matches.
+    pub(super) bypass: FlowNodeId,
 }
 
 pub(super) struct BuiltRead {
@@ -82,10 +98,11 @@ type Build<T> = Result<T, Unsupported>;
 /// unreachable code records no reads.
 ///
 /// The builder models the control flow of blocks, `if`, `while`, `do...while`,
-/// `for`, labeled statements, `break`, `continue`, `return`, and `throw`. Any
-/// other statement, such as `switch`, `try`, `for...in`, or `for...of`, is an
-/// opaque region: the builder evaluates its expressions in source order from
-/// the flow before it, and the code after it continues from that evaluation.
+/// `for`, `switch`, labeled statements, `break`, `continue`, `return`, and
+/// `throw`. Any other statement, such as `try`, `for...in`, or `for...of`, is
+/// an opaque region: the builder evaluates its expressions in source order
+/// from the flow before it, and the code after it continues from that
+/// evaluation.
 /// A condition inside a region narrows only the rest of the expression that
 /// contains it, as in `x && x.length`. Each `break` or `continue` that leaves
 /// the region joins its target with the flow before the region. Because only
@@ -120,6 +137,7 @@ pub(super) fn build_root(
         instance_tested: FxHashSet::default(),
         instance_mentions: FxHashSet::default(),
         reads: Vec::new(),
+        switches: Vec::new(),
         jumps: Vec::new(),
         current: Some(0),
         remaining_visits: MAX_SYNTAX_NODES,
@@ -144,6 +162,7 @@ pub(super) fn build_root(
         instance_tested,
         instance_mentions: builder.instance_mentions,
         reads: builder.reads,
+        switches: builder.switches,
     })
 }
 
@@ -348,21 +367,38 @@ impl StatementCheck {
     }
 }
 
+/// The cases of a `switch` statement under construction.
+struct SwitchCases {
+    kind: SwitchKind,
+    discriminant: AnyJsExpression,
+    /// The test of each clause in source order, or `None` for `default`.
+    tests: Vec<Option<AnyJsExpression>>,
+    /// The flow after the discriminant, where every case is tested.
+    pre: FlowNodeId,
+    /// For `switch (true)`, a number of clauses and the flow on which none of
+    /// the cases of the clauses before that number matched.
+    unmatched: (usize, FlowNodeId),
+}
+
+impl SwitchCases {
+    /// Returns the case whose test is `test`, assumed to match or not.
+    fn case<'a>(&'a self, test: &'a AnyJsExpression, matched: bool) -> SwitchCase<'a> {
+        SwitchCase {
+            discriminant: &self.discriminant,
+            test,
+            kind: self.kind,
+            matched,
+        }
+    }
+}
+
 /// A statement that `break` or `continue` can target.
 struct JumpTarget {
     label: Option<TokenText>,
-    /// The loop's continue point; `None` for a labeled block.
+    kind: TargetKind,
+    /// The loop's continue point; `None` for a labeled block or a `switch`.
     continue_to: Option<FlowNodeId>,
     breaks: Vec<FlowNodeId>,
-}
-
-impl JumpTarget {
-    fn kind(&self) -> TargetKind {
-        match self.continue_to {
-            Some(_) => TargetKind::Loop,
-            None => TargetKind::Block,
-        }
-    }
 }
 
 struct RootBuilder<'a, 'raw> {
@@ -385,6 +421,7 @@ struct RootBuilder<'a, 'raw> {
     instance_tested: FxHashSet<FlowSubjectId>,
     instance_mentions: FxHashSet<(FlowNodeId, FlowSubjectId)>,
     reads: Vec<BuiltRead>,
+    switches: Vec<BuiltSwitch>,
     jumps: Vec<JumpTarget>,
     /// The incoming flow of the next statement, or `None` when unreachable.
     current: Option<FlowNodeId>,
@@ -432,6 +469,7 @@ impl RootBuilder<'_, '_> {
                 Some(label) => {
                     self.jumps.push(JumpTarget {
                         label: Some(label),
+                        kind: TargetKind::Block,
                         continue_to: None,
                         breaks: Vec::new(),
                     });
@@ -502,6 +540,9 @@ impl RootBuilder<'_, '_> {
             AnyJsStatement::JsForStatement(statement) => {
                 self.for_statement(&statement, current, label)
             }
+            AnyJsStatement::JsSwitchStatement(statement) => {
+                self.switch_statement(&statement, current, label)
+            }
             AnyJsStatement::JsBreakStatement(_) | AnyJsStatement::JsContinueStatement(_) => {
                 let jump = Jump::from_statement(&statement).ok_or(Unsupported)?;
                 let target = self.jump_target(&jump)?;
@@ -550,7 +591,7 @@ impl RootBuilder<'_, '_> {
     fn jump_target(&self, jump: &Jump) -> Build<usize> {
         self.jumps
             .iter()
-            .rposition(|target| jump.can_target(target.kind(), target.label.as_ref()))
+            .rposition(|target| jump.can_target(target.kind, target.label.as_ref()))
             .ok_or(Unsupported)
     }
 
@@ -693,6 +734,7 @@ impl RootBuilder<'_, '_> {
     ) -> Build<()> {
         self.jumps.push(JumpTarget {
             label,
+            kind: TargetKind::Loop,
             continue_to: Some(continue_to),
             breaks: Vec::new(),
         });
@@ -700,6 +742,275 @@ impl RootBuilder<'_, '_> {
             Some(body) => self.statement(body, None),
             None => Ok(()),
         }
+    }
+
+    /// Builds `statement` from `current`, as TypeScript's
+    /// `bindSwitchStatement` and `bindCaseBlock` do. `label` is the label of
+    /// `statement`, if any.
+    ///
+    /// Every case test is evaluated from the flow after the discriminant, so
+    /// a read in a case test never sees the cases before it. The clauses form
+    /// groups: a run of clauses without statements, followed by the next
+    /// clause. A group's statements start where one of its cases matches,
+    /// where no case of the statement matches when the group contains
+    /// `default`, and where the statements of the group before fall through.
+    /// The code after the statement continues from the end of the last
+    /// group, from each `break` that targets the statement, and, without
+    /// `default`, from the bypass: the path on which no case matches.
+    fn switch_statement(
+        &mut self,
+        statement: &JsSwitchStatement,
+        current: FlowNodeId,
+        label: Option<TokenText>,
+    ) -> Build<()> {
+        let discriminant = statement.discriminant().map_err(|_| Unsupported)?;
+        let pre = self.evaluate(discriminant.syntax(), current, 0)?;
+        let clauses: Vec<_> = statement.cases().iter().collect();
+        let mut tests = Vec::with_capacity(clauses.len());
+        for clause in &clauses {
+            let test = match clause {
+                AnyJsSwitchClause::JsCaseClause(clause) => {
+                    let test = clause.test().map_err(|_| Unsupported)?;
+                    self.evaluate(test.syntax(), pre, 0)?;
+                    Some(test)
+                }
+                AnyJsSwitchClause::JsDefaultClause(_) => None,
+            };
+            tests.push(test);
+        }
+        let mut cases = SwitchCases {
+            kind: SwitchKind::new(statement),
+            discriminant,
+            tests,
+            pre,
+            unmatched: (0, pre),
+        };
+        self.jumps.push(JumpTarget {
+            label,
+            kind: TargetKind::Switch,
+            continue_to: None,
+            breaks: Vec::new(),
+        });
+        let mut fallthrough = None;
+        let mut start = 0;
+        for (index, clause) in clauses.iter().enumerate() {
+            let consequent = clause.consequent();
+            if consequent.is_empty() && index + 1 < clauses.len() {
+                continue;
+            }
+            let entry = self.case_group_entry(&mut cases, start..index + 1)?;
+            self.current = self.join(entry.into_iter().chain(fallthrough))?;
+            self.statements(consequent.syntax())?;
+            fallthrough = self.current;
+            start = index + 1;
+        }
+        let target = self.jumps.pop().ok_or(Unsupported)?;
+        let bypass = if cases.tests.iter().any(Option::is_none) {
+            None
+        } else {
+            Some(self.switch_bypass(statement, &mut cases)?)
+        };
+        self.current = self.join(fallthrough.into_iter().chain(target.breaks).chain(bypass))?;
+        Ok(())
+    }
+
+    /// Returns the flows where the statements of the case group made of the
+    /// clauses at `group` start, apart from the fall-through, following
+    /// TypeScript's `getTypeAtSwitchClause`.
+    fn case_group_entry(
+        &mut self,
+        cases: &mut SwitchCases,
+        group: Range<usize>,
+    ) -> Build<Vec<FlowNodeId>> {
+        let has_default = cases.tests[group.clone()].iter().any(Option::is_none);
+        match cases.kind {
+            SwitchKind::Opaque => Ok(vec![cases.pre]),
+            // As in `narrowTypeBySwitchOnTrue`, no case before the group
+            // matched. With `default` in the group, no case after it matched
+            // either, while one of the group's own cases may have.
+            SwitchKind::True => {
+                let unmatched = self.unmatched_cases_before(cases, group.start)?;
+                if has_default {
+                    let mut flow = unmatched;
+                    for index in group.end..cases.tests.len() {
+                        flow = self.case_condition(cases, index, flow, false)?;
+                    }
+                    Ok(vec![flow])
+                } else {
+                    group
+                        .map(|index| self.case_condition(cases, index, unmatched, true))
+                        .collect()
+                }
+            }
+            SwitchKind::Value | SwitchKind::Typeof => {
+                let mut entry = Vec::with_capacity(group.len());
+                for index in group {
+                    if cases.tests[index].is_some() {
+                        entry.push(self.case_condition(cases, index, cases.pre, true)?);
+                    }
+                }
+                if has_default {
+                    let unmatched = self.unmatched_cases(cases);
+                    entry.push(match unmatched {
+                        Some(unmatched) => self.push_condition(cases.pre, unmatched)?,
+                        None => cases.pre,
+                    });
+                }
+                Ok(entry)
+            }
+        }
+    }
+
+    /// Returns the flow after `antecedent` where the case of the clause at
+    /// `index` matched or, when `matched` is false, did not, which is
+    /// `antecedent` itself for `default` and for a case that narrows nothing.
+    fn case_condition(
+        &mut self,
+        cases: &SwitchCases,
+        index: usize,
+        antecedent: FlowNodeId,
+        matched: bool,
+    ) -> Build<FlowNodeId> {
+        let Some(Some(test)) = cases.tests.get(index) else {
+            return Ok(antecedent);
+        };
+        match decompose_switch_case(
+            cases.case(test, matched),
+            self.model,
+            self.functions,
+            &mut self.subjects,
+            &mut self.guards,
+        ) {
+            Some(condition) => self.push_condition(antecedent, condition),
+            None => Ok(antecedent),
+        }
+    }
+
+    /// Returns the flow of `switch (true)` on which none of the cases of the
+    /// clauses before `end` matched, extending the chain that `cases` keeps.
+    fn unmatched_cases_before(&mut self, cases: &mut SwitchCases, end: usize) -> Build<FlowNodeId> {
+        let (mut count, mut flow) = cases.unmatched;
+        while count < end {
+            flow = self.case_condition(cases, count, flow, false)?;
+            count += 1;
+        }
+        cases.unmatched = (count, flow);
+        Ok(flow)
+    }
+
+    /// Returns the condition that no case of `cases` matched, or `None` when
+    /// no case narrows anything.
+    fn unmatched_cases(&mut self, cases: &SwitchCases) -> Option<DecomposedCondition> {
+        let mut unmatched: Option<DecomposedCondition> = None;
+        for test in cases.tests.iter().flatten() {
+            let Some(case) = decompose_switch_case(
+                cases.case(test, false),
+                self.model,
+                self.functions,
+                &mut self.subjects,
+                &mut self.guards,
+            ) else {
+                continue;
+            };
+            unmatched = Some(match unmatched {
+                Some(unmatched) => unmatched.then(case, &mut self.guards),
+                None => case,
+            });
+        }
+        unmatched
+    }
+
+    /// Returns the bypass of `statement`, a `switch` without `default`: the
+    /// flow on which none of its cases matched.
+    ///
+    /// When TypeScript can find the statement exhaustive, the bypass is a
+    /// [`FlowGuard::Bypass`] that inference drops for every subject once it
+    /// finds the statement exhaustive, as TypeScript's
+    /// `getTypeAtFlowBranchLabel` does.
+    fn switch_bypass(
+        &mut self,
+        statement: &JsSwitchStatement,
+        cases: &mut SwitchCases,
+    ) -> Build<FlowNodeId> {
+        match cases.kind {
+            SwitchKind::Opaque => Ok(cases.pre),
+            // `switch (true)` is never exhaustive, because its cases have type
+            // `boolean`, which is no unit type.
+            SwitchKind::True => self.unmatched_cases_before(cases, cases.tests.len()),
+            SwitchKind::Value | SwitchKind::Typeof => {
+                let Some(mut unmatched) = self.unmatched_cases(cases) else {
+                    return Ok(cases.pre);
+                };
+                let Some(switch) = self.exhaustive_switch(statement, cases, unmatched.guard) else {
+                    return self.push_condition(cases.pre, unmatched);
+                };
+                let index = u32::try_from(self.switches.len()).map_err(|_| Unsupported)?;
+                self.guards.push(FlowGuard::Bypass {
+                    switch: index,
+                    guard: unmatched.guard,
+                });
+                unmatched.guard = self.guards.len() - 1;
+                let bypass = self.push_condition(cases.pre, unmatched)?;
+                self.switches.push(BuiltSwitch { switch, bypass });
+                Ok(bypass)
+            }
+        }
+    }
+
+    /// Returns the record of `statement` that lets inference decide whether
+    /// it is exhaustive, given that `unmatched` is the index of the guard that
+    /// tests that none of its cases matched, as [`FlowSwitch`] describes.
+    ///
+    /// Returns `None` when TypeScript can't find the statement exhaustive or
+    /// Biome can't tell, and once the root records [`MAX_SWITCHES`]
+    /// statements.
+    fn exhaustive_switch(
+        &mut self,
+        statement: &JsSwitchStatement,
+        cases: &SwitchCases,
+        unmatched: usize,
+    ) -> Option<FlowSwitch> {
+        if self.switches.len() >= MAX_SWITCHES {
+            return None;
+        }
+        let operand = exhaustive_operand(&cases.discriminant, cases.kind)?;
+        if !cases
+            .tests
+            .iter()
+            .flatten()
+            .all(|test| is_unit_case(&cases.discriminant, test, cases.kind, self.model))
+        {
+            return None;
+        }
+        let subject = subject_of(&operand, self.model, &mut self.subjects)?;
+        let typeof_kinds =
+            (cases.kind == SwitchKind::Typeof).then(|| self.typeof_kinds(unmatched, subject));
+        Some(FlowSwitch {
+            discriminant: operand.range(),
+            subject,
+            guard: unmatched,
+            start: statement.l_curly_token().ok()?.text_trimmed_range().start(),
+            typeof_kinds,
+        })
+    }
+
+    /// Returns the kinds of value, one bit each as [`typeof_kind_bit`] gives
+    /// them, that the guard at `guard` tests `subject` with `typeof` for.
+    fn typeof_kinds(&self, guard: usize, subject: FlowSubjectId) -> u8 {
+        let mut kinds = 0;
+        let mut pending = vec![guard];
+        while let Some(index) = pending.pop() {
+            match self.guards.get(index) {
+                Some(FlowGuard::Both { left, right, .. }) => pending.extend([*left, *right]),
+                Some(FlowGuard::Test {
+                    subject: tested,
+                    test: FlowTest::Typeof(kind),
+                    ..
+                }) if *tested == subject => kinds |= typeof_kind_bit(*kind),
+                _ => {}
+            }
+        }
+        kinds
     }
 
     /// Records reads and branches while evaluating `node` from `incoming`, and
@@ -1001,11 +1312,7 @@ mod tests {
                     positive,
                 } => {
                     let name = self.subject_name(*subject);
-                    let test = match test {
-                        FlowTest::Truthy => "Truthy",
-                        FlowTest::Nullish => "Nullish",
-                        _ => "Other",
-                    };
+                    let test = self.test_name(*test);
                     let negation = if *positive { "" } else { "!" };
                     facts.push(format!("{negation}{name}:{test}"));
                 }
@@ -1021,11 +1328,7 @@ mod tests {
                     let key = match key {
                         PropertyKey::Name(name) | PropertyKey::Private(name) => name,
                     };
-                    let test = match test {
-                        FlowTest::Truthy => "Truthy",
-                        FlowTest::Nullish => "Nullish",
-                        _ => "Other",
-                    };
+                    let test = self.test_name(*test);
                     let negation = if *positive { "" } else { "!" };
                     facts.push(format!("{negation}{object}[{key}]:{test}"));
                 }
@@ -1044,11 +1347,33 @@ mod tests {
                     self.facts(*left, facts);
                     self.facts(*right, facts);
                 }
+                // The bypass of a `switch` that may be exhaustive is written
+                // `bypass(Test)`.
+                FlowGuard::Bypass { guard, .. } => {
+                    let mut inner_facts = Vec::new();
+                    self.facts(*guard, &mut inner_facts);
+                    facts.extend(
+                        inner_facts
+                            .into_iter()
+                            .map(|fact| format!("bypass({fact})")),
+                    );
+                }
             }
         }
     }
 
     impl Built {
+        /// Names `test` as `Truthy`, `Nullish`, or `Other`, or as `=` and
+        /// the source of the literal that a test of equality compares with.
+        fn test_name(&self, test: FlowTest) -> String {
+            match test {
+                FlowTest::Truthy => "Truthy".to_owned(),
+                FlowTest::Nullish => "Nullish".to_owned(),
+                FlowTest::Literal(range) => format!("={}", &self.source[range]),
+                _ => "Other".to_owned(),
+            }
+        }
+
         /// Returns the source of the variable or the pattern that `subject`
         /// starts at, or `this`, followed by the names along its path, as in
         /// `o.v` or `this.#w`.
@@ -1274,9 +1599,9 @@ mod tests {
     #[test]
     fn reads_in_regions_keep_the_facts_from_before_them() {
         let built = function(
-            "function f(q, y) { if (q) { switch (y) { case read(q): read(q); } try { read(q); } catch (e) { read(q); } finally { read(q); } for (const v of y) read(q); for (const k in y) read(q); class C extends read(q) {} enum E { A = read(q) } after(q); } }",
+            "function f(q, y) { if (q) { try { read(q); } catch (e) { read(q); } finally { read(q); } for (const v of y) read(q); for (const k in y) read(q); class C extends read(q) {} enum E { A = read(q) } after(q); } }",
         );
-        for occurrence in 2..=11 {
+        for occurrence in 2..=9 {
             assert_eq!(
                 built.paths("q", occurrence),
                 [vec!["q:Truthy".to_owned()]],
@@ -1313,21 +1638,9 @@ mod tests {
         assert!(paths.iter().any(|path| path == &["!y:Truthy"]));
         assert!(paths.iter().any(|path| path == &["x:Truthy", "y:Truthy"]));
 
-        // `continue` out of a `switch` reaches the loop update.
-        let built = function(
-            "function f(x, y) { for (;; read(x)) { if (!x) { switch (y) { case 1: continue; } } return; } }",
-        );
-        assert_eq!(built.paths("x", 1), [vec!["!x:Truthy".to_owned()]]);
-
         // `continue` out of a `try` reaches the test of a `do...while` loop.
         let built = function(
             "function f(x) { do { if (x) { try { continue; } finally {} } return; } while (read(x)); }",
-        );
-        assert_eq!(built.paths("x", 2), [vec!["x:Truthy".to_owned()]]);
-
-        // A labeled `break` out of a `switch` leaves the labeled loop.
-        let built = function(
-            "function f(x, y) { outer: while (true) { if (x) { switch (y) { case 1: break outer; } } return; } after(x); }",
         );
         assert_eq!(built.paths("x", 2), [vec!["x:Truthy".to_owned()]]);
     }
@@ -1351,8 +1664,6 @@ mod tests {
     #[test]
     fn jumps_to_statements_inside_a_region_do_not_leave_it() {
         for source in [
-            "function f(x, y) { while (true) { switch (y) { case 1: break; } return; } after(x); }",
-            "function f(x, y) { while (true) { label: switch (y) { case 1: break label; } return; } after(x); }",
             "function f(x, y) { while (true) { try { while (y) { break; } } catch {} return; } after(x); }",
             "function f(x, y) { while (true) { try { for (const v of y) { continue; } } finally {} return; } after(x); }",
             "function f(x, y) { while (true) { try { each: for (const v in y) { for (const w of v) { continue each; } } } catch {} return; } after(x); }",
@@ -1382,6 +1693,167 @@ mod tests {
         let built =
             function("function f(x) { if (x) read(x); out: try { break out; } finally {} }");
         assert!(built.root.is_none());
+    }
+
+    /// Returns the facts of each path to the read `name` at `occurrence`,
+    /// each path's facts sorted, and the paths sorted.
+    fn sorted_paths(built: &Built, name: &str, occurrence: usize) -> Vec<Vec<String>> {
+        let mut paths = built.paths(name, occurrence);
+        for path in &mut paths {
+            path.sort();
+        }
+        paths.sort();
+        paths
+    }
+
+    fn facts(facts: &[&str]) -> Vec<String> {
+        facts.iter().map(|fact| (*fact).to_owned()).collect()
+    }
+
+    #[test]
+    fn switch_cases_narrow_their_group() {
+        let built = function(
+            "function f(x) { switch (x) { case 1: read(x); case 2: case 3: read(x); break; default: read(x); } after(x); }",
+        );
+        assert_eq!(sorted_paths(&built, "x", 2), [facts(&["x:=1"])]);
+        // The group of `2` and `3` also continues the statements of `1`.
+        assert_eq!(
+            sorted_paths(&built, "x", 3),
+            [facts(&["x:=1"]), facts(&["x:=2"]), facts(&["x:=3"])]
+        );
+        assert_eq!(
+            sorted_paths(&built, "x", 4),
+            [facts(&["!x:=1", "!x:=2", "!x:=3"])]
+        );
+        // With `default`, no path skips every case.
+        assert_eq!(
+            sorted_paths(&built, "x", 5),
+            [
+                facts(&["!x:=1", "!x:=2", "!x:=3"]),
+                facts(&["x:=1"]),
+                facts(&["x:=2"]),
+                facts(&["x:=3"])
+            ]
+        );
+    }
+
+    #[test]
+    fn default_joins_the_group_that_contains_it() {
+        let built =
+            function("function f(x) { switch (x) { case 1: break; default: case 2: read(x); } }");
+        assert_eq!(
+            sorted_paths(&built, "x", 2),
+            [facts(&["!x:=1", "!x:=2"]), facts(&["x:=2"])]
+        );
+    }
+
+    #[test]
+    fn case_tests_start_from_the_discriminant() {
+        let built = function("function f(x) { switch (x) { case 1: break; case read(x): } }");
+        assert_eq!(built.paths("x", 2), [Vec::<String>::new()]);
+    }
+
+    #[test]
+    fn switches_without_default_continue_where_no_case_matches() {
+        let built = function("function f(x) { switch (x) { case 1: return; } after(x); }");
+        assert_eq!(built.paths("x", 2), [facts(&["bypass(!x:=1)"])]);
+        assert_eq!(built.root().switches.len(), 1);
+        // A case that isn't a unit value keeps the switch from being
+        // exhaustive, and a case that narrows nothing adds no condition.
+        let built = function("function f(x) { switch (x) { case f(): return; } after(x); }");
+        assert_eq!(built.paths("x", 2), [Vec::<String>::new()]);
+        assert!(built.root().switches.is_empty());
+        let built =
+            function("function f(x) { switch (x) { case 1: return; case f(): } after(x); }");
+        assert_eq!(
+            sorted_paths(&built, "x", 2),
+            [Vec::new(), facts(&["!x:=1"])]
+        );
+        assert!(built.root().switches.is_empty());
+        // An empty switch has nothing to narrow.
+        let built = function("function f(x) { switch (x) {} after(x); }");
+        assert_eq!(built.paths("x", 2), [Vec::<String>::new()]);
+        assert!(built.root().switches.is_empty());
+    }
+
+    #[test]
+    fn breaks_leave_the_switch_and_continues_reach_the_loop() {
+        let built = function(
+            "function f(x, y) { for (;; read(x)) { if (!x) { switch (y) { case 1: continue; } } return; } }",
+        );
+        assert_eq!(
+            sorted_paths(&built, "x", 1),
+            [facts(&["!x:Truthy", "y:=1"])]
+        );
+        let built = function(
+            "function f(x, y) { outer: while (true) { if (x) { switch (y) { case 1: break outer; } } return; } after(x); }",
+        );
+        assert_eq!(sorted_paths(&built, "x", 2), [facts(&["x:Truthy", "y:=1"])]);
+        for source in [
+            "function f(x, y) { while (true) { switch (y) { case 1: break; } return; } after(x); }",
+            "function f(x, y) { while (true) { label: switch (y) { case 1: break label; } return; } after(x); }",
+        ] {
+            let built = function(source);
+            assert_eq!(built.point("x", 1), None, "{source}");
+        }
+        let built = function(
+            "function f(x, y) { label: switch (x) { case 1: if (y) break label; read(y); break; case 2: if (y) break; read(y); } after(y); }",
+        );
+        assert_eq!(built.paths("y", 2).len(), 1);
+        assert_eq!(built.paths("y", 4).len(), 1);
+        // Both `break` statements, the end of the second case, the end of the
+        // first case's statements before its `break`, and the bypass.
+        assert_eq!(built.paths("y", 5).len(), 5);
+    }
+
+    #[test]
+    fn switch_true_assumes_the_cases_before_a_group_failed() {
+        let built = function(
+            "function f(x, y) { switch (true) { case x === 1: read(x); break; case y === 2: read(x); break; default: read(x); } after(x); }",
+        );
+        assert_eq!(sorted_paths(&built, "x", 2), [facts(&["x:=1"])]);
+        assert_eq!(sorted_paths(&built, "x", 3), [facts(&["!x:=1", "y:=2"])]);
+        assert_eq!(sorted_paths(&built, "x", 4), [facts(&["!x:=1", "!y:=2"])]);
+        // `switch (true)` is never exhaustive.
+        assert!(built.root().switches.is_empty());
+        // A case that may give a truthy value other than `true` narrows only
+        // where it matched.
+        let built = function(
+            "function f(x) { switch (true) { case x: read(x); break; default: read(x); } }",
+        );
+        assert_eq!(built.paths("x", 2), [facts(&["x:Truthy"])]);
+        assert_eq!(built.paths("x", 3), [Vec::<String>::new()]);
+        // A group with `default` assumes only the cases outside it failed.
+        let built = function(
+            "function f(x) { switch (true) { case x === 1: default: read(x); break; case x === 2: } }",
+        );
+        assert_eq!(sorted_paths(&built, "x", 2), [facts(&["!x:=2"])]);
+    }
+
+    #[test]
+    fn default_narrows_no_receiver_of_an_optional_chain() {
+        let built = function(
+            "function f(z) { switch (z?.k) { case undefined: break; case 1: read(z); break; default: read(z); } }",
+        );
+        assert!(contains(&built.paths("z", 2), "!z:Nullish"));
+        let default = built.paths("z", 3);
+        assert!(
+            default.iter().flatten().all(|fact| fact != "!z:Nullish"),
+            "{default:?}"
+        );
+    }
+
+    #[test]
+    fn typeof_cases_narrow_only_their_operand() {
+        let built = function(
+            "function f(z) { switch (typeof z.k) { case \"string\": read(z); } if (typeof z.k === \"string\") read(z); }",
+        );
+        let case = built.paths("z", 2);
+        assert!(
+            case.iter().flatten().all(|fact| !fact.contains("z[k]")),
+            "{case:?}"
+        );
+        assert!(contains(&built.paths("z", 4), "z[k]:Other"));
     }
 
     #[test]

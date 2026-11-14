@@ -1,0 +1,39 @@
+// should not generate diagnostics
+
+function missingCase(kind: "a" | "b" | "c", label: string | null) {
+	switch (kind) {
+		case "a":
+			if (label === null) return;
+			break;
+		case "b":
+			if (label === null) return;
+	}
+	return label?.length;
+}
+
+function defaultAfterUndefined(o: { k: "a" } | undefined) {
+	switch (o?.k) {
+		case undefined:
+			return 0;
+		default:
+			return o?.k;
+	}
+}
+
+function caseTestBeforeTheCases(value: string | null) {
+	switch (value) {
+		case null:
+			return 0;
+		case value?.trim():
+			return 1;
+	}
+}
+
+function fallthrough(value: string | null, other: string | null) {
+	switch (value) {
+		case null:
+			other = value;
+		case "a":
+			return value?.length;
+	}
+}

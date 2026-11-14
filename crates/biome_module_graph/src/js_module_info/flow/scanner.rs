@@ -2,8 +2,8 @@ use super::builder::MAX_DEPTH;
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_syntax::{
     AnyJsBinding, AnyTsReturnType, JsConditionalExpression, JsDoWhileStatement, JsForStatement,
-    JsIdentifierBinding, JsIfStatement, JsLogicalExpression, JsSyntaxKind, JsSyntaxNode,
-    JsWhileStatement, TsDeclareFunctionDeclaration,
+    JsIdentifierBinding, JsIfStatement, JsLogicalExpression, JsSwitchStatement, JsSyntaxKind,
+    JsSyntaxNode, JsWhileStatement, TsDeclareFunctionDeclaration,
 };
 use biome_rowan::{AstNode, SyntaxKind, declare_node_union};
 use std::ops::Range;
@@ -12,11 +12,14 @@ use std::ops::Range;
 pub(super) const MAX_ROOT_NODES: usize = 16_384;
 
 declare_node_union! {
-    /// Syntax that tests a condition along some path.
+    /// Syntax that tests a condition along some path. Every `switch` counts,
+    /// whatever its discriminant, because one whose cases can't narrow is
+    /// rare.
     AnyFlowConditionSource = JsIfStatement
         | JsWhileStatement
         | JsDoWhileStatement
         | JsForStatement
+        | JsSwitchStatement
         | JsLogicalExpression
         | JsConditionalExpression
 }
@@ -31,8 +34,8 @@ declare_node_union! {
 /// [`MAX_ROOT_NODES`] syntax nodes, and uses only syntax the flow builder
 /// supports.
 ///
-/// The builder treats statements it does not model, such as `switch` or
-/// `try`, as opaque regions, so they do not reject a root. A root is not
+/// The builder treats statements it does not model, such as `try` or
+/// `for...of`, as opaque regions, so they do not reject a root. A root is not
 /// selected when its own syntax, outside nested roots, contains a `with`
 /// statement, bogus syntax, or nesting deeper than [`MAX_DEPTH`]. A `with`
 /// statement changes what the names inside it refer to, and TypeScript types
@@ -296,6 +299,16 @@ mod tests {
             selected("function f(x) { if (x) read(x); }"),
             ["function f(x) { if (x) read(x); }"]
         );
+    }
+
+    #[test]
+    fn switch_statements_are_conditions() {
+        for source in [
+            "function f(x) { switch (x) { case 1: read(x); } }",
+            "function f(x) { switch (g()) { default: read(x); } }",
+        ] {
+            assert_eq!(selected(source), [source], "{source}");
+        }
     }
 
     #[test]

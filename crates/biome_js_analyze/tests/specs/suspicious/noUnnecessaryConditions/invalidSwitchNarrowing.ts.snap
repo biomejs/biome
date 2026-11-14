@@ -1,0 +1,183 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidSwitchNarrowing.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+type Shape =
+	| { kind: "circle"; radius: number }
+	| { kind: "square"; size: number };
+
+function caseOfDiscriminant(shape: Shape | undefined) {
+	switch (shape?.kind) {
+		case "circle":
+			return shape?.radius;
+	}
+}
+
+function caseOfLiteral(value: string | null) {
+	switch (value) {
+		case "a":
+			return value?.length;
+	}
+}
+
+function caseOfTypeof(value: string | number | null) {
+	switch (typeof value) {
+		case "string":
+			return value?.length;
+	}
+}
+
+function switchOnTrue(value: string | null) {
+	switch (true) {
+		case value !== null:
+			return value?.length;
+	}
+}
+
+function afterExhaustiveSwitch(kind: "a" | "b", label: string | null) {
+	switch (kind) {
+		case "a":
+			if (label === null) return;
+			break;
+		case "b":
+			if (label === null) return;
+	}
+	return label?.length;
+}
+
+```
+
+# Diagnostics
+```
+invalidSwitchNarrowing.ts:10:11 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+     8 │ 	switch (shape?.kind) {
+     9 │ 		case "circle":
+  > 10 │ 			return shape?.radius;
+       │ 			       ^^^^^
+    11 │ 	}
+    12 │ }
+  
+  i Replace ?. with ..
+  
+     8 │ 	switch (shape?.kind) {
+     9 │ 		case "circle":
+  > 10 │ 			return shape?.radius;
+       │ 			            ^^
+    11 │ 	}
+    12 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidSwitchNarrowing.ts:17:11 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    15 │ 	switch (value) {
+    16 │ 		case "a":
+  > 17 │ 			return value?.length;
+       │ 			       ^^^^^
+    18 │ 	}
+    19 │ }
+  
+  i Replace ?. with ..
+  
+    15 │ 	switch (value) {
+    16 │ 		case "a":
+  > 17 │ 			return value?.length;
+       │ 			            ^^
+    18 │ 	}
+    19 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidSwitchNarrowing.ts:24:11 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    22 │ 	switch (typeof value) {
+    23 │ 		case "string":
+  > 24 │ 			return value?.length;
+       │ 			       ^^^^^
+    25 │ 	}
+    26 │ }
+  
+  i Replace ?. with ..
+  
+    22 │ 	switch (typeof value) {
+    23 │ 		case "string":
+  > 24 │ 			return value?.length;
+       │ 			            ^^
+    25 │ 	}
+    26 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidSwitchNarrowing.ts:31:11 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    29 │ 	switch (true) {
+    30 │ 		case value !== null:
+  > 31 │ 			return value?.length;
+       │ 			       ^^^^^
+    32 │ 	}
+    33 │ }
+  
+  i Replace ?. with ..
+  
+    29 │ 	switch (true) {
+    30 │ 		case value !== null:
+  > 31 │ 			return value?.length;
+       │ 			            ^^
+    32 │ 	}
+    33 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidSwitchNarrowing.ts:43:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    41 │ 			if (label === null) return;
+    42 │ 	}
+  > 43 │ 	return label?.length;
+       │ 	       ^^^^^
+    44 │ }
+    45 │ 
+  
+  i Replace ?. with ..
+  
+    41 │ 			if (label === null) return;
+    42 │ 	}
+  > 43 │ 	return label?.length;
+       │ 	            ^^
+    44 │ }
+    45 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```

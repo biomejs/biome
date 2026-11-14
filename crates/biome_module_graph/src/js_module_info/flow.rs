@@ -57,8 +57,8 @@ use biome_js_type_info::{
     RawTypeData, RawTypeId, TypeReference, TypeofExpression, TypeofKind,
     is_raw_narrowing_invariant, raw_may_be_object_union, raw_may_narrow_by_instanceof,
 };
-use biome_rowan::{AstNode, AstPtr, SyntaxKindSet, Text, TextRange};
-use builder::{BuiltRoot, build_root};
+use biome_rowan::{AstNode, AstPtr, SyntaxKindSet, Text, TextRange, TextSize};
+use builder::{BuiltRoot, BuiltSwitch, build_root};
 use guards::GuardFunctions;
 use rustc_hash::{FxHashMap, FxHashSet};
 use writes::WrittenPaths;
@@ -344,9 +344,76 @@ pub(crate) struct RootFlow {
     /// The subjects in [`Self::readonly_tested`] that no other guard tests or
     /// narrows, which need no solve when their path is not readonly.
     pub(crate) only_readonly_tested: FxHashSet<FlowSubjectId>,
+    /// The `switch` statements without `default` whose [`FlowGuard::Bypass`]
+    /// reaches a read, at most [`MAX_SWITCHES`] of them, in the order of
+    /// their guards' `switch` index. Empty when no such guard reaches a read.
+    pub(crate) switches: Box<[FlowSwitch]>,
+    /// The read points that the [`FlowGuard::Bypass`] of a statement in
+    /// [`Self::switches`] reaches, sorted.
+    pub(crate) bypassed: Box<[BypassedPoint]>,
+}
+
+/// A read point with the `switch` statements whose [`FlowGuard::Bypass`]
+/// reaches it: bit `i` stands for [`RootFlow::switches`]`[i]`.
+pub(crate) type BypassedPoint = (FlowNodeId, u64);
+
+/// The number of `switch` statements per execution root that can be found
+/// exhaustive, the bits of the mask that the solve takes.
+pub(crate) const MAX_SWITCHES: usize = 64;
+
+/// A `switch` statement whose [`FlowGuard::Bypass`] gives `never` when the
+/// statement is exhaustive.
+///
+/// Collection records only statements that TypeScript's
+/// `computeExhaustiveSwitchStatement` can find exhaustive: without `default`,
+/// with a discriminant that is a subject or `typeof` of one, and with cases
+/// that all test a unit value, such as `"a"`, `1`, `null`, or `undefined`, or
+/// a kind of value, such as `"string"`.
+#[derive(Debug)]
+pub(crate) struct FlowSwitch {
+    /// The range of the expression whose type at the statement decides
+    /// whether it is exhaustive: the discriminant, or the operand of
+    /// `typeof`, without parentheses.
+    pub(crate) discriminant: TextRange,
+    /// The subject of that expression.
+    pub(crate) subject: FlowSubjectId,
+    /// The index of the guard that tests that no case matches, the guard of
+    /// the statement's [`FlowGuard::Bypass`].
+    pub(crate) guard: usize,
+    /// Where the statement's cases start. A read before this offset never
+    /// asks whether the statement is exhaustive: the discriminant's own read
+    /// lies before it, so deciding a statement never needs itself.
+    pub(crate) start: TextSize,
+    /// The kinds of value that the cases of `switch (typeof x)` test, one bit
+    /// per [`TypeofKind`] as [`typeof_kind_bit`] gives it, or `None` for any
+    /// other discriminant. TypeScript finds such a statement exhaustive for
+    /// `x: unknown` or `x: any` when its cases test every kind.
+    pub(crate) typeof_kinds: Option<u8>,
+}
+
+/// Returns the bit of `kind` in [`FlowSwitch::typeof_kinds`].
+pub(crate) const fn typeof_kind_bit(kind: TypeofKind) -> u8 {
+    1 << match kind {
+        TypeofKind::Undefined => 0,
+        TypeofKind::Object => 1,
+        TypeofKind::Boolean => 2,
+        TypeofKind::Number => 3,
+        TypeofKind::BigInt => 4,
+        TypeofKind::String => 5,
+        TypeofKind::Symbol => 6,
+        TypeofKind::Function => 7,
+    }
 }
 
 impl RootFlow {
+    /// Returns the statements in [`Self::switches`] whose bypass reaches
+    /// `point`, as [`Self::bypassed`] describes.
+    pub(crate) fn bypassed_switches(&self, point: FlowNodeId) -> u64 {
+        self.bypassed
+            .binary_search_by_key(&point, |(point, _)| *point)
+            .map_or(0, |index| self.bypassed[index].1)
+    }
+
     /// Returns the points where the root reads `subject`, sorted, or an empty
     /// slice when it keeps no read of it.
     pub(crate) fn read_points(&self, subject: FlowSubjectId) -> &[FlowNodeId] {
@@ -612,6 +679,7 @@ impl RootCollector<'_> {
             mut instance_tested,
             instance_mentions,
             reads,
+            switches,
         }) = build_root(root, self.model, &mut self.functions, this_can_narrow)
         else {
             return;
@@ -882,6 +950,15 @@ impl RootCollector<'_> {
             instance_tested.retain(|subject| property_only.contains(subject));
             readonly_tested.retain(|subject| read_points.contains_key(subject));
             only_readonly_tested.retain(|subject| readonly_tested.contains(subject));
+            let read_points: FxHashMap<_, _> = read_points
+                .into_iter()
+                .map(|(subject, mut points)| {
+                    points.sort_unstable();
+                    points.dedup();
+                    (subject, points.into_boxed_slice())
+                })
+                .collect();
+            let (switches, bypassed) = self.bypassed_points(&nodes, switches, &read_points);
             flow.roots.push(RootFlow {
                 nodes: nodes.into_boxed_slice(),
                 guards: guards.into_boxed_slice(),
@@ -891,16 +968,67 @@ impl RootCollector<'_> {
                 pattern_elements,
                 readonly_tested,
                 only_readonly_tested,
-                read_points: read_points
-                    .into_iter()
-                    .map(|(subject, mut points)| {
-                        points.sort_unstable();
-                        points.dedup();
-                        (subject, points.into_boxed_slice())
-                    })
-                    .collect(),
+                read_points,
+                switches,
+                bypassed,
             });
         }
+    }
+
+    /// Returns the `switch` statements of `switches` whose bypass reaches a
+    /// read point of `read_points`, and those points, as
+    /// [`RootFlow::switches`] and [`RootFlow::bypassed`] describe them.
+    ///
+    /// Returns no statement when no bypass reaches a read, and when the walk
+    /// spends the relevance work limit, so no statement counts as exhaustive
+    /// in the root.
+    fn bypassed_points(
+        &self,
+        nodes: &[FlowNode],
+        switches: Vec<BuiltSwitch>,
+        read_points: &FxHashMap<FlowSubjectId, Box<[FlowNodeId]>>,
+    ) -> (Box<[FlowSwitch]>, Box<[BypassedPoint]>) {
+        if switches.is_empty() {
+            return (Box::default(), Box::default());
+        }
+        let successors = successors(nodes);
+        let mut reached = vec![0u64; nodes.len()];
+        let mut remaining = self.relevance_budget;
+        for (bit, switch) in switches.iter().enumerate() {
+            let mask = 1u64 << bit;
+            let mut pending = vec![switch.bypass];
+            while let Some(node) = pending.pop() {
+                let Some(left) = remaining.checked_sub(1) else {
+                    return (Box::default(), Box::default());
+                };
+                remaining = left;
+                let Some(bits) = reached.get_mut(node as usize) else {
+                    return (Box::default(), Box::default());
+                };
+                if *bits & mask != 0 {
+                    continue;
+                }
+                *bits |= mask;
+                pending.extend(&successors[node as usize]);
+            }
+        }
+        let mut bypassed: Vec<_> = read_points
+            .values()
+            .flatten()
+            .filter_map(|point| {
+                let bits = reached[*point as usize];
+                (bits != 0).then_some((*point, bits))
+            })
+            .collect();
+        if bypassed.is_empty() {
+            return (Box::default(), Box::default());
+        }
+        bypassed.sort_unstable_by_key(|(point, _)| *point);
+        bypassed.dedup_by_key(|(point, _)| *point);
+        (
+            switches.into_iter().map(|switch| switch.switch).collect(),
+            bypassed.into_boxed_slice(),
+        )
     }
 
     /// Returns the collected type of the value that the variable declared at
@@ -968,20 +1096,7 @@ impl RootCollector<'_> {
         property_only: &FxHashSet<FlowSubjectId>,
         mut walked: Vec<FlowSubjectId>,
     ) -> Option<FxHashSet<(FlowSubjectId, FlowNodeId)>> {
-        let mut successors = vec![Vec::new(); nodes.len()];
-        for (index, node) in (0..).zip(nodes) {
-            match node {
-                FlowNode::Start => {}
-                FlowNode::Join(predecessors) => {
-                    for predecessor in predecessors {
-                        successors[*predecessor as usize].push(index);
-                    }
-                }
-                FlowNode::Condition { antecedent, .. } => {
-                    successors[*antecedent as usize].push(index);
-                }
-            }
-        }
+        let successors = successors(nodes);
         // Paths and subjects in `property_only` lose their reads first.
         let is_secondary = |subject: FlowSubjectId| {
             property_only.contains(&subject)
@@ -1021,6 +1136,25 @@ impl RootCollector<'_> {
     }
 }
 
+/// Returns the nodes that each node of `nodes` flows directly into.
+fn successors(nodes: &[FlowNode]) -> Vec<Vec<FlowNodeId>> {
+    let mut successors = vec![Vec::new(); nodes.len()];
+    for (index, node) in (0..).zip(nodes) {
+        match node {
+            FlowNode::Start => {}
+            FlowNode::Join(predecessors) => {
+                for predecessor in predecessors {
+                    successors[*predecessor as usize].push(index);
+                }
+            }
+            FlowNode::Condition { antecedent, .. } => {
+                successors[*antecedent as usize].push(index);
+            }
+        }
+    }
+    successors
+}
+
 /// Replaces with [`FlowGuard::Keep`] each [`FlowGuard::ReadonlyPath`] guard in
 /// `guards` whose path has a replaceable object. Returns the subjects of the
 /// other such guards, then the subset of them that no other guard tests or
@@ -1047,7 +1181,8 @@ fn readonly_tested_subjects(
         FlowGuard::Keep
         | FlowGuard::Incomplete
         | FlowGuard::ReadonlyPath(_)
-        | FlowGuard::Both { .. } => None,
+        | FlowGuard::Both { .. }
+        | FlowGuard::Bypass { .. } => None,
     };
     let mut replaced = FxHashSet::default();
     let mut wrapped = FxHashSet::default();
