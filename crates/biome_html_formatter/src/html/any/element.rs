@@ -12,6 +12,7 @@ impl FormatRule<AnyHtmlElement> for FormatAnyHtmlElement {
             AnyHtmlElement::AstroFragment(node) => node.format().fmt(f),
             AnyHtmlElement::HtmlBogusElement(node) => node.format().fmt(f),
             AnyHtmlElement::HtmlCdataSection(node) => node.format().fmt(f),
+            AnyHtmlElement::HtmlDirective(node) => node.format().fmt(f),
             AnyHtmlElement::HtmlElement(node) => node.format().fmt(f),
             AnyHtmlElement::HtmlProcessingInstruction(node) => node.format().fmt(f),
             AnyHtmlElement::HtmlSelfClosingElement(node) => node.format().fmt(f),
