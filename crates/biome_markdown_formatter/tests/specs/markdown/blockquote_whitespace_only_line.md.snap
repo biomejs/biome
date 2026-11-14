@@ -34,6 +34,33 @@ info: markdown/blockquote_whitespace_only_line.md
   >   
 - b
 
+***
+
+> a
+>   	
+> b
+
+***
+
+> a
+>  	  
+> b
+
+***
+
+> >   
+> a
+
+***
+
+> >
+> a
+
+***
+
+> > >   
+> a
+
 ```
 
 
@@ -41,7 +68,7 @@ info: markdown/blockquote_whitespace_only_line.md
 
 ```md
 > a
-> 
+>
 > b
 
 ---
@@ -53,18 +80,45 @@ info: markdown/blockquote_whitespace_only_line.md
 ---
 
 > > a
-> 
+>
 > b
 
 ---
 
 > - a
-> 
+>
 > b
 
 ---
 
 - > - a
 - b
+
+---
+
+> a
+>
+> b
+
+---
+
+> a
+>
+> b
+
+---
+
+> >
+> a
+
+---
+
+> >
+> a
+
+---
+
+> > >
+> a
 
 ```

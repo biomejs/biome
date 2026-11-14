@@ -79,7 +79,7 @@ info: markdown/blockquote/ignore-code.md
  > - This is a long long
  >   long long long long
  >   long long paragraph.
-+> 
++>
  
  > ```js
  > // prettier-ignore
@@ -133,7 +133,7 @@ info: markdown/blockquote/ignore-code.md
 > - This is a long long
 >   long long long long
 >   long long paragraph.
-> 
+>
 
 > ```js
 > // prettier-ignore
