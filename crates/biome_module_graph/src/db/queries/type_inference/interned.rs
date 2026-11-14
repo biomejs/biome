@@ -53,10 +53,11 @@ pub(crate) struct FlowSubjectRootInput<'db> {
     /// Id of the subject in that root's subject table.
     #[returns(copy)]
     pub subject: FlowSubjectId,
-    /// The type that narrowing starts from, as
-    /// [`super::infer_flow_binding_baseline`] reports it for a variable: the
-    /// subject's declared type flattened for narrowing, or `None` when no
-    /// runtime test can change that type.
+    /// The type that narrowing starts from: the subject's declared type
+    /// flattened for narrowing, or `None` when no runtime test can change that
+    /// type. A variable's comes from [`super::infer_flow_binding_baseline`];
+    /// a property path's is the type of the member access at the read, so
+    /// reads of one path can start from different types.
     #[returns(copy)]
     pub baseline: Option<InferredTypeData<'db>>,
 }

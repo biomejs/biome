@@ -2,7 +2,8 @@ use super::guards::{
     DecomposedCondition, FlowGuard, FlowOutcome, GuardFunctions, decompose_assertion,
     decompose_condition,
 };
-use super::{FlowNode, FlowNodeId, FlowSubject, FlowSubjectId, FlowSubjectTable};
+use super::subjects::subject_of;
+use super::{AnyFlowExpression, FlowNode, FlowNodeId, FlowSubjectId, FlowSubjectTable};
 use biome_js_control_flow::{AnyJsControlFlowRoot, is_truthy_literal};
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
@@ -21,17 +22,17 @@ const MAX_FLOW_NODES: usize = 65_536;
 pub(super) struct BuiltRoot {
     pub(super) nodes: Vec<FlowNode>,
     pub(super) guards: Vec<FlowGuard>,
-    /// The subjects that guards, mentions, and reads refer to, each at the
-    /// index of its id.
-    pub(super) subjects: Vec<FlowSubject>,
+    /// The subjects that guards, mentions, and reads refer to.
+    pub(super) subjects: FlowSubjectTable,
     /// Condition nodes paired with each subject their guard may refine.
     pub(super) mentions: Vec<(FlowNodeId, FlowSubjectId)>,
-    /// Reachable reads of local bindings with their incoming flow.
+    /// Reachable reads of subjects with their incoming flow.
     pub(super) reads: Vec<BuiltRead>,
 }
 
 pub(super) struct BuiltRead {
-    pub(super) identifier: JsIdentifierExpression,
+    /// The identifier or static member expression that reads the subject.
+    pub(super) expression: AnyFlowExpression,
     pub(super) point: FlowNodeId,
     pub(super) subject: FlowSubjectId,
 }
@@ -58,8 +59,8 @@ type Build<T> = Result<T, Unsupported>;
 /// A condition inside a region narrows only the rest of the expression that
 /// contains it, as in `x && x.length`. Each `break` or `continue` that leaves
 /// the region joins its target with the flow before the region. Because only
-/// variables that are never written narrow, the flow before a region is never
-/// narrower than the real flow at any point inside or after it.
+/// subjects that the root never writes narrow, the flow before a region is
+/// never narrower than the real flow at any point inside or after it.
 ///
 /// Returns `None` for inputs exceeding construction limits. Like the statement
 /// control-flow graph, it also returns `None` when any statement, including
@@ -91,7 +92,7 @@ pub(super) fn build_root(
     Some(BuiltRoot {
         nodes: builder.nodes,
         guards: builder.guards,
-        subjects: builder.subjects.into_subjects(),
+        subjects: builder.subjects,
         mentions: builder.mentions,
         reads: builder.reads,
     })
@@ -680,7 +681,7 @@ impl RootBuilder<'_, '_> {
                 .and_then(|name| self.subjects.reference(self.model, &name))
             {
                 self.reads.push(BuiltRead {
-                    identifier,
+                    expression: AnyFlowExpression::JsIdentifierExpression(identifier),
                     point: incoming,
                     subject,
                 });
@@ -688,6 +689,20 @@ impl RootBuilder<'_, '_> {
             return Ok(incoming);
         }
         match AnyJsExpression::cast_ref(node) {
+            // The object is evaluated before the property is read.
+            Some(expression @ AnyJsExpression::JsStaticMemberExpression(_)) => {
+                let flow = self.children(node, incoming, depth)?;
+                if let Some(subject) = subject_of(&expression, self.model, &mut self.subjects)
+                    && let AnyJsExpression::JsStaticMemberExpression(member) = expression
+                {
+                    self.reads.push(BuiltRead {
+                        expression: AnyFlowExpression::JsStaticMemberExpression(member),
+                        point: flow,
+                        subject,
+                    });
+                }
+                Ok(flow)
+            }
             Some(AnyJsExpression::JsLogicalExpression(logical)) => {
                 let left = logical.left().map_err(|_| Unsupported)?;
                 let right = logical.right().map_err(|_| Unsupported)?;
@@ -715,14 +730,23 @@ impl RootBuilder<'_, '_> {
                 let negative = self.evaluate(alternate.syntax(), negative, depth + 1)?;
                 self.push(FlowNode::Join(vec![positive, negative]))
             }
-            _ => {
-                let mut flow = incoming;
-                for child in node.children() {
-                    flow = self.evaluate(&child, flow, depth + 1)?;
-                }
-                Ok(flow)
-            }
+            _ => self.children(node, incoming, depth),
         }
+    }
+
+    /// Evaluates the children of `node`, which lies at `depth`, in source
+    /// order from `incoming`, and returns the flow after them.
+    fn children(
+        &mut self,
+        node: &JsSyntaxNode,
+        incoming: FlowNodeId,
+        depth: usize,
+    ) -> Build<FlowNodeId> {
+        let mut flow = incoming;
+        for child in node.children() {
+            flow = self.evaluate(&child, flow, depth + 1)?;
+        }
+        Ok(flow)
     }
 
     fn condition(
@@ -800,7 +824,7 @@ impl RootBuilder<'_, '_> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::js_module_info::flow::FlowTest;
+    use crate::js_module_info::flow::{FlowSubject, FlowTest, PropertyKey};
     use biome_js_parser::{JsParserOptions, parse};
     use biome_js_semantic::{SemanticModelOptions, semantic_model};
     use biome_js_syntax::JsSyntaxKind;
@@ -865,7 +889,7 @@ mod tests {
             self.root()
                 .reads
                 .iter()
-                .find(|read| read.identifier.range() == range)
+                .find(|read| read.expression.range() == range)
                 .map(|read| read.point)
         }
 
@@ -910,9 +934,7 @@ mod tests {
                     test,
                     positive,
                 } => {
-                    let FlowSubject::Binding(binding) = &self.root().subjects[*subject as usize];
-                    let name =
-                        &self.source[usize::from(binding.start())..usize::from(binding.end())];
+                    let name = self.subject_name(*subject);
                     let test = match test {
                         FlowTest::Truthy => "Truthy",
                         FlowTest::Nullish => "Nullish",
@@ -925,6 +947,20 @@ mod tests {
                     self.facts(*left, facts);
                     self.facts(*right, facts);
                 }
+            }
+        }
+    }
+
+    impl Built {
+        /// Returns the source of the variable that `subject` starts at,
+        /// followed by the names along its path, as in `o.v`.
+        fn subject_name(&self, subject: FlowSubjectId) -> String {
+            match &self.root().subjects.as_slice()[subject as usize] {
+                FlowSubject::Binding(binding) => self.source[*binding].to_owned(),
+                FlowSubject::Member {
+                    object,
+                    key: PropertyKey::Name(name),
+                } => format!("{}.{name}", self.subject_name(*object)),
             }
         }
     }
@@ -1096,6 +1132,16 @@ mod tests {
         let built = function("function f(x, y) { if (y) x?.read(x); after(x); }");
         assert_eq!(built.paths("x", 2), [vec!["y:Truthy".to_owned()]]);
         assert_eq!(built.paths("x", 3).len(), 2);
+    }
+
+    #[test]
+    fn property_paths_are_read_and_tested_like_variables() {
+        let built =
+            function("function f(o) { if (o.v) read(o.v.w, (o).v); if (o?.v == null) read(o.v); }");
+        assert!(contains(&built.paths("o.v", 1), "o.v:Truthy"));
+        assert!(contains(&built.paths("o.v.w", 0), "o.v:Truthy"));
+        assert!(contains(&built.paths("(o).v", 0), "o.v:Truthy"));
+        assert!(contains(&built.paths("o.v", 2), "o.v:Nullish"));
     }
 
     #[test]

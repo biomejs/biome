@@ -1,0 +1,45 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validPropertyPathWrites.ts
+---
+# Input
+```ts
+// should not generate diagnostics
+// A write to `options.timer` anywhere in the function, including inside an
+// arrow function called where it is defined, stops the property from
+// narrowing, so each optional chain stays necessary. TypeScript types
+// `options.timer` as `Timer | null` in the first two functions. In
+// `replaceOptions` it gives `Timer`, because it ignores a write through a key
+// that is not a constant; Biome deliberately treats such a write as a write to
+// every property of the object.
+
+interface Timer {
+	cancel(): void;
+}
+
+declare function next(): Timer | null;
+
+function restart(options: { timer: Timer | null }) {
+	if (options.timer !== null) {
+		options.timer = next();
+		options.timer?.cancel();
+	}
+}
+
+function resetFirst(options: { timer: Timer | null }) {
+	if (options.timer !== null) {
+		(() => {
+			options.timer = next();
+		})();
+		options.timer?.cancel();
+	}
+}
+
+function replaceOptions(options: { timer: Timer | null }, key: "timer") {
+	if (options.timer !== null) {
+		options[key] = next();
+		options.timer?.cancel();
+	}
+}
+
+```
