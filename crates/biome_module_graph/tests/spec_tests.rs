@@ -82,6 +82,8 @@ mod promises;
 mod queries;
 #[path = "spec_tests/requests.test.rs"]
 mod requests;
+#[path = "spec_tests/scss_modules.test.rs"]
+mod scss_modules;
 #[path = "spec_tests/substitutions.test.rs"]
 mod substitutions;
 #[path = "spec_tests/tailwind_stylesheet.test.rs"]

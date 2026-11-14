@@ -1,0 +1,14 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: _card.scss
+---
+# Input
+```css
+// should not generate diagnostics
+
+// Loaded by styles.scss, which App.jsx imports. Sass resolves "card" to this partial.
+.card {
+	padding: 1rem;
+}
+
+```

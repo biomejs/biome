@@ -1,0 +1,6 @@
+// should not generate diagnostics
+
+// Loaded by styles.scss, which App.jsx imports. Sass resolves "card" to this partial.
+.card {
+	padding: 1rem;
+}

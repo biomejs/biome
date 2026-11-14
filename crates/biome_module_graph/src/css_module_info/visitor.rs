@@ -1,11 +1,13 @@
+use crate::ResolutionMode;
 use crate::css_module_info::{
     CssImport, CssImports, CssModuleInfo, TailwindImport, TailwindStylesheet,
 };
 use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
 use biome_css_syntax::{
-    AnyCssImportUrl, AnyCssRoot, CssClassSelector, CssImportAtRule, CssLanguage,
+    AnyCssImportUrl, AnyCssRoot, CssClassSelector, CssImportAtRule, CssLanguage, CssSyntaxKind,
     TwCustomVariantAtRule, TwThemeAtRule, TwUtilityAtRule,
 };
+use biome_resolver::SassLoadRule;
 use biome_rowan::{AstNode, SyntaxKindSet, Text, TextRange, TokenText, WalkEvent};
 use indexmap::IndexMap;
 
@@ -52,6 +54,7 @@ impl CssModuleVisitor {
                                 import: CssImport {
                                     range: url.range(),
                                     specifier: specifier.into(),
+                                    mode: ResolutionMode::Css,
                                 },
                                 position: tailwind.end(),
                             });
@@ -119,7 +122,27 @@ impl CssModuleVisitor {
             CssImport {
                 range: node.range(),
                 specifier: text,
+                mode: Self::import_mode(&node),
             },
         );
+    }
+
+    /// Returns the rules that resolve `url`: the Sass rules for the URL of a
+    /// Sass `@use`, `@forward` or `@import`, and the CSS rules otherwise. The
+    /// parser already turns plain CSS items of a Sass `@import`, such as
+    /// `"theme.css"`, into a `ScssPlainImport`.
+    fn import_mode(url: &AnyCssImportUrl) -> ResolutionMode {
+        let AnyCssImportUrl::CssString(url) = url else {
+            return ResolutionMode::Css;
+        };
+        match url.syntax().parent().map(|parent| parent.kind()) {
+            Some(CssSyntaxKind::SCSS_USE_AT_RULE | CssSyntaxKind::SCSS_FORWARD_AT_RULE) => {
+                ResolutionMode::Sass(SassLoadRule::Module)
+            }
+            Some(CssSyntaxKind::SCSS_IMPORT_ITEM_LIST) => {
+                ResolutionMode::Sass(SassLoadRule::Import)
+            }
+            _ => ResolutionMode::Css,
+        }
     }
 }

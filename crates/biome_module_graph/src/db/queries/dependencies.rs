@@ -79,7 +79,7 @@ pub(crate) fn css_dependencies(
 ) -> ModuleDependencies {
     let mut dependencies = DependencyCollector::new(db, path);
     for import in info.imports.iter() {
-        dependencies.resolve(&import.specifier, ResolutionMode::Css);
+        dependencies.resolve(&import.specifier, import.mode);
     }
     dependencies.finish()
 }

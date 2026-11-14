@@ -1,0 +1,15 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: styles.scss
+---
+# Input
+```css
+// should not generate diagnostics
+
+@use "card";
+
+.page {
+	margin: 0;
+}
+
+```
