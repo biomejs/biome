@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validClassFields.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+function instanceField() {
+    const self = this;
+    return class {
+        value = self.value;
+    };
+}
+
+function instanceFieldArrow() {
+    const self = this;
+    return class {
+        getValue = () => self.value;
+    };
+}
+
+function staticField() {
+    const self = this;
+    return class {
+        static value = self.value;
+    };
+}
+
+function staticFieldArrow() {
+    const self = this;
+    return class {
+        static getValue = () => self.value;
+    };
+}
+
+```
