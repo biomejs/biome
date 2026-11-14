@@ -89,6 +89,11 @@ pub enum MarkdownReLexContext {
     /// Document-level fenced code content and runs of indentation characters
     /// use the same mechanism.
     Span,
+    /// After a block quote prefix the parser has matched. If the rest of the
+    /// line is only spaces and tabs, it becomes one `MD_TEXTUAL_LITERAL`
+    /// without the line ending, because a blank line has no hard line break.
+    /// Otherwise the token is lexed as in the regular context.
+    BlankLineRest,
 }
 
 /// An extremely fast, lookup table based, lossless Markdown lexer
@@ -1859,6 +1864,17 @@ impl<'src> ReLexer<'src> for MarkdownLexer<'src> {
             Some(_) if context == MarkdownReLexContext::TextualFallback => {
                 self.consume_textual_impl::<false>(MarkdownLexContext::Regular)
             }
+            // Consume a whitespace run that ends the line as one text token,
+            // leaving the line ending as its own token.
+            Some(b' ' | b'\t')
+                if context == MarkdownReLexContext::BlankLineRest
+                    && self.current_whitespace_run_ends_line() =>
+            {
+                while matches!(self.current_byte(), Some(b' ' | b'\t')) {
+                    self.advance(1);
+                }
+                MD_TEXTUAL_LITERAL
+            }
             // Consume everything up to the end position the parser measured
             // as one token of the kind the parser chose.
             Some(_) if context == MarkdownReLexContext::Span => {
@@ -1878,9 +1894,9 @@ impl<'src> ReLexer<'src> for MarkdownLexer<'src> {
                     MarkdownReLexContext::ListPostMarker => MarkdownLexContext::ListPostMarker,
                     // Handled by the arms above; these contexts have no
                     // corresponding lex context.
-                    MarkdownReLexContext::TextualFallback | MarkdownReLexContext::Span => {
-                        MarkdownLexContext::Regular
-                    }
+                    MarkdownReLexContext::TextualFallback
+                    | MarkdownReLexContext::Span
+                    | MarkdownReLexContext::BlankLineRest => MarkdownLexContext::Regular,
                 };
 
                 self.consume_token(current, lex_context)

@@ -28,6 +28,49 @@ impl Quote {
     }
 }
 
+/// Returns how much of a quote's leading and trailing quote-only lines the
+/// formatter removes.
+///
+/// A quote that ends its parent block list drops both, and any other quote
+/// drops only the leading ones. An empty quote followed by more content, like
+/// the inner quote in `> >\n> a` or `> > >\n> a`, keeps everything: its
+/// content is only the newline that ends its line, and removing it would join
+/// the next line's prefix to this marker and nest the following content one
+/// level deeper.
+pub(crate) fn quote_boundary_trim_for(node: &MdQuote) -> QuoteBoundaryTrim {
+    let trim = if node.syntax().next_sibling().is_none() {
+        QuoteBoundaryTrim::LeadingAndTrailing
+    } else {
+        QuoteBoundaryTrim::Leading
+    };
+    if quote_boundary_trim_range(&node.content(), trim).is_empty()
+        && is_followed_by_quote_content(node)
+    {
+        QuoteBoundaryTrim::None
+    } else {
+        trim
+    }
+}
+
+/// Returns whether more content follows `node` inside its enclosing quotes,
+/// looking through quotes that `node` ends.
+fn is_followed_by_quote_content(node: &MdQuote) -> bool {
+    let mut current = node.syntax().clone();
+    loop {
+        if current.next_sibling().is_some() {
+            return true;
+        }
+        let Some(enclosing) = current
+            .parent()
+            .and_then(|list| list.parent())
+            .filter(|parent| MdQuote::can_cast(parent.kind()))
+        else {
+            return false;
+        };
+        current = enclosing;
+    }
+}
+
 pub(crate) fn should_format_quote_structurally(node: &MdQuote) -> FormatResult<bool> {
     block_list_has_quote_continuation(&node.content())
 }
@@ -36,11 +79,7 @@ impl Format<MarkdownFormatContext> for Quote {
     fn fmt(&self, f: &mut MarkdownFormatter) -> FormatResult<()> {
         let MdQuoteFields { content, prefix } = self.node.as_fields();
         let prefix = prefix?;
-        let quote_boundary_trim = if self.node.syntax().next_sibling().is_none() {
-            QuoteBoundaryTrim::LeadingAndTrailing
-        } else {
-            QuoteBoundaryTrim::Leading
-        };
+        let quote_boundary_trim = quote_boundary_trim_for(&self.node);
         let trim_range = quote_boundary_trim_range(&content, quote_boundary_trim);
         let remove_prefix = trim_range.start > 0 && !trim_range.is_empty();
 

@@ -1,10 +1,8 @@
 use crate::context::ProseWrap;
 use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
-use crate::markdown::lists::block_list::{
-    FormatMdBlockListOptions, QuoteBoundaryTrim, quote_boundary_trim_range,
-};
+use crate::markdown::lists::block_list::{FormatMdBlockListOptions, quote_boundary_trim_range};
 use crate::prelude::*;
-use crate::quote::{Quote, should_format_quote_structurally};
+use crate::quote::{Quote, quote_boundary_trim_for, should_format_quote_structurally};
 use biome_formatter::write;
 use biome_markdown_syntax::{MdQuote, MdQuoteFields};
 
@@ -19,11 +17,7 @@ impl FormatNodeRule<MdQuote> for FormatMdQuote {
 
         let MdQuoteFields { content, prefix } = node.as_fields();
         let prefix = prefix?;
-        let quote_boundary_trim = if node.syntax().next_sibling().is_none() {
-            QuoteBoundaryTrim::LeadingAndTrailing
-        } else {
-            QuoteBoundaryTrim::Leading
-        };
+        let quote_boundary_trim = quote_boundary_trim_for(node);
         let trim_range = quote_boundary_trim_range(&content, quote_boundary_trim);
         let remove_prefix = trim_range.start > 0 && !trim_range.is_empty();
 

@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use biome_formatter::{FormatRuleWithOptions, write};
+use biome_markdown_syntax::MarkdownSyntaxKind::{EOF, NEWLINE};
 use biome_markdown_syntax::{MdQuotePrefix, MdQuotePrefixFields};
 
 #[derive(Debug, Clone, Default)]
@@ -34,7 +35,15 @@ impl FormatNodeRule<MdQuotePrefix> for FormatMdQuotePrefix {
         write!(f, [pre_marker_indent.format(), marker_token.format(),])?;
 
         if let Some(post_marker_space_token) = post_marker_space_token {
-            write!(f, [post_marker_space_token.format()])?;
+            // On a blank quote line the space is trailing whitespace.
+            let line_is_blank = post_marker_space_token
+                .next_token()
+                .is_none_or(|token| matches!(token.kind(), NEWLINE | EOF));
+            if line_is_blank {
+                write!(f, [format_removed(&post_marker_space_token)])?;
+            } else {
+                write!(f, [post_marker_space_token.format()])?;
+            }
         } else {
             let marker = marker_token?;
             let next_has_text = marker
