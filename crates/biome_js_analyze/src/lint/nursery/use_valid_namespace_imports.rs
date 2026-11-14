@@ -94,7 +94,7 @@ declare_lint_rule! {
     /// - If you want to report imports of names that a module doesn't export, see [`noUnresolvedImports`](https://biomejs.dev/linter/rules/no-unresolved-imports/).
     /// - If you want to report reading a namespace import with a computed key, such as `utils[name]`, see [`noDynamicNamespaceImportAccess`](https://biomejs.dev/linter/rules/no-dynamic-namespace-import-access/).
     pub UseValidNamespaceImports {
-        version: "next",
+        version: "2.6.8",
         name: "useValidNamespaceImports",
         language: "js",
         sources: &[RuleSource::EslintImport("namespace").same()],

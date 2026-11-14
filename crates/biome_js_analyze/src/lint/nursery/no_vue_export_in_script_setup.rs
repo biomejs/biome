@@ -65,7 +65,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueExportInScriptSetup {
-        version: "next",
+        version: "2.6.8",
         name: "noVueExportInScriptSetup",
         language: "js",
         recommended: true,

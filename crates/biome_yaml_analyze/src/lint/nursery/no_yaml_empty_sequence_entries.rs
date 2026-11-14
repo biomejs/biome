@@ -44,7 +44,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoYamlEmptySequenceEntries {
-        version: "next",
+        version: "2.6.8",
         name: "noYamlEmptySequenceEntries",
         language: "yaml",
         sources: &[RuleSource::EslintYml("no-empty-sequence-entry").same()],

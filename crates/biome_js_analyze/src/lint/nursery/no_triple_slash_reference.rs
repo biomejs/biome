@@ -131,7 +131,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoTripleSlashReference {
-        version: "next",
+        version: "2.6.8",
         name: "noTripleSlashReference",
         language: "js",
         sources: &[RuleSource::EslintTypeScript("triple-slash-reference").same()],

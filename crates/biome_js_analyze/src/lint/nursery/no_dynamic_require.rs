@@ -81,7 +81,7 @@ declare_lint_rule! {
     /// - If you want to disallow `require()` entirely, see [`noCommonJs`](https://biomejs.dev/linter/rules/no-common-js/).
     ///
     pub NoDynamicRequire {
-        version: "next",
+        version: "2.6.8",
         name: "noDynamicRequire",
         language: "js",
         sources: &[RuleSource::EslintImport("no-dynamic-require").same()],

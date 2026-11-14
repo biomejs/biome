@@ -81,7 +81,7 @@ declare_lint_rule! {
     /// const entries = Object.fromEntries(scores);
     /// ```
     pub NoMisusedSpread {
-        version: "next",
+        version: "2.6.8",
         name: "noMisusedSpread",
         language: "js",
         sources: &[RuleSource::EslintTypeScript("no-misused-spread").same()],

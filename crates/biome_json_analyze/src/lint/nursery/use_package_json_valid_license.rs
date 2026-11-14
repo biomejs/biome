@@ -75,7 +75,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UsePackageJsonValidLicense {
-        version: "next",
+        version: "2.6.8",
         name: "usePackageJsonValidLicense",
         language: "json",
         recommended: true,

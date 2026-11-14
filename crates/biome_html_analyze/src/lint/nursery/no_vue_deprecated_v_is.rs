@@ -40,7 +40,7 @@ declare_lint_rule! {
     /// - [Vue `is` attribute](https://vuejs.org/api/built-in-special-attributes.html#is)
     /// - [Vue 3 migration guide: custom elements](https://v3-migration.vuejs.org/breaking-changes/custom-elements-interop.html)
     pub NoVueDeprecatedVIs {
-        version: "next",
+        version: "2.6.8",
         name: "noVueDeprecatedVIs",
         language: "html",
         recommended: true,

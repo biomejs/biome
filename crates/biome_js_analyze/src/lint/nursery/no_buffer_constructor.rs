@@ -70,7 +70,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoBufferConstructor {
-        version: "next",
+        version: "2.6.8",
         name: "noBufferConstructor",
         language: "js",
         sources: &[
