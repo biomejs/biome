@@ -730,6 +730,12 @@ where
 {
     fn enter(&mut self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeTransformAction<'db> {
         let ty = (self.resolve)(ty);
+        // A generic parameter is kept as it is. Rebuilding its constraint or
+        // default would intern a different parameter that no longer matches
+        // the existing references to it.
+        if matches!(ty, TypeData::Generic(_)) {
+            return TypeTransformAction::Replace(ty);
+        }
         // This runs before the instance's target is expanded to its declaration.
         if let TypeData::InstanceOf(instance) = ty
             && let Some(awaited) = self.instantiate_awaited(db, instance)
@@ -821,7 +827,9 @@ impl<'db> TypeData<'db> {
     ///
     /// The resolver is invoked before descending into each type. A `typeof`
     /// value whose resolved type is unknown remains wrapped so its identity can
-    /// be resolved by a later inference pass.
+    /// be resolved by a later inference pass. Generic parameters are kept as
+    /// they are, including their constraints and defaults, so that they still
+    /// match the references to them.
     pub fn normalize_nested_types(
         self,
         db: &'db dyn TypeDb,
@@ -1216,6 +1224,31 @@ mod tests {
         assert_eq!(
             source.substitute_types(&db, &substitutions),
             TypeTransformResult::LimitExceeded
+        );
+    }
+
+    #[test]
+    fn normalization_preserves_generic_parameter_identity() {
+        let db = TestDb::default();
+        let constraint = TypeData::TypeofType(InternedTypeofType::new(&db, TypeData::String));
+        let u = TypeData::Generic(InternedGenericTypeParameter::new(
+            &db,
+            false,
+            Some(constraint),
+            None,
+            Text::from("U"),
+        ));
+        let function = TypeData::Function(InternedFunction::new(
+            &db,
+            vec![u].into_boxed_slice(),
+            Box::default(),
+            ReturnType::Type(u),
+            false,
+            None,
+        ));
+        assert_eq!(
+            function.normalize_nested_types(&db, |ty| ty).unwrap(),
+            function
         );
     }
 
