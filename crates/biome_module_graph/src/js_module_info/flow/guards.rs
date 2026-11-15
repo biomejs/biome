@@ -977,6 +977,50 @@ fn is_boolean_valued(expression: &AnyJsExpression, remaining: &mut usize) -> boo
     }
 }
 
+/// Decomposes the condition that the body of a `for...in` loop whose head
+/// declares a variable, as `const k`, `let k`, or `var k` do, assumes about
+/// the loop's expression `expression`, into guards appended to `guards`, as
+/// [`decompose_condition`] does.
+///
+/// As in TypeScript's `getTypeAtFlowAssignment`, where such a loop "acts as a
+/// nonnull" on its expression, the condition tests that the expression is
+/// not nullish, and neither is any receiver of its optional chain, so
+/// `for (const k in o?.v)` narrows both `o?.v` and `o`. It adds no property
+/// or pattern guard: TypeScript narrows no object through
+/// `for (const k in s.kind)`. Parentheses are skipped, but `o!` tests
+/// nothing, where TypeScript narrows `o`.
+pub(super) fn decompose_for_in(
+    expression: &AnyJsExpression,
+    model: &SemanticModel,
+    functions: &mut GuardFunctions,
+    subjects: &mut FlowSubjectTable,
+    guards: &mut Vec<FlowGuard>,
+) -> DecomposedCondition {
+    let mut decomposer = Decomposer::new(model, functions, subjects, guards);
+    decomposer.shape_guards = false;
+    let step =
+        omit_parentheses(expression.clone(), &mut decomposer.remaining).and_then(|operand| {
+            Some(if has_operand_shape(&operand)? {
+                ConditionStep::Guard {
+                    operand,
+                    guard: SyntaxGuard::Nullish,
+                    positive: false,
+                    receivers: true,
+                }
+            } else {
+                ConditionStep::Unsupported
+            })
+        });
+    let guard = match step {
+        Some(step) => decomposer.step_guard(step, FlowOutcome::NonNullish, 0),
+        None => {
+            decomposer.complete = false;
+            decomposer.push(FlowGuard::Incomplete)
+        }
+    };
+    decomposer.finish(guard, [expression])
+}
+
 struct Decomposer<'a, 'raw> {
     model: &'a SemanticModel,
     functions: &'a mut GuardFunctions<'raw>,
@@ -999,10 +1043,10 @@ struct Decomposer<'a, 'raw> {
     /// Every initializer that an aliased condition has inlined.
     initializers: Vec<AnyJsExpression>,
     /// Whether a runtime test of a property or of an element of a pattern
-    /// also narrows the object or the pattern, through the guards that
-    /// [`Self::property_guard`] and [`Self::pattern_guard`] add. False for the
-    /// cases of `switch (typeof x)`, which narrow only the operand of
-    /// `typeof`.
+    /// also narrows the object or the pattern, as [`Self::property_guard`]
+    /// and [`Self::pattern_guard`] describe. False for the cases of
+    /// `switch (typeof x)`, which narrow only the operand of `typeof`, and for
+    /// the expression of a `for...in` loop.
     shape_guards: bool,
 }
 

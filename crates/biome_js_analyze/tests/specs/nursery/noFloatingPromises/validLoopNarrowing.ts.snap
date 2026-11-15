@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validLoopNarrowing.ts
+---
+# Input
+```ts
+// should not generate diagnostics
+
+function nullInForOf(values: (Promise<void> | null)[]) {
+	for (const value of values) {
+		if (value === null) {
+			value;
+		}
+	}
+}
+
+function stringAfterContinue(values: (Promise<void> | string)[]) {
+	for (const value of values) {
+		if (typeof value !== "string") continue;
+		value;
+	}
+}
+
+```
