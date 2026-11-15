@@ -381,6 +381,7 @@ define_categories! {
     "lint/nursery/noUselessParameterPropertyAssignment": "https://biomejs.dev/linter/rules/no-useless-parameter-property-assignment",
     "lint/nursery/noUselessQualifier": "https://biomejs.dev/linter/rules/no-useless-qualifier",
     "lint/nursery/noUselessRecursion": "https://biomejs.dev/linter/rules/no-useless-recursion",
+    "lint/nursery/noUselessSetConstruction": "https://biomejs.dev/linter/rules/no-useless-set-construction",
     "lint/nursery/noUselessSplice": "https://biomejs.dev/linter/rules/no-useless-splice",
     "lint/nursery/noUselessSpread": "https://biomejs.dev/linter/rules/no-useless-spread",
     "lint/nursery/noUselessTypeAssertion": "https://biomejs.dev/linter/rules/no-useless-type-assertion",

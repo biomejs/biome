@@ -2001,6 +2001,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noUselessSetConstruction",
+        TypeId::of::<
+            biome_rule_options::no_useless_set_construction::NoUselessSetConstructionOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "noUselessSplice",
         TypeId::of::<biome_rule_options::no_useless_splice::NoUselessSpliceOptions>(),
     ));
