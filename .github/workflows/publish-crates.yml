@@ -13,20 +13,9 @@ on:
           - patch
   pull_request:
     types:
-      - opened
-      - reopened
-      - synchronize
       - closed
     branches:
       - main
-
-concurrency:
-  group: >-
-    ${{ github.event_name == 'pull_request' &&
-    (github.event.pull_request.head.ref != 'automated-release/crates' ||
-    github.event.pull_request.head.repo.full_name != github.repository) &&
-    format('publish-crates-pr-{0}', github.run_id) || 'publish-crates' }}
-  cancel-in-progress: false
 
 env:
   CARGO_TERM_COLOR: always
@@ -34,10 +23,11 @@ env:
 jobs:
   prepare:
     if: github.event_name == 'workflow_dispatch'
+    concurrency:
+      group: prepare-crates
+      cancel-in-progress: false
     runs-on: depot-ubuntu-24.04-arm-16
     permissions:
-      # Dispatch verification for the generated release commit.
-      actions: write
       # Push the automated release branch.
       contents: write
       # Create the release pull request.
@@ -57,6 +47,14 @@ jobs:
           existing=$(gh pr list --base main --head automated-release/crates --state open --json url --jq 'first | .url // empty')
           if [ -n "$existing" ]; then
             echo "A crate release pull request is already open: $existing"
+            exit 1
+          fi
+      - name: Check for an existing release branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh api "repos/${{ github.repository }}/git/ref/heads/automated-release/crates" --silent; then
+            echo "The crate release branch still exists"
             exit 1
           fi
       - name: Install Node.js
@@ -94,34 +92,10 @@ jobs:
             --head automated-release/crates \
             --title "release: crates v$VERSION" \
             --body-file .github/PULL_REQUEST_TEMPLATE.md
-      - name: Dispatch crate publication verification
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run verify-crates.yml --ref automated-release/crates --field revision="$(git rev-parse HEAD)"
-
-  verify:
-    name: Verify crate publication
-    if: >-
-      github.event_name == 'pull_request' &&
-      github.event.action != 'closed' &&
-      github.event.pull_request.head.ref == 'automated-release/crates' &&
-      github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: depot-ubuntu-24.04-arm-16
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-      - name: Install toolchain
-        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
-        with:
-          cache-base: main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Verify crate publication
-        run: cargo run --locked -p xtask_publish_crates -- verify
+      - name: Report manual verification command
+        run: |
+          revision=$(git rev-parse HEAD)
+          echo "Run \`gh workflow run verify-crates.yml --ref automated-release/crates --field revision=$revision\` before merging." >> "$GITHUB_STEP_SUMMARY"
 
   detect:
     if: >-
@@ -152,18 +126,23 @@ jobs:
   publish:
     needs: detect
     if: needs.detect.outputs.version != ''
+    concurrency:
+      group: publish-crates
+      cancel-in-progress: false
     runs-on: depot-ubuntu-24.04-arm-16
     environment: crate-publish
     permissions:
-      # Check out the release, create its tag, and delete its branch after publication.
-      contents: write
+      # Inspect verification, check out the release, create its tag, and delete its branch.
+      actions: read
       checks: read
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          # Publish the exact tree that passed dry-run verification.
+          ref: ${{ github.event.pull_request.head.sha }}
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:
@@ -173,11 +152,39 @@ jobs:
       - name: Require successful dry-run verification
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
           VERIFIED_REVISION: ${{ github.event.pull_request.head.sha }}
         run: |
-          conclusion=$(gh api "repos/${{ github.repository }}/commits/$VERIFIED_REVISION/check-runs" \
-            --jq '[.check_runs[] | select(.name == "Verify crate publication")] | max_by(.completed_at).conclusion // empty')
-          test "$conclusion" = success
+          # Resolve each check to its Actions run so a same-named check from another source cannot authorize publishing.
+          verified=false
+          while IFS= read -r details_url; do
+            run_id=${details_url#*"/actions/runs/"}
+            run_id=${run_id%%/*}
+            case "$run_id" in
+              ''|*[!0-9]*) continue ;;
+            esac
+
+            IFS=$'\t' read -r workflow event head_sha head_repository run_conclusion < <(
+              gh api "repos/$REPOSITORY/actions/runs/$run_id" \
+                --jq '[.path, .event, .head_sha, .head_repository.full_name, .conclusion] | @tsv'
+            )
+            test "$head_sha" = "$VERIFIED_REVISION" || continue
+            test "$head_repository" = "$REPOSITORY" || continue
+            test "$run_conclusion" = success || continue
+            test "$workflow:$event" = .github/workflows/verify-crates.yml:workflow_dispatch || continue
+
+            conclusion=$(gh api "repos/$REPOSITORY/actions/runs/$run_id/jobs?filter=latest&per_page=100" \
+              --jq '[.jobs[] | select(.name == "Verify crate publication")] | max_by(.completed_at).conclusion // empty')
+            if test "$conclusion" = success; then
+              verified=true
+              break
+            fi
+          done < <(
+            gh api "repos/$REPOSITORY/commits/$VERIFIED_REVISION/check-runs" \
+              --method GET --field check_name="Verify crate publication" --field per_page=100 \
+              --jq '[.check_runs[] | select(.name == "Verify crate publication" and .conclusion == "success" and .app.slug == "github-actions" and .details_url != null)] | sort_by(.completed_at) | reverse | .[].details_url'
+          )
+          test "$verified" = true
       - name: Publish crates
         run: cargo run --locked -p xtask_publish_crates -- publish --execute --verified-revision "$VERIFIED_REVISION"
         env:

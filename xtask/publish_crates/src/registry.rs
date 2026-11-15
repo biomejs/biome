@@ -69,7 +69,10 @@ impl CratesIoRegistry {
         }
     }
 
-    fn request_text(&self, url: &str) -> Result<Option<String>> {
+    fn request<T, F>(&self, url: &str, mut parse: F) -> Result<Option<T>>
+    where
+        F: FnMut(&str) -> Result<T>,
+    {
         let mut last_error = None;
         let deadline = Instant::now() + REQUEST_TIMEOUT;
         for attempt in 0..MAX_REQUEST_ATTEMPTS {
@@ -93,21 +96,32 @@ impl CratesIoRegistry {
                     {
                         delay = retry_after;
                     }
-                    let body = response
-                        .body_mut()
-                        .read_to_string()
-                        .with_context(|| format!("failed to read response from {url}"))?;
-                    if (200..300).contains(&status) {
-                        return Ok(Some(body));
+                    match response.body_mut().read_to_string() {
+                        Ok(body) => {
+                            if (200..300).contains(&status) {
+                                match parse(&body)
+                                    .with_context(|| format!("failed to parse response from {url}"))
+                                {
+                                    Ok(value) => return Ok(Some(value)),
+                                    Err(error) => last_error = Some(error),
+                                }
+                            } else {
+                                let error = anyhow::anyhow!(
+                                    "request to {url} failed with HTTP {status}: {}",
+                                    body.trim()
+                                );
+                                if !is_transient_status(status) {
+                                    return Err(error);
+                                }
+                                last_error = Some(error);
+                            }
+                        }
+                        Err(error) => {
+                            last_error = Some(anyhow::Error::new(error).context(format!(
+                                "failed to read response from {url} after HTTP {status}"
+                            )));
+                        }
                     }
-                    let error = anyhow::anyhow!(
-                        "request to {url} failed with HTTP {status}: {}",
-                        body.trim()
-                    );
-                    if !is_transient_status(status) {
-                        return Err(error);
-                    }
-                    last_error = Some(error);
                 }
                 Err(error) => {
                     last_error =
@@ -131,10 +145,8 @@ impl CratesIoRegistry {
         let url = format!("{INDEX_BASE}/{}", sparse_index_path(name)?);
         let deadline = Instant::now() + PROPAGATION_TIMEOUT;
         loop {
-            if let Some(body) = self.request_text(&url)? {
-                for line in body.lines().filter(|line| !line.is_empty()) {
-                    let entry: IndexVersion = serde_json::from_str(line)
-                        .with_context(|| format!("invalid sparse index entry for {name}"))?;
+            if let Some(entries) = self.request(&url, |body| parse_sparse_index(name, body))? {
+                for entry in entries {
                     if entry.version == version {
                         if entry.checksum != checksum {
                             bail!(
@@ -160,26 +172,7 @@ impl CratesIoRegistry {
 impl Registry for CratesIoRegistry {
     fn crate_metadata(&mut self, name: &str) -> Result<Option<CrateMetadata>> {
         let url = format!("{API_BASE}/{name}");
-        let Some(body) = self.request_text(&url)? else {
-            return Ok(None);
-        };
-        let response: ApiCrateResponse = serde_json::from_str(&body)
-            .with_context(|| format!("invalid crates.io metadata for {name}"))?;
-        Ok(Some(CrateMetadata {
-            versions: response
-                .versions
-                .into_iter()
-                .map(|version| {
-                    (
-                        version.number,
-                        CrateVersion {
-                            checksum: version.checksum,
-                            yanked: version.yanked,
-                        },
-                    )
-                })
-                .collect(),
-        }))
+        self.request(&url, |body| parse_api_metadata(name, body))
     }
 
     fn wait_until_indexed(&mut self, name: &str, version: &str, checksum: &str) -> Result<()> {
@@ -234,6 +227,36 @@ struct IndexVersion {
     yanked: bool,
 }
 
+fn parse_api_metadata(name: &str, body: &str) -> Result<CrateMetadata> {
+    let response: ApiCrateResponse = serde_json::from_str(body)
+        .with_context(|| format!("invalid crates.io metadata for {name}"))?;
+    Ok(CrateMetadata {
+        versions: response
+            .versions
+            .into_iter()
+            .map(|version| {
+                (
+                    version.number,
+                    CrateVersion {
+                        checksum: version.checksum,
+                        yanked: version.yanked,
+                    },
+                )
+            })
+            .collect(),
+    })
+}
+
+fn parse_sparse_index(name: &str, body: &str) -> Result<Vec<IndexVersion>> {
+    body.lines()
+        .filter(|line| !line.is_empty())
+        .map(|line| {
+            serde_json::from_str(line)
+                .with_context(|| format!("invalid sparse index entry for {name}"))
+        })
+        .collect()
+}
+
 fn sparse_index_path(name: &str) -> Result<String> {
     if name.is_empty() || !name.is_ascii() {
         bail!("invalid crates.io crate name {name:?}");
@@ -270,9 +293,43 @@ fn retry_delay(attempt: usize) -> Duration {
 
 #[cfg(test)]
 mod tests {
-    use std::time::Duration;
+    use std::{
+        io::{BufRead, BufReader, Write},
+        net::{SocketAddr, TcpListener},
+        thread,
+        time::Duration,
+    };
 
-    use super::{is_transient_status, parse_retry_after, sparse_index_path};
+    use super::{
+        CratesIoRegistry, is_transient_status, parse_api_metadata, parse_retry_after,
+        parse_sparse_index, sparse_index_path,
+    };
+
+    fn serve_responses(
+        responses: Vec<(usize, &'static str)>,
+    ) -> (SocketAddr, thread::JoinHandle<()>) {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let server = thread::spawn(move || {
+            for (content_length, body) in responses {
+                let (mut stream, _) = listener.accept().unwrap();
+                let mut reader = BufReader::new(stream.try_clone().unwrap());
+                loop {
+                    let mut line = String::new();
+                    reader.read_line(&mut line).unwrap();
+                    if line == "\r\n" || line.is_empty() {
+                        break;
+                    }
+                }
+                write!(
+                    stream,
+                    "HTTP/1.1 200 OK\r\nContent-Length: {content_length}\r\nConnection: close\r\n\r\n{body}"
+                )
+                .unwrap();
+            }
+        });
+        (address, server)
+    }
 
     #[test]
     fn classifies_transient_responses() {
@@ -281,6 +338,55 @@ mod tests {
         assert!(!is_transient_status(400));
         assert_eq!(parse_retry_after("120"), Some(Duration::from_secs(120)));
         assert_eq!(parse_retry_after("invalid"), None);
+    }
+
+    #[test]
+    fn retries_incomplete_response_bodies() {
+        let (address, server) = serve_responses(vec![(10, "short"), (8, "complete")]);
+        let registry = CratesIoRegistry::new().unwrap();
+
+        let body = registry
+            .request(&format!("http://{address}"), |body| Ok(body.to_string()))
+            .unwrap();
+
+        assert_eq!(body.as_deref(), Some("complete"));
+        server.join().unwrap();
+    }
+
+    #[test]
+    fn retries_malformed_api_metadata() {
+        let valid = r#"{"versions":[{"num":"1.0.0","checksum":"abc","yanked":false}]}"#;
+        let (address, server) = serve_responses(vec![(1, "{"), (valid.len(), valid)]);
+        let registry = CratesIoRegistry::new().unwrap();
+
+        let metadata = registry
+            .request(&format!("http://{address}"), |body| {
+                parse_api_metadata("probe", body)
+            })
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(metadata.versions["1.0.0"].checksum, "abc");
+        server.join().unwrap();
+    }
+
+    #[test]
+    fn retries_malformed_sparse_index_entries() {
+        let valid = r#"{"vers":"1.0.0","cksum":"abc","yanked":false}
+"#;
+        let (address, server) = serve_responses(vec![(2, "{\n"), (valid.len(), valid)]);
+        let registry = CratesIoRegistry::new().unwrap();
+
+        let entries = registry
+            .request(&format!("http://{address}"), |body| {
+                parse_sparse_index("probe", body)
+            })
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(entries[0].version, "1.0.0");
+        assert_eq!(entries[0].checksum, "abc");
+        server.join().unwrap();
     }
 
     #[test]

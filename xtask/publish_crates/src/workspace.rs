@@ -699,6 +699,72 @@ mod tests {
     }
 
     #[test]
+    fn verified_revision_requires_the_current_git_tree() {
+        let fixture = Fixture::new(
+            &root_manifest(&[("public", "1.0.0")]),
+            &[(
+                "public",
+                package_manifest("public", ".workspace = true\n", Some(true), ""),
+            )],
+        );
+        let verified_revision = git_output(&fixture.root, &["rev-parse", "HEAD"]).unwrap();
+        run(
+            &fixture.root,
+            "git",
+            &[
+                "-c",
+                "user.name=Biome",
+                "-c",
+                "user.email=biome@example.com",
+                "commit",
+                "--quiet",
+                "--allow-empty",
+                "-m",
+                "same tree",
+            ],
+        );
+        let workspace = Workspace::from_directory(&fixture.root, false).unwrap();
+
+        workspace
+            .ensure_verified_revision(&verified_revision)
+            .unwrap();
+
+        write_file(
+            &fixture.root,
+            "crates/public/README.md",
+            &format!("{README_PREFIX}\n# public\nchanged\n"),
+        );
+        run(&fixture.root, "git", &["add", "crates/public/README.md"]);
+        run(
+            &fixture.root,
+            "git",
+            &[
+                "-c",
+                "user.name=Biome",
+                "-c",
+                "user.email=biome@example.com",
+                "commit",
+                "--quiet",
+                "-m",
+                "different tree",
+            ],
+        );
+        let workspace = Workspace::from_directory(&fixture.root, false).unwrap();
+
+        let error = workspace
+            .ensure_verified_revision(&verified_revision)
+            .unwrap_err()
+            .to_string();
+
+        assert!(error.contains("publication uses"));
+        assert!(
+            workspace
+                .ensure_verified_revision("unknown-revision")
+                .is_err()
+        );
+    }
+
+    #[test]
     fn rejects_a_missing_publish_setting() {
         let fixture = Fixture::new(
             &root_manifest(&[("missing", "1.0.0")]),

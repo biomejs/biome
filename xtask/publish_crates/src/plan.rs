@@ -31,7 +31,7 @@ impl PublishPlan {
         remote: &BTreeMap<String, Option<CrateMetadata>>,
     ) -> Result<Self> {
         let mut actions = BTreeMap::new();
-        let mut new_crates = BTreeSet::new();
+        let mut publishing = BTreeSet::new();
         let mut fresh = true;
 
         for package in packages {
@@ -39,10 +39,7 @@ impl PublishPlan {
                 .get(&package.name)
                 .with_context(|| format!("missing packaged checksum for {}", package.name))?;
             let action = match remote.get(&package.name) {
-                Some(None) => {
-                    new_crates.insert(package.name.as_str());
-                    PlanAction::Publish(PublishKind::New)
-                }
+                Some(None) => PlanAction::Publish(PublishKind::New),
                 Some(Some(metadata)) => match metadata.versions.get(&package.version.to_string()) {
                     Some(remote_version) if remote_version.yanked => {
                         bail!(
@@ -66,10 +63,13 @@ impl PublishPlan {
                 },
                 None => bail!("missing crates.io metadata for {}", package.name),
             };
+            if matches!(action, PlanAction::Publish(_)) {
+                publishing.insert(package.name.as_str());
+            }
             actions.insert(package.name.as_str(), action);
         }
 
-        let items = topological_order(packages, &new_crates)?
+        let items = topological_order(packages, &publishing)?
             .into_iter()
             .map(|package| {
                 Ok(PlanItem {
@@ -92,7 +92,7 @@ impl PublishPlan {
 
 pub(crate) fn topological_order<'a>(
     packages: &'a [PublishPackage],
-    new_crates: &BTreeSet<&str>,
+    publishing: &BTreeSet<&str>,
 ) -> Result<Vec<&'a PublishPackage>> {
     let packages_by_name = packages
         .iter()
@@ -115,7 +115,7 @@ pub(crate) fn topological_order<'a>(
             package
                 .dev_dependencies
                 .iter()
-                .filter(|dependency| new_crates.contains(dependency.as_str())),
+                .filter(|dependency| publishing.contains(dependency.as_str())),
         ) {
             if !packages_by_name.contains_key(dependency.as_str()) {
                 bail!(
@@ -219,7 +219,7 @@ mod tests {
     }
 
     #[test]
-    fn development_cycles_only_apply_to_new_crates() {
+    fn development_cycles_only_apply_to_publishing_versions() {
         let mut a = PublishPackage::new("a", &[]);
         a.dev_dependencies.insert("b".to_string());
         let mut b = PublishPackage::new("b", &[]);
@@ -231,8 +231,8 @@ mod tests {
             .into_iter()
             .map(|package| package.name.as_str())
             .collect::<Vec<_>>();
-        let new_crates = BTreeSet::from(["a", "b"]);
-        let error = topological_order(&packages, &new_crates)
+        let publishing = BTreeSet::from(["a", "b"]);
+        let error = topological_order(&packages, &publishing)
             .unwrap_err()
             .to_string();
 
@@ -241,7 +241,7 @@ mod tests {
     }
 
     #[test]
-    fn new_development_dependencies_are_created_first() {
+    fn unpublished_development_dependencies_are_published_first() {
         let mut dependent = PublishPackage::new("a", &[]);
         dependent.dev_dependencies.insert("z".to_string());
         let packages = vec![dependent, PublishPackage::new("z", &[])];
@@ -250,6 +250,36 @@ mod tests {
             .unwrap()
             .into_iter()
             .map(|package| package.name.as_str())
+            .collect::<Vec<_>>();
+
+        assert_eq!(order, ["z", "a"]);
+    }
+
+    #[test]
+    fn updated_development_dependencies_are_published_first() {
+        let mut dependent = PublishPackage::new("a", &[]);
+        dependent.dev_dependencies.insert("z".to_string());
+        let packages = vec![dependent, PublishPackage::new("z", &[])];
+        let remote = BTreeMap::from([
+            (
+                "a".to_string(),
+                Some(CrateMetadata {
+                    versions: BTreeMap::new(),
+                }),
+            ),
+            (
+                "z".to_string(),
+                Some(CrateMetadata {
+                    versions: BTreeMap::new(),
+                }),
+            ),
+        ]);
+
+        let plan = PublishPlan::new(&packages, &checksums(&packages), &remote).unwrap();
+        let order = plan
+            .items
+            .iter()
+            .map(|item| item.name.as_str())
             .collect::<Vec<_>>();
 
         assert_eq!(order, ["z", "a"]);

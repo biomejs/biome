@@ -9,7 +9,7 @@ on:
         type: string
 
 concurrency:
-  group: publish-crates
+  group: verify-crates-${{ inputs.revision }}
   cancel-in-progress: false
 
 env:
