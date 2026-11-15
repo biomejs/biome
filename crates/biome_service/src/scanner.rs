@@ -184,8 +184,9 @@ impl Scanner {
     /// Runs the setup phase of the scan of the project `project_key`: reads
     /// its configuration files, manifests and ignore files.
     ///
-    /// Returns `None` when the project is watched and `scan_options` doesn't
-    /// force the scan, because the watcher keeps the index up to date.
+    /// Returns `None` when the project is watched, its last scan indexed the
+    /// files that `scan_options` asks for, and `scan_options` doesn't force the
+    /// scan, because the watcher keeps the index up to date.
     /// Otherwise, publish the changes of `workspace`, then pass the result to
     /// [`Self::finish_project_scan()`], with the paths of the files that the
     /// setup phase deferred.
@@ -199,7 +200,10 @@ impl Scanner {
             .get_project_path(project_key)
             .ok_or_else(WorkspaceError::no_project)?;
 
-        if !scan_options.force && self.is_watched(&project_path) {
+        if !scan_options.force
+            && self.is_watched(&project_path)
+            && self.has_scanned_for(project_key, &scan_options.scan_kind)
+        {
             return Ok(None);
         }
 
@@ -439,6 +443,21 @@ impl Scanner {
     /// done if the watcher is active.
     pub fn reindex_file(&self, path: Utf8PathBuf) {
         let _ = self.watcher_tx.send(WatcherInstruction::ReindexFile(path));
+    }
+
+    /// Returns whether the last scan of the project `project_key` indexed the
+    /// files that a scan of `scan_kind` indexes.
+    ///
+    /// Only project and type-aware scans index all the files. When the project
+    /// has no finished scan, for example while its first scan runs, the result
+    /// is `true`.
+    fn has_scanned_for(&self, project_key: ProjectKey, scan_kind: &ScanKind) -> bool {
+        if !(scan_kind.is_project() || scan_kind.is_type_aware()) {
+            return true;
+        }
+        self.projects.pin().get(&project_key).is_none_or(|project| {
+            project.scan_kind.is_project() || project.scan_kind.is_type_aware()
+        })
     }
 
     /// Returns whether the given path is watched.

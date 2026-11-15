@@ -609,6 +609,9 @@ struct OwnedDb {
     /// Number of setter attempts observed before acquiring the setter gate.
     #[cfg(test)]
     setter_gate_attempts: AtomicUsize,
+    /// Number of reads that a pending setter interrupted.
+    #[cfg(test)]
+    interrupted_reads: AtomicUsize,
 }
 
 /// Clears the pending-setter signal when a setter completes or unwinds.
@@ -630,12 +633,16 @@ impl OwnedDb {
             pending_setters: AtomicUsize::new(0),
             #[cfg(test)]
             setter_gate_attempts: AtomicUsize::new(0),
+            #[cfg(test)]
+            interrupted_reads: AtomicUsize::new(0),
         }
     }
 
     fn fork(&self) -> WorkspaceDb {
         loop {
             if self.pending_setters.load(Ordering::Acquire) > 0 {
+                #[cfg(test)]
+                self.interrupted_reads.fetch_add(1, Ordering::Release);
                 // A setter is waiting for all clones to be dropped. If we
                 // waited for it here, a thread that already holds a clone
                 // could get stuck forever: see the rules on [OwnedDb].
@@ -1295,6 +1302,16 @@ impl DbState {
         match &self.storage {
             DbStorage::Shared(_) => 0,
             DbStorage::Owned(db) => db.setter_gate_attempts.load(Ordering::Acquire),
+        }
+    }
+
+    /// Returns the number of reads that a pending setter interrupted. Tests
+    /// use it to wait until a read meets a pending setter.
+    #[cfg(test)]
+    pub(crate) fn interrupted_reads(&self) -> usize {
+        match &self.storage {
+            DbStorage::Shared(_) => 0,
+            DbStorage::Owned(db) => db.interrupted_reads.load(Ordering::Acquire),
         }
     }
 }
