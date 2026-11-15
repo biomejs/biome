@@ -16,9 +16,9 @@ use crate::db::queries::{
 use biome_js_semantic::ScopeId;
 use biome_js_type_info::{
     CallArgumentType as RawCallArgumentType, DestructureField as RawDestructureField,
-    Literal as RawLiteral, Path, RawTypeData, TypeId, TypeReference, TypeReferenceQualifier,
-    TypeResolverLevel, TypeofExpression as RawTypeofExpression, global_type_id_for_qualifier,
-    global_types,
+    Literal as RawLiteral, ObjectKind, Path, RawTypeData, TypeId, TypeReference,
+    TypeReferenceQualifier, TypeResolverLevel, TypeofExpression as RawTypeofExpression,
+    global_type_id_for_qualifier, global_types,
     interned_types::{
         CallArgumentType as InferredCallArgumentType, ClassParents, ConditionalSubset,
         ConditionalType, InternedClass as InferredClass,
@@ -47,6 +47,9 @@ const MAX_AWAIT_EXPRESSION_STEPS: usize = 1024;
 const MAX_CALL_CALLEE_STEPS: usize = 64;
 const MAX_ELEMENT_INDEX_STEPS: usize = 1024;
 const MAX_PROPERTY_KEY_STEPS: usize = 64;
+// Bounds the nested object and array expressions of an argument whose
+// literal types `resolve_literal_argument` keeps.
+const MAX_LITERAL_ARGUMENT_DEPTH: usize = 64;
 
 /// `Promise.prototype` methods that receive synthesized signatures during
 /// member lookup, parsed from the member name.
@@ -146,13 +149,16 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             RawTypeofExpression::CallArgument(expression) => {
                 let callee = self.resolve(&expression.callee);
+                // The other arguments only select the signature, so they
+                // keep the literal types that a parameter with literal
+                // types would keep, as `WidenedArgument` describes.
                 let arguments = expression
                     .arguments
                     .iter()
                     .map(|argument| match argument {
-                        RawCallArgumentType::Argument(ty) => {
-                            InferredCallArgumentType::Argument(self.resolve(ty))
-                        }
+                        RawCallArgumentType::Argument(ty) => InferredCallArgumentType::Argument(
+                            self.resolve_literal_argument(ty, MAX_LITERAL_ARGUMENT_DEPTH),
+                        ),
                         RawCallArgumentType::Spread(ty) => {
                             InferredCallArgumentType::Spread(self.resolve(ty))
                         }
@@ -273,6 +279,9 @@ impl<'db> ResolutionCtx<'db, '_> {
                 let argument = self.resolve(&expression.argument);
                 Some(self.resolve_number_or_bigint_unary_expression(argument))
             }
+            RawTypeofExpression::WidenedLiteral(expression) => {
+                Some(self.resolve_widened_literal(expression))
+            }
         }
     }
 
@@ -358,6 +367,12 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             InferredTypeofExpression::UnaryMinus(expression) => {
                 Some(self.resolve_number_or_bigint_unary_expression(expression.argument))
+            }
+            // The raw expressions that the value came from are gone, so
+            // every literal type is widened, which is never narrower than
+            // widening only the fresh ones.
+            InferredTypeofExpression::WidenedLiteral(expression) => {
+                Some(self.widen_all_literals(expression.value, expression.is_return_type))
             }
         }
     }
@@ -476,6 +491,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                         }
                     }
                     ResolvedCallArgument::Argument(_)
+                    | ResolvedCallArgument::WidenedArgument { .. }
                     | ResolvedCallArgument::Optional(_)
                     | ResolvedCallArgument::Spread(_) => ResolvedCallArgument::Argument(*ty),
                 };
@@ -1003,8 +1019,14 @@ impl<'db> ResolutionCtx<'db, '_> {
         let mut args = Vec::new();
         for argument in arguments {
             match argument {
-                RawCallArgumentType::Argument(ty) => {
-                    args.push(ResolvedCallArgument::Argument(self.resolve(ty)))
+                RawCallArgumentType::Argument(reference) => {
+                    let ty = self.resolve(reference);
+                    args.push(match self.literal_argument(reference, ty) {
+                        Some(literal_ty) => {
+                            ResolvedCallArgument::WidenedArgument { ty, literal_ty }
+                        }
+                        None => ResolvedCallArgument::Argument(ty),
+                    });
                 }
                 RawCallArgumentType::Spread(ty) => {
                     let ty = self.resolve(ty);
@@ -1013,6 +1035,111 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
         }
         args
+    }
+
+    /// Returns the type of the call argument whose collected type is
+    /// `reference` and whose resolved type is `ty`, with the literal types
+    /// of the properties of its object expressions kept, as
+    /// [`ResolvedCallArgument::WidenedArgument`] describes, or `None` when
+    /// the argument is no object or array expression or keeps the same type.
+    fn literal_argument(
+        &mut self,
+        reference: &TypeReference,
+        ty: InferredTypeData<'db>,
+    ) -> Option<InferredTypeData<'db>> {
+        let TypeReference::Resolved(id) = reference else {
+            return None;
+        };
+        if id.level() != TypeResolverLevel::Thin || self.js_info.is_named_type(id.id()) {
+            return None;
+        }
+        let is_literal = match self.js_info.raw_types.get(id.id().index())? {
+            RawTypeData::Object(object) => object.kind == ObjectKind::Expression,
+            RawTypeData::Tuple(tuple) => tuple.is_inferred_array,
+            RawTypeData::Unknown
+            | RawTypeData::Global
+            | RawTypeData::BigInt
+            | RawTypeData::Boolean
+            | RawTypeData::Null
+            | RawTypeData::Number
+            | RawTypeData::String
+            | RawTypeData::Symbol
+            | RawTypeData::Undefined
+            | RawTypeData::Conditional
+            | RawTypeData::ImportNamespace(_)
+            | RawTypeData::Class(_)
+            | RawTypeData::Constructor(_)
+            | RawTypeData::Function(_)
+            | RawTypeData::Interface(_)
+            | RawTypeData::Module(_)
+            | RawTypeData::Namespace(_)
+            | RawTypeData::Generic(_)
+            | RawTypeData::Intersection(_)
+            | RawTypeData::Union(_)
+            | RawTypeData::TypeOperator(_)
+            | RawTypeData::IndexedAccess(_)
+            | RawTypeData::MappedType(_)
+            | RawTypeData::Extends(_)
+            | RawTypeData::Literal(_)
+            | RawTypeData::InstanceOf(_)
+            | RawTypeData::Reference(_)
+            | RawTypeData::MergedReference(_)
+            | RawTypeData::TypeofExpression(_)
+            | RawTypeData::TypeofType(_)
+            | RawTypeData::TypeofValue(_)
+            | RawTypeData::AnyKeyword
+            | RawTypeData::NeverKeyword
+            | RawTypeData::ObjectKeyword
+            | RawTypeData::ThisKeyword
+            | RawTypeData::UnknownKeyword
+            | RawTypeData::VoidKeyword => false,
+        };
+        if !is_literal {
+            return None;
+        }
+        let literal_ty = self.resolve_literal_argument(reference, MAX_LITERAL_ARGUMENT_DEPTH);
+        (literal_ty != ty).then_some(literal_ty)
+    }
+
+    /// Resolves the call argument whose collected type is `reference` with
+    /// the literal types of the properties of its object expressions kept,
+    /// also in nested object and array expressions, as a parameter with
+    /// literal types keeps them in TypeScript. Other parts of the argument,
+    /// such as the elements of an array that aren't objects, resolve as
+    /// usual. Below `depth` nested expressions, the argument resolves as
+    /// usual too.
+    fn resolve_literal_argument(
+        &mut self,
+        reference: &TypeReference,
+        depth: usize,
+    ) -> InferredTypeData<'db> {
+        let js_info = self.js_info;
+        if depth > 0
+            && let TypeReference::Resolved(id) = reference
+            && id.level() == TypeResolverLevel::Thin
+            && !js_info.is_named_type(id.id())
+            && let Some(raw) = js_info.raw_types.get(id.id().index())
+        {
+            if let RawTypeData::Object(object) = raw
+                && object.kind == ObjectKind::Expression
+            {
+                let db = self.db;
+                return InferredTypeData::from_raw_with_resolver(
+                    db,
+                    raw,
+                    false,
+                    &mut |reference| self.resolve_literal_argument(reference, depth - 1),
+                );
+            }
+            if let RawTypeData::Tuple(tuple) = raw
+                && tuple.is_inferred_array
+            {
+                return self.resolve_inferred_array(tuple, |ctx, reference| {
+                    ctx.resolve_literal_argument(reference, depth - 1)
+                });
+            }
+        }
+        self.resolve(reference)
     }
 
     fn resolve_inferred_call_arguments(

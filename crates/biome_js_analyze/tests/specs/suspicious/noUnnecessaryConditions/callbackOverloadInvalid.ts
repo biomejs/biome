@@ -12,3 +12,7 @@ declare function map<T>(mapper: Mapper<T>): T;
 export function mapped(flag: boolean) {
     return map(() => 42) || flag;
 }
+
+export function mappedConstant(flag: boolean) {
+    return map(() => "a" as const) || flag;
+}

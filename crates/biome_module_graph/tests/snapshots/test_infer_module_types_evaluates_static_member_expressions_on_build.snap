@@ -33,24 +33,24 @@ Binding Box "Box" => class "Box" {
 
 Binding object "object" => Object {
   prototype: No prototype
-  members: ["name": string: value]
+  members: ["name": string]
 }
 
 Expression "{ name: \"value\" }" => Object {
   prototype: No prototype
-  members: ["name": string: value]
+  members: ["name": string]
 }
 
 Expression "\"value\"" => string: value
 
-Binding objectName "objectName" => string: value
+Binding objectName "objectName" => string
 
 Expression "object" => Object {
   prototype: No prototype
-  members: ["name": string: value]
+  members: ["name": string]
 }
 
-Expression "object.name" => string: value
+Expression "object.name" => string
 
 Binding staticLabel "staticLabel" => string
 

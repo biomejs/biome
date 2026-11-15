@@ -28,9 +28,8 @@ use crate::db::queries::{
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{JsModuleInfo, ModuleDb, ModuleGraphGeneration, module_for_key};
 use biome_js_type_info::{
-    GlobalTypeId, RawTypeData, ResolvedTypeId, ScopeId, Tuple as RawTuple, TypeId, TypeOperator,
-    TypeReference, TypeReferenceQualifier, TypeResolverLevel,
-    TypeofExpression as RawTypeofExpression,
+    GlobalTypeId, ObjectKind, RawTypeData, ResolvedTypeId, ScopeId, Tuple as RawTuple, TypeId,
+    TypeOperator, TypeReference, TypeReferenceQualifier, TypeResolverLevel,
     interned_types::{
         InternedExtendsType as InferredExtendsType, InternedMappedType as InferredMappedType,
         InternedModule as InferredModule, InternedNamespace as InferredNamespace,
@@ -65,8 +64,6 @@ pub const MAX_ON_DEMAND_IMPORT_DEPTH: u8 = if cfg!(debug_assertions) { 64 } else
 const MAX_INFERRED_EXPRESSION_WRAPPER_STEPS: usize = 64;
 // Bounds nested rest elements followed when spreading a tuple.
 const MAX_SPREAD_ELEMENT_DEPTH: usize = 16;
-// Bounds nested conditional expressions checked for fresh literal branches.
-const MAX_FRESH_LITERAL_DEPTH: usize = 16;
 const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
 // Bounds retries when resolving a dynamically discovered declaration graph.
 // The graph itself is stored on the heap, so this is a work limit rather than
@@ -924,7 +921,13 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
         if let RawTypeData::Tuple(tuple) = raw
             && tuple.is_inferred_array
         {
-            return self.resolve_inferred_array(tuple);
+            return self.resolve_inferred_array(tuple, |ctx, reference| ctx.resolve(reference));
+        }
+
+        if let RawTypeData::Object(object) = raw
+            && object.kind == ObjectKind::Expression
+        {
+            return self.resolve_object_expression(raw, object);
         }
 
         let db = self.db;
@@ -936,27 +939,34 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
 
     /// Resolves an array expression outside a tuple context to `Array<T>`,
     /// where `T` is the union of its element types, as TypeScript does. Fresh
-    /// literal elements are widened to their primitive types, while declared
-    /// literal types and spread elements keep their types:
+    /// literal elements are widened to their primitive types, as
+    /// [`Self::widen_fresh_literals`] describes, while declared literal types
+    /// and spread elements keep their types:
     ///
     /// ```ts
     /// declare const dir: "asc" | "desc";
-    /// const values = [1, dir, ...([true] as const)]; // (number | "asc" | "desc" | true)[]
+    /// const one = 1;
+    /// const values = [1, dir, one, ...([true] as const)]; // (number | "asc" | "desc" | true)[]
     /// ```
+    ///
+    /// `resolve_element` resolves the type of each element before it is
+    /// widened.
     ///
     /// An empty array expression resolves to `unknown[]`, because TypeScript
     /// derives the element type of `const items = [];` from later writes, which
     /// are not tracked here.
-    fn resolve_inferred_array(&mut self, tuple: &RawTuple) -> InferredTypeData<'db> {
+    pub(super) fn resolve_inferred_array(
+        &mut self,
+        tuple: &RawTuple,
+        mut resolve_element: impl FnMut(&mut Self, &TypeReference) -> InferredTypeData<'db>,
+    ) -> InferredTypeData<'db> {
         let mut element_types = Vec::with_capacity(tuple.elements().len());
         for element in tuple.elements() {
-            let ty = self.resolve(&element.ty);
+            let ty = resolve_element(self, &element.ty);
             element_types.push(if element.is_rest {
                 self.resolve_spread_element_type(ty, MAX_SPREAD_ELEMENT_DEPTH)
-            } else if self.is_fresh_literal(&element.ty, MAX_FRESH_LITERAL_DEPTH) {
-                self.widen_literal_type(ty)
             } else {
-                ty
+                self.widen_fresh_literals(&element.ty, ty, false)
             });
         }
         let element_type = if element_types.is_empty() {
@@ -965,39 +975,6 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
             InferredTypeData::union_from_types(self.db, element_types)
         };
         InferredTypeData::array_instance(self.db, Box::new([element_type]))
-    }
-
-    /// Returns whether `reference` is the type of a literal expression, such as
-    /// `1`, `-1`, or `"a"`, or a conditional expression choosing between such
-    /// expressions. TypeScript widens these fresh literal types in mutable
-    /// locations.
-    fn is_fresh_literal(&self, reference: &TypeReference, depth: usize) -> bool {
-        let TypeReference::Resolved(id) = reference else {
-            return false;
-        };
-        if depth == 0
-            || id.level() != TypeResolverLevel::Thin
-            || self.js_info.is_named_type(id.id())
-        {
-            return false;
-        }
-        let Some(raw) = self.js_info.raw_types.get(id.id().index()) else {
-            return false;
-        };
-        if matches!(raw, RawTypeData::Literal(_)) {
-            return true;
-        }
-        let RawTypeData::TypeofExpression(expression) = raw else {
-            return false;
-        };
-        if let RawTypeofExpression::UnaryMinus(unary) = expression.as_ref() {
-            return unary.is_literal_argument;
-        }
-        if let RawTypeofExpression::Conditional(conditional) = expression.as_ref() {
-            return self.is_fresh_literal(&conditional.consequent, depth - 1)
-                && self.is_fresh_literal(&conditional.alternate, depth - 1);
-        }
-        false
     }
 
     /// Returns the type of the elements produced by spreading a value of type
@@ -1052,24 +1029,6 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
         } else {
             InferredTypeData::Unknown
         }
-    }
-
-    /// Widens primitive literal types, including literals in a union, to their
-    /// primitive types. Other types are returned unchanged.
-    fn widen_literal_type(&mut self, ty: InferredTypeData<'db>) -> InferredTypeData<'db> {
-        let resolved = self.resolve_inferred_type(ty);
-        if let InferredTypeData::Union(union) = resolved {
-            let types = union
-                .types(self.db)
-                .iter()
-                .map(|variant| {
-                    let resolved = self.resolve_inferred_type(*variant);
-                    widen_literal(self.db, resolved).unwrap_or(*variant)
-                })
-                .collect();
-            return InferredTypeData::union_from_types(self.db, types);
-        }
-        widen_literal(self.db, resolved).unwrap_or(ty)
     }
 
     fn resolve_inferred_expression_wrappers(
@@ -1214,23 +1173,5 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
     ) -> impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db> + '_ {
         let db = self.db;
         move |ty| self.resolve_inferred_type(ty).expand_structural_global(db)
-    }
-}
-
-/// Returns the primitive type of a primitive literal type, or `None` for other
-/// types, including object and regular expression literals.
-fn widen_literal<'db>(
-    db: &'db dyn ModuleDb,
-    ty: InferredTypeData<'db>,
-) -> Option<InferredTypeData<'db>> {
-    let InferredTypeData::Literal(literal) = ty else {
-        return None;
-    };
-    match literal.literal(db) {
-        InferredLiteral::BigInt(_) => Some(InferredTypeData::BigInt),
-        InferredLiteral::Boolean(_) => Some(InferredTypeData::Boolean),
-        InferredLiteral::Number(_) => Some(InferredTypeData::Number),
-        InferredLiteral::String(_) | InferredLiteral::Template(_) => Some(InferredTypeData::String),
-        InferredLiteral::Object(_) | InferredLiteral::RegExp(_) => None,
     }
 }

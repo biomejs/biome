@@ -419,7 +419,7 @@ Expression "() => \"replacement\"" => sync Function {
     params: []
     type_args: []
   }
-  returns: string: replacement
+  returns: string
 }
 
 Expression "\"replacement\"" => string: replacement

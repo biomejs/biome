@@ -1,0 +1,79 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+class Counter {
+	count = 0;
+	static label = "counter";
+	readonly start = 0;
+	limit: 10 = 10;
+	next(step = 1) {
+		return 1;
+	}
+	get size() {
+		return "s";
+	}
+}
+
+```
+
+## Result
+
+```
+Object {
+  prototype: No prototype
+  members: [
+    "count": Local TypeId(1),
+    static "label": Local TypeId(3),
+    readonly "start": Local TypeId(0),
+    "limit": Local TypeId(4),
+    "next": Local TypeId(8),
+    get "size": Local TypeId(11)
+  ]
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => number: 0
+
+Module TypeId(1) => widened Local TypeId(0)
+
+Module TypeId(2) => string: counter
+
+Module TypeId(3) => widened Local TypeId(2)
+
+Module TypeId(4) => number: 10
+
+Module TypeId(5) => number: 1
+
+Module TypeId(6) => widened Local TypeId(5)
+
+Module TypeId(7) => widened return Local TypeId(5)
+
+Module TypeId(8) => sync Function "next" {
+  accepts: {
+    params: [
+      required step: Local TypeId(6)
+    ]
+    type_args: []
+  }
+  returns: Local TypeId(7)
+}
+
+Module TypeId(9) => string: s
+
+Module TypeId(10) => widened return Local TypeId(9)
+
+Module TypeId(11) => sync Function "size" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Local TypeId(10)
+}
+```

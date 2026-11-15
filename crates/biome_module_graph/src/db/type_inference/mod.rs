@@ -18,6 +18,7 @@ mod lookup;
 mod promise_classification;
 mod qualifiers;
 mod resolver;
+mod widening;
 
 pub(in crate::db) use flow::{
     flow_binding_baseline, flow_expression_type, flow_subject_states, flow_subject_type,

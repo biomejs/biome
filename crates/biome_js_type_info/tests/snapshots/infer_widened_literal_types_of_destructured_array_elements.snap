@@ -1,0 +1,56 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+const [first, second] = [1n, 2];
+
+```
+
+## Result
+
+```
+first => Local TypeId(4)[0]
+second => Local TypeId(4)[1]
+
+```
+
+## Registered types
+
+```
+Module TypeId(0) => bigint: 1n
+
+Module TypeId(1) => widened Local TypeId(0)
+
+Module TypeId(2) => number: 2
+
+Module TypeId(3) => widened Local TypeId(2)
+
+Module TypeId(4) => Tuple {
+    elements: [
+        TupleElementType {
+            ty: Resolved(
+                Local TypeId(1),
+            ),
+            name: None,
+            is_optional: false,
+            is_rest: false,
+        },
+        TupleElementType {
+            ty: Resolved(
+                Local TypeId(3),
+            ),
+            name: None,
+            is_optional: false,
+            is_rest: false,
+        },
+    ],
+    is_inferred_array: false,
+}
+
+Module TypeId(5) => Local TypeId(4)[0]
+
+Module TypeId(6) => Local TypeId(4)[1]
+```

@@ -1329,6 +1329,7 @@ dependencies = [
  "biome_rowan",
  "biome_test_utils",
  "camino",
+ "enumflags2",
  "hashbrown 0.15.5",
  "insta",
  "rustc-hash 2.1.3",

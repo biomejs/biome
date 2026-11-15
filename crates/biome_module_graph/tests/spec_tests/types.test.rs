@@ -105,22 +105,12 @@ fn test_infer_module_types_merges_interfaces_and_classes_of_one_name() {
         binding("interfaceMember"),
         "1"
     ));
-    // TypeScript: `number`. Biome doesn't widen the literal types of class
-    // fields.
-    assert!(is_inferred_number_literal(&db, binding("classMember"), "1"));
+    // Class fields take the widened literal types of their initializers
+    // (`narrowing-probes/fix-d/tests.ts` L17).
+    assert!(is_inferred_number(&db, binding("classMember")));
     assert!(is_inferred_number_literal(&db, binding("throughNew"), "1"));
-    // TypeScript: `number`, as above.
-    assert!(is_inferred_number_literal(
-        &db,
-        binding("interfaceBaseMember"),
-        "1"
-    ));
-    // TypeScript: `number`, as above.
-    assert!(is_inferred_number_literal(
-        &db,
-        binding("classBaseMember"),
-        "3"
-    ));
+    assert!(is_inferred_number(&db, binding("interfaceBaseMember")));
+    assert!(is_inferred_number(&db, binding("classBaseMember")));
     assert_eq!(binding("genericFirst"), InferredTypeData::String);
     assert_eq!(binding("genericLast"), InferredTypeData::String);
     assert_eq!(

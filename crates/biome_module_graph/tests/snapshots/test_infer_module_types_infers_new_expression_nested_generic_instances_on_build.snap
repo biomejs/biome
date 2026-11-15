@@ -145,11 +145,11 @@ Expression "ArrayBox" => class "ArrayBox" {
 
 Expression "values" => instanceof Array<number>
 
-Binding callbackValue "callbackValue" => bool: true
+Binding callbackValue "callbackValue" => boolean
 
-Expression "new CallbackBox(() => true)" => instanceof CallbackBox<bool: true>
+Expression "new CallbackBox(() => true)" => instanceof CallbackBox<boolean>
 
-Expression "new CallbackBox(() => true).value" => bool: true
+Expression "new CallbackBox(() => true).value" => boolean
 
 Expression "CallbackBox" => class "CallbackBox" {
   extends: none
@@ -162,7 +162,7 @@ Expression "() => true" => sync Function {
     params: []
     type_args: []
   }
-  returns: bool: true
+  returns: boolean
 }
 
 Expression "true" => bool: true

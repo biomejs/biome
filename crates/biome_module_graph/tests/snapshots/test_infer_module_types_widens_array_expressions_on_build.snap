@@ -210,12 +210,12 @@ Expression "-1n" => BigInt
 
 Expression "1n" => bigint: 1n
 
-Binding first "first" => bigint: 1n
+Binding first "first" => BigInt
 
-Binding second "second" => number: 2
+Binding second "second" => number
 
-Expression "[1n, 2]" => [bigint: 1n,
-number: 2]
+Expression "[1n, 2]" => [BigInt,
+number]
 
 Expression "1n" => bigint: 1n
 
