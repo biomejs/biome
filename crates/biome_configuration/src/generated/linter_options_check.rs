@@ -1972,6 +1972,12 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_useless_length_check::NoUselessLengthCheckOptions>(),
     ));
     result.push(("complexity", "noUselessLoneBlockStatements", TypeId::of::<biome_rule_options::no_useless_lone_block_statements::NoUselessLoneBlockStatementsOptions>()));
+    result.push((
+        "nursery",
+        "noUselessNestedTernary",
+        TypeId::of::<biome_rule_options::no_useless_nested_ternary::NoUselessNestedTernaryOptions>(
+        ),
+    ));
     result.push(("nursery", "noUselessParameterPropertyAssignment", TypeId::of::<biome_rule_options::no_useless_parameter_property_assignment::NoUselessParameterPropertyAssignmentOptions>()));
     result.push((
         "nursery",
