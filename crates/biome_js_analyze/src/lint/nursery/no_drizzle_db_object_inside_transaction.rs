@@ -49,7 +49,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDrizzleDbObjectInsideTransaction {
-        version: "next",
+        version: "2.6.8",
         name: "noDrizzleDbObjectInsideTransaction",
         language: "js",
         recommended: false,

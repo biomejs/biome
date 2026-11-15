@@ -135,7 +135,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueAsyncComputed {
-        version: "next",
+        version: "2.6.8",
         name: "noVueAsyncComputed",
         language: "js",
         recommended: true,

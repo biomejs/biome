@@ -110,7 +110,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueRegisteredComponentNameCasing {
-        version: "next",
+        version: "2.6.8",
         name: "useVueRegisteredComponentNameCasing",
         language: "js",
         recommended: false,

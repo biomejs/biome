@@ -49,7 +49,7 @@ declare_lint_rule! {
     ///   [`useVueValidDefaultProp`](https://biomejs.dev/linter/rules/use-vue-valid-default-prop/).
     ///
     pub NoVueDefineModelDefault {
-        version: "next",
+        version: "2.6.8",
         name: "noVueDefineModelDefault",
         language: "js",
         recommended: false,

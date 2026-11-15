@@ -58,7 +58,7 @@ declare_lint_rule! {
     ///
     /// - [Vue 3 migration guide: Filters](https://v3-migration.vuejs.org/breaking-changes/filters.html)
     pub NoVueDeprecatedFilter {
-        version: "next",
+        version: "2.6.8",
         name: "noVueDeprecatedFilter",
         language: "js",
         recommended: true,
