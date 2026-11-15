@@ -1,0 +1,21 @@
+[package]
+name        = "xtask_publish_crates"
+version     = "0.0.0"
+edition     = "2024"
+description = "Internal tool for publishing Biome crates"
+publish     = false
+
+[dependencies]
+anyhow         = { workspace = true }
+bpaf           = { workspace = true }
+cargo_metadata = { workspace = true }
+ignore         = { workspace = true }
+ratelimit      = { workspace = true }
+serde          = { workspace = true }
+serde_json     = { workspace = true }
+sha2           = { workspace = true }
+toml           = { workspace = true }
+ureq           = { workspace = true }
+
+[lints]
+workspace = true
