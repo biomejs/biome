@@ -3579,6 +3579,11 @@ export interface Nursery {
 	 */
 	noUnsafeReturn?: NoUnsafeReturnConfiguration;
 	/**
+	 * Disallow inserting values into SQL strings passed to the exec() and prepare() methods of node:sqlite databases.
+	 * See https://biomejs.dev/linter/rules/no-unsafe-sqlite-interpolation
+	 */
+	noUnsafeSqliteInterpolation?: NoUnsafeSqliteInterpolationConfiguration;
+	/**
 	 * Disallow TypeScript type assertions other than const assertions.
 	 * See https://biomejs.dev/linter/rules/no-unsafe-type-assertion
 	 */
@@ -7207,6 +7212,9 @@ export type NoUnsafePlusOperandsConfiguration =
 export type NoUnsafeReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnsafeReturnOptions;
+export type NoUnsafeSqliteInterpolationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnsafeSqliteInterpolationOptions;
 export type NoUnsafeTypeAssertionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnsafeTypeAssertionOptions;
@@ -10597,6 +10605,10 @@ export interface RuleWithNoUnsafePlusOperandsOptions {
 export interface RuleWithNoUnsafeReturnOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnsafeReturnOptions;
+}
+export interface RuleWithNoUnsafeSqliteInterpolationOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnsafeSqliteInterpolationOptions;
 }
 export interface RuleWithNoUnsafeTypeAssertionOptions {
 	level: RulePlainConfiguration;
@@ -14146,6 +14158,7 @@ export type NoUnresolvedDefaultImportOptions = {};
 export type NoUnsafeIframeSandboxOptions = {};
 export type NoUnsafePlusOperandsOptions = {};
 export type NoUnsafeReturnOptions = {};
+export type NoUnsafeSqliteInterpolationOptions = {};
 export type NoUnsafeTypeAssertionOptions = {};
 export type NoUnsafeUnaryMinusOptions = {};
 export type NoUnusedClassesOptions = {};
@@ -16451,6 +16464,7 @@ export type Category =
 	| "lint/nursery/noUnsafeIframeSandbox"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUnsafeReturn"
+	| "lint/nursery/noUnsafeSqliteInterpolation"
 	| "lint/nursery/noUnsafeTypeAssertion"
 	| "lint/nursery/noUnsafeUnaryMinus"
 	| "lint/nursery/noUnusedClasses"

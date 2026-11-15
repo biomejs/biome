@@ -1,0 +1,15 @@
+/* should not generate diagnostics */
+const sqlite = require("node:sqlite");
+const { DatabaseSync } = require("node:sqlite");
+const Database = require("node:sqlite").DatabaseSync;
+
+new sqlite.DatabaseSync(":memory:").exec(`SELECT ${value}`);
+new DatabaseSync(":memory:").exec(`SELECT ${value}`);
+new (require("node:sqlite").DatabaseSync)(":memory:").exec(`SELECT ${value}`);
+new Database(":memory:").exec(`SELECT ${value}`);
+
+async function load() {
+	const dynamicSqlite = await import("node:sqlite");
+	const database = new dynamicSqlite.DatabaseSync(":memory:");
+	database.exec(`SELECT ${value}`);
+}

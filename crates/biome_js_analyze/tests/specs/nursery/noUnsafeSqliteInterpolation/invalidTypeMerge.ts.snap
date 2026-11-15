@@ -1,0 +1,57 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidTypeMerge.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import { DatabaseSync } from "node:sqlite";
+import * as sqlite from "node:sqlite";
+type DatabaseSync = {};
+type sqlite = {};
+
+new DatabaseSync(":memory:").exec(`SELECT ${id}`);
+new sqlite.DatabaseSync(":memory:").exec(`SELECT ${id}`);
+
+```
+
+# Diagnostics
+```
+invalidTypeMerge.ts:7:35 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to exec() inserts values with ${}.
+  
+    5 │ type sqlite = {};
+    6 │ 
+  > 7 │ new DatabaseSync(":memory:").exec(`SELECT ${id}`);
+      │                                   ^^^^^^^^^^^^^^
+    8 │ new sqlite.DatabaseSync(":memory:").exec(`SELECT ${id}`);
+    9 │ 
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTypeMerge.ts:8:42 lint/nursery/noUnsafeSqliteInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This SQL string passed to exec() inserts values with ${}.
+  
+    7 │ new DatabaseSync(":memory:").exec(`SELECT ${id}`);
+  > 8 │ new sqlite.DatabaseSync(":memory:").exec(`SELECT ${id}`);
+      │                                          ^^^^^^^^^^^^^^
+    9 │ 
+  
+  i Inserted values become part of the SQL code, so a value that contains SQL can change what the query does. This is called SQL injection.
+  
+  i Write a ? placeholder in the SQL string, and pass the values when you run the prepared statement, for example database.prepare("SELECT * FROM users WHERE id = ?").get(id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
