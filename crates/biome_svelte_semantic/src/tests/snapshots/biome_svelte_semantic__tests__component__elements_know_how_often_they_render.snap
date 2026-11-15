@@ -1,0 +1,20 @@
+---
+source: crates/biome_svelte_semantic/src/tests/component.rs
+expression: "component(r#\"<script>import Card from './Card.svelte';</script>\n<div id=\"once\" />\n{#if a}<div id=\"maybe\" />{#each b as c}<div id=\"many\" />{/each}{/if}\n<Card><div id=\"children\" /></Card>\n{#key k}<div id=\"keyed\" />{/key}\n<svelte:element this=\"p\" /><svelte:window onresize={r} />\n\"#).to_string().lines().filter(|line|\nline.starts_with(\"element\") ||\nline.starts_with(\"  attr\")).collect::<Vec<_>>().join(\"\\n\")"
+---
+element script 0..50 Dom Once scope=2
+element div 51..68 Dom Once scope=2
+  attr id = "once"
+element div 76..94 Dom AtMostOnce scope=3
+  attr id = "maybe"
+element div 108..125 Dom Any scope=4
+  attr id = "many"
+element Card 138..172 Component Once scope=2 tag-ref=4
+element div 144..165 Dom Any scope=5
+  attr id = "children"
+element div 181..199 Dom Once scope=6
+  attr id = "keyed"
+element svelte:element 206..233 DynamicElement Once scope=2
+  attr this = "p"
+element svelte:window 233..263 Special Once scope=2
+  attr onresize = snippet 4 event-handler

@@ -1,0 +1,13 @@
+---
+source: crates/biome_svelte_semantic/src/tests/component.rs
+expression: "references(r#\"<script>\n  const rows = $state([]);\n  export { row };\n  const render = () => row;\n</script>\n{@render row(rows[0])}\n{#snippet row(value, fallback = rows)}<p>{value}{fallback}{@render cell()}</p>{/snippet}\n{#snippet cell()}<td />{/snippet}\n<div>{#snippet hidden()}{/snippet}</div>\n\"#)"
+---
+ref 0 $state 24..30 Identifier Call -> Rune
+ref 1 row 47..50 Identifier Read -> 2 row
+ref 2 row 77..80 Identifier Read -> 2 row in-function
+ref 3 row 101..104 Identifier Call -> 2 row
+ref 4 rows 105..109 Identifier Escape path-open -> 0 rows
+ref 5 rows 147..151 Identifier Escape -> 0 rows in-snippet-block
+ref 6 value 157..162 Identifier Read -> 3 value in-snippet-block
+ref 7 fallback 164..172 Identifier Read -> 4 fallback in-snippet-block
+ref 8 cell 182..186 Identifier Call -> 5 cell in-snippet-block

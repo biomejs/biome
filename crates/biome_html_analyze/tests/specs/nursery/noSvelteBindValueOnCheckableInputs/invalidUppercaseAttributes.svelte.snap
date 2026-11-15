@@ -1,0 +1,68 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidUppercaseAttributes.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+
+<script>
+	let checked = $state(false);
+</script>
+
+<input TYPE="checkbox" bind:value={checked} />
+<!-- `CHECKED` is the `checked` attribute, so renaming the binding would repeat it: no fix. -->
+<input Type="checkbox" CHECKED bind:value={checked} />
+
+```
+
+# Diagnostics
+```
+invalidUppercaseAttributes.svelte:7:24 lint/nursery/noSvelteBindValueOnCheckableInputs  FIXABLE  ━━━━━━━━━━
+
+  × bind:value does not track whether this checkbox is checked.
+  
+    5 │ </script>
+    6 │ 
+  > 7 │ <input TYPE="checkbox" bind:value={checked} />
+      │                        ^^^^^^^^^^^^^^^^^^^^
+    8 │ <!-- `CHECKED` is the `checked` attribute, so renaming the binding would repeat it: no fix. -->
+    9 │ <input Type="checkbox" CHECKED bind:value={checked} />
+  
+  i Users change whether a checkbox is checked, not its value.
+  
+  i Use bind:checked to track whether this checkbox is checked, or bind:group to track the values of all checked checkboxes in a group.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use bind:checked instead.
+  
+     5  5 │   </script>
+     6  6 │   
+     7    │ - <input·TYPE="checkbox"·bind:value={checked}·/>
+        7 │ + <input·TYPE="checkbox"·bind:checked={checked}·/>
+     8  8 │   <!-- `CHECKED` is the `checked` attribute, so renaming the binding would repeat it: no fix. -->
+     9  9 │   <input Type="checkbox" CHECKED bind:value={checked} />
+  
+
+```
+
+```
+invalidUppercaseAttributes.svelte:9:32 lint/nursery/noSvelteBindValueOnCheckableInputs ━━━━━━━━━━━━━
+
+  × bind:value does not track whether this checkbox is checked.
+  
+     7 │ <input TYPE="checkbox" bind:value={checked} />
+     8 │ <!-- `CHECKED` is the `checked` attribute, so renaming the binding would repeat it: no fix. -->
+   > 9 │ <input Type="checkbox" CHECKED bind:value={checked} />
+       │                                ^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+  
+  i Users change whether a checkbox is checked, not its value.
+  
+  i Use bind:checked to track whether this checkbox is checked, or bind:group to track the values of all checked checkboxes in a group.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

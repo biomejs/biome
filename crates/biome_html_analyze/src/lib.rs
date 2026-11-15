@@ -14,6 +14,7 @@ mod vue;
 pub use crate::registry::visit_registry;
 pub use crate::services::aria::{Aria, AriaServices};
 pub use crate::services::module_graph::{HtmlDbService, HtmlModuleGraph};
+pub use crate::services::svelte::{SvelteSemantic, SvelteSemanticServices};
 pub use crate::services::vue::{VueSemantic, VueSemanticServices};
 pub use crate::suppression::HtmlSuppression;
 use crate::suppression_action::HtmlSuppressionAction;

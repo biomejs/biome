@@ -1,0 +1,11 @@
+---
+source: crates/biome_svelte_semantic/src/tests/component.rs
+expression: "component(r#\"<script module lang=\"ts\">\n  export const load = () => {};\n  export function helper() {}\n  export type Kind = 'a' | 'b';\n  const local = 1;\n  export { local as renamed, local };\n  export { other } from './other';\n  export * as all from './all';\n</script>\n\"#).to_string().lines().filter(|line|\nline.starts_with(\"export\")).collect::<Vec<_>>().join(\"\\n\")"
+---
+export load 41..45 local=load
+export helper 76..82 local=helper
+export Kind 102..106 local=Kind type-only
+export renamed 150..166 local=local
+export local 168..173 local=local
+export other 188..193 reexport
+export all 221..243 reexport

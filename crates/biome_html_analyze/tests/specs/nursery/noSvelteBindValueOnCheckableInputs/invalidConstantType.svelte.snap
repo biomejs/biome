@@ -1,0 +1,210 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidConstantType.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+
+<script module>
+	export const RADIO = "radio";
+</script>
+
+<script>
+	const kind = "checkbox";
+	const type = "checkbox";
+	const radio = RADIO;
+	let checked = $state(false);
+</script>
+
+<input type={"checkbox"} bind:value={checked} />
+<input type={kind} bind:value={checked} />
+<input {type} bind:value={checked} />
+<input type={`check${"box"}`} bind:value={checked} />
+<input type={radio} bind:value={checked} />
+{#if checked}
+	{@const local = "radio"}
+	<input type={local} bind:value={checked} />
+{/if}
+
+```
+
+# Diagnostics
+```
+invalidConstantType.svelte:14:26 lint/nursery/noSvelteBindValueOnCheckableInputs  FIXABLE  ━━━━━━━━━━
+
+  × bind:value does not track whether this checkbox is checked.
+  
+    12 │ </script>
+    13 │ 
+  > 14 │ <input type={"checkbox"} bind:value={checked} />
+       │                          ^^^^^^^^^^^^^^^^^^^^
+    15 │ <input type={kind} bind:value={checked} />
+    16 │ <input {type} bind:value={checked} />
+  
+  i Users change whether a checkbox is checked, not its value.
+  
+  i Use bind:checked to track whether this checkbox is checked, or bind:group to track the values of all checked checkboxes in a group.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use bind:checked instead.
+  
+    12 12 │   </script>
+    13 13 │   
+    14    │ - <input·type={"checkbox"}·bind:value={checked}·/>
+       14 │ + <input·type={"checkbox"}·bind:checked={checked}·/>
+    15 15 │   <input type={kind} bind:value={checked} />
+    16 16 │   <input {type} bind:value={checked} />
+  
+
+```
+
+```
+invalidConstantType.svelte:15:20 lint/nursery/noSvelteBindValueOnCheckableInputs  FIXABLE  ━━━━━━━━━━
+
+  × bind:value does not track whether this checkbox is checked.
+  
+    14 │ <input type={"checkbox"} bind:value={checked} />
+  > 15 │ <input type={kind} bind:value={checked} />
+       │                    ^^^^^^^^^^^^^^^^^^^^
+    16 │ <input {type} bind:value={checked} />
+    17 │ <input type={`check${"box"}`} bind:value={checked} />
+  
+  i Users change whether a checkbox is checked, not its value.
+  
+  i Use bind:checked to track whether this checkbox is checked, or bind:group to track the values of all checked checkboxes in a group.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use bind:checked instead.
+  
+    13 13 │   
+    14 14 │   <input type={"checkbox"} bind:value={checked} />
+    15    │ - <input·type={kind}·bind:value={checked}·/>
+       15 │ + <input·type={kind}·bind:checked={checked}·/>
+    16 16 │   <input {type} bind:value={checked} />
+    17 17 │   <input type={`check${"box"}`} bind:value={checked} />
+  
+
+```
+
+```
+invalidConstantType.svelte:16:15 lint/nursery/noSvelteBindValueOnCheckableInputs  FIXABLE  ━━━━━━━━━━
+
+  × bind:value does not track whether this checkbox is checked.
+  
+    14 │ <input type={"checkbox"} bind:value={checked} />
+    15 │ <input type={kind} bind:value={checked} />
+  > 16 │ <input {type} bind:value={checked} />
+       │               ^^^^^^^^^^^^^^^^^^^^
+    17 │ <input type={`check${"box"}`} bind:value={checked} />
+    18 │ <input type={radio} bind:value={checked} />
+  
+  i Users change whether a checkbox is checked, not its value.
+  
+  i Use bind:checked to track whether this checkbox is checked, or bind:group to track the values of all checked checkboxes in a group.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use bind:checked instead.
+  
+    14 14 │   <input type={"checkbox"} bind:value={checked} />
+    15 15 │   <input type={kind} bind:value={checked} />
+    16    │ - <input·{type}·bind:value={checked}·/>
+       16 │ + <input·{type}·bind:checked={checked}·/>
+    17 17 │   <input type={`check${"box"}`} bind:value={checked} />
+    18 18 │   <input type={radio} bind:value={checked} />
+  
+
+```
+
+```
+invalidConstantType.svelte:17:31 lint/nursery/noSvelteBindValueOnCheckableInputs  FIXABLE  ━━━━━━━━━━
+
+  × bind:value does not track whether this checkbox is checked.
+  
+    15 │ <input type={kind} bind:value={checked} />
+    16 │ <input {type} bind:value={checked} />
+  > 17 │ <input type={`check${"box"}`} bind:value={checked} />
+       │                               ^^^^^^^^^^^^^^^^^^^^
+    18 │ <input type={radio} bind:value={checked} />
+    19 │ {#if checked}
+  
+  i Users change whether a checkbox is checked, not its value.
+  
+  i Use bind:checked to track whether this checkbox is checked, or bind:group to track the values of all checked checkboxes in a group.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use bind:checked instead.
+  
+    15 15 │   <input type={kind} bind:value={checked} />
+    16 16 │   <input {type} bind:value={checked} />
+    17    │ - <input·type={`check${"box"}`}·bind:value={checked}·/>
+       17 │ + <input·type={`check${"box"}`}·bind:checked={checked}·/>
+    18 18 │   <input type={radio} bind:value={checked} />
+    19 19 │   {#if checked}
+  
+
+```
+
+```
+invalidConstantType.svelte:18:21 lint/nursery/noSvelteBindValueOnCheckableInputs  FIXABLE  ━━━━━━━━━━
+
+  × bind:value does not track whether this radio button is checked.
+  
+    16 │ <input {type} bind:value={checked} />
+    17 │ <input type={`check${"box"}`} bind:value={checked} />
+  > 18 │ <input type={radio} bind:value={checked} />
+       │                     ^^^^^^^^^^^^^^^^^^^^
+    19 │ {#if checked}
+    20 │ 	{@const local = "radio"}
+  
+  i Users change whether a radio button is checked, not its value.
+  
+  i Use bind:group to track the value of the selected radio button in a group.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use bind:group instead.
+  
+    16 16 │   <input {type} bind:value={checked} />
+    17 17 │   <input type={`check${"box"}`} bind:value={checked} />
+    18    │ - <input·type={radio}·bind:value={checked}·/>
+       18 │ + <input·type={radio}·bind:group={checked}·/>
+    19 19 │   {#if checked}
+    20 20 │   	{@const local = "radio"}
+  
+
+```
+
+```
+invalidConstantType.svelte:21:22 lint/nursery/noSvelteBindValueOnCheckableInputs  FIXABLE  ━━━━━━━━━━
+
+  × bind:value does not track whether this radio button is checked.
+  
+    19 │ {#if checked}
+    20 │ 	{@const local = "radio"}
+  > 21 │ 	<input type={local} bind:value={checked} />
+       │ 	                    ^^^^^^^^^^^^^^^^^^^^
+    22 │ {/if}
+    23 │ 
+  
+  i Users change whether a radio button is checked, not its value.
+  
+  i Use bind:group to track the value of the selected radio button in a group.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use bind:group instead.
+  
+    19 19 │   {#if checked}
+    20 20 │     {@const local = "radio"}
+    21    │ - → <input·type={local}·bind:value={checked}·/>
+       21 │ + → <input·type={local}·bind:group={checked}·/>
+    22 22 │   {/if}
+    23 23 │   
+  
+
+```

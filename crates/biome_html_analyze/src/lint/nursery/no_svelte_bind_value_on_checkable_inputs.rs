@@ -1,6 +1,5 @@
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
-    declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -11,8 +10,10 @@ use biome_html_syntax::{
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_svelte_bind_value_on_checkable_inputs::NoSvelteBindValueOnCheckableInputsOptions;
+use biome_svelte_semantic::{Attr, DirectiveKind, Element};
 
 use crate::HtmlRuleAction;
+use crate::services::svelte::SvelteSemantic;
 
 declare_lint_rule! {
     /// Disallow `bind:value` on checkbox and radio inputs.
@@ -70,7 +71,7 @@ pub struct State {
 }
 
 impl Rule for NoSvelteBindValueOnCheckableInputs {
-    type Query = Ast<AnyHtmlTagElement>;
+    type Query = SvelteSemantic<AnyHtmlTagElement>;
     type State = State;
     type Signals = Option<Self::State>;
     type Options = NoSvelteBindValueOnCheckableInputsOptions;
@@ -80,13 +81,13 @@ impl Rule for NoSvelteBindValueOnCheckableInputs {
         if element.tag_name_kind() != Some(T![input]) {
             return None;
         }
+        let model = ctx.model();
+        let input = model
+            .element_at(element.range())
+            .filter(|input| input.range() == element.range())?;
 
-        let input_type = element
-            .find_attribute_by_name("type")?
-            .as_html_attribute()?
-            .html_string()?
-            .inner_string_text()
-            .ok()?;
+        // The model follows `type={kind}` to the value of a `const kind`.
+        let input_type = find_attr(&input, "type")?.static_string()?;
         let input_kind = if input_type.eq_ignore_ascii_case("checkbox") {
             CheckableInputKind::Checkbox
         } else if input_type.eq_ignore_ascii_case("radio") {
@@ -95,15 +96,13 @@ impl Rule for NoSvelteBindValueOnCheckableInputs {
             return None;
         };
 
-        let directive = element
-            .attributes()
-            .into_iter()
-            .find_map(|attribute| match attribute {
-                AnyHtmlAttribute::AnySvelteDirective(AnySvelteDirective::SvelteBindDirective(
-                    directive,
-                )) if is_binding_named(&directive, "value") => Some(directive),
-                _ => None,
-            })?;
+        let binding = input.directive(DirectiveKind::Bind, "value")?;
+        let AnyHtmlAttribute::AnySvelteDirective(AnySvelteDirective::SvelteBindDirective(
+            directive,
+        )) = model.node(&binding)?
+        else {
+            return None;
+        };
 
         Some(State {
             input_kind,
@@ -137,17 +136,10 @@ impl Rule for NoSvelteBindValueOnCheckableInputs {
         let replacement = state.input_kind.replacement_binding();
         // Svelte treats `bind:checked` and `checked` as the same attribute name and rejects
         // elements that repeat a name, so renaming the binding would break those elements.
-        let element = ctx.query();
-        if element.find_attribute_by_name(replacement).is_some()
-            || element
-                .attributes()
-                .into_iter()
-                .any(|attribute| match attribute {
-                    AnyHtmlAttribute::AnySvelteDirective(
-                        AnySvelteDirective::SvelteBindDirective(directive),
-                    ) => is_binding_named(&directive, replacement),
-                    _ => false,
-                })
+        let model = ctx.model();
+        let input = model.element_at(ctx.query().range())?;
+        if find_attr(&input, replacement).is_some()
+            || input.directive(DirectiveKind::Bind, replacement).is_some()
         {
             return None;
         }
@@ -231,11 +223,10 @@ impl biome_console::fmt::Display for CheckableInputKind {
     }
 }
 
-fn is_binding_named(directive: &SvelteBindDirective, name: &str) -> bool {
-    directive
-        .value()
-        .ok()
-        .and_then(|value| value.property().ok())
-        .and_then(|property| property.as_svelte_name()?.ident_token().ok())
-        .is_some_and(|token| token.text_trimmed() == name)
+/// Returns the attribute of `input` named `name`. HTML attribute names are
+/// case-insensitive, so `TYPE` names `type`.
+fn find_attr(input: &Element, name: &str) -> Option<Attr> {
+    input
+        .attrs()
+        .find(|attr| attr.name().is_some_and(|attr_name| attr_name.eq_ignore_ascii_case(name)))
 }

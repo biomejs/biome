@@ -1,0 +1,12 @@
+---
+source: crates/biome_svelte_semantic/src/tests/component.rs
+expression: "references(r#\"<script>\n  import { fade } from 'svelte/transition';\n  import * as ui from './ui';\n  import tooltip from './tooltip';\n  let value = $state('');\n  let active = $state(false);\n</script>\n<ui.Button.Primary transition:fade use:tooltip.show={'x'} />\n<input bind:value class:active class:other-name style:color />\n\"#)"
+---
+ref 0 $state 132..138 Identifier Call -> Rune
+ref 1 $state 159..165 Identifier Call -> Rune
+ref 2 ui 185..187 TagName(ElementId(1)) Read path=Button.Primary -> 1 ui
+ref 3 fade 214..218 DirectiveName(AttrId(0)) Call -> 0 fade
+ref 4 tooltip 223..230 DirectiveName(AttrId(1)) Call path=show -> 2 tooltip
+ref 5 value 257..262 DirectiveShorthand(AttrId(2)) Write -> 3 value
+ref 6 active 269..275 DirectiveShorthand(AttrId(3)) Read -> 4 active
+ref 7 color 299..304 DirectiveShorthand(AttrId(5)) Read -> Global

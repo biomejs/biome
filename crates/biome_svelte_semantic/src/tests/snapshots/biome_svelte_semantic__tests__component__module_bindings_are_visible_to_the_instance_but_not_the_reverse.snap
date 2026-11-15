@@ -1,0 +1,9 @@
+---
+source: crates/biome_svelte_semantic/src/tests/component.rs
+expression: "references(r#\"<script module>\n  export const shared = 1;\n  console.log(local);\n</script>\n<script>\n  let local = shared;\n</script>\n{shared}{local}\n\"#)"
+---
+ref 0 console 45..52 Identifier Call path=log -> Global
+ref 1 local 57..62 Identifier Escape -> Global
+ref 2 shared 98..104 Identifier Escape -> 0 shared
+ref 3 shared 117..123 Identifier Read -> 0 shared
+ref 4 local 125..130 Identifier Read -> 1 local

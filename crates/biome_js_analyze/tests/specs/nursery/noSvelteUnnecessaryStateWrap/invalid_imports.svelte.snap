@@ -1,0 +1,64 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_imports.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+	import { SvelteMap as ReactiveMap } from "svelte/reactivity";
+	import * as reactivity from "svelte/reactivity";
+
+	// A renamed import of a reactive class.
+	const map = $state(new ReactiveMap());
+	// A reactive class read from a namespace import.
+	const set = $state(new reactivity.SvelteSet());
+</script>
+
+```
+
+# Diagnostics
+```
+invalid_imports.svelte:7:14 lint/nursery/noSvelteUnnecessaryStateWrap  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  i ReactiveMap is already reactive, wrapping it in $state() is unnecessary.
+  
+    6 │ 	// A renamed import of a reactive class.
+  > 7 │ 	const map = $state(new ReactiveMap());
+      │ 	            ^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 	// A reactive class read from a namespace import.
+    9 │ 	const set = $state(new reactivity.SvelteSet());
+  
+  i Classes from svelte/reactivity track their own mutations without needing a $state wrapper.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary $state() wrapper.
+  
+    6 │ → const·map·=·$state(new·ReactiveMap());
+      │               -------                -  
+
+```
+
+```
+invalid_imports.svelte:9:14 lint/nursery/noSvelteUnnecessaryStateWrap  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  i SvelteSet is already reactive, wrapping it in $state() is unnecessary.
+  
+     7 │ 	const map = $state(new ReactiveMap());
+     8 │ 	// A reactive class read from a namespace import.
+   > 9 │ 	const set = $state(new reactivity.SvelteSet());
+       │ 	            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ </script>
+    11 │ 
+  
+  i Classes from svelte/reactivity track their own mutations without needing a $state wrapper.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary $state() wrapper.
+  
+    8 │ → const·set·=·$state(new·reactivity.SvelteSet());
+      │               -------                         -  
+
+```

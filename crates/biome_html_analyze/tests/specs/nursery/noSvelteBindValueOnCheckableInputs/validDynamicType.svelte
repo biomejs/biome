@@ -1,0 +1,13 @@
+<!-- should not generate diagnostics -->
+
+<script>
+	const type = "checkbox";
+	let mutable = "checkbox";
+	let name = $state("");
+	let types = $state(["text"]);
+</script>
+
+<input type={mutable} bind:value={name} />
+{#each types as type}
+	<input {type} bind:value={name} />
+{/each}

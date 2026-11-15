@@ -10,6 +10,7 @@ pub use crate::services::control_flow::ControlFlowGraph;
 use crate::services::embedded::EmbeddedService;
 pub use crate::services::react_compiler::{ReactCompilerResult, ReactCompilerServices};
 use crate::services::semantic::SemanticModelBuilderVisitor;
+pub use crate::services::svelte::{SvelteSemantic, SvelteSemanticServices};
 use crate::services::typed::TypedModule;
 pub use crate::suppression::JsSuppression;
 use crate::suppression_action::JsSuppressionAction;

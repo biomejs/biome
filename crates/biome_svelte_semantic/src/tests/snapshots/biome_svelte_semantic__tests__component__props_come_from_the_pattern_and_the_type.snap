@@ -1,0 +1,9 @@
+---
+source: crates/biome_svelte_semantic/src/tests/component.rs
+expression: "model.to_string().lines().filter(|line|\nline.starts_with(\"prop\")).collect::<Vec<_>>().join(\"\\n\")"
+---
+props rest=rest typed complete=true
+prop label 117..122 local=label in-type uses=1
+prop value 124..129 local=value default bindable uses=0
+prop id 38..40 in-type uses=1
+prop onclick 90..97 in-type uses=0

@@ -2,17 +2,13 @@ use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_semantic::ReferencesExtensions;
-use biome_js_syntax::{
-    AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, JsCallExpression, JsImport,
-    JsVariableDeclarator,
-};
-use biome_languages::JsFileSource;
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TokenText};
+use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsReferenceIdentifier};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TextSize, TokenText};
 use biome_rule_options::no_svelte_unnecessary_state_wrap::NoSvelteUnnecessaryStateWrapOptions;
+use biome_svelte_semantic::{Imported, Rune, RuneCall};
 
 use crate::JsRuleAction;
-use crate::services::semantic::Semantic;
+use crate::services::svelte::{SvelteSemantic, SvelteSemanticServices};
 
 /// Classes from `svelte/reactivity` that are already reactive without `$state`.
 const REACTIVE_CLASSES: &[&str] = &[
@@ -134,81 +130,72 @@ declare_lint_rule! {
     }
 }
 
-/// The name of the reactive class being unnecessarily wrapped.
-pub type RuleState = TokenText;
-
 impl Rule for NoSvelteUnnecessaryStateWrap {
-    type Query = Semantic<JsCallExpression>;
-    type State = RuleState;
+    type Query = SvelteSemantic<JsCallExpression>;
+    type State = TokenText;
     type Signals = Option<Self::State>;
     type Options = NoSvelteUnnecessaryStateWrapOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call = ctx.query();
-        let model = ctx.model();
+        let svelte = ctx.svelte_model();
+        let offset = snippet_offset(ctx);
 
-        if !ctx
-            .source_type::<JsFileSource>()
-            .as_embedding_kind()
-            .is_svelte()
-        {
+        // The model records the calls of runes, which nothing in the file can shadow, and
+        // `state_call` keeps those of `$state`.
+        let rune_call = state_call(ctx, call)?;
+        if rune_call.args() != 1 {
             return None;
         }
+        let argument = call
+            .arguments()
+            .ok()?
+            .args()
+            .first()?
+            .ok()?
+            .as_any_js_expression()?
+            .clone();
 
-        // Callee must be the `$state` rune.
-        let callee = call.callee().ok()?;
-        let callee_ident = callee.as_js_identifier_expression()?;
-        if callee_ident.name().ok()?.value_token().ok()?.text_trimmed() != "$state" {
-            return None;
-        }
-
-        // Must be called with exactly one argument.
-        let args = call.arguments().ok()?.args();
-        if args.len() != 1 {
-            return None;
-        }
-        let arg_expr = args.first()?.ok()?.as_any_js_expression()?.clone();
-
-        // Argument must be `new X(...)` or `X(...)`.
-        let class_callee = match &arg_expr {
+        // Argument must be `new X(...)` or `X(...)`, where `X` may be read from a namespace, as
+        // in `new reactivity.SvelteMap()`.
+        let class_callee = match argument.omit_parentheses() {
             AnyJsExpression::JsNewExpression(new_expr) => new_expr.callee().ok()?,
             AnyJsExpression::JsCallExpression(inner_call) => inner_call.callee().ok()?,
             _ => return None,
         };
-        let class_ident = class_callee.as_js_identifier_expression()?;
-        let class_ref = class_ident.name().ok()?;
-        let class_name_text = class_ref.value_token().ok()?.token_text_trimmed();
+        let (base, members) = match class_callee.clone().omit_parentheses() {
+            AnyJsExpression::JsIdentifierExpression(identifier) => (identifier.name().ok()?, 0),
+            AnyJsExpression::JsStaticMemberExpression(member) => {
+                let object = member.object().ok()?.omit_parentheses();
+                (object.as_js_identifier_expression()?.name().ok()?, 1)
+            }
+            _ => return None,
+        };
 
-        let is_builtin = REACTIVE_CLASSES.contains(&class_name_text.text());
-        let is_additional = ctx
-            .options()
+        let name = class_name(&base, members, &class_callee)?;
+
+        // A named import must be the callee itself, so that `SvelteDate.now()` isn't taken for
+        // the class. A namespace import must be read for exactly one member.
+        let reference = svelte.reference_at(base.range() + offset)?;
+        let expected_members = match reference.symbol().as_ref().and_then(|symbol| symbol.imported()) {
+            Some(Imported::Named(_)) => Some(0),
+            Some(Imported::Namespace) => Some(1),
+            _ => None,
+        };
+        if expected_members == Some(members)
+            && reference.path().count() == members
+            && let Some((SVELTE_REACTIVITY_MODULE, imported)) = reference.imported_member()
+            && REACTIVE_CLASSES.contains(&imported)
+        {
+            return Some(name);
+        }
+
+        // Additional classes are matched by name, wherever they are declared.
+        ctx.options()
             .additional_reactive_classes()
             .iter()
-            .any(|c| c.as_ref() == class_name_text.text());
-
-        if !is_builtin && !is_additional {
-            return None;
-        }
-
-        // For built-in classes, verify the class is imported from `svelte/reactivity`.
-        // We only check static ES module imports (`import { X } from "..."`), which is
-        // the only realistic pattern in Svelte component files. Dynamic `import()` and
-        // CommonJS `require()` are not handled.
-        if is_builtin {
-            let binding = model.binding(&class_ref)?;
-            let imported_from = binding
-                .syntax()
-                .ancestors()
-                .skip(1)
-                .find_map(JsImport::cast)
-                .and_then(|import| import.source_text().ok());
-            match imported_from {
-                Some(source) if source.text() == SVELTE_REACTIVITY_MODULE => {}
-                _ => return None,
-            }
-        }
-
-        Some(class_name_text)
+            .any(|class| class.as_ref() == name.text())
+            .then_some(name)
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -229,20 +216,14 @@ impl Rule for NoSvelteUnnecessaryStateWrap {
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let call = ctx.query();
-        let model = ctx.model();
 
         // When allowReassign is enabled, withhold the fix for variables that are reassigned after
-        // declaration — removing $state would break reactivity for those reference changes.
+        // declaration, in the script or in the template, as by `bind:this`. Removing `$state`
+        // would break reactivity for those reference changes.
         if ctx.options().allow_reassign()
-            && let Some(declarator) = call
-                .syntax()
-                .ancestors()
-                .skip(1)
-                .find_map(JsVariableDeclarator::cast)
-            && let Ok(AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(
-                id_binding,
-            ))) = declarator.id()
-            && id_binding.all_writes(model).next().is_some()
+            && state_call(ctx, call)?
+                .symbols()
+                .any(|symbol| symbol.is_reassigned())
         {
             return None;
         }
@@ -260,4 +241,34 @@ impl Rule for NoSvelteUnnecessaryStateWrap {
             mutation,
         ))
     }
+}
+
+/// The position in the host document of the start of the analyzed tree.
+fn snippet_offset(services: &SvelteSemanticServices) -> TextSize {
+    services
+        .snippet()
+        .map_or_else(TextSize::default, |snippet| snippet.offset())
+}
+
+/// Returns the model's record of `call` when it calls the `$state` rune.
+fn state_call(services: &SvelteSemanticServices, call: &JsCallExpression) -> Option<RuneCall> {
+    services
+        .svelte_model()
+        .rune_call_at(call.range() + snippet_offset(services))
+        .filter(|rune_call| rune_call.rune() == Rune::State)
+}
+
+/// Returns the name of the class a callee names, as written: `X` for `X`, and
+/// `X` for `namespace.X`.
+fn class_name(
+    base: &JsReferenceIdentifier,
+    members: usize,
+    callee: &AnyJsExpression,
+) -> Option<TokenText> {
+    if members == 0 {
+        return Some(base.value_token().ok()?.token_text_trimmed());
+    }
+    let member = callee.clone().omit_parentheses();
+    let member = member.as_js_static_member_expression()?.member().ok()?;
+    Some(member.value_token().ok()?.token_text_trimmed())
 }

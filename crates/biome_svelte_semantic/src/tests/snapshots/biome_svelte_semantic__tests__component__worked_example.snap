@@ -1,0 +1,101 @@
+---
+source: crates/biome_svelte_semantic/src/tests/component.rs
+expression: component(TODO_LIST).to_string()
+---
+file Component runes=true
+script Module 25..59 lang=ts
+script Instance 88..482 lang=ts
+element script 0..68 Dom Once scope=2
+  attr module
+  attr lang = "ts"
+element script 70..491 Dom Once scope=2
+  attr lang = "ts"
+element h1 493..528 Dom Once scope=2
+  attr {title} = snippet 2
+element input 529..558 Dom Once scope=2
+  attr bind:value = snippet 5
+element Item 605..676 Component Any scope=4 tag-ref=24
+  attr {text} = snippet 8
+  attr href = snippet 9 snippet 10
+  attr onclick = snippet 11
+element input 679..721 Dom Any scope=4
+  attr bind:value = snippet 12
+element p 732..756 Dom AtMostOnce scope=5
+element em 824..842 Dom Any scope=7
+block Each 559..764 expression=6 key=7
+  branch EachBody 605..721 scope=4
+  branch EachElse 732..756 scope=5
+block Snippet 766..853 expression=14
+  branch SnippetBody 787..842 scope=7
+snippet 0 Script(ScriptId(0)) 25..59 Module scope=0
+snippet 1 Script(ScriptId(1)) 88..482 Module scope=1
+snippet 2 AttrValue(AttrId(3)) 498..503 Identifier scope=2
+snippet 3 Text(Some(ElementId(2))) 506..511 Identifier scope=3
+snippet 4 Text(Some(ElementId(2))) 515..521 Identifier scope=3
+snippet 5 AttrValue(AttrId(4)) 548..554 Identifier scope=2
+snippet 6 EachList(BlockId(0)) 565..574 Identifier scope=2
+snippet 7 EachKey(BlockId(0)) 598..600 Identifier scope=4
+snippet 8 AttrValue(AttrId(5)) 612..616 Identifier scope=4
+snippet 9 AttrPart(AttrId(6), 0) 625..631 Identifier scope=4 value=String("/todos/") strings=["/todos/"] prefix="/todos/" suffix="/todos/"
+snippet 10 AttrPart(AttrId(6), 1) 633..635 Identifier scope=4
+snippet 11 AttrValue(AttrId(7)) 647..672 Function { params: 0 } scope=4
+snippet 12 AttrValue(AttrId(8)) 698..717 MemberChain scope=4
+snippet 13 RenderTag 744..751 Call scope=6
+snippet 14 SnippetSignature(BlockId(1)) 776..783 SnippetSignature scope=7 in-snippet-block
+snippet 15 ConstTag 795..820 Declaration scope=7 in-snippet-block
+snippet 16 Text(Some(ElementId(7))) 829..836 Identifier scope=8 in-snippet-block value=String("Nothing to do") strings=["Nothing to do"] prefix="Nothing to do" suffix="Nothing to do"
+scope 0 Module
+  symbol 3 Local prerender 41..50 Const exported value=Bool(true)
+scope 1 Instance parent=0
+  symbol 4 Import writable 100..108 Import import=svelte/store:Named("writable")
+  symbol 5 Import Item 141..145 Import import=./Item.svelte:Default
+  symbol 6 Local Props 181..186 Type type-only
+  symbol 7 Local title 261..266 Let rune=$props
+  symbol 8 Local items 268..273 Let rune=$props
+  symbol 9 Local rest 294..298 Let rune=$props
+  symbol 10 Local filter 326..332 Let rune=$state reassigned
+  symbol 11 Local visible 353..360 Let rune=$derived
+  symbol 12 Local count 433..438 Const store=Writable
+  symbol 13 Local prefix 462..468 Const value=String("/todos/") strings=["/todos/"] prefix="/todos/" suffix="/todos/"
+scope 2 Template parent=1
+  symbol 14 Snippet empty 776..781 Function
+scope 4 Branch(BranchId(0)) parent=2
+  symbol 0 EachItem id 579..581 BlockVariable each-source=visible
+  symbol 1 EachItem text 583..587 BlockVariable each-source=visible
+  symbol 2 EachIndex index 591..596 BlockVariable
+scope 7 Branch(BranchId(2)) parent=2
+  symbol 15 ConstTag message 795..802 Const value=String("Nothing to do") strings=["Nothing to do"] prefix="Nothing to do" suffix="Nothing to do"
+rune $bindable 276..289 target=Other args=1
+rune $props 310..318 target=Variable args=0 symbols=title,items,rest
+rune $state 335..345 target=Variable args=1 symbols=filter
+rune $derived 363..423 target=Variable args=1 symbols=visible
+props rest=rest typed complete=true
+prop title 261..266 local=title in-type uses=2
+prop items 268..273 local=items default bindable in-type uses=1
+prop onselect 219..227 in-type uses=1
+export prerender 41..50 local=prerender
+ref 0 writable 441..449 Identifier Call -> 4 writable
+ref 1 Props 302..307 Identifier Read -> 6 Props type
+ref 2 items 372..377 Identifier Call path=filter -> 8 items
+ref 3 filter 414..420 Identifier Escape -> 10 filter in-function
+ref 4 Todo 211..215 Identifier Read -> Global type
+ref 5 $bindable 276..285 Identifier Call -> Rune
+ref 6 $props 310..316 Identifier Call -> Rune
+ref 7 $state 335..341 Identifier Call -> Rune
+ref 8 $derived 363..371 Identifier Call -> Rune
+ref 9 title 498..503 Identifier Read -> 7 title
+ref 10 title 506..511 Identifier Read -> 7 title
+ref 11 $count 515..521 Identifier Read -> 12 count store
+ref 12 filter 548..554 Identifier Write -> 10 filter
+ref 13 visible 566..573 Identifier Read -> 11 visible
+ref 14 id 598..600 Identifier Read -> 0 id
+ref 15 text 612..616 Identifier Read -> 1 text
+ref 16 prefix 625..631 Identifier Read -> 13 prefix
+ref 17 id 633..635 Identifier Read -> 0 id
+ref 18 rest 653..657 Identifier Call path=onselect -> 9 rest in-function
+ref 19 id 669..671 Identifier Escape -> 0 id in-function
+ref 20 visible 698..705 Identifier Write path-open -> 11 visible
+ref 21 index 706..711 Identifier Read -> 2 index
+ref 22 empty 744..749 Identifier Call -> 14 empty
+ref 23 message 829..836 Identifier Read -> 15 message in-snippet-block
+ref 24 Item 606..610 TagName(ElementId(4)) Read -> 5 Item

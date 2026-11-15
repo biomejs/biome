@@ -1,0 +1,18 @@
+---
+source: crates/biome_svelte_semantic/src/tests/component.rs
+expression: "references(r#\"<script>let item = $state(); let list = $state([]);</script>\n{#each list as item, i (item.id)}{item}{i}{:else}{item}{/each}\n{#await list then { item: value = item }}{value}{:catch error}{error}{/await}\n{#if list}{@const total = list.length}{total}{:else}{total}{/if}\n\"#)"
+---
+ref 0 $state 19..25 Identifier Call -> Rune
+ref 1 $state 40..46 Identifier Call -> Rune
+ref 2 list 68..72 Identifier Read -> 5 list
+ref 3 item 85..89 Identifier Read path=id -> 0 item
+ref 4 item 95..99 Identifier Read -> 0 item
+ref 5 i 101..102 Identifier Read -> 1 i
+ref 6 item 111..115 Identifier Read -> 4 item
+ref 7 list 132..136 Identifier Read -> 5 list
+ref 8 value 166..171 Identifier Read -> 2 value
+ref 9 error 187..192 Identifier Read -> 3 error
+ref 10 list 207..211 Identifier Read -> 5 list
+ref 11 list 228..232 Identifier Escape path=length -> 5 list
+ref 12 total 241..246 Identifier Read -> 6 total
+ref 13 total 255..260 Identifier Read -> Global

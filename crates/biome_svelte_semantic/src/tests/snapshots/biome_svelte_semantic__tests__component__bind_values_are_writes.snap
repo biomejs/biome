@@ -1,0 +1,10 @@
+---
+source: crates/biome_svelte_semantic/src/tests/component.rs
+expression: "references(r#\"<script>\n  let user = $state({});\n  let element;\n  let value = $state();\n</script>\n<input bind:value={user.name} bind:this={element} />\n<input bind:value={() => value, (next) => (value = next)} />\n\"#)"
+---
+ref 0 $state 22..28 Identifier Call -> Rune
+ref 1 $state 63..69 Identifier Call -> Rune
+ref 2 user 102..106 Identifier Write path=name -> 0 user
+ref 3 element 124..131 Identifier Write -> 1 element
+ref 4 value 161..166 Identifier Read -> 2 value in-function
+ref 5 value 179..184 Identifier Write -> 2 value in-function

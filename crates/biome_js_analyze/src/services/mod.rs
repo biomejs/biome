@@ -6,6 +6,7 @@ pub mod manifest;
 pub mod react_compiler;
 pub mod semantic;
 pub mod semantic_class;
+pub mod svelte;
 pub mod turborepo;
 pub mod typed;
 pub mod vue;

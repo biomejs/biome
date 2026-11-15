@@ -1,0 +1,9 @@
+---
+source: crates/biome_svelte_semantic/src/tests/component.rs
+expression: "references(r#\"<script>\n  const width = window.innerWidth;\n  function measure() { return window.innerHeight; }\n</script>\n<p>{window.location}</p>\n<button onclick={() => window.alert()} />\n{#snippet later()}{window.name}{/snippet}\n\"#)"
+---
+ref 0 window 25..31 Identifier Escape path=innerWidth -> Global
+ref 1 window 74..80 Identifier Escape path=innerHeight -> Global in-function
+ref 2 window 110..116 Identifier Read path=location -> Global
+ref 3 window 154..160 Identifier Call path=alert -> Global in-function
+ref 4 window 192..198 Identifier Read path=name -> Global in-snippet-block
