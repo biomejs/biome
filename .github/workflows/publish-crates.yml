@@ -171,6 +171,8 @@ jobs:
             test "$head_sha" = "$VERIFIED_REVISION" || continue
             test "$head_repository" = "$REPOSITORY" || continue
             test "$run_conclusion" = success || continue
+            workflow=${workflow%@*}
+            workflow=${workflow#"$REPOSITORY/"}
             test "$workflow:$event" = .github/workflows/verify-crates.yml:workflow_dispatch || continue
 
             conclusion=$(gh api "repos/$REPOSITORY/actions/runs/$run_id/jobs?filter=latest&per_page=100" \

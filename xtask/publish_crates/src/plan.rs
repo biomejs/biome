@@ -111,12 +111,14 @@ pub(crate) fn topological_order<'a>(
         .collect::<BTreeMap<_, _>>();
 
     for package in packages {
-        for dependency in package.dependencies.iter().chain(
-            package
-                .dev_dependencies
-                .iter()
-                .filter(|dependency| publishing.contains(dependency.as_str())),
-        ) {
+        for dependency in package
+            .dependencies
+            .iter()
+            .chain(package.dev_dependencies.iter().filter(|dependency| {
+                publishing.contains(package.name.as_str())
+                    && publishing.contains(dependency.as_str())
+            }))
+        {
             if !packages_by_name.contains_key(dependency.as_str()) {
                 bail!(
                     "{} depends on missing publishable crate {dependency}",
@@ -246,13 +248,46 @@ mod tests {
         dependent.dev_dependencies.insert("z".to_string());
         let packages = vec![dependent, PublishPackage::new("z", &[])];
 
-        let order = topological_order(&packages, &BTreeSet::from(["z"]))
+        let order = topological_order(&packages, &BTreeSet::from(["a", "z"]))
             .unwrap()
             .into_iter()
             .map(|package| package.name.as_str())
             .collect::<Vec<_>>();
 
         assert_eq!(order, ["z", "a"]);
+    }
+
+    #[test]
+    fn skipped_development_dependents_do_not_create_cycles() {
+        let mut skipped = PublishPackage::new("a", &[]);
+        skipped.dev_dependencies.insert("z".to_string());
+        let packages = vec![skipped, PublishPackage::new("z", &["a"])];
+        let remote = BTreeMap::from([
+            (
+                "a".to_string(),
+                Some(CrateMetadata {
+                    versions: BTreeMap::from([(
+                        "1.0.0".to_string(),
+                        crate::registry::CrateVersion {
+                            checksum: "a-checksum".to_string(),
+                            yanked: false,
+                        },
+                    )]),
+                }),
+            ),
+            ("z".to_string(), None),
+        ]);
+
+        let plan = PublishPlan::new(&packages, &checksums(&packages), &remote).unwrap();
+        let order = plan
+            .items
+            .iter()
+            .map(|item| item.name.as_str())
+            .collect::<Vec<_>>();
+
+        assert_eq!(order, ["a", "z"]);
+        assert_eq!(plan.items[0].action, PlanAction::Skip);
+        assert_eq!(plan.items[1].action, PlanAction::Publish(PublishKind::New));
     }
 
     #[test]
