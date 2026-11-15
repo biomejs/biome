@@ -120,6 +120,7 @@ fn global_catalog() -> crate::TypeData {
                     ty: crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into(),
                 },
             ]),
+            scope_id: None,
         }),
     )
 }
@@ -143,6 +144,7 @@ fn global_item() -> crate::TypeData {
                     ty: crate::globals::GLOBAL_STRING_KEYWORD_ID.into(),
                 },
             ]),
+            scope_id: None,
         }),
     )
 }
@@ -160,6 +162,7 @@ fn global_named() -> crate::TypeData {
                     ty: crate::globals::GLOBAL_STRING_KEYWORD_ID.into(),
                 },
             ]),
+            scope_id: None,
         }),
     )
 }
@@ -177,6 +180,7 @@ fn global_tagged() -> crate::TypeData {
                     ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
                 },
             ]),
+            scope_id: None,
         }),
     )
 }
@@ -194,6 +198,7 @@ fn global_unselected() -> crate::TypeData {
                     ty: crate::globals::GLOBAL_STRING_KEYWORD_ID.into(),
                 },
             ]),
+            scope_id: None,
         }),
     )
 }
