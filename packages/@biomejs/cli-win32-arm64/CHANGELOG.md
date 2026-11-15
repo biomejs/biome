@@ -1,5 +1,9 @@
 # @biomejs/cli-win32-arm64
 
+## 2.6.8
+
+No changes in this release.
+
 ## 2.6.7
 
 No changes in this release.

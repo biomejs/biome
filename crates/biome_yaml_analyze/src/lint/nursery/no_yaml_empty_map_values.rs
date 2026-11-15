@@ -51,7 +51,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoYamlEmptyMapValues {
-        version: "next",
+        version: "2.6.8",
         name: "noYamlEmptyMapValues",
         language: "yaml",
         sources: &[RuleSource::EslintYml("no-empty-mapping-value").same()],

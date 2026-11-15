@@ -179,7 +179,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoTailwindRestrictedClasses {
-        version: "next",
+        version: "2.6.8",
         name: "noTailwindRestrictedClasses",
         language: "html",
         sources: &[RuleSource::EslintBetterTailwindcss("no-restricted-classes").inspired()],

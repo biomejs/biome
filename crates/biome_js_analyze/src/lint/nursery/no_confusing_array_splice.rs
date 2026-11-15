@@ -74,7 +74,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoConfusingArraySplice {
-        version: "next",
+        version: "2.6.8",
         name: "noConfusingArraySplice",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-confusing-array-splice").same()],

@@ -193,7 +193,7 @@ declare_lint_rule! {
     /// - To enforce a consistent way of writing the `v-on` directive itself, see [`useVueConsistentVOnStyle`](https://biomejs.dev/linter/rules/use-vue-consistent-v-on-style/).
     ///
     pub UseVueConsistentVOnHandlerStyle {
-        version: "next",
+        version: "2.6.8",
         name: "useVueConsistentVOnHandlerStyle",
         language: "js",
         recommended: false,
