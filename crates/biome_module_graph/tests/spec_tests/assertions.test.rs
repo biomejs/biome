@@ -454,7 +454,9 @@ fn assertions_respect_binding_identity_writes_and_existing_subject_restrictions(
         ("written", "value", &[String, Number]),
         ("argumentWrite", "value", &[String, Number]),
         ("captured", "value", &[String, Number]),
-        ("try", "value", &[String, Number]),
+        // TypeScript 7.0.2 (`tsc --strict`) narrows the read inside the try
+        // block (`narrowing-probes/m4-l3/extra.ts` L8).
+        ("try", "value", &[String]),
         ("writtenCallee", "value", &[String, Number]),
     ] {
         let ty = normalized_type_at(&db, module, SOURCE, marker, expression);

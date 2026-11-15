@@ -1,0 +1,189 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidTryNarrowing.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// Conditions in a try block, a catch clause, and a finally block narrow as
+// anywhere else, and the code after a `try` statement continues from the ends
+// of its try block and its catch clause, as in TypeScript.
+
+declare function check(): void;
+
+function inTry(value: string | null) {
+	try {
+		if (value !== null) {
+			return value?.length;
+		}
+	} finally {}
+}
+
+function afterCatchReturns(value: string | null) {
+	try {
+		if (value === null) return;
+	} catch {
+		return;
+	}
+	return value?.length;
+}
+
+function afterFinally(value: string | null) {
+	try {
+		if (value === null) return;
+	} finally {
+	}
+	return value?.length;
+}
+
+function testInFinally(value: string | null) {
+	try {
+		check();
+	} finally {
+		if (value === null) throw new Error("missing");
+	}
+	return value?.length;
+}
+
+function catchVariable() {
+	try {
+		check();
+	} catch (error) {
+		if (error instanceof Error) {
+			return error?.message;
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidTryNarrowing.ts:11:11 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+     9 │ 	try {
+    10 │ 		if (value !== null) {
+  > 11 │ 			return value?.length;
+       │ 			       ^^^^^
+    12 │ 		}
+    13 │ 	} finally {}
+  
+  i Replace ?. with ..
+  
+     9 │ 	try {
+    10 │ 		if (value !== null) {
+  > 11 │ 			return value?.length;
+       │ 			            ^^
+    12 │ 		}
+    13 │ 	} finally {}
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidTryNarrowing.ts:22:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    20 │ 		return;
+    21 │ 	}
+  > 22 │ 	return value?.length;
+       │ 	       ^^^^^
+    23 │ }
+    24 │ 
+  
+  i Replace ?. with ..
+  
+    20 │ 		return;
+    21 │ 	}
+  > 22 │ 	return value?.length;
+       │ 	            ^^
+    23 │ }
+    24 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidTryNarrowing.ts:30:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    28 │ 	} finally {
+    29 │ 	}
+  > 30 │ 	return value?.length;
+       │ 	       ^^^^^
+    31 │ }
+    32 │ 
+  
+  i Replace ?. with ..
+  
+    28 │ 	} finally {
+    29 │ 	}
+  > 30 │ 	return value?.length;
+       │ 	            ^^
+    31 │ }
+    32 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidTryNarrowing.ts:39:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    37 │ 		if (value === null) throw new Error("missing");
+    38 │ 	}
+  > 39 │ 	return value?.length;
+       │ 	       ^^^^^
+    40 │ }
+    41 │ 
+  
+  i Replace ?. with ..
+  
+    37 │ 		if (value === null) throw new Error("missing");
+    38 │ 	}
+  > 39 │ 	return value?.length;
+       │ 	            ^^
+    40 │ }
+    41 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidTryNarrowing.ts:47:11 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    45 │ 	} catch (error) {
+    46 │ 		if (error instanceof Error) {
+  > 47 │ 			return error?.message;
+       │ 			       ^^^^^
+    48 │ 		}
+    49 │ 	}
+  
+  i Replace ?. with ..
+  
+    45 │ 	} catch (error) {
+    46 │ 		if (error instanceof Error) {
+  > 47 │ 			return error?.message;
+       │ 			            ^^
+    48 │ 		}
+    49 │ 	}
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```

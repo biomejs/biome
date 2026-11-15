@@ -482,7 +482,7 @@ fn unwritten_let_and_const_subjects_narrow_but_writes_captures_and_var_do_not() 
         function captured(value: string | number) {
             if (guard(value)) { return () => /*captured*/value; }
         }
-        function unsupportedRoot(value: string | number) {
+        function insideTry(value: string | number) {
             try { if (guard(value)) { /*try*/value; } } finally {}
         }
     "#;
@@ -493,7 +493,9 @@ fn unwritten_let_and_const_subjects_narrow_but_writes_captures_and_var_do_not() 
         ("var", "hoisted", &[String, Number]),
         ("written", "value", &[String, Number]),
         ("captured", "value", &[String, Number]),
-        ("try", "value", &[String, Number]),
+        // TypeScript 7.0.2 (`tsc --strict`) narrows the read inside the try
+        // block (`narrowing-probes/m4-l3/extra.ts` L9).
+        ("try", "value", &[String]),
     ] {
         let ty = normalized_type_at(&db, module, SOURCE, marker, expression);
         assert_variants(&db, ty, expected, marker);

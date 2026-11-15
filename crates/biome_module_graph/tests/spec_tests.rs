@@ -102,6 +102,8 @@ mod substitutions;
 mod switch;
 #[path = "spec_tests/tailwind_stylesheet.test.rs"]
 mod tailwind_stylesheet;
+#[path = "spec_tests/try.test.rs"]
+mod try_statements;
 #[path = "spec_tests/types.test.rs"]
 mod types;
 
