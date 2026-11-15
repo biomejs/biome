@@ -1,0 +1,64 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: evolvingTypesInvalid.ts
+---
+# Input
+```ts
+// A `let` declared without an initializer and an array initialized with `[]`
+// take their types from the values that the code assigns or adds to them, as
+// in TypeScript, so each statement below is a promise that nothing handles.
+
+declare function load(): Promise<number>;
+
+function assigned() {
+	let pending;
+	pending = load();
+	pending;
+}
+
+function pushed() {
+	const pending = [];
+	pending.push(load());
+	pending;
+}
+
+```
+
+# Diagnostics
+```
+evolvingTypesInvalid.ts:10:2 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+     8 │ 	let pending;
+     9 │ 	pending = load();
+  > 10 │ 	pending;
+       │ 	^^^^^^^^
+    11 │ }
+    12 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+evolvingTypesInvalid.ts:16:2 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An array of Promises was found, meaning they are not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    14 │ 	const pending = [];
+    15 │ 	pending.push(load());
+  > 16 │ 	pending;
+       │ 	^^^^^^^^
+    17 │ }
+    18 │ 
+  
+  i This happens when an array of Promises is not wrapped with Promise.all() or a similar method, and is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

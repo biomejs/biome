@@ -1,0 +1,82 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidEvolvingTypes.ts
+---
+# Input
+```ts
+// A `let` declared without an initializer, or with `null` or `undefined`,
+// takes its type from the values that the code assigns to it, as in
+// TypeScript, so each condition below can't change.
+
+interface Timer {
+	cancel(): void;
+}
+
+declare function make(): Timer;
+
+function assigned() {
+	let timer;
+	timer = make();
+	timer?.cancel();
+}
+
+function initializedWithNull() {
+	let timer = null;
+	timer = make();
+	timer?.cancel();
+}
+
+```
+
+# Diagnostics
+```
+invalidEvolvingTypes.ts:14:2 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    12 │ 	let timer;
+    13 │ 	timer = make();
+  > 14 │ 	timer?.cancel();
+       │ 	^^^^^
+    15 │ }
+    16 │ 
+  
+  i Replace ?. with ..
+  
+    12 │ 	let timer;
+    13 │ 	timer = make();
+  > 14 │ 	timer?.cancel();
+       │ 	     ^^
+    15 │ }
+    16 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidEvolvingTypes.ts:20:2 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    18 │ 	let timer = null;
+    19 │ 	timer = make();
+  > 20 │ 	timer?.cancel();
+       │ 	^^^^^
+    21 │ }
+    22 │ 
+  
+  i Replace ?. with ..
+  
+    18 │ 	let timer = null;
+    19 │ 	timer = make();
+  > 20 │ 	timer?.cancel();
+       │ 	     ^^
+    21 │ }
+    22 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```

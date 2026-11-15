@@ -15,7 +15,7 @@ use crate::globals::{
     GLOBAL_STRING_KEYWORD_ID, GLOBAL_SYMBOL_KEYWORD_ID, GLOBAL_UNDEFINED_ID, GLOBAL_UNKNOWN_ID,
     GLOBAL_UNKNOWN_KEYWORD_ID,
 };
-use crate::interned_types::{InternedLiteral, Literal};
+use crate::interned_types::{InternedLiteral, Literal, TypeMemberKind};
 use crate::resolved::InferredTypeData;
 use crate::type_relation::{
     Assignability, InstanceType, PropertyLookup, PropertyPresence, TypeResolver,
@@ -1303,6 +1303,155 @@ pub fn base_literal_type<'db>(
         }
         _ => ty,
     }
+}
+
+/// Returns the type that a value of type `ty` gives a variable whose type
+/// evolves with its writes, or adds to the element type of an array that
+/// evolves, as TypeScript's `getWidenedLiteralType` gives it: `ty` with its
+/// literal members replaced by their primitive types, so `1 | "a"` becomes
+/// `number | string`.
+///
+/// The result replaces the variable's type instead of narrowing a declared
+/// one, so a value whose type Biome may infer differently from TypeScript
+/// gives `Unknown`, which leaves a read with its declared type. Biome's type
+/// matches TypeScript's when it is built from primitive types, `null`,
+/// `undefined`, `never`, interfaces, instances of classes and interfaces with
+/// such type arguments, as `Array<number>` or `Date`, and object types whose members
+/// are all properties of such types, as `{ k: number }`. A literal type
+/// inside an object type or a type argument gives `Unknown`: TypeScript
+/// widens `{ k: 1 }` to `{ k: number }`, as Biome does, but Biome keeps `1`
+/// in `{ k: id(1) }`. Functions, methods, getters, tuples, generics, `any`,
+/// `unknown`, and `void` give `Unknown` too. `resolve` resolves handles as
+/// for [`narrow_type`], and a type with more than 256 parts gives `Unknown`.
+pub fn evolving_assigned_type<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    mut resolve: impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
+    let mut remaining = MAX_NARROWING_STEPS;
+    let resolve: &mut TypeResolver<'db, '_> = &mut resolve;
+    widened_value(db, ty, resolve, &mut remaining).unwrap_or(InferredTypeData::Unknown)
+}
+
+/// Returns `ty` resolved, with its literal members widened, when Biome types
+/// a value of type `ty` as TypeScript does, as [`evolving_assigned_type`]
+/// describes, or `None` otherwise.
+fn widened_value<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    resolve: &mut TypeResolver<'db, '_>,
+    remaining: &mut usize,
+) -> Option<InferredTypeData<'db>> {
+    *remaining = remaining.checked_sub(1)?;
+    let ty = resolve(ty);
+    match ty {
+        InferredTypeData::Literal(_) => widened_literal(db, ty),
+        InferredTypeData::InstanceOf(instance)
+            if resolve(instance.ty(db)).should_flatten_instance(instance.type_parameters(db)) =>
+        {
+            widened_value(db, instance.ty(db), resolve, remaining)
+        }
+        InferredTypeData::Union(union) => {
+            let members = union
+                .types(db)
+                .iter()
+                .map(|member| widened_value(db, *member, resolve, remaining))
+                .collect::<Option<Vec<_>>>()?;
+            Some(InferredTypeData::union_from_types(db, members))
+        }
+        _ => is_exact_value(db, ty, resolve, remaining).then_some(ty),
+    }
+}
+
+/// Returns whether Biome types a part of a value's type as TypeScript does,
+/// as [`evolving_assigned_type`] describes: the type itself, a property type,
+/// or a type argument, where TypeScript widens no literal type.
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Every other type may differ from TypeScript's."
+)]
+fn is_exact_value<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    resolve: &mut TypeResolver<'db, '_>,
+    remaining: &mut usize,
+) -> bool {
+    let Some(left) = remaining.checked_sub(1) else {
+        return false;
+    };
+    *remaining = left;
+    match resolve(ty) {
+        InferredTypeData::BigInt
+        | InferredTypeData::Boolean
+        | InferredTypeData::Null
+        | InferredTypeData::Number
+        | InferredTypeData::String
+        | InferredTypeData::Symbol
+        | InferredTypeData::Undefined
+        | InferredTypeData::NeverKeyword
+        | InferredTypeData::Interface(_) => true,
+        InferredTypeData::Union(union) => union
+            .types(db)
+            .iter()
+            .all(|member| is_exact_value(db, *member, resolve, remaining)),
+        InferredTypeData::InstanceOf(instance) => {
+            let target = resolve(instance.ty(db));
+            let arguments = instance.type_parameters(db);
+            if target.should_flatten_instance(arguments) {
+                return is_exact_value(db, target, resolve, remaining);
+            }
+            matches!(
+                target.expand_canonical_global(db),
+                InferredTypeData::Class(_) | InferredTypeData::Interface(_)
+            ) && arguments
+                .iter()
+                .all(|argument| is_exact_value(db, *argument, resolve, remaining))
+        }
+        InferredTypeData::Object(object) => {
+            !object.has_unknown_members(db)
+                && object.members(db).iter().all(|member| {
+                    matches!(
+                        member.kind,
+                        TypeMemberKind::Named(_)
+                            | TypeMemberKind::NamedOptional(_)
+                            | TypeMemberKind::ReadonlyNamed(_)
+                            | TypeMemberKind::ReadonlyNamedOptional(_)
+                    ) && is_exact_value(db, member.ty, resolve, remaining)
+                })
+        }
+        _ => false,
+    }
+}
+
+/// Returns the element type of `ty`, the type of an array that evolves with
+/// its writes: the union of the type arguments of its members, each of which
+/// must be an instance of `Array` with one type argument, as the joins of
+/// `Array<number>` and `Array<string>` give `number | string`. An array to
+/// which nothing was added yet is `Array<never>`, whose element type is
+/// `never`.
+///
+/// Returns `None` when a member is something else, as `Unknown` or
+/// `undefined`, and when the members exceed the work limit of 256 types.
+pub fn evolving_array_element<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let mut remaining = MAX_NARROWING_STEPS;
+    let members = union_members(db, ty, &mut remaining)?;
+    let mut elements = Vec::with_capacity(members.len());
+    for member in members {
+        let InferredTypeData::InstanceOf(instance) = member else {
+            return None;
+        };
+        let [element] = instance.type_parameters(db).as_ref() else {
+            return None;
+        };
+        if !instance.ty(db).is_array_class(db) {
+            return None;
+        }
+        elements.push(*element);
+    }
+    Some(InferredTypeData::union_from_types(db, elements))
 }
 
 /// Returns the runtime test that the flattened target of a type predicate
@@ -4791,6 +4940,100 @@ mod tests {
             base_literal_type(db, InferredTypeData::Null),
             InferredTypeData::Null
         );
+    }
+
+    /// Returns the type of an object literal with `members`.
+    fn object_expression<'db>(
+        db: &'db TestDb,
+        members: Vec<TypeMember<'db>>,
+    ) -> InferredTypeData<'db> {
+        InferredTypeData::Object(InternedObject::new(
+            db,
+            None,
+            members.into_boxed_slice(),
+            false,
+            ObjectKind::Expression,
+        ))
+    }
+
+    /// Returns `Array<element>`.
+    fn array<'db>(db: &'db TestDb, element: InferredTypeData<'db>) -> InferredTypeData<'db> {
+        InferredTypeData::instance_of(db, InferredTypeData::array_class(), Box::new([element]))
+    }
+
+    #[test]
+    fn evolving_values_widen_literals_and_reject_types_biome_may_infer_otherwise() {
+        let db = &TestDb::default();
+        let evolving = |ty| super::evolving_assigned_type(db, ty, |ty| ty);
+        let object = |members| object_expression(db, members);
+        let array = |element| array(db, element);
+        assert_eq!(
+            evolving(union(db, &[number(db, "1"), string(db, "a")])),
+            union(db, &[InferredTypeData::Number, InferredTypeData::String])
+        );
+        assert_eq!(evolving(InferredTypeData::Null), InferredTypeData::Null);
+        let widened = object(vec![member("k", InferredTypeData::Number)]);
+        assert_eq!(evolving(widened), widened);
+        let elements = array(InferredTypeData::Number);
+        assert_eq!(evolving(elements), elements);
+        let instance = instance(db, class(db, "Date", None, Vec::new()));
+        assert_eq!(evolving(instance), instance);
+        // A literal inside an object type or a type argument may stay in
+        // Biome where TypeScript widens it, and functions, `unknown`, and
+        // types that Biome couldn't determine may differ too.
+        for ty in [
+            object(vec![member("k", number(db, "1"))]),
+            array(string(db, "a")),
+            array(InferredTypeData::UnknownKeyword),
+            object(vec![TypeMember {
+                kind: TypeMemberKind::Getter(Text::new_static("k")),
+                ty: InferredTypeData::Number,
+            }]),
+            InferredTypeData::Unknown,
+            InferredTypeData::AnyKeyword,
+            InferredTypeData::VoidKeyword,
+            union(
+                db,
+                &[InferredTypeData::Number, InferredTypeData::UnknownKeyword],
+            ),
+        ] {
+            assert_eq!(evolving(ty), InferredTypeData::Unknown, "{ty:?}");
+        }
+    }
+
+    #[test]
+    fn evolving_arrays_join_the_elements_of_their_members() {
+        let db = &TestDb::default();
+        let array = |element| array(db, element);
+        assert_eq!(
+            super::evolving_array_element(
+                db,
+                union(
+                    db,
+                    &[
+                        array(InferredTypeData::Number),
+                        array(InferredTypeData::String)
+                    ]
+                )
+            ),
+            Some(union(
+                db,
+                &[InferredTypeData::Number, InferredTypeData::String]
+            ))
+        );
+        assert_eq!(
+            super::evolving_array_element(db, array(InferredTypeData::NeverKeyword)),
+            Some(InferredTypeData::NeverKeyword)
+        );
+        for ty in [
+            InferredTypeData::Unknown,
+            union(
+                db,
+                &[array(InferredTypeData::Number), InferredTypeData::Undefined],
+            ),
+        ] {
+            assert_eq!(super::evolving_array_element(db, ty), None, "{ty:?}");
+        }
     }
 
     #[test]

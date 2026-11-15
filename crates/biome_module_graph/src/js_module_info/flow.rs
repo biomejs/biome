@@ -373,6 +373,47 @@ pub(crate) enum FlowWriteEffect {
     /// below the subject gets its declared type, and the subject itself keeps
     /// its type.
     Wildcard,
+    /// A value added to an array whose type evolves with its writes, as
+    /// [`FlowEvolving::Array`] describes: an argument of `a.push(..)` or
+    /// `a.unshift(..)`, or the value of `a[0] = v`, whose type joins the
+    /// element type of the array, as TypeScript's
+    /// `getTypeAtFlowArrayMutation` adds it. A value that Biome can't type
+    /// as TypeScript does, such as a spread argument or the value of
+    /// `a[i] = v`, whose key may not be a number, has no index, and the
+    /// array gets its declared type at the reads that the write reaches.
+    Elements(Option<u32>),
+    /// The assignment of an empty array literal to an array whose type
+    /// evolves with its writes, which starts its element type again at
+    /// `never`, as TypeScript's `isEmptyArrayAssignment` does.
+    EmptyArray,
+}
+
+/// How TypeScript types a variable without a type annotation from the
+/// values that the code writes to it, as its `autoType` and `autoArrayType`
+/// do, instead of from its initializer.
+///
+/// TypeScript gives such a variable a type at each read from the writes that
+/// reach it, as Biome's flow does with a solve whose state is that type, not
+/// a declared type that writes narrow. A read in another function, as in a
+/// closure, has an implicit `any` there (TS7005), so the variable keeps its
+/// declared type outside the root that declares it.
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+pub(crate) enum FlowEvolving {
+    /// A subject whose writes narrow its declared type.
+    #[default]
+    None,
+    /// A `let` or a `var` declared without an initializer or with `null` or
+    /// `undefined`, which starts at `undefined` and takes the type of each
+    /// value assigned to it, its literal types widened, as
+    /// [`evolving_assigned_type`] gives it.
+    ///
+    /// [`evolving_assigned_type`]: biome_js_type_info::evolving_assigned_type
+    Variable,
+    /// A `let`, a `const`, or a `var` initialized with an empty array literal,
+    /// whose element type starts at `never` and joins the type of each value
+    /// added to it, as [`FlowWriteEffect::Elements`] describes. A read gives
+    /// an array of that element type, and runtime tests don't narrow it.
+    Array,
 }
 
 /// The value that a write assigns, before inference resolves its type in
@@ -500,6 +541,10 @@ pub(crate) struct RootFlow {
     /// capture point already comes from a flow that starts where the variable
     /// is declared, `undefined` included.
     pub(crate) uninitialized: FxHashSet<FlowSubjectId>,
+    /// The variables with reads whose type evolves with their writes, as
+    /// [`FlowEvolving`] describes, with how it evolves. Every such variable
+    /// is declared by the root.
+    pub(crate) evolving: FxHashMap<FlowSubjectId, FlowEvolving>,
     /// The capture point of each variable that the root continues from an
     /// enclosing root, keyed by the variable. When the root runs, such a
     /// variable starts with its type where the enclosing root creates the
@@ -683,6 +728,13 @@ impl RootFlow {
     /// [`Self::uninitialized`] describes.
     pub(crate) fn is_uninitialized(&self, subject: FlowSubjectId) -> bool {
         self.uninitialized.contains(&subject)
+    }
+
+    /// Returns how the type of `subject` evolves with its writes, as
+    /// [`Self::evolving`] describes, or [`FlowEvolving::None`] for a subject
+    /// whose writes narrow its declared type.
+    pub(crate) fn evolving(&self, subject: FlowSubjectId) -> FlowEvolving {
+        self.evolving.get(&subject).copied().unwrap_or_default()
     }
 
     /// Returns the capture point where the variable `subject` continues the
@@ -1085,10 +1137,16 @@ impl RootCollector<'_> {
         bindings: &[JsIdentifierBinding],
         has_this: bool,
     ) {
-        let mut eligible: FxHashSet<TextRange> = bindings
-            .iter()
-            .filter_map(|binding| self.eligible_range(binding))
-            .collect();
+        let mut eligible: FxHashSet<TextRange> = FxHashSet::default();
+        let mut evolving_ranges: FxHashMap<TextRange, FlowEvolving> = FxHashMap::default();
+        for binding in bindings {
+            if let Some((range, evolving)) = self.declared_range(binding) {
+                eligible.insert(range);
+                if evolving != FlowEvolving::None {
+                    evolving_ranges.insert(range, evolving);
+                }
+            }
+        }
         let this_can_narrow = has_this && subjects::this_can_narrow(root);
         let Some(BuiltRoot {
             nodes,
@@ -1104,6 +1162,8 @@ impl RootCollector<'_> {
             assigned,
             written,
             mut captures,
+            initializers,
+            hoisted,
         }) = build_root(root, self.model, &mut self.functions, this_can_narrow)
         else {
             return;
@@ -1138,24 +1198,81 @@ impl RootCollector<'_> {
         // write that can run in the root's flow. Other writes, as in a
         // function called where it is defined or a class static block, run at
         // points that the graph doesn't model.
-        eligible.retain(|range| self.writes_are_modeled(*range, root, &written));
-        let uninitialized = self.uninitialized_subjects(root, &subjects, &eligible);
+        eligible.retain(|range| {
+            self.writes_are_modeled(*range, root, &written)
+                && (evolving_ranges.get(range) != Some(&FlowEvolving::Array)
+                    || self.mutations_are_modeled(*range, root, &written))
+        });
+        // A variable whose type evolves with its writes has a type other than
+        // its declared type only after a write whose value Biome types as
+        // TypeScript does, so one without such a write keeps its declared
+        // type at every read, without a solve.
+        let typed: FxHashSet<FlowSubjectId> = (0..)
+            .zip(&nodes)
+            .filter_map(|(id, node)| match node {
+                FlowNode::Write { write, .. } if !initializers.contains(&id) => {
+                    writes.get(*write as usize)
+                }
+                FlowNode::Write { .. }
+                | FlowNode::Start
+                | FlowNode::Join(_)
+                | FlowNode::Condition { .. } => None,
+            })
+            .filter(|write| {
+                matches!(
+                    write.effect,
+                    FlowWriteEffect::Assign(Some(_)) | FlowWriteEffect::Elements(Some(_))
+                )
+            })
+            .map(|write| write.subject)
+            .collect();
+        let mut evolving: FxHashMap<FlowSubjectId, FlowEvolving> = FxHashMap::default();
+        for (range, kind) in evolving_ranges {
+            match subjects.get(&FlowSubject::Binding(range)) {
+                Some(subject) if typed.contains(&subject) && eligible.contains(&range) => {
+                    evolving.insert(subject, kind);
+                }
+                Some(_) | None => {
+                    eligible.remove(&range);
+                }
+            }
+        }
+        let mut uninitialized = self.uninitialized_subjects(root, &subjects, &eligible);
+        uninitialized.retain(|subject| !evolving.contains_key(subject));
         // A write mentions its subject where it can change the subject's
         // type, so the reads after it are kept, and the subject narrows as a
         // tested one, not only through tests of its shape.
         let condition_mentioned: FxHashSet<FlowSubjectId> =
             mentions.iter().map(|(_, subject)| *subject).collect();
         let mut write_mentioned: FxHashSet<FlowSubjectId> = FxHashSet::default();
+        // TypeScript types every read of a variable whose type evolves with
+        // its writes from the flow, but only the reads that a write after its
+        // initializer reaches have a type other than what its declaration
+        // gives it, as `null` in `let x = null`, apart from the `undefined`
+        // of a `let x` that nothing has assigned yet, which keeps its declared
+        // type, and of a `var` read before its declarator, where the start
+        // mentions it. So only those writes mention it, which keeps the others
+        // without candidates.
         for (node, write) in (0..).zip(&nodes).filter_map(|(id, node)| match node {
             FlowNode::Write { write, .. } => Some((id, *write)),
             FlowNode::Start | FlowNode::Join(_) | FlowNode::Condition { .. } => None,
         }) {
             if let Some(write) = writes.get(write as usize)
-                && self.write_may_change(write, subjects.as_slice())
+                && if evolving.contains_key(&write.subject) {
+                    !initializers.contains(&node)
+                } else {
+                    self.write_may_change(write, subjects.as_slice())
+                }
             {
                 mentions.push((node, write.subject));
                 write_mentioned.insert(write.subject);
             }
+        }
+        for subject in hoisted
+            .iter()
+            .filter(|subject| evolving.contains_key(subject))
+        {
+            mentions.push((0, *subject));
         }
         // A subject that may be read before it is assigned, such as a `var`,
         // can be assignment-only too. A read that only writes reach has the
@@ -1164,7 +1281,9 @@ impl RootCollector<'_> {
         let mut assignment_only: FxHashSet<FlowSubjectId> = write_mentioned
             .iter()
             .copied()
-            .filter(|subject| !condition_mentioned.contains(subject))
+            .filter(|subject| {
+                !condition_mentioned.contains(subject) && !evolving.contains_key(subject)
+            })
             .collect();
         if !write_mentioned.is_empty() {
             property_only.retain(|subject| !write_mentioned.contains(subject));
@@ -1297,15 +1416,33 @@ impl RootCollector<'_> {
                     })
             })
             .collect();
+        // A read of a variable whose type evolves with its writes has an
+        // implicit `any` in a closure in TypeScript (TS7005), so it keeps its
+        // declared type there.
         let (captured, assumed_initialized) = if captures.is_empty() {
             (Vec::new(), FxHashSet::default())
-        } else {
+        } else if evolving.is_empty() {
             self.closure_reads(
                 flow,
                 root_range,
                 &captures,
                 &mut subjects,
                 &narrowable,
+                &mut eligible,
+                &mut reads,
+            )
+        } else {
+            let capturable = narrowable
+                .iter()
+                .copied()
+                .filter(|subject| !evolving.contains_key(subject))
+                .collect();
+            self.closure_reads(
+                flow,
+                root_range,
+                &captures,
+                &mut subjects,
+                &capturable,
                 &mut eligible,
                 &mut reads,
             )
@@ -1528,7 +1665,8 @@ impl RootCollector<'_> {
             let mut subject_writes: FxHashMap<FlowSubjectId, Vec<u32>> = FxHashMap::default();
             for write in &writes {
                 if let FlowWriteEffect::Assign(Some(value))
-                | FlowWriteEffect::CompoundLike(Some(value)) = write.effect
+                | FlowWriteEffect::CompoundLike(Some(value))
+                | FlowWriteEffect::Elements(Some(value)) = write.effect
                     && read_points.contains_key(&write.subject)
                 {
                     subject_writes.entry(write.subject).or_default().push(value);
@@ -1547,6 +1685,10 @@ impl RootCollector<'_> {
                 .filter(|subject| read_points.contains_key(subject))
                 .collect();
             assignment_only.retain(|subject| read_points.contains_key(subject));
+            let evolving = evolving
+                .into_iter()
+                .filter(|(subject, _)| read_points.contains_key(subject))
+                .collect();
             flow.roots.push(RootFlow {
                 nodes: nodes.into_boxed_slice(),
                 guards: guards.into_boxed_slice(),
@@ -1563,6 +1705,7 @@ impl RootCollector<'_> {
                 assigned: assigned.into_boxed_slice(),
                 subject_writes,
                 uninitialized,
+                evolving,
                 assignment_only,
                 captures: FxHashMap::default(),
             });
@@ -1662,11 +1805,34 @@ impl RootCollector<'_> {
     /// that declares it and in the roots nested in that one. Each root still
     /// checks the writes of the variable with [`Self::writes_are_modeled`].
     ///
-    /// An import narrows too, with the declared type of what it imports. A
-    /// `var` narrows unless another declaration redeclares its name, as
-    /// [`Self::is_redeclared`] lists. A read can reach a `var` before its
-    /// declarator. See [`Self::uninitialized_subjects`].
+    /// An import narrows too, with the declared type of what it imports, and
+    /// so does a `var`, which a read can reach before its declarator, as
+    /// [`RootCollector::uninitialized_subjects`] describes, unless its scope
+    /// declares its name twice. A variable whose type evolves with its writes
+    /// narrows only in the root that declares it, as [`Self::declared_range`]
+    /// describes.
     fn eligible_range(&mut self, binding: &JsIdentifierBinding) -> Option<TextRange> {
+        match self.declared_range(binding)? {
+            (range, FlowEvolving::None) => Some(range),
+            (_, FlowEvolving::Variable | FlowEvolving::Array) => None,
+        }
+    }
+
+    /// Returns the range of `binding` when its reads can narrow in the root
+    /// that declares it, as [`Self::eligible_range`] decides, with how its
+    /// type evolves with its writes, as [`evolving_declaration`] decides.
+    ///
+    /// Such a variable narrows whatever its collected type, which doesn't
+    /// follow its writes. TypeScript gives it an implicit `any` (TS7005)
+    /// outside the function that declares it, so it keeps its declared type
+    /// in nested roots, including closures. One that nothing writes, and no
+    /// call or element assignment adds values to, has the type of its
+    /// initializer everywhere, which its collected type is, so it narrows as
+    /// any other variable.
+    fn declared_range(
+        &mut self,
+        binding: &JsIdentifierBinding,
+    ) -> Option<(TextRange, FlowEvolving)> {
         let range = binding.range();
         // The declared type of a destructured variable ignores defaults, so it
         // can lack the type of a default that supplies the value.
@@ -1678,16 +1844,27 @@ impl RootCollector<'_> {
         if declared.range() != range {
             return None;
         }
-        // TypeScript gives such a variable a type that evolves with its
-        // writes, which its declared type in Biome doesn't follow.
-        if declared.all_writes().next().is_some() && is_evolving_declaration(&declared) {
-            return None;
-        }
+        let evolving = match evolving_declaration(&declared, self.model) {
+            FlowEvolving::Variable if declared.all_writes().next().is_none() => FlowEvolving::None,
+            FlowEvolving::Array
+                if declared.all_writes().next().is_none()
+                    && !declared.all_reads().any(|read| {
+                        read.syntax()
+                            .parent()
+                            .and_then(JsIdentifierExpression::cast)
+                            .is_some_and(|identifier| builder::is_array_mutation(&identifier))
+                    }) =>
+            {
+                FlowEvolving::None
+            }
+            evolving => evolving,
+        };
         // Untyped and `any` bindings never narrow, so their reads need no flow.
-        if self
-            .raw_binding_types
-            .get(&range)
-            .is_none_or(|reference| is_raw_narrowing_invariant(reference, self.raw_types))
+        if evolving == FlowEvolving::None
+            && self
+                .raw_binding_types
+                .get(&range)
+                .is_none_or(|reference| is_raw_narrowing_invariant(reference, self.raw_types))
         {
             return None;
         }
@@ -1696,7 +1873,7 @@ impl RootCollector<'_> {
         {
             return None;
         }
-        Some(range)
+        Some((range, evolving))
     }
 
     /// Returns whether the variable declared at `range` can narrow in a root
@@ -2133,6 +2310,42 @@ impl RootCollector<'_> {
         })
     }
 
+    /// Returns whether the graph of `root` has a write point for every call
+    /// and element assignment that adds values to the array that the variable
+    /// declared at `range` holds and that can run in the root's flow, given
+    /// the variables that such writes with a write point add to, `written`,
+    /// as [`builder::is_array_mutation`] finds them among the variable's
+    /// semantic reads.
+    ///
+    /// As for [`Self::writes_are_modeled`], code that runs only when called
+    /// doesn't count, as TypeScript ignores a `push` in a callback, and any
+    /// other such write without a write point, as in a function called where
+    /// it is defined, means that the array's type can't follow its writes in
+    /// the root.
+    fn mutations_are_modeled(
+        &self,
+        range: TextRange,
+        root: &AnyJsControlFlowRoot,
+        written: &WrittenTargets,
+    ) -> bool {
+        let Some(binding) = self.model.as_binding_by_range(range) else {
+            return false;
+        };
+        let root_range = root.syntax().text_trimmed_range();
+        binding.all_reads().all(|read| {
+            let start = read.range_start();
+            if !root_range.contains(start) || written.mutations.contains(&start) {
+                return true;
+            }
+            let node = read.syntax_near(root.syntax());
+            !node
+                .parent()
+                .and_then(JsIdentifierExpression::cast)
+                .is_some_and(|identifier| builder::is_array_mutation(&identifier))
+                || writes::runs_only_when_called(&node, root)
+        })
+    }
+
     /// Returns whether `write` can change the type of its subject at a read,
     /// as far as the collected types tell. An assignment or `delete` changes
     /// only a union, and a compound assignment changes only a type with a
@@ -2152,9 +2365,11 @@ impl RootCollector<'_> {
             FlowWriteEffect::Assign(Some(_)) | FlowWriteEffect::Undefined => may_be_union(),
             FlowWriteEffect::CompoundLike(Some(_)) => may_be_union() || may_have_literal(),
             FlowWriteEffect::CompoundLike(None) | FlowWriteEffect::Compound => may_have_literal(),
-            FlowWriteEffect::Assign(None) | FlowWriteEffect::Reset | FlowWriteEffect::Wildcard => {
-                false
-            }
+            FlowWriteEffect::Assign(None)
+            | FlowWriteEffect::Reset
+            | FlowWriteEffect::Wildcard
+            | FlowWriteEffect::Elements(_)
+            | FlowWriteEffect::EmptyArray => false,
         }
     }
 
@@ -2489,36 +2704,77 @@ const BINDING_PATTERN_KINDS: SyntaxKindSet<JsLanguage> = JsArrayBindingPattern::
     .union(JsObjectBindingPatternRest::KIND_SET)
     .union(JsObjectBindingPatternShorthandProperty::KIND_SET);
 
-/// Returns whether TypeScript gives the variable `binding` a type that evolves
-/// with its writes. Such a variable is a `let` or a `var` without a type
-/// annotation whose initializer is `null`, `undefined`, or an empty array
-/// literal. A variable without an initializer has no collected type in Biome.
-fn is_evolving_declaration(binding: &Binding) -> bool {
+/// Returns how TypeScript types the variable `binding` from its writes, as
+/// [`FlowEvolving`] describes, following its `autoType` and `autoArrayType`.
+///
+/// The variable must be declared by a declarator of a `let`, a `const`, or a
+/// `var` statement, or of the head of a `for` loop, as a name without a type
+/// annotation. An exported or `declare` declaration doesn't count, nor does
+/// the head of a `for...in` or `for...of` loop, which assigns its variable
+/// each iteration. A `let` or a `var` evolves as a variable when it has no
+/// initializer or one that is `null` or the global `undefined`, in
+/// parentheses or not, and any of the three evolves as an array when its
+/// initializer is an empty array literal without parentheses. `model`
+/// resolves `undefined`, so a local variable of that name doesn't count.
+fn evolving_declaration(binding: &Binding, model: &SemanticModel) -> FlowEvolving {
     let Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) =
         binding.tree().declaration()
     else {
-        return false;
+        return FlowEvolving::None;
     };
     if declarator.variable_annotation().is_some() {
-        return false;
+        return FlowEvolving::None;
     }
-    let Some(initializer) = declarator
-        .initializer()
-        .and_then(|initializer| initializer.expression().ok())
+    // An exported or `declare` declaration is a clause of its statement.
+    let Some(AnyJsVariableDeclaration::JsVariableDeclaration(declaration)) =
+        declarator.declaration()
     else {
-        return false;
+        return FlowEvolving::None;
     };
-    match initializer.omit_parentheses() {
-        AnyJsExpression::AnyJsLiteralExpression(
+    if declaration
+        .parent::<JsVariableDeclarationClause>()
+        .is_some()
+    {
+        return FlowEvolving::None;
+    }
+    let Ok(kind) = declaration.variable_kind() else {
+        return FlowEvolving::None;
+    };
+    let initializer = declarator
+        .initializer()
+        .and_then(|initializer| initializer.expression().ok());
+    if let Some(AnyJsExpression::JsArrayExpression(array)) = &initializer {
+        return if array.elements().is_empty()
+            && matches!(
+                kind,
+                JsVariableKind::Let | JsVariableKind::Const | JsVariableKind::Var
+            ) {
+            FlowEvolving::Array
+        } else {
+            FlowEvolving::None
+        };
+    }
+    if !matches!(kind, JsVariableKind::Let | JsVariableKind::Var) {
+        return FlowEvolving::None;
+    }
+    let is_unit = match initializer.map(AnyJsExpression::omit_parentheses) {
+        None => true,
+        Some(AnyJsExpression::AnyJsLiteralExpression(
             AnyJsLiteralExpression::JsNullLiteralExpression(_),
-        ) => true,
-        AnyJsExpression::JsArrayExpression(array) => array.elements().is_empty(),
-        AnyJsExpression::JsIdentifierExpression(identifier) => identifier
-            .name()
-            .ok()
-            .and_then(|name| name.value_token().ok())
-            .is_some_and(|token| token.text_trimmed() == "undefined"),
-        _ => false,
+        )) => true,
+        Some(AnyJsExpression::JsIdentifierExpression(identifier)) => {
+            identifier.name().is_ok_and(|name| {
+                name.value_token()
+                    .is_ok_and(|token| token.text_trimmed() == "undefined")
+                    && model.binding(&name).is_none()
+            })
+        }
+        Some(_) => false,
+    };
+    if is_unit {
+        FlowEvolving::Variable
+    } else {
+        FlowEvolving::None
     }
 }
 
@@ -2593,6 +2849,7 @@ fn has_destructuring_default(binding: &JsIdentifierBinding) -> bool {
 
 #[cfg(test)]
 mod tests {
+    use super::FlowEvolving;
     use crate::js_module_info::{JsModuleInfo, JsModuleVisitor, TypeInferenceMode};
     use biome_js_parser::{JsParserOptions, parse};
     use biome_js_semantic::{SemanticModelOptions, semantic_model};
@@ -2846,6 +3103,66 @@ mod tests {
         let root = info.flow.root(read.root).unwrap();
         assert!(root.is_uninitialized(read.subject));
         assert!(root.is_assignment_only(read.subject));
+    }
+
+    #[test]
+    fn evolving_declarations_narrow_where_a_typed_write_reaches_them() {
+        const SOURCE: &str = r#"
+            declare function read(): number;
+            declare const c: boolean;
+            function f() {
+                let x;
+                /*before*/x;
+                x = 1;
+                /*after*/x;
+                const g = () => /*closure*/x;
+                let u = null;
+                u = read();
+                /*untyped*/u;
+                const a = [];
+                a.push(1);
+                /*array*/a;
+                const b = [];
+                b.push(1);
+                (() => b.push(2))();
+                /*invoked*/b;
+                var v = null;
+                /*hoisted*/v;
+                v = 1;
+            }
+            let m = null;
+            m = 1;
+            function h() { /*nested*/m; }
+        "#;
+        let info = module(SOURCE);
+        // Only a read that a write with a value reaches, after the
+        // initializer, has a type other than the declared type, apart from a
+        // `var` read before its declarator. A closure, a nested root, a
+        // variable without such a write, and an array that a function called
+        // where it is defined adds to keep the declared type.
+        for (marker, expression, evolving) in [
+            ("before", "x", None),
+            ("after", "x", Some(FlowEvolving::Variable)),
+            ("closure", "x", None),
+            ("untyped", "u", Some(FlowEvolving::Variable)),
+            ("array", "a", Some(FlowEvolving::Array)),
+            ("invoked", "b", None),
+            ("hoisted", "v", Some(FlowEvolving::Variable)),
+            ("nested", "m", None),
+        ] {
+            let range = marked(SOURCE, marker, expression);
+            let kind = info.flow.read(range).map(|read| {
+                let root = info.flow.root(read.root).unwrap();
+                assert!(!root.is_uninitialized(read.subject), "{marker}");
+                root.evolving(read.subject)
+            });
+            assert_eq!(kind, evolving, "{marker}");
+            assert_eq!(
+                info.flow.is_candidate(range),
+                evolving.is_some(),
+                "{marker}"
+            );
+        }
     }
 
     #[test]

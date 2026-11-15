@@ -114,8 +114,10 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   every `for...in` loop, every logical assignment, and every `?.` that a key
   or arguments follow in its chain, a write (an assignment, `++`, `--`,
   `delete`, a declarator with an initializer whose type annotation is a union
-  or that destructures a pattern, or the head of a `for...of` loop that
-  assigns a target), or, in a module with an `asserts` annotation, a
+  or that destructures a pattern, the head of a `for...of` loop that
+  assigns a target, or a call of `push` or `unshift` on a variable when the
+  root also declares a variable without a type annotation initialized with
+  `[]`), or, in a module with an `asserts` annotation, a
   standalone call. It also records whether the root's own code
   uses `this`, so a root whose only subjects are paths on `this` still gets a
   graph. The scanner rejects a root when its own code contains a `with`
@@ -143,9 +145,19 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   join, as `createFlowMutation` does: assignments of every kind, `++`, `--`,
   `delete`, destructuring targets, loop-head targets, the variables of an
   annotated declarator, and those of a `var` declarator with an initializer,
-  which a read can reach before the declarator, written without a value. A
-  value that Biome may type narrower than TypeScript
-  (`value_callees`) gets none, so the write gives the declared type. A call
+  which a read can reach before the declarator, written without a value.
+  A declarator of a variable whose type evolves with its writes
+  (`FlowEvolving`, as `evolving_declaration` decides) writes its
+  initializer, `FlowWriteEffect::EmptyArray` for `[]`, and
+  `BuiltRoot::initializers` lists those write nodes. For such an array, each
+  argument of a call of `push` or `unshift` on it (`mutated_array`), after
+  the arguments run, and the value of an element assignment with `=`
+  (`element_write`) add a `FlowWriteEffect::Elements` write node, and an
+  assignment of `[]` an `EmptyArray` one; `WrittenTargets::mutations` lists
+  the variables that they add to. A value that Biome may type narrower than
+  TypeScript (`value_callees`), or that reads a variable whose type evolves
+  with its writes (`reads_evolving`), whose declared type doesn't follow
+  them, gets none, so the write gives the declared type. A call
   whose callee's annotation the syntax doesn't show, an import or a method
   (`FlowCallee`), is kept in `FlowAssigned::callees`, and the reading
   context confirms it where it resolves the assigned types
@@ -448,10 +460,22 @@ in the root has a write node or runs only when called, as `writes.rs` decides
 root). A `var` whose name another declaration of its scope declares, as a
 second `var`, a function, or a parameter of its function does, doesn't narrow
 (`is_redeclared`), because the semantic model resolves every reference to the
-last declaration while each declarator writes the variable. A `let` or a `var`
-without an annotation whose initializer is `null`, `undefined`, or `[]`
-doesn't narrow when it is written, because TypeScript gives it a type that
-evolves with its writes. A pattern can narrow when its elements can and none
+last declaration while each declarator writes the variable. A variable
+whose type evolves with its writes, as `evolving_declaration` decides
+following TypeScript's `autoType` and `autoArrayType`, can narrow whatever
+its collected type, but only in the root that declares it
+(`declared_range`): `eligible_range` refuses it to nested roots and
+`closure_reads` skips it, because TypeScript gives it an implicit `any`
+there. One that nothing writes or adds to narrows as any other variable.
+An array also needs a write node for every addition that runs in the root's
+flow (`mutations_are_modeled`). Such a variable stays a subject only when a
+write node other than its initializer gives it a value, and only those
+write nodes mention it, so only the reads that they reach become
+candidates, together with the reads of a `var` with an initializer that the
+start reaches (`BuiltRoot::hoisted`), where it is still `undefined`.
+`RootFlow::evolving` records how each such subject evolves, and none is in
+`RootFlow::uninitialized` or `RootFlow::assignment_only`. A pattern can
+narrow when its elements can and none
 of them is written. A
 property path can narrow when its variable can, or when it starts at a `this`
 that is a subject, and the write scan finds no write without a write node
@@ -558,6 +582,24 @@ solve. Lookups share them per root and subject through
 `infer_flow_assigned_types`. A subject in `RootFlow::uninitialized` starts
 with `undefined`, and a read where `undefined` remains although the declared
 type lacks it gets the declared type.
+
+A read of a subject in `RootFlow::evolving` has its own solve, selected by
+`FlowSubjectRootInput::evolving` (`narrow_evolving`), whose state is the type
+that the writes give, from `undefined` at the start, not the declared type
+narrowed. `apply_evolving_write` follows `getTypeAtFlowAssignment` and
+`getTypeAtFlowArrayMutation` for such subjects: a variable takes the
+assigned type, and an array's state is `Array<T>`, which `EmptyArray` starts
+at `Array<never>` and each `Elements` write extends with the value's type,
+so a join gives a union of arrays whose element types
+`evolving_array_element` unions at the read. Their assigned types are
+widened by `evolving_assigned_type`, which gives `Unknown` for a value that
+Biome may type otherwise than TypeScript, and a write of the subject without
+such a value gives `Unknown`. A read whose state is `Unknown`, or an array to which nothing
+was added, keeps its declared type (`evolving_array_read`). Runtime tests
+narrow a variable from its incoming type, which stands for its declared
+type, and never narrow an array. When the values that the root assigns
+are all `null` or all `undefined`, apart from undetermined ones, the read
+keeps its declared type without a solve.
 
 Complete module inference evaluates flow candidates in its own resolution
 context instead of through `infer_flow_expression_type`,
