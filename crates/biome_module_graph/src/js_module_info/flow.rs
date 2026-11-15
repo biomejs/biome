@@ -40,7 +40,7 @@ mod subjects;
 mod writes;
 
 pub(crate) use expressions::AnyFlowExpression;
-pub(crate) use guards::{FlowGuard, FlowTest, guard_signature};
+pub(crate) use guards::{FlowGuard, FlowTest, UnitValue, binding_unit_value, guard_signature};
 pub(crate) use scanner::FlowRootScanner;
 
 use biome_js_control_flow::AnyJsControlFlowRoot;
@@ -366,10 +366,13 @@ pub(crate) const MAX_SWITCHES: usize = 64;
 /// A `switch` statement whose [`FlowGuard::Bypass`] gives `never` when the
 /// statement is exhaustive.
 ///
-/// Collection records only statements that TypeScript can find exhaustive:
-/// statements without `default`, with a discriminant that is a subject or
-/// `typeof` of one, and with cases that all test a unit value, such as `"a"`,
-/// `1`, `null`, or `undefined`, or a kind of value, such as `"string"`.
+/// Collection records only statements that TypeScript's
+/// `computeExhaustiveSwitchStatement` can find exhaustive: without `default`,
+/// with a discriminant that is a subject or `typeof` of one, and with cases
+/// that all test a unit value, such as `"a"`, `-1`, `null`, `undefined`, or
+/// a `const` that holds one, or a kind of value, such as `"string"`. A case
+/// that tests an imported value is recorded too, and inference counts the
+/// statement as exhaustive only when that value is a unit value.
 #[derive(Debug)]
 pub(crate) struct FlowSwitch {
     /// The range of the expression whose type at the statement decides

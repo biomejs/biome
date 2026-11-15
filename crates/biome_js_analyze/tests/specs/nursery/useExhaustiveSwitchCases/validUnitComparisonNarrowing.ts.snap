@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validUnitComparisonNarrowing.ts
+---
+# Input
+```ts
+// should not generate diagnostics
+
+const A = "a";
+
+function afterConstant(kind: "a" | "b") {
+	if (kind === A) return;
+	switch (kind) {
+		case "b":
+			break;
+	}
+}
+
+function afterNegative(n: -1 | 0 | 1) {
+	if (n === -1) return;
+	switch (n) {
+		case 0:
+			break;
+		case 1:
+			break;
+	}
+}
+
+function afterVoid(v: "a" | undefined) {
+	if (v === void 0) return;
+	switch (v) {
+		case "a":
+			break;
+	}
+}
+
+```

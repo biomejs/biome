@@ -1,0 +1,23 @@
+// should not generate diagnostics
+
+const A = "a";
+const P = -(1);
+
+function constantBeforeSwitch(kind: "a" | "b", label: string | null) {
+	if (kind === A) return;
+	if (kind === "b") return;
+	switch (kind) {
+		case "a":
+			if (label === null) return;
+	}
+	return label?.length;
+}
+
+function parenthesizedNegativeCase(kind: -1 | 1, label: string | null) {
+	switch (kind) {
+		case P:
+		case 1:
+			if (label === null) return;
+	}
+	return label?.length;
+}
