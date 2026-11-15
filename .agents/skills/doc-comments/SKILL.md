@@ -131,6 +131,34 @@ Module docs should describe a durable concept or design reason, not list items
 that will become stale. If there is no durable concept to explain, use a brief
 one-line description.
 
+### External References
+
+Document the contract, not upstream coordinates. Explain the local invariant,
+constraint, or observable behavior before naming another project. The comment
+must remain useful without opening external source code.
+
+Mention another project when its identity affects maintenance: Biome
+intentionally matches or diverges from its observable behavior, depends on its
+public API, or preserves important provenance. Prefer that contract over private
+function names, module paths, file paths, or line numbers.
+
+Apply the rename test: if upstream could rename or move a symbol without
+changing its behavior, the comment should remain correct. Replace a brittle
+symbol with the behavior it represented. When provenance materially helps,
+place a commit-pinned permalink after the self-contained explanation. Record
+exact compatibility behavior in a local test.
+
+```rust
+// BAD: Keep this broken because Prettier's `someInternalHelper` returns true.
+
+// GOOD: Keep this group broken because flattening it would move the trailing
+//       comment. Matching Prettier for this case is an intentional compatibility
+//       requirement.
+```
+
+Public API, standard, and protocol names are appropriate when Biome is directly
+coupled to them.
+
 ## Banned Patterns
 
 **Narrating the next line.** Delete these on sight:
@@ -235,7 +263,10 @@ Read only the comments in the diff, without the implementation:
    advanced target-language knowledge and state the details needed to predict
    behavior.
 5. Check public names, examples, terminology, inclusivity, and grammar.
-6. Inspect generated or rendered output when applicable.
+6. In contributor comments, apply the rename test to external symbols and
+   source locations. Ensure the behavior is self-contained, and verify retained
+   public API or standard names and pinned provenance links.
+7. Inspect generated or rendered output when applicable.
 
 Delete redundant contributor comments, but retain descriptions required by a
 user-facing surface.
