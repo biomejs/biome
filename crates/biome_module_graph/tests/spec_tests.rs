@@ -40,6 +40,8 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 mod aliased_conditions;
 #[path = "spec_tests/assertions.test.rs"]
 mod assertions;
+#[path = "spec_tests/assignments.test.rs"]
+mod assignments;
 #[path = "spec_tests/augmentations.test.rs"]
 mod augmentations;
 #[path = "spec_tests/callback_parameters.test.rs"]

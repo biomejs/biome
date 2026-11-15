@@ -136,55 +136,6 @@ switch (bigintUnion) {
 
 # Diagnostics
 ```
-invalid.ts:13:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The switch statement is not exhaustive.
-  
-    11 │ let result = 0;
-    12 │ 
-  > 13 │ switch (day) {
-       │ ^^^^^^^^^^^^^^
-  > 14 │ 	case 'Monday': {
-  > 15 │ 		result = 1;
-  > 16 │ 		break;
-  > 17 │ 	}
-  > 18 │ }
-       │ ^
-    19 │ 
-    20 │ switch (day) {
-  
-  i Some variants of the union type are not handled here.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i These cases are missing:
-  
-  - "Tuesday"
-  - "Wednesday"
-  - "Thursday"
-  - "Friday"
-  - "Saturday"
-  - "Sunday"
-  
-  i Unsafe fix: Add the missing cases to the switch statement.
-  
-     15  15 │       result = 1;
-     16  16 │       break;
-     17     │ - → }
-         17 │ + → }
-         18 │ + → case·"Tuesday":·throw·new·Error("TODO:·Not·implemented·yet");
-         19 │ + → case·"Wednesday":·throw·new·Error("TODO:·Not·implemented·yet");
-         20 │ + → case·"Thursday":·throw·new·Error("TODO:·Not·implemented·yet");
-         21 │ + → case·"Friday":·throw·new·Error("TODO:·Not·implemented·yet");
-         22 │ + → case·"Saturday":·throw·new·Error("TODO:·Not·implemented·yet");
-         23 │ + → case·"Sunday":·throw·new·Error("TODO:·Not·implemented·yet");
-     18  24 │   }
-     19  25 │   
-  
-
-```
-
-```
 invalid.ts:20:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The switch statement is not exhaustive.
@@ -205,28 +156,11 @@ invalid.ts:20:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   i These cases are missing:
   
   - "Monday"
-  - "Tuesday"
-  - "Wednesday"
-  - "Thursday"
-  - "Friday"
-  - "Saturday"
-  - "Sunday"
   
   i Unsafe fix: Add the missing cases to the switch statement.
   
-     18  18 │   }
-     19  19 │   
-     20     │ - switch·(day)·{
-         20 │ + switch·(day)·{case·"Monday":·throw·new·Error("TODO:·Not·implemented·yet");
-         21 │ + ··case·"Tuesday":·throw·new·Error("TODO:·Not·implemented·yet");
-         22 │ + ··case·"Wednesday":·throw·new·Error("TODO:·Not·implemented·yet");
-         23 │ + ··case·"Thursday":·throw·new·Error("TODO:·Not·implemented·yet");
-         24 │ + ··case·"Friday":·throw·new·Error("TODO:·Not·implemented·yet");
-         25 │ + ··case·"Saturday":·throw·new·Error("TODO:·Not·implemented·yet");
-         26 │ + ··case·"Sunday":·throw·new·Error("TODO:·Not·implemented·yet");
-     21  27 │   }
-     22  28 │   
-  
+    20 │ switch·(day)·{case·"Monday":·throw·new·Error("TODO:·Not·implemented·yet");
+       │               ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ```
 

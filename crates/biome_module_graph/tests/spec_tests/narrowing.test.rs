@@ -399,10 +399,9 @@ fn condition_discovery_preserves_shadowing_and_depth_limits() {
 }
 
 #[test]
-fn unrelated_conditions_writes_and_captures_skip_flow_queries() {
+fn unrelated_conditions_and_captures_skip_flow_queries() {
     for source in [
         "function f(value: string | number, other: boolean) { if (other) return; /*read*/value; }",
-        "function f(value: string | number) { if (typeof value === 'string') { value = 1; /*read*/value; } }",
         "function f(value: string | number) { if (typeof value === 'string') return () => /*read*/value; }",
     ] {
         let (db, module) = narrowing_db(source);
@@ -1516,8 +1515,11 @@ fn narrowing_is_isolated_by_binding_identity() {
     }
 }
 
+// TypeScript 7.0.2 (`tsc --strict`) gives `number` after the write and
+// `string` in the closure (`narrowing-probes/m5-l2/existing.ts` L8). Biome
+// doesn't narrow reads in closures yet.
 #[test]
-fn writes_and_captures_remain_conservative() {
+fn writes_narrow_and_captures_remain_conservative() {
     use InferredTypeData::{Number, String};
     const SOURCE: &str = r#"
         function reassigned(value: string | number) {
@@ -1533,9 +1535,9 @@ fn writes_and_captures_remain_conservative() {
         }
     "#;
     let (db, module) = narrowing_db(SOURCE);
-    for marker in ["written", "captured"] {
+    for (marker, expected) in [("written", &[Number][..]), ("captured", &[String, Number])] {
         let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
-        assert_variants(&db, ty, &[String, Number], marker);
+        assert_variants(&db, ty, expected, marker);
     }
 }
 
@@ -2006,12 +2008,12 @@ fn destructuring_and_logical_assignments_to_other_variables_keep_narrowing() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) narrows every read below to `string`,
-// because none of the writes comes between the condition and the read. Biome
-// narrows only variables that are never written, so these reads keep their
-// declared type.
+// because none of the writes comes between the condition and the read, and
+// a write in a closure that the function doesn't call where it is defined
+// never cancels narrowing.
 #[test]
-fn variables_written_by_destructuring_or_logical_assignments_do_not_narrow() {
-    use InferredTypeData::{Null, String};
+fn variables_written_by_destructuring_or_logical_assignments_narrow() {
+    use InferredTypeData::String;
     const SOURCE: &str = r#"
         declare function read(): string | null;
         function arrayPattern(value: string | null) {
@@ -2044,7 +2046,7 @@ fn variables_written_by_destructuring_or_logical_assignments_do_not_narrow() {
     let (db, module) = narrowing_db(SOURCE);
     for marker in ["array", "object", "logical", "nested"] {
         let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
-        assert_variants(&db, ty, &[String, Null], marker);
+        assert_variants(&db, ty, &[String], marker);
     }
 }
 

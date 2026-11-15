@@ -6,19 +6,22 @@
 //! the same subject get the same id even when their syntax differs, as in
 //! `(o)?.v`, `o["v"]`, and `o.v`.
 
+use super::writes::is_invoked;
 use super::{FlowSubject, FlowSubjectId, FlowSubjectTable, PropertyKey};
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsAssignment, AnyJsBindingPattern, AnyJsClass,
-    AnyJsClassMember, AnyJsExpression, AnyJsGetter, AnyJsLiteralExpression, AnyJsName,
-    AnyJsObjectBindingPatternMember, AnyJsObjectMemberName, AnyJsParameter, AnyJsSetter,
-    JsArrayBindingPatternElement, JsArrowFunctionExpression, JsFormalParameter, JsFunctionBody,
-    JsIdentifierBinding, JsInitializerClause, JsLanguage, JsMethodClassMember,
-    JsMethodObjectMember, JsObjectBindingPatternProperty, JsObjectBindingPatternShorthandProperty,
-    JsObjectExpression, JsParameters, JsPropertyClassMember, JsRestParameter, JsSyntaxKind,
-    JsSyntaxNode, JsSyntaxToken, JsVariableDeclarator, binding_ext::AnyJsBindingDeclaration,
-    inner_string_text, unescape_js_identifier,
+    AnyJsClassMember, AnyJsClassMemberName, AnyJsExpression, AnyJsFunction, AnyJsGetter,
+    AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember, AnyJsObjectMemberName,
+    AnyJsParameter, AnyJsPropertyModifier, AnyJsSetter, AnyTsPropertyAnnotation,
+    AnyTsPropertySignatureModifier, JsArrayBindingPatternElement, JsArrowFunctionExpression,
+    JsConstructorClassMember, JsFormalParameter, JsFunctionBody, JsIdentifierBinding,
+    JsInitializerClause, JsLanguage, JsMethodClassMember, JsMethodObjectMember,
+    JsObjectBindingPatternProperty, JsObjectBindingPatternShorthandProperty, JsObjectExpression,
+    JsParameters, JsPropertyClassMember, JsRestParameter, JsSyntaxKind, JsSyntaxNode,
+    JsSyntaxToken, JsVariableDeclarator, binding_ext::AnyJsBindingDeclaration, inner_string_text,
+    unescape_js_identifier,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, Text, TextRange, TokenText,
@@ -53,6 +56,7 @@ declare_node_union! {
     /// A class or object member whose body, or initializer for a field, runs
     /// with the `this` of its class or object.
     AnyThisMember = JsMethodClassMember
+        | JsConstructorClassMember
         | JsPropertyClassMember
         | JsMethodObjectMember
         | AnyJsGetter
@@ -541,13 +545,12 @@ fn visit_pattern_bindings(
 /// class, `this` is an instance of the class, and in an object literal, it is
 /// the object.
 ///
+/// It is also the case in a constructor and in an arrow function created in
+/// one, where a field without an initializer may be read before it is
+/// assigned, as [`uninitialized_fields`] describes.
+///
 /// It is not the case:
 ///
-/// - In a constructor, where TypeScript reads a field without an initializer
-///   at its declared type after a test that leaves `undefined` possible, as in
-///   `if (this.x !== null) this.x` (TS2565). An arrow function called where it
-///   is defined runs in its constructor's flow, so no arrow function whose
-///   `this` comes from a constructor narrows it either.
 /// - In a `static` member or static block, where `this` is the class itself,
 ///   which Biome types as an instance of the class.
 /// - In a member with a `this` parameter, whose type Biome ignores.
@@ -638,9 +641,138 @@ fn types_this_of_members(owner: &AnyMemberOwner) -> bool {
     }
 }
 
+/// Returns the class whose constructor is `root`, or calls `root` where it
+/// is defined, through arrow functions that are each called where they are
+/// defined, as in `constructor() { (() => this.x)(); }`. TypeScript analyzes
+/// such an arrow function as part of the constructor's flow, so a field that
+/// the constructor hasn't assigned yet may be read there before it is
+/// assigned.
+///
+/// Returns `None` for any other root, including an arrow function created in
+/// a constructor that is not called where it is defined.
+pub(super) fn constructor_class(root: &AnyJsControlFlowRoot) -> Option<AnyJsClass> {
+    let mut root = root.clone();
+    loop {
+        match &root {
+            AnyJsControlFlowRoot::JsConstructorClassMember(constructor) => {
+                // A member's parent is its list, inside the class.
+                return constructor
+                    .syntax()
+                    .grand_parent()
+                    .and_then(AnyJsClass::cast);
+            }
+            AnyJsControlFlowRoot::AnyJsFunction(
+                function @ AnyJsFunction::JsArrowFunctionExpression(_),
+            ) if is_invoked(function) => {
+                root = function
+                    .syntax()
+                    .ancestors()
+                    .skip(1)
+                    .find_map(AnyJsControlFlowRoot::cast)?;
+            }
+            _ => return None,
+        }
+    }
+}
+
+/// The fields of a class that a constructor may read before it assigns
+/// them.
+pub(super) struct UninitializedFields {
+    keys: Vec<PropertyKey>,
+    /// Whether such a field has a computed key that names no property that
+    /// Biome can tell, so that any property may be one.
+    any: bool,
+}
+
+impl UninitializedFields {
+    /// Returns whether the property `key` of `this` may be read before it is
+    /// assigned.
+    pub(super) fn contains(&self, key: &PropertyKey) -> bool {
+        self.any || self.keys.contains(key)
+    }
+}
+
+/// Returns the fields of `class` that its constructor may read before it
+/// assigns them, as TypeScript's `isPropertyWithoutInitializer` and
+/// `getFlowTypeOfAccessExpression` decide it: fields that are not `static`,
+/// have no initializer and no definite assignment assertion, as `x!: T`, and
+/// are not declared with `declare` or `accessor`. A parameter property, as
+/// `constructor(public x: T)`, is assigned before the body runs.
+pub(super) fn uninitialized_fields(class: &AnyJsClass) -> UninitializedFields {
+    let mut fields = UninitializedFields {
+        keys: Vec::new(),
+        any: false,
+    };
+    for member in class.members() {
+        let name = match member {
+            AnyJsClassMember::JsPropertyClassMember(property) => {
+                let is_initialized = property.value().is_some()
+                    || matches!(
+                        property.property_annotation(),
+                        Some(AnyTsPropertyAnnotation::TsDefinitePropertyAnnotation(_))
+                    )
+                    || property.modifiers().iter().any(|modifier| {
+                        matches!(
+                            modifier,
+                            AnyJsPropertyModifier::JsStaticModifier(_)
+                                | AnyJsPropertyModifier::JsAccessorModifier(_)
+                        )
+                    });
+                if is_initialized {
+                    continue;
+                }
+                property.name()
+            }
+            AnyJsClassMember::TsPropertySignatureClassMember(property) => {
+                let is_initialized = property.modifiers().iter().any(|modifier| {
+                    matches!(
+                        modifier,
+                        AnyTsPropertySignatureModifier::TsDeclareModifier(_)
+                            | AnyTsPropertySignatureModifier::JsStaticModifier(_)
+                            | AnyTsPropertySignatureModifier::JsAccessorModifier(_)
+                    )
+                });
+                if is_initialized {
+                    continue;
+                }
+                property.name()
+            }
+            _ => continue,
+        };
+        match name.ok().as_ref().and_then(class_member_key) {
+            Some(key) => fields.keys.push(key),
+            None => fields.any = true,
+        }
+    }
+    fields
+}
+
+/// Returns the key of the property or private name that the name of a class
+/// member names, spelled as [`member_name_key`] requires, or `None` for a
+/// computed key that names no such property.
+fn class_member_key(name: &AnyJsClassMemberName) -> Option<PropertyKey> {
+    match name {
+        AnyJsClassMemberName::JsLiteralMemberName(name) => {
+            let token = name.value().ok()?;
+            match token.kind() {
+                JsSyntaxKind::IDENT => identifier_key(&token),
+                JsSyntaxKind::JS_STRING_LITERAL => string_key(inner_string_text(&token)),
+                JsSyntaxKind::JS_NUMBER_LITERAL => decimal_integer_key(&token),
+                _ => None,
+            }
+        }
+        AnyJsClassMemberName::JsPrivateClassMemberName(name) => {
+            identifier_text(&name.id_token().ok()?).map(PropertyKey::Private)
+        }
+        AnyJsClassMemberName::JsComputedMemberName(name) => literal_key(&name.expression().ok()?),
+        AnyJsClassMemberName::JsMetavariable(_) => None,
+    }
+}
+
 /// Returns whether the class or object `member` is declared `static`.
 fn is_static(member: &AnyThisMember) -> bool {
     match member {
+        AnyThisMember::JsConstructorClassMember(_) => false,
         AnyThisMember::JsMethodClassMember(method) => method
             .modifiers()
             .iter()
@@ -661,7 +793,9 @@ fn has_this_parameter(member: &AnyThisMember) -> bool {
     let parameters = match member {
         AnyThisMember::JsMethodClassMember(method) => method.parameters(),
         AnyThisMember::JsMethodObjectMember(method) => method.parameters(),
-        AnyThisMember::JsPropertyClassMember(_)
+        // A constructor can't declare a `this` parameter (TS2681).
+        AnyThisMember::JsConstructorClassMember(_)
+        | AnyThisMember::JsPropertyClassMember(_)
         | AnyThisMember::AnyJsGetter(_)
         | AnyThisMember::AnyJsSetter(_) => return false,
     };
@@ -840,12 +974,13 @@ mod tests {
                     .collect()
             })
         };
-        assert_eq!(
-            this_paths("class K { m() { this.v; } }"),
-            [Some("this.v".to_owned())]
-        );
         for source in [
+            "class K { m() { this.v; } }",
             "class K { constructor() { this.v; } }",
+        ] {
+            assert_eq!(this_paths(source), [Some("this.v".to_owned())], "{source}");
+        }
+        for source in [
             "class K { static m() { this.v; } }",
             "function f() { this.v; }",
         ] {
@@ -899,9 +1034,12 @@ mod tests {
                 false,
             ),
             ("export default class { m() { this; } }", false),
-            ("class K { constructor() { this; } }", false),
-            ("class K { constructor() { const f = () => this; } }", false),
-            ("class K { constructor() { (() => this)(); } }", false),
+            ("class K { constructor() { this; } }", true),
+            ("class K { constructor() { const f = () => this; } }", true),
+            ("class K { constructor() { (() => this)(); } }", true),
+            // TypeScript rejects `this` in the parameters of a constructor
+            // (TS2333).
+            ("class K { constructor(f = () => this) {} }", false),
             ("class K { static m() { this; } }", false),
             ("class K { static get g() { return this; } }", false),
             ("class K { static { this; } }", false),
@@ -937,6 +1075,55 @@ mod tests {
                 .find_map(AnyJsControlFlowRoot::cast)
                 .unwrap();
             assert_eq!(this_can_narrow(&root), expected, "{source}");
+        }
+    }
+
+    #[test]
+    fn constructors_and_the_arrow_functions_they_call_read_their_class_fields() {
+        const SOURCE: &str = r#"
+            class K {
+                a: string | null;
+                b: string | null = null;
+                c!: string | null;
+                static d: string | null;
+                declare e: string | null;
+                #f: string | null;
+                "g": string | null;
+                accessor h: string | null;
+                constructor(public i: string | null) {
+                    (() => { (() => this)(); })();
+                    const later = () => this;
+                }
+            }
+        "#;
+        let parsed = parse(SOURCE, JsFileSource::ts(), JsParserOptions::default());
+        assert!(!parsed.has_errors());
+        let roots: Vec<_> = parsed
+            .syntax()
+            .descendants()
+            .filter_map(AnyJsControlFlowRoot::cast)
+            .collect();
+        // The constructor and the arrow functions called where they are
+        // defined have its class, the arrow function in `later` doesn't.
+        let classes: Vec<_> = roots[1..]
+            .iter()
+            .map(|root| constructor_class(root).is_some())
+            .collect();
+        assert_eq!(classes, [true, true, true, false]);
+        let fields = uninitialized_fields(&constructor_class(&roots[1]).unwrap());
+        let name = |name: &'static str| PropertyKey::Name(Text::from(name));
+        for (key, expected) in [
+            (name("a"), true),
+            (name("b"), false),
+            (name("c"), false),
+            (name("d"), false),
+            (name("e"), false),
+            (PropertyKey::Private(Text::from("f")), true),
+            (name("g"), true),
+            (name("h"), false),
+            (name("i"), false),
+        ] {
+            assert_eq!(fields.contains(&key), expected, "{key:?}");
         }
     }
 

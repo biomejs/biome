@@ -1,10 +1,13 @@
 use super::builder::{MAX_DEPTH, has_operands};
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsOptionalChainExpression, AnyTsReturnType, JsAssignmentExpression,
-    JsAssignmentOperator, JsConditionalExpression, JsDoWhileStatement, JsForInStatement,
-    JsForStatement, JsIdentifierBinding, JsIfStatement, JsLogicalExpression, JsSwitchStatement,
-    JsSyntaxKind, JsSyntaxNode, JsWhileStatement, TsDeclareFunctionDeclaration,
+    AnyJsBinding, AnyJsBindingPattern, AnyJsForInOrOfInitializer, AnyJsOptionalChainExpression,
+    AnyTsReturnType, AnyTsType, JsAssignmentExpression, JsAssignmentOperator,
+    JsConditionalExpression, JsDoWhileStatement, JsForInStatement, JsForOfStatement,
+    JsForStatement, JsIdentifierBinding, JsIfStatement, JsLogicalExpression,
+    JsPostUpdateExpression, JsPreUpdateExpression, JsSwitchStatement, JsSyntaxKind, JsSyntaxNode,
+    JsUnaryExpression, JsUnaryOperator, JsVariableDeclarator, JsWhileStatement,
+    TsDeclareFunctionDeclaration,
 };
 use biome_rowan::{AstNode, SyntaxKind, declare_node_union};
 use std::ops::Range;
@@ -27,15 +30,24 @@ declare_node_union! {
         | JsConditionalExpression
 }
 
+declare_node_union! {
+    /// Syntax that writes a variable or a property, which a write point of the
+    /// flow graph narrows by: an assignment, `++`, and `--`. `delete`, a
+    /// declarator with an initializer whose type annotation is a union or
+    /// that destructures a pattern, and the head of a `for...of` loop that
+    /// assigns a target count too.
+    AnyFlowWriteSource = JsAssignmentExpression | JsPreUpdateExpression | JsPostUpdateExpression
+}
+
 /// Selects the execution roots that may need flow while the module visitor
 /// walks the syntax tree, so collection never walks the module again.
 ///
 /// The visitor must report every node of the module in preorder through
 /// [`Self::enter`] and [`Self::leave`]. A root is selected when it directly
-/// contains a condition, or a standalone call while the module declares an
-/// assertion, outside its nested roots, has fewer than
-/// [`MAX_ROOT_NODES`] syntax nodes, and uses only syntax the flow builder
-/// supports.
+/// contains a condition, a write that [`AnyFlowWriteSource`] describes, or a
+/// standalone call while the module declares an assertion, outside its
+/// nested roots, has fewer than [`MAX_ROOT_NODES`] syntax nodes, and uses
+/// only syntax the flow builder supports.
 ///
 /// The builder treats statements it does not model, such as a class
 /// declaration, as opaque regions, so they do not reject a root. A root is not
@@ -107,6 +119,7 @@ impl FlowRootScanner {
                 first_binding: self.bindings.len(),
                 depth: self.depth,
                 has_condition: false,
+                has_write: false,
                 has_call_statement: false,
                 has_this: false,
                 is_unsupported: false,
@@ -158,6 +171,8 @@ impl FlowRootScanner {
             self.statement_expression = Some(self.depth + 1);
         } else if !root.has_condition && is_evaluation_condition(node) {
             root.has_condition = true;
+        } else if !root.has_write && is_write(node) {
+            root.has_write = true;
         }
     }
 
@@ -179,7 +194,7 @@ impl FlowRootScanner {
         let Some(root) = self.open.pop() else {
             return;
         };
-        if (root.has_condition || root.has_call_statement)
+        if (root.has_condition || root.has_write || root.has_call_statement)
             && !root.is_unsupported
             && self.visited - root.first_node < MAX_ROOT_NODES
             && let Some(node) = AnyJsControlFlowRoot::cast_ref(node)
@@ -192,7 +207,7 @@ impl FlowRootScanner {
                 bindings: start..self.kept_bindings.len(),
                 has_this: root.has_this,
             };
-            if root.has_condition {
+            if root.has_condition || root.has_write {
                 self.selected.push(selected);
             } else {
                 self.deferred.push(selected);
@@ -266,6 +281,38 @@ fn is_evaluation_condition(node: &JsSyntaxNode) -> bool {
     }
 }
 
+/// Returns whether `node` writes a variable or a property in a way that a
+/// write point narrows by, as [`AnyFlowWriteSource`] describes.
+fn is_write(node: &JsSyntaxNode) -> bool {
+    if AnyFlowWriteSource::can_cast(node.kind()) {
+        return true;
+    }
+    if let Some(unary) = JsUnaryExpression::cast_ref(node) {
+        return unary.operator() == Ok(JsUnaryOperator::Delete);
+    }
+    if let Some(declarator) = JsVariableDeclarator::cast_ref(node) {
+        let Some(annotation) = declarator
+            .variable_annotation()
+            .and_then(|annotation| annotation.type_annotation().ok().flatten())
+        else {
+            return false;
+        };
+        return declarator.initializer().is_some()
+            && (annotation
+                .ty()
+                .is_ok_and(|ty| matches!(ty, AnyTsType::TsUnionType(_)))
+                || declarator
+                    .id()
+                    .is_ok_and(|id| !matches!(id, AnyJsBindingPattern::AnyJsBinding(_))));
+    }
+    JsForOfStatement::cast_ref(node).is_some_and(|statement| {
+        matches!(
+            statement.initializer(),
+            Ok(AnyJsForInOrOfInitializer::AnyJsAssignmentPattern(_))
+        )
+    })
+}
+
 struct OpenRoot {
     first_node: usize,
     /// Index in [`FlowRootScanner::bindings`] of the first binding the root
@@ -273,6 +320,9 @@ struct OpenRoot {
     first_binding: usize,
     depth: usize,
     has_condition: bool,
+    /// Whether the root's own code writes a variable or a property, as
+    /// [`is_write`] decides it.
+    has_write: bool,
     /// Whether the root's own code has an expression statement that is a call,
     /// possibly in parentheses.
     has_call_statement: bool,
@@ -381,7 +431,6 @@ mod tests {
         // A `?.` that no key or arguments follow evaluates nothing more, and
         // parentheses end a chain.
         for source in [
-            "function f(x) { x += read(x); }",
             "function f(x) { x?.a.b; }",
             "function f(x) { x?.read(); }",
             "function f(x) { (x?.a).read(x); }",
@@ -389,6 +438,38 @@ mod tests {
         ] {
             assert!(selected(source).is_empty(), "{source}");
         }
+    }
+
+    #[test]
+    fn writes_select_their_root() {
+        for source in [
+            "function f(x) { x = read(); }",
+            "function f(x) { x += read(x); }",
+            "function f(o) { o.v++; }",
+            "function f(o) { --o.v; }",
+            "function f(o) { delete o.v; }",
+            "function f(x) { [x] = read(); }",
+            "function f(x) { for (x of read()) {} }",
+            "function f() { const x: string | number = read(); }",
+            "function f() { const { x }: { x: string | number } = read(); }",
+        ] {
+            assert_eq!(selected(source), [source], "{source}");
+        }
+        // A declarator without a union annotation or without an initializer,
+        // a declared loop variable, and a write in a nested root don't.
+        for source in [
+            "function f() { const x: string = read(); }",
+            "function f() { let x: string | number; }",
+            "function f() { for (const x of read()) {} }",
+            "function f() { const x = read(); }",
+            "function f(x) { return () => 0; }",
+        ] {
+            assert!(selected(source).is_empty(), "{source}");
+        }
+        assert_eq!(
+            selected("function f(x) { const g = () => { x = 1; }; }"),
+            ["() => { x = 1; }"]
+        );
     }
 
     #[test]

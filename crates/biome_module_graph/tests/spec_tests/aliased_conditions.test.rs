@@ -686,16 +686,15 @@ fn readonly_paths_never_narrow_through_properties_that_an_augmentation_can_hide(
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) reports TS2540 for the write and gives
-// `never` at the read, because the write assigns `null` after the alias.
-// Biome keeps the declared type, because a path that the function writes never
-// narrows.
+// `never` at the read, because the write assigns `null` after the alias and
+// the aliased test still applies to the readonly path. Biome gives Unknown
+// for a read that no value reaches.
 #[test]
-fn written_readonly_paths_keep_their_declared_types() {
-    use InferredTypeData::{Null, String};
+fn written_readonly_paths_apply_the_aliased_test_after_the_write() {
     assert_reads(
         r#"
         function written(o: { readonly v: string | null }) { const ok = o.v !== null; o.v = null; if (ok) /*written*/o.v; }
         "#,
-        &[("written", "o.v", &[String, Null])],
+        &[("written", "o.v", &[InferredTypeData::Unknown])],
     );
 }
