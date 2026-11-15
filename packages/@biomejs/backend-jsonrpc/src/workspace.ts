@@ -4129,6 +4129,11 @@ export interface Nursery {
 	 */
 	useDisposables?: UseDisposablesConfiguration;
 	/**
+	 * Require an early continue instead of an if statement that wraps the rest of a loop body.
+	 * See https://biomejs.dev/linter/rules/use-early-continue
+	 */
+	useEarlyContinue?: UseEarlyContinueConfiguration;
+	/**
 	 * Require switch-case statements to be exhaustive.
 	 * See https://biomejs.dev/linter/rules/use-exhaustive-switch-cases
 	 */
@@ -7532,6 +7537,9 @@ export type UseDescribeFunctionTitleConfiguration =
 export type UseDisposablesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDisposablesOptions;
+export type UseEarlyContinueConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseEarlyContinueOptions;
 export type UseExhaustiveSwitchCasesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExhaustiveSwitchCasesOptions;
@@ -11174,6 +11182,14 @@ export interface RuleWithUseDisposablesOptions {
 	level: RulePlainConfiguration;
 	options?: UseDisposablesOptions;
 }
+export interface RuleWithUseEarlyContinueOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseEarlyContinueOptions;
+}
 export interface RuleWithUseExhaustiveSwitchCasesOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -14416,6 +14432,13 @@ export interface UseConsistentUnicodeBomOptions {
 export type UseControlLabelOptions = {};
 export type UseDescribeFunctionTitleOptions = {};
 export type UseDisposablesOptions = {};
+export interface UseEarlyContinueOptions {
+	/**
+	 * The largest number of statements that an `if` statement at the end of a loop body can
+	 * contain before the rule reports it (default: 1).
+	 */
+	maximumStatements?: number;
+}
 export interface UseExhaustiveSwitchCasesOptions {
 	/**
 	 * Require a `case` for each value in the union, even when the switch has a `default` clause.
@@ -16544,6 +16567,7 @@ export type Category =
 	| "lint/nursery/useControlLabel"
 	| "lint/nursery/useDescribeFunctionTitle"
 	| "lint/nursery/useDisposables"
+	| "lint/nursery/useEarlyContinue"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExpectToContain"
 	| "lint/nursery/useExpectToHaveBeenCalled"

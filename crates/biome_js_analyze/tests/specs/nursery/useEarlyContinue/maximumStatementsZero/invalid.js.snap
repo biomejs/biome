@@ -1,0 +1,195 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+for (const item of items) {
+	if (item.isActive) {
+		process(item);
+	}
+}
+
+for (const item of items) {
+	if (item.isActive)
+		process(item);
+}
+
+for (const item of items) {
+	prepare(item);
+	if (item.isActive) process(item);
+}
+
+for (const item of items) { if (item.isActive) process(item); }
+
+for (const item of items) {
+	if (item.isActive) {
+		if (item.isReady) {
+			process(item);
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:3:2 lint/nursery/useEarlyContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement wraps the rest of the loop body.
+  
+    1 │ /* should generate diagnostics */
+    2 │ for (const item of items) {
+  > 3 │ 	if (item.isActive) {
+      │ 	^^^^^^^^^^^^^^^^^^
+    4 │ 		process(item);
+    5 │ 	}
+  
+  i The main code of the loop is nested one level deeper than it needs to be, which makes it harder to follow.
+  
+  i Skip the iteration early with continue when the condition isn't met, then write the rest of the code after it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an early continue instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   for (const item of items) {
+     3    │ - → if·(item.isActive)·{
+     4    │ - → → process(item);
+     5    │ - → }
+        3 │ + → if·(!item.isActive)·{
+        4 │ + → → continue;
+        5 │ + → }
+        6 │ + → → process(item);
+     6  7 │   }
+     7  8 │   
+  
+
+```
+
+```
+invalid.js:9:2 lint/nursery/useEarlyContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement wraps the rest of the loop body.
+  
+     8 │ for (const item of items) {
+   > 9 │ 	if (item.isActive)
+       │ 	^^^^^^^^^^^^^^^^^^
+    10 │ 		process(item);
+    11 │ }
+  
+  i The main code of the loop is nested one level deeper than it needs to be, which makes it harder to follow.
+  
+  i Skip the iteration early with continue when the condition isn't met, then write the rest of the code after it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an early continue instead.
+  
+     7  7 │   
+     8  8 │   for (const item of items) {
+     9    │ - → if·(item.isActive)
+    10    │ - → → process(item);
+        9 │ + → if·(!item.isActive)
+       10 │ + → → continue;
+       11 │ + → process(item);
+    11 12 │   }
+    12 13 │   
+  
+
+```
+
+```
+invalid.js:15:2 lint/nursery/useEarlyContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement wraps the rest of the loop body.
+  
+    13 │ for (const item of items) {
+    14 │ 	prepare(item);
+  > 15 │ 	if (item.isActive) process(item);
+       │ 	^^^^^^^^^^^^^^^^^^
+    16 │ }
+    17 │ 
+  
+  i The main code of the loop is nested one level deeper than it needs to be, which makes it harder to follow.
+  
+  i Skip the iteration early with continue when the condition isn't met, then write the rest of the code after it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an early continue instead.
+  
+    13 13 │   for (const item of items) {
+    14 14 │     prepare(item);
+    15    │ - → if·(item.isActive)·process(item);
+       15 │ + → if·(!item.isActive)·continue;
+       16 │ + → process(item);
+    16 17 │   }
+    17 18 │   
+  
+
+```
+
+```
+invalid.js:18:29 lint/nursery/useEarlyContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement wraps the rest of the loop body.
+  
+    16 │ }
+    17 │ 
+  > 18 │ for (const item of items) { if (item.isActive) process(item); }
+       │                             ^^^^^^^^^^^^^^^^^^
+    19 │ 
+    20 │ for (const item of items) {
+  
+  i The main code of the loop is nested one level deeper than it needs to be, which makes it harder to follow.
+  
+  i Skip the iteration early with continue when the condition isn't met, then write the rest of the code after it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an early continue instead.
+  
+    18 │ for·(const·item·of·items)·{·if·(!item.isActive)·continue;·process(item);·}
+       │                                 +               ++++++++++                
+
+```
+
+```
+invalid.js:21:2 lint/nursery/useEarlyContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement wraps the rest of the loop body.
+  
+    20 │ for (const item of items) {
+  > 21 │ 	if (item.isActive) {
+       │ 	^^^^^^^^^^^^^^^^^^
+    22 │ 		if (item.isReady) {
+    23 │ 			process(item);
+  
+  i The main code of the loop is nested one level deeper than it needs to be, which makes it harder to follow.
+  
+  i Skip the iteration early with continue when the condition isn't met, then write the rest of the code after it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an early continue instead.
+  
+    19 19 │   
+    20 20 │   for (const item of items) {
+    21    │ - → if·(item.isActive)·{
+    22    │ - → → if·(item.isReady)·{
+       21 │ + → if·(!item.isActive)·{
+       22 │ + → → continue;
+       23 │ + → }
+       24 │ + → → if·(item.isReady)·{
+    23 25 │         process(item);
+    24    │ - → → }
+    25    │ - → }
+       26 │ + → → }
+    26 27 │   }
+    27 28 │   
+  
+
+```
