@@ -81,6 +81,43 @@ generated API, or rule page, so retain the self-contained behavior summary even
 when the Rust name appears descriptive. Keep item contracts in `///`; put
 implementation rationale beside the code as `//`, not in user-facing docs.
 
+## Direct Prose
+
+Write in the present tense and active voice. Put the main clause before
+supporting qualifications so readers get the point immediately. Conventional
+rustdoc summaries such as `Returns...` or `Represents...` do this directly.
+Rewrite openings such as `A value whose...` so the sentence first says what the
+value is or does.
+
+Relative clauses introduced by `whose`, `which`, or `that` remain useful for a
+brief qualification after the main claim. Give a separate fact its own sentence,
+and repeat a short noun when that is clearer than making the reader trace an
+antecedent.
+
+Use a colon to introduce a list, quotation, example, mapping, or short
+definition. Write a reason, consequence, or separate explanation as its own
+sentence or connect it explicitly with `because`, `when`, or `so`. Rewrite prose
+labels such as "Note:" and "Reason:" as ordinary sentences; keep labels with
+established semantics, such as `SAFETY:`.
+
+State the relevant fact before adding a cross-reference. Links provide further
+detail or navigation. Replace phrases such as "as `foo` describes", "as `foo`
+decides", or "as `foo` finds" with the behavior they stand for.
+
+```rust
+// BAD:
+/// A cache whose entries are declaration ranges, which later lookups reuse.
+
+// GOOD:
+/// Caches results by declaration range. Later lookups reuse those results.
+
+// BAD:
+/// Does not resolve aliases: the value comes directly from syntax.
+
+// GOOD:
+/// Reads the value directly from syntax without resolving aliases.
+```
+
 ## Writing End-User Documentation
 
 Start with a short, plain-language sentence that says what the item does. Add
@@ -89,7 +126,6 @@ default or omission behavior, interactions, side effects, persistence, results,
 limitations, failures, and recovery. Use an example when prose leaves the result
 ambiguous.
 
-Write in the present tense and active voice, with one main idea per sentence.
 Use familiar, concrete words; explain necessary terms in the same paragraph.
 Avoid vague pronouns, unexplained acronyms, idioms, and dismissive words such as
 "obviously", "simply", or "just". Proofread grammar and terminology.
@@ -113,7 +149,6 @@ implementation.
 
 - Start with a plain-language description of what the function returns or
   accomplishes.
-- Use short or medium-length sentences. Keep one main idea per sentence.
 - Avoid internal jargon. If a technical term is necessary, explain what it means
   in the same paragraph.
 - Describe business-logic caveats that can surprise callers. Examples include
@@ -121,6 +156,10 @@ implementation.
   conditions that return `None`, `Unknown`, or an indeterminate result.
 - Do not describe implementation details unless callers need them to understand
   the behavior.
+
+For a type, describe the abstraction it represents instead of listing its fields
+or variants in one sentence. Put non-obvious field or variant behavior on those
+items.
 
 Add an example when the signature cannot clearly show a relationship such as
 overload selection, argument mapping, import traversal, fallback behavior, or
@@ -263,10 +302,13 @@ Read only the comments in the diff, without the implementation:
    advanced target-language knowledge and state the details needed to predict
    behavior.
 5. Check public names, examples, terminology, inclusivity, and grammar.
-6. In contributor comments, apply the rename test to external symbols and
+6. Ensure each sentence leads with its main claim. Keep relative clauses as
+   brief qualifiers, express reasons and consequences in sentences rather than
+   explanatory colons, and make links supplemental.
+7. In contributor comments, apply the rename test to external symbols and
    source locations. Ensure the behavior is self-contained, and verify retained
    public API or standard names and pinned provenance links.
-7. Inspect generated or rendered output when applicable.
+8. Inspect generated or rendered output when applicable.
 
 Delete redundant contributor comments, but retain descriptions required by a
 user-facing surface.
