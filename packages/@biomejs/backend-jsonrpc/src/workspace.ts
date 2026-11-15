@@ -1536,7 +1536,7 @@ export interface YamlFormatterConfiguration {
 	quoteStyle?: QuoteStyle;
 	/**
 	 * Whether multiline flow mappings (`{ ... }`) and sequences (`[ ... ]`) end with a comma
-	 * after their last entry. Defaults to `none`, which removes it.
+	 * after their last entry. Defaults to `all`. ryl's formatter uses `none`.
 	 */
 	trailingCommas?: YamlTrailingCommas;
 	/**

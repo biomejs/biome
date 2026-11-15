@@ -79,7 +79,7 @@ pub struct YamlFormatOptions {
     bracket_spacing: Option<BracketSpacing>,
     /// The exact number of spaces between content and a comment on the same line. Defaults to 2.
     comment_spacing: CommentSpacing,
-    /// Whether multiline flow mappings and sequences end with a comma. Defaults to none.
+    /// Whether multiline flow mappings and sequences end with a comma. Defaults to all.
     trailing_commas: TrailingCommas,
 }
 
@@ -238,10 +238,11 @@ impl fmt::Display for YamlFormatOptions {
     serde(rename_all = "camelCase")
 )]
 pub enum TrailingCommas {
-    /// Removes the comma after the last entry. This is the default.
-    #[default]
+    /// Removes the comma after the last entry.
     None,
-    /// Adds a comma after the last entry when the collection spans multiple lines.
+    /// Adds a comma after the last entry when the collection spans multiple lines. This is the
+    /// default.
+    #[default]
     All,
 }
 

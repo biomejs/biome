@@ -48,7 +48,7 @@ group: !!map &a
 flow_keys: {
     ? key    # after flow key colon
     : value,
-    other: 2    # after flow entry
+    other: 2,    # after flow entry
   }
 colon_line: { ? key    # after explicit flow key
     :    # after flow colon

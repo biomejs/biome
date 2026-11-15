@@ -74,7 +74,7 @@ flow_map: { a: 1 }    # after flow mapping
 multiline_flow:    # after open bracket
   [
     a,    # after entry
-    b
+    b,
   ]
 literal: |    # literal header
   text

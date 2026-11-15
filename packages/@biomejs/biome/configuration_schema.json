@@ -22809,7 +22809,7 @@
 					"default": null
 				},
 				"trailingCommas": {
-					"description": "Whether multiline flow mappings (`{ ... }`) and sequences (`[ ... ]`) end with a comma\nafter their last entry. Defaults to `none`, which removes it.",
+					"description": "Whether multiline flow mappings (`{ ... }`) and sequences (`[ ... ]`) end with a comma\nafter their last entry. Defaults to `all`. ryl's formatter uses `none`.",
 					"anyOf": [
 						{ "$ref": "#/$defs/YamlTrailingCommas" },
 						{ "type": "null" }

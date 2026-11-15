@@ -304,7 +304,7 @@ The configuration contained in `biome.json` or `biome.jsonc`.
                               which yamllint's `comments` rule expects.
         --yaml-formatter-trailing-commas=<none|all>  Whether multiline flow mappings (`{ ... }`) and
                               sequences (`[ ... ]`) end with a comma after their last entry.
-                              Defaults to `none`, which removes it.
+                              Defaults to `all`. ryl's formatter uses `none`.
         --yaml-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
                               of the file.
                               Setting this option to `false` is **highly discouraged** because it

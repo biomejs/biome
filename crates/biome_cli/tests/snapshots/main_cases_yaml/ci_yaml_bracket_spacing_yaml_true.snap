@@ -87,7 +87,7 @@ file.yaml format ━━━━━━━━━━━━━━━━━━━━━
        17 │ + ····first_key:·first_value,
        18 │ + ····second_key:·second_value,
        19 │ + ····third_key:·third_value,
-       20 │ + ····fourth_key:·fourth_value
+       20 │ + ····fourth_key:·fourth_value,
        21 │ + ··}
        22 │ + long_sequence:
        23 │ + ··[
@@ -96,7 +96,7 @@ file.yaml format ━━━━━━━━━━━━━━━━━━━━━
        26 │ + ····third_value,
        27 │ + ····fourth_value,
        28 │ + ····fifth_value,
-       29 │ + ····sixth_value
+       29 │ + ····sixth_value,
        30 │ + ··]
     17 31 │   commented_mapping: {
     18    │ - ··#·before
@@ -105,7 +105,7 @@ file.yaml format ━━━━━━━━━━━━━━━━━━━━━
     21    │ - ··#·after
        32 │ + ····#·before
        33 │ + ····first:·1,··#·between
-       34 │ + ····second:·2
+       34 │ + ····second:·2,
        35 │ + ····#·after
     22 36 │     }
     23 37 │   commented_sequence: [
@@ -115,7 +115,7 @@ file.yaml format ━━━━━━━━━━━━━━━━━━━━━
     27    │ - ··#·after
        38 │ + ····#·before
        39 │ + ····first,··#·between
-       40 │ + ····second
+       40 │ + ····second,
        41 │ + ····#·after
     28 42 │     ]
     29 43 │   

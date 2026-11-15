@@ -391,7 +391,7 @@ fn format_yaml_trailing_commas_cli_option() {
                 "format",
                 "--write",
                 "--yaml-formatter-trailing-commas",
-                "all",
+                "none",
                 file_path.as_str(),
             ]
             .as_slice(),
@@ -402,6 +402,6 @@ fn format_yaml_trailing_commas_cli_option() {
     assert_file_contents(
         &fs,
         file_path,
-        "key:\n  [\n    first_value,\n    second_value,\n    third_value,\n    fourth_value,\n    fifth_value,\n    sixth_value,\n  ]\n",
+        "key:\n  [\n    first_value,\n    second_value,\n    third_value,\n    fourth_value,\n    fifth_value,\n    sixth_value\n  ]\n",
     );
 }

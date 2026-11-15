@@ -60,7 +60,7 @@ a:
 {
   ? key  # on the key line
   # on its own line
-  : v
+  : v,
 }
 ---
 { ? [a, b]  # collection

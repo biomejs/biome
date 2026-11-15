@@ -90,7 +90,7 @@ pub struct YamlFormatterConfiguration {
     pub comment_spacing: Option<CommentSpacing>,
 
     /// Whether multiline flow mappings (`{ ... }`) and sequences (`[ ... ]`) end with a comma
-    /// after their last entry. Defaults to `none`, which removes it.
+    /// after their last entry. Defaults to `all`. ryl's formatter uses `none`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("yaml-formatter-trailing-commas"), argument("none|all"))
