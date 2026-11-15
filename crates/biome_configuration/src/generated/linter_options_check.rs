@@ -2735,6 +2735,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("nursery", "useExpectToHaveBeenCalledTimes", TypeId::of::<biome_rule_options::use_expect_to_have_been_called_times::UseExpectToHaveBeenCalledTimesOptions>()));
     result.push((
         "nursery",
+        "useExpectToHaveLength",
+        TypeId::of::<biome_rule_options::use_expect_to_have_length::UseExpectToHaveLengthOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useExpectToStrictEqual",
         TypeId::of::<biome_rule_options::use_expect_to_strict_equal::UseExpectToStrictEqualOptions>(
         ),

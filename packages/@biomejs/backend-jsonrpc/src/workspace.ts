@@ -4083,6 +4083,11 @@ export interface Nursery {
 	 */
 	useExpectToHaveBeenCalledTimes?: UseExpectToHaveBeenCalledTimesConfiguration;
 	/**
+	 * Enforce using toHaveLength() to check the length of an array or string.
+	 * See https://biomejs.dev/linter/rules/use-expect-to-have-length
+	 */
+	useExpectToHaveLength?: UseExpectToHaveLengthConfiguration;
+	/**
 	 * Enforce using toStrictEqual() instead of toEqual() to compare values in tests.
 	 * See https://biomejs.dev/linter/rules/use-expect-to-strict-equal
 	 */
@@ -7429,6 +7434,9 @@ export type UseExpectToHaveBeenCalledConfiguration =
 export type UseExpectToHaveBeenCalledTimesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExpectToHaveBeenCalledTimesOptions;
+export type UseExpectToHaveLengthConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseExpectToHaveLengthOptions;
 export type UseExpectToStrictEqualConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExpectToStrictEqualOptions;
@@ -10997,6 +11005,14 @@ export interface RuleWithUseExpectToHaveBeenCalledTimesOptions {
 	level: RulePlainConfiguration;
 	options?: UseExpectToHaveBeenCalledTimesOptions;
 }
+export interface RuleWithUseExpectToHaveLengthOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseExpectToHaveLengthOptions;
+}
 export interface RuleWithUseExpectToStrictEqualOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -14187,6 +14203,7 @@ export interface UseExhaustiveSwitchCasesOptions {
 export type UseExpectToContainOptions = {};
 export type UseExpectToHaveBeenCalledOptions = {};
 export type UseExpectToHaveBeenCalledTimesOptions = {};
+export type UseExpectToHaveLengthOptions = {};
 export type UseExpectToStrictEqualOptions = {};
 /**
  * Options for the `useExplicitReturnType` rule.
@@ -16286,6 +16303,7 @@ export type Category =
 	| "lint/nursery/useExpectToContain"
 	| "lint/nursery/useExpectToHaveBeenCalled"
 	| "lint/nursery/useExpectToHaveBeenCalledTimes"
+	| "lint/nursery/useExpectToHaveLength"
 	| "lint/nursery/useExpectToStrictEqual"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitReturnType"
