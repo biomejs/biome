@@ -112,8 +112,8 @@ one of its own variables or a path on its own `this`. Its parts live in
   analyzes a class field that has an initializer apart from the code around
   the class. It also skips `declare` statements, which never run.
 - The builder models the control flow of blocks, `if`, `while`, `do...while`,
-  `for`, `for...in`, `for...of`, `switch`, labeled statements, `break`,
-  `continue`, `return`, and `throw`, as TypeScript's binder does. A
+  `for`, `for...in`, `for...of`, `switch`, `try`, labeled statements,
+  `break`, `continue`, `return`, and `throw`, as TypeScript's binder does. A
   `for...in` or `for...of` loop evaluates its expression once, before the
   loop. Its header, where each iteration starts, joins the flow after the
   expression with the end of the body and each `continue`, as
@@ -132,16 +132,29 @@ one of its own variables or a path on its own `this`. Its parts live in
   statement also continues from the bypass, the condition that no case
   matched. `switch (true)` chains the conditions instead, as TypeScript's
   `narrowTypeBySwitchOnTrue` does: a group starts where every case before it
-  failed to match. Any other statement, such as `try`, is an opaque region.
-  The builder evaluates the expressions of a region in source order from the
-  flow point before it, without modelling the branches and
-  jumps inside it, and the next statement continues from the result. For each
-  `break` or `continue` inside the region that targets a statement outside it,
-  the builder adds the point before the region as a predecessor of that
-  target, once per target. Regions keep narrowing sound because only subjects
-  that the root never writes narrow: the state before a region is never
-  narrower than the state at any point inside or after it. Replacing a region
-  with a model of its statement only makes narrowing more precise.
+  failed to match. A `try` statement starts its catch clause from the flow
+  before the statement, as `bindTryStatement` does: an exception can leave
+  the try block at any point, and while the graph has no write points, no
+  point inside the block is narrower than its start. The builder keeps the
+  join that the exceptions of each enclosing try block and catch clause
+  reach, which a point that changes a subject's type must join, as
+  TypeScript's `createFlowMutation` does. The code after the statement
+  continues from the ends of the try block and the catch clause, and `break`
+  and `continue` reach their targets directly. A finally block is built
+  twice. The first build starts from the join of those ends, the exceptions,
+  and each `return` in the try block and the catch clause, and records the
+  reads of the block. The second build starts from the ends only and records
+  no reads, and the code after the statement continues from it, because that
+  code runs only when the statement completed normally, as TypeScript's
+  `createReduceLabel` over the normal exits says. Any other statement, a
+  declaration such as a class or an enum, is an opaque region. The builder
+  evaluates the expressions of a region in source order from the flow point
+  before it, and the next statement continues from the result. Regions keep
+  narrowing sound because only subjects that the root never writes narrow:
+  the state before a region is never narrower than the state at any point
+  inside or after it. For the same reason, the builder joins the target of
+  any `break` or `continue` that leaves a region from the point before the
+  region.
 - `subjects.rs` maps an expression to the subject it reads or tests: a
   variable or `this`, or a property path that starts at one, such as `o.v`,
   `a.b.c`, `t[0]`, or `this.#v`. A static member access with a named property

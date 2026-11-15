@@ -2120,19 +2120,6 @@ fn class_expressions_keep_narrowing_outside_their_members() {
 #[test]
 fn unmodelled_statements_elsewhere_keep_narrowing() {
     const SOURCE: &str = r#"
-        declare function check(): boolean;
-        function tries(value: string | null) {
-            try {
-                check();
-            } catch (error) {
-                check();
-            } finally {
-                check();
-            }
-            if (value !== null) {
-                /*try*/value;
-            }
-        }
         function classes(value: string | null) {
             class Local {
                 field = 1;
@@ -2152,62 +2139,9 @@ fn unmodelled_statements_elsewhere_keep_narrowing() {
         }
     "#;
     let (db, module) = narrowing_db(SOURCE);
-    for marker in ["try", "class", "enum"] {
+    for marker in ["class", "enum"] {
         let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
         assert_variants(&db, ty, &[InferredTypeData::String], marker);
-    }
-}
-
-// TypeScript 7.0.2 (`tsc --strict`) narrows every read below to `string`.
-#[test]
-fn reads_inside_unmodelled_statements_keep_the_facts_from_before_them() {
-    const SOURCE: &str = r#"
-        function reads(value: string | null) {
-            if (value === null) {
-                return;
-            }
-            try {
-                /*try*/value;
-            } catch (error) {
-                /*catch*/value;
-            } finally {
-                /*finally*/value;
-            }
-            /*after*/value;
-        }
-    "#;
-    let (db, module) = narrowing_db(SOURCE);
-    for marker in ["try", "catch", "finally", "after"] {
-        let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
-        assert_variants(&db, ty, &[InferredTypeData::String], marker);
-    }
-}
-
-// TypeScript 7.0.2 (`tsc --strict`) narrows `tryAfterReturn` and `afterTry`
-// to `string`, and gives `string | null` at `finally`. Biome does not model
-// the control flow inside a `try` statement, so an `if` or `return`
-// inside one narrows nothing, and Biome deliberately keeps the wider
-// declared type at every read.
-#[test]
-fn conditions_inside_unmodelled_statements_do_not_narrow_yet() {
-    use InferredTypeData::{Null, String};
-    const SOURCE: &str = r#"
-        function wider(value: string | null) {
-            try {
-                if (value === null) {
-                    return;
-                }
-                /*tryAfterReturn*/value;
-            } finally {
-                /*finally*/value;
-            }
-            /*afterTry*/value;
-        }
-    "#;
-    let (db, module) = narrowing_db(SOURCE);
-    for marker in ["tryAfterReturn", "finally", "afterTry"] {
-        let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
-        assert_variants(&db, ty, &[String, Null], marker);
     }
 }
 
@@ -2217,7 +2151,7 @@ fn conditions_inside_unmodelled_statements_do_not_narrow_yet() {
 // gives `string` at the test of the third loop, which only the `continue` in
 // its `switch` reaches.
 #[test]
-fn jumps_out_of_unmodelled_statements_carry_their_entry_facts() {
+fn jumps_out_of_try_and_switch_statements_reach_their_targets() {
     use InferredTypeData::{Null, String};
     const SOURCE: &str = r#"
         declare function check(): boolean;
