@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidCombinedImport.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import globals, { describe } from "@jest/globals";
+
+describe("sum", () => {
+	it("adds two numbers", () => {});
+});
+
+```
+
+# Diagnostics
+```
+invalidCombinedImport.js:5:2 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test API it is used as a global variable.
+  
+    4 │ describe("sum", () => {
+  > 5 │ 	it("adds two numbers", () => {});
+      │ 	^^
+    6 │ });
+    7 │ 
+  
+  i Whether this global variable exists depends on the configuration of the test runner. An import shows where the test API comes from and works with any configuration.
+  
+  i Import it from @jest/globals instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Import it from @jest/globals.
+  
+    2 │ import·globals,·{·describe,·it·}·from·"@jest/globals";
+      │                           ++++                        
+
+```
