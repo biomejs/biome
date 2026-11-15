@@ -4083,6 +4083,11 @@ export interface Nursery {
 	 */
 	useExpectToHaveBeenCalledTimes?: UseExpectToHaveBeenCalledTimesConfiguration;
 	/**
+	 * Enforce using toStrictEqual() instead of toEqual() to compare values in tests.
+	 * See https://biomejs.dev/linter/rules/use-expect-to-strict-equal
+	 */
+	useExpectToStrictEqual?: UseExpectToStrictEqualConfiguration;
+	/**
 	 * Require explicit return types on functions and class methods.
 	 * See https://biomejs.dev/linter/rules/use-explicit-return-type
 	 */
@@ -7424,6 +7429,9 @@ export type UseExpectToHaveBeenCalledConfiguration =
 export type UseExpectToHaveBeenCalledTimesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExpectToHaveBeenCalledTimesOptions;
+export type UseExpectToStrictEqualConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseExpectToStrictEqualOptions;
 export type UseExplicitReturnTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExplicitReturnTypeOptions;
@@ -10989,6 +10997,14 @@ export interface RuleWithUseExpectToHaveBeenCalledTimesOptions {
 	level: RulePlainConfiguration;
 	options?: UseExpectToHaveBeenCalledTimesOptions;
 }
+export interface RuleWithUseExpectToStrictEqualOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseExpectToStrictEqualOptions;
+}
 export interface RuleWithUseExplicitReturnTypeOptions {
 	level: RulePlainConfiguration;
 	options?: UseExplicitReturnTypeOptions;
@@ -14171,6 +14187,7 @@ export interface UseExhaustiveSwitchCasesOptions {
 export type UseExpectToContainOptions = {};
 export type UseExpectToHaveBeenCalledOptions = {};
 export type UseExpectToHaveBeenCalledTimesOptions = {};
+export type UseExpectToStrictEqualOptions = {};
 /**
  * Options for the `useExplicitReturnType` rule.
  */
@@ -16269,6 +16286,7 @@ export type Category =
 	| "lint/nursery/useExpectToContain"
 	| "lint/nursery/useExpectToHaveBeenCalled"
 	| "lint/nursery/useExpectToHaveBeenCalledTimes"
+	| "lint/nursery/useExpectToStrictEqual"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitReturnType"
 	| "lint/nursery/useExplicitType"

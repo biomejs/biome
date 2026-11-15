@@ -591,6 +591,7 @@ pub mod use_expect;
 pub mod use_expect_to_contain;
 pub mod use_expect_to_have_been_called;
 pub mod use_expect_to_have_been_called_times;
+pub mod use_expect_to_strict_equal;
 pub mod use_explicit_length_check;
 pub mod use_explicit_return_type;
 pub mod use_explicit_type;

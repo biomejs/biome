@@ -480,6 +480,7 @@ define_categories! {
     "lint/nursery/useExpectToContain": "https://biomejs.dev/linter/rules/use-expect-to-contain",
     "lint/nursery/useExpectToHaveBeenCalled": "https://biomejs.dev/linter/rules/use-expect-to-have-been-called",
     "lint/nursery/useExpectToHaveBeenCalledTimes": "https://biomejs.dev/linter/rules/use-expect-to-have-been-called-times",
+    "lint/nursery/useExpectToStrictEqual": "https://biomejs.dev/linter/rules/use-expect-to-strict-equal",
     "lint/nursery/useExplicitFunctionReturnType": "https://biomejs.dev/linter/rules/use-explicit-type",
     "lint/nursery/useExplicitReturnType": "https://biomejs.dev/linter/rules/use-explicit-return-type",
     "lint/nursery/useExplicitType": "https://biomejs.dev/linter/rules/use-explicit-type",
