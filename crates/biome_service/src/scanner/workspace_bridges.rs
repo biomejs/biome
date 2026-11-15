@@ -39,8 +39,9 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
     /// Returns the Tailwind CSS stylesheets that the settings of the project
     /// with the given `project_key` point to.
     ///
-    /// Every scan kind except [`ScanKind::NoScanner`] indexes them and the
-    /// files they import, because the Tailwind rules read them.
+    /// Scans index them and the files they import, because the Tailwind rules
+    /// read them, except [`ScanKind::NoScanner`] and the scans on WASM.
+    #[cfg_attr(target_family = "wasm", expect(dead_code))]
     fn get_tailwind_stylesheets(&self, project_key: ProjectKey) -> Vec<Utf8PathBuf>;
 
     /// Returns whether the given `path` has been indexed.

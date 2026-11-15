@@ -545,28 +545,32 @@ impl Scanner {
                             scope.handle(traversal_ctx, path.to_path_buf());
                         }
                     }));
+                #[cfg_attr(target_family = "wasm", expect(unused_mut))]
                 let mut duration = start.elapsed();
 
-                let mut all_dependencies = mem::take(&mut ctx.dependencies).into_inner().unwrap();
-                all_dependencies.extend(dependencies);
                 // WASM has no watcher, and scans don't index dependencies
-                // there, except the Tailwind stylesheets and their imports.
-                #[cfg(target_family = "wasm")]
-                all_dependencies.clear();
-                // The Tailwind rules read the stylesheets, which the traversal
-                // skips in scans of known files, in ignored folders, and
-                // outside the targets of the scan. As dependencies, they are
-                // indexed with the files they import, and their folders below
-                // `folder` are watched.
-                all_dependencies.extend(ctx.workspace.get_tailwind_stylesheets(project_key));
-                if !all_dependencies.is_empty() {
-                    let (dependencies_duration, folders_to_watch) =
-                        scan_dependencies(folder, all_dependencies.into_iter().collect(), ctx);
-                    duration += dependencies_duration;
-                    let _ = self
-                        .watcher_tx
-                        .try_send(WatcherInstruction::WatchFolders(folders_to_watch));
+                // there.
+                #[cfg(not(target_family = "wasm"))]
+                {
+                    let mut all_dependencies =
+                        mem::take(&mut ctx.dependencies).into_inner().unwrap();
+                    all_dependencies.extend(dependencies);
+                    // Scans of known files don't index the Tailwind
+                    // stylesheets, and no traversal reaches the ones in
+                    // ignored folders or outside its targets. As dependencies,
+                    // they are indexed with the files they import.
+                    all_dependencies.extend(ctx.workspace.get_tailwind_stylesheets(project_key));
+                    if !all_dependencies.is_empty() {
+                        let (dependencies_duration, folders_to_watch) =
+                            scan_dependencies(folder, all_dependencies.into_iter().collect(), ctx);
+                        duration += dependencies_duration;
+                        let _ = self
+                            .watcher_tx
+                            .try_send(WatcherInstruction::WatchFolders(folders_to_watch));
+                    }
                 }
+                #[cfg(target_family = "wasm")]
+                let _ = (folder, dependencies);
 
                 duration
             });
