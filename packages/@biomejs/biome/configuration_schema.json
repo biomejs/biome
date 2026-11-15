@@ -7295,6 +7295,13 @@
 			]
 		},
 		"NoTestGlobalsOptions": { "type": "object", "additionalProperties": false },
+		"NoTestHooksConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTestHooksOptions" }
+			]
+		},
+		"NoTestHooksOptions": { "type": "object", "additionalProperties": false },
 		"NoThenPropertyConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -10093,6 +10100,13 @@
 					"description": "Disallow using test APIs as global variables.\nSee https://biomejs.dev/linter/rules/no-test-globals",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoTestGlobalsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noTestHooks": {
+					"description": "Disallow setup and teardown hooks in tests.\nSee https://biomejs.dev/linter/rules/no-test-hooks",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTestHooksConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -16085,6 +16099,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoTestGlobalsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoTestHooksOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTestHooksOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

@@ -132,6 +132,26 @@ test2.js:2:1 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━
 ```
 
 ```block
+test2.js:3:2 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The beforeEach hook is not allowed.
+  
+    2 │ describe("foo", () => {
+  > 3 │ 	beforeEach(() => {});
+      │ 	^^^^^^^^^^
+    4 │     beforeEach(() => {});
+    5 │     test("bar", () => {
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
 test2.js:3:2 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The test API beforeEach is used as a global variable.
@@ -154,6 +174,27 @@ test2.js:3:2 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━
        2 │ + import·{·beforeEach·}·from·"@jest/globals";
     2  3 │   describe("foo", () => {
     3  4 │   	beforeEach(() => {});
+  
+
+```
+
+```block
+test2.js:4:5 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The beforeEach hook is not allowed.
+  
+    2 │ describe("foo", () => {
+    3 │ 	beforeEach(() => {});
+  > 4 │     beforeEach(() => {});
+      │     ^^^^^^^^^^
+    5 │     test("bar", () => {
+    6 │         someFn();
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -303,5 +344,5 @@ test2.js:4:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━
 Checked 2 files in <TIME>. No fixes applied.
 Found 1 error.
 Found 2 warnings.
-Found 6 infos.
+Found 8 infos.
 ```

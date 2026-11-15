@@ -3493,6 +3493,11 @@ export interface Nursery {
 	 */
 	noTestGlobals?: NoTestGlobalsConfiguration;
 	/**
+	 * Disallow setup and teardown hooks in tests.
+	 * See https://biomejs.dev/linter/rules/no-test-hooks
+	 */
+	noTestHooks?: NoTestHooksConfiguration;
+	/**
 	 * Disallow this outside of classes.
 	 * See https://biomejs.dev/linter/rules/no-this-outside-of-class
 	 */
@@ -7105,6 +7110,9 @@ export type NoTanstackQueryVoidQueryFnConfiguration =
 export type NoTestGlobalsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTestGlobalsOptions;
+export type NoTestHooksConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTestHooksOptions;
 export type NoThisOutsideOfClassConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoThisOutsideOfClassOptions;
@@ -10436,6 +10444,10 @@ export interface RuleWithNoTestGlobalsOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoTestGlobalsOptions;
+}
+export interface RuleWithNoTestHooksOptions {
+	level: RulePlainConfiguration;
+	options?: NoTestHooksOptions;
 }
 export interface RuleWithNoThisOutsideOfClassOptions {
 	level: RulePlainConfiguration;
@@ -13964,6 +13976,7 @@ export interface NoTailwindRestyledComponentsOptions {
 export type NoTanstackQueryRestDestructuringOptions = {};
 export type NoTanstackQueryVoidQueryFnOptions = {};
 export type NoTestGlobalsOptions = {};
+export type NoTestHooksOptions = {};
 export type NoThisOutsideOfClassOptions = {};
 export interface NoTripleSlashReferenceOptions {
 	/**
@@ -16165,6 +16178,7 @@ export type Category =
 	| "lint/nursery/noDynamicRequire"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
+	| "lint/nursery/noTestHooks"
 	| "lint/nursery/noYamlEmptySequenceEntries"
 	| "lint/nursery/noErasingOperation"
 	| "lint/nursery/noExcessiveNestedBlocks"
