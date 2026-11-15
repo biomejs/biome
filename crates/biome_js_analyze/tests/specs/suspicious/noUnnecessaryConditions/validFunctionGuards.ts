@@ -48,12 +48,6 @@ function written(value: string | null) {
 	}
 }
 
-function captured(value: string | null) {
-	if (isString(value)) {
-		return () => value?.length;
-	}
-}
-
 function unsupportedCallees(value: string | null) {
 	if (alias(value)) value?.length;
 	if (generic(value)) value?.length;

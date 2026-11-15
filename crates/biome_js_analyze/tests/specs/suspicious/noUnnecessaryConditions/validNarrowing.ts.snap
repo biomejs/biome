@@ -35,12 +35,6 @@ function reassigned(value: string | null) {
 	}
 }
 
-function captured(value: string | null) {
-	if (value !== null) {
-		return () => value?.length;
-	}
-}
-
 interface Value {}
 function structural(value: Value | null) {
 	if (!value) return value == null;

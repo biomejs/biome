@@ -399,10 +399,10 @@ fn condition_discovery_preserves_shadowing_and_depth_limits() {
 }
 
 #[test]
-fn unrelated_conditions_and_captures_skip_flow_queries() {
+fn unrelated_conditions_and_function_declarations_skip_flow_queries() {
     for source in [
         "function f(value: string | number, other: boolean) { if (other) return; /*read*/value; }",
-        "function f(value: string | number) { if (typeof value === 'string') return () => /*read*/value; }",
+        "function f(value: string | number) { if (typeof value === 'string') { function g() { return /*read*/value; } } }",
     ] {
         let (db, module) = narrowing_db(source);
         db.clear_salsa_events();
@@ -1516,9 +1516,10 @@ fn narrowing_is_isolated_by_binding_identity() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives `number` after the write and
-// `string` in the closure. Biome doesn't narrow reads in closures.
+// `string` in the closure, which is created after the test
+// (`narrowing-probes/m5-l2/existing.ts` L8, `m5-l4/existing.ts` L15).
 #[test]
-fn writes_narrow_and_captures_remain_conservative() {
+fn writes_narrow_and_captures_continue_the_flow() {
     use InferredTypeData::{Number, String};
     const SOURCE: &str = r#"
         function reassigned(value: string | number) {
@@ -1534,7 +1535,7 @@ fn writes_narrow_and_captures_remain_conservative() {
         }
     "#;
     let (db, module) = narrowing_db(SOURCE);
-    for (marker, expected) in [("written", &[Number][..]), ("captured", &[String, Number])] {
+    for (marker, expected) in [("written", &[Number][..]), ("captured", &[String])] {
         let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
         assert_variants(&db, ty, expected, marker);
     }
@@ -2049,13 +2050,11 @@ fn variables_written_by_destructuring_or_logical_assignments_narrow() {
     }
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
-// except the read in `method`. TypeScript narrows that read to `string`,
-// because it keeps the narrowing of a parameter that a method of a class
-// expression captures when nothing writes the parameter. Biome does not narrow
-// reads in closures.
-// TypeScript analyzes a class field with an initializer on its own, so reads
-// in the field keep their declared type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
+// (`narrowing-probes/m5-l4/existing.ts` L13 for `method`). A method of a
+// class expression keeps the narrowing of a parameter that it captures, when
+// nothing writes the parameter. TypeScript analyzes a class field with an
+// initializer on its own, so reads in the field keep their declared type.
 #[test]
 fn class_expressions_keep_narrowing_outside_their_members() {
     use InferredTypeData::{Null, String};
@@ -2093,7 +2092,7 @@ fn class_expressions_keep_narrowing_outside_their_members() {
         ("extends", &[String]),
         ("field", &[String, Null]),
         ("static", &[String, Null]),
-        ("method", &[String, Null]),
+        ("method", &[String]),
         ("after", &[String]),
         ("outside", &[String, Null]),
     ] {

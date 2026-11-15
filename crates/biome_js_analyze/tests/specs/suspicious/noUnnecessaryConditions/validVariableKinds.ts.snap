@@ -5,9 +5,10 @@ expression: validVariableKinds.ts
 # Input
 ```ts
 // should not generate diagnostics
-// Each condition below stays necessary: a test outside a closure never
-// reaches a read inside it, a function called where it is defined can write
-// the variable, and a `var` can be read before its declarator.
+// Each condition below stays necessary: a test outside a closure doesn't
+// reach a read inside it of a `let` declared at the top level of a file,
+// which another script can write, a function called where it is defined can
+// write the variable, and a `var` can be read before its declarator.
 
 interface Timer {
 	cancel(): void;
