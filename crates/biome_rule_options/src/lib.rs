@@ -590,6 +590,7 @@ pub mod use_default_switch_clause;
 pub mod use_default_switch_clause_last;
 pub mod use_deprecated_date;
 pub mod use_deprecated_reason;
+pub mod use_describe_function_title;
 pub mod use_destructuring;
 pub mod use_disposables;
 pub mod use_dom_node_text_content;

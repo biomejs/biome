@@ -2723,6 +2723,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_deprecated_reason::UseDeprecatedReasonOptions>(),
     ));
     result.push((
+        "nursery",
+        "useDescribeFunctionTitle",
+        TypeId::of::<
+            biome_rule_options::use_describe_function_title::UseDescribeFunctionTitleOptions,
+        >(),
+    ));
+    result.push((
         "style",
         "useDestructuring",
         TypeId::of::<biome_rule_options::use_destructuring::UseDestructuringOptions>(),

@@ -189,6 +189,7 @@ static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noTestGlobals"),
         RuleFilter::Rule("nursery", "noTestHooks"),
         RuleFilter::Rule("nursery", "useCalledWith"),
+        RuleFilter::Rule("nursery", "useDescribeFunctionTitle"),
         RuleFilter::Rule("nursery", "useExpectToContain"),
         RuleFilter::Rule("nursery", "useExpectToHaveBeenCalled"),
         RuleFilter::Rule("nursery", "useExpectToHaveBeenCalledTimes"),
