@@ -215,7 +215,20 @@ one of its own variables or a path on its own `this`. Its parts live in
 - `guards.rs` decomposes every condition into guards on subjects, combined
   the way `!`, `&&`, and `||` combine them. For example,
   `typeof value === "string"` becomes a runtime test of `value`, and
-  `o.v !== null` a runtime test of `o.v`. When the tested operand is part of
+  `o.v !== null` a runtime test of `o.v`. A comparison tests one operand
+  only when the other is a unit value (`unit_value`), whose type has a
+  single value: a literal, `void`, `-1`, a template literal without
+  substitutions, or a `const` without a type annotation whose initializer
+  is one, which the decomposer follows through the semantic model. The test
+  then names that literal by its range, so inference resolves it as it
+  resolves a literal written in the comparison. A value that a named or
+  default import binds is a test of the import's variable
+  (`FlowTest::Imported`): collection can't see the module that declares it,
+  so inference follows the import with `find_export_origin` and applies the
+  same rules to the declaration there, reading syntax and raw types without
+  resolving a type. Other values, such as variables with a type annotation
+  and calls, give no test, because Biome may infer their types narrower than
+  TypeScript does. When the tested operand is part of
   an optional chain and the test's result shows that the operand is not
   `undefined`, as the true branch of `x?.y === 1` does, the guard also tests
   each receiver of the chain that is a subject as not nullish, such as `x`
@@ -291,7 +304,8 @@ one of its own variables or a path on its own `this`. Its parts live in
   discriminant decides how cases narrow (`SwitchKind`). A case of
   `switch (typeof x)` is `typeof x === test`, without property or pattern
   guards, because TypeScript narrows only the operand there, and a single
-  case that isn't a string literal makes no case narrow. A case of
+  case that is neither a string literal nor a template literal without
+  substitutions makes no case narrow. A case of
   `switch (true)` is its test when it is truthy. The condition that a case
   did not match never tests the receivers of an optional chain, as in
   TypeScript, and for `switch (true)` it decomposes the test as falsy only
@@ -470,7 +484,11 @@ whether that statement is exhaustive (`switch_is_exhaustive`), as
 TypeScript's `computeExhaustiveSwitchStatement` does: the guard of the
 bypass, applied to the type of the discriminant's read at the statement,
 must leave `never`. That type is the read's flow-sensitive type when
-narrowing changes it, and its ordinary type otherwise. The answer is part of
+narrowing changes it, and its ordinary type otherwise. A case that compares
+with an imported value counts only when inference finds a unit value there,
+because TypeScript finds no statement exhaustive when a case's type is not a
+unit type, while a case that narrows nothing would leave the other cases to
+decide. The answer is part of
 the key of the solve queries (`FlowSubjectRootInput::exhaustive`, one bit per
 statement), and `FlowGuard::Bypass` gives `never` in a solve whose key has
 its bit. A read never asks about a statement whose cases come after it, so

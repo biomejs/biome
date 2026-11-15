@@ -85,8 +85,18 @@ const TYPES: &str = r#"
 /// which follows [`TYPES`]. `expected` lists the sorted names of the type's
 /// members in the form that [`variant_names`] returns.
 fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
+    assert_reads_importing(source, "", reads);
+}
+
+/// Asserts the reads of `source` as [`assert_reads`] does, in a module that
+/// can import `constants` from `./constants.ts`.
+fn assert_reads_importing(source: &str, constants: &str, reads: &[(&str, &str, &[&str])]) {
     let source = format!("{TYPES}{source}");
-    let (db, module) = narrowing_db(&source);
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), source.as_str());
+    fs.insert("/src/constants.ts".into(), constants);
+    let db = build_js_test_module_db(&fs, &["/src/index.ts", "/src/constants.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
     let mismatches: Vec<_> = reads
         .iter()
         .filter_map(|(marker, expression, expected)| {
@@ -287,41 +297,64 @@ fn statements_inside_cases_narrow() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) narrows the case and `default` reads to
-// `-1` and `number`, to `"a"` and `"b" | "c"`, and to `E.A` and `E.B`, and
-// narrows `template` and `nonNull` to `"a"`. It gives `number` at `nan`.
-// Biome compares only with literals that spell their value, so `-1`, a
-// `const`, an enum member, and a template literal don't narrow, and neither
-// does a discriminant that isn't a subject, such as `x!`. Biome keeps the
-// declared type, which is wider.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
+// (`narrowing-probes/m4/switch.ts` L20, L22, L49, and
+// `narrowing-probes/fix-e/switch.ts` L11 to L16): a case narrows by a value
+// whose type is a unit type, as `===` with it does, also when the value is
+// `-1`, a `const`, an imported `const`, `void 0`, or a template literal
+// without substitutions.
+#[test]
+fn cases_narrow_by_unit_values() {
+    assert_reads_importing(
+        r#"
+        import { EK } from "./constants.ts";
+        function f17(x: number) { switch (x) { case -1: /*negative*/x; break; default: /*negativeDefault*/x; } }
+        const K = "a";
+        const M = -1;
+        function f18(x: ABC) { switch (x) { case K: /*constant*/x; break; default: /*constantDefault*/x; } }
+        function f44(x: ABC) { switch (x) { case `a`: /*template*/x; break; default: /*templateDefault*/x; } }
+        function s4(x: -1 | 1) { switch (x) { case M: /*heldNegative*/x; break; default: /*heldNegativeDefault*/x; } }
+        function s5(x: string | undefined) { switch (x) { case void 0: /*void*/x; break; default: /*voidDefault*/x; } }
+        function s6(x: ABC) { switch (x) { case EK: /*imported*/x; break; default: /*importedDefault*/x; } }
+        "#,
+        r#"export const EK = "a";"#,
+        &[
+            ("negative", "x", &["number: -1"]),
+            ("negativeDefault", "x", &["number"]),
+            ("constant", "x", &["string: a"]),
+            ("constantDefault", "x", &["string: b", "string: c"]),
+            ("template", "x", &["string: a"]),
+            ("templateDefault", "x", &["string: b", "string: c"]),
+            ("heldNegative", "x", &["number: -1"]),
+            ("heldNegativeDefault", "x", &["number: 1"]),
+            ("void", "x", &["undefined"]),
+            ("voidDefault", "x", &["string"]),
+            ("imported", "x", &["string: a"]),
+            ("importedDefault", "x", &["string: b", "string: c"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) narrows `e` to `E.A` and `E.B`, and `x`
+// to `"a"` at `nonNull` (`narrowing-probes/m4/switch.ts` L24, L50), and gives
+// `number` at `nan` (L48). Biome doesn't infer the type of an enum, so its
+// members aren't unit values, and a discriminant that isn't a subject, such
+// as `x!`, narrows nothing. Biome keeps the declared type, which is wider.
 #[test]
 fn cases_that_biome_does_not_compare_keep_the_declared_type() {
     assert_reads(
         r#"
-        function f17(x: number) { switch (x) { case -1: /*negative*/x; break; default: /*negativeDefault*/x; } }
-        const K = "a";
-        function f18(x: ABC) { switch (x) { case K: /*constant*/x; break; default: /*constantDefault*/x; } }
         enum E { A, B }
         function f19(e: E) { /*enumDeclared*/e; switch (e) { case E.A: /*enum*/e; break; default: /*enumDefault*/e; } }
         function f43(x: number) { switch (x) { case NaN: /*nan*/x; } }
-        function f44(x: ABC) { switch (x) { case `a`: /*template*/x; } }
         function f45(x: ABC) { switch (x!) { case "a": /*nonNull*/x; } }
         "#,
         &[
-            ("negative", "x", &["number"]),
-            ("negativeDefault", "x", &["number"]),
-            ("constant", "x", &["string: a", "string: b", "string: c"]),
-            (
-                "constantDefault",
-                "x",
-                &["string: a", "string: b", "string: c"],
-            ),
             // Biome doesn't infer the type of a variable of an enum type.
             ("enumDeclared", "e", &["Unknown"]),
             ("enum", "e", &["Unknown"]),
             ("enumDefault", "e", &["Unknown"]),
             ("nan", "x", &["number"]),
-            ("template", "x", &["string: a", "string: b", "string: c"]),
             ("nonNull", "x", &["string: a", "string: b", "string: c"]),
         ],
     );
@@ -475,11 +508,13 @@ fn typeof_cases_narrow_the_operand() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// except `invalid` and `template`. A case that isn't a string literal makes
-// no case of `switch (typeof x)` narrow, and a `typeof` case narrows only the
-// operand, not the object that holds it or the pattern that declares it.
-// TypeScript gives `never` for an invalid kind (`"strin"`) and `string` for a
-// template literal, where Biome keeps the declared type, which is wider.
+// (`narrowing-probes/m4/typeof.ts` L7, L12, L21, L22, `m4/more.ts` L4, L5,
+// and `fix-e/switch.ts` L34, L35). A case that is neither a string literal
+// nor a template literal without substitutions makes no case of
+// `switch (typeof x)` narrow, and a `typeof` case narrows only the operand,
+// not the object that holds it or the pattern that declares it. TypeScript
+// gives `never` for an invalid kind (`"strin"`), where Biome keeps the
+// declared type, which is wider.
 #[test]
 fn typeof_switches_narrow_only_their_operand() {
     assert_reads(
@@ -488,7 +523,8 @@ fn typeof_switches_narrow_only_their_operand() {
         function f3(x: string | number, k: string) { switch (typeof x) { case "string": /*nonLiteral*/x; break; case k: break; } }
         function f8(o: { k: "a"; a: 1 } | { k: 1; b: 2 }) { switch (typeof o.k) { case "string": /*object*/o; } }
         function f17(x: string | number) { switch (typeof x) { case "strin": /*invalid*/x; } }
-        function f18(x: string | number) { switch (typeof x) { case `string`: /*template*/x; } }
+        function f18(x: string | number) { switch (typeof x) { case `string`: /*template*/x; break; default: /*templateDefault*/x; } }
+        function t1(x: string | number) { if (typeof x === `string`) /*templateIf*/x; else /*templateElse*/x; }
         function m1(s: S) { const { kind, v } = s; switch (typeof kind) { case "string": /*pattern*/v; } }
         function m2(s: S) { const k = s.kind; switch (typeof k) { case "string": /*held*/s; } }
         "#,
@@ -503,7 +539,10 @@ fn typeof_switches_narrow_only_their_operand() {
                 ],
             ),
             ("invalid", "x", &["number", "string"]),
-            ("template", "x", &["number", "string"]),
+            ("template", "x", &["string"]),
+            ("templateDefault", "x", &["number"]),
+            ("templateIf", "x", &["string"]),
+            ("templateElse", "x", &["number"]),
             ("pattern", "v", &["number", "string"]),
             (
                 "held",
@@ -714,13 +753,11 @@ fn exhaustive_switches_narrow_other_subjects() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives `string | null` for `y` at every
-// read below except `template`, where it gives `string`. Where a switch isn't
-// exhaustive, a case is missing, the discriminant is `typeof` in parentheses,
-// which TypeScript checks as a string value, or the discriminant is `never`
-// before the switch, and `never` is no literal type. At `loop`, the read
-// comes before the switch in the loop. Biome compares only with literals that
-// spell their value, so a template literal case keeps the switch from being
-// exhaustive, and the type at `template` is wider.
+// read below (`narrowing-probes/m4/switch.ts` L26, `m4-l1/extra.ts` L6, L14,
+// L19, L23, L37). A case is missing, the discriminant is `typeof` in
+// parentheses, which TypeScript checks as a string value, the discriminant is
+// `never` before the switch, which no literal type is, or the read comes
+// before the switch in a loop.
 #[test]
 fn switches_that_are_not_exhaustive_keep_the_path_that_matches_no_case() {
     assert_reads(
@@ -730,7 +767,6 @@ fn switches_that_are_not_exhaustive_keep_the_path_that_matches_no_case() {
         function f5(x: unknown, y: string | null) { switch (typeof x) { case "string": case "number": case "bigint": case "boolean": case "symbol": case "undefined": case "object": if (y === null) return; } /*sevenKinds*/y; }
         function f7(x: "a" | "b", y: string | null) { if (x === "a") return; if (x === "b") return; switch (x) { case "a": if (y === null) return; } /*never*/y; }
         function f9(x: "a" | "b", y: string | null) { while (more()) { /*loop*/y; switch (x) { case "a": if (y === null) return; break; case "b": if (y === null) return; } } }
-        function f15(x: "a" | "b", y: string | null) { switch (x) { case "a": if (y === null) return; break; case `b`: if (y === null) return; } /*template*/y; }
         function f16(o: { k: "a" | "b" } | undefined, y: string | null) { switch (o?.k) { case "a": case "b": if (y === null) return; } /*optionalChain*/y; }
         "#,
         &[
@@ -739,9 +775,105 @@ fn switches_that_are_not_exhaustive_keep_the_path_that_matches_no_case() {
             ("sevenKinds", "y", &["null", "string"]),
             ("never", "y", &["null", "string"]),
             ("loop", "y", &["null", "string"]),
-            ("template", "y", &["null", "string"]),
             ("optionalChain", "y", &["null", "string"]),
         ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `string` for `y` at every read
+// below (`narrowing-probes/m4-l1/extra.ts` L35, and `fix-e/switch.ts` L18 to
+// L22, L32, L36), and `never` for `x` at `discriminant` (L27), which Biome
+// reads as Unknown: a case whose value is a unit type, such as `-1`, a
+// `const`, an imported `const`, `void 0`, or a template literal without
+// substitutions, counts toward exhaustiveness as a literal does, also after
+// a comparison with a `const` that narrows the discriminant.
+#[test]
+fn switches_with_cases_of_unit_values_are_exhaustive() {
+    assert_reads_importing(
+        r#"
+        import { EK } from "./constants.ts";
+        const K = "a";
+        const T = `b`;
+        function f15(x: "a" | "b", y: string | null) { switch (x) { case "a": if (y === null) return; break; case `b`: if (y === null) return; } /*template*/y; }
+        function x1(x: ABC, y: string | null) { switch (x) { case K: if (y === null) return; break; case "b": if (y === null) return; break; case "c": if (y === null) return; } /*constant*/y; }
+        function x2(x: -1 | 1, y: string | null) { switch (x) { case -1: if (y === null) return; break; case 1: if (y === null) return; } /*negative*/y; }
+        function x3(x: ABC, y: string | null) { switch (x) { case `a`: case T: case "c": if (y === null) return; } /*templates*/y; }
+        function x4(x: string | undefined, y: string | null) { if (x !== undefined && x !== "a") return; switch (x) { case "a": case void 0: if (y === null) return; } /*void*/y; }
+        function x5(x: ABC, y: string | null) { switch (x) { case EK: case "b": case "c": if (y === null) return; } /*imported*/y; }
+        function h4(x: "a" | "b", y: string | null) { if (x === K) return; switch (x) { case "b": if (y === null) return; } /*narrowedBefore*/y; }
+        function t3(x: string | number, y: string | null) { switch (typeof x) { case `string`: if (y === null) return; break; case "number": if (y === null) return; } /*typeof*/y; }
+        function d1(x: ABC) { switch (x) { case K: return; case "b": return; case "c": return; } /*discriminant*/x; }
+        "#,
+        r#"export const EK = "a";"#,
+        &[
+            ("template", "y", &["string"]),
+            ("constant", "y", &["string"]),
+            ("negative", "y", &["string"]),
+            ("templates", "y", &["string"]),
+            ("void", "y", &["string"]),
+            ("imported", "y", &["string"]),
+            ("narrowedBefore", "y", &["string"]),
+            ("typeof", "y", &["string"]),
+            ("discriminant", "x", &["Unknown"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `string | null` for `y` at every
+// read below but `function` (`narrowing-probes/fix-e/switch.ts` L23, L25,
+// L29 to L31, L58): a case whose value is `-(1)`, which is `number`, or an
+// imported `"a" as string` keeps a switch from being exhaustive, even when
+// the other cases cover every value, and so does a discriminant that a
+// comparison with a `const`, an imported `const`, or `-1` narrows to `never`
+// before the switch, as no literal type is `never`. TypeScript gives `string` at
+// `function` (L24), because `f()` returns `"c"`, where Biome doesn't compare
+// with a call and keeps the path that matches no case, which is wider.
+#[test]
+fn switches_with_cases_that_are_not_unit_values_are_not_exhaustive() {
+    assert_reads_importing(
+        r#"
+        import { EK, EP, ES } from "./constants.ts";
+        const K = "a";
+        const P = -(1);
+        declare function f(): "c";
+        const F = f();
+        function x6(x: -1 | 1, y: string | null) { switch (x) { case P: case 1: if (y === null) return; } /*parenthesized*/y; }
+        function x7(x: ABC, y: string | null) { switch (x) { case "a": case "b": case F: if (y === null) return; } /*function*/y; }
+        function x8(x: -1 | 1, y: string | null) { switch (x) { case EP: case 1: if (y === null) return; } /*imported*/y; }
+        function x9(x: "a" | "b", y: string | null) { switch (x) { case "a": case "b": case ES: if (y === null) return; } /*importedString*/y; }
+        function h1(x: "a" | "b", y: string | null) { if (x === K) return; if (x === "b") return; switch (x) { case "a": if (y === null) return; } /*constant*/y; }
+        function h2(x: "a" | "b", y: string | null) { if (x === EK) return; if (x === "b") return; switch (x) { case "a": if (y === null) return; } /*importedBefore*/y; }
+        function h3(x: -1 | 1, y: string | null) { if (x === -1) return; if (x === 1) return; switch (x) { case -1: if (y === null) return; } /*negative*/y; }
+        "#,
+        r#"export const EK = "a"; export const EP = -(1); export const ES = "a" as string;"#,
+        &[
+            ("parenthesized", "y", &["null", "string"]),
+            ("function", "y", &["null", "string"]),
+            ("imported", "y", &["null", "string"]),
+            ("importedString", "y", &["null", "string"]),
+            ("constant", "y", &["null", "string"]),
+            ("importedBefore", "y", &["null", "string"]),
+            ("negative", "y", &["null", "string"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at both reads
+// (`narrowing-probes/fix-e/hazard.ts` L4, L5): the comparisons before the
+// switch narrow `x` to `never`, so no case type covers it. Biome doesn't
+// compare with an enum member or a variable with a type annotation, so `x`
+// is `"a"` at the switch, which is exhaustive, and `y` reads as `string`,
+// which is narrower than TypeScript in code that TypeScript types as
+// impossible, as the Limits in `NARROWING.md` describe.
+#[test]
+fn switches_after_comparisons_that_biome_does_not_decompose_can_be_exhaustive() {
+    assert_reads(
+        r#"
+        enum E { A = "a" }
+        function h(x: "a" | "b", y: string | null) { if (x === E.A) return; if (x === "b") return; switch (x) { case "a": if (y === null) return; } /*enum*/y; }
+        function g(x: "a" | "b", y: string | null, k: "a") { if (x === k) return; if (x === "b") return; switch (x) { case "a": if (y === null) return; } /*annotated*/y; }
+        "#,
+        &[("enum", "y", &["string"]), ("annotated", "y", &["string"])],
     );
 }
 

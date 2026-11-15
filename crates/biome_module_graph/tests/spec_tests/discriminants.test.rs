@@ -801,11 +801,12 @@ fn reads_that_property_tests_cannot_narrow_skip_the_solve() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) removes the member whose property type
-// can't share a value with what the test leaves, and narrows `s` by a `const`
-// of a literal type. Biome doesn't compare object types with other types, so
-// it assumes that an object type shares a value with every type except `null`
-// and `undefined`. A comparison narrows only with a literal. Every read below
-// except `notNull` is therefore wider than TypeScript's.
+// can't share a value with what the test leaves (`m3-l2/objects.ts` L7 to
+// L9, L11), and narrows `s` by a `const` of a literal type to `Circle`
+// (L10), as Biome does. Biome keeps both members whenever a property type is
+// an object type and the test leaves a value other than `null` or
+// `undefined`, because it doesn't compare object types with other types, so
+// the other reads are wider.
 #[test]
 fn tests_that_biome_cannot_compare_keep_more_members() {
     assert_reads(
@@ -845,8 +846,7 @@ fn tests_that_biome_cannot_compare_keep_more_members() {
                     r#"["k": number: 0, "y": number: 2]"#,
                 ],
             ),
-            // TypeScript gives `Circle`.
-            ("constant", "s", &["Circle", "Square"]),
+            ("constant", "s", &["Circle"]),
             (
                 "notNull",
                 "o",

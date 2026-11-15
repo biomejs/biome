@@ -11,6 +11,7 @@
 //! read is its field on the pattern narrowed there.
 
 use super::flow_expressions::collected_member_name;
+use super::imports::{ExportOriginResult, find_export_origin};
 use super::{ImportResolution, ResolutionCtx, resolve_local_type_on_demand};
 use crate::db::queries::{
     BindingTypeInput, FlowSubjectRootInput, FlowSubjectTypeInput, FlowSwitchInput,
@@ -19,18 +20,22 @@ use crate::db::queries::{
 };
 use crate::js_module_info::flow::{
     FlowGuard, FlowNode, FlowNodeId, FlowRead, FlowSubject, FlowSubjectId, FlowTest, PropertyKey,
-    RootFlow, guard_signature,
+    RootFlow, UnitValue, binding_unit_value, guard_signature,
 };
-use crate::{JsModuleInfo, ModuleDb, ModuleInfo};
+use crate::module_graph::ModuleInfoKind;
+use crate::{
+    JsExport, JsModuleInfo, JsOwnExport, ModuleDb, ModuleInfo, ResolutionMode,
+    resolve_module_import,
+};
 use biome_js_syntax::{AnyJsExpression, JsIdentifierExpression};
 use biome_js_type_info::interned_types::{Literal, TypeData};
 use biome_js_type_info::{
-    NarrowingPredicate, PropertyTest, RawTypeData, RawTypeId, TypeId, TypeReference,
-    TypeofExpression, has_readonly_property, is_narrowing_invariant, may_narrow_by_instanceof,
-    may_narrow_by_property, narrow_by_in_operator, narrow_by_instanceof, narrow_by_property,
-    narrow_by_type_predicate, narrow_type,
+    ImportSymbol, Literal as RawLiteral, NarrowingPredicate, PropertyTest, RawTypeData, RawTypeId,
+    TypeId, TypeReference, TypeofExpression, has_readonly_property, is_narrowing_invariant,
+    may_narrow_by_instanceof, may_narrow_by_property, narrow_by_in_operator, narrow_by_instanceof,
+    narrow_by_property, narrow_by_type_predicate, narrow_type,
 };
-use biome_rowan::{AstNode, TextRange, TextSize};
+use biome_rowan::{AstNode, Text, TextRange, TextSize};
 use rustc_hash::FxHashMap;
 use std::collections::VecDeque;
 
@@ -174,7 +179,14 @@ enum FlatteningError {
     Cycle,
 }
 
-/// The state that the guards of one solve of a subject share.
+/// The state of one solve that its guards share: the subject it narrows, the
+/// subject's declared type at the root's start, whether the subject is a
+/// readonly path, as [`FlowGuard::ReadonlyPath`] requires, the `switch`
+/// statements found exhaustive, as [`FlowGuard::Bypass`] requires, one bit
+/// each, the results of the property guards, `in` tests, `instanceof`
+/// tests, and calls to type-guard functions applied so far, keyed by guard
+/// index and incoming type, and the values of the imported variables that
+/// [`FlowTest::Imported`] compares with, found so far, keyed by declaration.
 struct GuardSolve<'db> {
     /// The subject that the solve narrows.
     subject: FlowSubjectId,
@@ -190,6 +202,25 @@ struct GuardSolve<'db> {
     /// and calls to type-guard functions applied so far, keyed by guard index
     /// and incoming type.
     properties: FxHashMap<(usize, TypeData<'db>), TypeData<'db>>,
+    imported: FxHashMap<TextRange, Option<TypeData<'db>>>,
+}
+
+impl<'db> GuardSolve<'db> {
+    fn new(
+        subject: FlowSubjectId,
+        declared: TypeData<'db>,
+        readonly_path: bool,
+        exhaustive: u64,
+    ) -> Self {
+        Self {
+            subject,
+            declared,
+            readonly_path,
+            exhaustive,
+            properties: FxHashMap::default(),
+            imported: FxHashMap::default(),
+        }
+    }
 }
 
 /// Marks a root node that the walk in [`ReachingFlow::new`] has not reached.
@@ -696,16 +727,53 @@ impl<'db> ResolutionCtx<'db, '_> {
         if matches!(ty, TypeData::Unknown | TypeData::NeverKeyword) || is_narrowing_invariant(ty) {
             return false;
         }
-        let mut solve = GuardSolve {
-            subject: switch.subject,
-            declared: ty,
-            readonly_path: false,
-            exhaustive: 0,
-            properties: FxHashMap::default(),
-        };
+        let mut solve = GuardSolve::new(switch.subject, ty, false, 0);
+        if !self.compares_with_unit_values(root, switch.guard, &mut solve) {
+            return false;
+        }
         let mut remaining = MAX_FLOW_STEPS;
         self.apply_guard(root, switch.guard, &mut solve, ty, &mut remaining)
             == Some(TypeData::NeverKeyword)
+    }
+
+    /// Returns whether every imported variable that a test of the subject of
+    /// `solve` in the guard at `guard` compares with holds a unit value, as
+    /// [`Self::imported_value`] finds it. TypeScript's
+    /// `computeExhaustiveSwitchStatement` finds no statement exhaustive when
+    /// the type of one of its cases is not a unit type, while a case that
+    /// narrows nothing would leave the remaining cases to decide.
+    fn compares_with_unit_values(
+        &mut self,
+        root: &RootFlow,
+        guard: usize,
+        solve: &mut GuardSolve<'db>,
+    ) -> bool {
+        let mut pending = vec![guard];
+        while let Some(index) = pending.pop() {
+            match root.guards.get(index) {
+                Some(FlowGuard::Both { left, right, .. }) => pending.extend([*left, *right]),
+                Some(FlowGuard::ReadonlyPath(guard) | FlowGuard::Bypass { guard, .. }) => {
+                    pending.push(*guard);
+                }
+                Some(FlowGuard::Test {
+                    subject,
+                    test: FlowTest::Imported { binding, .. },
+                    ..
+                }) if *subject == solve.subject => {
+                    if self.imported_value(*binding, solve).is_none() {
+                        return false;
+                    }
+                }
+                Some(
+                    FlowGuard::Keep
+                    | FlowGuard::Incomplete
+                    | FlowGuard::Test { .. }
+                    | FlowGuard::Property { .. },
+                )
+                | None => {}
+            }
+        }
+        true
     }
 
     /// Returns whether the property path that `member` reads at `read` is
@@ -915,13 +983,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         let states = self.solve_flow(
             root,
             &reaching,
-            GuardSolve {
-                subject,
-                declared: baseline,
-                readonly_path,
-                exhaustive,
-                properties: FxHashMap::default(),
-            },
+            GuardSolve::new(subject, baseline, readonly_path, exhaustive),
         )?;
         Some(
             reaching
@@ -1120,12 +1182,13 @@ impl<'db> ResolutionCtx<'db, '_> {
                         | FlowTest::Typeof(_)
                         | FlowTest::Null
                         | FlowTest::Literal(_)
-                        | FlowTest::Undefined { .. } => ty,
+                        | FlowTest::Undefined { .. }
+                        | FlowTest::Imported { .. } => ty,
                     };
                     solve.properties.insert((index, ty), narrowed);
                     return Some(narrowed);
                 }
-                match self.test_predicate(*test) {
+                match self.test_predicate(*test, solve) {
                     Some(predicate) => {
                         narrow_type(self.db, ty, predicate, *positive, self.narrowing_resolver())
                     }
@@ -1148,7 +1211,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 if let Some(narrowed) = solve.properties.get(&(index, ty)) {
                     return Some(*narrowed);
                 }
-                let narrowed = match self.test_predicate(*test) {
+                let narrowed = match self.test_predicate(*test, solve) {
                     Some(predicate) => {
                         let test = PropertyTest {
                             name: name.text(),
@@ -1276,7 +1339,14 @@ impl<'db> ResolutionCtx<'db, '_> {
         )
     }
 
-    fn test_predicate(&mut self, test: FlowTest) -> Option<NarrowingPredicate<'db>> {
+    /// Returns the predicate that `test` applies, or `None` when it narrows
+    /// nothing, as for a comparison with an imported variable that holds no
+    /// unit value.
+    fn test_predicate(
+        &mut self,
+        test: FlowTest,
+        solve: &mut GuardSolve<'db>,
+    ) -> Option<NarrowingPredicate<'db>> {
         Some(match test {
             FlowTest::Truthy => NarrowingPredicate::Truthy,
             FlowTest::Nullish => NarrowingPredicate::Nullish,
@@ -1290,10 +1360,35 @@ impl<'db> ResolutionCtx<'db, '_> {
                 NarrowingPredicate::Literal(TypeData::Undefined)
             }
             FlowTest::Undefined { strict: false } => NarrowingPredicate::Nullish,
+            FlowTest::Imported { binding, strict } => {
+                match (self.imported_value(binding, solve)?, strict) {
+                    (value, true) => NarrowingPredicate::Literal(value),
+                    (TypeData::Null | TypeData::Undefined, false) => NarrowingPredicate::Nullish,
+                    // Loose equality with another value is not decomposed yet.
+                    (_, false) => return None,
+                }
+            }
             FlowTest::Predicate { .. } | FlowTest::In(_) | FlowTest::Instanceof(_) => {
                 return None;
             }
         })
+    }
+
+    /// Returns the unit value that the imported variable declared at
+    /// `binding` holds, as [`imported_unit_value`] finds it, kept in `solve`
+    /// so that a loop that applies the test again doesn't follow the import
+    /// again.
+    fn imported_value(
+        &mut self,
+        binding: TextRange,
+        solve: &mut GuardSolve<'db>,
+    ) -> Option<TypeData<'db>> {
+        if let Some(value) = solve.imported.get(&binding) {
+            return *value;
+        }
+        let value = imported_unit_value(self.db, self.module, self.js_info, binding);
+        solve.imported.insert(binding, value);
+        value
     }
 
     /// Returns `ty` narrowed by a call to the type-guard function declared at
@@ -1334,6 +1429,107 @@ impl<'db> ResolutionCtx<'db, '_> {
         // An alias resolves to an instance of its target. The baseline flattens
         // that instance, as it does for a variable declared with the alias.
         self.flow_baseline(target)
+    }
+}
+
+/// Limits the imports followed to find the value of an imported variable that
+/// a comparison names.
+const MAX_IMPORT_STEPS: usize = 16;
+
+/// Returns the unit value that the imported variable declared at `binding` in
+/// `js_info`, the module `module`, holds: `null`, `undefined`, or a string,
+/// number, bigint, or boolean literal type, as [`UnitValue`] describes for
+/// the variable that declares it.
+///
+/// The import is followed through re-exports to the module that declares
+/// the variable, as `find_export_origin` follows exports, and on through the
+/// imports that the `const`s there name, at most 16 of them. No type is
+/// resolved: the value comes from the syntax of the declarations and the raw
+/// type of the literal, so it is the same in every resolution context.
+///
+/// Returns `None` for a type-only import, a namespace import, an export that
+/// isn't a variable, as `export default "a"`, which TypeScript also narrows
+/// by, a variable that holds no unit value, and more than 16 imports.
+fn imported_unit_value<'db>(
+    db: &'db dyn ModuleDb,
+    mut module: ModuleInfo,
+    js_info: &JsModuleInfo,
+    mut binding: TextRange,
+) -> Option<TypeData<'db>> {
+    let mut info = js_info;
+    for _ in 0..MAX_IMPORT_STEPS {
+        let TypeReference::Import(import) = info.raw_binding_types.get(&binding)? else {
+            return None;
+        };
+        if import.type_only {
+            return None;
+        }
+        let name = match &import.symbol {
+            ImportSymbol::Named(name) => name.clone(),
+            ImportSymbol::Default => Text::new_static("default"),
+            ImportSymbol::All => return None,
+        };
+        let resolved =
+            resolve_module_import(db, module, &import.specifier, ResolutionMode::JavaScript);
+        let target = db.module_for_path(resolved.path().as_path()?)?;
+        let ExportOriginResult::Found {
+            module: origin,
+            name,
+        } = find_export_origin(db, target, name)
+        else {
+            return None;
+        };
+        let ModuleInfoKind::Js(origin_info) = origin.kind(db) else {
+            return None;
+        };
+        let Some(JsExport::Own(JsOwnExport::Binding(declaration))) =
+            origin_info.exports.get(name.text())
+        else {
+            return None;
+        };
+        let declared = origin_info
+            .semantic_model
+            .as_binding_by_range(*declaration)?;
+        match binding_unit_value(&declared, &origin_info.semantic_model)? {
+            UnitValue::Null => return Some(TypeData::Null),
+            UnitValue::Undefined => return Some(TypeData::Undefined),
+            UnitValue::Literal(literal) => return raw_literal_type(db, origin_info, literal),
+            UnitValue::Imported(next) => {
+                module = origin;
+                info = origin_info;
+                binding = next;
+            }
+        }
+    }
+    None
+}
+
+/// Returns the type of the expression at `range` in `js_info` when its raw
+/// type is a string, number, bigint, or boolean literal, converted without a
+/// resolution context, because a literal refers to no other type.
+fn raw_literal_type<'db>(
+    db: &'db dyn ModuleDb,
+    js_info: &JsModuleInfo,
+    range: TextRange,
+) -> Option<TypeData<'db>> {
+    let TypeReference::Resolved(RawTypeId::Local(id)) = js_info.raw_expressions.get(&range)? else {
+        return None;
+    };
+    let raw = js_info.raw_types.get(id.index())?;
+    let RawTypeData::Literal(literal) = raw else {
+        return None;
+    };
+    match literal.as_ref() {
+        RawLiteral::String(_)
+        | RawLiteral::Number(_)
+        | RawLiteral::BigInt(_)
+        | RawLiteral::Boolean(_) => Some(TypeData::from_raw_with_resolver(
+            db,
+            raw,
+            false,
+            &mut |_| TypeData::Unknown,
+        )),
+        RawLiteral::Object(_) | RawLiteral::RegExp(_) | RawLiteral::Template(_) => None,
     }
 }
 
