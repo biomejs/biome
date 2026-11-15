@@ -156,6 +156,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_bun_modules::NoBunModulesOptions>(),
     ));
     result.push((
+        "nursery",
+        "noCanvasToImage",
+        TypeId::of::<biome_rule_options::no_canvas_to_image::NoCanvasToImageOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noCatchAssign",
         TypeId::of::<biome_rule_options::no_catch_assign::NoCatchAssignOptions>(),

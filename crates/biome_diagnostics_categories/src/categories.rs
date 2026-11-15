@@ -234,6 +234,7 @@ define_categories! {
     "lint/nursery/noBooleanSortComparator": "https://biomejs.dev/linter/rules/no-boolean-sort-comparator",
     "lint/nursery/noBufferConstructor": "https://biomejs.dev/linter/rules/no-buffer-constructor",
     "lint/nursery/noBunModules": "https://biomejs.dev/linter/rules/no-bun-modules",
+    "lint/nursery/noCanvasToImage": "https://biomejs.dev/linter/rules/no-canvas-to-image",
     "lint/nursery/noChainedComparison": "https://biomejs.dev/linter/rules/no-chained-comparison",
     "lint/nursery/noColorInvalidHex": "https://biomejs.dev/linter/rules/no-color-invalid-hex",
     "lint/nursery/noComponentHookFactories": "https://biomejs.dev/linter/rules/no-component-hook-factories",

@@ -3814,6 +3814,16 @@
 			]
 		},
 		"NoBunModulesOptions": { "type": "object", "additionalProperties": false },
+		"NoCanvasToImageConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoCanvasToImageOptions" }
+			]
+		},
+		"NoCanvasToImageOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoCatchAssignConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9510,6 +9520,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noCanvasToImage": {
+					"description": "Disallow converting a canvas to an image only to draw it onto another canvas.\nSee https://biomejs.dev/linter/rules/no-canvas-to-image",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoCanvasToImageConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noChainedComparison": {
 					"description": "Disallow chaining comparisons, as in a \\< b \\< c.\nSee https://biomejs.dev/linter/rules/no-chained-comparison",
 					"anyOf": [
@@ -13079,6 +13096,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoBunModulesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoCanvasToImageOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoCanvasToImageOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
