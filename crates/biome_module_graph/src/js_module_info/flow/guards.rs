@@ -1,21 +1,22 @@
 use super::subjects::{
-    AnyPatternElement, array_element_key, identifier_key, literal_key, member_name_key, subject_of,
+    AnyPatternElement, array_element_key, assigned_subject, identifier_key, literal_key,
+    member_name_key, subject_of,
 };
 use super::{FlowSubject, FlowSubjectId, FlowSubjectTable, PropertyKey, subject_root};
 use crate::js_module_info::TsBindingReferenceExt;
 use biome_js_semantic::{Binding, JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
-    AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsExpression, AnyJsFormalParameter,
-    AnyJsInProperty, AnyJsLiteralExpression, AnyJsMemberExpression, AnyJsOptionalChainExpression,
-    AnyJsParameter, AnyJsSwitchClause, AnyJsVariableDeclaration, JsBinaryOperator,
-    JsCallExpression, JsIdentifierExpression, JsLanguage, JsLogicalOperator, JsModule,
-    JsReferenceIdentifier, JsScript, JsSwitchStatement, JsUnaryOperator, JsVariableDeclarator,
-    JsVariableKind, JsVariableStatement, T, binding_ext::AnyJsBindingDeclaration,
-    unescape_js_identifier,
+    AnyJsArrowFunctionParameters, AnyJsAssignment, AnyJsCallArgument, AnyJsExpression,
+    AnyJsFormalParameter, AnyJsInProperty, AnyJsLiteralExpression, AnyJsMemberExpression,
+    AnyJsOptionalChainExpression, AnyJsParameter, AnyJsSwitchClause, AnyJsVariableDeclaration,
+    JsBinaryOperator, JsCallExpression, JsIdentifierExpression, JsLanguage, JsLogicalOperator,
+    JsModule, JsReferenceIdentifier, JsScript, JsSwitchStatement, JsUnaryOperator,
+    JsVariableDeclarator, JsVariableKind, JsVariableStatement, T,
+    binding_ext::AnyJsBindingDeclaration, unescape_js_identifier,
 };
 use biome_js_type_info::{
     Function, FunctionParameter, RawPredicateTarget, RawTypeData, RawTypeId, ReturnType,
-    TypeReference, TypeReferenceQualifier, TypeofKind, raw_predicate_target,
+    TypeReference, TypeReferenceQualifier, TypeofKind, raw_may_be_nullish, raw_predicate_target,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, SyntaxKind, SyntaxKindSet, Text, TextRange, WalkEvent,
@@ -262,6 +263,24 @@ impl<'a> GuardFunctions<'a> {
             raw_types,
             raw_binding_types,
             guards: FxHashMap::default(),
+        }
+    }
+
+    /// Returns whether `object`, the object of a `?.`, may be `null` or
+    /// `undefined` as far as the collected types tell. It is false for `this`
+    /// and for a variable whose collected type [`raw_may_be_nullish`]
+    /// rejects, as `o` in `const o = { a: 1 }; o?.f(o)`, where a test that
+    /// the object is not nullish narrows nothing.
+    pub(super) fn may_be_nullish(&self, object: &AnyJsExpression, model: &SemanticModel) -> bool {
+        match object {
+            AnyJsExpression::JsThisExpression(_) => false,
+            AnyJsExpression::JsIdentifierExpression(identifier) => identifier
+                .name()
+                .ok()
+                .and_then(|name| model.binding(&name))
+                .and_then(|binding| self.raw_binding_types.get(&binding.range()))
+                .is_none_or(|reference| raw_may_be_nullish(reference, self.raw_types)),
+            _ => true,
         }
     }
 
@@ -672,6 +691,41 @@ pub(super) fn decompose_condition(
     let mut decomposer = Decomposer::new(model, functions, subjects, guards);
     let guard = decomposer.guard(expression.clone(), outcome, 0);
     decomposer.finish(guard, [expression])
+}
+
+/// Decomposes the test that a logical assignment applies to its target
+/// `target`, assuming `outcome`, into guards appended to `guards`, as
+/// TypeScript's `bindLogicalLikeExpression` does: `x ??= y` evaluates `y`
+/// where `x` is nullish, `x ||= y` where it is falsy, and `x &&= y` where it
+/// is truthy.
+///
+/// The guard tests the subject that [`assigned_subject`] gives the target, as
+/// [`decompose_condition`] tests the expression with the same spelling, and
+/// adds the same property guard for a named property, so `s.kind ||= "c"`
+/// narrows `s` as `s.kind || "c"` does. A target is never part of an optional
+/// chain, so the guard tests no receiver. A target that is no subject, as
+/// `o[k]`, gives [`FlowGuard::Keep`].
+pub(super) fn decompose_assignment_target(
+    target: &AnyJsAssignment,
+    outcome: FlowOutcome,
+    model: &SemanticModel,
+    functions: &mut GuardFunctions,
+    subjects: &mut FlowSubjectTable,
+    guards: &mut Vec<FlowGuard>,
+) -> DecomposedCondition {
+    let mut decomposer = Decomposer::new(model, functions, subjects, guards);
+    let (test, positive) = match outcome {
+        FlowOutcome::Truthy => (FlowTest::Truthy, true),
+        FlowOutcome::Falsy => (FlowTest::Truthy, false),
+        FlowOutcome::Nullish => (FlowTest::Nullish, true),
+        FlowOutcome::NonNullish => (FlowTest::Nullish, false),
+    };
+    let guard = match assigned_subject(target, model, decomposer.subjects) {
+        Some(subject) => decomposer.target_test(subject, test, positive),
+        None => FlowGuard::Keep,
+    };
+    let guard = decomposer.push(guard);
+    decomposer.finish(guard, std::iter::empty())
 }
 
 /// How the cases of a `switch` statement narrow, which depends on its
@@ -1303,7 +1357,7 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
         if let Some((test, subject)) = tested
             && self.shape_guards
         {
-            let property = self.property_guard(operand, subject, test, positive);
+            let property = self.property_guard(Some(operand), subject, test, positive);
             let pattern = self.pattern_guard(subject, test, positive);
             for property in [property, pattern].into_iter().flatten() {
                 let left = self.push(guard);
@@ -1322,6 +1376,30 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
         }
     }
 
+    /// Returns the guard for `test` applied to `subject`, the target of a
+    /// logical assignment, combined with the guard that
+    /// [`Self::property_guard`] gives its object.
+    fn target_test(&mut self, subject: FlowSubjectId, test: FlowTest, positive: bool) -> FlowGuard {
+        self.mentions.push(subject);
+        let guard = FlowGuard::Test {
+            subject,
+            test,
+            positive,
+        };
+        match self.property_guard(None, subject, test, positive) {
+            Some(property) => {
+                let left = self.push(guard);
+                let right = self.push(property);
+                FlowGuard::Both {
+                    left,
+                    right,
+                    sequential: true,
+                }
+            }
+            None => guard,
+        }
+    }
+
     /// Returns the guard that a runtime test of `operand`, whose subject is
     /// `subject`, applies to the object that holds the tested property, as
     /// `s.kind === "c"` applies to `s`. The property is `subject` itself when
@@ -1331,6 +1409,10 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     /// `this` that a test may narrow. Inside an inlined aliased condition, a
     /// guard on a property path is wrapped in [`FlowGuard::ReadonlyPath`].
     ///
+    /// `operand` is `None` for the target of a logical assignment, as `s.kind`
+    /// in `s.kind ||= "c"`, which reads its property without an optional
+    /// chain and holds no property in a variable.
+    ///
     /// Returns `None` for a call to a type-guard function, for `in`, and for
     /// `instanceof`, because TypeScript never narrows `s` through
     /// `isC(s.kind)`, `"a" in s.kind`, or `s.kind instanceof C`. Only the
@@ -1338,7 +1420,7 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     /// `o`.
     fn property_guard(
         &mut self,
-        operand: &AnyJsExpression,
+        operand: Option<&AnyJsExpression>,
         subject: FlowSubjectId,
         test: FlowTest,
         positive: bool,
@@ -1357,11 +1439,11 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
                 } => (
                     *object,
                     key.clone(),
-                    is_optional_chain(operand),
+                    operand.is_some_and(is_optional_chain),
                     self.aliases > 0,
                 ),
                 FlowSubject::Binding(_) => {
-                    let (object, key, optional_chain) = self.held_property(operand)?;
+                    let (object, key, optional_chain) = self.held_property(operand?)?;
                     (object, key, optional_chain, true)
                 }
                 FlowSubject::This | FlowSubject::Member { .. } | FlowSubject::Pattern(_) => {

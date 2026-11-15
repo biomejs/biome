@@ -1,0 +1,15 @@
+// should not generate diagnostics
+// The arguments after `?.` see its object as not nullish, and a default sees
+// the narrowing before it, so `||` has no nullish left operand there, as in
+// TypeScript.
+
+type Options = { w: number; f(value: unknown): void };
+declare const fallback: Options;
+
+function receiverInArguments(o: Options | undefined) {
+	o?.f(o || fallback);
+}
+
+function parameterDefault(o: Options | undefined, w = o ? o || fallback : fallback) {
+	return w;
+}
