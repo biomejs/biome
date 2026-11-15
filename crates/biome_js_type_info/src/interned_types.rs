@@ -1714,6 +1714,7 @@ impl<'db> TypeDataSlots<'db> {
             }
             TypeofExpression::Typeof(expression) => self.slots.push(expression.argument),
             TypeofExpression::UnaryMinus(expression) => self.slots.push(expression.argument),
+            TypeofExpression::WidenedLiteral(expression) => self.slots.push(expression.value),
         }
     }
 
@@ -2263,6 +2264,12 @@ impl<'db> TypeDataSlotReplacements<'db> {
                     argument: self.take_type()?,
                 })
             }
+            TypeofExpression::WidenedLiteral(expression) => {
+                TypeofExpression::WidenedLiteral(TypeofWidenedLiteralExpression {
+                    value: self.take_type()?,
+                    is_return_type: expression.is_return_type,
+                })
+            }
         })
     }
 
@@ -2758,6 +2765,7 @@ pub enum TypeofExpression<'db> {
     This(TypeofThisOrSuperExpression<'db>),
     Typeof(TypeofTypeofExpression<'db>),
     UnaryMinus(TypeofUnaryMinusExpression<'db>),
+    WidenedLiteral(TypeofWidenedLiteralExpression<'db>),
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
@@ -2877,6 +2885,14 @@ pub struct TypeofTypeofExpression<'db> {
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct TypeofUnaryMinusExpression<'db> {
     pub argument: TypeData<'db>,
+}
+
+/// The inferred counterpart of
+/// [`raw::TypeofWidenedLiteralExpression`](crate::TypeofWidenedLiteralExpression).
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
+pub struct TypeofWidenedLiteralExpression<'db> {
+    pub value: TypeData<'db>,
+    pub is_return_type: bool,
 }
 
 #[salsa::interned]
@@ -3599,6 +3615,12 @@ fn convert_typeof_expression<'db>(
         raw::TypeofExpression::UnaryMinus(expression) => {
             TypeofExpression::UnaryMinus(TypeofUnaryMinusExpression {
                 argument: resolve_reference(&expression.argument),
+            })
+        }
+        raw::TypeofExpression::WidenedLiteral(expression) => {
+            TypeofExpression::WidenedLiteral(TypeofWidenedLiteralExpression {
+                value: resolve_reference(&expression.value),
+                is_return_type: expression.is_return_type,
             })
         }
     }
@@ -4439,6 +4461,15 @@ mod tests {
             typeof_type(
                 &db,
                 TypeofExpression::UnaryMinus(TypeofUnaryMinusExpression { argument: s.next() }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::WidenedLiteral(TypeofWidenedLiteralExpression {
+                    value: s.next(),
+                    is_return_type: true,
+                }),
             )
         });
 

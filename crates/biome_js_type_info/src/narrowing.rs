@@ -302,6 +302,11 @@ enum RawReferenceTarget<'a> {
 
 /// Follows `reference` through raw references to the type it stands for.
 ///
+/// The type of a value that a mutable location widens, as
+/// [`TypeofExpression::WidenedLiteral`] describes, is followed to the value:
+/// widening a literal type to its primitive type doesn't change whether the
+/// type can be nullish or an object.
+///
 /// Returns `None` for a type name or an import, which raw tables don't
 /// resolve, for a local id outside `raw_types`, and when the chain exceeds
 /// [`MAX_RAW_REFERENCE_STEPS`].
@@ -317,9 +322,14 @@ fn raw_reference_target<'a>(
                 return Some(RawReferenceTarget::Global(*id));
             }
             TypeReference::Resolved(RawTypeId::Local(local)) => {
-                match raw_types.get(local.index())? {
+                let data = raw_types.get(local.index())?;
+                match data {
                     RawTypeData::Reference(next) => reference = next,
-                    data => return Some(RawReferenceTarget::Local(data)),
+                    RawTypeData::TypeofExpression(expression) => match expression.as_ref() {
+                        TypeofExpression::WidenedLiteral(widened) => reference = &widened.value,
+                        _ => return Some(RawReferenceTarget::Local(data)),
+                    },
+                    _ => return Some(RawReferenceTarget::Local(data)),
                 }
             }
         }
@@ -4653,8 +4663,10 @@ mod tests {
             ObjectKind::Expression,
         ));
         let shape = object(db, vec![member("a", one)]);
-        // TypeScript widens `{ a: 1 }` to `{ a: number }`, which is not a
-        // subtype of `{ a: 1 }`, so the `else` branch keeps it.
+        // An object literal keeps `a: 1` where Biome can't tell that the
+        // value is a fresh literal, as for `{ a: id(1) }`, which TypeScript
+        // types as `{ a: number }`, not a subtype of `{ a: 1 }`, so the
+        // `else` branch keeps it.
         let ty = union(db, &[literal, InferredTypeData::String]);
         assert_eq!(narrow_predicate(db, ty, shape, true), literal);
         assert_eq!(narrow_predicate(db, ty, shape, false), ty);
@@ -4664,8 +4676,8 @@ mod tests {
             narrow_predicate(db, ty, shape, false),
             InferredTypeData::String
         );
-        // TypeScript types a class field initialized with `1` as `number`, so
-        // `{ a: number }` is a subtype of the class.
+        // A class field initialized with `id(1)` is `number` in TypeScript,
+        // of which `{ a: number }` is a subtype.
         let class = instance(db, class(db, "A", None, vec![member("a", one)]));
         let wide = object(db, vec![member("a", InferredTypeData::Number)]);
         let ty = union(db, &[wide, InferredTypeData::String]);

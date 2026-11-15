@@ -1032,6 +1032,18 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                 write!(f, [&format_args![token("typeof"), space(), &expr.argument]])
             }
             Self::UnaryMinus(expr) => write!(f, [&format_args![token("-"), &expr.argument]]),
+            Self::WidenedLiteral(expr) => write!(
+                f,
+                [&format_args![
+                    token(if expr.is_return_type {
+                        "widened return"
+                    } else {
+                        "widened"
+                    }),
+                    space(),
+                    &expr.value
+                ]]
+            ),
         }
     }
 }

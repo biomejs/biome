@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+const n = 1,
+	s = flag ? "a" : 1;
+
+```
+
+## Result
+
+```
+n => number: 1
+s => unresolved reference "flag" (scope ID: 0) ? Local TypeId(1) : Local TypeId(0)
+
+```
+
+## Registered types
+
+```
+Module TypeId(0) => number: 1
+
+Module TypeId(1) => string: a
+
+Module TypeId(2) => unresolved reference "flag" (scope ID: 0) ? Local TypeId(1) : Local TypeId(0)
+```

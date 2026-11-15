@@ -59,10 +59,14 @@ use crate::{
     TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNewExpression,
     TypeofNullishCoalescingExpression, TypeofParameterExpression, TypeofStaticMemberExpression,
     TypeofThisOrSuperExpression, TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
-    Union,
+    TypeofWidenedLiteralExpression, Union,
 };
 
 const MAX_CONST_ASSERTION_DEPTH: usize = 50;
+
+/// Bounds the raw references and union members that
+/// [`may_have_fresh_literal`] follows.
+const MAX_FRESH_LITERAL_SHAPE_DEPTH: usize = 8;
 
 impl TypeData {
     /// Applies the given `pattern` and returns the named bindings, and their
@@ -472,37 +476,56 @@ impl TypeData {
             AnyJsExpression::AnyJsLiteralExpression(expr) => {
                 Self::from_any_js_literal_expression(expr).unwrap_or_default()
             }
-            AnyJsExpression::JsArrayExpression(expr) => Self::Tuple(Box::new(Tuple {
-                elements: expr
-                    .elements()
-                    .into_iter()
-                    .filter_map(|el| match el {
-                        Ok(AnyJsArrayElement::AnyJsExpression(expr)) => Some(TupleElementType {
-                            ty: collector.reference_to_resolved_expression(scope_id, &expr),
-                            name: None,
-                            is_optional: false,
-                            is_rest: false,
-                        }),
-                        Ok(AnyJsArrayElement::JsSpread(spread)) => spread
-                            .argument()
-                            .ok()
-                            .map(|expr| collector.reference_to_resolved_expression(scope_id, &expr))
-                            .map(|ty| TupleElementType {
-                                ty,
-                                name: None,
-                                is_optional: false,
-                                is_rest: true,
-                            }),
-                        Ok(AnyJsArrayElement::JsArrayHole(_)) | Err(_) => Some(TupleElementType {
-                            ty: TypeReference::unknown(),
-                            name: None,
-                            is_optional: false,
-                            is_rest: false,
-                        }),
-                    })
-                    .collect(),
-                is_inferred_array: !is_in_tuple_context(expr),
-            })),
+            AnyJsExpression::JsArrayExpression(expr) => {
+                let context = ArrayExpressionContext::of(expr);
+                Self::Tuple(Box::new(Tuple {
+                    elements: expr
+                        .elements()
+                        .into_iter()
+                        .filter_map(|el| match el {
+                            Ok(AnyJsArrayElement::AnyJsExpression(expr)) => {
+                                let ty = value_reference(collector, scope_id, &expr);
+                                Some(TupleElementType {
+                                    // TypeScript widens the elements of the value
+                                    // that a destructuring pattern takes apart,
+                                    // because the pattern gives them no literal
+                                    // type, so `const [a] = [1]` declares `a` as
+                                    // `number`.
+                                    ty: if context == ArrayExpressionContext::Destructured {
+                                        widened_literal_reference(collector, ty, false)
+                                    } else {
+                                        ty
+                                    },
+                                    name: None,
+                                    is_optional: false,
+                                    is_rest: false,
+                                })
+                            }
+                            Ok(AnyJsArrayElement::JsSpread(spread)) => spread
+                                .argument()
+                                .ok()
+                                .map(|expr| {
+                                    collector.reference_to_resolved_expression(scope_id, &expr)
+                                })
+                                .map(|ty| TupleElementType {
+                                    ty,
+                                    name: None,
+                                    is_optional: false,
+                                    is_rest: true,
+                                }),
+                            Ok(AnyJsArrayElement::JsArrayHole(_)) | Err(_) => {
+                                Some(TupleElementType {
+                                    ty: TypeReference::unknown(),
+                                    name: None,
+                                    is_optional: false,
+                                    is_rest: false,
+                                })
+                            }
+                        })
+                        .collect(),
+                    is_inferred_array: context == ArrayExpressionContext::Array,
+                }))
+            }
             AnyJsExpression::JsArrowFunctionExpression(expr) => {
                 Self::from_js_arrow_function_expression(collector, scope_id, expr)
             }
@@ -655,13 +678,7 @@ impl TypeData {
                     type_data_from_const_assertion_expression(collector, scope_id, &inner)
                 } else {
                     let ty = Self::from_any_ts_type(collector, scope_id, &annotation);
-                    if matches!(ty, Self::Object(_) | Self::Tuple(_)) {
-                        // Keep asserted shapes behind a reference so const inference
-                        // does not mistake the annotation for a fresh literal.
-                        Self::Reference(collector.reference_to_owned_data(ty))
-                    } else {
-                        ty
-                    }
+                    asserted_type(collector, ty)
                 }
             }
             AnyJsExpression::TsInstantiationExpression(expr) => {
@@ -679,13 +696,7 @@ impl TypeData {
                     type_data_from_const_assertion_expression(collector, scope_id, &inner)
                 } else {
                     let ty = Self::from_any_ts_type(collector, scope_id, &annotation);
-                    if matches!(ty, Self::Object(_) | Self::Tuple(_)) {
-                        // Keep asserted shapes behind a reference so const inference
-                        // does not mistake the annotation for a fresh literal.
-                        Self::Reference(collector.reference_to_owned_data(ty))
-                    } else {
-                        ty
-                    }
+                    asserted_type(collector, ty)
                 }
             }
             AnyJsExpression::JsUnaryExpression(expr) => {
@@ -1806,13 +1817,33 @@ impl TypeData {
             .collect()
     }
 
+    /// Returns the variables that `decl` declares, with their types.
+    ///
+    /// A `let` or `var` variable without a type annotation takes the
+    /// widened literal type of its initializer, as
+    /// [`TypeofWidenedLiteralExpression`] describes, so `let n = 1` declares
+    /// `n` as `number`, while `const n = 1` declares it as `1`.
     pub fn typed_bindings_from_js_variable_declarator(
         collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &JsVariableDeclarator,
     ) -> Option<Box<[(Text, TypeReference)]>> {
         let pattern = decl.id().ok()?;
-        let ty = Self::from_js_variable_declarator(collector, scope_id, decl)?.into_owned();
+        let mut ty = Self::from_js_variable_declarator(collector, scope_id, decl)?.into_owned();
+        if decl.variable_annotation().is_none()
+            && matches!(pattern, AnyJsBindingPattern::AnyJsBinding(_))
+            && decl
+                .declaration()
+                .is_some_and(|declaration| declaration.is_let() || declaration.is_var())
+            && let Some(initializer) = decl
+                .initializer()
+                .and_then(|initializer| initializer.expression().ok())
+        {
+            let value = value_reference(collector, scope_id, &initializer);
+            if may_have_fresh_literal(collector, &value, false, MAX_FRESH_LITERAL_SHAPE_DEPTH) {
+                ty = Self::Reference(widened_literal_reference(collector, value, false));
+            }
+        }
         Self::typed_bindings_from_js_binding_pattern(collector, scope_id, ty, &pattern, false)
     }
 }
@@ -1945,6 +1976,7 @@ impl FunctionParameter {
             scope_id,
             param.binding(),
             param.type_annotation(),
+            param.initializer(),
             param.question_mark_token().is_some(),
             false,
         )
@@ -1960,16 +1992,25 @@ impl FunctionParameter {
             scope_id,
             param.binding(),
             param.type_annotation(),
+            None,
             false,
             true,
         )
     }
 
+    /// Builds the parameter that `binding` declares, typed by `annotation`.
+    ///
+    /// A parameter named by an identifier without an annotation takes the
+    /// widened literal type of its default value, `initializer`, as
+    /// [`TypeofWidenedLiteralExpression`] describes, so `x` is `number` in
+    /// `function f(x = 1) {}`. Without either, and for a destructuring
+    /// pattern without an annotation, the type is unknown.
     fn from_binding_with_annotation(
         collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         binding: SyntaxResult<AnyJsBindingPattern>,
         annotation: Option<TsTypeAnnotation>,
+        initializer: Option<JsInitializerClause>,
         is_optional: bool,
         is_rest: bool,
     ) -> Self {
@@ -1980,9 +2021,19 @@ impl FunctionParameter {
             .and_then(AnyJsBinding::as_js_identifier_binding)
             .and_then(|identifier| identifier.name_token().ok())
             .map(|token| token.token_text_trimmed().into());
-        let ty_data = annotation
-            .and_then(|annotation| annotation.ty().ok())
-            .map_or_default(|ty| TypeData::from_any_ts_type(collector, scope_id, &ty));
+        let ty_data = match (annotation, initializer) {
+            (Some(annotation), _) => annotation
+                .ty()
+                .ok()
+                .map_or_default(|ty| TypeData::from_any_ts_type(collector, scope_id, &ty)),
+            (None, Some(initializer)) if name.is_some() => {
+                initializer.expression().ok().map_or_default(|expression| {
+                    let value = value_reference(collector, scope_id, &expression);
+                    TypeData::Reference(widened_literal_reference(collector, value, false))
+                })
+            }
+            (None, _) => TypeData::unknown(),
+        };
         // Optional parameters can be called without a value, so include `undefined` in the type
         let ty = if is_optional {
             let ty_ref = collector.reference_to_owned_data(ty_data.clone());
@@ -2368,6 +2419,10 @@ impl TypeMember {
             }
             AnyJsClassMember::JsPropertyClassMember(member) => {
                 member.name().ok().and_then(|name| {
+                    let is_readonly = member
+                        .modifiers()
+                        .into_iter()
+                        .any(|modifier| modifier.as_ts_readonly_modifier().is_some());
                     let ty = match member
                         .property_annotation()
                         .and_then(|annotation| annotation.type_annotation().ok())
@@ -2379,7 +2434,8 @@ impl TypeMember {
                             .value()
                             .and_then(|initializer| initializer.expression().ok())
                             .map_or_default(|expr| {
-                                collector.reference_to_resolved_expression(scope_id, &expr)
+                                let value = value_reference(collector, scope_id, &expr);
+                                field_initializer_reference(collector, value, is_readonly)
                             }),
                     };
                     let is_static = member
@@ -2391,10 +2447,6 @@ impl TypeMember {
                         .as_ref()
                         .and_then(|annotation| annotation.as_ts_optional_property_annotation())
                         .is_some();
-                    let is_readonly = member
-                        .modifiers()
-                        .into_iter()
-                        .any(|modifier| modifier.as_ts_readonly_modifier().is_some());
                     Self::from_class_member_info(
                         collector,
                         scope_id,
@@ -2429,19 +2481,21 @@ impl TypeMember {
             }
             AnyJsClassMember::TsInitializedPropertySignatureClassMember(member) => {
                 member.name().ok().and_then(|name| {
-                    let ty = collector.reference_to_resolved_expression(
+                    let is_readonly = member
+                        .modifiers()
+                        .into_iter()
+                        .any(|modifier| modifier.as_ts_readonly_modifier().is_some());
+                    let value = value_reference(
+                        collector,
                         scope_id,
                         &member.value().ok()?.expression().ok()?,
                     );
+                    let ty = field_initializer_reference(collector, value, is_readonly);
                     let is_static = member
                         .modifiers()
                         .into_iter()
                         .any(|modifier| modifier.as_js_static_modifier().is_some());
                     let is_optional = member.question_mark_token().is_some();
-                    let is_readonly = member
-                        .modifiers()
-                        .into_iter()
-                        .any(|modifier| modifier.as_ts_readonly_modifier().is_some());
                     Self::from_class_member_info(
                         collector,
                         scope_id,
@@ -3540,6 +3594,14 @@ fn function_params_from_js_params(
     })
 }
 
+/// Returns the return type of a function: its annotation, or the type of
+/// the values that its body returns, as [`type_from_function_body`] collects
+/// them, wrapped in a `Promise` for an `async` function.
+///
+/// An inferred return type that is a single fresh literal type is widened,
+/// as [`TypeofWidenedLiteralExpression::is_return_type`] describes, so
+/// `() => 1` returns `number`, while `() => flag ? "a" : "b"` returns
+/// `"a" | "b"`.
 fn function_return_type(
     collector: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
@@ -3555,10 +3617,10 @@ fn function_return_type(
         };
     }
 
-    let mut return_ty = match body {
-        Some(AnyJsFunctionBody::AnyJsExpression(return_expr)) => collector
-            .resolve_expression(scope_id, &return_expr)
-            .into_owned(),
+    let return_ty = match body {
+        Some(AnyJsFunctionBody::AnyJsExpression(return_expr)) => {
+            TypeData::Reference(value_reference(collector, scope_id, &return_expr))
+        }
         Some(AnyJsFunctionBody::JsFunctionBody(body)) => {
             type_from_function_body(collector, scope_id, body)
         }
@@ -3569,14 +3631,18 @@ fn function_return_type(
             });
         }
     };
+    let return_ty = collector.reference_to_owned_data(return_ty);
+    let return_ty = widened_literal_reference(collector, return_ty, true);
 
-    if is_async {
-        return_ty = TypeData::promise_of(scope_id, collector.reference_to_owned_data(return_ty));
-    }
-
-    ReturnType::Type(collector.reference_to_owned_data(return_ty))
+    ReturnType::Type(if is_async {
+        collector.reference_to_owned_data(TypeData::promise_of(scope_id, return_ty))
+    } else {
+        return_ty
+    })
 }
 
+/// Returns the type of a getter: its annotation, or the type of the values
+/// that its body returns, widened as [`function_return_type`] widens them.
 fn getter_return_type(
     collector: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
@@ -3592,7 +3658,8 @@ fn getter_return_type(
         None => return TypeReference::unknown(),
     };
 
-    collector.reference_to_owned_data(return_ty)
+    let return_ty = collector.reference_to_owned_data(return_ty);
+    widened_literal_reference(collector, return_ty, true)
 }
 
 /// A modifier without an operator, such as `?`, adds like `+?` does.
@@ -3730,6 +3797,10 @@ fn type_from_annotation(
         .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
 }
 
+/// Returns the type of the values that the `return` statements of `body`
+/// return, outside nested functions: `void` without one, the type of the
+/// only one, or the union of their types. A `return` without a value returns
+/// `undefined`.
 fn type_from_function_body(
     collector: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
@@ -3740,28 +3811,18 @@ fn type_from_function_body(
         .pruned_descendents(|node| !AnyJsFunction::can_cast(node.kind()))
         .filter_map(JsReturnStatement::cast)
         .map(|return_statement| {
-            return_statement.argument().map_or(
-                TypeData::Reference(GLOBAL_UNDEFINED_ID.into()),
-                |argument| {
-                    collector
-                        .resolve_expression(scope_id, &argument)
-                        .into_owned()
-                },
-            )
+            return_statement
+                .argument()
+                .map_or(GLOBAL_UNDEFINED_ID.into(), |argument| {
+                    value_reference(collector, scope_id, &argument)
+                })
         })
         .collect();
 
     match return_types.len() {
         0 => TypeData::VoidKeyword,
-        1 => return_types.remove(0),
-        _ => {
-            let return_types = return_types
-                .into_iter()
-                .map(|ty| collector.reference_to_owned_data(ty))
-                .collect();
-
-            TypeData::Union(Box::new(Union(return_types)))
-        }
+        1 => TypeData::Reference(return_types.remove(0)),
+        _ => TypeData::Union(Box::new(Union(return_types.into_boxed_slice()))),
     }
 }
 
@@ -3838,52 +3899,209 @@ fn type_data_from_const_assertion_expression(
     apply_deep_const(collector, inner_type)
 }
 
-/// Returns whether TypeScript infers the array expression as a tuple rather
-/// than an array because of where it appears:
-///
-/// ```ts
-/// const [first, second] = [1, "a"];
-/// [first, second] = [second, first];
-/// call(...[1, 2]);
-/// [1, "a"] satisfies [number, string];
-/// ```
-fn is_in_tuple_context(expr: &JsArrayExpression) -> bool {
-    let mut node = expr.syntax().clone();
-    let parent = loop {
-        let Some(parent) = node.parent() else {
-            return false;
+/// How TypeScript infers an array expression, which depends on where it
+/// appears.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum ArrayExpressionContext {
+    /// An array, as `const values = [1, "a"]` gives `(number | string)[]`.
+    Array,
+    /// A tuple that a destructuring pattern takes apart, as in
+    /// `const [first, second] = [1, "a"]` and
+    /// `[first, second] = [second, first]`. The pattern gives the elements no
+    /// literal type, so their literal types are widened, and `first` is
+    /// `number`.
+    Destructured,
+    /// Another tuple, as in `call(...[1, 2])` and
+    /// `[1, "a"] satisfies [number, string]`.
+    Tuple,
+}
+
+impl ArrayExpressionContext {
+    fn of(expr: &JsArrayExpression) -> Self {
+        let mut node = expr.syntax().clone();
+        let parent = loop {
+            let Some(parent) = node.parent() else {
+                return Self::Array;
+            };
+            if parent.kind() != JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION {
+                break parent;
+            }
+            node = parent;
         };
-        if parent.kind() != JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION {
-            break parent;
+        if let Some(initializer) = JsInitializerClause::cast_ref(&parent) {
+            let Some(owner) = initializer.syntax().parent() else {
+                return Self::Array;
+            };
+            let pattern = JsVariableDeclarator::cast_ref(&owner)
+                .and_then(|declarator| declarator.id().ok())
+                .or_else(|| {
+                    JsFormalParameter::cast_ref(&owner)
+                        .and_then(|parameter| parameter.binding().ok())
+                });
+            return if matches!(pattern, Some(AnyJsBindingPattern::JsArrayBindingPattern(_))) {
+                Self::Destructured
+            } else {
+                Self::Array
+            };
         }
-        node = parent;
+        if let Some(assignment) = JsAssignmentExpression::cast_ref(&parent) {
+            return if matches!(
+                assignment.left(),
+                Ok(AnyJsAssignmentPattern::JsArrayAssignmentPattern(_))
+            ) {
+                Self::Destructured
+            } else {
+                Self::Array
+            };
+        }
+        if parent.kind() == JsSyntaxKind::JS_SPREAD
+            && parent
+                .parent()
+                .is_some_and(|list| list.kind() == JsSyntaxKind::JS_CALL_ARGUMENT_LIST)
+        {
+            return Self::Tuple;
+        }
+        if let Some(satisfies) = TsSatisfiesExpression::cast_ref(&parent)
+            && matches!(satisfies.ty(), Ok(AnyTsType::TsTupleType(_)))
+        {
+            return Self::Tuple;
+        }
+        Self::Array
+    }
+}
+
+/// Returns the type that the assertion `expression as T` or `<T>expression`
+/// gives, where `ty` is the type of `T`.
+///
+/// Asserted shapes and literal types stay behind a reference, so const
+/// inference and literal widening don't mistake the annotation for the type
+/// of an object, array, or literal expression: the raw table stores equal
+/// types once, so the `1` of `1 as 1` is the same type as the `1` of `1`,
+/// whose literal type TypeScript widens in a mutable location.
+fn asserted_type(collector: &mut dyn RawTypeCollector, ty: TypeData) -> TypeData {
+    let is_shape_or_literal = match &ty {
+        TypeData::Object(_) | TypeData::Tuple(_) => true,
+        TypeData::Literal(literal) => literal.is_primitive(),
+        _ => false,
     };
-    if let Some(initializer) = JsInitializerClause::cast_ref(&parent) {
-        let Some(owner) = initializer.syntax().parent() else {
-            return false;
-        };
-        let pattern = JsVariableDeclarator::cast_ref(&owner)
-            .and_then(|declarator| declarator.id().ok())
-            .or_else(|| {
-                JsFormalParameter::cast_ref(&owner).and_then(|parameter| parameter.binding().ok())
-            });
-        return matches!(pattern, Some(AnyJsBindingPattern::JsArrayBindingPattern(_)));
+    if is_shape_or_literal {
+        TypeData::Reference(collector.reference_to_owned_data(ty))
+    } else {
+        ty
     }
-    if let Some(assignment) = JsAssignmentExpression::cast_ref(&parent) {
-        return matches!(
-            assignment.left(),
-            Ok(AnyJsAssignmentPattern::JsArrayAssignmentPattern(_))
-        );
+}
+
+/// Returns the reference to the type of `expression`, as a value that may
+/// initialize a mutable location. A type assertion, as `1 as 1` or
+/// `1 as const`, stays behind a reference, because its literal type is not
+/// fresh, as [`asserted_type`] describes.
+fn value_reference(
+    collector: &mut dyn RawTypeCollector,
+    scope_id: ScopeId,
+    expression: &AnyJsExpression,
+) -> TypeReference {
+    let reference = collector.reference_to_resolved_expression(scope_id, expression);
+    if matches!(
+        expression.clone().omit_parentheses(),
+        AnyJsExpression::TsAsExpression(_) | AnyJsExpression::TsTypeAssertionExpression(_)
+    ) {
+        let id = collector.register_type(Cow::Owned(TypeData::Reference(reference)));
+        collector.reference_to_id(id)
+    } else {
+        reference
     }
-    if parent.kind() == JsSyntaxKind::JS_SPREAD {
-        return parent
-            .parent()
-            .is_some_and(|list| list.kind() == JsSyntaxKind::JS_CALL_ARGUMENT_LIST);
+}
+
+/// Returns the type that a mutable location without a type annotation takes
+/// from a value of type `value`, as [`TypeofWidenedLiteralExpression`]
+/// describes, or `value` itself when its collected type shows that it has no
+/// fresh literal type, as for an object, a call, or a function.
+///
+/// `is_return_type` selects the rule for a return type inferred from a
+/// function's body, as [`TypeofWidenedLiteralExpression::is_return_type`]
+/// describes. Resolution decides which literal types are fresh.
+fn widened_literal_reference(
+    collector: &mut dyn RawTypeCollector,
+    value: TypeReference,
+    is_return_type: bool,
+) -> TypeReference {
+    if !may_have_fresh_literal(
+        collector,
+        &value,
+        is_return_type,
+        MAX_FRESH_LITERAL_SHAPE_DEPTH,
+    ) {
+        return value;
     }
-    if let Some(satisfies) = TsSatisfiesExpression::cast_ref(&parent) {
-        return matches!(satisfies.ty(), Ok(AnyTsType::TsTupleType(_)));
+    collector.reference_to_owned_data(TypeData::from(TypeofExpression::WidenedLiteral(
+        TypeofWidenedLiteralExpression {
+            value,
+            is_return_type,
+        },
+    )))
+}
+
+/// Returns the type of a class field that an initializer of type `value`
+/// gives: widened, as [`widened_literal_reference`] describes, unless the
+/// field is `readonly`, whose literal types TypeScript keeps.
+fn field_initializer_reference(
+    collector: &mut dyn RawTypeCollector,
+    value: TypeReference,
+    is_readonly: bool,
+) -> TypeReference {
+    if is_readonly {
+        value
+    } else {
+        widened_literal_reference(collector, value, false)
     }
-    false
+}
+
+/// Returns whether the collected type at `reference` may be or include a
+/// fresh literal type: a primitive literal type, a conditional or logical
+/// expression, a unary minus of a literal, or a name, which may refer to a
+/// `const` declared without a type annotation. A reference to another local
+/// type stands for an assertion, as [`asserted_type`] and
+/// [`value_reference`] describe, whose literal type is not fresh.
+///
+/// With `is_return_values`, a union is the values that a function returns,
+/// which may have one when one of its members may. Another union is a type
+/// annotation, whose literal types aren't fresh. A chain of names deeper than
+/// `depth` may have one.
+fn may_have_fresh_literal(
+    collector: &dyn RawTypeCollector,
+    reference: &TypeReference,
+    is_return_values: bool,
+    depth: usize,
+) -> bool {
+    if depth == 0 {
+        return true;
+    }
+    match reference {
+        TypeReference::Qualifier(_) | TypeReference::Import(_) => true,
+        TypeReference::Resolved(RawTypeId::Global(_)) => false,
+        TypeReference::Resolved(RawTypeId::Local(id)) => match collector.get_by_id(*id) {
+            TypeData::Literal(literal) => matches!(
+                literal.as_ref(),
+                Literal::BigInt(_) | Literal::Boolean(_) | Literal::Number(_) | Literal::String(_)
+            ),
+            TypeData::TypeofExpression(expression) => match expression.as_ref() {
+                TypeofExpression::UnaryMinus(expression) => expression.is_literal_argument,
+                TypeofExpression::Conditional(_)
+                | TypeofExpression::LogicalAnd(_)
+                | TypeofExpression::LogicalOr(_)
+                | TypeofExpression::NullishCoalescing(_) => true,
+                _ => false,
+            },
+            TypeData::Reference(
+                next @ (TypeReference::Qualifier(_) | TypeReference::Import(_)),
+            ) => may_have_fresh_literal(collector, next, false, depth - 1),
+            TypeData::Union(union) if is_return_values => union
+                .types()
+                .iter()
+                .any(|member| may_have_fresh_literal(collector, member, false, depth - 1)),
+            _ => false,
+        },
+    }
 }
 
 /// Applies const assertion conversion to inferred tuple and object types.

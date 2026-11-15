@@ -16,6 +16,7 @@ mod globals;
 pub(crate) mod globals_ids;
 mod inferred_type;
 pub mod interned_types;
+mod literal_widening;
 mod local_inference;
 mod narrowing;
 pub mod resolved;
@@ -38,6 +39,7 @@ pub use inferred_type::{
     ObjectSpreadMisuse, TypeTraversalError,
 };
 pub use interned_types::{RawTypeData, TypeDb};
+pub use literal_widening::{FreshLiteralKinds, PrimitiveLiteralKind, widen_literal_of_kinds};
 pub use narrowing::{
     NarrowingPredicate, PropertyTest, RawPredicateTarget, TypeofKind, falsy_values,
     has_readonly_property, is_narrowing_invariant, is_raw_narrowing_invariant,

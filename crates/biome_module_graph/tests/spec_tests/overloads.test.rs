@@ -181,13 +181,16 @@ fn test_infer_module_types_substitutes_callback_returns_through_type_aliases_on_
         .expect("module must exist");
     let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
 
+    // The callback's return type is widened, because `T` gives it no literal
+    // type, so `T` is `number`, as in TypeScript 7.0.2
+    // (`narrowing-probes/fix-d/tests.ts` L13, L14).
     for name in ["aliased", "inline"] {
         let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
             .unwrap_or_else(|| panic!("{name} binding type must be inferred"));
         let ty = inferred.resolve_type(&db, ty);
         assert!(
-            is_inferred_number_literal(&db, ty, "42"),
-            "{name} must be the literal 42, got {}",
+            is_inferred_number(&db, ty),
+            "{name} must be number, got {}",
             format_inferred_type(&db, ty)
         );
     }

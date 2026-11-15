@@ -60,7 +60,7 @@ Binding readValue "readValue" => sync Function "readValue" {
 
 Expression "{ value: 1 }" => Object {
   prototype: No prototype
-  members: ["value": number: 1]
+  members: ["value": number]
 }
 
 Expression "1" => number: 1

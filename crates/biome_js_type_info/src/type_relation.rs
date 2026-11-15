@@ -466,11 +466,13 @@ fn is_decimal_integer_name(name: &str) -> bool {
 ///   of one module are different classes, so their instances are
 ///   undetermined for the same reason.
 /// - A property of the type of an object literal or of an instance of a
-///   class that is not built in can have the literal type of its
-///   initializer, as `1` for `{ a: 1 }`, where TypeScript widens it to
-///   `number` unless it is readonly or `as const`. Such a property is also
-///   compared with its literal types widened, and the result is undetermined
-///   when the two comparisons disagree.
+///   class that is not built in can have a literal type that TypeScript
+///   widens. Biome widens the literal types of initializers where it can
+///   tell that they are fresh, but not, for example, the result of a generic
+///   call, so `{ a: id(1) }` keeps `a: 1` where TypeScript gives
+///   `a: number`. Such a property is also compared with its literal types
+///   widened, and the result is undetermined when the two comparisons
+///   disagree.
 pub(crate) fn is_subtype<'db>(
     db: &'db dyn TypeDb,
     source: TypeData<'db>,
@@ -2703,13 +2705,14 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
     /// `undefined` added to `target` when it is optional.
     ///
     /// `widens` tells whether the members of the source and of the target
-    /// may have literal types that TypeScript widens. A literal type of a
-    /// field initializer is widened unless the field is readonly or
-    /// `as const`, and Biome doesn't record either, so `{ a: 1 }` can be
-    /// `{ a: number }` in TypeScript. The member is then also compared with
-    /// its literal types widened, and the result is undetermined when the
-    /// comparisons disagree. Two members of the same type on two sides that
-    /// both may widen are taken as the same member, as a subclass inherits it.
+    /// may have literal types that TypeScript widens, as
+    /// [`Self::may_widen_members`] describes. Biome widens the fresh literal
+    /// types of initializers, but it can't tell every fresh literal type, as
+    /// the result `1` of `id(1)`, so `{ a: id(1) }` can be `{ a: number }` in
+    /// TypeScript. The member is then also compared with its literal types
+    /// widened, and the result is undetermined when the comparisons
+    /// disagree. Two members of the same type on two sides that both may
+    /// widen are taken as the same member, as a subclass inherits it.
     fn is_widened_member_assignable(
         &mut self,
         source: TypeData<'db>,
@@ -2746,10 +2749,11 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         result
     }
 
-    /// Returns whether the members of `ty` may have literal types that
-    /// TypeScript widens to their primitive types. This holds for the type of
-    /// an object literal and for an instance of a class that is not built in,
-    /// because their fields can take their types from initializers.
+    /// Returns whether the members of `ty` may have literal types where
+    /// TypeScript widens the literal to its primitive type: whether `ty` is
+    /// the type of an object literal or an instance of a class that is not
+    /// built in, whose fields can take their types from initializers whose
+    /// fresh literal types Biome doesn't see.
     fn may_widen_members(&mut self, ty: TypeData<'db>) -> bool {
         match ty {
             TypeData::Object(object) => object.kind(self.db) == ObjectKind::Expression,

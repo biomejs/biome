@@ -62,6 +62,19 @@ a handle to it has the same data in every context; data built without its
 contributions would make `instanceof` see two declarations. A contribution's
 members are resolved only by whoever resolves its handle, in its own module.
 
+Resolution widens fresh literal types where TypeScript does, as in
+`let n = 1`, which declares `n` as `number`
+(`src/db/type_inference/widening.rs`). Collection marks the locations, as
+the type-info guide describes, and resolution tells a fresh literal type from
+a declared one by the raw expressions behind the value: a literal, the
+operands of a conditional or logical expression, and the initializer of a
+`const` declared without an annotation, also in another module, found with
+`find_export_origin` without resolving a type. The properties of an object
+literal are widened where the object is resolved. A call keeps their
+literal types to select an overload, as TypeScript's contextual typing
+does, and infers generic parameters from the widened type
+(`ResolvedCallArgument::WidenedArgument`).
+
 Start at `src/module_graph.rs`, `src/js_module_info/collector.rs`, and
 `src/db/type_inference/resolver.rs`.
 

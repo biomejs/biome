@@ -32,14 +32,14 @@ Object {
   members: [
     readonly "value": Local TypeId(1),
     readonly "label"?: Local TypeId(2),
-    "count": Local TypeId(3),
-    static "shared": Local TypeId(4),
+    "count": Local TypeId(4),
+    static "shared": Local TypeId(5),
     readonly "declared": string,
-    get "size": Local TypeId(5),
-    constructor: Local TypeId(8),
+    get "size": Local TypeId(7),
+    constructor: Local TypeId(10),
     readonly "first": string,
-    readonly "second"?: Local TypeId(6),
-    "third": Local TypeId(7)
+    readonly "second"?: Local TypeId(8),
+    "third": Local TypeId(9)
   ]
 }
 ```
@@ -55,21 +55,25 @@ Module TypeId(2) => string | undefined
 
 Module TypeId(3) => number: 0
 
-Module TypeId(4) => number: 1
+Module TypeId(4) => widened Local TypeId(3)
 
-Module TypeId(5) => sync Function "size" {
+Module TypeId(5) => number: 1
+
+Module TypeId(6) => widened return Local TypeId(5)
+
+Module TypeId(7) => sync Function "size" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Local TypeId(4)
+  returns: Local TypeId(6)
 }
 
-Module TypeId(6) => number | undefined
+Module TypeId(8) => number | undefined
 
-Module TypeId(7) => boolean
+Module TypeId(9) => boolean
 
-Module TypeId(8) => Constructor {
+Module TypeId(10) => Constructor {
     type_parameters: [],
     parameters: [
         ConstructorParameter {
@@ -92,7 +96,7 @@ Module TypeId(8) => Constructor {
                 NamedFunctionParameter {
                     name: "second",
                     ty: Resolved(
-                        Local TypeId(6),
+                        Local TypeId(8),
                     ),
                     is_optional: true,
                     is_rest: false,
@@ -107,7 +111,7 @@ Module TypeId(8) => Constructor {
                 NamedFunctionParameter {
                     name: "third",
                     ty: Resolved(
-                        Local TypeId(7),
+                        Local TypeId(9),
                     ),
                     is_optional: false,
                     is_rest: false,

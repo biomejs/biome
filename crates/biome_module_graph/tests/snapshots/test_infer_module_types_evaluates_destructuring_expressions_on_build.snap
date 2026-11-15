@@ -28,7 +28,7 @@ Binding object "object" => instanceof Object {
 
 Expression "{ a: \"value\", c: true, }" => Object {
   prototype: No prototype
-  members: ["a": string: value, "c": bool: true]
+  members: ["a": string, "c": boolean]
 }
 
 Expression "\"value\"" => string: value

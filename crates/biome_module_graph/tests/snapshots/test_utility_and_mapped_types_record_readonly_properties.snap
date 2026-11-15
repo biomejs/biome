@@ -96,7 +96,7 @@ Binding constant "constant" => Object {
 
 Expression "{ A: 1 }" => Object {
   prototype: No prototype
-  members: ["A": number: 1]
+  members: ["A": number]
 }
 
 Expression "{ A: 1 } as const" => Object {

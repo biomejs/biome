@@ -1514,6 +1514,7 @@ pub enum TypeofExpression {
     This(TypeofThisOrSuperExpression),
     Typeof(TypeofTypeofExpression),
     UnaryMinus(TypeofUnaryMinusExpression),
+    WidenedLiteral(TypeofWidenedLiteralExpression),
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -1681,6 +1682,40 @@ pub struct TypeofUnaryMinusExpression {
     /// Whether the operand syntax is a number or bigint literal.
     pub is_literal_argument: bool,
     pub argument: TypeReference,
+}
+
+/// The type that a mutable location takes from the value that initializes
+/// it, as TypeScript's `getWidenedLiteralType` gives it: the type of `value`
+/// with its fresh literal types widened to their primitive types.
+///
+/// A fresh literal type is the type of a literal expression, such as `1` or
+/// `"a"`, which a conditional or logical expression, or a `const` declared
+/// without a type annotation, passes on. A literal type that an annotation
+/// or `as const` declares is not fresh, so it stays:
+///
+/// ```ts
+/// declare const flag: boolean;
+/// declare const declared: "a";
+/// let n = 1; // number
+/// let s = flag ? declared : "b"; // "a" | string
+/// ```
+///
+/// The collector uses this for `let` and `var` variables, class fields that
+/// aren't `readonly`, parameters with a default value, and elements of array
+/// expressions that a destructuring pattern takes apart, when they have no
+/// type annotation, and for the return type inferred from a function's body.
+/// Properties of object expressions and elements of other array expressions
+/// are widened where their containing type is resolved instead, because a
+/// call needs their literal types to select an overload.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct TypeofWidenedLiteralExpression {
+    /// The type of the value.
+    pub value: TypeReference,
+
+    /// Whether `value` is the union of the values that a function returns,
+    /// which TypeScript widens only when it is a single literal type: `1`
+    /// becomes `number`, while `"a" | "b"` stays.
+    pub is_return_type: bool,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
