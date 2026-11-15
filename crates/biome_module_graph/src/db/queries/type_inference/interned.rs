@@ -75,6 +75,37 @@ pub(crate) struct FlowSubjectRootInput<'db> {
     /// no bypass reaches keep a mask of zero and share one solve.
     #[returns(copy)]
     pub exhaustive: u64,
+    /// The types of the values that the writes of the subject assign, in the
+    /// order of the root's collected writes of the subject, resolved by the
+    /// context that reads the subject, or `None` when no write with a value
+    /// reduces the subject, so that other subjects keep sharing their
+    /// solves.
+    #[returns(copy)]
+    pub assigned: Option<FlowAssignedTypes<'db>>,
+}
+
+/// The types of the values that the writes of one subject assign, as
+/// [`super::infer_flow_assigned_types`] resolves them.
+#[salsa::interned]
+#[derive(Debug)]
+pub(crate) struct FlowAssignedTypes<'db> {
+    #[returns(ref)]
+    pub types: Box<[InferredTypeData<'db>]>,
+}
+
+/// Identifies a subject within one execution root, whose assigned types
+/// [`super::infer_flow_assigned_types`] resolves.
+#[salsa::interned]
+#[derive(Debug)]
+pub(crate) struct FlowSubjectWritesInput<'db> {
+    #[returns(copy)]
+    pub module: ModuleInfo,
+    /// Index of the execution root in the module's collected flow.
+    #[returns(copy)]
+    pub root: usize,
+    /// Id of the subject in that root's subject table.
+    #[returns(copy)]
+    pub subject: FlowSubjectId,
 }
 
 /// Identifies one `switch` statement of an execution root, for the query

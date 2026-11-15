@@ -1,12 +1,12 @@
 //! Syntax-only flow facts that let type inference narrow reads of variables
 //! and their property paths.
 //!
-//! Collection records a graph of possible paths for each execution root that
-//! tests one of its own variables or a property path that starts at one of
-//! them or at the root's `this`. The graph's conditions are already
-//! decomposed into guards on subjects. Collection also records the incoming
-//! path of every read such a guard can reach. Type inference later applies the
-//! guards to resolved types without inspecting syntax again.
+//! Collection records, for each execution root that tests or writes one of
+//! its own variables, a graph of possible paths whose conditions are already
+//! decomposed into guards on subjects and whose writes record the values they
+//! assign. It also records the incoming path of every read such a guard or
+//! write can reach. Type inference later applies the guards
+//! to resolved types without inspecting syntax again.
 //!
 //! A subject is what a runtime test checks and a read narrows: a variable, or
 //! a property path that starts at a variable or at `this`, such as `o.v`,
@@ -18,19 +18,21 @@
 //! pattern.
 //!
 //! An execution root is a body analyzed independently, such as a module,
-//! function, or method. Only `let`, `const`, and parameter bindings that are
-//! never reassigned and are read in the root that declares them participate,
-//! so refinements cannot cross closure boundaries. Each root has its own
-//! `this`. Paths on it narrow only where Biome types `this` as TypeScript
-//! does: in class methods and accessors that are not `static`, in object
-//! literal methods and accessors, and in arrow functions inside them or inside
-//! the initializer of a field that is not `static`.
-//! [`subjects::this_can_narrow`] has the full rule. A property path narrows
-//! only when its variable or `this` does and the root never writes the path,
-//! one of its prefixes, or any property of one of its prefixes through a key
-//! that does not spell the property's name, such as `o[k]`. The graph does not
-//! invalidate facts on writes or calls, which is why written subjects are
-//! excluded.
+//! function, or method. Only `let`, `const`, and parameter bindings read in
+//! the root that declares them participate, so refinements cannot cross
+//! closure boundaries. Each root has its own `this`, and paths on it narrow
+//! only where Biome types `this` as TypeScript does, as
+//! [`subjects::this_can_narrow`] describes. A property path narrows only when
+//! its variable or `this` does.
+//!
+//! A write to a subject in the root's own flow is a write point of the graph,
+//! where the subject takes the type of the assigned value, reduced against
+//! its declared type, as TypeScript's `getTypeAtFlowAssignment` gives it, and
+//! the paths that extend it take their declared types. A write that runs with
+//! the root but outside that flow, as in a function called where it is
+//! defined or a class static block, has no write point, so the subject it
+//! writes doesn't narrow anywhere in the root. Calls never invalidate facts,
+//! as in TypeScript.
 
 mod builder;
 mod expressions;
@@ -39,28 +41,32 @@ mod scanner;
 mod subjects;
 mod writes;
 
+pub(crate) use builder::{AnyMemberDeclaration, CalleeReturn, declaration_return, member_return};
 pub(crate) use expressions::AnyFlowExpression;
 pub(crate) use guards::{FlowGuard, FlowTest, UnitValue, binding_unit_value, guard_signature};
 pub(crate) use scanner::FlowRootScanner;
 
 use biome_js_control_flow::AnyJsControlFlowRoot;
-use biome_js_semantic::{HasDeclarationAstNode, JsDeclarationKind, SemanticModel};
+use biome_js_semantic::{Binding, HasDeclarationAstNode, JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
-    AnyJsClass, JsArrayBindingPattern, JsArrayBindingPatternElement,
+    AnyJsClass, AnyJsExpression, AnyJsLiteralExpression, AnyJsVariableDeclaration,
+    AnyTsVariableAnnotation, JsArrayBindingPattern, JsArrayBindingPatternElement,
     JsArrayBindingPatternElementList, JsArrayBindingPatternRestElement, JsGetterObjectMember,
     JsIdentifierBinding, JsLanguage, JsMethodObjectMember, JsObjectBindingPattern,
     JsObjectBindingPatternProperty, JsObjectBindingPatternPropertyList, JsObjectBindingPatternRest,
     JsObjectBindingPatternShorthandProperty, JsSetterObjectMember, JsSyntaxNode, JsThisExpression,
+    JsVariableDeclarationClause, TsDeclareStatement, binding_ext::AnyJsBindingDeclaration,
 };
 use biome_js_type_info::{
-    RawTypeData, RawTypeId, TypeReference, TypeofExpression, TypeofKind,
-    is_raw_narrowing_invariant, raw_may_be_object_union, raw_may_narrow_by_instanceof,
+    DestructureField, RawTypeData, RawTypeId, TypeReference, TypeofExpression, TypeofKind,
+    is_raw_narrowing_invariant, raw_may_be_object_union, raw_may_be_union, raw_may_have_literal,
+    raw_may_narrow_by_instanceof,
 };
-use biome_rowan::{AstNode, AstPtr, SyntaxKindSet, Text, TextRange, TextSize};
+use biome_rowan::{AstNode, AstPtr, AstSeparatedList, SyntaxKindSet, Text, TextRange, TextSize};
 use builder::{BuiltRoot, BuiltSwitch, build_root};
 use guards::GuardFunctions;
 use rustc_hash::{FxHashMap, FxHashSet};
-use writes::WrittenPaths;
+use writes::{WrittenPaths, WrittenTargets};
 
 /// Index of a node in [`RootFlow::nodes`].
 ///
@@ -300,6 +306,107 @@ pub(crate) enum FlowNode {
         /// Index of the condition's guard in [`RootFlow::guards`].
         guard: usize,
     },
+    /// The point right after a write to a subject, as TypeScript's
+    /// `FlowAssignment` node stands for one.
+    Write {
+        antecedent: FlowNodeId,
+        /// Index of the write in [`RootFlow::writes`].
+        write: u32,
+    },
+}
+
+/// A write to a subject, which a [`FlowNode::Write`] stands for.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub(crate) struct FlowWrite {
+    pub(crate) subject: FlowSubjectId,
+    pub(crate) effect: FlowWriteEffect,
+}
+
+/// How a write changes the type of its subject, as TypeScript's
+/// `getTypeAtFlowAssignment` gives it.
+///
+/// An index refers to [`RootFlow::assigned`], the value that the write
+/// assigns. A write whose value Biome can't type as TypeScript does has no
+/// index, so the subject gets its declared type there.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub(crate) enum FlowWriteEffect {
+    /// An assignment of a value, as `x = v`, `x ??= v` where the right
+    /// operand runs, a destructuring target, or an initializer: the declared
+    /// type reduced by the assigned type, as [`narrow_by_assignment`] gives
+    /// it.
+    ///
+    /// [`narrow_by_assignment`]: biome_js_type_info::narrow_by_assignment
+    Assign(Option<u32>),
+    /// An assignment whose right operand is a binary expression with a shift
+    /// or arithmetic operator, as `x = x + 1`: the primitive type of the
+    /// literal types of the declared type reduced by the assigned type, as
+    /// TypeScript's `isInCompoundLikeAssignment` gives it.
+    CompoundLike(Option<u32>),
+    /// A compound assignment, as `x += 1`, or `++` and `--`: the primitive
+    /// type of the literal types of the type before the write, which can be
+    /// wider than the declared type, as `number` for `x: 1 | 2` after `x++`.
+    Compound,
+    /// `delete o.p`, which assigns `undefined`.
+    Undefined,
+    /// A write that Biome doesn't reduce, as `(x as T) = v` or `delete o["p"]`:
+    /// the declared type.
+    Reset,
+    /// A write through a key that is not a literal, as `o[k] = v` or
+    /// `delete o[k]`, which can write any property of the subject: every path
+    /// below the subject gets its declared type, and the subject itself keeps
+    /// its type.
+    Wildcard,
+}
+
+/// The value that a write assigns, before inference resolves its type in
+/// the reading context.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub(crate) struct FlowAssigned {
+    pub(crate) value: FlowAssignedValue,
+    /// The fields that destructuring reads from the value to reach the
+    /// target, outermost first, each with the default that supplies it when
+    /// it is `undefined`.
+    pub(crate) steps: Box<[FlowDestructureStep]>,
+    /// The callees of the calls that the value and the defaults can give,
+    /// whose return types the reading context must confirm come from
+    /// annotations before a write reduces by the value.
+    pub(crate) callees: Box<[FlowCallee]>,
+}
+
+/// The callee of a call that a value can give, whose return type collection
+/// can't tell comes from an annotation, as [`CalleeReturn::Resolved`]
+/// describes.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub(crate) enum FlowCallee {
+    /// The binding at this range, which an import declares.
+    Import(TextRange),
+    /// The member that the static member expression at this range reads, as
+    /// `a.m`, whose object and name the reading context takes from the type
+    /// that local inference collected for the expression.
+    Member(TextRange),
+}
+
+/// Where the value of a write comes from.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub(crate) enum FlowAssignedValue {
+    /// The value of the expression at this range, as the right operand of an
+    /// assignment or an initializer.
+    Expression(TextRange),
+    /// An element of the iterable at this range, which the head of a
+    /// `for...of` loop assigns.
+    IterableValue(TextRange),
+    /// A key, which the head of a `for...in` loop assigns: a `string`.
+    Key,
+}
+
+/// One field that destructuring reads, as `a` in `({ a: x } = o)` or `0` in
+/// `[x] = t`.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub(crate) struct FlowDestructureStep {
+    pub(crate) field: DestructureField,
+    /// The range of the default that supplies the field when it is
+    /// `undefined`, as `1` in `[x = 1] = t`.
+    pub(crate) default: Option<TextRange>,
 }
 
 /// The paths through one execution root and the guards its conditions apply.
@@ -353,6 +460,24 @@ pub(crate) struct RootFlow {
     /// The read points that the [`FlowGuard::Bypass`] of a statement in
     /// [`Self::switches`] reaches, sorted.
     pub(crate) bypassed: Box<[BypassedPoint]>,
+    /// The writes that [`FlowNode::Write`] nodes stand for.
+    pub(crate) writes: Box<[FlowWrite]>,
+    /// The values that the writes assign.
+    pub(crate) assigned: Box<[FlowAssigned]>,
+    /// For each subject with reads that a write with a value reduces, the
+    /// indices of those values in [`Self::assigned`], sorted. Inference
+    /// resolves their types in this order and passes them to the solve.
+    pub(crate) subject_writes: FxHashMap<FlowSubjectId, Box<[u32]>>,
+    /// The subjects with reads that only writes mention, which no condition
+    /// tests: a write narrows only a union or a type with a literal member,
+    /// so their reads need no solve when their declared type is neither.
+    pub(crate) assignment_only: FxHashSet<FlowSubjectId>,
+    /// The subjects with reads that may be read before they are assigned: a
+    /// `let` declared without an initializer, and in a constructor, a
+    /// property of `this` whose field has no initializer. Narrowing starts
+    /// them with `undefined` added to their declared type, as TypeScript's
+    /// `checkIdentifier` and `getFlowTypeOfAccessExpression` do.
+    pub(crate) uninitialized: FxHashSet<FlowSubjectId>,
 }
 
 /// A read point with the `switch` statements whose [`FlowGuard::Bypass`]
@@ -481,6 +606,47 @@ impl RootFlow {
             FlowSubject::This | FlowSubject::Member { .. } | FlowSubject::Pattern(_) => None,
         }
     }
+
+    /// Returns the values that the writes of `subject` assign, as
+    /// [`Self::subject_writes`] lists them, or an empty slice when no write
+    /// with a value reduces it.
+    pub(crate) fn subject_writes(&self, subject: FlowSubjectId) -> &[u32] {
+        self.subject_writes
+            .get(&subject)
+            .map_or(&[], |writes| writes)
+    }
+
+    /// Returns whether only writes narrow `subject`, as
+    /// [`Self::assignment_only`] describes.
+    pub(crate) fn is_assignment_only(&self, subject: FlowSubjectId) -> bool {
+        self.assignment_only.contains(&subject)
+    }
+
+    /// Returns whether `subject` may be read before it is assigned, as
+    /// [`Self::uninitialized`] describes.
+    pub(crate) fn is_uninitialized(&self, subject: FlowSubjectId) -> bool {
+        self.uninitialized.contains(&subject)
+    }
+
+    /// Returns whether the subject `prefix` is a proper prefix of the path
+    /// of `subject`, as `o` and `o.v` are of `o.v.w`.
+    pub(crate) fn is_proper_prefix(
+        &self,
+        prefix: FlowSubjectId,
+        mut subject: FlowSubjectId,
+    ) -> bool {
+        while let Some(FlowSubject::Member { object, .. }) = self.subjects.get(subject as usize) {
+            // A table stores objects before their members.
+            if *object >= subject {
+                return false;
+            }
+            if *object == prefix {
+                return true;
+            }
+            subject = *object;
+        }
+        false
+    }
 }
 
 /// A read whose type a test in its execution root may refine.
@@ -505,6 +671,8 @@ pub(crate) struct ModuleFlow {
     property_only_bindings: FxHashSet<TextRange>,
     /// The declarations of the bindings in [`RootFlow::instance_tested`].
     instance_tested_bindings: FxHashSet<TextRange>,
+    /// The declarations of the bindings in [`RootFlow::assignment_only`].
+    assignment_only_bindings: FxHashSet<TextRange>,
     /// The candidates that are candidates only because they are, or contain,
     /// reads of one binding in [`Self::property_only_bindings`], reads of one
     /// binding that only `instanceof` or type-guard functions whose targets
@@ -525,8 +693,8 @@ impl ModuleFlow {
     /// selected.
     ///
     /// Reads are kept only when their binding has a narrowable collected type,
-    /// as decided by [`is_raw_narrowing_invariant`], and a test of that binding
-    /// can reach them. Execution roots that exceed a construction or relevance
+    /// as decided by [`is_raw_narrowing_invariant`], and a test or a write of
+    /// that binding can reach them. Execution roots that exceed a construction or relevance
     /// work limit keep no reads.
     pub(crate) fn collect(
         roots: FlowRootScanner,
@@ -595,6 +763,12 @@ impl ModuleFlow {
     /// read.
     pub(crate) fn is_instance_tested_binding(&self, range: TextRange) -> bool {
         self.instance_tested_bindings.contains(&range)
+    }
+
+    /// Returns whether only writes narrow the binding declared at `range`, as
+    /// [`RootFlow::assignment_only`] describes.
+    pub(crate) fn is_assignment_only_binding(&self, range: TextRange) -> bool {
+        self.assignment_only_bindings.contains(&range)
     }
 
     /// Returns the declaration range of the single binding or pattern whose
@@ -667,7 +841,7 @@ impl RootCollector<'_> {
         bindings: &[JsIdentifierBinding],
         has_this: bool,
     ) {
-        let eligible: FxHashSet<TextRange> = bindings
+        let mut eligible: FxHashSet<TextRange> = bindings
             .iter()
             .filter_map(|binding| self.eligible_range(binding))
             .collect();
@@ -687,10 +861,47 @@ impl RootCollector<'_> {
             instance_mentions,
             reads,
             switches,
+            writes,
+            assigned,
+            written,
         }) = build_root(root, self.model, &mut self.functions, this_can_narrow)
         else {
             return;
         };
+        // A variable narrows only where the graph has a write point for each
+        // write that can run in the root's flow. Other writes, as in a
+        // function called where it is defined or a class static block, run at
+        // points that the graph doesn't model.
+        eligible.retain(|range| self.writes_are_modeled(*range, root, &written));
+        let uninitialized = self.uninitialized_subjects(root, &subjects, &eligible);
+        // A write mentions its subject where it can change the subject's
+        // type, so the reads after it are kept, and the subject narrows as a
+        // tested one, not only through tests of its shape.
+        let condition_mentioned: FxHashSet<FlowSubjectId> =
+            mentions.iter().map(|(_, subject)| *subject).collect();
+        let mut write_mentioned: FxHashSet<FlowSubjectId> = FxHashSet::default();
+        for (node, write) in (0..).zip(&nodes).filter_map(|(id, node)| match node {
+            FlowNode::Write { write, .. } => Some((id, *write)),
+            FlowNode::Start | FlowNode::Join(_) | FlowNode::Condition { .. } => None,
+        }) {
+            if let Some(write) = writes.get(write as usize)
+                && self.write_may_change(write, subjects.as_slice())
+            {
+                mentions.push((node, write.subject));
+                write_mentioned.insert(write.subject);
+            }
+        }
+        let mut assignment_only: FxHashSet<FlowSubjectId> = write_mentioned
+            .iter()
+            .copied()
+            .filter(|subject| {
+                !condition_mentioned.contains(subject) && !uninitialized.contains(subject)
+            })
+            .collect();
+        if !write_mentioned.is_empty() {
+            property_only.retain(|subject| !write_mentioned.contains(subject));
+            instance_tested.retain(|subject| !write_mentioned.contains(subject));
+        }
         // A pattern's declared type is the collected type of the value it
         // destructures. The collected type of each element destructures that
         // value, so any element gives it.
@@ -772,7 +983,7 @@ impl RootCollector<'_> {
             || reads
                 .iter()
                 .any(|read| tested.contains(&read.subject) && is_path(read.subject)))
-        .then(|| WrittenPaths::new(root, self.model, &subjects));
+        .then(|| WrittenPaths::new(root, self.model, &subjects, &written));
         // A `const` keeps the value that the property had at its declaration,
         // and a write to the property before the test can make the object
         // differ from that value, as in
@@ -794,21 +1005,28 @@ impl RootCollector<'_> {
                     object: *object,
                     key: key.clone(),
                 });
-                if property.is_none_or(|property| written.cancels(subjects.as_slice(), property)) {
+                // A write of the object itself, as `s = t` after
+                // `const k = s.kind`, changes the object that the `const`
+                // read the property of.
+                if property
+                    .is_none_or(|property| written.cancels(subjects.as_slice(), property, true))
+                {
                     *guard = FlowGuard::Keep;
                 }
             }
         }
         let (mut readonly_tested, mut only_readonly_tested) =
             readonly_tested_subjects(&mut guards, subjects.as_slice());
+        // A write narrows a path whether or not it is readonly.
+        only_readonly_tested.retain(|subject| !write_mentioned.contains(subject));
         let narrowable: FxHashSet<FlowSubjectId> = tested
             .iter()
             .copied()
             .filter(|subject| {
                 root_can_narrow(*subject)
-                    && written
-                        .as_ref()
-                        .is_none_or(|written| !written.cancels(subjects.as_slice(), *subject))
+                    && written.as_ref().is_none_or(|written| {
+                        !written.cancels(subjects.as_slice(), *subject, false)
+                    })
             })
             .collect();
         // Returns the pattern that can narrow the element that `read` reads.
@@ -912,6 +1130,9 @@ impl RootCollector<'_> {
                             flow.instance_tested_bindings.insert(*range);
                         }
                         binding = Some(*range);
+                    } else if assignment_only.contains(&read.subject) {
+                        flow.assignment_only_bindings.insert(*range);
+                        binding = Some(*range);
                     } else if reached_by_other_tests.as_ref().is_some_and(|reached| {
                         instance_mentions
                             .iter()
@@ -966,6 +1187,30 @@ impl RootCollector<'_> {
                 })
                 .collect();
             let (switches, bypassed) = self.bypassed_points(&nodes, switches, &read_points);
+            // The values that the writes of each read subject assign, which
+            // inference resolves for its solve.
+            let mut subject_writes: FxHashMap<FlowSubjectId, Vec<u32>> = FxHashMap::default();
+            for write in &writes {
+                if let FlowWriteEffect::Assign(Some(value))
+                | FlowWriteEffect::CompoundLike(Some(value)) = write.effect
+                    && read_points.contains_key(&write.subject)
+                {
+                    subject_writes.entry(write.subject).or_default().push(value);
+                }
+            }
+            let subject_writes = subject_writes
+                .into_iter()
+                .map(|(subject, mut values)| {
+                    values.sort_unstable();
+                    values.dedup();
+                    (subject, values.into_boxed_slice())
+                })
+                .collect();
+            let uninitialized = uninitialized
+                .into_iter()
+                .filter(|subject| read_points.contains_key(subject))
+                .collect();
+            assignment_only.retain(|subject| read_points.contains_key(subject));
             flow.roots.push(RootFlow {
                 nodes: nodes.into_boxed_slice(),
                 guards: guards.into_boxed_slice(),
@@ -978,6 +1223,11 @@ impl RootCollector<'_> {
                 read_points,
                 switches,
                 bypassed,
+                writes: writes.into_boxed_slice(),
+                assigned: assigned.into_boxed_slice(),
+                subject_writes,
+                uninitialized,
+                assignment_only,
             });
         }
     }
@@ -1072,8 +1322,12 @@ impl RootCollector<'_> {
         if binding.range() != range
             || binding.is_imported()
             || binding.declaration_kind() == JsDeclarationKind::HoistedValue
-            || binding.all_writes().next().is_some()
         {
+            return None;
+        }
+        // TypeScript gives such a variable a type that evolves with its
+        // writes, which its declared type in Biome doesn't follow.
+        if binding.all_writes().next().is_some() && is_evolving_declaration(&binding) {
             return None;
         }
         // Untyped and `any` bindings never narrow, so their reads need no flow.
@@ -1085,6 +1339,96 @@ impl RootCollector<'_> {
             return None;
         }
         Some(range)
+    }
+
+    /// Returns whether the graph of `root` has a write point for every write
+    /// of the variable declared at `range` that can run in the root's flow,
+    /// given the targets that have one, `written`.
+    ///
+    /// A write in code that runs only when called, as the body of a callback,
+    /// never cancels narrowing, as in TypeScript. Any other write without a
+    /// write point, as in a function called where it is defined, a class
+    /// static block, a field initializer, or unreachable code, makes the
+    /// variable keep its declared type in the whole root.
+    fn writes_are_modeled(
+        &self,
+        range: TextRange,
+        root: &AnyJsControlFlowRoot,
+        written: &WrittenTargets,
+    ) -> bool {
+        let Some(binding) = self.model.as_binding_by_range(range) else {
+            return false;
+        };
+        binding.all_writes().all(|write| {
+            written.variables.contains(&write.range_start())
+                || writes::runs_only_when_called(&write.syntax_near(root.syntax()), root)
+        })
+    }
+
+    /// Returns whether `write` can change the type of its subject at a read,
+    /// as far as the collected types tell: an assignment or `delete` changes
+    /// only a union, and a compound assignment only a type with a literal
+    /// member. The declared type of a property path is not collected, so a
+    /// write of a path can always change it.
+    fn write_may_change(&self, write: &FlowWrite, subjects: &[FlowSubject]) -> bool {
+        let declared = match subjects.get(write.subject as usize) {
+            Some(FlowSubject::Binding(range)) => self.raw_binding_types.get(range),
+            Some(FlowSubject::Member { .. } | FlowSubject::This) => None,
+            Some(FlowSubject::Pattern(_)) | None => return false,
+        };
+        let may_be_union =
+            || declared.is_none_or(|reference| raw_may_be_union(reference, self.raw_types));
+        let may_have_literal =
+            || declared.is_none_or(|reference| raw_may_have_literal(reference, self.raw_types));
+        match write.effect {
+            FlowWriteEffect::Assign(Some(_)) | FlowWriteEffect::Undefined => may_be_union(),
+            FlowWriteEffect::CompoundLike(Some(_)) => may_be_union() || may_have_literal(),
+            FlowWriteEffect::CompoundLike(None) | FlowWriteEffect::Compound => may_have_literal(),
+            FlowWriteEffect::Assign(None) | FlowWriteEffect::Reset | FlowWriteEffect::Wildcard => {
+                false
+            }
+        }
+    }
+
+    /// Returns the subjects of `subjects`, the table of `root`, that may be
+    /// read before they are assigned, as [`RootFlow::uninitialized`]
+    /// describes, among the variables of `eligible` and the paths on `this`.
+    ///
+    /// A `let` counts when it is declared without an initializer, outside the
+    /// head of a `for...in` or `for...of` loop, without a definite assignment
+    /// assertion, as `let x!: T`, and outside a `declare` statement. A path on
+    /// `this` counts in a constructor, and in an arrow function that it calls
+    /// where it is defined, when its first key names a field of the
+    /// constructor's class that is not `static`, has no initializer and no
+    /// `!`, and is not declared with `declare` or `accessor`, as TypeScript's
+    /// `getFlowTypeOfAccessExpression` decides it.
+    fn uninitialized_subjects(
+        &self,
+        root: &AnyJsControlFlowRoot,
+        subjects: &FlowSubjectTable,
+        eligible: &FxHashSet<TextRange>,
+    ) -> FxHashSet<FlowSubjectId> {
+        let fields =
+            subjects::constructor_class(root).map(|class| subjects::uninitialized_fields(&class));
+        let this = subjects.get(&FlowSubject::This);
+        (0..)
+            .zip(subjects.as_slice())
+            .filter(|(_, subject)| match subject {
+                FlowSubject::Binding(range) => {
+                    eligible.contains(range)
+                        && self
+                            .model
+                            .as_binding_by_range(*range)
+                            .is_some_and(|binding| is_uninitialized_declaration(&binding))
+                }
+                FlowSubject::Member { object, key } => {
+                    this == Some(*object)
+                        && fields.as_ref().is_some_and(|fields| fields.contains(key))
+                }
+                FlowSubject::This | FlowSubject::Pattern(_) => false,
+            })
+            .map(|(id, _)| id)
+            .collect()
     }
 
     /// Returns the `(subject, point)` pairs that a test of the subject can
@@ -1155,7 +1499,7 @@ fn successors(nodes: &[FlowNode]) -> Vec<Vec<FlowNodeId>> {
                     successors[*predecessor as usize].push(index);
                 }
             }
-            FlowNode::Condition { antecedent, .. } => {
+            FlowNode::Condition { antecedent, .. } | FlowNode::Write { antecedent, .. } => {
                 successors[*antecedent as usize].push(index);
             }
         }
@@ -1263,6 +1607,68 @@ const BINDING_PATTERN_KINDS: SyntaxKindSet<JsLanguage> = JsArrayBindingPattern::
     .union(JsObjectBindingPatternPropertyList::KIND_SET)
     .union(JsObjectBindingPatternRest::KIND_SET)
     .union(JsObjectBindingPatternShorthandProperty::KIND_SET);
+
+/// Returns whether TypeScript gives the variable `binding` a type that evolves
+/// with its writes, as its `autoType` and `autoArrayType` do: a `let` or a
+/// `var` without a type annotation whose initializer is `null`, `undefined`,
+/// or an empty array literal. A variable without an initializer has no
+/// collected type in Biome.
+fn is_evolving_declaration(binding: &Binding) -> bool {
+    let Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) =
+        binding.tree().declaration()
+    else {
+        return false;
+    };
+    if declarator.variable_annotation().is_some() {
+        return false;
+    }
+    let Some(initializer) = declarator
+        .initializer()
+        .and_then(|initializer| initializer.expression().ok())
+    else {
+        return false;
+    };
+    match initializer.omit_parentheses() {
+        AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsNullLiteralExpression(_),
+        ) => true,
+        AnyJsExpression::JsArrayExpression(array) => array.elements().is_empty(),
+        AnyJsExpression::JsIdentifierExpression(identifier) => identifier
+            .name()
+            .ok()
+            .and_then(|name| name.value_token().ok())
+            .is_some_and(|token| token.text_trimmed() == "undefined"),
+        _ => false,
+    }
+}
+
+/// Returns whether `binding` is declared by a `let` that may be read before
+/// it is assigned, as [`RootCollector::uninitialized_subjects`] describes.
+fn is_uninitialized_declaration(binding: &Binding) -> bool {
+    let Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) =
+        binding.tree().declaration()
+    else {
+        return false;
+    };
+    if declarator.initializer().is_some()
+        || matches!(
+            declarator.variable_annotation(),
+            Some(AnyTsVariableAnnotation::TsDefiniteVariableAnnotation(_))
+        )
+    {
+        return false;
+    }
+    let Some(AnyJsVariableDeclaration::JsVariableDeclaration(declaration)) =
+        declarator.declaration()
+    else {
+        return false;
+    };
+    declaration.is_let()
+        && !declaration
+            .parent::<JsVariableDeclarationClause>()
+            .and_then(|clause| clause.parent::<TsDeclareStatement>())
+            .is_some()
+}
 
 /// Returns whether a destructuring default can supply the value of `binding`,
 /// either its own default, as in `{ a = 1 }`, or the default of an enclosing
@@ -1436,7 +1842,7 @@ mod tests {
     }
 
     #[test]
-    fn paths_on_this_narrow_outside_constructors_and_static_members() {
+    fn paths_on_this_narrow_outside_static_members() {
         const SOURCE: &str = r#"
             class K {
                 x: string | null = null;
@@ -1454,8 +1860,8 @@ mod tests {
         let info = module(SOURCE);
         for (marker, expression, expected) in [
             ("method", "this.x", true),
-            ("constructor", "this.x", false),
-            ("arrow", "this.x", false),
+            ("constructor", "this.x", true),
+            ("arrow", "this.x", true),
             ("static", "this.s", false),
             ("block", "this.s", false),
             ("field", "this.x", true),
@@ -1469,7 +1875,7 @@ mod tests {
     }
 
     #[test]
-    fn written_and_deleted_paths_are_not_reads() {
+    fn targets_of_writes_and_deletes_are_not_reads() {
         const SOURCE: &str = r#"
             function f(o: { v: { w: string | null } | null; n: number | null }) {
                 if (o.v !== null && o.n !== null) {
@@ -1481,11 +1887,13 @@ mod tests {
             }
         "#;
         let info = module(SOURCE);
+        // The object of a target is read, and a path is read after the
+        // writes of it.
         for (marker, expression, expected) in [
             ("object", "o.v", true),
             ("object", "o.v.w", false),
             ("deleted", "o.n", false),
-            ("after", "o.n", false),
+            ("after", "o.n", true),
         ] {
             assert_eq!(
                 info.flow.read(marked(SOURCE, marker, expression)).is_some(),
@@ -1756,9 +2164,10 @@ mod tests {
     fn elements_of_patterns_that_cannot_narrow_are_not_candidates() {
         const SOURCE: &str = r#"
             type S = { kind: "a"; v: 1 } | { kind: "b"; v: 2 };
+            function g() { return 1 as const; }
             function mutable(s: S) { let { kind, v } = s; if (kind === "a") { /*mutable*/v; } }
             function single(s: S) { const { kind } = s; const { v } = s; if (kind === "a") { /*single*/v; } }
-            function written({ kind, v }: S) { v = 2; if (kind === "a") { /*written*/v; } }
+            function written({ kind, v }: S) { v = g(); if (kind === "a") { /*written*/v; } }
             function enclosingDefault(w: { a?: S }, d: S) { const { a: { kind, v } = d } = w; if (kind === "a") { /*enclosingDefault*/v; } }
             function closure({ kind, v }: S) { const h = () => { if (kind === "a") { /*closure*/v; } }; }
             function notUnion({ a, b }: { a: string | null; b: number }) { if (a) { /*notUnion*/b; } }

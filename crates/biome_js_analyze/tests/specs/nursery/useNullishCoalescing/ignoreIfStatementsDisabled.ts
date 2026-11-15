@@ -4,6 +4,7 @@
 // strict check that misses one of them is not reported.
 
 declare let obj: { x: number } | null;
+declare let other: { x: number } | null;
 declare function makeObj(): { x: number };
 
 // Object-shaped annotations do not prove truthiness, so no safe fix is offered.
@@ -11,8 +12,9 @@ if (!obj) {
 	obj = makeObj();
 }
 
-// The same uncertainty applies to a single-statement body.
-if (!obj) obj = makeObj();
+// The same uncertainty applies to a single-statement body. The assignment
+// above makes `obj` non-nullish, so this uses another variable.
+if (!other) other = makeObj();
 
 // loose null check: always safe to fix.
 declare let loose: string | null;

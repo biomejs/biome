@@ -41,11 +41,12 @@ pub use inferred_type::{
 pub use interned_types::{RawTypeData, TypeDb};
 pub use literal_widening::{FreshLiteralKinds, PrimitiveLiteralKind, widen_literal_of_kinds};
 pub use narrowing::{
-    NarrowingPredicate, PropertyTest, RawPredicateTarget, TypeofKind, falsy_values,
-    has_readonly_property, is_narrowing_invariant, is_raw_narrowing_invariant,
-    may_narrow_by_instanceof, may_narrow_by_property, narrow_by_in_operator, narrow_by_instanceof,
-    narrow_by_property, narrow_by_type_predicate, narrow_type, raw_may_be_nullish,
-    raw_may_be_object_union, raw_may_narrow_by_instanceof, raw_predicate_target,
+    NarrowingPredicate, PropertyTest, RawPredicateTarget, TypeofKind, base_literal_type,
+    falsy_values, has_readonly_property, is_narrowing_invariant, is_raw_narrowing_invariant,
+    may_narrow_by_instanceof, may_narrow_by_property, narrow_by_assignment, narrow_by_in_operator,
+    narrow_by_instanceof, narrow_by_property, narrow_by_type_predicate, narrow_type,
+    raw_may_be_nullish, raw_may_be_object_union, raw_may_be_union, raw_may_have_literal,
+    raw_may_narrow_by_instanceof, raw_predicate_target,
 };
 pub use return_type_relation::{
     NarrowedTypeCandidates, ReturnTypeRelation, ReturnTypeVerdict, compare_declared_return_type,
