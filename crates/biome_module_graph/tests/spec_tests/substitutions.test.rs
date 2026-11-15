@@ -725,9 +725,10 @@ fn test_infer_module_types_reads_members_of_distinct_mapped_type_instances() {
 }
 
 #[test]
-fn test_infer_module_types_skips_mapped_types_with_literal_indexed_keys() {
-    // Indexing with a literal is not evaluated, so these mapped types have no
-    // members to find, whatever their type arguments are.
+fn test_infer_module_types_mapped_types_with_literal_indexed_keys() {
+    // A number literal index selects a tuple element, so `ByElement` has the
+    // member `A`. Indexing with a string literal is not evaluated, so
+    // `ByColumns` has no members to find, whatever its type arguments are.
     let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/index.ts".into(),
@@ -747,10 +748,10 @@ fn test_infer_module_types_skips_mapped_types_with_literal_indexed_keys() {
         .expect("module must exist");
     let inferred = infer_module_types(&db, module).expect("types must be inferred");
 
-    for name in ["element", "column"] {
+    for (name, expected) in [("element", "number"), ("column", "unknown")] {
         let ty = inferred_binding_ty_by_name(&db, module, inferred, name)
             .expect("binding type must be inferred");
-        assert_eq!(format_inferred_type(&db, ty), "unknown", "{name}");
+        assert_eq!(format_inferred_type(&db, ty), expected, "{name}");
     }
 }
 

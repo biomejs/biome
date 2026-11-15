@@ -769,7 +769,7 @@ where
         {
             TypeTransformAction::Replace(ty)
         } else if let TypeData::IndexedAccess(access) = ty
-            && access.index(db).is_never_supported_index()
+            && access.index(db).is_never_supported_index(db)
         {
             // The access normalizes to unknown in `leave` whatever its object
             // is, so the object, which can be large, is not normalized.
@@ -814,16 +814,17 @@ where
                 keyof(db, operator.ty(db), self.resolve).unwrap_or(TypeData::Unknown)
             }
             TypeData::IndexedAccess(access) => {
-                indexed_access(db, access.object(db), access.index(db)).unwrap_or_else(|| {
-                    // `T[K]` with an unsubstituted `K` is not unknown: a
-                    // mapped type still substitutes its keys for `K` after
-                    // normalizing its property type.
-                    if access.index(db).is_generic_reference(db) {
-                        TypeData::IndexedAccess(access)
-                    } else {
-                        TypeData::Unknown
-                    }
-                })
+                indexed_access(db, access.object(db), access.index(db), self.resolve)
+                    .unwrap_or_else(|| {
+                        // `T[K]` with an unsubstituted `K` is not unknown: a
+                        // mapped type still substitutes its keys for `K` after
+                        // normalizing its property type.
+                        if access.index(db).is_generic_reference(db) {
+                            TypeData::IndexedAccess(access)
+                        } else {
+                            TypeData::Unknown
+                        }
+                    })
             }
             // A mapped type whose keys are not resolved stays unevaluated so it
             // can still be instantiated by a later substitution.

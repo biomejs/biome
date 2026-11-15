@@ -6,20 +6,25 @@
 //! possible key or element. This does not depend on which branches execute.
 
 use crate::interned_types::{
-    InternedIndexedAccessType, InternedLiteral, InternedMappedType, Literal, MappedTypeKeys,
-    ProjectedKey, ReturnType, TypeData, TypeDb, TypeMember, TypeMemberKind,
+    InternedIndexedAccessType, InternedLiteral, InternedMappedType, InternedTuple, Literal,
+    MappedTypeKeys, ProjectedKey, ReturnType, TypeData, TypeDb, TypeMember, TypeMemberKind,
     requires_escape_handling,
 };
 use crate::type_relation::TypeResolver;
 use crate::type_transform::TypeSubstitution;
-use crate::{MappedTypeModifier, TypeOperator};
+use crate::{MappedTypeModifier, ObjectKind, TypeOperator};
 use biome_rowan::Text;
 use rustc_hash::FxHashSet;
+use std::collections::VecDeque;
 
 const MAX_PROJECTION_MEMBERS: usize = 1024;
 
-/// Maximum number of interfaces whose members are collected for one `keyof`.
+/// Maximum number of interfaces whose members are collected for one `keyof`,
+/// or searched for one numeric property.
 const MAX_KEYOF_INTERFACES: usize = 64;
+
+/// Largest integer that a JavaScript number represents exactly, 2^53 - 1.
+const MAX_SAFE_INTEGER: u64 = (1 << 53) - 1;
 
 /// Returns every member of an object, or `None` if the list may be incomplete.
 ///
@@ -304,21 +309,44 @@ fn member_value_type<'db>(db: &'db dyn TypeDb, member: &TypeMember<'db>) -> Type
     }
 }
 
-impl TypeData<'_> {
+impl<'db> TypeData<'db> {
     /// Returns whether [`indexed_access`] can never evaluate `T[self]`,
     /// whatever `T` is.
     ///
-    /// Only `T[number]` is evaluated. A literal index, as in `T[0]` or
-    /// `T["key"]`, is never `number`, and substituting generics can't change
-    /// it.
-    pub(crate) fn is_never_supported_index(self) -> bool {
-        matches!(self, Self::Literal(_))
+    /// Only `number` and number literals written as decimal integers, as in
+    /// `T[0]`, are evaluated. Other literal indexes, as in `T["key"]` or
+    /// `T[-1]`, stay unsupported, and substituting generics can't change them.
+    pub(crate) fn is_never_supported_index(self, db: &'db dyn TypeDb) -> bool {
+        matches!(self, Self::Literal(_)) && literal_index(db, self).is_none()
     }
 }
 
-/// Combines the possible element types selected by `T[number]`.
+/// Returns the position selected by a number literal index written as a
+/// decimal integer, such as `0` in `T[0]`.
 ///
-/// For example, indexing this const tuple produces `"A" | "B" | "C"`:
+/// Other spellings of the same number, such as `0x1` or `1.0`, return `None`,
+/// as do negative and fractional numbers. So do integers above
+/// `Number.MAX_SAFE_INTEGER`: TypeScript rounds them, so their text doesn't
+/// name the position or property they select.
+fn literal_index<'db>(db: &'db dyn TypeDb, index: TypeData<'db>) -> Option<usize> {
+    let TypeData::Literal(literal) = index else {
+        return None;
+    };
+    let Literal::Number(number) = literal.literal(db) else {
+        return None;
+    };
+    let text = number.as_str();
+    let position = text.parse::<u64>().ok()?;
+    if position > MAX_SAFE_INTEGER || position.to_string() != text {
+        return None;
+    }
+    usize::try_from(position).ok()
+}
+
+/// Evaluates an indexed access type `T[K]` whose operands are normalized.
+///
+/// `T[number]` combines the possible element types of a tuple or array. For
+/// example, indexing this const tuple produces `"A" | "B" | "C"`:
 ///
 /// ```ts
 /// const values = ["A", "B", "C"] as const;
@@ -329,47 +357,47 @@ impl TypeData<'_> {
 /// contributes its element type; for example, `("A" | "B")[][number]` produces
 /// `"A" | "B"`.
 ///
-/// Returns `None` for unannotated mutable arrays, tuples with rest elements,
-/// indices other than `number`, signed bigint literals, strings requiring escape handling, or work
-/// exceeding 1024 members or visited types. These results must stay unknown.
+/// A number literal index selects one position or numeric property:
+///
+/// ```ts
+/// type First = [string, number][0];            // string
+/// type Optional = [string, boolean?][1];       // boolean | undefined
+/// type InRest = [string, ...number[]][2];      // number
+/// type Element = string[][0];                  // string
+/// type Property = { 0: "zero"; 1: "one" }[1];  // "one"
+/// ```
+///
+/// A union index is evaluated for each member, so `[string, number][0 | 1]`
+/// produces `string | number`. `resolve` resolves the handles of the
+/// interfaces a property is looked up in, which are not normalized with the
+/// operands.
+///
+/// Returns `None` for unannotated mutable arrays, `number` indexes into tuples
+/// with rest elements, literal indexes that are out of range or not decimal
+/// integers, tuples whose rest element isn't last, properties of generic
+/// interface instances or of objects with uncollected members, signed bigint
+/// literals, strings requiring escape handling, or work exceeding 1024 members
+/// or visited types. These results must stay unknown.
 pub(crate) fn indexed_access<'db>(
     db: &'db dyn TypeDb,
-    mut object: TypeData<'db>,
+    object: TypeData<'db>,
     index: TypeData<'db>,
+    resolve: &mut TypeResolver<'db, '_>,
 ) -> Option<TypeData<'db>> {
-    if index != TypeData::Number {
-        return None;
-    }
-    if let TypeData::TypeOperator(operator) = object
-        && operator.operator(db) == TypeOperator::Readonly
-    {
-        object = operator.ty(db);
-    }
-    let projected = match object {
-        TypeData::Tuple(tuple) => {
-            if tuple.is_inferred_array(db) {
+    let projected = match index {
+        TypeData::Union(union) => {
+            let indexes = union.types(db);
+            if indexes.len() > MAX_PROJECTION_MEMBERS {
                 return None;
             }
-            let elements = tuple.elements(db);
-            if elements.len() > MAX_PROJECTION_MEMBERS
-                || elements.iter().any(|element| element.is_rest)
-            {
-                return None;
-            }
-            let mut types = Vec::with_capacity(elements.len() + 1);
-            for element in elements {
-                types.push(element.ty);
-            }
-            if elements.iter().any(|element| element.is_optional) {
-                types.push(TypeData::Undefined);
-            }
-            Some(TypeData::union_from_types(db, types))
+            let types = indexes
+                .iter()
+                .map(|index| project_index(db, object, *index, resolve))
+                .collect::<Option<Vec<_>>>()?;
+            TypeData::union_from_types(db, types)
         }
-        TypeData::InstanceOf(instance) if instance.ty(db).is_array_class(db) => {
-            instance.type_parameters(db).first().copied()
-        }
-        _ => None,
-    }?;
+        index => project_index(db, object, index, resolve)?,
+    };
     if projected
         .union_iterator(db)
         .any(|ty| ty == TypeData::UnknownKeyword)
@@ -406,4 +434,184 @@ pub(crate) fn indexed_access<'db>(
         }
     }
     pending.is_empty().then_some(projected)
+}
+
+/// Selects the types `object[index]` reads for one member of the index, as
+/// described by [`indexed_access`], before literals are checked.
+fn project_index<'db>(
+    db: &'db dyn TypeDb,
+    mut object: TypeData<'db>,
+    index: TypeData<'db>,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> Option<TypeData<'db>> {
+    if let TypeData::TypeOperator(operator) = object
+        && operator.operator(db) == TypeOperator::Readonly
+    {
+        object = operator.ty(db);
+    }
+    if index == TypeData::Number {
+        return match object {
+            TypeData::Tuple(tuple) => {
+                if tuple.is_inferred_array(db) {
+                    return None;
+                }
+                let elements = tuple.elements(db);
+                if elements.len() > MAX_PROJECTION_MEMBERS
+                    || elements.iter().any(|element| element.is_rest)
+                {
+                    return None;
+                }
+                let mut types = Vec::with_capacity(elements.len() + 1);
+                for element in elements {
+                    types.push(element.ty);
+                }
+                if elements.iter().any(|element| element.is_optional) {
+                    types.push(TypeData::Undefined);
+                }
+                Some(TypeData::union_from_types(db, types))
+            }
+            TypeData::InstanceOf(instance) if instance.ty(db).is_array_class(db) => {
+                instance.type_parameters(db).first().copied()
+            }
+            _ => None,
+        };
+    }
+
+    let position = literal_index(db, index)?;
+    match object {
+        TypeData::Tuple(tuple) => tuple_element_at(db, tuple, position, resolve),
+        TypeData::InstanceOf(instance) if instance.ty(db).is_array_class(db) => {
+            instance.type_parameters(db).first().copied()
+        }
+        object => numeric_property(db, object, position, resolve),
+    }
+}
+
+/// Returns the type read at `position` of a declared tuple.
+///
+/// An optional element also contributes `undefined`. A position at or past a
+/// trailing rest element, such as `...number[]`, reads the rest's element
+/// type. Returns `None` for unannotated mutable arrays, positions past the
+/// last element, and positions at or past a rest element that isn't last or
+/// isn't an array.
+fn tuple_element_at<'db>(
+    db: &'db dyn TypeDb,
+    tuple: InternedTuple<'db>,
+    position: usize,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> Option<TypeData<'db>> {
+    if tuple.is_inferred_array(db) {
+        return None;
+    }
+    let elements = tuple.elements(db);
+    if let Some(rest) = elements.iter().position(|element| element.is_rest)
+        && position >= rest
+    {
+        if rest + 1 != elements.len() {
+            return None;
+        }
+        return match resolve(elements[rest].ty) {
+            TypeData::InstanceOf(instance) if instance.ty(db).is_array_class(db) => {
+                instance.type_parameters(db).first().copied()
+            }
+            _ => None,
+        };
+    }
+    let element = elements.get(position)?;
+    Some(if element.is_optional {
+        TypeData::union_from_types(db, Vec::from([element.ty, TypeData::Undefined]))
+    } else {
+        element.ty
+    })
+}
+
+/// Returns the type of the property of an object or interface whose name is
+/// `position` written as a decimal integer.
+///
+/// Both `{ 1: x }` and `{ "1": x }` declare that property. An interface's own
+/// property takes precedence over those of the interfaces it extends, which
+/// are searched in order. An optional property also contributes `undefined`.
+///
+/// Returns `None` if no such property is found, if the object has uncollected
+/// members, or if the lookup reaches a generic interface or an instance of
+/// one, whose property types would need its type arguments. A property of an
+/// object expression also returns `None` unless it is const-asserted: its
+/// type is that of the initial value, such as `"a"` for `{ 0: "a" }`, while
+/// the property may hold any `string`. At most 64 interfaces are searched.
+fn numeric_property<'db>(
+    db: &'db dyn TypeDb,
+    object: TypeData<'db>,
+    position: usize,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> Option<TypeData<'db>> {
+    let name = position.to_string();
+    let find = |members: &'db [TypeMember<'db>]| {
+        members
+            .iter()
+            .find(|member| member.kind.computed_name().is_none() && member.kind.has_name(&name))
+    };
+    let member = match non_generic_declaration(db, object, resolve)? {
+        TypeData::Object(object) => {
+            if object.has_unknown_members(db) {
+                return None;
+            }
+            let member = find(object.members(db))?;
+            if object.kind(db) == ObjectKind::Expression && !member.kind.is_const_asserted() {
+                return None;
+            }
+            member
+        }
+        TypeData::Literal(literal) => match literal.literal(db) {
+            Literal::Object(members) => find(members)?,
+            _ => return None,
+        },
+        TypeData::Interface(interface) if interface.type_parameters(db).is_empty() => {
+            let mut pending = VecDeque::from([interface]);
+            let mut seen = FxHashSet::default();
+            loop {
+                let interface = pending.pop_front()?;
+                if !seen.insert(interface) {
+                    continue;
+                }
+                if seen.len() > MAX_KEYOF_INTERFACES {
+                    return None;
+                }
+                if let Some(member) = find(interface.members(db)) {
+                    break member;
+                }
+                for parent in interface.extends(db) {
+                    let TypeData::Interface(parent) =
+                        non_generic_declaration(db, *parent, resolve)?
+                    else {
+                        return None;
+                    };
+                    if !parent.type_parameters(db).is_empty() {
+                        return None;
+                    }
+                    pending.push_back(parent);
+                }
+            }
+        }
+        _ => return None,
+    };
+    let ty = member_value_type(db, member);
+    Some(if member.kind.is_optional() {
+        TypeData::union_from_types(db, Vec::from([ty, TypeData::Undefined]))
+    } else {
+        ty
+    })
+}
+
+/// Returns the declaration that `ty` refers to or is an instance of, or `None`
+/// for an instance with type arguments.
+fn non_generic_declaration<'db>(
+    db: &'db dyn TypeDb,
+    ty: TypeData<'db>,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> Option<TypeData<'db>> {
+    match resolve(ty) {
+        TypeData::InstanceOf(instance) if !instance.type_parameters(db).is_empty() => None,
+        TypeData::InstanceOf(instance) => Some(resolve(instance.ty(db))),
+        ty => Some(ty),
+    }
 }
