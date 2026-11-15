@@ -1,0 +1,149 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidVariableKinds.ts
+---
+# Input
+```ts
+// A `var`, a module variable, and a parameter of an enclosing function
+// narrow by the tests and writes of the function that reads them, as in
+// TypeScript, so each condition below can't change.
+
+interface Timer {
+	cancel(): void;
+}
+
+declare function make(): Timer;
+declare function next(): Timer | null;
+
+let current: Timer | null = next();
+
+function hoisted() {
+	var timer: Timer | null = make();
+	timer?.cancel();
+}
+
+function enclosing() {
+	if (current !== null) {
+		current?.cancel();
+	}
+}
+
+function writes() {
+	current = make();
+	current?.cancel();
+}
+
+function parameter(timer: Timer | null) {
+	return () => {
+		if (timer) {
+			timer?.cancel();
+		}
+	};
+}
+
+```
+
+# Diagnostics
+```
+invalidVariableKinds.ts:16:2 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    14 │ function hoisted() {
+    15 │ 	var timer: Timer | null = make();
+  > 16 │ 	timer?.cancel();
+       │ 	^^^^^
+    17 │ }
+    18 │ 
+  
+  i Replace ?. with ..
+  
+    14 │ function hoisted() {
+    15 │ 	var timer: Timer | null = make();
+  > 16 │ 	timer?.cancel();
+       │ 	     ^^
+    17 │ }
+    18 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidVariableKinds.ts:21:3 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    19 │ function enclosing() {
+    20 │ 	if (current !== null) {
+  > 21 │ 		current?.cancel();
+       │ 		^^^^^^^
+    22 │ 	}
+    23 │ }
+  
+  i Replace ?. with ..
+  
+    19 │ function enclosing() {
+    20 │ 	if (current !== null) {
+  > 21 │ 		current?.cancel();
+       │ 		       ^^
+    22 │ 	}
+    23 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidVariableKinds.ts:27:2 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    25 │ function writes() {
+    26 │ 	current = make();
+  > 27 │ 	current?.cancel();
+       │ 	^^^^^^^
+    28 │ }
+    29 │ 
+  
+  i Replace ?. with ..
+  
+    25 │ function writes() {
+    26 │ 	current = make();
+  > 27 │ 	current?.cancel();
+       │ 	       ^^
+    28 │ }
+    29 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidVariableKinds.ts:33:4 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    31 │ 	return () => {
+    32 │ 		if (timer) {
+  > 33 │ 			timer?.cancel();
+       │ 			^^^^^
+    34 │ 		}
+    35 │ 	};
+  
+  i Replace ?. with ..
+  
+    31 │ 	return () => {
+    32 │ 		if (timer) {
+  > 33 │ 			timer?.cancel();
+       │ 			     ^^
+    34 │ 		}
+    35 │ 	};
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```

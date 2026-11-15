@@ -114,6 +114,8 @@ mod tailwind_stylesheet;
 mod try_statements;
 #[path = "spec_tests/types.test.rs"]
 mod types;
+#[path = "spec_tests/variable_kinds.test.rs"]
+mod variable_kinds;
 
 #[path = "spec_tests/support.rs"]
 mod support;
