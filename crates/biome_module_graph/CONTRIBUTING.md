@@ -92,9 +92,11 @@ narrowing updates the rows it affects there. This section describes how
 narrowing is built.
 
 An execution root is a body analyzed independently, such as a module,
-function, or method. Each root gets its own graph, and a read never sees facts
-from an enclosing root. Biome uses its semantic model to distinguish variables
-with the same name.
+function, or method. Each root gets its own graph. A read in a closure, such
+as an arrow function, continues the flow of the root that creates the
+closure from the point where it creates it, as TypeScript does; any other
+read never sees facts from an enclosing root. Biome uses its semantic model to
+distinguish variables with the same name.
 
 Flow is split like types: collection gathers syntax-only facts, and tracked
 queries do everything that needs a resolved type.
@@ -162,7 +164,12 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   object a tested subject. The builder skips class members: methods, accessors,
   constructors, and static blocks are roots of their own, and TypeScript
   analyzes a class field that has an initializer apart from the code around
-  the class. It also skips `declare` statements, which never run.
+  the class. It also skips `declare` statements, which never run. It records
+  each closure that it skips in reachable code and that continues the flow
+  where it is created (`AnyContinuingClosure`: a function or arrow
+  expression, or a method or accessor of an object literal or of a class
+  expression) with the flow point there, its capture point
+  (`BuiltRoot::captures`).
 - The builder models the control flow of blocks, `if`, `while`, `do...while`,
   `for`, `for...in`, `for...of`, `switch`, `try`, labeled statements,
   `break`, `continue`, `return`, and `throw`, as TypeScript's binder does. A
@@ -469,6 +476,33 @@ list it only when every root that keeps reads of it lists it in
 built even when it declares no variable that can narrow, because it can read
 one of an enclosing root, and it keeps no graph when relevance keeps no
 read.
+A read inside a closure that a root creates, directly or through other
+closures, can continue the root's flow at the capture point of the outermost
+one (`closure_reads`). The root looks for such reads of each variable that it
+tests or writes, and of each element of a pattern that it narrows, among the
+variable's semantic reads, and keeps those that TypeScript's
+`checkIdentifier` continues (`capture_rule`): a `const` that is not an
+import, and a parameter, a `catch` variable, or a `let`, except one that is
+exported or declared at the top level of a file, read after its last
+assignment. The last assignment comes from the variable's semantic writes,
+each extended to the end of the outermost statement of TypeScript's list
+around it that starts after the declaration (`assignment_position`, as
+`extendAssignmentPosition` does), and a write in another function means that
+no read continues. Every function between the read and the root must be such
+a closure, and each must reach the next one in, or the read, in its own
+reachable code (`continues_to`): as its builder found it, for a root that was
+built, and otherwise when no `return`, `throw`, `break`, `continue`, or
+infinite loop ends before it (`first_exit`), which is wider. Decorators,
+computed keys of members, fields, types, `declare` statements, and `with`
+statements stop the chain. Roots are collected inner first, so a root finds
+whether a nested root already keeps the read. When none does, the read
+becomes a read of the root at the capture point. Otherwise the outermost
+nested root that keeps the read, or continues from it, gets a capture of the
+variable (`RootFlow::captures`), the capture point becomes a read point of
+the root, and the nested root's uninitialized start of the variable goes,
+because the type at the capture point starts where the variable is declared.
+Each closure adds one read point to the root, which all its reads share.
+
 Other variable types are resolved only when a candidate read is queried,
 because resolving them can be costly.
 
@@ -496,6 +530,21 @@ single solve, and `infer_flow_subject_type` takes the result at the read's
 incoming flow point. Both queries take the starting type as part of their
 key, so reads of a subject share one solve when they start from the same
 type.
+
+A read of a variable that its root continues from an enclosing root
+(`RootFlow::captures`) starts from the variable's type at the capture point
+(`narrow_captured`): `captured_type` takes it from the solve of the enclosing
+root, which starts from the declared type or from the enclosing root's own
+capture, so a chain of closures resolves outward. That type is the baseline
+in the key of the read's solve, so the closure's tests narrow it further, and
+the solve of the enclosing root is the one its own reads share. A `let` that
+may be read before it is assigned keeps the `undefined` of its start along
+the chain. A read in a closure starts it without `undefined` when some code
+assigns it, as TypeScript's `checkIdentifier` assumes such a variable
+assigned in a nested function (`FlowCapture::assumes_initialized`,
+`FlowRead::assumes_initialized`), and otherwise gets the declared type where
+`undefined` remains although the declared type lacks it. Complete module
+inference keeps the type at each capture point in `LocalFlow`.
 
 A write node applies `apply_write`, following `getTypeAtFlowAssignment`:
 the declared type reduced by the assigned type (`narrow_by_assignment`,

@@ -1868,7 +1868,7 @@ fn is_optional_chain(expression: &AnyJsExpression) -> bool {
 
 /// Returns whether `declaration` is a variable statement directly in the body
 /// of a module or script, not in a block, a loop head, or a namespace.
-fn is_top_level_statement(declaration: &AnyJsVariableDeclaration) -> bool {
+pub(super) fn is_top_level_statement(declaration: &AnyJsVariableDeclaration) -> bool {
     declaration
         .parent::<JsVariableStatement>()
         .and_then(|statement| statement.syntax().grand_parent())

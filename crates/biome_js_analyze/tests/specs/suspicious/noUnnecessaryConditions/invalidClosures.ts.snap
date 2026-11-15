@@ -1,0 +1,185 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidClosures.ts
+---
+# Input
+```ts
+// A read in a closure created after a test sees the test, as in TypeScript,
+// when the variable is a `const`, or a parameter or a `let` that nothing
+// assigns after the closure is created, so each condition below can't
+// change.
+
+interface Timer {
+	cancel(): void;
+}
+
+declare function isTimer(value: unknown): value is Timer;
+declare function next(): Timer | null;
+
+function tested(timer: Timer | null) {
+	if (timer !== null) {
+		return () => timer?.cancel();
+	}
+}
+
+function guarded(timer: Timer | null) {
+	if (isTimer(timer)) {
+		return () => timer?.cancel();
+	}
+}
+
+function constant() {
+	const timer = next();
+	if (timer) {
+		[1].forEach(() => timer?.cancel());
+	}
+}
+
+function pastLastAssignment(timer: Timer | null) {
+	timer ??= next();
+	if (!timer) return;
+	return () => timer?.cancel();
+}
+
+function method(timer: Timer | null) {
+	if (timer) {
+		return {
+			stop() {
+				timer?.cancel();
+			},
+		};
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidClosures.ts:15:16 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    13 │ function tested(timer: Timer | null) {
+    14 │ 	if (timer !== null) {
+  > 15 │ 		return () => timer?.cancel();
+       │ 		             ^^^^^
+    16 │ 	}
+    17 │ }
+  
+  i Replace ?. with ..
+  
+    13 │ function tested(timer: Timer | null) {
+    14 │ 	if (timer !== null) {
+  > 15 │ 		return () => timer?.cancel();
+       │ 		                  ^^
+    16 │ 	}
+    17 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidClosures.ts:21:16 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    19 │ function guarded(timer: Timer | null) {
+    20 │ 	if (isTimer(timer)) {
+  > 21 │ 		return () => timer?.cancel();
+       │ 		             ^^^^^
+    22 │ 	}
+    23 │ }
+  
+  i Replace ?. with ..
+  
+    19 │ function guarded(timer: Timer | null) {
+    20 │ 	if (isTimer(timer)) {
+  > 21 │ 		return () => timer?.cancel();
+       │ 		                  ^^
+    22 │ 	}
+    23 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidClosures.ts:28:21 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    26 │ 	const timer = next();
+    27 │ 	if (timer) {
+  > 28 │ 		[1].forEach(() => timer?.cancel());
+       │ 		                  ^^^^^
+    29 │ 	}
+    30 │ }
+  
+  i Replace ?. with ..
+  
+    26 │ 	const timer = next();
+    27 │ 	if (timer) {
+  > 28 │ 		[1].forEach(() => timer?.cancel());
+       │ 		                       ^^
+    29 │ 	}
+    30 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidClosures.ts:35:15 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    33 │ 	timer ??= next();
+    34 │ 	if (!timer) return;
+  > 35 │ 	return () => timer?.cancel();
+       │ 	             ^^^^^
+    36 │ }
+    37 │ 
+  
+  i Replace ?. with ..
+  
+    33 │ 	timer ??= next();
+    34 │ 	if (!timer) return;
+  > 35 │ 	return () => timer?.cancel();
+       │ 	                  ^^
+    36 │ }
+    37 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidClosures.ts:42:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    40 │ 		return {
+    41 │ 			stop() {
+  > 42 │ 				timer?.cancel();
+       │ 				^^^^^
+    43 │ 			},
+    44 │ 		};
+  
+  i Replace ?. with ..
+  
+    40 │ 		return {
+    41 │ 			stop() {
+  > 42 │ 				timer?.cancel();
+       │ 				     ^^
+    43 │ 			},
+    44 │ 		};
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
