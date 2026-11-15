@@ -7,6 +7,7 @@ use crate::rule_context::create_rule_context;
 use crate::semantic::register_semantic;
 use crate::source::read_module_source;
 use crate::token::JsAstToken;
+use crate::trivia::JsTriviaPiece;
 use biome_analyze::{PluginDiagnosticEntry, ServiceBag};
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxElement, JsSyntaxKind, JsSyntaxNode};
@@ -65,6 +66,7 @@ impl JsExecContext {
 
         JsAstNode::register(&mut ctx)?;
         JsAstToken::register(&mut ctx)?;
+        JsTriviaPiece::register(&mut ctx)?;
         JsNodeKindSet::<JsLanguage>::register(&mut ctx)?;
         JsTokenKindSet::<JsLanguage>::register(&mut ctx)?;
         JsMutation::register(&mut ctx)?;
