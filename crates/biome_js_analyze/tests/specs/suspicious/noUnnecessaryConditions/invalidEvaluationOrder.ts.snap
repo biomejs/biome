@@ -1,0 +1,166 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidEvaluationOrder.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// The key and the arguments after `?.` see its object as not nullish, the
+// defaults of destructuring patterns and parameters see the narrowing before
+// them, and the right operand of a logical assignment sees the test of its
+// target, as in TypeScript.
+
+type Options = { v: string | null; w: number; f(value: unknown): void };
+
+function receiverInArguments(o: Options | undefined) {
+	o?.f(o?.w);
+}
+
+function receiverInLaterLink(o: { g(): Options } | undefined) {
+	o?.g().f(o?.g);
+}
+
+function parameterDefault(o: Options | undefined, w = o && o?.w) {
+	return w;
+}
+
+function destructuringDefault(o: Options | undefined, source: { a?: number }) {
+	if (o) {
+		const { a = o?.w } = source;
+		return a;
+	}
+}
+
+type Empty = { kind: ""; options: Options };
+type Named = { kind: "named"; options?: Options };
+
+function logicalAssignmentDiscriminant(s: Empty | Named) {
+	s.kind ||= (s.options?.f(0), "named");
+}
+
+```
+
+# Diagnostics
+```
+invalidEvaluationOrder.ts:10:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+     9 │ function receiverInArguments(o: Options | undefined) {
+  > 10 │ 	o?.f(o?.w);
+       │ 	     ^
+    11 │ }
+    12 │ 
+  
+  i Replace ?. with ..
+  
+     9 │ function receiverInArguments(o: Options | undefined) {
+  > 10 │ 	o?.f(o?.w);
+       │ 	      ^^
+    11 │ }
+    12 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidEvaluationOrder.ts:14:11 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    13 │ function receiverInLaterLink(o: { g(): Options } | undefined) {
+  > 14 │ 	o?.g().f(o?.g);
+       │ 	         ^
+    15 │ }
+    16 │ 
+  
+  i Replace ?. with ..
+  
+    13 │ function receiverInLaterLink(o: { g(): Options } | undefined) {
+  > 14 │ 	o?.g().f(o?.g);
+       │ 	          ^^
+    15 │ }
+    16 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidEvaluationOrder.ts:17:60 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    15 │ }
+    16 │ 
+  > 17 │ function parameterDefault(o: Options | undefined, w = o && o?.w) {
+       │                                                            ^
+    18 │ 	return w;
+    19 │ }
+  
+  i Replace ?. with ..
+  
+    15 │ }
+    16 │ 
+  > 17 │ function parameterDefault(o: Options | undefined, w = o && o?.w) {
+       │                                                             ^^
+    18 │ 	return w;
+    19 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidEvaluationOrder.ts:23:15 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    21 │ function destructuringDefault(o: Options | undefined, source: { a?: number }) {
+    22 │ 	if (o) {
+  > 23 │ 		const { a = o?.w } = source;
+       │ 		            ^
+    24 │ 		return a;
+    25 │ 	}
+  
+  i Replace ?. with ..
+  
+    21 │ function destructuringDefault(o: Options | undefined, source: { a?: number }) {
+    22 │ 	if (o) {
+  > 23 │ 		const { a = o?.w } = source;
+       │ 		             ^^
+    24 │ 		return a;
+    25 │ 	}
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidEvaluationOrder.ts:32:14 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    31 │ function logicalAssignmentDiscriminant(s: Empty | Named) {
+  > 32 │ 	s.kind ||= (s.options?.f(0), "named");
+       │ 	            ^^^^^^^^^
+    33 │ }
+    34 │ 
+  
+  i Replace ?. with ..
+  
+    31 │ function logicalAssignmentDiscriminant(s: Empty | Named) {
+  > 32 │ 	s.kind ||= (s.options?.f(0), "named");
+       │ 	                     ^^
+    33 │ }
+    34 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```

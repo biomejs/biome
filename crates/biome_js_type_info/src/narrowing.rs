@@ -126,6 +126,85 @@ pub fn raw_may_narrow_by_instanceof(reference: &TypeReference, raw_types: &[RawT
     raw_object_members(reference, raw_types) >= 1
 }
 
+/// Returns whether a collected type reference may resolve to a type that
+/// `null` or `undefined` can have, without resolving it.
+///
+/// A runtime test that a value is not nullish, such as the one that `?.`
+/// applies to its object, narrows only such a type. This returns false when
+/// the raw tables show that every member of the type is `string`, `number`,
+/// `boolean`, `bigint`, `symbol`, a literal type, an object, interface, class,
+/// function, constructor, or tuple type written in place, `object`, `this`, a
+/// module or namespace, or the result of `new`, `+`, unary `-`, `~`, or
+/// `typeof`, as for the object literal of `const o = { a: 1 }`. `null`,
+/// `undefined`, `void`, `unknown`, `any`, a type name, an import, a generic,
+/// other inferred types, and a chain of raw references longer than the step
+/// limit may be nullish. `raw_types` is the module table that local
+/// references index.
+pub fn raw_may_be_nullish(reference: &TypeReference, raw_types: &[RawTypeData]) -> bool {
+    let Some(target) = raw_reference_target(reference, raw_types) else {
+        return true;
+    };
+    match target {
+        RawReferenceTarget::Local(RawTypeData::Union(union)) => {
+            union
+                .types()
+                .iter()
+                .any(|member| match raw_reference_target(member, raw_types) {
+                    // A nested union may be nullish, without looking into it.
+                    Some(target) => raw_target_may_be_nullish(&target),
+                    None => true,
+                })
+        }
+        target => raw_target_may_be_nullish(&target),
+    }
+}
+
+/// Returns whether `target` may be nullish, as [`raw_may_be_nullish`]
+/// decides it, taking a union as nullish.
+fn raw_target_may_be_nullish(target: &RawReferenceTarget) -> bool {
+    let data = match target {
+        RawReferenceTarget::Global(id) => {
+            return ![
+                GLOBAL_BIGINT_KEYWORD_ID,
+                GLOBAL_BOOLEAN_KEYWORD_ID,
+                GLOBAL_NUMBER_KEYWORD_ID,
+                GLOBAL_STRING_KEYWORD_ID,
+                GLOBAL_SYMBOL_KEYWORD_ID,
+            ]
+            .contains(id);
+        }
+        RawReferenceTarget::Local(data) => data,
+    };
+    match data {
+        RawTypeData::BigInt
+        | RawTypeData::Boolean
+        | RawTypeData::Number
+        | RawTypeData::String
+        | RawTypeData::Symbol
+        | RawTypeData::Literal(_)
+        | RawTypeData::Class(_)
+        | RawTypeData::Constructor(_)
+        | RawTypeData::Function(_)
+        | RawTypeData::Interface(_)
+        | RawTypeData::Module(_)
+        | RawTypeData::Namespace(_)
+        | RawTypeData::Object(_)
+        | RawTypeData::Tuple(_)
+        | RawTypeData::ImportNamespace(_)
+        | RawTypeData::ObjectKeyword
+        | RawTypeData::ThisKeyword => false,
+        RawTypeData::TypeofExpression(expression) => !matches!(
+            expression.as_ref(),
+            TypeofExpression::New(_)
+                | TypeofExpression::Addition(_)
+                | TypeofExpression::BitwiseNot(_)
+                | TypeofExpression::Typeof(_)
+                | TypeofExpression::UnaryMinus(_)
+        ),
+        _ => true,
+    }
+}
+
 /// Returns how many object types the type at `reference` may have among its
 /// members, as far as raw tables tell, up to two.
 ///
@@ -4195,6 +4274,108 @@ mod tests {
         ));
         // A local id outside the table may stand for anything.
         assert!(raw_may_be_object_union(&local(3), &[]));
+    }
+
+    #[test]
+    fn raw_types_without_null_or_undefined_are_never_nullish() {
+        let local = |index| TypeReference::Resolved(RawTypeId::Local(crate::TypeId::new(index)));
+        let union_of = |types: Vec<TypeReference>| {
+            RawTypeData::Union(Box::new(crate::Union(types.into_boxed_slice())))
+        };
+        let string_literal = RawTypeData::Literal(Box::new(crate::Literal::String(
+            crate::literal::StringLiteral::from(Text::new_static("a")),
+        )));
+        let object = RawTypeData::Object(Box::new(crate::Object {
+            prototype: None,
+            members: Box::default(),
+            has_unknown_members: false,
+            kind: ObjectKind::Expression,
+        }));
+        for (raw_types, expected) in [
+            (vec![object.clone()], false),
+            (vec![RawTypeData::String], false),
+            (vec![string_literal.clone()], false),
+            (
+                vec![
+                    union_of(vec![
+                        TypeReference::Resolved(GLOBAL_STRING_KEYWORD_ID),
+                        local(1),
+                    ]),
+                    object.clone(),
+                ],
+                false,
+            ),
+            (
+                vec![RawTypeData::Reference(local(1)), object.clone()],
+                false,
+            ),
+            (
+                vec![RawTypeData::from(TypeofExpression::New(
+                    crate::TypeofNewExpression {
+                        callee: TypeReference::unknown(),
+                        arguments: Box::default(),
+                    },
+                ))],
+                false,
+            ),
+            (
+                vec![union_of(vec![
+                    TypeReference::Resolved(GLOBAL_STRING_KEYWORD_ID),
+                    TypeReference::Resolved(GLOBAL_UNDEFINED_ID),
+                ])],
+                true,
+            ),
+            (
+                vec![
+                    union_of(vec![
+                        TypeReference::Resolved(GLOBAL_NULL_KEYWORD_ID),
+                        local(1),
+                    ]),
+                    object.clone(),
+                ],
+                true,
+            ),
+            // A nested union, a name, and an inferred call may be nullish.
+            (
+                vec![
+                    union_of(vec![local(1)]),
+                    union_of(vec![TypeReference::Resolved(GLOBAL_STRING_KEYWORD_ID)]),
+                ],
+                true,
+            ),
+            (
+                vec![RawTypeData::TypeofType(Box::new(TypeReference::unknown()))],
+                true,
+            ),
+            (vec![RawTypeData::Null], true),
+            (vec![RawTypeData::VoidKeyword], true),
+            (vec![RawTypeData::Unknown], true),
+            (
+                vec![RawTypeData::from(TypeofExpression::Call(
+                    crate::TypeofCallExpression {
+                        callee: TypeReference::unknown(),
+                        arguments: Box::default(),
+                    },
+                ))],
+                true,
+            ),
+        ] {
+            assert_eq!(
+                raw_may_be_nullish(&local(0), &raw_types),
+                expected,
+                "{raw_types:?}"
+            );
+        }
+        assert!(!raw_may_be_nullish(
+            &TypeReference::Resolved(GLOBAL_NUMBER_KEYWORD_ID),
+            &[]
+        ));
+        assert!(raw_may_be_nullish(
+            &TypeReference::Resolved(GLOBAL_UNDEFINED_ID),
+            &[]
+        ));
+        // A local id outside the table may stand for anything.
+        assert!(raw_may_be_nullish(&local(3), &[]));
     }
 
     #[test]

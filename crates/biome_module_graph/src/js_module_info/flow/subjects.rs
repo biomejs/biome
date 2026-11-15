@@ -10,8 +10,8 @@ use super::{FlowSubject, FlowSubjectId, FlowSubjectTable, PropertyKey};
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
-    AnyJsArrayBindingPatternElement, AnyJsBindingPattern, AnyJsClass, AnyJsClassMember,
-    AnyJsExpression, AnyJsGetter, AnyJsLiteralExpression, AnyJsName,
+    AnyJsArrayBindingPatternElement, AnyJsAssignment, AnyJsBindingPattern, AnyJsClass,
+    AnyJsClassMember, AnyJsExpression, AnyJsGetter, AnyJsLiteralExpression, AnyJsName,
     AnyJsObjectBindingPatternMember, AnyJsObjectMemberName, AnyJsParameter, AnyJsSetter,
     JsArrayBindingPatternElement, JsArrowFunctionExpression, JsFormalParameter, JsFunctionBody,
     JsIdentifierBinding, JsInitializerClause, JsLanguage, JsMethodClassMember,
@@ -133,6 +133,41 @@ pub(super) fn subject_of(
         })?;
     }
     Some(subject)
+}
+
+/// Returns the id of the subject that the assignment target `target` writes,
+/// adding the subject and every prefix of its path to `subjects` on first
+/// use, as [`subject_of`] does for the expression with the same spelling:
+/// `x`, `o.v`, `o["v"]`, and `(o.v)` write the subjects that they would read.
+///
+/// Returns `None` for every other target, including `o[k]`, `o!.v`, `x!`, and
+/// `x as T`, and when the table has used every [`FlowSubjectId`].
+pub(super) fn assigned_subject(
+    target: &AnyJsAssignment,
+    model: &SemanticModel,
+    subjects: &mut FlowSubjectTable,
+) -> Option<FlowSubjectId> {
+    let (object, key) = match target {
+        AnyJsAssignment::JsIdentifierAssignment(identifier) => {
+            return subjects.reference(model, identifier);
+        }
+        AnyJsAssignment::JsParenthesizedAssignment(parenthesized) => {
+            return assigned_subject(&parenthesized.assignment().ok()?, model, subjects);
+        }
+        AnyJsAssignment::JsStaticMemberAssignment(member) => {
+            (member.object().ok()?, property_key(&member.member().ok()?)?)
+        }
+        AnyJsAssignment::JsComputedMemberAssignment(member) => {
+            (member.object().ok()?, literal_key(&member.member().ok()?)?)
+        }
+        AnyJsAssignment::JsBogusAssignment(_)
+        | AnyJsAssignment::TsAsAssignment(_)
+        | AnyJsAssignment::TsNonNullAssertionAssignment(_)
+        | AnyJsAssignment::TsSatisfiesAssignment(_)
+        | AnyJsAssignment::TsTypeAssertionAssignment(_) => return None,
+    };
+    let object = subject_of(&object, model, subjects)?;
+    subjects.intern(FlowSubject::Member { object, key })
 }
 
 /// Returns the key of the property or private name that `name` names. A

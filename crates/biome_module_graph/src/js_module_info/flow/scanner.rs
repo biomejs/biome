@@ -1,7 +1,8 @@
-use super::builder::MAX_DEPTH;
+use super::builder::{MAX_DEPTH, has_operands};
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_syntax::{
-    AnyJsBinding, AnyTsReturnType, JsConditionalExpression, JsDoWhileStatement, JsForInStatement,
+    AnyJsBinding, AnyJsOptionalChainExpression, AnyTsReturnType, JsAssignmentExpression,
+    JsAssignmentOperator, JsConditionalExpression, JsDoWhileStatement, JsForInStatement,
     JsForStatement, JsIdentifierBinding, JsIfStatement, JsLogicalExpression, JsSwitchStatement,
     JsSyntaxKind, JsSyntaxNode, JsWhileStatement, TsDeclareFunctionDeclaration,
 };
@@ -155,6 +156,8 @@ impl FlowRootScanner {
             self.bindings.push(binding);
         } else if kind == JsSyntaxKind::JS_EXPRESSION_STATEMENT {
             self.statement_expression = Some(self.depth + 1);
+        } else if !root.has_condition && is_evaluation_condition(node) {
+            root.has_condition = true;
         }
     }
 
@@ -216,6 +219,50 @@ impl FlowRootScanner {
     /// nested roots and types, in source order.
     pub(super) fn bindings(&self, root: &SelectedRoot) -> &[JsIdentifierBinding] {
         &self.kept_bindings[root.bindings.clone()]
+    }
+}
+
+/// Returns whether `node` evaluates part of an expression only on some paths,
+/// as a condition of TypeScript's binder that no [`AnyFlowConditionSource`]
+/// stands for: a logical assignment, whose right operand runs depending on
+/// its target, or a `?.` that a key or arguments follow in its chain, which
+/// run only when the object of the `?.` is not nullish.
+fn is_evaluation_condition(node: &JsSyntaxNode) -> bool {
+    if let Some(assignment) = JsAssignmentExpression::cast_ref(node) {
+        return assignment.operator().is_ok_and(|operator| {
+            matches!(
+                operator,
+                JsAssignmentOperator::LogicalAndAssign
+                    | JsAssignmentOperator::LogicalOrAssign
+                    | JsAssignmentOperator::NullishCoalescingAssign
+            )
+        });
+    }
+    let Some(mut link) = AnyJsOptionalChainExpression::cast_ref(node) else {
+        return false;
+    };
+    if !link.is_optional() {
+        return false;
+    }
+    // The links that follow `node` in its chain enclose it as their object.
+    loop {
+        if has_operands(&link) {
+            return true;
+        }
+        let Some(outer) = link
+            .syntax()
+            .parent()
+            .and_then(AnyJsOptionalChainExpression::cast)
+        else {
+            return false;
+        };
+        if !outer
+            .object()
+            .is_ok_and(|object| object.syntax() == link.syntax())
+        {
+            return false;
+        }
+        link = outer;
     }
 }
 
@@ -315,6 +362,33 @@ mod tests {
         }
         // A `for...of` loop tests nothing.
         assert!(selected("function f(x) { for (const item of x) read(item); }").is_empty());
+    }
+
+    #[test]
+    fn logical_assignments_and_optional_links_before_operands_are_conditions() {
+        for source in [
+            "function f(x) { x ??= read(x); }",
+            "function f(x) { x.v ||= read(x); }",
+            "function f(x) { x &&= read(x); }",
+            "function f(x) { x?.read(x); }",
+            "function f(x) { x?.[read(x)]; }",
+            "function f(x) { x?.(x); }",
+            "function f(x) { x?.a.b.read(x); }",
+            "function f(x) { x.a?.b[read(x)].c; }",
+        ] {
+            assert_eq!(selected(source), [source], "{source}");
+        }
+        // A `?.` that no key or arguments follow evaluates nothing more, and
+        // parentheses end a chain.
+        for source in [
+            "function f(x) { x += read(x); }",
+            "function f(x) { x?.a.b; }",
+            "function f(x) { x?.read(); }",
+            "function f(x) { (x?.a).read(x); }",
+            "function f(x) { read(x?.a, x); }",
+        ] {
+            assert!(selected(source).is_empty(), "{source}");
+        }
     }
 
     #[test]
