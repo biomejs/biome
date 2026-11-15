@@ -1,6 +1,7 @@
 use super::WorkspaceWatcherBridge;
 use crate::WorkspaceError;
 use crate::diagnostics::WatchError;
+use crate::workspace::retry_on_pending_write;
 use biome_diagnostics::PrintDescription;
 use biome_diagnostics::serde::Diagnostic;
 use bpaf::Bpaf;
@@ -237,7 +238,7 @@ impl Watcher {
                         self.unwatch_folder(workspace, path);
                     }
                     Ok(WatcherInstruction::ReindexFile(path)) => {
-                        Self::reindex_file(workspace, &path);
+                        retry_on_pending_write(|| Self::reindex_file(workspace, &path));
                     }
                     Ok(WatcherInstruction::Stop) | Err(_) => {
                         debug!("stop");
@@ -250,8 +251,23 @@ impl Watcher {
         workspace.notify_stopped();
     }
 
+    /// Updates the index for the filesystem `event`, and returns the
+    /// diagnostics of the update.
+    ///
+    /// A concurrent client update can interrupt the database reads of the
+    /// update, and the event is then handled again. That is safe, because
+    /// indexing and unloading are idempotent.
     #[tracing::instrument(level = "trace", skip(workspace))]
-    fn handle_notify_event(
+    pub(crate) fn handle_notify_event(
+        workspace: &impl WorkspaceWatcherBridge,
+        event: NotifyEvent,
+    ) -> Vec<Diagnostic> {
+        // The watcher has no cancellation boundary of its own, so an
+        // interruption would otherwise stop it.
+        retry_on_pending_write(|| Self::handle_notify_event_once(workspace, event.clone()))
+    }
+
+    fn handle_notify_event_once(
         workspace: &impl WorkspaceWatcherBridge,
         event: NotifyEvent,
     ) -> Vec<Diagnostic> {

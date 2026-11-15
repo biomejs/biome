@@ -974,6 +974,47 @@ fn watcher_updates_retry_when_a_write_is_pending() {
 
 #[cfg(feature = "module_graph")]
 #[test]
+fn watcher_events_retry_when_a_write_is_pending() {
+    const TIMEOUT: Duration = Duration::from_secs(5);
+    const FILE: &str = "/project/src/index.ts";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert("/project/package.json".into(), br#"{"name":"project"}"#);
+    fs.insert(FILE.into(), b"export const value = 1;");
+    let (workspace, project_key) = scanned_lsp_workspace(&fs, "/project");
+    assert!(workspace.is_indexed(Utf8Path::new(FILE)));
+
+    // The retained read keeps the setter pending, so the watcher must read
+    // the database while a write is waiting.
+    let retained_db = workspace.get_db();
+    let watcher_result = std::thread::scope(|scope| {
+        let update = scope.spawn(|| {
+            workspace
+                .db_state
+                .insert_root_settings(project_key, Settings::default());
+        });
+        assert!(wait_until(TIMEOUT, || workspace.db_state.pending_setters() == 1));
+
+        let event = notify::Event::new(notify::EventKind::Remove(notify::event::RemoveKind::File))
+            .add_path(FILE.into());
+        let watcher_update =
+            scope.spawn(|| crate::Watcher::handle_notify_event(&watcher(&workspace), event));
+        std::thread::sleep(Duration::from_millis(50));
+        drop(retained_db);
+
+        update.join().expect("the setter completes");
+        watcher_update.join()
+    });
+
+    watcher_result.expect("the watcher must not unwind");
+    assert!(
+        !workspace.is_indexed(Utf8Path::new(FILE)),
+        "the watcher unloads the removed file after the write completes"
+    );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
 fn renaming_a_manifest_indexes_newly_reachable_dependencies() {
     const INDEX: &str = "/project/src/index.ts";
     const DECLARATION: &str = "/project/node_modules/dependency/index.d.ts";
