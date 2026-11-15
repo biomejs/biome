@@ -13,12 +13,19 @@ on:
           - patch
   pull_request:
     types:
+      - opened
+      - reopened
+      - synchronize
       - closed
     branches:
       - main
 
 concurrency:
-  group: publish-crates
+  group: >-
+    ${{ github.event_name == 'pull_request' &&
+    (github.event.pull_request.head.ref != 'automated-release/crates' ||
+    github.event.pull_request.head.repo.full_name != github.repository) &&
+    format('publish-crates-pr-{0}', github.run_id) || 'publish-crates' }}
   cancel-in-progress: false
 
 env:
@@ -29,6 +36,8 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
     runs-on: depot-ubuntu-24.04-arm-16
     permissions:
+      # Dispatch verification for the generated release commit.
+      actions: write
       # Push the automated release branch.
       contents: write
       # Create the release pull request.
@@ -85,6 +94,34 @@ jobs:
             --head automated-release/crates \
             --title "release: crates v$VERSION" \
             --body-file .github/PULL_REQUEST_TEMPLATE.md
+      - name: Dispatch crate publication verification
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run verify-crates.yml --ref automated-release/crates --field revision="$(git rev-parse HEAD)"
+
+  verify:
+    name: Verify crate publication
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.action != 'closed' &&
+      github.event.pull_request.head.ref == 'automated-release/crates' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: depot-ubuntu-24.04-arm-16
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
+        with:
+          cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify crate publication
+        run: cargo run --locked -p xtask_publish_crates -- verify
 
   detect:
     if: >-
@@ -120,10 +157,12 @@ jobs:
     permissions:
       # Check out the release, create its tag, and delete its branch after publication.
       contents: write
+      checks: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           ref: ${{ github.event.pull_request.merge_commit_sha }}
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
@@ -131,17 +170,30 @@ jobs:
           cache-base: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Require successful dry-run verification
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERIFIED_REVISION: ${{ github.event.pull_request.head.sha }}
+        run: |
+          conclusion=$(gh api "repos/${{ github.repository }}/commits/$VERIFIED_REVISION/check-runs" \
+            --jq '[.check_runs[] | select(.name == "Verify crate publication")] | max_by(.completed_at).conclusion // empty')
+          test "$conclusion" = success
       - name: Publish crates
-        run: cargo publish --workspace --locked
+        run: cargo run --locked -p xtask_publish_crates -- publish --execute --verified-revision "$VERIFIED_REVISION"
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
+          VERIFIED_REVISION: ${{ github.event.pull_request.head.sha }}
       - name: Create release tag
         env:
           VERSION: ${{ needs.detect.outputs.version }}
         run: |
           tag="crates@v$VERSION"
-          git tag "$tag"
-          git push origin "$tag"
+          if git rev-parse --verify --quiet "refs/tags/$tag^{commit}" > /dev/null; then
+            test "$(git rev-parse "refs/tags/$tag^{commit}")" = "$(git rev-parse HEAD)"
+          else
+            git tag "$tag"
+            git push origin "$tag"
+          fi
       - name: Delete release branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

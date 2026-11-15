@@ -1,6 +1,13 @@
 [workspace]
 resolver        = "2"
-members         = ["crates/*", "xtask/codegen", "xtask/coverage", "xtask/glue", "xtask/rules_check"]
+members         = [
+  "crates/*",
+  "xtask/codegen",
+  "xtask/coverage",
+  "xtask/glue",
+  "xtask/publish_crates",
+  "xtask/rules_check"
+]
 default-members = ["crates/*"]
 
 [workspace.package]
@@ -60,7 +67,7 @@ biome_html_formatter         = { path = "./crates/biome_html_formatter", version
 biome_html_parser            = { path = "./crates/biome_html_parser", version = "0.7.0" }
 biome_html_syntax            = { path = "./crates/biome_html_syntax", version = "0.7.0" }
 biome_js_analyze             = { path = "./crates/biome_js_analyze", version = "0.5.7" }
-biome_js_control_flow        = { path = "./crates/biome_js_control_flow", version = "0.1.0" }
+biome_js_control_flow        = { path = "./crates/biome_js_control_flow", version = "0.7.0" }
 biome_js_extent              = { path = "./crates/biome_js_extent", version = "0.7.0" }
 biome_js_factory             = { path = "./crates/biome_js_factory", version = "0.7.0" }
 biome_js_formatter           = { path = "./crates/biome_js_formatter", version = "0.7.0" }
@@ -80,7 +87,7 @@ biome_json_value             = { path = "./crates/biome_json_value", version = "
 biome_line_index             = { path = "./crates/biome_line_index", version = "0.7.0" }
 biome_lsp                    = { path = "./crates/biome_lsp" }
 biome_lsp_converters         = { path = "./crates/biome_lsp_converters", version = "0.7.0" }
-biome_manifest               = { path = "./crates/biome_manifest", version = "0.0.1" }
+biome_manifest               = { path = "./crates/biome_manifest", version = "0.7.0" }
 biome_markdown_factory       = { path = "./crates/biome_markdown_factory", version = "0.7.0" }
 biome_markdown_formatter     = { path = "./crates/biome_markdown_formatter", version = "0.7.0" }
 biome_markdown_parser        = { path = "./crates/biome_markdown_parser", version = "0.7.0" }
@@ -123,6 +130,7 @@ boa_engine                   = { version = "0.22.0", default-features = false, f
 boxcar                       = "0.2.14"
 bpaf                         = { version = "0.9.28", features = ["derive"] }
 camino                       = "1.2.6"
+cargo_metadata               = "0.23.1"
 cfg-if                       = "1.0.5"
 color                        = "0.3.3"
 countme                      = "3.0.1"
@@ -158,6 +166,7 @@ proc-macro2                  = "1.0.107"
 quickcheck                   = "1.1.0"
 quickcheck_macros            = "1.2.0"
 quote                        = "1.0.47"
+ratelimit                    = "2.0.0"
 rayon                        = "1.12.0"
 regex                        = "1.13.1"
 rustc-hash                   = "2.1.3"
@@ -166,6 +175,7 @@ salsa                        = "0.28.5"
 schemars                     = { version = "1.2.3", features = ["indexmap2", "smallvec1"] }
 serde                        = { version = "1.0.229", features = ["derive"] }
 serde_json                   = "1.0.154"
+sha2                         = "0.11.1"
 similar                      = "2.7.0"
 similar-asserts              = "1.7.0"
 smallvec                     = { version = "1.16.5", features = ["const_new", "serde", "union"] }
@@ -176,6 +186,7 @@ terminal_size                = "0.4.4"
 tests_macros                 = { path = "./crates/tests_macros" }
 tikv-jemallocator            = "0.6.1"
 tokio                        = "1.53.3"
+toml                         = "1.1.2"
 tower                        = "0.5.3"
 tower-lsp-server             = "0.23.0"
 tracing                      = { version = "0.1.44", default-features = false, features = ["attributes", "std"] }
