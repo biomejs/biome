@@ -188,6 +188,7 @@ jobs:
           VERSION: ${{ needs.detect.outputs.version }}
         run: |
           tag="crates@v$VERSION"
+          # Keep reruns idempotent, but fail if the release tag points to another commit.
           if git rev-parse --verify --quiet "refs/tags/$tag^{commit}" > /dev/null; then
             test "$(git rev-parse "refs/tags/$tag^{commit}")" = "$(git rev-parse HEAD)"
           else
