@@ -70,6 +70,10 @@ pub struct TailwindConfiguration {
     /// Biome doesn't scan the rest of your project to read them. Setting this
     /// option also turns on `css.parser.tailwindDirectives`, unless you set
     /// that option yourself.
+    ///
+    /// The file must be inside your project folder. Biome doesn't read a
+    /// stylesheet outside that folder, so the Tailwind rules then only know
+    /// the default Tailwind CSS configuration.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stylesheet: Option<String>,
 }

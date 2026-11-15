@@ -515,21 +515,28 @@ impl Session {
     }
 
     /// Registers an open project with its root path and scans the folder.
+    ///
+    /// When `watch` is set, the scanned folders are watched for changes.
     #[tracing::instrument(level = "debug", skip(self))]
     pub(crate) async fn insert_and_scan_project(
         self: &Arc<Self>,
         project_key: ProjectKey,
         path: BiomePath,
         scan_kind: ScanKind,
+        watch: bool,
         force: bool,
     ) {
         self.projects.pin().insert(path.clone(), project_key);
 
         // Spawn the scan in the background, to avoid timing out the LSP request.
         let session = self.clone();
-        spawn(async move { session.scan_project(project_key, scan_kind, force).await })
-            .await
-            .expect("Scanning task to complete successfully");
+        spawn(async move {
+            session
+                .scan_project(project_key, scan_kind, watch, force)
+                .await
+        })
+        .await
+        .expect("Scanning task to complete successfully");
     }
 
     /// Get a [`Document`] matching the provided [`Uri`]
@@ -1173,6 +1180,7 @@ impl Session {
         self: &Arc<Self>,
         project_key: ProjectKey,
         scan_kind: ScanKind,
+        watch: bool,
         force: bool,
     ) {
         let progress_token = ProgressToken::String(Uuid::new_v4().to_string());
@@ -1208,7 +1216,7 @@ impl Session {
         spawn_blocking(move || {
             let result = session.workspace().scan_project(ScanProjectParams {
                 project_key,
-                watch: scan_kind.is_project() || scan_kind.is_type_aware(),
+                watch,
                 force,
                 scan_kind,
                 verbose: false,
@@ -1479,6 +1487,10 @@ impl Session {
         };
 
         let scan_kind = ProjectScanComputer::new(&configuration).compute();
+        let has_tailwind_stylesheet = configuration
+            .tailwind
+            .as_ref()
+            .is_some_and(|tailwind| tailwind.stylesheet.is_some());
         // We give priority to the scan kind requested by the user.
         let scan_kind = if scan_kind.is_project() || scan_kind.is_type_aware() {
             scan_kind
@@ -1489,6 +1501,11 @@ impl Session {
         } else {
             scan_kind
         };
+        // Project rules read the files that the scan indexes, and the Tailwind
+        // rules read the stylesheet and the files it imports, so the watcher
+        // keeps them up to date. The editor watches the configuration and
+        // ignore files.
+        let watch = scan_kind.is_project() || scan_kind.is_type_aware() || has_tailwind_stylesheet;
 
         let result = self.workspace().update_settings(UpdateSettingsParams {
             project_key,
@@ -1501,7 +1518,7 @@ impl Session {
             module_graph_resolution_kind: ModuleGraphResolutionKind::from(&scan_kind),
         });
 
-        self.insert_and_scan_project(project_key, project_path.into(), scan_kind, force)
+        self.insert_and_scan_project(project_key, project_path.into(), scan_kind, watch, force)
             .await;
 
         if let Err(WorkspaceError::PluginErrors(error)) = result {
