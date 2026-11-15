@@ -158,6 +158,17 @@ pub(crate) fn expected_named_import_specifier(p: &JsParser, range: TextRange) ->
     expected_node("identifier", range, p)
 }
 
+pub(crate) fn expected_import_call(
+    p: &JsParser,
+    range: TextRange,
+    phase: TextRange,
+) -> ParseDiagnostic {
+    p.err_builder(
+        format!("Expected `(` after `import.{}`", p.text(phase)),
+        range,
+    )
+}
+
 pub(crate) fn duplicate_assertion_keys_error(
     p: &JsParser,
     key: &str,
