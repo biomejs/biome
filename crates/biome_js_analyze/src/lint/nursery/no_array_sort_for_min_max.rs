@@ -7,14 +7,16 @@ use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody,
-    AnyJsParameter, AnyTsType, JsBinaryOperator, JsCallExpression, JsComputedMemberExpression,
-    JsParameters, JsSyntaxToken, JsUnaryOperator, T, TsReferenceType,
-    binding_ext::AnyJsBindingDeclaration,
+    AnyJsParameter, JsBinaryOperator, JsCallExpression, JsComputedMemberExpression, JsParameters,
+    JsSyntaxToken, JsUnaryOperator, T,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, declare_node_union};
 use biome_rule_options::no_array_sort_for_min_max::NoArraySortForMinMaxOptions;
 
-use crate::{JsRuleAction, services::semantic::Semantic};
+use crate::{
+    JsRuleAction, services::semantic::Semantic,
+    utils::indexed_collection::is_known_non_numeric_indexed_collection,
+};
 
 declare_lint_rule! {
     /// Disallow sorting an array only to read its smallest or largest value.
@@ -120,7 +122,7 @@ impl Rule for NoArraySortForMinMax {
         let direction = sort_direction(&comparator)?;
 
         if has_optional_chain_element(&receiver)
-            || is_known_unsupported_receiver(&receiver, ctx.model())
+            || is_known_non_numeric_indexed_collection(&receiver, ctx.model())
         {
             return None;
         }
@@ -233,36 +235,6 @@ enum SortDirection {
     Ascending,
     Descending,
 }
-
-/// Constructors whose instances sort numbers and can be spread into `Math.min()` or `Math.max()`.
-///
-/// `BigInt64Array` and `BigUint64Array` are absent because `Math.min()` and `Math.max()` throw
-/// on `bigint` values.
-const NUMERIC_ARRAY_CONSTRUCTORS: &[&str] = &[
-    "Array",
-    "Float16Array",
-    "Float32Array",
-    "Float64Array",
-    "Int16Array",
-    "Int32Array",
-    "Int8Array",
-    "Uint16Array",
-    "Uint32Array",
-    "Uint8Array",
-    "Uint8ClampedArray",
-];
-
-/// Type names whose values are not arrays, so their `sort()` method is unrelated to arrays.
-const NON_ARRAY_TYPE_NAMES: &[&str] = &[
-    "CanvasRenderingContext2D",
-    "Map",
-    "OffscreenCanvasRenderingContext2D",
-    "ReadonlyMap",
-    "ReadonlySet",
-    "Set",
-    "WeakMap",
-    "WeakSet",
-];
 
 /// Returns the object and the only argument of a call like `object.name(argument)`.
 ///
@@ -481,164 +453,6 @@ fn has_optional_chain_element(expression: &AnyJsExpression) -> bool {
     }
 }
 
-/// Returns `true` if `receiver` is known not to be an array of numbers.
-///
-/// This recognizes values that are not arrays at all (`new Set()`, object literals, functions,
-/// and template strings), `bigint` typed arrays, and variables or parameters whose type
-/// annotation, or `const` initial value, is one of those.
-fn is_known_unsupported_receiver(receiver: &AnyJsExpression, model: &SemanticModel) -> bool {
-    let Some(receiver) = omit_type_wrappers(receiver.clone()) else {
-        return false;
-    };
-    if let Some(identifier) = receiver.as_js_identifier_expression() {
-        let Some(declaration) = identifier
-            .name()
-            .ok()
-            .and_then(|reference| model.binding(&reference))
-            .and_then(|binding| binding.tree().declaration())
-        else {
-            return false;
-        };
-        return match declaration {
-            AnyJsBindingDeclaration::JsFormalParameter(parameter) => parameter
-                .type_annotation()
-                .and_then(|annotation| annotation.ty().ok())
-                .is_some_and(|ty| is_unsupported_type(&ty)),
-            AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
-                if let Some(annotation) = declarator
-                    .variable_annotation()
-                    .and_then(|annotation| annotation.type_annotation().ok()?)
-                    .and_then(|annotation| annotation.ty().ok())
-                {
-                    is_unsupported_type(&annotation)
-                } else if declarator
-                    .declaration()
-                    .is_some_and(|declaration| declaration.is_const())
-                {
-                    declarator
-                        .initializer()
-                        .and_then(|initializer| initializer.expression().ok())
-                        .and_then(omit_type_wrappers)
-                        .is_some_and(|initializer| is_unsupported_value(&initializer))
-                } else {
-                    false
-                }
-            }
-            _ => false,
-        };
-    }
-    is_unsupported_value(&receiver)
-}
-
-/// Returns `true` if `expression` creates a value that is known not to be an array of numbers.
-fn is_unsupported_value(expression: &AnyJsExpression) -> bool {
-    match expression {
-        AnyJsExpression::JsObjectExpression(_)
-        | AnyJsExpression::JsFunctionExpression(_)
-        | AnyJsExpression::JsArrowFunctionExpression(_)
-        | AnyJsExpression::JsClassExpression(_) => true,
-        AnyJsExpression::JsTemplateExpression(template) => template.tag().is_none(),
-        AnyJsExpression::JsNewExpression(new_expression) => !new_expression
-            .callee()
-            .ok()
-            .and_then(|callee| identifier_name(&callee))
-            .is_some_and(|name| {
-                NUMERIC_ARRAY_CONSTRUCTORS
-                    .binary_search(&name.text_trimmed())
-                    .is_ok()
-            }),
-        // `BigInt64Array.from()` and `BigUint64Array.of()`
-        AnyJsExpression::JsCallExpression(call) => call
-            .callee()
-            .ok()
-            .and_then(|callee| {
-                callee
-                    .omit_parentheses()
-                    .as_js_static_member_expression()
-                    .cloned()
-            })
-            .is_some_and(|member| {
-                member
-                    .member()
-                    .ok()
-                    .and_then(|name| name.as_js_name()?.value_token().ok())
-                    .is_some_and(|name| matches!(name.text_trimmed(), "from" | "of"))
-                    && member
-                        .object()
-                        .ok()
-                        .and_then(|object| identifier_name(&object))
-                        .is_some_and(|name| {
-                            matches!(name.text_trimmed(), "BigInt64Array" | "BigUint64Array")
-                        })
-            }),
-        _ => false,
-    }
-}
-
-/// Returns `true` if a type annotation names a type that is known not to be an array of numbers.
-fn is_unsupported_type(ty: &AnyTsType) -> bool {
-    is_bigint_array_type(ty) || is_non_array_type(ty)
-}
-
-/// Returns `true` if a type annotation is `BigInt64Array` or `BigUint64Array`, or a union that
-/// includes one of them. Calling `Math.min()` or `Math.max()` with any `bigint` value throws.
-fn is_bigint_array_type(ty: &AnyTsType) -> bool {
-    match ty {
-        AnyTsType::TsReferenceType(reference) => type_reference_name(reference)
-            .is_some_and(|name| matches!(name.text_trimmed(), "BigInt64Array" | "BigUint64Array")),
-        AnyTsType::TsUnionType(union) => union
-            .types()
-            .iter()
-            .any(|member| member.is_ok_and(|member| is_bigint_array_type(&member))),
-        AnyTsType::TsParenthesizedType(parenthesized) => parenthesized
-            .ty()
-            .is_ok_and(|inner| is_bigint_array_type(&inner)),
-        _ => false,
-    }
-}
-
-/// Returns `true` if a type annotation names a type that is not an array, or a union whose
-/// members all are.
-fn is_non_array_type(ty: &AnyTsType) -> bool {
-    match ty {
-        AnyTsType::TsReferenceType(reference) => {
-            type_reference_name(reference).is_some_and(|name| {
-                NON_ARRAY_TYPE_NAMES
-                    .binary_search(&name.text_trimmed())
-                    .is_ok()
-            })
-        }
-        AnyTsType::TsUnionType(union) => union
-            .types()
-            .iter()
-            .all(|member| member.is_ok_and(|member| is_non_array_type(&member))),
-        AnyTsType::TsParenthesizedType(parenthesized) => parenthesized
-            .ty()
-            .is_ok_and(|inner| is_non_array_type(&inner)),
-        _ => false,
-    }
-}
-
-fn type_reference_name(reference: &TsReferenceType) -> Option<JsSyntaxToken> {
-    reference
-        .name()
-        .ok()?
-        .as_js_reference_identifier()?
-        .value_token()
-        .ok()
-}
-
-fn identifier_name(expression: &AnyJsExpression) -> Option<JsSyntaxToken> {
-    expression
-        .clone()
-        .omit_parentheses()
-        .as_js_identifier_expression()?
-        .name()
-        .ok()?
-        .value_token()
-        .ok()
-}
-
 /// Returns `true` if a local variable named `Math` is visible at `node`, so that a reference to
 /// `Math` written there wouldn't point to the built-in object.
 fn is_math_shadowed(model: &SemanticModel, node: &AnyArrayEndAccess) -> bool {
@@ -646,23 +460,4 @@ fn is_math_shadowed(model: &SemanticModel, node: &AnyArrayEndAccess) -> bool {
         .scope(node.syntax())
         .ancestors()
         .any(|scope| scope.get_binding("Math").is_some())
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{NON_ARRAY_TYPE_NAMES, NUMERIC_ARRAY_CONSTRUCTORS};
-
-    #[test]
-    fn lists_are_sorted() {
-        for list in [NUMERIC_ARRAY_CONSTRUCTORS, NON_ARRAY_TYPE_NAMES] {
-            for pair in list.windows(2) {
-                assert!(
-                    pair[0] < pair[1],
-                    "{} must come before {}",
-                    pair[1],
-                    pair[0]
-                );
-            }
-        }
-    }
 }

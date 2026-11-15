@@ -38,3 +38,12 @@ new URLSearchParams(query).forEach((value, key) => consume(key, value));
 
 const aliased = map;
 aliased.forEach((value) => console.log(value));
+
+// Any `new` expression other than `new Array()` or a typed array creates something else.
+new Collection().forEach((value) => console.log(value));
+
+function shadowed(Map) {
+	new Map().forEach((value) => console.log(value));
+}
+
+({ forEach(callback) {} }).forEach((value) => console.log(value));

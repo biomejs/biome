@@ -8,3 +8,6 @@ function collections(map: Map<string, number>, set: ReadonlySet<string>) {
 	!map.some(element => test(element));
 	!set.every(element => test(element));
 }
+function params(values: URLSearchParams | null) {
+	!values!.some(element => test(element));
+}

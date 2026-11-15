@@ -43,6 +43,7 @@ async function f8() {
 }
 const length8 = (array.push)(value);
 const length9 = tag`items`.push(value);
+const length10 = new Uint8Array(4).push(value);
 
 ```
 
@@ -602,7 +603,7 @@ invalid.js:38:24 lint/nursery/noReturnArrayPush ━━━━━━━━━━�
   > 38 │ const length8 = (array.push)(value);
        │                        ^^^^
     39 │ const length9 = tag`items`.push(value);
-    40 │ 
+    40 │ const length10 = new Uint8Array(4).push(value);
   
   i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
   
@@ -622,7 +623,28 @@ invalid.js:39:28 lint/nursery/noReturnArrayPush ━━━━━━━━━━�
     38 │ const length8 = (array.push)(value);
   > 39 │ const length9 = tag`items`.push(value);
        │                            ^^^^
-    40 │ 
+    40 │ const length10 = new Uint8Array(4).push(value);
+    41 │ 
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:40:36 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    38 │ const length8 = (array.push)(value);
+    39 │ const length9 = tag`items`.push(value);
+  > 40 │ const length10 = new Uint8Array(4).push(value);
+       │                                    ^^^^
+    41 │ 
   
   i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
   

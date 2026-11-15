@@ -123,11 +123,7 @@ impl Rule for NoNegatedArrayPredicate {
             .as_js_static_member_expression()?
             .object()
             .ok()?;
-        if matches!(
-            receiver.clone().omit_type_wrappers()?,
-            AnyJsExpression::AnyJsLiteralExpression(_)
-        ) || is_known_non_indexed_collection(&receiver, ctx.model(), MAX_RESOLUTION_DEPTH)
-        {
+        if is_known_non_indexed_collection(&receiver, ctx.model()) {
             return None;
         }
 
@@ -228,10 +224,6 @@ impl biome_console::fmt::Display for PredicateMethod {
         })
     }
 }
-
-/// Bounds how many variables a receiver check follows, so that `const a = b; const b = a;`
-/// terminates.
-const MAX_RESOLUTION_DEPTH: u8 = 8;
 
 /// Tokens that change how a statement or an `export default` declaration is parsed when they
 /// start it, or that continue the previous statement when it doesn't end with a semicolon.

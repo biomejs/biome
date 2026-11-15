@@ -73,3 +73,7 @@ function nullable(map: Map<string, string> | undefined) {
 
 let cache: Set<string> | null = null;
 cache?.forEach((value) => console.log(value));
+
+function onlyNullish(value: null | undefined) {
+	value?.forEach((item) => console.log(item));
+}
