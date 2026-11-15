@@ -4154,6 +4154,11 @@ export interface Nursery {
 	 */
 	useExhaustiveSwitchCases?: UseExhaustiveSwitchCasesConfiguration;
 	/**
+	 * Enforce using an equality matcher instead of comparing values with === or !== inside expect().
+	 * See https://biomejs.dev/linter/rules/use-expect-equality-matcher
+	 */
+	useExpectEqualityMatcher?: UseExpectEqualityMatcherConfiguration;
+	/**
 	 * Enforce using toContain() to check whether an array or string contains a value.
 	 * See https://biomejs.dev/linter/rules/use-expect-to-contain
 	 */
@@ -7567,6 +7572,9 @@ export type UseEarlyContinueConfiguration =
 export type UseExhaustiveSwitchCasesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExhaustiveSwitchCasesOptions;
+export type UseExpectEqualityMatcherConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseExpectEqualityMatcherOptions;
 export type UseExpectToContainConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExpectToContainOptions;
@@ -11238,6 +11246,14 @@ export interface RuleWithUseExhaustiveSwitchCasesOptions {
 	level: RulePlainConfiguration;
 	options?: UseExhaustiveSwitchCasesOptions;
 }
+export interface RuleWithUseExpectEqualityMatcherOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseExpectEqualityMatcherOptions;
+}
 export interface RuleWithUseExpectToContainOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -14489,6 +14505,7 @@ export interface UseExhaustiveSwitchCasesOptions {
 	 */
 	requireExplicitCase?: boolean;
 }
+export type UseExpectEqualityMatcherOptions = {};
 export type UseExpectToContainOptions = {};
 export type UseExpectToHaveBeenCalledOptions = {};
 export type UseExpectToHaveBeenCalledTimesOptions = {};
@@ -16615,6 +16632,7 @@ export type Category =
 	| "lint/nursery/useDisposables"
 	| "lint/nursery/useEarlyContinue"
 	| "lint/nursery/useExhaustiveSwitchCases"
+	| "lint/nursery/useExpectEqualityMatcher"
 	| "lint/nursery/useExpectToContain"
 	| "lint/nursery/useExpectToHaveBeenCalled"
 	| "lint/nursery/useExpectToHaveBeenCalledTimes"

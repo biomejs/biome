@@ -605,6 +605,7 @@ pub mod use_error_message;
 pub mod use_exhaustive_dependencies;
 pub mod use_exhaustive_switch_cases;
 pub mod use_expect;
+pub mod use_expect_equality_matcher;
 pub mod use_expect_to_contain;
 pub mod use_expect_to_have_been_called;
 pub mod use_expect_to_have_been_called_times;
