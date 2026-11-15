@@ -1,0 +1,5 @@
+short_sequence: [a, b,]
+short_mapping: {a: 1,}
+long_sequence: [first_value, second_value, third_value]
+long_mapping: {first_key: first_value, second_key: second_value,}
+nested: [[first_value, second_value], {key: value, other: value}]

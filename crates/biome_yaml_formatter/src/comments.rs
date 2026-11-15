@@ -3,6 +3,7 @@ use biome_formatter::comments::{
     SourceComment,
 };
 use biome_formatter::formatter::Formatter;
+use biome_formatter::trivia::format_inline_comment_space;
 use biome_formatter::{FormatRefWithRule, FormatResult, FormatRule, write};
 use biome_parser::{TokenSet, token_set};
 use biome_rowan::AstNode;
@@ -251,7 +252,7 @@ impl Format<YamlFormatContext> for FormatMiddleComments<'_> {
 
         for comment in dangling {
             if single {
-                write!(f, [space()])?;
+                write!(f, [format_inline_comment_space()])?;
             } else {
                 write!(f, [hard_line_break()])?;
             }
@@ -262,6 +263,29 @@ impl Format<YamlFormatContext> for FormatMiddleComments<'_> {
             comment.mark_formatted();
         }
         Ok(())
+    }
+}
+
+/// Formats the gap between an indicator (`:`, `-`) and the value after it.
+/// A leading comment of the value prints right after the gap, on the
+/// indicator's line, so the gap is then an inline comment gap
+pub(crate) struct FormatValueGap<'a> {
+    value: &'a YamlSyntaxNode,
+}
+
+impl<'a> FormatValueGap<'a> {
+    pub(crate) fn new(value: &'a YamlSyntaxNode) -> Self {
+        Self { value }
+    }
+}
+
+impl Format<YamlFormatContext> for FormatValueGap<'_> {
+    fn fmt(&self, f: &mut Formatter<YamlFormatContext>) -> FormatResult<()> {
+        if f.comments().has_leading_comments(self.value) {
+            write!(f, [format_inline_comment_space()])
+        } else {
+            write!(f, [space()])
+        }
     }
 }
 
@@ -565,7 +589,7 @@ impl Format<YamlFormatContext> for FormatCommentsSlice<'_> {
     fn fmt(&self, f: &mut Formatter<YamlFormatContext>) -> FormatResult<()> {
         for (index, comment) in self.comments.iter().enumerate() {
             if index == 0 && self.inline_first && comment.lines_before() == 0 {
-                write!(f, [space()])?;
+                write!(f, [format_inline_comment_space()])?;
             } else if comment.lines_before() > 1 {
                 write!(f, [empty_line()])?;
             } else {

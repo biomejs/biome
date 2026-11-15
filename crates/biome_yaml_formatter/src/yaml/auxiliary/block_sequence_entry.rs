@@ -1,4 +1,4 @@
-use crate::comments::FormatEntryDanglingComments;
+use crate::comments::{FormatEntryDanglingComments, FormatValueGap};
 use crate::prelude::*;
 use biome_formatter::write;
 use biome_yaml_syntax::{YamlBlockSequenceEntry, YamlBlockSequenceEntryFields};
@@ -11,10 +11,11 @@ impl FormatNodeRule<YamlBlockSequenceEntry> for FormatYamlBlockSequenceEntry {
         let minus_token = minus_token?;
         write!(f, [minus_token.format()])?;
 
-        // An entry without a value but with a comment on its line still gets
-        // the space that would separate the value from the `-`, so the
-        // comment ends up two columns over: `-  # comment`
+        // An entry without a value but with a comment on its line is at least
+        // two columns over, as in Prettier: `-  # comment`. A comment spacing
+        // of 2 or more already provides that gap
         if value.is_none()
+            && f.options().comment_spacing().value() == 1
             && f.comments()
                 .dangling_comments(node.syntax())
                 .first()
@@ -32,9 +33,15 @@ impl FormatNodeRule<YamlBlockSequenceEntry> for FormatYamlBlockSequenceEntry {
                 // - |
                 //   content
                 // ```
-                write!(f, [space(), value.format()])?;
+                write!(f, [FormatValueGap::new(value.syntax()), value.format()])?;
             } else {
-                write!(f, [space(), align("  ", &value.format())])?;
+                write!(
+                    f,
+                    [
+                        FormatValueGap::new(value.syntax()),
+                        align("  ", &value.format())
+                    ]
+                )?;
             }
         }
 

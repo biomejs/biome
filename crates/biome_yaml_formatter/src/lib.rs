@@ -11,7 +11,7 @@ mod utils;
 mod verbatim;
 mod yaml;
 
-pub use crate::context::{YamlFormatContext, YamlFormatOptions};
+pub use crate::context::{TrailingCommas, YamlFormatContext, YamlFormatOptions};
 pub(crate) use crate::trivia::*;
 
 use biome_deserialize::TextRange;

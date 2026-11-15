@@ -44,7 +44,7 @@ valueless:
   - key
 : - seq
   - value
-key: # comment
+key:  # comment
   value
 sets: !!set
   ? one

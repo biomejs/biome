@@ -62,13 +62,13 @@ long_sequence:
   ]
 commented_mapping: {
     # before
-    first: 1, # between
+    first: 1,  # between
     second: 2,
     # after
   }
 commented_sequence: [
     # before
-    first, # between
+    first,  # between
     second,
     # after
   ]
@@ -110,13 +110,13 @@ long_sequence:
   ]
 commented_mapping: {
     # before
-    first: 1, # between
+    first: 1,  # between
     second: 2,
     # after
   }
 commented_sequence: [
     # before
-    first, # between
+    first,  # between
     second,
     # after
   ]
@@ -158,13 +158,13 @@ long_sequence:
   ]
 commented_mapping: {
     # before
-    first: 1, # between
+    first: 1,  # between
     second: 2,
     # after
   }
 commented_sequence: [
     # before
-    first, # between
+    first,  # between
     second,
     # after
   ]

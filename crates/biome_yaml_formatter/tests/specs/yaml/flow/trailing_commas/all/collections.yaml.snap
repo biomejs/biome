@@ -1,0 +1,61 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/flow/trailing_commas/all/collections.yaml
+---
+
+# Input
+
+```yaml
+short_sequence: [a, b,]
+short_mapping: {a: 1,}
+long_sequence: [first_value, second_value, third_value]
+long_mapping: {first_key: first_value, second_key: second_value,}
+nested: [[first_value, second_value], {key: value, other: value}]
+
+```
+
+
+# Options
+
+```json
+{
+  "formatter": {
+    "lineWidth": 30
+  },
+  "yaml": {
+    "formatter": {
+      "trailingCommas": "all"
+    }
+  }
+}
+```
+
+# Formatted
+
+```yaml
+short_sequence: [a, b]
+short_mapping: { a: 1 }
+long_sequence:
+  [
+    first_value,
+    second_value,
+    third_value,
+  ]
+long_mapping:
+  {
+    first_key: first_value,
+    second_key: second_value,
+  }
+nested:
+  [
+    [
+      first_value,
+      second_value,
+    ],
+    {
+      key: value,
+      other: value,
+    },
+  ]
+
+```

@@ -289,3 +289,119 @@ fn yaml_bracket_spacing_cli_option() {
         }
     }
 }
+
+#[test]
+fn format_yaml_comment_spacing_with_override() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "yaml": {
+        "formatter": {
+            "commentSpacing": 3
+        }
+    },
+    "overrides": [
+        {
+            "includes": ["special/**"],
+            "yaml": {
+                "formatter": {
+                    "commentSpacing": 1
+                }
+            }
+        }
+    ]
+}"#
+        .as_bytes(),
+    );
+
+    let file_path = Utf8Path::new("file.yaml");
+    fs.insert(file_path.into(), "key: value # comment\n".as_bytes());
+    let overridden_file_path = Utf8Path::new("special/file.yaml");
+    fs.insert(
+        overridden_file_path.into(),
+        "key: value  # comment\n".as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                file_path.as_str(),
+                overridden_file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, file_path, "key: value   # comment\n");
+    assert_file_contents(&fs, overridden_file_path, "key: value # comment\n");
+}
+
+#[test]
+fn format_yaml_comment_spacing_cli_option() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.yaml");
+    fs.insert(file_path.into(), "key: value # comment\n".as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--yaml-formatter-comment-spacing",
+                "4",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, file_path, "key: value    # comment\n");
+}
+
+#[test]
+fn format_yaml_trailing_commas_cli_option() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.yaml");
+    fs.insert(
+        file_path.into(),
+        "key: [first_value, second_value, third_value, fourth_value, fifth_value, sixth_value]\n"
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--yaml-formatter-trailing-commas",
+                "none",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(
+        &fs,
+        file_path,
+        "key:\n  [\n    first_value,\n    second_value,\n    third_value,\n    fourth_value,\n    fifth_value,\n    sixth_value\n  ]\n",
+    );
+}

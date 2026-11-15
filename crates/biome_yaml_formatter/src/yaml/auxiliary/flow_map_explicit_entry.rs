@@ -1,5 +1,5 @@
 use super::flow_map_implicit_entry::{FormatBreakableKeyEntry, FormatImplicitEntryBody};
-use crate::comments::FormatCommentsSlice;
+use crate::comments::{FormatCommentsSlice, FormatValueGap};
 use crate::prelude::*;
 use crate::utils::{FormatMultilineKeyEntry, multiline_plain_key};
 use biome_formatter::write;
@@ -209,7 +209,13 @@ impl Format<YamlFormatContext> for FormatExplicitPair<'_> {
         }
         write!(f, [hard_line_break(), self.colon_token.format()])?;
         if let Some(value) = self.value {
-            write!(f, [space(), align("  ", &value.format())])?;
+            write!(
+                f,
+                [
+                    FormatValueGap::new(value.syntax()),
+                    align("  ", &value.format())
+                ]
+            )?;
         }
         Ok(())
     }

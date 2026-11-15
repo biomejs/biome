@@ -41,6 +41,7 @@ biome_resolver             = { workspace = true }
 biome_rowan                = { workspace = true, features = ["serde"] }
 biome_rule_options         = { workspace = true }
 biome_string_case          = { workspace = true }
+biome_yaml_formatter       = { workspace = true, features = ["serde"], optional = true }
 biome_yaml_syntax          = { workspace = true, optional = true }
 bpaf                       = { workspace = true, optional = true }
 camino                     = { workspace = true }
@@ -73,7 +74,11 @@ lang_html    = [
 lang_js      = ["biome_configuration_macros/lang_js", "dep:biome_js_formatter"]
 lang_json    = ["biome_configuration_macros/lang_json", "dep:biome_json_formatter"]
 lang_md      = ["biome_configuration_macros/lang_md", "dep:biome_markdown_formatter"]
-lang_yaml    = ["biome_configuration_macros/lang_yaml", "dep:biome_yaml_syntax"]
+lang_yaml    = [
+  "biome_configuration_macros/lang_yaml",
+  "dep:biome_yaml_formatter",
+  "dep:biome_yaml_syntax",
+]
 plugins      = ["dep:biome_plugin_loader"]
 schema       = [
   "biome_analyze/schema",
@@ -86,6 +91,7 @@ schema       = [
   "biome_markdown_formatter/schema",
   "biome_plugin_loader/schema",
   "biome_rule_options/schema",
+  "biome_yaml_formatter/schema",
   "biome_yaml_syntax/schema",
   "dep:schemars",
   "lang_css",

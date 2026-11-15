@@ -1,15 +1,18 @@
 use crate::YamlCommentStyle;
 use crate::comments::{FormatYamlLeadingComment, YamlComments};
+use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::rowan::RowanSource;
+use biome_formatter::separated::TrailingSeparator;
 use biome_formatter::{
-    BracketSpacing, CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding,
-    LineWidth, QuoteStyle, TrailingNewline, TransformSourceMap,
+    BracketSpacing, CommentSpacing, CstFormatContext, FormatContext, FormatOptions, IndentStyle,
+    LineEnding, LineWidth, QuoteStyle, TrailingNewline, TransformSourceMap,
 };
 use biome_formatter::{IndentWidth, rowan::prelude::*};
 use biome_yaml_syntax::YamlLanguage;
 use std::default::Default;
 use std::fmt;
 use std::rc::Rc;
+use std::str::FromStr;
 
 #[derive(Debug)]
 pub struct YamlFormatContext {
@@ -55,6 +58,10 @@ impl CstFormatContext for YamlFormatContext {
     fn comments(&self) -> &YamlComments {
         &self.comments
     }
+
+    fn comment_spacing(&self) -> CommentSpacing {
+        self.options.comment_spacing
+    }
 }
 
 #[derive(Debug, Default, Clone, PartialEq)]
@@ -70,6 +77,10 @@ pub struct YamlFormatOptions {
     /// Whether to insert spaces inside non-empty flow mappings and sequences
     /// that fit on one line. When unset, mappings have spaces and sequences do not.
     bracket_spacing: Option<BracketSpacing>,
+    /// The exact number of spaces between content and a comment on the same line. Defaults to 2.
+    comment_spacing: CommentSpacing,
+    /// Whether multiline flow mappings and sequences end with a comma. Defaults to all.
+    trailing_commas: TrailingCommas,
 }
 
 impl YamlFormatOptions {
@@ -138,6 +149,39 @@ impl YamlFormatOptions {
     pub fn bracket_spacing(&self) -> Option<BracketSpacing> {
         self.bracket_spacing
     }
+
+    pub fn with_comment_spacing(mut self, comment_spacing: CommentSpacing) -> Self {
+        self.comment_spacing = comment_spacing;
+        self
+    }
+
+    pub fn set_comment_spacing(&mut self, comment_spacing: CommentSpacing) {
+        self.comment_spacing = comment_spacing;
+    }
+
+    pub fn comment_spacing(&self) -> CommentSpacing {
+        self.comment_spacing
+    }
+
+    pub fn with_trailing_commas(mut self, trailing_commas: TrailingCommas) -> Self {
+        self.trailing_commas = trailing_commas;
+        self
+    }
+
+    pub fn set_trailing_commas(&mut self, trailing_commas: TrailingCommas) {
+        self.trailing_commas = trailing_commas;
+    }
+
+    pub fn trailing_commas(&self) -> TrailingCommas {
+        self.trailing_commas
+    }
+
+    pub(crate) fn to_trailing_separator(&self) -> TrailingSeparator {
+        match self.trailing_commas {
+            TrailingCommas::None => TrailingSeparator::Omit,
+            TrailingCommas::All => TrailingSeparator::Allowed,
+        }
+    }
 }
 
 impl FormatOptions for YamlFormatOptions {
@@ -178,7 +222,62 @@ impl fmt::Display for YamlFormatOptions {
         } else {
             writeln!(f, "Bracket spacing: unset")?;
         }
+        writeln!(f, "Comment spacing: {}", self.comment_spacing)?;
+        writeln!(f, "Trailing commas: {}", self.trailing_commas)?;
 
         Ok(())
+    }
+}
+
+/// Controls whether multiline flow mappings (`{ ... }`) and sequences (`[ ... ]`) end with a
+/// comma after their last entry.
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Deserializable, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub enum TrailingCommas {
+    /// Removes the comma after the last entry.
+    None,
+    /// Adds a comma after the last entry when the collection spans multiple lines. This is the
+    /// default.
+    #[default]
+    All,
+}
+
+impl FromStr for TrailingCommas {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "none" => Ok(Self::None),
+            "all" => Ok(Self::All),
+            _ => Err("Value not supported for TrailingCommas"),
+        }
+    }
+}
+
+impl fmt::Display for TrailingCommas {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::None => std::write!(f, "None"),
+            Self::All => std::write!(f, "All"),
+        }
+    }
+}
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for TrailingCommas {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("YamlTrailingCommas")
+    }
+
+    fn json_schema(_generator: &mut schemars::generate::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "type": "string",
+            "enum": ["none", "all"],
+            "description": "Controls whether multiline flow mappings (`{ ... }`) and sequences (`[ ... ]`) end with a comma after their last entry."
+        })
     }
 }

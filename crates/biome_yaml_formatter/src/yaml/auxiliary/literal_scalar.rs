@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::trivia::format_dangling_comments;
+use biome_formatter::trivia::{format_dangling_comments, format_inline_comment_space};
 use biome_formatter::write;
 use biome_rowan::AstNode;
 use biome_yaml_syntax::{YamlLiteralScalar, YamlLiteralScalarFields};
@@ -17,7 +17,13 @@ impl FormatNodeRule<YamlLiteralScalar> for FormatYamlLiteralScalar {
 
         // The comment on the header line
         if f.comments().has_dangling_comments(node.syntax()) {
-            write!(f, [space(), format_dangling_comments(node.syntax())])?;
+            write!(
+                f,
+                [
+                    format_inline_comment_space(),
+                    format_dangling_comments(node.syntax())
+                ]
+            )?;
         }
 
         write!(f, [content?.format()])

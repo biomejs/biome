@@ -45,7 +45,7 @@ long:
     : v,
   }
 comment: { ? [
-        a, # forces the explicit form
+        a,  # forces the explicit form
         b,
       ]
     : v }

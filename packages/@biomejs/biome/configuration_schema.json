@@ -523,6 +523,13 @@
 				}
 			]
 		},
+		"CommentSpacing": {
+			"description": "The exact number of spaces between content and a comment that follows it on the same line.\n\nAccepted values range from 1 through 4.",
+			"type": "integer",
+			"format": "uint8",
+			"maximum": 4,
+			"minimum": 1
+		},
 		"CompilationMode": {
 			"description": "Controls which functions React Compiler analyzes.",
 			"oneOf": [
@@ -22776,6 +22783,10 @@
 					"description": "Whether to insert spaces inside non-empty flow mappings (`{ key: value }`)\nand sequences (`[ item ]`) that fit on one line. If unset, inherits the\nglobal bracket spacing setting. When neither is set, mappings have spaces\nand sequences do not.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
 				},
+				"commentSpacing": {
+					"description": "The exact number of spaces between content and a comment on the same line\n(`key: value  # comment`). Defaults to 2, which yamllint's `comments` rule expects.",
+					"anyOf": [{ "$ref": "#/$defs/CommentSpacing" }, { "type": "null" }]
+				},
 				"enabled": {
 					"description": "Control the formatter for Yaml (and its super languages) files.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -22797,6 +22808,13 @@
 					"anyOf": [{ "$ref": "#/$defs/QuoteStyle" }, { "type": "null" }],
 					"default": null
 				},
+				"trailingCommas": {
+					"description": "Whether multiline flow mappings (`{ ... }`) and sequences (`[ ... ]`) end with a comma\nafter their last entry. Defaults to `all`. ryl's formatter uses `none`.",
+					"anyOf": [
+						{ "$ref": "#/$defs/YamlTrailingCommas" },
+						{ "type": "null" }
+					]
+				},
 				"trailingNewline": {
 					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- https://thoughtbot.com/blog/no-newline-at-end-of-file\n- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804\n- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files\n\nDisable the option at your own risk.\n\nDefaults to true.",
 					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
@@ -22814,6 +22832,11 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"YamlTrailingCommas": {
+			"description": "Controls whether multiline flow mappings (`{ ... }`) and sequences (`[ ... ]`) end with a comma after their last entry.",
+			"type": "string",
+			"enum": ["none", "all"]
 		}
 	}
 }

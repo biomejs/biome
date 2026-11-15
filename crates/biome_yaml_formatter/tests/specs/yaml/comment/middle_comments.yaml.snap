@@ -22,15 +22,15 @@ anchored: &default # This key
 # Formatted
 
 ```yaml
-single: !!str # comment
+single: !!str  # comment
   123
 plain2: !!str
   # one
   # two
   hello
-flowtag: !!map # comment
+flowtag: !!map  # comment
   {}
-anchored: &default # This key
+anchored: &default  # This key
   subkey: value
 
 ```
