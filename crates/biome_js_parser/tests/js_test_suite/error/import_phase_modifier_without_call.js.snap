@@ -553,7 +553,7 @@ import_phase_modifier_without_call.js:3:8 parse ━━━━━━━━━━�
     1 │ import.defer
     2 │ import.source;
   > 3 │ import.defer.foo
-      │        ^^^^^
+      │        ^^^^^^^^^
     4 │ import.source x
     5 │ new import.defer
   
@@ -564,7 +564,7 @@ import_phase_modifier_without_call.js:4:8 parse ━━━━━━━━━━�
     2 │ import.source;
     3 │ import.defer.foo
   > 4 │ import.source x
-      │        ^^^^^^
+      │        ^^^^^^^^
     5 │ new import.defer
     6 │ a = import.defer + 1
   
@@ -586,7 +586,7 @@ import_phase_modifier_without_call.js:6:12 parse ━━━━━━━━━━�
     4 │ import.source x
     5 │ new import.defer
   > 6 │ a = import.defer + 1
-      │            ^^^^^
+      │            ^^^^^^^^^
     7 │ import.defer("x")
     8 │ import.source("x")
   

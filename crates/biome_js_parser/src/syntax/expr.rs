@@ -1366,12 +1366,7 @@ fn parse_primary_expression(p: &mut JsParser, context: ExpressionContext) -> Par
                         // Parse the call arguments
                         parse_import_call_expression(p, context, m)
                     } else {
-                        let err = p.err_builder(
-                            format!("Expected `(` after `import.{}`", p.text(phase)),
-                            phase,
-                        );
-                        p.error(err);
-                        let _ = ParseRecoveryTokenSet::new(
+                        let recovered = ParseRecoveryTokenSet::new(
                             JS_BOGUS_EXPRESSION,
                             STMT_RECOVERY_SET.union(EXPR_RECOVERY_SET).union(token_set![
                                 T![,],
@@ -1381,6 +1376,14 @@ fn parse_primary_expression(p: &mut JsParser, context: ExpressionContext) -> Par
                         )
                         .enable_recovery_on_line_break()
                         .recover(p);
+
+                        let range = if let Ok(marker) = &recovered {
+                            TextRange::new(phase.start(), marker.range(p).end())
+                        } else {
+                            phase
+                        };
+                        p.error(js_parse_error::expected_import_call(p, range, phase));
+
                         m.complete(p, JS_BOGUS_EXPRESSION)
                     }
                 } else if p.at(T![ident]) && p.text(p.cur_range()) == "meta" {
