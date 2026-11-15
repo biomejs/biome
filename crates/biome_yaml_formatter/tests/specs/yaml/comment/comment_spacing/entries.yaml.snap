@@ -1,0 +1,58 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/comment/comment_spacing/entries.yaml
+---
+
+# Input
+
+```yaml
+? explicit # after explicit key
+: value # after explicit value
+group: &a !!map # first middle comment
+  # second middle comment
+  b: 1
+flow_keys: {
+  key: # after flow key colon
+    value,
+  other: 2 # after flow entry
+}
+colon_line: { ? key # after explicit flow key
+  : # after flow colon
+    value }
+...  # after document end
+
+```
+
+
+# Options
+
+```json
+{
+  "yaml": {
+    "formatter": {
+      "commentSpacing": 4
+    }
+  }
+}
+```
+
+# Formatted
+
+```yaml
+explicit:    # after explicit key
+  value    # after explicit value
+group: !!map &a
+  # first middle comment
+  # second middle comment
+  b: 1
+flow_keys: {
+    ? key    # after flow key colon
+    : value,
+    other: 2    # after flow entry
+  }
+colon_line: { ? key    # after explicit flow key
+    :    # after flow colon
+      value }
+...    # after document end
+
+```

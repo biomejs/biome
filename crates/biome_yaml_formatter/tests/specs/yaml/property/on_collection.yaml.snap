@@ -32,7 +32,7 @@ tagged: !!map
   b: 2
 both: !!map &anchor
   c: 3
-commented: &anchor # comment
+commented: &anchor  # comment
   d: 4
 seq: &anchor
   - a

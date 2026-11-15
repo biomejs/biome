@@ -40,13 +40,13 @@ long:
         single,
         eighty,
         column,
-        line,
+        line
       ]
-    : v,
+    : v
   }
 comment: { ? [
-        a, # forces the explicit form
-        b,
+        a,  # forces the explicit form
+        b
       ]
     : v }
 value:
@@ -66,8 +66,8 @@ value:
         a,
         single,
         eighty,
-        column,
-      ],
+        column
+      ]
   }
 pair: [{ a: b }: adjacent]
 

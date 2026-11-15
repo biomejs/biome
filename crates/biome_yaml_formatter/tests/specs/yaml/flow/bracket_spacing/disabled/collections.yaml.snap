@@ -55,7 +55,7 @@ nested:
   {
     map: {a: b},
     seq: [a, {b: c}],
-    empty: [{}, []],
+    empty: [{}, []]
   }
 pairs: [key: value, ? explicit, : empty]
 empty_pair: [: ]
@@ -74,7 +74,7 @@ long_mapping:
     first_key: first_value,
     second_key: second_value,
     third_key: third_value,
-    fourth_key: fourth_value,
+    fourth_key: fourth_value
   }
 long_sequence:
   [
@@ -83,7 +83,7 @@ long_sequence:
     third_value,
     fourth_value,
     fifth_value,
-    sixth_value,
+    sixth_value
   ]
 
 ```

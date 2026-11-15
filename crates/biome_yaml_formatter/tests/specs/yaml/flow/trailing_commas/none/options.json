@@ -1,0 +1,10 @@
+{
+  "formatter": {
+    "lineWidth": 30
+  },
+  "yaml": {
+    "formatter": {
+      "trailingCommas": "none"
+    }
+  }
+}

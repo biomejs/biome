@@ -297,6 +297,30 @@ where
     }
 }
 
+/// Formats the gap between content and a comment that follows it on the same line:
+/// [CstFormatContext::comment_spacing] spaces.
+pub const fn format_inline_comment_space() -> FormatInlineCommentSpace {
+    FormatInlineCommentSpace
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct FormatInlineCommentSpace;
+
+impl<Context: CstFormatContext> Format<Context> for FormatInlineCommentSpace {
+    fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+        // `space()` merges with adjacent spaces, so the width beyond one space is a token
+        const PADDING: &str = "   ";
+        debug_assert_eq!(PADDING.len(), usize::from(crate::CommentSpacing::MAX - 1));
+
+        let extra = usize::from(f.context().comment_spacing().value() - 1);
+        write!(f, [space()])?;
+        if extra > 0 {
+            write!(f, [token(&PADDING[..extra])])?;
+        }
+        Ok(())
+    }
+}
+
 /// Formats the trailing comments of `node`.
 pub const fn format_trailing_comments<L: Language>(
     node: &SyntaxNode<L>,
@@ -376,7 +400,7 @@ where
                                     }) {
                                         write!(f, [hard_line_break()])?;
                                     } else {
-                                        write!(f, [space()])?;
+                                        write!(f, [format_inline_comment_space()])?;
                                     }
                                 }
                                 1 => write!(f, [hard_line_break()])?,
@@ -389,8 +413,12 @@ where
                     ]
                 )?;
             } else {
-                let content =
-                    format_with(|f| write!(f, [maybe_space(!should_nestle), format_comment]));
+                let content = format_with(|f| {
+                    if !should_nestle {
+                        write!(f, [format_inline_comment_space()])?;
+                    }
+                    write!(f, [format_comment])
+                });
                 if comment.kind().is_line() {
                     write!(f, [line_suffix(&content), expand_parent()])?;
                 } else {

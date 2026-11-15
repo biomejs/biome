@@ -1,5 +1,6 @@
-use biome_formatter::IndentWidth;
+use biome_formatter::{CommentSpacing, IndentWidth};
 use biome_formatter_test::test_prettier_snapshot::{PrettierSnapshot, PrettierTestFile};
+use biome_yaml_formatter::TrailingCommas;
 use biome_yaml_formatter::{YamlFormatLanguage, YamlFormatOptions};
 use camino::Utf8Path;
 use std::env;
@@ -17,7 +18,11 @@ fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
     ));
 
     let test_file = PrettierTestFile::new(input, root_path);
-    let options = YamlFormatOptions::default().with_indent_width(IndentWidth::default());
+    // Prettier writes one space before an inline comment and adds trailing commas
+    let options = YamlFormatOptions::default()
+        .with_indent_width(IndentWidth::default())
+        .with_comment_spacing(CommentSpacing::try_from(1).unwrap())
+        .with_trailing_commas(TrailingCommas::All);
     let language = language::YamlTestFormatLanguage::default();
     let snapshot = PrettierSnapshot::new(test_file, language, YamlFormatLanguage::new(options));
 

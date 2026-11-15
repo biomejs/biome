@@ -75,13 +75,13 @@ a:
 {
   ? "key"
   # before the colon
-  : value,
+  : value
 }
 ---
 {
-  ? key # on the key line
+  ? key  # on the key line
   # before the colon
-  : value,
+  : value
 }
 ---
 { "key":
@@ -102,8 +102,8 @@ a:
     # on the colon line
     value }
 ---
-{ ? key # on the key line
-  : # after the colon
+{ ? key  # on the key line
+  :  # after the colon
     value }
 ---
 { key:
@@ -124,8 +124,8 @@ a:
         value }
 ---
 {
-  : # without a key
-    value,
+  :  # without a key
+    value
 }
 ---
 {
@@ -133,7 +133,7 @@ a:
   # separated
 
   # by a blank line
-  : value,
+  : value
 }
 ---
 [key:

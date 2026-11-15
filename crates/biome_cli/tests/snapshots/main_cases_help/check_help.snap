@@ -313,6 +313,12 @@ The configuration contained in `biome.json` or `biome.jsonc`.
                               flow mappings (`{ key: value }`) and sequences (`[ item ]`) that fit
                               on one line. If unset, inherits the global bracket spacing setting.
                               When neither is set, mappings have spaces and sequences do not.
+        --yaml-formatter-comment-spacing=NUMBER  The exact number of spaces between content and a
+                              comment on the same line (`key: value  # comment`). Defaults to 2,
+                              which yamllint's `comments` rule expects.
+        --yaml-formatter-trailing-commas=<none|all>  Whether multiline flow mappings (`{ ... }`) and
+                              sequences (`[ ... ]`) end with a comma after their last entry.
+                              Defaults to `none`, which removes it.
         --yaml-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
                               of the file.
                               Setting this option to `false` is **highly discouraged** because it

@@ -44,17 +44,17 @@ empty_sequence: [ ] # empty
 ```yaml
 mapping: {
     # before
-    first: 1, # between
-    second: 2,
+    first: 1,  # between
+    second: 2
     # after
   }
 sequence: [
     # before
-    first, # between
-    second,
+    first,  # between
+    second
     # after
   ]
-empty_mapping: {} # empty
-empty_sequence: [] # empty
+empty_mapping: {}  # empty
+empty_sequence: []  # empty
 
 ```

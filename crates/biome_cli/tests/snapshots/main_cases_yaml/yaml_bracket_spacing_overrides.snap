@@ -49,7 +49,7 @@ long_mapping:
     first_key: first_value,
     second_key: second_value,
     third_key: third_value,
-    fourth_key: fourth_value,
+    fourth_key: fourth_value
   }
 long_sequence:
   [
@@ -58,18 +58,18 @@ long_sequence:
     third_value,
     fourth_value,
     fifth_value,
-    sixth_value,
+    sixth_value
   ]
 commented_mapping: {
     # before
-    first: 1, # between
-    second: 2,
+    first: 1,  # between
+    second: 2
     # after
   }
 commented_sequence: [
     # before
-    first, # between
-    second,
+    first,  # between
+    second
     # after
   ]
 
@@ -97,7 +97,7 @@ long_mapping:
     first_key: first_value,
     second_key: second_value,
     third_key: third_value,
-    fourth_key: fourth_value,
+    fourth_key: fourth_value
   }
 long_sequence:
   [
@@ -106,18 +106,18 @@ long_sequence:
     third_value,
     fourth_value,
     fifth_value,
-    sixth_value,
+    sixth_value
   ]
 commented_mapping: {
     # before
-    first: 1, # between
-    second: 2,
+    first: 1,  # between
+    second: 2
     # after
   }
 commented_sequence: [
     # before
-    first, # between
-    second,
+    first,  # between
+    second
     # after
   ]
 
@@ -145,7 +145,7 @@ long_mapping:
     first_key: first_value,
     second_key: second_value,
     third_key: third_value,
-    fourth_key: fourth_value,
+    fourth_key: fourth_value
   }
 long_sequence:
   [
@@ -154,18 +154,18 @@ long_sequence:
     third_value,
     fourth_value,
     fifth_value,
-    sixth_value,
+    sixth_value
   ]
 commented_mapping: {
     # before
-    first: 1, # between
-    second: 2,
+    first: 1,  # between
+    second: 2
     # after
   }
 commented_sequence: [
     # before
-    first, # between
-    second,
+    first,  # between
+    second
     # after
   ]
 

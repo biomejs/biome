@@ -1,6 +1,6 @@
 use crate::comments::preserved_lines_before;
 use crate::prelude::*;
-use biome_formatter::trivia::format_dangling_comment;
+use biome_formatter::trivia::{format_dangling_comment, format_inline_comment_space};
 use biome_formatter::write;
 use biome_rowan::AstNode;
 use biome_yaml_syntax::{YamlDocument, YamlDocumentFields};
@@ -101,7 +101,7 @@ impl FormatNodeRule<YamlDocument> for FormatYamlDocument {
         // the blank lines that separate them.
         if let Some((first, rest)) = body_comments.split_first() {
             if first.lines_before() == 0 {
-                write!(f, [space()])?;
+                write!(f, [format_inline_comment_space()])?;
             } else {
                 write!(f, [hard_line_break()])?;
             }
