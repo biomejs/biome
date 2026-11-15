@@ -63,9 +63,9 @@ Expression "sleep()" => instanceof Promise<void>
 
 Binding awaited "awaited" => void | undefined
 
-Expression "await promise" => void | undefined
+Expression "await promise" => void
 
-Expression "promise" => instanceof Promise<void> | undefined
+Expression "promise" => instanceof Promise<void>
 
 Expression "awaited" => void | undefined
 ```

@@ -103,8 +103,8 @@ queries do everything that needs a resolved type.
 
 When type inference is enabled, collection (`src/js_module_info/flow.rs`)
 builds a graph of the possible paths through each execution root that tests
-or writes one of its own variables or a path on its own `this`. Its parts
-live in `src/js_module_info/flow/`:
+or writes a variable that it reads, its own or one of an enclosing root, or
+a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
 
 - `scanner.rs` selects roots while the module visitor walks the syntax tree,
   so collection never walks the whole module again. A root is selected when
@@ -139,8 +139,10 @@ live in `src/js_module_info/flow/`:
   Each write of a subject adds a write node (`FlowWriteEffect`, with the
   assigned `FlowAssigned` value) that also joins the innermost exception
   join, as `createFlowMutation` does: assignments of every kind, `++`, `--`,
-  `delete`, destructuring targets, loop-head targets, and the variables of an
-  annotated declarator. A value that Biome may type narrower than TypeScript
+  `delete`, destructuring targets, loop-head targets, the variables of an
+  annotated declarator, and those of a `var` declarator with an initializer,
+  which a read can reach before the declarator, written without a value. A
+  value that Biome may type narrower than TypeScript
   (`value_callees`) gets none, so the write gives the declared type. A call
   whose callee's annotation the syntax doesn't show, an import or a method
   (`FlowCallee`), is kept in `FlowAssigned::callees`, and the reading
@@ -171,10 +173,12 @@ live in `src/js_module_info/flow/`:
   such as the defaults of a destructuring pattern, from the header, then
   writes an assignment target of the head. The header is also the exit, so
   the code after the loop continues from it and from each `break`, and a
-  test in the body never reaches it. A variable that the head declares gets
-  no write node: the header joins the entry, where the variable has its
-  declared type, so the facts that the end of the body carries back never
-  make a read narrower than that type. A `switch` evaluates every case test
+  test in the body never reaches it. A `let` or a `const` that the head
+  declares gets no write node: the header joins the entry, where the
+  variable has its declared type, so the facts that the end of the body
+  carries back never make a read narrower than that type. A `var` is
+  hoisted, so code before the loop can test or write it, and each iteration
+  writes it without a value, which gives it its declared type. A `switch` evaluates every case test
   from the flow after its discriminant. Its clauses form groups, a run of
   clauses without statements followed by the next clause, and a group's
   statements start from the join of a condition for each of its cases, a
@@ -369,8 +373,11 @@ live in `src/js_module_info/flow/`:
   change the property before the test.
 - `writes.rs` finds the writes of a root that its graph doesn't model, as
   in a function called where it is defined or a class static block. A
-  variable narrows only when each of its semantic writes has a write node
-  or runs only when called (`runs_only_when_called`). `WrittenPaths` tells
+  variable narrows only when each of its semantic writes in the root has a
+  write node or runs only when called (`runs_only_when_called`). A write
+  outside the root, of a variable that an enclosing root declares, never
+  counts: it runs in another function, or in the enclosing root before or
+  after the root's code. `WrittenPaths` tells
   the writes of paths and variables apart by `BuiltRoot::written`: a path
   that an unmodeled write may change doesn't narrow anywhere in its root,
   and an aliased property guard whose property or object the root writes at
@@ -425,10 +432,16 @@ type-guard function whose target has only object types checks is also in
 `RootFlow::instance_tested`, and collection drops it only when its
 collected type shows that it has no object type
 (`raw_may_narrow_by_instanceof`). A
-variable whose type is a name, an import, or inferred from an expression stays. A variable can narrow when it is
-declared in the root, neither untyped nor annotated `any`, not supplied by a
+variable whose type is a name, an import, or inferred from an expression stays. A variable can narrow in
+the root that declares it and in the roots nested in that one, including an
+import, when it is neither untyped nor annotated `any`, not supplied by a
 destructuring default, which the declared type ignores, and each of its writes
-has a write node or runs only when called, as `writes.rs` decides. A `let`
+in the root has a write node or runs only when called, as `writes.rs` decides
+(`eligible_range`, and `encloses_eligible` once per variable of an enclosing
+root). A `var` whose name another declaration of its scope declares, as a
+second `var`, a function, or a parameter of its function does, doesn't narrow
+(`is_redeclared`), because the semantic model resolves every reference to the
+last declaration while each declarator writes the variable. A `let` or a `var`
 without an annotation whose initializer is `null`, `undefined`, or `[]`
 doesn't narrow when it is written, because TypeScript gives it a type that
 evolves with its writes. A pattern can narrow when its elements can and none
@@ -448,9 +461,14 @@ skip it as a whole when that variable or pattern can't narrow. A candidate
 made only by reads of one variable records the variable too when only
 `instanceof` tests and type-guard functions whose targets have only object
 types reach those reads, even though other tests of the variable reach its
-other reads; a second walk from those other tests finds such reads. A root
-that declares no variable that can narrow and has no `this` subject gets no
-graph.
+other reads; a second walk from those other tests finds such reads. A
+variable that several roots read has one baseline, so
+`ModuleFlow::property_only_bindings` and `ModuleFlow::assignment_only_bindings`
+list it only when every root that keeps reads of it lists it in
+`RootFlow::property_only` or `RootFlow::assignment_only`. A selected root is
+built even when it declares no variable that can narrow, because it can read
+one of an enclosing root, and it keeps no graph when relevance keeps no
+read.
 Other variable types are resolved only when a candidate read is queried,
 because resolving them can be costly.
 
@@ -460,7 +478,9 @@ Lookups skip flow for any expression that is not a candidate. Guards, the
 subjects each condition may narrow, and reads refer to a subject by its id in
 its root's subject table, so a test and a read of the same subject match. For
 a candidate read of a variable, `infer_flow_binding_baseline` resolves the
-variable's declared type once. For a read of a property path, the declared
+variable's declared type once, for every root that reads it. For an import,
+that is the type of what it imports, which the tracked queries of the
+import's resolution give. For a read of a property path, the declared
 type is the type of the member access at that read, computed from the
 narrowed type of its object when the object has one, as TypeScript types
 property reads. Facts about the variable therefore reach its
