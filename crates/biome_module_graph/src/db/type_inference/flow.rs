@@ -25,7 +25,7 @@ use crate::db::queries::{
 };
 use crate::js_module_info::flow::{
     AnyMemberDeclaration, CalleeReturn, FlowAssigned, FlowAssignedValue, FlowCallee, FlowCapture,
-    FlowGuard, FlowNode, FlowNodeId, FlowRead, FlowSubject, FlowSubjectId, FlowTest,
+    FlowEvolving, FlowGuard, FlowNode, FlowNodeId, FlowRead, FlowSubject, FlowSubjectId, FlowTest,
     FlowWriteEffect, PropertyKey, RootFlow, UnitValue, binding_unit_value, declaration_return,
     guard_signature, member_return,
 };
@@ -39,10 +39,10 @@ use biome_js_syntax::{AnyJsExpression, JsIdentifierExpression};
 use biome_js_type_info::interned_types::{ClassParents, Literal, TypeData, TypeMember};
 use biome_js_type_info::{
     ImportSymbol, Literal as RawLiteral, NarrowingPredicate, PropertyTest, RawTypeData, RawTypeId,
-    TypeId, TypeReference, TypeofExpression, base_literal_type, has_readonly_property,
-    is_narrowing_invariant, may_narrow_by_instanceof, may_narrow_by_property, narrow_by_assignment,
-    narrow_by_in_operator, narrow_by_instanceof, narrow_by_property, narrow_by_type_predicate,
-    narrow_type,
+    TypeId, TypeReference, TypeofExpression, base_literal_type, evolving_array_element,
+    evolving_assigned_type, has_readonly_property, is_narrowing_invariant,
+    may_narrow_by_instanceof, may_narrow_by_property, narrow_by_assignment, narrow_by_in_operator,
+    narrow_by_instanceof, narrow_by_property, narrow_by_type_predicate, narrow_type,
 };
 use biome_rowan::{AstNode, Text, TextRange, TextSize};
 use rustc_hash::FxHashMap;
@@ -151,6 +151,11 @@ pub(in crate::db) fn flow_subject_type<'db>(
     if narrowed == TypeData::NeverKeyword {
         return Some(TypeData::Unknown);
     }
+    match states.evolving(db) {
+        FlowEvolving::None => {}
+        FlowEvolving::Variable => return (narrowed != TypeData::Unknown).then_some(narrowed),
+        FlowEvolving::Array => return evolving_array_read(db, narrowed),
+    }
     // TypeScript reports a read that may come before the variable or the
     // field is assigned (TS2454, TS2565) and gives it the declared type.
     if root.is_uninitialized(states.subject(db))
@@ -171,6 +176,25 @@ pub(in crate::db) fn flow_assigned_types<'db>(
 ) -> Option<FlowAssignedTypes<'db>> {
     let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
     ctx.assigned_types(root, subject)
+}
+
+/// Returns the type of a read of an array whose type evolves with its writes,
+/// as [`FlowEvolving::Array`] describes, given its type there, `state`: an
+/// array of its element type.
+///
+/// Returns `None`, so that the read keeps its declared type, where nothing
+/// was added to the array yet, as TypeScript gives such a read an implicit
+/// `any[]` (TS7005), and where the element type is `Unknown` or `state` is no
+/// array, because a write that reaches the read assigns or adds a value that
+/// Biome can't type as TypeScript does.
+fn evolving_array_read<'db>(db: &'db dyn ModuleDb, state: TypeData<'db>) -> Option<TypeData<'db>> {
+    let element = evolving_array_element(db, state)?;
+    (!matches!(element, TypeData::NeverKeyword | TypeData::Unknown)).then(|| array_of(db, element))
+}
+
+/// Returns `Array<element>`.
+fn array_of<'db>(db: &'db dyn ModuleDb, element: TypeData<'db>) -> TypeData<'db> {
+    TypeData::instance_of(db, TypeData::array_class(), Box::new([element]))
 }
 
 /// Returns whether `ty` is `undefined` or a union with an `undefined` member.
@@ -212,7 +236,17 @@ enum FlatteningError {
     Cycle,
 }
 
-/// The state of one solve that its guards and writes share.
+/// The state of one solve that its guards share: the subject it narrows, the
+/// subject's declared type at the root's start, whether the subject is a
+/// readonly path, as [`FlowGuard::ReadonlyPath`] requires, the `switch`
+/// statements found exhaustive, as [`FlowGuard::Bypass`] requires, one bit
+/// each, the types that the subject's writes assign, how its type evolves
+/// with its writes, as [`FlowEvolving`] describes, the results of the
+/// property guards, `in` tests, `instanceof` tests, and calls to type-guard
+/// functions applied so far, keyed by guard index and incoming type, the
+/// values of the imported variables that [`FlowTest::Imported`] compares
+/// with, found so far, keyed by declaration, and the type that each write
+/// of the subject that assigns a value gives it.
 struct GuardSolve<'db> {
     /// The subject that the solve narrows.
     subject: FlowSubjectId,
@@ -226,9 +260,7 @@ struct GuardSolve<'db> {
     exhaustive: u64,
     /// The types that the subject's writes assign.
     assigned: Option<FlowAssignedTypes<'db>>,
-    /// The results of the property guards, `in` tests, `instanceof` tests,
-    /// and calls to type-guard functions applied so far, keyed by guard index
-    /// and incoming type.
+    evolving: FlowEvolving,
     properties: FxHashMap<(usize, TypeData<'db>), TypeData<'db>>,
     /// The values of the imported variables that [`FlowTest::Imported`]
     /// compares with, found so far, keyed by declaration.
@@ -245,6 +277,7 @@ impl<'db> GuardSolve<'db> {
         readonly_path: bool,
         exhaustive: u64,
         assigned: Option<FlowAssignedTypes<'db>>,
+        evolving: FlowEvolving,
     ) -> Self {
         Self {
             subject,
@@ -252,6 +285,7 @@ impl<'db> GuardSolve<'db> {
             readonly_path,
             exhaustive,
             assigned,
+            evolving,
             properties: FxHashMap::default(),
             imported: FxHashMap::default(),
             writes: FxHashMap::default(),
@@ -493,6 +527,10 @@ impl<'db> ResolutionCtx<'db, '_> {
             return None;
         };
         let start = identifier.range().start();
+        let evolving = root.evolving(read.subject);
+        if evolving != FlowEvolving::None {
+            return self.narrow_evolving(read, start, evolving);
+        }
         let declared = root
             .element_pattern(read.subject)
             .and_then(|pattern| self.narrowed_element(read, start, pattern, binding));
@@ -550,11 +588,60 @@ impl<'db> ResolutionCtx<'db, '_> {
                     false,
                     exhaustive,
                     assigned,
+                    FlowEvolving::None,
                 ),
                 read.point,
             ),
         )
         .or(declared)
+    }
+
+    /// Returns the type of the variable read at `read`, whose expression
+    /// starts at `start`, when its type evolves with its writes as `evolving`
+    /// describes: the type that the writes that reach the read give it, from
+    /// `undefined` where it is declared, without its declared type.
+    ///
+    /// Returns `None`, so that the read keeps its declared type, where such a
+    /// write assigns a value that Biome can't type as TypeScript does, and
+    /// without a solve when the other values that the root assigns are all
+    /// `null` or all `undefined`. The declared type then already is that
+    /// type, as for `let x = null; x = null`, or is wider, as Unknown for
+    /// `let x; x = null` and `unknown[]` for `const a = []; a.push(null)`.
+    fn narrow_evolving(
+        &mut self,
+        read: FlowRead,
+        start: TextSize,
+        evolving: FlowEvolving,
+    ) -> Option<TypeData<'db>> {
+        let assigned = self.flow_assigned_types(read.root, read.subject)?;
+        let mut unit = None;
+        if assigned.types(self.db).iter().all(|ty| {
+            *ty == TypeData::Unknown
+                || (matches!(ty, TypeData::Null | TypeData::Undefined)
+                    && *unit.get_or_insert(*ty) == *ty)
+        }) {
+            return None;
+        }
+        let exhaustive = self.exhaustive_switches(read, start);
+        let assigned = Some(assigned);
+        infer_flow_subject_type(
+            self.db,
+            FlowSubjectTypeInput::new(
+                self.db,
+                FlowSubjectRootInput::new(
+                    self.db,
+                    self.module,
+                    read.root,
+                    read.subject,
+                    Some(TypeData::Undefined),
+                    false,
+                    exhaustive,
+                    assigned,
+                    evolving,
+                ),
+                read.point,
+            ),
+        )
     }
 
     /// Returns the narrowed type of the variable declared at `binding` at
@@ -655,6 +742,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     false,
                     exhaustive,
                     assigned,
+                    FlowEvolving::None,
                 ),
                 read.point,
             ),
@@ -780,6 +868,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 false,
                 exhaustive,
                 assigned,
+                FlowEvolving::None,
             ),
         );
         let ty = states
@@ -832,6 +921,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     false,
                     exhaustive,
                     None,
+                    FlowEvolving::None,
                 ),
                 read.point,
             ),
@@ -939,6 +1029,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     readonly_path,
                     exhaustive,
                     assigned,
+                    FlowEvolving::None,
                 ),
                 read.point,
             ),
@@ -995,6 +1086,11 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// default's type, as in TypeScript. A value that can't be resolved, or
     /// whose type may come from a return type that Biome infers, is `Unknown`,
     /// which reduces nothing.
+    ///
+    /// The values of a subject whose type evolves with its writes are its
+    /// types after the writes, so each has its literal types widened, as
+    /// [`evolving_assigned_type`] gives it, and is `Unknown` where Biome may
+    /// type it otherwise than TypeScript does.
     pub(super) fn assigned_types(
         &mut self,
         root: usize,
@@ -1006,23 +1102,25 @@ impl<'db> ResolutionCtx<'db, '_> {
         if values.is_empty() {
             return None;
         }
+        let evolving = root.evolving(subject) != FlowEvolving::None;
         let types: Box<[_]> = values
             .iter()
             .map(|value| {
                 root.assigned
                     .get(*value as usize)
-                    .and_then(|assigned| self.assigned_type(assigned))
+                    .and_then(|assigned| self.assigned_type(assigned, evolving))
                     .unwrap_or(TypeData::Unknown)
             })
             .collect();
         Some(FlowAssignedTypes::new(self.db, types))
     }
 
-    /// Returns the type of the value that `assigned` describes, without
-    /// narrowing. Returns `None` when the value can't be resolved, and when it
-    /// may come from a call whose return type doesn't come from an
-    /// annotation; see [`Self::has_annotated_return`].
-    fn assigned_type(&mut self, assigned: &FlowAssigned) -> Option<TypeData<'db>> {
+    /// Returns the type of the value that `assigned` describes, as
+    /// [`Self::assigned_types`] resolves it, for a subject whose type evolves
+    /// with its writes when `evolving` is true, or `None` when it can't be
+    /// resolved or when a call that it can give may have a return type that
+    /// Biome infers, as [`Self::has_annotated_return`] decides.
+    fn assigned_type(&mut self, assigned: &FlowAssigned, evolving: bool) -> Option<TypeData<'db>> {
         if !assigned
             .callees
             .iter()
@@ -1040,7 +1138,14 @@ impl<'db> ResolutionCtx<'db, '_> {
             FlowAssignedValue::Expression(range) => {
                 let reference = self.js_info.raw_expressions.get(&range)?.clone();
                 let ty = self.resolve(&reference);
-                self.literal_argument(&reference, ty).unwrap_or(ty)
+                // TypeScript widens the literal types of the properties of an
+                // object literal that it assigns to a variable whose type
+                // evolves with its writes, which has no declared type.
+                if evolving {
+                    ty
+                } else {
+                    self.literal_argument(&reference, ty).unwrap_or(ty)
+                }
             }
             FlowAssignedValue::IterableValue(range) => {
                 let iterable = self.raw_operand_at(range)?;
@@ -1062,6 +1167,10 @@ impl<'db> ResolutionCtx<'db, '_> {
                 );
                 ty = TypeData::union_from_types(self.db, vec![defined, default]);
             }
+        }
+        if evolving {
+            let db = self.db;
+            return Some(evolving_assigned_type(db, ty, self.narrowing_resolver()));
         }
         Some(ty)
     }
@@ -1195,7 +1304,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         if matches!(ty, TypeData::Unknown | TypeData::NeverKeyword) || is_narrowing_invariant(ty) {
             return false;
         }
-        let mut solve = GuardSolve::new(switch.subject, ty, false, 0, None);
+        let mut solve = GuardSolve::new(switch.subject, ty, false, 0, None, FlowEvolving::None);
         if !self.compares_with_unit_values(root, switch.guard, &mut solve) {
             return false;
         }
@@ -1459,6 +1568,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 input.readonly_path(db),
                 input.exhaustive(db),
                 input.assigned(db),
+                input.evolving(db),
             ),
         )?;
         Some(
@@ -1642,9 +1752,19 @@ impl<'db> ResolutionCtx<'db, '_> {
                 test,
                 positive,
             } => {
-                if *tested != subject {
+                // Runtime tests don't narrow an array whose type evolves with
+                // its writes.
+                if *tested != subject || solve.evolving == FlowEvolving::Array {
                     return Some(ty);
                 }
+                // A variable whose type evolves with its writes has no
+                // declared type, so the tests that look at one look at the
+                // incoming type.
+                let declared = if solve.evolving == FlowEvolving::Variable {
+                    ty
+                } else {
+                    solve.declared
+                };
                 if let FlowTest::In(_) | FlowTest::Instanceof(_) | FlowTest::Predicate { .. } = test
                 {
                     // Loops revisit conditions, and each application compares
@@ -1653,19 +1773,19 @@ impl<'db> ResolutionCtx<'db, '_> {
                         return Some(*narrowed);
                     }
                     let narrowed = match *test {
-                        FlowTest::In(key) => self.narrow_by_in(ty, solve.declared, key, *positive),
+                        FlowTest::In(key) => self.narrow_by_in(ty, declared, key, *positive),
                         FlowTest::Predicate {
                             function,
                             object_target,
                         } => self.narrow_by_predicate(
                             ty,
-                            solve.declared,
+                            declared,
                             function,
                             object_target,
                             *positive,
                         ),
                         test @ FlowTest::Instanceof(_) => {
-                            self.narrow_by_instance(ty, solve.declared, test, *positive)
+                            self.narrow_by_instance(ty, declared, test, *positive)
                         }
                         FlowTest::Truthy
                         | FlowTest::Nullish
@@ -1693,9 +1813,14 @@ impl<'db> ResolutionCtx<'db, '_> {
                 optional_chain,
                 ..
             } => {
-                if *object != subject {
+                if *object != subject || solve.evolving == FlowEvolving::Array {
                     return Some(ty);
                 }
+                let declared = if solve.evolving == FlowEvolving::Variable {
+                    ty
+                } else {
+                    solve.declared
+                };
                 // Loops revisit conditions, and each application looks up the
                 // property in every member of the union.
                 if let Some(narrowed) = solve.properties.get(&(index, ty)) {
@@ -1709,13 +1834,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                             positive: *positive,
                             optional_chain: *optional_chain,
                         };
-                        narrow_by_property(
-                            self.db,
-                            ty,
-                            solve.declared,
-                            test,
-                            self.narrowing_resolver(),
-                        )
+                        narrow_by_property(self.db, ty, declared, test, self.narrowing_resolver())
                     }
                     None => ty,
                 };
@@ -1787,8 +1906,13 @@ impl<'db> ResolutionCtx<'db, '_> {
                 ty
             };
         }
+        if solve.evolving != FlowEvolving::None {
+            return self.apply_evolving_write(root, write.effect, solve, ty);
+        }
         let (declared, value) = match write.effect {
             FlowWriteEffect::Wildcard => return ty,
+            // Only a subject whose type evolves with its writes has these.
+            FlowWriteEffect::Elements(_) | FlowWriteEffect::EmptyArray => return solve.declared,
             FlowWriteEffect::Compound => return base_literal_type(self.db, ty),
             FlowWriteEffect::Reset | FlowWriteEffect::Assign(None) => return solve.declared,
             FlowWriteEffect::CompoundLike(None) => {
@@ -1823,6 +1947,71 @@ impl<'db> ResolutionCtx<'db, '_> {
         };
         solve.writes.insert(index, narrowed);
         narrowed
+    }
+
+    /// Returns the type of a subject whose type evolves with its writes, as
+    /// [`FlowEvolving`] describes, right after its write `effect`, given its
+    /// incoming type `ty`, following TypeScript's `getTypeAtFlowAssignment`
+    /// and `getTypeAtFlowArrayMutation` for such a subject.
+    ///
+    /// A variable takes the type of the assigned value. An array starts again
+    /// at `Array<never>` for an empty array literal, takes the type of another
+    /// assigned array, and adds a value to the element type of `ty`. A write
+    /// whose value Biome can't type as TypeScript does gives `Unknown`, so the
+    /// reads that it reaches keep their declared type.
+    fn apply_evolving_write(
+        &self,
+        root: &RootFlow,
+        effect: FlowWriteEffect,
+        solve: &GuardSolve<'db>,
+        ty: TypeData<'db>,
+    ) -> TypeData<'db> {
+        let db = self.db;
+        let assigned = |value: u32| {
+            root.subject_writes(solve.subject)
+                .binary_search(&value)
+                .ok()
+                .and_then(|position| {
+                    solve
+                        .assigned
+                        .and_then(|assigned| assigned.types(db).get(position).copied())
+                })
+                .unwrap_or(TypeData::Unknown)
+        };
+        match (solve.evolving, effect) {
+            (_, FlowWriteEffect::Wildcard) => ty,
+            (FlowEvolving::Variable, FlowWriteEffect::Assign(Some(value))) => assigned(value),
+            (FlowEvolving::Array, FlowWriteEffect::EmptyArray) => {
+                array_of(db, TypeData::NeverKeyword)
+            }
+            (FlowEvolving::Array, FlowWriteEffect::Assign(Some(value))) => {
+                let value = assigned(value);
+                if evolving_array_element(db, value).is_some() {
+                    value
+                } else {
+                    TypeData::Unknown
+                }
+            }
+            (FlowEvolving::Array, FlowWriteEffect::Elements(Some(value))) => {
+                let value = assigned(value);
+                match evolving_array_element(db, ty) {
+                    Some(element) if value != TypeData::Unknown => {
+                        array_of(db, TypeData::union_from_types(db, vec![element, value]))
+                    }
+                    Some(_) | None => TypeData::Unknown,
+                }
+            }
+            (
+                FlowEvolving::None | FlowEvolving::Variable | FlowEvolving::Array,
+                FlowWriteEffect::Assign(_)
+                | FlowWriteEffect::CompoundLike(_)
+                | FlowWriteEffect::Compound
+                | FlowWriteEffect::Undefined
+                | FlowWriteEffect::Reset
+                | FlowWriteEffect::Elements(_)
+                | FlowWriteEffect::EmptyArray,
+            ) => TypeData::Unknown,
+        }
     }
 
     /// Narrows `ty` by `name in value`, where `name` is the string or number
@@ -2443,6 +2632,7 @@ mod tests {
             subject_writes: Default::default(),
             assignment_only: Default::default(),
             uninitialized: Default::default(),
+            evolving: Default::default(),
             captures: Default::default(),
         };
         let reaching = ReachingFlow::new(&root, &[2]).unwrap();

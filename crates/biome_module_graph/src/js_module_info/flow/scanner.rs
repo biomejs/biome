@@ -1,15 +1,15 @@
-use super::builder::{MAX_DEPTH, has_operands};
+use super::builder::{MAX_DEPTH, has_operands, mutated_array};
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsBindingPattern, AnyJsForInOrOfInitializer, AnyJsOptionalChainExpression,
-    AnyTsReturnType, AnyTsType, JsAssignmentExpression, JsAssignmentOperator,
-    JsConditionalExpression, JsDoWhileStatement, JsForInStatement, JsForOfStatement,
-    JsForStatement, JsIdentifierBinding, JsIfStatement, JsLogicalExpression,
-    JsPostUpdateExpression, JsPreUpdateExpression, JsSwitchStatement, JsSyntaxKind, JsSyntaxNode,
-    JsUnaryExpression, JsUnaryOperator, JsVariableDeclarator, JsWhileStatement,
-    TsDeclareFunctionDeclaration,
+    AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, AnyJsForInOrOfInitializer,
+    AnyJsOptionalChainExpression, AnyTsReturnType, AnyTsType, JsAssignmentExpression,
+    JsAssignmentOperator, JsCallExpression, JsConditionalExpression, JsDoWhileStatement,
+    JsForInStatement, JsForOfStatement, JsForStatement, JsIdentifierBinding, JsIfStatement,
+    JsLogicalExpression, JsPostUpdateExpression, JsPreUpdateExpression, JsSwitchStatement,
+    JsSyntaxKind, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator, JsVariableDeclarator,
+    JsWhileStatement, TsDeclareFunctionDeclaration,
 };
-use biome_rowan::{AstNode, SyntaxKind, declare_node_union};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxKind, declare_node_union};
 use std::ops::Range;
 
 /// Limits the syntax nodes, including nested roots, of a root that gets flow.
@@ -118,6 +118,8 @@ impl FlowRootScanner {
                 depth: self.depth,
                 has_condition: false,
                 has_write: false,
+                has_array_mutation: false,
+                has_empty_array: false,
                 has_call_statement: false,
                 has_this: false,
                 is_unsupported: false,
@@ -171,6 +173,16 @@ impl FlowRootScanner {
             root.has_condition = true;
         } else if !root.has_write && is_write(node) {
             root.has_write = true;
+        } else if let Some(call) = JsCallExpression::cast_ref(node) {
+            root.has_array_mutation |= mutated_array(&call).is_some();
+        } else if let Some(declarator) = JsVariableDeclarator::cast_ref(node) {
+            root.has_empty_array |= declarator.variable_annotation().is_none()
+                && declarator
+                    .initializer()
+                    .and_then(|initializer| initializer.expression().ok())
+                    .is_some_and(|expression| {
+                        matches!(expression, AnyJsExpression::JsArrayExpression(array) if array.elements().is_empty())
+                    });
         }
     }
 
@@ -192,7 +204,8 @@ impl FlowRootScanner {
         let Some(root) = self.open.pop() else {
             return;
         };
-        if (root.has_condition || root.has_write || root.has_call_statement)
+        let has_write = root.has_write || (root.has_array_mutation && root.has_empty_array);
+        if (root.has_condition || has_write || root.has_call_statement)
             && !root.is_unsupported
             && self.visited - root.first_node < MAX_ROOT_NODES
             && let Some(node) = AnyJsControlFlowRoot::cast_ref(node)
@@ -205,7 +218,7 @@ impl FlowRootScanner {
                 bindings: start..self.kept_bindings.len(),
                 has_this: root.has_this,
             };
-            if root.has_condition || root.has_write {
+            if root.has_condition || has_write {
                 self.selected.push(selected);
             } else {
                 self.deferred.push(selected);
@@ -324,6 +337,14 @@ struct OpenRoot {
     /// Whether the root's own code writes a variable or a property, as
     /// [`is_write`] decides it.
     has_write: bool,
+    /// Whether the root's own code adds values to an array that a variable
+    /// holds, as `a.push(v)` does, which writes the variable when its type
+    /// evolves with its writes.
+    has_array_mutation: bool,
+    /// Whether the root's own code declares a variable without a type
+    /// annotation that an empty array literal initializes, whose type may
+    /// evolve with its writes.
+    has_empty_array: bool,
     /// Whether the root's own code has an expression statement that is a call,
     /// possibly in parentheses.
     has_call_statement: bool,
@@ -471,6 +492,29 @@ mod tests {
             selected("function f(x) { const g = () => { x = 1; }; }"),
             ["() => { x = 1; }"]
         );
+    }
+
+    #[test]
+    fn pushes_select_a_root_that_declares_an_empty_array() {
+        for source in [
+            "function f(v) { const a = []; a.push(v); }",
+            "function f(v) { let a = []; a.unshift(v); }",
+            "function f(v) { var a = []; (a)!.push(v); }",
+        ] {
+            assert_eq!(selected(source), [source], "{source}");
+        }
+        // The empty array and the call must both be in the root's own code,
+        // and the callee must name `push` or `unshift` on a variable.
+        for source in [
+            "function f(a, v) { a.push(v); }",
+            "function f(v) { const a: number[] = []; a.push(v); }",
+            "function f(v) { const a = [v]; a.push(v); }",
+            "function f(v) { const a = []; a.pop(v); }",
+            "function f(v) { const a = []; a[\"push\"](v); }",
+            "function f(v) { const a = []; return () => a.push(v); }",
+        ] {
+            assert!(selected(source).is_empty(), "{source}");
+        }
     }
 
     #[test]

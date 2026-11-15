@@ -1,0 +1,10 @@
+// should not generate diagnostics
+// A `let` initialized with `null` takes the type of the value that the code
+// assigns to it, as in TypeScript, so the left operand of the `||` below
+// can't be nullish.
+
+function assigned(input: string) {
+	let label = null;
+	label = input;
+	return label || "none";
+}

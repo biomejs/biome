@@ -48,6 +48,10 @@ pub(super) struct WrittenTargets {
     /// The range of each member assignment target and `delete` expression
     /// with a write point.
     pub(super) members: FxHashSet<TextRange>,
+    /// The start of each variable that a call or an element assignment adds
+    /// values to with a write point, as `a` in `a.push(v)` or `a[0] = v`,
+    /// which is where the semantic model's reference to the variable starts.
+    pub(super) mutations: FxHashSet<TextSize>,
 }
 
 /// Returns whether `node`, which lies below `root`, runs only when something
