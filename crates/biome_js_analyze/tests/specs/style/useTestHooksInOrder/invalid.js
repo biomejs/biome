@@ -49,3 +49,9 @@ describe('member form', () => {
 // Top-level out-of-order hooks
 afterEach(() => {});
 beforeAll(() => {});
+
+// Hooks out of order in a describe block with a mode
+test.describe.serial('serial suite', () => {
+  test.afterEach(() => {});
+  test.beforeEach(() => {});
+});

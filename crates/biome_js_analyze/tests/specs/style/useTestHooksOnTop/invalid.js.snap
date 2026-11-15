@@ -64,6 +64,18 @@ suite('my suite', () => {
   beforeEach(() => {});
 });
 
+// Hook after test in a describe block with a mode
+test.describe.serial('serial suite', () => {
+  test('does something', () => {});
+  test.beforeEach(() => {});
+});
+
+// Hook after test in a conditional describe block
+describe.skipIf(isCI)('conditional suite', () => {
+  it('does something', () => {});
+  beforeEach(() => {});
+});
+
 ```
 
 # Diagnostics
@@ -372,6 +384,58 @@ invalid.js:58:3 lint/style/useTestHooksOnTop ━━━━━━━━━━━�
        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     58 │   beforeEach(() => {});
     59 │ });
+  
+  i Move the hook above all test cases in the same block for better readability.
+  
+
+```
+
+```
+invalid.js:64:3 lint/style/useTestHooksOnTop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Lifecycle hook beforeEach appears after a test case.
+  
+    62 │ test.describe.serial('serial suite', () => {
+    63 │   test('does something', () => {});
+  > 64 │   test.beforeEach(() => {});
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^
+    65 │ });
+    66 │ 
+  
+  i Placing the hook after this test case makes it harder to spot the setup and teardown for these tests at a glance.
+  
+    61 │ // Hook after test in a describe block with a mode
+    62 │ test.describe.serial('serial suite', () => {
+  > 63 │   test('does something', () => {});
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    64 │   test.beforeEach(() => {});
+    65 │ });
+  
+  i Move the hook above all test cases in the same block for better readability.
+  
+
+```
+
+```
+invalid.js:70:3 lint/style/useTestHooksOnTop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Lifecycle hook beforeEach appears after a test case.
+  
+    68 │ describe.skipIf(isCI)('conditional suite', () => {
+    69 │   it('does something', () => {});
+  > 70 │   beforeEach(() => {});
+       │   ^^^^^^^^^^^^^^^^^^^^
+    71 │ });
+    72 │ 
+  
+  i Placing the hook after this test case makes it harder to spot the setup and teardown for these tests at a glance.
+  
+    67 │ // Hook after test in a conditional describe block
+    68 │ describe.skipIf(isCI)('conditional suite', () => {
+  > 69 │   it('does something', () => {});
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    70 │   beforeEach(() => {});
+    71 │ });
   
   i Move the hook above all test cases in the same block for better readability.
   

@@ -4353,6 +4353,11 @@ export interface Nursery {
 	 */
 	useTanstackQueryStableQueryClient?: UseTanstackQueryStableQueryClientConfiguration;
 	/**
+	 * Require tests and hooks to be inside a describe block.
+	 * See https://biomejs.dev/linter/rules/use-top-level-describe
+	 */
+	useTopLevelDescribe?: UseTopLevelDescribeConfiguration;
+	/**
 	 * Require Markdown documents to start with a top-level heading.
 	 * See https://biomejs.dev/linter/rules/use-top-level-heading
 	 */
@@ -7606,6 +7611,9 @@ export type UseTanstackQueryInfiniteQueryPropertyOrderConfiguration =
 export type UseTanstackQueryStableQueryClientConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTanstackQueryStableQueryClientOptions;
+export type UseTopLevelDescribeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTopLevelDescribeOptions;
 export type UseTopLevelHeadingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTopLevelHeadingOptions;
@@ -11333,6 +11341,10 @@ export interface RuleWithUseTanstackQueryStableQueryClientOptions {
 	level: RulePlainConfiguration;
 	options?: UseTanstackQueryStableQueryClientOptions;
 }
+export interface RuleWithUseTopLevelDescribeOptions {
+	level: RulePlainConfiguration;
+	options?: UseTopLevelDescribeOptions;
+}
 export interface RuleWithUseTopLevelHeadingOptions {
 	level: RulePlainConfiguration;
 	options?: UseTopLevelHeadingOptions;
@@ -14404,6 +14416,14 @@ export type UseTailwindStaticClassStringsOptions = {};
 export type UseTailwindVariablesShorthandOptions = {};
 export type UseTanstackQueryInfiniteQueryPropertyOrderOptions = {};
 export type UseTanstackQueryStableQueryClientOptions = {};
+export interface UseTopLevelDescribeOptions {
+	/**
+	 * The maximum number of `describe` blocks allowed at the top level of a file.
+	 *
+	 * When this option isn't set, any number of top-level `describe` blocks is allowed.
+	 */
+	maxTopLevelDescribes?: number;
+}
 export type UseTopLevelHeadingOptions = {};
 export type UseTopLevelRequireOptions = {};
 export type UseUnaryMinusOptions = {};
@@ -16400,6 +16420,7 @@ export type Category =
 	| "lint/nursery/useTailwindVariablesShorthand"
 	| "lint/nursery/useTanstackQueryInfiniteQueryPropertyOrder"
 	| "lint/nursery/useTanstackQueryStableQueryClient"
+	| "lint/nursery/useTopLevelDescribe"
 	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useTopLevelRequire"
 	| "lint/nursery/useUnaryMinus"

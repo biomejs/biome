@@ -1,0 +1,138 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidMaxTopLevelDescribes.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+describe("one", () => {
+	describe("one (nested)", () => {});
+	describe("two (nested)", () => {});
+	describe("three (nested)", () => {});
+});
+
+test.describe("two", () => {
+	describe("one (nested)", () => {});
+});
+
+describe("three", () => {
+	describe("one (nested)", () => {});
+});
+
+describe.each([1, 2])("four %d", () => {});
+
+test.describe.serial("five", () => {});
+
+describe.skipIf(isCI)("six", () => {});
+
+function declareSuite() {
+	describe("seven", () => {});
+}
+
+```
+
+# Diagnostics
+```
+invalidMaxTopLevelDescribes.js:13:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This top-level describe block exceeds the maximum of 2 allowed in a file.
+  
+    11 │ });
+    12 │ 
+  > 13 │ describe("three", () => {
+       │ ^^^^^^^^
+    14 │ 	describe("one (nested)", () => {});
+    15 │ });
+  
+  i A file with many top-level describe blocks is harder to navigate than a file that groups them under a shared name.
+  
+  i Move this block into another describe block, or move it to a separate file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMaxTopLevelDescribes.js:17:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This top-level describe block exceeds the maximum of 2 allowed in a file.
+  
+    15 │ });
+    16 │ 
+  > 17 │ describe.each([1, 2])("four %d", () => {});
+       │ ^^^^^^^^^^^^^
+    18 │ 
+    19 │ test.describe.serial("five", () => {});
+  
+  i A file with many top-level describe blocks is harder to navigate than a file that groups them under a shared name.
+  
+  i Move this block into another describe block, or move it to a separate file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMaxTopLevelDescribes.js:19:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This top-level describe block exceeds the maximum of 2 allowed in a file.
+  
+    17 │ describe.each([1, 2])("four %d", () => {});
+    18 │ 
+  > 19 │ test.describe.serial("five", () => {});
+       │ ^^^^^^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ describe.skipIf(isCI)("six", () => {});
+  
+  i A file with many top-level describe blocks is harder to navigate than a file that groups them under a shared name.
+  
+  i Move this block into another describe block, or move it to a separate file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMaxTopLevelDescribes.js:21:1 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This top-level describe block exceeds the maximum of 2 allowed in a file.
+  
+    19 │ test.describe.serial("five", () => {});
+    20 │ 
+  > 21 │ describe.skipIf(isCI)("six", () => {});
+       │ ^^^^^^^^^^^^^^^
+    22 │ 
+    23 │ function declareSuite() {
+  
+  i A file with many top-level describe blocks is harder to navigate than a file that groups them under a shared name.
+  
+  i Move this block into another describe block, or move it to a separate file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMaxTopLevelDescribes.js:24:2 lint/nursery/useTopLevelDescribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This top-level describe block exceeds the maximum of 2 allowed in a file.
+  
+    23 │ function declareSuite() {
+  > 24 │ 	describe("seven", () => {});
+       │ 	^^^^^^^^
+    25 │ }
+    26 │ 
+  
+  i A file with many top-level describe blocks is harder to navigate than a file that groups them under a shared name.
+  
+  i Move this block into another describe block, or move it to a separate file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
