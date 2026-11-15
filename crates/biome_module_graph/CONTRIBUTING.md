@@ -95,8 +95,9 @@ one of its own variables or a path on its own `this`. Its parts live in
 
 - `scanner.rs` selects roots while the module visitor walks the syntax tree,
   so collection never walks the whole module again. A root is selected when
-  its own code contains a condition, counting every `switch` statement, or,
-  in a module with an `asserts` annotation, a standalone call. It also records whether the root's own code
+  its own code contains a condition, counting every `switch` statement and
+  every `for...in` loop, or, in a module with an `asserts` annotation, a
+  standalone call. It also records whether the root's own code
   uses `this`, so a root whose only subjects are paths on `this` still gets a
   graph. The scanner rejects a root when its own code contains a `with`
   statement or bogus syntax, and a root over its node or depth limit. Declaration files (`.d.ts`, `.d.mts`, `.d.cts`, in any letter
@@ -111,8 +112,18 @@ one of its own variables or a path on its own `this`. Its parts live in
   analyzes a class field that has an initializer apart from the code around
   the class. It also skips `declare` statements, which never run.
 - The builder models the control flow of blocks, `if`, `while`, `do...while`,
-  `for`, `switch`, labeled statements, `break`, `continue`, `return`, and
-  `throw`, as TypeScript's binder does. A `switch` evaluates every case test
+  `for`, `for...in`, `for...of`, `switch`, labeled statements, `break`,
+  `continue`, `return`, and `throw`, as TypeScript's binder does. A
+  `for...in` or `for...of` loop evaluates its expression once, before the
+  loop. Its header, where each iteration starts, joins the flow after the
+  expression with the end of the body and each `continue`, as
+  `bindForInOrForOfStatement` does, and each iteration evaluates the head,
+  such as the defaults of a destructuring pattern, from the header. The header is also the exit, so the code after the loop
+  continues from it and from each `break`, and a test in the body never
+  reaches it. The graph has no write point for the loop variable: the
+  header joins the entry, where the variable has its declared type, so the
+  facts that the end of the body carries back never make a read narrower
+  than that type. A `switch` evaluates every case test
   from the flow after its discriminant. Its clauses form groups, a run of
   clauses without statements followed by the next clause, and a group's
   statements start from the join of a condition for each of its cases, a
@@ -121,9 +132,9 @@ one of its own variables or a path on its own `this`. Its parts live in
   statement also continues from the bypass, the condition that no case
   matched. `switch (true)` chains the conditions instead, as TypeScript's
   `narrowTypeBySwitchOnTrue` does: a group starts where every case before it
-  failed to match. Any other statement, such as `try`, `for...in`, or
-  `for...of`, is an opaque region. The builder evaluates the expressions of a region in source
-  order from the flow point before it, without modelling the branches and
+  failed to match. Any other statement, such as `try`, is an opaque region.
+  The builder evaluates the expressions of a region in source order from the
+  flow point before it, without modelling the branches and
   jumps inside it, and the next statement continues from the result. For each
   `break` or `continue` inside the region that targets a statement outside it,
   the builder adds the point before the region as a predecessor of that
@@ -245,6 +256,13 @@ one of its own variables or a path on its own `this`. Its parts live in
   of one, with cases that all test a unit value or a kind of value, wraps
   its bypass guard in `FlowGuard::Bypass` and is recorded in
   `RootFlow::switches`, at most 64 per root.
+  The body of a `for...in` loop whose head declares a variable starts with
+  the condition that the loop's expression is not nullish
+  (`decompose_for_in`), as TypeScript's `getTypeAtFlowAssignment` assumes
+  at the assignment of that variable. It also tests each receiver of an
+  optional chain, as in `for (const k in o?.v)`, and adds no property or
+  pattern guard, because TypeScript narrows no object through
+  `for (const k in s.kind)`.
   A test `x instanceof C` becomes a runtime test of `x` that holds the range
   of `C`, which inference resolves only when the test can narrow. The
   decomposed condition lists `x` with the objects of property guards, and

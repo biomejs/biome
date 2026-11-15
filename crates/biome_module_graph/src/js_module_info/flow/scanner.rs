@@ -1,9 +1,9 @@
 use super::builder::MAX_DEPTH;
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_syntax::{
-    AnyJsBinding, AnyTsReturnType, JsConditionalExpression, JsDoWhileStatement, JsForStatement,
-    JsIdentifierBinding, JsIfStatement, JsLogicalExpression, JsSwitchStatement, JsSyntaxKind,
-    JsSyntaxNode, JsWhileStatement, TsDeclareFunctionDeclaration,
+    AnyJsBinding, AnyTsReturnType, JsConditionalExpression, JsDoWhileStatement, JsForInStatement,
+    JsForStatement, JsIdentifierBinding, JsIfStatement, JsLogicalExpression, JsSwitchStatement,
+    JsSyntaxKind, JsSyntaxNode, JsWhileStatement, TsDeclareFunctionDeclaration,
 };
 use biome_rowan::{AstNode, SyntaxKind, declare_node_union};
 use std::ops::Range;
@@ -12,13 +12,15 @@ use std::ops::Range;
 pub(super) const MAX_ROOT_NODES: usize = 16_384;
 
 declare_node_union! {
-    /// Syntax that tests a condition along some path. Every `switch` counts,
-    /// whatever its discriminant, because one whose cases can't narrow is
-    /// rare.
+    /// Syntax that tests a condition along some path. Every `switch` and
+    /// every `for...in` loop counts, whatever its discriminant or expression,
+    /// because one that can't narrow is rare. A `for...in` loop tests that
+    /// its expression is not nullish when its head declares a variable.
     AnyFlowConditionSource = JsIfStatement
         | JsWhileStatement
         | JsDoWhileStatement
         | JsForStatement
+        | JsForInStatement
         | JsSwitchStatement
         | JsLogicalExpression
         | JsConditionalExpression
@@ -34,8 +36,8 @@ declare_node_union! {
 /// [`MAX_ROOT_NODES`] syntax nodes, and uses only syntax the flow builder
 /// supports.
 ///
-/// The builder treats statements it does not model, such as `try` or
-/// `for...of`, as opaque regions, so they do not reject a root. A root is not
+/// The builder treats statements it does not model, such as `try`, as opaque
+/// regions, so they do not reject a root. A root is not
 /// selected when its own syntax, outside nested roots, contains a `with`
 /// statement, bogus syntax, or nesting deeper than [`MAX_DEPTH`]. A `with`
 /// statement changes what the names inside it refer to, and TypeScript types
@@ -302,13 +304,17 @@ mod tests {
     }
 
     #[test]
-    fn switch_statements_are_conditions() {
+    fn switch_statements_and_for_in_loops_are_conditions() {
         for source in [
             "function f(x) { switch (x) { case 1: read(x); } }",
             "function f(x) { switch (g()) { default: read(x); } }",
+            "function f(x) { for (const key in x) read(x); }",
+            "function f(x) { for (key in g()) read(x); }",
         ] {
             assert_eq!(selected(source), [source], "{source}");
         }
+        // A `for...of` loop tests nothing.
+        assert!(selected("function f(x) { for (const item of x) read(item); }").is_empty());
     }
 
     #[test]
@@ -387,8 +393,6 @@ mod tests {
             "try { read(x); } catch (error) { read(error); }",
             "try { read(x); } finally { read(x); }",
             "switch (x) { case 1: read(x); break; default: read(x); }",
-            "for (const key in x) read(key);",
-            "for (const item of x) read(item);",
             "class C extends Base { field = read(x); }",
             "enum E { A = 1 }",
         ] {

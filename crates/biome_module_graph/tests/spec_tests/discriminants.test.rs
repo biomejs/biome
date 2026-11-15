@@ -1144,13 +1144,17 @@ fn discriminants_held_at_the_top_level_follow_exports() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) narrows every read below, giving `Circle`
-// or the first tuple. Biome keeps the declared type at every read except
-// `inSwitch`, because it doesn't follow `s!` and keys that are spelled
-// differently from the property, loose equality doesn't narrow an object,
-// a read in a closure or inside `for...of` never sees the test, and a `const`
-// exported by an `export { ... }` list holds nothing. A test inside a `switch`
-// narrows as anywhere else, so `inSwitch` gives `Circle`, as in TypeScript.
+// TypeScript 7.0.2 (`tsc --strict`) narrows every read below
+// (`narrowing-probes/m3-l3/access.ts` L16, L27, L30, L34, L36,
+// `m3-l3/destructure.ts` L23, L26, L42, L44, L46, `m3-l3/more.ts` L14 and
+// L17, and `m3-l3/scope.ts` L12), giving `Circle` or the first tuple, except
+// at `inSwitch` and `forOf`. Biome keeps the declared type: it doesn't follow
+// `s!` and keys that are spelled differently from the property, loose
+// equality doesn't narrow an object yet, a read in a closure never sees the
+// test, and a `const` exported by an `export { ... }` list holds nothing. A
+// test inside a `switch` or a `for...of` loop narrows as anywhere else, so
+// `inSwitch` and `forOf` give `Circle`, as in TypeScript (`m3-l3/more.ts`
+// L17, `m4-l2/moved.ts` L7).
 #[test]
 fn discriminant_constants_that_biome_does_not_follow_keep_the_object() {
     assert_reads(
@@ -1192,7 +1196,7 @@ fn discriminant_constants_that_biome_does_not_follow_keep_the_object() {
                 "t",
                 &["[string: a, number]", "[string: b, string]"],
             ),
-            ("forOf", "s", &["Circle", "Square"]),
+            ("forOf", "s", &["Circle"]),
             ("inSwitch", "s", &["Circle"]),
             ("exportList", "s2", &["Circle", "Square"]),
         ],
@@ -1340,10 +1344,13 @@ fn assert_element_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert_reads(&format!("{DESTRUCTURED}{source}"), reads);
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
-// A test of one element of a destructuring pattern narrows the value the
-// pattern destructures, and another element of the same pattern reads its
-// property on the narrowed value.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
+// (`narrowing-probes/m3/destructure.ts` L5, L6, L10, L13 to L15, L20, L21,
+// L22, L24, L25, L27, L28, L30, `m3-l4/patterns.ts` L13, L14, L17, L19 to
+// L23, L26 to L28, L30, L32, L35, L38, L39, L42, L45, L46, and `m3-l4/more.ts`
+// L10, L13 to L15, L18, L20 to L22): a test of one element of a destructuring pattern narrows
+// the value the pattern destructures, and another element of the same
+// pattern reads its property on the narrowed value.
 #[test]
 fn tests_of_destructured_elements_narrow_the_other_elements() {
     assert_element_reads(
@@ -1385,6 +1392,7 @@ fn tests_of_destructured_elements_narrow_the_other_elements() {
         function loop(s: S) { const { kind, v } = s; while (kind === "c") { /*loop*/v; } }
         function nestedDeclaration({ kind, v }: S) { function h() { kind; } if (kind === "c") /*nestedDeclaration*/v; }
         function forOf(shapes: S[]) { for (const { kind, v } of shapes) { kind === "c" && /*forOf*/v; } }
+        function forOfIf(shapes: S[]) { for (const { kind, v } of shapes) { if (kind === "c") /*forOfIf*/v; } }
         export const { kind: exported, v: exportedValue } = g;
         if (exported === "c") /*exported*/exportedValue;
         "#,
@@ -1431,6 +1439,7 @@ fn tests_of_destructured_elements_narrow_the_other_elements() {
             ("loop", "v", &["number"]),
             ("nestedDeclaration", "v", &["number"]),
             ("forOf", "v", &["number"]),
+            ("forOfIf", "v", &["number"]),
             ("exported", "exportedValue", &["number"]),
         ],
     );
@@ -1536,24 +1545,24 @@ fn destructured_elements_that_do_not_narrow_each_other() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `number` at every read below.
-// Biome keeps the declared type in these cases. Loose `==` with a literal
-// doesn't narrow an object. An element under a default of an enclosing
-// pattern never narrows, because its declared type ignores the default. An
-// `if` inside `for...of` and a read in a closure never see the test. A
-// written parameter variable never narrows, while TypeScript narrows `v` by
-// the assignment `v = 1`. Biome also gives the declared type `unknown`, which
-// no test narrows, to an element destructured from `s!`, to a parameter
-// destructured in a function that a variable annotation types, and to the
-// parameters of a function typed by a rest parameter whose type is a union
-// of tuples.
+// TypeScript 7.0.2 (`tsc --strict`) gives `number` at every read below
+// (`narrowing-probes/m3/destructure.ts` L11, L23, `m3-l4/patterns.ts` L24,
+// L25, L29, L31, L33). Biome keeps the declared type: loose `==` with a
+// literal doesn't narrow an object yet, an element under a default of an
+// enclosing pattern never narrows because its declared type ignores the
+// default, a read in a closure never sees the test, and a written parameter
+// variable never narrows, while TypeScript
+// narrows `v` by the assignment `v = 1`. Biome also gives an element
+// destructured from `s!`, a parameter destructured in a function that a
+// variable annotation types, and the parameters of a function typed by a
+// rest parameter whose type is a union of tuples the declared type
+// `unknown`, which no test narrows.
 #[test]
 fn destructured_elements_that_biome_does_not_narrow_yet() {
     assert_element_reads(
         r#"
         function loose(s: S) { const { kind, v } = s; if (kind == "c") /*loose*/v; }
         function enclosingDefault(w: { a?: S }) { const { a: { kind, v } = g } = w; if (kind === "c") /*enclosingDefault*/v; }
-        function forOf(shapes: S[]) { for (const { kind, v } of shapes) { if (kind === "c") /*forOf*/v; } }
         function closure(s: S) { const { kind, v } = s; const h = () => { if (kind === "c") /*closure*/v; }; }
         function assigned({ kind, v }: S) { v = 1; if (kind === "c") /*assigned*/v; }
         function nonNull(s: S | undefined) { const { kind, v } = s!; if (kind === "c") /*nonNull*/v; }
@@ -1563,7 +1572,6 @@ fn destructured_elements_that_biome_does_not_narrow_yet() {
         &[
             ("loose", "v", &["number", "string"]),
             ("enclosingDefault", "v", &["number", "string"]),
-            ("forOf", "v", &["number", "string"]),
             ("closure", "v", &["number", "string"]),
             ("assigned", "v", &["number", "string"]),
             ("nonNull", "v", &["unknown"]),
