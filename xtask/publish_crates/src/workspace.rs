@@ -712,7 +712,14 @@ mod tests {
             .unwrap_err()
             .to_string();
 
-        assert!(error.contains("crates/missing/Cargo.toml: missing explicit publish field"));
+        let manifest = Path::new("crates").join("missing").join("Cargo.toml");
+        assert!(
+            error.contains(&format!(
+                "{}: missing explicit publish field",
+                manifest.display()
+            )),
+            "{error}"
+        );
     }
 
     #[test]
