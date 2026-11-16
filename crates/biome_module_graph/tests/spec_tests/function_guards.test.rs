@@ -974,9 +974,7 @@ fn object_targets_that_differ_only_by_readonly_keep_both_members_in_the_else_bra
 
 // TypeScript 7.0.2 (`tsc --strict`) merges the interfaces of one name in one
 // scope into one type, and a class with them, and gives every read below the
-// expected type (`narrowing-probes/fix-c1/spec/guards.ts` L5 to L15, as in
-// `narrowing-probes/m3-l7/aug/index.ts` L8 and
-// `narrowing-probes/merging/local.ts` L8).
+// expected type.
 #[test]
 fn object_targets_see_the_members_of_every_merged_declaration() {
     assert_reads(

@@ -605,11 +605,7 @@ fn readonly_paths_never_narrow_where_typescript_sees_a_mutable_property() {
 // TypeScript 7.0.2 (`tsc --strict`) merges the interfaces of one name in one
 // scope, and a class with them, and takes `readonly` from the first
 // declaration of a property (TS2687 reports the others). It gives every read
-// below the expected type (`narrowing-probes/fix-c1/spec/readonly.ts` L4 to
-// L20, as in `narrowing-probes/merging/local.ts` L26, L28, and L30,
-// `narrowing-probes/m3-l9/merge.ts` L5, L8, L11, and L15, and
-// `narrowing-probes/m3-l9/merge2.ts` L6 and L9), unless a comment gives
-// TypeScript's type.
+// below the expected type, unless a comment gives TypeScript's type.
 #[test]
 fn readonly_paths_take_readonly_from_the_first_merged_declaration() {
     use InferredTypeData::{Null, String};

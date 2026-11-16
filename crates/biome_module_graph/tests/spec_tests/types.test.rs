@@ -51,12 +51,8 @@ fn test_named_type_ids_are_sorted_and_deduplicated() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) merges the interfaces of one name in one
-// scope into one type, and a class with them
-// (`narrowing-probes/fix-c1/spec/types.ts` L7 to L16 and
-// `narrowing-probes/fix-c1/spec/typeparams.ts` L8 and L11, as in
-// `narrowing-probes/merging/local.ts` L21, L24, L36, and L39). Every binding
-// below has the type that TypeScript gives it, unless a comment gives
-// TypeScript's type.
+// scope into one type, and a class with them. Every binding below has the type
+// that TypeScript gives it, unless a comment gives TypeScript's type.
 #[test]
 fn test_infer_module_types_merges_interfaces_and_classes_of_one_name() {
     let fs = MemoryFileSystem::default();

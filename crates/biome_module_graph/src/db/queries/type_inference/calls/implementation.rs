@@ -1683,8 +1683,10 @@ fn raw_local_class_name_matches<'db>(
         .is_some_and(|name| name.text() == expected_name)
 }
 
-/// Returns the handles of the parents of the raw class behind `local` that
-/// its module's table resolves: its parent class, then its interface bases.
+/// Returns local handles for the parent class and then the interface bases of
+/// the raw class behind `local`. A parent that doesn't resolve to a type of
+/// the same module is left out, and the result is empty when no raw class is
+/// behind `local`.
 fn raw_local_class_parents<'db>(
     db: &'db dyn ModuleDb,
     local: InferredLocalTypeHandle<'db>,

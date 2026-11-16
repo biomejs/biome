@@ -4492,8 +4492,8 @@ mod tests {
         }
     }
 
-    /// Returns an instance of the class `name` that interfaces merged into it
-    /// give `members` and `interface_bases`, without a parent class.
+    /// Returns an instance of a class called `name` that has `members`, the
+    /// `interface_bases` of interfaces merged into it, and no parent class.
     fn merged_class_instance<'db>(
         db: &'db TestDb,
         name: &'static str,
@@ -4544,7 +4544,7 @@ mod tests {
 
         // `in` finds the property on the interface base.
         assert_eq!(narrow_in(db, union(db, &[n, other]), "b", false), other);
-        // `instanceof` derives the class from the interface base.
+        // `instanceof` counts `M` as derived from its interface base `A`.
         assert_eq!(narrow_instance(db, union(db, &[m, ic]), a, true), m);
         assert_eq!(narrow_instance(db, union(db, &[m, ic]), a, false), ic);
         // A type predicate finds the member on the interface base.

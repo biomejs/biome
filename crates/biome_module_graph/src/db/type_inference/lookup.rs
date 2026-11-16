@@ -516,10 +516,9 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
                     extends,
                     interface_bases,
                 } = class.parents(db);
-                // Interface bases give only instance-side members, which a
-                // lookup of static members never reaches. They are pushed
-                // first, so the parent class, as in TypeScript's base types of
-                // a class, is searched before them.
+                // Interface bases give only instance-side members, so a lookup
+                // of static members skips them. They are pushed first, so the
+                // parent class is searched before them, as in TypeScript.
                 if matches!(
                     state.mode,
                     MemberLookupMode::Any | MemberLookupMode::Instance

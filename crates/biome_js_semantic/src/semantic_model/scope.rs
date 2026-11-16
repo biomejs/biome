@@ -156,15 +156,18 @@ impl Scope {
             .collect()
     }
 
-    /// Returns every set of interface and class declarations of one name in
-    /// this scope, which TypeScript merges into one type, each in source
-    /// order, ordered by their first declaration. Only names with two or more
-    /// such declarations are returned. A class expression is never part of a
-    /// set, and neither is a declaration of another kind, such as a namespace
-    /// or a variable, between the declarations of a set. A class that follows
-    /// another class of the name starts no set, because TypeScript rejects the
-    /// pair (TS2300), but a set can still hold two classes that an interface
-    /// separates, as in `class A {}`, `interface A {}`, `class A {}`.
+    /// Returns the sets of interface and class declarations that share a name
+    /// in this scope. TypeScript merges each set into one type. Each set lists
+    /// its declarations in source order, and the sets are ordered by their
+    /// first declaration. Only names with two or more such declarations form
+    /// a set.
+    ///
+    /// A class expression is never part of a set, and neither is a
+    /// declaration of another kind, such as a namespace or a variable, between
+    /// the declarations of a set. A class that follows another class of the
+    /// name starts no set, because TypeScript rejects the pair (TS2300). A set
+    /// can still hold two classes that an interface separates, as in
+    /// `class A {}`, `interface A {}`, `class A {}`.
     ///
     /// For example, `interface A { a: 1 }`, `namespace A {}`, and
     /// `class A {}` give one set with the interface and the class.

@@ -192,8 +192,8 @@ try {} catch (error) {}"#,
     assert!(scope_count >= 10, "{scope_count} scopes");
 }
 
-/// Returns, for each merge set of the global scope of the TypeScript
-/// `source`, the offsets of the names of its declarations.
+/// Returns the offsets of the declaration names in each merge set of the
+/// global scope of the TypeScript `source`.
 fn merged_type_declaration_offsets(source: &str) -> Vec<Vec<u32>> {
     let r = biome_js_parser::parse(source, JsFileSource::ts(), JsParserOptions::default());
     assert!(r.diagnostics().is_empty(), "at {source:?}");
@@ -230,9 +230,9 @@ fn declaration_offsets(source: &str, name: &str) -> Vec<u32> {
     offsets
 }
 
-/// Interfaces of one name, and a class with them, form one merge set in
-/// either order, listed in source order, and only names that two or more of
-/// them declare form one.
+/// Interfaces of one name form one merge set, and a class joins it whether
+/// it comes before or after them. Each set lists its declarations in source
+/// order. Only names with two or more such declarations form a set.
 #[test]
 fn merged_type_declarations_record_interfaces_and_classes_of_one_name() {
     let source = "interface A { a: 1 }\n\
@@ -277,9 +277,9 @@ fn merged_type_declarations_survive_declaration_merging() {
     ));
 }
 
-/// Two classes of one name don't merge, which TypeScript rejects (TS2300),
-/// and neither does a class expression, whose name is local to it, nor
-/// declarations in two scopes.
+/// Two classes of one name form no merge set, because TypeScript rejects the
+/// pair (TS2300). A class expression joins no set because its name is local
+/// to it, and declarations of one name in two scopes form no set either.
 #[test]
 fn merged_type_declarations_leave_out_what_typescript_does_not_merge() {
     let r = biome_js_parser::parse(

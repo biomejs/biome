@@ -2799,8 +2799,8 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                     return false;
                 }
                 // A class that the source reaches only through the interface
-                // bases of a class counts as unrelated, which leaves the
-                // result undetermined.
+                // bases of a class counts as unrelated, so assignability
+                // stays undetermined.
                 let Some(ClassParents {
                     extends: Some(parent),
                     interface_bases: _,
@@ -3032,8 +3032,8 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 interface.extends(self.db).to_vec(),
                 true,
             ),
-            // The parent class comes before the interface bases, as in
-            // TypeScript's base types of a class.
+            // The parent class comes before the interface bases, so its
+            // members take precedence over theirs, as in TypeScript.
             TypeData::Class(class) if matches!(ty, TypeData::InstanceOf(_)) => {
                 let ClassParents {
                     extends,
@@ -3360,8 +3360,8 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         }
         self.remaining_steps = self.remaining_steps.checked_sub(1)?;
         let (members, parents, is_class) = match self.resolve(ty).expand_canonical_global(self.db) {
-            // Interfaces merged into a class give only its instances
-            // members, so only the parent class has static members to
+            // Interfaces merged into a class give members only to its
+            // instances, so only the parent class has static members to
             // inherit.
             TypeData::Class(class) => {
                 let ClassParents {

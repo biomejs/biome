@@ -199,11 +199,8 @@ fn in_keeps_the_members_that_declare_the_property() {
 
 // TypeScript 7.0.2 (`tsc --strict`) merges the interfaces of one name in one
 // scope into one type, and a class with them, and gives every read below the
-// expected type (`narrowing-probes/fix-c1/spec/in.ts` L7 to L16, as in
-// `narrowing-probes/m3-l6/merged_in.ts` L6 and
-// `narrowing-probes/merging/local.ts` L6 and L16). Where every member
-// declares the property as required, the `else` branch is `never` in
-// TypeScript, which Biome reads as Unknown.
+// expected type. Where every member declares the property as required, the
+// `else` branch is `never` in TypeScript, which Biome reads as Unknown.
 #[test]
 fn in_sees_the_members_of_every_merged_declaration() {
     assert_reads(

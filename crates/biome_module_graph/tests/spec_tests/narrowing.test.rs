@@ -1809,9 +1809,9 @@ fn typeof_removes_or_replaces_object_types() {
 }
 
 // Every expected type is the type that TypeScript 7.0.2 (`tsc --strict`) gives
-// the read (`narrowing-probes/fix-c1/spec/guards.ts` L18 and L20), unless a
-// comment gives TypeScript's type. An interface merged into a class can give
-// its instances a call signature, of its own or through its `extends` clause.
+// the read, unless a comment gives TypeScript's type. An interface merged into
+// a class can give its instances a call signature, of its own or through its
+// `extends` clause.
 #[test]
 fn typeof_function_keeps_classes_that_merged_interfaces_make_callable() {
     assert_object_reads(

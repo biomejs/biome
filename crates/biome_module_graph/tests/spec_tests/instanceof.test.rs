@@ -495,15 +495,12 @@ fn instanceof_tells_classes_with_the_same_contents_apart() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) merges a class and the interfaces of its
-// name in one scope into one type, whose bases are the class's `extends`
-// clause and the interfaces' ones, and merges interfaces of one name with all
-// their `extends` clauses. It gives every read below the expected type
-// (`narrowing-probes/fix-c1/spec/instanceof.ts` L12 to L24, as in
-// `narrowing-probes/m3-l6/exposure.ts` L19, L20, and L22,
-// `narrowing-probes/m3-l6/merged.ts` L13 and L14, and
-// `narrowing-probes/merging/local.ts` L12, L14, and L18). An `else` branch
-// that no value reaches is `never` in TypeScript, which Biome reads as
-// Unknown.
+// name in one scope into one type. The bases of that type are the types in
+// the `extends` clauses of the class and of the interfaces. Interfaces of one
+// name merge with all their `extends` clauses. TypeScript gives every read
+// below the expected type, unless a comment gives TypeScript's type. An
+// `else` branch that no value reaches is `never` in TypeScript, which Biome
+// reads as Unknown.
 #[test]
 fn instanceof_follows_the_extends_clauses_of_every_merged_declaration() {
     assert_reads(
@@ -543,10 +540,9 @@ fn instanceof_follows_the_extends_clauses_of_every_merged_declaration() {
             ("firstDeclarationElse", "x", &["unknown"]),
             ("lastDeclaration", "x", &["I2"]),
             ("lastDeclarationElse", "x", &["instanceof C"]),
-            // `Q4.K`, which TypeScript relates to `Q3.K` by its members.
-            // Equal merged declarations in two namespaces are two classes, as
-            // `instanceof_tells_classes_with_the_same_contents_apart`
-            // describes, so the read keeps its type.
+            // TypeScript: `Q4.K`, because it relates `Q4.K` to `Q3.K` by their
+            // members. Biome counts equal merged declarations in two
+            // namespaces as two classes, so the read keeps its type.
             ("namespaces", "x", &["instanceof K", "string"]),
             ("namespacesElse", "x", &["instanceof K", "string"]),
             ("sameNamespace", "x", &["instanceof K"]),

@@ -469,30 +469,35 @@ impl JsModuleInfoCollector {
         }
     }
 
-    /// Gives the bindings of `set`, interface and class declarations of one
-    /// name in one scope in source order, the one type that TypeScript merges
-    /// them into, so whichever binding name resolution or an export picks, in
-    /// a type or a value position, names it.
+    /// Gives every binding of `set` the one type that TypeScript merges its
+    /// declarations into. `set` holds the interface and class declarations of
+    /// one name in one scope, in source order. Name resolution and exports can
+    /// pick any binding of the set, in a type or a value position, and each
+    /// one names the merged type.
     ///
     /// Interfaces merge into an interface with the `extends` clauses and
     /// members of all of them in source order. A class and interfaces merge
     /// into the class, with the class's members first, and the `extends`
     /// clauses of the interfaces as its [`Class::interface_bases`]. The
     /// merged type has the type parameters of the declaration that lists the
-    /// most of them. Member lookup takes the
-    /// first member of a name, so the first declaration of a property
-    /// decides its type and whether it is readonly, as in TypeScript, but
-    /// the first declaration of a method also gives all its overloads, where
-    /// TypeScript puts the overloads of later declarations first. The merged
-    /// type keeps the scope of the class or the first interface, which tells
-    /// it apart from an equal set in another scope.
+    /// most of them. The merged type keeps the scope of the class or the first
+    /// interface, which tells it apart from an equal set in another scope.
+    ///
+    /// Member lookup takes the first member of a name. As in TypeScript, the
+    /// first declaration of a property sets its type and whether it is
+    /// readonly. The first declaration of a method also gives all its
+    /// overloads, where TypeScript puts the overloads of later declarations
+    /// first.
     ///
     /// The bindings keep their own types when the set has two classes, which
     /// TypeScript rejects (TS2300), or when a declaration has no collected
-    /// type. They get Unknown when a declaration's type parameters aren't the
-    /// first ones of the merged type, by name, or leave out one without a
-    /// default (TS2428), and when an interface gives a class a construct
-    /// signature, which Biome would take as the class's constructor.
+    /// type. The bindings get Unknown in two cases:
+    ///
+    /// - A declaration's type parameters don't match the first type
+    ///   parameters of the merged type by name, or leave out one without a
+    ///   default (TS2428).
+    /// - An interface gives a class a construct signature. Biome would take
+    ///   that signature as the class's constructor.
     fn merge_type_declarations(&mut self, set: &[BindingId]) {
         let mut type_ids = Vec::with_capacity(set.len());
         for id in set {

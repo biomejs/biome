@@ -2829,22 +2829,22 @@ pub struct InternedClass<'db> {
     pub scope_id: Option<ScopeId>,
 }
 
-/// The types that a class inherits from, as [`InternedClass::parents`]
-/// gives them.
+/// The types that a class inherits from: its parent class and the bases of
+/// the interfaces merged into it.
 ///
-/// The parents are grouped so that every reader of them destructures this
-/// struct and decides about each kind of parent: a reader that ignores the
-/// interface bases of a class reports its inherited members as missing.
+/// The parents are grouped so that every reader destructures this struct and
+/// handles each kind of parent. A reader that ignores the interface bases of
+/// a class reports the members the class inherits from them as missing.
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct ClassParents<'db> {
-    /// The parent class, as in `class N extends C {}`: a value, whose
-    /// instances give the instance-side members, and whose static members the
-    /// class inherits.
+    /// The parent class, as `C` in `class N extends C {}`. It is a value. The
+    /// instances of the class inherit the members of its instances, and the
+    /// class inherits its static members.
     pub extends: Option<TypeData<'db>>,
-    /// The instance types that the `extends` clauses of the interfaces merged
-    /// into the class name, as `A` for `interface N extends A {}` next to
-    /// `class N {}`, which give only instance-side members. See
-    /// [`crate::type_data::Class::interface_bases`].
+    /// The types named in the `extends` clauses of the interfaces merged into
+    /// the class, as `A` for `interface N extends A {}` next to `class N {}`.
+    /// They are instance types, so they give members only to the instances of
+    /// the class. See [`crate::type_data::Class::interface_bases`].
     pub interface_bases: Box<[TypeData<'db>]>,
 }
 
