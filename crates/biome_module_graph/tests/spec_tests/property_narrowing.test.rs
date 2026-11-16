@@ -663,7 +663,7 @@ fn complete_module_tables_agree_with_path_reads() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 // Paths on `this` narrow like paths on a variable in class methods and
 // accessors, in object literal methods, and in arrow functions inside them or
 // inside a field initializer.
@@ -717,7 +717,7 @@ fn paths_on_this_narrow_like_paths_on_variables() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives the expected type at each read,
+// TypeScript 7.0.2 (`tsc --strict`) gives the expected type at each read,
 // because narrowing never reaches an arrow function created after the test,
 // and an object literal method or class method inside the method has its own
 // `this`.
@@ -746,7 +746,7 @@ fn reads_in_nested_functions_see_no_facts_about_this() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives the type in the comment after each
+// TypeScript 7.0.2 (`tsc --strict`) gives the type in the comment after each
 // read. In a constructor, and in an arrow function called where the
 // constructor defines it, TypeScript reads a field without an initializer at
 // its declared type after a test that leaves `undefined` possible (TS2565).
@@ -783,7 +783,7 @@ fn constructors_keep_paths_on_this_unnarrowed() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) narrows `staticMethod` and `staticBlock` to
+// TypeScript 7.0.2 (`tsc --strict`) narrows `staticMethod` and `staticBlock` to
 // `string`, and reports TS2339 at `instanceField`, because `this` in a static
 // method or static block is the class. Biome types `this` there as an instance
 // of the class, so it cannot read the type of `this.s`, and it reads `this.x`
@@ -812,7 +812,7 @@ fn static_members_keep_paths_on_this_unnarrowed() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) narrows every read below to `string`,
+// TypeScript 7.0.2 (`tsc --strict`) narrows every read below to `string`,
 // because an object literal method takes `this` from the object or from its
 // contextual type, and a function or method with a `this` parameter takes it
 // from the parameter. Biome finds the object or class only through a variable
@@ -852,7 +852,7 @@ fn paths_on_this_stay_unnarrowed_where_biome_types_this_otherwise() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) narrows every read below to `string`,
+// TypeScript 7.0.2 (`tsc --strict`) narrows every read below to `string`,
 // because a write to `this.x` in another method, in a callback, or in a
 // function called through `.call(this)` never cancels its narrowing. Biome
 // copies this unsound narrowing; `NARROWING.md` lists it among the deliberate
@@ -881,12 +881,12 @@ fn writes_to_this_in_other_functions_keep_narrowing() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives the type in the comment after each
+// TypeScript 7.0.2 (`tsc --strict`) gives the type in the comment after each
 // read. Every write cancels the narrowing of the path it writes, so Biome reads
 // the path at its declared type. A write to another path, at `other` and
 // `superOther`, keeps the narrowing. TypeScript differs at three reads. At
 // `arrowIife` and `functionIife`, it narrows the path to the assigned type at
-// the write, which Biome does not model yet. At `super`, it ignores the write
+// the write, which Biome does not model. At `super`, it ignores the write
 // through `super`, although that write can set `this.x` through a setter of
 // the parent class.
 #[test]
@@ -932,7 +932,7 @@ fn writes_to_this_in_the_same_root_cancel_narrowing() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives the type in the comment after each
+// TypeScript 7.0.2 (`tsc --strict`) gives the type in the comment after each
 // read. A private name narrows on any object, as `o.#v` does. TypeScript also
 // treats `this["#x"]` as the same reference as `this.#x`, although they are
 // different properties; Biome keeps them apart, so it is wider there.

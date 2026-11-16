@@ -39,9 +39,10 @@ use rustc_hash::FxHashSet;
 /// setter of a parent class with `this` as its receiver. Wherever the scan
 /// differs from TypeScript, it counts more writes: TypeScript ignores, for
 /// example, writes in `async` and generator functions called where they are
-/// defined, in field initializers and parameter defaults, through `as` and
-/// `satisfies`, through `super`, and to `this` in a static block, whose
-/// `this` is another object.
+/// defined, in field initializers and the parameter defaults of methods,
+/// through `as` and `satisfies`, and through `super`. Like the scan, TypeScript 7.0.2 treats
+/// `this.v = x` in a static block as a write of the root's `this.v`, although
+/// the static block's `this` is the class.
 pub(super) struct WrittenPaths {
     /// Subjects that an assignment or `delete` writes directly.
     written: FxHashSet<FlowSubjectId>,
