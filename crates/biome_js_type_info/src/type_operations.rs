@@ -283,9 +283,10 @@ pub(crate) fn mapped_type<'db>(
 /// `ConstAsserted*` kinds record that a member came from an `as const`
 /// expression, and a mapped type is a type declaration rather than such an
 /// expression. Callers pass the source member's
-/// [`TypeMemberKind::is_optional`] and, unless a modifier decides it,
-/// [`TypeMemberKind::is_readonly`], which are also true for the
-/// `ConstAsserted*` kinds, so both carry over from every kind.
+/// [`TypeMemberKind::is_optional`] and, unless a `readonly` or `-readonly`
+/// modifier overrides it, [`TypeMemberKind::is_readonly`]. Both also hold for
+/// the matching `ConstAsserted*` kinds, so optionality and readonly carry
+/// over from every kind.
 fn mapped_member_kind<'db>(
     name: &Text,
     is_optional: bool,

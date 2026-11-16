@@ -2318,9 +2318,12 @@ pub enum TypeMemberKind<'db> {
     Named(Text),
     NamedOptional(Text),
     NamedStatic(Text),
-    /// See [`crate::TypeMemberKind::ReadonlyNamed`].
+    /// A [`Self::Named`] property declared `readonly`, or made readonly by a
+    /// mapped type such as `Readonly<T>`. See
+    /// [`crate::TypeMemberKind::ReadonlyNamed`].
     ReadonlyNamed(Text),
-    /// See [`crate::TypeMemberKind::ReadonlyNamedOptional`].
+    /// A [`Self::NamedOptional`] property declared `readonly`, or made
+    /// readonly by a mapped type such as `Readonly<T>`.
     ReadonlyNamedOptional(Text),
 }
 
@@ -2388,7 +2391,11 @@ impl<'db> TypeMemberKind<'db> {
     }
 
     /// Returns whether this member is a property that can't be assigned
-    /// through its type, as [`crate::TypeMemberKind::is_readonly`] describes.
+    /// through its type: one declared `readonly` or made readonly by a mapped
+    /// type such as `Readonly<T>`, or a property of an object literal under an
+    /// `as const` assertion, including one with a computed key.
+    ///
+    /// A getter is never readonly, because Biome doesn't collect setters.
     pub fn is_readonly(&self) -> bool {
         matches!(
             self,
@@ -2440,8 +2447,8 @@ impl<'db> TypeMemberKind<'db> {
         }
     }
 
-    /// Marks a named instance property as readonly, as
-    /// [`crate::TypeMemberKind::with_readonly`] does.
+    /// Marks a named instance property as readonly and returns other kinds
+    /// unchanged. See [`crate::TypeMemberKind::with_readonly`].
     pub fn with_readonly(self) -> Self {
         match self {
             Self::Named(name) => Self::ReadonlyNamed(name),
@@ -2484,9 +2491,9 @@ impl<'db> TypeMemberKind<'db> {
         }
     }
 
-    /// Returns the name of an instance property or getter, the members that
-    /// `keyof` lists and that `"name" in value` tests, whether they are
-    /// optional, readonly, or from an `as const` object.
+    /// Returns the name of an instance property or getter, including optional
+    /// and readonly properties and those of an `as const` object. These are
+    /// the members that `keyof` lists and that `"name" in value` tests.
     ///
     /// Static members, constructors, signatures, and members with computed
     /// keys return `None`, even when they have a name.

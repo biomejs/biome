@@ -252,13 +252,16 @@ pub(crate) enum PropertyLookup<'db> {
     /// The property exists. `ty` is its type as a read sees it, with the
     /// type arguments of the object substituted but its handles unresolved.
     /// `is_readonly` tells whether the property can't be assigned through
-    /// the object's type, as [`TypeMemberKind::is_readonly`] describes.
+    /// the object's type.
     Found {
         ty: TypeData<'db>,
         is_optional: bool,
         #[cfg_attr(
             not(test),
-            expect(dead_code, reason = "no narrowing reads readonly properties, only tests do")
+            expect(
+                dead_code,
+                reason = "no narrowing reads readonly properties, only tests do"
+            )
         )]
         is_readonly: bool,
     },
@@ -274,10 +277,10 @@ pub(crate) enum PropertyLookup<'db> {
 /// members of `Object`.
 ///
 /// A tuple without rest elements has a property for each element, named by
-/// its index in decimal, such as `"0"`, which is optional when the element
-/// is, and readonly when the tuple is, as `readonly [string]` is. A tuple has
-/// no property for an index past its last element. Other names of tuple
-/// properties, such as `length`, give `Unknown`, and so do arrays,
+/// its index in decimal, such as `"0"`. The property is optional when the
+/// element is, and readonly when the tuple is, as in `readonly [string]`. A
+/// tuple has no property for an index past its last element. Other names of
+/// tuple properties, such as `length`, give `Unknown`, and so do arrays,
 /// primitives, functions, and unresolved types.
 ///
 /// A found property is readonly when it is declared `readonly`, when it
@@ -310,8 +313,9 @@ pub(crate) fn find_property<'db>(
     }
 }
 
-/// Returns the property `name` of `tuple`, as [`find_property`] describes,
-/// where `is_readonly` tells whether the tuple is readonly.
+/// Returns the property `name` of `tuple`, as [`find_property`] describes.
+/// `is_readonly` marks every element property readonly, as for a `readonly`
+/// tuple.
 fn tuple_element<'db>(
     db: &'db dyn TypeDb,
     tuple: InternedTuple<'db>,
@@ -915,9 +919,8 @@ enum MemberLookup<'db> {
     Found {
         ty: TypeData<'db>,
         is_optional: bool,
-        /// Whether the member is readonly, as [`TypeMemberKind::is_readonly`]
-        /// describes. Comparisons ignore it, as TypeScript's assignability
-        /// does.
+        /// Whether the member can't be assigned through the object's type.
+        /// Comparisons ignore it, as TypeScript's assignability does.
         is_readonly: bool,
     },
     Missing,

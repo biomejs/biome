@@ -567,8 +567,8 @@ impl<'l, 'a> GlobalBuilder<'l, 'a> {
 
     /// Returns `None` when a computed key can't be represented.
     ///
-    /// `readonly` applies only to named instance members: static members and
-    /// computed keys don't record it.
+    /// `readonly` applies only to named instance members. Static members and
+    /// computed keys ignore it.
     fn lower_member_key(
         &mut self,
         name: AnyJsObjectMemberName,

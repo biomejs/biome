@@ -628,9 +628,9 @@ impl<'db> ResolutionCtx<'db, '_> {
         self.preserve_unknown_members(ty, has_unknown_members)
     }
 
-    /// Resolves `Readonly<T>` to the members of `T`, with its named
-    /// properties marked readonly, as
-    /// [`InferredTypeMemberKind::with_readonly`] does.
+    /// Resolves `Readonly<T>` to an object with the own members of `T` and
+    /// marks its named instance properties readonly. Returns `Unknown` when
+    /// the own members of `T` can't be collected.
     fn resolve_readonly(&mut self, qualifier: &TypeReferenceQualifier) -> InferredTypeData<'db> {
         let target_ty = self.resolve(&qualifier.type_parameters[0]);
         self.own_members(target_ty).map_or(

@@ -3317,7 +3317,7 @@ mod tests {
     }
 
     /// Returns `is_optional` and `is_readonly` of the property `name` of `ty`,
-    /// or `None` when [`find_property`] doesn't find it.
+    /// or `None` when [`find_property`] reports it missing or unknown.
     fn property_modifiers<'db>(
         db: &'db TestDb,
         ty: InferredTypeData<'db>,

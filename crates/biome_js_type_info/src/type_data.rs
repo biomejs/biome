@@ -1103,8 +1103,9 @@ impl TypeMember {
         self.kind.is_const_asserted()
     }
 
-    /// Returns whether this member is a readonly property, as
-    /// [`TypeMemberKind::is_readonly`] describes.
+    /// Returns whether this member is a property declared `readonly` or a
+    /// property of an object literal under an `as const` assertion. See
+    /// [`TypeMemberKind::is_readonly`].
     #[inline]
     pub fn is_readonly(&self) -> bool {
         self.kind.is_readonly()
@@ -1367,11 +1368,13 @@ impl TypeMemberKind {
         }
     }
 
-    /// Marks a named instance property as declared `readonly`.
+    /// Marks a named instance property as declared `readonly` and returns
+    /// other kinds unchanged.
     ///
-    /// Other kinds are returned unchanged: static members, because property
-    /// lookups don't read them, and getters, which [`Self::is_readonly`]
-    /// describes. A member under an `as const` assertion is readonly already.
+    /// Static members aren't marked because property lookups don't read them.
+    /// Getters aren't marked because Biome doesn't collect setters, so it never
+    /// treats a getter as readonly. A member under an `as const` assertion is
+    /// readonly already.
     pub fn with_readonly(self) -> Self {
         match self {
             Self::Named(name) => Self::ReadonlyNamed(name),

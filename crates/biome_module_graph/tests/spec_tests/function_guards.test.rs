@@ -948,12 +948,11 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert_no_whole_module_inference(&db, &db.take_salsa_events());
 }
 
-// Biome records `readonly`, so two object types that differ only by it are
-// different types. Its subtype relation ignores `readonly`, so it can't tell
-// which of the two TypeScript's strict subtype relation prefers, and the
-// `else` branch keeps both members of each pair. A comment gives the type
-// that TypeScript 6.0.3 (`tsc --strict`) gives where it differs
-// (`narrowing-probes/m3-l8/identity.ts` L6 and L7).
+// The `else` branch keeps a member that differs from the target only by
+// `readonly`. Biome records `readonly`, so the two are different types, but
+// its subtype relation ignores `readonly`, so it can't tell which of the two
+// TypeScript's strict subtype relation prefers. A comment gives the type
+// that TypeScript 6.0.3 (`tsc --strict`) gives where it differs.
 #[test]
 fn object_targets_that_differ_only_by_readonly_keep_both_members_in_the_else_branch() {
     assert_reads(

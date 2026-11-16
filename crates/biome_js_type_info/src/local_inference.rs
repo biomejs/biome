@@ -2733,9 +2733,8 @@ impl TypeMember {
 
     /// Builds the member for a class method or field named `name`.
     ///
-    /// `is_readonly` marks a named instance field as declared `readonly`, as
-    /// [`TypeMemberKind::with_readonly`] does; static and computed fields
-    /// don't record it.
+    /// `is_readonly` marks a named instance field as declared `readonly`.
+    /// Static and computed fields ignore it.
     #[inline]
     fn from_class_member_info(
         collector: &mut dyn RawTypeCollector,
