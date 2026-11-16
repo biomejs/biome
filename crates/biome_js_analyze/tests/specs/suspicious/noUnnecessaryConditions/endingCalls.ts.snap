@@ -1,0 +1,159 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: endingCalls.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+declare function fail(message: string): never;
+declare function assert(condition: unknown): asserts condition;
+declare const log: { fatal(message: string): never };
+
+function localNever(value: string | null) {
+	if (value === null) fail("missing");
+	return value?.length;
+}
+
+function methodNever(value: string | null) {
+	if (value === null) log.fatal("missing");
+	return value?.length;
+}
+
+function assertFalse(value: string | null) {
+	if (value === null) assert(false);
+	return value?.length;
+}
+
+function literalTrue(value: string | null) {
+	if (value === null) {
+		if (true) return;
+	}
+	return value?.length;
+}
+
+```
+
+# Diagnostics
+```
+endingCalls.ts:9:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+     7 │ function localNever(value: string | null) {
+     8 │ 	if (value === null) fail("missing");
+   > 9 │ 	return value?.length;
+       │ 	       ^^^^^
+    10 │ }
+    11 │ 
+  
+  i Replace ?. with ..
+  
+     7 │ function localNever(value: string | null) {
+     8 │ 	if (value === null) fail("missing");
+   > 9 │ 	return value?.length;
+       │ 	            ^^
+    10 │ }
+    11 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+endingCalls.ts:14:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    12 │ function methodNever(value: string | null) {
+    13 │ 	if (value === null) log.fatal("missing");
+  > 14 │ 	return value?.length;
+       │ 	       ^^^^^
+    15 │ }
+    16 │ 
+  
+  i Replace ?. with ..
+  
+    12 │ function methodNever(value: string | null) {
+    13 │ 	if (value === null) log.fatal("missing");
+  > 14 │ 	return value?.length;
+       │ 	            ^^
+    15 │ }
+    16 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+endingCalls.ts:19:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    17 │ function assertFalse(value: string | null) {
+    18 │ 	if (value === null) assert(false);
+  > 19 │ 	return value?.length;
+       │ 	       ^^^^^
+    20 │ }
+    21 │ 
+  
+  i Replace ?. with ..
+  
+    17 │ function assertFalse(value: string | null) {
+    18 │ 	if (value === null) assert(false);
+  > 19 │ 	return value?.length;
+       │ 	            ^^
+    20 │ }
+    21 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+endingCalls.ts:24:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    22 │ function literalTrue(value: string | null) {
+    23 │ 	if (value === null) {
+  > 24 │ 		if (true) return;
+       │ 		    ^^^^
+    25 │ 	}
+    26 │ 	return value?.length;
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
+  
+
+```
+
+```
+endingCalls.ts:26:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    24 │ 		if (true) return;
+    25 │ 	}
+  > 26 │ 	return value?.length;
+       │ 	       ^^^^^
+    27 │ }
+    28 │ 
+  
+  i Replace ?. with ..
+  
+    24 │ 		if (true) return;
+    25 │ 	}
+  > 26 │ 	return value?.length;
+       │ 	            ^^
+    27 │ }
+    28 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```

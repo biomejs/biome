@@ -4,6 +4,7 @@ mod call;
 mod expression;
 mod member;
 mod promise;
+mod reachability;
 mod return_type;
 
 pub use call::{
@@ -15,4 +16,5 @@ pub use promise::{
     ArrayOfPromisesClassificationRequest, PromiseClassificationRequest,
     PromiseReturningFunctionClassificationRequest,
 };
+pub use reachability::UnreachableCodeClassificationRequest;
 pub use return_type::{FunctionReturnTypeRequest, MemberReturnTypeRequest, TypeInferenceSource};
