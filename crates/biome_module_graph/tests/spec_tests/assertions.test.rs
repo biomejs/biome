@@ -453,8 +453,7 @@ fn assertions_respect_binding_identity_writes_and_existing_subject_restrictions(
         ("var", "other", &[String, Number]),
         // TypeScript 7.0.2 (`tsc --strict`) gives `number` after the write,
         // and `never` after the assertion of the written argument, which
-        // Biome reads as Unknown (`narrowing-probes/m5-l2/existing.ts` L6,
-        // L7).
+        // Biome reads as Unknown.
         ("written", "value", &[Number]),
         ("argumentWrite", "value", &[InferredTypeData::Unknown]),
         ("captured", "value", &[String, Number]),

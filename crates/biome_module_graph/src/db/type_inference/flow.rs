@@ -5,11 +5,11 @@
 //! [`crate::js_module_info::flow`]). This module resolves the type that the
 //! read's subject starts from and the types that its writes assign, and
 //! applies the guards and the writes along every path that reaches the read.
-//! A variable starts from its declared type. The declared
-//! type of a property path at a read is the type of the member access there,
-//! given the narrowed type of its object, as TypeScript types property reads.
-//! Likewise, the declared type of an element of a destructuring pattern at a
-//! read is its field on the pattern narrowed there.
+//! A variable starts from its declared type. The declared type of a property
+//! path at a read is the type of the member access there, given the narrowed
+//! type of its object, as TypeScript types property reads. Likewise, the
+//! declared type of an element of a destructuring pattern at a read is its
+//! field on the pattern narrowed there.
 
 use super::flow_expressions::collected_member_name;
 use super::imports::{ExportOriginResult, find_export_origin};
@@ -180,7 +180,7 @@ fn contains_undefined(db: &dyn ModuleDb, ty: TypeData) -> bool {
 }
 
 /// Returns whether a write can change a subject whose declared type is
-/// `baseline`: an assignment narrows only a union, and a compound assignment
+/// `baseline`. An assignment narrows only a union, and a compound assignment
 /// changes only a literal type.
 fn may_narrow_by_assignment(baseline: TypeData) -> bool {
     matches!(
@@ -209,16 +209,7 @@ enum FlatteningError {
     Cycle,
 }
 
-/// The state of one solve that its guards share: the subject it narrows, the
-/// subject's declared type at the root's start, whether the subject is a
-/// readonly path, as [`FlowGuard::ReadonlyPath`] requires, the `switch`
-/// statements found exhaustive, as [`FlowGuard::Bypass`] requires, one bit
-/// each, the types that the subject's writes assign, the results of the
-/// property guards, `in` tests, `instanceof` tests, and calls to type-guard
-/// functions applied so far, keyed by guard index and incoming type, the
-/// values of the imported variables that [`FlowTest::Imported`] compares
-/// with, found so far, keyed by declaration, and the type that each write
-/// of the subject that assigns a value gives it.
+/// The state of one solve that its guards and writes share.
 struct GuardSolve<'db> {
     /// The subject that the solve narrows.
     subject: FlowSubjectId,
@@ -230,12 +221,17 @@ struct GuardSolve<'db> {
     /// The `switch` statements found exhaustive, one bit each, as
     /// [`FlowGuard::Bypass`] requires.
     exhaustive: u64,
+    /// The types that the subject's writes assign.
     assigned: Option<FlowAssignedTypes<'db>>,
+    /// The results of the property guards, `in` tests, `instanceof` tests,
+    /// and calls to type-guard functions applied so far, keyed by guard index
+    /// and incoming type.
     properties: FxHashMap<(usize, TypeData<'db>), TypeData<'db>>,
-    /// The unit values of the imported variables that a [`FlowTest::Imported`]
-    /// compares with, found so far, keyed by declaration. `None` records a
-    /// variable that holds no unit value.
+    /// The values of the imported variables that [`FlowTest::Imported`]
+    /// compares with, found so far, keyed by declaration.
     imported: FxHashMap<TextRange, Option<TypeData<'db>>>,
+    /// The type that each write of the subject that assigns a value gives it,
+    /// keyed by write index.
     writes: FxHashMap<u32, TypeData<'db>>,
 }
 
@@ -682,9 +678,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns the types that the writes of `subject` in the root at index
-    /// `root` assign, as [`crate::db::queries::infer_flow_assigned_types`]
-    /// resolves them, or resolved in this context and kept per root and
-    /// subject when it evaluates flow locally.
+    /// `root` assign. When this context evaluates flow locally, it resolves
+    /// them itself and keeps them per root and subject. Otherwise it queries
+    /// [`crate::db::queries::infer_flow_assigned_types`].
     ///
     /// Returns `None` without resolving anything when no write with a value
     /// reduces the subject.
@@ -728,9 +724,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// `for...of` loop, or `string` for the head of a `for...in` loop. A
     /// destructured field is read from it as a destructured variable's
     /// declared type is, and a default replaces `undefined` with the
-    /// default's type, as TypeScript's `getTypeWithDefault` does. A value
-    /// that can't be resolved, or whose type may come from a return type that
-    /// Biome infers, is `Unknown`, which reduces nothing.
+    /// default's type, as in TypeScript. A value that can't be resolved, or
+    /// whose type may come from a return type that Biome infers, is `Unknown`,
+    /// which reduces nothing.
     pub(super) fn assigned_types(
         &mut self,
         root: usize,
@@ -754,10 +750,10 @@ impl<'db> ResolutionCtx<'db, '_> {
         Some(FlowAssignedTypes::new(self.db, types))
     }
 
-    /// Returns the type of the value that `assigned` describes, as
-    /// [`Self::assigned_types`] resolves it, or `None` when it can't be
-    /// resolved or when a call that it can give may have a return type that
-    /// Biome infers, as [`Self::has_annotated_return`] decides.
+    /// Returns the type of the value that `assigned` describes, without
+    /// narrowing. Returns `None` when the value can't be resolved, and when it
+    /// may come from a call whose return type doesn't come from an
+    /// annotation; see [`Self::has_annotated_return`].
     fn assigned_type(&mut self, assigned: &FlowAssigned) -> Option<TypeData<'db>> {
         if !assigned
             .callees
@@ -768,10 +764,11 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
         let mut ty = match assigned.value {
             // TypeScript types an object or array literal by the declared type
-            // of its target, which keeps the literal types of its properties
+            // of its target, so it keeps the literal types of its properties
             // where the declared type has them. Keeping all of them gives a
-            // subtype of TypeScript's type, which the reduction never makes
-            // narrower than TypeScript's.
+            // subtype of TypeScript's type. A subtype is assignable to every
+            // member that TypeScript's type is assignable to, so the reduction
+            // never gives a narrower type than TypeScript's.
             FlowAssignedValue::Expression(range) => {
                 let reference = self.js_info.raw_expressions.get(&range)?.clone();
                 let ty = self.resolve(&reference);
@@ -801,8 +798,10 @@ impl<'db> ResolutionCtx<'db, '_> {
         Some(ty)
     }
 
-    /// Returns whether the return type of `callee` comes from an annotation,
-    /// as [`CalleeReturn::Resolved`] describes.
+    /// Returns whether the return type of `callee` comes from an annotation.
+    /// An import is followed to the declaration that it names, and a member
+    /// must come from an annotation on every type that its object can have;
+    /// see [`CalleeReturn::Resolved`].
     fn has_annotated_return(&mut self, callee: FlowCallee) -> bool {
         let info = self.js_info;
         match callee {
@@ -1281,7 +1280,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         mut guards: GuardSolve<'db>,
     ) -> Option<Vec<TypeData<'db>>> {
         // A variable or a field that may be read before it is assigned holds
-        // `undefined` at the start, as TypeScript's initial type gives it.
+        // `undefined` at the start, as in TypeScript.
         let start = if root.is_uninitialized(guards.subject) {
             TypeData::union_from_types(self.db, vec![guards.declared, TypeData::Undefined])
         } else {
@@ -1493,16 +1492,16 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns the type of the subject that `solve` narrows right after the
-    /// write at index `index`, given its incoming type `ty`, following
-    /// TypeScript's `getTypeAtFlowAssignment`.
+    /// write at index `index`, given its incoming type `ty`. TypeScript types
+    /// a reference after an assignment the same way.
     ///
     /// A write of the subject itself gives the declared type reduced by the
-    /// assigned type, as [`FlowWriteEffect`] describes. The result depends
-    /// only on the declared type and the value, except for a compound
+    /// assigned type; [`FlowWriteEffect`] lists the exceptions. The result
+    /// depends only on the declared type and the value, except for a compound
     /// assignment, so it is computed once per write. A write of a proper
     /// prefix of the subject's path, or of any property of one, gives the
-    /// declared type, as TypeScript's `containsMatchingReference` does. Any
-    /// other write leaves the incoming type.
+    /// declared type, as in TypeScript. Any other write leaves the incoming
+    /// type.
     fn apply_write(
         &mut self,
         root: &RootFlow,
@@ -1806,10 +1805,11 @@ fn imported_unit_value<'db>(
 /// `binding` in `js_info`, the module `module`, comes from an annotation.
 ///
 /// The import is followed through re-exports to the module that declares the
-/// export, as `find_export_origin` follows exports. A binding that an import
-/// declares there is followed in turn, at most 16 of them. Another binding
-/// is annotated in a declaration file, which declares only annotated
-/// functions, and elsewhere as [`declaration_return`] decides.
+/// export. A binding that an import declares there is followed in turn, at
+/// most 16 of them. Another binding is annotated in a declaration file,
+/// because a declaration file declares only annotated functions. Elsewhere
+/// it is annotated when its declaration has a return type annotation or a
+/// function type annotation; see [`declaration_return`].
 fn imported_return_is_annotated(
     db: &dyn ModuleDb,
     mut module: ModuleInfo,
@@ -1872,14 +1872,20 @@ fn imported_return_is_annotated(
 /// annotation, so that a call of the member has a return type that comes
 /// from an annotation.
 ///
-/// That holds for a lib global or an instance of one, unless a module other
-/// than a declaration file merges an interface into it; a primitive, a
-/// literal that isn't an object, and a tuple, whose members are those of
-/// their lib types; a type that a declaration file declares, when the
-/// classes and interfaces that it extends are such types too; and an
-/// instance of a class or an interface that a module other than a
-/// declaration file declares, as [`own_member`] decides. `null` and
-/// `undefined` have no members to call.
+/// That holds for:
+///
+/// - a lib global or an instance of one, unless a module other than a
+///   declaration file merges an interface into it;
+/// - a primitive, a literal that isn't an object, and a tuple, whose members
+///   are those of their lib types;
+/// - a type that a declaration file declares, when the classes and
+///   interfaces that it extends are such types too;
+/// - an instance of a class or an interface that a module other than a
+///   declaration file declares, when it declares the member only as methods
+///   with a return type annotation, or inherits it from such types; see
+///   [`own_member`].
+///
+/// `null` and `undefined` have no members to call.
 fn has_annotated_member(db: &dyn ModuleDb, ty: TypeData, name: &str) -> bool {
     // Each type comes with whether a value of it is an instance, as the
     // object of a call of a class's method is.
@@ -1969,8 +1975,8 @@ fn has_annotated_member(db: &dyn ModuleDb, ty: TypeData, name: &str) -> bool {
                     }
                     return false;
                 } else {
-                    // A handle in another module or a type that an alias
-                    // names, which its own module decides.
+                    // A handle to a type of another module, or a type that
+                    // an alias names, is checked in turn as resolved.
                     pending.push((resolved, instance));
                     continue;
                 };
@@ -2020,27 +2026,28 @@ fn has_annotated_member(db: &dyn ModuleDb, ty: TypeData, name: &str) -> bool {
 enum OwnMember {
     /// Its own methods, each with a return type annotation.
     Annotated,
-    /// The classes and interfaces that it extends: it declares no member
-    /// with the name, and no computed key or index signature that could
-    /// stand for it.
+    /// The classes and interfaces that it extends, because it declares no
+    /// member with the name, and no computed key or index signature that
+    /// could stand for it.
     Inherited,
     /// Anything else, including a static member, a member without an
     /// annotation, and a member of a merged declaration.
     Other,
 }
 
-/// Returns where an instance of a class or an interface that `module`, a
-/// module other than a declaration file, declares gets its member `name`,
-/// given the scope that the class or interface records, the `members` that
-/// local inference collected for it, and how many `contributions` other
-/// modules merge into it.
+/// Returns where an instance of a class or an interface gets its member
+/// `name`. `module` declares the class or interface and is not a declaration
+/// file. `scope_id` is the scope that the class or interface records,
+/// `members` are the members that local inference collected for it, and
+/// `contributions` is how many declarations other modules merge into it.
 ///
-/// Its own members are those that [`member_return`] finds in the declaration
-/// that opens the scope. Declarations merged into it can add members with
-/// the name: member lookup finds a class's own members before them, but can
-/// find those of a later interface declaration first. So the member is its
-/// own only when local inference collected no more members with the name
-/// than the declaration declares, and inherited only when it collected none.
+/// Its own members are the members named `name` in the declaration that
+/// opens the scope; see [`member_return`]. Declarations merged into it can
+/// add members with the name. Member lookup finds a class's own members
+/// before them, but can find those of a later interface declaration first.
+/// So the member is its own only when local inference collected no more
+/// members with the name than the declaration declares, and inherited only
+/// when it collected none.
 fn own_member(
     db: &dyn ModuleDb,
     module: ModuleInfo,

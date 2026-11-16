@@ -491,8 +491,7 @@ fn let_const_and_written_subjects_narrow_but_captures_and_var_do_not() {
         ("const", "value", &[String][..]),
         ("let", "other", &[String]),
         ("var", "hoisted", &[String, Number]),
-        // TypeScript 7.0.2 (`tsc --strict`) gives `number` after the write
-        // (`narrowing-probes/m5-l2/existing.ts` L8).
+        // TypeScript 7.0.2 (`tsc --strict`) gives `number` after the write.
         ("written", "value", &[Number]),
         ("captured", "value", &[String, Number]),
         // TypeScript 7.0.2 (`tsc --strict`) narrows the read inside the try

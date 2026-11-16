@@ -1516,8 +1516,7 @@ fn narrowing_is_isolated_by_binding_identity() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives `number` after the write and
-// `string` in the closure (`narrowing-probes/m5-l2/existing.ts` L8). Biome
-// doesn't narrow reads in closures yet.
+// `string` in the closure. Biome doesn't narrow reads in closures yet.
 #[test]
 fn writes_narrow_and_captures_remain_conservative() {
     use InferredTypeData::{Number, String};

@@ -497,18 +497,18 @@ pub(crate) fn is_empty_object_type<'db>(
 }
 
 /// Returns the union of the `members` of a declared union type that a value
-/// of one of the `values` may have, when `assigned`, the type that the values
-/// make up, is assignable to that union, as TypeScript's
-/// `getAssignmentReducedType` filters a declared type at an assignment.
+/// of one of the `values` may have. `assigned` is the type that the values
+/// make up, and it must be assignable to that union. TypeScript filters a
+/// declared type at an assignment the same way.
 ///
 /// A member is kept when one of `values` is the member itself, or when Biome
 /// can't rule out that the value is assignable to it, so an undetermined
 /// comparison keeps the member. Returns `None` when every member is kept, and
-/// when `assigned` is not, or may not be, assignable to the kept members, so
-/// that the caller keeps the declared type, as TypeScript does when its
-/// filter gives a type that the assigned type is not assignable to. All
-/// comparisons share one budget of [`MAX_RELATION_STEPS`] steps, after which
-/// they are undetermined.
+/// when `assigned` is not, or may not be, assignable to the kept members. The
+/// caller then keeps the declared type, as TypeScript does when its filter
+/// gives a type that the assigned type is not assignable to. All comparisons
+/// share one budget of [`MAX_RELATION_STEPS`] steps, after which they are
+/// undetermined.
 pub(crate) fn assignment_reduced_members<'db>(
     db: &'db dyn TypeDb,
     members: &[TypeData<'db>],

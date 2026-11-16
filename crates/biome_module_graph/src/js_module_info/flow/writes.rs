@@ -5,8 +5,8 @@
 //! expression called where it is defined, a class static block, or a field
 //! initializer, has no point, so a subject that such code writes doesn't
 //! narrow anywhere in the root. Like TypeScript, the scan ignores the bodies
-//! of other functions, which run only when called: a call never cancels
-//! narrowing, in TypeScript or in Biome.
+//! of other functions, because they run only when called. A call never
+//! cancels narrowing, in TypeScript or in Biome.
 
 use super::subjects::{literal_key, property_key};
 use super::{FlowSubject, FlowSubjectId, FlowSubjectTable, PropertyKey};
@@ -102,10 +102,10 @@ const CALL_KINDS: SyntaxKindSet<JsLanguage> =
 /// `this.v = x` in a static block as a write of the root's `this.v`, although
 /// the static block's `this` is the class.
 ///
-/// The scan tells apart the writes that have a write point in the graph,
-/// which the builder recorded, from the others, which run outside the
-/// root's flow or through a target that the builder doesn't map to a
-/// subject, as `(o as T).v = x`.
+/// The scan tells apart the writes that the builder recorded with a write
+/// point in the graph from the others. The others run outside the root's
+/// flow or through a target that the builder doesn't map to a subject, as
+/// `(o as T).v = x`.
 pub(super) struct WrittenPaths {
     /// Subjects that an assignment or `delete` writes directly.
     written: FxHashSet<FlowSubjectId>,
@@ -200,9 +200,9 @@ impl WrittenPaths {
     }
 
     /// Returns whether a write in the root may change `subject`, given the
-    /// `subjects` of the root, each at the index of its id. With
-    /// `modeled` false, only the writes that have no write point count,
-    /// which narrowing can't follow along the flow.
+    /// `subjects` of the root, each at the index of its id. When `modeled` is
+    /// false, only the writes without a write point count, because narrowing
+    /// can't follow them along the flow.
     ///
     /// That is the case when the root writes `subject` or one of its
     /// prefixes, or writes a property of a proper prefix through a key that

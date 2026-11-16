@@ -126,14 +126,14 @@ type Build<T> = Result<T, Unsupported>;
 /// `break`, `continue`, `return`, and `throw`, and evaluates expressions in
 /// the order in which JavaScript runs them, with a write point after each
 /// write to a subject. Any other statement, such as a class or enum
-/// declaration, is an opaque region: the builder evaluates its expressions
+/// declaration, is an opaque region. The builder evaluates its expressions
 /// from the flow before it, and the code after it continues from that
 /// evaluation. A condition inside a region narrows only the rest of the
 /// expression that contains it, as in `x && x.length`. Each `break` or
 /// `continue` that leaves the region joins its target with the flow before
-/// the region, which is never narrower than the flow at any point inside the
-/// region while the region has no write point. A region with both is not
-/// supported.
+/// the region. That flow is never narrower than the flow at any point inside
+/// the region while the region has no write point, so a region with both a
+/// write point and a `break` or `continue` that leaves it is not supported.
 ///
 /// Returns `None` for inputs exceeding construction limits. Like the statement
 /// control-flow graph, it also returns `None` when any statement, including
@@ -421,9 +421,9 @@ pub(super) fn has_operands(link: &AnyJsOptionalChainExpression) -> bool {
 }
 
 /// Returns whether `right`, the right operand of `=`, makes the assignment
-/// compound-like, as TypeScript's `isCompoundLikeAssignment` decides it: a
-/// binary expression, in parentheses or not, with a shift or arithmetic
-/// operator, as in `x = x + 1`.
+/// compound-like, as in TypeScript. That is the case for a binary expression,
+/// in parentheses or not, with a shift or arithmetic operator, as in
+/// `x = x + 1`.
 fn is_compound_like(right: &AnyJsExpression) -> bool {
     let AnyJsExpression::JsBinaryExpression(binary) = right.clone().omit_parentheses() else {
         return false;
@@ -447,23 +447,24 @@ fn is_compound_like(right: &AnyJsExpression) -> bool {
 /// Limits the operands that [`value_callees`] visits.
 const MAX_VALUE_STEPS: usize = 32;
 
-/// Returns the callees whose return types the reading context must confirm
-/// come from annotations before a write reduces by the value of
-/// `expression`, or `None` when Biome may type the value narrower than
+/// Returns the callees whose return types must come from annotations before
+/// a write reduces by the value of `expression`. The reading context
+/// confirms them. Returns `None` when Biome may type the value narrower than
 /// TypeScript does, so that a write of it gives the subject its declared
 /// type.
 ///
 /// The values that `expression` can give are visited through parentheses,
 /// the branches of a conditional expression, the operands of `&&`, `||`, and
-/// `??`, the last operand of the comma operator, and `await`, and so are the
-/// objects along an optional chain, since `?.` gives `undefined` only when
-/// Biome's type of its object has it. Among them:
+/// `??`, the last operand of the comma operator, and `await`. The objects
+/// along an optional chain are visited too, because `?.` gives `undefined`
+/// only when Biome's type of its object has it. Among them:
 ///
-/// - A call depends on its callee, as [`callee_return`] decides. Biome infers
-///   the return type of a function without a return type annotation without
-///   the `undefined` of an end that the function can reach.
-/// - `typeof` gives `None`: Biome types it as the one kind of value that the
-///   operand's type has, where TypeScript gives every kind.
+/// - A call depends on where the return type of its callee comes from; see
+///   [`callee_return`]. An inferred return type gives `None`, because Biome
+///   infers the return type of a function without a return type annotation
+///   without the `undefined` of an end that the function can reach.
+/// - `typeof` gives `None`, because Biome types it as the one kind of value
+///   that the operand's type has, where TypeScript gives every kind.
 ///
 /// Also returns `None` when the operands exceed [`MAX_VALUE_STEPS`].
 fn value_callees(expression: &AnyJsExpression, model: &SemanticModel) -> Option<Vec<FlowCallee>> {
@@ -525,30 +526,40 @@ pub(crate) enum CalleeReturn {
     /// An annotation that the syntax shows, or a declaration in the lib or in
     /// a declaration file, which has no function body to infer from.
     Annotated,
-    /// A function body, or a type that the syntax doesn't show: a call keeps
-    /// the declared type.
+    /// A function body, or a type that the syntax doesn't show. A write of
+    /// the call's value gives the subject its declared type.
     Inferred,
-    /// A declaration that the reading context finds. For an import, it is
-    /// the declaration that the import names, in the module that declares
-    /// it, which decides as [`declaration_return`] does, and is annotated in
-    /// a declaration file. For a member, every type that its object can have
-    /// must get the member from the lib, from a declaration file, or from
-    /// methods with a return type annotation, as [`member_return`] finds
-    /// them in a class or an interface: a primitive, a tuple, a lib global, a
+    /// A declaration that the reading context finds.
+    ///
+    /// For an import, it is the declaration that the import names, in the
+    /// module that declares it. That declaration is annotated in a
+    /// declaration file, and elsewhere follows the rules for a local variable
+    /// (see [`declaration_return`]).
+    ///
+    /// For a member, every type that its object can have must get the member
+    /// from the lib, from a declaration file, or from methods with a return
+    /// type annotation. Such a type is a primitive, a tuple, a lib global, a
     /// type that a declaration file declares, or a class or an interface that
     /// declares such methods or inherits them, without a merged interface
-    /// that another module declares.
+    /// that another module declares. [`member_return`] finds the methods in a
+    /// class or an interface.
     Resolved(FlowCallee),
 }
 
 /// Returns where the return type of `callee`, the callee of a call, comes
-/// from: a function or arrow expression's annotation, when it has one; a
-/// variable that the module doesn't declare is a global that the lib or a
-/// declaration file declares; a variable that the module declares depends on
-/// its declaration, as [`declaration_return`] decides; and a member, as
-/// `a.m`, depends on the types that its object can have. Other callees are
-/// inferred, including an element, as `a[0]`, whose type can come from a
-/// type argument, as in `[g][0]()`.
+/// from:
+///
+/// - A function or arrow expression is annotated when it has a return type
+///   annotation.
+/// - A variable that the module doesn't declare is a global that the lib or
+///   a declaration file declares, so it is annotated.
+/// - A variable that the module declares depends on its declaration; see
+///   [`declaration_return`].
+/// - A member, as `a.m`, depends on the types that its object can have, so
+///   the reading context resolves it.
+///
+/// Other callees are inferred, including an element, as `a[0]`, whose type
+/// can come from a type argument, as in `[g][0]()`.
 pub(crate) fn callee_return(callee: &AnyJsExpression, model: &SemanticModel) -> CalleeReturn {
     match callee.clone().omit_parentheses() {
         AnyJsExpression::JsArrowFunctionExpression(function) => {
@@ -860,9 +871,8 @@ struct RootBuilder<'a, 'raw> {
     /// catch clause, innermost last. Each join is the start of the catch clause
     /// or finally block that handles an exception thrown inside its block.
     ///
-    /// Each join starts with the flow where its block starts and gains each
-    /// write point inside the block, as TypeScript's `createFlowMutation`
-    /// adds a mutation to the current exception target, and the end of each
+    /// Each join starts with the flow where its block starts. It gains each
+    /// write point inside the block, as in TypeScript, and the end of each
     /// finally block nested in the block. Conditions only narrow, so no other
     /// point inside the block is narrower than one of these.
     exceptions: Vec<FlowNodeId>,
@@ -1354,19 +1364,18 @@ impl RootBuilder<'_, '_> {
         let header = self.push(FlowNode::Join(vec![flow]))?;
         let mut flow = match statement.initializer().map_err(|_| Unsupported)? {
             // Each iteration assigns the variables of a declaration, after the
-            // defaults of its pattern, with no write point: the header joins
-            // the entry, where they have their declared types because no test
-            // or write before the loop can mention them, so the facts that
-            // the end of the body carries back from an earlier iteration never
-            // make a read narrower than the declared type, which is also the
-            // type of the value that each iteration assigns.
+            // defaults of its pattern, with no write point. The header joins
+            // the entry, where the variables have their declared types because
+            // no test or write before the loop can mention them. So the facts
+            // that the end of the body carries back from an earlier iteration
+            // never make a read narrower than the declared type, which is also
+            // the type of the value that each iteration assigns.
             AnyJsForInOrOfInitializer::JsForVariableDeclaration(declaration) => {
                 self.declaration(&declaration.into(), header, 0)?
             }
             // An assignment target is written each iteration, after the
             // pattern is evaluated, with a key for `for...in` and an element
-            // of the iterable for `for...of`, as TypeScript's
-            // `bindForInOrForOfStatement` writes it.
+            // of the iterable for `for...of`, as in TypeScript.
             AnyJsForInOrOfInitializer::AnyJsAssignmentPattern(pattern) => {
                 let flow = self.assignment_pattern(&pattern, header, 0)?;
                 let value = statement.assigned_value(&expression);
@@ -1687,9 +1696,9 @@ impl RootBuilder<'_, '_> {
     /// Builds `statement` from `current`, following TypeScript's control flow
     /// for `try` statements.
     ///
-    /// An exception can leave the try block at any point, and none of them is
-    /// narrower than the start of the block or one of its write points, as
-    /// [`Self::exceptions`] describes, so the catch clause starts from the
+    /// An exception can leave the try block at any point. None of those
+    /// points is narrower than the start of the block or one of its write
+    /// points (see [`Self::exceptions`]), so the catch clause starts from the
     /// join of those. The normal exits are the ends of the try block and of the
     /// catch clause. `break` and `continue` reach their targets directly,
     /// without passing through the finally block, as in TypeScript.
@@ -1959,10 +1968,9 @@ impl RootBuilder<'_, '_> {
     /// its flow joins the flow before each `?.` with the end of the chain.
     /// When no key or argument has a write point, that join has the type of
     /// the flow after the root for every subject, so the code after the chain
-    /// continues from that flow instead, as TypeScript's
-    /// `bindOptionalChainFlow` restores the flow from before a chain that
-    /// changes no subject. A test inside the chain then reaches no read after
-    /// it, so those reads need no flow.
+    /// continues from that flow instead. TypeScript likewise restores the flow
+    /// from before a chain that changes no subject. A test inside the chain
+    /// then reaches no read after it, so those reads need no flow.
     fn optional_chain(
         &mut self,
         chain: &AnyJsOptionalChainExpression,
@@ -2050,7 +2058,7 @@ impl RootBuilder<'_, '_> {
     /// [`Self::write_target`] describes.
     ///
     /// A destructuring assignment follows TypeScript's binder rather than
-    /// runtime order: it evaluates its pattern first, as
+    /// runtime order. It evaluates its pattern first, as
     /// [`Self::assignment_pattern`] describes, then the right operand, and
     /// then writes each target in source order, as [`Self::pattern_writes`]
     /// describes. At runtime, the right operand runs first and each default
@@ -2126,8 +2134,9 @@ impl RootBuilder<'_, '_> {
     }
 
     /// Evaluates `++` or `--` on `operand`, which lies at `depth`, from
-    /// `incoming`: the object and the key of the operand, after which the
-    /// operand is written, as a compound assignment writes its target.
+    /// `incoming`, and returns the flow after it. The object and the key of
+    /// the operand run first, and then the operand is written, as a compound
+    /// assignment writes its target.
     fn update(
         &mut self,
         operand: &AnyJsAssignment,
@@ -2141,14 +2150,13 @@ impl RootBuilder<'_, '_> {
     /// Evaluates `unary`, a `delete` expression, which lies at `depth`, from
     /// `incoming`, and returns the flow after it.
     ///
-    /// The object and the key of the deleted property run, after which a
-    /// write point removes the property, as TypeScript's
-    /// `bindDeleteExpressionFlow` does for `delete o.p`, which assigns
-    /// `undefined`. TypeScript ignores `delete o["p"]`, while Biome gives
-    /// `o.p` its declared type there, and `delete o[k]` gives every path
-    /// below `o` its declared type. Any other operand, as `delete (o.p)`, is
-    /// evaluated as an expression and adds no write point, so collection
-    /// counts it as a write that the graph doesn't model.
+    /// The object and the key of the deleted property run, and then a write
+    /// point removes the property. For `delete o.p`, the write assigns
+    /// `undefined`, as in TypeScript. TypeScript ignores `delete o["p"]`, while
+    /// Biome gives `o.p` its declared type there, and `delete o[k]` gives every
+    /// path below `o` its declared type. Any other operand, as
+    /// `delete (o.p)`, is evaluated as an expression and adds no write point,
+    /// so collection counts it as a write that the graph doesn't model.
     fn delete(
         &mut self,
         unary: &JsUnaryExpression,
@@ -2372,9 +2380,9 @@ impl RootBuilder<'_, '_> {
     /// order from `incoming`, and returns the flow after them.
     ///
     /// Each target is assigned the field of `value` that the elements around
-    /// it read, `steps` for those outside `pattern`, with the default of each
-    /// element along the way, as TypeScript's `getAssignedType` gives it, or
-    /// gets its declared type when `value` is `None`. A computed key that
+    /// it read, with `steps` for those outside `pattern` and the default of
+    /// each element along the way, as in TypeScript. A target gets its
+    /// declared type when `value` is `None`. A computed key that
     /// [`member_name_key`] rejects reads an unknown field, and so does a rest
     /// element after one, so their targets get their declared types.
     fn pattern_writes(
@@ -2509,12 +2517,12 @@ impl RootBuilder<'_, '_> {
     /// `incoming`, with the effect that `effect` gives, and returns the flow
     /// after it.
     ///
-    /// Parentheses and `!` around the target are skipped, as TypeScript's
-    /// `isMatchingReference` skips them. TypeScript doesn't narrow at a target
-    /// behind `as`, `satisfies`, or `<T>`, as `(x as T) = v`, so the write
-    /// gives the subject its declared type, which is wider. A write through a
-    /// key that [`literal_key`] rejects, as `o[k] = v`, writes any property of
-    /// `o`, as [`FlowWriteEffect::Wildcard`] describes.
+    /// Parentheses and `!` around the target are skipped, as in TypeScript.
+    /// TypeScript doesn't narrow at a target behind `as`, `satisfies`, or
+    /// `<T>`, as `(x as T) = v`, so the write gives the subject its declared
+    /// type, which is wider. A write through a key that [`literal_key`]
+    /// rejects, as `o[k] = v`, writes any property of `o`, as
+    /// [`FlowWriteEffect::Wildcard`] describes.
     ///
     /// A target that is no subject and whose object is no subject, as `f().v`
     /// or a global, adds no point and isn't recorded in
@@ -2606,9 +2614,9 @@ impl RootBuilder<'_, '_> {
         self.push_write(incoming, FlowWrite { subject, effect })
     }
 
-    /// Adds a [`FlowNode::Write`] of `write` after `antecedent`, which the
-    /// innermost exception join also gets, as TypeScript's `createFlowMutation`
-    /// adds a mutation to the current exception target, and returns it.
+    /// Adds a [`FlowNode::Write`] of `write` after `antecedent` and returns
+    /// it. The innermost exception join also gets the new node, as in
+    /// TypeScript.
     fn push_write(&mut self, antecedent: FlowNodeId, write: FlowWrite) -> Build<FlowNodeId> {
         let index = match self.write_ids.get(&write) {
             Some(index) => *index,
@@ -2667,17 +2675,17 @@ impl RootBuilder<'_, '_> {
     }
 
     /// Returns the value of `expression` as a write assigns it, or `None`
-    /// when Biome can't type it as TypeScript does, as [`value_callees`]
-    /// decides.
+    /// when Biome can't type it as TypeScript does, as for `typeof` or a call
+    /// to a function whose return type Biome infers; see [`value_callees`].
     fn assigned_expression(&mut self, expression: &AnyJsExpression) -> Option<FlowAssignedValue> {
         self.check_value(expression)
             .then(|| FlowAssignedValue::Expression(expression.range()))
     }
 
     /// Returns whether Biome can type `expression`, a value or a default that
-    /// a write assigns, as TypeScript does once the reading context confirms
-    /// the callees that [`value_callees`] gives, which
-    /// [`Self::assigned_value`] then finds by the range of `expression`.
+    /// a write assigns, as TypeScript does, once the reading context confirms
+    /// the callees that [`value_callees`] gives. The callees are recorded by
+    /// the range of `expression`, where [`Self::assigned_value`] finds them.
     fn check_value(&mut self, expression: &AnyJsExpression) -> bool {
         let Some(callees) = value_callees(expression, self.model) else {
             return false;
@@ -2722,12 +2730,12 @@ impl RootBuilder<'_, '_> {
     /// Each declarator evaluates its binding pattern as
     /// [`Self::binding_pattern`] describes, then its initializer, as
     /// TypeScript's binder does, although the initializer runs first at
-    /// runtime: TypeScript's types after a write in one of them, as in
+    /// runtime. TypeScript's types after a write in one of them, as in
     /// `const [a = (x = 1)] = [x]`, follow that order. A declarator with a
     /// type annotation then writes the variables it declares, as
     /// [`Self::binding_writes`] describes. Other declarators add no write
-    /// point: the declared type of the variable is the type of the
-    /// initializer, which the write would reduce to that same type. A
+    /// point, because the declared type of the variable is the type of the
+    /// initializer, and the write would reduce it to that same type. A
     /// declarator without an initializer, as in a `for...of` head or
     /// `let x!: T`, evaluates only its pattern. `using` and `await using`
     /// declarations evaluate as `const` does.

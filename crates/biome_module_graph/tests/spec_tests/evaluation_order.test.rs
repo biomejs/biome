@@ -295,12 +295,11 @@ fn logical_assignments_test_their_target_before_their_right_operand() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5/compound.ts` L25 to L27 and `m5/order.ts` L19 and
-// L20): the right operand of a logical assignment sees the test of its
-// target, and the target is written where the right operand runs, so the
-// code after the assignment joins the written value with the path that
-// skipped it. `any` assigned to the target keeps its declared type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// The right operand of a logical assignment sees the test of its target, and
+// the target is written where the right operand runs, so the code after the
+// assignment joins the written value with the path that skipped it. `any`
+// assigned to the target keeps its declared type.
 #[test]
 fn written_targets_of_logical_assignments_narrow() {
     assert_reads(
