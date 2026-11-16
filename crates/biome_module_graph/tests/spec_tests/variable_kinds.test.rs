@@ -35,9 +35,9 @@ fn narrowing_db_with(source: &str, modules: &[(&str, &str)]) -> (TestModuleDb, M
 }
 
 /// Names each member of `ty`, sorted: an interface by its name, Biome's
-/// Unknown, which a read on a path that no value takes has, as `Unknown`, and
-/// any other type by its formatted text on one line, such as `string`,
-/// `null`, or `string: a`.
+/// Unknown as `Unknown`, and any other type by its formatted text on one
+/// line, such as `string`, `null`, or `string: a`. A read on a path that no
+/// value takes is Unknown.
 fn variant_names(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
     if ty == InferredTypeData::Unknown {
         return vec!["Unknown".to_owned()];
@@ -77,16 +77,16 @@ const DECLARATIONS: &str = r#"
     interface Square { kind: "s"; w: number }
 "#;
 
-/// Asserts the type of each `(marker, expression, expected)` read in `source`,
-/// which follows [`DECLARATIONS`], by the names of its members, as
-/// [`variant_names`] gives them, and that complete module inference gives
-/// each read the type that a lookup gives it.
+/// Asserts that [`variant_names`] gives `expected` for the type of each
+/// `(marker, expression, expected)` read in `source`, and that complete
+/// module inference gives each read the type that a lookup gives it.
+/// `source` follows [`DECLARATIONS`] in the module.
 fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert_reads_with(source, &[], reads);
 }
 
-/// Asserts the reads in `source` as [`assert_reads`] does, with `modules`
-/// beside it, as [`narrowing_db_with`] takes them.
+/// Asserts the reads in `source` like [`assert_reads`], with each
+/// `(path, source)` of `modules` as another module that `source` can import.
 fn assert_reads_with(source: &str, modules: &[(&str, &str)], reads: &[(&str, &str, &[&str])]) {
     let source = format!("{DECLARATIONS}{source}");
     let lookups: Vec<_> = {
@@ -128,14 +128,12 @@ fn assert_reads_with(source: &str, modules: &[(&str, &str)], reads: &[(&str, &st
     assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5/vars.ts` L5 to L7, L9, L10, L12 to L15,
-// `m5/uninit.ts` L10, `m5-l3/extra.ts` L9 to L14, L25, L26, L28, L29, L31,
-// L37, and `m5-l3/declarator.ts` L4, L5). A `var` can be read before its declarator, where it is
-// `undefined`, so a read where `undefined` remains, although the declared
-// type lacks it, gets the declared type (TS2454), and each declarator with
-// an initializer, and each iteration of a `for...in` or `for...of` loop that
-// declares it, writes it.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected
+// type. A `var` can be read before its declarator, where it is `undefined`.
+// A read where `undefined` remains, although the declared type lacks it,
+// gets the declared type (TS2454). Each declarator with an initializer
+// writes the `var`, and so does each iteration of a `for...in` or `for...of`
+// loop that declares it.
 #[test]
 fn var_declarations_narrow_from_their_hoisted_start() {
     assert_reads(
@@ -195,14 +193,13 @@ fn var_declarations_narrow_from_their_hoisted_start() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives the narrower type in the comment for
-// each read below (`narrowing-probes/m5/vars.ts` L8, L11, `m5-l3/extra.ts`
-// L15, `m5-l3/redeclared.ts` L4), and `string | null` at `bothDeclared`
-// (`m5-l3/extra.ts` L30). Biome keeps a `var` whose name its scope declares
-// twice, or a parameter of its function declares, at its declared type: the
-// semantic model resolves every reference to the last declaration, while
-// each declarator writes the one variable that they all declare, so at
-// `beforeLast` the write of the first declarator would be missed.
+// TypeScript 7.0.2 (`tsc --strict`) gives the narrower type in the comment
+// for each read below, and `string | null` at `bothDeclared`. Biome keeps a
+// `var` at its declared type when its scope declares its name twice or a
+// parameter of its function declares it. The semantic model resolves every
+// reference to the last declaration, while each declarator writes the one
+// variable that they all declare, so narrowing would miss the write of the
+// first declarator at `beforeLast`.
 #[test]
 fn redeclared_var_declarations_keep_their_declared_type() {
     assert_reads(
@@ -236,11 +233,11 @@ const IMPORTED: &str = r#"
     export declare function g(): void;
 "#;
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5/imports/main.ts` L5 to L14). An import narrows by the
-// tests of the root that reads it, from the declared type of what it
-// imports, a live `let` too, and a call never changes it. A test outside a
-// closure doesn't reach a read inside it.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected
+// type. An import narrows by the tests of the root that reads it, from the
+// declared type of what it imports, even when it imports a `let`. A call
+// never cancels that narrowing. A test outside a closure doesn't reach a
+// read inside it.
 #[test]
 fn imported_bindings_narrow() {
     assert_reads_with(
@@ -275,15 +272,13 @@ fn imported_bindings_narrow() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5/outer.ts` L9 to L21, `m5/uninit.ts` L11, and
-// `m5-l3/extra.ts` L16 to L18, L20, L21, L23, L24, L27, L32 to L36, where it
-// gives `string` at `outerVar`, and `m5-l3/held.ts` L5). A function narrows a variable that an
-// enclosing root declares by its own tests and writes, from the declared
-// type: writes in other functions and in the enclosing root never change it
-// there. A `let` without an initializer that nothing writes may be read
-// before it is assigned (TS2454); Biome reads such a `var` the same way,
-// where TypeScript assumes it initialized.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected
+// type, unless a comment gives TypeScript's type. A function narrows a
+// variable that an enclosing root declares by its own tests and writes,
+// from the declared type. Writes in other functions and in the enclosing
+// root never change its type there. A `let` without an initializer that
+// nothing writes may be read before it is assigned (TS2454). Biome reads
+// such a `var` the same way, where TypeScript assumes it initialized.
 #[test]
 fn variables_of_enclosing_roots_narrow_by_the_reading_root() {
     assert_reads(
@@ -357,13 +352,13 @@ fn variables_of_enclosing_roots_narrow_by_the_reading_root() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives the narrower type in the comment for
-// each read below (`narrowing-probes/m5-l3/extra.ts` L19, L22). Biome keeps
-// the declared type of a variable that a function called where it is
-// defined writes, because the graph has no write point there, and narrows a
-// variable that an enclosing root declares only from its declared type,
-// where TypeScript continues the flow of the enclosing root at the creation
-// of a closure, where `x` is `null`.
+// TypeScript 7.0.2 (`tsc --strict`) gives the narrower type in the comment
+// for each read below. Biome keeps the declared type of a variable when a
+// function called where it is defined writes it, because the graph has no
+// write point for that write. Biome also narrows a variable that an
+// enclosing root declares only from its declared type. TypeScript continues
+// the flow of the enclosing root where it creates the closure, where `x` is
+// `null`.
 #[test]
 fn variables_of_enclosing_roots_that_biome_narrows_less() {
     assert_reads(
@@ -381,10 +376,10 @@ fn variables_of_enclosing_roots_that_biome_narrows_less() {
 }
 
 // Lookups resolve the type that narrowing of an import starts from once,
-// through `infer_flow_binding_baseline`, which reads in every function
-// share. Complete module inference resolves it in its own context, from the
-// import that it has resolved already, and lookups of reads that start from
-// the same type reuse its solves.
+// through the `infer_flow_binding_baseline` query, and the reads in every
+// function share it. Complete module inference resolves that type in its
+// own context, from the import that it has resolved already. Later lookups
+// of reads that start from the same type reuse its solves.
 #[test]
 fn imported_baselines_are_shared_by_the_roots_that_read_them() {
     const SOURCE: &str = r#"

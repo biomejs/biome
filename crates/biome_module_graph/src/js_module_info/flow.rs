@@ -1,13 +1,12 @@
 //! Syntax-only flow facts that let type inference narrow reads of variables
 //! and their property paths.
 //!
-//! Collection records a graph of possible paths for each execution root that
-//! tests or writes one of its own variables. The graph's conditions are
-//! already decomposed into guards on subjects, and its writes record the
-//! values they assign. Collection also records the incoming path of every
-//! read that such a guard or write can reach. Type inference later applies
-//! the guards and the writes to resolved types without inspecting syntax
-//! again.
+//! Collection records, for each execution root that tests or writes a
+//! variable, a graph of possible paths whose conditions are already
+//! decomposed into guards on subjects and whose writes record the values they
+//! assign. It also records the incoming path of every read such a guard or
+//! write can reach. Type inference later applies the guards
+//! to resolved types without inspecting syntax again.
 //!
 //! A subject is what a runtime test checks and a read narrows: a variable, or
 //! a property path that starts at a variable or at `this`, such as `o.v`,
@@ -22,21 +21,21 @@
 //! function, or method. A variable narrows in each root that reads it: the
 //! root that declares it, and a root nested in that one, such as a function
 //! that reads a module's variable or one of its imports. Each root starts
-//! from the variable's declared type, so refinements never cross closure
+//! from the variable's declared type, so facts never cross closure
 //! boundaries. Each root has its own `this`, and paths on it narrow only
-//! where Biome types `this` as TypeScript does, as
-//! [`subjects::this_can_narrow`] describes. A property path narrows only when
-//! its variable or `this` does.
+//! where Biome types `this` as TypeScript does. See
+//! [`subjects::this_can_narrow`] for those roots. A property path narrows
+//! only when its variable or `this` does.
 //!
 //! A write to a subject in the root's own flow is a write point of the graph,
 //! where the subject takes the type of the assigned value, reduced against
-//! its declared type, as TypeScript's `getTypeAtFlowAssignment` gives it, and
-//! the paths that extend it take their declared types. A write that runs with
-//! the root but outside that flow, as in a function called where it is
-//! defined or a class static block, has no write point, so the subject it
-//! writes doesn't narrow anywhere in the root. Calls never invalidate facts,
-//! as in TypeScript, and neither do writes in other roots, which run before
-//! the root runs or while a call inside it runs.
+//! its declared type as in TypeScript, and the paths that extend it take
+//! their declared types. A write that runs with the root but outside that
+//! flow, as in a function called where it is defined or a class static
+//! block, has no write point, so the subject it writes doesn't narrow
+//! anywhere in the root. Calls never invalidate facts, as in TypeScript.
+//! Writes in other roots don't either, because they run before the root
+//! runs or while a call inside it runs.
 
 mod builder;
 mod expressions;
@@ -479,10 +478,10 @@ pub(crate) struct RootFlow {
     pub(crate) assignment_only: FxHashSet<FlowSubjectId>,
     /// The subjects with reads that may be read before they are assigned: a
     /// `let` declared without an initializer, a `var`, and in a constructor,
-    /// a property of `this` whose field has no initializer, as
-    /// [`RootCollector::uninitialized_subjects`] decides. Narrowing starts
+    /// a property of `this` whose field has no initializer. Narrowing starts
     /// them with `undefined` added to their declared type, as TypeScript
-    /// does.
+    /// does. See [`RootCollector::uninitialized_subjects`] for the exact
+    /// conditions.
     pub(crate) uninitialized: FxHashSet<FlowSubjectId>,
 }
 
@@ -674,9 +673,9 @@ pub(crate) struct ModuleFlow {
     /// Points to each candidate expression, keyed by its trimmed range.
     candidates: FxHashMap<TextRange, AstPtr<AnyFlowExpression>>,
     /// The declarations of the bindings in [`RootFlow::property_only`] of
-    /// every root that keeps reads of them. A variable that several roots
-    /// read has one type that narrowing starts from in all of them, so it is
-    /// here only when it is property-only in each.
+    /// every root that keeps reads of them. A variable is here only when it
+    /// is property-only in each of those roots, because narrowing starts
+    /// from the same type in all of them.
     property_only_bindings: FxHashSet<TextRange>,
     /// The declarations of the bindings in [`Self::property_only_bindings`]
     /// that [`RootFlow::instance_tested`] lists in some root.
@@ -857,28 +856,32 @@ struct RootCollector<'a> {
     raw_binding_types: &'a FxHashMap<TextRange, TypeReference>,
     relevance_budget: usize,
     functions: GuardFunctions<'a>,
-    /// Whether each variable that a root nested in its declaring root reads
-    /// can narrow there, as [`Self::eligible_range`] decides it, keyed by
-    /// its declaration.
+    /// Caches, by declaration, whether a variable read in a root nested in
+    /// the one that declares it can narrow there. See
+    /// [`Self::encloses_eligible`].
     enclosing: FxHashMap<TextRange, bool>,
-    /// The declarations of each scope that another declaration of the same
-    /// name redeclares, as [`Self::redeclared_in`] finds them.
+    /// Caches, for each scope, the declarations that share their name with
+    /// another declaration of the scope, or of a function body with a
+    /// parameter. See [`Self::redeclared_in`].
     redeclared: FxHashMap<ScopeId, FxHashSet<TextRange>>,
     /// How the kept reads of each variable narrow, merged over the roots
     /// that keep them, keyed by its declaration.
     binding_reads: FxHashMap<TextRange, BindingReads>,
 }
 
-/// How the conditions and writes of the roots that keep reads of a variable
-/// narrow those reads, as [`ModuleFlow::property_only_bindings`] and
-/// [`ModuleFlow::assignment_only_bindings`] record it.
+/// Classifies how the conditions and writes of every root that keeps reads
+/// of a variable narrow those reads. [`ModuleFlow::property_only_bindings`]
+/// and [`ModuleFlow::assignment_only_bindings`] record the result.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum BindingReads {
-    /// Only tests of the variable's shape, as [`RootFlow::property_only`]
-    /// describes, and, when `instance_tested`, `instanceof` or a type-guard
-    /// function whose target has only object types in some root.
+    /// Only tests of the variable's shape narrow the reads: tests of its
+    /// properties, `in`, `instanceof`, and type-guard functions whose
+    /// targets have only object types. `instance_tested` is true when
+    /// `instanceof` or such a type-guard function narrows them in some root.
+    /// See [`RootFlow::property_only`].
     PropertyOnly { instance_tested: bool },
-    /// Only writes, as [`RootFlow::assignment_only`] describes.
+    /// Only writes narrow the reads, and no condition tests the variable.
+    /// See [`RootFlow::assignment_only`].
     AssignmentOnly,
     /// Any other test, in at least one root.
     Tested,
@@ -911,10 +914,10 @@ impl RootCollector<'_> {
     /// and uses `this` there when `has_this` is true.
     ///
     /// A variable that an enclosing root declares, or an import read in a
-    /// function, narrows in `root` too, by the tests and writes of `root`
-    /// alone, from its declared type: TypeScript narrows a reference by the
-    /// flow of its own function, and a variable read in a nested function is
-    /// a closure's capture, whose value other code may change between calls.
+    /// function, narrows in `root` too, from its declared type, by the tests
+    /// and writes of `root` alone. TypeScript narrows a reference by the flow
+    /// of its own function. A variable read in a nested function is a
+    /// closure's capture, and other code may change its value between calls.
     /// So `root` gets a graph even when it declares no variable that can
     /// narrow, and relevance keeps no read when no subject can narrow.
     fn add_root(
@@ -980,10 +983,10 @@ impl RootCollector<'_> {
                 write_mentioned.insert(write.subject);
             }
         }
-        // A subject that may be read before it is assigned, such as every
-        // `var`, is no exception: a read that only writes reach has the
-        // declared type unless the write narrows it, and the `undefined` of
-        // its start gives the declared type too.
+        // A subject that may be read before it is assigned, such as a `var`,
+        // can be assignment-only too. A read that only writes reach has the
+        // declared type unless a write narrows it, and the `undefined` of the
+        // subject's start gives the declared type too.
         let mut assignment_only: FxHashSet<FlowSubjectId> = write_mentioned
             .iter()
             .copied()
@@ -1404,13 +1407,13 @@ impl RootCollector<'_> {
     }
 
     /// Returns the range of `binding` when its reads can narrow, in the root
-    /// that declares it and in the roots nested in that one, before
-    /// [`Self::writes_are_modeled`] checks its writes in a root.
+    /// that declares it and in the roots nested in that one. Each root still
+    /// checks the writes of the variable with [`Self::writes_are_modeled`].
     ///
-    /// An import narrows too, with the declared type of what it imports, and
-    /// so does a `var`, which a read can reach before its declarator, as
-    /// [`RootCollector::uninitialized_subjects`] describes, unless its scope
-    /// declares its name twice.
+    /// An import narrows too, with the declared type of what it imports. A
+    /// `var` narrows unless another declaration redeclares its name, as
+    /// [`Self::is_redeclared`] lists. A read can reach a `var` before its
+    /// declarator. See [`Self::uninitialized_subjects`].
     fn eligible_range(&mut self, binding: &JsIdentifierBinding) -> Option<TextRange> {
         let range = binding.range();
         // The declared type of a destructured variable ignores defaults, so it
@@ -1444,9 +1447,9 @@ impl RootCollector<'_> {
         Some(range)
     }
 
-    /// Returns whether the variable declared at `range`, which a root nested
-    /// in the root that declares it reads, can narrow there, as
-    /// [`Self::eligible_range`] decides it, once per variable.
+    /// Returns whether the variable declared at `range` can narrow in a root
+    /// nested in the one that declares it, by the rules of
+    /// [`Self::eligible_range`]. Computes the result once per variable.
     fn encloses_eligible(&mut self, range: TextRange) -> bool {
         if let Some(eligible) = self.enclosing.get(&range) {
             return *eligible;
@@ -1462,14 +1465,16 @@ impl RootCollector<'_> {
     }
 
     /// Returns whether another declaration redeclares the name of the `var`
-    /// that `declared` stands for, and `binding` declares: another
-    /// declaration of the scope that the `var` is hoisted to, such as a
-    /// second `var`, a function, or a parameter of the function, or a
-    /// declaration of a scope between them, such as a catch variable.
+    /// that `binding` declares and `declared` stands for in the semantic
+    /// model. The other declaration belongs either to the scope that the
+    /// `var` is hoisted to, such as a second `var`, a function, or a
+    /// parameter of the function, or to a scope between them, such as a catch
+    /// variable.
     ///
-    /// The semantic model gives each declaration its own binding and resolves
-    /// every reference and write to the last one, while each declarator's
-    /// initializer writes the variable that they all declare.
+    /// Such a `var` can't narrow, because the semantic model gives each
+    /// declaration its own binding and resolves every reference and write to
+    /// the last one, while each declarator's initializer writes the variable
+    /// that they all declare.
     fn is_redeclared(&mut self, declared: &Binding, binding: &JsIdentifierBinding) -> bool {
         let Ok(name) = binding.name_token() else {
             return true;
@@ -1500,8 +1505,8 @@ impl RootCollector<'_> {
     fn redeclared_in(&mut self, scope: &Scope) -> &FxHashSet<TextRange> {
         self.redeclared.entry(scope.id()).or_insert_with(|| {
             let mut redeclared = FxHashSet::default();
-            // `get_binding` gives the last declaration of a name, so each
-            // earlier one finds it.
+            // `get_binding` returns the last declaration of a name, so each
+            // earlier declaration of the name marks itself and the last one.
             for binding in scope.bindings() {
                 if !binding.declaration_kind().declares_value() {
                     continue;
@@ -1537,8 +1542,8 @@ impl RootCollector<'_> {
     /// given the targets that have one, `written`.
     ///
     /// A write in code that runs only when called, as the body of a callback,
-    /// never cancels narrowing, as in TypeScript, and neither does a write
-    /// outside `root`, of a variable that an enclosing root declares: it runs
+    /// never cancels narrowing, as in TypeScript. Neither does a write outside
+    /// `root` to a variable that an enclosing root declares, because it runs
     /// in another function, or in the enclosing root before or after the
     /// code of `root` runs. Any other write without a write point, as in a
     /// function called where it is defined, a class static block, a field
@@ -1587,9 +1592,9 @@ impl RootCollector<'_> {
         }
     }
 
-    /// Returns the subjects that may be read before they are assigned (see
-    /// [`RootFlow::uninitialized`]), among the variables of `eligible` and the
-    /// paths on `this`. `subjects` is the subject table of `root`.
+    /// Returns the subjects of `subjects`, the table of `root`, that may be
+    /// read before they are assigned, among the variables of `eligible` and
+    /// the paths on `this`, for [`RootFlow::uninitialized`].
     ///
     /// In the root that declares it, a `let` counts when it is declared
     /// without an initializer, outside the head of a `for...in` or `for...of`
@@ -1597,14 +1602,13 @@ impl RootCollector<'_> {
     /// above every declarator. Neither counts with a definite assignment
     /// assertion, as `let x!: T`, or in a `declare` statement. In a root
     /// nested in the one that declares it, a `let` or a `var` counts only
-    /// when it has no initializer and no write at all, as TypeScript's
-    /// `checkIdentifier` decides for a `let`; TypeScript assumes such a `var`
-    /// initialized there. A path on `this` counts in a constructor, and in an
-    /// arrow function that it calls where it is defined, when its first key
-    /// names a field of the constructor's class that is not `static`, has no
-    /// initializer and no `!`, and is not declared with `declare` or
-    /// `accessor`, as TypeScript's `getFlowTypeOfAccessExpression` decides
-    /// it.
+    /// when it has no initializer and no write at all. TypeScript treats such
+    /// a `let` the same way but assumes such a `var` initialized there. A
+    /// path on `this` counts in a constructor, and in an arrow function that
+    /// it calls where it is defined, when its first key names a field of the
+    /// constructor's class that is not `static`, has no initializer and no
+    /// `!`, and is not declared with `declare` or `accessor`, as in
+    /// TypeScript.
     fn uninitialized_subjects(
         &self,
         root: &AnyJsControlFlowRoot,
@@ -1852,8 +1856,8 @@ fn is_evolving_declaration(binding: &Binding) -> bool {
 
 /// Returns whether `binding` is declared by a `let` or a `var` that may be
 /// read before it is assigned, in the root that declares it, or in a root
-/// nested in that one when `enclosed` is true, as
-/// [`RootCollector::uninitialized_subjects`] describes.
+/// nested in that one when `enclosed` is true. See
+/// [`RootCollector::uninitialized_subjects`] for the conditions.
 fn is_uninitialized_declaration(binding: &Binding, enclosed: bool) -> bool {
     let Some(declaration) = binding.tree().declaration() else {
         return false;
@@ -2190,8 +2194,9 @@ mod tests {
                 .and_then(|root| root.subject_binding(read.subject))
                 .unwrap()
         };
-        // Narrowing of a variable starts from one type in every root, which
-        // a test of `s` itself needs in `tested`.
+        // Narrowing of a variable starts from one type in every root. The
+        // test of `s` itself in `tested` needs that type, so `s` is not
+        // property-only in `shape` either.
         assert!(!info.flow.is_property_only_binding(binding("s")));
         assert!(info.flow.is_property_only_binding(binding("t")));
     }

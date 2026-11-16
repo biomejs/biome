@@ -1376,15 +1376,15 @@ impl RootBuilder<'_, '_> {
         let header = self.push(FlowNode::Join(vec![flow]))?;
         let mut flow = match statement.initializer().map_err(|_| Unsupported)? {
             // Each iteration assigns the variables of a declaration, after the
-            // defaults of its pattern, with no write point for a `let` or a
-            // `const`: the header joins the entry, where they have their
-            // declared types because no test or write before the loop can
-            // mention them, so the facts that the end of the body carries back
-            // from an earlier iteration never make a read narrower than the
+            // defaults of its pattern. A `let` or a `const` needs no write
+            // point for this. No test or write before the loop can mention
+            // it, so it has its declared type at the entry, which the header
+            // joins. The facts that the end of the body carries back from an
+            // earlier iteration then never make a read narrower than the
             // declared type, which is also the type of the value that each
             // iteration assigns. A `var` is hoisted, so code before the loop
-            // can test or write it, and each iteration writes it without a
-            // value, which gives it that type.
+            // can test or write it. Each iteration writes a `var` without a
+            // value, which gives it its declared type.
             AnyJsForInOrOfInitializer::JsForVariableDeclaration(declaration) => {
                 let flow = self.declaration(&declaration.clone().into(), header, 0)?;
                 match declaration
@@ -2751,21 +2751,20 @@ impl RootBuilder<'_, '_> {
     /// Evaluates the declarators of `declaration`, which lies at `depth`, in
     /// order from `incoming`, and returns the flow after them.
     ///
-    /// Each declarator evaluates its binding pattern as
-    /// [`Self::binding_pattern`] describes, then its initializer, as
-    /// TypeScript's binder does, although the initializer runs first at
-    /// runtime. TypeScript's types after a write in one of them, as in
-    /// `const [a = (x = 1)] = [x]`, follow that order. A declarator with a
-    /// type annotation then writes the variables it declares, as
-    /// [`Self::binding_writes`] describes. A `var` declarator without one
-    /// writes its variables without a value, which gives them their declared
-    /// types: the declared type of the variable is the type of the
-    /// initializer, which the write would reduce to that same type, and a
-    /// read before the declarator sees the variable as `undefined`. Other
-    /// declarators add no write point, because no read comes before them. A
-    /// declarator without an initializer, as in a `for...of` head or
-    /// `let x!: T`, evaluates only its pattern. `using` and `await using`
-    /// declarations evaluate as `const` does.
+    /// Each declarator evaluates its binding pattern, with
+    /// [`Self::binding_pattern`], then its initializer. The initializer runs
+    /// first at runtime, but TypeScript's types after a write in one of them,
+    /// as in `const [a = (x = 1)] = [x]`, follow this order. A declarator with
+    /// a type annotation then writes the variables it declares with the
+    /// initializer's value. A `var` declarator without one also writes its
+    /// variables, because a read before the declarator sees the variable as
+    /// `undefined`. That write has no value and gives the variables their
+    /// declared types. A write of the initializer's value would give the same
+    /// types, because the declared type of such a variable is the type of the
+    /// initializer. Other declarators add no write point, because no read
+    /// comes before them. A declarator without an initializer, as in a
+    /// `for...of` head or `let x!: T`, evaluates only its pattern. `using` and
+    /// `await using` declarations evaluate as `const` does.
     fn declaration(
         &mut self,
         declaration: &AnyJsVariableDeclaration,

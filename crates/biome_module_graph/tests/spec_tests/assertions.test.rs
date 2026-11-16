@@ -450,8 +450,7 @@ fn assertions_respect_binding_identity_writes_and_existing_subject_restrictions(
         ("localCallee", "value", &[Number]),
         ("parameterCallee", "value", &[String, Number]),
         ("let", "value", &[String]),
-        // TypeScript 7.0.2 (`tsc --strict`) narrows a `var` too
-        // (`narrowing-probes/m5-l3/extra.ts` L9).
+        // TypeScript 7.0.2 (`tsc --strict`) narrows a `var` too.
         ("var", "other", &[String]),
         // TypeScript 7.0.2 (`tsc --strict`) gives `number` after the write,
         // and `never` after the assertion of the written argument, which

@@ -490,8 +490,7 @@ fn let_const_var_and_written_subjects_narrow_but_captures_do_not() {
     for (marker, expression, expected) in [
         ("const", "value", &[String][..]),
         ("let", "other", &[String]),
-        // TypeScript 7.0.2 (`tsc --strict`) narrows a `var` too
-        // (`narrowing-probes/m5-l3/extra.ts` L10).
+        // TypeScript 7.0.2 (`tsc --strict`) narrows a `var` too.
         ("var", "hoisted", &[String]),
         // TypeScript 7.0.2 (`tsc --strict`) gives `number` after the write.
         ("written", "value", &[Number]),
