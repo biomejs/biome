@@ -27,9 +27,8 @@ fn narrowing_db(source: &str) -> (TestModuleDb, ModuleInfo) {
     (db, module)
 }
 
-/// Names each member of `ty`, sorted: Biome's Unknown, which a read on a path
-/// that no value takes has, as `Unknown`, and any other type by its
-/// formatted text on one line, such as `string`, `null`, or
+/// Names each member of `ty`, sorted: Biome's Unknown as `Unknown`, and any
+/// other type by its formatted text on one line, such as `string`, `null`, or
 /// `instanceof Array<number>`.
 fn variant_names(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
     if ty == InferredTypeData::Unknown {
@@ -59,9 +58,9 @@ const DECLARATIONS: &str = r#"
 "#;
 
 /// Asserts the type of each `(marker, expression, expected)` read in `source`,
-/// which follows [`DECLARATIONS`], by the names of its members, as
-/// [`variant_names`] gives them, and that complete module inference gives
-/// each read the type that a lookup gives it.
+/// which follows [`DECLARATIONS`], by the names of its members from
+/// [`variant_names`]. Also asserts that complete module inference gives each
+/// read the type that a lookup gives it.
 fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     let source = format!("{DECLARATIONS}{source}");
     let lookups: Vec<_> = {
@@ -103,12 +102,11 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5/evolve.ts` L5, L6, L8, L9, L13 to L15, L18, L19, and
-// `narrowing-probes/m5-l5/variables.ts`). A `let` or a `var` without a type
-// annotation, declared without an initializer or with `null` or `undefined`,
-// starts at `undefined` and takes the type of each value assigned to it, its
-// literal types widened, in the function that declares it.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A `let` or a `var` without a type annotation, declared without an
+// initializer or with `null` or `undefined`, starts at `undefined` and takes
+// the type of each value assigned to it, its literal types widened, in the
+// function that declares it.
 #[test]
 fn evolving_variables_take_the_types_of_their_writes() {
     assert_reads(
@@ -196,12 +194,10 @@ fn evolving_variables_take_the_types_of_their_writes() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5/evolve.ts` L10 to L12, L16, L17, L20, L23, and
-// `narrowing-probes/m5-l5/arrays.ts`). A variable initialized with an empty
-// array literal starts with the element type `never` and joins the widened
-// type of each value that `push`, `unshift`, or an assignment to an element
-// with a number key adds to it.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A variable initialized with an empty array literal starts with the element
+// type `never` and joins the widened type of each value that `push`,
+// `unshift`, or an assignment to an element with a number key adds to it.
 #[test]
 fn evolving_arrays_take_the_types_of_their_elements() {
     assert_reads(
@@ -266,15 +262,14 @@ fn evolving_arrays_take_the_types_of_their_elements() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives each read below a narrower type
-// than Biome, in the comment after it (`narrowing-probes/m5/evolve.ts` L7,
-// L21, and `narrowing-probes/m5-l5/declared.ts`). Biome keeps the declared
-// type where a write that reaches the read assigns a value that Biome may
-// type otherwise than TypeScript does, as a call without a return type
-// annotation, a function, a compound assignment, or a value that reads such
-// a variable, where nothing but `null`, or nothing but `undefined`, is
-// assigned, in a closure or a nested function,
-// where TypeScript reports an implicit `any` (TS7005), and where a function
-// called where it is defined adds to an array.
+// than Biome, in the comment after it. Biome keeps the declared type where a
+// write that reaches the read assigns a value that Biome may type differently
+// from TypeScript, as a call without a return type annotation, a function, a
+// compound assignment, or a value that reads such a variable. Biome also
+// keeps it where nothing but `null`, or nothing but `undefined`, is assigned,
+// in a closure or a nested function, where TypeScript reports an implicit
+// `any` (TS7005), and where a function called where it is defined adds to an
+// array.
 #[test]
 fn evolving_declarations_keep_their_declared_type_where_biome_cant_follow_them() {
     assert_reads(
@@ -319,8 +314,7 @@ fn evolving_declarations_keep_their_declared_type_where_biome_cant_follow_them()
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5/evolve.ts` L22 and `narrowing-probes/m5-l5/reads.ts`).
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 // A variable with a type annotation or an initializer other than `null`,
 // `undefined`, or `[]`, including `[]` in parentheses, doesn't evolve, and
 // neither does an exported one, which TypeScript types as an implicit `any`

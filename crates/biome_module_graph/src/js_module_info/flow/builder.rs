@@ -97,9 +97,9 @@ pub(super) struct BuiltRoot {
     /// with their writes, as `null` in `let x = null`, which give such a
     /// variable the type that its declaration already gives it.
     pub(super) initializers: FxHashSet<FlowNodeId>,
-    /// The variables whose type evolves with their writes that a `var`
-    /// declares with an initializer, which a read before the declarator sees
-    /// as `undefined` instead of the type that its declaration gives it.
+    /// The variables whose type evolves with their writes and that a `var`
+    /// declares with an initializer. A read before the declarator sees such a
+    /// variable as `undefined` instead of the type that its declaration gives.
     pub(super) hoisted: FxHashSet<FlowSubjectId>,
 }
 
@@ -530,10 +530,10 @@ fn is_var(declarator: &JsVariableDeclarator) -> bool {
     }
 }
 
-/// Returns the variable that `call` adds values to as an array, as
-/// TypeScript's `bindCallExpressionFlow` finds one: the object of a callee
-/// written as `.push` or `.unshift`, when it is a variable in parentheses or
-/// not, or with `!`, as `a` in `a.push(v)`, `a?.unshift(v)`, or `(a)!.push(v)`.
+/// Returns the variable that `call` adds values to as an array, matching the
+/// calls that TypeScript treats as array mutations. The callee must be
+/// written as `.push` or `.unshift` on a variable, in parentheses or not, or
+/// with `!`, as `a` in `a.push(v)`, `a?.unshift(v)`, or `(a)!.push(v)`.
 /// TypeScript doesn't look at the type of the object or of the method.
 pub(super) fn mutated_array(call: &JsCallExpression) -> Option<JsIdentifierExpression> {
     let AnyJsExpression::JsStaticMemberExpression(callee) = call.callee().ok()? else {
@@ -567,8 +567,8 @@ fn array_variable(mut expression: AnyJsExpression) -> Option<JsIdentifierExpress
     }
 }
 
-/// Returns whether `identifier` is the object of an array mutation, as
-/// [`mutated_array`] finds one, or of the target of an element assignment
+/// Returns whether `identifier` is the object of a `push` or `unshift` call
+/// that [`mutated_array`] matches, or of the target of an element assignment
 /// with `=` and any key, as `a` in `a[i] = v`. Other writes of an element,
 /// as `a[0] += 1` or `[a[0]] = t`, add nothing to an array in TypeScript.
 pub(super) fn is_array_mutation(identifier: &JsIdentifierExpression) -> bool {
@@ -605,7 +605,8 @@ pub(super) fn is_array_mutation(identifier: &JsIdentifierExpression) -> bool {
 }
 
 /// Returns whether `expression` is an empty array literal without
-/// parentheses, as TypeScript's `isEmptyArrayLiteral` decides.
+/// parentheses. TypeScript doesn't count an empty array literal in
+/// parentheses either.
 fn is_empty_array_literal(expression: &AnyJsExpression) -> bool {
     matches!(expression, AnyJsExpression::JsArrayExpression(array) if array.elements().is_empty())
 }
@@ -1071,11 +1072,11 @@ struct RootBuilder<'a, 'raw> {
     value_callees: FxHashMap<TextRange, Box<[FlowCallee]>>,
     written: WrittenTargets,
     captures: Vec<BuiltCapture>,
-    /// How the type of each variable met so far evolves with its writes, as
-    /// [`evolving_declaration`] decides it, by the range of its declaration.
+    /// How the type of each variable met so far evolves with its writes, by
+    /// the range of its declaration.
     evolving: FxHashMap<TextRange, FlowEvolving>,
     /// Whether each value checked so far reads a variable whose type evolves
-    /// with its writes, as [`Self::reads_evolving`] decides it, by its range.
+    /// with its writes, by the value's range.
     evolving_values: FxHashMap<TextRange, bool>,
     initializers: FxHashSet<FlowNodeId>,
     hoisted: FxHashSet<FlowSubjectId>,
@@ -2962,7 +2963,7 @@ impl RootBuilder<'_, '_> {
     }
 
     /// Returns how the type of the variable declared at `range` evolves with
-    /// its writes, as [`evolving_declaration`] decides it, once per variable.
+    /// its writes, calling [`evolving_declaration`] once per variable.
     fn evolving(&mut self, range: TextRange) -> FlowEvolving {
         if let Some(evolving) = self.evolving.get(&range) {
             return *evolving;
@@ -2977,8 +2978,8 @@ impl RootBuilder<'_, '_> {
         evolving
     }
 
-    /// Returns the subject of the variable that `identifier` reads when its
-    /// type evolves as an array, as [`FlowEvolving::Array`] describes.
+    /// Returns the subject of the variable that `identifier` reads when the
+    /// variable's type evolves as an array.
     fn evolving_array(&mut self, identifier: &JsIdentifierExpression) -> Option<FlowSubjectId> {
         let binding = self.model.binding(&identifier.name().ok()?)?;
         if self.evolving(binding.range()) != FlowEvolving::Array {
@@ -3024,11 +3025,11 @@ impl RootBuilder<'_, '_> {
     }
 
     /// Adds the write points of `call` after `incoming`, the flow after its
-    /// arguments, when it adds values to an array whose type evolves with its
-    /// writes, as [`mutated_array`] finds it, and returns the flow after
-    /// them: one write point per argument, in order, as TypeScript's
-    /// `getTypeAtFlowArrayMutation` adds each argument. A spread argument
-    /// adds a value that Biome can't type as TypeScript does.
+    /// arguments, when `call` adds values to an array whose type evolves with
+    /// its writes, and returns the flow after them. Each argument gets one
+    /// write point, in order, as TypeScript adds each argument to the element
+    /// type. A spread argument adds a value that Biome can't type as
+    /// TypeScript does. [`mutated_array`] recognizes the calls that add values.
     fn array_mutation(
         &mut self,
         call: &JsCallExpression,
@@ -3060,11 +3061,11 @@ impl RootBuilder<'_, '_> {
     /// `target = value` to an array whose type evolves with its writes, as
     /// `a[0] = v` does, after `incoming`, and returns the flow after it.
     ///
-    /// The value joins the element type only for a key whose type is a
-    /// number, as TypeScript's `isEvolvingArrayOperationTarget` requires:
-    /// a number literal. A string key adds nothing, and the value of any
-    /// other key, which may be a number, is a value that Biome can't type
-    /// as TypeScript does. Any other target adds no write point.
+    /// The value joins the element type only for a number literal key,
+    /// because TypeScript adds a value only when the key's type is a number.
+    /// A string key adds nothing. Any other key may be a number, so its value
+    /// is one that Biome can't type as TypeScript does. Any other target adds
+    /// no write point.
     fn element_write(
         &mut self,
         target: &AnyJsAssignment,
@@ -4293,8 +4294,8 @@ mod tests {
                 "y:Assign",
             ])]
         );
-        // `push` on an array that doesn't evolve is an ordinary call, and an
-        // empty array that another variable declares restarts nothing.
+        // `push` on an array that doesn't evolve is an ordinary call, and
+        // assigning an empty array literal to that array restarts nothing.
         let built = function("function f(w: number[], v) { w.push(v); w = []; read(w); }");
         assert_eq!(built.paths("w", 3), [facts(&["w:Assign"])]);
         // A value that reads a variable whose type evolves with its writes
