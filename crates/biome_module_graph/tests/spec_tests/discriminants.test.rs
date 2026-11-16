@@ -1138,19 +1138,14 @@ fn discriminants_held_at_the_top_level_follow_exports() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) narrows every read below
-// (`narrowing-probes/m3-l3/access.ts` L16, L27, L30, L34, L36,
-// `m3-l3/destructure.ts` L23, L26, L42, L44, L46, `m3-l3/more.ts` L14 and
-// L17, and `m3-l3/scope.ts` L12), giving `Circle` or the first tuple, except
-// at `inSwitch`, `forOf`, `closure`, and `patternClosure`. Biome keeps the
-// declared type: it doesn't follow `s!` and keys that are spelled
+// TypeScript 7.0.2 (`tsc --strict`) narrows every read below, giving
+// `Circle` or the first tuple. A test inside a `switch`, a `for...of` loop,
+// or a closure that reads the variables of its enclosing function narrows as
+// anywhere else, so Biome also gives `Circle` at `inSwitch`, `forOf`,
+// `closure`, and `patternClosure`. Biome keeps the declared type at the
+// other reads, because it doesn't follow `s!` and keys that are spelled
 // differently from the property, loose equality doesn't narrow an object
-// yet, and a `const` exported by an `export { ... }` list holds nothing. A
-// test inside a `switch`, a `for...of` loop, or a closure that reads the
-// variables of its enclosing function narrows as anywhere else, so
-// `inSwitch`, `forOf`, `closure`, and `patternClosure` give `Circle`, as in
-// TypeScript (`m3-l3/more.ts` L17, `m4-l2/moved.ts` L7,
-// `m5-l3/existing2.ts` L7, L8).
+// yet, and a `const` exported by an `export { ... }` list holds nothing.
 #[test]
 fn discriminant_constants_that_biome_does_not_follow_keep_the_object() {
     assert_reads(
@@ -1538,18 +1533,16 @@ fn destructured_elements_that_do_not_narrow_each_other() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `number` at every read below
-// (`narrowing-probes/m3/destructure.ts` L11, L23, `m3-l4/patterns.ts` L24,
-// L25, L29, L31, L33, `m5-l3/existing2.ts` L9). Biome keeps the declared
-// type: loose `==` with a literal doesn't narrow an object yet, and an
-// element under a default of an enclosing pattern never narrows because its
-// declared type ignores the default. A test in a closure narrows the
-// pattern of the enclosing function there, as in TypeScript, so `closure`
-// gives `number`. Biome also gives an element
-// destructured from `s!`, a parameter destructured in a function that a
-// variable annotation types, and the parameters of a function typed by a
-// rest parameter whose type is a union of tuples the declared type
-// `unknown`, which no test narrows.
+// TypeScript 7.0.2 (`tsc --strict`) gives `number` at every read below. A
+// test in a closure narrows the pattern of the enclosing function there, as
+// in TypeScript, so `closure` gives `number`. Biome keeps the declared type
+// at `loose` and `enclosingDefault`, because loose `==` with a literal
+// doesn't narrow an object yet, and an element under a default of an
+// enclosing pattern never narrows because its declared type ignores the
+// default. Biome also gives the declared type `unknown`, which no test
+// narrows, to an element destructured from `s!`, a parameter destructured in
+// a function that a variable annotation types, and the parameters of a
+// function typed by a rest parameter whose type is a union of tuples.
 #[test]
 fn destructured_elements_that_biome_does_not_narrow_yet() {
     assert_element_reads(
