@@ -400,9 +400,9 @@ impl<H, T> ThinArc<H, T> {
     ///
     /// # Panics
     ///
-    /// Panics if `items` yields more or fewer items than its `len()`. If `map`
-    /// or the iterator panics, the allocation and the items already written
-    /// are leaked.
+    /// Panics if `items` yields more or fewer items than its `len()`. On any
+    /// panic, including one from `map` or the iterator, the allocation and the
+    /// items already written are leaked.
     #[inline]
     pub(crate) fn from_header_and_iter_with<I, F>(mut header: H, mut items: I, mut map: F) -> Self
     where
@@ -588,7 +588,10 @@ mod tests {
 
     impl ExactSizeIterator for OverReported {}
 
-    // The panic leaks the allocation by design, which Miri reports as an error.
+    // Skipped under Miri. The test passes there, but Miri's leak check then
+    // fails the whole run. `from_header_and_iter_with` panics before the
+    // header is written, so the allocation cannot be dropped as a `ThinArc`
+    // and is leaked on purpose (see its `# Panics` section).
     #[cfg_attr(miri, ignore)]
     #[test]
     #[should_panic(expected = "ExactSizeIterator over-reported length")]
@@ -614,7 +617,10 @@ mod tests {
 
     impl ExactSizeIterator for UnderReported {}
 
-    // The panic leaks the allocation by design, which Miri reports as an error.
+    // Skipped under Miri. The test passes there, but Miri's leak check then
+    // fails the whole run. `from_header_and_iter_with` panics before the
+    // header is written, so the allocation cannot be dropped as a `ThinArc`
+    // and is leaked on purpose (see its `# Panics` section).
     #[cfg_attr(miri, ignore)]
     #[test]
     #[should_panic(expected = "ExactSizeIterator under-reported length")]
