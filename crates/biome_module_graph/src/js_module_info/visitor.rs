@@ -101,17 +101,20 @@ impl JsModuleVisitor {
     }
 
     /// Registers the interfaces that this module merges into declarations
-    /// that it doesn't own, as TypeScript merges them: those of each
-    /// `declare module "specifier" {}` and `declare global {}` block of a
-    /// module, and the top-level interfaces of a declaration file that is a
-    /// script, whose declarations are globals.
+    /// that it doesn't own.
+    ///
+    /// In a module, these are the interfaces of each
+    /// `declare module "specifier" {}` and `declare global {}` block. In a
+    /// declaration file that is a script, they are the top-level interfaces,
+    /// because a script's declarations are globals.
     ///
     /// Only the top-level items of the file and the blocks' own items are
     /// read, because TypeScript accepts these blocks only at the top level
     /// of a module. In a script, `declare module "specifier" {}` declares a
-    /// module instead of augmenting one, so it adds nothing here, and so does
-    /// a TypeScript file that isn't a declaration file and has no import or
-    /// export, which is more often a test fixture than a file of globals.
+    /// module instead of augmenting one, so it adds nothing here. A
+    /// TypeScript file that isn't a declaration file and has no import or
+    /// export adds nothing either, because such a file is more often a test
+    /// fixture than a file of globals.
     fn visit_contributions(&self, collector: &mut JsModuleInfoCollector) {
         let items = match &self.root {
             AnyJsRoot::JsModule(module) => module.items(),
@@ -602,9 +605,9 @@ fn get_ts_name(binding_result: AnyTsIdentifierBinding) -> Option<TokenText> {
     Some(name)
 }
 
-/// Returns whether `item` makes its file a module, as TypeScript's
-/// `isAnExternalModuleIndicatorNode` decides: an import or export
-/// declaration, or `import x = require("...")`.
+/// Returns whether `item` is an import or export declaration, or
+/// `import x = require("...")`. TypeScript treats a file that has such an
+/// item as a module.
 fn is_external_module_indicator(item: &AnyJsModuleItem) -> bool {
     match item {
         AnyJsModuleItem::JsImport(_) | AnyJsModuleItem::JsExport(_) => true,

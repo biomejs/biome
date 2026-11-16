@@ -15,8 +15,9 @@
 //! they can't join an inference cycle, and the resolution of any global can
 //! read them.
 //!
-//! Each projection backdates unless its own entry changes, so a declaration
-//! depends only on the contributions that it has.
+//! The queries that callers use each read one entry of the index, for one
+//! module or one global. Salsa backdates such a query when its entry doesn't
+//! change, so a declaration depends only on the contributions that it has.
 
 use super::interned::{AugmentedExportInput, GlobalNameInput, GlobalTypeContributionsInput};
 use crate::db::type_inference::{ExportOriginResult, find_export_origin, module_for_import};
@@ -185,9 +186,9 @@ pub(crate) fn global_name_declaration<'db>(
     )
 }
 
-/// Returns the exports that only augmentations add to `module`, such as
-/// `Fresh` in `declare module "./a" { interface Fresh {} }` when `./a`
-/// exports no `Fresh`, with the declaration of each.
+/// Returns the exports that only augmentations add to `module`, each with
+/// its declaration. For example, `declare module "./a" { interface Fresh {} }`
+/// adds `Fresh` when `./a` exports no `Fresh`.
 ///
 /// The first augmentation of a name, by module path and then source order,
 /// is its declaration, and the others are its contributions.
@@ -215,9 +216,12 @@ pub(crate) fn module_new_exports(
 // #region ENTRY POINTS
 
 /// Returns the interface declarations that the indexed modules merge into
-/// the global `id` of the standard library, through `declare global` blocks
-/// and the top-level interfaces of declaration scripts, as
-/// [`biome_js_type_info::TypeDb::global_contributions`] describes.
+/// the standard library global `id`, as the module and local type of each.
+///
+/// The declarations come from `declare global` blocks and the top-level
+/// interfaces of declaration scripts, ordered by module path and then by
+/// source order. This implements
+/// [`biome_js_type_info::TypeDb::global_contributions`].
 pub fn global_contributions(db: &dyn ModuleDb, id: GlobalTypeId) -> &[(ModuleKey, LocalTypeId)] {
     global_type_contributions(db, GlobalTypeContributionsInput::new(db, id))
 }
@@ -244,8 +248,9 @@ impl ModuleAugmentationTargets {
     }
 }
 
-/// The declaration that an augmentation merges into, as
-/// [`augmentation_target`] finds it.
+/// The declaration that an augmentation merges into, after following the
+/// re-exports and imports of the augmented name (see
+/// [`augmentation_target`]).
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum AugmentationTarget {
     /// An interface or a class declared in `module`.
@@ -366,10 +371,12 @@ fn augmentation_target_impl(
     AugmentationTarget::None
 }
 
-/// Returns the type of the interface or class that the raw type `type_id`
-/// is, or refers to as the type meaning of an export, as for an export of a
-/// class with the interfaces merged into it, or of an interface with a
-/// namespace of its name.
+/// Returns the interface or class that the raw type `type_id` is or refers
+/// to, or `None` for any other type.
+///
+/// The type meaning of an export can refer to the declaration, as for an
+/// export of a class with interfaces merged into it, or of an interface
+/// with a namespace of the same name.
 fn declaration_type_id(raw_types: &[RawTypeData], type_id: TypeId) -> Option<TypeId> {
     let referenced = match raw_types.get(type_id.index())? {
         RawTypeData::Class(_) | RawTypeData::Interface(_) => return Some(type_id),

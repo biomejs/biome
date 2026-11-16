@@ -1,12 +1,10 @@
 //! Interfaces that modules merge into declarations they don't own: module
 //! augmentations, `declare global` blocks, and declaration scripts.
 //!
-//! Each test mirrors a probe directory under `.pi/narrowing-probes/`, file
-//! for file, with the probe's `p(...)` reads written as marked expressions.
-//! TypeScript 7.0.2 (`tsc --strict`) gives the probes the types that the
-//! tests expect, unless a comment gives TypeScript's type. An `else` branch
-//! that no value reaches is `never` in TypeScript, which Biome reads as
-//! Unknown.
+//! TypeScript 7.0.2 (`tsc --strict`) gives every marked read the type that
+//! the test expects, unless a comment gives TypeScript's type. An `else`
+//! branch that no value reaches is `never` in TypeScript, which Biome reads
+//! as Unknown.
 
 use super::*;
 use biome_module_graph::LocalTypeInput;
@@ -68,10 +66,8 @@ const AUG_FILES: &[(&str, &str)] = &[
     ("/src/noimport.ts", AUG_NOIMPORT),
 ];
 
-// `narrowing-probes/merging/aug/`: `use.ts` L6 to L15, `fresh.ts` L4, and
-// `noimport.ts` L4. TypeScript merges an augmentation into its target for
-// the whole program, also for a module that doesn't import the augmenting
-// one.
+// TypeScript merges an augmentation into its target for the whole program,
+// also for a module that doesn't import the augmenting one.
 #[test]
 fn module_augmentations_add_members_and_bases_to_their_targets() {
     assert_file_reads(
@@ -111,9 +107,8 @@ fn module_augmentations_add_members_and_bases_to_their_targets() {
     );
 }
 
-// `narrowing-probes/merging/barrel/use.ts` L5 and L6. TypeScript merges an
-// augmentation of a module that re-exports a declaration, with `export *`
-// or by name, into that declaration.
+// TypeScript merges an augmentation of a module that re-exports a
+// declaration, with `export *` or by name, into that declaration.
 #[test]
 fn module_augmentations_merge_through_reexports() {
     assert_file_reads(
@@ -186,8 +181,8 @@ const GLOBAL_FILES: &[(&str, &str)] = &[
     ("/src/use.ts", GLOBAL_USE),
 ];
 
-// `narrowing-probes/merging/global/augment.ts` L9 and L11. In the module
-// that declares it, `String` is the global with the members of both.
+// In the module with the `declare global` block, `String` is the global
+// with the members of both declarations.
 #[test]
 fn declare_global_merges_into_the_global_in_the_declaring_module() {
     assert_file_reads(
@@ -202,9 +197,9 @@ fn declare_global_merges_into_the_global_in_the_declaring_module() {
     );
 }
 
-// `narrowing-probes/merging/global/use.ts` L3 to L10. Another module sees
-// the members that `declare global` adds to the wrapper of `string` and to
-// `Array`, and the global that only `declare global` declares.
+// Another module sees the members that `declare global` adds to the
+// wrapper of `string` and to `Array`, and the global that only
+// `declare global` declares.
 #[test]
 fn declare_global_merges_into_the_global_in_other_modules() {
     assert_file_reads(
@@ -225,15 +220,16 @@ fn declare_global_merges_into_the_global_in_other_modules() {
             ("last", "xs.last()", &["string", "undefined"]),
             ("fresh", "fg.g", &["number: 1"]),
             // TypeScript: `null`. A falsy test keeps the object types that a
-            // primitive's wrapper can satisfy, and `String` now has `format`.
+            // primitive's wrapper can satisfy, and `declare global` gives
+            // `String` a `format` method.
             ("falsy", "x", &["Fmt", "null"]),
             ("truthy", "x", &["Fmt"]),
         ],
     );
 }
 
-// `narrowing-probes/merging/script/use.ts` L3 and L5. The top-level
-// interfaces of a declaration file without imports or exports are globals.
+// The top-level interfaces of a declaration file without imports or exports
+// are globals.
 #[test]
 fn declaration_scripts_declare_globals() {
     assert_file_reads(
@@ -262,8 +258,6 @@ export {};
     );
 }
 
-// `narrowing-probes/fix-c2/m3-l5-aug/index.ts` L5 and L6, which read both
-// branches of `narrowing-probes/m3-l5/aug/index.ts` L5 and L6.
 #[test]
 fn in_sees_the_members_of_augmentations() {
     assert_file_reads(
@@ -297,9 +291,6 @@ function g(x: X | Y) { if ('extra' in x) /*g*/x; else /*notG*/x; }
     );
 }
 
-// `narrowing-probes/m3-l6/aug/use.ts` L5 and L6, and
-// `narrowing-probes/m3-l6/mods/index.ts` L8: `extends` clauses that an
-// augmentation adds to an interface and to a class.
 #[test]
 fn instanceof_follows_the_bases_that_augmentations_add() {
     assert_file_reads(
@@ -364,10 +355,10 @@ export function f3(x: X | Sub) { if (x instanceof Base) /*f3*/x; else /*notF3*/x
     );
 }
 
-// `narrowing-probes/m3-l7/aug/index.ts` L5 and L8, and `global.ts` L5: type
-// predicates whose targets an augmented member, a member of merged
-// declarations, or a member that `declare global` adds to `String`
-// satisfies.
+// A type predicate keeps the union members that satisfy its target: an
+// interface that an augmentation completes, an interface merged from two
+// declarations, and `string`, whose wrapper `declare global` gives a
+// `format` method.
 #[test]
 fn type_predicates_keep_members_that_augmentations_complete() {
     const FILES: &[(&str, &str)] = &[
@@ -433,8 +424,7 @@ function merged(x: M | { m: 1; y: 2 } | string) { if (isM(x)) /*merged*/x; else 
     );
 }
 
-// `narrowing-probes/m3-l1/augmented.ts` L5: a member that `declare global`
-// adds to `String` in the module that reads it.
+// `declare global` adds the member to `String` in the module that reads it.
 #[test]
 fn typeof_sees_wrapper_members_that_declare_global_adds() {
     assert_file_reads(
@@ -452,8 +442,8 @@ function f(x: Fmt | number) { if (typeof x === "string") /*string*/x; }
     );
 }
 
-// `narrowing-probes/m3-l9/aug/use.ts` L4 and L5. The first declaration of a
-// property decides whether it is readonly (TS2687 reports the other).
+// The first declaration of a property decides whether it is readonly
+// (TS2687 reports the other).
 #[test]
 fn readonly_paths_take_readonly_from_the_declaration_that_an_augmentation_redeclares() {
     assert_file_reads(
@@ -490,11 +480,11 @@ function a2(o: Y) { const ok = o.v !== null; if (ok) /*a2*/o.v; }
     );
 }
 
-// `narrowing-probes/fix-c2/overloads/aug/use.ts` L4 (`a.ts b.ts c.ts
-// use.ts`) and `global/use.ts` L3. TypeScript merges augmentations after the
-// declarations they augment, in the order of the program's files, and tries
-// the overloads of a later declaration first. Biome orders the augmenting
-// modules by path.
+// TypeScript merges augmentations after the declarations they augment, in
+// the order of the program's files, and tries the overloads of a later
+// declaration first. Biome orders the augmenting modules by path, so the
+// expected types match TypeScript when the program lists the files in path
+// order.
 #[test]
 fn methods_of_contributions_are_tried_before_those_of_their_targets() {
     assert_file_reads(
@@ -555,9 +545,8 @@ export {};
     );
 }
 
-// `narrowing-probes/fix-c2/class-order/use.ts` L4. The members that an
-// augmentation declares on a class are the class's own in TypeScript, so
-// they come before those of its parent class.
+// The members that an augmentation declares on a class are the class's own
+// in TypeScript, so they come before those of its parent class.
 #[test]
 fn class_contributions_come_before_the_parent_class() {
     assert_file_reads(

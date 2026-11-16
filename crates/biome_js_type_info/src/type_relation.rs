@@ -3046,9 +3046,9 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 interface.extends(self.db).to_vec(),
                 true,
             ),
-            // The parent class comes before the interface bases, as in
-            // TypeScript's base types of a class. Contributions come first:
-            // TypeScript counts their members as the class's own.
+            // Contributions come first, because TypeScript counts their
+            // members as the class's own. The parent class comes before the
+            // other interface bases, as in TypeScript's base types of a class.
             TypeData::Class(class) if matches!(ty, TypeData::InstanceOf(_)) => {
                 let ClassParents {
                     extends,

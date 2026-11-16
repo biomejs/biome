@@ -672,12 +672,15 @@ impl JsModuleInfoCollector {
         }
     }
 
-    /// Returns the merged class or interface `merged` with each method that
-    /// two or more of its `declarations` declare, given in source order,
-    /// merged into one member whose overloads are ordered as TypeScript
-    /// orders them (see [`order_merged_overloads`]): a later declaration's
-    /// overloads are tried first. The merged member takes the place of the
-    /// method's first member.
+    /// Returns the merged class or interface `merged` with the overloads of
+    /// each method that two or more of its `declarations` declare merged
+    /// into one member.
+    ///
+    /// `declarations` are in source order. The merged member orders the
+    /// overloads as TypeScript does, so a later declaration's overloads are
+    /// tried first (see [`order_merged_overloads`]). It takes the place of
+    /// the method's first member, and the method's other members are
+    /// removed.
     ///
     /// A method keeps its first declaration's member when a declaration
     /// gives its name to something else, such as a property, which
@@ -799,9 +802,9 @@ impl JsModuleInfoCollector {
         }
     }
 
-    /// Returns the call signatures of a method whose type is `ty`, each with
-    /// whether it is specialized, as [`order_merged_overloads`] takes them,
-    /// or `None` when `ty` isn't a method's type, as for a property's.
+    /// Returns the call signatures of a method whose type is `ty`, each
+    /// paired with whether it is specialized (see [`Self::is_specialized`]).
+    /// Returns `None` when `ty` isn't a method's type, as for a property.
     ///
     /// A method's type is a named function, or an object with one call
     /// signature per overload. An optional method's type also includes
@@ -874,16 +877,17 @@ impl JsModuleInfoCollector {
     }
 
     /// Records the interfaces that [`Self::register_contribution`]
-    /// registered, with the raw types of their declarations, in
-    /// [`Self::contributions`], and makes their names refer to what they
-    /// merge into: the export of the augmented module, or the global that
-    /// the standard library declares with the name. A global name that the
-    /// library doesn't declare keeps naming the module's declaration.
+    /// registered in [`Self::contributions`], with the raw types of their
+    /// declarations.
     ///
-    /// For example, `X` names the merged `X` of `./a` inside
+    /// Also makes each interface's name refer to what the interface merges
+    /// into: the export of the augmented module, or the global that the
+    /// standard library declares with the name. A global name that the library
+    /// doesn't declare keeps naming the module's declaration. This matches
+    /// TypeScript, where the declaring module sees the merged type. For
+    /// example, `X` names the merged `X` of `./a` inside
     /// `declare module "./a" { interface X { self(): X } }`, and `String`
-    /// names the global `String` after `declare global { interface String {} }`,
-    /// as in TypeScript, where the declaring module sees the merged type.
+    /// names the global `String` after `declare global { interface String {} }`.
     ///
     /// Runs after the collector merges the interfaces of one name in one
     /// block, so an interface declared twice in a block is one contribution.

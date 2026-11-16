@@ -530,9 +530,10 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
                 // Interface bases give only instance-side members, which a
                 // lookup of static members never reaches. They are pushed
                 // first, so the parent class, as in TypeScript's base types of
-                // a class, is searched before them. Contributions are pushed
-                // last, so they are searched before the parent class: their
-                // members are the class's own in TypeScript.
+                // a class, is searched before them. TypeScript counts the
+                // members of contributions as the class's own, so
+                // contributions are pushed last and searched before the
+                // parent class.
                 let is_instance_side = matches!(
                     state.mode,
                     MemberLookupMode::Any | MemberLookupMode::Instance
@@ -652,9 +653,10 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
     collected_type_result(db, found)
 }
 
-/// Returns the contributions of the interface or class `ty`: the
-/// interfaces that other modules merge into it, as
-/// [`InferredTypeData::with_contributions`] places them.
+/// Returns the contributions of the interface or class `ty`, the interfaces
+/// that other modules merge into it. They are the leading entries of the
+/// interface's `extends` clauses or of the class's interface bases (see
+/// [`InferredTypeData::with_contributions`]). Other types have none.
 fn contributions<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,
@@ -674,17 +676,22 @@ fn contributions<'db>(
 }
 
 /// Returns the method `name` of the interface or class `ty`, which has
-/// contributions, with the overloads of `ty`'s own declaration, given as
-/// `own_member`, and of each contribution that declares the method, ordered
-/// as TypeScript orders the overloads of merged declarations (see
-/// [`order_merged_overloads`]): the contributions follow the declaration, in
-/// their order, so the last contribution's overloads are tried first.
+/// contributions, with the overloads of all its declarations merged into
+/// one member.
 ///
-/// Returns `None` when fewer than two of them declare `name` as a method, or
-/// when one declares it as something else, such as a property, which
-/// TypeScript rejects. The lookup then finds the member as it finds any
-/// other: the declaration's own first, then the contributions'. Only the
-/// contributions' own members count, not those they inherit.
+/// The declarations are `ty`'s own, given as `own_member`, and each
+/// contribution that declares the method. The overloads are ordered as
+/// TypeScript orders the overloads of merged declarations (see
+/// [`order_merged_overloads`]). The contributions follow `ty`'s own
+/// declaration, in their order, so the last contribution's overloads are
+/// tried first.
+///
+/// Returns `None` for a lookup of static members, when fewer than two
+/// declarations declare `name` as a method, or when one declares it as
+/// something else, such as a property, which TypeScript rejects. The lookup
+/// then finds the member as it finds any other: the declaration's own
+/// first, then the contributions'. Only the contributions' own members
+/// count, not those they inherit.
 ///
 /// The returned type has the type parameters of `ty`, so the lookup applies
 /// its substitutions to it as to an own member's type.
@@ -747,9 +754,9 @@ fn merged_contributed_method<'db>(
     ))
 }
 
-/// Returns the call signatures of a method whose type is `ty`, each with
-/// whether it is specialized, as [`order_merged_overloads`] takes them, or
-/// `None` when `ty` isn't a method's type, as for a property's.
+/// Returns the call signatures of a method whose type is `ty`, each paired
+/// with whether it is specialized (see [`is_specialized`]). Returns `None`
+/// when `ty` isn't a method's type, as for a property.
 ///
 /// A method's type is a named function, or an object with one call
 /// signature per overload. An optional method's type also includes

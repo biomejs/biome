@@ -278,10 +278,8 @@ fn test_infer_module_types_selects_method_overloads_of_interfaces_and_object_typ
 
 // TypeScript 7.0.2 (`tsc --strict`) tries the overloads of a later declaration
 // of a merged interface or class first, and signatures with a parameter of a
-// literal type before all others (`reorderCandidates`), so every read below
-// has the expected type (`narrowing-probes/fix-c2/overloads/local.ts` L4 to
-// L28 and `special.ts` L4, L7, L13, and L16), unless a comment gives
-// TypeScript's type.
+// literal type before all others. It gives every read below the expected
+// type, unless a comment gives TypeScript's type.
 #[test]
 fn merged_declarations_try_the_overloads_of_later_declarations_first() {
     let source = r#"
@@ -338,7 +336,7 @@ declare const o8: O8;
             ("literalUnion", "o4.f(\"a\")", &["number: 2"]),
             ("numberLiteral", "o5.f(1)", &["number: 1"]),
             // TypeScript: `1`. Biome keeps the order of the overloads of one
-            // declaration (`special.ts` L10).
+            // declaration.
             ("oneDeclaration", "o6.f(\"a\")", &["number: 2"]),
             ("specializedOfLater", "o8.f(\"b\")", &["number: 2"]),
         ],

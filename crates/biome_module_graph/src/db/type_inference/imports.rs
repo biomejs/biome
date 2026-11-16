@@ -771,11 +771,11 @@ impl<'db> ResolutionCtx<'db, '_> {
         })
     }
 
-    /// Resolves an export that `module` doesn't declare and that a module
-    /// augmentation adds, as `Fresh` in
-    /// `declare module "./a" { interface Fresh {} }` when `./a` exports no
-    /// `Fresh`, to a handle to its declaration in the augmenting module.
-    /// Returns [`ExportResolution::Missing`] when no augmentation adds it.
+    /// Resolves an export that only a module augmentation adds to `module`
+    /// to a handle to its declaration in the augmenting module. For example,
+    /// `declare module "./a" { interface Fresh {} }` adds `Fresh` when `./a`
+    /// exports no `Fresh`. Returns [`ExportResolution::Missing`] when no
+    /// augmentation adds the export.
     fn resolve_new_export(&self, module: ModuleInfo, name: &str) -> ExportResolution<'db> {
         let new_exports = module_new_exports(self.db, module);
         let Ok(position) =

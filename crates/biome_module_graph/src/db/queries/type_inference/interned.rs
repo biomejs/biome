@@ -166,8 +166,8 @@ pub struct NormalizeTypeInput<'db> {
     pub ty: InferredTypeData<'db>,
 }
 
-/// Interned input for [`super::augmentation_target`]: a name that an
-/// augmentation of a module declares.
+/// Interned input for [`super::augmentations::augmentation_target`]: a name
+/// that an augmentation of a module declares.
 ///
 /// The name borrows the source text of the augmentation, so interning it
 /// allocates no string.
@@ -181,7 +181,7 @@ pub(crate) struct AugmentedExportInput<'db> {
     pub name: Text,
 }
 
-/// Interned input for [`super::global_type_contributions`].
+/// Interned input for [`super::augmentations::global_type_contributions`].
 #[salsa::interned]
 #[derive(Debug)]
 pub(crate) struct GlobalTypeContributionsInput<'db> {
@@ -189,9 +189,9 @@ pub(crate) struct GlobalTypeContributionsInput<'db> {
     pub id: GlobalTypeId,
 }
 
-/// Interned input for [`super::global_name_declaration`], a global that the
-/// standard library doesn't declare. The name borrows the source text that
-/// refers to it.
+/// Interned input for [`super::global_name_declaration`]: the name of a
+/// global that the standard library doesn't declare. The name borrows the
+/// source text that refers to the global.
 #[salsa::interned]
 #[derive(Debug)]
 pub(crate) struct GlobalNameInput<'db> {

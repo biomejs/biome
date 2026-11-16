@@ -190,8 +190,7 @@ impl JsModuleInfo {
 }
 
 /// Orders the call signatures of a method that several merged declarations
-/// declare, as TypeScript's `reorderCandidates` orders the candidates of a
-/// call to it.
+/// declare in the order that TypeScript tries them for a call to the method.
 ///
 /// `declarations` gives each declaration's signatures in declaration order,
 /// each with whether it is specialized: whether one of its parameters has a
@@ -368,7 +367,7 @@ pub(crate) struct ModuleAugmentation {
 pub(crate) struct ContributedInterface {
     pub(crate) name: Text,
     /// The interface's declaration in the module's raw types. Interfaces of
-    /// one name in one block share one, as the collector merges them.
+    /// one name in one block share one, because the collector merges them.
     pub(crate) type_id: TypeId,
 }
 

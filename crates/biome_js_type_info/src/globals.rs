@@ -144,9 +144,8 @@ pub fn global_type_id_for_qualifier(qualifier: &TypeReferenceQualifier) -> Optio
     }
 }
 
-/// Resolves a name that a type annotation refers to, such as `String` in
-/// `interface String {}`, to a global that the TypeScript standard library
-/// declares as a type.
+/// Resolves a type name, such as `String` in `interface String {}`, to a
+/// global that the TypeScript standard library declares as a type.
 pub fn global_type_id_for_type_name(name: &str) -> Option<GlobalTypeId> {
     lookup_global(crate::generated::global_types::TYPE_GLOBALS, name)
 }

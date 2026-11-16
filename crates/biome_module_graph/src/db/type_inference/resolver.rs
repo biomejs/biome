@@ -817,10 +817,11 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
         ty
     }
 
-    /// Adds to the interface or class `ty`, the data of the declaration
-    /// `type_id`, the interfaces that other modules merge into it through
-    /// module augmentations, as [`InferredTypeData::with_contributions`]
-    /// describes. Other types are returned unchanged.
+    /// Returns `ty`, the data of the declaration `type_id`, with the
+    /// interfaces that other modules merge into the declaration through
+    /// module augmentations (see [`InferredTypeData::with_contributions`]).
+    /// Only an interface or a class receives them; other types are returned
+    /// unchanged.
     ///
     /// Every import resolution mode builds a declaration's data here, from
     /// the same tracked index, so a handle to the declaration has the same

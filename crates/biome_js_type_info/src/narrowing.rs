@@ -590,9 +590,9 @@ pub fn may_narrow_by_property(db: &dyn TypeDb, declared: InferredTypeData) -> bo
 /// `Readonly<T>` makes it readonly, and when it is an element of a `readonly`
 /// tuple. A getter is never readonly, because Biome doesn't collect setters,
 /// so a getter may have one. A property that a member inherits, through an
-/// `extends` clause, a prototype, or a module augmentation, doesn't count: an
-/// augmentation in a module that Biome doesn't index can give the member a
-/// property of the same name that isn't readonly.
+/// `extends` clause, a prototype, or a module augmentation, doesn't count,
+/// because an augmentation in a module that Biome doesn't index can give the
+/// member a property of the same name that isn't readonly.
 ///
 /// Returns false when `ty` has no member other than `null` and `undefined`,
 /// when a member is a primitive, a function, an array, an intersection, a

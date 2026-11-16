@@ -114,13 +114,13 @@ pub trait TypeDb: biome_db::Db {
     }
 
     /// Returns the interface declarations that the project merges into the
-    /// global `id`, through `declare global` blocks and the top-level
-    /// interfaces of declaration scripts, as the module and local type of
-    /// each, in the order that their members are searched.
+    /// global `id`, as the module and local type of each.
     ///
-    /// The global's data includes them as contributions (see
-    /// [`TypeData::with_contributions`]). The default has none, for a
-    /// database without modules.
+    /// The declarations come from `declare global` blocks and from the
+    /// top-level interfaces of declaration scripts. They are in the order
+    /// that member lookup searches them. The global's data includes them as
+    /// contributions (see [`TypeData::with_contributions`]). The default has
+    /// none, for a database without modules.
     fn global_contributions(&self, id: GlobalTypeId) -> &[(ModuleKey, LocalTypeId)] {
         let _ = id;
         &[]
@@ -1140,19 +1140,21 @@ impl<'db> TypeData<'db> {
         Self::InstanceOf(InternedTypeInstance::new(db, ty, type_parameters))
     }
 
-    /// Returns this interface or class with `contributions` merged into it:
-    /// the interface declarations that other modules merge into it, through
-    /// a module augmentation, a `declare global` block, or a declaration
-    /// script, each given as the module and local type of its declaration.
+    /// Returns this interface or class with `contributions` merged into it.
+    ///
+    /// Each contribution is an interface declaration that another module
+    /// merges into this type through a module augmentation, a `declare
+    /// global` block, or a declaration script. It is given as the module and
+    /// local type of that declaration.
     ///
     /// The contributions become handles placed before the interface's
     /// `extends` clauses, or before the class's interface bases, in the
-    /// given order, and [`InternedInterface::contributions`] or
+    /// given order. [`InternedInterface::contributions`] or
     /// [`InternedClass::contributions`] counts them. Their data stays in the
-    /// module that declares them, and only a reader that resolves a handle
-    /// resolves their members. When the declaration has type parameters,
-    /// each handle is an instance with them as type arguments, so the
-    /// contribution's own type parameters stand for the declaration's.
+    /// module that declares them, so only a reader that resolves a handle
+    /// resolves their members. When this type has type parameters, each
+    /// handle is an instance with those type parameters as type arguments,
+    /// so the contribution's own type parameters stand for this type's.
     /// Other types, and an empty `contributions`, are returned unchanged.
     pub fn with_contributions(
         self,
@@ -2923,13 +2925,13 @@ pub struct InternedClass<'db> {
     /// values. See [`crate::type_data::Class::scope_id`].
     #[returns(copy)]
     pub scope_id: Option<ScopeId>,
-    /// How many of the first [`ClassParents::interface_bases`] are
-    /// contributions: the interfaces that module augmentations, `declare
-    /// global` blocks, and declaration scripts in other modules merge into
-    /// this class, as handles to their declarations. TypeScript counts their
-    /// members as the class's own, so member lookup searches them before the
-    /// parent class and merges their method overloads with the class's.
-    /// Every other reader treats them as interface bases.
+    /// Counts the leading [`ClassParents::interface_bases`] that are
+    /// contributions. A contribution is a handle to an interface that a
+    /// module augmentation, a `declare global` block, or a declaration
+    /// script in another module merges into this class. TypeScript counts
+    /// their members as the class's own, so member lookup searches them
+    /// before the parent class and merges their method overloads with the
+    /// class's. Every other reader treats them as interface bases.
     #[returns(copy)]
     pub contributions: usize,
 }
@@ -2993,13 +2995,13 @@ pub struct InternedInterface<'db> {
     /// different values. See [`crate::type_data::Interface::scope_id`].
     #[returns(copy)]
     pub scope_id: Option<ScopeId>,
-    /// How many of the first [`Self::extends`] entries are contributions:
-    /// the interfaces that module augmentations, `declare global` blocks,
-    /// and declaration scripts in other modules merge into this interface,
-    /// as handles to their declarations. TypeScript counts their members as
-    /// the interface's own, so member lookup merges their method overloads
-    /// with the interface's. Every other reader treats them as `extends`
-    /// clauses.
+    /// Counts the leading [`Self::extends`] entries that are contributions.
+    /// A contribution is a handle to an interface that a module
+    /// augmentation, a `declare global` block, or a declaration script in
+    /// another module merges into this interface. TypeScript counts their
+    /// members as the interface's own, so member lookup merges their method
+    /// overloads with the interface's. Every other reader treats them as
+    /// `extends` clauses.
     #[returns(copy)]
     pub contributions: usize,
 }

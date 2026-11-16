@@ -832,9 +832,9 @@ fn build_files_db(files: &[(&str, &str)]) -> TestModuleDb {
 }
 
 /// Asserts the type of each `(marker, expression, expected)` read of the
-/// module `path`, one of `files`, by the names of its union members, as
-/// [`type_names`] gives them. `marker` names the comment `/*marker*/` that
-/// comes right before the read.
+/// module `path`, one of `files`. `expected` lists the sorted names of the
+/// type's union members (see [`type_names`]). `marker` names the comment
+/// `/*marker*/` that comes right before the read.
 fn assert_file_reads(files: &[(&str, &str)], path: &str, reads: &[(&str, &str, &[&str])]) {
     let db = build_files_db(files);
     let module = db.module_for_path(Utf8Path::new(path)).unwrap();
