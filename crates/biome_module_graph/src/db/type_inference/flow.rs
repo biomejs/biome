@@ -5,10 +5,9 @@
 //! [`crate::js_module_info::flow`]). This module resolves the type that the
 //! read's subject starts from, the types that its writes assign, what the
 //! call points that may narrow it do, and which statement calls before it
-//! never return, and applies the guards and the writes along every path that
-//! reaches the read. The solve's key carries
-//! all of these, so a solve resolves no declared type, assigned value, or
-//! callee.
+//! never return. It applies the guards and the writes along every path that
+//! reaches the read. The solve's key carries all of these, so a solve
+//! resolves no declared type, assigned value, or callee.
 //! A variable starts from its declared type. In a closure that continues the
 //! flow where it is created, the variable starts instead from its type at
 //! that point, its capture point. The solve of the enclosing root gives that
@@ -298,7 +297,7 @@ enum FlatteningError {
 /// readonly path, as [`FlowGuard::ReadonlyPath`] requires, the `switch`
 /// statements found exhaustive, as [`FlowGuard::Bypass`] requires, one bit
 /// each, the types that the subject's writes assign, how its type evolves
-/// with its writes, as [`FlowEvolving`] describes, the effects of the call
+/// with its writes ([`FlowEvolving`]), the effects of the call
 /// points that narrow it, as [`FlowGuard::Call`] requires, the statement
 /// calls found to end the path, one bit each, the results of the
 /// property guards, `in` tests, `instanceof` tests, and calls to type-guard
@@ -524,8 +523,8 @@ pub(in crate::db) struct LocalFlow<'db> {
     subject_call_effects: FxHashMap<(usize, FlowSubjectId), Option<FlowCallEffects<'db>>>,
     /// Whether a path reaches each read point asked about so far without
     /// crossing a call that never returns, keyed by the index of its root, the
-    /// point, and the calls found to end the path, as
-    /// [`ResolutionCtx::ending_calls`] decides it.
+    /// point, and the mask of the calls found to never return. Filled by
+    /// [`ResolutionCtx::ending_calls`].
     reached: FxHashMap<(usize, FlowNodeId, u64), bool>,
 }
 
@@ -869,8 +868,7 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// itself when no test of the root can change it.
     ///
     /// Returns `None` when every path to the read crosses a call that never
-    /// returns, where the read keeps its declared type, as
-    /// [`Self::ending_calls`] describes.
+    /// returns, so the read keeps its declared type, as in TypeScript.
     fn narrow_from(
         &mut self,
         read: FlowRead,
@@ -1021,8 +1019,9 @@ impl<'db> ResolutionCtx<'db, '_> {
         let exhaustive = self.exhaustive_switches(read, capture.start);
         let assigned = self.flow_assigned_types(capture.root, capture.subject);
         let calls = self.call_effects(capture.root, capture.subject);
-        // A closure created where only ended paths arrive starts from that
-        // point too, so TypeScript gives its reads their declared types.
+        // TypeScript gives the reads of a closure their declared types when
+        // every path to the point that creates it crosses a call that never
+        // returns.
         let ends = self.ending_calls(read)?;
         let states = infer_flow_subject_states(
             self.db,
@@ -1517,10 +1516,10 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// statement call only through an assertion. The target is flattened as a
     /// declared type is, and a target of `any` or `unknown` narrows nothing.
     ///
-    /// A statement call ends the path, as [`FlowCallEffect::Ends`]
-    /// describes, when its signature returns `never` by a return type
-    /// annotation, as [`Self::has_annotated_callee`] decides, or asserts an
-    /// argument that is always false with `asserts value`.
+    /// The effect of a statement call is [`FlowCallEffect::Ends`] when the
+    /// return type annotation of its signature's declaration is `never` (see
+    /// [`Self::has_annotated_callee`]), or when its signature is
+    /// `asserts value` and the asserted argument is always false.
     fn resolve_call_effect(&mut self, call: &FlowCall) -> Option<FlowCallEffect<'db>> {
         let info = self.js_info;
         let range = call.range;
@@ -1676,14 +1675,13 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns which statements of the root that `graph` holds some path
-    /// reaches, as [`crate::db::queries::infer_flow_reachability`] describes.
+    /// reaches, and whether a path reaches the root's end. See
+    /// [`crate::db::queries::infer_flow_reachability`].
     ///
-    /// A path ends where the graph has no flow, at a statement call whose
-    /// effect is [`FlowCallEffect::Ends`], and on the path that matches no
-    /// case of a `switch` statement that is exhaustive, as
-    /// [`Self::switch_is_exhaustive`] decides it, as TypeScript's
-    /// `isReachableFlowNode` decides. A call point that collection kept
-    /// shares its effect with narrowing; another one is resolved here.
+    /// A path ends where the graph has no flow, at a statement call that
+    /// never returns, and on the path that matches no case of an exhaustive
+    /// `switch` statement, as in TypeScript. A call point that collection
+    /// kept shares its effect with narrowing; another one is resolved here.
     ///
     /// Returns `None` when the walk exceeds its work limit.
     fn reachability(&mut self, graph: &ReachabilityGraph) -> Option<FlowReachability> {
@@ -1760,19 +1758,19 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns whether the return type of the callee of a statement call
-    /// comes from an annotation, as TypeScript's
-    /// `hasTypePredicateOrNeverReturnType` requires of a `never` return type
-    /// that ends the path, given how collection recorded the callee, as
-    /// [`FlowCallKind::Statement`] describes `root`, `steps`, and
-    /// `annotated`.
+    /// comes from an annotation, given the callee's `root`, `steps`, and
+    /// `annotated`, as [`FlowCallKind::Statement`] records them. TypeScript
+    /// ends the path at a call that returns `never` only when that return
+    /// type comes from an annotation.
     ///
-    /// A callee that is the name that it starts at has one as collection
-    /// found, and an import as the declaration that it names, as
-    /// [`imported_return_is_annotated`] decides. So does a member of a
-    /// namespace that `declare` declares, which has no body to infer from.
-    /// Any other callee reads a member, which every type of its object must
-    /// declare with a return type annotation, as
-    /// [`has_annotated_return_member`] decides.
+    /// A callee without member accesses takes `annotated`, which collection
+    /// read from the syntax, unless it is an import. An imported callee, or
+    /// a member of a namespace import, has one when the declaration of the
+    /// export that it names does. A member of a namespace that `declare`
+    /// declares always has one, because it has no body to infer from. Any
+    /// other callee reads a member, which every type of its object must
+    /// declare with an annotated return type (see
+    /// [`has_annotated_return_member`]).
     fn has_annotated_callee(
         &mut self,
         root: FlowCallRoot,
@@ -1802,18 +1800,17 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns the statement calls of the root of `read` that never return
-    /// and whose node reaches the read, one bit each, as
-    /// [`FlowSubjectRootInput::ends`] takes them, or `None` when every path
+    /// and whose node reaches the read, one bit each, in the mask that
+    /// [`FlowSubjectRootInput::ends`] takes. Returns `None` when every path
     /// to the read crosses one of them.
     ///
     /// A call never returns when inference finds its effect to be
     /// [`FlowCallEffect::Ends`]. TypeScript gives a read that only such paths
-    /// reach its declared type (`unreachableNeverType`), so the caller then
-    /// keeps the declared type without a solve. Otherwise each such call
-    /// adds nothing to the read, as a join of `unreachableNeverType` with
-    /// other types does. When the walk that tells exceeds its work limit,
-    /// the read is solved with the mask, which gives `Unknown` where no path
-    /// remains.
+    /// reach its declared type, so the caller then keeps the declared type
+    /// without a solve. Otherwise the paths through such a call add nothing
+    /// to the read's type, as in TypeScript. When the walk that checks for a
+    /// path around those calls exceeds its work limit, the read is solved
+    /// with the mask, which gives `Unknown` where no path remains.
     fn ending_calls(&mut self, read: FlowRead) -> Option<u64> {
         let Some(root) = self.js_info.flow.root(read.root) else {
             return Some(0);
@@ -1939,8 +1936,9 @@ impl<'db> ResolutionCtx<'db, '_> {
         self.is_exhaustive_in(root, switch)
     }
 
-    /// Returns whether `switch`, a statement of `root`, is exhaustive, as
-    /// [`Self::switch_is_exhaustive`] decides it.
+    /// Returns whether every value that the type of the discriminant of
+    /// `switch`, a statement of `root`, allows matches a case. See
+    /// [`Self::switch_is_exhaustive`].
     fn is_exhaustive_in(&mut self, root: &RootFlow, switch: &FlowSwitch) -> bool {
         let Some(discriminant) = self
             .flow_operand_at(switch.discriminant)
@@ -3138,10 +3136,10 @@ fn is_namespace_import(js_info: &JsModuleInfo, binding: TextRange) -> bool {
 }
 
 /// Returns whether every type that `ty` can be declares its member `name`
-/// with a return type annotation, as [`has_annotated_member`] decides, or
-/// `ty` is a type literal whose members named `name` are all functions
-/// written in place, as a method signature and a property annotated with a
-/// function type are, whose syntax states their return types.
+/// with a return type annotation (see [`has_annotated_member`]), or `ty` is a
+/// type literal whose members named `name` are all functions written in
+/// place. A method signature and a property annotated with a function type
+/// are such functions, and their syntax states their return types.
 fn has_annotated_return_member(db: &dyn ModuleDb, ty: TypeData, name: &str) -> bool {
     if has_annotated_member(db, ty, name) {
         return true;

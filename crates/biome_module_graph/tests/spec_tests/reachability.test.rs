@@ -7,11 +7,10 @@ use biome_module_graph::{
     },
 };
 
-// Expected types are those of TypeScript 7.0.2 (`tsc --noEmit --strict
-// --target es2022`) on the probes named in each test, in
-// `narrowing-probes/m6/` and `narrowing-probes/m6-l2/`. TypeScript gives a
-// read that only ended paths reach its declared type, where it reports
-// TS7027 with `--allowUnreachableCode false`.
+// Expected types are those that TypeScript 7.0.2 (`tsc --noEmit --strict
+// --target es2022`) gives the same reads. TypeScript gives a read that only
+// ended paths reach its declared type, and reports TS7027 there with
+// `--allowUnreachableCode false`.
 
 fn marked_range(source: &str, marker: &str, expression: &str) -> TextRange {
     let marker = format!("/*{marker}*/");
@@ -42,9 +41,9 @@ fn narrowing_db_with(source: &str, modules: &[(&str, &str)]) -> (TestModuleDb, M
 }
 
 /// Names each member of `ty`, sorted: an interface or a class instance by its
-/// name, Biome's Unknown, which a read on a path that no value takes has, as
-/// `Unknown`, and any other type by its formatted text on one line, such as
-/// `string`, `null`, or `string: a`.
+/// name, Biome's Unknown as `Unknown`, and any other type by its formatted
+/// text on one line, such as `string`, `null`, or `string: a`. A read on a
+/// path that no value takes has the type Unknown.
 fn variant_names(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
     if ty == InferredTypeData::Unknown {
         return vec!["Unknown".to_owned()];
@@ -72,10 +71,11 @@ fn variant_names(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
     names
 }
 
-/// Asserts the type of each `(marker, expression, expected)` read in `source`,
-/// by the names of its members, as [`variant_names`] gives them, with
-/// `modules` beside it, as [`narrowing_db_with`] takes them, and that
-/// complete module inference gives each read the type that a lookup gives it.
+/// Asserts the type of each `(marker, expression, expected)` read in `source`
+/// by the names of its members (see [`variant_names`]), with each
+/// `(path, source)` of `modules` as another module that `source` can import.
+/// Also asserts that complete module inference gives each read the type that
+/// a lookup gives it.
 fn assert_reads_with(source: &str, modules: &[(&str, &str)], reads: &[(&str, &str, &[&str])]) {
     let lookups: Vec<_> = {
         let (db, module) = narrowing_db_with(source, modules);
@@ -116,13 +116,14 @@ fn assert_reads_with(source: &str, modules: &[(&str, &str)], reads: &[(&str, &st
     assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
 }
 
-/// Asserts the reads in `source` as [`assert_reads_with`] does, without other
-/// modules.
+/// Asserts the type of each read in `source` without other modules (see
+/// [`assert_reads_with`]).
 fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert_reads_with(source, &[], reads);
 }
 
-/// The module that `narrowing-probes/m6/imports/main.ts` imports.
+/// A module of type-guard functions, assertion functions, and functions that
+/// never return, which tests import as `./guards`.
 const GUARDS: &str = r#"
         export function isString(v: unknown): v is string { return typeof v === "string"; }
         export declare function isNumber(v: unknown): v is number;
@@ -147,7 +148,8 @@ const GUARDS: &str = r#"
         export { isString as isStringAlias };
 "#;
 
-/// The declarations of `narrowing-probes/m6/never.ts`.
+/// Declarations of callees with and without a `never` return type
+/// annotation, which the tests of calls that end the path share.
 const NEVER: &str = r#"
         declare function f<T>(): T;
         declare const c: boolean;
@@ -167,8 +169,10 @@ const NEVER: &str = r#"
         declare function assert(v: unknown): asserts v;
 "#;
 
-// `never.ts` L11, L18 to L20, L23, L24, L26, L27, L34, L35, L41, L46 give
-// `string`; L21, L22, L25, L30, L33, L36, L42 to L45 keep `string | null`.
+// TypeScript ends the path at a statement call whose callee is a dotted name
+// with an explicit type at every name, when the declaration of the call's
+// signature annotates the return type as `never`. Each read that keeps
+// `string | null` follows a call that fails one of these conditions.
 #[test]
 fn calls_that_never_return_end_the_path() {
     let source = format!(
@@ -229,13 +233,13 @@ fn calls_that_never_return_end_the_path() {
     );
 }
 
-// `never.ts` L37 to L40 and L47: the paths that a call ends add nothing
-// where they join others, a `try` block's exceptions still reach `catch`,
-// and a read that only ended paths reach keeps its declared type (L31, L40,
-// L47; TS7027). Generic and overloaded signatures (L28, L29) end the path in
-// TypeScript, which resolves the call's signature; Biome keeps the declared
-// type there, which is wider. A `never` return type that comes from a
-// function body ends nothing (`m6-l2/extra.ts` L19).
+// The paths that a call ends add nothing where they join others, and a `try`
+// block's exceptions still reach `catch`. A read that only ended paths reach
+// keeps its declared type, and TypeScript reports TS7027 there. Calls of
+// generic and overloaded signatures end the path in TypeScript, because it
+// resolves the call's signature. Biome keeps the declared type after them,
+// which is wider. A `never` return type that comes from a function body ends
+// nothing.
 #[test]
 fn reads_that_only_ended_paths_reach_keep_their_declared_type() {
     let source = format!(
@@ -276,10 +280,9 @@ fn reads_that_only_ended_paths_reach_keep_their_declared_type() {
     );
 }
 
-// `m6/imports/main.ts` L24 to L31 with `m6/imports/guards.ts`: an import and
-// a method end the path when the declaration that they name annotates the
-// return type as `never` and every name along the callee has an explicit
-// type.
+// An imported function and a method end the path when the declaration that
+// they name annotates the return type as `never` and every name along the
+// callee has an explicit type.
 #[test]
 fn imported_calls_that_never_return_end_the_path() {
     let source = r#"
@@ -314,9 +317,10 @@ fn imported_calls_that_never_return_end_the_path() {
     );
 }
 
-// `m6/asserts.ts` L27 to L29, L42, and `m6-l2/extra.ts` L15: `asserts value`
-// never returns for an argument that is always false, as TypeScript's
-// `isFalseExpression` reads it. `0` and `!true` aren't.
+// A call of an `asserts value` signature never returns for an argument that
+// TypeScript reads as always false: the literal `false`, `a && b` when either
+// operand is, and `a || b` when both are, also inside parentheses. `0` and
+// `!true` aren't.
 #[test]
 fn assertions_of_false_end_the_path() {
     let source = format!(
@@ -348,12 +352,11 @@ fn assertions_of_false_end_the_path() {
     );
 }
 
-// `m6/reach.ts` L6 to L30 and `m6-l2/extra.ts` L8 to L14, L23, L26: the
-// literal `true` or `false`, without parentheses, makes the branch that it
-// never takes unreachable, in `if`, loops, conditional expressions, and the
-// operands of `&&` and `||`, which TypeScript's binder decides in
-// `createFlowCondition`. `!false`, `(false)`, `0`, a `const` holding
-// `false`, and the operands of `??` are ordinary conditions.
+// The literal `true` or `false`, without parentheses, makes the branch that
+// it never takes unreachable, in `if`, loops, conditional expressions, and
+// the operands of `&&` and `||`, as TypeScript's binder decides. `!false`,
+// `(false)`, `0`, a `const` holding `false`, and the operands of `??` are
+// ordinary conditions.
 #[test]
 fn literal_conditions_make_branches_unreachable() {
     let source = r#"
@@ -434,10 +437,9 @@ fn literal_conditions_make_branches_unreachable() {
     );
 }
 
-// `m6/literals.ts` L7 to L13 and L16 to L18: only the literal `true` makes a
-// loop run until `break`. `while (1)`, `while ("a")`, `while ((true))`,
-// `do...while (1)`, `for (; 1;)`, and `while (!0)` can also end by their
-// test.
+// A loop without a test, or with the literal `true` as its test, runs until
+// `break`. `while (1)`, `while ("a")`, `while ((true))`, `do...while (1)`,
+// `for (; 1;)`, and `while (!0)` can also end by their test.
 #[test]
 fn loops_exit_unless_their_test_is_the_literal_true() {
     let source = r#"
@@ -486,9 +488,8 @@ fn classify(
 }
 
 // TypeScript 7.0.2 reports TS7027 with `--allowUnreachableCode false` at
-// every statement classified `Match` below (`m6/never.ts` L31, `m6/reach.ts`
-// L6, `m4/exhaustive.ts` L17), and at none of the others. A read that
-// narrowing makes impossible is reachable code.
+// every statement classified `Match` below, and at none of the others. A
+// read that narrowing makes impossible is reachable code.
 #[test]
 fn unreachable_code_requests_classify_statements() {
     const SOURCE: &str = r#"

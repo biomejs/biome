@@ -232,17 +232,17 @@ pub(crate) fn infer_flow_switch_exhaustive<'db>(
     )
 }
 
-/// Finds which statements of one execution root no path reaches, as
-/// TypeScript's `isReachableFlowNode` decides it, and whether a path reaches
-/// the root's end.
+/// Finds which statements of one execution root no path reaches, and whether
+/// a path reaches the root's end, as TypeScript decides reachability.
 ///
 /// The root's flow graph is built from the module's syntax when this query
 /// runs, so code that nothing asks about costs nothing. A statement is
 /// unreachable when every path to it ends first: at `return`, `throw`,
 /// `break`, or `continue`, in a branch that a condition written as the
-/// literal `true` or `false` never takes, at a call that never returns, as
-/// [`infer_flow_call_effect`] finds it, or on the path that matches no case
-/// of an exhaustive `switch`.
+/// literal `true` or `false` never takes, at a call whose signature's return
+/// type annotation is `never` or that asserts an argument that is always
+/// false (see [`infer_flow_call_effect`]), or on the path that matches no
+/// case of an exhaustive `switch`.
 ///
 /// Returns `None` for an unavailable root, when the root exceeds a work
 /// limit of its graph or of the walk, and when a query cycle passes through
@@ -305,11 +305,11 @@ pub(crate) fn infer_flow_assigned_types<'db>(
     )
 }
 
-/// Resolves what one call point does, as TypeScript's `getEffectsSignature`
-/// finds the signature of its callee: a type predicate of a call in a
-/// condition, or an assertion of a statement call, with its target, or, for
-/// a statement call, that it never returns, because the return type
-/// annotation of its signature's declaration is `never` or it asserts an
+/// Resolves what one call point does from the signature of its callee, as
+/// TypeScript finds that signature. A call in a condition can apply a type
+/// predicate, and a statement call an assertion, each with its target. A
+/// statement call can also never return, because the return type annotation
+/// of its signature's declaration is `never` or because it asserts an
 /// argument that is always false.
 ///
 /// The reads of every subject that the call may narrow share the result.
