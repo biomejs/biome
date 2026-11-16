@@ -13,9 +13,9 @@
 //! `a.b.c`, `t[0]`, or `this.#cache`. Guards and reads refer to a subject by
 //! its id in the root's subject table, so a test and a read of the same subject
 //! match without comparing syntax. A destructuring pattern such as
-//! `{ kind, v }` is a subject too, which tests of its elements narrow and
-//! whose narrowed type gives each of its elements its declared type at a
-//! read.
+//! `{ kind, v }` is a subject too. Tests of its elements narrow the pattern,
+//! and each element's declared type at a read is its property on the narrowed
+//! pattern.
 //!
 //! An execution root is a body analyzed independently, such as a module,
 //! function, or method. Only `let`, `const`, and parameter bindings that are
@@ -92,10 +92,10 @@ pub(crate) enum FlowSubject {
     ///
     /// A runtime test of one of its elements narrows it as a test of the
     /// element's property narrows an object, and a read of another element
-    /// takes that property of the narrowed pattern, as TypeScript's
-    /// `getNarrowedTypeOfSymbol` does. Only [`FlowGuard::Property`] guards
-    /// narrow it, and no expression reads it: [`RootFlow::pattern_elements`]
-    /// maps the reads of its elements to it.
+    /// takes that element's property on the narrowed pattern, as in
+    /// TypeScript. Only [`FlowGuard::Property`] guards narrow it. No
+    /// expression reads it, so [`RootFlow::pattern_elements`] maps the reads
+    /// of its elements to it.
     Pattern(TextRange),
 }
 
@@ -146,9 +146,10 @@ struct FlowSubjectTable {
     /// The execution root whose `this` can be a subject, or `None` when paths
     /// on the root's `this` cannot narrow.
     this_root: Option<JsSyntaxNode>,
-    /// The elements of each [`FlowSubject::Pattern`] in the table that the
-    /// narrowing of the pattern reaches, keyed by the range of the variable,
-    /// with the pattern and the key of the property the element reads.
+    /// Maps the range of each element variable of a [`FlowSubject::Pattern`]
+    /// in the table to the pattern and the key of the property that the
+    /// element reads. It holds only the elements that the narrowing of the
+    /// pattern reaches.
     pattern_elements: FxHashMap<TextRange, (FlowSubjectId, PropertyKey)>,
     /// The variables found to be no element of such a pattern.
     non_elements: FxHashSet<TextRange>,
@@ -220,10 +221,11 @@ impl FlowSubjectTable {
         self.intern(FlowSubject::This)
     }
 
-    /// Returns the pattern that a runtime test of the variable declared at
-    /// `range` narrows, with the key of the property that the variable reads
-    /// from it, adding the pattern to the table on first use, as
-    /// [`subjects::narrowing_pattern`] describes.
+    /// Returns the destructuring pattern that a runtime test of the variable
+    /// declared at `range` narrows, with the key of the property that the
+    /// variable reads from it. Adds the pattern to the table on first use.
+    /// See [`subjects::narrowing_pattern`] for the patterns that a test
+    /// narrows.
     ///
     /// Returns `None` when no such pattern holds the variable, and when the
     /// table has used every [`FlowSubjectId`].
@@ -252,9 +254,9 @@ impl FlowSubjectTable {
         self.pattern_elements.get(&range).cloned()
     }
 
-    /// Returns the pattern and the key of the variable declared at `range`
-    /// when it is an element of a pattern in the table, as
-    /// [`Self::pattern`] adds them.
+    /// Returns the pattern and the key of the property that the variable
+    /// declared at `range` reads, when a pattern already in the table holds
+    /// the variable. Unlike [`Self::pattern`], it never adds a pattern.
     fn pattern_element(&self, range: TextRange) -> Option<&(FlowSubjectId, PropertyKey)> {
         self.pattern_elements.get(&range)
     }
@@ -337,8 +339,10 @@ impl RootFlow {
         self.property_only.contains(&subject)
     }
 
-    /// Returns the pattern whose narrowing gives the element `subject` its
-    /// declared type, as [`Self::pattern_elements`] describes.
+    /// Returns the [`FlowSubject::Pattern`] that holds the element `subject`
+    /// when a test of the pattern can reach a read of the element. At such a
+    /// read, the element's declared type is its property on the narrowed
+    /// pattern.
     pub(crate) fn element_pattern(&self, subject: FlowSubjectId) -> Option<FlowSubjectId> {
         self.pattern_elements.get(&subject).copied()
     }
@@ -350,7 +354,7 @@ impl RootFlow {
     /// Returns the range of the variable that the path of `subject` starts
     /// at, which is the variable itself for a [`FlowSubject::Binding`].
     ///
-    /// Returns `None` for `this`, a pattern, and a path on either, and when
+    /// Returns `None` for `this`, a path on `this`, and a pattern, and when
     /// the root has no such subject.
     pub(crate) fn subject_binding(&self, subject: FlowSubjectId) -> Option<TextRange> {
         match subject_root(&self.subjects, subject)? {
@@ -380,16 +384,16 @@ pub(crate) struct ModuleFlow {
     candidates: FxHashMap<TextRange, AstPtr<AnyFlowExpression>>,
     /// The declarations of the bindings in [`RootFlow::property_only`].
     property_only_bindings: FxHashSet<TextRange>,
-    /// The candidates that are candidates only because they are, or contain,
+    /// Maps the range of a candidate to the declaration of the binding, or
+    /// the range of the pattern, whose reads alone make it a candidate. Such
+    /// a candidate is, or contains,
     /// reads of one binding in [`Self::property_only_bindings`], or reads of
-    /// elements of one pattern in [`Self::pattern_types`] that no test of the
-    /// elements themselves reaches, keyed by range, with the range of that
-    /// binding's declaration or of that pattern. Such a candidate keeps its
-    /// type when no test of a property can narrow the binding or the
-    /// pattern.
+    /// elements of one pattern in [`Self::pattern_types`] that no test of
+    /// the elements themselves reaches. It keeps its type when no test of a
+    /// property can narrow the binding or the pattern.
     property_only_candidates: FxHashMap<TextRange, TextRange>,
-    /// The declared type of each [`FlowSubject::Pattern`] with reads, keyed
-    /// by the range of the pattern: the collected type of the value that the
+    /// Maps the range of each [`FlowSubject::Pattern`] with reads to its
+    /// declared type, which is the collected type of the value that the
     /// pattern destructures.
     pattern_types: FxHashMap<TextRange, TypeReference>,
 }
@@ -460,27 +464,26 @@ impl ModuleFlow {
         self.property_only_bindings.contains(&range)
     }
 
-    /// Returns the declaration of the binding whose reads alone make the
-    /// expression at `range` a candidate, when that binding is one that
-    /// [`Self::is_property_only_binding`] accepts, or the range of the
-    /// pattern, one that [`Self::pattern_type`] accepts, whose elements' reads
-    /// alone make it one.
+    /// Returns the declaration of the binding, or the range of the pattern,
+    /// whose reads alone make the expression at `range` a candidate. The
+    /// binding is one that conditions narrow only through tests of its
+    /// properties, and a pattern counts the reads of its elements that no
+    /// test of the elements themselves reaches.
     pub(crate) fn property_only_candidate(&self, range: TextRange) -> Option<TextRange> {
         self.property_only_candidates.get(&range).copied()
     }
 
-    /// Returns the collected declared type of the [`FlowSubject::Pattern`] at
-    /// `range`, as [`Self::pattern_types`] describes, or `None` when `range`
-    /// is not a pattern with reads.
+    /// Returns the declared type of the [`FlowSubject::Pattern`] at `range`,
+    /// which is the collected type of the value that the pattern
+    /// destructures, or `None` when `range` is not a pattern with reads.
     pub(crate) fn pattern_type(&self, range: TextRange) -> Option<&TypeReference> {
         self.pattern_types.get(&range)
     }
 
     /// Records `expression` as a candidate. `binding` is the declaration of
     /// the binding in [`Self::property_only_bindings`], or the range of the
-    /// pattern in [`Self::pattern_types`], whose read alone makes it a
-    /// candidate, as [`Self::property_only_candidates`] describes, or `None`
-    /// for a read of another subject.
+    /// pattern in [`Self::pattern_types`], whose read alone makes
+    /// `expression` a candidate. It is `None` for a read of another subject.
     fn insert_candidate(&mut self, expression: &AnyFlowExpression, binding: Option<TextRange>) {
         let range = expression.range();
         let is_new = !self.candidates.contains_key(&range);
@@ -548,8 +551,9 @@ impl RootCollector<'_> {
         else {
             return;
         };
-        // The declared type of each pattern is the value its elements
-        // destructure, which the collected type of each element names.
+        // A pattern's declared type is the collected type of the value it
+        // destructures. The collected type of each element destructures that
+        // value, so any element gives it.
         let mut pattern_types: FxHashMap<FlowSubjectId, TypeReference> = FxHashMap::default();
         for (element, (pattern, _)) in &subjects.pattern_elements {
             if !pattern_types.contains_key(pattern)
@@ -658,8 +662,8 @@ impl RootCollector<'_> {
                         .is_none_or(|written| !written.cancels(subjects.as_slice(), *subject))
             })
             .collect();
-        // The pattern that narrows the element that `read` reads, which a
-        // test of the element itself need not mention.
+        // Returns the pattern that can narrow the element that `read` reads.
+        // A read through the pattern needs no test of the element itself.
         let element_pattern = |read: &builder::BuiltRead| {
             let Some(FlowSubject::Binding(binding)) =
                 subjects.as_slice().get(read.subject as usize)

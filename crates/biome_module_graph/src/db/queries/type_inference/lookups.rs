@@ -89,8 +89,8 @@ fn infer_flow_expression_type_impl<'db>(
 }
 
 /// Resolves the type that flow refinement starts from, shared by every read of
-/// a binding, or by every read of the elements of a destructuring pattern
-/// when the range is a pattern's.
+/// a binding. When the range is a destructuring pattern's, every read of the
+/// pattern's elements shares it.
 ///
 /// Returns `None` when the module does not support inference, the binding has
 /// no collected type, or no supported runtime test can change its type. The

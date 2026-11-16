@@ -203,7 +203,7 @@ fn decimal_integer_key(token: &JsSyntaxToken) -> Option<PropertyKey> {
 /// with the elements of that pattern whose reads the narrowing reaches, or
 /// `None` when no such pattern holds `binding`.
 ///
-/// This follows TypeScript's `getNarrowedTypeOfSymbol`. The pattern's
+/// This follows how TypeScript narrows destructured variables. The pattern's
 /// declaration, found through the enclosing patterns, is a `const`
 /// declarator, as in `const { kind, v } = s` or `for (const [k, x] of xs)`,
 /// or a parameter, as in `({ kind, v }: S) => {}` or `(...[k, x]: T) => {}`,
@@ -213,11 +213,11 @@ fn decimal_integer_key(token: &JsSyntaxToken) -> Option<PropertyKey> {
 ///
 /// The returned elements are the direct elements of the pattern that are
 /// neither rest elements nor have a default, such as `kind` and `v` in
-/// `{ kind, v }` or `k` and `x` in `[k, , x]`, each as the range of its
-/// variable with the key of the property it reads: the key that
-/// [`member_name_key`] or [`identifier_key`] gives, or its decimal index in an
-/// array pattern, counting holes. `binding` must be one of them, and there
-/// must be at least two, so that a test of one can narrow another.
+/// `{ kind, v }` or `k` and `x` in `[k, , x]`. Each is the range of its
+/// variable with the key of the property it reads. An object element reads
+/// the property that its key names, and an array element reads its decimal
+/// index, counting holes. Returns `None` unless `binding` is one of them and
+/// there are at least two, so that a test of one can narrow another.
 /// TypeScript counts every element, but with a single such element the
 /// pattern narrows nothing that the test of that element doesn't.
 pub(super) fn narrowing_pattern(
@@ -247,10 +247,12 @@ pub(super) fn narrowing_pattern(
     .then_some((pattern, elements))
 }
 
-/// Returns the variable that `element`, at `index` in its pattern, binds with
-/// the key of the property it reads, as [`narrowing_pattern`] describes, or
-/// `None` for a rest element, an element with a default, a nested pattern,
-/// and a key that names no property.
+/// Returns the range of the variable that `element`, at `index` in its
+/// pattern, binds, with the key of the property it reads: the property that
+/// an object element's key names, or `index` for an array element.
+///
+/// Returns `None` for a rest element, an element with a default, a nested
+/// pattern, and a key that names no property.
 fn pattern_element(element: &JsSyntaxNode, index: usize) -> Option<(TextRange, PropertyKey)> {
     if let Some(property) = JsObjectBindingPatternShorthandProperty::cast_ref(element) {
         if property.init().is_some() {
@@ -287,10 +289,13 @@ fn pattern_element(element: &JsSyntaxNode, index: usize) -> Option<(TextRange, P
     ))
 }
 
-/// Returns whether the values that the destructuring `pattern` binds can't
-/// change after the destructuring, as [`narrowing_pattern`] requires: its
-/// declaration is a `const` declarator or a parameter, no enclosing pattern
-/// supplies a default, and no variable of the declaration is written.
+/// Returns whether the declaration of the destructuring `pattern` lets a test
+/// of one element narrow the others, as [`narrowing_pattern`] requires.
+///
+/// The declaration must be a `const` declarator or a parameter whose
+/// variables are never written, so the values that the pattern binds can't
+/// change after the destructuring. No enclosing pattern may supply a default,
+/// because the declared types of the elements ignore it.
 fn has_constant_declaration(pattern: &JsSyntaxNode, model: &SemanticModel) -> bool {
     let mut pattern = pattern.clone();
     let root = loop {
@@ -310,7 +315,8 @@ fn has_constant_declaration(pattern: &JsSyntaxNode, model: &SemanticModel) -> bo
             break pattern;
         }
         // A nested pattern is the value of a property or an element of the
-        // enclosing pattern, whose parent is its list.
+        // enclosing pattern. That property or element sits in a list inside
+        // the enclosing pattern.
         let has_default = if let Some(property) = JsObjectBindingPatternProperty::cast_ref(&parent)
         {
             property.init().is_some()
@@ -327,8 +333,9 @@ fn has_constant_declaration(pattern: &JsSyntaxNode, model: &SemanticModel) -> bo
         };
         pattern = enclosing;
     };
-    // TypeScript checks every variable of a parameter, as
-    // `isSomeSymbolAssigned` does. A `const` variable is never written.
+    // As in TypeScript, a write to any variable of a parameter, including one
+    // in a nested pattern, stops the narrowing. A `const` variable is never
+    // written.
     let Some(root) = AnyJsBindingPattern::cast(root) else {
         return false;
     };

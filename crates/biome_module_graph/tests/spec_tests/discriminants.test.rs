@@ -1331,19 +1331,16 @@ const DESTRUCTURED: &str = r#"
     declare const g: S;
 "#;
 
-/// Asserts the reads of `source`, which follows [`DESTRUCTURED`], as
-/// [`assert_reads`] does.
+/// Asserts the reads of `source` with [`assert_reads`], after prepending
+/// [`DESTRUCTURED`].
 fn assert_element_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert_reads(&format!("{DESTRUCTURED}{source}"), reads);
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3/destructure.ts` L5, L6, L10, L13 to L15, L20, L21,
-// L22, L24, L25, L27, L28, L30, `m3-l4/patterns.ts` L13, L14, L17, L19 to
-// L23, L26, L28, L30, L32, L35, L38, L39, L42, L45, L46, and `m3-l4/more.ts`
-// L10, L13 to L15, L18, L20 to L22): a test of one element of a destructuring pattern narrows
-// the value the pattern destructures, and another element of the same
-// pattern reads its property on the narrowed value.
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type,
+// because a test of one element of a destructuring pattern narrows the value
+// that the pattern destructures, and another element of the same pattern
+// reads its property on the narrowed value.
 #[test]
 fn tests_of_destructured_elements_narrow_the_other_elements() {
     assert_element_reads(
@@ -1436,10 +1433,9 @@ fn tests_of_destructured_elements_narrow_the_other_elements() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3/destructure.ts` L22, and `m3-l4/patterns.ts` L17):
-// an aliased condition narrows the pattern when its declaration is a `const`
-// or a parameter whose variables are never written.
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type,
+// because an aliased condition narrows the pattern when its declaration is a
+// `const` or a parameter whose variables are never written.
 #[test]
 fn aliased_conditions_narrow_destructured_elements() {
     assert_element_reads(
@@ -1456,12 +1452,11 @@ fn aliased_conditions_narrow_destructured_elements() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3-l4/patterns.ts` L35, L43, L44, and `m3-l4/more.ts`
-// L11). A destructured element that is tested itself starts from its
-// property on the narrowed pattern, and so does an optional property, which
-// keeps `undefined`. Destructuring throws on `null` and `undefined`, so the
-// pattern narrows as if its initializer had neither.
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// A destructured element that is tested itself starts from its property on
+// the narrowed pattern, and so does an optional property, which keeps
+// `undefined`. Destructuring throws on `null` and `undefined`, so the pattern
+// narrows as if its initializer had neither.
 #[test]
 fn destructured_elements_start_from_the_narrowed_pattern() {
     assert_element_reads(
@@ -1482,14 +1477,11 @@ fn destructured_elements_start_from_the_narrowed_pattern() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) keeps every read below as declared
-// (`narrowing-probes/m3/destructure.ts` L7, L8, L18, L19, L29,
-// `m3/literals.ts` L7, `m3-l4/patterns.ts` L15, L16, L18, L40, L41, L47,
-// L49, and `m3-l4/more.ts` L12, L16, L23 to L25). Only a direct element of a
-// pattern with at least two elements, without a default and not a rest
-// element, narrows the other elements, and only when its declaration is a
-// `const` or a parameter whose variables are never written, and when the
-// tested element is a discriminant.
+// TypeScript 6.0.3 (`tsc --strict`) keeps every read below as declared. Only
+// a direct element of a pattern with at least two elements, without a default
+// and not a rest element, narrows the other elements. It does so only when
+// the pattern's declaration is a `const` or a parameter whose variables are
+// never written, and when the tested element is a discriminant.
 #[test]
 fn destructured_elements_that_do_not_narrow_each_other() {
     assert_element_reads(
@@ -1541,18 +1533,17 @@ fn destructured_elements_that_do_not_narrow_each_other() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives `number` at every read below
-// (`narrowing-probes/m3/destructure.ts` L11, L23, `m3-l4/patterns.ts` L24,
-// L25, L27, L29, L31, L33). Biome keeps the declared type: loose `==` with a
-// literal doesn't narrow an object yet, an element under a default of an
-// enclosing pattern never narrows because its declared type ignores the
-// default, an `if` inside `for...of` and a read in a closure never see the
-// test, and a written parameter variable never narrows, while TypeScript
-// narrows `v` by the assignment `v = 1`. Biome also gives an element
-// destructured from `s!`, a parameter destructured in a function that a
-// variable annotation types, and the parameters of a function typed by a
-// rest parameter whose type is a union of tuples the declared type
-// `unknown`, which no test narrows.
+// TypeScript 6.0.3 (`tsc --strict`) gives `number` at every read below.
+// Biome keeps the declared type in these cases. Loose `==` with a literal
+// doesn't narrow an object yet. An element under a default of an enclosing
+// pattern never narrows, because its declared type ignores the default. An
+// `if` inside `for...of` and a read in a closure never see the test. A
+// written parameter variable never narrows, while TypeScript narrows `v` by
+// the assignment `v = 1`. Biome also gives the declared type `unknown`, which
+// no test narrows, to an element destructured from `s!`, to a parameter
+// destructured in a function that a variable annotation types, and to the
+// parameters of a function typed by a rest parameter whose type is a union
+// of tuples.
 #[test]
 fn destructured_elements_that_biome_does_not_narrow_yet() {
     assert_element_reads(
@@ -1579,11 +1570,10 @@ fn destructured_elements_that_biome_does_not_narrow_yet() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives `number` at both reads
-// (`narrowing-probes/m3-l4/between.ts` L6, L7), although a default or a
-// computed key between the two elements can run code that changes `s` after
-// `kind` is read and before `v` is, so `v` can be a string at the read.
-// Biome narrows the same way, as `NARROWING.md` records.
+// TypeScript 6.0.3 (`tsc --strict`) gives `number` at both reads, although a
+// default or a computed key between the two elements can run code that
+// changes `s` after `kind` is read and before `v` is, so `v` can be a string
+// at the read. Biome narrows the same way, as `NARROWING.md` records.
 #[test]
 fn code_between_destructured_elements_keeps_the_narrowing() {
     assert_element_reads(
@@ -1602,8 +1592,7 @@ fn code_between_destructured_elements_keeps_the_narrowing() {
 }
 
 // TypeScript 6.0.3 (`tsc --strict`) reports the comparison and gives `never`
-// at the read (`narrowing-probes/m3-l4/more.ts` L26): no member is left, so
-// Biome reads the element as Unknown.
+// at the read. No member is left, so Biome reads the element as Unknown.
 #[test]
 fn impossible_tests_of_destructured_elements_read_as_unknown() {
     let source = format!(
@@ -1622,8 +1611,8 @@ fn impossible_tests_of_destructured_elements_read_as_unknown() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) keeps `b` as declared: a test of an
-// element narrows only a pattern whose value is a union. Collection drops
+// TypeScript 6.0.3 (`tsc --strict`) keeps `b` as declared, because a test of
+// an element narrows only a pattern whose value is a union. Collection drops
 // the read of `b` when the annotation shows that the value is not a union,
 // without resolving anything. Otherwise the read checks the pattern's
 // declared type once, and solves the pattern only when it is a union.
@@ -1669,10 +1658,10 @@ fn destructured_elements_of_values_that_are_not_unions_skip_the_solve() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives `number` and `string`
-// (`narrowing-probes/m3/destructure.ts` L6). Complete module inference
-// narrows the elements from the pattern's declared type that its own context
-// resolved, as lookups do, and both reads share one solve of the pattern.
+// TypeScript 6.0.3 (`tsc --strict`) gives `number` and `string`. Complete
+// module inference narrows the elements from the pattern's declared type,
+// resolved in its own context, as lookups do, and both reads share one solve
+// of the pattern.
 #[test]
 fn complete_module_inference_narrows_destructured_elements_as_lookups_do() {
     use InferredTypeData::{Number, String};

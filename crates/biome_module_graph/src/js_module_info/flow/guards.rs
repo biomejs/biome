@@ -513,8 +513,8 @@ pub(super) struct DecomposedCondition {
     /// Subjects whose type the condition may refine only through
     /// [`FlowGuard::Property`], such as `s` in `s.kind === "c"`, unless
     /// `mentions` also lists them. When decomposition stops early, this also
-    /// lists the pattern of every variable in `mentions` that is an element
-    /// of a destructuring pattern that a test of the variable narrows.
+    /// lists, for every variable in `mentions`, the destructuring pattern
+    /// that a test of the variable narrows.
     pub(super) parents: Vec<FlowSubjectId>,
 }
 
@@ -831,13 +831,14 @@ impl Decomposer<'_, '_> {
     /// Returns the guard that a runtime test of the variable `subject`
     /// applies to the destructuring pattern that holds the variable as an
     /// element, as `kind === "c"` applies to `{ kind, v }` in
-    /// `const { kind, v } = s`, when [`subjects::narrowing_pattern`] accepts
-    /// the pattern.
+    /// `const { kind, v } = s`.
     ///
-    /// Returns `None` for a call to a type-guard function, as for
+    /// Returns `None` when no pattern that a test can narrow holds the
+    /// variable, and for a call to a type-guard function, as for
     /// [`Self::property_guard`]. Inside an inlined aliased condition, every
     /// such pattern can be tested, because its values don't change after the
-    /// destructuring.
+    /// destructuring. See [`subjects::narrowing_pattern`] for the patterns
+    /// that a test can narrow.
     ///
     /// [`subjects::narrowing_pattern`]: super::subjects::narrowing_pattern
     fn pattern_guard(
@@ -1057,8 +1058,8 @@ impl Decomposer<'_, '_> {
 /// list, `this`, and a readonly property. An alias declared in an enclosing
 /// function would read another `this` than the root's. A destructuring
 /// pattern is accepted, as in TypeScript, because the table stores only
-/// patterns that a `const` or a parameter whose variables are never written
-/// declares.
+/// patterns declared by a `const` or by a parameter whose variables are
+/// never written.
 #[expect(
     clippy::wildcard_enum_match_arm,
     reason = "Only parameters, catch variables, and `const` and `let` declarations qualify."

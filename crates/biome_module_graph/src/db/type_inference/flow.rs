@@ -64,8 +64,11 @@ pub(in crate::db) fn flow_binding_baseline<'db>(
     info: &JsModuleInfo,
     range: TextRange,
 ) -> Option<TypeData<'db>> {
-    // Declaration queries can erase a cyclic object's shape. The raw baseline
-    // still lets flow detect an impossible branch and return an unknown override.
+    // The declared type is resolved from the raw type of the binding, or of
+    // the value that a pattern destructures, not through a declaration query,
+    // because declaration queries can erase a cyclic object's shape. The raw
+    // type still lets flow detect an impossible branch and return an unknown
+    // override.
     let reference = info
         .raw_binding_types
         .get(&range)
@@ -350,9 +353,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// When the variable is an element of a destructuring pattern that a test
     /// narrows at the read, as `v` in `const { kind, v } = s` after
     /// `kind === "c"`, its declared type there is its property on the
-    /// narrowed pattern, as [`Self::narrowed_element`] gives it, and its own
-    /// tests narrow it from that type, as the tests of a property path narrow
-    /// it from its type on the narrowed object.
+    /// narrowed pattern. Tests of the variable itself then narrow it from that
+    /// type, as tests of a property path narrow it from its type on the
+    /// narrowed object.
     ///
     /// Returns `None` when collection kept no flow for the read, when no
     /// runtime test can change the variable's type, or when narrowing leaves
@@ -406,10 +409,10 @@ impl<'db> ResolutionCtx<'db, '_> {
         .or(declared)
     }
 
-    /// Returns the type of the element declared at `element` at `read`,
-    /// given the `pattern` that holds it: the element's property on the type
-    /// of the pattern narrowed at the read, destructured as the element's
-    /// collected type destructures the pattern's declared type.
+    /// Returns the type at `read` of the element declared at `element`, given
+    /// the `pattern` that holds it. The type is the element's property on the
+    /// pattern narrowed at the read, destructured the same way as the
+    /// element's collected type destructures the pattern's declared type.
     ///
     /// Returns `None` when no test can narrow the pattern, when the pattern
     /// keeps its declared type at the read, and when the property can't be
@@ -471,8 +474,9 @@ impl<'db> ResolutionCtx<'db, '_> {
         if let Some(baseline) = self.local_flow.as_ref()?.baselines.get(&binding) {
             return *baseline;
         }
-        // As in `flow_binding_baseline`, the raw binding type gives the
-        // declared type.
+        // The declared type is resolved from the raw type of the binding or
+        // the pattern, not through a declaration query, so a cyclic object
+        // keeps its shape, as in `flow_binding_baseline`.
         let info = self.js_info;
         let baseline = info
             .raw_binding_types
@@ -562,9 +566,11 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns the type that narrowing of a destructuring pattern starts
-    /// from, given its `declared` type, the value it destructures: the
-    /// [`Self::property_baseline`] of `declared` without `null` and
-    /// `undefined`, which destructuring rejects. So in
+    /// from, given its `declared` type, which is the type of the value it
+    /// destructures.
+    ///
+    /// The result is the [`Self::property_baseline`] of `declared` without
+    /// `null` and `undefined`, because destructuring throws on both. So in
     /// `if (!s) return; const { kind, v } = s;`, the pattern narrows even
     /// when the collected type of `s` there still includes `undefined`.
     fn pattern_baseline(&mut self, declared: TypeData<'db>) -> Option<TypeData<'db>> {
