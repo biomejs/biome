@@ -1144,8 +1144,8 @@ fn discriminants_held_at_the_top_level_follow_exports() {
 // anywhere else, so Biome also gives `Circle` at `inSwitch`, `forOf`,
 // `closure`, and `patternClosure`. Biome keeps the declared type at the
 // other reads, because it doesn't follow `s!` and keys that are spelled
-// differently from the property, loose equality doesn't narrow an object
-// yet, and a `const` exported by an `export { ... }` list holds nothing.
+// differently from the property, loose equality doesn't narrow an object,
+// and a `const` exported by an `export { ... }` list holds nothing.
 #[test]
 fn discriminant_constants_that_biome_does_not_follow_keep_the_object() {
     assert_reads(
@@ -1537,7 +1537,7 @@ fn destructured_elements_that_do_not_narrow_each_other() {
 // test in a closure narrows the pattern of the enclosing function there, as
 // in TypeScript, so `closure` gives `number`. Biome keeps the declared type
 // at `loose` and `enclosingDefault`, because loose `==` with a literal
-// doesn't narrow an object yet, and an element under a default of an
+// doesn't narrow an object, and an element under a default of an
 // enclosing pattern never narrows because its declared type ignores the
 // default. Biome also gives the declared type `unknown`, which no test
 // narrows, to an element destructured from `s!`, a parameter destructured in
