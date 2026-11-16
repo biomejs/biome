@@ -1547,7 +1547,7 @@ fn assert_object_reads(source: &str, reads: &[(&str, &[&str])]) {
     }
 }
 
-// Every expected type is the type that TypeScript 6.0.3 (`tsc --strict`) gives
+// Every expected type is the type that TypeScript 7.0.2 (`tsc --strict`) gives
 // the read, unless a comment gives TypeScript's type and the reason Biome's
 // type is wider.
 #[test]
@@ -1589,6 +1589,8 @@ fn falsy_branch_removes_object_types_that_no_falsy_primitive_satisfies() {
             // TypeScript: `undefined`, because only `{}` written as a type
             // literal keeps falsy values.
             ("emptyInterface", &["Empty", "undefined"]),
+            // TypeScript: `undefined`, because only `{}` written as a type
+            // literal keeps falsy values.
             ("emptyClass", &["instanceof E", "undefined"]),
             // TypeScript: `undefined`. Generics stay unchanged.
             ("generic", &["instanceof T", "undefined"]),
@@ -1596,7 +1598,7 @@ fn falsy_branch_removes_object_types_that_no_falsy_primitive_satisfies() {
     );
 }
 
-// Every expected type is the type that TypeScript 6.0.3 (`tsc --strict`) gives
+// Every expected type is the type that TypeScript 7.0.2 (`tsc --strict`) gives
 // the read, unless a comment gives TypeScript's type. A read that TypeScript
 // types as `never` is Unknown.
 #[test]
@@ -1695,7 +1697,7 @@ fn typeof_removes_or_replaces_object_types() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) types both `&&` expressions as
+// TypeScript 7.0.2 (`tsc --strict`) types both `&&` expressions as
 // `1 | undefined`. `typeof` narrows each left operand, so the type of `&&`
 // includes the falsy values of the narrowed operand. Biome keeps `Len` because
 // `""` has `length`.

@@ -229,7 +229,7 @@ pub(crate) fn primitive_can_satisfy<'db>(
     AssignabilityCheck::new(db, resolve, &[]).primitive_can_satisfy(kind, target)
 }
 
-/// Returns the members that TypeScript 6.0.3's library files declare on the
+/// Returns the members that TypeScript 7.0.2's library files declare on the
 /// wrapper of a `typeof` kind but the generated globals lack. These members
 /// come from library files newer than ES2015.
 fn members_from_newer_libraries(kind: TypeofKind) -> &'static [&'static str] {
