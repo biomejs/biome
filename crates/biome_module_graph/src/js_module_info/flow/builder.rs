@@ -1375,16 +1375,15 @@ impl RootBuilder<'_, '_> {
         let flow = self.evaluate(expression.syntax(), current, 0)?;
         let header = self.push(FlowNode::Join(vec![flow]))?;
         let mut flow = match statement.initializer().map_err(|_| Unsupported)? {
-            // Each iteration assigns the variables of a declaration, after the
-            // defaults of its pattern. A `let` or a `const` needs no write
-            // point for this. No test or write before the loop can mention
-            // it, so it has its declared type at the entry, which the header
-            // joins. The facts that the end of the body carries back from an
-            // earlier iteration then never make a read narrower than the
-            // declared type, which is also the type of the value that each
-            // iteration assigns. A `var` is hoisted, so code before the loop
-            // can test or write it. Each iteration writes a `var` without a
-            // value, which gives it its declared type.
+            // Each iteration assigns the variables of a declaration after the
+            // defaults of its pattern. A `let`, `const`, or `using` declaration
+            // needs no write point: its variables are scoped to the loop, so no
+            // test or write before the loop can mention them. They have their
+            // declared types at the entry, which the header joins. Facts on the
+            // back edge from an earlier iteration therefore cannot narrow a
+            // read below its declared type. A `var` is hoisted, so code before
+            // the loop can test or write it. Each iteration writes a `var`
+            // without a value, which gives it its declared type.
             AnyJsForInOrOfInitializer::JsForVariableDeclaration(declaration) => {
                 let flow = self.declaration(&declaration.clone().into(), header, 0)?;
                 match declaration

@@ -304,8 +304,8 @@ fn writes_to_the_path_a_prefix_or_any_property_narrow_or_cancel_narrowing() {
 // TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at `arrow` and
 // `declaration`, because property narrowing never reaches a function created
 // later. It gives `string` at `iife`, where Biome is wider, because the body
-// of a function called where it is defined does not continue the outer flow
-// yet. TypeScript and Biome both give `string` at `enclosing`, because a path
+// of a function called where it is defined does not continue the outer flow.
+// TypeScript and Biome both give `string` at `enclosing`, because a path
 // on a variable of an enclosing function narrows by the tests of the function
 // that reads it.
 #[test]

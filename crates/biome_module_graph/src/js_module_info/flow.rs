@@ -915,11 +915,12 @@ impl RootCollector<'_> {
     ///
     /// A variable that an enclosing root declares, or an import read in a
     /// function, narrows in `root` too, from its declared type, by the tests
-    /// and writes of `root` alone. TypeScript narrows a reference by the flow
-    /// of its own function. A variable read in a nested function is a
-    /// closure's capture, and other code may change its value between calls.
-    /// So `root` gets a graph even when it declares no variable that can
-    /// narrow, and relevance keeps no read when no subject can narrow.
+    /// and writes of `root` alone. TypeScript uses the flow at a closure's
+    /// creation to narrow a read when the variable is a `const`, or when
+    /// nothing assigns the variable after the closure is created. Biome
+    /// starts the captured variable from its declared type instead. So `root`
+    /// gets a graph even when it declares no variable that can narrow, and
+    /// relevance keeps no read when no subject can narrow.
     fn add_root(
         &mut self,
         flow: &mut ModuleFlow,
