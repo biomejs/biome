@@ -179,29 +179,25 @@ enum FlatteningError {
     Cycle,
 }
 
-/// The state of one solve that its guards share: the subject it narrows, the
-/// subject's declared type at the root's start, whether the subject is a
-/// readonly path, as [`FlowGuard::ReadonlyPath`] requires, the `switch`
-/// statements found exhaustive, as [`FlowGuard::Bypass`] requires, one bit
-/// each, the results of the property guards, `in` tests, `instanceof`
-/// tests, and calls to type-guard functions applied so far, keyed by guard
-/// index and incoming type, and the values of the imported variables that
-/// [`FlowTest::Imported`] compares with, found so far, keyed by declaration.
+/// The state of one solve, shared by the guards that it applies.
 struct GuardSolve<'db> {
     /// The subject that the solve narrows.
     subject: FlowSubjectId,
     /// The subject's declared type at the root's start.
     declared: TypeData<'db>,
-    /// Whether the subject is a readonly path. The guard that a
-    /// [`FlowGuard::ReadonlyPath`] wraps applies only when it is.
+    /// Whether the subject is a readonly path, as [`FlowGuard::ReadonlyPath`]
+    /// requires.
     readonly_path: bool,
-    /// The `switch` statements found exhaustive, one bit per index in the
-    /// root's switches. The [`FlowGuard::Bypass`] of each gives `never`.
+    /// The `switch` statements found exhaustive, one bit each, as
+    /// [`FlowGuard::Bypass`] requires.
     exhaustive: u64,
-    /// The results of the property guards, `in` tests, `instanceof` tests,
-    /// and calls to type-guard functions applied so far, keyed by guard index
-    /// and incoming type.
+    /// The results of the property guards, `in` tests, `instanceof` tests, and
+    /// calls to type-guard functions applied so far, keyed by guard index and
+    /// incoming type.
     properties: FxHashMap<(usize, TypeData<'db>), TypeData<'db>>,
+    /// The unit values of the imported variables that a [`FlowTest::Imported`]
+    /// compares with, found so far, keyed by declaration. `None` records a
+    /// variable that holds no unit value.
     imported: FxHashMap<TextRange, Option<TypeData<'db>>>,
 }
 
@@ -736,12 +732,14 @@ impl<'db> ResolutionCtx<'db, '_> {
             == Some(TypeData::NeverKeyword)
     }
 
-    /// Returns whether every imported variable that a test of the subject of
-    /// `solve` in the guard at `guard` compares with holds a unit value, as
-    /// [`Self::imported_value`] finds it. TypeScript's
-    /// `computeExhaustiveSwitchStatement` finds no statement exhaustive when
-    /// the type of one of its cases is not a unit type, while a case that
-    /// narrows nothing would leave the remaining cases to decide.
+    /// Returns whether every imported variable that the guard at `guard`
+    /// compares the subject of `solve` with holds a unit value in the module
+    /// that declares it.
+    ///
+    /// TypeScript finds a `switch` statement exhaustive only when the type of
+    /// every case is a unit type. A case that compares with an imported
+    /// variable that holds no unit value narrows nothing, so without this
+    /// check the remaining cases alone would make the statement exhaustive.
     fn compares_with_unit_values(
         &mut self,
         root: &RootFlow,
@@ -1339,9 +1337,13 @@ impl<'db> ResolutionCtx<'db, '_> {
         )
     }
 
-    /// Returns the predicate that `test` applies, or `None` when it narrows
-    /// nothing, as for a comparison with an imported variable that holds no
-    /// unit value.
+    /// Returns the predicate that `test` applies.
+    ///
+    /// Returns `None` for a call to a type-guard function, an `in` test, and an
+    /// `instanceof` test, which have no predicate. Also returns `None` for a
+    /// comparison with an imported variable that holds no unit value, or, with
+    /// loose equality, that holds a unit value other than `null` or
+    /// `undefined`, because such a comparison narrows nothing.
     fn test_predicate(
         &mut self,
         test: FlowTest,
@@ -1364,7 +1366,8 @@ impl<'db> ResolutionCtx<'db, '_> {
                 match (self.imported_value(binding, solve)?, strict) {
                     (value, true) => NarrowingPredicate::Literal(value),
                     (TypeData::Null | TypeData::Undefined, false) => NarrowingPredicate::Nullish,
-                    // Loose equality with another value is not decomposed yet.
+                    // Loose equality with any other value doesn't narrow the
+                    // subject, as loose equality with a literal doesn't.
                     (_, false) => return None,
                 }
             }
@@ -1374,10 +1377,12 @@ impl<'db> ResolutionCtx<'db, '_> {
         })
     }
 
-    /// Returns the unit value that the imported variable declared at
-    /// `binding` holds, as [`imported_unit_value`] finds it, kept in `solve`
-    /// so that a loop that applies the test again doesn't follow the import
-    /// again.
+    /// Returns the unit value that the imported variable declared at `binding`
+    /// holds in the module that declares it, or `None` when it holds none.
+    ///
+    /// The result is kept in `solve`, so a loop that applies the test again
+    /// doesn't follow the import again. [`imported_unit_value`] lists the
+    /// imports followed.
     fn imported_value(
         &mut self,
         binding: TextRange,
@@ -1438,18 +1443,20 @@ const MAX_IMPORT_STEPS: usize = 16;
 
 /// Returns the unit value that the imported variable declared at `binding` in
 /// `js_info`, the module `module`, holds: `null`, `undefined`, or a string,
-/// number, bigint, or boolean literal type, as [`UnitValue`] describes for
-/// the variable that declares it.
+/// number, bigint, or boolean literal type.
 ///
-/// The import is followed through re-exports to the module that declares
-/// the variable, as `find_export_origin` follows exports, and on through the
-/// imports that the `const`s there name, at most 16 of them. No type is
-/// resolved: the value comes from the syntax of the declarations and the raw
-/// type of the literal, so it is the same in every resolution context.
+/// The import is followed through re-exports to the module that declares the
+/// variable. When that variable is a `const` that names another imported
+/// variable, the search continues with that import, through at most 16
+/// imports in all. The value comes from the syntax of the declarations and the
+/// raw type of the literal, without resolving any type, so it is the same in
+/// every resolution context.
 ///
-/// Returns `None` for a type-only import, a namespace import, an export that
-/// isn't a variable, as `export default "a"`, which TypeScript also narrows
-/// by, a variable that holds no unit value, and more than 16 imports.
+/// Returns `None` for a type-only import, a namespace import, an import that
+/// doesn't resolve to a single declaration, an export that isn't a variable, a
+/// variable that holds no unit value, and more than 16 imports.
+/// An export that isn't a variable includes `export default "a"`, which
+/// TypeScript narrows by.
 fn imported_unit_value<'db>(
     db: &'db dyn ModuleDb,
     mut module: ModuleInfo,

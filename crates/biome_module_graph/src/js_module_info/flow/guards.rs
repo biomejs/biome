@@ -139,21 +139,20 @@ pub(crate) enum FlowTest {
     /// Strict equality with `null`.
     Null,
     /// Strict equality with the value of the expression at this range, whose
-    /// collected type is a primitive literal type: a literal such as `"a"` or
-    /// `1`, `-1`, `+1`, or a template literal without substitutions, written
-    /// in the comparison or as the initializer of a `const` that the
-    /// comparison names, as [`UnitValue::Literal`] describes.
+    /// collected type is a primitive literal type. The expression is a literal
+    /// such as `"a"` or `1`, `-1`, `+1`, or a template literal without
+    /// substitutions. It is written in the comparison or as the initializer of
+    /// a `const` that the comparison names.
     Literal(TextRange),
     /// Equality with `undefined`; loose equality also matches `null`.
     Undefined {
         strict: bool,
     },
-    /// Equality with the value of the imported variable declared at
-    /// `binding`, which inference finds in the module that declares it, as
-    /// [`UnitValue::Imported`] describes. The test narrows nothing when that
-    /// value isn't a unit value. With loose equality (`strict` false), it
-    /// narrows only when the value is `null` or `undefined`, which then match
-    /// both.
+    /// Equality with the value of the imported variable declared at `binding`.
+    /// Inference reads that value in the module that declares the variable,
+    /// and the test narrows nothing when the value isn't a unit value. With
+    /// loose equality (`strict` false), the test narrows only when the value
+    /// is `null` or `undefined`, and then matches both.
     Imported {
         binding: TextRange,
         strict: bool,
@@ -856,16 +855,17 @@ pub(super) fn exhaustive_operand(
 }
 
 /// Returns whether TypeScript gives the case test `test` of a `switch`
-/// statement of `kind` a unit type that a case of Biome also tests, as
-/// TypeScript's `computeExhaustiveSwitchStatement` requires of every case:
-/// a value that [`unit_value`] accepts for [`SwitchKind::Value`], and a string
-/// literal or a template literal without substitutions that names a kind of
-/// value for [`SwitchKind::Typeof`], as `"string"` does.
+/// statement of `kind` a unit type that a case of Biome also tests.
+/// TypeScript finds a statement exhaustive only when every case has a unit
+/// type. For [`SwitchKind::Value`], the test must be a unit value, such as
+/// `"a"`, `-1`, `null`, `undefined`, or a `const` that holds one. For
+/// [`SwitchKind::Typeof`], it must be a string literal or a template literal
+/// without substitutions that names a kind of value, as `"string"` does.
 ///
-/// Returns true for an imported variable, whose value only inference can
-/// read, so the statement is found exhaustive only when inference finds a
-/// unit value there too. A local variable named `undefined` counts only when
-/// it holds a unit value, as a variable of any other name does.
+/// Returns true for an imported variable because only inference can read its
+/// value, so inference finds the statement exhaustive only when the variable
+/// holds a unit value. A local variable named `undefined` counts only when it
+/// holds a unit value, as a variable of any other name does.
 pub(super) fn is_unit_case(
     discriminant: &AnyJsExpression,
     test: &AnyJsExpression,
@@ -911,8 +911,8 @@ pub(super) struct SwitchCase<'a> {
 ///
 /// A case of [`SwitchKind::Value`] and [`SwitchKind::Typeof`] statements
 /// narrows as `discriminant === test` and `typeof operand === test` do, and
-/// fails to match as `!==` does. A case that doesn't match narrows no
-/// receiver of an optional chain, as in TypeScript, so `default` after
+/// fails to match as `!==` does. As in TypeScript, a case that doesn't match
+/// narrows no receiver of an optional chain, so `default` after
 /// `case undefined:` keeps `undefined` in `o` for `switch (o?.k)`. A case of
 /// [`SwitchKind::True`] narrows as its test does when it is truthy. It fails
 /// to match as the test does when it is falsy only when every truthy value
@@ -923,9 +923,8 @@ pub(super) struct SwitchCase<'a> {
 ///
 /// Returns `None` when the case narrows nothing: for a
 /// [`SwitchKind::Opaque`] statement, a case that fails to match and isn't
-/// boolean, and a case test that isn't a unit value that [`unit_value`]
-/// accepts, such as an enum member or a variable with a type annotation,
-/// which TypeScript also narrows by.
+/// boolean, and a case test that isn't a unit value, such as an enum member
+/// or a variable with a type annotation. TypeScript narrows by both of those.
 pub(super) fn decompose_switch_case(
     case: SwitchCase,
     model: &SemanticModel,
@@ -2072,13 +2071,13 @@ fn condition_step(
 /// `subject == value` otherwise, assuming that they are equal when
 /// `positive` is true.
 ///
-/// `subject` is tested when it can be the operand of a comparison and
-/// `value` is a unit value, as [`unit_value`] decides it, or when `subject`
-/// is `typeof` of such an operand and `value` names a kind of value, as
-/// `"string"` and `` `string` `` do. Other comparisons are
-/// [`ConditionStep::Unsupported`], as TypeScript narrows by a value whose type
-/// is not a unit type only through the comparability of types, which Biome
-/// doesn't decide.
+/// `subject` is tested when it can be the operand of a comparison and `value`
+/// is a unit value, such as `"a"`, `-1`, `null`, `undefined`, or a `const`
+/// that holds one. When `subject` is `typeof` of such an operand, the operand
+/// is tested when `value` names a kind of value, as `"string"` and
+/// `` `string` `` do. Other comparisons are [`ConditionStep::Unsupported`],
+/// because TypeScript narrows by a value whose type is not a unit type only
+/// through the comparability of types, which Biome doesn't check.
 #[expect(
     clippy::wildcard_enum_match_arm,
     reason = "Comparisons only support subjects and primitive guards."
@@ -2149,8 +2148,8 @@ fn comparison_step(
     // where the operand cannot be `undefined`: where it equals a primitive
     // literal or, strictly, `null`, where it differs from `undefined` or,
     // loosely, from `null`, and where its `typeof` is not `"undefined"`.
-    // Collection can't tell which of these an imported value is, so a
-    // comparison with one narrows no receiver.
+    // Collection can't tell whether an imported value is `undefined`, `null`,
+    // or a primitive literal, so a comparison with one narrows no receiver.
     let receivers = match &guard {
         SyntaxGuard::Null | SyntaxGuard::Literal(_) | SyntaxGuard::LooseLiteral => positive,
         SyntaxGuard::Nullish | SyntaxGuard::Undefined { .. } => !positive,
@@ -2169,11 +2168,11 @@ fn comparison_step(
     })
 }
 
-/// A value whose type is a unit type, which a comparison narrows by, as
-/// TypeScript's `narrowTypeByEquality` narrows by a value whose type
-/// `isUnitType` accepts: where the operands are equal, the other operand
-/// keeps the members that can equal the value, and where they differ, it
-/// loses the members that are the value.
+/// A value of a unit type, a type with a single value such as `"a"` or
+/// `null`. A comparison with a unit value narrows the other operand, as in
+/// TypeScript. Where the operands are equal, the other operand keeps the
+/// members that can equal the value. Where they differ, it loses the members
+/// that are the value.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum UnitValue {
     Null,
@@ -2189,8 +2188,8 @@ pub(crate) enum UnitValue {
     /// count either.
     Literal(TextRange),
     /// The value of the variable declared at this range, which a named or a
-    /// default import binds. The module that declares it decides whether it
-    /// holds a unit value, which only inference can read.
+    /// default import binds. Only inference can tell whether the variable
+    /// holds a unit value, because the value is written in another module.
     Imported(TextRange),
 }
 
@@ -2201,15 +2200,16 @@ const MAX_HELD_VALUES: usize = 16;
 /// Returns the unit value of `expression`, or `None` when it has none that
 /// Biome compares with.
 ///
-/// A literal, `null`, `undefined`, and `void` have one, as [`UnitValue`]
-/// describes. A variable has the unit value of its initializer when it is a
-/// `const` without a type annotation that binds a name, so `K` holds `"a"`
-/// after `const K = "a"`, also through such `const`s that name one another,
-/// at most 16 of them: TypeScript gives such a `const` the type of its
-/// initializer. A variable that a named or a default import binds is a
-/// [`UnitValue::Imported`]. Other variables have none, such as a `let`, whose
-/// literal type widens, and a variable with a type annotation, and neither do
-/// other expressions, such as a call or `1 === 1`, whose types Biome may infer
+/// A literal, `null`, `undefined`, and `void` have a unit value. A `const`
+/// without a type annotation and without destructuring holds the unit value of
+/// its initializer, because TypeScript gives such a `const` the type of its
+/// initializer. So `K` holds `"a"` after `const K = "a"`, also through such
+/// `const`s that name one another, at most 16 of them. A variable that a named
+/// or a default import binds is a [`UnitValue::Imported`].
+///
+/// Other variables have no unit value, such as a `let`, whose literal type
+/// widens, and a variable with a type annotation. Other expressions have none
+/// either, such as a call or `1 === 1`, because Biome may infer their types
 /// narrower than TypeScript does.
 pub(crate) fn unit_value(
     expression: AnyJsExpression,
@@ -2236,8 +2236,8 @@ pub(crate) fn unit_value(
     None
 }
 
-/// Returns the unit value that `binding` holds, as [`unit_value`] gives it
-/// for a read of `binding`, or `None` when it holds none that Biome compares
+/// Returns the unit value that `binding` holds, which is also the unit value
+/// of a read of `binding`, or `None` when it holds none that Biome compares
 /// with.
 pub(crate) fn binding_unit_value(binding: &Binding, model: &SemanticModel) -> Option<UnitValue> {
     match held_value(binding)? {
@@ -2249,7 +2249,7 @@ pub(crate) fn binding_unit_value(binding: &Binding, model: &SemanticModel) -> Op
     }
 }
 
-/// The value of a variable, as far as [`unit_value`] follows it.
+/// Where the value of a variable that a comparison names comes from.
 enum HeldValue {
     /// A named or a default import binds the variable.
     Imported,
@@ -2274,9 +2274,10 @@ fn held_value(binding: &Binding) -> Option<HeldValue> {
     }
 }
 
-/// Returns the unit value of `expression` when it is a literal, `void`, or
-/// one of the other expressions that [`UnitValue`] lists, without
-/// following variables.
+/// Returns the unit value of `expression` without following variables: `null`,
+/// a string, number, bigint, or boolean literal, `-` or `+` directly before a
+/// number literal, a template literal without a tag and without
+/// substitutions, or `void`.
 #[expect(
     clippy::wildcard_enum_match_arm,
     reason = "Only literals and `void` have a unit value written in place."
@@ -2319,8 +2320,8 @@ fn literal_unit_value(expression: &AnyJsExpression) -> Option<UnitValue> {
     }
 }
 
-/// Returns whether `template` has no tag and no substitutions, as
-/// `` `a` `` doesn't, so its value is the text between its backticks.
+/// Returns whether `template` has no tag and no substitutions, as in
+/// `` `a` ``, so its value is the text between its backticks.
 fn is_plain_template(template: &JsTemplateExpression) -> bool {
     let mut elements = template.elements().iter();
     template.tag().is_none()
@@ -2331,9 +2332,9 @@ fn is_plain_template(template: &JsTemplateExpression) -> bool {
         }
 }
 
-/// Returns the text of `template` when [`is_plain_template`] accepts it and
-/// it is not empty, as `string` for `` `string` ``. Escapes stay as they are
-/// written, so a text with an escape names no kind of value.
+/// Returns the text between the backticks of `template` when it has no tag,
+/// no substitutions, and some text, as `string` for `` `string` ``. Escapes
+/// stay as they are written, so a text with an escape names no kind of value.
 fn plain_template_text(template: &JsTemplateExpression) -> Option<TokenText> {
     if !is_plain_template(template) {
         return None;
@@ -3702,11 +3703,12 @@ mod tests {
         }
     }
 
-    /// Decomposes the test of the last `if` statement in `program` and names
-    /// the value that its first runtime test compares with: `=` and the
+    /// Decomposes the condition of the last `if` statement in `program` and
+    /// names the value that its first runtime test compares with: `=` and the
     /// source of a [`FlowTest::Literal`], `null`, `undefined`, `==null` or
-    /// `==undefined` for loose equality, `import` and the imported name, or
-    /// `none` when the condition tests nothing.
+    /// `==undefined` for loose equality, `import` and the imported name, with
+    /// `==` before the name for loose equality, or `none` when the condition
+    /// tests nothing.
     fn compared_value(program: &str) -> String {
         let decomposed = decomposed_last(program, FlowOutcome::Truthy);
         let source = decomposed.model.root().syntax().to_string();
@@ -3780,8 +3782,9 @@ mod tests {
                 "import { A } from './k'; const K = A; function f(x) { if (x === K) {} }",
                 "import A",
             ),
-            // `-(1)` and `-1n` are `number` and `bigint`, a `let` widens its
-            // literal, and Biome doesn't compare with the others yet.
+            // `-(1)` has the type `number`, Biome gives `-1n` the type
+            // `bigint`, and a `let` widens its literal. Biome doesn't compare
+            // with the other values below.
             ("function f(x) { if (x === -(1)) {} }", "none"),
             ("function f(x) { if (x === -1n) {} }", "none"),
             ("function f(x) { if (x === `${x}`) {} }", "none"),

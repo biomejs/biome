@@ -366,13 +366,14 @@ pub(crate) const MAX_SWITCHES: usize = 64;
 /// A `switch` statement whose [`FlowGuard::Bypass`] gives `never` when the
 /// statement is exhaustive.
 ///
-/// Collection records only statements that TypeScript's
-/// `computeExhaustiveSwitchStatement` can find exhaustive: without `default`,
-/// with a discriminant that is a subject or `typeof` of one, and with cases
-/// that all test a unit value, such as `"a"`, `-1`, `null`, `undefined`, or
-/// a `const` that holds one, or a kind of value, such as `"string"`. A case
-/// that tests an imported value is recorded too, and inference counts the
-/// statement as exhaustive only when that value is a unit value.
+/// Collection records only statements that TypeScript can find exhaustive:
+/// statements without `default`, with a discriminant that is a subject or
+/// `typeof` of one, and with cases that all test a unit value or a kind of
+/// value. A unit value is a value such as `"a"`, `-1`, `null`, `undefined`, or
+/// a `const` that holds one, and a kind of value is a string such as
+/// `"string"`. A case that tests an imported variable is recorded too, because
+/// only inference can read its value. Inference counts the statement as
+/// exhaustive only when that variable holds a unit value.
 #[derive(Debug)]
 pub(crate) struct FlowSwitch {
     /// The range of the expression whose type at the statement decides
