@@ -540,10 +540,13 @@ fn instanceof_follows_the_extends_clauses_of_every_merged_declaration() {
             ("firstDeclarationElse", "x", &["unknown"]),
             ("lastDeclaration", "x", &["I2"]),
             ("lastDeclarationElse", "x", &["instanceof C"]),
-            // TypeScript: `Q4.K`, because it relates `Q4.K` to `Q3.K` by their
-            // members. Biome counts equal merged declarations in two
-            // namespaces as two classes, so the read keeps its type.
+            // TypeScript gives `Q4.K` for `namespaces` because it relates
+            // `Q4.K` to `Q3.K` by their members. Biome treats equal merged
+            // declarations in separate namespaces as separate classes, so
+            // `namespaces` keeps its declared type.
             ("namespaces", "x", &["instanceof K", "string"]),
+            // TypeScript gives the declared type, `string | Q3.K`, for
+            // `namespacesElse`.
             ("namespacesElse", "x", &["instanceof K", "string"]),
             ("sameNamespace", "x", &["instanceof K"]),
             ("sameNamespaceElse", "x", &["string"]),
