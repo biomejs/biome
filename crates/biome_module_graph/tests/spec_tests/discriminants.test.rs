@@ -108,7 +108,7 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 #[test]
 fn equality_and_truthiness_of_a_discriminant_narrow_the_object() {
     assert_reads(
@@ -147,7 +147,7 @@ fn equality_and_truthiness_of_a_discriminant_narrow_the_object() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives `Circle` in the loop and `Square`
+// TypeScript 7.0.2 (`tsc --strict`) gives `Circle` in the loop and `Square`
 // after it.
 #[test]
 fn discriminants_narrow_loops_and_their_exits() {
@@ -159,7 +159,7 @@ fn discriminants_narrow_loops_and_their_exits() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 #[test]
 fn discriminants_of_every_unit_type_narrow_the_object() {
     assert_reads(
@@ -342,7 +342,7 @@ fn discriminants_of_every_unit_type_narrow_the_object() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) keeps every read below unchanged, unless a
+// TypeScript 7.0.2 (`tsc --strict`) keeps every read below unchanged, unless a
 // comment gives its type. It reports errors in `missing` and `partial`
 // (TS2339) and in `possiblyUndefined` (TS18048).
 #[test]
@@ -421,7 +421,7 @@ fn tests_of_properties_that_are_not_discriminants_keep_the_object() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 // A test through an optional chain keeps the `null` and `undefined` members
 // of the object where the property reads as `undefined`.
 #[test]
@@ -464,7 +464,7 @@ fn discriminants_read_through_optional_chains_narrow_the_object() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 // Only the object that holds the property narrows, and a read of the property
 // starts from the narrowed object.
 #[test]
@@ -500,7 +500,7 @@ fn only_the_object_that_holds_the_discriminant_narrows() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type,
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
 // unless a comment gives its type. A write to the discriminant keeps the
 // object narrowed, because TypeScript checks the written value against the
 // narrowed object's property.
@@ -536,7 +536,7 @@ fn writes_to_the_discriminant_keep_the_object_narrowed() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 #[test]
 fn tuple_elements_are_discriminants() {
     assert_reads(
@@ -560,7 +560,7 @@ fn tuple_elements_are_discriminants() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 #[test]
 fn discriminants_of_classes_and_inherited_properties_narrow() {
     assert_reads(
@@ -581,7 +581,7 @@ fn discriminants_of_classes_and_inherited_properties_narrow() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives `{ ok: true; value: number }`.
+// TypeScript 7.0.2 (`tsc --strict`) gives `{ ok: true; value: number }`.
 // Biome keeps the declared type, because the declared type of `r` is an
 // instance of the generic alias rather than a union, and no runtime test
 // narrows such an instance.
@@ -598,7 +598,7 @@ fn instances_of_generic_aliases_keep_their_declared_type() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 // An aliased condition narrows the object when the object is a variable that
 // cannot change, but never a property path such as `w.s`. TypeScript narrows
 // such a path only when its properties are `readonly`.
@@ -633,7 +633,7 @@ fn aliased_conditions_narrow_the_object_of_a_discriminant() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives each read below the type `never`,
+// TypeScript 7.0.2 (`tsc --strict`) gives each read below the type `never`,
 // and Biome reads it as Unknown, because no value of the property passes the
 // test and the branch is impossible.
 #[test]
@@ -668,10 +668,11 @@ fn impossible_discriminant_tests_read_as_unknown() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) keeps `o` as declared, because a test of
-// a property narrows only a union. The annotation of `o` in the first source
-// shows that it is not a union, so collection drops the read. The second
-// source runs one solve.
+// TypeScript 7.0.2 (`tsc --strict`) keeps `o` as declared in the first source
+// and narrows it to `{ k: "a" }` in the second, because a test of a property
+// narrows only a union. The annotation of `o` in the first source shows that
+// it is not a union, so collection drops the read. The second source runs one
+// solve.
 #[test]
 fn property_tests_of_objects_that_are_not_unions_skip_the_solve() {
     for (source, solves) in [
@@ -696,7 +697,7 @@ fn property_tests_of_objects_that_are_not_unions_skip_the_solve() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 // The parameter's declared type is an alias of this module, and the
 // variables initialized from calls have inferred types.
 #[test]
@@ -736,7 +737,7 @@ fn complete_module_inference_and_lookups_agree_on_discriminants() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) keeps `o` as declared and narrows `p`. A
+// TypeScript 7.0.2 (`tsc --strict`) keeps `o` as declared and narrows `p`. A
 // test of a property of `o` can't narrow it, because its declared type is a
 // single object type, so neither complete module inference nor lookups solve
 // its flow. Complete module inference has already resolved the alias `Pair`,
@@ -798,12 +799,12 @@ fn reads_that_property_tests_cannot_narrow_skip_the_solve() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) removes the member whose property type
+// TypeScript 7.0.2 (`tsc --strict`) removes the member whose property type
 // can't share a value with what the test leaves, and narrows `s` by a `const`
 // of a literal type. Biome doesn't compare object types with other types, so
 // it assumes that an object type shares a value with every type except `null`
-// and `undefined`. A comparison narrows only with a literal. These reads are
-// therefore wider than TypeScript's.
+// and `undefined`. A comparison narrows only with a literal. Every read below
+// except `notNull` is therefore wider than TypeScript's.
 #[test]
 fn tests_that_biome_cannot_compare_keep_more_members() {
     assert_reads(
