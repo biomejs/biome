@@ -561,18 +561,22 @@ fn has_non_numeric_reduce_parameter(
     }
 
     let member = reduce_member_expression(&call)?;
+    // The accumulator starts as the initial value when one is passed, so it can be
+    // inspected even when the receiver isn't an array literal.
+    if index == 0 {
+        match arguments.next() {
+            None => {}
+            Some(Ok(initial)) => {
+                return Some(initial.as_any_js_expression().is_some_and(|initial| {
+                    has_non_numeric_reduction_value(initial, model).unwrap_or(false)
+                }));
+            }
+            Some(Err(_)) => return Some(false),
+        }
+    }
+
     let array = array_from_reduce_receiver(&member.object().ok()?, model)?;
-    Some(match index {
-        0 => match arguments.next() {
-            None => array_has_known_non_numeric_element(&array, model),
-            Some(Ok(initial)) => initial.as_any_js_expression().is_some_and(|initial| {
-                has_non_numeric_reduction_value(initial, model).unwrap_or(false)
-            }),
-            Some(Err(_)) => false,
-        },
-        1 => array_has_known_non_numeric_element(&array, model),
-        _ => false,
-    })
+    Some(array_has_known_non_numeric_element(&array, model))
 }
 
 fn array_from_reduce_receiver(
