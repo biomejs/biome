@@ -33,3 +33,5 @@ const text = "1";
 (a: string[]) => -a[0];
 declare const boxed: Number;
 -boxed;
+(a: number | undefined = undefined) => -a;
+(a: string | undefined = "1") => -a;

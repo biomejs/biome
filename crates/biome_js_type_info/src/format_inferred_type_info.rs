@@ -872,6 +872,15 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                     &expr.alternate,
                 ])]
             ),
+            Self::DefaultedParameter(expr) => write!(
+                f,
+                [&format_args![
+                    token("DefaultedParameter"),
+                    token("("),
+                    group(&soft_block_indent(&expr.ty)),
+                    token(")")
+                ]]
+            ),
             Self::Destructure(expr) => match &expr.destructure_field {
                 DestructureField::Index { index, .. } => write!(
                     f,

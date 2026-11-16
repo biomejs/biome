@@ -526,10 +526,21 @@ impl JsModuleInfoCollector {
                 {
                     return ty;
                 }
-                return self
+                let ty = self
                     .function_parameters
                     .get(param.syntax())
                     .map_or_default(|param| param.binding_type(binding_name));
+                // A default value replaces `undefined` inside the function body.
+                if param.type_annotation().is_some()
+                    && matches!(param.binding(), Ok(AnyJsBindingPattern::AnyJsBinding(_)))
+                    && let Some(default) = param
+                        .initializer()
+                        .and_then(|initializer| initializer.expression().ok())
+                {
+                    let ty = TypeData::defaulted_parameter_of(self, scope_id, ty, &default);
+                    return self.reference_to_owned_data(ty);
+                }
+                return ty;
             } else if let Some(param) = JsRestParameter::cast_ref(&ancestor) {
                 return self
                     .function_parameters

@@ -51,12 +51,12 @@ use crate::{
     TypeMemberAccessibility, TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference,
     TypeReferenceQualifier, TypeofAdditionExpression, TypeofAwaitExpression,
     TypeofBitwiseNotExpression, TypeofCallArgumentExpression, TypeofCallExpression,
-    TypeofComputedMemberExpression, TypeofConditionalExpression, TypeofDestructureExpression,
-    TypeofExpression, TypeofIndexExpression, TypeofIterableValueOfExpression,
-    TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNewExpression,
-    TypeofNullishCoalescingExpression, TypeofParameterExpression, TypeofStaticMemberExpression,
-    TypeofThisOrSuperExpression, TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
-    Union,
+    TypeofComputedMemberExpression, TypeofConditionalExpression,
+    TypeofDefaultedParameterExpression, TypeofDestructureExpression, TypeofExpression,
+    TypeofIndexExpression, TypeofIterableValueOfExpression, TypeofLogicalAndExpression,
+    TypeofLogicalOrExpression, TypeofNewExpression, TypeofNullishCoalescingExpression,
+    TypeofParameterExpression, TypeofStaticMemberExpression, TypeofThisOrSuperExpression,
+    TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue, Union,
 };
 
 const MAX_CONST_ASSERTION_DEPTH: usize = 50;
@@ -295,6 +295,21 @@ impl TypeData {
         let destructured = collector.reference_to_owned_data(destructured);
         let default = collector.reference_to_resolved_expression(scope_id, &default);
         Self::Union(Box::new(Union(Box::new([destructured, default]))))
+    }
+
+    /// Type of a parameter binding that has a default value: the declared type
+    /// without `undefined`, or the type of the default.
+    pub fn defaulted_parameter_of(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        ty: TypeReference,
+        default: &AnyJsExpression,
+    ) -> Self {
+        let declared = collector.reference_to_owned_data(Self::from(
+            TypeofExpression::DefaultedParameter(TypeofDefaultedParameterExpression { ty }),
+        ));
+        let default = collector.reference_to_resolved_expression(scope_id, default);
+        Self::Union(Box::new(Union(Box::new([declared, default]))))
     }
 
     fn destructuring_of(ty: TypeReference, destructure_field: DestructureField) -> Self {

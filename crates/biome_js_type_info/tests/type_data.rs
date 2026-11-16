@@ -64,6 +64,12 @@ fn verify_type_sizes() {
     );
 
     assert_eq!(
+        std::mem::size_of::<TypeofDefaultedParameterExpression>(),
+        16,
+        "The size shouldn't go higher"
+    );
+
+    assert_eq!(
         std::mem::size_of::<TypeofCallExpression>(),
         32,
         "The size shouldn't go higher"

@@ -1382,6 +1382,7 @@ pub enum TypeofExpression {
     CallArgument(TypeofCallArgumentExpression),
     ComputedMember(TypeofComputedMemberExpression),
     Conditional(TypeofConditionalExpression),
+    DefaultedParameter(TypeofDefaultedParameterExpression),
     Destructure(TypeofDestructureExpression),
     Index(TypeofIndexExpression),
     OptionalChainIndex(TypeofIndexExpression),
@@ -1452,6 +1453,14 @@ pub struct TypeofConditionalExpression {
     pub test: TypeReference,
     pub consequent: TypeReference,
     pub alternate: TypeReference,
+}
+
+/// Declared type of a parameter that has a default value, as seen inside the
+/// function body. The default replaces `undefined`, so `undefined` is removed
+/// from the declared type.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct TypeofDefaultedParameterExpression {
+    pub ty: TypeReference,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]

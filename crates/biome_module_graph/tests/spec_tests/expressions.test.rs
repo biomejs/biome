@@ -1099,6 +1099,81 @@ fn test_infer_module_types_removes_undefined_from_destructuring_defaults_on_buil
 }
 
 #[test]
+fn test_infer_module_types_removes_undefined_from_parameter_defaults_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type MaybeNumber = number | undefined;
+
+            export function withDefault(value: number | undefined = 0) {
+                return value;
+            }
+            export const fromDefault = withDefault();
+
+            export function withAliasedDefault(value: MaybeNumber = 0) {
+                return value;
+            }
+            export const fromAliasedDefault = withAliasedDefault();
+
+            export function withNullableDefault(value: number | null | undefined = 0) {
+                return value;
+            }
+            export const fromNullableDefault = withNullableDefault();
+
+            export function withUndefinedDefault(value: number | undefined = undefined) {
+                return value;
+            }
+            export const fromUndefinedDefault = withUndefinedDefault();
+
+            export function withoutDefault(value: number | undefined) {
+                return value;
+            }
+            export const fromWithoutDefault = withoutDefault(undefined);
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    for name in ["fromDefault", "fromAliasedDefault", "fromNullableDefault"] {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} binding type must be inferred"));
+        let ty = inferred.resolve_type(&db, ty);
+        assert!(
+            contains_inferred_number(&db, ty),
+            "{name} must stay a number"
+        );
+        assert!(
+            !contains_inferred_undefined(&db, ty),
+            "{name} must not include undefined"
+        );
+    }
+
+    let nullable_ty =
+        inferred_binding_ty_by_name(&db, index_module, inferred, "fromNullableDefault")
+            .expect("fromNullableDefault binding type must be inferred");
+    let nullable_ty = inferred.resolve_type(&db, nullable_ty);
+    assert!(
+        contains_inferred_null(&db, nullable_ty),
+        "a default value must not remove null"
+    );
+
+    for name in ["fromUndefinedDefault", "fromWithoutDefault"] {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} binding type must be inferred"));
+        let ty = inferred.resolve_type(&db, ty);
+        assert!(
+            contains_inferred_undefined(&db, ty),
+            "{name} must keep undefined"
+        );
+    }
+}
+
+#[test]
 fn test_infer_module_types_evaluates_this_and_super_edge_expressions_on_build() {
     let fs = MemoryFileSystem::default();
     fs.insert(

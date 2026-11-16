@@ -45,6 +45,7 @@ const MAX_PROMISE_UNWRAP_STEPS: usize = 64;
 const MAX_REST_MEMBER_STEPS: usize = 1024;
 const MAX_AWAIT_EXPRESSION_STEPS: usize = 1024;
 const MAX_CALL_CALLEE_STEPS: usize = 64;
+const MAX_ALIAS_INSTANCE_STEPS: usize = 64;
 const MAX_ELEMENT_INDEX_STEPS: usize = 1024;
 const MAX_PROPERTY_KEY_STEPS: usize = 64;
 
@@ -186,6 +187,10 @@ impl<'db> ResolutionCtx<'db, '_> {
                 let consequent = self.resolve(&expression.consequent);
                 let alternate = self.resolve(&expression.alternate);
                 self.resolve_conditional_expression(test, consequent, alternate)
+            }
+            RawTypeofExpression::DefaultedParameter(expression) => {
+                let ty = self.resolve(&expression.ty);
+                Some(self.defaulted_parameter_type(ty))
             }
             RawTypeofExpression::Destructure(expression) => {
                 if self.import_resolution.is_on_demand()
@@ -341,6 +346,9 @@ impl<'db> ResolutionCtx<'db, '_> {
                     expression.consequent,
                     expression.alternate,
                 ),
+            InferredTypeofExpression::DefaultedParameter(expression) => {
+                Some(self.defaulted_parameter_type(expression.ty))
+            }
             InferredTypeofExpression::Destructure(expression) => {
                 match &expression.destructure_field {
                     RawDestructureField::Index {
@@ -989,6 +997,24 @@ impl<'db> ResolutionCtx<'db, '_> {
         let ty = self.resolve_inferred_type(ty);
         if ty == InferredTypeData::Undefined {
             return InferredTypeData::NeverKeyword;
+        }
+        self.type_without_undefined(ty)
+    }
+
+    /// A parameter's default value replaces `undefined` inside the function
+    /// body. An annotation that names a type alias, such as `MaybeNumber`, is an
+    /// instance of that alias, so the alias is expanded first.
+    fn defaulted_parameter_type(&mut self, ty: InferredTypeData<'db>) -> InferredTypeData<'db> {
+        let mut ty = self.resolve_inferred_type(ty);
+        for _ in 0..MAX_ALIAS_INSTANCE_STEPS {
+            let InferredTypeData::InstanceOf(instance) = ty else {
+                break;
+            };
+            let target = self.resolve_inferred_type(instance.ty(self.db));
+            if !target.should_flatten_instance(instance.type_parameters(self.db)) {
+                break;
+            }
+            ty = target;
         }
         self.type_without_undefined(ty)
     }

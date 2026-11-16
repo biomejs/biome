@@ -39,6 +39,8 @@ const text = "1";
 (a: string[]) => -a[0];
 declare const boxed: Number;
 -boxed;
+(a: number | undefined = undefined) => -a;
+(a: string | undefined = "1") => -a;
 
 ```
 
@@ -639,7 +641,49 @@ invalid.ts:35:1 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━�
     34 │ declare const boxed: Number;
   > 35 │ -boxed;
        │ ^^^^^^
-    36 │ 
+    36 │ (a: number | undefined = undefined) => -a;
+    37 │ (a: string | undefined = "1") => -a;
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:36:40 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be undefined instead of number or bigint.
+  
+    34 │ declare const boxed: Number;
+    35 │ -boxed;
+  > 36 │ (a: number | undefined = undefined) => -a;
+       │                                        ^^
+    37 │ (a: string | undefined = "1") => -a;
+    38 │ 
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:37:34 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be string instead of number or bigint.
+  
+    35 │ -boxed;
+    36 │ (a: number | undefined = undefined) => -a;
+  > 37 │ (a: string | undefined = "1") => -a;
+       │                                  ^^
+    38 │ 
   
   i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
   

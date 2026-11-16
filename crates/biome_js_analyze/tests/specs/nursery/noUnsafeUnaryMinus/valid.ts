@@ -33,3 +33,9 @@ declare const direction: Direction;
 (a: Record<string, number>, key: string) => -a[key];
 (a: [number, bigint]) => -a[1];
 (a: number[]) => -(a[0]);
+(bleed: number | undefined = 0) => -bleed;
+type MaybeNumber = number | undefined;
+(bleed: MaybeNumber = 0) => -bleed;
+function withDefault(bleed: number | undefined = 0) {
+	return -bleed;
+}
