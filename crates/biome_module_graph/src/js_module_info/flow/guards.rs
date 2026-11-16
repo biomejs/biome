@@ -72,9 +72,9 @@ pub(crate) enum FlowGuard {
         /// property before the condition, as in
         /// `const k = s.kind; if (k === "c")` or in an aliased condition such
         /// as `const ok = s.kind === "c"; if (ok)`. A write to the property
-        /// between the two can make `object` differ from what the test shows,
-        /// so collection replaces such a guard with [`Self::Keep`] when the
-        /// root writes the property.
+        /// between the `const` and the test can make `object` differ from
+        /// what the test shows, so collection replaces such a guard with
+        /// [`Self::Keep`] when the root writes the property.
         aliased: bool,
     },
     /// The operands of `&&` or `||`. A sequential pair applies `right` to the
@@ -749,11 +749,12 @@ impl Decomposer<'_, '_> {
 
     /// Returns the guard that a runtime test of `operand`, whose subject is
     /// `subject`, applies to the object that holds the tested property, as
-    /// `s.kind === "c"` applies to `s`. The property is `subject` itself when
-    /// it is a named property, or the property whose value a variable holds,
-    /// as [`Self::held_property`] describes, so `k === "c"` also applies to
-    /// `s` after `const k = s.kind`. The object must be a subject other than
-    /// `this` that a test may narrow.
+    /// `s.kind === "c"` applies to `s`. The tested property is `subject`
+    /// itself when `subject` is a named property. When `operand` names a
+    /// `const` that holds a property, the tested property is the held one, so
+    /// `k === "c"` also applies to `s` after `const k = s.kind`. See
+    /// [`Self::held_property`] for the declarations that hold a property. The
+    /// object must be a subject other than `this` that a test may narrow.
     ///
     /// Returns `None` unless `subject` is a property, other than a private
     /// one, of a subject other than `this` that a test may narrow. Also
@@ -805,13 +806,15 @@ impl Decomposer<'_, '_> {
         })
     }
 
-    /// Returns the object and the key of the property whose value `operand`
-    /// holds, with whether it reads the property through an optional chain,
-    /// when `operand` names a `const` that holds a property of a subject.
+    /// Returns the object and the key of the property that `operand` holds
+    /// when `operand` names a `const` that holds a property of a subject, as
+    /// `k` holds `s.kind` after `const k = s.kind`. The returned flag tells
+    /// whether the `const` reads the property through an optional chain.
     ///
-    /// This follows TypeScript's `getCandidateDiscriminantPropertyAccess`.
-    /// The `const` is not exported and has no type annotation, as for an
-    /// aliased condition, and it is declared in one of these ways:
+    /// The accepted declarations match those through which TypeScript narrows
+    /// the object of a discriminant, except where noted below. The `const` is
+    /// not exported and has no type annotation, as for an aliased condition,
+    /// and it is declared in one of these ways:
     ///
     /// - Its initializer is a member access whose object is a subject, as in
     ///   `const k = s.kind`, `s?.kind`, `s["kind"]`, or `t[0]`.
@@ -827,9 +830,10 @@ impl Decomposer<'_, '_> {
     /// Parentheses around the initializer don't matter. `s!.kind`, `s!`, and
     /// `s as S` are not subjects, so they hold nothing, although TypeScript
     /// accepts `s!.kind`. A chain that starts at a parenthesized optional
-    /// chain holds nothing either, as [`chain_receivers`] describes. For a
-    /// pattern, the path of the property is added to the subject table, so
-    /// that collection can find writes to it.
+    /// chain, such as `(s?.a)?.kind`, holds nothing either, because a test of
+    /// such a chain narrows nothing. See [`chain_receivers`]. For a pattern,
+    /// the path of the property is added to the subject table, so that
+    /// collection can find writes to it.
     fn held_property(
         &mut self,
         operand: &AnyJsExpression,
@@ -1053,9 +1057,11 @@ fn const_initializer(declarator: &JsVariableDeclarator) -> Option<AnyJsExpressio
     declarator.initializer()?.expression().ok()
 }
 
-/// Returns the declarator whose binding is the pattern that holds `element`,
-/// a property or an element of an object or array binding pattern, or `None`
-/// when that pattern is nested in another one or belongs to a parameter.
+/// Returns the variable declarator that binds the pattern containing
+/// `element`, a property or an element of an object or array binding pattern.
+///
+/// Returns `None` when that pattern is nested in another pattern or belongs to
+/// a parameter.
 fn pattern_declarator(element: &JsSyntaxNode) -> Option<JsVariableDeclarator> {
     // An element's parent is its list, inside the pattern.
     JsVariableDeclarator::cast(element.grand_parent()?.parent()?)
@@ -1760,8 +1766,9 @@ mod tests {
 
     /// Decomposes the test of the last `if` statement in the module
     /// `program` and names the objects of its [`FlowGuard::Property`] guards
-    /// as [`property_names`] does, with a `~` after the key of a guard that a
-    /// `const` holds.
+    /// with their keys, as `value[kind]`. A name starts with `?` when the test
+    /// reads the key through an optional chain, and ends with `~` when the
+    /// guard's `aliased` field is true.
     fn property_names_in(program: &str, outcome: FlowOutcome) -> Vec<String> {
         let Decomposed {
             guards,

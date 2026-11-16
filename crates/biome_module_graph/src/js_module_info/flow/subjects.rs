@@ -111,14 +111,18 @@ fn identifier_text(token: &JsSyntaxToken) -> Option<Text> {
     (!text.contains('\\')).then_some(text)
 }
 
-/// Returns the key of the property that the name of a property in an object
-/// binding pattern names, as `kind` and `"kind"` in `{ kind: k }` and
-/// `{ "kind": k }` do.
+/// Returns the key of the property that `name` names in an object binding
+/// pattern, as both `{ kind: k }` and `{ "kind": k }` name `kind`.
 ///
-/// An identifier has its escapes decoded, as [`identifier_key`] decodes them.
-/// A string literal, a number literal, and the expression of a computed name
-/// must spell the property's name, as [`literal_key`] requires, so
-/// `{ "\u006bind": k }`, `{ 0x0: k }`, and ``{ [`kind`]: k }`` give `None`.
+/// An identifier has its escapes decoded. A string literal, a number literal,
+/// or the expression of a computed name gives a key only when its spelling is
+/// the property's name: a string literal without escapes, or a decimal integer
+/// literal from `0` to 2^53 - 1 without leading zeros or separators.
+/// [`literal_key`] applies the same rule to the key of an element access.
+///
+/// Returns `None` for any other name, such as `{ "\u006bind": k }`,
+/// `{ 0x0: k }`, or ``{ [`kind`]: k }``, and for an identifier whose escape is
+/// malformed.
 pub(super) fn member_name_key(name: &AnyJsObjectMemberName) -> Option<PropertyKey> {
     match name {
         AnyJsObjectMemberName::JsLiteralMemberName(name) => {
@@ -166,15 +170,17 @@ pub(super) fn literal_key(key: &AnyJsExpression) -> Option<PropertyKey> {
     }
 }
 
-/// Returns the key that the text of a string literal, without its quotes,
-/// names, or `None` when it has an escape, which would need decoding.
+/// Returns the key of the property that `text` names, where `text` is the
+/// content of a string literal without its quotes. Returns `None` when `text`
+/// has an escape, because escapes are not decoded.
 fn string_key(text: TokenText) -> Option<PropertyKey> {
     (!text.contains('\\')).then(|| PropertyKey::Name(text.into()))
 }
 
 /// Returns the key that the number literal `token` names when it is a
-/// decimal integer from `0` to 2^53 - 1 without leading zeros or separators,
-/// whose spelling is the property's name, as [`literal_key`] describes.
+/// decimal integer from `0` to 2^53 - 1 without leading zeros or separators.
+/// Such a literal converts to a string equal to its spelling, so the spelling
+/// is the property's name. Returns `None` for any other number literal.
 fn decimal_integer_key(token: &JsSyntaxToken) -> Option<PropertyKey> {
     let text = token.text_trimmed();
     let is_decimal_integer =

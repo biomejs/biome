@@ -857,12 +857,10 @@ fn tests_that_biome_cannot_compare_keep_more_members() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3-l3/access.ts` L9 to L11, L14, L15, L20 to L26, L28,
-// L33, L35, L40 to L46, `m3-l3/more.ts` L20, and `m3/destructure.ts` L12): a
-// test of a `const` that holds a property of an object, as `k` holds
-// `s.kind`, narrows the object as a test of the property does, and only that
-// object.
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type,
+// because a test of a `const` that holds a property of an object, as `k` holds
+// `s.kind`, narrows that object, and only that object, as a test of the
+// property does.
 #[test]
 fn discriminants_held_in_constants_narrow_the_object() {
     assert_reads(
@@ -964,12 +962,11 @@ fn discriminants_held_in_constants_narrow_the_object() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3-l3/access.ts` L12, L13, L37 to L39, L48,
-// `m3-l3/more.ts` L6, and `m3/aliases.ts` L7). A test of a `const` that
-// holds `s?.kind` tests no receiver, so `s` keeps `undefined` wherever the
-// property can be `undefined`. A truthiness test also inlines `s?.kind` as an
-// aliased condition, which shows that `s` is not nullish.
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// A test of a `const` that holds `s?.kind` tests no receiver, so `s` keeps
+// `undefined` wherever the property can be `undefined`. A truthiness test also
+// inlines `s?.kind` as an aliased condition, which shows that `s` is not
+// nullish.
 #[test]
 fn discriminants_held_through_optional_chains_keep_nullish_objects() {
     assert_reads(
@@ -1007,11 +1004,9 @@ fn discriminants_held_through_optional_chains_keep_nullish_objects() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3-l3/destructure.ts` L9 to L11, L13, L16, L19, L21,
-// L22, L24, L25, L27 to L30, L32, L33, L35, L36, L39, L45, and
-// `m3/destructure.ts` L9 and L17): a test of an element of a destructuring
-// `const` narrows the initializer as a test of the element's property does.
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type,
+// because a test of an element of a destructuring `const` narrows the
+// initializer as a test of the element's property does.
 #[test]
 fn destructured_discriminants_narrow_the_initializer() {
     assert_reads(
@@ -1070,12 +1065,10 @@ fn destructured_discriminants_narrow_the_initializer() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) keeps every read below as declared
-// (`narrowing-probes/m3-l3/access.ts` L17 to L19, L29, `m3-l3/destructure.ts`
-// L12, L14, L15, L17, L18, L20, L38, L43, `m3-l3/more.ts` L15, and
-// `m3/aliases.ts` L14 to L16). Only an unannotated `const` holds a
-// discriminant, and only when its initializer reads the property directly or
-// through a pattern that the declarator binds, without a default.
+// TypeScript 6.0.3 (`tsc --strict`) keeps every read below as declared. Only
+// an unannotated `const` holds a discriminant, and only when its initializer
+// reads the property directly or through a pattern that the declarator binds,
+// without a default.
 #[test]
 fn constants_that_hold_no_discriminant_keep_the_object() {
     assert_reads(
@@ -1120,10 +1113,9 @@ fn constants_that_hold_no_discriminant_keep_the_object() {
 }
 
 // TypeScript 6.0.3 (`tsc --strict`) gives `Shape` at the first two reads and
-// `Circle` at the others (`narrowing-probes/m3-l3/scope.ts` L8, L15, L18,
-// L23). An exported `const` holds no discriminant, but the object it reads
-// can be exported, or a `let` at the top level of a file, because only the
-// `const` must keep its value.
+// `Circle` at the others. An exported `const` holds no discriminant, but the
+// object it reads can be exported, or a `let` at the top level of a file,
+// because only the `const` must keep its value.
 #[test]
 fn discriminants_held_at_the_top_level_follow_exports() {
     assert_reads(
@@ -1151,14 +1143,12 @@ fn discriminants_held_at_the_top_level_follow_exports() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) narrows every read below
-// (`narrowing-probes/m3-l3/access.ts` L16, L27, L30, L34, L36,
-// `m3-l3/destructure.ts` L23, L26, L42, L44, L46, `m3-l3/more.ts` L14 and
-// L17, and `m3-l3/scope.ts` L12), giving `Circle` or the first tuple. Biome
-// keeps the declared type: it doesn't follow `s!` and keys that are spelled
-// differently from the property, loose equality doesn't narrow an object yet,
-// a read in a closure or inside `for...of` or `switch` never sees the test,
-// and a `const` exported by an `export { ... }` list holds nothing.
+// TypeScript 6.0.3 (`tsc --strict`) narrows every read below, giving `Circle`
+// or the first tuple. Biome keeps the declared type at each of them. It
+// doesn't follow `s!` or keys that are spelled differently from the property,
+// and loose equality doesn't narrow an object. A read in a closure or inside
+// `for...of` or `switch` never sees the test. A `const` exported by an
+// `export { ... }` list holds nothing.
 #[test]
 fn discriminant_constants_that_biome_does_not_follow_keep_the_object() {
     assert_reads(
@@ -1207,11 +1197,9 @@ fn discriminant_constants_that_biome_does_not_follow_keep_the_object() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives `Ok`
-// (`narrowing-probes/m3-l3/destructure.ts` L40): it takes a rest element as
-// the property with its name, so `ok` holds `r.ok`, although it holds an
-// object, which is always truthy. Biome keeps the declared type, because
-// `r` can be `Err` there.
+// TypeScript 6.0.3 (`tsc --strict`) gives `Ok`, because it takes the rest
+// element `ok` as the property `r.ok`. Biome keeps the declared type, because
+// `ok` holds an object, which is always truthy, so `r` can be `Err` there.
 #[test]
 fn rest_elements_hold_no_discriminant() {
     assert_reads(
@@ -1222,14 +1210,11 @@ fn rest_elements_hold_no_discriminant() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3-l3/access.ts` L31, L32, `m3-l3/destructure.ts` L31,
-// L37, `m3-l3/more.ts` L9, L10, `m3-l3/scope.ts` L19, L20, and
-// `m3/aliases.ts` L8). Inside an aliased condition, the held discriminant
-// narrows the object only when the object cannot change between the `const`
-// and the test, so never a property path such as `w.s`. Outside one, a
-// `const` in a block or a loop, and one that holds a property of a path on
-// `this`, narrow as elsewhere.
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// Inside an aliased condition, the held discriminant narrows the object only
+// when the object cannot change between the `const` and the test, so never a
+// property path such as `w.s`. Outside one, a `const` in a block or a loop,
+// and one that holds a property of a path on `this`, narrow as elsewhere.
 #[test]
 fn held_discriminants_narrow_through_aliased_conditions() {
     assert_reads(
@@ -1259,15 +1244,14 @@ fn held_discriminants_narrow_through_aliased_conditions() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives `Circle` at every read below
-// (`narrowing-probes/m3-l3/writes.ts` L7 to L10 and L12 to L17), although
-// in the first six functions the write can make `s.kind` differ from the
-// value the `const` holds, so `s` can be a `Square`, or not match any member,
-// at the read. Biome keeps the declared type there: a test of a `const` that
-// holds a property, or an aliased condition that tests it, narrows the
-// object only when the root's own code never writes the property. A test of
-// the property itself reads its current value, and a call or a callback that
-// writes the property keeps the narrowing, as in TypeScript.
+// TypeScript 6.0.3 (`tsc --strict`) gives `Circle` at every read below,
+// although in the first six functions the write can make `s.kind` differ from
+// the value the `const` holds, so `s` can be a `Square`, or not match any
+// member, at the read. Biome keeps the declared type there, because a test of
+// a `const` that holds a property, or an aliased condition that tests it,
+// narrows the object only when the root's own code never writes the property.
+// A test of the property itself reads its current value, and a call or a
+// callback that writes the property keeps the narrowing, as in TypeScript.
 #[test]
 fn writes_to_a_held_discriminant_stop_the_narrowing() {
     assert_reads(
@@ -1304,11 +1288,12 @@ fn writes_to_a_held_discriminant_stop_the_narrowing() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) keeps `o` as declared: a test of a
-// property narrows only a union. A held discriminant makes its object a
-// subject that only tests of its properties narrow, so collection drops the
-// read of `o` when its annotation shows that it is not a union, and a read of
-// a union runs one solve.
+// TypeScript 6.0.3 (`tsc --strict`) keeps `o` as declared when it is not a
+// union, because a test of a property narrows only a union. A held
+// discriminant makes its object a subject that only tests of its properties
+// narrow. Collection drops the read of such an object when its annotation
+// shows that it is not a union, so the read runs no solve, while a read of a
+// union runs one.
 #[test]
 fn held_discriminants_of_objects_that_are_not_unions_skip_the_solve() {
     for (source, solves) in [

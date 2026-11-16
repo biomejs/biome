@@ -504,9 +504,12 @@ impl RootCollector<'_> {
                 .iter()
                 .any(|read| tested.contains(&read.subject) && is_path(read.subject)))
         .then(|| WrittenPaths::new(root, self.model, &subjects));
-        // A `const` holds the value that the property had where it was
-        // declared, which a write to the property can change before the test,
-        // as in `const k = s.kind; s.kind = "s"; if (k === "c")`.
+        // A `const` keeps the value that the property had at its declaration,
+        // and a write to the property before the test can make the object
+        // differ from that value, as in
+        // `const k = s.kind; s.kind = "s"; if (k === "c")`. An aliased property
+        // guard therefore narrows nothing when a write in the root may change
+        // its property.
         if has_aliased_property && let Some(written) = &written {
             for guard in &mut guards {
                 let FlowGuard::Property {
@@ -1052,8 +1055,8 @@ mod tests {
         let s = root.subject_binding(info.flow.read(marked(SOURCE, "s", "s")).unwrap().subject);
         let t = root.subject_binding(read.subject);
         // Only the guard of `t` from a `const` and the direct test of `s.k`
-        // remain: `s.k` can change between the `const` declarations and the
-        // first test.
+        // remain, because the root writes `s.k` between the `const`
+        // declarations and the first test.
         assert_eq!(objects, [(t.unwrap(), true), (s.unwrap(), false)]);
     }
 
