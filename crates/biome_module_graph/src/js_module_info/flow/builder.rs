@@ -24,7 +24,7 @@ pub(super) struct BuiltRoot {
     /// The subjects that guards, mentions, and reads refer to, each at the
     /// index of its id.
     pub(super) subjects: Vec<FlowSubject>,
-    /// Condition nodes paired with each subject their guard may refine.
+    /// Condition nodes paired with each subject their guard may narrow.
     pub(super) mentions: Vec<(FlowNodeId, FlowSubjectId)>,
     /// Reachable reads of local bindings with their incoming flow.
     pub(super) reads: Vec<BuiltRead>,

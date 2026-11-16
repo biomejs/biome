@@ -1,10 +1,10 @@
 //! Syntax-only flow facts that let type inference refine variable reads.
 //!
-//! Collection records, for each execution root that tests one of its own
-//! variables, a graph of possible paths whose conditions are already
-//! decomposed into guards on subjects. It also records the incoming path of
-//! every read such a guard can reach. Type inference later applies the guards
-//! to resolved types without inspecting syntax again.
+//! Collection records a graph of possible paths for each execution root that
+//! tests one of its own variables. The graph's conditions are already
+//! decomposed into guards on subjects. Collection also records the incoming
+//! path of every read such a guard can reach. Type inference later applies the
+//! guards to resolved types without inspecting syntax again.
 //!
 //! A subject is what a runtime test checks and a read narrows. Guards and
 //! reads refer to a subject by its id in the root's subject table, so a test
@@ -135,8 +135,6 @@ impl RootFlow {
         self.read_points.get(&subject).map_or(&[], |points| points)
     }
 
-    /// Returns the subject with id `subject`, or `None` when the root has no
-    /// such subject.
     pub(crate) fn subject(&self, subject: FlowSubjectId) -> Option<&FlowSubject> {
         self.subjects.get(subject as usize)
     }

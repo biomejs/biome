@@ -39,7 +39,7 @@ pub(crate) enum FlowOutcome {
 /// type, while `Incomplete` makes it unknown.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) enum FlowGuard {
-    /// The step cannot refine any subject, so the incoming type is kept.
+    /// The step cannot narrow any subject, so the incoming type is kept.
     Keep,
     /// Decomposition stopped at its work limit or at missing syntax, so the
     /// incoming type becomes unknown.
@@ -478,7 +478,7 @@ fn parameter_name(name: &Text) -> Option<Cow<'_, str>> {
 /// A condition decomposed into the arena.
 pub(super) struct DecomposedCondition {
     pub(super) guard: usize,
-    /// Subjects whose type the condition may refine.
+    /// Subjects whose type the condition may narrow.
     ///
     /// When decomposition stops early, this conservatively lists every
     /// variable read directly in the condition.
@@ -486,7 +486,8 @@ pub(super) struct DecomposedCondition {
 }
 
 /// Decomposes `expression`, assuming `outcome`, into guards appended to
-/// `guards`, whose tests refer to subjects by their ids in `subjects`.
+/// `guards`. The tests in those guards refer to subjects by their ids in
+/// `subjects`.
 pub(super) fn decompose_condition(
     expression: &AnyJsExpression,
     outcome: FlowOutcome,
@@ -852,7 +853,7 @@ mod tests {
     use biome_js_syntax::JsIfStatement;
     use biome_languages::JsFileSource;
 
-    /// Decomposes the `if` test `source` and names the mentioned subjects.
+    /// Decomposes the `if` condition `source` and names the mentioned subjects.
     fn decompose(source: &str, outcome: FlowOutcome) -> (Vec<FlowGuard>, Vec<String>) {
         let parsed = parse(
             &format!("function f(value, other) {{ if ({source}) {{}} }}"),
