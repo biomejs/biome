@@ -23,10 +23,10 @@ use rustc_hash::FxHashSet;
 /// logical assignment, `++` or `--`, a destructuring target, or the target of
 /// a `for...in` or `for...of` loop, and so does `delete`. Parentheses, `!`,
 /// `as`, `satisfies`, and `<T>` around the objects of a written path are
-/// ignored, so `(o as T).v = x` writes `o.v`. An element access writes the
-/// property that its key names when the key is a literal that
-/// [`literal_key`] accepts, so `o["v"] = x` writes `o.v`, and any property of
-/// its object otherwise, as in `o[k] = x`.
+/// ignored, so `(o as T).v = x` writes `o.v`. An element access whose key
+/// spells the property's name writes that property, so `o["v"] = x` writes
+/// `o.v`. With any other key, as in `o[k] = x` or `o[0x0] = x`, it counts as a
+/// write of every property of its object.
 ///
 /// The scan covers the whole root, including function and arrow expressions
 /// that are called where they are defined, class static blocks, field
@@ -41,8 +41,9 @@ use rustc_hash::FxHashSet;
 pub(super) struct WrittenPaths {
     /// Subjects that an assignment or `delete` writes directly.
     written: FxHashSet<FlowSubjectId>,
-    /// Subjects with a property written through a key that is not a literal,
-    /// as in `o[k] = x`, which can write any of their properties.
+    /// Subjects with a property written through a key that does not spell the
+    /// property's name, as in `o[k] = x`. Such a write counts as a write of
+    /// every property of the subject.
     wildcards: FxHashSet<FlowSubjectId>,
 }
 
@@ -94,8 +95,9 @@ impl WrittenPaths {
     ///
     /// That is the case when the root writes `subject` or one of its
     /// prefixes, or writes a property of a proper prefix through a key that
-    /// is not a literal. A write to an extension of `subject`, such as `o.v.w`
-    /// for `o.v`, does not change the value of `subject`.
+    /// does not spell the property's name. A write to an extension of
+    /// `subject`, such as `o.v.w` for `o.v`, does not change the value of
+    /// `subject`.
     pub(super) fn cancels(&self, subjects: &[FlowSubject], subject: FlowSubjectId) -> bool {
         if self.written.contains(&subject) {
             return true;
@@ -136,8 +138,7 @@ impl WrittenPaths {
     }
 
     /// Records the write of the property that `key` names on `object`, or of
-    /// any property of `object` when `key` is not a literal that
-    /// [`literal_key`] accepts.
+    /// any property of `object` when `key` does not spell the property's name.
     fn computed_member(
         &mut self,
         object: AnyJsExpression,
@@ -196,9 +197,9 @@ impl WrittenPaths {
     /// Returns the subject that `expression`, the object of a written
     /// property, refers to, or `None` when no stored subject starts with it.
     ///
-    /// A key along the object that is not a literal, as in `o[k].v`, can name
-    /// any property, so it records a write of every property of the object
-    /// before it and returns `None`.
+    /// A key along the object that does not spell the property's name, as in
+    /// `o[k].v`, can name any property, so it records a write of every
+    /// property of the object before it and returns `None`.
     #[expect(
         clippy::wildcard_enum_match_arm,
         reason = "Only variables and member accesses lead to a subject."
@@ -329,8 +330,8 @@ mod tests {
 
     const PATHS: [&str; 5] = ["o.v", "o.v.w", "o.w", "q.v", "o.v.w.x"];
 
-    /// Returns the paths among [`PATHS`] that `body` cancels, as
-    /// [`cancelled_among`] does.
+    /// Returns the paths among [`PATHS`] that `body` cancels in the function
+    /// root of [`cancelled_among`].
     fn cancelled(body: &str) -> Vec<&'static str> {
         cancelled_among(&PATHS, body)
     }

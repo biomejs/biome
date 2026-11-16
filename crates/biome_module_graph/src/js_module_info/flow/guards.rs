@@ -823,8 +823,9 @@ fn comparison_step(
 }
 
 /// Returns whether `expression` has the shape of a subject: an identifier or a
-/// member access, which [`subject_of`] accepts when its object is a subject
-/// too and, for an element access, its key is a literal.
+/// member access. A member access is a subject only when its object is one too
+/// and, for an element access, its key spells the property's name, which
+/// [`subject_of`] checks.
 ///
 /// Returns `None` when the identifier, the object, or the member is missing.
 #[expect(

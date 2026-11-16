@@ -11,18 +11,20 @@ use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression, AnyJsName, unesca
 use biome_rowan::Text;
 use std::borrow::Cow;
 
-/// The largest integer that a JavaScript number holds exactly, 2^53 - 1.
+/// The value of JavaScript's `Number.MAX_SAFE_INTEGER`, 2^53 - 1: the largest
+/// integer `n` such that a number represents both `n` and `n + 1` exactly.
 const MAX_SAFE_INTEGER: u64 = (1 << 53) - 1;
 
 /// Returns the id of the subject that `expression` reads, adding the subject
 /// and every prefix of its path to `subjects` on first use.
 ///
 /// A subject is an identifier that refers to a declaration, or a member access
-/// whose object is a subject: a static member access with a named property,
-/// such as `o.v` or `a.b.c`, or an element access whose key [`literal_key`]
-/// accepts, such as `o["v"]` or `t[0]`. Parentheses around the expression and
-/// its objects are skipped, and an optional access reads the same subject as a
-/// plain one, as in TypeScript: `(o)?.v` is `o.v`.
+/// whose object is a subject. A static member access must name its property,
+/// as in `o.v` or `a.b.c`, and an element access must have a key that spells
+/// the property's name, as in `o["v"]` or `t[0]`. [`literal_key`] lists the
+/// accepted keys. Parentheses around the expression and its objects are
+/// skipped, and an optional access reads the same subject as a plain one, as
+/// in TypeScript: `(o)?.v` is `o.v`.
 ///
 /// Returns `None` for any other expression, including `this.v`, `o[k]`,
 /// `o!.v`, `f().v`, a private name such as `o.#v`, and a global, and when the
@@ -87,13 +89,15 @@ pub(super) fn property_key(name: &AnyJsName) -> Option<PropertyKey> {
 /// leading zeros or separators, such as `0`.
 ///
 /// JavaScript converts a number key to a string, and such an integer converts
-/// to its own digits, so `t[0]` reads the same property as `t["0"]`, and
-/// `o["v"]` the same as `o.v`.
+/// to its own digits, so `t[0]` reads the same property as `t["0"]`. A string
+/// key reads the property it spells, so `o["v"]` reads the same property as
+/// `o.v`.
 ///
-/// Returns `None` for every other key. That includes a number literal that
-/// converts to other text, such as `0x0`, `1e0`, `1.0`, `1_0`, and
-/// `9007199254740993`, which converts to `"9007199254740992"`, and an
+/// Returns `None` for every other key, including a number literal that
+/// converts to other text, such as `0x0`, `1e0`, `1.0`, or `1_0`, and an
 /// expression that is not a literal, such as `k`, `-0`, or a template literal.
+/// An integer literal above 2^53 - 1 can also convert to other text, as
+/// `9007199254740993` converts to `"9007199254740992"`.
 #[expect(
     clippy::wildcard_enum_match_arm,
     reason = "Only string and number literals can name a property by their spelling."

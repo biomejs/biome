@@ -18,10 +18,11 @@
 //! function, or method. Only `let`, `const`, and parameter bindings that are
 //! never reassigned and are read in the root that declares them participate,
 //! so refinements cannot cross closure boundaries. A property path narrows
-//! only when its variable does and the root never writes the path, one of its
-//! prefixes, or a property of one of its prefixes through a key that is not a
-//! literal. The graph does not invalidate facts on writes or calls, which is
-//! why written subjects are excluded.
+//! only when its variable can narrow and the root never writes the path, one
+//! of its prefixes, or any property of one of its prefixes through a key that
+//! does not spell the property's name, such as `o[k]`. The graph does not
+//! invalidate facts on writes or calls, which is why written subjects are
+//! excluded.
 
 mod builder;
 mod expressions;
@@ -73,10 +74,9 @@ pub(crate) enum FlowSubject {
 /// The property that a step of a subject's path reads.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub(crate) enum PropertyKey {
-    /// A property named by an identifier, with its escapes decoded, or by an
-    /// element access key whose spelling is the property's name, so `o.v`,
-    /// `o.\u0076`, and `o["v"]` read the same property, and so do `t[0]` and
-    /// `t["0"]`.
+    /// A property named by an identifier with its escapes decoded, or by an
+    /// element access key that spells the property's name. `o.v`, `o.\u0076`,
+    /// and `o["v"]` read the same property, and so do `t[0]` and `t["0"]`.
     Name(Text),
 }
 

@@ -401,10 +401,10 @@ fn narrowed_callees_resolve_their_calls() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type:
-// an element access with a string or integer literal key reads the same
-// property as a named access, so `o["a"]` and `o.a` share their narrowing, and
-// so do `t[0]` and `t["0"]`.
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type,
+// because an element access with a string or integer literal key reads the
+// same property as a named access. `o["a"]` and `o.a` share their narrowing,
+// and so do `t[0]` and `t["0"]`.
 #[test]
 fn literal_keys_read_the_same_property_as_names() {
     use InferredTypeData::{Null, Number, String};
@@ -460,9 +460,9 @@ fn literal_keys_read_the_same_property_as_names() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) narrows every read below to `string`: a
-// write through a literal key writes only the property it names, and a call
-// such as `a.shift()` never cancels narrowing.
+// TypeScript 6.0.3 (`tsc --strict`) narrows every read below to `string`,
+// because a write through a literal key writes only the property it names, and
+// a call such as `a.shift()` never cancels narrowing.
 #[test]
 fn literal_key_writes_keep_other_properties() {
     use InferredTypeData::String;
@@ -490,8 +490,8 @@ fn literal_key_writes_keep_other_properties() {
         ],
     );
 
-    // TypeScript gives `{ b: string | null }`: writing `o["a"]["b"]` leaves
-    // `o["a"]`.
+    // TypeScript gives `{ b: string | null }`, because writing `o["a"]["b"]`
+    // does not change `o["a"]`.
     const EXTENSION: &str = r#"
         function extension(o: { a: { b: string | null } | null }) {
             /*declared*/o["a"];
@@ -512,11 +512,11 @@ fn literal_key_writes_keep_other_properties() {
 
 // Each expected type keeps `null` or `undefined`. TypeScript 6.0.3
 // (`tsc --strict`) gives the type in the comment after each read. Where it
-// differs, TypeScript narrows the path at the write itself, which Biome does
-// not model yet, or ignores the write: a write through a key that is not a
-// literal (`anyIndex` and `negativeZero`; `NARROWING.md` lists this among the
-// deliberate choices) and `delete` through an element access (`deleted`).
-// Biome's declared type of `a[0]` includes `undefined`.
+// differs, TypeScript either narrows the path at the write itself, which Biome
+// does not model yet, or ignores the write. It ignores a write through a key
+// that is not a literal (`anyIndex` and `negativeZero`) and `delete` through
+// an element access (`deleted`). `NARROWING.md` lists both among the
+// deliberate choices. Biome's declared type of `a[0]` includes `undefined`.
 #[test]
 fn literal_key_writes_cancel_their_path() {
     use InferredTypeData::{Null, String, Undefined};
@@ -562,12 +562,12 @@ fn literal_key_writes_cancel_their_path() {
 }
 
 // TypeScript 6.0.3 (`tsc --strict`) gives the type in the comment after each
-// read. Two keys match only when they name the same property: `-0` is not a
-// literal, `"01"` names another property than `1`, and an integer literal
-// above 2^53 - 1 names the property of the nearest number, so
-// `9007199254740993` names `"9007199254740992"`. TypeScript also matches other
-// spellings of a key, such as `0x0`, `1e0`, a template literal, and an escape;
-// Biome does not, so it is wider there.
+// read. Two keys match only when both are literals that name the same
+// property. `-0` is not a literal, and `"01"` names a different property than
+// `1`. An integer literal above 2^53 - 1 names the property of the nearest
+// number, so `9007199254740993` names `"9007199254740992"`. TypeScript also
+// matches other spellings of a key, such as `0x0`, `1e0`, a template literal,
+// and an escape. Biome does not, so its type is wider for those reads.
 #[test]
 fn keys_that_name_other_properties_do_not_match() {
     use InferredTypeData::{Null, String};

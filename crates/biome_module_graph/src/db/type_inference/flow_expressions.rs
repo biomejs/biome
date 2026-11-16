@@ -78,9 +78,9 @@ impl<'db> ResolutionCtx<'db, '_> {
                 let member_expression = member.member().ok()?;
                 let object = self.flow_operand(&object_expression);
                 let key = self.flow_operand(&member_expression);
-                // As for a static member, the type of the access is the
-                // declared type that a property path with a literal key
-                // narrows.
+                // The declared type of a property path with a literal key is
+                // the type of this access, computed on the narrowed types of
+                // the object and the key when they have them.
                 let declared = if object.is_none() && key.is_none() {
                     self.js_info.flow.read(member.range())?;
                     self.raw_operand(&AnyJsExpression::from(member.clone()))?
