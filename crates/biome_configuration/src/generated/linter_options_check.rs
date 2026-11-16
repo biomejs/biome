@@ -2683,6 +2683,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::use_consistent_enum_value_type::UseConsistentEnumValueTypeOptions,
         >(),
     ));
+    result.push(("nursery", "useConsistentExistenceIndexCheck", TypeId::of::<biome_rule_options::use_consistent_existence_index_check::UseConsistentExistenceIndexCheckOptions>()));
     result.push(("nursery", "useConsistentFontWeightNotation", TypeId::of::<biome_rule_options::use_consistent_font_weight_notation::UseConsistentFontWeightNotationOptions>()));
     result.push((
         "nursery",
