@@ -857,7 +857,7 @@ fn tests_that_biome_cannot_compare_keep_more_members() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type,
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
 // because a test of a `const` that holds a property of an object, as `k` holds
 // `s.kind`, narrows that object, and only that object, as a test of the
 // property does.
@@ -962,7 +962,7 @@ fn discriminants_held_in_constants_narrow_the_object() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 // A test of a `const` that holds `s?.kind` tests no receiver, so `s` keeps
 // `undefined` wherever the property can be `undefined`. A truthiness test also
 // inlines `s?.kind` as an aliased condition, which shows that `s` is not
@@ -1004,7 +1004,7 @@ fn discriminants_held_through_optional_chains_keep_nullish_objects() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type,
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
 // because a test of an element of a destructuring `const` narrows the
 // initializer as a test of the element's property does.
 #[test]
@@ -1065,7 +1065,7 @@ fn destructured_discriminants_narrow_the_initializer() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) keeps every read below as declared. Only
+// TypeScript 7.0.2 (`tsc --strict`) keeps every read below as declared. Only
 // an unannotated `const` holds a discriminant, and only when its initializer
 // reads the property directly or through a pattern that the declarator binds,
 // without a default.
@@ -1112,7 +1112,7 @@ fn constants_that_hold_no_discriminant_keep_the_object() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives `Shape` at the first two reads and
+// TypeScript 7.0.2 (`tsc --strict`) gives `Shape` at the first two reads and
 // `Circle` at the others. An exported `const` holds no discriminant, but the
 // object it reads can be exported, or a `let` at the top level of a file,
 // because only the `const` must keep its value.
@@ -1143,7 +1143,7 @@ fn discriminants_held_at_the_top_level_follow_exports() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) narrows every read below, giving `Circle`
+// TypeScript 7.0.2 (`tsc --strict`) narrows every read below, giving `Circle`
 // or the first tuple. Biome keeps the declared type at each of them. It
 // doesn't follow `s!` or keys that are spelled differently from the property,
 // and loose equality doesn't narrow an object. A read in a closure or inside
@@ -1197,7 +1197,7 @@ fn discriminant_constants_that_biome_does_not_follow_keep_the_object() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives `Ok`, because it takes the rest
+// TypeScript 7.0.2 (`tsc --strict`) gives `Ok`, because it takes the rest
 // element `ok` as the property `r.ok`. Biome keeps the declared type, because
 // `ok` holds an object, which is always truthy, so `r` can be `Err` there.
 #[test]
@@ -1210,7 +1210,7 @@ fn rest_elements_hold_no_discriminant() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 // Inside an aliased condition, the held discriminant narrows the object only
 // when the object cannot change between the `const` and the test, so never a
 // property path such as `w.s`. Outside one, a `const` in a block or a loop,
@@ -1244,7 +1244,7 @@ fn held_discriminants_narrow_through_aliased_conditions() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives `Circle` at every read below,
+// TypeScript 7.0.2 (`tsc --strict`) gives `Circle` at every read below,
 // although in the first six functions the write can make `s.kind` differ from
 // the value the `const` holds, so `s` can be a `Square`, or not match any
 // member, at the read. Biome keeps the declared type there, because a test of
@@ -1288,7 +1288,7 @@ fn writes_to_a_held_discriminant_stop_the_narrowing() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) keeps `o` as declared when it is not a
+// TypeScript 7.0.2 (`tsc --strict`) keeps `o` as declared when it is not a
 // union, because a test of a property narrows only a union. A held
 // discriminant makes its object a subject that only tests of its properties
 // narrow. Collection drops the read of such an object when its annotation
