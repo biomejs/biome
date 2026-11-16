@@ -838,17 +838,19 @@ impl<'db> TypeData<'db> {
         self.normalize_nested_types_with(db, resolve, false)
     }
 
-    /// Normalizes nested types like [`Self::normalize_nested_types`], but keeps
-    /// generic parameters as they are, including their constraints and
-    /// defaults.
+    /// Resolves nested type handles and simplifies structural wrappers while
+    /// keeping generic parameters, including their constraints and defaults,
+    /// unchanged.
     ///
-    /// Member types often declare generic parameters with large constraints,
-    /// such as `RE extends ReferenceExpression<DB, TB>`, and member lookup
-    /// normalizes a member type every time it finds the member. Keeping the
-    /// parameters avoids normalizing those constraints on every lookup.
-    /// Analyzers need the other normalization, because they read a parameter's
-    /// normalized constraint, for example to decide that a value of type `T` is
-    /// always truthy when `T extends "a" | "b"`.
+    /// Member lookup uses this normalization because member lookup normalizes a
+    /// member type every time it finds the member. Member types often declare
+    /// generic parameters with large constraints, such as
+    /// `RE extends ReferenceExpression<DB, TB>`. Keeping the parameters avoids
+    /// normalizing those constraints on every lookup.
+    ///
+    /// Analyzers read a parameter's normalized constraint, so they use
+    /// [`Self::normalize_nested_types`] instead. For example, a value of type
+    /// `T` is always truthy when `T extends "a" | "b"`.
     pub fn normalize_nested_types_keeping_generics(
         self,
         db: &'db dyn TypeDb,

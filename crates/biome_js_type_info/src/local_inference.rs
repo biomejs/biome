@@ -2267,7 +2267,9 @@ impl TypeMember {
             }
             AnyJsClassMember::JsMethodClassMember(member) => member.name().ok().and_then(|name| {
                 let type_parameters = member.type_parameters();
-                // Reusing the enclosing scope lets nongeneric methods share raw types.
+                // Nongeneric methods keep the enclosing class scope. Their raw
+                // types then match those of the other class members, so the
+                // collector registers each shared type once.
                 let method_scope_id = if type_parameters.is_some() {
                     collector
                         .scope_for_node(member.syntax())
@@ -2306,7 +2308,9 @@ impl TypeMember {
             }),
             AnyJsClassMember::TsMethodSignatureClassMember(member) => {
                 let type_parameters = member.type_parameters();
-                // Reusing the enclosing scope lets nongeneric signatures share raw types.
+                // Nongeneric signatures keep the enclosing class scope. Their
+                // raw types then match those of the other class members, so
+                // the collector registers each shared type once.
                 let method_scope_id = if type_parameters.is_some() {
                     collector
                         .scope_for_node(member.syntax())

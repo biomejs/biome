@@ -5,8 +5,8 @@
 //! Normalization resolves those references throughout wrappers such as unions,
 //! intersections, tuples, instances, merged references, and `typeof` types.
 //! Types that cannot contain these references are returned unchanged.
-//! Member types selected by member lookup are normalized without resolving
-//! their local handles or the constraints of their generic parameters.
+//! Member type normalization leaves local handles unresolved and keeps generic
+//! parameters, including their constraints, unchanged.
 //!
 //! Substitution rewrites a type without resolving any references, so it reads
 //! no module inputs and cannot join an inference cycle.
@@ -147,9 +147,10 @@ pub(crate) fn substitute_types_in_root_body<'db>(
 
 /// Returns whether [`normalize_member_type`] could change `ty`.
 ///
-/// Member type normalization leaves local handles unresolved and keeps generic
-/// parameters as they are. Primitives and keywords have no nested types. These
-/// types are returned unchanged, so callers can skip the query for them.
+/// The query returns local handles, generic parameters, primitives, and
+/// keywords unchanged. It leaves local handles unresolved, keeps generic
+/// parameters as they are, and finds no nested types in primitives and
+/// keywords. Callers can skip the query for these types.
 pub(crate) fn member_type_needs_normalization(ty: InferredTypeData<'_>) -> bool {
     !matches!(
         ty,
