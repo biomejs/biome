@@ -16,6 +16,7 @@ domains.json:4:7 deserialize ━━━━━━━━━━━━━━━━━
   i Accepted values:
   
   - astro
+  - biomePlugin
   - convex
   - drizzle
   - react
