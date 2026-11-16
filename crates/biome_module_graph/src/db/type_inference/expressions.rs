@@ -149,9 +149,9 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             RawTypeofExpression::CallArgument(expression) => {
                 let callee = self.resolve(&expression.callee);
-                // The other arguments only select the signature, so they
-                // keep the literal types that a parameter with literal
-                // types would keep, as `WidenedArgument` describes.
+                // The other arguments only select the signature, so the
+                // literal types of their object properties are kept, as
+                // TypeScript keeps them for a parameter with literal types.
                 let arguments = expression
                     .arguments
                     .iter()
@@ -1038,10 +1038,12 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns the type of the call argument whose collected type is
-    /// `reference` and whose resolved type is `ty`, with the literal types
-    /// of the properties of its object expressions kept, as
-    /// [`ResolvedCallArgument::WidenedArgument`] describes, or `None` when
-    /// the argument is no object or array expression or keeps the same type.
+    /// `reference`, with the literal types of the properties of its object
+    /// expressions kept, for the `literal_ty` of a
+    /// [`ResolvedCallArgument::WidenedArgument`].
+    ///
+    /// Returns `None` when the argument is not an object or array expression,
+    /// or when keeping the literal types gives `ty`, its resolved type.
     fn literal_argument(
         &mut self,
         reference: &TypeReference,
@@ -1105,9 +1107,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// the literal types of the properties of its object expressions kept,
     /// also in nested object and array expressions, as a parameter with
     /// literal types keeps them in TypeScript. Other parts of the argument,
-    /// such as the elements of an array that aren't objects, resolve as
-    /// usual. Below `depth` nested expressions, the argument resolves as
-    /// usual too.
+    /// such as the elements of an array that aren't objects, resolve with
+    /// their fresh literal types widened. Beyond `depth` nested expressions,
+    /// the literal types of properties are widened too.
     fn resolve_literal_argument(
         &mut self,
         reference: &TypeReference,

@@ -2,7 +2,7 @@
 //! that initialize them.
 //!
 //! TypeScript gives `let n = 1` the type `number` and `const n = 1` the type
-//! `1`. The type of literal expression is a *fresh* literal type, which
+//! `1`. The type of a literal expression is a *fresh* literal type, which
 //! widens to its primitive type where the value initializes a location that
 //! the program can assign later: a `let` or `var` variable, a property of an
 //! object expression, a class field that isn't `readonly`, an element of an
@@ -14,15 +14,15 @@
 //! `number`. A literal type that an annotation or `as const` declares is not
 //! fresh and stays.
 //!
-//! Collection marks the mutable locations, as
-//! [`TypeofWidenedLiteralExpression`](biome_js_type_info::TypeofWidenedLiteralExpression)
-//! describes, and resolution widens them here. Collection can't tell a fresh
-//! literal type from a declared one, because the raw table stores equal types
-//! once: the `1` of `let n = 1` and the `1` of `let n: 1` share one id. This
-//! module tells them apart by the raw expression that the value comes from:
-//! [`fresh_literal_kinds`] lists the kinds of literals that the value's
-//! literal expressions have, following conditional and logical expressions
-//! and `const` declarations, also into the modules that export them.
+//! Collection wraps the value of each mutable location in a
+//! [`TypeofWidenedLiteralExpression`](biome_js_type_info::TypeofWidenedLiteralExpression),
+//! and resolution widens it here. Collection can't tell a fresh literal type
+//! from a declared one, because the raw table stores equal types once, so
+//! the `1` of `let n = 1` and the `1` of `let n: 1` share one id. This module
+//! tells them apart by the raw expression that the value comes from.
+//! [`fresh_literal_kinds`] lists the kinds of the value's literal
+//! expressions, following conditional and logical expressions and `const`
+//! declarations, also into the modules that export them.
 //!
 //! Widening every literal type of a kind that has a fresh literal gives the
 //! same type as TypeScript, which widens only the fresh ones, because the
@@ -57,8 +57,8 @@ const MAX_SCOPE_STEPS: usize = 1024;
 /// Bounds the `typeof` wrappers looked through to find a literal type.
 const MAX_WRAPPER_STEPS: usize = 16;
 
-/// Returns the kinds of the fresh literal types that the value whose
-/// collected type is `reference`, in `module`, has.
+/// Returns the kinds of the fresh literal types of a value in `module`,
+/// given the collected type of the value, `reference`.
 ///
 /// A value has the fresh literal type of a literal expression, of an operand
 /// of a conditional or logical expression, of a unary minus applied to a
@@ -203,9 +203,9 @@ impl FreshLiteralSearch<'_> {
                 | RawTypeofExpression::This(_)
                 | RawTypeofExpression::Typeof(_) => {}
             },
-            // A reference to another local type stands for an assertion, as
-            // `1 as 1`, whose literal type is not fresh, and a union is a type
-            // annotation, whose literal types aren't either.
+            // A reference to another local type stands for an assertion, such
+            // as `1 as 1`, whose literal type is not fresh. A union is a type
+            // annotation, whose literal types aren't fresh either.
             RawTypeData::Reference(TypeReference::Resolved(_))
             | RawTypeData::Union(_)
             | RawTypeData::Unknown
@@ -342,8 +342,8 @@ impl FreshLiteralSearch<'_> {
 }
 
 impl<'db> ResolutionCtx<'db, '_> {
-    /// Resolves the type that a mutable location takes from its value, as
-    /// [`RawTypeofWidenedLiteralExpression`] describes.
+    /// Resolves the type that a mutable location takes from its value: the
+    /// resolved value of `expression` with its fresh literal types widened.
     pub(super) fn resolve_widened_literal(
         &mut self,
         expression: &RawTypeofWidenedLiteralExpression,
@@ -353,15 +353,14 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns `ty`, the resolved type of the value whose collected type is
-    /// `value`, with its literal types of each kind that the value has a
-    /// fresh literal type of widened to their primitive types, as the module
-    /// documentation describes. With `is_return_type`, `ty` widens only when
-    /// it is a single literal type, as a return type inferred from a
-    /// function's body does.
+    /// `value`, with literal types widened to their primitive types. A literal
+    /// type widens when the value has a fresh literal type of the same kind.
+    /// With `is_return_type`, `ty` widens only when it is a single literal
+    /// type, as a return type inferred from a function's body does.
     ///
-    /// `ty` is returned unchanged, with its handles and wrappers, when it has
-    /// no literal type to widen, which skips the search of the raw tables for
-    /// most values.
+    /// Returns `ty` unchanged, with its handles and wrappers, when it has no
+    /// literal type to widen. The raw tables are searched only when `ty` has
+    /// a literal type.
     pub(super) fn widen_fresh_literals(
         &mut self,
         value: &TypeReference,
@@ -374,8 +373,7 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns `ty` with every primitive literal type that it includes
-    /// widened, as [`Self::widen_fresh_literals`] widens the fresh ones, for
-    /// a value whose raw expression is no longer known. With
+    /// widened, for a value whose raw expression isn't known. With
     /// `is_return_type`, `ty` widens only when it is a single literal type.
     pub(super) fn widen_all_literals(
         &mut self,
@@ -386,8 +384,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns `ty` with its literal types of the kinds that `kinds` returns
-    /// widened, as [`Self::widen_fresh_literals`] describes. `kinds` runs
-    /// only when `ty` has a literal type that could widen.
+    /// widened to their primitive types. With `is_return_type`, `ty` widens
+    /// only when it is a single literal type. `kinds` runs only when `ty` has
+    /// a literal type that could widen.
     fn widen_literals_of_kinds(
         &mut self,
         ty: InferredTypeData<'db>,
@@ -438,9 +437,10 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
-    /// Returns the literal type that `ty` stands for, looking through local
-    /// handles and the `typeof` of a named value, which a shorthand property
-    /// such as `{ K }` has, or `None` when `ty` isn't a literal type.
+    /// Returns the literal type that `ty` stands for, or `None` when `ty`
+    /// isn't a literal type. Looks through local handles and through the
+    /// `typeof` of a named value, which a shorthand property such as `{ K }`
+    /// has.
     fn literal_of(&mut self, mut ty: InferredTypeData<'db>) -> Option<InferredTypeData<'db>> {
         for _ in 0..MAX_WRAPPER_STEPS {
             ty = self.resolve_inferred_type(ty);
@@ -455,11 +455,11 @@ impl<'db> ResolutionCtx<'db, '_> {
         None
     }
 
-    /// Resolves `raw`, the type of an object expression, whose data is
-    /// `object`, with the fresh literal types of the properties that no
-    /// `as const` asserts widened, as TypeScript widens them where no
-    /// contextual type keeps them: `{ a: 1 }` is `{ a: number }`, while
-    /// `{ a: 1 as const }` is `{ a: 1 }`.
+    /// Resolves `raw`, the type of an object expression whose data is
+    /// `object`, and widens the fresh literal types of its properties, as
+    /// TypeScript does where no contextual type keeps them. A property that
+    /// `as const` asserts keeps its literal type, so `{ a: 1 }` is
+    /// `{ a: number }`, while `{ a: 1 as const }` is `{ a: 1 }`.
     pub(super) fn resolve_object_expression(
         &mut self,
         raw: &RawTypeData,

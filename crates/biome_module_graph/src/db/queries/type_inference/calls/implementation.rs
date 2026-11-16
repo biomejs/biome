@@ -2049,13 +2049,14 @@ pub(in crate::db) enum ResolvedCallArgument<'db> {
         const_ty: InferredTypeData<'db>,
     },
     /// An object or array expression whose properties have fresh literal
-    /// types, which `ty` widens, as TypeScript does when no parameter gives
-    /// them a literal type, and `literal_ty` keeps. A parameter selects an
-    /// overload with `literal_ty`, as TypeScript checks each overload's
-    /// parameter with the argument's literal types kept where the parameter
-    /// has literal types, so `{ kind: "b" }` matches `{ kind: "b" }` and not
-    /// `{ kind: "a" }`. A generic parameter is inferred from `ty`, so `T` is
-    /// `{ a: number }` for `id({ a: 1 })`.
+    /// types. `ty` widens those literal types, as TypeScript does when no
+    /// parameter gives them a literal type, and `literal_ty` keeps them.
+    ///
+    /// A parameter is matched against `literal_ty`, because TypeScript keeps
+    /// the argument's literal types where the parameter has literal types,
+    /// so `{ kind: "b" }` matches `{ kind: "b" }` and not `{ kind: "a" }`
+    /// when an overload is selected. A generic parameter is inferred from
+    /// `ty`, so `T` is `{ a: number }` for `id({ a: 1 })`.
     WidenedArgument {
         ty: InferredTypeData<'db>,
         literal_ty: InferredTypeData<'db>,

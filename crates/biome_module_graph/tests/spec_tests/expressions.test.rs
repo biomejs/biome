@@ -236,7 +236,7 @@ fn test_infer_module_types_widens_array_expressions_on_build() {
         ("conditional", "instanceof Array<number>"),
         ("negativeBigints", "instanceof Array<BigInt>"),
         // A destructuring pattern gives the elements no literal type, so
-        // TypeScript 7.0.2 widens them (`narrowing-probes/fix-d/tests.ts` L18).
+        // TypeScript 7.0.2 widens them.
         ("first", "BigInt"),
         ("second", "number"),
         ("picked", "boolean"),

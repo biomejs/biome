@@ -2705,14 +2705,15 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
     /// `undefined` added to `target` when it is optional.
     ///
     /// `widens` tells whether the members of the source and of the target
-    /// may have literal types that TypeScript widens, as
-    /// [`Self::may_widen_members`] describes. Biome widens the fresh literal
-    /// types of initializers, but it can't tell every fresh literal type, as
-    /// the result `1` of `id(1)`, so `{ a: id(1) }` can be `{ a: number }` in
-    /// TypeScript. The member is then also compared with its literal types
-    /// widened, and the result is undetermined when the comparisons
-    /// disagree. Two members of the same type on two sides that both may
-    /// widen are taken as the same member, as a subclass inherits it.
+    /// may have literal types that TypeScript widens, as for an object
+    /// literal or an instance of a class that is not built in. Each flag
+    /// comes from [`Self::may_widen_members`]. Biome widens the fresh literal
+    /// types of initializers, but it can't tell every fresh literal type,
+    /// such as the result `1` of `id(1)`, so `{ a: id(1) }` can be
+    /// `{ a: number }` in TypeScript. The member is then also compared with
+    /// its literal types widened, and the result is undetermined when the
+    /// comparisons disagree. Two members of the same type on two sides that
+    /// both may widen are taken as the same member, as a subclass inherits it.
     fn is_widened_member_assignable(
         &mut self,
         source: TypeData<'db>,
@@ -2752,7 +2753,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
     /// Returns whether the members of `ty` may have literal types where
     /// TypeScript widens the literal to its primitive type: whether `ty` is
     /// the type of an object literal or an instance of a class that is not
-    /// built in, whose fields can take their types from initializers whose
+    /// built in. Their fields can take their types from initializers whose
     /// fresh literal types Biome doesn't see.
     fn may_widen_members(&mut self, ty: TypeData<'db>) -> bool {
         match ty {

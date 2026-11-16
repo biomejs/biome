@@ -1,9 +1,10 @@
-//! The kinds of fresh literal types that a value has, which TypeScript widens
-//! where the value initializes a mutable location.
+//! The primitive kinds of fresh literal types, which TypeScript widens where
+//! a value initializes a mutable location.
 //!
-//! Collection marks those locations, as [`TypeofWidenedLiteralExpression`]
-//! describes, and resolution in the module graph finds the kinds of the fresh
-//! literal types of each value, which can take it into other modules.
+//! Collection wraps the value of each mutable location in a
+//! [`TypeofWidenedLiteralExpression`]. Resolution in the module graph then
+//! collects the kinds of the fresh literal types of the value, following
+//! names into other modules, and widens the literal types of those kinds.
 
 use enumflags2::BitFlags;
 
@@ -33,15 +34,16 @@ pub enum PrimitiveLiteralKind {
 /// the primitive type absorbs the other literal types of its kind, as
 /// `string` absorbs `"a"` in `"a" | string`. It is wider only for a literal
 /// type that is both fresh and declared, which TypeScript keeps. All kinds
-/// stand for a value whose fresh literal types aren't known, which is never
-/// narrower than widening only the fresh ones.
+/// stand for a value whose fresh literal types aren't known. Widening all of
+/// them is never narrower than widening only the fresh ones.
 pub type FreshLiteralKinds = BitFlags<PrimitiveLiteralKind>;
 
 impl PrimitiveLiteralKind {
-    /// Returns the kind of `literal`, the raw type of a literal expression,
-    /// or `None` for an object or regular expression literal, which has no
-    /// primitive type, and for a template literal type, which only a type
-    /// annotation has.
+    /// Returns the kind of `literal`, the raw type of a literal expression.
+    ///
+    /// Returns `None` for an object or regular expression literal, because it
+    /// has no primitive type, and for a template literal type, because only a
+    /// type annotation has one.
     pub fn from_literal_expression(literal: &Literal) -> Option<Self> {
         match literal {
             Literal::BigInt(_) => Some(Self::BigInt),

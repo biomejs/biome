@@ -105,8 +105,7 @@ fn test_infer_module_types_merges_interfaces_and_classes_of_one_name() {
         binding("interfaceMember"),
         "1"
     ));
-    // Class fields take the widened literal types of their initializers
-    // (`narrowing-probes/fix-d/tests.ts` L17).
+    // Class fields take the widened literal types of their initializers.
     assert!(is_inferred_number(&db, binding("classMember")));
     assert!(is_inferred_number_literal(&db, binding("throughNew"), "1"));
     assert!(is_inferred_number(&db, binding("interfaceBaseMember")));

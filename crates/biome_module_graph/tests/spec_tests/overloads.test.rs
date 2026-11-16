@@ -182,8 +182,7 @@ fn test_infer_module_types_substitutes_callback_returns_through_type_aliases_on_
     let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
 
     // The callback's return type is widened, because `T` gives it no literal
-    // type, so `T` is `number`, as in TypeScript 7.0.2
-    // (`narrowing-probes/fix-d/tests.ts` L13, L14).
+    // type, so `T` is `number`, as in TypeScript 7.0.2.
     for name in ["aliased", "inline"] {
         let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
             .unwrap_or_else(|| panic!("{name} binding type must be inferred"));
