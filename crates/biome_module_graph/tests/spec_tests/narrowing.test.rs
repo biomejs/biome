@@ -1516,8 +1516,7 @@ fn narrowing_is_isolated_by_binding_identity() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives `number` after the write and
-// `string` in the closure, which is created after the test
-// (`narrowing-probes/m5-l2/existing.ts` L8, `m5-l4/existing.ts` L15).
+// `string` in the closure, which is created after the test.
 #[test]
 fn writes_narrow_and_captures_continue_the_flow() {
     use InferredTypeData::{Number, String};
@@ -2050,11 +2049,11 @@ fn variables_written_by_destructuring_or_logical_assignments_narrow() {
     }
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5-l4/existing.ts` L13 for `method`). A method of a
-// class expression keeps the narrowing of a parameter that it captures, when
-// nothing writes the parameter. TypeScript analyzes a class field with an
-// initializer on its own, so reads in the field keep their declared type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A method of a class expression keeps the narrowing of a parameter that it
+// captures, when nothing writes the parameter. TypeScript analyzes a class
+// field with an initializer on its own, so reads in the field keep their
+// declared type.
 #[test]
 fn class_expressions_keep_narrowing_outside_their_members() {
     use InferredTypeData::{Null, String};

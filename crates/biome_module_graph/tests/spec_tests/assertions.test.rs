@@ -458,8 +458,7 @@ fn assertions_respect_binding_identity_writes_and_existing_subject_restrictions(
         ("written", "value", &[Number]),
         ("argumentWrite", "value", &[InferredTypeData::Unknown]),
         // TypeScript 7.0.2 (`tsc --strict`) narrows a read in a closure
-        // created after the assertion (`narrowing-probes/m5-l4/existing.ts`
-        // L10).
+        // created after the assertion.
         ("captured", "value", &[String]),
         // TypeScript 7.0.2 (`tsc --strict`) narrows the read inside the try
         // block.

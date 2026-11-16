@@ -27,10 +27,10 @@ fn narrowing_db(source: &str) -> (TestModuleDb, ModuleInfo) {
     (db, module)
 }
 
-/// Names each member of `ty`, sorted: an interface by its name, Biome's
-/// Unknown, which a read on a path that no value takes has, as `Unknown`, and
+/// Names each member of `ty`, sorted. An interface is named by its name, and
 /// any other type by its formatted text on one line, such as `string`,
-/// `null`, or `string: a`.
+/// `null`, or `string: a`. Biome's Unknown, the type of a read on a path that
+/// no value takes, is named `Unknown`.
 fn variant_names(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
     if ty == InferredTypeData::Unknown {
         return vec!["Unknown".to_owned()];
@@ -58,7 +58,7 @@ fn variant_names(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
     names
 }
 
-/// Declarations shared by the tests.
+/// Declarations that [`assert_reads`] puts before each test source.
 const DECLARATIONS: &str = r#"
     declare function f<T>(): T;
     declare const c: boolean;
@@ -68,10 +68,10 @@ const DECLARATIONS: &str = r#"
     interface Square { kind: "s"; w: number }
 "#;
 
-/// Asserts the type of each `(marker, expression, expected)` read in `source`,
-/// which follows [`DECLARATIONS`], by the names of its members, as
-/// [`variant_names`] gives them, and that complete module inference gives
-/// each read the type that a lookup gives it.
+/// Asserts the type of each `(marker, expression, expected)` read in `source`
+/// by the names of its members (see [`variant_names`]). Also asserts that
+/// complete module inference gives each read the type that a lookup gives
+/// it.
 fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     let source = format!("{DECLARATIONS}{source}");
     let lookups: Vec<_> = {
@@ -113,12 +113,11 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5/closures.ts` L6, L7, L9, L11, L14, L16, L17, L19,
-// L24 to L28, L30 to L33, L36 to L38, L40, L45). A read in a function or
-// arrow expression, or in a method or accessor of an object literal or a
-// class expression, continues the flow where the closure is created: always
-// for a `const`, and for a parameter or a `let` past its last assignment.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A read in a function or arrow expression, or in a method or accessor of an
+// object literal or a class expression, continues the flow where the closure
+// is created. It always does for a `const`, and for a parameter or a `let`
+// past its last assignment.
 #[test]
 fn closures_continue_the_flow_where_they_are_created() {
     assert_reads(
@@ -173,13 +172,12 @@ fn closures_continue_the_flow_where_they_are_created() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below its declared type
-// (`narrowing-probes/m5/closures.ts` L8, L10, L12, L13, L15, L18, L20 to
-// L23, L29, L34, L35, L39, L43, L44, L47). A parameter or a `let` that its
-// function assigns after the read, or that another function assigns, a
-// property path, a `var`, a function declaration, a method of a class
-// declaration, and a field initializer start from the declared type, and so
-// does a closure created before the test.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below its declared type.
+// A read in a closure starts from the declared type when it reads a `var`, a
+// property path, or a parameter or a `let` that its function assigns after
+// the read or that another function assigns. So does a read in a function
+// declaration, a method of a class declaration, or a field initializer, and
+// a read in a closure created before the test.
 #[test]
 fn closures_keep_the_declared_type_where_typescript_does() {
     assert_reads(
@@ -225,11 +223,10 @@ fn closures_keep_the_declared_type_where_typescript_does() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives the narrower type in the comment for
-// each read below (`narrowing-probes/m5/closures.ts` L41, L42, L46, L48). A
-// class static block continues the flow of the code around its class, and so
-// does a function called where it is defined, whose writes change the reads
-// after the call; Biome analyzes both on their own. Biome also evaluates no
-// computed key of a class member.
+// each read below. In TypeScript, a class static block continues the flow of
+// the code around its class, and so does a function called where it is
+// defined, so its writes change the reads after the call. Biome analyzes both
+// on their own. Biome also evaluates no computed key of a class member.
 #[test]
 fn closures_that_biome_narrows_less() {
     assert_reads(
@@ -252,11 +249,10 @@ fn closures_that_biome_narrows_less() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5/closures2.ts` L6 to L15, L19 to L26). The elements of
-// a destructuring pattern, a discriminated union, an aliased condition, and
-// a capture through other closures continue too. A test inside a closure
-// narrows further from the type where the closure is created.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// The elements of a destructuring pattern, a discriminated union, an aliased
+// condition, and a capture through other closures continue too. A test inside
+// a closure narrows further from the type where the closure is created.
 #[test]
 fn closures_narrow_patterns_unions_and_their_own_tests() {
     assert_reads(
@@ -311,12 +307,11 @@ fn closures_narrow_patterns_unions_and_their_own_tests() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5/closures3.ts` L5 to L12). An assignment counts until
-// the end of the outermost variable or expression statement, `if`, loop,
-// `switch`, `try`, or class declaration around it that starts after the
-// declaration, so a closure created inside that statement keeps the
-// declared type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// An assignment counts until the end of the outermost variable or expression
+// statement, `if`, loop, `switch`, `try`, or class declaration around it that
+// starts after the declaration, so a closure created inside that statement
+// keeps the declared type.
 #[test]
 fn assignments_count_until_the_end_of_their_statement() {
     assert_reads(
@@ -343,8 +338,7 @@ fn assignments_count_until_the_end_of_their_statement() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5-l4/edge.ts` L12 to L18, L20 to L38, L41 to L48).
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 // A `catch` variable and a destructured `let` follow the rule of a `let`.
 // An assignment in a `return` statement or a labeled block counts from its
 // own position or its expression statement, a `for` statement's update
@@ -425,11 +419,10 @@ fn closures_follow_typescripts_rule_in_every_statement_kind() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5-l4/chains.ts` L12 to L18). A closure nested in another
-// one continues the flow of each closure around it, so the tests of every
-// one of them narrow it, and an element of a destructuring pattern continues
-// the narrowing of its pattern.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A closure nested in another one continues the flow of each closure around
+// it, so the tests of every one of them narrow it, and an element of a
+// destructuring pattern continues the narrowing of its pattern.
 #[test]
 fn chains_of_closures_resolve_outward() {
     assert_reads(
@@ -456,15 +449,13 @@ fn chains_of_closures_resolve_outward() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5-l4/chains.ts` L6 to L11, `m5-l4/uninit.ts` L4 to L7,
-// `m5-l4/doc.ts` L5, and `m5/uninit.ts` L11). A `let` without an initializer
-// starts with `undefined` where it is declared, but TypeScript assumes it
-// assigned there for a read in a nested function, a closure included, once
-// any code assigns it (a deliberate-choice row of `NARROWING.md`). A `let`
-// that nothing assigns keeps `undefined`, and a read where `undefined`
-// remains, although the declared type lacks it, gets the declared type
-// (TS2454).
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A `let` without an initializer starts with `undefined` where it is
+// declared, but TypeScript assumes it assigned there for a read in a nested
+// function, a closure included, when any code assigns it (a deliberate-choice
+// row of `NARROWING.md`). A `let` that nothing assigns keeps `undefined`, and
+// a read where `undefined` remains, although the declared type lacks it, gets
+// the declared type (TS2454).
 #[test]
 fn closures_read_uninitialized_variables_from_their_start() {
     assert_reads(
@@ -500,10 +491,9 @@ fn closures_read_uninitialized_variables_from_their_start() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5-l4/unreachable.ts` L8, L10 to L20). A read in a
-// closure created in unreachable code, or in unreachable code of a closure,
-// gets the declared type, as a read in unreachable code does.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A read in a closure created in unreachable code, or in unreachable code of
+// a closure, gets the declared type, as a read in unreachable code does.
 #[test]
 fn closures_in_unreachable_code_keep_the_declared_type() {
     assert_reads(
@@ -538,13 +528,13 @@ fn closures_in_unreachable_code_keep_the_declared_type() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at every read below
-// (`narrowing-probes/m5-l4/unreachable.ts` L6, L7, L9, `m5-l4/constant.ts`
-// L5, L9): it finds the code after a call that returns `never` and the
+// TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at every read
+// below, because it finds the code after a call that returns `never` and the
 // branch of `if (false)` unreachable, and gives a read there the declared
 // type. Biome evaluates that code as reachable, so it narrows these reads,
-// those in closures created there too: narrower than TypeScript, only in
-// code that TypeScript finds unreachable (a Limits bullet of `NARROWING.md`).
+// including those in closures created there. Biome is narrower than
+// TypeScript only in code that TypeScript finds unreachable (a Limits bullet
+// of `NARROWING.md`).
 #[test]
 fn closures_in_code_that_only_typescript_finds_unreachable() {
     assert_reads(
@@ -565,11 +555,10 @@ fn closures_in_code_that_only_typescript_finds_unreachable() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `string` at the first two reads
-// below (`narrowing-probes/m5-l4/edge.ts` L9, L11), and at `top`
-// (`m5/closures2.ts` L17). Biome keeps the declared type of a `let` declared
-// at the top level of a file, because it can't tell a module from a script,
-// whose top-level `let` another script can write.
+// TypeScript 7.0.2 (`tsc --strict`) gives `string` at every read below.
+// Biome keeps the declared type of a `let` declared at the top level of a
+// file, because it can't tell a module from a script, whose top-level `let`
+// another script can write.
 #[test]
 fn closures_at_the_top_level_of_a_module() {
     assert_reads(
