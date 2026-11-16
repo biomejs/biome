@@ -1128,11 +1128,12 @@ fn predicate_match<'db>(
     let is_candidate_subtype =
         |resolve: &mut TypeResolver<'db, '_>| is_subtype(db, candidate, member, resolve);
     Some(match is_subtype(db, member, candidate, resolve) {
-        // Biome identifies a class by its contents, which include the scope
-        // it opens in its module, and by the handle that names it. Two
-        // classes with the same contents and no handle, as one class in each
-        // of two modules with equal scopes, may be two declarations, which
-        // TypeScript tells apart when they have private members.
+        // Two equal class instances without a handle may be two declarations,
+        // so Biome can't tell how they relate. Biome identifies a class by its
+        // contents, including the scope it opens in its module, and by the
+        // handle that names it. One class in each of two modules can have the
+        // same contents and equal scopes. TypeScript tells such classes apart
+        // when they have private members.
         Assignability::Assignable
             if member == candidate && is_class_instance_without_handle(db, member, resolve) =>
         {

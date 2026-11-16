@@ -535,10 +535,11 @@ pub struct Class {
     /// The scope that the class declaration or expression opens, or `None`
     /// for a class without one, such as a generated global.
     ///
-    /// Raw types are deduplicated by content, so without it two classes with
-    /// the same contents, such as `class K { k = 1 }` in two namespaces of
-    /// one module, would be one type, and `instanceof` couldn't tell them
-    /// apart. One declaration still gives one type wherever it is collected.
+    /// Two classes with the same contents and different scopes are different
+    /// types, so `instanceof` tells apart `class K { k = 1 }` in two
+    /// namespaces of one module. Raw types are deduplicated by content, so
+    /// without the scope those classes would be one type. One declaration
+    /// gives one type wherever it is collected, because its scope is the same.
     pub scope_id: Option<ScopeId>,
 }
 
@@ -833,13 +834,13 @@ pub struct Namespace {
     pub members: Box<[TypeMember]>,
 
     /// The scope that declares the outermost namespace around this one, or
-    /// this one itself when no namespace encloses it, or `None` when Biome
-    /// has no scopes for the declaration.
+    /// the scope that declares this one when no namespace encloses it. `None`
+    /// when Biome has no scopes for the declaration.
     ///
-    /// With [`Self::enclosing`], it tells namespaces with the same path apart
-    /// as TypeScript does: namespaces of one name merge when the same
-    /// namespace or scope declares them, so `namespace M {}` twice in one
-    /// module is one type, which holds the members of both, while
+    /// Together with [`Self::enclosing`], it tells namespaces with the same
+    /// path apart the way TypeScript does. Namespaces of one name merge when
+    /// the same namespace or scope declares them. So `namespace M {}` twice in
+    /// one module is one type that holds the members of both, while
     /// `namespace A { namespace N {} }` and `namespace B { namespace N {} }`
     /// are two.
     pub scope_id: Option<ScopeId>,

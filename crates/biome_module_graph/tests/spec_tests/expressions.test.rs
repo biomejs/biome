@@ -753,8 +753,7 @@ fn test_infer_module_types_evaluates_conditional_logical_fast_paths_on_build() {
     ));
 
     // TypeScript 7.0.2 keeps both branches of a conditional expression even
-    // when its test is always truthy, so `conditional` is `"yes" | 1`
-    // (`narrowing-probes/fix-a/spec.ts` L7).
+    // when its test is always truthy, so `conditional` is `"yes" | 1`.
     let conditional_ty = inferred_binding_ty_by_name(&db, index_module, inferred, "conditional")
         .expect("conditional binding type must be inferred");
     let conditional_ty = inferred.resolve_type(&db, conditional_ty);

@@ -1371,12 +1371,12 @@ fn logical_and_keeps_broad_number_as_its_falsy_part() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) types each conditional expression below
-// as the union of its branches (`narrowing-probes/fix-a/spec.ts` L5 to L19):
-// a test that can never be truthy, or never falsy, removes no branch, but a
-// branch of type `never` adds nothing, including a read of the tested
-// variable that the test leaves no value, which Biome reads as Unknown. The
-// `narrowed*` cases reach the expression with a narrowed test or branch, and
-// the others without.
+// as the union of its branches. A test that can never be truthy, or never
+// falsy, removes no branch. A branch of type `never` adds nothing. TypeScript
+// types a read of the tested variable as `never` when the test leaves the
+// variable no value, and Biome reads it as Unknown, so such a read adds
+// nothing either. The `narrowed*` cases and `nullishBranch` reach the
+// expression with a narrowed test or branch, and the others without.
 #[test]
 fn conditional_expressions_keep_both_branches() {
     const SOURCE: &str = r#"

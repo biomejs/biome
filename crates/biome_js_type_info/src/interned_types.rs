@@ -2756,8 +2756,9 @@ pub struct InternedClass<'db> {
     pub name: Option<Text>,
     #[returns(copy)]
     pub is_builtin: bool,
-    /// See [`crate::type_data::Class::scope_id`]. Two classes with the same
-    /// contents and different scopes are different values.
+    /// The scope that the class opens, or `None` for a class without one.
+    /// Two classes with the same contents and different scopes are different
+    /// values. See [`crate::type_data::Class::scope_id`].
     #[returns(copy)]
     pub scope_id: Option<ScopeId>,
 }
@@ -2795,7 +2796,9 @@ pub struct InternedInterface<'db> {
     pub extends: Box<[TypeData<'db>]>,
     pub members: Box<[TypeMember<'db>]>,
     pub name: Text,
-    /// See [`crate::type_data::Interface::scope_id`].
+    /// The scope that the interface opens, or `None` for an interface without
+    /// one. Two interfaces with the same contents and different scopes are
+    /// different values. See [`crate::type_data::Interface::scope_id`].
     #[returns(copy)]
     pub scope_id: Option<ScopeId>,
 }

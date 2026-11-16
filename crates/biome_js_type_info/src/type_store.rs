@@ -107,9 +107,10 @@ pub trait RawTypeCollector {
         None
     }
 
-    /// Returns the scope around the one that `node` opens, which is the scope
-    /// that declares `node` when `node` is a declaration with its own scope,
-    /// such as a namespace, or `None` for collectors without a semantic model.
+    /// Returns the scope around the one that `node` opens. For a declaration
+    /// with its own scope, such as a namespace, this is the scope that
+    /// declares `node`. Returns `None` for collectors without a semantic
+    /// model.
     fn enclosing_scope_for_node(&self, _node: &JsSyntaxNode) -> Option<ScopeId> {
         None
     }

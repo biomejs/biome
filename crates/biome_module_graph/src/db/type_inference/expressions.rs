@@ -362,12 +362,12 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
-    /// Returns the type of a conditional expression whose branches have the
-    /// types `consequent` and `alternate`: their union, whatever the test, as
-    /// TypeScript gives it. A branch of type `never`, such as a call to a
-    /// function that never returns, adds nothing, so `x ? 1 : fail()` is `1`.
-    /// TypeScript keeps both branches even when the test is always truthy or
-    /// always falsy, as `true ? 1 : "s"`, which is `1 | "s"`.
+    /// Returns the union of `consequent` and `alternate`, the types of the
+    /// branches of a conditional expression, whatever the test, as TypeScript
+    /// does. Both branches count even when the test is always truthy or
+    /// always falsy, so `true ? 1 : "s"` is `1 | "s"`. A branch of type
+    /// `never`, such as a call to a function that never returns, adds
+    /// nothing, so `x ? 1 : fail()` is `1`.
     fn resolve_conditional_expression(
         &self,
         consequent: InferredTypeData<'db>,

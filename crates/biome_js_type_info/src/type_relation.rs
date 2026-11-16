@@ -458,8 +458,9 @@ fn is_decimal_integer_name(name: &str) -> bool {
 ///   through different handles, or through a handle and without one, such as
 ///   one class declared in each of two modules, are undetermined, because
 ///   TypeScript relates classes with private members only to themselves and
-///   their subclasses. Two such classes in two namespaces of one module are
-///   different classes, which are undetermined for the same reason.
+///   their subclasses. Two classes with the same members in two namespaces
+///   of one module are different classes, so their instances are
+///   undetermined for the same reason.
 /// - A property of the type of an object literal or of an instance of a
 ///   class that is not built in can have the literal type of its
 ///   initializer, as `1` for `{ a: 1 }`, where TypeScript widens it to
@@ -565,10 +566,10 @@ pub(crate) fn instance_types<'db>(
 /// another type without a declaration, and none of these is derived from a
 /// class or an interface.
 ///
-/// Biome identifies a declaration by the contents that it collects, which
-/// include the scope that the declaration opens in its module, together with
+/// Biome identifies a declaration by the contents that it collects and by
 /// the handle that names it when Biome reaches it through one, as for a class
-/// declared in a module or a namespace that a module exports. So two classes
+/// declared in a module or a namespace that a module exports. The contents
+/// include the scope that the declaration opens in its module, so two classes
 /// with the same members in two namespaces of one module are two
 /// declarations. Two declarations with the same contents and different
 /// handles, such as two identical classes in two modules, can't be told from
@@ -3587,12 +3588,12 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         result
     }
 
-    /// Returns whether `a` and `b` are the same declaration, as
-    /// [`is_derived_from`] identifies declarations, or `None` when they have
-    /// the same contents and different handles, as identical declarations in
-    /// two modules can, whose scopes may be equal. Normalization can intern a
-    /// second copy of a built-in class, so built-in classes are also compared
-    /// by name.
+    /// Returns whether `a` and `b` are the same declaration by comparing their
+    /// contents, including the scope each opens in its module. Returns `None`
+    /// when they have the same contents and different handles, because two
+    /// identical declarations in two modules can have equal scopes.
+    /// Normalization can intern a second copy of a built-in class, so built-in
+    /// classes are also compared by name.
     fn is_same_declaration(&self, a: Declaration<'db>, b: Declaration<'db>) -> Option<bool> {
         let is_same = a.data == b.data
             || matches!(

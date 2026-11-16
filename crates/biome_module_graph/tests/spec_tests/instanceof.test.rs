@@ -456,10 +456,9 @@ function copy(x: KA | string) { if (x instanceof KB) /*copy*/x; else /*copyElse*
     }
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/fix-a/identity_spec.ts` L10 to L14), except where a
-// comment gives TypeScript's type. Two classes with the same name and members
-// in two namespaces of one module are two declarations.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment gives TypeScript's type. Two classes with the same
+// name and members in two namespaces of one module are two declarations.
 #[test]
 fn instanceof_tells_classes_with_the_same_contents_apart() {
     assert_reads(
@@ -475,9 +474,9 @@ fn instanceof_tells_classes_with_the_same_contents_apart() {
         function ownParent(x: Q1.L | string) { if (x instanceof Q1.K) /*ownParent*/x; else /*ownParentElse*/x; }
         "#,
         &[
-            // `P2.K`, which TypeScript relates to `P1.K` by its members. Biome
-            // doesn't, because a class can declare private members, so the
-            // read keeps its type.
+            // TypeScript gives `P2.K`, because it relates `P2.K` to `P1.K` by
+            // their members. Biome doesn't, because a class can declare
+            // private members, so the read keeps its type.
             ("other", "x", &["instanceof K", "string"]),
             ("otherElse", "x", &["instanceof K", "string"]),
             ("same", "x", &["instanceof K"]),
@@ -485,7 +484,8 @@ fn instanceof_tells_classes_with_the_same_contents_apart() {
             ("bothDeclared", "x", &["instanceof K", "instanceof K"]),
             ("both", "x", &["instanceof K"]),
             ("bothElse", "x", &["instanceof K"]),
-            // `Q2.K`, as for `other`.
+            // TypeScript gives `Q2.K`, because it relates `Q2.K` to `Q1.L` by
+            // their members. Biome doesn't, so the read keeps its type.
             ("parent", "x", &["instanceof L", "string"]),
             ("parentElse", "x", &["instanceof L", "string"]),
             ("ownParent", "x", &["instanceof L"]),

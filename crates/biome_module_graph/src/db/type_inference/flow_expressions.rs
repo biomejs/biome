@@ -161,8 +161,8 @@ impl<'db> ResolutionCtx<'db, '_> {
                 let consequent = self.flow_operand(&consequent_expression);
                 let alternate = self.flow_operand(&alternate_expression);
                 // The test doesn't change the type of the expression, so
-                // without a refined branch it is the type that inference
-                // gives without flow.
+                // when neither branch is narrowed, the expression has the type
+                // that inference gives it without flow.
                 if consequent.is_none() && alternate.is_none() {
                     return None;
                 }
@@ -254,19 +254,19 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
-    /// Returns the type that the branch `branch` of a conditional expression
-    /// whose test is `test` adds to the type of the expression, given the
-    /// branch's type `ty`. `positive` is true for the branch that runs when
-    /// the test is truthy.
+    /// Returns the type that `branch` adds to the type of a conditional
+    /// expression with the test `test`. `ty` is the type of `branch`, and
+    /// `positive` is true for the branch that runs when the test is truthy.
     ///
-    /// TypeScript gives a conditional expression the union of the types of
-    /// its branches, whatever its test, and a branch of type `never` adds
-    /// nothing. A branch that only reads the variable that the test reads, as
-    /// `x` in `x ? 1 : x`, is `never` in TypeScript when the test leaves the
-    /// variable no value in that branch, and Biome reads it as Unknown there,
-    /// so such a branch adds nothing either: with `x: { a: number }`,
-    /// `x ? 1 : x` is `1`. Any other branch gives `ty`, even when the test
-    /// can never select it, as in TypeScript, so `x ? 1 : "s"` is `1 | "s"`.
+    /// TypeScript types a conditional expression as the union of its
+    /// branches, whatever the test, so this returns `ty` even when the test
+    /// can never select `branch`. With `x: { a: number }`, `x ? 1 : "s"` is
+    /// `1 | "s"`.
+    ///
+    /// Returns `never`, which adds nothing to the union, when `branch` only
+    /// reads the variable that `test` reads, Biome reads `branch` as Unknown,
+    /// and the test leaves the variable no value in that branch. TypeScript
+    /// types such a read as `never`, so with the same `x`, `x ? 1 : x` is `1`.
     fn conditional_branch(
         &mut self,
         test: &AnyJsExpression,

@@ -198,8 +198,7 @@ fn test_infer_module_types_aggregates_merged_namespace_members() {
 
 // TypeScript 7.0.2 (`tsc --strict`) merges namespaces of one name only when
 // one scope or one namespace declares them, so `A.N` has no `b` and `B.N` no
-// `a` (TS2339), while `M.N` has both members
-// (`narrowing-probes/fix-a/namespaces.ts` L7 to L12).
+// `a` (TS2339), while `M.N` has both members.
 #[test]
 fn test_infer_module_types_keeps_namespaces_of_one_name_in_different_scopes_apart() {
     let fs = MemoryFileSystem::default();
