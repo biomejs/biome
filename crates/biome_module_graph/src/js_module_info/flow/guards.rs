@@ -135,14 +135,15 @@ pub(crate) enum FlowGuard {
     Bypass { switch: u32, guard: usize },
     /// The call point at index `call` in [`RootFlow::calls`], whose result
     /// is truthy when `positive` is true and falsy otherwise. A statement
-    /// call's guard is always positive: it stands for the call returning.
+    /// call's guard is always positive, because it stands for the call
+    /// returning.
     ///
-    /// What the call narrows depends on its callee's signature, which
-    /// inference resolves in the context that reads a subject and passes to
-    /// the solve: a type predicate or an assertion narrows the argument or
-    /// the receiver that it names, and an `asserts value` signature applies
-    /// the guard of its argument decomposed as a condition that holds. A
-    /// call without such a signature keeps the incoming type.
+    /// What the call narrows depends on its callee's signature. Inference
+    /// resolves the signature in the context that reads a subject and passes
+    /// its effect to the solve. A type predicate or an assertion narrows the
+    /// argument or the receiver that it names, and an `asserts value`
+    /// signature applies the guard of its argument decomposed as a condition
+    /// that holds. A call without such a signature keeps the incoming type.
     ///
     /// [`RootFlow::calls`]: super::RootFlow::calls
     Call { call: u32, positive: bool },
@@ -259,9 +260,9 @@ pub(crate) fn guard_signature<'a>(
 /// the contract holds. The guard's collected signature and its declaration
 /// select the tested argument. Collection never infers the guard's body.
 ///
-/// A call of a local function is decided from its collected signature. Any
-/// other call whose callee is a dotted name is a call point, as [`FlowCall`]
-/// describes, whose callee inference resolves.
+/// A call of a local function narrows according to its collected signature.
+/// Any other call whose callee is a dotted name is a call point (see
+/// [`FlowCall`]), and inference resolves its callee.
 pub(super) struct GuardFunctions<'a> {
     raw_types: &'a [RawTypeData],
     raw_binding_types: &'a FxHashMap<TextRange, TypeReference>,
@@ -271,9 +272,9 @@ pub(super) struct GuardFunctions<'a> {
     /// The call points of the root under construction, in the order they are
     /// first met, each with the subjects that it may narrow.
     calls: Vec<(FlowCall, Box<[FlowSubjectId]>)>,
-    /// The index of each call point in `calls`, by the range of its call, so
-    /// that a call that a second build of a finally block or a second
-    /// decomposition of a condition meets again keeps its index.
+    /// The index of each call point in `calls`, keyed by the range of its
+    /// call. A call met again, in a second build of a finally block or a
+    /// second decomposition of a condition, keeps its index.
     call_ids: FxHashMap<TextRange, u32>,
 }
 
@@ -334,10 +335,10 @@ impl<'a> GuardFunctions<'a> {
     }
 
     /// Returns whether `call`, a statement call, can establish a condition
-    /// when it returns, as [`decompose_statement_call`] decides from syntax:
-    /// a call of a local assertion function, or a call point whose callee
-    /// passes TypeScript's explicit-type rule. A root that only such calls
-    /// select needs flow only when one of them can.
+    /// when it returns, judged from syntax alone: it calls a local assertion
+    /// function, or it has no type arguments and its callee passes
+    /// TypeScript's explicit-type rule, as [`statement_callee`] checks. A root
+    /// that only statement calls select needs flow only when one of them can.
     pub(super) fn keeps_statement_call(
         &mut self,
         call: &JsCallExpression,
@@ -358,11 +359,11 @@ impl<'a> GuardFunctions<'a> {
     }
 
     /// Returns whether `call` calls a function whose collected signature
-    /// decides whether a call of it narrows, as [`Self::guard`] reads it: a
-    /// function declaration or a `declare function` of the module, or a
-    /// variable without a type annotation that an arrow or function
-    /// expression initializes. Such a call is never a call point, because
-    /// the signature that the call point would resolve is that one.
+    /// decides whether the call narrows: a function declaration or a
+    /// `declare function` of the module, or a variable without a type
+    /// annotation that an arrow or function expression initializes.
+    /// [`Self::guard`] reads that signature. Such a call is never a call
+    /// point, because a call point would resolve the same signature.
     fn calls_local_function(&self, call: &JsCallExpression, model: &SemanticModel) -> bool {
         let Some(AnyJsExpression::JsIdentifierExpression(callee)) =
             call.callee().ok().map(AnyJsExpression::omit_parentheses)
@@ -688,18 +689,18 @@ fn named_binding(qualifier: &TypeReferenceQualifier, model: &SemanticModel) -> O
 /// returns, or returns `None` when it narrows nothing.
 ///
 /// A statement call is the expression of an expression statement, or an
-/// operand of the comma operator there, without parentheses around it, as
-/// TypeScript's binder adds calls to the flow: `(assert(x));` is none, while
-/// `(assert(x), 0);` is one.
+/// operand of the comma operator there, without parentheses around it. These
+/// are the calls that TypeScript adds to the flow. For example,
+/// `(assert(x));` is none, while `(assert(x), 0);` is one.
 ///
-/// A call of a local assertion function, as [`GuardFunctions::guard`] decides
-/// it, applies its contract here: `asserts value is T` tests an argument that
-/// is a subject against the guard's target, and `asserts value` decomposes
-/// the argument as a condition that holds, so `assert(value !== null)`
-/// excludes `null` from `value`. A call of another local function narrows
-/// nothing. Any other callee that passes TypeScript's explicit-type rule, as
-/// [`statement_callee`] decides it, makes the call a call point, whose
-/// condition mentions every subject that it may narrow.
+/// A call of a local assertion function applies its contract here, as
+/// [`GuardFunctions::guard`] reads it. `asserts value is T` tests an argument
+/// that is a subject against the guard's target, and `asserts value`
+/// decomposes the argument as a condition that holds, so
+/// `assert(value !== null)` excludes `null` from `value`. A call of another
+/// local function narrows nothing. Any other call whose callee passes
+/// TypeScript's explicit-type rule, as [`statement_callee`] checks, is a
+/// call point. Its condition mentions every subject that it may narrow.
 pub(super) fn decompose_statement_call(
     call: &JsCallExpression,
     model: &SemanticModel,
@@ -792,10 +793,10 @@ pub(super) struct DecomposedCondition {
     /// The subjects in `parents` that `instanceof` or a type-guard function
     /// whose target has only object types checks.
     pub(super) instance_tested: Vec<FlowSubjectId>,
-    /// Subjects that call points may narrow, as [`FlowGuard::Call`]
-    /// describes, unless `mentions` or `parents` also list them. Whether
-    /// such a call narrows depends on its callee's signature, which only
-    /// inference resolves, so the reads that only these subjects' call
+    /// Subjects that call points may narrow. A subject that `mentions` or
+    /// `parents` also lists counts as mentioned by them instead. Whether a
+    /// call point narrows depends on its callee's signature, which only
+    /// inference resolves. So the reads that only these subjects' call
     /// points reach keep their declared types without a solve when no call
     /// point narrows.
     pub(super) call_mentions: Vec<FlowSubjectId>,
@@ -1535,15 +1536,16 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     }
 
     /// Returns the guard of `call`, a call whose result a condition tests,
-    /// truthy when `positive` is true, when it is a call point:
-    /// [`FlowGuard::Call`] when its callee is a dotted name that is no local
-    /// function, as [`GuardFunctions::calls_local_function`] decides, and it
-    /// passes a subject as an argument or as the object of its callee, as
-    /// TypeScript's `hasMatchingArgument` requires. Otherwise, and for an
-    /// optional call that is falsy, which TypeScript doesn't narrow by
-    /// (`isCallChain`), the guard is [`FlowGuard::Keep`]. So is the guard of a
-    /// call that starts at a parenthesized optional chain, as
-    /// [`chain_receivers`] describes for any test.
+    /// where the result is truthy when `positive` is true.
+    ///
+    /// The guard is [`FlowGuard::Call`] when the callee is a dotted name that
+    /// is no local function, as [`GuardFunctions::calls_local_function`]
+    /// checks, and the call passes a subject as an argument or as the object
+    /// of its callee, as TypeScript requires. Otherwise the guard is
+    /// [`FlowGuard::Keep`]. So is the guard of a call with type arguments, of
+    /// a falsy optional call, which TypeScript doesn't narrow by, and of a
+    /// call that starts at a parenthesized optional chain, which narrows
+    /// nothing for any test (see [`chain_receivers`]).
     ///
     /// Inside an inlined aliased condition, only subjects that
     /// [`narrows_through_aliases`] accepts count.
@@ -1590,15 +1592,15 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     }
 
     /// Returns the index of the guard of `call`, a statement call, when it is
-    /// a call point, as [`decompose_statement_call`] describes, after
-    /// decomposing each of its arguments as a condition that holds.
+    /// a call point, after decomposing each of its arguments as a condition
+    /// that holds.
     ///
     /// The call mentions every subject that it may narrow: its subject
     /// arguments, the subject of the object of its callee, and the subjects
     /// that the decomposed arguments mention. Returns `None` when it may
-    /// narrow none, when its callee fails TypeScript's explicit-type rule, as
-    /// [`statement_callee`] decides, and when an argument can't be decomposed
-    /// completely.
+    /// narrow none, when it has type arguments, when its callee fails
+    /// TypeScript's explicit-type rule, as [`statement_callee`] checks, and
+    /// when an argument can't be decomposed completely.
     fn statement_call_point(&mut self, call: &JsCallExpression) -> Option<usize> {
         if call.type_arguments().is_some() {
             return None;
@@ -1669,10 +1671,11 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     }
 
     /// Returns the subject of `operand`, an argument or the object of a
-    /// callee, when a call point may narrow it, as
-    /// [`Self::condition_call_point`] describes. A subject read through a
-    /// chain that starts at a parenthesized optional chain narrows nothing,
-    /// as for any other test, which [`chain_receivers`] describes.
+    /// callee, when a call point may narrow it. Inside an inlined aliased
+    /// condition, only subjects that [`narrows_through_aliases`] accepts
+    /// count. A subject read through a chain that starts at a parenthesized
+    /// optional chain narrows nothing, as for any other test (see
+    /// [`chain_receivers`]).
     fn narrowed_operand(&mut self, operand: &AnyJsExpression) -> Option<FlowSubjectId> {
         chain_receivers(operand, &mut self.remaining)?;
         let subject = subject_of(operand, self.model, self.subjects)?;
@@ -2717,9 +2720,9 @@ fn chain_receivers(
     Some(receivers)
 }
 
-/// Returns whether `callee` is a dotted name, as TypeScript's `isDottedName`
-/// requires of the callee of a call point: an identifier or `this`, followed
-/// by property accesses with `.` or `?.`, in parentheses or not, as `a.b.c`,
+/// Returns whether `callee` is a dotted name, which TypeScript requires of the
+/// callee of a call point: an identifier or `this`, followed by property
+/// accesses with `.` or `?.`, in parentheses or not, such as `a.b.c`,
 /// `(a).b`, or `this.m`.
 ///
 /// Returns false when the walk runs out of work.
@@ -2751,15 +2754,16 @@ fn is_dotted_name(callee: &AnyJsExpression, remaining: &mut usize) -> bool {
 
 /// Returns how the reading context confirms that `callee`, the callee of a
 /// statement call without parentheses, follows TypeScript's explicit-type
-/// rule (`getTypeOfDottedName`), with the ranges of its member accesses, as
-/// [`FlowCallKind::Statement`] records them.
+/// rule, with the ranges of its member accesses, as
+/// [`FlowCallKind::Statement`] records them. The rule requires every name
+/// along the callee to have an explicit type.
 ///
 /// The callee must be a dotted name, as [`is_dotted_name`] describes, and the
 /// name that it starts at must have an explicit type, as [`explicit_name`]
-/// decides for a variable. `this` has one in a method, an accessor, a
+/// checks for a variable. `this` has one in a method, an accessor, a
 /// constructor, or a field of a class, unless it is `static`, and in a
-/// function with a `this` parameter, as [`explicit_this`] decides. Returns
-/// `None` otherwise: TypeScript then ignores an assertion (TS2775).
+/// function with a `this` parameter, as [`explicit_this`] checks. Returns
+/// `None` otherwise, because TypeScript then ignores an assertion (TS2775).
 fn statement_callee(
     callee: &AnyJsExpression,
     model: &SemanticModel,
@@ -2794,18 +2798,18 @@ fn statement_callee(
 }
 
 /// Returns how the reading context confirms that the variable that
-/// `identifier` reads has an explicit type, as TypeScript's
-/// `getExplicitTypeOfSymbol` requires of the name that the callee of a
-/// statement call starts at, or `None` when it has none. `has_steps` tells
-/// whether the callee accesses members of the variable.
+/// `identifier` reads has an explicit type, or `None` when it has none.
+/// TypeScript requires an explicit type of the name that the callee of a
+/// statement call starts at. `has_steps` tells whether the callee accesses
+/// members of the variable.
 ///
-/// A function, a class, a variable or a parameter with a type annotation,
-/// and a namespace that `declare` declares, whose members all have explicit
-/// types, have one. So does a global, which the lib or a declaration file
-/// declares. An import has one when the declaration that it names has one,
-/// which the reading context finds, and so does a namespace import, as
-/// [`FlowCallRoot::Import`] describes. A variable without a type annotation,
-/// an element of a destructuring pattern, and a namespace that can declare
+/// A function, a class, and a variable or a parameter with a type annotation
+/// have one. So does a namespace that `declare` declares, because all its
+/// members have explicit types, and a global, which the lib or a declaration
+/// file declares. An import, including a namespace import, has one when the
+/// declaration that it names has one, which the reading context checks (see
+/// [`FlowCallRoot::Import`]). A variable without a type annotation, an
+/// element of a destructuring pattern, and a namespace that can declare
 /// members without types have none.
 fn explicit_name(
     identifier: &JsIdentifierExpression,
@@ -2855,13 +2859,13 @@ fn explicit_name(
     explicit.then_some(FlowCallRoot::Explicit)
 }
 
-/// Returns whether TypeScript gives the `this` that `this` reads an explicit
-/// type, as its `getExplicitThisType` does, and Biome gives it the same type:
-/// in a method, an accessor, a constructor, or a field of a class, looking
-/// through arrow functions, unless the member is `static` or a static block,
-/// where Biome types `this` as an instance, and in a function with a `this`
-/// parameter. In an object literal method, TypeScript's `this` has no
-/// explicit type.
+/// Returns whether TypeScript gives the value that `this` reads an explicit
+/// type, and Biome gives it the same type. That holds in a method, an
+/// accessor, a constructor, or a field of a class, looking through arrow
+/// functions, and in a function with a `this` parameter. It doesn't hold in
+/// a `static` member or a static block, where Biome types `this` as an
+/// instance, nor in an object literal method, where TypeScript's `this` has
+/// no explicit type.
 fn explicit_this(this: &JsThisExpression) -> bool {
     for node in this.syntax().ancestors().skip(1) {
         // The decorators and computed keys of a member run where the class is

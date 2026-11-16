@@ -88,10 +88,9 @@ pub(crate) struct FlowSubjectRootInput<'db> {
     /// values that the writes assign.
     #[returns(copy)]
     pub evolving: FlowEvolving,
-    /// The effects of the root's call points that may narrow the subject and
-    /// whose signature narrows, resolved by the context that reads the
-    /// subject, or `None` when no such call narrows, so that other subjects
-    /// keep sharing their solves.
+    /// The effects of the root's call points that narrow the subject,
+    /// resolved by the context that reads the subject. `None` when none of
+    /// them narrows, so that other subjects keep sharing their solves.
     #[returns(copy)]
     pub calls: Option<FlowCallEffects<'db>>,
 }
@@ -116,24 +115,23 @@ pub(crate) struct FlowCallInput<'db> {
     pub call: TextRange,
 }
 
-/// What a call point does once its callee's signature is known, as
-/// TypeScript's `getEffectsSignature` finds the signature.
+/// How a call point narrows, which the signature of its callee decides.
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub(crate) enum FlowCallEffect<'db> {
     /// The call narrows nothing.
     #[default]
     None,
-    /// A call in a condition whose signature returns a type predicate, as
-    /// `value is T`, which narrows the operand that `parameter` names to
-    /// `target` where the call is truthy, and removes `target` where it is
-    /// falsy.
+    /// A call in a condition whose signature returns a type predicate, such
+    /// as `value is T`. The call narrows the operand that `parameter` names
+    /// to `target` where it is truthy, and removes `target` from the operand
+    /// where it is falsy.
     Predicate {
         parameter: FlowCallParameter,
         target: InferredTypeData<'db>,
     },
-    /// A statement call whose signature asserts, as `asserts value is T` or,
-    /// without a `target`, `asserts value`, which narrows the operand that
-    /// `parameter` names once the call returns.
+    /// A statement call whose signature asserts, such as `asserts value is T`,
+    /// or `asserts value` without a `target`. The call narrows the operand
+    /// that `parameter` names once it returns.
     Assertion {
         parameter: FlowCallParameter,
         target: Option<InferredTypeData<'db>>,

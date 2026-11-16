@@ -7,8 +7,8 @@
 //! assign. It also records the incoming path of every read such a guard or
 //! write can reach. Type inference later applies the guards
 //! to resolved types without inspecting syntax again. A call whose effect
-//! depends on its callee's signature is a call point, as [`FlowCall`]
-//! describes, whose effect inference resolves where it reads a subject that
+//! depends on its callee's signature is a call point (see [`FlowCall`]).
+//! Inference resolves its effect in the context that reads a subject that
 //! the call may narrow.
 //!
 //! A subject is what a runtime test checks and a read narrows: a variable, or
@@ -483,16 +483,16 @@ pub(crate) struct FlowDestructureStep {
     pub(crate) default: Option<TextRange>,
 }
 
-/// A call whose effect on narrowing depends on its callee's type: a call
-/// point.
+/// A call point: a call whose effect on narrowing depends on its callee's
+/// type.
 ///
 /// TypeScript narrows through a call whose callee's signature returns a type
-/// predicate or an assertion, as its `getEffectsSignature` finds it.
-/// Collection decides a local function from its collected signature, so such
-/// a call is never a call point. Every other call whose callee is a dotted
-/// name, an identifier or `this` followed by `.name` accesses, and that
-/// passes a subject, is one, and inference resolves its effect in the context
-/// that reads a subject it may narrow, as [`FlowGuard::Call`] describes.
+/// predicate or an assertion. Collection reads the signature of a local
+/// function itself, so a call of one is never a call point. Every other call
+/// that passes a subject and whose callee is a dotted name, an identifier or
+/// `this` followed by `.name` accesses, is a call point. Inference resolves
+/// its effect in the context that reads a subject it may narrow, and
+/// [`FlowGuard::Call`] applies that effect.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct FlowCall {
     /// The range of the call expression, which identifies the call to
@@ -503,13 +503,13 @@ pub(crate) struct FlowCall {
     /// pass any value to the parameters from its position on.
     pub(crate) arguments: Box<[FlowCallArgument]>,
     /// The subject of the object that the callee reads its function from,
-    /// as `n` in `n.isLeaf()`, which a `this is T` or `asserts this`
-    /// signature narrows.
+    /// such as `n` in `n.isLeaf()`. A `this is T` or `asserts this`
+    /// signature narrows it.
     pub(crate) receiver: Option<FlowSubjectId>,
 }
 
-/// Where a call point sits, which decides how TypeScript finds its
-/// signature.
+/// Where a call point sits. The position decides how TypeScript finds the
+/// callee's signature and which kind of signature narrows.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) enum FlowCallKind {
     /// A call whose result a condition tests, as `isString(x)` in
@@ -518,10 +518,9 @@ pub(crate) enum FlowCallKind {
     /// a type predicate.
     Condition,
     /// A call that an expression statement makes, as the whole statement or
-    /// as an operand of the comma operator, as TypeScript's binder adds it to
-    /// the flow. TypeScript takes the signature from the explicit type of
-    /// every name along the callee (`getTypeOfDottedName`), and narrows only
-    /// through an assertion.
+    /// as an operand of the comma operator, which TypeScript adds to the
+    /// flow. TypeScript takes the signature from the explicit type of every
+    /// name along the callee, and narrows only through an assertion.
     Statement {
         /// How the reading context confirms that the name that the callee
         /// starts at has an explicit type.
@@ -541,8 +540,8 @@ pub(crate) enum FlowCallRoot {
     /// class member that is not `static` or in a function with a `this`
     /// parameter.
     Explicit,
-    /// A namespace that `declare` declares, whose members all have explicit
-    /// types, so its first step needs no check.
+    /// A namespace that `declare` declares. Its members all have explicit
+    /// types, so the first step needs no check.
     Namespace,
     /// The import declared at this range, whose type is explicit when the
     /// declaration that it names has one. The first step of a namespace
@@ -582,8 +581,9 @@ pub(crate) struct RootFlow {
     /// union with two object types, and the others only a type with an object
     /// type or `unknown`, so these subjects need no solve when their declared
     /// type is not one. Every [`FlowSubject::Pattern`] with reads is one. A
-    /// call point doesn't count as a test here: inference starts a read from
-    /// the whole declared type when one of the subject's call points narrows.
+    /// call point doesn't count as a test here, because inference starts a
+    /// read from the whole declared type when one of the subject's call
+    /// points narrows.
     pub(crate) property_only: FxHashSet<FlowSubjectId>,
     /// The subjects in [`Self::property_only`] that `instanceof` or a
     /// type-guard function whose target has only object types narrows. Their
@@ -934,8 +934,8 @@ pub(crate) struct ModuleFlow {
     /// The candidates that are candidates only because they are, or contain,
     /// reads of one subject that only call points reach, keyed by range,
     /// with the index of the root and the subject. Such a candidate keeps its
-    /// type when no call point of that subject in that root narrows, which
-    /// inference finds before it resolves the subject's declared type.
+    /// type when no call point of that subject in that root narrows.
+    /// Inference checks that before it resolves the subject's declared type.
     call_only_candidates: FxHashMap<TextRange, (usize, FlowSubjectId)>,
     /// Maps the range of each [`FlowSubject::Pattern`] with reads to its
     /// declared type, which is the collected type of the value that the
@@ -1074,16 +1074,14 @@ impl ModuleFlow {
         self.property_only_candidates.get(&range).copied()
     }
 
-    /// Returns the root and the subject whose reads, which only call points
-    /// reach, alone make the expression at `range` a candidate, as
-    /// [`Self::call_only_candidates`] describes.
+    /// Returns the root and the subject whose reads alone make the expression
+    /// at `range` a candidate, when only call points reach those reads.
     pub(crate) fn call_only_candidate(&self, range: TextRange) -> Option<(usize, FlowSubjectId)> {
         self.call_only_candidates.get(&range).copied()
     }
 
-    /// Returns the call point of the call expression at `range`, as
-    /// [`FlowCall`] describes it, or `None` when the call is no call point of
-    /// a root with flow.
+    /// Returns the call point of the call expression at `range`, or `None`
+    /// when the call is no call point of a root with flow.
     pub(crate) fn call(&self, range: TextRange) -> Option<&FlowCall> {
         let (root, call) = *self.calls.get(&range)?;
         self.roots.get(root)?.calls.get(call as usize)
@@ -1100,9 +1098,9 @@ impl ModuleFlow {
     /// the binding in [`Self::property_only_bindings`], or the range of the
     /// pattern in [`Self::pattern_types`], whose read alone makes it a
     /// candidate, as [`Self::property_only_candidates`] describes, or `None`
-    /// for a read of another subject. `called` is the root and the subject
-    /// whose read, which only call points reach, makes it a candidate, as
-    /// [`Self::call_only_candidates`] describes, or `None` for another read.
+    /// for a read of another subject. `called` is the root and the subject of
+    /// a read that only call points reach, for
+    /// [`Self::call_only_candidates`], or `None` for another read.
     fn insert_candidate(
         &mut self,
         expression: &AnyFlowExpression,
@@ -1438,8 +1436,9 @@ impl RootCollector<'_> {
         // A write mentions its subject where it can change the subject's
         // type, so the reads after it are kept, and the subject narrows as a
         // tested one, not only through tests of its shape. A call point
-        // narrows only through a signature that inference finds, so the
-        // subjects that only call points mention keep their class, and
+        // narrows only through a signature that inference resolves. So the
+        // subjects that call points mention keep the property-only or
+        // assignment-only class that their other mentions give them, and
         // inference starts a read from the subject's whole declared type when
         // one of its call points narrows.
         let call_mentioned: FxHashSet<FlowSubjectId> =
@@ -1712,9 +1711,9 @@ impl RootCollector<'_> {
             .collect();
         // Variables and paths that call points mention, whose reads only call
         // points may reach. Such a read narrows only when one of those calls
-        // has a signature that narrows, which inference finds before it
-        // resolves the subject's declared type, so its candidate records the
-        // subject.
+        // has a signature that narrows. Inference checks that before it
+        // resolves the subject's declared type, so the read's candidate
+        // records the subject.
         let call_reached: Vec<FlowSubjectId> = walked
             .iter()
             .copied()

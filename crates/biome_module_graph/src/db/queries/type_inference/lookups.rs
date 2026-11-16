@@ -266,20 +266,20 @@ pub(crate) fn infer_flow_assigned_types<'db>(
     )
 }
 
-/// Resolves what one call point does, as TypeScript's `getEffectsSignature`
-/// finds the signature of its callee: a type predicate of a call in a
-/// condition, or an assertion of a statement call, with its target.
+/// Resolves how one call point narrows, from the signature of its callee: the
+/// type predicate of a call in a condition, or the assertion of a statement
+/// call, with its target.
 ///
-/// The reads of every subject that the call may narrow share the result,
-/// which their solves take in their keys, so the solves resolve no callee.
+/// The reads of every subject that the call may narrow share the result.
+/// Their solves take it in their keys, so a solve resolves no callee.
 /// Complete module inference resolves the same effect in its own context
-/// instead. A call in a condition takes the callee's ordinary type, and a
+/// instead. A call in a condition takes the callee's ordinary type. A
 /// statement call requires every name along its callee to have an explicit
-/// type, as TypeScript's `getTypeOfDottedName` does.
+/// type, as TypeScript does before it applies an assertion.
 ///
 /// Returns [`FlowCallEffect::None`] for a call that is no call point, for a
-/// callee without exactly one signature that is not generic, and when a query
-/// cycle passes through this lookup.
+/// callee without exactly one signature or with a generic one, and when a
+/// query cycle passes through this lookup.
 #[salsa::tracked(returns(copy), cycle_result=infer_flow_call_effect_cycle_result)]
 pub(crate) fn infer_flow_call_effect<'db>(
     db: &'db dyn ModuleDb,
