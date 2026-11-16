@@ -1337,7 +1337,7 @@ fn assert_element_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert_reads(&format!("{DESTRUCTURED}{source}"), reads);
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type,
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
 // because a test of one element of a destructuring pattern narrows the value
 // that the pattern destructures, and another element of the same pattern
 // reads its property on the narrowed value.
@@ -1433,7 +1433,7 @@ fn tests_of_destructured_elements_narrow_the_other_elements() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type,
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
 // because an aliased condition narrows the pattern when its declaration is a
 // `const` or a parameter whose variables are never written.
 #[test]
@@ -1452,7 +1452,7 @@ fn aliased_conditions_narrow_destructured_elements() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 // A destructured element that is tested itself starts from its property on
 // the narrowed pattern, and so does an optional property, which keeps
 // `undefined`. Destructuring throws on `null` and `undefined`, so the pattern
@@ -1477,7 +1477,7 @@ fn destructured_elements_start_from_the_narrowed_pattern() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) keeps every read below as declared. Only
+// TypeScript 7.0.2 (`tsc --strict`) keeps every read below as declared. Only
 // a direct element of a pattern with at least two elements, without a default
 // and not a rest element, narrows the other elements. It does so only when
 // the pattern's declaration is a `const` or a parameter whose variables are
@@ -1533,9 +1533,9 @@ fn destructured_elements_that_do_not_narrow_each_other() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives `number` at every read below.
+// TypeScript 7.0.2 (`tsc --strict`) gives `number` at every read below.
 // Biome keeps the declared type in these cases. Loose `==` with a literal
-// doesn't narrow an object yet. An element under a default of an enclosing
+// doesn't narrow an object. An element under a default of an enclosing
 // pattern never narrows, because its declared type ignores the default. An
 // `if` inside `for...of` and a read in a closure never see the test. A
 // written parameter variable never narrows, while TypeScript narrows `v` by
@@ -1570,7 +1570,7 @@ fn destructured_elements_that_biome_does_not_narrow_yet() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives `number` at both reads, although a
+// TypeScript 7.0.2 (`tsc --strict`) gives `number` at both reads, although a
 // default or a computed key between the two elements can run code that
 // changes `s` after `kind` is read and before `v` is, so `v` can be a string
 // at the read. Biome narrows the same way, as `NARROWING.md` records.
@@ -1591,7 +1591,7 @@ fn code_between_destructured_elements_keeps_the_narrowing() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) reports the comparison and gives `never`
+// TypeScript 7.0.2 (`tsc --strict`) reports the comparison and gives `never`
 // at the read. No member is left, so Biome reads the element as Unknown.
 #[test]
 fn impossible_tests_of_destructured_elements_read_as_unknown() {
@@ -1611,11 +1611,13 @@ fn impossible_tests_of_destructured_elements_read_as_unknown() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) keeps `b` as declared, because a test of
-// an element narrows only a pattern whose value is a union. Collection drops
-// the read of `b` when the annotation shows that the value is not a union,
-// without resolving anything. Otherwise the read checks the pattern's
-// declared type once, and solves the pattern only when it is a union.
+// TypeScript 7.0.2 (`tsc --strict`) keeps `b` as declared in the first two
+// sources, whose values are not unions, and gives `1` in the third, because a
+// test of an element narrows only a pattern whose value is a union.
+// Collection drops the read of `b` when the annotation shows that the value
+// is not a union, without resolving anything. Otherwise the read checks the
+// pattern's declared type once, and solves the pattern only when it is a
+// union.
 #[test]
 fn destructured_elements_of_values_that_are_not_unions_skip_the_solve() {
     for (source, candidate, solves) in [
@@ -1658,7 +1660,7 @@ fn destructured_elements_of_values_that_are_not_unions_skip_the_solve() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives `number` and `string`. Complete
+// TypeScript 7.0.2 (`tsc --strict`) gives `number` and `string`. Complete
 // module inference narrows the elements from the pattern's declared type,
 // resolved in its own context, as lookups do, and both reads share one solve
 // of the pattern.
