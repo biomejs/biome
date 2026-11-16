@@ -2201,7 +2201,7 @@ fn reads_inside_unmodelled_statements_keep_the_facts_from_before_them() {
 
 // TypeScript 7.0.2 (`tsc --strict`) narrows `tryAfterReturn` and `afterTry`
 // to `string`, and gives `string | null` at `finally`. Biome does not model
-// the control flow inside a `try` statement yet, so an `if` or `return`
+// the control flow inside a `try` statement, so an `if` or `return`
 // inside one narrows nothing, and Biome deliberately keeps the wider
 // declared type at every read.
 #[test]

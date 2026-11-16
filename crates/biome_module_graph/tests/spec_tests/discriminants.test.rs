@@ -1147,7 +1147,7 @@ fn discriminants_held_at_the_top_level_follow_exports() {
 // TypeScript 7.0.2 (`tsc --strict`) narrows every read below, giving `Circle`
 // or the first tuple. Biome keeps the declared type at every read except
 // `inSwitch`, because it doesn't follow `s!` and keys that are spelled
-// differently from the property, loose equality doesn't narrow an object yet,
+// differently from the property, loose equality doesn't narrow an object,
 // a read in a closure or inside `for...of` never sees the test, and a `const`
 // exported by an `export { ... }` list holds nothing. A test inside a `switch`
 // narrows as anywhere else, so `inSwitch` gives `Circle`, as in TypeScript.

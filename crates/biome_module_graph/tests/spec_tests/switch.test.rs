@@ -316,7 +316,7 @@ fn cases_that_biome_does_not_compare_keep_the_declared_type() {
                 "x",
                 &["string: a", "string: b", "string: c"],
             ),
-            // Biome doesn't infer the type of a variable of an enum type yet.
+            // Biome doesn't infer the type of a variable of an enum type.
             ("enumDeclared", "e", &["Unknown"]),
             ("enum", "e", &["Unknown"]),
             ("enumDefault", "e", &["Unknown"]),
