@@ -1,4 +1,4 @@
-// should not generate diagnostics for ternary (ignoreTernaryTests: true)
+/* should not generate diagnostics */
 
 declare const a: string | null;
 const r1 = a !== null ? a : 'default';

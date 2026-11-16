@@ -4,20 +4,19 @@ expression: ignoreBooleanCoercionDisabled.ts
 ---
 # Input
 ```ts
-// Tests for ignoreBooleanCoercion: false
-// `||` and `||=` inside a Boolean() call SHOULD still generate diagnostics.
+/* should generate diagnostics */
 
 declare const a: string | null;
 declare const b: string;
 declare const c: string;
 
-// || directly inside Boolean()
+// `||` inside `Boolean()`
 const r1 = Boolean(a || b);
 
-// chained || inside Boolean()
+// Chained `||` inside `Boolean()`
 const r2 = Boolean(a || b || c);
 
-// ||= inside Boolean()
+// `||=` inside `Boolean()`
 declare let assigned: string | null;
 const r3 = Boolean(assigned ||= b);
 
@@ -25,15 +24,15 @@ const r3 = Boolean(assigned ||= b);
 
 # Diagnostics
 ```
-ignoreBooleanCoercionDisabled.ts:9:22 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreBooleanCoercionDisabled.ts:8:22 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-     8 │ // || directly inside Boolean()
-   > 9 │ const r1 = Boolean(a || b);
+     7 │ // `||` inside `Boolean()`
+   > 8 │ const r1 = Boolean(a || b);
        │                      ^^
-    10 │ 
-    11 │ // chained || inside Boolean()
+     9 │ 
+    10 │ // Chained `||` inside `Boolean()`
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
@@ -45,15 +44,15 @@ ignoreBooleanCoercionDisabled.ts:9:22 lint/nursery/useNullishCoalescing ━━�
 ```
 
 ```
-ignoreBooleanCoercionDisabled.ts:12:22 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreBooleanCoercionDisabled.ts:11:22 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    11 │ // chained || inside Boolean()
-  > 12 │ const r2 = Boolean(a || b || c);
+    10 │ // Chained `||` inside `Boolean()`
+  > 11 │ const r2 = Boolean(a || b || c);
        │                      ^^
-    13 │ 
-    14 │ // ||= inside Boolean()
+    12 │ 
+    13 │ // `||=` inside `Boolean()`
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
@@ -65,15 +64,15 @@ ignoreBooleanCoercionDisabled.ts:12:22 lint/nursery/useNullishCoalescing ━━�
 ```
 
 ```
-ignoreBooleanCoercionDisabled.ts:16:29 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreBooleanCoercionDisabled.ts:15:29 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of ||=.
   
-    14 │ // ||= inside Boolean()
-    15 │ declare let assigned: string | null;
-  > 16 │ const r3 = Boolean(assigned ||= b);
+    13 │ // `||=` inside `Boolean()`
+    14 │ declare let assigned: string | null;
+  > 15 │ const r3 = Boolean(assigned ||= b);
        │                             ^^^
-    17 │ 
+    16 │ 
   
   i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
   

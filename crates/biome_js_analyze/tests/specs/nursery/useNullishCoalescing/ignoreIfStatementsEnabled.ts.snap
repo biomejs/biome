@@ -4,26 +4,24 @@ expression: ignoreIfStatementsEnabled.ts
 ---
 # Input
 ```ts
-// Tests for ignoreIfStatements: true.
-// if statements assigning to a nullish variable are ignored, but || and ||= still report.
+/* should generate diagnostics */
 
 declare let a: string | null;
 
-// ignored
+// `if` statements: not reported
 if (!a) {
 	a = 'default';
 }
 
-// ignored
 if (a == null) {
 	a = 'fallback';
 }
 
-// || still reported
+// `||`
 declare const s: string | null;
 const r1 = s || 'x';
 
-// ||= still reported
+// `||=`
 declare let b: string | null;
 b ||= 'y';
 
@@ -31,16 +29,16 @@ b ||= 'y';
 
 # Diagnostics
 ```
-ignoreIfStatementsEnabled.ts:18:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreIfStatementsEnabled.ts:16:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    16 │ // || still reported
-    17 │ declare const s: string | null;
-  > 18 │ const r1 = s || 'x';
+    14 │ // `||`
+    15 │ declare const s: string | null;
+  > 16 │ const r1 = s || 'x';
        │              ^^
-    19 │ 
-    20 │ // ||= still reported
+    17 │ 
+    18 │ // `||=`
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
@@ -52,15 +50,15 @@ ignoreIfStatementsEnabled.ts:18:14 lint/nursery/useNullishCoalescing ━━━�
 ```
 
 ```
-ignoreIfStatementsEnabled.ts:22:3 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreIfStatementsEnabled.ts:20:3 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of ||=.
   
-    20 │ // ||= still reported
-    21 │ declare let b: string | null;
-  > 22 │ b ||= 'y';
+    18 │ // `||=`
+    19 │ declare let b: string | null;
+  > 20 │ b ||= 'y';
        │   ^^^
-    23 │ 
+    21 │ 
   
   i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
   

@@ -1,36 +1,26 @@
----
-source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: assignmentValid.ts
----
-# Input
-```ts
-// should not generate diagnostics
+/* should not generate diagnostics */
 
-// Already using ??=
+// Already using `??=`
 declare let a: string | null;
 a ??= 'default';
 
-// &&= operator - not our concern
+// `&&=`
 declare let b: string | null;
 b &&= 'value';
 
-// Non-nullish type
+// Non-nullish types
 declare let c: string;
 c ||= 'fallback';
 
 declare let d: number;
 d ||= 0;
 
-// Boolean type (falsy but not nullish)
 declare let e: boolean;
 e ||= true;
 
-// Non-nullish union
+// Non-nullish union types
 declare let f: string | number;
 f ||= 'fallback';
 
-// Object type without nullish
 declare let g: { a: string };
 g ||= { a: 'default' };
-
-```

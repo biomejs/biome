@@ -4,54 +4,50 @@ expression: ignoreBooleanCoercionEnabled.ts
 ---
 # Input
 ```ts
-// Tests for ignoreBooleanCoercion: true
-// `||` and `||=` inside a Boolean() call should NOT generate diagnostics.
+/* should generate diagnostics */
 
 declare const a: string | null;
 declare const b: string;
 declare const c: string;
+declare const d: string;
+declare const n: number | undefined;
 
-// || directly inside Boolean()
+// `||` inside `Boolean()`: not reported
 const r1 = Boolean(a || b);
 
-// chained || inside Boolean()
+// Chained `||` inside `Boolean()`: not reported
 const r2 = Boolean(a || b || c);
 
-// || inside parenthesized argument
+// Parenthesized argument: not reported
 const r3 = Boolean((a || b));
 
-// ||= inside Boolean()
+// `||=` inside `Boolean()`: not reported
 declare let assigned: string | null;
 const r4 = Boolean(assigned ||= b);
 
-// || nested inside Boolean() within another call: still suppressed because the
-// value still flows into the Boolean() coercion.
+// `Boolean()` nested in another call: not reported
 declare function identity<T>(value: T): T;
-const r4b = identity(Boolean(a || 'default'));
+const r5 = identity(Boolean(a || 'default'));
 
-// || mixed with && inside Boolean(): the whole argument is boolean-coerced,
-// so the walk steps through the && parent and suppresses the ||.
-declare const d: string;
-const r4c = Boolean(d && (a || 'default'));
+// `||` under `&&` inside `Boolean()`: not reported
+const r6 = Boolean(d && (a || 'default'));
 
-// These SHOULD still generate diagnostics (not inside Boolean()).
-const r5 = a || 'default';
-
-declare const n: number | undefined;
-const r6 = n || 0;
+// Outside `Boolean()`
+const r7 = a || 'default';
+const r8 = n || 0;
 
 declare let assignPlain: string | null;
 assignPlain ||= 'default';
 
-// Inside a non-Boolean call: SHOULD generate a diagnostic.
-const r7 = identity(a || 'default');
+// Inside another call
+const r9 = identity(a || 'default');
 
-// Boolean shadowed by a parameter: SHOULD generate a diagnostic.
+// `Boolean` shadowed by a parameter
 function shadowedByParameter(Boolean: (value: unknown) => boolean) {
 	return Boolean(a || 'default');
 }
 
-// Boolean shadowed by a local binding: SHOULD generate a diagnostic.
+// `Boolean` shadowed by a local variable
 function shadowedByLocal() {
 	const Boolean = (value: unknown) => !!value;
 	return Boolean(a || 'default');
@@ -61,15 +57,15 @@ function shadowedByLocal() {
 
 # Diagnostics
 ```
-ignoreBooleanCoercionEnabled.ts:32:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreBooleanCoercionEnabled.ts:30:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    31 │ // These SHOULD still generate diagnostics (not inside Boolean()).
-  > 32 │ const r5 = a || 'default';
+    29 │ // Outside `Boolean()`
+  > 30 │ const r7 = a || 'default';
        │              ^^
-    33 │ 
-    34 │ declare const n: number | undefined;
+    31 │ const r8 = n || 0;
+    32 │ 
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
@@ -81,15 +77,16 @@ ignoreBooleanCoercionEnabled.ts:32:14 lint/nursery/useNullishCoalescing ━━�
 ```
 
 ```
-ignoreBooleanCoercionEnabled.ts:35:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreBooleanCoercionEnabled.ts:31:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    34 │ declare const n: number | undefined;
-  > 35 │ const r6 = n || 0;
+    29 │ // Outside `Boolean()`
+    30 │ const r7 = a || 'default';
+  > 31 │ const r8 = n || 0;
        │              ^^
-    36 │ 
-    37 │ declare let assignPlain: string | null;
+    32 │ 
+    33 │ declare let assignPlain: string | null;
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
@@ -101,15 +98,15 @@ ignoreBooleanCoercionEnabled.ts:35:14 lint/nursery/useNullishCoalescing ━━�
 ```
 
 ```
-ignoreBooleanCoercionEnabled.ts:38:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreBooleanCoercionEnabled.ts:34:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of ||=.
   
-    37 │ declare let assignPlain: string | null;
-  > 38 │ assignPlain ||= 'default';
+    33 │ declare let assignPlain: string | null;
+  > 34 │ assignPlain ||= 'default';
        │             ^^^
-    39 │ 
-    40 │ // Inside a non-Boolean call: SHOULD generate a diagnostic.
+    35 │ 
+    36 │ // Inside another call
   
   i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
   
@@ -121,15 +118,15 @@ ignoreBooleanCoercionEnabled.ts:38:13 lint/nursery/useNullishCoalescing ━━�
 ```
 
 ```
-ignoreBooleanCoercionEnabled.ts:41:23 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreBooleanCoercionEnabled.ts:37:23 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    40 │ // Inside a non-Boolean call: SHOULD generate a diagnostic.
-  > 41 │ const r7 = identity(a || 'default');
+    36 │ // Inside another call
+  > 37 │ const r9 = identity(a || 'default');
        │                       ^^
-    42 │ 
-    43 │ // Boolean shadowed by a parameter: SHOULD generate a diagnostic.
+    38 │ 
+    39 │ // `Boolean` shadowed by a parameter
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
@@ -141,16 +138,16 @@ ignoreBooleanCoercionEnabled.ts:41:23 lint/nursery/useNullishCoalescing ━━�
 ```
 
 ```
-ignoreBooleanCoercionEnabled.ts:45:19 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreBooleanCoercionEnabled.ts:41:19 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    43 │ // Boolean shadowed by a parameter: SHOULD generate a diagnostic.
-    44 │ function shadowedByParameter(Boolean: (value: unknown) => boolean) {
-  > 45 │ 	return Boolean(a || 'default');
+    39 │ // `Boolean` shadowed by a parameter
+    40 │ function shadowedByParameter(Boolean: (value: unknown) => boolean) {
+  > 41 │ 	return Boolean(a || 'default');
        │ 	                 ^^
-    46 │ }
-    47 │ 
+    42 │ }
+    43 │ 
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
@@ -162,16 +159,16 @@ ignoreBooleanCoercionEnabled.ts:45:19 lint/nursery/useNullishCoalescing ━━�
 ```
 
 ```
-ignoreBooleanCoercionEnabled.ts:51:19 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreBooleanCoercionEnabled.ts:47:19 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    49 │ function shadowedByLocal() {
-    50 │ 	const Boolean = (value: unknown) => !!value;
-  > 51 │ 	return Boolean(a || 'default');
+    45 │ function shadowedByLocal() {
+    46 │ 	const Boolean = (value: unknown) => !!value;
+  > 47 │ 	return Boolean(a || 'default');
        │ 	                 ^^
-    52 │ }
-    53 │ 
+    48 │ }
+    49 │ 
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
