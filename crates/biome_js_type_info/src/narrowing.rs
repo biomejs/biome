@@ -186,9 +186,10 @@ pub fn raw_primitive_target<'a>(
 /// `string`, `number`, and `bigint` unchanged, as TypeScript does at a read.
 /// [`falsy_values`] gives the narrower type of the value that `&&` returns.
 ///
-/// An object type that a primitive or a function might satisfy, such as
-/// `{ length: number }`, which every string has, is compared with the apparent
-/// types of the values that pass a falsy or `typeof` test:
+/// A primitive or a function can have an object type, such as
+/// `{ length: number }`, which every string has. Falsy and `typeof` tests
+/// therefore compare an object type with the apparent types of the values that
+/// pass the test:
 ///
 /// - The false branch of a truthiness test removes it when no falsy string,
 ///   number, boolean, or bigint can have it.
@@ -201,11 +202,11 @@ pub fn raw_primitive_target<'a>(
 ///   and no function can have it.
 ///
 /// Other branches keep it, and so does a comparison that cannot decide. Such
-/// object types are type literals, interfaces, and instances of classes and
-/// interfaces; generics and unresolved handles stay unchanged. `resolve`
-/// replaces local and global handles with the types they stand for, as for
-/// [`InternedExtendsType::select_branch`]. It is called only to compare
-/// object types, so other narrowing never calls it.
+/// object types are type literals, interfaces, and instances of classes,
+/// interfaces, and type literals. Generics and unresolved handles stay
+/// unchanged. `resolve` replaces local and global handles with the types they
+/// stand for, as for [`InternedExtendsType::select_branch`]. Narrowing calls it
+/// only to compare object types.
 ///
 /// [`InternedExtendsType::select_branch`]: crate::interned_types::InternedExtendsType::select_branch
 pub fn narrow_type<'db>(
@@ -380,8 +381,14 @@ fn narrow_non_union<'db>(
     }
 }
 
-/// Narrows `ty` by a falsy or `typeof` test that its kind alone does not
-/// decide, when it is an object type, as described by [`narrow_type`].
+/// Narrows the object type `ty` by a falsy or `typeof` test that the type's
+/// truthiness or `typeof` result does not decide.
+///
+/// Returns `NeverKeyword` when no value that passes the test can have `ty`. In
+/// the true branch of `typeof`, returns the tested kind's type when every value
+/// of that kind has `ty`. Returns `ty` unchanged otherwise, including when `ty`
+/// is not an object type or the branch keeps object types. [`narrow_type`]
+/// lists the branches that compare object types.
 fn narrow_object<'db>(
     db: &'db dyn TypeDb,
     ty: InferredTypeData<'db>,
@@ -445,8 +452,8 @@ fn is_object_type<'db>(
     }
 }
 
-/// Returns the type that every value whose `typeof` is `kind` has, or `None`
-/// for `"object"`.
+/// Returns the type of the values whose `typeof` is `kind`, or `None` for
+/// `"object"`.
 fn typeof_type<'db>(db: &'db dyn TypeDb, kind: TypeofKind) -> Option<InferredTypeData<'db>> {
     Some(match kind {
         TypeofKind::Undefined => InferredTypeData::Undefined,
@@ -665,8 +672,8 @@ mod tests {
     #[salsa::db]
     impl TypeDb for TestDb {}
 
-    /// Calls [`super::narrow_type`] with a resolver that returns its input,
-    /// because these tests build types without local handles.
+    /// Calls [`super::narrow_type`] with a resolver that returns its input, so
+    /// local handles stay unresolved.
     fn narrow_type<'db>(
         db: &'db dyn TypeDb,
         ty: InferredTypeData<'db>,
@@ -1269,7 +1276,7 @@ mod tests {
         }
     }
 
-    /// Returns the interface `name` with `members`, extending `parents`.
+    /// Returns an interface named `Shape` with `members`, extending `parents`.
     fn interface<'db>(
         db: &'db TestDb,
         parents: &[InferredTypeData<'db>],
@@ -1440,8 +1447,8 @@ mod tests {
                 );
             }
         }
-        // Instances of built-in classes are never primitives, and they are
-        // never functions either.
+        // No primitive and no function has the members of `Date`, such as
+        // `getTime`.
         let date = InferredTypeData::instance_of(
             &db,
             InferredTypeData::GlobalType(
@@ -1528,8 +1535,8 @@ mod tests {
                 ty
             );
         }
-        // `Function` replaces an object type only when it is the only member
-        // of the branch: other members stay as they are.
+        // In a union, the true branch of `typeof` with `"function"` removes
+        // `string` and replaces `{ length: number }` with `Function`.
         let ty = union(&db, &[length, InferredTypeData::String]);
         assert_eq!(
             narrow_type(

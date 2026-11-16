@@ -1493,8 +1493,9 @@ fn consumers_keep_structural_truthiness_and_void_results_uncertain() {
     );
 }
 
-/// Names each member of `ty` by the first line of its formatted type, with an
-/// interface named by its declared name, sorted.
+/// Returns the sorted names of the members of the union `ty`, or the name of
+/// `ty` itself when it is not a union. A name is the first line of the
+/// formatted type, or the declared name of an interface.
 fn variant_names(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
     let variants = match ty {
         InferredTypeData::Union(union) => union.types(db).to_vec(),
@@ -1534,9 +1535,9 @@ const OBJECT_TYPES: &str = r#"
     class E {}
 "#;
 
-/// Asserts the type of `x` at each marker of `source`, which follows
-/// [`OBJECT_TYPES`], by the names of its members, as [`variant_names`] gives
-/// them.
+/// Asserts the type of `x` at each marker of `source` by its sorted member
+/// names from [`variant_names`]. The declarations in [`OBJECT_TYPES`] precede
+/// `source`, so it can use them.
 fn assert_object_reads(source: &str, reads: &[(&str, &[&str])]) {
     let source = format!("{OBJECT_TYPES}{source}");
     let (db, module) = narrowing_db(&source);
@@ -1547,8 +1548,8 @@ fn assert_object_reads(source: &str, reads: &[(&str, &[&str])]) {
 }
 
 // Every expected type is the type that TypeScript 6.0.3 (`tsc --strict`) gives
-// the read, unless a comment gives TypeScript's type: there Biome keeps an
-// object type that a falsy primitive can have, so its type is wider.
+// the read, unless a comment gives TypeScript's type and the reason Biome's
+// type is wider.
 #[test]
 fn falsy_branch_removes_object_types_that_no_falsy_primitive_satisfies() {
     assert_object_reads(
@@ -1677,8 +1678,8 @@ fn typeof_removes_or_replaces_object_types() {
             ("notObjectCallable", &["Callable"]),
             // TypeScript: `string`. Every string has `length`.
             ("notObjectLen", &["Len", "string"]),
-            // TypeScript: `string`. A class can declare private members,
-            // which no string has, and they are not modelled.
+            // TypeScript: `string`. A class can declare private members, which
+            // no string has, and Biome does not model them.
             ("stringClassLength", &["instanceof L"]),
             // TypeScript: `string`. `padStart` comes from a newer library
             // than the generated globals.
@@ -1695,9 +1696,9 @@ fn typeof_removes_or_replaces_object_types() {
 }
 
 // TypeScript 6.0.3 (`tsc --strict`) types both `&&` expressions as
-// `1 | undefined`. Both reach the flow path, because `typeof` narrows the left
-// operand, so `falsy_values` gives its part of the value. Biome keeps `Len`,
-// which `""` has.
+// `1 | undefined`. `typeof` narrows each left operand, so the type of `&&`
+// includes the falsy values of the narrowed operand. Biome keeps `Len` because
+// `""` has `length`.
 #[test]
 fn logical_and_removes_object_types_from_its_falsy_part() {
     const SOURCE: &str = r#"

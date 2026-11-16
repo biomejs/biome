@@ -1166,8 +1166,9 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
     }
 
     /// Returns the resolver that `narrow_type` and `falsy_values` use to
-    /// compare object types with primitives. It resolves handles as
-    /// [`Self::select_conditional_branch`] does.
+    /// compare object types with primitives. It resolves local handles and
+    /// structural globals, like the resolver of
+    /// [`Self::select_conditional_branch`].
     pub(in crate::db::type_inference) fn narrowing_resolver(
         &mut self,
     ) -> impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db> + '_ {

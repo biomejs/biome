@@ -217,9 +217,9 @@ impl<'db> InternedExtendsType<'db> {
 /// wrapper through `declare global` are not seen.
 ///
 /// For `"function"`, a `target` that has or may inherit a call or construct
-/// signature is undetermined, because a function of that type keeps it. A
-/// value whose `typeof` is `"undefined"` never has an object type, and one
-/// whose `typeof` is `"object"` is always undetermined.
+/// signature is undetermined, because some functions have that type and others
+/// do not. The result is always `NotAssignable` for `"undefined"`, because no
+/// such value has an object type, and `Undetermined` for `"object"`.
 pub(crate) fn primitive_can_satisfy<'db>(
     db: &'db dyn TypeDb,
     kind: TypeofKind,
@@ -230,8 +230,8 @@ pub(crate) fn primitive_can_satisfy<'db>(
 }
 
 /// Returns the members that TypeScript 6.0.3's library files declare on the
-/// wrapper of a `typeof` kind, but that the generated globals lack, because
-/// they come from library files newer than ES2015.
+/// wrapper of a `typeof` kind but the generated globals lack. These members
+/// come from library files newer than ES2015.
 fn members_from_newer_libraries(kind: TypeofKind) -> &'static [&'static str] {
     match kind {
         TypeofKind::String => &[
@@ -501,8 +501,8 @@ impl StructuralMembers<'_> {
     }
 }
 
-/// Whether the values of an object type are functions, because the type has a
-/// call or construct signature.
+/// Whether an object type has a call or construct signature, which only
+/// functions have.
 enum Signatures {
     Present,
     Absent,
@@ -1467,8 +1467,9 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
     }
 
     /// Returns whether the values of the object type `ty` have a call or
-    /// construct signature, of their own or from a parent, which `depth`
-    /// counts.
+    /// construct signature, declared or inherited. `depth` counts the parents
+    /// already visited. Past [`MAX_MEMBER_LOOKUP_DEPTH`], the result is
+    /// [`Signatures::Unknown`].
     ///
     /// An instance of a class has one only through a built-in parent class
     /// such as `Function`. The signatures listed on a built-in class, such as
@@ -1527,8 +1528,15 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         result
     }
 
-    /// Looks up a member of the apparent type of a value whose `typeof` is
-    /// `kind`, as described by [`primitive_can_satisfy`].
+    /// Looks up `name` on the apparent type of a value whose `typeof` is
+    /// `kind`: the instance members of the kind's wrapper, then the members of
+    /// `Object`. A `bigint` has no wrapper among the generated globals, so only
+    /// `Object` is searched.
+    ///
+    /// Returns `MemberLookup::Unknown` for a member that a library newer than
+    /// the generated globals adds to the wrapper, when an index signature or a
+    /// computed member of the wrapper may have `name`, and for `"object"` and
+    /// `"undefined"`.
     fn find_primitive_member(&mut self, kind: TypeofKind, name: &str) -> MemberLookup<'db> {
         if members_from_newer_libraries(kind).contains(&name) {
             return MemberLookup::Unknown;
@@ -1558,8 +1566,10 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                     is_optional: member.kind.is_optional(),
                 };
             }
-            // Unlike `find_member`, a member keyed by a well-known symbol,
-            // such as `[Symbol.iterator]` of `String`, can't have this name.
+            // A member keyed by a well-known symbol, such as `[Symbol.iterator]`
+            // of `String`, can't have this name, so it doesn't make the lookup
+            // unknown. `find_member` treats every computed member as a possible
+            // match.
             let is_numeric_name = name.parse::<f64>().is_ok();
             if members.iter().any(|member| {
                 member.kind.index_signature_type().is_some_and(|key| {
