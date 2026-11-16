@@ -120,7 +120,7 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 // Where every member declares the property as required, the `else` branch is
 // `never` in TypeScript, which Biome reads as Unknown. `"a" in x` with an
 // `undefined` member is an error in TypeScript (TS18048).
@@ -197,7 +197,7 @@ fn in_keeps_the_members_that_declare_the_property() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type,
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
 // except where a comment gives TypeScript's type. Biome keeps a member when it
 // can't tell that the member lacks the property.
 #[test]
@@ -247,7 +247,7 @@ fn in_keeps_the_members_that_may_have_the_property() {
 }
 
 // Biome keeps the declared type of every read below. A comment gives the type
-// that TypeScript 6.0.3 (`tsc --strict`) gives where it differs.
+// that TypeScript 7.0.2 (`tsc --strict`) gives where it differs.
 #[test]
 fn in_keeps_the_declared_type_where_biome_cannot_tell() {
     assert_reads(

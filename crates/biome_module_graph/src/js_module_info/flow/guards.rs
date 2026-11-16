@@ -112,7 +112,7 @@ pub(crate) enum FlowTest {
     Predicate(TextRange),
     /// The `in` operator, as in `"a" in value`. The range is the key, a string
     /// or number literal that spells the property's name, such as `"a"` or `0`
-    /// but not `"a"` or `0x0`. See [`literal_key`].
+    /// but not `"\u0061"` or `0x0`. See [`literal_key`].
     In(TextRange),
 }
 
@@ -1278,7 +1278,7 @@ fn condition_step(
             })
         }
         AnyJsExpression::JsInExpression(expression) => {
-            // A private name, as in `#p in value`, isn't decomposed yet.
+            // A private name, as in `#p in value`, isn't decomposed.
             let AnyJsInProperty::AnyJsExpression(key) = expression.property().ok()? else {
                 return Some(ConditionStep::Unsupported);
             };
