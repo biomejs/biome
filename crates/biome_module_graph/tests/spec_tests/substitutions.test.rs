@@ -712,7 +712,7 @@ fn test_infer_module_types_reads_members_of_distinct_mapped_type_instances() {
     let inferred = infer_module_types(&db, module).expect("types must be inferred");
 
     // `T` is inferred from the object expressions, whose property types
-    // TypeScript 7.0.2 widens (`narrowing-probes/fix-d/tests.ts` L15, L16).
+    // TypeScript 7.0.2 widens.
     for (name, expected) in [
         ("firstA", "number"),
         ("firstB", "string"),

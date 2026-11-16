@@ -939,9 +939,8 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
 
     /// Resolves an array expression outside a tuple context to `Array<T>`,
     /// where `T` is the union of its element types, as TypeScript does. Fresh
-    /// literal elements are widened to their primitive types, as
-    /// [`Self::widen_fresh_literals`] describes, while declared literal types
-    /// and spread elements keep their types:
+    /// literal elements are widened to their primitive types, while declared
+    /// literal types and spread elements keep their types:
     ///
     /// ```ts
     /// declare const dir: "asc" | "desc";

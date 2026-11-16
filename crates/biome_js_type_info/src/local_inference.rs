@@ -1819,10 +1819,10 @@ impl TypeData {
 
     /// Returns the variables that `decl` declares, with their types.
     ///
-    /// A `let` or `var` variable without a type annotation takes the
-    /// widened literal type of its initializer, as
-    /// [`TypeofWidenedLiteralExpression`] describes, so `let n = 1` declares
-    /// `n` as `number`, while `const n = 1` declares it as `1`.
+    /// A `let` or `var` variable without a type annotation takes the type of
+    /// its initializer with fresh literal types widened, so `let n = 1`
+    /// declares `n` as `number`, while `const n = 1` declares it as `1`. See
+    /// [`TypeofWidenedLiteralExpression`] for which literal types are fresh.
     pub fn typed_bindings_from_js_variable_declarator(
         collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
@@ -2001,10 +2001,10 @@ impl FunctionParameter {
     /// Builds the parameter that `binding` declares, typed by `annotation`.
     ///
     /// A parameter named by an identifier without an annotation takes the
-    /// widened literal type of its default value, `initializer`, as
-    /// [`TypeofWidenedLiteralExpression`] describes, so `x` is `number` in
-    /// `function f(x = 1) {}`. Without either, and for a destructuring
-    /// pattern without an annotation, the type is unknown.
+    /// type of its default value, `initializer`, with fresh literal types
+    /// widened, so `x` is `number` in `function f(x = 1) {}`. Without either,
+    /// and for a destructuring pattern without an annotation, the type is
+    /// unknown.
     fn from_binding_with_annotation(
         collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
@@ -3595,13 +3595,12 @@ fn function_params_from_js_params(
 }
 
 /// Returns the return type of a function: its annotation, or the type of
-/// the values that its body returns, as [`type_from_function_body`] collects
-/// them, wrapped in a `Promise` for an `async` function.
+/// the values that its body returns, wrapped in a `Promise` for an `async`
+/// function.
 ///
-/// An inferred return type that is a single fresh literal type is widened,
-/// as [`TypeofWidenedLiteralExpression::is_return_type`] describes, so
-/// `() => 1` returns `number`, while `() => flag ? "a" : "b"` returns
-/// `"a" | "b"`.
+/// An inferred return type widens only when it is a single fresh literal
+/// type, so `() => 1` returns `number`, while `() => flag ? "a" : "b"`
+/// returns `"a" | "b"`.
 fn function_return_type(
     collector: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
@@ -3642,7 +3641,7 @@ fn function_return_type(
 }
 
 /// Returns the type of a getter: its annotation, or the type of the values
-/// that its body returns, widened as [`function_return_type`] widens them.
+/// that its body returns, widened when it is a single fresh literal type.
 fn getter_return_type(
     collector: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
@@ -3973,11 +3972,11 @@ impl ArrayExpressionContext {
 /// Returns the type that the assertion `expression as T` or `<T>expression`
 /// gives, where `ty` is the type of `T`.
 ///
-/// Asserted shapes and literal types stay behind a reference, so const
-/// inference and literal widening don't mistake the annotation for the type
-/// of an object, array, or literal expression: the raw table stores equal
-/// types once, so the `1` of `1 as 1` is the same type as the `1` of `1`,
-/// whose literal type TypeScript widens in a mutable location.
+/// Asserted shapes and primitive literal types stay behind a reference, so
+/// const inference and literal widening don't mistake the annotation for the
+/// type of an object, array, or literal expression. The raw table stores
+/// equal types once, so the `1` of `1 as 1` has the same id as the fresh `1`
+/// of the expression `1`, which TypeScript widens in a mutable location.
 fn asserted_type(collector: &mut dyn RawTypeCollector, ty: TypeData) -> TypeData {
     let is_shape_or_literal = match &ty {
         TypeData::Object(_) | TypeData::Tuple(_) => true,
@@ -3992,9 +3991,10 @@ fn asserted_type(collector: &mut dyn RawTypeCollector, ty: TypeData) -> TypeData
 }
 
 /// Returns the reference to the type of `expression`, as a value that may
-/// initialize a mutable location. A type assertion, as `1 as 1` or
-/// `1 as const`, stays behind a reference, because its literal type is not
-/// fresh, as [`asserted_type`] describes.
+/// initialize a mutable location. A type assertion, such as `1 as 1` or
+/// `1 as const`, gets a reference of its own. Its literal type is not fresh,
+/// and the reference keeps widening from taking it for the fresh literal
+/// type of a literal expression.
 fn value_reference(
     collector: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
@@ -4013,13 +4013,14 @@ fn value_reference(
 }
 
 /// Returns the type that a mutable location without a type annotation takes
-/// from a value of type `value`, as [`TypeofWidenedLiteralExpression`]
-/// describes, or `value` itself when its collected type shows that it has no
-/// fresh literal type, as for an object, a call, or a function.
+/// from a value of type `value`: a [`TypeofWidenedLiteralExpression`] that
+/// widens the fresh literal types of `value`, or `value` itself when its
+/// collected type shows that it has no fresh literal type, as for an object,
+/// a call, or a function.
 ///
-/// `is_return_type` selects the rule for a return type inferred from a
-/// function's body, as [`TypeofWidenedLiteralExpression::is_return_type`]
-/// describes. Resolution decides which literal types are fresh.
+/// With `is_return_type`, `value` is the type of the values that a
+/// function's body returns, which widens only when it is a single literal
+/// type. Resolution decides which literal types are fresh.
 fn widened_literal_reference(
     collector: &mut dyn RawTypeCollector,
     value: TypeReference,
@@ -4041,9 +4042,9 @@ fn widened_literal_reference(
     )))
 }
 
-/// Returns the type of a class field that an initializer of type `value`
-/// gives: widened, as [`widened_literal_reference`] describes, unless the
-/// field is `readonly`, whose literal types TypeScript keeps.
+/// Returns the type that a class field takes from an initializer of type
+/// `value`: `value` with its fresh literal types widened, or `value` itself
+/// for a `readonly` field, whose literal types TypeScript keeps.
 fn field_initializer_reference(
     collector: &mut dyn RawTypeCollector,
     value: TypeReference,
@@ -4057,16 +4058,18 @@ fn field_initializer_reference(
 }
 
 /// Returns whether the collected type at `reference` may be or include a
-/// fresh literal type: a primitive literal type, a conditional or logical
-/// expression, a unary minus of a literal, or a name, which may refer to a
-/// `const` declared without a type annotation. A reference to another local
-/// type stands for an assertion, as [`asserted_type`] and
-/// [`value_reference`] describe, whose literal type is not fresh.
+/// fresh literal type. It may when the type is a primitive literal type, a
+/// conditional or logical expression, a unary minus of a literal, or a name,
+/// because a name may refer to a `const` declared without a type annotation.
+/// A reference to another local type is not fresh, because
+/// [`asserted_type`] and [`value_reference`] put assertions such as `1 as 1`
+/// behind such a reference.
 ///
-/// With `is_return_values`, a union is the values that a function returns,
-/// which may have one when one of its members may. Another union is a type
-/// annotation, whose literal types aren't fresh. A chain of names deeper than
-/// `depth` may have one.
+/// With `is_return_values`, a union stands for the values that a function
+/// returns, and it may have a fresh literal type when one of its members
+/// may. Any other union is a type annotation, whose literal types aren't
+/// fresh. Beyond `depth` nested references and union members, the type
+/// counts as possibly fresh.
 fn may_have_fresh_literal(
     collector: &dyn RawTypeCollector,
     reference: &TypeReference,

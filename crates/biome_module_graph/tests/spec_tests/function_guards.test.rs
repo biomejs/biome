@@ -1115,12 +1115,10 @@ fn object_targets_narrow_both_branches() {
             ("g30", "x", &["Foo"]),
             ("g30Else", "x", &["null", "undefined"]),
             // The object literal's properties have the widened literal types
-            // of their values, so `o` is a subtype of `Foo`
-            // (`narrowing-probes/fix-d/guards.ts` L39).
+            // of their values, so `o` is a subtype of `Foo`.
             ("g33", "o", &[r#"["a": number, "b": number]"#]),
             ("g33Else", "o", &["unknown"]),
-            // The target is a subtype of `{ type: string; payload: number }`
-            // (`narrowing-probes/fix-d/guards.ts` L42).
+            // The target is a subtype of `{ type: string; payload: number }`.
             (
                 "w3",
                 "action",
