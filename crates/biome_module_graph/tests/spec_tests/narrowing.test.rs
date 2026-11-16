@@ -86,6 +86,23 @@ fn variant_texts(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
     texts
 }
 
+/// Asserts that the reads that `events` evaluated resolved no type that
+/// narrowing starts from and ran no solve, as for candidates that only call
+/// points without a narrowing signature reach.
+fn assert_no_flow_solves(db: &TestModuleDb, events: &[salsa::Event]) {
+    for query in [
+        "infer_flow_binding_baseline",
+        "infer_flow_subject_states",
+        "infer_flow_subject_type",
+    ] {
+        assert_eq!(
+            function_query_will_execute_count_by_name(db, query, events),
+            0,
+            "{query} must not execute when no call point narrows"
+        );
+    }
+}
+
 fn assert_no_flow_queries(db: &TestModuleDb, events: &[salsa::Event]) {
     for query in [
         "infer_flow_expression_type_impl",
@@ -134,8 +151,12 @@ fn cyclic_bindings_keep_unknown_overrides_for_impossible_branches() {
     }
 }
 
+// Each `Promise.resolve(value)` statement is a call point that passes
+// `value`, so the reads after it are candidates, but its callee has no
+// assertion signature, so they resolve no declared type and run no solve.
+// Lookups resolve each call's effect once.
 #[test]
-fn branchless_promise_batches_skip_flow_queries() {
+fn branchless_promise_batches_skip_flow_solves() {
     let mut source = String::from("function batch(value: number) {\n");
     for index in 0..16 {
         source.push_str(&format!("/*call{index}*/Promise.resolve(value);\n"));
@@ -159,7 +180,11 @@ fn branchless_promise_batches_skip_flow_queries() {
             assert!(ty.is_promise_instance(&db));
         }
         let events = db.take_salsa_events();
-        assert_no_flow_queries(&db, &events);
+        assert_no_flow_solves(&db, &events);
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, "infer_flow_call_effect", &events),
+            if cold { 16 } else { 0 }
+        );
         assert_eq!(
             function_query_will_execute_count_by_name(&db, "infer_expression_is_promise", &events),
             if cold { 16 } else { 0 }
@@ -214,8 +239,6 @@ fn loop_updates_keep_conditions_that_occur_later_in_the_source() {
 fn unsupported_condition_subjects_skip_flow_queries() {
     for condition in [
         "value.length",
-        "check(value)",
-        "value.method()",
         "value === other",
         "typeof value === other",
         "value == 1",
@@ -233,6 +256,29 @@ fn unsupported_condition_subjects_skip_flow_queries() {
             condition,
         );
         assert_no_flow_queries(&db, &db.take_salsa_events());
+    }
+    // A call of a function that the module doesn't declare is a call point,
+    // whose effect a lookup resolves before anything else.
+    for condition in ["check(value)", "value.method()"] {
+        let source = format!(
+            "function f(value: string | number, other: unknown) {{ if ({condition}) {{ /*read*/value; }} }}"
+        );
+        let (db, module) = narrowing_db(&source);
+        db.clear_salsa_events();
+        let ty = normalized_type_at(&db, module, &source, "read", "value");
+        assert_variants(
+            &db,
+            ty,
+            &[InferredTypeData::String, InferredTypeData::Number],
+            condition,
+        );
+        let events = db.take_salsa_events();
+        assert_no_flow_solves(&db, &events);
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, "infer_flow_call_effect", &events),
+            1,
+            "{condition}"
+        );
     }
 }
 

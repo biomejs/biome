@@ -455,7 +455,10 @@ fn callee_and_subject_shadowing_use_semantic_binding_identity() {
         ("innerJoin", &[String, Number]),
         ("outer", &[String]),
         ("localCallee", &[Number]),
-        ("parameterCallee", &[String, Number]),
+        // TypeScript 7.0.2 (`tsc --strict`) narrows through a parameter
+        // annotated with a function type that returns a type predicate
+        // (`narrowing-probes/m6/preds.ts` L24).
+        ("parameterCallee", &[String]),
     ] {
         let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
         assert_variants(&db, ty, expected, marker);
@@ -536,11 +539,6 @@ fn unsupported_callees_signatures_and_arguments_do_not_refine() {
             "guard.apply(undefined, [value])",
         ),
         (
-            "aliased",
-            "declare function original(input: unknown): input is string; const guard = original;",
-            "guard(value)",
-        ),
-        (
             "written let",
             "let guard = (input: unknown): input is string => typeof input === 'string'; guard = (input): input is string => false;",
             "guard(value)",
@@ -559,11 +557,6 @@ fn unsupported_callees_signatures_and_arguments_do_not_refine() {
             "default arrow formal",
             "const guard = (input: unknown = ''): input is string => typeof input === 'string';",
             "guard(value)",
-        ),
-        (
-            "method",
-            "const owner = { guard(input: unknown): input is string { return typeof input === 'string'; } };",
-            "owner.guard(value)",
         ),
         (
             "optional call",
@@ -669,10 +662,24 @@ fn unsupported_callees_signatures_and_arguments_do_not_refine() {
     }
 }
 
+// TypeScript 7.0.2 (`tsc --strict`) narrows through an alias of a type-guard
+// function and through an object literal method too
+// (`narrowing-probes/m6/preds.ts` L21, L22, `narrowing-probes/m6-l1/guards.ts`),
+// which are call points whose callee's type inference resolves.
 #[test]
 fn guards_bound_to_variables_and_untested_parameters_narrow() {
     use InferredTypeData::{Number, String};
     for (name, declaration, call) in [
+        (
+            "aliased",
+            "declare function original(input: unknown): input is string; const guard = original;",
+            "guard(value)",
+        ),
+        (
+            "method",
+            "const owner = { guard(input: unknown): input is string { return typeof input === 'string'; } };",
+            "owner.guard(value)",
+        ),
         (
             "arrow",
             "const guard = (input: unknown): input is string => typeof input === 'string';",
@@ -1477,8 +1484,12 @@ fn guards_narrow_in_modules_that_call_eval() {
     }
 }
 
+// TypeScript 7.0.2 (`tsc --strict`) narrows through an imported type-guard
+// function (`narrowing-probes/m6/imports/main.ts` L6). The callee is a call
+// point whose signature a lookup resolves without inferring either module
+// completely.
 #[test]
-fn imported_guards_do_not_refine_even_when_the_export_is_available() {
+fn imported_guards_refine_without_inferring_whole_modules() {
     use InferredTypeData::{Number, String};
     const SOURCE: &str = r#"
         import { guard } from "./guard.ts";
@@ -1494,9 +1505,9 @@ fn imported_guards_do_not_refine_even_when_the_export_is_available() {
     );
     let db = build_js_test_module_db(&fs, &["/src/index.ts", "/src/guard.ts"], true);
     let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
-    for marker in ["then", "else"] {
+    for (marker, expected) in [("then", String), ("else", Number)] {
         let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
-        assert_variants(&db, ty, &[String, Number], marker);
+        assert_variants(&db, ty, &[expected], marker);
     }
     assert_no_whole_module_inference(&db, &db.take_salsa_events());
 }

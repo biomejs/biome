@@ -26,7 +26,7 @@ function standalone(value: string | null) {
 }
 
 function parenthesized(value: string | null) {
-	(((assertString)((value))));
+	(assertString)((value));
 	return value ?? "fallback";
 }
 
@@ -84,6 +84,15 @@ function loop(value: string | null, flag: boolean) {
 	return value?.length;
 }
 
+function commaOperand(value: string | null) {
+	(assertString(value), value?.length);
+}
+
+function annotatedParameter(value: string | null, check: (input: unknown) => asserts input is string) {
+	check(value);
+	return value?.length;
+}
+
 ```
 
 # Diagnostics
@@ -119,7 +128,7 @@ assertionFlow.ts:24:9 lint/suspicious/noUnnecessaryConditions ━━━━━━
   ! Unnecessary nullish coalescing.
   
     22 │ function parenthesized(value: string | null) {
-    23 │ 	(((assertString)((value))));
+    23 │ 	(assertString)((value));
   > 24 │ 	return value ?? "fallback";
        │ 	       ^^^^^
     25 │ }
@@ -128,7 +137,7 @@ assertionFlow.ts:24:9 lint/suspicious/noUnnecessaryConditions ━━━━━━
   i Drop ?? and the fallback expression.
   
     22 │ function parenthesized(value: string | null) {
-    23 │ 	(((assertString)((value))));
+    23 │ 	(assertString)((value));
   > 24 │ 	return value ?? "fallback";
        │ 	             ^^
     25 │ }
@@ -410,6 +419,56 @@ assertionFlow.ts:78:9 lint/suspicious/noUnnecessaryConditions ━━━━━━
        │ 	            ^^
     79 │ }
     80 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+assertionFlow.ts:82:24 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    81 │ function commaOperand(value: string | null) {
+  > 82 │ 	(assertString(value), value?.length);
+       │ 	                      ^^^^^
+    83 │ }
+    84 │ 
+  
+  i Replace ?. with ..
+  
+    81 │ function commaOperand(value: string | null) {
+  > 82 │ 	(assertString(value), value?.length);
+       │ 	                           ^^
+    83 │ }
+    84 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+assertionFlow.ts:87:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    85 │ function annotatedParameter(value: string | null, check: (input: unknown) => asserts input is string) {
+    86 │ 	check(value);
+  > 87 │ 	return value?.length;
+       │ 	       ^^^^^
+    88 │ }
+    89 │ 
+  
+  i Replace ?. with ..
+  
+    85 │ function annotatedParameter(value: string | null, check: (input: unknown) => asserts input is string) {
+    86 │ 	check(value);
+  > 87 │ 	return value?.length;
+       │ 	            ^^
+    88 │ }
+    89 │ 
   
   i The receiver is guaranteed to be non-nullish.
   
