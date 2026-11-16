@@ -58,8 +58,8 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[InferredTypeData<'static>]
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type:
-// testing a `const` tests the condition that initializes it.
+// Testing a `const` also tests the condition that initializes it. TypeScript
+// 6.0.3 (`tsc --strict`) gives every read below the expected type.
 #[test]
 fn aliased_conditions_narrow_like_their_initializers() {
     use InferredTypeData::{Null, Number, String};
@@ -109,8 +109,8 @@ fn aliased_conditions_narrow_like_their_initializers() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives `x` the type `{ y: string }`: the
-// inlined `x?.y` shows that `x` is not nullish, as `if (x?.y)` does.
+// The inlined `x?.y` shows that `x` is not nullish, as `if (x?.y)` does.
+// TypeScript 6.0.3 (`tsc --strict`) gives `x` the type `{ y: string }`.
 #[test]
 fn aliased_conditions_narrow_optional_chain_receivers() {
     const SOURCE: &str = r#"
@@ -161,8 +161,8 @@ fn aliases_combine_with_negation_logical_operators_and_loops() {
 }
 
 // TypeScript 6.0.3 (`tsc --strict`) inlines five aliases into one another, not
-// six: it narrows `x` at `five`, but tests only the truthiness of `c1` at
-// `six`, so `x` keeps `string | null` there.
+// six. It narrows `x` at `five`, but at `six` it tests only the truthiness of
+// `c1`, so `x` keeps `string | null` there.
 #[test]
 fn aliases_inline_up_to_five_levels() {
     use InferredTypeData::{Null, String};
@@ -181,7 +181,7 @@ fn aliases_inline_up_to_five_levels() {
 
 // TypeScript 6.0.3 (`tsc --strict`) applies the inlined condition to the type
 // that the subject has at the test, wherever the alias is declared. A branch
-// that the alias rules out is impossible, where TypeScript gives `never` and
+// that the alias rules out is impossible. TypeScript gives `never` there, and
 // Biome gives Unknown.
 #[test]
 fn aliases_apply_their_initializer_where_they_are_tested() {
@@ -216,8 +216,8 @@ fn aliases_apply_their_initializer_where_they_are_tested() {
 
 // TypeScript 6.0.3 (`tsc --strict`) gives every read below `string | null`,
 // except where a comment says otherwise. TypeScript inlines only an
-// unannotated `const` with an initializer that binds an identifier, and only
-// when tested for truthiness.
+// unannotated `const` that binds an identifier to an initializer, and only
+// when the `const` is tested for truthiness.
 #[test]
 fn other_declarations_are_not_aliases() {
     use InferredTypeData::{Null, String};
@@ -239,16 +239,16 @@ fn other_declarations_are_not_aliases() {
             ("as", "x", &[String, Null]),
             ("coalesced", "x", &[String, Null]),
             ("conditional", "x", &[String, Null]),
-            // TypeScript gives `string`: it narrows through a comparison with
-            // `true`. Biome tests only the alias itself.
+            // TypeScript gives `string` because it narrows through a comparison
+            // with `true`. Biome tests only the alias itself.
             ("comparison", "x", &[String, Null]),
         ],
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below `string | null`,
-// except where a comment says otherwise: an inlined condition narrows only a
-// variable that cannot change between the alias and its test.
+// An inlined condition narrows only a variable that cannot change between the
+// alias and its test. TypeScript 6.0.3 (`tsc --strict`) gives every read below
+// `string | null`, except where a comment says otherwise.
 #[test]
 fn inlined_conditions_narrow_only_variables_that_cannot_change() {
     use InferredTypeData::{Null, String};
@@ -277,21 +277,22 @@ fn inlined_conditions_narrow_only_variables_that_cannot_change() {
             // top-level `let` of a script, which other scripts can write.
             // Biome cannot tell a script from a module.
             ("moduleLet", "moduleLet", &[String, Null]),
-            // TypeScript gives `string`: only an `export` keyword on the
-            // declaration stops it from inlining for a `const`.
+            // TypeScript gives `string` because, for a `const`, only an
+            // `export` keyword on the declaration stops it from inlining.
             ("viaSpecifier", "viaSpecifier", &[String, Null]),
             ("writtenBetween", "y", &[String, Null]),
             ("writtenAfter", "x", &[String, Null]),
             ("mutable", "o.v", &[String, Null]),
-            // TypeScript gives `string`: it inlines for a readonly property.
+            // TypeScript gives `string` because it inlines for a readonly
+            // property.
             ("readonly", "o.v", &[String, Null]),
         ],
     );
 }
 
 // TypeScript 6.0.3 (`tsc --strict`) gives every read below `string`, in a
-// script and in a module: none of these variables is a top-level `let` of a
-// script.
+// script and in a module, because none of these variables is a top-level `let`
+// of a script.
 #[test]
 fn inlined_conditions_narrow_module_constants_and_nested_lets() {
     use InferredTypeData::String;

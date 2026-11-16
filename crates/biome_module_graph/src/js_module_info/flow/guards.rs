@@ -477,20 +477,23 @@ pub(super) struct DecomposedCondition {
     /// Subjects whose type the condition may narrow.
     ///
     /// When decomposition stops early, this conservatively lists every
-    /// variable and property path read directly in the condition, and every
-    /// subject read directly in an inlined initializer that
-    /// [`narrows_through_aliases`] accepts.
+    /// variable and property path read directly in the condition. It also
+    /// lists every variable read directly in an inlined initializer when the
+    /// variable cannot change between the alias and its test. See
+    /// [`narrows_through_aliases`] for the variables that qualify.
     pub(super) mentions: Vec<FlowSubjectId>,
 }
 
 /// Decomposes `expression`, assuming `outcome`, into guards appended to
-/// `guards`, whose tests refer to subjects by their ids in `subjects`.
+/// `guards`. The tests in those guards refer to subjects by their ids in
+/// `subjects`.
 ///
-/// A truthiness test of a `const` without a type annotation, such as `ok` in
-/// `const ok = x !== null; if (ok) x`, is an aliased condition: it also
-/// applies the condition that initializes the `const`, as TypeScript does,
-/// to the subjects that [`narrows_through_aliases`] accepts. Aliases inline
-/// into one another up to [`MAX_INLINED_ALIASES`] levels.
+/// A truthiness test of an aliased condition, a `const` without a type
+/// annotation, also tests the initializer of the `const`, as TypeScript does.
+/// For example, `if (ok) x` after `const ok = x !== null` reads `x` as not
+/// null. The inlined condition narrows only variables that cannot change
+/// between the alias and its test (see [`narrows_through_aliases`]).
+/// Aliases inline into one another up to [`MAX_INLINED_ALIASES`] levels.
 pub(super) fn decompose_condition(
     expression: &AnyJsExpression,
     outcome: FlowOutcome,
@@ -556,7 +559,8 @@ struct Decomposer<'a, 'raw> {
     /// The number of aliased conditions whose initializers enclose the
     /// expression being decomposed.
     aliases: usize,
-    /// Every initializer that an aliased condition has inlined.
+    /// Every initializer inlined from an aliased condition. When decomposition
+    /// stops early, `mentions` also lists the subjects read in them.
     initializers: Vec<AnyJsExpression>,
 }
 
@@ -728,7 +732,8 @@ impl Decomposer<'_, '_> {
     /// Returns the initializer that a truthiness test of `operand` inlines
     /// when `operand` names an aliased condition: a `const` that is not
     /// exported, has no type annotation, and binds an identifier, not a
-    /// pattern, to an initializer. TypeScript inlines nothing else.
+    /// pattern, to an initializer. TypeScript inlines nothing else, though it
+    /// also accepts a `const` exported by an `export { ... }` list.
     ///
     /// Returns `None` once [`MAX_INLINED_ALIASES`] initializers enclose
     /// `operand`, as TypeScript stops there too.
@@ -740,9 +745,7 @@ impl Decomposer<'_, '_> {
             return None;
         };
         let binding = self.model.binding(&identifier.name().ok()?)?;
-        // TypeScript gives an `export const` a local symbol that is not a
-        // `const`, so it never inlines one. Biome also skips a `const`
-        // exported by a specifier, which TypeScript inlines.
+        // TypeScript never inlines an `export const`.
         if binding.is_exported() {
             return None;
         }
@@ -761,9 +764,10 @@ impl Decomposer<'_, '_> {
         Some(initializer)
     }
 
-    /// Returns whether a test may narrow `subject`, which holds outside
-    /// inlined initializers and, inside one, for the subjects that
-    /// [`narrows_through_aliases`] accepts.
+    /// Returns whether a test may narrow `subject`. Outside inlined
+    /// initializers, every subject qualifies. Inside one, only a variable that
+    /// cannot change between the alias and its test qualifies (see
+    /// [`narrows_through_aliases`]).
     fn may_test(&self, subject: FlowSubjectId) -> bool {
         self.aliases == 0 || narrows_through_aliases(self.subjects, subject, self.model)
     }
@@ -777,18 +781,18 @@ impl Decomposer<'_, '_> {
 /// Returns whether the condition inlined from an aliased condition may narrow
 /// `subject`, an id in `subjects`.
 ///
-/// TypeScript applies an inlined condition only to a reference whose value
-/// cannot change between the declaration of the alias and its test
-/// (`isConstantReference`): a variable that is never written and is declared
-/// by `const`, as a parameter or a catch variable, or by `let` unless the
-/// `let` statement is at the top level of a script, where other scripts can
-/// write it. Biome cannot tell a script from a module, so it rejects a `let`
-/// statement at the top level of any file.
+/// Accepts only a variable whose value cannot change between the declaration
+/// of the alias and its test. The variable is never written, is not exported,
+/// and is declared by `const`, as a parameter or a catch variable, or by a
+/// `let` statement that is not at the top level of the file.
 ///
-/// Biome also rejects every exported variable, `this`, and every property
-/// path, where TypeScript accepts a `const` exported by an `export { ... }`
-/// list, `this`, and a readonly property. An alias declared in an enclosing
-/// function would read another `this` than the root's.
+/// TypeScript applies the same rule, with these differences:
+/// - TypeScript rejects a top-level `let` only in a script, because other
+///   scripts can write it. Biome cannot tell a script from a module.
+/// - TypeScript accepts a `const` exported by an `export { ... }` list.
+/// - TypeScript accepts `this` and a readonly property. Biome rejects `this`
+///   because an alias declared in an enclosing function can read a different
+///   `this` from the execution root's.
 #[expect(
     clippy::wildcard_enum_match_arm,
     reason = "Only parameters, catch variables, and `const` and `let` declarations qualify."
