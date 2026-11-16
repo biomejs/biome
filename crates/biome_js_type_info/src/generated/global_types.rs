@@ -2702,13 +2702,13 @@ fn global_function_constructor() -> crate::TypeData {
 }
 fn global_this_parameter_type() -> crate::TypeData {
     crate::TypeData::instance_of(crate::TypeInstance {
-        ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
+        ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
         type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(0)).into()]),
     })
 }
 fn global_omit_this_parameter() -> crate::TypeData {
     crate::TypeData::instance_of(crate::TypeInstance {
-        ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
+        ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
         type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(0)).into()]),
     })
 }
@@ -5029,7 +5029,7 @@ fn global_promise() -> crate::TypeData {
 }
 fn global_awaited() -> crate::TypeData {
     crate::TypeData::instance_of(crate::TypeInstance {
-        ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
+        ty: crate::RawTypeId::Local(crate::TypeId::new(12)).into(),
         type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(0)).into()]),
     })
 }
@@ -5123,25 +5123,25 @@ fn global_non_nullable() -> crate::TypeData {
 }
 fn global_parameters() -> crate::TypeData {
     crate::TypeData::instance_of(crate::TypeInstance {
-        ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+        ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
         type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(1)).into()]),
     })
 }
 fn global_constructor_parameters() -> crate::TypeData {
     crate::TypeData::instance_of(crate::TypeInstance {
-        ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+        ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
         type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(1)).into()]),
     })
 }
 fn global_return_type() -> crate::TypeData {
     crate::TypeData::instance_of(crate::TypeInstance {
-        ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+        ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
         type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(1)).into()]),
     })
 }
 fn global_instance_type() -> crate::TypeData {
     crate::TypeData::instance_of(crate::TypeInstance {
-        ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+        ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
         type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(1)).into()]),
     })
 }
@@ -7829,10 +7829,10 @@ fn global_intl_number_format_options_use_grouping_registry() -> crate::TypeData 
     }))
 }
 fn global_intl_number_format_options_use_grouping() -> crate::TypeData {
-    crate::TypeData::Reference(crate::RawTypeId::Local(crate::TypeId::new(5)).into())
+    crate::TypeData::Reference(crate::RawTypeId::Local(crate::TypeId::new(6)).into())
 }
 fn global_intl_resolved_number_format_options_use_grouping() -> crate::TypeData {
-    crate::TypeData::Reference(crate::RawTypeId::Local(crate::TypeId::new(4)).into())
+    crate::TypeData::Reference(crate::RawTypeId::Local(crate::TypeId::new(5)).into())
 }
 fn global_intl_number_format_options() -> crate::TypeData {
     crate::TypeData::Interface(Box::new(crate::Interface {
@@ -9026,6 +9026,7 @@ fn global_reflect_apply() -> crate::TypeData {
             },
         ]),
         has_unknown_members: false,
+        kind: crate::ObjectKind::Shape,
     })
 }
 fn global_reflect_construct() -> crate::TypeData {
@@ -9042,6 +9043,7 @@ fn global_reflect_construct() -> crate::TypeData {
             },
         ]),
         has_unknown_members: false,
+        kind: crate::ObjectKind::Shape,
     })
 }
 fn global_reflect_define_property() -> crate::TypeData {
@@ -9122,7 +9124,7 @@ fn global_reflect_get() -> crate::TypeData {
                 is_rest: false,
             }),
         ]),
-        return_type: crate::ReturnType::Type(crate::RawTypeId::Local(crate::TypeId::new(4)).into()),
+        return_type: crate::ReturnType::Type(crate::RawTypeId::Local(crate::TypeId::new(5)).into()),
     }))
 }
 fn global_reflect_get_own_property_descriptor() -> crate::TypeData {
@@ -9147,7 +9149,7 @@ fn global_reflect_get_own_property_descriptor() -> crate::TypeData {
                 is_rest: false,
             }),
         ]),
-        return_type: crate::ReturnType::Type(crate::RawTypeId::Local(crate::TypeId::new(6)).into()),
+        return_type: crate::ReturnType::Type(crate::RawTypeId::Local(crate::TypeId::new(7)).into()),
     }))
 }
 fn global_reflect_get_prototype_of() -> crate::TypeData {
@@ -9242,14 +9244,15 @@ fn global_reflect_set() -> crate::TypeData {
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::CallSignature,
-                ty: crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::CallSignature,
-                ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(7)).into(),
             },
         ]),
         has_unknown_members: false,
+        kind: crate::ObjectKind::Shape,
     })
 }
 fn global_reflect_set_prototype_of() -> crate::TypeData {
@@ -9711,7 +9714,7 @@ fn global_decorator_metadata_object() -> crate::TypeData {
     crate::TypeData::Reference(crate::RawTypeId::Local(crate::TypeId::new(2)).into())
 }
 fn global_decorator_metadata() -> crate::TypeData {
-    crate::TypeData::Reference(crate::RawTypeId::Local(crate::TypeId::new(2)).into())
+    crate::TypeData::Reference(crate::RawTypeId::Local(crate::TypeId::new(4)).into())
 }
 fn global_class_decorator_context() -> crate::TypeData {
     crate::TypeData::Interface(Box::new(crate::Interface {
@@ -10012,6 +10015,7 @@ fn global_intl() -> crate::TypeData {
             },
         ]),
         has_unknown_members: false,
+        kind: crate::ObjectKind::Shape,
     })
 }
 fn global_reflect() -> crate::TypeData {
@@ -10076,6 +10080,7 @@ fn global_reflect() -> crate::TypeData {
             },
         ]),
         has_unknown_members: false,
+        kind: crate::ObjectKind::Shape,
     })
 }
 fn global_symbol_iterator() -> crate::TypeData {
@@ -10781,6 +10786,7 @@ static OBJECT_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 67]> =
                     ty: crate::RawTypeId::Local(crate::TypeId::new(31)).into(),
                 }]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::GenericTypeParameter {
                 is_const: false,
@@ -10928,6 +10934,7 @@ static OBJECT_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 67]> =
                 prototype: None,
                 members: Box::new([]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::GenericTypeParameter {
                 is_const: false,
@@ -11179,6 +11186,7 @@ static OBJECT_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 67]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -11197,6 +11205,7 @@ static OBJECT_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 67]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -11211,6 +11220,7 @@ static OBJECT_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 67]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -11233,6 +11243,7 @@ static OBJECT_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 67]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -11512,6 +11523,7 @@ static OBJECT_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 61]
                     ty: crate::RawTypeId::Local(crate::TypeId::new(25)).into(),
                 }]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::GenericTypeParameter {
                 is_const: false,
@@ -11659,6 +11671,7 @@ static OBJECT_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 61]
                 prototype: None,
                 members: Box::new([]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::GenericTypeParameter {
                 is_const: false,
@@ -11910,6 +11923,7 @@ static OBJECT_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 61]
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -11928,6 +11942,7 @@ static OBJECT_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 61]
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -11942,6 +11957,7 @@ static OBJECT_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 61]
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -11964,6 +11980,7 @@ static OBJECT_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 61]
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -12140,7 +12157,7 @@ static FUNCTION_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 4
             })),
         ]
     });
-static THIS_PARAMETER_TYPE_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 2]> =
+static THIS_PARAMETER_TYPE_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 4]> =
     std::sync::LazyLock::new(|| {
         [
             crate::TypeData::from(crate::GenericTypeParameter {
@@ -12149,18 +12166,9 @@ static THIS_PARAMETER_TYPE_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 2]
                 constraint: crate::TypeReference::unknown(),
                 default: crate::TypeReference::unknown(),
             }),
-            crate::TypeData::Union(Box::new(crate::Union(Box::new([
-                crate::globals::GLOBAL_UNKNOWN_ID.into(),
-                crate::globals::GLOBAL_UNKNOWN_KEYWORD_ID.into(),
-            ])))),
-        ]
-    });
-static OMIT_THIS_PARAMETER_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 4]> =
-    std::sync::LazyLock::new(|| {
-        [
             crate::TypeData::from(crate::GenericTypeParameter {
                 is_const: false,
-                name: biome_rowan::Text::new_static("T"),
+                name: biome_rowan::Text::new_static("U"),
                 constraint: crate::TypeReference::unknown(),
                 default: crate::TypeReference::unknown(),
             }),
@@ -12171,21 +12179,83 @@ static OMIT_THIS_PARAMETER_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 4]
                 parameters: Box::new([crate::FunctionParameter::Named(
                     crate::NamedFunctionParameter {
                         name: biome_rowan::Text::new_static("args"),
-                        ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
+                        ty: crate::globals::GLOBAL_NEVER_KEYWORD_ID.into(),
                         is_optional: false,
                         is_rest: true,
                     },
                 )]),
-                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_UNKNOWN_ID.into()),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_ANY_KEYWORD_ID.into()),
             })),
-            crate::TypeData::Union(Box::new(crate::Union(Box::new([
-                crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
-                crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
-            ])))),
-            crate::TypeData::Union(Box::new(crate::Union(Box::new([
-                crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
-                crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
-            ])))),
+            crate::TypeData::Extends(Box::new(crate::ExtendsType {
+                check_type: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+                extends_type: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+                true_type: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
+                false_type: crate::globals::GLOBAL_UNKNOWN_KEYWORD_ID.into(),
+                infer_types: Box::new([crate::RawTypeId::Local(crate::TypeId::new(1)).into()]),
+                distributive: true,
+            })),
+        ]
+    });
+static OMIT_THIS_PARAMETER_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 7]> =
+    std::sync::LazyLock::new(|| {
+        [
+            crate::TypeData::from(crate::GenericTypeParameter {
+                is_const: false,
+                name: biome_rowan::Text::new_static("T"),
+                constraint: crate::TypeReference::unknown(),
+                default: crate::TypeReference::unknown(),
+            }),
+            crate::TypeData::instance_of(crate::TypeInstance {
+                ty: crate::globals::GLOBAL_THIS_PARAMETER_TYPE_ID.into(),
+                type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(0)).into()]),
+            }),
+            crate::TypeData::from(crate::GenericTypeParameter {
+                is_const: false,
+                name: biome_rowan::Text::new_static("A"),
+                constraint: crate::TypeReference::unknown(),
+                default: crate::TypeReference::unknown(),
+            }),
+            crate::TypeData::from(crate::GenericTypeParameter {
+                is_const: false,
+                name: biome_rowan::Text::new_static("R"),
+                constraint: crate::TypeReference::unknown(),
+                default: crate::TypeReference::unknown(),
+            }),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: None,
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("args"),
+                        ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+                        is_optional: false,
+                        is_rest: true,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(
+                    crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
+                ),
+            })),
+            crate::TypeData::Extends(Box::new(crate::ExtendsType {
+                check_type: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+                extends_type: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
+                true_type: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
+                false_type: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+                infer_types: Box::new([
+                    crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+                    crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
+                ]),
+                distributive: true,
+            })),
+            crate::TypeData::Extends(Box::new(crate::ExtendsType {
+                check_type: crate::globals::GLOBAL_UNKNOWN_KEYWORD_ID.into(),
+                extends_type: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
+                true_type: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+                false_type: crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
+                infer_types: Box::default(),
+                distributive: false,
+            })),
         ]
     });
 static CALLABLE_FUNCTION_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 16]> =
@@ -12374,6 +12444,7 @@ static CALLABLE_FUNCTION_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 16]>
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -12388,6 +12459,7 @@ static CALLABLE_FUNCTION_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 16]>
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -12554,6 +12626,7 @@ static NEWABLE_FUNCTION_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 14]> 
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -12568,6 +12641,7 @@ static NEWABLE_FUNCTION_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 14]> 
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -13378,6 +13452,7 @@ static STRING_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 93]> =
                     ty: crate::RawTypeId::Local(crate::TypeId::new(60)).into(),
                 }]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::Function(Box::new(crate::Function {
                 is_async: false,
@@ -13426,6 +13501,7 @@ static STRING_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 93]> =
                     ty: crate::RawTypeId::Local(crate::TypeId::new(63)).into(),
                 }]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::Function(Box::new(crate::Function {
                 is_async: false,
@@ -13480,6 +13556,7 @@ static STRING_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 93]> =
                     ty: crate::RawTypeId::Local(crate::TypeId::new(66)).into(),
                 }]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::Function(Box::new(crate::Function {
                 is_async: false,
@@ -13528,6 +13605,7 @@ static STRING_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 93]> =
                     ty: crate::RawTypeId::Local(crate::TypeId::new(69)).into(),
                 }]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::Function(Box::new(crate::Function {
                 is_async: false,
@@ -13576,6 +13654,7 @@ static STRING_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 93]> =
                     ty: crate::RawTypeId::Local(crate::TypeId::new(72)).into(),
                 }]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::Function(Box::new(crate::Function {
                 is_async: false,
@@ -13687,6 +13766,7 @@ static STRING_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 93]> =
                     ty: crate::RawTypeId::Local(crate::TypeId::new(83)).into(),
                 }]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::Function(Box::new(crate::Function {
                 is_async: false,
@@ -13723,6 +13803,7 @@ static STRING_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 93]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -13737,6 +13818,7 @@ static STRING_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 93]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -13759,6 +13841,7 @@ static STRING_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 93]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -13773,6 +13856,7 @@ static STRING_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 93]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -13787,6 +13871,7 @@ static STRING_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 93]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -13801,6 +13886,7 @@ static STRING_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 93]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -13815,6 +13901,7 @@ static STRING_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 93]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -13913,6 +14000,7 @@ static STRING_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 13]
                     ty: crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
                 }]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::instance_of(crate::TypeInstance {
                 ty: crate::globals::GLOBAL_ARRAY_ID.into(),
@@ -16020,6 +16108,7 @@ static DATE_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 72]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -16034,6 +16123,7 @@ static DATE_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 72]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -16048,6 +16138,7 @@ static DATE_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 72]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -16070,6 +16161,7 @@ static DATE_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 72]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -16635,6 +16727,7 @@ static REG_EXP_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 25]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -17418,6 +17511,7 @@ static JSON_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 9]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -18320,6 +18414,7 @@ static READONLY_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 67]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -18334,6 +18429,7 @@ static READONLY_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 67]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -18348,6 +18444,7 @@ static READONLY_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 67]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -18362,6 +18459,7 @@ static READONLY_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 67]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -18380,6 +18478,7 @@ static READONLY_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 67]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -18398,6 +18497,7 @@ static READONLY_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 67]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -18412,6 +18512,7 @@ static READONLY_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 67]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -19808,6 +19909,7 @@ static ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 96]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -19822,6 +19924,7 @@ static ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 96]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -19836,6 +19939,7 @@ static ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 96]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -19850,6 +19954,7 @@ static ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 96]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -19864,6 +19969,7 @@ static ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 96]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -19882,6 +19988,7 @@ static ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 96]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -19900,6 +20007,7 @@ static ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 96]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -19914,6 +20022,7 @@ static ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 96]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -19936,6 +20045,7 @@ static ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 96]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -20235,6 +20345,7 @@ static ARRAY_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 22]>
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -20466,7 +20577,7 @@ static PROMISE_LIKE_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 14]> =
             })),
         ]
     });
-static AWAITED_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 5]> =
+static AWAITED_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 13]> =
     std::sync::LazyLock::new(|| {
         [
             crate::TypeData::from(crate::GenericTypeParameter {
@@ -20475,22 +20586,115 @@ static AWAITED_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 5]> =
                 constraint: crate::TypeReference::unknown(),
                 default: crate::TypeReference::unknown(),
             }),
+            crate::TypeData::Union(Box::new(crate::Union(Box::new([
+                crate::globals::GLOBAL_NULL_KEYWORD_ID.into(),
+                crate::globals::GLOBAL_UNDEFINED_ID.into(),
+            ])))),
+            crate::TypeData::from(crate::GenericTypeParameter {
+                is_const: false,
+                name: biome_rowan::Text::new_static("F"),
+                constraint: crate::TypeReference::unknown(),
+                default: crate::TypeReference::unknown(),
+            }),
+            crate::TypeData::from(crate::GenericTypeParameter {
+                is_const: false,
+                name: biome_rowan::Text::new_static("_"),
+                constraint: crate::TypeReference::unknown(),
+                default: crate::TypeReference::unknown(),
+            }),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("then")),
+                parameters: Box::new([
+                    crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("onfulfilled"),
+                        ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+                        is_optional: false,
+                        is_rest: false,
+                    }),
+                    crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("args"),
+                        ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
+                        is_optional: false,
+                        is_rest: true,
+                    }),
+                ]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_ANY_KEYWORD_ID.into()),
+            })),
+            crate::TypeData::from(crate::Object {
+                prototype: None,
+                members: Box::new([crate::TypeMember {
+                    kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("then")),
+                    ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
+                }]),
+                has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
+            }),
+            crate::TypeData::Intersection(Box::new(crate::Intersection(Box::new([
+                crate::globals::GLOBAL_OBJECT_KEYWORD_ID.into(),
+                crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
+            ])))),
+            crate::TypeData::from(crate::GenericTypeParameter {
+                is_const: false,
+                name: biome_rowan::Text::new_static("V"),
+                constraint: crate::TypeReference::unknown(),
+                default: crate::TypeReference::unknown(),
+            }),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: None,
+                parameters: Box::new([
+                    crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("value"),
+                        ty: crate::RawTypeId::Local(crate::TypeId::new(7)).into(),
+                        is_optional: false,
+                        is_rest: false,
+                    }),
+                    crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("args"),
+                        ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
+                        is_optional: false,
+                        is_rest: true,
+                    }),
+                ]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_ANY_KEYWORD_ID.into()),
+            })),
             crate::TypeData::instance_of(crate::TypeInstance {
                 ty: crate::globals::GLOBAL_AWAITED_ID.into(),
-                type_parameters: Box::new([crate::globals::GLOBAL_UNKNOWN_ID.into()]),
+                type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(7)).into()]),
             }),
-            crate::TypeData::Union(Box::new(crate::Union(Box::new([
-                crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
-                crate::globals::GLOBAL_NEVER_KEYWORD_ID.into(),
-            ])))),
-            crate::TypeData::Union(Box::new(crate::Union(Box::new([
-                crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
-                crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
-            ])))),
-            crate::TypeData::Union(Box::new(crate::Union(Box::new([
-                crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
-                crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
-            ])))),
+            crate::TypeData::Extends(Box::new(crate::ExtendsType {
+                check_type: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+                extends_type: crate::RawTypeId::Local(crate::TypeId::new(8)).into(),
+                true_type: crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
+                false_type: crate::globals::GLOBAL_NEVER_KEYWORD_ID.into(),
+                infer_types: Box::new([
+                    crate::RawTypeId::Local(crate::TypeId::new(7)).into(),
+                    crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
+                ]),
+                distributive: true,
+            })),
+            crate::TypeData::Extends(Box::new(crate::ExtendsType {
+                check_type: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+                extends_type: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
+                true_type: crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
+                false_type: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+                infer_types: Box::new([
+                    crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+                    crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
+                ]),
+                distributive: true,
+            })),
+            crate::TypeData::Extends(Box::new(crate::ExtendsType {
+                check_type: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+                extends_type: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
+                true_type: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+                false_type: crate::RawTypeId::Local(crate::TypeId::new(11)).into(),
+                infer_types: Box::default(),
+                distributive: true,
+            })),
         ]
     });
 static ARRAY_LIKE_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 1]> =
@@ -20586,10 +20790,14 @@ static EXCLUDE_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 3]> =
                 constraint: crate::TypeReference::unknown(),
                 default: crate::TypeReference::unknown(),
             }),
-            crate::TypeData::Union(Box::new(crate::Union(Box::new([
-                crate::globals::GLOBAL_NEVER_KEYWORD_ID.into(),
-                crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
-            ])))),
+            crate::TypeData::Extends(Box::new(crate::ExtendsType {
+                check_type: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+                extends_type: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
+                true_type: crate::globals::GLOBAL_NEVER_KEYWORD_ID.into(),
+                false_type: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+                infer_types: Box::default(),
+                distributive: true,
+            })),
         ]
     });
 static EXTRACT_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 3]> =
@@ -20607,10 +20815,14 @@ static EXTRACT_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 3]> =
                 constraint: crate::TypeReference::unknown(),
                 default: crate::TypeReference::unknown(),
             }),
-            crate::TypeData::Union(Box::new(crate::Union(Box::new([
-                crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
-                crate::globals::GLOBAL_NEVER_KEYWORD_ID.into(),
-            ])))),
+            crate::TypeData::Extends(Box::new(crate::ExtendsType {
+                check_type: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+                extends_type: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
+                true_type: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+                false_type: crate::globals::GLOBAL_NEVER_KEYWORD_ID.into(),
+                infer_types: Box::default(),
+                distributive: true,
+            })),
         ]
     });
 static OMIT_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 6]> =
@@ -20665,6 +20877,7 @@ static NON_NULLABLE_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 3]> =
                 prototype: None,
                 members: Box::new([]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::Intersection(Box::new(crate::Intersection(Box::new([
                 crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
@@ -20672,7 +20885,7 @@ static NON_NULLABLE_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 3]> =
             ])))),
         ]
     });
-static PARAMETERS_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 3]> =
+static PARAMETERS_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 5]> =
     std::sync::LazyLock::new(|| {
         [
             crate::TypeData::Function(Box::new(crate::Function {
@@ -20695,13 +20908,37 @@ static PARAMETERS_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 3]> =
                 constraint: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
                 default: crate::TypeReference::unknown(),
             }),
-            crate::TypeData::Union(Box::new(crate::Union(Box::new([
-                crate::globals::GLOBAL_UNKNOWN_ID.into(),
-                crate::globals::GLOBAL_NEVER_KEYWORD_ID.into(),
-            ])))),
+            crate::TypeData::from(crate::GenericTypeParameter {
+                is_const: false,
+                name: biome_rowan::Text::new_static("P"),
+                constraint: crate::TypeReference::unknown(),
+                default: crate::TypeReference::unknown(),
+            }),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: None,
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("args"),
+                        ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+                        is_optional: false,
+                        is_rest: true,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_ANY_KEYWORD_ID.into()),
+            })),
+            crate::TypeData::Extends(Box::new(crate::ExtendsType {
+                check_type: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
+                extends_type: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
+                true_type: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+                false_type: crate::globals::GLOBAL_NEVER_KEYWORD_ID.into(),
+                infer_types: Box::new([crate::RawTypeId::Local(crate::TypeId::new(2)).into()]),
+                distributive: true,
+            })),
         ]
     });
-static CONSTRUCTOR_PARAMETERS_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 3]> =
+static CONSTRUCTOR_PARAMETERS_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 5]> =
     std::sync::LazyLock::new(|| {
         [
             crate::TypeData::Constructor(Box::new(crate::Constructor {
@@ -20723,13 +20960,36 @@ static CONSTRUCTOR_PARAMETERS_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData;
                 constraint: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
                 default: crate::TypeReference::unknown(),
             }),
-            crate::TypeData::Union(Box::new(crate::Union(Box::new([
-                crate::globals::GLOBAL_UNKNOWN_ID.into(),
-                crate::globals::GLOBAL_NEVER_KEYWORD_ID.into(),
-            ])))),
+            crate::TypeData::from(crate::GenericTypeParameter {
+                is_const: false,
+                name: biome_rowan::Text::new_static("P"),
+                constraint: crate::TypeReference::unknown(),
+                default: crate::TypeReference::unknown(),
+            }),
+            crate::TypeData::Constructor(Box::new(crate::Constructor {
+                type_parameters: Box::default(),
+                parameters: Box::new([crate::ConstructorParameter {
+                    parameter: crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("args"),
+                        ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+                        is_optional: false,
+                        is_rest: true,
+                    }),
+                    accessibility: None,
+                }]),
+                return_type: Some(crate::globals::GLOBAL_ANY_KEYWORD_ID.into()),
+            })),
+            crate::TypeData::Extends(Box::new(crate::ExtendsType {
+                check_type: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
+                extends_type: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
+                true_type: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+                false_type: crate::globals::GLOBAL_NEVER_KEYWORD_ID.into(),
+                infer_types: Box::new([crate::RawTypeId::Local(crate::TypeId::new(2)).into()]),
+                distributive: true,
+            })),
         ]
     });
-static RETURN_TYPE_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 3]> =
+static RETURN_TYPE_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 5]> =
     std::sync::LazyLock::new(|| {
         [
             crate::TypeData::Function(Box::new(crate::Function {
@@ -20752,13 +21012,39 @@ static RETURN_TYPE_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 3]> =
                 constraint: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
                 default: crate::TypeReference::unknown(),
             }),
-            crate::TypeData::Union(Box::new(crate::Union(Box::new([
-                crate::globals::GLOBAL_UNKNOWN_ID.into(),
-                crate::globals::GLOBAL_ANY_KEYWORD_ID.into(),
-            ])))),
+            crate::TypeData::from(crate::GenericTypeParameter {
+                is_const: false,
+                name: biome_rowan::Text::new_static("R"),
+                constraint: crate::TypeReference::unknown(),
+                default: crate::TypeReference::unknown(),
+            }),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: None,
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("args"),
+                        ty: crate::globals::GLOBAL_ANY_KEYWORD_ID.into(),
+                        is_optional: false,
+                        is_rest: true,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(
+                    crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+                ),
+            })),
+            crate::TypeData::Extends(Box::new(crate::ExtendsType {
+                check_type: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
+                extends_type: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
+                true_type: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+                false_type: crate::globals::GLOBAL_ANY_KEYWORD_ID.into(),
+                infer_types: Box::new([crate::RawTypeId::Local(crate::TypeId::new(2)).into()]),
+                distributive: true,
+            })),
         ]
     });
-static INSTANCE_TYPE_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 3]> =
+static INSTANCE_TYPE_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 5]> =
     std::sync::LazyLock::new(|| {
         [
             crate::TypeData::Constructor(Box::new(crate::Constructor {
@@ -20780,10 +21066,33 @@ static INSTANCE_TYPE_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 3]> =
                 constraint: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
                 default: crate::TypeReference::unknown(),
             }),
-            crate::TypeData::Union(Box::new(crate::Union(Box::new([
-                crate::globals::GLOBAL_UNKNOWN_ID.into(),
-                crate::globals::GLOBAL_ANY_KEYWORD_ID.into(),
-            ])))),
+            crate::TypeData::from(crate::GenericTypeParameter {
+                is_const: false,
+                name: biome_rowan::Text::new_static("R"),
+                constraint: crate::TypeReference::unknown(),
+                default: crate::TypeReference::unknown(),
+            }),
+            crate::TypeData::Constructor(Box::new(crate::Constructor {
+                type_parameters: Box::default(),
+                parameters: Box::new([crate::ConstructorParameter {
+                    parameter: crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("args"),
+                        ty: crate::globals::GLOBAL_ANY_KEYWORD_ID.into(),
+                        is_optional: false,
+                        is_rest: true,
+                    }),
+                    accessibility: None,
+                }]),
+                return_type: Some(crate::RawTypeId::Local(crate::TypeId::new(2)).into()),
+            })),
+            crate::TypeData::Extends(Box::new(crate::ExtendsType {
+                check_type: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
+                extends_type: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
+                true_type: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+                false_type: crate::globals::GLOBAL_ANY_KEYWORD_ID.into(),
+                infer_types: Box::new([crate::RawTypeId::Local(crate::TypeId::new(2)).into()]),
+                distributive: true,
+            })),
         ]
     });
 static UPPERCASE_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 1]> =
@@ -21393,6 +21702,7 @@ static DATA_VIEW_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 24]> =
                     ty: crate::globals::GLOBAL_NEVER_KEYWORD_ID.into(),
                 }]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::Intersection(Box::new(crate::Intersection(Box::new([
                 crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
@@ -21463,6 +21773,7 @@ static DATA_VIEW_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 
                     ty: crate::globals::GLOBAL_NEVER_KEYWORD_ID.into(),
                 }]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::Intersection(Box::new(crate::Intersection(Box::new([
                 crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
@@ -22682,6 +22993,7 @@ static INT8_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -22700,6 +23012,7 @@ static INT8_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -22714,6 +23027,7 @@ static INT8_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -22736,6 +23050,7 @@ static INT8_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -23063,6 +23378,7 @@ static INT8_ARRAY_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData;
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -24235,6 +24551,7 @@ static UINT8_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -24253,6 +24570,7 @@ static UINT8_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -24267,6 +24585,7 @@ static UINT8_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -24289,6 +24608,7 @@ static UINT8_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -24616,6 +24936,7 @@ static UINT8_ARRAY_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -25788,6 +26109,7 @@ static UINT8_CLAMPED_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -25806,6 +26128,7 @@ static UINT8_CLAMPED_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -25820,6 +26143,7 @@ static UINT8_CLAMPED_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -25842,6 +26166,7 @@ static UINT8_CLAMPED_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -26169,6 +26494,7 @@ static UINT8_CLAMPED_ARRAY_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -27341,6 +27667,7 @@ static INT16_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -27359,6 +27686,7 @@ static INT16_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -27373,6 +27701,7 @@ static INT16_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -27395,6 +27724,7 @@ static INT16_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -27722,6 +28052,7 @@ static INT16_ARRAY_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -28894,6 +29225,7 @@ static UINT16_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -28912,6 +29244,7 @@ static UINT16_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -28926,6 +29259,7 @@ static UINT16_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -28948,6 +29282,7 @@ static UINT16_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -29275,6 +29610,7 @@ static UINT16_ARRAY_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeDat
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -30447,6 +30783,7 @@ static INT32_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -30465,6 +30802,7 @@ static INT32_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -30479,6 +30817,7 @@ static INT32_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -30501,6 +30840,7 @@ static INT32_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -30828,6 +31168,7 @@ static INT32_ARRAY_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -32000,6 +32341,7 @@ static UINT32_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -32018,6 +32360,7 @@ static UINT32_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -32032,6 +32375,7 @@ static UINT32_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -32054,6 +32398,7 @@ static UINT32_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -32381,6 +32726,7 @@ static UINT32_ARRAY_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeDat
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -33553,6 +33899,7 @@ static FLOAT32_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -33571,6 +33918,7 @@ static FLOAT32_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -33585,6 +33933,7 @@ static FLOAT32_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -33607,6 +33956,7 @@ static FLOAT32_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -33934,6 +34284,7 @@ static FLOAT32_ARRAY_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeDa
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -35106,6 +35457,7 @@ static FLOAT64_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -35124,6 +35476,7 @@ static FLOAT64_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -35138,6 +35491,7 @@ static FLOAT64_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -35160,6 +35514,7 @@ static FLOAT64_ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 80]> =
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -35487,6 +35842,7 @@ static FLOAT64_ARRAY_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeDa
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -35872,16 +36228,22 @@ static INTL_NUMBER_FORMAT_OPTIONS_CURRENCY_DISPLAY_LOCAL_TYPES: std::sync::LazyL
     ]
 });
 static INTL_NUMBER_FORMAT_OPTIONS_USE_GROUPING_LOCAL_TYPES: std::sync::LazyLock<
-    [crate::TypeData; 6],
+    [crate::TypeData; 7],
 > = std::sync::LazyLock::new(|| {
     [
+        crate::TypeData::from(crate::Object {
+            prototype: None,
+            members: Box::new([]),
+            has_unknown_members: false,
+            kind: crate::ObjectKind::Shape,
+        }),
         crate::TypeData::instance_of(crate::TypeInstance {
             ty: crate::globals::GLOBAL_INTL_NUMBER_FORMAT_OPTIONS_USE_GROUPING_REGISTRY_ID.into(),
             type_parameters: Box::default(),
         }),
         crate::TypeData::TypeOperator(Box::new(crate::TypeOperatorType {
             operator: crate::TypeOperator::Keyof,
-            ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+            ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
         })),
         crate::TypeData::Literal(Box::new(crate::Literal::String(
             biome_rowan::Text::new_static("true").into(),
@@ -35890,38 +36252,52 @@ static INTL_NUMBER_FORMAT_OPTIONS_USE_GROUPING_LOCAL_TYPES: std::sync::LazyLock<
             biome_rowan::Text::new_static("false").into(),
         ))),
         crate::TypeData::Union(Box::new(crate::Union(Box::new([
-            crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
-            crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
-        ])))),
-        crate::TypeData::Union(Box::new(crate::Union(Box::new([
-            crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
             crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
+            crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
         ])))),
+        crate::TypeData::Extends(Box::new(crate::ExtendsType {
+            check_type: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+            extends_type: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
+            true_type: crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
+            false_type: crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
+            infer_types: Box::default(),
+            distributive: false,
+        })),
     ]
 });
 static INTL_RESOLVED_NUMBER_FORMAT_OPTIONS_USE_GROUPING_LOCAL_TYPES: std::sync::LazyLock<
-    [crate::TypeData; 5],
+    [crate::TypeData; 6],
 > = std::sync::LazyLock::new(|| {
     [
+        crate::TypeData::from(crate::Object {
+            prototype: None,
+            members: Box::new([]),
+            has_unknown_members: false,
+            kind: crate::ObjectKind::Shape,
+        }),
         crate::TypeData::instance_of(crate::TypeInstance {
             ty: crate::globals::GLOBAL_INTL_NUMBER_FORMAT_OPTIONS_USE_GROUPING_REGISTRY_ID.into(),
             type_parameters: Box::default(),
         }),
         crate::TypeData::TypeOperator(Box::new(crate::TypeOperatorType {
             operator: crate::TypeOperator::Keyof,
-            ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+            ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
         })),
         crate::TypeData::Literal(Box::new(crate::Literal::Boolean(false.into()))),
         crate::TypeData::Union(Box::new(crate::Union(Box::new([
-            crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
-        ])))),
-        crate::TypeData::Union(Box::new(crate::Union(Box::new([
-            crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
             crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
         ])))),
+        crate::TypeData::Extends(Box::new(crate::ExtendsType {
+            check_type: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+            extends_type: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
+            true_type: crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
+            false_type: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
+            infer_types: Box::default(),
+            distributive: false,
+        })),
     ]
 });
 static INTL_NUMBER_FORMAT_OPTIONS_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 11]> =
@@ -38892,6 +39268,7 @@ static PROMISE_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 51
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -38906,6 +39283,7 @@ static PROMISE_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 51
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -38924,6 +39302,7 @@ static PROMISE_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 51
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -38938,6 +39317,7 @@ static PROMISE_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 51
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::from(crate::Object {
                 prototype: None,
@@ -38952,6 +39332,7 @@ static PROMISE_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 51
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
         ]
     });
@@ -39256,7 +39637,7 @@ static REFLECT_DELETE_PROPERTY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData
             type_parameters: Box::default(),
         })]
     });
-static REFLECT_GET_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 5]> =
+static REFLECT_GET_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 6]> =
     std::sync::LazyLock::new(|| {
         [
             crate::TypeData::from(crate::GenericTypeParameter {
@@ -39275,17 +39656,25 @@ static REFLECT_GET_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 5]> =
                 constraint: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
                 default: crate::TypeReference::unknown(),
             }),
+            crate::TypeData::TypeOperator(Box::new(crate::TypeOperatorType {
+                operator: crate::TypeOperator::Keyof,
+                ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+            })),
             crate::TypeData::IndexedAccess(Box::new(crate::IndexedAccessType {
                 object: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
                 index: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             })),
-            crate::TypeData::Union(Box::new(crate::Union(Box::new([
-                crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
-                crate::globals::GLOBAL_ANY_KEYWORD_ID.into(),
-            ])))),
+            crate::TypeData::Extends(Box::new(crate::ExtendsType {
+                check_type: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+                extends_type: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
+                true_type: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
+                false_type: crate::globals::GLOBAL_ANY_KEYWORD_ID.into(),
+                infer_types: Box::default(),
+                distributive: true,
+            })),
         ]
     });
-static REFLECT_GET_OWN_PROPERTY_DESCRIPTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 7]> =
+static REFLECT_GET_OWN_PROPERTY_DESCRIPTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 8]> =
     std::sync::LazyLock::new(|| {
         [
             crate::TypeData::from(crate::GenericTypeParameter {
@@ -39304,20 +39693,28 @@ static REFLECT_GET_OWN_PROPERTY_DESCRIPTOR_LOCAL_TYPES: std::sync::LazyLock<[cra
                 constraint: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
                 default: crate::TypeReference::unknown(),
             }),
+            crate::TypeData::TypeOperator(Box::new(crate::TypeOperatorType {
+                operator: crate::TypeOperator::Keyof,
+                ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+            })),
             crate::TypeData::IndexedAccess(Box::new(crate::IndexedAccessType {
                 object: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
                 index: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             })),
-            crate::TypeData::Union(Box::new(crate::Union(Box::new([
-                crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
-                crate::globals::GLOBAL_ANY_KEYWORD_ID.into(),
-            ])))),
+            crate::TypeData::Extends(Box::new(crate::ExtendsType {
+                check_type: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+                extends_type: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
+                true_type: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
+                false_type: crate::globals::GLOBAL_ANY_KEYWORD_ID.into(),
+                infer_types: Box::default(),
+                distributive: true,
+            })),
             crate::TypeData::instance_of(crate::TypeInstance {
                 ty: crate::globals::GLOBAL_TYPED_PROPERTY_DESCRIPTOR_ID.into(),
-                type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(4)).into()]),
+                type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(5)).into()]),
             }),
             crate::TypeData::Union(Box::new(crate::Union(Box::new([
-                crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
+                crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
                 crate::globals::GLOBAL_UNDEFINED_ID.into(),
             ])))),
         ]
@@ -39349,7 +39746,7 @@ static REFLECT_OWN_KEYS_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 2]> =
             }),
         ]
     });
-static REFLECT_SET_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 7]> =
+static REFLECT_SET_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 8]> =
     std::sync::LazyLock::new(|| {
         [
             crate::TypeData::from(crate::GenericTypeParameter {
@@ -39368,14 +39765,22 @@ static REFLECT_SET_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 7]> =
                 constraint: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
                 default: crate::TypeReference::unknown(),
             }),
+            crate::TypeData::TypeOperator(Box::new(crate::TypeOperatorType {
+                operator: crate::TypeOperator::Keyof,
+                ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+            })),
             crate::TypeData::IndexedAccess(Box::new(crate::IndexedAccessType {
                 object: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
                 index: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             })),
-            crate::TypeData::Union(Box::new(crate::Union(Box::new([
-                crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
-                crate::globals::GLOBAL_ANY_KEYWORD_ID.into(),
-            ])))),
+            crate::TypeData::Extends(Box::new(crate::ExtendsType {
+                check_type: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+                extends_type: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
+                true_type: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
+                false_type: crate::globals::GLOBAL_ANY_KEYWORD_ID.into(),
+                infer_types: Box::default(),
+                distributive: true,
+            })),
             crate::TypeData::Function(Box::new(crate::Function {
                 is_async: false,
                 type_parameters: Box::new([
@@ -39398,7 +39803,7 @@ static REFLECT_SET_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 7]> =
                     }),
                     crate::FunctionParameter::Named(crate::NamedFunctionParameter {
                         name: biome_rowan::Text::new_static("value"),
-                        ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
+                        ty: crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
                         is_optional: false,
                         is_rest: false,
                     }),
@@ -40443,21 +40848,43 @@ static DECORATOR_METADATA_OBJECT_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeDa
             ])))),
         ]
     });
-static DECORATOR_METADATA_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 3]> =
+static DECORATOR_METADATA_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 5]> =
     std::sync::LazyLock::new(|| {
         [
+            crate::TypeData::from(crate::Object {
+                prototype: None,
+                members: Box::new([crate::TypeMember {
+                    kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("metadata")),
+                    ty: crate::globals::GLOBAL_SYMBOL_KEYWORD_ID.into(),
+                }]),
+                has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
+            }),
+            crate::TypeData::from(crate::Object {
+                prototype: None,
+                members: Box::new([crate::TypeMember {
+                    kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("Symbol")),
+                    ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+                }]),
+                has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
+            }),
             crate::TypeData::instance_of(crate::TypeInstance {
                 ty: crate::globals::GLOBAL_DECORATOR_METADATA_OBJECT_ID.into(),
                 type_parameters: Box::default(),
             }),
             crate::TypeData::Union(Box::new(crate::Union(Box::new([
-                crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+                crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
                 crate::globals::GLOBAL_UNDEFINED_ID.into(),
             ])))),
-            crate::TypeData::Union(Box::new(crate::Union(Box::new([
-                crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
-                crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
-            ])))),
+            crate::TypeData::Extends(Box::new(crate::ExtendsType {
+                check_type: crate::globals::GLOBAL_UNKNOWN_ID.into(),
+                extends_type: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
+                true_type: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+                false_type: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
+                infer_types: Box::default(),
+                distributive: false,
+            })),
         ]
     });
 static CLASS_DECORATOR_CONTEXT_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 7]> =
@@ -40597,6 +41024,7 @@ static CLASS_METHOD_DECORATOR_CONTEXT_LOCAL_TYPES: std::sync::LazyLock<[crate::T
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::Function(Box::new(crate::Function {
                 is_async: false,
@@ -40692,6 +41120,7 @@ static CLASS_GETTER_DECORATOR_CONTEXT_LOCAL_TYPES: std::sync::LazyLock<[crate::T
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::Function(Box::new(crate::Function {
                 is_async: false,
@@ -40791,6 +41220,7 @@ static CLASS_SETTER_DECORATOR_CONTEXT_LOCAL_TYPES: std::sync::LazyLock<[crate::T
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::Function(Box::new(crate::Function {
                 is_async: false,
@@ -40910,6 +41340,7 @@ static CLASS_ACCESSOR_DECORATOR_CONTEXT_LOCAL_TYPES: std::sync::LazyLock<[crate:
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::Function(Box::new(crate::Function {
                 is_async: false,
@@ -41125,6 +41556,7 @@ static CLASS_FIELD_DECORATOR_CONTEXT_LOCAL_TYPES: std::sync::LazyLock<[crate::Ty
                     },
                 ]),
                 has_unknown_members: false,
+                kind: crate::ObjectKind::Shape,
             }),
             crate::TypeData::Function(Box::new(crate::Function {
                 is_async: false,

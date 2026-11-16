@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validUnresolvedBarrel.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+export * from "./does-not-exist.js";
+
+```

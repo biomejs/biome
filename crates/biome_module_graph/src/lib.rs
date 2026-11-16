@@ -42,7 +42,9 @@ pub use db::queries::{
     tailwind_stylesheet, transitive_importers_of, traverse_import_tree_for_classes,
     traverse_import_tree_for_html_classes,
 };
-pub use db::{ModuleDb, ModuleGraphGeneration, ResolverDb, TypeDb, module_for_key};
+pub use db::{
+    MAX_ON_DEMAND_IMPORT_DEPTH, ModuleDb, ModuleGraphGeneration, ResolverDb, TypeDb, module_for_key,
+};
 pub use diagnostics::ModuleDiagnostic;
 pub use html_module_info::{
     HtmlImport, HtmlModuleInfo, PreparedHtmlModule, SerializedHtmlModuleInfo, prepare_html_module,

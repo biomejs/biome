@@ -152,6 +152,14 @@ pub enum LoweredTypeData {
         object: LoweredTypeReference,
         index: LoweredTypeReference,
     },
+    Extends {
+        check_type: LoweredTypeReference,
+        extends_type: LoweredTypeReference,
+        true_type: LoweredTypeReference,
+        false_type: LoweredTypeReference,
+        infer_types: Box<[LoweredTypeReference]>,
+        distributive: bool,
+    },
     InstanceOf {
         ty: LoweredTypeReference,
         type_parameters: Box<[LoweredTypeReference]>,

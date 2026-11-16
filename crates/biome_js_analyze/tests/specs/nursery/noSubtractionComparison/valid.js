@@ -1,0 +1,19 @@
+/* should not generate diagnostics */
+a > b;
+a < b;
+a === b;
+a - b;
+a - b > 1;
+a - b > c;
+a - b === c;
+a + b > 0;
+a * b > 0;
+a % b > 0;
+a > 0;
+0 > a;
+0 > 0;
+a - b > 0n;
+a - b > -0;
+a - b instanceof c;
+a - b in c;
+a - b > "0";

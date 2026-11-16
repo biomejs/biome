@@ -1,15 +1,12 @@
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::AnyJsExpression;
-use biome_rowan::{AstNode, TextRange};
+use biome_js_syntax::JsCallExpression;
+use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use biome_rule_options::no_vue_options_api::NoVueOptionsApiOptions;
+use biome_vue_semantic::ComponentKind;
 
-use crate::frameworks::vue::vue_call::is_vue_api_reference;
-use crate::frameworks::vue::vue_component::{
-    AnyVueComponent, VueComponent, VueComponentQuery, VueOptionsApiBasedComponent,
-};
-use biome_languages::JsFileSource;
+use crate::services::vue::VueComponent;
 
 declare_lint_rule! {
     /// Disallow the use of Vue Options API.
@@ -135,55 +132,38 @@ pub struct RuleState {
 }
 
 impl Rule for NoVueOptionsApi {
-    type Query = VueComponentQuery;
+    type Query = VueComponent;
     type State = RuleState;
     type Signals = Option<Self::State>;
     type Options = NoVueOptionsApiOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let component = VueComponent::from_potential_component(
-            ctx.query(),
-            ctx.model(),
-            ctx.source_type::<JsFileSource>(),
-            ctx.file_path(),
-        )?;
-
-        // <script setup> or defineComponent with function signature are valid for Vapor Mode
-        match component.kind() {
-            AnyVueComponent::Setup(_) => None,
-            AnyVueComponent::OptionsApi(opts) => {
-                let expr = opts.definition_expression()?;
-                if is_define_component_or_create_app(&expr, ctx.model()) {
+        let component = ctx.query();
+        let range = match component.kind() {
+            // <script setup> is valid for Vapor Mode
+            ComponentKind::Setup => return None,
+            ComponentKind::OptionsObject => {
+                // `export default createApp({ ... })` is reported as a `createApp()` component.
+                let is_create_app = ctx.vue_model().components().any(|other| {
+                    other.kind() == ComponentKind::CreateApp
+                        && other.host_range() == component.host_range()
+                });
+                if is_create_app {
                     return None;
                 }
-                Some(RuleState {
-                    range: expr.range(),
-                })
+                component.range()
             }
-            AnyVueComponent::DefineComponent(component) => {
-                if component.setup_func().is_some() {
+            ComponentKind::DefineComponent => {
+                // defineComponent with function signature is valid for Vapor Mode
+                let call = JsCallExpression::cast(ctx.vue_model().node(component)?)?;
+                if call.arguments().ok()?.args().len() == 2 {
                     return None;
                 }
-                let definition = component.definition_expression()?;
-                if definition.as_js_object_expression().is_some() {
-                    Some(RuleState {
-                        range: definition.range(),
-                    })
-                } else {
-                    None
-                }
+                component.options_object_range()?
             }
-            AnyVueComponent::CreateApp(component) => {
-                let definition = component.definition_expression()?;
-                if definition.as_js_object_expression().is_some() {
-                    Some(RuleState {
-                        range: definition.range(),
-                    })
-                } else {
-                    None
-                }
-            }
-        }
+            ComponentKind::CreateApp => component.options_object_range()?,
+        };
+        Some(RuleState { range })
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -203,18 +183,4 @@ impl Rule for NoVueOptionsApi {
             }),
         )
     }
-}
-
-fn is_define_component_or_create_app(
-    expr: &AnyJsExpression,
-    model: &biome_js_semantic::SemanticModel,
-) -> bool {
-    let Some(call_expr) = expr.as_js_call_expression() else {
-        return false;
-    };
-    let Some(callee) = call_expr.callee().ok().and_then(|c| c.inner_expression()) else {
-        return false;
-    };
-    is_vue_api_reference(&callee, model, "defineComponent")
-        || is_vue_api_reference(&callee, model, "createApp")
 }

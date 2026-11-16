@@ -1,0 +1,871 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+fetch(url, { body });
+new Request(url, { body });
+fetch(url, { method: "GET", body });
+new Request(url, { method: "GET", body });
+fetch(url, { method: "HEAD", body });
+new Request(url, { method: "HEAD", body });
+fetch(url, { method: "head", body });
+new Request(url, { method: "head", body });
+fetch(url, { method: `get`, body });
+fetch(url, { method: true ? "GET" : "POST", body });
+new Request(url, { method: false ? "POST" : "HEAD", body });
+const condition = true;
+let value;
+fetch(url, { method: condition ? "GET" : value, body });
+const method = "head";
+new Request(url, { method, body: "foo=bar" });
+fetch(url, { method, body: "foo=bar" });
+const aliasedMethod = method;
+fetch(url, { method: aliasedMethod, body: "foo=bar" });
+fetch(url, { body }, extraArgument);
+new Request(url, { body }, extraArgument);
+fetch(url, { body: undefined, body: "foo=bar" });
+new Request(url, { body: undefined, body: "foo=bar" });
+fetch(url, { method: "post", body: "foo=bar", method: "HEAD" });
+new Request(url, { method: "post", body: "foo=bar", method: "HEAD" });
+fetch(url, { ["method"]: "GET", "body": "x" });
+fetch(url, { ["body"]: "x" });
+fetch(url, { [`body`]: "x", method: "GET" });
+fetch(url, { body: "x", [`method`]: "GET" });
+fetch(url, { ...options, method: "GET", body: "x" });
+fetch(url, { ...options, body: "x", method: "GET" });
+fetch(url, ({ body: "x" }));
+globalThis.fetch(url, { body: "x" });
+window.fetch(url, { body: "x" });
+new globalThis.Request(url, { body: "x" });
+fetch?.(url, { body: "x" });
+await fetch(url, { body: "x" });
+fetch(url, { method: 0 ? "POST" : "GET", body });
+fetch(url, { method: 0.0 ? "POST" : "GET", body });
+fetch(url, { method: 0x0 ? "POST" : "GET", body });
+fetch(url, { method: 1n ? "GET" : "POST", body });
+fetch(url, { body() {} });
+fetch(url, { get body() { return "x"; } });
+
+```
+
+# Diagnostics
+```
+invalid.js:2:14 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ fetch(url, { body });
+      │              ^^^^
+    3 │ new Request(url, { body });
+    4 │ fetch(url, { method: "GET", body });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:20 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    1 │ /* should generate diagnostics */
+    2 │ fetch(url, { body });
+  > 3 │ new Request(url, { body });
+      │                    ^^^^
+    4 │ fetch(url, { method: "GET", body });
+    5 │ new Request(url, { method: "GET", body });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:29 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    2 │ fetch(url, { body });
+    3 │ new Request(url, { body });
+  > 4 │ fetch(url, { method: "GET", body });
+      │                             ^^^^
+    5 │ new Request(url, { method: "GET", body });
+    6 │ fetch(url, { method: "HEAD", body });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:35 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    3 │ new Request(url, { body });
+    4 │ fetch(url, { method: "GET", body });
+  > 5 │ new Request(url, { method: "GET", body });
+      │                                   ^^^^
+    6 │ fetch(url, { method: "HEAD", body });
+    7 │ new Request(url, { method: "HEAD", body });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:30 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is HEAD.
+  
+    4 │ fetch(url, { method: "GET", body });
+    5 │ new Request(url, { method: "GET", body });
+  > 6 │ fetch(url, { method: "HEAD", body });
+      │                              ^^^^
+    7 │ new Request(url, { method: "HEAD", body });
+    8 │ fetch(url, { method: "head", body });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:36 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is HEAD.
+  
+    5 │ new Request(url, { method: "GET", body });
+    6 │ fetch(url, { method: "HEAD", body });
+  > 7 │ new Request(url, { method: "HEAD", body });
+      │                                    ^^^^
+    8 │ fetch(url, { method: "head", body });
+    9 │ new Request(url, { method: "head", body });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:30 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is HEAD.
+  
+     6 │ fetch(url, { method: "HEAD", body });
+     7 │ new Request(url, { method: "HEAD", body });
+   > 8 │ fetch(url, { method: "head", body });
+       │                              ^^^^
+     9 │ new Request(url, { method: "head", body });
+    10 │ fetch(url, { method: `get`, body });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:36 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is HEAD.
+  
+     7 │ new Request(url, { method: "HEAD", body });
+     8 │ fetch(url, { method: "head", body });
+   > 9 │ new Request(url, { method: "head", body });
+       │                                    ^^^^
+    10 │ fetch(url, { method: `get`, body });
+    11 │ fetch(url, { method: true ? "GET" : "POST", body });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:29 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+     8 │ fetch(url, { method: "head", body });
+     9 │ new Request(url, { method: "head", body });
+  > 10 │ fetch(url, { method: `get`, body });
+       │                             ^^^^
+    11 │ fetch(url, { method: true ? "GET" : "POST", body });
+    12 │ new Request(url, { method: false ? "POST" : "HEAD", body });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:45 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+     9 │ new Request(url, { method: "head", body });
+    10 │ fetch(url, { method: `get`, body });
+  > 11 │ fetch(url, { method: true ? "GET" : "POST", body });
+       │                                             ^^^^
+    12 │ new Request(url, { method: false ? "POST" : "HEAD", body });
+    13 │ const condition = true;
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:53 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is HEAD.
+  
+    10 │ fetch(url, { method: `get`, body });
+    11 │ fetch(url, { method: true ? "GET" : "POST", body });
+  > 12 │ new Request(url, { method: false ? "POST" : "HEAD", body });
+       │                                                     ^^^^
+    13 │ const condition = true;
+    14 │ let value;
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:49 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    13 │ const condition = true;
+    14 │ let value;
+  > 15 │ fetch(url, { method: condition ? "GET" : value, body });
+       │                                                 ^^^^
+    16 │ const method = "head";
+    17 │ new Request(url, { method, body: "foo=bar" });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:28 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is HEAD.
+  
+    15 │ fetch(url, { method: condition ? "GET" : value, body });
+    16 │ const method = "head";
+  > 17 │ new Request(url, { method, body: "foo=bar" });
+       │                            ^^^^
+    18 │ fetch(url, { method, body: "foo=bar" });
+    19 │ const aliasedMethod = method;
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:22 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is HEAD.
+  
+    16 │ const method = "head";
+    17 │ new Request(url, { method, body: "foo=bar" });
+  > 18 │ fetch(url, { method, body: "foo=bar" });
+       │                      ^^^^
+    19 │ const aliasedMethod = method;
+    20 │ fetch(url, { method: aliasedMethod, body: "foo=bar" });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:37 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is HEAD.
+  
+    18 │ fetch(url, { method, body: "foo=bar" });
+    19 │ const aliasedMethod = method;
+  > 20 │ fetch(url, { method: aliasedMethod, body: "foo=bar" });
+       │                                     ^^^^
+    21 │ fetch(url, { body }, extraArgument);
+    22 │ new Request(url, { body }, extraArgument);
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:14 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    19 │ const aliasedMethod = method;
+    20 │ fetch(url, { method: aliasedMethod, body: "foo=bar" });
+  > 21 │ fetch(url, { body }, extraArgument);
+       │              ^^^^
+    22 │ new Request(url, { body }, extraArgument);
+    23 │ fetch(url, { body: undefined, body: "foo=bar" });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:20 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    20 │ fetch(url, { method: aliasedMethod, body: "foo=bar" });
+    21 │ fetch(url, { body }, extraArgument);
+  > 22 │ new Request(url, { body }, extraArgument);
+       │                    ^^^^
+    23 │ fetch(url, { body: undefined, body: "foo=bar" });
+    24 │ new Request(url, { body: undefined, body: "foo=bar" });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:31 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    21 │ fetch(url, { body }, extraArgument);
+    22 │ new Request(url, { body }, extraArgument);
+  > 23 │ fetch(url, { body: undefined, body: "foo=bar" });
+       │                               ^^^^
+    24 │ new Request(url, { body: undefined, body: "foo=bar" });
+    25 │ fetch(url, { method: "post", body: "foo=bar", method: "HEAD" });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:37 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    22 │ new Request(url, { body }, extraArgument);
+    23 │ fetch(url, { body: undefined, body: "foo=bar" });
+  > 24 │ new Request(url, { body: undefined, body: "foo=bar" });
+       │                                     ^^^^
+    25 │ fetch(url, { method: "post", body: "foo=bar", method: "HEAD" });
+    26 │ new Request(url, { method: "post", body: "foo=bar", method: "HEAD" });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:30 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is HEAD.
+  
+    23 │ fetch(url, { body: undefined, body: "foo=bar" });
+    24 │ new Request(url, { body: undefined, body: "foo=bar" });
+  > 25 │ fetch(url, { method: "post", body: "foo=bar", method: "HEAD" });
+       │                              ^^^^
+    26 │ new Request(url, { method: "post", body: "foo=bar", method: "HEAD" });
+    27 │ fetch(url, { ["method"]: "GET", "body": "x" });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:36 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is HEAD.
+  
+    24 │ new Request(url, { body: undefined, body: "foo=bar" });
+    25 │ fetch(url, { method: "post", body: "foo=bar", method: "HEAD" });
+  > 26 │ new Request(url, { method: "post", body: "foo=bar", method: "HEAD" });
+       │                                    ^^^^
+    27 │ fetch(url, { ["method"]: "GET", "body": "x" });
+    28 │ fetch(url, { ["body"]: "x" });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:33 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    25 │ fetch(url, { method: "post", body: "foo=bar", method: "HEAD" });
+    26 │ new Request(url, { method: "post", body: "foo=bar", method: "HEAD" });
+  > 27 │ fetch(url, { ["method"]: "GET", "body": "x" });
+       │                                 ^^^^^^
+    28 │ fetch(url, { ["body"]: "x" });
+    29 │ fetch(url, { [`body`]: "x", method: "GET" });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:14 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    26 │ new Request(url, { method: "post", body: "foo=bar", method: "HEAD" });
+    27 │ fetch(url, { ["method"]: "GET", "body": "x" });
+  > 28 │ fetch(url, { ["body"]: "x" });
+       │              ^^^^^^^^
+    29 │ fetch(url, { [`body`]: "x", method: "GET" });
+    30 │ fetch(url, { body: "x", [`method`]: "GET" });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:14 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    27 │ fetch(url, { ["method"]: "GET", "body": "x" });
+    28 │ fetch(url, { ["body"]: "x" });
+  > 29 │ fetch(url, { [`body`]: "x", method: "GET" });
+       │              ^^^^^^^^
+    30 │ fetch(url, { body: "x", [`method`]: "GET" });
+    31 │ fetch(url, { ...options, method: "GET", body: "x" });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:30:14 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    28 │ fetch(url, { ["body"]: "x" });
+    29 │ fetch(url, { [`body`]: "x", method: "GET" });
+  > 30 │ fetch(url, { body: "x", [`method`]: "GET" });
+       │              ^^^^
+    31 │ fetch(url, { ...options, method: "GET", body: "x" });
+    32 │ fetch(url, { ...options, body: "x", method: "GET" });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:41 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    29 │ fetch(url, { [`body`]: "x", method: "GET" });
+    30 │ fetch(url, { body: "x", [`method`]: "GET" });
+  > 31 │ fetch(url, { ...options, method: "GET", body: "x" });
+       │                                         ^^^^
+    32 │ fetch(url, { ...options, body: "x", method: "GET" });
+    33 │ fetch(url, ({ body: "x" }));
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:26 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    30 │ fetch(url, { body: "x", [`method`]: "GET" });
+    31 │ fetch(url, { ...options, method: "GET", body: "x" });
+  > 32 │ fetch(url, { ...options, body: "x", method: "GET" });
+       │                          ^^^^
+    33 │ fetch(url, ({ body: "x" }));
+    34 │ globalThis.fetch(url, { body: "x" });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:33:15 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    31 │ fetch(url, { ...options, method: "GET", body: "x" });
+    32 │ fetch(url, { ...options, body: "x", method: "GET" });
+  > 33 │ fetch(url, ({ body: "x" }));
+       │               ^^^^
+    34 │ globalThis.fetch(url, { body: "x" });
+    35 │ window.fetch(url, { body: "x" });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:34:25 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    32 │ fetch(url, { ...options, body: "x", method: "GET" });
+    33 │ fetch(url, ({ body: "x" }));
+  > 34 │ globalThis.fetch(url, { body: "x" });
+       │                         ^^^^
+    35 │ window.fetch(url, { body: "x" });
+    36 │ new globalThis.Request(url, { body: "x" });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:21 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    33 │ fetch(url, ({ body: "x" }));
+    34 │ globalThis.fetch(url, { body: "x" });
+  > 35 │ window.fetch(url, { body: "x" });
+       │                     ^^^^
+    36 │ new globalThis.Request(url, { body: "x" });
+    37 │ fetch?.(url, { body: "x" });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:36:31 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    34 │ globalThis.fetch(url, { body: "x" });
+    35 │ window.fetch(url, { body: "x" });
+  > 36 │ new globalThis.Request(url, { body: "x" });
+       │                               ^^^^
+    37 │ fetch?.(url, { body: "x" });
+    38 │ await fetch(url, { body: "x" });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:37:16 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    35 │ window.fetch(url, { body: "x" });
+    36 │ new globalThis.Request(url, { body: "x" });
+  > 37 │ fetch?.(url, { body: "x" });
+       │                ^^^^
+    38 │ await fetch(url, { body: "x" });
+    39 │ fetch(url, { method: 0 ? "POST" : "GET", body });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:38:20 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    36 │ new globalThis.Request(url, { body: "x" });
+    37 │ fetch?.(url, { body: "x" });
+  > 38 │ await fetch(url, { body: "x" });
+       │                    ^^^^
+    39 │ fetch(url, { method: 0 ? "POST" : "GET", body });
+    40 │ fetch(url, { method: 0.0 ? "POST" : "GET", body });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:42 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    37 │ fetch?.(url, { body: "x" });
+    38 │ await fetch(url, { body: "x" });
+  > 39 │ fetch(url, { method: 0 ? "POST" : "GET", body });
+       │                                          ^^^^
+    40 │ fetch(url, { method: 0.0 ? "POST" : "GET", body });
+    41 │ fetch(url, { method: 0x0 ? "POST" : "GET", body });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:40:44 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    38 │ await fetch(url, { body: "x" });
+    39 │ fetch(url, { method: 0 ? "POST" : "GET", body });
+  > 40 │ fetch(url, { method: 0.0 ? "POST" : "GET", body });
+       │                                            ^^^^
+    41 │ fetch(url, { method: 0x0 ? "POST" : "GET", body });
+    42 │ fetch(url, { method: 1n ? "GET" : "POST", body });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:44 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    39 │ fetch(url, { method: 0 ? "POST" : "GET", body });
+    40 │ fetch(url, { method: 0.0 ? "POST" : "GET", body });
+  > 41 │ fetch(url, { method: 0x0 ? "POST" : "GET", body });
+       │                                            ^^^^
+    42 │ fetch(url, { method: 1n ? "GET" : "POST", body });
+    43 │ fetch(url, { body() {} });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:42:43 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    40 │ fetch(url, { method: 0.0 ? "POST" : "GET", body });
+    41 │ fetch(url, { method: 0x0 ? "POST" : "GET", body });
+  > 42 │ fetch(url, { method: 1n ? "GET" : "POST", body });
+       │                                           ^^^^
+    43 │ fetch(url, { body() {} });
+    44 │ fetch(url, { get body() { return "x"; } });
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:43:14 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    41 │ fetch(url, { method: 0x0 ? "POST" : "GET", body });
+    42 │ fetch(url, { method: 1n ? "GET" : "POST", body });
+  > 43 │ fetch(url, { body() {} });
+       │              ^^^^
+    44 │ fetch(url, { get body() { return "x"; } });
+    45 │ 
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:44:18 lint/nursery/noInvalidFetchOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This request has a body, but its method is GET.
+  
+    42 │ fetch(url, { method: 1n ? "GET" : "POST", body });
+    43 │ fetch(url, { body() {} });
+  > 44 │ fetch(url, { get body() { return "x"; } });
+       │                  ^^^^
+    45 │ 
+  
+  i Requests that use the GET or HEAD method can't have a body, so this code throws a TypeError when it runs. A request without a method uses GET.
+  
+  i Remove the body, or use a method that allows one, such as POST.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

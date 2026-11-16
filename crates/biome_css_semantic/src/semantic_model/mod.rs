@@ -62,7 +62,7 @@ mod tests {
 
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 2);
-        assert_eq!(rule.child_ids.len(), 0);
+        assert_eq!(rule.child_ids().len(), 0);
         assert_eq!(rule.parent_id, None);
     }
 
@@ -106,14 +106,14 @@ mod tests {
         let rule = rules.first().unwrap();
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 1);
-        assert_eq!(rule.child_ids.len(), 1);
+        assert_eq!(rule.child_ids().len(), 1);
 
-        let child_id = rule.child_ids.first().unwrap();
+        let child_id = rule.child_ids().first().unwrap();
         let child = model.get_rule_by_id(child_id).unwrap();
 
         assert_eq!(child.selectors.len(), 1);
         assert_eq!(child.declarations.len(), 1);
-        assert_eq!(child.child_ids.len(), 0);
+        assert_eq!(child.child_ids().len(), 0);
         assert_eq!(child.parent_id, Some(rule.id));
     }
 
@@ -136,13 +136,13 @@ mod tests {
 
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 0);
-        assert_eq!(rule.child_ids.len(), 1);
+        assert_eq!(rule.child_ids().len(), 1);
 
-        let child_id = rule.child_ids.first().unwrap();
+        let child_id = rule.child_ids().first().unwrap();
         let child = model.get_rule_by_id(child_id).unwrap();
         assert_eq!(child.selectors.len(), 1);
         assert_eq!(child.declarations.len(), 1);
-        assert_eq!(child.child_ids.len(), 0);
+        assert_eq!(child.child_ids().len(), 0);
         assert_eq!(child.parent_id, Some(rule.id));
     }
 
@@ -165,13 +165,13 @@ mod tests {
 
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 0);
-        assert_eq!(rule.child_ids.len(), 1);
+        assert_eq!(rule.child_ids().len(), 1);
 
-        let child_id = rule.child_ids.first().unwrap();
+        let child_id = rule.child_ids().first().unwrap();
         let child = model.get_rule_by_id(child_id).unwrap();
         assert_eq!(child.selectors.len(), 0);
         assert_eq!(child.declarations.len(), 1);
-        assert_eq!(child.child_ids.len(), 0);
+        assert_eq!(child.child_ids().len(), 0);
         assert_eq!(child.parent_id, Some(rule.id));
     }
 
@@ -517,6 +517,42 @@ or>";
                 .map(|declaration| declaration.name().text().to_string())
                 .collect::<Vec<_>>(),
             ["--inline"]
+        );
+    }
+
+    #[test]
+    fn test_root_declarations_in_styled_snippet() {
+        let source =
+            "color: red; --size: 1px; &:hover { color: blue; } @font-face { font-family: x; }";
+        let parse = parse_css(
+            source,
+            CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Styled),
+            CssParserOptions::default(),
+        );
+        let model = super::semantic_model(&parse.tree());
+        let names = |declarations: Vec<super::model::CssModelDeclaration>| {
+            declarations
+                .iter()
+                .map(|declaration| declaration.name().text().to_string())
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(
+            names(model.root_declarations().collect()),
+            ["color", "--size"]
+        );
+
+        let top_level = TextRange::at(TextSize::from(0), TextSize::from(10));
+        assert_eq!(
+            names(model.get_declarations_by_range(top_level)),
+            ["color", "--size"]
+        );
+
+        let hover_start = source.find("color: blue").unwrap() as u32;
+        let hover = TextRange::at(TextSize::from(hover_start), TextSize::from(11));
+        assert_eq!(names(model.get_declarations_by_range(hover)), ["color"]);
+        assert_eq!(
+            names(model.get_ancestor_declarations_by_range(hover).collect()),
+            ["color", "color", "--size"]
         );
     }
 

@@ -1,0 +1,99 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidRequire.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const { before, beforeEach: setup, "afterAll": done } = require("node:test");
+const { afterEach } = (require("mocha"));
+
+before(() => {});
+setup(() => {});
+done(() => {});
+afterEach(() => {});
+
+```
+
+# Diagnostics
+```
+invalidRequire.js:5:1 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The before hook is not allowed.
+  
+    3 │ const { afterEach } = (require("mocha"));
+    4 │ 
+  > 5 │ before(() => {});
+      │ ^^^^^^
+    6 │ setup(() => {});
+    7 │ done(() => {});
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidRequire.js:6:1 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The beforeEach hook is not allowed.
+  
+    5 │ before(() => {});
+  > 6 │ setup(() => {});
+      │ ^^^^^
+    7 │ done(() => {});
+    8 │ afterEach(() => {});
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidRequire.js:7:1 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The afterAll hook is not allowed.
+  
+    5 │ before(() => {});
+    6 │ setup(() => {});
+  > 7 │ done(() => {});
+      │ ^^^^
+    8 │ afterEach(() => {});
+    9 │ 
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidRequire.js:8:1 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The afterEach hook is not allowed.
+  
+    6 │ setup(() => {});
+    7 │ done(() => {});
+  > 8 │ afterEach(() => {});
+      │ ^^^^^^^^^
+    9 │ 
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

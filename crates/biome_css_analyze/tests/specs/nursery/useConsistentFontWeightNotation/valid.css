@@ -1,0 +1,24 @@
+/* should not generate diagnostics */
+a { font-weight: 100; }
+a { font-weight: 400; }
+a { font-weight: 700; }
+a { font-weight: 850; }
+a { FONT-WEIGHT: 100; }
+a { font-weight: var(--weight); }
+a { font-weight: inherit; }
+a { font-weight: INITIAL; }
+a { font-weight: /* bold */ 400; }
+a { font: italic small-caps 400 16px/3 cursive; }
+a { font: italic small-caps 400 16px/500 "bold font name"; }
+a { font: italic small-caps 400 16px/500 boldfontname; }
+a { font: 16px bold, serif; }
+a { font: normal 400 normal 16px serif; }
+a { font: 400 normal 16px serif; }
+a { font: 400 16px serif; }
+a { font: italic var(--weight) 20px serif; }
+a { font: normal var(--weight) 16px serif; }
+a { font: normal var(--weight) var(--size)/1.5 var(--family); }
+a { font: caption; }
+a { color: bold; }
+@font-face { font-weight: 400 700; }
+@font-face { font-weight: 400.5 700.5; }

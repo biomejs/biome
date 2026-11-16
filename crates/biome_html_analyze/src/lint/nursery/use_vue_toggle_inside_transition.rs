@@ -130,8 +130,8 @@ impl Rule for UseVueToggleInsideTransition {
 }
 
 /// Tag kinds that Vue doesn't render as a known native element: the built-in
-/// `<component>` and `<slot>`, and any tag name that isn't a known HTML or SVG
-/// tag.
+/// `<component>` and `<slot>`, and any tag name that isn't a known HTML, SVG, or
+/// MathML tag.
 const NON_NATIVE_TAGS: TokenSet<HtmlSyntaxKind> =
     token_set![T![component], T![slot], HtmlSyntaxKind::HTML_UNKNOWN_TAG];
 
@@ -154,7 +154,7 @@ fn has_appear(transition: &HtmlOpeningElement) -> bool {
         .is_some_and(|value| value.trim() == "false")
 }
 
-/// Returns `true` if `element` is a known HTML or SVG element, rather than a
+/// Returns `true` if `element` is a known HTML, SVG, or MathML element, rather than a
 /// component or an element that renders something else in its place.
 fn is_native_element(element: &AnyHtmlTagElement) -> bool {
     element

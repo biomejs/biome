@@ -46,6 +46,17 @@ assignPlain ||= 'default';
 // Inside a non-Boolean call: SHOULD generate a diagnostic.
 const r7 = identity(a || 'default');
 
+// Boolean shadowed by a parameter: SHOULD generate a diagnostic.
+function shadowedByParameter(Boolean: (value: unknown) => boolean) {
+	return Boolean(a || 'default');
+}
+
+// Boolean shadowed by a local binding: SHOULD generate a diagnostic.
+function shadowedByLocal() {
+	const Boolean = (value: unknown) => !!value;
+	return Boolean(a || 'default');
+}
+
 ```
 
 # Diagnostics
@@ -118,6 +129,49 @@ ignoreBooleanCoercionEnabled.ts:41:23 lint/nursery/useNullishCoalescing ━━�
   > 41 │ const r7 = identity(a || 'default');
        │                       ^^
     42 │ 
+    43 │ // Boolean shadowed by a parameter: SHOULD generate a diagnostic.
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreBooleanCoercionEnabled.ts:45:19 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    43 │ // Boolean shadowed by a parameter: SHOULD generate a diagnostic.
+    44 │ function shadowedByParameter(Boolean: (value: unknown) => boolean) {
+  > 45 │ 	return Boolean(a || 'default');
+       │ 	                 ^^
+    46 │ }
+    47 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreBooleanCoercionEnabled.ts:51:19 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    49 │ function shadowedByLocal() {
+    50 │ 	const Boolean = (value: unknown) => !!value;
+  > 51 │ 	return Boolean(a || 'default');
+       │ 	                 ^^
+    52 │ }
+    53 │ 
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   

@@ -170,7 +170,7 @@ fn render_type_data(data: &LoweredTypeData) -> String {
         LoweredTypeData::NeverKeyword => "crate::TypeData::NeverKeyword".to_string(),
         LoweredTypeData::Null => "crate::TypeData::Null".to_string(),
         LoweredTypeData::Object(members) => format!(
-            "crate::TypeData::from(crate::Object {{ prototype: None, members: Box::new([{}]), has_unknown_members: false }})",
+            "crate::TypeData::from(crate::Object {{ prototype: None, members: Box::new([{}]), has_unknown_members: false, kind: crate::ObjectKind::Shape }})",
             render_members(members),
         ),
         LoweredTypeData::ObjectKeyword => "crate::TypeData::ObjectKeyword".to_string(),
@@ -231,6 +231,21 @@ fn render_type_data(data: &LoweredTypeData) -> String {
             "crate::TypeData::IndexedAccess(Box::new(crate::IndexedAccessType {{ object: {}, index: {} }}))",
             render_type_reference(object),
             render_type_reference(index),
+        ),
+        LoweredTypeData::Extends {
+            check_type,
+            extends_type,
+            true_type,
+            false_type,
+            infer_types,
+            distributive,
+        } => format!(
+            "crate::TypeData::Extends(Box::new(crate::ExtendsType {{ check_type: {}, extends_type: {}, true_type: {}, false_type: {}, infer_types: {}, distributive: {distributive} }}))",
+            render_type_reference(check_type),
+            render_type_reference(extends_type),
+            render_type_reference(true_type),
+            render_type_reference(false_type),
+            render_type_references(infer_types),
         ),
         LoweredTypeData::Undefined => "crate::TypeData::Undefined".to_string(),
         LoweredTypeData::InstanceOf {

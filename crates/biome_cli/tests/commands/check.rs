@@ -1044,6 +1044,38 @@ macro_rules! check_windows_symlink {
 }
 
 #[test]
+fn missing_path() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let root_path = Utf8PathBuf::from_path_buf(temp_dir())
+        .unwrap()
+        .join("check_missing_path");
+    let missing_path = root_path.join("missing.js");
+
+    let _ = remove_dir_all(&root_path);
+    create_dir(&root_path).unwrap();
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(OsFileSystem::new(root_path.clone())),
+        &mut console,
+        Args::from(["check", missing_path.as_str()].as_slice()),
+    );
+
+    remove_dir_all(root_path).unwrap();
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "missing_path",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn fs_error_dereferenced_symlink() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

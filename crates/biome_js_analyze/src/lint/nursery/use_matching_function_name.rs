@@ -128,7 +128,7 @@ impl Rule for UseMatchingFunctionName {
                 let AnyJsAssignmentPattern::AnyJsAssignment(left) = assignment.left().ok()? else {
                     return None;
                 };
-                let (target, name) = assignment_target_name(&left)?;
+                let (target, name) = assignment_target_name(left)?;
                 (target, name, assignment.range().start())
             }
             JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER => {
@@ -214,8 +214,8 @@ fn function_name(function: &JsFunctionExpression) -> Option<Text> {
 
 /// Returns the name assigned to by `left`, or `None` if the name isn't known statically, is
 /// private, or is `module.exports`.
-fn assignment_target_name(left: &AnyJsAssignment) -> Option<(NameTarget, TokenText)> {
-    let (object, name) = match left {
+fn assignment_target_name(left: AnyJsAssignment) -> Option<(NameTarget, TokenText)> {
+    let (object, name) = match left.omit_target_parentheses() {
         AnyJsAssignment::JsIdentifierAssignment(identifier) => {
             let name = identifier.name_token().ok()?.token_text_trimmed();
             return Some((NameTarget::Variable, name));
@@ -237,9 +237,6 @@ fn assignment_target_name(left: &AnyJsAssignment) -> Option<(NameTarget, TokenTe
                 return None;
             };
             (member.object().ok()?, inner_string_text(&token))
-        }
-        AnyJsAssignment::JsParenthesizedAssignment(parenthesized) => {
-            return assignment_target_name(&parenthesized.assignment().ok()?);
         }
         _ => return None,
     };

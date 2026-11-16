@@ -9,9 +9,10 @@ use crate::source::read_module_source;
 use crate::token::JsAstToken;
 use biome_analyze::{PluginDiagnosticEntry, ServiceBag};
 use biome_js_semantic::SemanticModel;
-use biome_js_syntax::{JsLanguage, JsSyntaxKind, JsSyntaxNode};
+use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxElement, JsSyntaxKind, JsSyntaxNode};
 use biome_languages::JsFileSource;
 use biome_resolver::FsWithResolverProxy;
+use biome_rowan::AstNode;
 use boa_engine::builtins::promise::PromiseState;
 use boa_engine::object::builtins::{JsArray, JsFunction};
 use boa_engine::property::PropertyKey;
@@ -43,8 +44,14 @@ pub struct JsPluginRule {
 
     pub requires_semantic: bool,
 
-    /// The `run()` function of the rule, called with every node matching the query.
+    /// The `run()` function of the rule, called with every node or token matching the query.
     pub run: JsFunction,
+
+    /// The Grit pattern used to select the nodes passed to `run`, if any.
+    ///
+    /// When set, `kinds` contains the file root kinds, because the pattern is
+    /// executed once per file rather than once per node kind.
+    pub grit: Option<String>,
 }
 
 impl JsExecContext {
@@ -152,47 +159,75 @@ impl JsExecContext {
             };
 
             let query_type = query.get(js_string!("type"), ctx)?;
-            let requires_semantic = match query_type.as_string() {
-                Some(ty) if ty == "ast" => false,
-                Some(ty) if ty == "semantic" => true,
-                _ => return Err(JsNativeError::typ()
-                    .with_message(format!(
-                        "Rule {name} has an unsupported query type. Use ast(...) or semantic(...)."
-                    ))
-                    .into()),
+            let (requires_semantic, grit) = match query_type.as_string() {
+                Some(ty) if ty == "ast" => (
+                    query
+                        .get(js_string!("requiresSemantic"), ctx)?
+                        .as_boolean()
+                        .unwrap_or(false),
+                    None,
+                ),
+                Some(ty) if ty == "grit" => {
+                    let pattern = query.get(js_string!("pattern"), ctx)?;
+                    let Some(pattern) = pattern.as_string() else {
+                        return Err(JsNativeError::typ()
+                            .with_message(format!(
+                                "Rule {name} has an invalid Grit query. Pass a Grit pattern string to grit()."
+                            ))
+                            .into());
+                    };
+                    let requires_semantic = query
+                        .get(js_string!("requiresSemantic"), ctx)?
+                        .as_boolean()
+                        .unwrap_or(false);
+                    (requires_semantic, Some(pattern.to_std_string_lossy()))
+                }
+                _ => {
+                    return Err(JsNativeError::typ()
+                        .with_message(format!(
+                            "Rule {name} has an unsupported query type. Use ast(...) or grit(...)."
+                        ))
+                        .into());
+                }
             };
 
-            let kinds = JsArray::from_object(
-                query
-                    .get(js_string!("kinds"), ctx)?
-                    .as_object()
-                    .ok_or_else(|| {
-                        JsNativeError::typ()
-                            .with_message(format!("Rule {name} has an invalid AST query"))
-                    })?,
-            )?;
+            let rule_kinds = if grit.is_some() {
+                AnyJsRoot::KIND_SET.iter().collect()
+            } else {
+                let kinds = JsArray::from_object(
+                    query
+                        .get(js_string!("kinds"), ctx)?
+                        .as_object()
+                        .ok_or_else(|| {
+                            JsNativeError::typ()
+                                .with_message(format!("Rule {name} has an invalid AST query"))
+                        })?,
+                )?;
 
-            let mut rule_kinds = Vec::new();
-            for index in 0..kinds.length(ctx)? {
-                let kind = kinds.at(index as i64, ctx)?;
-                let kind = kind
-                    .as_string()
-                    .map(|kind| kind.to_std_string_lossy())
-                    .and_then(|kind| JsAstNode::syntax_kind_from_ast_name(&kind))
-                    .ok_or_else(|| {
-                        JsNativeError::typ().with_message(format!(
-                            "Rule {name} queries an unknown syntax kind: {}",
-                            kind.display()
-                        ))
-                    })?;
-                rule_kinds.push(kind);
-            }
+                let mut rule_kinds = Vec::new();
+                for index in 0..kinds.length(ctx)? {
+                    let kind = kinds.at(index as i64, ctx)?;
+                    let kind = kind
+                        .as_string()
+                        .map(|kind| kind.to_std_string_lossy())
+                        .and_then(|kind| JsAstNode::syntax_kind_from_ast_name(&kind))
+                        .ok_or_else(|| {
+                            JsNativeError::typ().with_message(format!(
+                                "Rule {name} queries an unknown syntax kind: {}",
+                                kind.display()
+                            ))
+                        })?;
+                    rule_kinds.push(kind);
+                }
+                rule_kinds
+            };
 
             rules.push(JsPluginRule {
                 name,
                 kinds: rule_kinds,
                 requires_semantic,
                 run,
+                grit,
             });
         }
 
@@ -205,9 +240,17 @@ impl JsExecContext {
     /// The returned value is bound to this context: it must not outlive it, nor be passed to
     /// another [`JsExecContext`].
     pub fn create_js_ast(&mut self, node: JsSyntaxNode) -> JsValue {
-        let root = node.ancestors().last().unwrap_or_else(|| node.clone());
-        self.api.set_source(Some(root));
-        JsAstNode::from_node(node, &mut self.ctx)
+        self.create_js_element(JsSyntaxElement::Node(node))
+    }
+
+    /// Wraps a node or a token in the AST bindings exposed to the plugins.
+    ///
+    /// The returned value is bound to this context: it must not outlive it, nor
+    /// be passed to another [`JsExecContext`].
+    pub fn create_js_element(&mut self, element: JsSyntaxElement) -> JsValue {
+        let root = element.tree_top();
+        self.api.set_source(root);
+        JsAstNode::from_element(element, &mut self.ctx)
     }
 
     pub fn call_function(
@@ -229,7 +272,7 @@ impl JsExecContext {
     pub fn call_rule(
         &mut self,
         rule: &JsPluginRule,
-        node: JsSyntaxNode,
+        element: JsSyntaxElement,
         path: &Utf8Path,
         source_type: JsFileSource,
         services: &ServiceBag,
@@ -241,7 +284,7 @@ impl JsExecContext {
         } else {
             None
         };
-        let ast = self.create_js_ast(node);
+        let ast = self.create_js_element(element);
         let context = create_rule_context(path, source_type, model, &mut self.ctx);
         self.call_function(&rule.run, &JsValue::undefined(), &[ast, context])
     }

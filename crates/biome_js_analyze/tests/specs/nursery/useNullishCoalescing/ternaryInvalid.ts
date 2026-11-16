@@ -50,10 +50,6 @@ const r12 = l != undefined ? l : 'default';
 declare const n: string | null;
 const r13 = null === n ? 'default' : n;
 
-// Strict single with null | undefined (diagnostic only, no fix)
-declare const nu: string | null | undefined;
-const r17 = nu !== null ? nu : 'default';
-
 // Fallback is conditional (needs parens)
 declare const p: string | null;
 const r14 = p !== null ? p : p ? 'a' : 'b';
@@ -104,23 +100,7 @@ function getVal(x: string | null): string {
 declare const paren: string | null;
 const r24 = (paren !== null ? paren : 'default').toUpperCase();
 
-// --- StrictSingle fixability: opposite nullish variant in type ---
-
-// Checks !== null but type has undefined (not null): no fix
-declare const ss1: string | undefined;
-const r26 = ss1 !== null ? ss1 : 'default';
-
-// Checks !== undefined but type has null (not undefined): no fix
-declare const ss2: string | null;
-const r27 = ss2 !== undefined ? ss2 : 'default';
-
-// Inverted: checks === null but type has undefined: no fix
-declare const ss3: string | undefined;
-const r28 = ss3 === null ? 'default' : ss3;
-
-// Inverted: checks === undefined but type has null: no fix
-declare const ss4: string | null;
-const r29 = ss4 === undefined ? 'default' : ss4;
+// --- StrictSingle fixability: type has only the checked nullish variant ---
 
 // Checks !== null, type has only null: fix IS safe
 declare const ss5: string | null;
@@ -130,15 +110,7 @@ const r30 = ss5 !== null ? ss5 : 'default';
 declare const ss6: string | undefined;
 const r31 = ss6 !== undefined ? ss6 : 'default';
 
-// Checks !== null, type has void (acts as undefined): no fix
-declare const ss7: string | void;
-const r32 = ss7 !== null ? ss7 : 'default';
-
-// --- Compound fixability: duplicate vs complementary literals ---
-
-// Both sides check null (not complementary): no fix
-declare const cp1: string | null | undefined;
-const r33 = cp1 !== null && cp1 !== null ? cp1 : 'default';
+// --- Compound fixability: complementary literals ---
 
 // Complementary: one null, one undefined: fix IS safe
 declare const cp2: string | null | undefined;

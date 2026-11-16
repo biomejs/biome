@@ -1,4 +1,6 @@
+use crate::ModuleGraphGeneration;
 use crate::db::ModuleDb;
+use crate::db::queries::module_importers;
 use crate::module_graph::ModuleInfo;
 use camino::{Utf8Path, Utf8PathBuf};
 
@@ -141,15 +143,21 @@ where
                     imported_path,
                     branch,
                 } => {
-                    let mut importers = Vec::new();
-                    self.visitor.db().for_each_module(&mut |importer| {
-                        if self
-                            .visitor
-                            .should_visit_importer(&imported_path, importer, &branch)
-                        {
-                            importers.push(importer);
-                        }
-                    });
+                    let importers = {
+                        let db = self.visitor.db();
+                        module_importers(db, ModuleGraphGeneration::get(db))
+                            .for_path(&imported_path)
+                            .iter()
+                            .copied()
+                            .filter(|importer| {
+                                self.visitor.should_visit_importer(
+                                    &imported_path,
+                                    *importer,
+                                    &branch,
+                                )
+                            })
+                            .collect::<Vec<_>>()
+                    };
 
                     let mut items = Vec::new();
                     let mut explorations = Vec::new();

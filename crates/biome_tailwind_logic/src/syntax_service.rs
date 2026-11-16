@@ -314,17 +314,11 @@ where
     }
 }
 
-pub struct TailwindSyntaxVisitor<N: AstNode> {
-    skip_subtree: Option<SyntaxNode<N::Language>>,
-    _node: PhantomData<N>,
-}
+pub struct TailwindSyntaxVisitor<N>(PhantomData<N>);
 
-impl<N: AstNode> Default for TailwindSyntaxVisitor<N> {
+impl<N> Default for TailwindSyntaxVisitor<N> {
     fn default() -> Self {
-        Self {
-            skip_subtree: None,
-            _node: PhantomData,
-        }
+        Self(PhantomData)
     }
 }
 
@@ -339,26 +333,15 @@ where
         event: &WalkEvent<SyntaxNode<Self::Language>>,
         mut ctx: VisitorContext<Self::Language>,
     ) {
-        let node = match event {
-            WalkEvent::Enter(node) => node,
-            WalkEvent::Leave(node) => {
-                if let Some(skip_subtree) = &self.skip_subtree
-                    && skip_subtree == node
-                {
-                    self.skip_subtree = None;
-                }
-                return;
-            }
+        let WalkEvent::Enter(node) = event else {
+            return;
         };
 
-        if self.skip_subtree.is_some() {
-            return;
-        }
-
+        // A node overlaps the range only if all its ancestors do, so checking
+        // the node alone skips the same nodes as skipping whole subtrees.
         if let Some(range) = ctx.range
             && node.text_range_with_trivia().ordering(range).is_ne()
         {
-            self.skip_subtree = Some(node.clone());
             return;
         }
 
@@ -399,6 +382,13 @@ where
             node: node.clone(),
             class_string,
         });
+    }
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<Self::Language>>,
+    ) -> Option<SyntaxKindSet<Self::Language>> {
+        Some(N::KIND_SET)
     }
 }
 
@@ -726,9 +716,16 @@ impl TailwindClassStringHost for JsLiteralMemberName {
         if !inspect_string_literal(self.syntax(), options, is_class_attribute).unwrap_or(false) {
             return None;
         }
+        let value = self.value().ok()?;
+        // Only string literal keys have an opening quote to skip.
+        let quote_len = if value.kind() == JsSyntaxKind::JS_STRING_LITERAL {
+            TextSize::from(1)
+        } else {
+            TextSize::from(0)
+        };
         tailwind_class_string(
             self.name().ok()?,
-            self.value().ok()?.text_trimmed_range().start() + TextSize::from(1),
+            value.text_trimmed_range().start() + quote_len,
             ClassStringHostKind::JsLiteralMemberName,
         )
         .into()
@@ -816,5 +813,32 @@ impl TailwindClassStringHost for HtmlAttribute {
             ClassStringHostKind::HtmlString,
         )
         .into()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_js_parser::{JsParserOptions, parse};
+
+    /// Returns the source text at the `inner_range` of each object key that
+    /// holds a class string in `source`.
+    fn object_key_class_texts(source: &str) -> Vec<String> {
+        let parse = parse(source, JsFileSource::jsx(), JsParserOptions::default());
+        parse
+            .syntax()
+            .descendants()
+            .filter_map(JsLiteralMemberName::cast)
+            .filter_map(|name| name.tailwind_class_string(&TailwindOptions::default(), false))
+            .map(|class_string| source[class_string.inner_range].to_string())
+            .collect()
+    }
+
+    #[test]
+    fn object_key_inner_range() {
+        assert_eq!(
+            object_key_class_texts(r#"clsx({ flex: active, "p-2": active, 'm-2': active });"#),
+            ["flex", "p-2", "m-2"]
+        );
     }
 }

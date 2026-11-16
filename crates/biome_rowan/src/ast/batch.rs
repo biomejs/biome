@@ -457,7 +457,7 @@ where
         let combined_trivia =
             chain_trivia_pieces(leading_pieces.into_iter(), trailing_pieces.into_iter());
 
-        if let Some(next_token) = node.last_token().and_then(|t| t.next_token()) {
+        if let Some(next_token) = node.next_token() {
             let new_next_token = next_token.with_leading_trivia_pieces(chain_trivia_pieces(
                 combined_trivia,
                 next_token.leading_trivia().pieces(),
@@ -664,10 +664,7 @@ where
                     // The root of batch mutation is not necessarily
                     // the document root in some rule actions,
                     // so we need to find the actual document root
-                    let mut document_root = root;
-                    while let Some(parent) = document_root.parent() {
-                        document_root = parent;
-                    }
+                    let document_root = root.tree_top();
 
                     if curr_is_from_action {
                         text_mutation_list = vec![(

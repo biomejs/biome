@@ -1,5 +1,5 @@
 use crate::JsRuleAction;
-use crate::services::vue::{VueProp, node_at_range};
+use crate::services::vue::VueProp;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
     declare_lint_rule,
@@ -8,12 +8,10 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
-use biome_js_syntax::{
-    AnyJsArrayElement, AnyJsExpression, JsArrayElementList, JsPropertyObjectMember,
-};
+use biome_js_syntax::{AnyJsArrayElement, AnyJsExpression, JsArrayElementList};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::use_vue_boolean_prop_type_first::UseVueBooleanPropTypeFirstOptions;
-use biome_vue_semantic::{PropForm, PropType};
+use biome_vue_semantic::PropType;
 
 declare_lint_rule! {
     /// Require `Boolean` to be the first type of Vue props that accept several types.
@@ -87,25 +85,10 @@ impl Rule for UseVueBooleanPropTypeFirst {
         if !types.contains(PropType::Boolean) || types.exactly_one().is_some() {
             return None;
         }
-        let member =
-            node_at_range::<JsPropertyObjectMember>(&ctx.root(), prop.declaration_range())?;
-        let value = member.value().ok()?.inner_expression()?;
-        let types = match prop.form()? {
-            PropForm::Constructor => value,
-            PropForm::Options => {
-                let AnyJsExpression::JsObjectExpression(options) = value else {
-                    return None;
-                };
-                options
-                    .find_member("type")?
-                    .as_js_property_object_member()?
-                    .value()
-                    .ok()?
-                    .inner_expression()?
-            }
-            PropForm::ArrayString | PropForm::TypeMember => return None,
-        };
-        let AnyJsExpression::JsArrayExpression(array) = types else {
+        let types = ctx.vue_model().node(&prop.runtime_type_node()?)?;
+        let AnyJsExpression::JsArrayExpression(array) =
+            AnyJsExpression::cast(types)?.inner_expression()?
+        else {
             return None;
         };
         let (index, element) = array
@@ -187,13 +170,11 @@ fn with_trivia_of(element: &AnyJsArrayElement, slot: &AnyJsArrayElement) -> AnyJ
     let leading: Vec<_> = slot
         .syntax()
         .first_leading_trivia()
-        .map(|trivia| trivia.pieces().collect())
-        .unwrap_or_default();
+        .map_or_default(|trivia| trivia.pieces().collect());
     let trailing: Vec<_> = slot
         .syntax()
         .last_trailing_trivia()
-        .map(|trivia| trivia.pieces().collect())
-        .unwrap_or_default();
+        .map_or_default(|trivia| trivia.pieces().collect());
     element
         .clone()
         .with_leading_trivia_pieces(leading)

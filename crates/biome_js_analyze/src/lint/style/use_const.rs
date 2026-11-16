@@ -448,18 +448,11 @@ fn has_member_expr_in_array_pat(pat: &JsArrayAssignmentPattern) -> bool {
         .any(|it| it.pattern().is_some_and(has_member_expr_in_assign_pat))
 }
 
-fn is_member_expr_assignment(mut assignment: AnyJsAssignment) -> bool {
-    use AnyJsAssignment::*;
-    while let JsParenthesizedAssignment(p) = assignment {
-        if let Ok(p) = p.assignment() {
-            assignment = p
-        } else {
-            return false;
-        }
-    }
+fn is_member_expr_assignment(assignment: AnyJsAssignment) -> bool {
     matches!(
-        assignment,
-        JsComputedMemberAssignment(_) | JsStaticMemberAssignment(_)
+        assignment.omit_target_parentheses(),
+        AnyJsAssignment::JsComputedMemberAssignment(_)
+            | AnyJsAssignment::JsStaticMemberAssignment(_)
     )
 }
 

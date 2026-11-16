@@ -1,4 +1,5 @@
 use crate::context::ProseWrap;
+use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
 use crate::prelude::*;
 use biome_formatter::write;
 use biome_markdown_syntax::{
@@ -74,13 +75,15 @@ fn format_code_fence(
 /// space. These padding spaces are consumed by CommonMark's code-span rules, preventing them from
 /// changing the interpreted code string.
 ///
-/// Construction returns `None` for non-textual content and for code spans nested in links, images,
-/// or reference definitions. Those nodes retain their source fences and content instead of using
-/// this serialization.
+/// Construction returns `None` for content other than text and block quote continuation prefixes,
+/// and for code spans nested in links, images, or reference definitions. Those nodes retain their
+/// source fences and content instead of using this serialization.
 ///
 /// See <https://spec.commonmark.org/0.30/#code-spans>.
 struct CodeSpanNormalization {
-    /// Every textual node between the opening and closing backtick fences, in source order.
+    /// Every inline item between the opening and closing backtick fences, in source order.
+    items: Vec<AnyMdInline>,
+    /// The textual items used to compute the CommonMark code string.
     textuals: Vec<MdTextual>,
     /// Whether the first and last boundary units are removed because both are spaces or line
     /// endings and the content contains a non-space character.
@@ -107,13 +110,15 @@ impl CodeSpanNormalization {
             return None;
         }
 
-        let textuals = content
-            .iter()
-            .map(|item| match item {
-                AnyMdInline::MdTextual(textual) => Some(textual),
-                _ => None,
-            })
-            .collect::<Option<Vec<_>>>()?;
+        let items = content.iter().collect::<Vec<_>>();
+        let textuals = items.iter().try_fold(Vec::new(), |mut textuals, item| {
+            match item {
+                AnyMdInline::MdTextual(textual) => textuals.push(textual.clone()),
+                AnyMdInline::MdQuotePrefix(_) => {}
+                _ => return None,
+            }
+            Some(textuals)
+        })?;
         let has_non_space = textuals.iter().try_fold(false, |has_non_space, textual| {
             Some(
                 has_non_space
@@ -135,6 +140,7 @@ impl CodeSpanNormalization {
             first == '`' || last == '`' || (first == ' ' && last == ' ' && has_non_space);
 
         Some(Self {
+            items,
             textuals,
             trim_boundaries,
             needs_padding,
@@ -166,6 +172,7 @@ impl CodeSpanNormalization {
                             }
                         }
                     }
+                    AnyMdInline::MdQuotePrefix(_) => {}
                     _ => return None,
                 }
             }
@@ -273,8 +280,28 @@ impl Format<MarkdownFormatContext> for CodeSpanNormalization {
 
         let last_index = self.textuals.len().saturating_sub(1);
         let prose_wrap = f.options().prose_wrap();
+        let mut textual_index = 0;
 
-        for (index, textual) in self.textuals.iter().enumerate() {
+        for item in &self.items {
+            let AnyMdInline::MdTextual(textual) = item else {
+                let AnyMdInline::MdQuotePrefix(prefix) = item else {
+                    unreachable!("code span normalization accepts only text and quote prefixes");
+                };
+                if prose_wrap == ProseWrap::Preserve {
+                    write!(f, [prefix.format()])?;
+                } else {
+                    write!(
+                        f,
+                        [prefix.format().with_options(FormatMdQuotePrefixOptions {
+                            should_remove: true,
+                        })]
+                    )?;
+                }
+                continue;
+            };
+
+            let index = textual_index;
+            textual_index += 1;
             if prose_wrap == ProseWrap::Preserve
                 && (!self.trim_boundaries || (index != 0 && index != last_index))
             {

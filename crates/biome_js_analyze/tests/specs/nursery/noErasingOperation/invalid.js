@@ -1,0 +1,20 @@
+/* should generate diagnostics */
+x * 0;
+0 * x;
+0 & x;
+x & 0;
+0 / x;
+0.0 * x;
+0x0 * x;
+0e5 * x;
+x + y * 0;
+(x + y) * 0;
+foo() * 0;
+-3 * 0;
+0 / -3;
+0 / 5;
+x * (0);
+x * ((0));
+0 * 0;
+0 & 0;
+const total = price * 0;

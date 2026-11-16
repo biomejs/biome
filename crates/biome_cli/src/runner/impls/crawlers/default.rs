@@ -27,6 +27,7 @@ where
             duration,
             scanner_duration,
             errors,
+            traversal_errors,
             warnings,
             infos,
             suggested_fixes_skipped,
@@ -54,6 +55,7 @@ where
             },
             diagnostics,
             evaluated_paths,
+            traversal_errors,
         }
     }
 }

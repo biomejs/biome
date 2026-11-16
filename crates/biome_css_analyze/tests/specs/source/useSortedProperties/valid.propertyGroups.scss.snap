@@ -1,0 +1,35 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.propertyGroups.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+.variables {
+  $color: red;
+  display: block;
+  color: $color;
+}
+
+.assignments {
+  $size: 10px;
+  width: $size;
+  $size: 20px;
+  height: $size;
+}
+
+.statements {
+  @include theme;
+  display: block;
+  color: red;
+  @if true { color: blue; }
+  display: flex;
+  color: green;
+}
+
+.nesting-declaration {
+  font: { size: 12px; }
+  color: red;
+}
+
+```

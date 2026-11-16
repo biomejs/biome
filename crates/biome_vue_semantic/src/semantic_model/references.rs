@@ -11,7 +11,7 @@
 //! `emit('change')` is a use of the event `change`.
 
 use super::builder::{ModelBuilder, NewSymbol, synthetic_name};
-use super::component::ScriptInput;
+use super::component::{ScriptInput, static_string_text};
 use super::layout::Layout;
 use super::model::*;
 use super::snippets::SfcSnippet;
@@ -138,6 +138,7 @@ pub(crate) fn add_builtins_scope(builder: &mut ModelBuilder) -> ScopeId {
             namespace: Namespace::Binding,
             kind: SymbolKind::Builtin,
             component: None,
+            node: None,
         });
     }
     scope
@@ -164,6 +165,7 @@ pub(crate) fn collect_template_symbols(
                 namespace: Namespace::Binding,
                 kind: SymbolKind::VForAlias,
                 component: None,
+                node: None,
             });
         }
     }
@@ -186,6 +188,7 @@ pub(crate) fn collect_template_symbols(
                 continue;
             };
             let range = token.text_trimmed_range() + snippet.content_offset;
+            let node = builder.add_js_node(Some(*id), binding.syntax());
             builder.add_symbol(NewSymbol {
                 name: token.token_text_trimmed(),
                 range,
@@ -195,6 +198,7 @@ pub(crate) fn collect_template_symbols(
                 namespace: Namespace::Binding,
                 kind: SymbolKind::SlotParam,
                 component: None,
+                node: Some(node),
             });
         }
     }
@@ -209,6 +213,7 @@ pub(crate) fn collect_template_symbols(
             namespace: Namespace::TemplateRef,
             kind: SymbolKind::TemplateRef,
             component: scopes.component,
+            node: None,
         });
     }
 }
@@ -547,9 +552,7 @@ impl Walker<'_> {
             .into_iter()
             .flat_map(|arguments| arguments.args().iter().flatten())
             .collect();
-        let Some(AnyJsExpression::AnyJsLiteralExpression(
-            AnyJsLiteralExpression::JsStringLiteralExpression(literal),
-        )) = arguments
+        let Some(literal) = arguments
             .first()
             .and_then(AnyJsCallArgument::as_any_js_expression)
             .map(|argument| argument.clone().omit_parentheses())
@@ -557,7 +560,8 @@ impl Walker<'_> {
             self.mark_uses_open(component, Namespace::Emit);
             return;
         };
-        let Ok(name) = literal.inner_string_text() else {
+        let Some(name) = static_string_text(&literal) else {
+            self.mark_uses_open(component, Namespace::Emit);
             return;
         };
         let mut resolution =

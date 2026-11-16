@@ -170,6 +170,12 @@ impl Scope {
         self.data.scope_node_by_range[&self.range()].to_node(self.data.to_root().syntax())
     }
 
+    /// Returns the kind of [Self::syntax], without locating the node in the
+    /// tree.
+    pub fn syntax_kind(&self) -> JsSyntaxKind {
+        self.data.scope_node_by_range[&self.range()].kind()
+    }
+
     /// Return the [Closure] associated with this scope if
     /// it has one, otherwise returns None.
     /// See [HasClosureAstNode] for nodes that have closure.

@@ -1,11 +1,16 @@
-use biome_js_syntax::{AnyJsExpression, JsBinaryExpression, JsSyntaxNode, inner_string_text};
+use biome_js_syntax::{
+    AnyJsExpression, JsBinaryExpression, JsSyntaxKind, JsSyntaxNode, JsUnaryOperator,
+    inner_string_text,
+};
 use biome_rowan::{AstNode, Direction, WalkEvent};
+use biome_unicode_table::is_js_ident;
 use rustc_hash::FxHasher;
 use std::hash::{Hash, Hasher};
 use std::iter;
 
 pub mod batch;
 pub mod function_return;
+pub mod indexed_collection;
 pub mod rename;
 pub mod same_reference;
 #[cfg(test)]
@@ -99,6 +104,14 @@ pub(crate) fn find_variable_position(
         .next()
 }
 
+/// Returns `true` if `name` can be declared as a variable in a module, where
+/// strict mode reserves words such as `let` and `static`.
+pub(crate) fn can_be_variable_name(name: &str) -> bool {
+    is_js_ident(name)
+        && !JsSyntaxKind::from_keyword(name)
+            .is_some_and(|keyword| keyword.is_non_contextual_keyword())
+}
+
 // Parse the package name from an import value
 pub(crate) fn parse_package_name(path: &str) -> Option<&str> {
     if path.is_empty() {
@@ -145,6 +158,25 @@ pub(crate) fn parse_package_name(path: &str) -> Option<&str> {
         None
     } else {
         Some(path)
+    }
+}
+
+/// Returns the value of a number literal, looking through parentheses, TypeScript type
+/// wrappers, and unary `+` and `-`.
+pub(crate) fn static_number_value(expression: &AnyJsExpression) -> Option<f64> {
+    match expression.clone().omit_type_wrappers()? {
+        AnyJsExpression::AnyJsLiteralExpression(literal) => {
+            literal.as_js_number_literal_expression()?.as_number()
+        }
+        AnyJsExpression::JsUnaryExpression(unary) => {
+            let value = static_number_value(&unary.argument().ok()?)?;
+            match unary.operator().ok()? {
+                JsUnaryOperator::Minus => Some(-value),
+                JsUnaryOperator::Plus => Some(value),
+                _ => None,
+            }
+        }
+        _ => None,
     }
 }
 

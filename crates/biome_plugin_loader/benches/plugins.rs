@@ -44,24 +44,28 @@ type Plugins = Vec<Arc<Box<dyn AnalyzerPlugin>>>;
 struct Scenario {
     name: &'static str,
     grit: &'static str,
+    grit_in_js: &'static str,
     js: &'static str,
 }
 
 const CONSOLE_LOG: Scenario = Scenario {
     name: "console_log",
     grit: include_str!("fixtures/grit/console_log.grit"),
+    grit_in_js: include_str!("fixtures/grit_in_js/console_log_grit.js"),
     js: include_str!("fixtures/js/console_log.js"),
 };
 
 const RESTRICTED_CALLEE: Scenario = Scenario {
     name: "restricted_callee",
     grit: include_str!("fixtures/grit/restricted_callee.grit"),
+    grit_in_js: include_str!("fixtures/grit_in_js/restricted_callee_grit.js"),
     js: include_str!("fixtures/js/restricted_callee.js"),
 };
 
 const UNDEFINED_REFERENCE: Scenario = Scenario {
     name: "undefined_reference",
     grit: include_str!("fixtures/grit/undefined_reference.grit"),
+    grit_in_js: include_str!("fixtures/grit_in_js/undefined_reference_grit.js"),
     js: include_str!("fixtures/js/undefined_reference.js"),
 };
 
@@ -69,7 +73,16 @@ const UNDEFINED_REFERENCE: Scenario = Scenario {
 const AWAIT_IN_LOOP: Scenario = Scenario {
     name: "await_in_loop",
     grit: include_str!("fixtures/grit/await_in_loop.grit"),
+    grit_in_js: include_str!("fixtures/grit_in_js/await_in_loop_grit.js"),
     js: include_str!("fixtures/js/await_in_loop.js"),
+};
+
+/// Selects every identifier reference, exercising many distinct matches per file.
+const REFERENCE_IDENTIFIER: Scenario = Scenario {
+    name: "reference_identifier",
+    grit: include_str!("fixtures/grit/reference_identifier.grit"),
+    grit_in_js: include_str!("fixtures/grit_in_js/reference_identifier_grit.js"),
+    js: include_str!("fixtures/js/reference_identifier.js"),
 };
 
 const SCENARIOS: &[&Scenario] = &[
@@ -77,20 +90,23 @@ const SCENARIOS: &[&Scenario] = &[
     &RESTRICTED_CALLEE,
     &UNDEFINED_REFERENCE,
     &AWAIT_IN_LOOP,
+    &REFERENCE_IDENTIFIER,
 ];
 
 #[derive(Clone, Copy)]
 enum Engine {
     Grit,
+    GritInJs,
     Js,
 }
 
-const ENGINES: &[Engine] = &[Engine::Grit, Engine::Js];
+const ENGINES: &[Engine] = &[Engine::Grit, Engine::GritInJs, Engine::Js];
 
 impl Engine {
     fn plugin_path(self) -> &'static str {
         match self {
             Self::Grit => "/plugin.grit",
+            Self::GritInJs => "/plugin_grit.js",
             Self::Js => "/plugin.js",
         }
     }
@@ -102,6 +118,11 @@ impl Engine {
             Self::Grit => {
                 fs.insert(path.into(), scenario.grit);
                 Box::new(AnalyzerGritPlugin::load(&fs, path, None).expect("valid Grit plugin"))
+            }
+            Self::GritInJs => {
+                fs.insert(path.into(), scenario.grit_in_js);
+                let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
+                Box::new(AnalyzerJsPlugin::load(fs, path, None).expect("valid JS plugin"))
             }
             Self::Js => {
                 fs.insert(path.into(), scenario.js);
@@ -116,6 +137,7 @@ impl fmt::Display for Engine {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(match self {
             Self::Grit => "grit",
+            Self::GritInJs => "grit_in_js",
             Self::Js => "js",
         })
     }
@@ -312,6 +334,7 @@ fn assert_parity() {
             for fixture in FIXTURES {
                 let root = parse_fixture(fixture);
                 let grit = analyze(&root, &plugins(Engine::Grit.load(scenario)));
+                let grit_in_js = analyze(&root, &plugins(Engine::GritInJs.load(scenario)));
                 let js = analyze(&root, &plugins(Engine::Js.load(scenario)));
                 assert!(
                     !grit.is_empty(),
@@ -322,6 +345,11 @@ fn assert_parity() {
                 assert_eq!(
                     grit, js,
                     "{}/{}: the Grit and JS plugins report different ranges",
+                    scenario.name, fixture.name
+                );
+                assert_eq!(
+                    grit_in_js, js,
+                    "{}/{}: the Grit-in-JS and JS plugins report different ranges",
                     scenario.name, fixture.name
                 );
             }

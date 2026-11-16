@@ -1,0 +1,4 @@
+/* should not generate diagnostics */
+ul > li {}
+nav a {}
+:has(> img) {}

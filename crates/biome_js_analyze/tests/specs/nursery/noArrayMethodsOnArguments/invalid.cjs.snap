@@ -1,0 +1,252 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.cjs
+---
+# Input
+```cjs
+/* should generate diagnostics */
+const arguments = [];
+function outerConst() { arguments.map(() => {}); }
+function inDefaultValue(value = arguments.map(() => {})) {}
+function arrowReadsOuterFunction() { return () => arguments.map(() => {}); }
+function varWithoutValue() { var arguments; arguments.map(() => {}); }
+function varWithoutValueComputed() { var arguments; arguments["map"](() => {}); }
+function varWithoutValueInArrow() { var arguments; return () => arguments.map(() => {}); }
+function varWithoutValueInBlock() { { var arguments; } arguments.map(() => {}); }
+function varWithoutValueTwice() { var arguments; var arguments; arguments.map(() => {}); }
+function varWithoutValueReassignedAfterCall() { var arguments; arguments.map(() => {}); arguments = []; }
+function wrapper() { function arguments() { arguments.map(() => {}); } }
+const namedExpression = function arguments() { arguments.map(() => {}); };
+
+```
+
+# Diagnostics
+```
+invalid.cjs:3:25 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const arguments = [];
+  > 3 │ function outerConst() { arguments.map(() => {}); }
+      │                         ^^^^^^^^^^^^^
+    4 │ function inDefaultValue(value = arguments.map(() => {})) {}
+    5 │ function arrowReadsOuterFunction() { return () => arguments.map(() => {}); }
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.cjs:4:33 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+    2 │ const arguments = [];
+    3 │ function outerConst() { arguments.map(() => {}); }
+  > 4 │ function inDefaultValue(value = arguments.map(() => {})) {}
+      │                                 ^^^^^^^^^^^^^
+    5 │ function arrowReadsOuterFunction() { return () => arguments.map(() => {}); }
+    6 │ function varWithoutValue() { var arguments; arguments.map(() => {}); }
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.cjs:5:51 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+    3 │ function outerConst() { arguments.map(() => {}); }
+    4 │ function inDefaultValue(value = arguments.map(() => {})) {}
+  > 5 │ function arrowReadsOuterFunction() { return () => arguments.map(() => {}); }
+      │                                                   ^^^^^^^^^^^^^
+    6 │ function varWithoutValue() { var arguments; arguments.map(() => {}); }
+    7 │ function varWithoutValueComputed() { var arguments; arguments["map"](() => {}); }
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.cjs:6:45 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+    4 │ function inDefaultValue(value = arguments.map(() => {})) {}
+    5 │ function arrowReadsOuterFunction() { return () => arguments.map(() => {}); }
+  > 6 │ function varWithoutValue() { var arguments; arguments.map(() => {}); }
+      │                                             ^^^^^^^^^^^^^
+    7 │ function varWithoutValueComputed() { var arguments; arguments["map"](() => {}); }
+    8 │ function varWithoutValueInArrow() { var arguments; return () => arguments.map(() => {}); }
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.cjs:7:53 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+    5 │ function arrowReadsOuterFunction() { return () => arguments.map(() => {}); }
+    6 │ function varWithoutValue() { var arguments; arguments.map(() => {}); }
+  > 7 │ function varWithoutValueComputed() { var arguments; arguments["map"](() => {}); }
+      │                                                     ^^^^^^^^^^^^^^^^
+    8 │ function varWithoutValueInArrow() { var arguments; return () => arguments.map(() => {}); }
+    9 │ function varWithoutValueInBlock() { { var arguments; } arguments.map(() => {}); }
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.cjs:8:65 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+     6 │ function varWithoutValue() { var arguments; arguments.map(() => {}); }
+     7 │ function varWithoutValueComputed() { var arguments; arguments["map"](() => {}); }
+   > 8 │ function varWithoutValueInArrow() { var arguments; return () => arguments.map(() => {}); }
+       │                                                                 ^^^^^^^^^^^^^
+     9 │ function varWithoutValueInBlock() { { var arguments; } arguments.map(() => {}); }
+    10 │ function varWithoutValueTwice() { var arguments; var arguments; arguments.map(() => {}); }
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.cjs:9:56 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+     7 │ function varWithoutValueComputed() { var arguments; arguments["map"](() => {}); }
+     8 │ function varWithoutValueInArrow() { var arguments; return () => arguments.map(() => {}); }
+   > 9 │ function varWithoutValueInBlock() { { var arguments; } arguments.map(() => {}); }
+       │                                                        ^^^^^^^^^^^^^
+    10 │ function varWithoutValueTwice() { var arguments; var arguments; arguments.map(() => {}); }
+    11 │ function varWithoutValueReassignedAfterCall() { var arguments; arguments.map(() => {}); arguments = []; }
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.cjs:10:65 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+     8 │ function varWithoutValueInArrow() { var arguments; return () => arguments.map(() => {}); }
+     9 │ function varWithoutValueInBlock() { { var arguments; } arguments.map(() => {}); }
+  > 10 │ function varWithoutValueTwice() { var arguments; var arguments; arguments.map(() => {}); }
+       │                                                                 ^^^^^^^^^^^^^
+    11 │ function varWithoutValueReassignedAfterCall() { var arguments; arguments.map(() => {}); arguments = []; }
+    12 │ function wrapper() { function arguments() { arguments.map(() => {}); } }
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.cjs:11:64 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+     9 │ function varWithoutValueInBlock() { { var arguments; } arguments.map(() => {}); }
+    10 │ function varWithoutValueTwice() { var arguments; var arguments; arguments.map(() => {}); }
+  > 11 │ function varWithoutValueReassignedAfterCall() { var arguments; arguments.map(() => {}); arguments = []; }
+       │                                                                ^^^^^^^^^^^^^
+    12 │ function wrapper() { function arguments() { arguments.map(() => {}); } }
+    13 │ const namedExpression = function arguments() { arguments.map(() => {}); };
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.cjs:12:45 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+    10 │ function varWithoutValueTwice() { var arguments; var arguments; arguments.map(() => {}); }
+    11 │ function varWithoutValueReassignedAfterCall() { var arguments; arguments.map(() => {}); arguments = []; }
+  > 12 │ function wrapper() { function arguments() { arguments.map(() => {}); } }
+       │                                             ^^^^^^^^^^^^^
+    13 │ const namedExpression = function arguments() { arguments.map(() => {}); };
+    14 │ 
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.cjs:13:48 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+    11 │ function varWithoutValueReassignedAfterCall() { var arguments; arguments.map(() => {}); arguments = []; }
+    12 │ function wrapper() { function arguments() { arguments.map(() => {}); } }
+  > 13 │ const namedExpression = function arguments() { arguments.map(() => {}); };
+       │                                                ^^^^^^^^^^^^^
+    14 │ 
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

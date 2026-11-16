@@ -41,6 +41,7 @@ impl Finalizer for DefaultFinalizer {
             mut summary,
             evaluated_paths,
             mut diagnostics,
+            traversal_errors,
         } = result;
 
         diagnostics.sort_unstable_by(|a, b| match a.severity().cmp(&b.severity()) {
@@ -134,7 +135,10 @@ impl Finalizer for DefaultFinalizer {
         reporter.write(&mut ConsoleReporterWriter(console), &mut visitor)?;
 
         // Processing emitted error diagnostics, exit with a non-zero code
-        if processed.saturating_sub(skipped) == 0 && !cli_options.no_errors_on_unmatched {
+        if processed.saturating_sub(skipped) == 0
+            && traversal_errors == 0
+            && !cli_options.no_errors_on_unmatched
+        {
             Err(CliDiagnostic::no_files_processed(
                 execution.as_diagnostic_category(),
                 paths,

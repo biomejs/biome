@@ -49,6 +49,8 @@ pub(crate) enum TrimMode {
     /// This mode works similarly to [TrimMode::All], however, text that contains
     /// words and have more than trailing/leading spaces are normalized to one
     NormalizeWords,
+    /// Normalizes words without replacing textual line breaks with spaces.
+    NormalizeWordsPreserveLines,
     /// Don't trim anything
     #[default]
     None,
@@ -80,6 +82,10 @@ impl TextPrintMode {
 
     pub(crate) const fn is_normalize_words(&self) -> bool {
         matches!(self, Self::Trim(TrimMode::NormalizeWords))
+    }
+
+    pub(crate) const fn is_normalize_words_preserve_lines(&self) -> bool {
+        matches!(self, Self::Trim(TrimMode::NormalizeWordsPreserveLines))
     }
 
     pub(crate) const fn is_auto_link_like(&self) -> bool {

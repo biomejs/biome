@@ -1,0 +1,81 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.cjs
+---
+# Input
+```cjs
+/* should generate diagnostics */
+a.charAt(0) === "\08";
+a.charAt(0) === "\400";
+
+```
+
+# Diagnostics
+```
+invalid.cjs:2:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ a.charAt(0) === "\08";
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    3 │ a.charAt(0) === "\400";
+    4 │ 
+  
+  i This expression returns one character at most.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ a.charAt(0) === "\08";
+      │ ^^^^^^^^^^^
+    3 │ a.charAt(0) === "\400";
+    4 │ 
+  
+  i But this string has more than one character.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ a.charAt(0) === "\08";
+      │                 ^^^^^
+    3 │ a.charAt(0) === "\400";
+    4 │ 
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.cjs:3:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    1 │ /* should generate diagnostics */
+    2 │ a.charAt(0) === "\08";
+  > 3 │ a.charAt(0) === "\400";
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i This expression returns one character at most.
+  
+    1 │ /* should generate diagnostics */
+    2 │ a.charAt(0) === "\08";
+  > 3 │ a.charAt(0) === "\400";
+      │ ^^^^^^^^^^^
+    4 │ 
+  
+  i But this string has more than one character.
+  
+    1 │ /* should generate diagnostics */
+    2 │ a.charAt(0) === "\08";
+  > 3 │ a.charAt(0) === "\400";
+      │                 ^^^^^^
+    4 │ 
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

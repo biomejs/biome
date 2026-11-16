@@ -57,6 +57,7 @@ AnyJsRoot =
 	| JsExpressionTemplateRoot
 	| JsSvelteSnippetRoot
 	| JsSvelteDeclarationRoot
+	| JsSvelteLegacyConstRoot
 	| JsVueSlotPropsRoot
 	| JsVueGenericRoot
 
@@ -122,6 +123,17 @@ JsSvelteDeclarationRoot =
 AnyJsSvelteDeclaration =
 	JsVariableDeclaration
 	| JsBogusVariableDeclaration
+
+// Legacy {@const} payloads omit the const keyword, which belongs to HTML.
+// {@const value: number = expression}
+//         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+JsSvelteLegacyConstRoot =
+		declarator: AnyJsSvelteLegacyConstDeclarator
+		eof: 'EOF'
+
+AnyJsSvelteLegacyConstDeclarator =
+	JsVariableDeclarator
+	| JsBogus
 
 JsDirective =
 	value: 'js_string_literal'

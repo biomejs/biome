@@ -1,0 +1,483 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+interface Server {
+	listen(port: number, callback: () => void): number;
+	listen(port?: number): string;
+}
+
+type Client = {
+	connect(url: string, callback: () => void): number;
+	connect(url: string): string;
+};
+
+interface Store<T> {
+	read(key: string, callback: (value: T) => void): number;
+	read(key: string): T;
+}
+
+interface Plugin {
+	start?(callback: () => void): number;
+	start?(): string;
+}
+
+declare const server: Server;
+declare const client: Client;
+declare const store: Store<string>;
+declare const plugin: Plugin;
+
+export const listening = server.listen(0);
+export const listeningWithCallback = server.listen(0, () => {});
+export const connected = client.connect("url");
+export const read = store.read("key");
+export const started = plugin.start?.();
+```
+
+## Inferred types
+
+```
+Binding Server "Server" => interface "Server" {
+  extends: []
+  type_args: []
+  members: [
+    "listen":
+      Object {
+        prototype: No prototype
+        members: [
+          ():
+            sync Function "listen" {
+              accepts: {
+                params: [
+                  required port: number
+                  required callback: sync Function {
+                    accepts: {
+                      params: []
+                      type_args: []
+                    }
+                    returns: void
+                  }
+                ]
+                type_args: []
+              }
+              returns: number
+            }
+          ,
+          ():
+            sync Function "listen" {
+              accepts: {
+                params: [
+                  optional port: number | undefined
+                ]
+                type_args: []
+              }
+              returns: string
+            }
+        ]
+      }
+  ]
+}
+
+Binding port "port" => number
+
+Binding callback "callback" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Binding port "port" => number | undefined
+
+Binding Client "Client" => Object {
+  prototype: No prototype
+  members: [
+    "connect":
+      Object {
+        prototype: No prototype
+        members: [
+          ():
+            sync Function "connect" {
+              accepts: {
+                params: [
+                  required url: string
+                  required callback: sync Function {
+                    accepts: {
+                      params: []
+                      type_args: []
+                    }
+                    returns: void
+                  }
+                ]
+                type_args: []
+              }
+              returns: number
+            }
+          ,
+          ():
+            sync Function "connect" {
+              accepts: {
+                params: [
+                  required url: string
+                ]
+                type_args: []
+              }
+              returns: string
+            }
+        ]
+      }
+  ]
+}
+
+Binding url "url" => string
+
+Binding callback "callback" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Binding url "url" => string
+
+Binding Store "Store" => interface "Store" {
+  extends: []
+  type_args: [T]
+  members: [
+    "read":
+      Object {
+        prototype: No prototype
+        members: [
+          ():
+            sync Function "read" {
+              accepts: {
+                params: [
+                  required key: string
+                  required callback: sync Function {
+                    accepts: {
+                      params: [
+                        required value: instanceof T
+                      ]
+                      type_args: []
+                    }
+                    returns: void
+                  }
+                ]
+                type_args: []
+              }
+              returns: number
+            }
+          ,
+          ():
+            sync Function "read" {
+              accepts: {
+                params: [
+                  required key: string
+                ]
+                type_args: []
+              }
+              returns: instanceof T
+            }
+        ]
+      }
+  ]
+}
+
+Binding T "T" => T
+
+Binding key "key" => string
+
+Binding callback "callback" => sync Function {
+  accepts: {
+    params: [
+      required value: instanceof T
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding value "value" => instanceof T
+
+Binding key "key" => string
+
+Binding Plugin "Plugin" => interface "Plugin" {
+  extends: []
+  type_args: []
+  members: [
+    "start"?:
+      Object {
+        prototype: No prototype
+        members: [
+          ():
+            sync Function "start" {
+              accepts: {
+                params: [
+                  required callback: sync Function {
+                    accepts: {
+                      params: []
+                      type_args: []
+                    }
+                    returns: void
+                  }
+                ]
+                type_args: []
+              }
+              returns: number
+            }
+          ,
+          ():
+            sync Function "start" {
+              accepts: {
+                params: []
+                type_args: []
+              }
+              returns: string
+            }
+        ]
+      }
+      | undefined
+  ]
+}
+
+Binding callback "callback" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Binding server "server" => instanceof Server
+
+Binding client "client" => instanceof Client
+
+Binding store "store" => instanceof Store<string>
+
+Binding plugin "plugin" => instanceof Plugin
+
+Binding listening "listening" => string
+
+Expression "server" => instanceof Server
+
+Expression "server.listen" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "listen" {
+        accepts: {
+          params: [
+            required port: number
+            required callback: sync Function {
+              accepts: {
+                params: []
+                type_args: []
+              }
+              returns: void
+            }
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "listen" {
+        accepts: {
+          params: [
+            optional port: number | undefined
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+  ]
+}
+
+Expression "server.listen(0)" => string
+
+Expression "0" => number: 0
+
+Binding listeningWithCallback "listeningWithCallback" => number
+
+Expression "server" => instanceof Server
+
+Expression "server.listen" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "listen" {
+        accepts: {
+          params: [
+            required port: number
+            required callback: sync Function {
+              accepts: {
+                params: []
+                type_args: []
+              }
+              returns: void
+            }
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "listen" {
+        accepts: {
+          params: [
+            optional port: number | undefined
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+  ]
+}
+
+Expression "server.listen(0, () => {})" => number
+
+Expression "0" => number: 0
+
+Expression "() => {}" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Binding connected "connected" => string
+
+Expression "client" => instanceof Client
+
+Expression "client.connect" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "connect" {
+        accepts: {
+          params: [
+            required url: string
+            required callback: sync Function {
+              accepts: {
+                params: []
+                type_args: []
+              }
+              returns: void
+            }
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "connect" {
+        accepts: {
+          params: [
+            required url: string
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+  ]
+}
+
+Expression "client.connect(\"url\")" => string
+
+Expression "\"url\"" => string: url
+
+Binding read "read" => string
+
+Expression "store" => instanceof Store<string>
+
+Expression "store.read" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "read" {
+        accepts: {
+          params: [
+            required key: string
+            required callback: sync Function {
+              accepts: {
+                params: [
+                  required value: string
+                ]
+                type_args: []
+              }
+              returns: void
+            }
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "read" {
+        accepts: {
+          params: [
+            required key: string
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+  ]
+}
+
+Expression "store.read(\"key\")" => string
+
+Expression "\"key\"" => string: key
+
+Binding started "started" => string | undefined
+
+Expression "plugin" => instanceof Plugin
+
+Expression "plugin.start" =>
+  Object {
+    prototype: No prototype
+    members: [
+      ():
+        sync Function "start" {
+          accepts: {
+            params: [
+              required callback: sync Function {
+                accepts: {
+                  params: []
+                  type_args: []
+                }
+                returns: void
+              }
+            ]
+            type_args: []
+          }
+          returns: number
+        }
+      ,
+      ():
+        sync Function "start" {
+          accepts: {
+            params: []
+            type_args: []
+          }
+          returns: string
+        }
+    ]
+  }
+  | undefined
+
+Expression "plugin.start?.()" => string | undefined
+```

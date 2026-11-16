@@ -219,4 +219,5 @@ pub(crate) struct TraverseResult {
     pub(crate) summary: TraversalSummary,
     pub(crate) evaluated_paths: Vec<BiomePath>,
     pub(crate) diagnostics: Vec<Error>,
+    pub(crate) traversal_errors: u32,
 }

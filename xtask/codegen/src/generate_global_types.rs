@@ -127,8 +127,7 @@ fn collect_discovered_sources(
                     diagnostic
                         .detail
                         .as_ref()
-                        .map(|detail| format!(": {detail}"))
-                        .unwrap_or_default()
+                        .map_or_default(|detail| format!(": {detail}"))
                 )
             })
         }));

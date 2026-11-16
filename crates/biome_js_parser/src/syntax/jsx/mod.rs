@@ -526,6 +526,9 @@ fn parse_jsx_expression_child(p: &mut JsParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(T!['{']);
+    if Astro.is_supported(p) {
+        skip_astro_html_comments(p);
+    }
 
     // test jsx jsx_children_spread
     // <div>{...a}</div>;

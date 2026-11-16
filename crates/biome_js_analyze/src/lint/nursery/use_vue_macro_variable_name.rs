@@ -1,14 +1,14 @@
 use crate::JsRuleAction;
 use crate::services::vue::VueComponent;
+use crate::utils::can_be_variable_name;
 use crate::utils::rename::RenameSymbolExtensions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{JsIdentifierBinding, JsSyntaxKind};
+use biome_js_syntax::JsIdentifierBinding;
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 use biome_rule_options::use_vue_macro_variable_name::UseVueMacroVariableNameOptions;
-use biome_unicode_table::is_js_ident;
 use biome_vue_semantic::{ComponentKind, Origin, Symbol};
 
 declare_lint_rule! {
@@ -366,11 +366,4 @@ impl biome_console::fmt::Display for Macro {
             Self::UseAttrs => "useAttrs()",
         })
     }
-}
-
-/// Returns `true` if `name` can be declared as a variable in a module, where
-/// strict mode reserves words such as `let` and `static`.
-fn can_be_variable_name(name: &str) -> bool {
-    is_js_ident(name)
-        && !JsSyntaxKind::from_keyword(name).is_some_and(|keyword| keyword.is_non_contextual_keyword())
 }

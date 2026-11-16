@@ -302,6 +302,39 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "tspan",
         "view",
         "vkern",
+        // Known MathML tag names, from the MathML Core element index. They are all
+        // lower-case, so they match case-insensitively like HTML names. `a` is
+        // shared with HTML and is not repeated here.
+        "annotation",
+        "annotation-xml",
+        "maction",
+        "math",
+        "merror",
+        "mfrac",
+        "mi",
+        "mmultiscripts",
+        "mn",
+        "mo",
+        "mover",
+        "mpadded",
+        "mphantom",
+        "mprescripts",
+        "mroot",
+        "mrow",
+        "ms",
+        "mspace",
+        "msqrt",
+        "mstyle",
+        "msub",
+        "msubsup",
+        "msup",
+        "mtable",
+        "mtd",
+        "mtext",
+        "mtr",
+        "munder",
+        "munderover",
+        "semantics",
     ],
     literals: &["HTML_STRING_LITERAL", "HTML_LITERAL", "HTML_TEMPLATE_CHUNK"],
     tokens: &[
@@ -309,7 +342,7 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "NEWLINE",
         "WHITESPACE",
         "IDENT",
-        // Tag name fallbacks. Known HTML/SVG tag names get their own keyword token
+        // Tag name fallbacks. Known HTML/SVG/MathML tag names get their own keyword token
         // kinds (see the `keywords` list above); these cover everything else: an
         // unknown/custom tag, and a component name (`<Foo>`) respectively.
         "HTML_UNKNOWN_TAG",

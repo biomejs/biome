@@ -35,4 +35,12 @@ pub trait Suppression {
     fn parse_snippet(&self, _range: TextRange) -> Vec<SuppressionComment<'_, Self::Diagnostic>> {
         Vec::new()
     }
+
+    /// Returns `false` only if [`Self::parse_snippet`] returns no comments for
+    /// every range. The default returns `false`, matching the default
+    /// [`Self::parse_snippet`]; implementations that override one override
+    /// both.
+    fn has_snippet_comments(&self) -> bool {
+        false
+    }
 }

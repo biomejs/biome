@@ -419,8 +419,7 @@ pub fn snapshot() -> Vec<RuleProfile> {
     return AGGREGATED_PROFILER
         .lock()
         .as_ref()
-        .map(RuleProfiler::snapshot)
-        .unwrap_or_default();
+        .map_or_default(RuleProfiler::snapshot);
 
     #[cfg(target_arch = "wasm32")]
     Vec::new()

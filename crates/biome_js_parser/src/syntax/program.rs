@@ -1,7 +1,10 @@
 //! Top level functions for parsing a script or module, also includes module specific items.
 
 use super::module::parse_module_body;
-use super::stmt::{VariableDeclarationParent, parse_statements, parse_variable_declaration};
+use super::stmt::{
+    VariableDeclarationParent, parse_statements, parse_svelte_legacy_const_declarator,
+    parse_variable_declaration,
+};
 use crate::JsParser;
 use crate::prelude::*;
 use crate::state::{ChangeParserState, EnableStrictMode, SignatureFlags};
@@ -13,7 +16,7 @@ use crate::syntax::function::{
 use crate::syntax::js_parse_error;
 use crate::syntax::jsx::skip_astro_html_comments;
 use crate::syntax::stmt::parse_directives;
-use crate::syntax::typescript::{TypeContext, parse_vue_generic_type_parameters};
+use crate::syntax::typescript::{TypeContext, parse_generic_type_parameters};
 use biome_js_syntax::JsSyntaxKind::*;
 use biome_js_syntax::{JsSyntaxKind, T};
 use biome_languages::javascript::ModuleKind;
@@ -42,6 +45,10 @@ pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
         return parse_vue_event_handler(p, m);
     }
 
+    if p.source_type().is_svelte_const_block() {
+        return parse_svelte_legacy_const(p, m);
+    }
+
     if p.source_type().is_svelte_declaration() {
         return parse_svelte_declaration(p, m);
     }
@@ -50,8 +57,8 @@ pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
         return parse_vue_slot_props(p, m);
     }
 
-    if p.source_type().is_vue_generics_list() {
-        return parse_vue_generic(p, m);
+    if p.source_type().is_generics_list() {
+        return parse_generic(p, m);
     }
 
     // Handle template expressions (Vue {{ }}, Svelte { }, Astro { })
@@ -118,6 +125,33 @@ fn parse_svelte_declaration(p: &mut JsParser, m: Marker) -> CompletedMarker {
     }
 
     m.complete(p, JS_SVELTE_DECLARATION_ROOT)
+}
+
+fn parse_svelte_legacy_const(p: &mut JsParser, m: Marker) -> CompletedMarker {
+    let declarator_recovery = p.start();
+    let declarator = parse_svelte_legacy_const_declarator(p)
+        .or_add_diagnostic(p, js_parse_error::expected_binding);
+
+    if !p.at(EOF) {
+        let recovery = if let Some(declarator) = declarator {
+            declarator_recovery.abandon(p);
+            declarator.undo_completion(p)
+        } else {
+            declarator_recovery
+        };
+        p.error(js_parse_error::template_expression_trailing_code(
+            p,
+            p.cur_range(),
+        ));
+        while !p.at(EOF) {
+            p.bump_any();
+        }
+        recovery.complete(p, JS_BOGUS);
+    } else {
+        declarator_recovery.abandon(p);
+    }
+
+    m.complete(p, JS_SVELTE_LEGACY_CONST_ROOT)
 }
 
 /// Parses template expressions like Vue {{ expr }}, Svelte { expr }, or Astro { expr }.
@@ -242,11 +276,10 @@ fn parse_vue_slot_props(p: &mut JsParser, m: Marker) -> CompletedMarker {
     m.complete(p, JS_VUE_SLOT_PROPS_ROOT)
 }
 
-/// Parses the value of the `generic` attribute of a Vue `<script setup>`: `generic="T extends Item"`.
-/// Vue compiles the value as the type parameters of the component function, so the
-/// value is a type parameter list without the surrounding angle brackets.
-fn parse_vue_generic(p: &mut JsParser, m: Marker) -> CompletedMarker {
-    parse_vue_generic_type_parameters(p);
+/// Parses component type parameters from a Vue `generic` attribute or a Svelte
+/// `generics` attribute. Both frameworks omit the surrounding angle brackets.
+fn parse_generic(p: &mut JsParser, m: Marker) -> CompletedMarker {
+    parse_generic_type_parameters(p);
     m.complete(p, JS_VUE_GENERIC_ROOT)
 }
 

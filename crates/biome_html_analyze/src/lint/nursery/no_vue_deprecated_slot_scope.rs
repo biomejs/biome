@@ -239,7 +239,7 @@ fn can_convert_to_v_slot(tag: &AnyHtmlTagElement, element: &AnyHtmlElement, is_t
         return false;
     };
     // Component names such as `<MyList>` have no tag kind, and names such as
-    // `<my-list>` aren't known HTML tags.
+    // `<my-list>` aren't known HTML, SVG, or MathML tags.
     let owner_is_component = owner.name().is_ok_and(|name| {
         name.tag_name_kind()
             .is_none_or(|kind| kind == HtmlSyntaxKind::HTML_UNKNOWN_TAG)

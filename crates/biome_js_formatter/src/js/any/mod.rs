@@ -45,6 +45,7 @@ pub(crate) mod property_modifier;
 pub(crate) mod root;
 pub(crate) mod statement;
 pub(crate) mod svelte_declaration;
+pub(crate) mod svelte_legacy_const_declarator;
 pub(crate) mod switch_clause;
 pub(crate) mod template_element;
 pub(crate) mod vue_generic_type_parameters;

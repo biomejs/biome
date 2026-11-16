@@ -9,13 +9,14 @@ use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsBinding, AnyJsBindingPattern, AnyJsCallArgument, AnyJsExpression,
     AnyJsFunction, AnyJsMemberExpression, AnyTsType, JsArrayExpression, JsAssignmentExpression,
-    JsBinaryOperator, JsCallArgumentList, JsCallArguments, JsCallExpression,
-    JsConditionalExpression, JsFormalParameter, JsIdentifierExpression, JsImportCallExpression,
-    JsNewExpression, JsParameterList, JsParameters, JsPostUpdateExpression, JsPreUpdateExpression,
+    JsBigintLiteralExpression, JsBinaryOperator, JsCallArgumentList, JsCallArguments,
+    JsCallExpression, JsConditionalExpression, JsFormalParameter, JsIdentifierExpression,
+    JsImportCallExpression, JsInitializerClause, JsLanguage, JsNewExpression, JsParameterList,
+    JsParameters, JsPostUpdateExpression, JsPreUpdateExpression, JsReferenceIdentifier,
     JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclarator,
-    binding_ext::AnyJsBindingDeclaration,
+    WalkEvent, binding_ext::AnyJsBindingDeclaration,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxTriviaPiece};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxKindSet, SyntaxTriviaPiece};
 use biome_rule_options::use_math_min_max::UseMathMinMaxOptions;
 
 declare_lint_rule! {
@@ -73,8 +74,8 @@ impl Rule for UseMathMinMax {
         let model = ctx.model();
         let comparison = extract_comparison(conditional)?;
 
-        if has_unsupported_operand(&comparison.left)
-            || has_unsupported_operand(&comparison.right)
+        if has_unsupported_operand(model, &comparison.left)
+            || has_unsupported_operand(model, &comparison.right)
             || has_unsupported_identifier_operand(model, &comparison.left).unwrap_or(false)
             || has_unsupported_identifier_operand(model, &comparison.right).unwrap_or(false)
             || has_non_numeric_reduce_parameter(&comparison.left, model).unwrap_or(false)
@@ -516,9 +517,9 @@ fn clean_argument(expression: &AnyJsExpression) -> Option<AnyJsExpression> {
 
 /// Detect whether the expression is obviously not compatible with `Math.min`/`Math.max`,
 /// such as non-number literals, `bigint`, and `Date`.
-fn has_unsupported_operand(expression: &AnyJsExpression) -> bool {
+fn has_unsupported_operand(model: &SemanticModel, expression: &AnyJsExpression) -> bool {
     unwrap_expression(expression.clone()).is_none_or(|expr| {
-        is_non_number_literal(&expr) || is_bigint_like(&expr) || is_date_construction(&expr)
+        is_non_number_literal(&expr) || is_bigint(model, &expr) || is_date_construction(&expr)
     })
 }
 
@@ -632,7 +633,7 @@ fn has_non_numeric_reduction_value(
     expression: &AnyJsExpression,
     model: &SemanticModel,
 ) -> Option<bool> {
-    if has_unsupported_operand(expression) {
+    if has_unsupported_operand(model, expression) {
         return Some(true);
     }
     let expression = unwrap_expression(expression.clone())?;
@@ -703,16 +704,86 @@ fn is_supported_numeric_annotation(annotation: &AnyTsType) -> bool {
             .is_some_and(|name| name.syntax().text_trimmed() == "Number")
 }
 
-// Is it a `bigint` literal or a `BigInt()` call? Math.min/max don't work with bigints, so we want to
-// avoid suggesting a replacement that would break the code.
-fn is_bigint_like(expression: &AnyJsExpression) -> bool {
-    match expression {
-        AnyJsExpression::AnyJsLiteralExpression(literal) => {
-            literal.as_js_bigint_literal_expression().is_some()
+/// Returns `true` if the expression contains a `bigint`, either directly or in the initializer of a
+/// `const` variable it uses. Function bodies and call arguments are skipped, except `BigInt()`.
+fn is_bigint(model: &SemanticModel, expression: &AnyJsExpression) -> bool {
+    contains_bigint(expression.syntax(), Some(model))
+}
+
+/// Scans `node` for a `bigint` literal or `BigInt()` call. With a `model`, the initializers of the
+/// `const` variables it uses are scanned too, without following their own variables.
+fn contains_bigint(node: &JsSyntaxNode, model: Option<&SemanticModel>) -> bool {
+    let mut preorder = node.preorder_of_kinds(BIGINT_SEARCH_KINDS);
+    while let Some(event) = preorder.next() {
+        let WalkEvent::Enter(node) = event else {
+            continue;
+        };
+        if JsBigintLiteralExpression::can_cast(node.kind()) {
+            return true;
         }
-        AnyJsExpression::JsCallExpression(call) => is_named_call(call, "BigInt"),
-        _ => false,
+        if let Some(call) = JsCallExpression::cast_ref(&node) {
+            if is_named_call(&call, "BigInt") || is_bigint_method_call(&call) {
+                return true;
+            }
+        } else if let Some(reference) = JsReferenceIdentifier::cast_ref(&node) {
+            if model
+                .and_then(|model| const_initializer(model, &reference))
+                .is_some_and(|initializer| contains_bigint(initializer.syntax(), None))
+            {
+                return true;
+            }
+        } else {
+            preorder.skip_subtree();
+        }
     }
+    false
+}
+
+/// Returns the initializer of the `const` variable that `reference` refers to.
+fn const_initializer(
+    model: &SemanticModel,
+    reference: &JsReferenceIdentifier,
+) -> Option<AnyJsExpression> {
+    let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) =
+        model.binding(reference)?.tree().declaration()?
+    else {
+        return None;
+    };
+    if !declarator.declaration()?.is_const() {
+        return None;
+    }
+    declarator.initializer()?.expression().ok()
+}
+
+/// The nodes [`contains_bigint`] inspects: `bigint` literals, calls, variable references, and the
+/// function bodies and call arguments it skips.
+const BIGINT_SEARCH_KINDS: SyntaxKindSet<JsLanguage> = JsBigintLiteralExpression::KIND_SET
+    .union(JsCallExpression::KIND_SET)
+    .union(JsReferenceIdentifier::KIND_SET)
+    .union(JsCallArguments::KIND_SET)
+    .union(AnyJsFunction::KIND_SET);
+
+/// Is it a `BigInt.asIntN()` or `BigInt.asUintN()` call?
+fn is_bigint_method_call(call: &JsCallExpression) -> bool {
+    call.callee()
+        .ok()
+        .and_then(|callee| AnyJsMemberExpression::cast(callee.omit_parentheses().into_syntax()))
+        .is_some_and(|member| {
+            member
+                .member_name()
+                .is_some_and(|name| matches!(name.text(), "asIntN" | "asUintN"))
+                && member
+                    .object()
+                    .ok()
+                    .and_then(|object| {
+                        object
+                            .omit_parentheses()
+                            .as_js_identifier_expression()
+                            .cloned()
+                    })
+                    .and_then(|identifier| identifier.name().ok())
+                    .is_some_and(|name| name.name().is_ok_and(|name| name == "BigInt"))
+        })
 }
 
 /// Checks whether an identifier operand is declared in a way that makes a `Math.min`/`Math.max`
@@ -729,6 +800,14 @@ fn has_unsupported_identifier_operand(
     let reference = identifier.name().ok()?;
     let binding = model.binding(&reference)?;
     let declaration = binding.tree().declaration()?;
+    let pattern_default = match &declaration {
+        AnyJsBindingDeclaration::JsArrayBindingPatternElement(element) => element.init(),
+        AnyJsBindingDeclaration::JsObjectBindingPatternProperty(property) => property.init(),
+        AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(property) => {
+            property.init()
+        }
+        _ => None,
+    };
 
     Some(
         match declaration
@@ -736,10 +815,11 @@ fn has_unsupported_identifier_operand(
             .unwrap_or(declaration)
         {
             AnyJsBindingDeclaration::JsFormalParameter(parameter) => {
-                parameter_has_unsupported_metadata(&parameter)
+                parameter_has_unsupported_metadata(model, &parameter)
+                    || is_non_numeric_initializer(model, pattern_default)
             }
             AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
-                declarator_has_unsupported_metadata(&declarator)
+                declarator_has_unsupported_metadata(model, &declarator)
             }
             _ => false,
         },
@@ -748,32 +828,42 @@ fn has_unsupported_identifier_operand(
 
 /// Returns `true` when a parameter's annotation or default value suggests that it should not be
 /// treated as a numeric operand.
-fn parameter_has_unsupported_metadata(parameter: &JsFormalParameter) -> bool {
+fn parameter_has_unsupported_metadata(
+    model: &SemanticModel,
+    parameter: &JsFormalParameter,
+) -> bool {
     parameter
         .type_annotation()
         .and_then(|annotation| annotation.ty().ok())
         .is_some_and(|annotation| !is_supported_numeric_annotation(&annotation))
-        || parameter
-            .initializer()
-            .and_then(|initializer| initializer.expression().ok())
-            .is_some_and(|expression| {
-                is_non_number_literal(&expression) || is_date_construction(&expression)
-            })
+        || is_non_numeric_initializer(model, parameter.initializer())
 }
 
 /// Returns `true` when a variable declarator's annotation or initializer suggests that it should
 /// not be treated as a numeric operand.
-fn declarator_has_unsupported_metadata(declarator: &JsVariableDeclarator) -> bool {
+fn declarator_has_unsupported_metadata(
+    model: &SemanticModel,
+    declarator: &JsVariableDeclarator,
+) -> bool {
     declarator.variable_annotation().is_some_and(|annotation| {
         annotation
             .as_ts_type_annotation()
             .and_then(|annotation| annotation.ty().ok())
             .is_some_and(|annotation| !is_supported_numeric_annotation(&annotation))
-    }) || declarator
-        .initializer()
+    }) || is_non_numeric_initializer(model, declarator.initializer())
+}
+
+/// Returns `true` when an initializer or default value is clearly not a number.
+fn is_non_numeric_initializer(
+    model: &SemanticModel,
+    initializer: Option<JsInitializerClause>,
+) -> bool {
+    initializer
         .and_then(|initializer| initializer.expression().ok())
         .is_some_and(|expression| {
-            is_non_number_literal(&expression) || is_date_construction(&expression)
+            is_non_number_literal(&expression)
+                || is_bigint(model, &expression)
+                || is_date_construction(&expression)
         })
 }
 

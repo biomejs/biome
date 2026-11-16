@@ -234,7 +234,7 @@ fn resolve_import_definition(
                 module_db,
                 SymbolFromModuleInfo::new(module_db, local_name, target_module),
             );
-            if !matches!(lookup, JsExportedSymbolLookup::Found(_)) {
+            if !matches!(lookup, JsExportedSymbolLookup::Found(..)) {
                 lookup = find_js_exported_symbol(
                     module_db,
                     SymbolFromModuleInfo::new(module_db, "default", target_module),
@@ -247,7 +247,7 @@ fn resolve_import_definition(
                         TextRange::new(TextSize::from(0), TextSize::from(0)),
                     );
                 }
-                JsExportedSymbolLookup::Found(own_export) => match own_export {
+                JsExportedSymbolLookup::Found(own_export, _) => match own_export {
                     JsOwnExport::Binding(range) => {
                         result.store(BiomePath::new(target_path), *range)
                     }
@@ -278,7 +278,7 @@ fn resolve_import_definition(
                             TextRange::new(TextSize::from(0), TextSize::from(0)),
                         );
                     }
-                    JsExportedSymbolLookup::Found(own_export) => match own_export {
+                    JsExportedSymbolLookup::Found(own_export, _) => match own_export {
                         JsOwnExport::Binding(range) => {
                             result.store(BiomePath::new(target_path), *range)
                         }

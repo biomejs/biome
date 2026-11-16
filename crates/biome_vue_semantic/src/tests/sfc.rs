@@ -3,6 +3,9 @@ use crate::{
     Access, Assignability, BlockKind, BranchKind, Certainty, ComponentKind, EffectiveValue,
     MacroOption, Namespace, Origin, RefSite, Resolution, RootShape, SymbolKind, Tri,
 };
+use biome_html_parser::{HtmlParserOptions, parse_html};
+use biome_html_syntax::{HtmlRoot, HtmlSyntaxKind};
+use biome_languages::HtmlFileSource;
 use biome_rowan::{TextRange, TextSize};
 
 const LIST: &str = r#"<script setup lang="ts">
@@ -492,6 +495,22 @@ fn external_script_makes_missing_names_unknowable() {
             ("v-focus".into(), Resolution::Unknowable),
         ]
     );
+}
+
+#[test]
+fn known_hyphenated_tags_are_native() {
+    let model = sfc(r#"<template>
+  <math><annotation-xml encoding="text/html" /></math>
+  <svg><font-face /></svg>
+  <my-card />
+</template>
+"#);
+    let components: Vec<_> = model
+        .elements()
+        .filter(|element| element.is_component())
+        .map(|element| element.tag().to_string())
+        .collect();
+    assert_eq!(components, ["my-card"]);
 }
 
 #[test]
@@ -1044,4 +1063,37 @@ fn script_blocks_with_only_comments_declare_nothing() {
     let model = sfc("<script>\n// plain\n</script>\n<script setup>\n/* setup */\n</script>\n");
     assert_eq!(model.blocks().count(), 2);
     assert!(model.symbols().all(|symbol| symbol.snippet().is_none()));
+}
+
+#[test]
+fn elements_and_attributes_point_to_their_nodes() {
+    let model = sfc(LIST);
+    let options = HtmlParserOptions::from(&HtmlFileSource::vue());
+    let host: HtmlRoot = parse_html(LIST, options).tree();
+    let nodes = model.resolve_html_nodes(&host);
+
+    let card = model
+        .elements()
+        .find(|element| element.tag() == "Card")
+        .expect("an element");
+    let node = nodes.get(card.html_node()).expect("a resolved node");
+    assert_eq!(node.kind(), HtmlSyntaxKind::HTML_ELEMENT);
+    assert_eq!(node.text_trimmed_range(), card.range());
+
+    let attrs: Vec<_> = card
+        .attrs()
+        .map(|attr| {
+            let node = nodes.get(attr.html_node()).expect("a resolved node");
+            assert_eq!(node.text_trimmed_range(), attr.range());
+            node.text_trimmed().to_string()
+        })
+        .collect();
+    assert_eq!(
+        attrs,
+        [
+            r#"v-for="item in items""#,
+            r#":key="item.id""#,
+            r#"@click="emit('select', item.id)""#,
+        ]
+    );
 }

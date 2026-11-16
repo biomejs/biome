@@ -213,6 +213,30 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdThematicBreakChar::new_unchecked(node) };
                     $body
                 }
+                $crate::MarkdownSyntaxKind::MDX_BLOCK_EXPRESSION => {
+                    let $pattern = unsafe { $crate::MdxBlockExpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MDX_ESM_BLOCK => {
+                    let $pattern = unsafe { $crate::MdxEsmBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MDX_EXPRESSION_CONTENT => {
+                    let $pattern = unsafe { $crate::MdxExpressionContent::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MDX_INLINE_EXPRESSION => {
+                    let $pattern = unsafe { $crate::MdxInlineExpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MDX_JSX_BLOCK_TAG => {
+                    let $pattern = unsafe { $crate::MdxJsxBlockTag::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MDX_JSX_INLINE_TAG => {
+                    let $pattern = unsafe { $crate::MdxJsxInlineTag::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MD_BOGUS => {
                     let $pattern = unsafe { $crate::MdBogus::new_unchecked(node) };
                     $body

@@ -28,3 +28,9 @@ function JsVariableStatement6() {
     var variable1 = initializer(),
         variable2 = initializer();
 }
+
+function JsVariableStatement7() {
+    return;
+    const { a = fallback(), b } = initializer(),
+        [c = fallback()] = initializer();
+}

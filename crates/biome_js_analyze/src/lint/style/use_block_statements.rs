@@ -212,8 +212,7 @@ impl Rule for UseBlockStatements {
                     .syntax()
                     .first_leading_trivia()
                     .as_ref()
-                    .map(collect_to_first_newline)
-                    .unwrap_or_default();
+                    .map_or_default(collect_to_first_newline);
 
                 // If the statement has no leading trivia, add a space after
                 // the opening curly token
@@ -242,8 +241,7 @@ impl Rule for UseBlockStatements {
                         .syntax()
                         .first_leading_trivia()
                         .as_ref()
-                        .map(collect_to_first_newline)
-                        .unwrap_or_default();
+                        .map_or_default(collect_to_first_newline);
                 }
 
                 // Apply the cloned trivia to the closing curly token, or

@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidExportDefault.js
+---
+# Input
+```js
+/* should generate diagnostics */
+export default async function cleanup() {}
+promise.finally(cleanup);
+
+```
+
+# Diagnostics
+```
+invalidExportDefault.js:3:17 lint/nursery/noAsyncPromiseFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This async function is passed to .finally().
+  
+    1 │ /* should generate diagnostics */
+    2 │ export default async function cleanup() {}
+  > 3 │ promise.finally(cleanup);
+      │                 ^^^^^^^
+    4 │ 
+  
+  i The function is declared async here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ export default async function cleanup() {}
+      │                ^^^^^
+    3 │ promise.finally(cleanup);
+    4 │ 
+  
+  i If this function fails, the promise returned by .finally() is rejected with its error, and the original result or error of the promise is lost.
+  
+  i Use a function that isn't async. If the cleanup has to be asynchronous, handle its errors inside the function, for example with .catch().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

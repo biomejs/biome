@@ -205,11 +205,7 @@ pub(crate) fn create_mutation(
     let anchor = JsAstNode::from_value(anchor).ok_or_else(|| {
         JsNativeError::typ().with_message("createMutation() received a value that is not a Biome node. Pass the node supplied to run() or one of its child nodes, not a token, string, or plain object.")
     })?;
-    let root = anchor
-        .node
-        .ancestors()
-        .last()
-        .unwrap_or_else(|| anchor.node.clone());
+    let root = anchor.node.tree_top();
     Ok(JsMutation::from_data(
         JsMutation {
             batch: Some(BatchMutation::new(root)),

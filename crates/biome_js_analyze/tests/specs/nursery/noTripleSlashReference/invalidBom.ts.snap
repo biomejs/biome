@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidBom.ts
+---
+# Input
+```ts
+﻿/// <reference path="./globals.d.ts" />
+/* should generate diagnostics */
+export {};
+
+```
+
+# Diagnostics
+```
+invalidBom.ts:1:2 lint/nursery/noTripleSlashReference ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected triple-slash reference to ./globals.d.ts.
+  
+  > 1 │ �/// <reference path="./globals.d.ts" />
+      │  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ /* should generate diagnostics */
+    3 │ export {};
+  
+  i A triple-slash reference loads code for the whole file without showing which parts the file uses.
+  
+  i Use an import statement to load the file instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

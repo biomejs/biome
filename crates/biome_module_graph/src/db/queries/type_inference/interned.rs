@@ -5,6 +5,7 @@
 //! cached by interning.
 
 use crate::ModuleInfo;
+use crate::js_module_info::flow::FlowNodeId;
 use biome_js_type_info::interned_types::{
     CallArgumentType as InferredCallArgumentType, LocalTypeId as InferredLocalTypeId,
     TypeData as InferredTypeData, TypeSubstitution as InferredTypeSubstitution,
@@ -33,6 +34,31 @@ pub struct BindingTypeInput<'db> {
     /// Source range used to identify the binding.
     #[returns(copy)]
     pub range: TextRange,
+}
+
+/// Identifies a binding within one execution root.
+#[salsa::interned]
+#[derive(Debug)]
+pub(crate) struct FlowBindingRootInput<'db> {
+    #[returns(copy)]
+    pub binding: BindingTypeInput<'db>,
+    /// Index of the execution root in the binding module's collected flow.
+    #[returns(copy)]
+    pub root: usize,
+}
+
+/// Identifies a binding's incoming state within one execution root.
+#[salsa::interned]
+#[derive(Debug)]
+pub(crate) struct FlowBindingTypeInput<'db> {
+    #[returns(copy)]
+    pub binding: BindingTypeInput<'db>,
+    /// Index of the execution root in the binding module's collected flow.
+    #[returns(copy)]
+    pub root: usize,
+    /// Node index in that root's flow graph.
+    #[returns(copy)]
+    pub point: FlowNodeId,
 }
 
 /// Interned input for [`super::infer_local_type`].

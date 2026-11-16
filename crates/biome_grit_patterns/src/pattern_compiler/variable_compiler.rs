@@ -98,7 +98,7 @@ impl NodeCompilationContext<'_> {
 
         scope.push(VariableSource::Compiled {
             name,
-            file: path.map(|p| p.to_string()).unwrap_or_default(),
+            file: path.map_or_default(|p| p.to_string()),
             locations,
         });
         Variable::new(scope_index, index)

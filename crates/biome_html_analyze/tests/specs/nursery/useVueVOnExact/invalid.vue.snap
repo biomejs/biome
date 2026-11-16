@@ -66,6 +66,7 @@ expression: invalid.vue
   <button :is="kind" @click="foo" @click.ctrl="bar"></button>
   <div @click.right="foo" @contextmenu.ctrl="bar"></div>
   <div @mousedown="foo" @mousedown.ctrl.right="bar"></div>
+  <math @click="foo" @click.ctrl="bar"><mi @click="foo" @click.ctrl="bar">x</mi></math>
 </template>
 
 ```
@@ -557,7 +558,7 @@ invalid.vue:61:8 lint/nursery/useVueVOnExact ━━━━━━━━━━━�
   > 61 │   <div @click.right="foo" @contextmenu.ctrl="bar"></div>
        │        ^^^^^^^^^^^^
     62 │   <div @mousedown="foo" @mousedown.ctrl.right="bar"></div>
-    63 │ </template>
+    63 │   <math @click="foo" @click.ctrl="bar"><mi @click="foo" @click.ctrl="bar">x</mi></math>
   
   i When these modifier keys are held down, both listeners run.
   
@@ -566,7 +567,7 @@ invalid.vue:61:8 lint/nursery/useVueVOnExact ━━━━━━━━━━━�
   > 61 │   <div @click.right="foo" @contextmenu.ctrl="bar"></div>
        │                           ^^^^^^^^^^^^^^^^^
     62 │   <div @mousedown="foo" @mousedown.ctrl.right="bar"></div>
-    63 │ </template>
+    63 │   <math @click="foo" @click.ctrl="bar"><mi @click="foo" @click.ctrl="bar">x</mi></math>
   
   i Add the .exact modifier so this listener only runs when no other modifier keys are held down.
   
@@ -584,8 +585,8 @@ invalid.vue:62:8 lint/nursery/useVueVOnExact ━━━━━━━━━━━�
     61 │   <div @click.right="foo" @contextmenu.ctrl="bar"></div>
   > 62 │   <div @mousedown="foo" @mousedown.ctrl.right="bar"></div>
        │        ^^^^^^^^^^
-    63 │ </template>
-    64 │ 
+    63 │   <math @click="foo" @click.ctrl="bar"><mi @click="foo" @click.ctrl="bar">x</mi></math>
+    64 │ </template>
   
   i When these modifier keys are held down, both listeners run.
   
@@ -593,8 +594,64 @@ invalid.vue:62:8 lint/nursery/useVueVOnExact ━━━━━━━━━━━�
     61 │   <div @click.right="foo" @contextmenu.ctrl="bar"></div>
   > 62 │   <div @mousedown="foo" @mousedown.ctrl.right="bar"></div>
        │                         ^^^^^^^^^^^^^^^^^^^^^
-    63 │ </template>
-    64 │ 
+    63 │   <math @click="foo" @click.ctrl="bar"><mi @click="foo" @click.ctrl="bar">x</mi></math>
+    64 │ </template>
+  
+  i Add the .exact modifier so this listener only runs when no other modifier keys are held down.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:63:9 lint/nursery/useVueVOnExact ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This event listener also runs when the modifier keys of another listener are held down.
+  
+    61 │   <div @click.right="foo" @contextmenu.ctrl="bar"></div>
+    62 │   <div @mousedown="foo" @mousedown.ctrl.right="bar"></div>
+  > 63 │   <math @click="foo" @click.ctrl="bar"><mi @click="foo" @click.ctrl="bar">x</mi></math>
+       │         ^^^^^^
+    64 │ </template>
+    65 │ 
+  
+  i When these modifier keys are held down, both listeners run.
+  
+    61 │   <div @click.right="foo" @contextmenu.ctrl="bar"></div>
+    62 │   <div @mousedown="foo" @mousedown.ctrl.right="bar"></div>
+  > 63 │   <math @click="foo" @click.ctrl="bar"><mi @click="foo" @click.ctrl="bar">x</mi></math>
+       │                      ^^^^^^^^^^^
+    64 │ </template>
+    65 │ 
+  
+  i Add the .exact modifier so this listener only runs when no other modifier keys are held down.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:63:44 lint/nursery/useVueVOnExact ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This event listener also runs when the modifier keys of another listener are held down.
+  
+    61 │   <div @click.right="foo" @contextmenu.ctrl="bar"></div>
+    62 │   <div @mousedown="foo" @mousedown.ctrl.right="bar"></div>
+  > 63 │   <math @click="foo" @click.ctrl="bar"><mi @click="foo" @click.ctrl="bar">x</mi></math>
+       │                                            ^^^^^^
+    64 │ </template>
+    65 │ 
+  
+  i When these modifier keys are held down, both listeners run.
+  
+    61 │   <div @click.right="foo" @contextmenu.ctrl="bar"></div>
+    62 │   <div @mousedown="foo" @mousedown.ctrl.right="bar"></div>
+  > 63 │   <math @click="foo" @click.ctrl="bar"><mi @click="foo" @click.ctrl="bar">x</mi></math>
+       │                                                         ^^^^^^^^^^^
+    64 │ </template>
+    65 │ 
   
   i Add the .exact modifier so this listener only runs when no other modifier keys are held down.
   

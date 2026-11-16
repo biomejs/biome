@@ -1,14 +1,13 @@
 use crate::frameworks::vue::vue_instance::{
     is_in_component_definition_object, is_this_or_direct_const_alias,
 };
-use crate::services::semantic::Semantic;
+use crate::services::vue::VueSemantic;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsMemberExpression, JsCallExpression};
-use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_vue_deprecated_events_api::NoVueDeprecatedEventsApiOptions;
 
@@ -84,7 +83,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoVueDeprecatedEventsApi {
-    type Query = Semantic<JsCallExpression>;
+    type Query = VueSemantic<JsCallExpression>;
     type State = EventsApiMethod;
     type Signals = Option<Self::State>;
     type Options = NoVueDeprecatedEventsApiOptions;
@@ -99,11 +98,7 @@ impl Rule for NoVueDeprecatedEventsApi {
         let object = member.object().ok()?;
         if !is_this_or_direct_const_alias(object.clone(), ctx.model())
             || !is_in_component_definition_object(
-                &object,
-                ctx.model(),
-                ctx.source_type::<JsFileSource>(),
-                ctx.file_path(),
-            )
+                &object, ctx.vue_model())
         {
             return None;
         }

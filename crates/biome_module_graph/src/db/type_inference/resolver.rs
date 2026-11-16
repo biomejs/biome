@@ -18,8 +18,8 @@
 
 use super::{BindingTypeData, InferredModuleTypes, globals::global_type, lookup::MemberLookupMode};
 use crate::db::queries::{
-    LocalTypeInput, infer_local_type, infer_module_types, infer_module_types_from_tables,
-    inference_module_sccs,
+    ExpressionTypeInput, LocalTypeInput, infer_flow_expression_type, infer_local_type,
+    infer_module_types, infer_module_types_from_tables, inference_module_sccs,
 };
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{JsModuleInfo, ModuleDb, ModuleGraphGeneration, module_for_key};
@@ -28,11 +28,11 @@ use biome_js_type_info::{
     TypeReference, TypeReferenceQualifier, TypeResolverLevel,
     TypeofExpression as RawTypeofExpression,
     interned_types::{
-        InternedMappedType as InferredMappedType, InternedModule as InferredModule,
-        InternedNamespace as InferredNamespace, InternedTypeofValue, Literal as InferredLiteral,
-        LocalTypeHandle, LocalTypeId, ModuleKey, TypeData as InferredTypeData,
-        TypeMember as InferredTypeMember, TypeMemberKind as InferredTypeMemberKind,
-        TypeSubstitution as InferredTypeSubstitution,
+        InternedExtendsType as InferredExtendsType, InternedMappedType as InferredMappedType,
+        InternedModule as InferredModule, InternedNamespace as InferredNamespace,
+        InternedTypeofValue, Literal as InferredLiteral, LocalTypeHandle, LocalTypeId, ModuleKey,
+        TypeData as InferredTypeData, TypeMember as InferredTypeMember,
+        TypeMemberKind as InferredTypeMemberKind, TypeSubstitution as InferredTypeSubstitution,
     },
 };
 use biome_rowan::{Text, TextRange};
@@ -49,7 +49,15 @@ use std::{
 // handles before recursion, so the remaining depth comes from structural types
 // nested within one declaration.
 pub(super) const MAX_RAW_TYPE_RESOLUTION_DEPTH: usize = 64;
-pub(super) const MAX_ON_DEMAND_IMPORT_DEPTH: u8 = 128;
+
+/// Number of imports that one on-demand lookup follows before it resolves the
+/// next import from complete module tables, inferred bottom-up.
+///
+/// Imports within the active import cycle do not count. The limit guards Rust
+/// stack recursion, because each followed import nests another lookup query.
+/// Debug builds use a lower limit because unoptimized code uses more stack for
+/// each nested query.
+pub const MAX_ON_DEMAND_IMPORT_DEPTH: u8 = if cfg!(debug_assertions) { 64 } else { 128 };
 const MAX_INFERRED_EXPRESSION_WRAPPER_STEPS: usize = 64;
 // Bounds nested rest elements followed when spreading a tuple.
 const MAX_SPREAD_ELEMENT_DEPTH: usize = 16;
@@ -256,7 +264,14 @@ pub(in crate::db) fn resolve_raw_types<'db>(
     let expressions = js_info
         .raw_expressions
         .iter()
-        .map(|(range, reference)| (*range, ctx.resolve(reference)))
+        .map(|(range, reference)| {
+            let ty = if js_info.flow.is_candidate(*range) {
+                infer_flow_expression_type(db, ExpressionTypeInput::new(db, module, *range))
+            } else {
+                None
+            };
+            (*range, ty.unwrap_or_else(|| ctx.resolve(reference)))
+        })
         .collect();
 
     let binding_type_data = js_info
@@ -1059,6 +1074,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
                 | InferredTypeData::TypeOperator(_)
                 | InferredTypeData::IndexedAccess(_)
                 | InferredTypeData::MappedType(_)
+                | InferredTypeData::Extends(_)
                 | InferredTypeData::Literal(_)
                 | InferredTypeData::MergedReference(_)
                 | InferredTypeData::TypeofType(_)
@@ -1106,6 +1122,30 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
         }
 
         ty
+    }
+
+    /// Selects the branch of a conditional type that an expression operates
+    /// on, such as the operand of `-value` in:
+    ///
+    /// ```ts
+    /// declare const value: true extends true ? bigint : number;
+    /// ```
+    ///
+    /// The branch is returned as declared, with its local handles unresolved.
+    /// Returns `None` when no branch can be selected, for example because the
+    /// check type still refers to a generic.
+    pub(in crate::db::type_inference) fn select_conditional_branch(
+        &mut self,
+        extends: InferredExtendsType<'db>,
+    ) -> Option<InferredTypeData<'db>> {
+        let db = self.db;
+        let check_type = extends.check_type(db);
+        if check_type.may_refer_to_free_generic(db) {
+            return None;
+        }
+        extends.select_branch(db, check_type, extends.extends_type(db), |ty| {
+            self.resolve_inferred_type(ty).expand_structural_global(db)
+        })
     }
 }
 

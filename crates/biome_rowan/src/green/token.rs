@@ -145,6 +145,12 @@ impl GreenTokenData {
         &self.data.header.trailing
     }
 
+    /// Whether the leading or trailing trivia of this token has a comment.
+    #[inline]
+    pub(crate) fn has_comments(&self) -> bool {
+        self.flags().contains(GreenElementFlags::HAS_COMMENTS)
+    }
+
     #[inline]
     pub(crate) fn flags(&self) -> GreenElementFlags {
         self.data.header.flags

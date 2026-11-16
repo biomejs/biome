@@ -255,6 +255,14 @@ impl JsAstNode {
             .into()
     }
 
+    /// Wraps a node or a token as the corresponding plugin API value.
+    pub(crate) fn from_element(element: JsSyntaxElement, context: &mut Context) -> JsValue {
+        match element {
+            JsSyntaxElement::Node(node) => Self::from_node(node, context),
+            JsSyntaxElement::Token(token) => JsAstToken::from_token(token, context),
+        }
+    }
+
     pub(crate) fn from_value(this: &JsValue) -> Option<Self> {
         let object = this.as_object()?;
         let node = object.downcast_ref::<Self>()?;

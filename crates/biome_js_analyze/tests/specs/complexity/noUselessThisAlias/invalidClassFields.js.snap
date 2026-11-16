@@ -1,0 +1,112 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidClassFields.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+function computedFieldName() {
+    const self = this;
+    return class {
+        [self.key] = 1;
+    };
+}
+
+function computedFieldNameArrow() {
+    const self = this;
+    return class {
+        [(() => self.key)()] = 1;
+    };
+}
+
+class Widget {
+    value = function () {
+        const self = this;
+        return () => self.value;
+    }();
+}
+
+```
+
+# Diagnostics
+```
+invalidClassFields.js:4:11 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This aliasing of this is unnecessary.
+  
+    3 │ function computedFieldName() {
+  > 4 │     const self = this;
+      │           ^^^^^^^^^^^
+    5 │     return class {
+    6 │         [self.key] = 1;
+  
+  i Arrow functions inherits `this` from their enclosing scope.
+  
+  i Safe fix: Use this instead of an alias.
+  
+     2  2 │   
+     3  3 │   function computedFieldName() {
+     4    │ - ····const·self·=·this;
+     5  4 │       return class {
+     6    │ - ········[self.key]·=·1;
+        5 │ + ········[this.key]·=·1;
+     7  6 │       };
+     8  7 │   }
+  
+
+```
+
+```
+invalidClassFields.js:11:11 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This aliasing of this is unnecessary.
+  
+    10 │ function computedFieldNameArrow() {
+  > 11 │     const self = this;
+       │           ^^^^^^^^^^^
+    12 │     return class {
+    13 │         [(() => self.key)()] = 1;
+  
+  i Arrow functions inherits `this` from their enclosing scope.
+  
+  i Safe fix: Use this instead of an alias.
+  
+     9  9 │   
+    10 10 │   function computedFieldNameArrow() {
+    11    │ - ····const·self·=·this;
+    12 11 │       return class {
+    13    │ - ········[(()·=>·self.key)()]·=·1;
+       12 │ + ········[(()·=>·this.key)()]·=·1;
+    14 13 │       };
+    15 14 │   }
+  
+
+```
+
+```
+invalidClassFields.js:19:15 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This aliasing of this is unnecessary.
+  
+    17 │ class Widget {
+    18 │     value = function () {
+  > 19 │         const self = this;
+       │               ^^^^^^^^^^^
+    20 │         return () => self.value;
+    21 │     }();
+  
+  i Arrow functions inherits `this` from their enclosing scope.
+  
+  i Safe fix: Use this instead of an alias.
+  
+    17 17 │   class Widget {
+    18 18 │       value = function () {
+    19    │ - ········const·self·=·this;
+    20    │ - ········return·()·=>·self.value;
+       19 │ + ········return·()·=>·this.value;
+    21 20 │       }();
+    22 21 │   }
+  
+
+```

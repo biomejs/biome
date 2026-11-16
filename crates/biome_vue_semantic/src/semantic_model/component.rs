@@ -19,7 +19,8 @@ use biome_js_syntax::{
     JsGetterClassMember, JsGetterObjectMember, JsIdentifierBinding, JsImport, JsLanguage, JsModule,
     JsObjectBindingPattern, JsObjectExpression, JsParameters, JsReferenceIdentifier,
     JsReturnStatement, JsSetterClassMember, JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode,
-    TsIdentifierBinding, TsInterfaceDeclaration, TsTypeAliasDeclaration, TsTypeMemberList,
+    TsFunctionType, TsIdentifierBinding, TsInterfaceDeclaration, TsTypeAliasDeclaration,
+    TsTypeMemberList, static_value::StaticValue,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{
@@ -142,10 +143,12 @@ impl Collector<'_, '_> {
             let Some(module) = module else {
                 return;
             };
-            let range = self.host(module.syntax().text_trimmed_range());
-            let component =
-                self.builder
-                    .add_component(ComponentKind::Setup, range, self.input.snippet);
+            let component = self.builder.add_component(
+                ComponentKind::Setup,
+                module.syntax(),
+                self.input.snippet,
+                self.input.offset,
+            );
             self.builder.component_mut(component).is_defined_in_place = true;
             self.output.components.push(component);
             self.collect_module_bindings(Some(component));
@@ -235,10 +238,12 @@ impl Collector<'_, '_> {
             self.default_call = Some(call.syntax().text_trimmed_range());
             return;
         }
-        let range = self.host(expression.syntax().text_trimmed_range());
-        let component =
-            self.builder
-                .add_component(ComponentKind::OptionsObject, range, self.input.snippet);
+        let component = self.builder.add_component(
+            ComponentKind::OptionsObject,
+            expression.syntax(),
+            self.input.snippet,
+            self.input.offset,
+        );
         self.builder.component_mut(component).is_defined_in_place = matches!(
             expression.inner_expression(),
             Some(AnyJsExpression::JsObjectExpression(_))
@@ -300,8 +305,9 @@ impl Collector<'_, '_> {
         };
         let local_range = call.syntax().text_trimmed_range();
         let is_default_export = self.default_call == Some(local_range);
-        let range = self.host(local_range);
-        let component = self.builder.add_component(kind, range, self.input.snippet);
+        let component =
+            self.builder
+                .add_component(kind, call.syntax(), self.input.snippet, self.input.offset);
         self.output.components.push(component);
         if is_default_export {
             self.output.default_export = Some(component);
@@ -351,6 +357,15 @@ impl Collector<'_, '_> {
                 }
                 if let Some(options) = arguments.last() {
                     self.collect_options_expression(options, component);
+                }
+                // Vue replaces the `setup` option with the first argument,
+                // so that option never runs.
+                if arguments.len() == 2
+                    && let Some(setup) = arguments.first()
+                {
+                    let setup_function =
+                        expression_function(setup).map(|function| self.node_ref(function.syntax()));
+                    self.builder.component_mut(component).setup_function = setup_function;
                 }
             }
         }
@@ -482,11 +497,12 @@ impl Collector<'_, '_> {
                         AnyJsStatement::can_cast(ancestor.kind())
                             || JsImport::can_cast(ancestor.kind())
                     })
-                    .map_or(range, |node| self.host(node.text_trimmed_range()));
+                    .unwrap_or_else(|| syntax.clone());
+                let node = self.builder.add_js_node(self.input.snippet, &declaration);
                 let id = self.builder.add_symbol(NewSymbol {
                     name: name_token.token_text_trimmed(),
                     range,
-                    declaration,
+                    declaration: self.host(declaration.text_trimmed_range()),
                     snippet: self.input.snippet,
                     scope,
                     namespace: Namespace::Binding,
@@ -496,6 +512,7 @@ impl Collector<'_, '_> {
                         SymbolKind::Local
                     },
                     component,
+                    node: Some(node),
                 });
                 self.builder.symbol_mut(id).type_only = type_only;
             }
@@ -517,6 +534,8 @@ impl Collector<'_, '_> {
             self.builder.open_all(component, OpenReason::NonLiteral);
             return;
         };
+        let options_object = self.node_ref(object.syntax());
+        self.builder.component_mut(component).options_object = Some(options_object);
         self.collect_options_object(&object, component);
     }
 
@@ -534,8 +553,8 @@ impl Collector<'_, '_> {
                 "emits" => self.collect_emits_option(&member, component),
                 "data" => {
                     if let Some(function) = member_function(&member) {
-                        let range = self.host(function.syntax().text_trimmed_range());
-                        self.builder.component_mut(component).data_function = Some(range);
+                        let data_function = self.node_ref(function.syntax());
+                        self.builder.component_mut(component).data_function = Some(data_function);
                     }
                     self.collect_data_option(&member, component, SymbolKind::Data);
                 }
@@ -561,8 +580,8 @@ impl Collector<'_, '_> {
                 "setup" => self.collect_setup_function(member_function(&member), component),
                 "name" | "inheritAttrs" => self.collect_scalar_option(&member, component),
                 "render" => {
-                    let range = self.host(member.syntax().text_trimmed_range());
-                    self.builder.component_mut(component).render = Some(range);
+                    let render = self.node_ref(member.syntax());
+                    self.builder.component_mut(component).render = Some(render);
                 }
                 "model" => self.collect_model_option(&member, component),
                 "extends" => self.builder.open_all(component, OpenReason::Extends),
@@ -580,7 +599,7 @@ impl Collector<'_, '_> {
                             component,
                             name.clone(),
                             member_name_range(&member),
-                            member.syntax().text_trimmed_range(),
+                            member.syntax(),
                             Namespace::Option,
                             SymbolKind::LifecycleHook,
                         );
@@ -617,19 +636,20 @@ impl Collector<'_, '_> {
         self.builder.component_mut(component).model_option = Some(range);
     }
 
-    /// Adds a declaration to the instance scope of `component`. Ranges are in
+    /// Adds a declaration to the instance scope of `component`. `range` is in
     /// the coordinates of the tree.
     fn add_instance_symbol(
         &mut self,
         component: ComponentId,
         name: TokenText,
         range: Option<TextRange>,
-        declaration: TextRange,
+        declaration: &JsSyntaxNode,
         namespace: Namespace,
         kind: SymbolKind,
     ) -> SymbolId {
         let scope = self.builder.data.components[component.index()].instance;
-        let declaration = self.host(declaration);
+        let node = self.builder.add_js_node(self.input.snippet, declaration);
+        let declaration = self.host(declaration.text_trimmed_range());
         self.builder.add_symbol(NewSymbol {
             name,
             range: range.map_or(declaration, |range| self.host(range)),
@@ -639,6 +659,7 @@ impl Collector<'_, '_> {
             namespace,
             kind,
             component: Some(component),
+            node: Some(node),
         })
     }
 
@@ -681,7 +702,7 @@ impl Collector<'_, '_> {
                         component,
                         name,
                         Some(range),
-                        range,
+                        literal.syntax(),
                         Namespace::Binding,
                         SymbolKind::Prop,
                     );
@@ -747,7 +768,7 @@ impl Collector<'_, '_> {
                         component,
                         name,
                         member_name_range(&member),
-                        member.syntax().text_trimmed_range(),
+                        member.syntax(),
                         Namespace::Binding,
                         SymbolKind::Prop,
                     );
@@ -762,14 +783,13 @@ impl Collector<'_, '_> {
         props
     }
 
-    fn runtime_prop_detail(&self, value: Option<AnyJsExpression>) -> PropDetail {
-        let runtime_type = value
-            .as_ref()
-            .map(|value| self.host(value.syntax().text_trimmed_range()));
-        let value = value.and_then(|value| value.inner_expression());
-        let Some(AnyJsExpression::JsObjectExpression(options)) = &value else {
+    fn runtime_prop_detail(&mut self, value: Option<AnyJsExpression>) -> PropDetail {
+        let inner = value.as_ref().and_then(|value| value.inner_expression());
+        let Some(AnyJsExpression::JsObjectExpression(options)) = &inner else {
+            // The value itself is the prop's runtime type.
+            let runtime_type = value.as_ref().map(|value| self.node_ref(value.syntax()));
             return PropDetail {
-                types: match &value {
+                types: match &inner {
                     // `size: () => {}` passes an inline function, which names
                     // no type.
                     Some(value) if !is_function_expression(value) => self.constructor_types(value),
@@ -806,42 +826,37 @@ impl Collector<'_, '_> {
                     match member_value(&member) {
                         Some(value) => {
                             detail.types = self.constructor_types(&value);
-                            detail.runtime_type =
-                                Some(self.host(value.syntax().text_trimmed_range()));
+                            detail.runtime_type = Some(self.node_ref(value.syntax()));
                         }
                         // `{ type }` holds the type in a variable.
                         None => detail.types = TypeSet::from(PropType::Unknown),
                     }
                 }
                 "required" => {
-                    detail.required = match member_value(&member) {
-                        Some(AnyJsExpression::AnyJsLiteralExpression(
-                            AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
-                        )) => literal.value_token().map_or(Tri::Unknown, |token| {
-                            (token.text_trimmed() == "true").into()
-                        }),
-                        _ => Tri::Unknown,
-                    };
+                    detail.required =
+                        match member_value(&member).and_then(|value| value.inner_expression()) {
+                            Some(AnyJsExpression::AnyJsLiteralExpression(
+                                AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
+                            )) => literal.value_token().map_or(Tri::Unknown, |token| {
+                                (token.text_trimmed() == "true").into()
+                            }),
+                            _ => Tri::Unknown,
+                        };
                 }
                 "default" => {
-                    let range = match &member {
-                        AnyJsObjectMember::JsPropertyObjectMember(property) => property
-                            .value()
-                            .ok()
-                            .map(|value| value.syntax().text_trimmed_range()),
-                        AnyJsObjectMember::JsMethodObjectMember(method) => {
-                            Some(method.syntax().text_trimmed_range())
+                    let value = match &member {
+                        AnyJsObjectMember::JsPropertyObjectMember(property) => {
+                            property.value().ok().map(AstNode::into_syntax)
                         }
-                        AnyJsObjectMember::JsShorthandPropertyObjectMember(shorthand) => {
-                            Some(shorthand.syntax().text_trimmed_range())
+                        AnyJsObjectMember::JsMethodObjectMember(_)
+                        | AnyJsObjectMember::JsShorthandPropertyObjectMember(_) => {
+                            Some(member.syntax().clone())
                         }
                         _ => None,
                     };
-                    if let Some(range) = range {
-                        detail.defaults = Box::new([PropDefaultData {
-                            range: self.host(range),
-                            source: DefaultSource::Inline,
-                        }]);
+                    if let Some(value) = value {
+                        detail.defaults =
+                            Box::new([self.prop_default(&value, DefaultSource::Inline)]);
                     }
                 }
                 "validator" => {
@@ -896,9 +911,7 @@ impl Collector<'_, '_> {
     /// Reads props written as a type: `defineProps<{ a: string }>()`.
     fn collect_type_props(&mut self, ty: &AnyTsType, component: ComponentId) -> Vec<SymbolId> {
         let mut props = Vec::new();
-        let Some(members) = self.resolve_type_members(ty) else {
-            self.builder
-                .open(component, Namespace::Binding, OpenReason::UnresolvedType);
+        let Some(members) = self.type_members(ty, component, Namespace::Binding) else {
             return props;
         };
         for member in members.iter() {
@@ -936,7 +949,7 @@ impl Collector<'_, '_> {
                 component,
                 name,
                 Some(name_range),
-                member.syntax().text_trimmed_range(),
+                member.syntax(),
                 Namespace::Binding,
                 SymbolKind::Prop,
             );
@@ -958,19 +971,40 @@ impl Collector<'_, '_> {
     /// Returns the members of an object type, following references to type
     /// aliases and interfaces declared in the same tree.
     ///
-    /// Returns `None` for a type whose members cannot all be listed: an
-    /// imported type, an interface that extends another, or anything that is
-    /// not an object type.
-    fn resolve_type_members(&self, ty: &AnyTsType) -> Option<TsTypeMemberList> {
-        self.resolve_type_members_within(ty, MAX_TYPE_ALIAS_DEPTH)
+    /// When the members the type declares are not all listed, `namespace` of
+    /// `component` is marked as possibly incomplete. Returns `None` for a type
+    /// whose members cannot be listed at all: an imported type, or anything
+    /// that is not an object type. An interface that extends another lists
+    /// its own members only.
+    fn type_members(
+        &mut self,
+        ty: &AnyTsType,
+        component: ComponentId,
+        namespace: Namespace,
+    ) -> Option<TsTypeMemberList> {
+        let resolved = self.resolve_type_members_within(ty, MAX_TYPE_ALIAS_DEPTH);
+        if resolved
+            .as_ref()
+            .is_none_or(|(_, is_complete)| !is_complete)
+        {
+            self.builder
+                .open(component, namespace, OpenReason::UnresolvedType);
+        }
+        resolved.map(|(members, _)| members)
     }
 
-    fn resolve_type_members_within(&self, ty: &AnyTsType, depth: u8) -> Option<TsTypeMemberList> {
+    /// Returns the members of `ty`, and whether they are all the members the
+    /// type declares.
+    fn resolve_type_members_within(
+        &self,
+        ty: &AnyTsType,
+        depth: u8,
+    ) -> Option<(TsTypeMemberList, bool)> {
         // Aliases can refer to each other in a cycle, which no object type
         // ends.
         let depth = depth.checked_sub(1)?;
         match ty {
-            AnyTsType::TsObjectType(object) => Some(object.members()),
+            AnyTsType::TsObjectType(object) => Some((object.members(), true)),
             AnyTsType::TsParenthesizedType(parenthesized) => {
                 self.resolve_type_members_within(&parenthesized.ty().ok()?, depth)
             }
@@ -983,8 +1017,9 @@ impl Collector<'_, '_> {
                 } else {
                     identifier
                         .parent::<TsInterfaceDeclaration>()
-                        .filter(|interface| interface.extends_clause().is_none())
-                        .map(|interface| interface.members())
+                        .map(|interface| {
+                            (interface.members(), interface.extends_clause().is_none())
+                        })
                 }
             }
             _ => None,
@@ -1004,25 +1039,22 @@ impl Collector<'_, '_> {
         match expression.inner_expression() {
             Some(AnyJsExpression::JsArrayExpression(array)) => {
                 for element in array.elements().iter().flatten() {
-                    let AnyJsArrayElement::AnyJsExpression(
-                        AnyJsExpression::AnyJsLiteralExpression(
-                            AnyJsLiteralExpression::JsStringLiteralExpression(literal),
-                        ),
-                    ) = element
-                    else {
+                    let AnyJsArrayElement::AnyJsExpression(element) = element else {
                         self.builder
                             .open(component, Namespace::Emit, OpenReason::NonLiteral);
                         continue;
                     };
-                    let Ok(name) = literal.inner_string_text() else {
+                    let Some(name) = static_string_text(&element) else {
+                        self.builder
+                            .open(component, Namespace::Emit, OpenReason::NonLiteral);
                         continue;
                     };
-                    let range = literal.syntax().text_trimmed_range();
+                    let range = element.syntax().text_trimmed_range();
                     let id = self.add_instance_symbol(
                         component,
                         name,
                         Some(range),
-                        range,
+                        element.syntax(),
                         Namespace::Emit,
                         SymbolKind::Emit,
                     );
@@ -1050,17 +1082,19 @@ impl Collector<'_, '_> {
                         component,
                         name,
                         member_name_range(&member),
-                        member.syntax().text_trimmed_range(),
+                        member.syntax(),
                         Namespace::Emit,
                         SymbolKind::Emit,
                     );
+                    let validator = function
+                        .as_ref()
+                        .map(|function| self.node_ref(function.syntax()));
                     self.builder.symbol_mut(id).detail = Detail::Emit {
                         payload_params: function
                             .as_ref()
                             .and_then(function_parameters)
                             .map(|(count, _)| count),
-                        validator: function
-                            .map(|function| self.host(function.syntax().text_trimmed_range())),
+                        validator,
                         form: EmitForm::Object,
                     };
                 }
@@ -1072,12 +1106,26 @@ impl Collector<'_, '_> {
     }
 
     /// Reads emits written as a type: `defineEmits<{ change: [id: number] }>()`,
-    /// `defineEmits<{ change(id: number): void }>()` or
-    /// `defineEmits<{ (e: 'change', id: number): void }>()`.
+    /// `defineEmits<{ change(id: number): void }>()`,
+    /// `defineEmits<{ (e: 'change', id: number): void }>()` or
+    /// `defineEmits<(e: 'change', id: number) => void>()`.
     fn collect_type_emits(&mut self, ty: &AnyTsType, component: ComponentId) {
-        let Some(members) = self.resolve_type_members(ty) else {
-            self.builder
-                .open(component, Namespace::Emit, OpenReason::UnresolvedType);
+        if let Some(function) = self.resolve_function_type_within(ty, MAX_TYPE_ALIAS_DEPTH) {
+            match function.parameters() {
+                Ok(parameters) => self.collect_signature_emits(
+                    &parameters,
+                    function.syntax(),
+                    EmitForm::FunctionType,
+                    component,
+                ),
+                Err(_) => {
+                    self.builder
+                        .open(component, Namespace::Emit, OpenReason::UnresolvedType);
+                }
+            }
+            return;
+        }
+        let Some(members) = self.type_members(ty, component, Namespace::Emit) else {
             return;
         };
         for member in members.iter() {
@@ -1100,7 +1148,7 @@ impl Collector<'_, '_> {
                             .name()
                             .ok()
                             .map(|name| name.syntax().text_trimmed_range()),
-                        property.syntax().text_trimmed_range(),
+                        property.syntax(),
                         Namespace::Emit,
                         SymbolKind::Emit,
                     );
@@ -1114,41 +1162,12 @@ impl Collector<'_, '_> {
                     let Ok(parameters) = signature.parameters() else {
                         continue;
                     };
-                    let count = parameters.items().len();
-                    let Some(Ok(AnyJsParameter::AnyJsFormalParameter(first))) =
-                        parameters.items().iter().next()
-                    else {
-                        continue;
-                    };
-                    let Some(event_type) = first
-                        .as_js_formal_parameter()
-                        .and_then(|parameter| parameter.type_annotation())
-                        .and_then(|annotation| annotation.ty().ok())
-                    else {
-                        self.builder
-                            .open(component, Namespace::Emit, OpenReason::UnresolvedType);
-                        continue;
-                    };
-                    let mut names = Vec::new();
-                    if !string_literal_types(&event_type, &mut names) {
-                        self.builder
-                            .open(component, Namespace::Emit, OpenReason::UnresolvedType);
-                    }
-                    for (name, range) in names {
-                        let id = self.add_instance_symbol(
-                            component,
-                            name,
-                            Some(range),
-                            signature.syntax().text_trimmed_range(),
-                            Namespace::Emit,
-                            SymbolKind::Emit,
-                        );
-                        self.builder.symbol_mut(id).detail = Detail::Emit {
-                            payload_params: Some(count.saturating_sub(1) as u8),
-                            validator: None,
-                            form: EmitForm::CallSignature,
-                        };
-                    }
+                    self.collect_signature_emits(
+                        &parameters,
+                        signature.syntax(),
+                        EmitForm::CallSignature,
+                        component,
+                    );
                 }
                 AnyTsTypeMember::TsMethodSignatureTypeMember(method) => {
                     let Some(name) = method.name().ok().and_then(|name| name.name()) else {
@@ -1165,7 +1184,7 @@ impl Collector<'_, '_> {
                             .name()
                             .ok()
                             .map(|name| name.syntax().text_trimmed_range()),
-                        method.syntax().text_trimmed_range(),
+                        method.syntax(),
                         Namespace::Emit,
                         SymbolKind::Emit,
                     );
@@ -1177,6 +1196,74 @@ impl Collector<'_, '_> {
                 }
                 _ => {}
             }
+        }
+    }
+
+    /// Reads the events a signature declares with the type of its first
+    /// parameter, as in `(e: 'change' | 'update', id: number)`. `node` is the
+    /// signature, which each event points to.
+    fn collect_signature_emits(
+        &mut self,
+        parameters: &JsParameters,
+        node: &JsSyntaxNode,
+        form: EmitForm,
+        component: ComponentId,
+    ) {
+        let count = parameters.items().len();
+        let Some(Ok(AnyJsParameter::AnyJsFormalParameter(first))) =
+            parameters.items().iter().next()
+        else {
+            return;
+        };
+        let Some(event_type) = first
+            .as_js_formal_parameter()
+            .and_then(|parameter| parameter.type_annotation())
+            .and_then(|annotation| annotation.ty().ok())
+        else {
+            self.builder
+                .open(component, Namespace::Emit, OpenReason::UnresolvedType);
+            return;
+        };
+        let mut names = Vec::new();
+        if !string_literal_types(&event_type, &mut names) {
+            self.builder
+                .open(component, Namespace::Emit, OpenReason::UnresolvedType);
+        }
+        for (name, range) in names {
+            let id = self.add_instance_symbol(
+                component,
+                name,
+                Some(range),
+                node,
+                Namespace::Emit,
+                SymbolKind::Emit,
+            );
+            self.builder.symbol_mut(id).detail = Detail::Emit {
+                payload_params: Some(count.saturating_sub(1) as u8),
+                validator: None,
+                form,
+            };
+        }
+    }
+
+    /// Returns the function type `ty` is, following parentheses and local
+    /// type aliases.
+    fn resolve_function_type_within(&self, ty: &AnyTsType, depth: u8) -> Option<TsFunctionType> {
+        // Aliases can refer to each other in a cycle.
+        let depth = depth.checked_sub(1)?;
+        match ty {
+            AnyTsType::TsFunctionType(function) => Some(function.clone()),
+            AnyTsType::TsParenthesizedType(parenthesized) => {
+                self.resolve_function_type_within(&parenthesized.ty().ok()?, depth)
+            }
+            AnyTsType::TsReferenceType(reference) => {
+                let name = reference.name().ok()?;
+                let binding = self.input.js.binding(name.as_js_reference_identifier()?)?;
+                let alias = TsIdentifierBinding::cast(binding.syntax())?
+                    .parent::<TsTypeAliasDeclaration>()?;
+                self.resolve_function_type_within(&alias.ty().ok()?, depth)
+            }
+            _ => None,
         }
     }
 
@@ -1215,9 +1302,12 @@ impl Collector<'_, '_> {
     /// When `ty` is `None` or its members cannot be listed, the slots of the
     /// component are left open.
     fn collect_type_slots(&mut self, ty: Option<&AnyTsType>, component: ComponentId) {
-        let Some(members) = ty.and_then(|ty| self.resolve_type_members(ty)) else {
+        let Some(ty) = ty else {
             self.builder
                 .open(component, Namespace::Slot, OpenReason::UnresolvedType);
+            return;
+        };
+        let Some(members) = self.type_members(ty, component, Namespace::Slot) else {
             return;
         };
         for member in members.iter() {
@@ -1239,7 +1329,7 @@ impl Collector<'_, '_> {
                 component,
                 name,
                 Some(name_range),
-                member.syntax().text_trimmed_range(),
+                member.syntax(),
                 Namespace::Slot,
                 SymbolKind::Slot,
             );
@@ -1331,7 +1421,7 @@ impl Collector<'_, '_> {
                 component,
                 name,
                 member_name_range(&member),
-                member.syntax().text_trimmed_range(),
+                member.syntax(),
                 Namespace::Binding,
                 kind,
             );
@@ -1387,14 +1477,14 @@ impl Collector<'_, '_> {
             let mut setter = None;
             match &member {
                 AnyJsObjectMember::JsMethodObjectMember(method) => {
-                    getter = Some(method.syntax().text_trimmed_range());
+                    getter = Some(method.syntax().clone());
                 }
                 _ => match member_value(&member).and_then(|value| value.inner_expression()) {
                     Some(AnyJsExpression::JsObjectExpression(accessors)) => {
                         for accessor in accessors.members().iter().flatten() {
                             match accessor.name().as_ref().map(TokenText::text) {
                                 Some("get") => {
-                                    getter = Some(accessor.syntax().text_trimmed_range());
+                                    getter = Some(accessor.syntax().clone());
                                 }
                                 Some("set") => {
                                     setter = Some(accessor.syntax().text_trimmed_range());
@@ -1404,7 +1494,7 @@ impl Collector<'_, '_> {
                         }
                     }
                     Some(value) if is_function_expression(&value) => {
-                        getter = Some(value.syntax().text_trimmed_range());
+                        getter = Some(value.syntax().clone());
                     }
                     _ => {}
                 },
@@ -1413,12 +1503,12 @@ impl Collector<'_, '_> {
                 component,
                 name,
                 member_name_range(&member),
-                member.syntax().text_trimmed_range(),
+                member.syntax(),
                 Namespace::Binding,
                 SymbolKind::Computed,
             );
             self.builder.symbol_mut(id).detail = Detail::Computed {
-                getter: getter.map(|range| self.host(range)),
+                getter: getter.map(|getter| self.node_ref(&getter)),
                 setter: setter.map(|range| self.host(range)),
             };
         }
@@ -1448,7 +1538,7 @@ impl Collector<'_, '_> {
                 component,
                 name,
                 member_name_range(&member),
-                member.syntax().text_trimmed_range(),
+                member.syntax(),
                 Namespace::Binding,
                 SymbolKind::Method,
             );
@@ -1483,7 +1573,7 @@ impl Collector<'_, '_> {
                 component,
                 name,
                 range,
-                member.syntax().text_trimmed_range(),
+                member.syntax(),
                 Namespace::Option,
                 SymbolKind::Watcher,
             );
@@ -1598,7 +1688,7 @@ impl Collector<'_, '_> {
                         component,
                         name,
                         Some(range),
-                        range,
+                        literal.syntax(),
                         Namespace::Binding,
                         SymbolKind::Inject,
                     );
@@ -1615,7 +1705,7 @@ impl Collector<'_, '_> {
                         component,
                         name,
                         member_name_range(&member),
-                        member.syntax().text_trimmed_range(),
+                        member.syntax(),
                         Namespace::Binding,
                         SymbolKind::Inject,
                     );
@@ -1655,7 +1745,7 @@ impl Collector<'_, '_> {
                 component,
                 name,
                 member_name_range(&member),
-                member.syntax().text_trimmed_range(),
+                member.syntax(),
                 namespace,
                 kind,
             );
@@ -1677,6 +1767,8 @@ impl Collector<'_, '_> {
             self.builder.open_all_uses(component);
             return;
         };
+        let setup_function = self.node_ref(function.syntax());
+        self.builder.component_mut(component).setup_function = Some(setup_function);
 
         if let Some(parameters) = parameter_patterns(&function) {
             if let Some(props) = parameters.first() {
@@ -1729,7 +1821,7 @@ impl Collector<'_, '_> {
                     component,
                     name,
                     member_name_range(&member),
-                    member.syntax().text_trimmed_range(),
+                    member.syntax(),
                     Namespace::Binding,
                     SymbolKind::SetupReturn,
                 );
@@ -1814,7 +1906,7 @@ impl Collector<'_, '_> {
                 .arguments()
                 .ok()
                 .and_then(|arguments| arguments.args().iter().next()?.ok())
-                .map(|argument| self.host(argument.syntax().text_trimmed_range()));
+                .map(|argument| self.node_ref(argument.syntax()));
             self.builder.symbol_mut(symbol).detail = Detail::Computed {
                 getter,
                 setter: None,
@@ -1848,7 +1940,7 @@ impl Collector<'_, '_> {
                 component,
                 synthetic_name(hook),
                 Some(callee_token.text_trimmed_range()),
-                call.syntax().text_trimmed_range(),
+                call.syntax(),
                 Namespace::Option,
                 SymbolKind::LifecycleHook,
             );
@@ -1857,7 +1949,7 @@ impl Collector<'_, '_> {
                 component,
                 callee_token.token_text_trimmed(),
                 Some(callee_token.text_trimmed_range()),
-                call.syntax().text_trimmed_range(),
+                call.syntax(),
                 Namespace::Option,
                 SymbolKind::Watcher,
             );
@@ -1934,7 +2026,7 @@ impl Collector<'_, '_> {
                 component,
                 name,
                 range,
-                call.syntax().text_trimmed_range(),
+                call.syntax(),
                 Namespace::Binding,
                 SymbolKind::Model,
             );
@@ -2042,15 +2134,14 @@ impl Collector<'_, '_> {
                 complete = false;
                 continue;
             };
-            let range = match &member {
-                AnyJsObjectMember::JsPropertyObjectMember(property) => property
-                    .value()
-                    .ok()
-                    .map(|value| value.syntax().text_trimmed_range()),
-                other => Some(other.syntax().text_trimmed_range()),
+            let value = match &member {
+                AnyJsObjectMember::JsPropertyObjectMember(property) => {
+                    property.value().ok().map(AstNode::into_syntax)
+                }
+                other => Some(other.syntax().clone()),
             };
-            if let Some(range) = range {
-                self.add_prop_default(props, name.text(), range, DefaultSource::WithDefaults);
+            if let Some(value) = value {
+                self.add_prop_default(props, name.text(), &value, DefaultSource::WithDefaults);
             }
         }
         complete
@@ -2094,7 +2185,7 @@ impl Collector<'_, '_> {
                         self.add_prop_default(
                             props,
                             name.text(),
-                            default,
+                            default.syntax(),
                             DefaultSource::Destructure,
                         );
                     }
@@ -2104,14 +2195,32 @@ impl Collector<'_, '_> {
         }
     }
 
+    /// Describes `node`, a node of the tree, for a row of the model.
+    fn node_ref(&mut self, node: &JsSyntaxNode) -> JsNodeRef {
+        JsNodeRef {
+            range: self.host(node.text_trimmed_range()),
+            node: self.builder.add_js_node(self.input.snippet, node),
+        }
+    }
+
+    /// Describes the default value of a prop written as `value`: an
+    /// expression, or the object member that holds it.
+    fn prop_default(&mut self, value: &JsSyntaxNode, source: DefaultSource) -> PropDefaultData {
+        PropDefaultData {
+            range: self.host(value.text_trimmed_range()),
+            node: self.builder.add_js_node(self.input.snippet, value),
+            source,
+        }
+    }
+
     fn add_prop_default(
         &mut self,
         props: &[SymbolId],
         name: &str,
-        range: TextRange,
+        value: &JsSyntaxNode,
         source: DefaultSource,
     ) {
-        let range = self.host(range);
+        let default = self.prop_default(value, source);
         let Some(id) = props
             .iter()
             .copied()
@@ -2121,7 +2230,7 @@ impl Collector<'_, '_> {
         };
         if let Detail::Prop(detail) = &mut self.builder.symbol_mut(id).detail {
             let mut defaults = std::mem::take(&mut detail.defaults).into_vec();
-            defaults.push(PropDefaultData { range, source });
+            defaults.push(default);
             detail.defaults = defaults.into_boxed_slice();
         }
     }
@@ -2258,6 +2367,28 @@ fn member_name_range(member: &AnyJsObjectMember) -> Option<TextRange> {
     }
 }
 
+/// Returns the text of `expression` when it is a string written in place: a
+/// string literal, as in `'change'`, or a template literal without a tag or
+/// substitutions, as in `` `change` ``.
+///
+/// Parentheses around `expression` must already be removed.
+pub(crate) fn static_string_text(expression: &AnyJsExpression) -> Option<TokenText> {
+    match expression {
+        AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsStringLiteralExpression(literal),
+        ) => literal.inner_string_text().ok(),
+        // A tagged template calls its tag, so its value is unknown.
+        AnyJsExpression::JsTemplateExpression(template) if template.tag().is_none() => {
+            match expression.as_static_value()? {
+                StaticValue::String(token) => Some(token.token_text_trimmed()),
+                StaticValue::EmptyString(_) => Some(synthetic_name("")),
+                _ => None,
+            }
+        }
+        _ => None,
+    }
+}
+
 fn is_function_expression(expression: &AnyJsExpression) -> bool {
     matches!(
         expression,
@@ -2357,11 +2488,11 @@ fn parameter_patterns(function: &AnyFunctionLike) -> Option<Vec<AnyJsBindingPatt
     bare_parameter(function).map(|binding| vec![AnyJsBindingPattern::AnyJsBinding(binding)])
 }
 
-/// Returns the name, binding and default value range of each property of an
-/// object destructuring pattern.
+/// Returns the name, binding and default value of each property of an object
+/// destructuring pattern.
 fn object_pattern_bindings(
     pattern: &JsObjectBindingPattern,
-) -> Vec<(TokenText, JsIdentifierBinding, Option<TextRange>)> {
+) -> Vec<(TokenText, JsIdentifierBinding, Option<AnyJsExpression>)> {
     let mut result = Vec::new();
     for member in pattern.properties().iter().flatten() {
         match member {
@@ -2375,10 +2506,7 @@ fn object_pattern_bindings(
                 else {
                     continue;
                 };
-                let default = property
-                    .init()
-                    .and_then(|init| init.expression().ok())
-                    .map(|expression| expression.syntax().text_trimmed_range());
+                let default = property.init().and_then(|init| init.expression().ok());
                 result.push((name, binding, default));
             }
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(property) => {
@@ -2388,10 +2516,7 @@ fn object_pattern_bindings(
                 let Ok(token) = binding.name_token() else {
                     continue;
                 };
-                let default = property
-                    .init()
-                    .and_then(|init| init.expression().ok())
-                    .map(|expression| expression.syntax().text_trimmed_range());
+                let default = property.init().and_then(|init| init.expression().ok());
                 result.push((token.token_text_trimmed(), binding, default));
             }
             _ => {}

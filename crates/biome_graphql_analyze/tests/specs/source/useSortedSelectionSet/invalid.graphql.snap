@@ -96,67 +96,6 @@ invalid.graphql:3:10 assist/source/useSortedSelectionSet  FIXABLE  ━━━━�
 ```
 
 ```
-invalid.graphql:8:17 assist/source/useSortedSelectionSet  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Selection set is not sorted.
-  
-     6 │     ...accountFields
-     7 │     lastName
-   > 8 │     ... on User {
-       │                 ^
-   > 9 │       updatedAt
-  > 10 │       createdAt
-  > 11 │     }
-       │     ^
-    12 │     email
-    13 │     ... on Address {
-  
-  i Unsafe fix: Sort selection set.
-  
-     7  7 │       lastName
-     8  8 │       ... on User {
-     9    │ - ······updatedAt
-    10    │ - ······createdAt
-        9 │ + ······createdAt
-       10 │ + ······updatedAt
-    11 11 │       }
-    12 12 │       email
-  
-
-```
-
-```
-invalid.graphql:13:20 assist/source/useSortedSelectionSet  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Selection set is not sorted.
-  
-    11 │     }
-    12 │     email
-  > 13 │     ... on Address {
-       │                    ^
-  > 14 │       street
-  > 15 │       city
-  > 16 │       zipCode
-  > 17 │     }
-       │     ^
-    18 │   }
-    19 │ }
-  
-  i Unsafe fix: Sort selection set.
-  
-    12 12 │       email
-    13 13 │       ... on Address {
-    14    │ - ······street
-    15    │ - ······city
-       14 │ + ······city
-       15 │ + ······street
-    16 16 │         zipCode
-    17 17 │       }
-  
-
-```
-
-```
 invalid.graphql:22:10 assist/source/useSortedSelectionSet  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Selection set is not sorted.
