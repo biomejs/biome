@@ -591,11 +591,14 @@ impl Decomposer<'_, '_> {
     }
 
     /// Returns the guard for `guard` applied to `operand`: a runtime test of
-    /// `operand` when it is a subject, combined with the tests that
-    /// [`Self::receiver_tests`] adds when `receivers` holds.
+    /// `operand` when it is a subject and `guard` is not
+    /// [`SyntaxGuard::LooseLiteral`]. When `receivers` holds, the guard first
+    /// tests that each receiver of the optional chain around `operand` is not
+    /// nullish.
     ///
-    /// Returns [`FlowGuard::Keep`] when [`chain_receivers`] returns `None`
-    /// for `operand`.
+    /// Returns [`FlowGuard::Keep`] when the chain around `operand` starts at a
+    /// parenthesized optional chain, as in `(o?.v)?.w`, and when finding its
+    /// receivers runs out of work or meets missing syntax.
     fn test(
         &mut self,
         operand: &AnyJsExpression,
@@ -644,8 +647,10 @@ impl Decomposer<'_, '_> {
         }
     }
 
-    /// Returns `guard` combined, as `&&` combines its operands, with a test
-    /// that each of `receivers` that is a subject is not nullish.
+    /// Returns `guard` preceded by a test that each of `receivers` is not
+    /// nullish, combined as `&&` combines its operands. The innermost
+    /// receiver, which `receivers` lists last, is tested first. A receiver
+    /// that is not a subject adds no test.
     fn receiver_tests(&mut self, receivers: Vec<AnyJsExpression>, guard: FlowGuard) -> FlowGuard {
         let mut guard = guard;
         for receiver in receivers {
@@ -693,14 +698,14 @@ enum SyntaxGuard {
 /// One syntax step, with child expressions left undecomposed.
 enum ConditionStep {
     Unsupported,
-    /// A runtime test of `operand`, an expression that [`has_operand_shape`]
-    /// accepts.
+    /// A runtime test of `operand`, an expression with the shape of a subject
+    /// or a call in an optional chain.
     Guard {
         operand: AnyJsExpression,
         guard: SyntaxGuard,
         positive: bool,
-        /// Whether the result shows that `operand` is not `undefined`, so the
-        /// receivers of an optional chain are not nullish either.
+        /// Whether the guard also tests that the receivers of the optional
+        /// chain around `operand` are not nullish.
         receivers: bool,
     },
     /// A call that may report a type guard's test.
@@ -913,7 +918,7 @@ fn comparison_step(
 /// expression with the shape of a subject, or a call in an optional chain,
 /// such as `o?.f()`, whose receivers the comparison can narrow.
 ///
-/// Returns `None` when [`has_subject_shape`] does.
+/// Returns `None` when the identifier, the object, or the member is missing.
 fn has_operand_shape(expression: &AnyJsExpression) -> Option<bool> {
     Some(
         has_subject_shape(expression)?
@@ -964,9 +969,11 @@ fn has_subject_shape(expression: &AnyJsExpression) -> Option<bool> {
 /// Returns `None` when the chain starts at a parenthesized optional chain, as
 /// `(o?.v)?.w` and `(o?.v).w` do, and when the walk runs out of work or meets
 /// missing syntax. A test of such an operand narrows nothing. TypeScript
-/// narrows `o.v` there, and the paths that extend it, but not `o`, except in
-/// the truthiness of a condition. A read through `o?.v` then adds `undefined`
-/// back from `o`, while a read in Biome keeps the narrowed type of its path.
+/// narrows `o.v` there, and the paths that extend it, but not `o`, so its
+/// reads through `o?.v` add `undefined` back from `o`. A read in Biome keeps
+/// the narrowed type of its path, so narrowing `o.v` alone would leave that
+/// `undefined` out. When the test is the truthiness of a condition,
+/// TypeScript narrows `o` as well, and Biome is deliberately wider.
 fn chain_receivers(
     operand: &AnyJsExpression,
     remaining: &mut usize,
@@ -1016,8 +1023,8 @@ mod tests {
     use biome_js_syntax::JsIfStatement;
     use biome_languages::JsFileSource;
 
-    /// A decomposed `if` test, with the semantic model and the subject table
-    /// that name its subjects.
+    /// A decomposed `if` condition, with the semantic model and the subject
+    /// table that name its subjects.
     struct Decomposed {
         guards: Vec<FlowGuard>,
         condition: DecomposedCondition,
@@ -1025,8 +1032,8 @@ mod tests {
         subjects: Vec<FlowSubject>,
     }
 
-    /// Decomposes the `if` test `source` in a function with the parameters
-    /// `value` and `other`.
+    /// Decomposes the `if` condition `source` in a function with the
+    /// parameters `value` and `other`.
     fn decomposed(source: &str, outcome: FlowOutcome) -> Decomposed {
         let parsed = parse(
             &format!("function f(value, other) {{ if ({source}) {{}} }}"),
@@ -1061,7 +1068,7 @@ mod tests {
         }
     }
 
-    /// Decomposes the `if` test `source` and names the mentioned subjects.
+    /// Decomposes the `if` condition `source` and names the mentioned subjects.
     fn decompose(source: &str, outcome: FlowOutcome) -> (Vec<FlowGuard>, Vec<String>) {
         let decomposed = decomposed(source, outcome);
         let names = decomposed
@@ -1106,9 +1113,9 @@ mod tests {
         decompose(source, outcome).1
     }
 
-    /// Decomposes the `if` test `source` and names the subjects that its
-    /// receiver tests check, outermost guard first, followed by the main
-    /// guard that they wrap.
+    /// Decomposes the `if` condition `source`. Returns the names of the
+    /// subjects that its receiver tests check, outermost guard first, and the
+    /// guard that those tests wrap.
     fn receiver_names(source: &str, outcome: FlowOutcome) -> (Vec<String>, FlowGuard) {
         let Decomposed {
             guards,

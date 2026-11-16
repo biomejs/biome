@@ -1013,8 +1013,8 @@ const RECEIVER: &str = r#"
 "#;
 
 // TypeScript 6.0.3 (`tsc --strict`) gives each read `X` where the expected
-// value is `false` and `X | undefined` where it is `true`: a test of an
-// optional chain shows that its receiver is not nullish in the branch where
+// value is `false` and `X | undefined` where it is `true`, because a test of
+// an optional chain shows that its receiver is not nullish in the branch where
 // the chain cannot be `undefined`, and in no branch of `??`.
 #[test]
 fn optional_chain_receivers_follow_the_kind_of_test() {
@@ -1097,10 +1097,10 @@ fn optional_chain_receivers_follow_the_kind_of_test() {
 
 // TypeScript 6.0.3 (`tsc --strict`) gives every read below a type without
 // `undefined` (`X`, `{ w: string }`, `C`, `() => X | undefined`,
-// `Record<string, string>`, or `string`), except at `callResult`, where
-// `get()` is a call, not a subject, and keeps `X | undefined`: every receiver
-// along the chain that is a subject narrows, including callees and receivers
-// after a call.
+// `Record<string, string>`, or `string`), except at `callResult`. Every
+// receiver along the chain that is a subject narrows, including callees and
+// receivers after a call. `get()` is a call, not a subject, so it keeps
+// `X | undefined` at `callResult`.
 #[test]
 fn optional_chain_receivers_narrow_along_the_chain() {
     let source = format!(
@@ -1155,14 +1155,14 @@ fn optional_chain_receivers_narrow_along_the_chain() {
 
 // TypeScript 6.0.3 (`tsc --strict`) narrows `x` at `parenthesizedReceiver`,
 // because `(x)` is the receiver of the chain. Parentheses around an optional
-// chain end the outer chain: in a comparison, TypeScript narrows `x.z` but not
-// `x`, so `x?.z` adds `undefined` back from `x`, and gives `X | undefined` and
+// chain end the outer chain. In a comparison, TypeScript narrows `x.z` but not
+// `x`, so `x?.z` adds `undefined` back from `x`. It gives `X | undefined` and
 // `{ w: string } | undefined` at `chain` and `chainInner`, and
-// `X | undefined` and `C | undefined` at `chainPath` and `chainPathInner`. As
-// the truthiness of a condition, `(x?.z)?.w` narrows `x` to `X` and `x?.z` to
-// `{ w: string }` in TypeScript. Biome narrows nothing for a chain that starts
-// at a parenthesized optional chain, so it is deliberately wider at `truthy`
-// and `truthyInner`.
+// `X | undefined` and `C | undefined` at `chainPath` and `chainPathInner`.
+// When it tests `(x?.z)?.w` for truthiness, TypeScript narrows `x` to `X` and
+// `x?.z` to `{ w: string }`. Biome narrows nothing for a chain that starts at
+// a parenthesized optional chain, so it is deliberately wider at `truthy` and
+// `truthyInner`.
 #[test]
 fn optional_chain_receivers_stop_at_parentheses() {
     let source = format!(
