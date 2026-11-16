@@ -102,7 +102,7 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 // An `else` branch that no value reaches is `never` in TypeScript, which Biome
 // reads as Unknown. `x instanceof A` with a primitive member is an error in
 // TypeScript (TS2358) only when no member is an object type.
@@ -265,7 +265,9 @@ fn instanceof_narrows_by_declarations() {
 /// How [`variant_names`] names `() => void`.
 const VOID_FUNCTION: &str = "sync Function { accepts: { params: [] type_args: [] } returns: void }";
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// An `else` branch that no value reaches is `never` in TypeScript, which Biome
+// reads as Unknown.
 #[test]
 fn instanceof_narrows_through_the_flow() {
     assert_reads(
@@ -349,7 +351,7 @@ fn instanceof_narrows_through_the_flow() {
 }
 
 // Biome keeps the declared type of every read below. A comment gives the type
-// that TypeScript 6.0.3 (`tsc --strict`) gives where it differs.
+// that TypeScript 7.0.2 (`tsc --strict`) gives where it differs.
 #[test]
 fn instanceof_keeps_the_declared_type_where_biome_cannot_tell() {
     assert_reads(
@@ -412,7 +414,7 @@ fn instanceof_keeps_the_declared_type_where_biome_cannot_tell() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type,
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
 // except where a comment gives TypeScript's type.
 #[test]
 fn instanceof_compares_classes_of_other_modules() {

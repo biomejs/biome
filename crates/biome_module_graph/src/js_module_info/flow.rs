@@ -484,17 +484,23 @@ impl ModuleFlow {
         self.property_only_bindings.contains(&range)
     }
 
-    /// Returns whether an `instanceof` test narrows the binding declared at
-    /// `range`, one that [`Self::is_property_only_binding`] accepts.
+    /// Returns whether conditions narrow the binding declared at `range` only
+    /// through tests of its shape and at least one is an `instanceof` test.
+    ///
+    /// This returns `false` when a non-shape test also narrows the binding,
+    /// even if only `instanceof` tests reach a particular read.
     pub(crate) fn is_instance_tested_binding(&self, range: TextRange) -> bool {
         self.instance_tested_bindings.contains(&range)
     }
 
-    /// Returns the declaration of the binding, or the range of the pattern,
-    /// whose reads alone make the expression at `range` a candidate. The
-    /// binding is one that conditions narrow only through tests of its
-    /// properties, and a pattern counts the reads of its elements that no
-    /// test of the elements themselves reaches.
+    /// Returns the declaration range of the single binding or pattern whose
+    /// reads alone make the expression at `range` a candidate.
+    ///
+    /// A binding qualifies when conditions narrow it only through tests of
+    /// its shape, or when only `instanceof` tests reach its reads in this
+    /// expression. The latter can apply even when other tests narrow the
+    /// binding at other reads. A pattern qualifies through reads of elements
+    /// that no test of the elements themselves reaches.
     pub(crate) fn property_only_candidate(&self, range: TextRange) -> Option<TextRange> {
         self.property_only_candidates.get(&range).copied()
     }
