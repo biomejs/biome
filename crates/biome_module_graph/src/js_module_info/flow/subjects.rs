@@ -26,12 +26,13 @@ const MAX_SAFE_INTEGER: u64 = (1 << 53) - 1;
 /// and every prefix of its path to `subjects` on first use.
 ///
 /// A subject is an identifier that refers to a declaration, `this` when the
-/// table stores it, or a member access whose object is a subject: a static
-/// member access with a named property or a private name, such as `o.v`,
-/// `a.b.c`, or `this.#v`, or an element access whose key [`literal_key`]
-/// accepts, such as `o["v"]` or `t[0]`. Parentheses around the expression and
-/// its objects are skipped, and an optional access reads the same subject as a
-/// plain one, as in TypeScript: `(o)?.v` is `o.v`.
+/// table stores it, or a member access whose object is a subject. A static
+/// member access must name a property or a private name, as in `o.v`, `a.b.c`,
+/// or `this.#v`, and an element access must have a key that spells the
+/// property's name, as in `o["v"]` or `t[0]`. [`literal_key`] lists the
+/// accepted keys. Parentheses around the expression and its objects are
+/// skipped, and an optional access reads the same subject as a plain one, as
+/// in TypeScript: `(o)?.v` is `o.v`.
 ///
 /// Returns `None` for any other expression, including `o[k]`, `o!.v`,
 /// `f().v`, `super.v`, and a global, and when the table has used every
@@ -76,8 +77,9 @@ pub(super) fn subject_of(
     Some(subject)
 }
 
-/// Returns the key of the property or private name that `name` names, so
-/// `#v` gives a [`PropertyKey::Private`] that differs from the key of `["#v"]`.
+/// Returns the key of the property or private name that `name` names. A
+/// private name such as `#v` gives a [`PropertyKey::Private`], which differs
+/// from the key of `["#v"]`.
 ///
 /// Returns `None` for a name whose escape is malformed, because its decoded
 /// text is unknown.
@@ -140,15 +142,18 @@ pub(super) fn literal_key(key: &AnyJsExpression) -> Option<PropertyKey> {
 }
 
 /// Returns whether paths on the `this` of `root`, such as `this.v`, can narrow
-/// there: whether Biome types that `this` as TypeScript does and TypeScript
-/// narrows its properties as those of a variable.
+/// there. They can when Biome types that `this` as TypeScript does and
+/// TypeScript narrows its properties like those of a variable.
 ///
 /// That is the case in a class method or accessor that is not `static`, in an
 /// object literal method or accessor, and in an arrow function whose `this`
 /// comes from one of them or from the initializer of a class field that is not
-/// `static`, provided that Biome finds the member's class or object, as
-/// [`types_this_of_members`] describes. In a class, `this` is an instance of
-/// the class, and in an object literal, it is the object.
+/// `static`. The member's class or object must also have a name that Biome can
+/// find: the name of a class declaration or class expression, or a variable
+/// that the class expression or object literal initializes, as in
+/// `const o = { ... }`. [`types_this_of_members`] has the exact lookup. In a
+/// class, `this` is an instance of the class, and in an object literal, it is
+/// the object.
 ///
 /// It is not the case:
 ///
@@ -160,23 +165,23 @@ pub(super) fn literal_key(key: &AnyJsExpression) -> Option<PropertyKey> {
 /// - In a `static` member or static block, where `this` is the class itself,
 ///   which Biome types as an instance of the class.
 /// - In a member with a `this` parameter, whose type Biome ignores.
-/// - In a member of a class or object literal that Biome does not find, such
-///   as an object literal passed to a call, where Biome types `this` from an
+/// - In a member of a class or object literal without such a name, such as an
+///   object literal passed to a call. Biome types that `this` from an
 ///   enclosing class or object literal, or not at all.
 /// - In a function declaration or expression, and in a module or namespace.
 ///   Biome types the `this` of a function only when the function is the value
 ///   of a class field or an object literal property, as in
 ///   `{ f: function () {} }`.
 /// - In an arrow function in the decorators, computed key, or `extends` clause
-///   of a class or a member, which see the `this` of the code around the class
-///   or object while Biome types it as an instance of the class or as the
-///   object.
+///   of a class or a member. That arrow function sees the `this` of the code
+///   around the class or object, but Biome types it as an instance of the
+///   class or as the object.
 pub(super) fn this_can_narrow(root: &AnyJsControlFlowRoot) -> bool {
     // The child of `node` that the walk comes from, or `None` at the root.
     let mut child: Option<JsSyntaxNode> = None;
     for node in root.syntax().ancestors() {
-        // Parameters and the body run with the member's `this`, unlike its
-        // decorators and computed key.
+        // Parameters, the body, and a field initializer run with the member's
+        // `this`, unlike its decorators and computed key.
         let in_body = child.as_ref().is_none_or(|child| {
             matches!(
                 child.kind(),

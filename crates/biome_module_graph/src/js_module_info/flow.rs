@@ -2,11 +2,11 @@
 //! and their property paths.
 //!
 //! Collection records a graph of possible paths for each execution root that
-//! tests one of its own variables or a property path that starts at one. The
-//! graph's conditions are already decomposed into guards on subjects.
-//! Collection also records the incoming path of every read such a guard can
-//! reach. Type inference later applies the guards to resolved types without
-//! inspecting syntax again.
+//! tests one of its own variables or a property path that starts at one of
+//! them or at the root's `this`. The graph's conditions are already
+//! decomposed into guards on subjects. Collection also records the incoming
+//! path of every read such a guard can reach. Type inference later applies the
+//! guards to resolved types without inspecting syntax again.
 //!
 //! A subject is what a runtime test checks and a read narrows: a variable, or
 //! a property path that starts at a variable or at `this`, such as `o.v`,
@@ -18,12 +18,16 @@
 //! function, or method. Only `let`, `const`, and parameter bindings that are
 //! never reassigned and are read in the root that declares them participate,
 //! so refinements cannot cross closure boundaries. Each root has its own
-//! `this`, and paths on it narrow only where Biome types `this` as TypeScript
-//! does, as [`subjects::this_can_narrow`] describes. A property path narrows
+//! `this`. Paths on it narrow only where Biome types `this` as TypeScript
+//! does: in class methods and accessors that are not `static`, in object
+//! literal methods and accessors, and in arrow functions inside them or inside
+//! the initializer of a field that is not `static`.
+//! [`subjects::this_can_narrow`] has the full rule. A property path narrows
 //! only when its variable or `this` does and the root never writes the path,
-//! one of its prefixes, or a property of one of its prefixes through a key that
-//! is not a literal. The graph does not invalidate facts on writes or calls,
-//! which is why written subjects are excluded.
+//! one of its prefixes, or any property of one of its prefixes through a key
+//! that does not spell the property's name, such as `o[k]`. The graph does not
+//! invalidate facts on writes or calls, which is why written subjects are
+//! excluded.
 
 mod builder;
 mod expressions;
@@ -63,8 +67,9 @@ pub(crate) type FlowSubjectId = u32;
 pub(crate) enum FlowSubject {
     /// The variable declared at this range.
     Binding(TextRange),
-    /// The `this` of the execution root. A table stores it only in a root
-    /// where [`subjects::this_can_narrow`] holds.
+    /// The `this` of the execution root. A table stores it only for a root
+    /// where paths on `this` can narrow, which are listed on
+    /// [`subjects::this_can_narrow`].
     This,
     /// The property `key` of the subject `object`, as in `o.v` or `o["v"]`.
     ///
@@ -84,8 +89,8 @@ pub(crate) enum PropertyKey {
     /// and `o["v"]` read the same property, and so do `t[0]` and `t["0"]`.
     Name(Text),
     /// A private name, such as `#v` in `o.#v`, without its `#` and with its
-    /// escapes decoded. It never matches a [`Self::Name`], so `o["#v"]`, which
-    /// reads a property whose name starts with `#`, is another subject.
+    /// escapes decoded. It never matches a [`Self::Name`]. So `o["#v"]` reads
+    /// the property named `#v`, a different subject from `o.#v`.
     Private(Text),
 }
 
@@ -117,14 +122,14 @@ fn subject_root(subjects: &[FlowSubject], mut subject: FlowSubjectId) -> Option<
 struct FlowSubjectTable {
     subjects: Vec<FlowSubject>,
     ids: FxHashMap<FlowSubject, FlowSubjectId>,
-    /// The execution root whose `this` can be a subject, or `None` when
-    /// [`subjects::this_can_narrow`] does not hold for it.
+    /// The execution root whose `this` can be a subject, or `None` when paths
+    /// on the root's `this` cannot narrow.
     this_root: Option<JsSyntaxNode>,
 }
 
 impl FlowSubjectTable {
-    /// Returns an empty table for the execution root `root`, which stores its
-    /// `this` when `this_can_narrow` holds.
+    /// Returns an empty table for the execution root `root`. The table stores
+    /// the root's `this` only when `this_can_narrow` is true.
     fn new(root: &AnyJsControlFlowRoot, this_can_narrow: bool) -> Self {
         Self {
             this_root: this_can_narrow.then(|| root.syntax().clone()),

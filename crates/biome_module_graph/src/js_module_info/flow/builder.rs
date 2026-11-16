@@ -44,9 +44,9 @@ type Build<T> = Result<T, Unsupported>;
 
 /// Builds the flow of `root`, excluding nested execution roots.
 ///
-/// Reads and runtime tests of paths on `this`, such as `this.v`, are recorded
-/// only when `this_can_narrow` is true, which the caller computes for `root`
-/// with [`this_can_narrow`].
+/// Records reads and runtime tests of paths on `this`, such as `this.v`, only
+/// when `this_can_narrow` is true. The caller computes it for `root` with
+/// [`this_can_narrow`].
 ///
 /// `root` must be selected by a [`FlowRootScanner`], which rejects the roots
 /// that the builder cannot build, such as a root with a `with` statement.

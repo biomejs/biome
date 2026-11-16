@@ -30,16 +30,16 @@ use rustc_hash::FxHashSet;
 ///
 /// The scan covers the whole root, including function and arrow expressions
 /// that are called where they are defined, class static blocks, field
-/// initializers, decorators, computed keys, and the parameters of nested
-/// functions. It skips the bodies of other functions, methods, accessors, and
-/// constructors. A write through another variable that holds the same object,
-/// as in `a.v = x` after `const a = o`, does not write `o.v`. Every `this`
-/// and `super` that the scan finds stands for the root's `this`, so
-/// `super.v = x`, which sets `v` on `this` or calls a setter of a parent class
-/// with `this` as its receiver, writes `this.v`. Wherever the scan differs
-/// from TypeScript, it counts more writes: TypeScript ignores, for example,
-/// writes in `async` and generator functions called where they are defined,
-/// in field initializers and parameter defaults, through `as` and
+/// initializers, decorators, computed keys, and the parameters of methods,
+/// accessors, and constructors. It skips the bodies of other functions,
+/// methods, accessors, and constructors. A write through another variable that
+/// holds the same object, as in `a.v = x` after `const a = o`, does not write
+/// `o.v`. The scan treats every `this` and `super` as the root's `this`. So
+/// `super.v = x` writes `this.v`, because it sets `v` on `this` or calls a
+/// setter of a parent class with `this` as its receiver. Wherever the scan
+/// differs from TypeScript, it counts more writes: TypeScript ignores, for
+/// example, writes in `async` and generator functions called where they are
+/// defined, in field initializers and parameter defaults, through `as` and
 /// `satisfies`, through `super`, and to `this` in a static block, whose
 /// `this` is another object.
 pub(super) struct WrittenPaths {
@@ -197,9 +197,9 @@ impl WrittenPaths {
     /// property, refers to, or `None` when no stored subject starts with it.
     ///
     /// `this` and `super` refer to the root's `this`. A key along the object
-    /// that is not a literal, as in `o[k].v`, can name any property, so it
-    /// records a write of every property of the object before it and returns
-    /// `None`.
+    /// that does not spell the property's name, as in `o[k].v`, can name any
+    /// property, so it records a write of every property of the object before
+    /// it and returns `None`.
     #[expect(
         clippy::wildcard_enum_match_arm,
         reason = "Only variables, `this`, `super`, and member accesses lead to a subject."

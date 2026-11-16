@@ -663,8 +663,8 @@ fn complete_module_tables_agree_with_path_reads() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type:
-// paths on `this` narrow like paths on a variable in class methods and
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// Paths on `this` narrow like paths on a variable in class methods and
 // accessors, in object literal methods, and in arrow functions inside them or
 // inside a field initializer.
 #[test]
@@ -717,9 +717,10 @@ fn paths_on_this_narrow_like_paths_on_variables() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives the expected type at each read:
-// narrowing never reaches an arrow function created after the test, and an
-// object literal method or class method inside the method has its own `this`.
+// TypeScript 6.0.3 (`tsc --strict`) gives the expected type at each read,
+// because narrowing never reaches an arrow function created after the test,
+// and an object literal method or class method inside the method has its own
+// `this`.
 #[test]
 fn reads_in_nested_functions_see_no_facts_about_this() {
     use InferredTypeData::{Null, Number, String};
@@ -811,14 +812,15 @@ fn static_members_keep_paths_on_this_unnarrowed() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) narrows every read below to `string`: an
-// object literal method takes `this` from the object, or from its contextual
-// type, and a function or method with a `this` parameter from the parameter.
-// Biome finds the object or class only through a variable it initializes or a
-// class name. Otherwise it types `this` from the enclosing class or object
-// literal, so `argument` and `classArgument` read the field of `K` and
-// `nested` the field of `o`, or not at all, and it ignores `this` parameters.
-// It narrows no path on `this` there.
+// TypeScript 6.0.3 (`tsc --strict`) narrows every read below to `string`,
+// because an object literal method takes `this` from the object or from its
+// contextual type, and a function or method with a `this` parameter takes it
+// from the parameter. Biome finds the object or class only through a variable
+// it initializes or a class name. Otherwise it types `this` from the enclosing
+// class or object literal, or not at all, so `argument` and `classArgument`
+// read the field of `K`, `nested` reads the field of `o`, and `module` reads
+// `unknown`. Biome also ignores `this` parameters, so `function` reads
+// `unknown`. It narrows no path on `this` in any of these places.
 #[test]
 fn paths_on_this_stay_unnarrowed_where_biome_types_this_otherwise() {
     use InferredTypeData::{Null, Number, String, Unknown};
@@ -850,10 +852,11 @@ fn paths_on_this_stay_unnarrowed_where_biome_types_this_otherwise() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) narrows every read below to `string`: a
-// write to `this.x` in another method, in a callback, or in a function called
-// through `.call(this)` never cancels its narrowing. Biome copies this unsound
-// narrowing; `NARROWING.md` lists it among the deliberate choices.
+// TypeScript 6.0.3 (`tsc --strict`) narrows every read below to `string`,
+// because a write to `this.x` in another method, in a callback, or in a
+// function called through `.call(this)` never cancels its narrowing. Biome
+// copies this unsound narrowing; `NARROWING.md` lists it among the deliberate
+// choices.
 #[test]
 fn writes_to_this_in_other_functions_keep_narrowing() {
     use InferredTypeData::String;
@@ -880,10 +883,12 @@ fn writes_to_this_in_other_functions_keep_narrowing() {
 
 // TypeScript 6.0.3 (`tsc --strict`) gives the type in the comment after each
 // read. Every write cancels the narrowing of the path it writes, so Biome reads
-// it at its declared type. Where TypeScript differs, it narrows the path at the
-// write itself, which Biome does not model yet, or ignores a write through
-// `super`, which can set `this.x` through a setter of the parent class. A
-// write to another path, at `other` and `superOther`, keeps the narrowing.
+// the path at its declared type. A write to another path, at `other` and
+// `superOther`, keeps the narrowing. TypeScript differs at three reads. At
+// `arrowIife` and `functionIife`, it narrows the path to the assigned type at
+// the write, which Biome does not model yet. At `super`, it ignores the write
+// through `super`, although that write can set `this.x` through a setter of
+// the parent class.
 #[test]
 fn writes_to_this_in_the_same_root_cancel_narrowing() {
     use InferredTypeData::{Null, String};
