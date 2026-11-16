@@ -385,11 +385,9 @@ fn assert_named_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3/readonly.ts` L5, L6, L8, L11, L14 to L17, L21, L22,
-// and `m3-l9/spec.ts` L5 to L23): an inlined condition narrows a property
-// path when every property along it is readonly, including an element of a
-// readonly tuple.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// An inlined condition narrows a property path when every property along it
+// is readonly, including an element of a readonly tuple.
 #[test]
 fn readonly_property_paths_narrow_through_aliased_conditions() {
     use InferredTypeData::{Null, Number, String};

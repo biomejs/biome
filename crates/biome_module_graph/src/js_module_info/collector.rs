@@ -565,12 +565,13 @@ impl JsModuleInfoCollector {
         TypeReference::unknown()
     }
 
-    /// Type of the variable `binding_name` that the `catch` clause declares in
-    /// `catch`: its annotation, which TypeScript accepts only as `unknown` or
-    /// `any`, or the `unknown` keyword without one, as TypeScript gives it
-    /// with `--strict` (`useUnknownInCatchVariables`). A variable of a
-    /// destructuring pattern, as `message` in `catch ({ message })`, is its
-    /// property of that type.
+    /// Type of the variable `binding_name` that the `catch` clause `catch`
+    /// declares. The type is the clause's annotation, or the `unknown` keyword
+    /// without one, which matches TypeScript with `--strict`
+    /// (`useUnknownInCatchVariables`). TypeScript accepts only `unknown` or
+    /// `any` as the annotation. A variable in a destructuring pattern, such as
+    /// `message` in `catch ({ message })`, has the type of that property. It is
+    /// `Unknown` when the clause's type is `unknown` or `any`.
     fn catch_binding_type(
         &mut self,
         scope_id: ScopeId,

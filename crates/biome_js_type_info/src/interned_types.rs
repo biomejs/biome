@@ -727,8 +727,9 @@ impl<'db> TypeData<'db> {
     }
 
     /// Returns whether this is the built-in `ReadonlyArray` interface, by its
-    /// handle or by its data. A generated global has no scope, so an interface
-    /// that a module declares with the same name doesn't count.
+    /// handle or by its data. An interface with the same name that a module
+    /// declares doesn't count, because it has a scope and a generated global
+    /// doesn't.
     pub fn is_readonly_array_interface(self, db: &'db dyn TypeDb) -> bool {
         self == Self::readonly_array_interface()
             || matches!(

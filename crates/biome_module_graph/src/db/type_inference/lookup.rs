@@ -611,16 +611,16 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
     collected_type_result(db, found)
 }
 
-/// Returns the type whose members a value of the resolved type `ty` has, as
-/// TypeScript's apparent type gives them, when `ty` has no members of its own,
-/// or `None` for other types:
+/// Returns the type that supplies the members of a value of the resolved type
+/// `ty`, or `None` for a type not listed here. The result follows TypeScript's
+/// apparent type:
 ///
 /// - a primitive or a literal of one has the members of its wrapper, so
 ///   `string` and `"a"` have those of `String`, and `s.length` is `number`.
 ///   `bigint` has none, because Biome has no `BigInt` global;
 /// - a regular expression literal has the members of `RegExp`;
 /// - `readonly T[]` has the members of `ReadonlyArray<T>`, and a `readonly`
-///   tuple those of `ReadonlyArray` of the union of its element types, so
+///   tuple has those of `ReadonlyArray` of the union of its element types, so
 ///   neither has the methods that change an array. Another `readonly` type has
 ///   the members of its operand.
 #[expect(
@@ -680,10 +680,10 @@ fn apparent_type<'db>(
     Some(InferredTypeData::instance_of(db, wrapper, Box::default()))
 }
 
-/// Returns the type of the elements of a `readonly` tuple with `elements`,
-/// as `ReadonlyArray` holds them: the union of their types, with `undefined`
-/// for an optional element, and the element type of the array that a rest
-/// element spreads, or Unknown when that is not an array.
+/// Returns the element type of the `ReadonlyArray` that a `readonly` tuple
+/// with `elements` has: the union of the element types. An optional element
+/// adds `undefined`. A rest element adds the element type of the array it
+/// spreads, or `Unknown` when it spreads anything other than an array.
 #[expect(
     clippy::wildcard_enum_match_arm,
     reason = "A rest element spreads an array or a value Biome can't take elements from."

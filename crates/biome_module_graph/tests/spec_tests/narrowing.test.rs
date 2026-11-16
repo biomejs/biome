@@ -2621,11 +2621,10 @@ fn adding_and_removing_conditions_invalidates_flow_candidates_with_equal_semanti
     }
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/fix-b/reads.ts` L10 to L33), except where a comment gives
-// TypeScript's type. A primitive has the members of its wrapper, such as
-// `String`, and `readonly T[]` and `readonly` tuples have the members of
-// `ReadonlyArray`, with or without narrowing.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment gives TypeScript's type. A primitive has the members
+// of its wrapper, such as `String`, and `readonly T[]` and `readonly` tuples
+// have the members of `ReadonlyArray`, with or without narrowing.
 #[test]
 fn primitive_and_readonly_array_members_resolve() {
     const SOURCE: &str = r#"
@@ -2659,16 +2658,17 @@ fn primitive_and_readonly_array_members_resolve() {
         ("boolean", "b.valueOf()", &["boolean"]),
         ("tupleElement", "t[0]", &["null", "string"]),
         ("tupleSecond", "t[1]", &["number"]),
-        // `2`: Biome gives a tuple the members of `Array` or `ReadonlyArray`,
-        // whose `length` is `number`, as for a tuple that isn't `readonly`.
+        // `2`. Biome types the `length` of every tuple as `number`, because a
+        // tuple has the members of `Array`, or of `ReadonlyArray` when it is
+        // `readonly`.
         ("tupleLength", "t.length", &["number"]),
-        // `string`: Biome adds `undefined` to an element of an array, whose
-        // index may be out of bounds, as for an array that isn't `readonly`.
+        // `string`. Biome adds `undefined` to an element of every array,
+        // `readonly` or not, because the index may be out of bounds.
         ("arrayElement", "ra[0]", &["string", "undefined"]),
         ("arrayLength", "ra.length", &["number"]),
         // `number`, as for `arrayElement`.
         ("readonlyArrayElement", "ro[0]", &["number", "undefined"]),
-        // `any`: `ReadonlyArray` has no `push` (TS2339).
+        // `any`, because `ReadonlyArray` has no `push` (TS2339).
         ("push", "ra.push", &["unknown"]),
         ("narrowedTuple", "t[0]", &["string"]),
         ("narrowedString", "x.length", &["number"]),
@@ -2683,12 +2683,12 @@ fn primitive_and_readonly_array_members_resolve() {
     assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/fix-b/catch.ts` L4 to L18), except where a comment gives
-// TypeScript's type: a variable that `catch` declares has its annotation, or
-// `unknown` without one, wherever the `catch` clause is, and narrows as a
-// value of type `unknown` does. The tests in `if` statements inside `catch`
-// don't narrow yet, as for any `try` statement, so the reads narrow inside
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment gives TypeScript's type. A variable that `catch`
+// declares has its annotation, or `unknown` without one, wherever the `catch`
+// clause is, and narrows as a value of type `unknown` does. Biome doesn't
+// model the control flow inside a `try` statement, so a test in an `if`
+// statement inside `catch` narrows nothing, and these reads narrow only within
 // one expression.
 #[test]
 fn catch_variables_have_the_unknown_keyword_type() {
@@ -2713,9 +2713,9 @@ fn catch_variables_have_the_unknown_keyword_type() {
         ("annotatedAny", "e", AnyKeyword),
         ("annotatedUnknown", "e", UnknownKeyword),
         ("shadow", "x", UnknownKeyword),
-        // `any`, after an error (TS2339): `unknown` has no property `message`.
+        // `any` after error TS2339, because `unknown` has no property `message`.
         ("objectPattern", "message", Unknown),
-        // `any`, after an error (TS2488): `unknown` is not iterable.
+        // `any` after error TS2488, because `unknown` is not iterable.
         ("arrayPattern", "first", Unknown),
         // `any`
         ("anyPattern", "message", Unknown),
