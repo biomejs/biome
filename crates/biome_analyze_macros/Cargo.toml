@@ -19,7 +19,7 @@ camino            = { workspace = true }
 prettyplease      = { workspace = true }
 proc-macro2       = { workspace = true }
 quote             = { workspace = true }
-syn               = { version = "2.0", features = ["extra-traits", "full", "parsing"] }
+syn               = { workspace = true, features = ["extra-traits", "full", "parsing"] }
 
 [lints]
 workspace = true

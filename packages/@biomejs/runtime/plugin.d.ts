@@ -547,6 +547,116 @@ declare module "./js_ast" {
 	}
 }
 
+/**
+ * The kind of a {@link TriviaPiece}.
+ *
+ * Comments are classified by whether their text contains a line break, not by
+ * their syntax: a `//` comment and a block comment on one line are both
+ * `"singleLineComment"`, while a block comment spanning several lines is a
+ * `"multiLineComment"`.
+ */
+export type TriviaKind =
+	| "newline"
+	| "whitespace"
+	| "singleLineComment"
+	| "multiLineComment";
+
+/**
+ * A piece of whitespace, a line break, or a comment.
+ *
+ * Biome attaches trivia to tokens instead of storing it as separate nodes. A
+ * token's leading trivia is everything between the previous token's trailing
+ * trivia and the token. Its trailing trivia is everything after the token up
+ * to, but excluding, the next line break. A comment on its own line is
+ * therefore leading trivia of the token that follows it, and a comment after
+ * code on the same line is trailing trivia of the token before it.
+ *
+ * Source text the parser skipped while recovering from a syntax error is
+ * omitted from trivia arrays.
+ *
+ * Pass a piece to {@link registerDiagnostic} to highlight it. Pieces do not
+ * have stable JavaScript object identity.
+ */
+export interface TriviaPiece {
+	readonly kind: TriviaKind;
+	/**
+	 * The source text of the piece. Comments include their delimiters, such
+	 * as the leading `//`.
+	 */
+	readonly text: string;
+	/** The token whose leading or trailing trivia contains this piece. */
+	readonly token: JsAstToken;
+	/**
+	 * Returns whether this piece is a comment, of either
+	 * {@link TriviaKind | kind}.
+	 *
+	 * For example, collect the comments before a statement:
+	 * ```ts
+	 * const comments = statement.leadingTrivia().filter((piece) => piece.isComment());
+	 * ```
+	 */
+	isComment(): this is TriviaPiece & {
+		readonly kind: "singleLineComment" | "multiLineComment";
+	};
+}
+
+declare module "./js_ast" {
+	interface JsAstNode {
+		/**
+		 * Returns a fresh array of the leading trivia of this node's first
+		 * token, in source order. Nodes without tokens return an empty array.
+		 *
+		 * For example, report statements preceded by a `TODO` comment:
+		 * ```ts
+		 * const todo = statement
+		 *   .leadingTrivia()
+		 *   .find((piece) => piece.isComment() && piece.text.includes("TODO"));
+		 * if (todo) registerDiagnostic(todo, "information", "Resolve this TODO.");
+		 * ```
+		 */
+		leadingTrivia(): readonly TriviaPiece[];
+		/**
+		 * Returns a fresh array of the trailing trivia of this node's last
+		 * token, in source order. Nodes without tokens return an empty array.
+		 */
+		trailingTrivia(): readonly TriviaPiece[];
+	}
+
+	interface JsAstToken {
+		/**
+		 * Returns a fresh array of the trivia before this token, in source
+		 * order. Tokens created with `factory.token()` have no trivia.
+		 */
+		leadingTrivia(): readonly TriviaPiece[];
+		/**
+		 * Returns a fresh array of the trivia after this token, up to but
+		 * excluding the next line break, in source order. Tokens created with
+		 * `factory.token()` have no trivia.
+		 */
+		trailingTrivia(): readonly TriviaPiece[];
+		/**
+		 * Returns a fresh array of the comments in this token's leading
+		 * trivia, in source order. Whitespace and line breaks are omitted.
+		 *
+		 * For example, report a `TODO` comment above a statement:
+		 * ```ts
+		 * const keyword = statement.declaration?.token("kindToken");
+		 * for (const comment of keyword?.leadingComments() ?? []) {
+		 *   if (comment.text.includes("TODO")) {
+		 *     registerDiagnostic(comment, "warning", "Resolve this TODO.");
+		 *   }
+		 * }
+		 * ```
+		 */
+		leadingComments(): readonly TriviaPiece[];
+		/**
+		 * Returns a fresh array of the comments in this token's trailing
+		 * trivia, in source order. Whitespace is omitted.
+		 */
+		trailingComments(): readonly TriviaPiece[];
+	}
+}
+
 /** A suggested source edit attached to a diagnostic. */
 export interface CodeFix {
 	readonly mutation: JsMutation;
@@ -557,8 +667,9 @@ export interface CodeFix {
 }
 
 /**
- * Reports an issue found by a plugin rule. Biome highlights the code represented
- * by `node` and displays `message` at the requested severity.
+ * Reports an issue found by a plugin rule. Biome highlights `element` and
+ * displays `message` at the requested severity. Nodes and tokens are
+ * highlighted without their leading and trailing trivia.
  *
  * Provide `fix` to include a suggested code change alongside the diagnostic.
  *
@@ -566,9 +677,12 @@ export interface CodeFix {
  * ```ts
  * registerDiagnostic(declaration, "warning", "Use let or const instead of var.");
  * ```
+ *
+ * @throws {TypeError} If `element` is a token or trivia piece that is not part
+ * of the analyzed source, such as a token created with `factory.token()`.
  */
 export function registerDiagnostic(
-	node: JsAstNode,
+	element: JsAstNode | JsAstToken | TriviaPiece,
 	severity: Severity,
 	message: string,
 	fix?: CodeFix,

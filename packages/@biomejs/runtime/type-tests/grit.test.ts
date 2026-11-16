@@ -56,7 +56,7 @@ defineRule({
 			element satisfies JsAstToken;
 			element.text satisfies string;
 			element.parent satisfies AnyJsAstNode | undefined;
-			// @ts-expect-error Diagnostics require an AST node, not a token.
+			// Diagnostics can highlight a matched token directly.
 			registerDiagnostic(element, "warning", "Unexpected plus.");
 		}
 	},

@@ -1,0 +1,98 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
+export const noTodo = defineRule({
+	query: ast("JS_MODULE"),
+	run(root) {
+		for (const statement of root.items) {
+			for (const piece of [
+				...statement.leadingTrivia(),
+				...statement.trailingTrivia(),
+			]) {
+				if (piece.isComment() && piece.text.includes("TODO")) {
+					registerDiagnostic(piece, "warning", `Resolve this ${piece.kind}.`);
+				}
+			}
+		}
+	},
+});
+export const noVarKeyword = defineRule({
+	query: ast("JS_VARIABLE_DECLARATION"),
+	run(declaration) {
+		const keyword = declaration.token("kindToken");
+		if (keyword?.text === "var") {
+			registerDiagnostic(keyword, "information", "Use let or const instead.");
+		}
+	},
+});
+```
+
+# Input
+
+## `/file.js`
+
+```js
+// TODO: remove this file
+var legacy = 1; /* TODO inline */
+/*
+ * TODO: multiple lines
+ */
+let modern = 2; // done
+```
+
+# Diagnostics
+
+```block
+/file.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Resolve this singleLineComment.
+  
+  > 1 │ // TODO: remove this file
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ var legacy = 1; /* TODO inline */
+    3 │ /*
+  
+
+/file.js:2:17 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Resolve this singleLineComment.
+  
+    1 │ // TODO: remove this file
+  > 2 │ var legacy = 1; /* TODO inline */
+      │                 ^^^^^^^^^^^^^^^^^
+    3 │ /*
+    4 │  * TODO: multiple lines
+  
+
+/file.js:3:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Resolve this multiLineComment.
+  
+    1 │ // TODO: remove this file
+    2 │ var legacy = 1; /* TODO inline */
+  > 3 │ /*
+      │ ^^
+  > 4 │  * TODO: multiple lines
+  > 5 │  */
+      │  ^^
+    6 │ let modern = 2; // done
+    7 │ 
+  
+
+/file.js:2:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use let or const instead.
+  
+    1 │ // TODO: remove this file
+  > 2 │ var legacy = 1; /* TODO inline */
+      │ ^^^
+    3 │ /*
+    4 │  * TODO: multiple lines
+```
