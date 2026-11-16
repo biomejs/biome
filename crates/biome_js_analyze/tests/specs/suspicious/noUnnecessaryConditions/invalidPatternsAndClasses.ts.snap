@@ -1,0 +1,146 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidPatternsAndClasses.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// Destructuring, class expressions, and logical assignments elsewhere in a
+// function do not stop narrowing, so `value` is a `string` at each optional
+// chain, as in TypeScript.
+
+function destructuredParameter({ value }: { value: string | null }) {
+	if (value !== null) {
+		return value?.length;
+	}
+}
+
+function destructuredConst(input: { value: string | null }) {
+	const { value } = input;
+	if (value !== null) {
+		return value?.length;
+	}
+}
+
+function classExpression(value: string | null) {
+	const Holder = class {
+		field = 1;
+	};
+	if (value !== null) {
+		return value?.length;
+	}
+}
+
+function logicalAssignment(value: string | null, count: number | undefined) {
+	count ??= 0;
+	if (value !== null) {
+		return value?.length;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidPatternsAndClasses.ts:8:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+     6 │ function destructuredParameter({ value }: { value: string | null }) {
+     7 │ 	if (value !== null) {
+   > 8 │ 		return value?.length;
+       │ 		       ^^^^^
+     9 │ 	}
+    10 │ }
+  
+  i Replace ?. with ..
+  
+     6 │ function destructuredParameter({ value }: { value: string | null }) {
+     7 │ 	if (value !== null) {
+   > 8 │ 		return value?.length;
+       │ 		            ^^
+     9 │ 	}
+    10 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidPatternsAndClasses.ts:15:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    13 │ 	const { value } = input;
+    14 │ 	if (value !== null) {
+  > 15 │ 		return value?.length;
+       │ 		       ^^^^^
+    16 │ 	}
+    17 │ }
+  
+  i Replace ?. with ..
+  
+    13 │ 	const { value } = input;
+    14 │ 	if (value !== null) {
+  > 15 │ 		return value?.length;
+       │ 		            ^^
+    16 │ 	}
+    17 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidPatternsAndClasses.ts:24:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    22 │ 	};
+    23 │ 	if (value !== null) {
+  > 24 │ 		return value?.length;
+       │ 		       ^^^^^
+    25 │ 	}
+    26 │ }
+  
+  i Replace ?. with ..
+  
+    22 │ 	};
+    23 │ 	if (value !== null) {
+  > 24 │ 		return value?.length;
+       │ 		            ^^
+    25 │ 	}
+    26 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidPatternsAndClasses.ts:31:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    29 │ 	count ??= 0;
+    30 │ 	if (value !== null) {
+  > 31 │ 		return value?.length;
+       │ 		       ^^^^^
+    32 │ 	}
+    33 │ }
+  
+  i Replace ?. with ..
+  
+    29 │ 	count ??= 0;
+    30 │ 	if (value !== null) {
+  > 31 │ 		return value?.length;
+       │ 		            ^^
+    32 │ 	}
+    33 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```

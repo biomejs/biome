@@ -80,7 +80,10 @@ one of its own variables. Its parts live in `src/js_module_info/flow/`:
   no code that runs, so the visitor does not look for roots in them.
 - `builder.rs` builds the graph of one selected root from start, join, and
   condition nodes. It records the incoming flow point of every reachable read
-  and, for each condition node, the variables its guard may narrow.
+  and, for each condition node, the variables its guard may narrow. It skips
+  class members: methods, accessors, constructors, and static blocks are roots
+  of their own, and TypeScript analyzes a class field that has an initializer
+  apart from the code around the class.
 - `guards.rs` decomposes every condition into guards on semantic bindings,
   combined the way `!`, `&&`, and `||` combine them. For example,
   `typeof value === "string"` becomes a runtime test of `value`. A call to a
@@ -96,7 +99,8 @@ one of its own variables. Its parts live in `src/js_module_info/flow/`:
 
 Collection then keeps only the reads that a runtime test of their variable can
 reach, and only for variables that can narrow: declared in the root, never
-written, and neither untyped nor annotated `any`. Those reads, plus the
+written, neither untyped nor annotated `any`, and not supplied by a
+destructuring default, which the declared type ignores. Those reads, plus the
 enclosing expressions that can use a narrowed operand, become candidates. A
 test inside a nested function never reaches reads in the enclosing one, and an
 array or object literal ends the chain of enclosing candidates. A root that

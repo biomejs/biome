@@ -6,7 +6,7 @@ use super::{FlowNode, FlowNodeId};
 use biome_js_control_flow::{AnyJsControlFlowRoot, is_truthy_literal};
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsFunction, AnyJsFunctionBody, AnyJsStatement, AnyTsType,
+    AnyJsClassMember, AnyJsExpression, AnyJsFunction, AnyJsFunctionBody, AnyJsStatement, AnyTsType,
     JsDoWhileStatement, JsForStatement, JsIdentifierExpression, JsIfStatement, JsSyntaxNode,
     JsWhileStatement, T,
 };
@@ -42,8 +42,8 @@ type Build<T> = Result<T, Unsupported>;
 ///
 /// `root` must be selected by a [`FlowRootScanner`], which only selects roots
 /// whose syntax the builder supports. Expression-bodied arrows are supported.
-/// Parameter initializers and module export declarations are not evaluated,
-/// and unreachable code records no reads.
+/// Parameter initializers, class members, and module export declarations are
+/// not evaluated, and unreachable code records no reads.
 ///
 /// Returns `None` for inputs exceeding construction limits. Like the statement
 /// control-flow graph, it also returns `None` when any statement, including
@@ -537,7 +537,16 @@ impl RootBuilder<'_, '_> {
             return Err(Unsupported);
         }
         let kind = node.kind();
-        if AnyJsControlFlowRoot::can_cast(kind) || AnyTsType::can_cast(kind) {
+        // Class members are left out of the enclosing flow: methods,
+        // accessors, constructors, and static blocks are execution roots of
+        // their own, and TypeScript analyzes a class field that has an
+        // initializer, including its decorators and computed key, apart from
+        // the code around the class. Only the decorators and computed keys of
+        // the other members lose the narrowing that TypeScript gives them.
+        if AnyJsControlFlowRoot::can_cast(kind)
+            || AnyJsClassMember::can_cast(kind)
+            || AnyTsType::can_cast(kind)
+        {
             return Ok(incoming);
         }
         if let Some(identifier) = JsIdentifierExpression::cast_ref(node) {
@@ -969,6 +978,22 @@ mod tests {
                 .root
                 .is_none()
         );
+    }
+
+    #[test]
+    fn class_expressions_evaluate_only_their_decorators_and_heritage() {
+        let built = function(
+            "function f(v) { if (v) { const C = @use(v) class extends use(v) { [v] = v; static w = v; m() { v; } static { v; } }; after(v); } }",
+        );
+        for occurrence in [2, 3, 9] {
+            assert!(
+                contains(&built.paths("v", occurrence), "v:Truthy"),
+                "{occurrence}"
+            );
+        }
+        for occurrence in 4..=8 {
+            assert_eq!(built.point("v", occurrence), None, "{occurrence}");
+        }
     }
 
     #[test]
