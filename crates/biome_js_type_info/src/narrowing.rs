@@ -1307,8 +1307,8 @@ pub fn base_literal_type<'db>(
 
 /// Returns the type that a value of type `ty` gives a variable whose type
 /// evolves with its writes, or adds to the element type of an array that
-/// evolves, as TypeScript's `getWidenedLiteralType` gives it: `ty` with its
-/// literal members replaced by their primitive types, so `1 | "a"` becomes
+/// evolves. The result is `ty` with its literal members replaced by their
+/// primitive types, as TypeScript widens them, so `1 | "a"` becomes
 /// `number | string`.
 ///
 /// The result replaces the variable's type instead of narrowing a declared
@@ -1316,13 +1316,14 @@ pub fn base_literal_type<'db>(
 /// gives `Unknown`, which leaves a read with its declared type. Biome's type
 /// matches TypeScript's when it is built from primitive types, `null`,
 /// `undefined`, `never`, interfaces, instances of classes and interfaces with
-/// such type arguments, as `Array<number>` or `Date`, and object types whose members
-/// are all properties of such types, as `{ k: number }`. A literal type
-/// inside an object type or a type argument gives `Unknown`: TypeScript
-/// widens `{ k: 1 }` to `{ k: number }`, as Biome does, but Biome keeps `1`
-/// in `{ k: id(1) }`. Functions, methods, getters, tuples, generics, `any`,
-/// `unknown`, and `void` give `Unknown` too. `resolve` resolves handles as
-/// for [`narrow_type`], and a type with more than 256 parts gives `Unknown`.
+/// such type arguments, as `Array<number>` or `Date`, and object types whose
+/// members are all properties of such types, as `{ k: number }`. A literal
+/// type inside an object type or a type argument gives `Unknown`, because
+/// TypeScript widens both `{ k: 1 }` and `{ k: id(1) }` to `{ k: number }`,
+/// while Biome keeps `1` in the second. Functions, methods, getters, tuples,
+/// generics, `any`, `unknown`, and `void` give `Unknown` too. `resolve`
+/// resolves handles as for [`narrow_type`], and a type with more than 256
+/// parts gives `Unknown`.
 pub fn evolving_assigned_type<'db>(
     db: &'db dyn TypeDb,
     ty: InferredTypeData<'db>,
@@ -1333,9 +1334,9 @@ pub fn evolving_assigned_type<'db>(
     widened_value(db, ty, resolve, &mut remaining).unwrap_or(InferredTypeData::Unknown)
 }
 
-/// Returns `ty` resolved, with its literal members widened, when Biome types
-/// a value of type `ty` as TypeScript does, as [`evolving_assigned_type`]
-/// describes, or `None` otherwise.
+/// Returns `ty` resolved, with its literal members widened, or `None` when
+/// Biome may type a value of type `ty` differently from TypeScript.
+/// [`evolving_assigned_type`] lists the types that match.
 fn widened_value<'db>(
     db: &'db dyn TypeDb,
     ty: InferredTypeData<'db>,
@@ -1363,9 +1364,10 @@ fn widened_value<'db>(
     }
 }
 
-/// Returns whether Biome types a part of a value's type as TypeScript does,
-/// as [`evolving_assigned_type`] describes: the type itself, a property type,
-/// or a type argument, where TypeScript widens no literal type.
+/// Returns whether Biome types `ty` as TypeScript does, where `ty` is a
+/// value's type, a property type, or a type argument. TypeScript widens no
+/// literal type in these positions, so `ty` must match exactly.
+/// [`evolving_assigned_type`] lists the types that match.
 #[expect(
     clippy::wildcard_enum_match_arm,
     reason = "Every other type may differ from TypeScript's."
@@ -1424,11 +1426,11 @@ fn is_exact_value<'db>(
 }
 
 /// Returns the element type of `ty`, the type of an array that evolves with
-/// its writes: the union of the type arguments of its members, each of which
-/// must be an instance of `Array` with one type argument, as the joins of
-/// `Array<number>` and `Array<string>` give `number | string`. An array to
-/// which nothing was added yet is `Array<never>`, whose element type is
-/// `never`.
+/// its writes. Each member of `ty` must be an instance of `Array` with one
+/// type argument, and the element type is the union of those arguments, so
+/// the join of `Array<number>` and `Array<string>` gives `number | string`.
+/// An array that nothing has been added to is `Array<never>`, whose element
+/// type is `never`.
 ///
 /// Returns `None` when a member is something else, as `Unknown` or
 /// `undefined`, and when the members exceed the work limit of 256 types.

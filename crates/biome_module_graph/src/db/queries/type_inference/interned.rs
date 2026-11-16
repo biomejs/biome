@@ -82,10 +82,10 @@ pub(crate) struct FlowSubjectRootInput<'db> {
     #[returns(copy)]
     pub assigned: Option<FlowAssignedTypes<'db>>,
     /// How the subject's type evolves with its writes, which selects the
-    /// solve: [`FlowEvolving::None`] narrows `baseline` by the root's guards
-    /// and writes, while the other kinds start at `baseline`, `undefined`,
-    /// and take their types from the values that the writes assign, as
-    /// [`FlowEvolving`] describes.
+    /// solve. With [`FlowEvolving::None`], the solve narrows `baseline` by the
+    /// root's guards and writes. With the other kinds, it starts at
+    /// `baseline`, which is `undefined`, and takes the subject's type from the
+    /// values that the writes assign.
     #[returns(copy)]
     pub evolving: FlowEvolving,
 }

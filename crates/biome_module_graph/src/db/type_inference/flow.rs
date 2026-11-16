@@ -179,14 +179,14 @@ pub(in crate::db) fn flow_assigned_types<'db>(
 }
 
 /// Returns the type of a read of an array whose type evolves with its writes,
-/// as [`FlowEvolving::Array`] describes, given its type there, `state`: an
-/// array of its element type.
+/// given the array's type `state` at the read. The result is an array of the
+/// element type of `state`.
 ///
-/// Returns `None`, so that the read keeps its declared type, where nothing
-/// was added to the array yet, as TypeScript gives such a read an implicit
-/// `any[]` (TS7005), and where the element type is `Unknown` or `state` is no
-/// array, because a write that reaches the read assigns or adds a value that
-/// Biome can't type as TypeScript does.
+/// Returns `None`, so that the read keeps its declared type, in two cases.
+/// When nothing has been added to the array, TypeScript gives the read an
+/// implicit `any[]` (TS7005). When the element type is `Unknown` or `state`
+/// is not an array, a write that reaches the read assigns or adds a value
+/// that Biome can't type as TypeScript does.
 fn evolving_array_read<'db>(db: &'db dyn ModuleDb, state: TypeData<'db>) -> Option<TypeData<'db>> {
     let element = evolving_array_element(db, state)?;
     (!matches!(element, TypeData::NeverKeyword | TypeData::Unknown)).then(|| array_of(db, element))
@@ -241,12 +241,12 @@ enum FlatteningError {
 /// readonly path, as [`FlowGuard::ReadonlyPath`] requires, the `switch`
 /// statements found exhaustive, as [`FlowGuard::Bypass`] requires, one bit
 /// each, the types that the subject's writes assign, how its type evolves
-/// with its writes, as [`FlowEvolving`] describes, the results of the
-/// property guards, `in` tests, `instanceof` tests, and calls to type-guard
-/// functions applied so far, keyed by guard index and incoming type, the
-/// values of the imported variables that [`FlowTest::Imported`] compares
-/// with, found so far, keyed by declaration, and the type that each write
-/// of the subject that assigns a value gives it.
+/// with its writes, the results of the property guards, `in` tests,
+/// `instanceof` tests, and calls to type-guard functions applied so far, keyed
+/// by guard index and incoming type, the values of the imported variables
+/// that [`FlowTest::Imported`] compares with, found so far, keyed by
+/// declaration, and the type that each write of the subject that assigns a
+/// value gives it.
 struct GuardSolve<'db> {
     /// The subject that the solve narrows.
     subject: FlowSubjectId,
@@ -598,15 +598,17 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     /// Returns the type of the variable read at `read`, whose expression
     /// starts at `start`, when its type evolves with its writes as `evolving`
-    /// describes: the type that the writes that reach the read give it, from
-    /// `undefined` where it is declared, without its declared type.
+    /// describes. The type comes from the writes that reach the read, starting
+    /// from `undefined` where the variable is declared, and ignores the
+    /// declared type.
     ///
     /// Returns `None`, so that the read keeps its declared type, where such a
-    /// write assigns a value that Biome can't type as TypeScript does, and
-    /// without a solve when the other values that the root assigns are all
-    /// `null` or all `undefined`. The declared type then already is that
-    /// type, as for `let x = null; x = null`, or is wider, as Unknown for
-    /// `let x; x = null` and `unknown[]` for `const a = []; a.push(null)`.
+    /// write assigns a value that Biome can't type as TypeScript does. Also
+    /// returns `None`, without a solve, when the values that the root assigns
+    /// and Biome can type are all `null` or all `undefined`. The declared type
+    /// then already is that type, as for `let x = null; x = null`, or is
+    /// wider, as Unknown for `let x; x = null` and `unknown[]` for
+    /// `const a = []; a.push(null)`.
     fn narrow_evolving(
         &mut self,
         read: FlowRead,
@@ -1087,10 +1089,10 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// whose type may come from a return type that Biome infers, is `Unknown`,
     /// which reduces nothing.
     ///
-    /// The values of a subject whose type evolves with its writes are its
-    /// types after the writes, so each has its literal types widened, as
-    /// [`evolving_assigned_type`] gives it, and is `Unknown` where Biome may
-    /// type it otherwise than TypeScript does.
+    /// For a subject whose type evolves with its writes, each value is the
+    /// subject's type after its write, so its literal types are widened, and
+    /// it is `Unknown` where Biome may type it differently from TypeScript.
+    /// [`evolving_assigned_type`] computes these types.
     pub(super) fn assigned_types(
         &mut self,
         root: usize,
@@ -1115,11 +1117,14 @@ impl<'db> ResolutionCtx<'db, '_> {
         Some(FlowAssignedTypes::new(self.db, types))
     }
 
-    /// Returns the type of the value that `assigned` describes, as
-    /// [`Self::assigned_types`] resolves it, for a subject whose type evolves
-    /// with its writes when `evolving` is true, or `None` when it can't be
-    /// resolved or when a call that it can give may have a return type that
-    /// Biome infers, as [`Self::has_annotated_return`] decides.
+    /// Returns the type of the value that `assigned` describes, typed without
+    /// narrowing, or `None` when it can't be resolved or when a call that it
+    /// can give may return a type that Biome infers instead of an annotated
+    /// one. [`Self::assigned_types`] lists how each kind of value is typed.
+    ///
+    /// When `evolving` is true, the subject's type evolves with its writes,
+    /// so the result has its literal types widened and is `Unknown` where
+    /// Biome may type the value differently from TypeScript.
     fn assigned_type(&mut self, assigned: &FlowAssigned, evolving: bool) -> Option<TypeData<'db>> {
         if !assigned
             .callees
@@ -1140,7 +1145,8 @@ impl<'db> ResolutionCtx<'db, '_> {
                 let ty = self.resolve(&reference);
                 // TypeScript widens the literal types of the properties of an
                 // object literal that it assigns to a variable whose type
-                // evolves with its writes, which has no declared type.
+                // evolves with its writes, because such a variable has no
+                // declared type to keep them.
                 if evolving {
                     ty
                 } else {
@@ -1949,10 +1955,9 @@ impl<'db> ResolutionCtx<'db, '_> {
         narrowed
     }
 
-    /// Returns the type of a subject whose type evolves with its writes, as
-    /// [`FlowEvolving`] describes, right after its write `effect`, given its
-    /// incoming type `ty`, following TypeScript's `getTypeAtFlowAssignment`
-    /// and `getTypeAtFlowArrayMutation` for such a subject.
+    /// Returns the type of a subject whose type evolves with its writes right
+    /// after its write `effect`, given its incoming type `ty`, as TypeScript
+    /// types such a subject after an assignment or an array mutation.
     ///
     /// A variable takes the type of the assigned value. An array starts again
     /// at `Array<never>` for an empty array literal, takes the type of another
