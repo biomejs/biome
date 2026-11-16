@@ -256,13 +256,11 @@ impl RootFlow {
     }
 
     /// Returns whether conditions narrow `subject` only through
-    /// [`FlowGuard::Property`], as [`Self::property_only`] describes.
+    /// [`FlowGuard::Property`] guards and the root has reads of `subject`.
     pub(crate) fn is_property_only(&self, subject: FlowSubjectId) -> bool {
         self.property_only.contains(&subject)
     }
 
-    /// Returns the subject with id `subject`, or `None` when the root has no
-    /// such subject.
     pub(crate) fn subject(&self, subject: FlowSubjectId) -> Option<&FlowSubject> {
         self.subjects.get(subject as usize)
     }
@@ -300,10 +298,10 @@ pub(crate) struct ModuleFlow {
     candidates: FxHashMap<TextRange, AstPtr<AnyFlowExpression>>,
     /// The declarations of the bindings in [`RootFlow::property_only`].
     property_only_bindings: FxHashSet<TextRange>,
-    /// The candidates that are candidates only because they are, or contain,
-    /// reads of one binding in [`Self::property_only_bindings`], keyed by
-    /// range, with that binding's declaration. Such a candidate keeps its
-    /// type when no test of a property can narrow the binding.
+    /// Maps the range of a candidate to the declaration of a binding in
+    /// [`Self::property_only_bindings`] when the candidate is, or contains,
+    /// reads of that binding and of no other subject. Such a candidate keeps
+    /// its type when no test of a property can narrow the binding.
     property_only_candidates: FxHashMap<TextRange, TextRange>,
 }
 
@@ -368,15 +366,16 @@ impl ModuleFlow {
     }
 
     /// Returns whether conditions narrow the binding declared at `range` only
-    /// through [`FlowGuard::Property`], as [`RootFlow::property_only`]
-    /// describes.
+    /// through [`FlowGuard::Property`] guards.
     pub(crate) fn is_property_only_binding(&self, range: TextRange) -> bool {
         self.property_only_bindings.contains(&range)
     }
 
     /// Returns the declaration of the binding whose reads alone make the
-    /// expression at `range` a candidate, when that binding is one that
-    /// [`Self::is_property_only_binding`] accepts.
+    /// expression at `range` a candidate. Returns `None` when the expression
+    /// is not a candidate, when it also reads another subject, and when
+    /// conditions can narrow the binding other than through
+    /// [`FlowGuard::Property`] guards.
     pub(crate) fn property_only_candidate(&self, range: TextRange) -> Option<TextRange> {
         self.property_only_candidates.get(&range).copied()
     }
@@ -452,10 +451,11 @@ impl RootCollector<'_> {
             return;
         };
         // A test of a property narrows its object only when the object's
-        // declared type is a union with at least two object types, so a
-        // variable that only such tests mention keeps its declared type when
-        // its collected type shows, without resolving it, that it is not one.
-        // Dropping it here spares its reads the flow queries.
+        // declared type is a union with at least two object types. A variable
+        // that only such tests mention keeps its declared type when it has no
+        // collected type, or when its collected type shows, without
+        // resolution, that it is not such a union. Dropping the variable here
+        // spares its reads the flow queries.
         let unnarrowable: FxHashSet<FlowSubjectId> = property_only
             .iter()
             .copied()
@@ -603,12 +603,12 @@ impl RootCollector<'_> {
     /// Returns the `(subject, point)` pairs that a test of the subject can
     /// reach, including the test itself.
     ///
-    /// Variables are walked before property paths and before the subjects in
-    /// `property_only`, which only tests of their properties narrow, so the
-    /// work limit never takes narrowing away from a variable because of
-    /// them. Returns no pair of a path or of a subject in `property_only` when
-    /// the limit runs out on them, and `None` when it runs out on the other
-    /// variables.
+    /// `property_only` holds the subjects that only tests of their properties
+    /// narrow. Other variables are walked first, before property paths and
+    /// the subjects in `property_only`, so those never take the work limit
+    /// from such a variable. When the limit runs out on a path or on a subject
+    /// in `property_only`, the result keeps no pair of any of them. When it
+    /// runs out on another variable, this returns `None`.
     fn reachable_from_tests(
         &self,
         nodes: &[FlowNode],
@@ -901,8 +901,6 @@ mod tests {
             }
         "#;
         let info = module(SOURCE);
-        // The paths can still be candidates, because their object `o` is a
-        // read that the tests of its properties can narrow.
         for (marker, expression, expected) in [
             ("object", "o.v", true),
             ("object", "o.v.w", false),

@@ -42,8 +42,8 @@ pub(in crate::db) fn flow_expression_type<'db>(
     info: &JsModuleInfo,
     range: TextRange,
 ) -> Option<TypeData<'db>> {
-    // As in `local_flow_expression_type`, a candidate made only by reads of a
-    // binding that no test of a property can narrow keeps its type.
+    // A candidate made only by reads of a binding that no test of a property
+    // can narrow keeps its type, as in `local_flow_expression_type`.
     if let Some(binding) = info.flow.property_only_candidate(range)
         && infer_flow_binding_baseline(db, BindingTypeInput::new(db, module, binding)).is_none()
     {
@@ -134,16 +134,20 @@ pub(in crate::db) fn flow_subject_type<'db>(
 enum FlatteningError {
     /// Flattening exceeded its work limit.
     Exceeded,
-    /// Handles to local types of the module form a cycle.
+    /// Handles to local types of the module form a cycle or a chain longer
+    /// than [`MAX_MODULE_HANDLE_STEPS`].
     Cycle,
 }
 
-/// The state of one solve that its guards share: the subject it narrows, the
-/// subject's declared type at the root's start, and the results of the
-/// property guards applied so far, keyed by guard index and incoming type.
+/// The state that the guards of one solve share.
 struct GuardSolve<'db> {
+    /// The subject that the solve narrows.
     subject: FlowSubjectId,
+    /// The subject's declared type at the root's start, which decides whether
+    /// a tested property is a discriminant.
     declared: TypeData<'db>,
+    /// The results of the property guards applied so far, keyed by guard
+    /// index and incoming type.
     properties: FxHashMap<(usize, TypeData<'db>), TypeData<'db>>,
 }
 
@@ -314,8 +318,8 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
         // A candidate made only by reads of a binding that conditions narrow
         // only through tests of its properties keeps its type when no such
-        // test can narrow the binding. Its baseline tells that without the
-        // syntax node.
+        // test can narrow the binding. The binding's baseline shows that
+        // without the syntax node.
         if let Some(binding) = info.flow.property_only_candidate(range)
             && self.local_binding_baseline(binding).is_none()
         {
@@ -474,16 +478,20 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// [`RootFlow::property_only`] starts from, given its `declared` type, or
     /// `None` when no test of a property can narrow it.
     ///
-    /// Such a test narrows only a union with two object types, as
-    /// [`may_narrow_by_property`] describes, so this is
-    /// [`Self::narrowing_baseline`] when the flattened type is one.
+    /// Such a test narrows only a union with at least two members that are
+    /// neither `null`, `undefined`, nor primitive types, the condition that
+    /// [`may_narrow_by_property`] checks. When the flattened type is such a
+    /// union, the result matches [`Self::narrowing_baseline`]. Returns
+    /// `Unknown` when flattening exceeds its work limit, and `None` when
+    /// handles to local types of the module form a cycle or a chain longer
+    /// than [`MAX_MODULE_HANDLE_STEPS`].
     ///
-    /// Unlike [`Self::narrowing_baseline`], flattening resolves the local
-    /// types of this context's module through this context, as
-    /// [`Self::resolve_module_handle`] describes. Complete module inference
-    /// has resolved all of them by the time it evaluates flow, so finding out
-    /// that most such subjects can't narrow costs only cache reads there,
-    /// where a lookup would resolve each type again in a fresh context.
+    /// Unlike [`Self::narrowing_baseline`], flattening resolves handles to
+    /// local types of this context's module through this context instead of
+    /// lookups. Complete module inference has resolved all of those types by
+    /// the time it evaluates flow, so there, finding out that a subject can't
+    /// narrow costs only cache reads. A lookup would resolve each type again
+    /// in a fresh context.
     fn property_baseline(&mut self, declared: TypeData<'db>) -> Option<TypeData<'db>> {
         match self.flatten_baseline(declared, true) {
             Ok(baseline) => (!is_narrowing_invariant(baseline)
@@ -538,10 +546,14 @@ impl<'db> ResolutionCtx<'db, '_> {
         self.flatten_baseline(ty, false).ok()
     }
 
-    /// Flattens `ty` as [`Self::flow_baseline`] does. When `in_context` is
-    /// true, handles to local types of this context's module are resolved
-    /// with [`Self::resolve_module_handle`] instead of lookups, and a cycle
-    /// of such handles stops the flattening.
+    /// Returns `ty` with its unions, aliases, and `typeof` types flattened, or
+    /// [`FlatteningError::Exceeded`] when flattening exceeds its work limit.
+    ///
+    /// When `in_context` is true, handles to local types of this context's
+    /// module are resolved through this context instead of lookups, as
+    /// [`Self::resolve_module_handle`] resolves them. A cycle of such handles,
+    /// or a chain longer than [`MAX_MODULE_HANDLE_STEPS`], stops the
+    /// flattening with [`FlatteningError::Cycle`].
     #[expect(
         clippy::wildcard_enum_match_arm,
         reason = "Other type shapes remain unchanged."

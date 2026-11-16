@@ -279,7 +279,12 @@ pub(crate) fn find_property<'db>(
     }
 }
 
-/// Returns the property `name` of `tuple`, as [`find_property`] describes.
+/// Looks up the element of `tuple` at the decimal index `name`, returning
+/// `Missing` for an index past the last element.
+///
+/// Returns `Unknown` for a name that is not the canonical spelling of an
+/// index, for an inferred array, and when a rest element comes at or before
+/// the index.
 fn tuple_element<'db>(
     db: &'db dyn TypeDb,
     tuple: InternedTuple<'db>,

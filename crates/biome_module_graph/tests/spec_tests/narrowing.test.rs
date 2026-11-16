@@ -437,8 +437,8 @@ fn unrefinable_binding_types_skip_flow_queries() {
         db.clear_salsa_events();
         assert_eq!(read("after"), ordinary, "{parameter}");
         let events = db.take_salsa_events();
-        // Only a type that resolves to `any` needs a flow query to find out,
-        // and once its declared type shows that, no solve runs.
+        // Only `Loose`, an alias of `any`, needs a query of the declared type
+        // to show that no test can narrow `value`. No case runs a solve.
         for (query, count) in [
             ("infer_flow_binding_baseline", baseline_queries),
             ("infer_flow_subject_type", 0),

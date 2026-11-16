@@ -87,27 +87,34 @@ pub fn is_raw_narrowing_invariant(reference: &TypeReference, raw_types: &[RawTyp
 /// least two members that are object types, without resolving it.
 ///
 /// A runtime test of a property narrows the value that holds it only when
-/// the value's declared type is such a union, as [`may_narrow_by_property`]
-/// describes. This returns false when the raw tables show that the type is
-/// something else: a primitive type, a literal type, a single object type,
-/// interface, class, function, tuple, intersection, or generic written in
-/// place, or a union of such types with at most one that is not primitive,
-/// as in `o: { v: string | null }` or `x: { a: 1 } | undefined`. Among
-/// inferred types, it returns false for the result of `new`, taken as one
-/// instance, and for the results of `+`, unary `-`, `~`, and `typeof`, which
-/// are primitives. A type name, an import, a `typeof` type, other inferred
-/// types, and a chain of raw references longer than the step limit may stand
-/// for a union of object types. `raw_types` is the module table that local
-/// references index.
+/// the value's declared type is such a union. [`may_narrow_by_property`]
+/// checks the same condition on a resolved type.
+///
+/// Returns false when the raw tables show that the type is one of these:
+///
+/// - a primitive type or a literal type;
+/// - a single object type, interface, class, function, tuple, intersection,
+///   or generic written in place;
+/// - the inferred result of `new`, taken as one instance;
+/// - the inferred result of `+`, unary `-`, `~`, or `typeof`, which is a
+///   primitive;
+/// - a union of the types above with at most one that is not primitive, as
+///   in `o: { v: string | null }` or `x: { a: 1 } | undefined`.
+///
+/// A type name, an import, a `typeof` type, other inferred types, and a chain
+/// of raw references longer than the step limit may stand for a union of
+/// object types, so this returns true for them. `raw_types` is the module
+/// table that local references index.
 pub fn raw_may_be_object_union(reference: &TypeReference, raw_types: &[RawTypeData]) -> bool {
     raw_object_members(reference, raw_types) >= 2
 }
 
 /// Returns how many object types the type at `reference` may have among its
-/// members, as far as raw tables tell, up to two: zero for primitive types,
-/// one for a single object type, and two for a union with two object types or
-/// a type that only resolution tells, as [`raw_may_be_object_union`]
-/// describes.
+/// members, as far as raw tables tell, up to two.
+///
+/// Returns zero for primitive types and one for a single object type. Returns
+/// two for a union with two object types and for a type that raw tables can't
+/// resolve, such as a type name or an import.
 fn raw_object_members(reference: &TypeReference, raw_types: &[RawTypeData]) -> usize {
     let Some(target) = raw_reference_target(reference, raw_types) else {
         return 2;
@@ -134,8 +141,9 @@ fn raw_object_members(reference: &TypeReference, raw_types: &[RawTypeData]) -> u
     }
 }
 
-/// Returns how many object types the local type `data` may have, as
-/// [`raw_object_members`] counts them, counting a union as two.
+/// Returns how many object types the local type `data` may have, up to two.
+/// A union, a reference, and other types that only resolution can tell count
+/// as two.
 fn raw_local_object_members(data: &RawTypeData) -> usize {
     match data {
         RawTypeData::BigInt
@@ -147,8 +155,8 @@ fn raw_local_object_members(data: &RawTypeData) -> usize {
         | RawTypeData::Undefined => 0,
         RawTypeData::Literal(literal) => usize::from(!literal.is_primitive()),
         RawTypeData::TypeofExpression(expression) => match expression.as_ref() {
-            // A construct signature that returns a union is rare, and keeping
-            // the declared type there is only wider.
+            // A construct signature rarely returns a union. When one does,
+            // the value keeps its wider declared type.
             TypeofExpression::New(_) => 1,
             TypeofExpression::Addition(_)
             | TypeofExpression::BitwiseNot(_)
@@ -395,35 +403,44 @@ pub struct PropertyTest<'a, 'db> {
 /// `if (shape.kind === "circle")` narrows `shape`, following TypeScript's
 /// narrowing by a discriminant.
 ///
-/// `declared` is the declared type of the tested value. It decides whether
-/// the property is a discriminant, as in TypeScript: `declared` is a union,
-/// and the property type of at least one of its members is made of unit
-/// types, such as `"circle"`, `1`, `null`, or `boolean`. Members that are
-/// primitives or that lack the property don't count. Otherwise `ty` is
+/// `declared` is the declared type of the tested value, and it decides
+/// whether the property is a discriminant. As in TypeScript, the property is
+/// a discriminant when `declared` is a union and the property type of at
+/// least one of its members is made of unit types, such as `"circle"`, `1`,
+/// `null`, or `boolean`. Members that are primitives or that lack the
+/// property don't count. When the property is not a discriminant, `ty` is
 /// returned unchanged, so `{ k: string } | { k: number }` is not narrowed by
 /// `typeof k`. A property whose type is the same in every member, which
 /// TypeScript does not treat as a discriminant either, keeps every member.
 /// `ty` is also returned unchanged when `declared` has fewer than two members
-/// that may be object types, as [`may_narrow_by_property`] describes, where
-/// TypeScript can only give `never`.
+/// that may be object types, the condition that [`may_narrow_by_property`]
+/// checks. In that case, the only narrowed type TypeScript can give is
+/// `never`.
 ///
-/// The test's predicate applies, as [`narrow_type`] applies it, to the union
-/// of the property types of the members of `ty`. The result keeps the members
-/// whose property type shares a value with what the predicate leaves. So
-/// `kind !== "c"` keeps both members of `{ kind: "c" } | { kind: string }`,
-/// because `kind` can be another string in both. A test that no property
-/// value passes gives `never`, as does a single member whose property the
-/// test rules out when `ty` is not a union.
+/// The test's predicate narrows the union of the property types of the
+/// members of `ty`, the same way [`narrow_type`] narrows a value. The result
+/// keeps the members whose property type shares a value with what the
+/// predicate leaves. So `kind !== "c"` keeps both members of
+/// `{ kind: "c" } | { kind: string }`, because the predicate leaves `string`,
+/// which shares a value with `"c"`. A test that no property value passes
+/// gives `never`, as does a single member whose property the test rules out
+/// when `ty` is not a union. Object types are assumed to share a value with
+/// every type except `null` and `undefined`.
 ///
 /// A `null` or `undefined` member of `ty` is kept when the test reads the
-/// property through an optional chain, where it gives the property the value
-/// `undefined`. Otherwise `ty` is returned unchanged, as it is when another
-/// member is not an object type with the property, when a property type
-/// includes a type that this function can't compare, such as a generic,
-/// `unknown`, or an intersection, and when the union traversal, which visits
-/// at most 256 types, runs out. Object types are assumed to share a value
-/// with every type except `null` and `undefined`. `resolve` resolves handles
-/// as for [`narrow_type`], and is also used to look up the properties.
+/// property through an optional chain, because the chain gives the property
+/// the value `undefined` for that member. `ty` is returned unchanged in these
+/// cases:
+///
+/// - a member of `ty` is `null` or `undefined`, and the test reads the
+///   property without an optional chain;
+/// - another member of `ty` is not an object type with the property;
+/// - a property type includes a type that this function can't compare, such
+///   as a generic, `unknown`, or an intersection;
+/// - the union traversal, which visits at most 256 types, runs out.
+///
+/// `resolve` resolves handles as for [`narrow_type`], and is also used to
+/// look up the properties.
 pub fn narrow_by_property<'db>(
     db: &'db dyn TypeDb,
     ty: InferredTypeData<'db>,
@@ -511,13 +528,13 @@ pub fn narrow_by_property<'db>(
     }
 }
 
-/// Returns whether [`narrow_by_property`] can narrow a value whose declared
-/// type is `declared` to a type other than `never`: whether `declared` is a
-/// union with at least two members that are neither `null`, `undefined`, nor
-/// a primitive type.
+/// Returns whether `declared` is a union with at least two members that are
+/// neither `null`, `undefined`, nor a primitive type. Only then can
+/// [`narrow_by_property`] narrow a value of that declared type to a type
+/// other than `never`.
 ///
-/// A test of a property keeps the `null` and `undefined` members and no
-/// primitive member has a discriminant, so with at most one other member the
+/// A test of a property keeps the `null` and `undefined` members, and no
+/// primitive member has a discriminant. With at most one other member, the
 /// test either keeps the value or rules out every member.
 pub fn may_narrow_by_property(db: &dyn TypeDb, declared: InferredTypeData) -> bool {
     let InferredTypeData::Union(union) = declared else {
@@ -543,8 +560,10 @@ pub fn may_narrow_by_property(db: &dyn TypeDb, declared: InferredTypeData) -> bo
         .is_some()
 }
 
-/// Returns whether the property `name` is a discriminant of `declared`, as
-/// [`narrow_by_property`] decides it.
+/// Returns whether the property `name` is a discriminant of `declared`: the
+/// property type of at least one member of `declared` is made of unit types.
+/// Members that are `null`, `undefined`, or primitives, and members that lack
+/// the property, don't count.
 ///
 /// Returns false when a member's property can't be looked up or has a type
 /// that [`PropertyValue`] does not describe, and when the `remaining` budget
@@ -571,9 +590,9 @@ fn is_discriminant<'db>(
     is_discriminant
 }
 
-/// Returns whether every value of a property type is a unit type, as
-/// [`PropertyValue::is_unit`] describes, which makes the property a
-/// discriminant.
+/// Returns whether every value of a property type is a unit type: a literal
+/// type, `null`, `undefined`, or `boolean`. A member with such a property
+/// type makes the property a discriminant.
 fn is_unit(values: &PropertyValues) -> bool {
     values.iter().all(|(_, value)| value.is_unit())
 }
@@ -2597,7 +2616,7 @@ mod tests {
                 );
             }
         }
-        // A type that is not a union is never narrowed.
+        // A value whose declared type is not a union is never narrowed.
         assert_eq!(
             narrow_property(&db, circle, circle, "kind", literal, false),
             circle
@@ -2712,7 +2731,7 @@ mod tests {
             second
         );
         // `length`, a key past the last element, and a key that is not the
-        // canonical spelling of an index are not looked up.
+        // canonical spelling of an index leave the union unchanged.
         for name in ["length", "2", "00"] {
             assert_eq!(
                 narrow_property(db, tuples, tuples, name, literal, true),
@@ -2765,7 +2784,7 @@ mod tests {
                 ],
                 true,
             ),
-            // An instance of a named type may be a union itself.
+            // A `typeof` type may stand for a union of object types.
             (
                 vec![
                     with_name,

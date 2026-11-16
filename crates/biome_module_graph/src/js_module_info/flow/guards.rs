@@ -496,9 +496,9 @@ pub(super) struct DecomposedCondition {
     /// variable cannot change between the alias and its test. See
     /// [`narrows_through_aliases`] for the variables that qualify.
     pub(super) mentions: Vec<FlowSubjectId>,
-    /// Subjects whose type the condition may refine only through
-    /// [`FlowGuard::Property`], such as `s` in `s.kind === "c"`, unless
-    /// `mentions` also lists them.
+    /// The objects of the condition's [`FlowGuard::Property`] guards, such as
+    /// `s` in `s.kind === "c"`. The condition may narrow such a subject only
+    /// through those guards, unless `mentions` also lists it.
     pub(super) parents: Vec<FlowSubjectId>,
 }
 
@@ -738,14 +738,15 @@ impl Decomposer<'_, '_> {
         }
     }
 
-    /// Returns the guard that a runtime test of `operand`, whose subject is
-    /// `subject`, applies to the object that holds it, as `s.kind === "c"`
-    /// applies to `s`, when `subject` is a named property of a subject other
-    /// than `this` that a test may narrow.
+    /// Returns the guard that a runtime test of `operand` applies to the
+    /// object that holds the tested property, as `s.kind === "c"` applies to
+    /// `s`. `subject` is the subject of `operand`.
     ///
-    /// Returns `None` for a call to a type-guard function, because
-    /// TypeScript never narrows `s` through `isC(s.kind)`. Only the object
-    /// that holds the property narrows: `o.a.kind` narrows `o.a`, not `o`.
+    /// Returns `None` unless `subject` is a property, other than a private
+    /// one, of a subject other than `this` that a test may narrow. Also
+    /// returns `None` for a call to a type-guard function, because TypeScript
+    /// never narrows `s` through `isC(s.kind)`. Only the object that holds the
+    /// property narrows, so `o.a.kind` narrows `o.a` but not `o`.
     fn property_guard(
         &mut self,
         operand: &AnyJsExpression,
@@ -1384,8 +1385,8 @@ mod tests {
 
     /// Decomposes the `if` test `source` and names the subjects that its
     /// receiver tests check, outermost guard first, followed by the main
-    /// guard that they wrap, without the [`FlowGuard::Property`] that a test
-    /// of a property adds to it.
+    /// guard that they wrap. The returned main guard leaves out the
+    /// [`FlowGuard::Property`] guard that a test of a property adds.
     fn receiver_names(source: &str, outcome: FlowOutcome) -> (Vec<String>, FlowGuard) {
         let Decomposed {
             guards,

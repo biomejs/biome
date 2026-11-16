@@ -43,9 +43,9 @@ fn normalized_type_at<'db>(
     .unwrap_or_else(|| panic!("expression at {marker} {range:?} must be inferred"))
 }
 
-/// Names each member of `ty`, sorted: an interface or class instance by its
-/// name, an object type literal by its members, and any other type by its
-/// formatted text on one line.
+/// Names each member of `ty`, sorted: an interface by its name, an object
+/// type literal by its members, and any other type by its formatted text on
+/// one line.
 fn variant_names(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
     let variants = match ty {
         InferredTypeData::Union(union) => union.types(db).to_vec(),
@@ -88,9 +88,11 @@ const SHAPES: &str = r#"
     declare function assert(value: unknown): asserts value;
 "#;
 
-/// Asserts the type of each `(marker, expression, expected)` read in `source`,
-/// which follows [`SHAPES`], by the names of its members, as [`variant_names`]
-/// gives them.
+/// Asserts the type of each `(marker, expression, expected)` read in `source`
+/// by comparing the sorted names of its members with `expected`.
+///
+/// The module under test is [`SHAPES`] followed by `source`, and
+/// [`variant_names`] names the members.
 fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     let source = format!("{SHAPES}{source}");
     let (db, module) = narrowing_db(&source);
@@ -106,9 +108,7 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3/discriminants.ts` L8 to L10, L23, L26, L28, L31, and
-// `m3-l2/cases.ts` L14, L15, L28 to L30, L32).
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
 #[test]
 fn equality_and_truthiness_of_a_discriminant_narrow_the_object() {
     assert_reads(
@@ -148,7 +148,7 @@ fn equality_and_truthiness_of_a_discriminant_narrow_the_object() {
 }
 
 // TypeScript 6.0.3 (`tsc --strict`) gives `Circle` in the loop and `Square`
-// after it (`m3-l2/cases.ts` L27).
+// after it.
 #[test]
 fn discriminants_narrow_loops_and_their_exits() {
     assert_reads(
@@ -159,9 +159,7 @@ fn discriminants_narrow_loops_and_their_exits() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3/discriminants.ts` L11, L14, L15, L24, L25, L29, L34,
-// and `m3-l2/cases.ts` L10 to L12, L37, L45, L46, L55 to L58).
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
 #[test]
 fn discriminants_of_every_unit_type_narrow_the_object() {
     assert_reads(
@@ -344,10 +342,9 @@ fn discriminants_of_every_unit_type_narrow_the_object() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) keeps every read below unchanged
-// (`narrowing-probes/m3/discriminants.ts` L12, L13, L27, L30, L32, L33, L36,
-// `m3/predicate_discriminant.ts` L8, and `m3-l2/cases.ts` L48 and L51), unless
-// a comment gives its type. L30, L36, and L51 are errors (TS2339 and TS18048).
+// TypeScript 6.0.3 (`tsc --strict`) keeps every read below unchanged, unless a
+// comment gives its type. It reports errors in `missing` and `partial`
+// (TS2339) and in `possiblyUndefined` (TS18048).
 #[test]
 fn tests_of_properties_that_are_not_discriminants_keep_the_object() {
     assert_reads(
@@ -424,11 +421,9 @@ fn tests_of_properties_that_are_not_discriminants_keep_the_object() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3/discriminants.ts` L16 and L35, `m3-l2/cases.ts` L8,
-// L9, L43, L44, L49, and `m3-l2/aliases_paths.ts` L7 and L12). A test through
-// an optional chain keeps the `null` and `undefined` members of the object
-// where the property reads as `undefined`.
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// A test through an optional chain keeps the `null` and `undefined` members
+// of the object where the property reads as `undefined`.
 #[test]
 fn discriminants_read_through_optional_chains_narrow_the_object() {
     assert_reads(
@@ -469,10 +464,9 @@ fn discriminants_read_through_optional_chains_narrow_the_object() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3/discriminants.ts` L17 and L18, `m3/literals.ts` L10,
-// `m3-l2/cases.ts` L39 and L50): only the object that holds the property
-// narrows, and a read of the property starts from the narrowed object.
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// Only the object that holds the property narrows, and a read of the property
+// starts from the narrowed object.
 #[test]
 fn only_the_object_that_holds_the_discriminant_narrows() {
     assert_reads(
@@ -506,11 +500,10 @@ fn only_the_object_that_holds_the_discriminant_narrows() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3/discriminants.ts` L21, `m3/literals.ts` L8, and
-// `m3-l2/cases.ts` L33, L52, L53), unless a comment gives its type. A write
-// to the discriminant keeps the object narrowed, because TypeScript checks
-// the written value against the narrowed object's property.
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type,
+// unless a comment gives its type. A write to the discriminant keeps the
+// object narrowed, because TypeScript checks the written value against the
+// narrowed object's property.
 #[test]
 fn writes_to_the_discriminant_keep_the_object_narrowed() {
     assert_reads(
@@ -543,9 +536,7 @@ fn writes_to_the_discriminant_keep_the_object_narrowed() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3/tuples.ts` L3 to L6, and `m3-l2/cases.ts` L40 and
-// L41).
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
 #[test]
 fn tuple_elements_are_discriminants() {
     assert_reads(
@@ -569,8 +560,7 @@ fn tuple_elements_are_discriminants() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3-l2/cases.ts` L18 and L22).
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
 #[test]
 fn discriminants_of_classes_and_inherited_properties_narrow() {
     assert_reads(
@@ -591,10 +581,10 @@ fn discriminants_of_classes_and_inherited_properties_narrow() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives `{ ok: true; value: number }`
-// (`narrowing-probes/m3-l2/cases.ts` L25). Biome keeps the declared type: the
-// declared type of `r` is an instance of the generic alias, not a union, and
-// no runtime test narrows such an instance yet.
+// TypeScript 6.0.3 (`tsc --strict`) gives `{ ok: true; value: number }`.
+// Biome keeps the declared type, because the declared type of `r` is an
+// instance of the generic alias rather than a union, and no runtime test
+// narrows such an instance.
 #[test]
 fn instances_of_generic_aliases_keep_their_declared_type() {
     const SOURCE: &str = r#"
@@ -608,12 +598,10 @@ fn instances_of_generic_aliases_keep_their_declared_type() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3/readonly.ts` L25, `m3/aliases.ts` L13, L17, and L18,
-// `m3-l2/cases.ts` L38, and `m3-l2/aliases_paths.ts` L6, L9, and L10). An
-// aliased condition narrows the object when the object is a variable that
-// cannot change, but never a property path such as `w.s`, which TypeScript
-// narrows only when its properties are `readonly`.
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// An aliased condition narrows the object when the object is a variable that
+// cannot change, but never a property path such as `w.s`. TypeScript narrows
+// such a path only when its properties are `readonly`.
 #[test]
 fn aliased_conditions_narrow_the_object_of_a_discriminant() {
     assert_reads(
@@ -645,10 +633,9 @@ fn aliased_conditions_narrow_the_object_of_a_discriminant() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives each read below the type `never`
-// (`narrowing-probes/m3/aliases.ts` L13, and `m3-l2/cases.ts` L6, L7, L13,
-// L36, and L54): no value of the property passes the test, so the branch is
-// impossible, and Biome reads it as Unknown.
+// TypeScript 6.0.3 (`tsc --strict`) gives each read below the type `never`,
+// and Biome reads it as Unknown, because no value of the property passes the
+// test and the branch is impossible.
 #[test]
 fn impossible_discriminant_tests_read_as_unknown() {
     let source = format!(
@@ -681,9 +668,10 @@ fn impossible_discriminant_tests_read_as_unknown() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) keeps `o` as declared: a test of a
-// property narrows only a union. Collection drops the first read, whose
-// annotation shows that `o` is not a union, and the second runs one solve.
+// TypeScript 6.0.3 (`tsc --strict`) keeps `o` as declared, because a test of
+// a property narrows only a union. The annotation of `o` in the first source
+// shows that it is not a union, so collection drops the read. The second
+// source runs one solve.
 #[test]
 fn property_tests_of_objects_that_are_not_unions_skip_the_solve() {
     for (source, solves) in [
@@ -708,10 +696,9 @@ fn property_tests_of_objects_that_are_not_unions_skip_the_solve() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
-// (`m3-l2/cost.ts` L10, L11, and `cases.ts` L18 with `Shape`). The parameter's
-// declared type is an alias of this module, and the variables initialized
-// from calls have inferred types.
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// The parameter's declared type is an alias of this module, and the
+// variables initialized from calls have inferred types.
 #[test]
 fn complete_module_inference_and_lookups_agree_on_discriminants() {
     let source = format!(
@@ -749,12 +736,11 @@ fn complete_module_inference_and_lookups_agree_on_discriminants() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) keeps `o` as declared and narrows `p`
-// (`m3-l2/cost.ts` L12 and L15). A test of a property of `o` can't narrow it,
-// because its declared type is a single object type, so neither complete
-// module inference nor lookups solve its flow. Finding out that the
-// declared type of `p` is a union costs complete module inference no lookup
-// of the alias, which it has already resolved.
+// TypeScript 6.0.3 (`tsc --strict`) keeps `o` as declared and narrows `p`. A
+// test of a property of `o` can't narrow it, because its declared type is a
+// single object type, so neither complete module inference nor lookups solve
+// its flow. Complete module inference has already resolved the alias `Pair`,
+// so it finds that the declared type of `p` is a union without a lookup.
 #[test]
 fn reads_that_property_tests_cannot_narrow_skip_the_solve() {
     let source = r#"
@@ -813,12 +799,11 @@ fn reads_that_property_tests_cannot_narrow_skip_the_solve() {
 }
 
 // TypeScript 6.0.3 (`tsc --strict`) removes the member whose property type
-// can't share a value with what the test leaves (`m3-l2/objects.ts` L7 to
-// L11), and narrows `s` by a `const` of a literal type (L10). Biome keeps
-// both members whenever a property type is an object type and the test
-// leaves a value other than `null` or `undefined`, because it doesn't compare
-// object types with other types, and a comparison narrows only with a
-// literal, so these reads are wider.
+// can't share a value with what the test leaves, and narrows `s` by a `const`
+// of a literal type. Biome doesn't compare object types with other types, so
+// it assumes that an object type shares a value with every type except `null`
+// and `undefined`. A comparison narrows only with a literal. These reads are
+// therefore wider than TypeScript's.
 #[test]
 fn tests_that_biome_cannot_compare_keep_more_members() {
     assert_reads(
