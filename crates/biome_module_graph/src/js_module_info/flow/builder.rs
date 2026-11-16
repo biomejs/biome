@@ -107,11 +107,11 @@ pub(super) struct BuiltRoot {
     /// declares with an initializer. A read before the declarator sees such a
     /// variable as `undefined` instead of the type that its declaration gives.
     pub(super) hoisted: FxHashSet<FlowSubjectId>,
-    /// When the build records statements, each statement of the root's own
-    /// code that the builder met, in the order it met them, with its incoming
-    /// flow, or `None` where no path reaches it. A statement nested in one
-    /// that no path reaches is never met. A finally block built twice lists
-    /// its statements twice.
+    /// Each statement of the root's own code that the builder met, in the
+    /// order it met them, with its incoming flow, or `None` where no path
+    /// reaches it. Empty unless the build records statements. A statement
+    /// nested in one that no path reaches is never met. A finally block built
+    /// twice lists its statements twice.
     pub(super) statements: Vec<(TextRange, Option<FlowNodeId>)>,
     /// The flow that reaches the end of the root, or `None` when every path
     /// ends before it, as at `return` or `throw`.
@@ -218,10 +218,9 @@ type Build<T> = Result<T, Unsupported>;
 /// write point and a `break` or `continue` that leaves it is not supported.
 ///
 /// A branch that a condition written as the literal `true` or `false` never
-/// takes, as TypeScript's `createFlowCondition` decides it, has no flow, so
-/// it records no read and adds nothing where it joins other paths, and so do
-/// the statements after a call of a local function that never returns, as
-/// [`GuardFunctions::local_call_ends`] decides it.
+/// takes has no flow, as in TypeScript's binder, so it records no read and
+/// adds nothing where it joins other paths. The statements after a call of a
+/// local function that never returns have no flow either.
 ///
 /// When `records_statements` is true, the build lists the statements that
 /// it meets with their incoming flow in [`BuiltRoot::statements`].
@@ -516,7 +515,7 @@ impl StatementCheck {
 
 /// Returns the value of `expression` when it is the literal `true` or
 /// `false` itself, without parentheses, as TypeScript's binder reads a
-/// condition in `createFlowCondition`.
+/// condition.
 pub(super) fn literal_condition(expression: &AnyJsExpression) -> Option<bool> {
     let AnyJsExpression::AnyJsLiteralExpression(
         AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
@@ -535,13 +534,13 @@ pub(super) fn literal_condition(expression: &AnyJsExpression) -> Option<bool> {
 const MAX_LITERAL_STEPS: usize = 256;
 
 /// Returns whether the condition `expression` is never truthy, when `truthy`
-/// is true, or never falsy otherwise, as TypeScript's binder finds it, so
-/// that the branch where it is has no flow.
+/// is true, or never falsy otherwise, as TypeScript's binder finds it. The
+/// branch that needs that outcome has no flow.
 ///
-/// The literal `true` is never falsy and `false` never truthy. An operand of
-/// `&&` or `||` is a condition of its own, as `bindLogicalLikeExpression`
-/// binds it, so `c && false` is never truthy and `c || true` never falsy,
-/// also inside parentheses and `!`, which inverts the outcome. Any other
+/// The literal `true` is never falsy and `false` never truthy. TypeScript
+/// binds each operand of `&&` or `||` as a condition of its own, so
+/// `c && false` is never truthy and `c || true` never falsy. That also holds
+/// inside parentheses and `!`, which inverts the outcome. Any other
 /// condition can be either, including `(false)`, `!false`, `0`, a `const`
 /// that holds `false`, and the operands of `??`. Returns false when the walk
 /// runs out of work.
@@ -554,9 +553,9 @@ fn never_has(expression: &AnyJsExpression, truthy: bool, remaining: &mut usize) 
     if let Some(value) = literal_condition(expression) {
         return value != truthy;
     }
-    // Parentheses and `!` pass the outcome to a logical operator inside them,
-    // as TypeScript's `isLogicalExpression` looks through them, and bind any
-    // other expression as one condition.
+    // TypeScript looks through parentheses and `!` for a logical operator,
+    // which gets the outcome, inverted by each `!`. Any other expression
+    // inside them is one ordinary condition.
     let mut truthy = truthy;
     let mut expression = expression.clone();
     let logical = loop {
@@ -1360,8 +1359,9 @@ struct RootBuilder<'a, 'raw> {
     /// Whether evaluation records reads. It is false while the builder builds
     /// a finally block a second time, because the first build recorded them.
     records_reads: bool,
-    /// The statements met so far with their incoming flow, when the build
-    /// records them, as [`BuiltRoot::statements`] describes.
+    /// The statements met so far with their incoming flow, for
+    /// [`BuiltRoot::statements`], or `None` when the build doesn't record
+    /// them.
     statements: Option<Vec<(TextRange, Option<FlowNodeId>)>>,
     /// The incoming flow of the next statement, or `None` when unreachable.
     current: Option<FlowNodeId>,
@@ -1650,9 +1650,9 @@ impl RootBuilder<'_, '_> {
     /// operand comes before the next operand.
     ///
     /// Returns `None` when a call of a local function that never returns ends
-    /// the path, as [`GuardFunctions::local_call_ends`] decides, so the
-    /// operands after it don't run. A call point whose signature never
-    /// returns ends the path only where inference finds that signature.
+    /// the path, so the operands after it don't run. A call point whose
+    /// signature never returns ends the path only where inference finds that
+    /// signature.
     fn statement_calls(
         &mut self,
         expression: &AnyJsExpression,
@@ -3874,11 +3874,11 @@ impl RootBuilder<'_, '_> {
     }
 
     /// Returns the flow where `expression`, a condition, has `outcome` after
-    /// `antecedent`, or `None` when it never has it, as
-    /// [`never_has_outcome`] decides: the branch is unreachable. A condition
-    /// written as the literal `true` or `false` narrows nothing, so the
-    /// branch that it takes continues from `antecedent`, as TypeScript's
-    /// `createFlowCondition` returns the antecedent for it.
+    /// `antecedent`, or `None` when the branch is unreachable because the
+    /// condition never has a truthy or falsy `outcome` (see
+    /// [`never_has_outcome`]). A condition written as the literal `true` or
+    /// `false` narrows nothing, so the branch that it takes continues from
+    /// `antecedent`, as in TypeScript.
     fn branch(
         &mut self,
         antecedent: FlowNodeId,

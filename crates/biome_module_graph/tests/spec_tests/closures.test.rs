@@ -528,11 +528,10 @@ fn closures_in_unreachable_code_keep_the_declared_type() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at every read below
-// (`narrowing-probes/m5-l4/unreachable.ts` L6, L7, L9, `m5-l4/constant.ts`
-// L5, L9): it finds the code after a call that returns `never` and the
-// branch of `if (false)` unreachable, and gives a read there, and in a
-// closure created there, the declared type.
+// TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at every read
+// below, because it finds the code after a call that returns `never` and the
+// branch of `if (false)` unreachable. It gives a read there, and in a closure
+// created there, the declared type.
 #[test]
 fn closures_in_code_that_typescript_finds_unreachable() {
     assert_reads(
@@ -553,12 +552,12 @@ fn closures_in_code_that_typescript_finds_unreachable() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`, `narrowing-probes/m6-l2/closures.ts` L7
-// to L11): a loop whose test is not the literal `true`, as `while (1)`, has
-// an exit, so a closure that a root doesn't analyze continues the flow past
-// it, while `while (true)` ends every path. A closure created after a call
-// to a method that returns `never` starts from that point, so its reads
-// keep the declared type, unless another path reaches it.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A loop whose test is not the literal `true`, as `while (1)`, has an exit,
+// so a closure that a root doesn't analyze continues the flow past it, while
+// `while (true)` ends every path. A closure created after a call to a method
+// that returns `never` starts from that point, so its reads keep the
+// declared type, unless another path reaches it.
 #[test]
 fn closures_after_loops_and_calls_that_end_the_path() {
     assert_reads(

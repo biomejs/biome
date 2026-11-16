@@ -7,18 +7,18 @@ use super::super::{
 use crate::ModuleInfo;
 use biome_rowan::TextRange;
 
-/// Classifies whether no path reaches a statement, as TypeScript's
-/// `isReachableFlowNode` decides.
+/// Classifies whether no path reaches a statement, as TypeScript decides
+/// reachability.
 ///
 /// [`TypeInferenceClassification::Match`] means that the statement is
-/// unreachable: every path to it ends first, at `return`, `throw`, `break`,
-/// or `continue`, in a branch that a condition written as the literal `true`
-/// or `false` never takes, at a call that never returns because its
-/// signature's return type annotation is `never` or because it asserts an
-/// argument that is always false, or on the path that matches no case of an
-/// exhaustive `switch`. [`TypeInferenceClassification::NoMatch`] means that
-/// some path reaches it. A narrowed type, even `never`, never makes code
-/// unreachable.
+/// unreachable, because every path to it ends first: at `return`, `throw`,
+/// `break`, or `continue`, in a branch that a condition written as the
+/// literal `true` or `false` never takes, at a call that never returns
+/// because its signature's return type annotation is `never` or because it
+/// asserts an argument that is always false, or on the path that matches no
+/// case of an exhaustive `switch`. [`TypeInferenceClassification::NoMatch`]
+/// means that some path reaches it. A narrowed type, even `never`, never
+/// makes code unreachable.
 ///
 /// The statement is the innermost one that contains `range`, and a statement
 /// nested in an unreachable one is unreachable too. A range outside any

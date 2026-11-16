@@ -8,11 +8,10 @@
 //! write can reach. Type inference later applies the guards
 //! to resolved types without inspecting syntax again. A call whose effect
 //! depends on its callee's signature is a call point (see [`FlowCall`]).
-//! Inference resolves its effect in the context that reads a subject that
-//! the call may narrow, or a subject on a path that the call may end.
-//! Branches that a literal `true` or `false` condition never takes, and the
-//! code after a call of a local function that never returns, have no flow at
-//! all.
+//! Inference resolves its effect where it reads a subject that the call may
+//! narrow, or a subject on a path that the call may end. Branches that a
+//! literal `true` or `false` condition never takes, and the code after a call
+//! of a local function that never returns, have no flow at all.
 //!
 //! A subject is what a runtime test checks and a read narrows: a variable, or
 //! a property path that starts at a variable or at `this`, such as `o.v`,
@@ -492,14 +491,13 @@ pub(crate) struct FlowDestructureStep {
 /// type.
 ///
 /// TypeScript narrows through a call whose callee's signature returns a type
-/// predicate or an assertion, as its `getEffectsSignature` finds it.
-/// Collection decides a local function from its collected signature, so such
-/// a call is never a call point. Every other call whose callee is a dotted
-/// name, an identifier or `this` followed by `.name` accesses, is one when it
-/// passes a subject or, as a statement call, always, because its signature
-/// can end the path. Inference resolves its effect in the context that reads
-/// a subject it may narrow, or a subject on a path that it may end, as
-/// [`FlowGuard::Call`] describes.
+/// predicate or an assertion. Collection decides a local function from its
+/// collected signature, so such a call is never a call point. Every other
+/// call whose callee is a dotted name, an identifier or `this` followed by
+/// `.name` accesses, is one when it passes a subject. Such a statement call
+/// always is one, because its signature can end the path. Inference resolves
+/// its effect in the context that reads a subject it may narrow, or a subject
+/// on a path that it may end (see [`FlowGuard::Call`]).
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct FlowCall {
     /// The range of the call expression, which identifies the call to
@@ -536,11 +534,11 @@ pub(crate) enum FlowCallKind {
         /// whose object is the root name outward, as `a.b` and `a.b.c` in
         /// `a.b.c(x)`. Each must read a member with an explicit type.
         steps: Box<[TextRange]>,
-        /// Whether the return type of the name that the callee starts at
-        /// comes from an annotation, as the syntax shows, when the callee is
-        /// that name itself, as `fail` in `fail()`: a variable or a parameter
-        /// annotated with a function type, or a global. TypeScript ends a
-        /// path at a call only when a `never` return type comes from the
+        /// Whether the syntax shows that the callee's return type comes from
+        /// an annotation, when the callee is a name without member accesses,
+        /// as `fail` in `fail()`. That holds for a variable or a parameter
+        /// annotated with a function type, and for a global. TypeScript ends
+        /// a path at a call only when a `never` return type comes from the
         /// annotation of the signature's declaration. The reading context
         /// checks an import and a member access itself.
         annotated: bool,
@@ -574,10 +572,10 @@ pub(crate) struct FlowCallArgument {
     /// decomposed as a condition that holds, which an `asserts value`
     /// signature applies.
     pub(crate) condition: Option<usize>,
-    /// Whether the argument is always false as TypeScript's
-    /// `isFalseExpression` reads it: the literal `false`, `a && b` with
-    /// either operand such, or `a || b` with both, through parentheses. An
-    /// `asserts value` signature never returns for such an argument.
+    /// Whether the argument is always false, as TypeScript reads it: the
+    /// literal `false`, `a && b` with either operand always false, or
+    /// `a || b` with both, also inside parentheses. An `asserts value`
+    /// signature never returns for such an argument.
     pub(crate) is_false: bool,
 }
 
@@ -670,11 +668,10 @@ pub(crate) struct RootFlow {
     /// argument or a receiver, and the statement calls whose arguments,
     /// decomposed as conditions that hold, test it.
     pub(crate) subject_calls: FxHashMap<FlowSubjectId, Box<[u32]>>,
-    /// The indices in [`Self::calls`] of the statement calls that may end the
-    /// path and whose node reaches a read, sorted, at most
-    /// [`MAX_ENDING_CALLS`] of them. Bit `i` of a mask in [`Self::called`]
-    /// stands for the call at index `i` here. Empty when no such call
-    /// reaches a read.
+    /// The indices in [`Self::calls`] of the first [`MAX_ENDING_CALLS`]
+    /// statement calls, which may end the path, sorted. Bit `i` of a mask in
+    /// [`Self::called`] stands for the call at index `i` here. Empty when no
+    /// such call reaches a read.
     pub(crate) ending_calls: Box<[u32]>,
     /// The read points that the node of a call in [`Self::ending_calls`]
     /// reaches, sorted.
@@ -723,8 +720,9 @@ pub(crate) const MAX_SWITCHES: usize = 64;
 /// stands for [`RootFlow::ending_calls`]`[i]`.
 pub(crate) type CalledPoint = (FlowNodeId, u64);
 
-/// The number of statement calls per execution root that can end a path,
-/// the bits of the mask that the solve takes. Later calls never end one.
+/// The number of statement calls per execution root that can end a path for
+/// narrowing, the bits of the mask that the solve takes. Narrowing treats
+/// later calls as calls that return.
 pub(crate) const MAX_ENDING_CALLS: usize = 64;
 
 /// A `switch` statement whose [`FlowGuard::Bypass`] gives `never` when the
@@ -786,7 +784,8 @@ impl RootFlow {
     }
 
     /// Returns the statement calls in [`Self::ending_calls`] whose node
-    /// reaches `point`, as [`Self::called`] describes.
+    /// reaches `point`, one bit each, or zero when `point` isn't in
+    /// [`Self::called`].
     pub(crate) fn called_calls(&self, point: FlowNodeId) -> u64 {
         self.called
             .binary_search_by_key(&point, |(point, _)| *point)
@@ -801,10 +800,10 @@ impl RootFlow {
     }
 
     /// Returns whether a path from the root's start reaches `point` without
-    /// crossing the node of a statement call whose bit `ends` has, a call
-    /// that never returns, as TypeScript gives a read that only such paths
-    /// reach its declared type. Returns `None` when the walk exceeds its
-    /// work limit.
+    /// crossing the node of a statement call whose bit `ends` has, the mask
+    /// of the calls that never return. TypeScript gives a read that no such
+    /// path reaches its declared type. Returns `None` when the walk exceeds
+    /// its work limit.
     pub(crate) fn reaches_past(&self, point: FlowNodeId, ends: u64) -> Option<bool> {
         if ends == 0 {
             return Some(true);
@@ -977,8 +976,8 @@ impl RootFlow {
     }
 }
 
-/// The flow of one execution root built on demand to find which of its
-/// statements no path reaches, as [`build_reachability`] gives it.
+/// The flow of one execution root, built on demand by [`build_reachability`]
+/// to find which of its statements no path reaches.
 pub(crate) struct ReachabilityGraph {
     /// The root's graph, guards, call points, and `switch` statements, with
     /// no reads.
@@ -992,17 +991,17 @@ pub(crate) struct ReachabilityGraph {
     pub(crate) end: Option<FlowNodeId>,
 }
 
-/// Builds the flow of `root`, an execution root of the module whose semantic
-/// model is `model` and whose collected types are `raw_types` and
-/// `raw_binding_types`, to find which of its statements no path reaches.
+/// Builds the flow of `root`, an execution root of the module, to find which
+/// of its statements no path reaches. `model` is the module's semantic model,
+/// and `raw_types` and `raw_binding_types` are its collected types.
 ///
-/// The build follows the rules of collection, as [`build_root`] describes,
-/// without selecting the root, keeping reads, or looking for writes that the
-/// graph doesn't model, so a root that collection skipped gets one too. The
-/// paths that a local function ends are already cut; the call points and the
-/// `switch` statements that inference must decide keep their nodes. Returns
-/// `None` when the root exceeds a construction limit or lacks syntax that the
-/// graph requires.
+/// The build follows the rules of collection (see [`build_root`]) without
+/// selecting the root, keeping reads, or looking for writes that the graph
+/// doesn't model, so a root that collection skipped gets a graph too. The
+/// graph already cuts the paths after a call of a local function that never
+/// returns; the call points and the `switch` statements that inference must
+/// decide keep their nodes. Returns `None` when the root exceeds a
+/// construction limit or lacks syntax that the graph requires.
 pub(crate) fn build_reachability(
     root: &AnyJsControlFlowRoot,
     model: &SemanticModel,
@@ -2231,9 +2230,10 @@ impl RootCollector<'_> {
         )
     }
 
-    /// Returns the statement calls of `calls` whose node reaches a read point
-    /// of `read_points`, and those points, as [`RootFlow::ending_calls`] and
-    /// [`RootFlow::called`] describe them.
+    /// Returns the indices of the statement calls in `calls`, and the read
+    /// points of `read_points` that the nodes of those calls reach, each with
+    /// the mask of the calls that reach it, for [`RootFlow::ending_calls`] and
+    /// [`RootFlow::called`].
     ///
     /// Only the first [`MAX_ENDING_CALLS`] statement calls of the root count.
     /// Returns no call when none reaches a read, and when the walk spends the
@@ -2673,10 +2673,10 @@ impl RootCollector<'_> {
 
     /// Returns where the first statement of the own code of `closure` that
     /// ends every path through it ends, or the largest offset when it has
-    /// none: `return`, `throw`, `break`, `continue`, a loop whose test is
-    /// missing or never false, as the literal `true` is and TypeScript's
-    /// binder finds it, and a call of a local function that never returns,
-    /// as [`GuardFunctions::local_call_ends`] decides, once per closure.
+    /// none. Such a statement is `return`, `throw`, `break`, `continue`, a
+    /// loop whose test is missing or never falsy by the rules of TypeScript's
+    /// binder, such as the literal `true`, or a call of a local function that
+    /// never returns. Each closure is scanned once.
     ///
     /// Code after that statement may be unreachable, and TypeScript gives a
     /// read in unreachable code its declared type. A statement that ends only
@@ -3143,9 +3143,9 @@ const MEMBER_KINDS: SyntaxKindSet<JsLanguage> =
     AnyJsClassMember::KIND_SET.union(AnyJsControlFlowRoot::KIND_SET);
 
 declare_node_union! {
-    /// A statement after which every path may end: a jump, a loop that
-    /// [`RootCollector::first_exit`] finds infinite, or a call of a local
-    /// function that never returns.
+    /// A statement after which every path may end: a jump, a loop that may
+    /// never exit by its test, or a call of a local function that never
+    /// returns. [`RootCollector::first_exit`] checks each one.
     AnyPathEnd = JsReturnStatement
         | JsThrowStatement
         | JsBreakStatement

@@ -50,8 +50,8 @@ impl<'db> TypeInferenceRequestContext<'db> {
     }
 
     /// Classifies whether no path reaches the innermost statement that
-    /// contains `range`, from the flow of the execution root around it, as
-    /// [`super::UnreachableCodeClassificationRequest`] describes.
+    /// contains `range`, from the flow of the execution root around it. See
+    /// [`super::UnreachableCodeClassificationRequest`].
     pub(crate) fn classify_statement_as_unreachable(
         &self,
         module: ModuleInfo,

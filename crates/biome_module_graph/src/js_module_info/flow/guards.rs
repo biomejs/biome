@@ -145,9 +145,9 @@ pub(crate) enum FlowGuard {
     /// the receiver that it names, and an `asserts value` signature applies
     /// the guard of its argument decomposed as a condition that holds. A
     /// call without such a signature keeps the incoming type. A statement
-    /// call whose signature never returns gives `never` in the solves whose
-    /// read the reading context found it to end, so the path adds nothing
-    /// after it.
+    /// call whose signature never returns gives `never` when the solve's mask
+    /// of ending calls has its bit, so the path through it adds nothing to
+    /// the read.
     ///
     /// [`RootFlow::calls`]: super::RootFlow::calls
     Call { call: u32, positive: bool },
@@ -363,13 +363,15 @@ impl<'a> GuardFunctions<'a> {
     }
 
     /// Returns whether `call`, a statement call of a local function, never
-    /// returns, as the function's declaration tells: a function declaration
-    /// or a `declare function` whose collected type is one signature that is
-    /// not generic and whose return type annotation is `never`, as
-    /// TypeScript's `hasTypePredicateOrNeverReturnType` requires, or a local
-    /// assertion function with `asserts value` whose tested argument is
-    /// always false, as [`is_false_expression`] reads it. A call of any
-    /// other callee is decided by inference, as a call point.
+    /// returns, judging from the function's declaration.
+    ///
+    /// A function declaration or a `declare function` never returns when its
+    /// return type annotation is `never` and its collected type is one
+    /// signature that is not generic. TypeScript ends the path only when the
+    /// `never` comes from an annotation. A local assertion function with
+    /// `asserts value` never returns when its tested argument is always false
+    /// (see [`is_false_expression`]). Inference decides a call of any other
+    /// callee as a call point.
     pub(super) fn local_call_ends(
         &mut self,
         call: &JsCallExpression,
@@ -1658,8 +1660,8 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     /// arguments, the subject of the object of its callee, and the subjects
     /// that the decomposed arguments mention. A call that mentions none is a
     /// call point too, because its signature can end the path. Returns
-    /// `None` when its callee fails TypeScript's explicit-type rule, as
-    /// [`statement_callee`] decides, and when an argument can't be decomposed
+    /// `None` when its callee fails TypeScript's explicit-type rule (see
+    /// [`statement_callee`]), and when an argument can't be decomposed
     /// completely.
     fn statement_call_point(&mut self, call: &JsCallExpression) -> Option<usize> {
         if call.type_arguments().is_some() {
@@ -2821,9 +2823,9 @@ fn is_dotted_name(callee: &AnyJsExpression, remaining: &mut usize) -> bool {
 
 /// Returns how the reading context confirms that `callee`, the callee of a
 /// statement call without parentheses, follows TypeScript's explicit-type
-/// rule (`getTypeOfDottedName`), with the ranges of its member accesses and
-/// whether the return type of a callee that is a name itself comes from an
-/// annotation, as [`FlowCallKind::Statement`] records them.
+/// rule, with the ranges of its member accesses and whether the return type
+/// of a callee that is a name itself comes from an annotation. These are the
+/// fields of [`FlowCallKind::Statement`].
 ///
 /// The callee must be a dotted name, as [`is_dotted_name`] describes, and the
 /// name that it starts at must have an explicit type, as [`explicit_name`]
@@ -2877,10 +2879,10 @@ fn statement_callee(
 }
 
 /// Returns whether `expression`, an argument of an assertion, is always
-/// false, as TypeScript's `isFalseExpression` reads it: the literal `false`,
-/// `a && b` when either operand is, and `a || b` when both are, through
-/// parentheses. An `asserts value` signature never returns for such an
-/// argument. Returns false when the walk runs out of work.
+/// false, as TypeScript reads it: the literal `false`, `a && b` when either
+/// operand is, and `a || b` when both are, also inside parentheses. An
+/// `asserts value` signature never returns for such an argument. Returns
+/// false when the walk runs out of work.
 pub(super) fn is_false_expression(expression: &AnyJsExpression, remaining: &mut usize) -> bool {
     let Some(left) = remaining.checked_sub(1) else {
         return false;
