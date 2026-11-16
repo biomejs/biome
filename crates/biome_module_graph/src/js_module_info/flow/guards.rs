@@ -106,8 +106,8 @@ pub(crate) enum FlowTest {
     Undefined {
         strict: bool,
     },
-    /// A call to the guard declared at `function`, whose return annotation
-    /// states the tested type, as in `value is string` or
+    /// A call to the type-guard function declared at `function`. Its type
+    /// predicate states the tested type, as in `value is string` or
     /// `asserts value is Foo`.
     Predicate {
         function: TextRange,
@@ -229,8 +229,8 @@ impl<'a> GuardFunctions<'a> {
         }
     }
 
-    /// Returns the argument that `call` tests, without parentheses, with the
-    /// test that the type predicate it calls applies.
+    /// Returns the argument that `call` tests, without parentheses, and the
+    /// [`FlowTest::Predicate`] that the call applies to it.
     ///
     /// Returns `None` unless `call` calls a supported type predicate.
     fn tested_argument(
@@ -409,20 +409,22 @@ impl<'a> GuardFunctions<'a> {
         parameter.initializer().is_none().then_some(guard)
     }
 
-    /// Returns whether every member of the raw guard `target` is an object
-    /// type, as far as raw tables and the scopes that declare its names tell,
-    /// or `None` when `target` is `any` or `unknown`, or has such a member.
+    /// Returns whether every member of `target`, the raw target of a type
+    /// predicate, is an object type, as far as raw tables and the scopes that
+    /// declare its names tell. Returns `None` when `target` is `any` or
+    /// `unknown`, or has such a member, and `Some(false)` when `target` has
+    /// more type references than [`MAX_TARGET_STEPS`] allows visiting.
     ///
-    /// A name continues with the type that a local type alias names, and a
-    /// local interface or class is an object type. An imported name can name
-    /// an alias of a primitive in another module, so it is not taken as one.
-    /// Other names, such as enums and type parameters, aren't either, while a
-    /// name that no scope declares, such as a global type, and a name
-    /// qualified by a namespace are taken as object types. This decides only
-    /// which declared types the test is applied to, never its result, so a
-    /// name taken as an object type that names an alias of a primitive, as
-    /// the global `PropertyKey` does, only keeps the declared type of a
-    /// variable that has no object type.
+    /// A local type alias is followed to the type it names, and a local
+    /// interface or class is an object type. An imported name isn't taken as
+    /// an object type, because it can name an alias of a primitive in another
+    /// module. Other local names, such as enums and type parameters, aren't
+    /// either. A name that no scope declares, such as a global type, and a
+    /// name qualified by a namespace are taken as object types. The result
+    /// decides only which declared types the test applies to, never what the
+    /// test gives. So when such a name is an alias of a primitive, as the
+    /// global `PropertyKey` is, the only effect is that a variable without an
+    /// object type keeps its declared type.
     fn is_object_target(&self, target: &TypeReference, model: &SemanticModel) -> Option<bool> {
         let mut pending = vec![target];
         let mut is_object = true;
@@ -469,8 +471,8 @@ impl<'a> GuardFunctions<'a> {
     }
 }
 
-/// Limits the type references, including the chain of type aliases, that the
-/// target of a guard visits.
+/// Limits the type references, including the chain of type aliases, visited
+/// in the target of a type predicate.
 const MAX_TARGET_STEPS: usize = 16;
 
 /// Returns the binding that `qualifier` names, or `None` for a name qualified
@@ -573,17 +575,20 @@ pub(super) struct DecomposedCondition {
     /// variable cannot change between the alias and its test. See
     /// [`narrows_through_aliases`] for the variables that qualify.
     pub(super) mentions: Vec<FlowSubjectId>,
-    /// Subjects whose type the condition may refine only through
-    /// [`FlowGuard::Property`], such as `s` in `s.kind === "c"`, through
-    /// [`FlowTest::In`], such as `x` in `"a" in x`, through
-    /// [`FlowTest::Instanceof`], such as `x` in `x instanceof Date`, or
-    /// through a [`FlowTest::Predicate`] whose target has only object types,
-    /// such as `x` in `isFoo(x)`, unless `mentions` also lists them. The
-    /// first two narrow only a union with two object types, and the others
-    /// only a type with an object type or `unknown`. When decomposition stops
-    /// early, this also lists the pattern of every variable in `mentions`
-    /// that is an element of a destructuring pattern that a test of the
-    /// variable narrows.
+    /// Subjects whose type the condition may narrow only through these tests,
+    /// unless `mentions` also lists them:
+    ///
+    /// - [`FlowGuard::Property`], such as `s` in `s.kind === "c"`.
+    /// - [`FlowTest::In`], such as `x` in `"a" in x`.
+    /// - [`FlowTest::Instanceof`], such as `x` in `x instanceof Date`.
+    /// - A [`FlowTest::Predicate`] whose target has only object types, such as
+    ///   `x` in `isFoo(x)`.
+    ///
+    /// The first two narrow only a union with two object types, and the
+    /// others narrow only a type with an object type or `unknown`. When
+    /// decomposition stops early, this also lists the pattern of every
+    /// variable in `mentions` that is an element of a destructuring pattern
+    /// that a test of the variable narrows.
     pub(super) parents: Vec<FlowSubjectId>,
     /// The subjects in `parents` that `instanceof` or a type-guard function
     /// whose target has only object types checks.
@@ -682,8 +687,9 @@ struct Decomposer<'a, 'raw> {
     remaining: usize,
     mentions: Vec<FlowSubjectId>,
     /// The objects of the [`FlowGuard::Property`] guards and the subjects of
-    /// the [`FlowTest::In`], [`FlowTest::Instanceof`], and object
-    /// [`FlowTest::Predicate`] tests decomposed so far.
+    /// the [`FlowTest::In`] and [`FlowTest::Instanceof`] tests and of the
+    /// [`FlowTest::Predicate`] tests whose targets have only object types,
+    /// decomposed so far.
     parents: Vec<FlowSubjectId>,
     /// The subjects of the [`FlowTest::Instanceof`] tests and of the
     /// [`FlowTest::Predicate`] tests whose targets have only object types
@@ -822,9 +828,9 @@ impl Decomposer<'_, '_> {
         let mut guard = match tested {
             Some((test, subject)) if self.may_test(subject) => {
                 // `in` narrows only a union with two object types, as a test
-                // of a property narrows its object, and `instanceof` and a
-                // target with only object types only a type with an object
-                // type or `unknown`.
+                // of a property narrows its object. `instanceof` and a
+                // type-guard function whose target has only object types
+                // narrow only a type with an object type or `unknown`.
                 match test {
                     FlowTest::In(_) => self.parents.push(subject),
                     FlowTest::Instanceof(_)

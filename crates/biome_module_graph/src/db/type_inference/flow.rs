@@ -609,9 +609,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// types, as [`may_narrow_by_property`] describes, so this is
     /// [`Self::narrowing_baseline`] when the flattened type is one. When
     /// `instance_tested` is true, `instanceof` or a type-guard function whose
-    /// target has only object types narrows the subject too, which also
-    /// narrows a type with one object type, as [`may_narrow_by_instanceof`]
-    /// describes.
+    /// target has only object types narrows the subject too. These tests also
+    /// narrow `unknown` and a type with one object type, which
+    /// [`may_narrow_by_instanceof`] checks.
     ///
     /// Unlike [`Self::narrowing_baseline`], flattening resolves handles to
     /// local types of this context's module through this context instead of
@@ -1032,15 +1032,15 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns `ty` narrowed by a call to the type-guard function declared at
-    /// `function`, given the subject's `declared` type, as
-    /// [`narrow_by_type_predicate`] narrows it.
+    /// `function`, given the subject's `declared` type, with
+    /// [`narrow_by_type_predicate`].
     ///
-    /// When `object_target` is true, collection found that every member of
-    /// the target is an object type, which narrows only a type with an object
-    /// type or `unknown` in Biome, as [`may_narrow_by_instanceof`] describes,
-    /// so `ty` is returned unchanged without resolving the target when
-    /// `declared` is not one. TypeScript also narrows a primitive by such a
-    /// target, as `string` by `{ length: number }`.
+    /// `object_target` is true when collection found that every member of the
+    /// target is an object type. Biome narrows by such a target only a type
+    /// that has an object type or is `unknown`, so when `declared` is not one,
+    /// this returns `ty` unchanged without resolving the target. TypeScript
+    /// also narrows a primitive by such a target, as `string` by
+    /// `{ length: number }`. See [`may_narrow_by_instanceof`].
     fn narrow_by_predicate(
         &mut self,
         ty: TypeData<'db>,

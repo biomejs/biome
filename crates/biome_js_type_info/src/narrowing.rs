@@ -257,14 +257,16 @@ pub enum RawPredicateTarget<'a> {
     /// An object type: a type literal, an interface or a class written in
     /// place, a function or constructor type, a tuple, `object`, an object
     /// literal type, or a name with type arguments, such as `Promise<void>`
-    /// or `Record<string, number>`, which may also name a type alias.
+    /// or `Record<string, number>`. A name with type arguments can also name
+    /// a type alias.
     Object,
     /// A type whose values may be primitives: a primitive type, a primitive
     /// literal, `null`, `undefined`, `void`, `never`, a `typeof` query, an
-    /// intersection, an import, or another type that raw tables don't tell.
+    /// intersection, an import, or any other type that raw tables don't show
+    /// to be an object type.
     Other,
-    /// `any`, `unknown`, or a type that inference couldn't determine, which
-    /// narrow nothing as a target.
+    /// `any`, `unknown`, or a type that inference couldn't determine. None of
+    /// these narrows anything as a target.
     Top,
     /// A union, whose members are classified separately.
     Union(&'a [TypeReference]),
@@ -273,8 +275,9 @@ pub enum RawPredicateTarget<'a> {
     Named(&'a TypeReferenceQualifier),
 }
 
-/// Classifies the target of a type predicate, as [`RawPredicateTarget`]
-/// describes, without resolving it.
+/// Classifies the target of a type predicate as an object type, a type whose
+/// values may be primitives, a type that narrows nothing, a union, or a name
+/// without type arguments, without resolving it.
 ///
 /// `raw_types` is the module table that local references index. A chain of
 /// raw references longer than the step limit is [`RawPredicateTarget::Other`].
@@ -815,10 +818,10 @@ fn instances_excluded<'db>(
 ///
 /// No primitive is derived from a class, so `instanceof` can only make a
 /// branch impossible for a value of a primitive type, or leave it unchanged.
-/// Biome narrows by a type predicate whose target has only object types, as
-/// [`narrow_by_type_predicate`] does, only such a type too, although
-/// TypeScript also narrows a primitive by a target that its wrapper type
-/// satisfies, as `string` by `{ length: number }`.
+/// Biome applies a type predicate whose target has only object types only to
+/// a declared type that this function accepts. TypeScript also narrows a
+/// primitive by such a target when the primitive's wrapper type satisfies
+/// it, as it narrows `string` by `{ length: number }`.
 pub fn may_narrow_by_instanceof(db: &dyn TypeDb, declared: InferredTypeData) -> bool {
     let is_object = |member: &InferredTypeData| {
         !matches!(
@@ -845,20 +848,21 @@ pub fn may_narrow_by_instanceof(db: &dyn TypeDb, declared: InferredTypeData) -> 
 }
 
 /// Narrows `ty` by a call to a type-guard function whose type predicate
-/// targets `target`, as `isFoo(value)` with `value is Foo` narrows `value`,
-/// following TypeScript's `getNarrowedType`. `target` must be flattened, as
-/// the declared type of a variable is.
+/// targets `target`, as `isFoo(value)` with `value is Foo` narrows `value`.
+/// The result matches TypeScript except where noted below. `target` must be
+/// flattened, as the declared type of a variable is.
 ///
 /// A primitive type, a primitive literal, `null`, or `undefined` as `target`
-/// applies the runtime test that it stands for, as [`narrow_type`] applies
-/// it: `typeof value === "string"` for `string`, and strict equality for a
+/// applies the runtime test that it stands for through [`narrow_type`]:
+/// `typeof value === "string"` for `string`, and strict equality for a
 /// literal. The false branch of a primitive type keeps the literals of that
 /// primitive, as `"a"` for `string`, when the true branch gets the primitive
-/// type from an object type, as from `{ length: number }`, because
-/// TypeScript's union of the two is the primitive type.
+/// type from an object type, as from `{ length: number }`. TypeScript keeps
+/// them too, because its union of such a literal and the primitive type is
+/// the primitive type.
 ///
-/// Other targets compare each member of `ty` with each member of `target` in
-/// TypeScript's subtype relation, as [`is_subtype`] describes:
+/// For other targets, Biome compares each member of `ty` with each member of
+/// `target` in TypeScript's subtype relation, using [`is_subtype`]:
 ///
 /// - When `positive` is true, a member of `ty` that is a subtype of a member
 ///   of `target` stays, a member of `target` that is a subtype of a member of
@@ -867,28 +871,33 @@ pub fn may_narrow_by_instanceof(db: &dyn TypeDb, declared: InferredTypeData) -> 
 ///   `target`. When no member remains, the result is `target` if it is a
 ///   subtype of `ty`, and `ty` otherwise, where TypeScript gives an
 ///   intersection such as `(string | number) & Foo`.
-/// - When `positive` is false, the members that the true branch keeps as
-///   they are, rather than replacing them with a member of `target`, are
-///   removed, which can give `never`, as TypeScript does.
+/// - When `positive` is false, the result removes each member that the true
+///   branch keeps as it is rather than replacing it with a member of
+///   `target`. As in TypeScript, this can give `never`.
 ///
-/// TypeScript's strict subtype relation decides which of two members that
-/// are subtypes of each other the true branch keeps, and it depends on
-/// modifiers that Biome doesn't record, such as `readonly`. So the false
-/// branch keeps such a member unless it is the same type as the member of
-/// `target`: with `interface Same { a: number }` and the target `Foo`,
-/// `Same | Bar` keeps `Same` in both branches, where TypeScript removes it
-/// from the false branch. The false branch also keeps a member when Biome
-/// can tell only that a member of `target` is a subtype of it, and so does
-/// it keep `unknown`, and every member when the true branch is empty.
+/// When a member and a member of `target` are subtypes of each other, the
+/// false branch keeps the member unless the two are the same type. In that
+/// case, TypeScript's strict subtype relation picks which of the two the
+/// true branch keeps, and that relation depends on modifiers that Biome
+/// doesn't record, such as `readonly`. With `interface Same { a: number }`
+/// and the target `Foo`, `Same | Bar` keeps `Same` in both branches, where
+/// TypeScript removes it from the false branch. The false branch also keeps
+/// a member when Biome can tell only that a member of `target` is a subtype
+/// of it. It keeps `unknown`, and it keeps every member when the true branch
+/// is empty.
 ///
-/// `ty` is returned unchanged when a comparison of two members can't tell
-/// whether either is a subtype of the other in the way that matters, as for
-/// generics, `unknown` in a union, classes that can declare private members,
-/// and literal types that TypeScript may widen, as [`is_subtype`] describes,
-/// when Biome may reach two classes with the same contents as one, when
-/// `target` has `any` or an undetermined member, and when the comparisons,
-/// which visit at most 256 pairs and types, run out. `resolve` resolves
-/// handles as for [`narrow_type`].
+/// `ty` is returned unchanged in these cases:
+///
+/// - A comparison of two members can't tell whether either is a subtype of
+///   the other, as for generics, classes that can declare private members,
+///   and literal types that TypeScript may widen. [`is_subtype`] describes
+///   these comparisons.
+/// - `ty` is a union with `unknown`.
+/// - Biome may reach two classes with the same contents as one.
+/// - `target` has `any` or an undetermined member.
+/// - The comparisons run out of their budget of 256 visited types and pairs.
+///
+/// `resolve` resolves handles as for [`narrow_type`].
 pub fn narrow_by_type_predicate<'db>(
     db: &'db dyn TypeDb,
     ty: InferredTypeData<'db>,
@@ -1029,17 +1038,18 @@ fn predicate_branch<'db>(
 }
 
 /// How a member of a narrowed type relates to a member of the target of a
-/// type predicate, as [`narrow_by_type_predicate`] compares them.
+/// type predicate in the subtype relation.
 enum PredicateMatch {
     /// The member is a subtype of the target member, and TypeScript keeps it
-    /// as it is: the two are the same type, or the target member is not a
-    /// subtype of the member.
+    /// as it is. This holds when the two are the same type, or when the
+    /// target member is not a subtype of the member.
     Member,
     /// The true branch keeps the member, but TypeScript may keep the target
-    /// member instead. Either both are subtypes of each other, and the
-    /// strict subtype relation picks one, or Biome can tell only that the
-    /// target member is a subtype of the member, so the member contains
-    /// whichever TypeScript keeps.
+    /// member instead. This holds when the member is a subtype of the target
+    /// member and the target member may be a subtype of the member, because
+    /// TypeScript's strict subtype relation then picks one. It also holds
+    /// when Biome can tell only that the target member is a subtype of the
+    /// member. In both cases, the member contains whichever TypeScript keeps.
     Either,
     /// The target member is a subtype of the member and replaces it.
     Target,
@@ -1048,8 +1058,11 @@ enum PredicateMatch {
 }
 
 /// Returns how `member` relates to `candidate`, a member of the target of a
-/// type predicate, or `None` when Biome can't tell in a way that decides the
-/// branches, as [`narrow_by_type_predicate`] describes.
+/// type predicate.
+///
+/// Returns `None` when Biome can't tell whether either is a subtype of the
+/// other, and when the two may be instances of distinct classes with the
+/// same contents.
 fn predicate_match<'db>(
     db: &'db dyn TypeDb,
     member: InferredTypeData<'db>,
@@ -1085,8 +1098,8 @@ fn predicate_match<'db>(
     })
 }
 
-/// Returns whether `ty` is an instance of a class that is not built in, which
-/// Biome reaches without a handle to a local type of a module.
+/// Returns whether `ty` is an instance of a class that is not built in and
+/// that Biome reaches without a handle to a local type of a module.
 fn is_class_instance_without_handle<'db>(
     db: &'db dyn TypeDb,
     ty: InferredTypeData<'db>,
@@ -1104,8 +1117,9 @@ fn is_class_instance_without_handle<'db>(
 }
 
 /// Returns whether `member` is a literal type, such as `"a"` or `true`, and
-/// `types` has its primitive type, such as `string` or `boolean`, which
-/// TypeScript's union of the two reduces to.
+/// `types` has its primitive type, such as `string` or `boolean`.
+/// TypeScript reduces the union of a literal type and its primitive type to
+/// the primitive type.
 fn has_primitive_of_literal<'db>(
     db: &'db dyn TypeDb,
     member: InferredTypeData<'db>,
@@ -4098,8 +4112,8 @@ mod tests {
             narrow_predicate(db, ty, shape, false),
             InferredTypeData::String
         );
-        // A class field initialized with `1` is `number` in TypeScript, of
-        // which `{ a: number }` is a subtype.
+        // TypeScript types a class field initialized with `1` as `number`, so
+        // `{ a: number }` is a subtype of the class.
         let class = instance(db, class(db, "A", None, vec![member("a", one)]));
         let wide = object(db, vec![member("a", InferredTypeData::Number)]);
         let ty = union(db, &[wide, InferredTypeData::String]);

@@ -528,13 +528,13 @@ fn optional_and_nested_assertion_calls_preserve_incoming_types() {
 }
 
 // A comment gives the type that TypeScript 6.0.3 (`tsc --strict`) gives
-// where it differs (`narrowing-probes/m3-l7/unknown.ts` L28).
+// where it differs.
 #[test]
 fn unsupported_assertion_signatures_and_never_returns_do_not_add_facts() {
     use InferredTypeData::{Null, String};
     for declaration in [
-        // `string & Promise<void>`: Biome keeps the declared type when no
-        // member of it is related to the target.
+        // Biome keeps the declared type when no member of it is related to
+        // the target. `string & Promise<void>`
         "declare function check(input: unknown): asserts input is Promise<void>;",
         "function check(this: unknown, input: unknown): asserts this is string {}",
         "function check(this: unknown, input: unknown): asserts this {}",
@@ -620,10 +620,10 @@ fn assertion_functions_must_be_declared_with_function() {
     assert_no_whole_module_inference(&db, &db.take_salsa_events());
 }
 
-// A target of `any` or `unknown` narrows nothing, and one whose members are
+// A target of `any` or `unknown` narrows nothing. A target whose members are
 // all object types narrows nothing in a value whose collected type has no
-// object type, as this union of string literals, so neither needs the flow
-// of the value.
+// object type, such as this union of string literals. So neither target
+// needs the flow of the value.
 #[test]
 fn assertion_targets_that_cannot_narrow_do_not_expand_large_baselines() {
     let variants = (0..1100)
@@ -693,9 +693,8 @@ fn alias_assertion_targets_narrow_like_the_types_they_name() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3/predicates.ts` L26, `narrowing-probes/m3-l7/spec.ts`
-// L55 to L57, L68, and `narrowing-probes/m3-l7/unknown.ts` L27).
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected
+// type.
 #[test]
 fn object_and_union_assertion_targets_narrow_the_following_reads() {
     const SOURCE: &str = r#"

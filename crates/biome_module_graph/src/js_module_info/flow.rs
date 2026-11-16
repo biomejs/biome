@@ -308,18 +308,23 @@ pub(crate) struct RootFlow {
     /// The points of each subject's reads, sorted and without duplicates.
     pub(crate) read_points: FxHashMap<FlowSubjectId, Box<[FlowNodeId]>>,
     /// The subjects with reads that conditions narrow only through tests of
-    /// their shape: [`FlowGuard::Property`], such as `s` when the only
-    /// condition that mentions it is `s.kind === "c"`, `in`, which
-    /// [`FlowTest::In`] applies to `x` in `"a" in x`, `instanceof`, which
-    /// [`FlowTest::Instanceof`] applies to `x` in `x instanceof Date`, and
-    /// calls to type-guard functions whose targets have only object types, as
-    /// `isFoo(x)` with `x is Foo`. A test of a property or `in` narrows only a
-    /// union with two object types, and the others only a type with an object
-    /// type or `unknown`, so these subjects need no solve when their declared
-    /// type is not one. Every [`FlowSubject::Pattern`] with reads is one.
+    /// their shape:
+    ///
+    /// - [`FlowGuard::Property`], such as `s` when the only condition that
+    ///   mentions it is `s.kind === "c"`.
+    /// - `in`, which [`FlowTest::In`] applies to `x` in `"a" in x`.
+    /// - `instanceof`, which [`FlowTest::Instanceof`] applies to `x` in
+    ///   `x instanceof Date`.
+    /// - Calls to type-guard functions whose targets have only object types,
+    ///   as `isFoo(x)` with `x is Foo`.
+    ///
+    /// A test of a property or `in` narrows only a union with two object
+    /// types, and the others narrow only a type with an object type or
+    /// `unknown`. So these subjects need no solve when their declared type is
+    /// not one. Every [`FlowSubject::Pattern`] with reads is in this set.
     pub(crate) property_only: FxHashSet<FlowSubjectId>,
     /// The subjects in [`Self::property_only`] that `instanceof` or a
-    /// type-guard function whose target has only object types narrows, whose
+    /// type-guard function whose target has only object types narrows. Their
     /// declared type need not be a union.
     pub(crate) instance_tested: FxHashSet<FlowSubjectId>,
     /// The [`FlowSubject::Pattern`] of each element whose reads a test of the
@@ -404,12 +409,12 @@ pub(crate) struct ModuleFlow {
     instance_tested_bindings: FxHashSet<TextRange>,
     /// The candidates that are candidates only because they are, or contain,
     /// reads of one binding in [`Self::property_only_bindings`], reads of one
-    /// binding that only the tests of [`RootFlow::instance_tested`] reach, or
-    /// reads of elements of one pattern in [`Self::pattern_types`] that no
-    /// test of the elements themselves reaches, keyed by range, with the
-    /// range of that binding's declaration or of that pattern. Such a
-    /// candidate keeps its type when the binding or the pattern has no type
-    /// that narrowing starts from.
+    /// binding that only `instanceof` or type-guard functions whose targets
+    /// have only object types reach, or reads of elements of one pattern in
+    /// [`Self::pattern_types`] that no test of the elements themselves
+    /// reaches, keyed by range, with the range of that binding's declaration
+    /// or of that pattern. Such a candidate keeps its type when the binding
+    /// or the pattern has no type that narrowing starts from.
     property_only_candidates: FxHashMap<TextRange, TextRange>,
     /// Maps the range of each [`FlowSubject::Pattern`] with reads to its
     /// declared type, which is the collected type of the value that the
@@ -483,8 +488,8 @@ impl ModuleFlow {
         self.property_only_bindings.contains(&range)
     }
 
-    /// Returns whether a test of [`RootFlow::instance_tested`] narrows the
-    /// binding declared at `range`, one that
+    /// Returns whether `instanceof` or a type-guard function whose target has
+    /// only object types narrows the binding declared at `range`, one that
     /// [`Self::is_property_only_binding`] accepts.
     pub(crate) fn is_instance_tested_binding(&self, range: TextRange) -> bool {
         self.instance_tested_bindings.contains(&range)
@@ -594,9 +599,9 @@ impl RootCollector<'_> {
             }
         }
         // A test of a property narrows its object only when the object's
-        // declared type is a union with at least two object types, and
-        // `instanceof` and a type-guard function whose target has only
-        // object types only a type with an object type or `unknown`, so a
+        // declared type is a union with at least two object types.
+        // `instanceof` and a type-guard function whose target has only object
+        // types narrow only a type with an object type or `unknown`. So a
         // variable or a pattern that only such tests mention keeps its
         // declared type when its collected type shows, without resolving it,
         // that its tests can't narrow it. Dropping it here spares its reads
@@ -729,11 +734,11 @@ impl RootCollector<'_> {
             })
             .flatten()
             .collect();
-        // Variables that other tests also mention, whose reads only
+        // Variables that other tests also mention can have reads that only
         // `instanceof` or a type-guard function whose target has only object
-        // types may reach. Such a read narrows only when the
-        // variable's declared type can, so its candidate records the variable
-        // as a read of a variable in `property_only` does.
+        // types may reach. Such a read narrows only when the variable's
+        // declared type can, so its candidate records the variable as a read
+        // of a variable in `property_only` does.
         let instance_reached: Vec<FlowSubjectId> = walked
             .iter()
             .copied()
@@ -1385,8 +1390,8 @@ mod tests {
         let info = module(SOURCE);
         let read = info.flow.read(marked(SOURCE, "x", "x")).unwrap();
         let root = info.flow.root(read.root).unwrap();
-        // A target whose members are all object types narrows, as
-        // `instanceof` does, only a type with an object type or `unknown`.
+        // Like `instanceof`, a target whose members are all object types
+        // narrows only a type with an object type or `unknown`.
         assert!(root.is_property_only(read.subject));
         assert!(root.is_instance_tested(read.subject));
         let read = info.flow.read(marked(SOURCE, "y", "y")).unwrap();
@@ -1394,8 +1399,9 @@ mod tests {
         let read = info.flow.read(marked(SOURCE, "w", "w")).unwrap();
         assert!(root.is_instance_tested(read.subject));
         // The annotations of `z` and `a` show that they have no object type,
-        // so their reads are dropped without resolving anything, also through
-        // the alias of a union of object types.
+        // so their reads are dropped without resolving anything. This also
+        // holds for `a`, whose type-guard function targets an alias of a
+        // union of object types.
         for marker in ["z", "a"] {
             assert!(
                 !info.flow.is_candidate(marked(SOURCE, marker, marker)),

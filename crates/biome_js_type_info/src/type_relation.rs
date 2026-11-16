@@ -12,8 +12,8 @@
 //! for `in`. For `instanceof`, [`instance_types`] gives the instance types of
 //! a constructor, and [`is_derived_from`] compares a type with them by
 //! declaration. [`is_subtype`] follows TypeScript's subtype relation, which
-//! is stricter than assignability, and decides how a type predicate such as
-//! `value is Foo` narrows.
+//! is stricter than assignability. Narrowing by a type predicate such as
+//! `value is Foo` compares types in that relation.
 //!
 //! The operands must already be normalized, as with the operations in
 //! [`crate::type_operations`].
@@ -422,18 +422,19 @@ fn is_decimal_integer_name(name: &str) -> bool {
 /// - A source that lacks an optional property of an object type target is not
 ///   a subtype of it, unless the source is the type of an object literal or a
 ///   tuple.
-/// - A primitive and an object type such as an interface are compared through
-///   the members of the primitive's wrapper type, as [`primitive_can_satisfy`]
-///   compares them, so `string` is a subtype of `{ length: number }` and not
-///   of `{ a: number }`. Assignability leaves these undetermined.
+/// - A primitive is compared with an object type, such as an interface,
+///   through the members of the primitive's wrapper type, so `string` is a
+///   subtype of `{ length: number }` and not of `{ a: number }`.
+///   Assignability leaves these comparisons undetermined. See
+///   [`primitive_can_satisfy`].
 /// - `object` is not a subtype of an object type with a member, optional or
 ///   not, that `Object` lacks, as `{ a?: number }`.
-/// - Two instances of classes with the same contents that Biome reaches
-///   through different handles, or through a handle and without one, such as
-///   one class declared in each of two modules, are undetermined, because
-///   TypeScript relates classes with private members only to themselves and
-///   their subclasses. Two such classes without handles, as in two
-///   namespaces of one module, can't be told from one class.
+/// - The comparison of two instances of classes with the same contents is
+///   undetermined when Biome reaches the classes through different handles,
+///   or through a handle and without one, such as one class declared in each
+///   of two modules. TypeScript relates classes with private members only to
+///   themselves and their subclasses. Two such classes without handles, as
+///   in two namespaces of one module, can't be told from one class.
 /// - A property of the type of an object literal or of an instance of a
 ///   class that is not built in can have the literal type of its
 ///   initializer, as `1` for `{ a: 1 }`, where TypeScript widens it to
@@ -1778,8 +1779,10 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
 
     /// Compares a value of the primitive `source` with the object type
     /// `target`, such as an interface or a type literal, in the subtype
-    /// relation, as [`is_subtype`] describes. Assignability leaves the result
-    /// undetermined, because it also decides conditional types.
+    /// relation, through the members of the primitive's wrapper type. `null`,
+    /// `undefined`, and `void` are subtypes of no object type. Assignability
+    /// leaves the result undetermined, because it also decides conditional
+    /// types.
     fn is_primitive_subtype_of_object(
         &mut self,
         source: PrimitiveKind,
@@ -1798,8 +1801,8 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 return Assignability::NotAssignable;
             }
         };
-        // Every value of the kind having the type proves that a literal of
-        // the kind has it, and no value having it proves the opposite.
+        // When every value of the kind has the type, so does a literal of the
+        // kind, and when no value has it, the literal doesn't either.
         self.primitive_can_satisfy(kind, target)
     }
 
@@ -2590,18 +2593,17 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
     }
 
     /// Compares the source member `source` with the target member called
-    /// `name` of type `target`, as [`Self::is_member_assignable`] does, with
+    /// `name` of type `target` through [`Self::is_member_assignable`], with
     /// `undefined` added to `target` when it is optional.
     ///
     /// `widens` tells whether the members of the source and of the target
-    /// may have literal types that TypeScript widens, as
-    /// [`Self::may_widen_members`] describes. A literal type of a field
-    /// initializer is widened unless the field is readonly or `as const`,
-    /// and Biome doesn't record either, so `{ a: 1 }` can be `{ a: number }`
-    /// in TypeScript. The member is then also compared with its literal
-    /// types widened, and the result is undetermined when the comparisons
-    /// disagree. Two members of the same type on two sides that both may
-    /// widen are taken as the same member, as a subclass inherits it.
+    /// may have literal types that TypeScript widens. A literal type of a
+    /// field initializer is widened unless the field is readonly or
+    /// `as const`, and Biome doesn't record either, so `{ a: 1 }` can be
+    /// `{ a: number }` in TypeScript. The member is then also compared with
+    /// its literal types widened, and the result is undetermined when the
+    /// comparisons disagree. Two members of the same type on two sides that
+    /// both may widen are taken as the same member, as a subclass inherits it.
     fn is_widened_member_assignable(
         &mut self,
         source: TypeData<'db>,
@@ -2638,10 +2640,10 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         result
     }
 
-    /// Returns whether the members of `ty` may have literal types where
-    /// TypeScript widens the literal to its primitive type: whether `ty` is
-    /// the type of an object literal or an instance of a class that is not
-    /// built in, whose fields can take their types from initializers.
+    /// Returns whether the members of `ty` may have literal types that
+    /// TypeScript widens to their primitive types. This holds for the type of
+    /// an object literal and for an instance of a class that is not built in,
+    /// because their fields can take their types from initializers.
     fn may_widen_members(&mut self, ty: TypeData<'db>) -> bool {
         match ty {
             TypeData::Object(object) => object.kind(self.db) == ObjectKind::Expression,
@@ -2656,7 +2658,8 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
 
     /// Returns `ty` with its primitive literal types, and those of the
     /// members of a union, replaced by their primitive types, as `number`
-    /// replaces `1`, or `None` when it has none.
+    /// replaces `1`, or `None` when it has none or is a union with more than
+    /// [`MAX_STRUCTURAL_MEMBERS`] members.
     fn widened(&mut self, ty: TypeData<'db>) -> Option<TypeData<'db>> {
         let ty = self.resolve(ty);
         if let Some(widened) = widened_literal(self.db, ty) {

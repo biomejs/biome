@@ -46,7 +46,7 @@ pub(super) struct BuiltRoot {
     /// `"a" in s`, `s instanceof Date`, or `isFoo(s)`.
     pub(super) property_only: FxHashSet<FlowSubjectId>,
     /// The subjects in `property_only` that `instanceof` or a type-guard
-    /// function whose target has only object types refines.
+    /// function whose target has only object types narrows.
     pub(super) instance_tested: FxHashSet<FlowSubjectId>,
     /// The condition nodes, each with a subject in `mentions`, whose
     /// condition mentions the subject only as the subject of `instanceof` or
@@ -377,11 +377,11 @@ struct RootBuilder<'a, 'raw> {
     /// type-guard function whose target has only object types.
     tested: FxHashSet<FlowSubjectId>,
     /// The objects of the [`FlowGuard::Property`] guards and the subjects of
-    /// the `in`, `instanceof`, and object type-guard tests of all
-    /// conditions.
+    /// the `in` and `instanceof` tests and of the calls to type-guard
+    /// functions whose targets have only object types, in all conditions.
     parents: FxHashSet<FlowSubjectId>,
-    /// The subjects of the `instanceof` and object type-guard tests of all
-    /// conditions.
+    /// The subjects of the `instanceof` tests and of the calls to type-guard
+    /// functions whose targets have only object types, in all conditions.
     instance_tested: FxHashSet<FlowSubjectId>,
     instance_mentions: FxHashSet<(FlowNodeId, FlowSubjectId)>,
     reads: Vec<BuiltRead>,

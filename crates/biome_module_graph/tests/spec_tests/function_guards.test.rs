@@ -752,9 +752,9 @@ fn long_signatures_names_and_parenthesized_callees_narrow() {
 }
 
 // TypeScript 6.0.3 (`tsc --strict`) gives every `then` read the target and
-// every `else` read `unknown` (`narrowing-probes/m3-l7/unknown.ts` L15 to
-// L20, L23, L24), except that a target of `{}` gives `null | undefined` and
-// `void` gives `{} | null` in the `else` branch, where Biome keeps `unknown`.
+// every `else` read `unknown`, except that in the `else` branch a target of
+// `{}` gives `null | undefined` and `void` gives `{} | null`, where Biome
+// keeps `unknown`.
 #[test]
 fn predicate_targets_narrow_unknown_to_the_target() {
     for target in [
@@ -812,9 +812,8 @@ fn predicate_targets_narrow_unknown_to_the_target() {
 }
 
 // TypeScript 6.0.3 (`tsc --strict`) keeps `unknown` in the `then` branch of
-// both targets and gives `never` in the `else` branch of `unknown`
-// (`narrowing-probes/m3-l7/unknown.ts` L21, L22). Biome supports neither
-// target, so both branches keep the declared type.
+// both targets and gives `never` in the `else` branch of `unknown`. Biome
+// supports neither target, so both branches keep the declared type.
 #[test]
 fn any_and_unknown_predicate_targets_preserve_unknown_and_indeterminate_classifications() {
     for target in ["any", "unknown"] {
@@ -885,8 +884,7 @@ fn variant_names(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
 }
 
 /// Types and type-guard functions shared by the tests of targets that are not
-/// primitives, as in `narrowing-probes/m3/predicates.ts` and
-/// `narrowing-probes/m3-l7/spec.ts`.
+/// primitives.
 const OBJECT_TARGETS: &str = r#"
     interface Foo { a: number }
     interface Foo2 extends Foo { b: number }
@@ -929,9 +927,10 @@ const OBJECT_TARGETS: &str = r#"
 /// How [`variant_names`] names `() => void`.
 const VOID_FUNCTION: &str = "sync Function { accepts: { params: [] type_args: [] } returns: void }";
 
-/// Asserts the type of each `(marker, expression, expected)` read in `source`,
-/// which follows [`OBJECT_TARGETS`], by the names of its members, as
-/// [`variant_names`] gives them.
+/// Asserts that the type of each `(marker, expression, expected)` read in
+/// `source` has the member names `expected`, sorted and spelled as
+/// [`variant_names`] spells them. `source` follows [`OBJECT_TARGETS`] in the
+/// module.
 fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     let source = format!("{OBJECT_TARGETS}{source}");
     let (db, module) = guard_db(&source);
@@ -948,12 +947,9 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert_no_whole_module_inference(&db, &db.take_salsa_events());
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3/predicates.ts` L17 to L21, L23 to L25, L27, L30 to
-// L33, L35, L38, `narrowing-probes/m3-l7/spec.ts` L35, L36, L38, L39, L41,
-// L42, L45 to L47, L60, L62 to L64, and `narrowing-probes/m3-l7/widened.ts`
-// L15). A branch that no value reaches is `never` in TypeScript, which Biome
-// reads as Unknown.
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// A branch that no value reaches is `never` in TypeScript, which Biome reads
+// as Unknown.
 #[test]
 fn object_targets_narrow_both_branches() {
     assert_reads(
@@ -991,8 +987,8 @@ fn object_targets_narrow_both_branches() {
         &[
             ("f1", "x", &["Foo"]),
             ("f1Else", "x", &["string"]),
-            // Copied from TypeScript although unsound: `Bar` is removed,
-            // although a `Bar` that also has `a` is a `Foo`.
+            // Biome matches TypeScript here, although it is unsound. `Bar` is
+            // removed, but a `Bar` that also has `a` is a `Foo`.
             ("f2", "x", &["Foo2"]),
             ("f2Else", "x", &["Bar"]),
             ("f3", "x", &["number", "string"]),
@@ -1050,7 +1046,8 @@ fn object_targets_narrow_both_branches() {
             ("g29Else", "x", &["string"]),
             ("g30", "x", &["Foo"]),
             ("g30Else", "x", &["null", "undefined"]),
-            // `{ a: number; b: number }` in TypeScript, a subtype of `Foo`.
+            // TypeScript types `o` as `{ a: number; b: number }`, a subtype of
+            // `Foo`.
             ("g33", "o", &[r#"["a": number: 1, "b": number: 2]"#]),
             ("g33Else", "o", &["unknown"]),
         ],
@@ -1059,10 +1056,7 @@ fn object_targets_narrow_both_branches() {
 
 // Biome keeps the declared type in both branches of every read below, or in
 // the `else` branch where it narrows only the `then` branch. A comment gives
-// the type that TypeScript 6.0.3 (`tsc --strict`) gives where it differs
-// (`narrowing-probes/m3/predicates.ts` L22, L28, L29, L34, L37, and
-// `narrowing-probes/m3-l7/spec.ts` L37, L43, L44, L61, and
-// `narrowing-probes/m3-l7/widened.ts` L9 to L11).
+// the type that TypeScript 6.0.3 (`tsc --strict`) gives where it differs.
 #[test]
 fn object_targets_keep_the_declared_type_where_biome_cannot_tell() {
     assert_reads(
@@ -1085,8 +1079,8 @@ fn object_targets_keep_the_declared_type_where_biome_cannot_tell() {
             ("f6", "x", &["number", "string"]),
             ("f6Else", "x", &["number", "string"]),
             // TypeScript's strict subtype relation keeps `{ a: number }` and
-            // `A` as they are, which Biome can't tell because it depends on
-            // modifiers such as `readonly`, so the `else` branch keeps them.
+            // `A` as they are. Biome can't tell, because that relation depends
+            // on modifiers such as `readonly`, so the `else` branch keeps them.
             ("f12", "x", &[r#"["a": number]"#]),
             // `Bar`
             ("f12Else", "x", &["Bar", r#"["a": number]"#]),
@@ -1116,9 +1110,9 @@ fn object_targets_keep_the_declared_type_where_biome_cannot_tell() {
             ("g27", "x", &[r#"["a": number]"#]),
             // `string`
             ("g27Else", "x", &[r#"["a": number]"#, "string"]),
-            // Biome types the field of `A`, and the properties of the object
-            // literal `action`, with the literal types of their initializers,
-            // which TypeScript widens to `number` and `string`, so it can't
+            // Biome types the field of `A` and the properties of the object
+            // literal `action` with the literal types of their initializers.
+            // TypeScript widens those to `number` and `string`, so Biome can't
             // tell whether one type is a subtype of the other.
             // `{ a: 1 }`
             ("w1", "x", &[r#"["a": number: 1]"#, "string"]),
@@ -1142,9 +1136,7 @@ fn object_targets_keep_the_declared_type_where_biome_cannot_tell() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3-l7/spec.ts` L48 to L52, L66, L67, and
-// `narrowing-probes/m3-l7/flow.ts` L6 to L12).
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
 #[test]
 fn object_targets_narrow_through_the_flow() {
     assert_reads(
@@ -1193,10 +1185,9 @@ fn object_targets_narrow_through_the_flow() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3-l7/widened.ts` L12, L13). Its union of `"a"` and `string`, the
-// types that the `then` branch gets, is `string`, so the `else` branch keeps
-// `"a"`.
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// The `then` branch gets `"a"` and `string`, whose union in TypeScript is
+// `string`, so the `else` branch keeps `"a"`.
 #[test]
 fn primitive_targets_keep_the_literals_that_the_then_branch_absorbs() {
     assert_reads(
@@ -1213,9 +1204,8 @@ fn primitive_targets_keep_the_literals_that_the_then_branch_absorbs() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3-l7/mods/index.ts` L5 to L8), except where a comment
-// gives TypeScript's type.
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type,
+// except where a comment gives TypeScript's type.
 #[test]
 fn object_targets_resolve_types_of_other_modules() {
     let files = [
@@ -1275,10 +1265,10 @@ function copy(x: K | string) { if (isCopy(x)) /*copy*/x; else /*copyElse*/x; }
     assert_no_whole_module_inference(&db, &db.take_salsa_events());
 }
 
-// A type predicate whose target has only object types can't narrow a value
-// whose declared type has no object type in Biome, so the target, whose
-// parent `Foo` comes from another module, is never resolved for it, even when
-// another test of the same value is solved.
+// In Biome, a type predicate whose target has only object types can't narrow
+// a value whose declared type has no object type. So the target `Local`,
+// which extends `Foo` from another module, is never resolved for such a
+// value, even when another test of the same value is solved.
 #[test]
 fn object_targets_are_not_resolved_for_values_without_object_types() {
     const SOURCE: &str = r#"
