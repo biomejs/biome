@@ -3639,6 +3639,11 @@ export interface Nursery {
 	 */
 	noUselessDateGetTime?: NoUselessDateGetTimeConfiguration;
 	/**
+	 * Disallow default values that can never be used.
+	 * See https://biomejs.dev/linter/rules/no-useless-default-assignment
+	 */
+	noUselessDefaultAssignment?: NoUselessDefaultAssignmentConfiguration;
+	/**
 	 * Disallow empty object fallbacks when spreading a value into an object.
 	 * See https://biomejs.dev/linter/rules/no-useless-fallback-in-spread
 	 */
@@ -7278,6 +7283,9 @@ export type NoUselessCallConfiguration =
 export type NoUselessDateGetTimeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessDateGetTimeOptions;
+export type NoUselessDefaultAssignmentConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessDefaultAssignmentOptions;
 export type NoUselessFallbackInSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessFallbackInSpreadOptions;
@@ -10721,6 +10729,14 @@ export interface RuleWithNoUselessDateGetTimeOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoUselessDateGetTimeOptions;
+}
+export interface RuleWithNoUselessDefaultAssignmentOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoUselessDefaultAssignmentOptions;
 }
 export interface RuleWithNoUselessFallbackInSpreadOptions {
 	/**
@@ -14262,6 +14278,7 @@ export type NoUselessAwaitOptions = {};
 export type NoUselessBindOptions = {};
 export type NoUselessCallOptions = {};
 export type NoUselessDateGetTimeOptions = {};
+export type NoUselessDefaultAssignmentOptions = {};
 export type NoUselessFallbackInSpreadOptions = {};
 export type NoUselessLengthCheckOptions = {};
 export type NoUselessNestedTernaryOptions = {};
@@ -16587,6 +16604,7 @@ export type Category =
 	| "lint/nursery/noUselessBind"
 	| "lint/nursery/noUselessCall"
 	| "lint/nursery/noUselessDateGetTime"
+	| "lint/nursery/noUselessDefaultAssignment"
 	| "lint/nursery/noUselessFallbackInSpread"
 	| "lint/nursery/noUselessLengthCheck"
 	| "lint/nursery/noUselessNestedTernary"
