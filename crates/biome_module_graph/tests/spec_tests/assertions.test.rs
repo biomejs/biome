@@ -527,18 +527,20 @@ fn optional_and_nested_assertion_calls_preserve_incoming_types() {
     }
 }
 
-// A comment gives the type that TypeScript 6.0.3 (`tsc --strict`) gives
-// where it differs.
+// TypeScript 7.0.2 (`tsc --strict`) gives `string | null` in each row without
+// a comment. A row comment gives TypeScript's type where Biome differs.
 #[test]
 fn unsupported_assertion_signatures_and_never_returns_do_not_add_facts() {
     use InferredTypeData::{Null, String};
     for declaration in [
-        // Biome keeps the declared type when no member of it is related to
-        // the target. `string & Promise<void>`
+        // TypeScript gives `string & Promise<void>`. Biome keeps
+        // `string | null` because neither member is related to the target.
         "declare function check(input: unknown): asserts input is Promise<void>;",
         "function check(this: unknown, input: unknown): asserts this is string {}",
         "function check(this: unknown, input: unknown): asserts this {}",
+        // TypeScript gives `string` after the generic truthiness assertion.
         "declare function check<T>(input: unknown): asserts input;",
+        // TypeScript gives `string` after resolving the overload.
         "declare function check(input: string): asserts input; declare function check(input: unknown): asserts input is string;",
         "declare function check(input: unknown): never;",
     ] {
@@ -693,7 +695,7 @@ fn alias_assertion_targets_narrow_like_the_types_they_name() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected
 // type.
 #[test]
 fn object_and_union_assertion_targets_narrow_the_following_reads() {

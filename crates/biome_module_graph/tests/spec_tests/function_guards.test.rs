@@ -751,7 +751,7 @@ fn long_signatures_names_and_parenthesized_callees_narrow() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every `then` read the target and
+// TypeScript 7.0.2 (`tsc --strict`) gives every `then` read the target and
 // every `else` read `unknown`, except that in the `else` branch a target of
 // `{}` gives `null | undefined` and `void` gives `{} | null`, where Biome
 // keeps `unknown`.
@@ -811,9 +811,10 @@ fn predicate_targets_narrow_unknown_to_the_target() {
     }
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) keeps `unknown` in the `then` branch of
-// both targets and gives `never` in the `else` branch of `unknown`. Biome
-// supports neither target, so both branches keep the declared type.
+// TypeScript 7.0.2 (`tsc --strict`) gives `any` in the `then` branch of an
+// `any` target and `unknown` in the `then` branch of an `unknown` target.
+// Both `else` branches are `never`. Biome supports neither target, so both
+// branches keep the declared type.
 #[test]
 fn any_and_unknown_predicate_targets_preserve_unknown_and_indeterminate_classifications() {
     for target in ["any", "unknown"] {
@@ -947,7 +948,7 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert_no_whole_module_inference(&db, &db.take_salsa_events());
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 // A branch that no value reaches is `never` in TypeScript, which Biome reads
 // as Unknown.
 #[test]
@@ -1056,7 +1057,7 @@ fn object_targets_narrow_both_branches() {
 
 // Biome keeps the declared type in both branches of every read below, or in
 // the `else` branch where it narrows only the `then` branch. A comment gives
-// the type that TypeScript 6.0.3 (`tsc --strict`) gives where it differs.
+// the type that TypeScript 7.0.2 (`tsc --strict`) gives where it differs.
 #[test]
 fn object_targets_keep_the_declared_type_where_biome_cannot_tell() {
     assert_reads(
@@ -1075,7 +1076,7 @@ fn object_targets_keep_the_declared_type_where_biome_cannot_tell() {
         function w3() { const action = { type: "add", payload: 1 }; if (isAdd(action)) /*w3*/action; else /*w3Else*/action; }
         "#,
         &[
-            // `(string & Foo) | (number & Foo)`
+            // `(string | number) & Foo`
             ("f6", "x", &["number", "string"]),
             ("f6Else", "x", &["number", "string"]),
             // TypeScript's strict subtype relation keeps `{ a: number }` and
@@ -1127,6 +1128,7 @@ fn object_targets_keep_the_declared_type_where_biome_cannot_tell() {
                 "action",
                 &[r#"["type": string: add, "payload": number: 1]"#],
             ),
+            // `{ type: string; payload: number }`
             (
                 "w3Else",
                 "action",
@@ -1136,7 +1138,7 @@ fn object_targets_keep_the_declared_type_where_biome_cannot_tell() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 #[test]
 fn object_targets_narrow_through_the_flow() {
     assert_reads(
@@ -1185,7 +1187,7 @@ fn object_targets_narrow_through_the_flow() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 // The `then` branch gets `"a"` and `string`, whose union in TypeScript is
 // `string`, so the `else` branch keeps `"a"`.
 #[test]
@@ -1204,7 +1206,7 @@ fn primitive_targets_keep_the_literals_that_the_then_branch_absorbs() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type,
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
 // except where a comment gives TypeScript's type.
 #[test]
 fn object_targets_resolve_types_of_other_modules() {
