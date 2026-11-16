@@ -33,8 +33,8 @@ use rustc_hash::FxHashSet;
 /// holds the same object, as in `a.v = x` after `const a = o`, does not write
 /// `o.v`. Wherever the scan differs from TypeScript, it counts more writes:
 /// TypeScript ignores, for example, writes in `async` and generator functions
-/// called where they are defined, in field initializers and parameter
-/// defaults, and through `as` and `satisfies`.
+/// called where they are defined, in field initializers and the parameter
+/// defaults of methods, and through `as` and `satisfies`.
 pub(super) struct WrittenPaths {
     /// Subjects that an assignment or `delete` writes directly.
     written: FxHashSet<FlowSubjectId>,
