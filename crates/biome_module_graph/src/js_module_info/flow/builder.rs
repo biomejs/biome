@@ -483,22 +483,23 @@ struct RootBuilder<'a, 'raw> {
     reads: Vec<BuiltRead>,
     switches: Vec<BuiltSwitch>,
     jumps: Vec<JumpTarget>,
-    /// For each enclosing try block or catch clause, innermost last, the join
-    /// that an exception thrown inside it reaches: the start of the catch
-    /// clause or of the finally block that handles it.
+    /// The joins that exceptions reach, one for each enclosing try block or
+    /// catch clause, innermost last. Each join is the start of the catch clause
+    /// or finally block that handles an exception thrown inside its block.
     ///
     /// Each join starts with the flow where its block starts and gains the end
     /// of each finally block nested in the block. The graph has no write
-    /// points, so no point inside the block is narrower than its start, and
-    /// the join needs no other predecessor. A point that changes the type of a
-    /// subject must also be added to the innermost join, as TypeScript's
-    /// `createFlowMutation` adds it to the current exception target.
+    /// points, so no point inside the block is wider than its start, and the
+    /// join needs no other predecessor. A point that can widen a subject, such
+    /// as a write, must also be added to the innermost join, as in TypeScript.
     exceptions: Vec<FlowNodeId>,
-    /// For each enclosing `try` statement that has a finally block, innermost
-    /// last, the flow at each `return` in its try block and catch clause,
-    /// which runs the finally block before leaving the function, and at the
-    /// end of each finally block nested there that such a `return` passes
-    /// through.
+    /// The flows that reach a finally block from a `return`, one list for each
+    /// enclosing `try` statement with a finally block, innermost last.
+    ///
+    /// A list holds the flow at each `return` in the statement's try block or
+    /// catch clause, because the finally block runs before the function
+    /// returns. It also holds the end of each finally block nested there that
+    /// such a `return` reached.
     returns: Vec<Vec<FlowNodeId>>,
     /// Whether evaluation records reads. It is false while the builder builds
     /// a finally block a second time, because the first build recorded them.
@@ -613,9 +614,10 @@ impl RootBuilder<'_, '_> {
                 self.current = None;
                 Ok(())
             }
-            // Inside a try block or catch clause, the exception reaches the
-            // join in `exceptions`, which already holds a flow that is never
-            // narrower than the flow at the `throw`.
+            // Inside a try block or catch clause, the exception needs no edge
+            // to the innermost join in `exceptions`. That join already holds
+            // the start of the block, which is never narrower than the flow at
+            // the `throw`.
             AnyJsStatement::JsThrowStatement(_) => {
                 self.evaluate(statement.syntax(), current, 0)?;
                 self.current = None;
@@ -640,8 +642,9 @@ impl RootBuilder<'_, '_> {
             AnyJsStatement::JsSwitchStatement(statement) => {
                 self.switch_statement(&statement, current, label)
             }
-            // A label on a `try` statement is no jump target, so a root that
-            // jumps to it has no flow, as `has_complete_statements` decides.
+            // A label on a `try` statement is not a jump target. A root with a
+            // `break` to such a label has no flow, because
+            // `has_complete_statements` rejects it before the build.
             AnyJsStatement::JsTryStatement(statement) => {
                 self.try_statement(&statement.into(), current)
             }
@@ -1175,15 +1178,16 @@ impl RootBuilder<'_, '_> {
         kinds
     }
 
-    /// Builds `statement` from `current`, as TypeScript's `bindTryStatement`
-    /// does.
+    /// Builds `statement` from `current`, following TypeScript's control flow
+    /// for `try` statements.
     ///
-    /// An exception can leave the try block at any point, and none of them is
-    /// narrower than the start of the block, as [`Self::exceptions`]
-    /// describes, so the catch clause starts from the flow before the
-    /// statement. The normal exits are the ends of the try block and of the
-    /// catch clause. `break` and `continue` reach their targets directly,
-    /// without passing through the finally block, as in TypeScript.
+    /// An exception can leave the try block at any point. Because the graph
+    /// has no write points, none of those points is wider than the start of
+    /// the block, so the catch clause starts from the flow before the
+    /// statement. See [`Self::exceptions`]. The normal exits are the ends of
+    /// the try block and of the catch clause. `break` and `continue` reach
+    /// their targets directly, without passing through the finally block, as
+    /// in TypeScript.
     ///
     /// Without a finally block, the code after the statement continues from
     /// the normal exits. A finally block is built twice:
@@ -1192,20 +1196,21 @@ impl RootBuilder<'_, '_> {
     ///   catch clause when there is one, and each `return` in either. It
     ///   records the reads of the block. Its end joins the enclosing
     ///   [`Self::exceptions`] and, when a `return` reached the block, the
-    ///   enclosing [`Self::returns`]. TypeScript joins there a view of the
-    ///   block that starts only from the exceptions, or only from the
-    ///   `return`s (`createReduceLabel`), so these joins are wider.
+    ///   enclosing [`Self::returns`]. These joins can be wider than
+    ///   TypeScript's, because TypeScript joins there the block as reached
+    ///   only from the exceptions, or only from the `return`s.
     /// - The second build starts from the normal exits only and records no
-    ///   reads, and the code after the statement continues from its end: that
-    ///   code runs only when the statement completed normally, as TypeScript's
-    ///   `createReduceLabel` over the normal exits says.
+    ///   reads. The code after the statement continues from its end, because
+    ///   that code runs only when the try block or the catch clause completed
+    ///   normally. TypeScript gives that code the same flow.
     ///
     /// Without a normal exit, the code after the statement is unreachable.
     fn try_statement(&mut self, statement: &AnyJsTryStatement, current: FlowNodeId) -> Build<()> {
         let finally = statement.finally_clause();
-        // Each build of a finally block builds the `try` statements nested in
-        // it twice. Every build pushes this join, so the node limit bounds the
-        // work even when the blocks evaluate nothing.
+        // A finally block is built twice, so the work doubles with each
+        // finally block that encloses a `try` statement. Every build pushes
+        // this join, so the node limit bounds that work even when the blocks
+        // evaluate nothing.
         let exception = self.push(FlowNode::Join(vec![current]))?;
         self.exceptions.push(exception);
         if finally.is_some() {
