@@ -1012,7 +1012,7 @@ const RECEIVER: &str = r#"
     type X = { y: string | null; n: number; f(): boolean; z?: { w: string }; g?: () => X | undefined };
 "#;
 
-// TypeScript 6.0.3 (`tsc --strict`) gives each read `X` where the expected
+// TypeScript 7.0.2 (`tsc --strict`) gives each read `X` where the expected
 // value is `false` and `X | undefined` where it is `true`, because a test of
 // an optional chain shows that its receiver is not nullish in the branch where
 // the chain cannot be `undefined`, and in no branch of `??`.
@@ -1095,7 +1095,7 @@ fn optional_chain_receivers_follow_the_kind_of_test() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below a type without
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below a type without
 // `undefined` (`X`, `{ w: string }`, `C`, `() => X | undefined`,
 // `Record<string, string>`, or `string`), except at `callResult`. Every
 // receiver along the chain that is a subject narrows, including callees and
@@ -1153,7 +1153,7 @@ fn optional_chain_receivers_narrow_along_the_chain() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) narrows `x` at `parenthesizedReceiver`,
+// TypeScript 7.0.2 (`tsc --strict`) narrows `x` at `parenthesizedReceiver`,
 // because `(x)` is the receiver of the chain. Parentheses around an optional
 // chain end the outer chain. In a comparison, TypeScript narrows `x.z` but not
 // `x`, so `x?.z` adds `undefined` back from `x`. It gives `X | undefined` and
@@ -1195,7 +1195,7 @@ fn optional_chain_receivers_stop_at_parentheses() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives `X | undefined` at `assigned`,
+// TypeScript 7.0.2 (`tsc --strict`) gives `X | undefined` at `assigned`,
 // `undefined` at `cleared`, and `X` at `later` and `extension`. A write to a
 // receiver cancels its narrowing in the whole function, as for any other
 // path, so Biome is deliberately wider at `cleared` and `later`, where
