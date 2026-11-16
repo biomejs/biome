@@ -52,7 +52,7 @@ use std::{iter, ops};
 pub(crate) use trivia::{SyntaxTrivia, SyntaxTriviaPiecesIterator};
 
 use crate::cursor::node::Siblings;
-use crate::cursor::node_rc::NodeRc;
+use crate::cursor::node_rc::{NodeRc, OwnedOrShared};
 pub(crate) use crate::cursor::token::SyntaxToken;
 use crate::green::{self, GreenElement, GreenNodeData, GreenTokenData};
 use crate::{
@@ -294,12 +294,12 @@ impl NodeData {
 
 impl NodeRc {
     fn into_green(self) -> GreenElement {
-        match Self::try_unwrap(self) {
-            Ok(data) => match data.kind {
+        match Self::into_data(self) {
+            OwnedOrShared::Owned(data) => match data.kind {
                 NodeKind::Root { green } => green,
                 NodeKind::Child { green, .. } => green.to_owned(),
             },
-            Err(ptr) => ptr.green().to_owned(),
+            OwnedOrShared::Shared(ptr) => ptr.green().to_owned(),
         }
     }
 

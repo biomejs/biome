@@ -68,6 +68,16 @@ pub(super) struct NodeRc {
     ptr: NonNull<NodeBox>,
 }
 
+/// Represents the outcome of moving a node out of its [NodeRc]. The move
+/// succeeds only when no other handle to the node exists.
+pub(super) enum OwnedOrShared {
+    /// Holds the node. No handle to the node remains, and the block that held
+    /// the node is back in the pool or the global allocator.
+    Owned(NodeData),
+    /// Holds the handle unchanged, because other handles to the node exist.
+    Shared(NodeRc),
+}
+
 impl NodeRc {
     #[inline]
     pub(super) fn new(data: NodeData) -> Self {
@@ -89,17 +99,12 @@ impl NodeRc {
         unsafe { &self.ptr.as_ref().count }
     }
 
-    /// Moves the node out of its block and releases the block, if `this` is the
-    /// only handle to the node.
-    ///
-    /// # Errors
-    ///
-    /// Returns `this` unchanged when other handles to the node exist, so the
-    /// caller keeps its handle and can still read the node, as with
-    /// `Rc::try_unwrap`.
-    pub(super) fn try_unwrap(this: Self) -> Result<NodeData, Self> {
+    /// Moves the node out of its block, releases the block, and returns
+    /// [OwnedOrShared::Owned] if `this` is the only handle to the node.
+    /// Otherwise, returns `this` unchanged in [OwnedOrShared::Shared].
+    pub(super) fn into_data(this: Self) -> OwnedOrShared {
         if this.count().get() != 1 {
-            return Err(this);
+            return OwnedOrShared::Shared(this);
         }
 
         let this = ManuallyDrop::new(this);
@@ -108,7 +113,7 @@ impl NodeRc {
         unsafe {
             let data = (&raw const (*this.ptr.as_ptr()).data).read();
             release(this.ptr);
-            Ok(data)
+            OwnedOrShared::Owned(data)
         }
     }
 
