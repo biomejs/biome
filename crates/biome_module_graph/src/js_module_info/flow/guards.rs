@@ -977,18 +977,17 @@ fn is_boolean_valued(expression: &AnyJsExpression, remaining: &mut usize) -> boo
     }
 }
 
-/// Decomposes the condition that the body of a `for...in` loop whose head
-/// declares a variable, as `const k`, `let k`, or `var k` do, assumes about
-/// the loop's expression `expression`, into guards appended to `guards`, as
-/// [`decompose_condition`] does.
+/// Decomposes the condition that the body of a `for...in` loop assumes about
+/// the loop's expression `expression` into guards appended to `guards`. The
+/// body assumes it only when the loop's head declares a variable, such as
+/// `const k`, `let k`, or `var k`.
 ///
-/// As in TypeScript's `getTypeAtFlowAssignment`, where such a loop "acts as a
-/// nonnull" on its expression, the condition tests that the expression is
-/// not nullish, and neither is any receiver of its optional chain, so
-/// `for (const k in o?.v)` narrows both `o?.v` and `o`. It adds no property
-/// or pattern guard: TypeScript narrows no object through
-/// `for (const k in s.kind)`. Parentheses are skipped, but `o!` tests
-/// nothing, where TypeScript narrows `o`.
+/// As in TypeScript, the condition tests that the expression is not nullish,
+/// and that no receiver of its optional chain is nullish either, so
+/// `for (const k in o?.v)` narrows both `o?.v` and `o`. The condition adds no
+/// property or pattern guard, so `for (const k in s.kind)` narrows `s.kind`
+/// but not `s`, which matches TypeScript. Parentheses are skipped, but `o!`
+/// tests nothing, where TypeScript narrows `o`.
 pub(super) fn decompose_for_in(
     expression: &AnyJsExpression,
     model: &SemanticModel,
@@ -1043,10 +1042,10 @@ struct Decomposer<'a, 'raw> {
     /// Every initializer that an aliased condition has inlined.
     initializers: Vec<AnyJsExpression>,
     /// Whether a runtime test of a property or of an element of a pattern
-    /// also narrows the object or the pattern, as [`Self::property_guard`]
-    /// and [`Self::pattern_guard`] describe. False for the cases of
+    /// also narrows the object or the pattern. False for the cases of
     /// `switch (typeof x)`, which narrow only the operand of `typeof`, and for
-    /// the expression of a `for...in` loop.
+    /// the expression of a `for...in` loop. See [`Self::property_guard`] and
+    /// [`Self::pattern_guard`].
     shape_guards: bool,
 }
 

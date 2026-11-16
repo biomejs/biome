@@ -56,8 +56,8 @@ fn variant_names(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
     names
 }
 
-/// Types shared by the tests, as interfaces, so that a read names each of its
-/// members.
+/// Declarations shared by the tests. Each object type is an interface, so
+/// [`variant_names`] names an object member of a read by its interface.
 const TYPES: &str = r#"
     interface A { a: 1 }
     interface V { v?: A }
@@ -74,10 +74,12 @@ const TYPES: &str = r#"
     declare function more(): boolean;
 "#;
 
-/// Asserts the type of each `(marker, expression, expected)` read in `source`,
-/// which follows [`TYPES`], by the names of its members, as [`variant_names`]
-/// gives them, and that complete module inference gives each read the type
-/// that a lookup gives it.
+/// Asserts that the type of each `(marker, expression, expected)` read in
+/// `source` has the sorted member names `expected`, and that complete module
+/// inference gives each read the same type as a lookup of that read alone.
+///
+/// [`TYPES`] is prepended to `source`. See [`variant_names`] for how members
+/// are named.
 fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     let source = format!("{TYPES}{source}");
     let lookups: Vec<_> = {
@@ -119,12 +121,10 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m4/loops.ts` L5 to L7, L19, L21, L22, L27, L31, L32,
-// and `m4-l2/extra.ts` L20, L25, L26, L30 to L32): conditions in the body
-// narrow the loop variable, its paths, and the elements of its pattern, and
-// a read at the top of the body joins the entry, where the variable has its
-// declared type, with the end of the body.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// Conditions in the body narrow the loop variable, its paths, and the
+// elements of its pattern. A read at the top of the body sees the entry,
+// where the variable has its declared type, joined with the end of the body.
 #[test]
 fn conditions_in_the_body_narrow_the_loop_variable() {
     assert_reads(
@@ -168,12 +168,11 @@ fn conditions_in_the_body_narrow_the_loop_variable() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m4/loops.ts` L8 to L12, L24 to L26, L28, L29, and
-// `m4-l2/extra.ts` L14, L15, L22, L24, L28, L29): the facts from before the
-// loop hold in the body and after it, the expression runs once before the
-// loop, and the code after the loop continues from the loop's header and
-// its `break` statements, so a test in the body never narrows it.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// The facts from before the loop hold in the body and after it, and the
+// expression runs once before the loop. The code after the loop continues
+// from the loop's header and from the `break` statements that target the
+// loop, so a test in the body never narrows that code.
 #[test]
 fn the_header_is_the_exit_of_the_loop() {
     assert_reads(
@@ -227,9 +226,9 @@ fn the_header_is_the_exit_of_the_loop() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) narrows every read below to `string`
-// (`narrowing-probes/m4-l2/moved.ts` L10, L12): a loop neither stops the
-// narrowing in its execution root nor loses the facts from before it.
+// TypeScript 7.0.2 (`tsc --strict`) narrows every read below to `string`. A
+// loop neither stops the narrowing in its execution root nor loses the facts
+// from before it.
 #[test]
 fn facts_from_before_a_loop_reach_its_body_and_the_code_after_it() {
     assert_reads(
@@ -248,11 +247,10 @@ fn facts_from_before_a_loop_reach_its_body_and_the_code_after_it() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m4/loops.ts` L13 to L16, L18, and `m4-l2/extra.ts` L7,
-// L8, L10, L12, L13, L21, L23): a `for...in` loop whose head declares a
-// variable makes its expression, and the receivers of its optional chain,
-// not nullish in the body, but not after the loop.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A `for...in` loop whose head declares a variable makes its expression, and
+// the receivers of its optional chain, not nullish in the body, but not
+// after the loop.
 #[test]
 fn for_in_makes_its_expression_not_nullish_in_the_body() {
     assert_reads(
@@ -293,14 +291,13 @@ fn for_in_makes_its_expression_not_nullish_in_the_body() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) keeps the declared type at every read
-// below (`narrowing-probes/m4/loops.ts` L17, L20, `m4/more.ts` L12, and
-// `m4-l2/extra.ts` L5, L6, L11): a `for...in` loop narrows nothing when its
-// head is an assignment target or a destructuring pattern, which TypeScript
-// rejects (TS2491), and a test of a property's value narrows no object, so
-// `for (const k in s.kind)` keeps `s`. A rest element never narrows, as
-// elsewhere: TypeScript gives `rest` the type `{ r: number } | { w: number }`
-// at both reads, where Biome's declared type of a rest element of an object
-// pattern is an object without members.
+// below. A `for...in` loop narrows nothing when its head is an assignment
+// target or a destructuring pattern, which TypeScript rejects (TS2491). A
+// test of a property's value narrows no object, so `for (const k in s.kind)`
+// keeps `s`. A rest element never narrows, as elsewhere. TypeScript gives
+// `rest` the type `{ r: number } | { w: number }` at both reads, while
+// Biome's declared type of a rest element of an object pattern is an object
+// without members.
 #[test]
 fn loops_that_narrow_nothing_keep_the_declared_type() {
     assert_reads(
@@ -341,10 +338,9 @@ fn loops_that_narrow_nothing_keep_the_declared_type() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m4/switch.ts` L30, `m4/more.ts` L7, and `m4-l2/extra.ts`
-// L16, L17, L19): a `switch` in the body narrows as anywhere else, `break`
-// leaves the `switch`, and `continue` reaches the loop's header.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A `switch` in the body narrows as anywhere else, `break` leaves the
+// `switch`, and `continue` reaches the loop's header.
 #[test]
 fn switch_statements_in_the_body_narrow() {
     assert_reads(
@@ -364,12 +360,11 @@ fn switch_statements_in_the_body_narrow() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) narrows `o` to `A` at the first two reads
-// below (`narrowing-probes/m4-l2/extra.ts` L9, L27), and gives
-// `string | null`, then `string`, at the last two (`m4/loops.ts` L23, and
-// `m4-l2/spec/` for `asyncIterableDeclared`). Biome keeps the declared type:
-// `o!` is not a variable or a property path, a read in a closure never sees
-// the narrowing around it, and Biome doesn't infer the type of the elements
-// of an `AsyncIterable`, so `v` is Unknown, which no test narrows.
+// below, and gives `string | null`, then `string`, at the last two. Biome
+// keeps the declared type of `o` because `o!` is not a variable or a
+// property path, and a read in a closure never sees the narrowing around it.
+// Biome doesn't infer the type of the elements of an `AsyncIterable`, so `v`
+// is Unknown, which no test narrows.
 #[test]
 fn loops_that_biome_does_not_narrow_yet() {
     assert_reads(

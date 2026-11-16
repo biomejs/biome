@@ -400,12 +400,13 @@ impl AnyJsForInOrOfStatement {
         }
     }
 
-    /// Returns whether the body assumes that the expression is not nullish:
-    /// for a `for...in` loop whose head declares one variable, as `const k`,
-    /// `let k`, and `var k` do. TypeScript's `getTypeAtFlowAssignment`
-    /// applies the rule only at the assignment of such a declaration, so
-    /// neither an assignment target, as in `for (k in o)`, nor a
-    /// destructuring pattern, which `for...in` rejects (TS2491), narrows.
+    /// Returns whether the body assumes that the expression is not nullish.
+    /// Only a `for...in` loop whose head declares one variable, such as
+    /// `const k`, `let k`, or `var k`, makes that assumption.
+    ///
+    /// As in TypeScript, an assignment target, as in `for (k in o)`, narrows
+    /// nothing. Neither does a destructuring pattern, which `for...in`
+    /// rejects (TS2491).
     fn assumes_non_nullish(&self) -> bool {
         let Self::JsForInStatement(statement) = self else {
             return false;
@@ -785,19 +786,20 @@ impl RootBuilder<'_, '_> {
         Ok(())
     }
 
-    /// Builds `statement` from `current`, as TypeScript's
-    /// `bindForInOrForOfStatement` does. `label` is the label of
-    /// `statement`, if any.
+    /// Builds `statement` from `current`, with the control flow that
+    /// TypeScript gives `for...in` and `for...of` loops. `label` is the label
+    /// of `statement`, if any.
     ///
     /// The expression runs once, before the loop. Every iteration starts at
-    /// the loop's header, which the end of the body and each `continue` that
-    /// targets the loop reach, and evaluates the head, such as the defaults
-    /// of a destructuring pattern, from there. The header is also the exit:
-    /// the code after the loop continues from it and from each `break` that
-    /// targets the loop, so a test in the body never narrows the code after
-    /// the loop. In a `for...in` loop that declares its variable, the body
-    /// also assumes that the expression is not nullish, as
-    /// [`decompose_for_in`] describes.
+    /// the loop's header and evaluates the head from there, including the
+    /// defaults of a destructuring pattern. The end of the body and each
+    /// `continue` that targets the loop return to the header. The header is
+    /// also the exit. The code after the loop continues from the header and
+    /// from each `break` that targets the loop, so a test in the body never
+    /// narrows the code after the loop. In a `for...in` loop whose head
+    /// declares one variable, the body also assumes that the expression and
+    /// the receivers of its optional chain are not nullish. See
+    /// [`decompose_for_in`].
     fn loop_statement(
         &mut self,
         statement: &AnyJsForInOrOfStatement,
@@ -809,12 +811,13 @@ impl RootBuilder<'_, '_> {
         let header = self.push(FlowNode::Join(vec![flow]))?;
         let initializer = statement.initializer().map_err(|_| Unsupported)?;
         let mut flow = self.evaluate(initializer.syntax(), header, 0)?;
-        // This is where each iteration assigns the loop variable, after the
-        // defaults of its pattern. The graph has no write point for it: the
-        // header joins the entry, where the variable and its paths have their
-        // declared types because no test before the loop can mention them,
-        // so the facts that the end of the body carries back from an earlier
-        // iteration never make a read narrower than its declared type.
+        // Each iteration assigns the loop variable here, after the defaults
+        // of its pattern, but the graph has no write point for it. None is
+        // needed because the header also joins the entry, where the variable
+        // and its paths have their declared types, since no test before the
+        // loop can mention them. So the facts that the end of the body
+        // carries back from an earlier iteration never make a read narrower
+        // than its declared type.
         if statement.assumes_non_nullish() {
             let condition = decompose_for_in(
                 &expression,
@@ -1729,7 +1732,8 @@ mod tests {
             let built = function(source);
             assert_eq!(built.paths("obj", 2), [Vec::<String>::new()], "{source}");
         }
-        // The test narrows no object through its property, as `obj[v]` would.
+        // The test of `obj.v` adds no guard on `obj`, which would be written
+        // `!obj[v]:Nullish`.
         let built = function("function f(obj) { for (const k in obj.v) read(obj); }");
         assert_eq!(built.paths("obj", 2), [facts(&["!obj.v:Nullish"])]);
     }
