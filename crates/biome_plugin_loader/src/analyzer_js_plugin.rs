@@ -2459,3 +2459,7 @@ mod kind_sets_tests;
 #[cfg(test)]
 #[path = "traversal.tests.rs"]
 mod traversal_tests;
+
+#[cfg(test)]
+#[path = "trivia.tests.rs"]
+mod trivia_tests;

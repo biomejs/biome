@@ -631,6 +631,16 @@ impl Class for JsAstNode {
                 js_string!("walk"),
                 2,
                 NativeFunction::from_fn_ptr(Self::walk),
+            )
+            .method(
+                js_string!("leadingTrivia"),
+                0,
+                NativeFunction::from_fn_ptr(Self::leading_trivia),
+            )
+            .method(
+                js_string!("trailingTrivia"),
+                0,
+                NativeFunction::from_fn_ptr(Self::trailing_trivia),
             );
 
         if !class.context().has_data::<JsAstPrototypeCache>() {
