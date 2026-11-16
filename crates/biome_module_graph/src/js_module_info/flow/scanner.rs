@@ -222,11 +222,11 @@ impl FlowRootScanner {
     }
 }
 
-/// Returns whether `node` evaluates part of an expression only on some paths,
-/// as a condition of TypeScript's binder that no [`AnyFlowConditionSource`]
-/// stands for: a logical assignment, whose right operand runs depending on
-/// its target, or a `?.` that a key or arguments follow in its chain, which
-/// run only when the object of the `?.` is not nullish.
+/// Returns whether `node` evaluates part of an expression only on some paths
+/// without being an [`AnyFlowConditionSource`]. A logical assignment runs its
+/// right operand depending on the value of its target. A `?.` that a key or
+/// arguments follow in its chain runs them only when its object is not
+/// nullish. TypeScript treats both as conditions.
 fn is_evaluation_condition(node: &JsSyntaxNode) -> bool {
     if let Some(assignment) = JsAssignmentExpression::cast_ref(node) {
         return assignment.operator().is_ok_and(|operator| {

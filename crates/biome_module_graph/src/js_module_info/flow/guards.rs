@@ -267,10 +267,13 @@ impl<'a> GuardFunctions<'a> {
     }
 
     /// Returns whether `object`, the object of a `?.`, may be `null` or
-    /// `undefined` as far as the collected types tell. It is false for `this`
-    /// and for a variable whose collected type [`raw_may_be_nullish`]
-    /// rejects, as `o` in `const o = { a: 1 }; o?.f(o)`, where a test that
-    /// the object is not nullish narrows nothing.
+    /// `undefined` as far as the collected types tell.
+    ///
+    /// Returns false for `this` and for a variable whose collected type can't
+    /// be nullish, such as `o` in `const o = { a: 1 }; o?.f(o)`. A test that
+    /// such an object is not nullish narrows nothing. Any other expression,
+    /// and a variable without a collected type, may be nullish.
+    /// [`raw_may_be_nullish`] lists the types that can't be nullish.
     pub(super) fn may_be_nullish(&self, object: &AnyJsExpression, model: &SemanticModel) -> bool {
         match object {
             AnyJsExpression::JsThisExpression(_) => false,
@@ -694,17 +697,16 @@ pub(super) fn decompose_condition(
 }
 
 /// Decomposes the test that a logical assignment applies to its target
-/// `target`, assuming `outcome`, into guards appended to `guards`, as
-/// TypeScript's `bindLogicalLikeExpression` does: `x ??= y` evaluates `y`
-/// where `x` is nullish, `x ||= y` where it is falsy, and `x &&= y` where it
-/// is truthy.
+/// `target`, assuming `outcome`, into guards appended to `guards`. The test
+/// matches TypeScript's: `x ??= y` evaluates `y` where `x` is nullish,
+/// `x ||= y` where `x` is falsy, and `x &&= y` where `x` is truthy.
 ///
-/// The guard tests the subject that [`assigned_subject`] gives the target, as
-/// [`decompose_condition`] tests the expression with the same spelling, and
-/// adds the same property guard for a named property, so `s.kind ||= "c"`
-/// narrows `s` as `s.kind || "c"` does. A target is never part of an optional
-/// chain, so the guard tests no receiver. A target that is no subject, as
-/// `o[k]`, gives [`FlowGuard::Keep`].
+/// The guard tests the subject that the expression with the same spelling as
+/// the target reads. For a named property, it also tests the object that
+/// holds the property, so `s.kind ||= "c"` narrows `s` as `s.kind || "c"`
+/// does. A target is never part of an optional chain, so the guard tests no
+/// receiver. A target that is no subject, such as `o[k]`, gives
+/// [`FlowGuard::Keep`].
 pub(super) fn decompose_assignment_target(
     target: &AnyJsAssignment,
     outcome: FlowOutcome,
@@ -1377,8 +1379,10 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     }
 
     /// Returns the guard for `test` applied to `subject`, the target of a
-    /// logical assignment, combined with the guard that
-    /// [`Self::property_guard`] gives its object.
+    /// logical assignment. When the target is a named property of an object
+    /// that a test may narrow, the guard also applies the test to that object,
+    /// as `s.kind ||= "c"` applies it to `s`. [`Self::property_guard`] builds
+    /// the guard on the object.
     fn target_test(&mut self, subject: FlowSubjectId, test: FlowTest, positive: bool) -> FlowGuard {
         self.mentions.push(subject);
         let guard = FlowGuard::Test {
@@ -1409,9 +1413,10 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     /// `this` that a test may narrow. Inside an inlined aliased condition, a
     /// guard on a property path is wrapped in [`FlowGuard::ReadonlyPath`].
     ///
-    /// `operand` is `None` for the target of a logical assignment, as `s.kind`
-    /// in `s.kind ||= "c"`, which reads its property without an optional
-    /// chain and holds no property in a variable.
+    /// `operand` is `None` for the target of a logical assignment, such as
+    /// `s.kind` in `s.kind ||= "c"`. Such a target never reads its property
+    /// through an optional chain. A variable target holds no property, because
+    /// only a `const` holds one.
     ///
     /// Returns `None` for a call to a type-guard function, for `in`, and for
     /// `instanceof`, because TypeScript never narrows `s` through

@@ -130,16 +130,17 @@ pub fn raw_may_narrow_by_instanceof(reference: &TypeReference, raw_types: &[RawT
 /// `null` or `undefined` can have, without resolving it.
 ///
 /// A runtime test that a value is not nullish, such as the one that `?.`
-/// applies to its object, narrows only such a type. This returns false when
-/// the raw tables show that every member of the type is `string`, `number`,
+/// applies to its object, narrows only such a type. Returns false when the
+/// raw tables show that every member of the type is `string`, `number`,
 /// `boolean`, `bigint`, `symbol`, a literal type, an object, interface, class,
 /// function, constructor, or tuple type written in place, `object`, `this`, a
 /// module or namespace, or the result of `new`, `+`, unary `-`, `~`, or
-/// `typeof`, as for the object literal of `const o = { a: 1 }`. `null`,
-/// `undefined`, `void`, `unknown`, `any`, a type name, an import, a generic,
-/// other inferred types, and a chain of raw references longer than the step
-/// limit may be nullish. `raw_types` is the module table that local
-/// references index.
+/// `typeof`, as for the object literal of `const o = { a: 1 }`. Every other
+/// type may be nullish, including `null`, `undefined`, `void`, `unknown`,
+/// `any`, a type name, an import, a generic, a `typeof` query, a nested union,
+/// the result of a call, and a type behind a chain of raw references longer
+/// than the step limit. `raw_types` is the module table that local references
+/// index.
 pub fn raw_may_be_nullish(reference: &TypeReference, raw_types: &[RawTypeData]) -> bool {
     let Some(target) = raw_reference_target(reference, raw_types) else {
         return true;
@@ -159,8 +160,9 @@ pub fn raw_may_be_nullish(reference: &TypeReference, raw_types: &[RawTypeData]) 
     }
 }
 
-/// Returns whether `target` may be nullish, as [`raw_may_be_nullish`]
-/// decides it, taking a union as nullish.
+/// Returns whether `target` may be nullish. A union may be nullish without
+/// looking into its members. [`raw_may_be_nullish`] lists the types that
+/// can't be nullish.
 fn raw_target_may_be_nullish(target: &RawReferenceTarget) -> bool {
     let data = match target {
         RawReferenceTarget::Global(id) => {
@@ -4335,7 +4337,8 @@ mod tests {
                 ],
                 true,
             ),
-            // A nested union, a name, and an inferred call may be nullish.
+            // A nested union, a `typeof` query, and an inferred call may be
+            // nullish.
             (
                 vec![
                     union_of(vec![local(1)]),

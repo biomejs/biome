@@ -547,11 +547,11 @@ impl RootBuilder<'_, '_> {
     /// Evaluates the parameters of `root` in order from `incoming`, because
     /// they run before its body, and returns the flow after them.
     ///
-    /// Each parameter evaluates its default as [`Self::default_value`]
-    /// describes, then its destructuring pattern as [`Self::binding_pattern`]
-    /// describes, so `y` in `(x, y = x && x.length)` sees the test of `x`.
-    /// The decorators of a parameter run where its class is defined, not
-    /// where the function is called, so they are not evaluated.
+    /// Each parameter evaluates its default, then its destructuring pattern,
+    /// so `x.length` in `(x, y = x && x.length)` sees the test of `x`. A
+    /// default runs only when the argument is `undefined`. The decorators of a
+    /// parameter run where its class is defined, not where the function is
+    /// called, so they are not evaluated.
     fn parameters(
         &mut self,
         root: &AnyJsControlFlowRoot,
@@ -616,8 +616,8 @@ impl RootBuilder<'_, '_> {
         self.parameter_list(&parameters, incoming)
     }
 
-    /// Evaluates `parameters` in order from `incoming`, as
-    /// [`Self::parameters`] describes, and returns the flow after them.
+    /// Evaluates `parameters` in order from `incoming` and returns the flow
+    /// after them.
     fn parameter_list(
         &mut self,
         parameters: &JsParameters,
@@ -638,8 +638,8 @@ impl RootBuilder<'_, '_> {
         Ok(flow)
     }
 
-    /// Evaluates `parameter` from `incoming`, as [`Self::parameters`]
-    /// describes, and returns the flow after it.
+    /// Evaluates the default of `parameter`, then its destructuring pattern,
+    /// from `incoming`, and returns the flow after them.
     fn formal_parameter(
         &mut self,
         parameter: &AnyJsFormalParameter,
@@ -1421,13 +1421,19 @@ impl RootBuilder<'_, '_> {
     /// Records reads and branches while evaluating `node` from `incoming`, and
     /// returns the flow after it.
     ///
-    /// Expressions are evaluated in the order in which JavaScript runs them,
-    /// with the conditions under which TypeScript's binder runs each part: an
-    /// optional chain as [`Self::optional_chain`] describes, an assignment as
-    /// [`Self::assignment`] describes, the right operand of `&&`, `||`, and
-    /// `??` from a test of the left operand, and each branch of a conditional
-    /// expression from a test of its condition. Any other node evaluates its
-    /// children in source order, which is the order in which they run.
+    /// Expressions are evaluated in the order in which JavaScript runs them. A
+    /// destructuring assignment evaluates its right operand before its
+    /// pattern. Any other node evaluates its children in source order, which
+    /// is the order in which they run.
+    ///
+    /// A part that runs only on some paths starts from the condition under
+    /// which it runs, as in TypeScript. The right operand of `&&`, `||`, and
+    /// `??` starts from a test of the left operand, and each branch of a
+    /// conditional expression from a test of its condition. The key and the
+    /// arguments after a `?.` start from a test that its object is not
+    /// nullish, and the right operand of a logical assignment from a test of
+    /// its target. [`Self::optional_chain`] and [`Self::assignment`] cover
+    /// chains and assignments in detail.
     fn evaluate(
         &mut self,
         node: &JsSyntaxNode,
@@ -1549,32 +1555,34 @@ impl RootBuilder<'_, '_> {
         }
     }
 
-    /// Evaluates the optional chain whose outermost link is `chain`, which
-    /// lies at `depth`, from `incoming`, as TypeScript's `bindOptionalChain`
-    /// does, and returns the flow after it.
+    /// Evaluates the optional chain whose outermost link is `chain` from
+    /// `incoming`, as TypeScript does, and returns the flow after it. `chain`
+    /// lies at `depth`.
     ///
     /// The chain evaluates its root, the object of its innermost link, then
     /// the key or arguments of each link outward. Parentheses end a chain, as
     /// for [`AnyJsOptionalChainExpression::is_optional_chain`] and the
     /// receivers of a runtime test, so the root of `(x?.a)?.b(y)` is
-    /// `(x?.a)`. A `?.` gives `undefined` without evaluating the rest of the
-    /// chain when its object is nullish, so each `?.` that a key or arguments
-    /// follow adds a condition that its object is not nullish, from which the
-    /// rest of the chain runs: `x` is not nullish in the arguments of
-    /// `x?.f(x)`, `x?.[x.k]`, and `x?.a.f(x)`. The condition tests the object
-    /// as not nullish rather than truthy, so `n` in `n?.toFixed(n)` keeps `0`.
-    /// Each property read is recorded after its object and key. A `?.` whose
-    /// object can't be nullish, as [`GuardFunctions::may_be_nullish`]
-    /// decides it, adds no condition.
+    /// `(x?.a)`.
+    ///
+    /// When its object is nullish, a `?.` gives `undefined` without evaluating
+    /// the rest of the chain. So each `?.` that a key or arguments follow adds
+    /// a condition that its object is not nullish, and the rest of the chain
+    /// runs from that condition. For example, `x` is not nullish in the
+    /// arguments of `x?.f(x)`, `x?.[x.k]`, and `x?.a.f(x)`. The condition
+    /// tests the object as not nullish rather than truthy, so `n` in
+    /// `n?.toFixed(n)` keeps `0`. A `?.` adds no condition when its object is
+    /// `this` or a variable whose collected type can't be nullish, such as `o`
+    /// after `const o = { a: 1 }`. Each property read is recorded after its
+    /// object and key.
     ///
     /// The code after the chain also runs where a `?.` gave `undefined`, so
-    /// its flow joins the flow before each `?.` with the end of the chain.
-    /// While no key or argument can change the type of a subject, that join
-    /// has the type of the flow after the root for every subject, so the code
-    /// after the chain continues from that flow, as TypeScript's
-    /// `bindOptionalChainFlow` restores the flow from before a chain that
-    /// changes no subject. A test inside the chain then reaches no read after
-    /// it, so those reads need no flow.
+    /// its flow joins the flow before each `?.` with the end of the chain. As
+    /// long as no key or argument can change the type of a subject, that join
+    /// gives every subject its type after the root. The code after the chain
+    /// therefore continues from the flow after the root, as TypeScript does
+    /// after a chain that changes no subject, and no test inside the chain
+    /// reaches a read after it.
     fn optional_chain(
         &mut self,
         chain: &AnyJsOptionalChainExpression,
@@ -1646,16 +1654,15 @@ impl RootBuilder<'_, '_> {
     ///
     /// An assignment to a variable or a property, including a compound
     /// assignment such as `o[k] += v`, evaluates the object and the key of its
-    /// target, as [`Self::assignment_target`] describes, then the right
-    /// operand, after which the target is written. A destructuring assignment
-    /// evaluates the right operand first, then its pattern, as
-    /// [`Self::assignment_pattern`] describes.
+    /// target, then the right operand, after which the target is written. A
+    /// destructuring assignment evaluates the right operand first, then its
+    /// pattern.
     ///
     /// A logical assignment evaluates its right operand only where its target
-    /// is nullish for `??=`, falsy for `||=`, or truthy for `&&=`, as
-    /// TypeScript's `bindLogicalLikeExpression` does, and writes the target
-    /// there. The flow after it joins that path with the path on which the
-    /// target's test skipped the right operand.
+    /// is nullish for `??=`, falsy for `||=`, or truthy for `&&=`, as in
+    /// TypeScript, and writes the target there. The flow after it joins that
+    /// path with the path on which the target's test skipped the right
+    /// operand.
     fn assignment(
         &mut self,
         assignment: &JsAssignmentExpression,
@@ -1700,8 +1707,8 @@ impl RootBuilder<'_, '_> {
     }
 
     /// Adds a node where the target `target` of a logical assignment has
-    /// `outcome` after `antecedent`, as [`decompose_assignment_target`]
-    /// decomposes it.
+    /// `outcome` after `antecedent`, and returns the flow after it. Adds no
+    /// node when the test can narrow no subject, as for the target `o[k]`.
     fn target_condition(
         &mut self,
         antecedent: FlowNodeId,
@@ -1757,15 +1764,15 @@ impl RootBuilder<'_, '_> {
         }
     }
 
-    /// Evaluates `pattern`, the target of a destructuring assignment, which
-    /// lies at `depth`, from `incoming`, the flow after the value that it
-    /// destructures, and returns the flow after it.
+    /// Evaluates `pattern`, the target of a destructuring assignment, from
+    /// `incoming` and returns the flow after it. `incoming` is the flow after
+    /// the value that `pattern` destructures, and `pattern` lies at `depth`.
     ///
-    /// The elements run in source order. Each evaluates its computed key, the
-    /// object and the key of its target as [`Self::assignment_target`]
-    /// describes, and its default as [`Self::default_value`] describes, after
-    /// which the target is written. An element whose target is a nested
-    /// pattern evaluates its default, then the nested pattern.
+    /// The elements run in source order. Each element evaluates its computed
+    /// key, then the object and the key of its target, then its default, after
+    /// which the target is written. A default runs only when the value is
+    /// `undefined`. An element whose target is a nested pattern evaluates its
+    /// default, then the nested pattern.
     fn assignment_pattern(
         &mut self,
         pattern: &AnyJsAssignmentPattern,
@@ -1831,9 +1838,11 @@ impl RootBuilder<'_, '_> {
         Ok(flow)
     }
 
-    /// Evaluates one element of a destructuring assignment, whose target is
-    /// `pattern` and whose default is `default`, as
-    /// [`Self::assignment_pattern`] describes.
+    /// Evaluates one element of a destructuring assignment from `incoming` and
+    /// returns the flow after it. `pattern` is the element's target and
+    /// `default` its default. A target that is no pattern evaluates its object
+    /// and key before the default, and a nested pattern runs after the
+    /// default.
     fn assignment_element(
         &mut self,
         pattern: Option<AnyJsAssignmentPattern>,
@@ -1857,11 +1866,10 @@ impl RootBuilder<'_, '_> {
     /// Evaluates the declarators of `declaration`, which lies at `depth`, in
     /// order from `incoming`, and returns the flow after them.
     ///
-    /// Each declarator evaluates its initializer, then its binding pattern as
-    /// [`Self::binding_pattern`] describes. A declarator without an
-    /// initializer, as in a `for...of` head or `let x!: T`, evaluates only its
-    /// pattern. `using` and `await using` declarations evaluate as `const`
-    /// does.
+    /// Each declarator evaluates its initializer, then its binding pattern. A
+    /// declarator without an initializer, as in a `for...of` head or
+    /// `let x!: T`, evaluates only its pattern. `using` and `await using`
+    /// declarations evaluate as `const` does.
     fn declaration(
         &mut self,
         declaration: &AnyJsVariableDeclaration,
@@ -1884,7 +1892,8 @@ impl RootBuilder<'_, '_> {
         }
     }
 
-    /// Evaluates `declarator`, as [`Self::declaration`] describes.
+    /// Evaluates the initializer of `declarator`, then its binding pattern,
+    /// from `incoming`, and returns the flow after them.
     fn declarator(
         &mut self,
         declarator: &JsVariableDeclarator,
@@ -1900,12 +1909,13 @@ impl RootBuilder<'_, '_> {
     }
 
     /// Evaluates `pattern`, the binding pattern of a declaration, a
-    /// parameter, or a `catch` clause, which lies at `depth`, from `incoming`,
-    /// the flow after the value that it destructures, and returns the flow
-    /// after it.
+    /// parameter, or a `catch` clause, from `incoming` and returns the flow
+    /// after it. `incoming` is the flow after the value that `pattern`
+    /// destructures, and `pattern` lies at `depth`.
     ///
-    /// The elements run in source order. Each evaluates its computed key, its
-    /// default as [`Self::default_value`] describes, and its nested pattern.
+    /// The elements run in source order. Each element evaluates its computed
+    /// key, then its default, then its nested pattern. A default runs only
+    /// when the value is `undefined`.
     fn binding_pattern(
         &mut self,
         pattern: &AnyJsBindingPattern,
@@ -1963,10 +1973,9 @@ impl RootBuilder<'_, '_> {
         Ok(flow)
     }
 
-    /// Evaluates one element of a binding pattern or one parameter, whose
-    /// pattern is `pattern` and whose default is `default`: the default as
-    /// [`Self::default_value`] describes, then the pattern as
-    /// [`Self::binding_pattern`] describes.
+    /// Evaluates one element of a binding pattern or one parameter from
+    /// `incoming` and returns the flow after it. The element evaluates its
+    /// default `default`, then its pattern `pattern`.
     fn binding_element(
         &mut self,
         pattern: Option<AnyJsBindingPattern>,
@@ -2003,9 +2012,9 @@ impl RootBuilder<'_, '_> {
     /// parameter, from `incoming`, and returns the flow after it.
     ///
     /// A default runs only when the value is `undefined`, so the flow after
-    /// it joins `incoming` with the end of the default, as TypeScript's
-    /// `bindInitializer` does: in `const { a = x && f(x) } = o`, `f(x)` sees
-    /// `x` as truthy, and the code after the declaration doesn't.
+    /// it joins `incoming` with the end of the default, as in TypeScript. In
+    /// `const { a = x && f(x) } = o`, for example, `f(x)` sees `x` as truthy,
+    /// and the code after the declaration doesn't.
     fn default_value(
         &mut self,
         default: Option<JsInitializerClause>,
@@ -2045,9 +2054,9 @@ impl RootBuilder<'_, '_> {
         self.push_condition(antecedent, condition)
     }
 
-    /// Adds a node where `condition` holds after `antecedent`, unless the
-    /// condition can narrow no subject, as for the object `f()` of
-    /// `f()?.g(x)`, and returns the flow after it.
+    /// Adds a node where `condition` holds after `antecedent` and returns the
+    /// flow after it. Adds no node when the condition can narrow no subject,
+    /// as for the object `f()` of `f()?.g(x)`.
     fn push_narrowing_condition(
         &mut self,
         antecedent: FlowNodeId,
@@ -2576,7 +2585,8 @@ mod tests {
             assert_eq!(built.paths("x", 1), [Vec::<String>::new()], "{source}");
             assert_eq!(built.paths("x", 2), [facts(&["!x:Nullish"])], "{source}");
         }
-        // Each `?.` tests its own object, which also tests a discriminant.
+        // Each `?.` tests its own object. The test of `x.a` also tests `x`
+        // through its property `a`.
         let built = function("function f(x) { x?.a?.read(x, x.a); }");
         let both = [facts(&["!x.a:Nullish", "!x:Nullish", "!x[a]:Nullish"])];
         assert_eq!(sorted_paths(&built, "x", 2), both);

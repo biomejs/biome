@@ -137,8 +137,9 @@ pub(super) fn subject_of(
 
 /// Returns the id of the subject that the assignment target `target` writes,
 /// adding the subject and every prefix of its path to `subjects` on first
-/// use, as [`subject_of`] does for the expression with the same spelling:
-/// `x`, `o.v`, `o["v"]`, and `(o.v)` write the subjects that they would read.
+/// use. A target writes the subject that the expression with the same
+/// spelling reads, as for `x`, `o.v`, `o["v"]`, and `(o.v)`. [`subject_of`]
+/// returns the subject of such an expression.
 ///
 /// Returns `None` for every other target, including `o[k]`, `o!.v`, `x!`, and
 /// `x as T`, and when the table has used every [`FlowSubjectId`].

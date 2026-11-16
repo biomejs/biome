@@ -56,7 +56,7 @@ fn variant_names(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
     names
 }
 
-/// Declarations shared by the tests.
+/// Declarations that [`assert_reads`] puts before every source.
 const DECLARATIONS: &str = r#"
     declare function g(): void;
     declare function use(...values: unknown[]): void;
@@ -65,10 +65,10 @@ const DECLARATIONS: &str = r#"
     interface F { f(v: unknown): void }
 "#;
 
-/// Asserts the type of each `(marker, expression, expected)` read in `source`,
-/// which follows [`DECLARATIONS`], by the names of its members, as
-/// [`variant_names`] gives them, and that complete module inference gives
-/// each read the type that a lookup gives it.
+/// Asserts that each `(marker, expression, expected)` read in `source` has a
+/// type whose sorted member names are `expected`. Also asserts that complete
+/// module inference gives each read the same type as a lookup of that read.
+/// `source` follows [`DECLARATIONS`], and [`variant_names`] names the members.
 fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     let source = format!("{DECLARATIONS}{source}");
     let lookups: Vec<_> = {
@@ -110,12 +110,10 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m4/chain.ts` L4 to L14, `m5/order.ts` L5 to L11,
-// `m5/flow.ts` L26, and `m5-l1/extra.ts` L25 to L28): the key and the
-// arguments after a `?.` run only when its object is not nullish, so they see
-// the object as not nullish, not as truthy, while the code after the chain
-// also runs when the object is nullish.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// The key and the arguments after a `?.` run only when its object is not
+// nullish, so they see the object as not nullish rather than truthy. The code
+// after the chain also runs when the object is nullish.
 #[test]
 fn receivers_are_not_nullish_inside_their_chain() {
     assert_reads(
@@ -178,11 +176,10 @@ fn receivers_are_not_nullish_inside_their_chain() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives the narrower type in the comment for
-// each read below (`narrowing-probes/m5-l1/extra.ts` L12 to L14). Biome is
-// wider and sound:
+// each read below. Biome is wider and sound:
 // - A chain whose root is a parenthesized optional chain tests the path of
-//   its root, `o.v`, but not `o`, which TypeScript narrows too.
-// - `!` ends a chain, so `x?.a!.b(x)` tests nothing, where TypeScript treats
+//   its root, `o.v`, but not `o`. TypeScript narrows `o` too.
+// - `!` ends a chain, so `x?.a!.b(x)` tests nothing. TypeScript treats
 //   `x?.a!` as part of the chain.
 #[test]
 fn chains_end_at_parentheses_and_non_null_assertions() {
@@ -208,12 +205,11 @@ fn chains_end_at_parentheses_and_non_null_assertions() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5/order.ts` L12 to L18, `m5/flow.ts` L28 and L29, and
-// `m5-l1/extra.ts` L15 to L24 and L29 to L31): the defaults of destructuring
-// patterns and parameters, computed keys, and the initializers of `using`
-// declarations see the narrowing before them, and a default runs only when
-// the value is `undefined`, so the code after it doesn't see its tests.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// The defaults of destructuring patterns and parameters, computed keys, and
+// the initializers of `using` declarations see the narrowing before them. A
+// default runs only when the value is `undefined`, so the code after it
+// doesn't see its tests.
 #[test]
 fn defaults_see_the_narrowing_before_them() {
     assert_reads(
@@ -270,11 +266,11 @@ fn defaults_see_the_narrowing_before_them() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5-l1/extra.ts` L6 to L9): the right operand of a
-// logical assignment runs where its target is falsy for `||=`, truthy for
-// `&&=`, and nullish for `??=`, so a test of a discriminant narrows the object
-// that holds it there, as the same test in `||`, `&&`, or `??` does.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// The right operand of a logical assignment runs where its target is falsy
+// for `||=`, truthy for `&&=`, and nullish for `??=`. There, a test of a
+// discriminant narrows the object that holds it, as the same test in `||`,
+// `&&`, or `??` does.
 #[test]
 fn logical_assignments_test_their_target_before_their_right_operand() {
     assert_reads(
@@ -300,11 +296,10 @@ fn logical_assignments_test_their_target_before_their_right_operand() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives the narrower type in the comment for
-// each read below (`narrowing-probes/m5/compound.ts` L25 to L27 and
-// `m5/order.ts` L19 and L20). A logical assignment writes its target, and a
-// variable or a property path that the execution root writes doesn't narrow
-// yet, so the target keeps its declared type in the right operand, which is
-// wider than TypeScript's.
+// each read below. A logical assignment writes its target, and a variable or a
+// property path that its execution root writes doesn't narrow yet. So the
+// target keeps its declared type in the right operand, which is wider than
+// TypeScript's type.
 #[test]
 fn written_targets_of_logical_assignments_keep_their_declared_type() {
     assert_reads(
