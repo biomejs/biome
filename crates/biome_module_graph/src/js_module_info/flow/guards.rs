@@ -114,16 +114,15 @@ pub(crate) enum FlowGuard {
         sequential: bool,
     },
     /// The guard at index `guard`, on the path where no case of the `switch`
-    /// statement at index `switch` in [`RootFlow::switches`] matches, which
-    /// gives `never` instead when that statement is exhaustive.
+    /// statement at index `switch` in [`RootFlow::switches`] matches. Gives
+    /// `never` instead when that statement is exhaustive.
     ///
     /// A `switch` is exhaustive when every value that its discriminant can
-    /// have at the statement matches a case, as TypeScript's
-    /// `isExhaustiveSwitchStatement` decides it. Then no value takes this
-    /// path, so it adds nothing to any subject after the statement. Whether a
-    /// statement is exhaustive depends on resolved types, so inference
-    /// decides it at the read, and the solve applies `guard` unless the read
-    /// says so.
+    /// have at the statement matches a case, as in TypeScript. Then no value
+    /// takes this path, so it adds nothing to any subject after the
+    /// statement. Whether a statement is exhaustive depends on resolved
+    /// types, so inference decides it at the read, and the solve applies
+    /// `guard` unless inference found the statement exhaustive for that read.
     ///
     /// [`RootFlow::switches`]: super::RootFlow::switches
     Bypass { switch: u32, guard: usize },
@@ -635,7 +634,7 @@ pub(super) struct DecomposedCondition {
 
 impl DecomposedCondition {
     /// Returns the condition that holds when this condition holds and then
-    /// `next` holds, as `&&` combines its operands: its guard applies `next`
+    /// `next` holds, as `&&` combines its operands. Its guard applies `next`
     /// to the result of this guard.
     pub(super) fn then(mut self, next: Self, guards: &mut Vec<FlowGuard>) -> Self {
         guards.push(FlowGuard::Both {
@@ -675,8 +674,8 @@ pub(super) fn decompose_condition(
     decomposer.finish(guard, [expression])
 }
 
-/// How the cases of a `switch` statement narrow, which its discriminant
-/// decides, as in TypeScript's `getTypeAtSwitchClause`.
+/// How the cases of a `switch` statement narrow, which depends on its
+/// discriminant, as in TypeScript.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) enum SwitchKind {
     /// The discriminant has the shape of a subject, or is a call in an
@@ -706,7 +705,7 @@ impl SwitchKind {
         let Ok(discriminant) = statement.discriminant() else {
             return Self::Opaque;
         };
-        // The binder checks the discriminant's kind without skipping
+        // TypeScript checks for a `true` discriminant without skipping
         // parentheses, so `(true)` narrows nothing.
         if let AnyJsExpression::AnyJsLiteralExpression(
             AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
@@ -767,9 +766,9 @@ fn typeof_operand(expression: &AnyJsExpression, remaining: &mut usize) -> Option
 /// operand of a [`SwitchKind::Typeof`] one.
 ///
 /// Returns `None` for other kinds, and for a `typeof` discriminant in
-/// parentheses, which TypeScript's `computeExhaustiveSwitchStatement` checks
-/// as a value instead, so that `switch ((typeof x))` is exhaustive only
-/// with a case for every kind.
+/// parentheses. TypeScript checks such a discriminant as a string value
+/// instead, so `switch ((typeof x))` is exhaustive only with a case for every
+/// kind.
 pub(super) fn exhaustive_operand(
     discriminant: &AnyJsExpression,
     kind: SwitchKind,
@@ -783,11 +782,11 @@ pub(super) fn exhaustive_operand(
 }
 
 /// Returns whether TypeScript gives the case test `test` of a `switch`
-/// statement of `kind` a unit type that a case of Biome also tests, as
-/// TypeScript's `computeExhaustiveSwitchStatement` requires of every case:
-/// a string, number, bigint, or boolean literal, `null`, or `undefined` for
-/// [`SwitchKind::Value`], and a string literal that names a kind of value for
-/// [`SwitchKind::Typeof`], as `"string"` does.
+/// statement of `kind` a unit type that a case of Biome also tests.
+/// TypeScript finds a statement exhaustive only when every case has a unit
+/// type. Biome accepts a string, number, bigint, or boolean literal, `null`,
+/// or `undefined` for [`SwitchKind::Value`], and a string literal that names
+/// a kind of value, such as `"string"`, for [`SwitchKind::Typeof`].
 ///
 /// Returns false for a local variable named `undefined`, which can hold any
 /// value.
@@ -831,27 +830,26 @@ pub(super) struct SwitchCase<'a> {
     pub(super) matched: bool,
 }
 
-/// Decomposes the case test `test` of a `switch` statement whose
-/// discriminant is `discriminant` and whose cases narrow as `kind` says,
-/// assuming that the case matched or, when `matched` is false, that it did
-/// not, into guards appended to `guards`, as [`decompose_condition`] does.
+/// Decomposes the test of `case` into guards appended to `guards`, assuming
+/// that the case matched or, when `case.matched` is false, that it did not.
 ///
 /// A case of [`SwitchKind::Value`] and [`SwitchKind::Typeof`] statements
 /// narrows as `discriminant === test` and `typeof operand === test` do, and
-/// fails to match as `!==` does. As in TypeScript's
-/// `narrowTypeBySwitchOptionalChainContainment`, a case that doesn't match
-/// narrows no receiver of an optional chain, so `default` after
+/// fails to match as `!==` does. A case that doesn't match narrows no
+/// receiver of an optional chain, as in TypeScript, so `default` after
 /// `case undefined:` keeps `undefined` in `o` for `switch (o?.k)`. A case of
 /// [`SwitchKind::True`] narrows as its test does when it is truthy. It fails
-/// to match as the test does when it is falsy only when [`is_boolean_valued`]
-/// accepts the test, because a case such as `case x:` with an object `x`
-/// fails when `x` is an object too. TypeScript takes it as falsy anyway.
+/// to match as the test does when it is falsy only when every truthy value
+/// of the test is `true` ([`is_boolean_valued`]). Otherwise a case that
+/// fails to match narrows nothing, because a case such as `case x:` also
+/// fails when `x` is an object, which is truthy. TypeScript takes the test
+/// as falsy anyway.
 ///
 /// Returns `None` when the case narrows nothing: for a
 /// [`SwitchKind::Opaque`] statement, a case that fails to match and isn't
 /// boolean, and a case test that a comparison can't use, such as `-1`, a
-/// `const`, an enum member, or a template literal, which TypeScript also
-/// narrows by.
+/// `const`, an enum member, or a template literal. TypeScript narrows by
+/// those case tests too.
 pub(super) fn decompose_switch_case(
     case: SwitchCase,
     model: &SemanticModel,
@@ -1001,9 +999,10 @@ struct Decomposer<'a, 'raw> {
     /// Every initializer that an aliased condition has inlined.
     initializers: Vec<AnyJsExpression>,
     /// Whether a runtime test of a property or of an element of a pattern
-    /// also narrows the object or the pattern, as [`Self::property_guard`]
-    /// and [`Self::pattern_guard`] describe. False for the cases of
-    /// `switch (typeof x)`, which narrow only the operand of `typeof`.
+    /// also narrows the object or the pattern, through the guards that
+    /// [`Self::property_guard`] and [`Self::pattern_guard`] add. False for the
+    /// cases of `switch (typeof x)`, which narrow only the operand of
+    /// `typeof`.
     shape_guards: bool,
 }
 
@@ -1034,9 +1033,9 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     /// decomposition found.
     ///
     /// When decomposition stopped early, the condition mentions every
-    /// variable and property path that `scanned` read directly instead, and
-    /// those that inlined initializers read and [`narrows_through_aliases`]
-    /// accepts.
+    /// variable and property path that `scanned` read directly instead. It
+    /// also mentions the variables that inlined initializers read when an
+    /// aliased condition can narrow them ([`narrows_through_aliases`]).
     fn finish<'e>(
         self,
         guard: usize,

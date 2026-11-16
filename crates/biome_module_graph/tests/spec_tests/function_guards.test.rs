@@ -206,9 +206,8 @@ fn primitive_literal_guards_keep_the_complement_of_literal_unions() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives the target in the `then` branch and
-// the broad primitive in the `else` branch, except for `boolean`, which is
-// `true | false`, so the `else` branch of `input is true` gives `false`
-// (`narrowing-probes/m4-l1/boolean.ts` L4, L8).
+// the broad primitive in the `else` branch. The exception is `boolean`, which
+// is `true | false`, so the `else` branch of `input is true` gives `false`.
 #[test]
 fn literal_guards_do_not_exclude_individual_values_from_broad_primitives() {
     for (target, primitive, otherwise) in [

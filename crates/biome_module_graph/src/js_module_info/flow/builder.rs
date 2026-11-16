@@ -744,8 +744,8 @@ impl RootBuilder<'_, '_> {
         }
     }
 
-    /// Builds `statement` from `current`, as TypeScript's
-    /// `bindSwitchStatement` and `bindCaseBlock` do. `label` is the label of
+    /// Builds `statement` from `current`, with the control flow that
+    /// TypeScript gives a `switch` statement. `label` is the label of
     /// `statement`, if any.
     ///
     /// Every case test is evaluated from the flow after the discriminant, so
@@ -815,8 +815,8 @@ impl RootBuilder<'_, '_> {
     }
 
     /// Returns the flows where the statements of the case group made of the
-    /// clauses at `group` start, apart from the fall-through, following
-    /// TypeScript's `getTypeAtSwitchClause`.
+    /// clauses at `group` start, apart from the fall-through, as in
+    /// TypeScript.
     fn case_group_entry(
         &mut self,
         cases: &mut SwitchCases,
@@ -825,9 +825,9 @@ impl RootBuilder<'_, '_> {
         let has_default = cases.tests[group.clone()].iter().any(Option::is_none);
         match cases.kind {
             SwitchKind::Opaque => Ok(vec![cases.pre]),
-            // As in `narrowTypeBySwitchOnTrue`, no case before the group
-            // matched. With `default` in the group, no case after it matched
-            // either, while one of the group's own cases may have.
+            // As in TypeScript, no case before the group matched. With
+            // `default` in the group, no case after it matched either, while
+            // one of the group's own cases may have.
             SwitchKind::True => {
                 let unmatched = self.unmatched_cases_before(cases, group.start)?;
                 if has_default {
@@ -862,7 +862,7 @@ impl RootBuilder<'_, '_> {
     }
 
     /// Returns the flow after `antecedent` where the case of the clause at
-    /// `index` matched or, when `matched` is false, did not, which is
+    /// `index` matched or, when `matched` is false, did not. The flow is
     /// `antecedent` itself for `default` and for a case that narrows nothing.
     fn case_condition(
         &mut self,
@@ -923,10 +923,11 @@ impl RootBuilder<'_, '_> {
     /// Returns the bypass of `statement`, a `switch` without `default`: the
     /// flow on which none of its cases matched.
     ///
-    /// When TypeScript can find the statement exhaustive, the bypass is a
-    /// [`FlowGuard::Bypass`] that inference drops for every subject once it
-    /// finds the statement exhaustive, as TypeScript's
-    /// `getTypeAtFlowBranchLabel` does.
+    /// When TypeScript can find the statement exhaustive, the condition of
+    /// the bypass is a [`FlowGuard::Bypass`]. Once inference finds the
+    /// statement exhaustive, that guard gives `never` for every subject, so
+    /// the bypass adds nothing to the code after the statement, as in
+    /// TypeScript.
     fn switch_bypass(
         &mut self,
         statement: &JsSwitchStatement,
@@ -958,12 +959,13 @@ impl RootBuilder<'_, '_> {
     }
 
     /// Returns the record of `statement` that lets inference decide whether
-    /// it is exhaustive, given that `unmatched` is the index of the guard that
-    /// tests that none of its cases matched, as [`FlowSwitch`] describes.
+    /// it is exhaustive. `unmatched` is the index of the guard that tests
+    /// that none of its cases matched.
     ///
-    /// Returns `None` when TypeScript can't find the statement exhaustive or
-    /// Biome can't tell, and once the root records [`MAX_SWITCHES`]
-    /// statements.
+    /// Returns `None` when the discriminant is neither a subject nor `typeof`
+    /// of one, or is `typeof` in parentheses, when a case tests something
+    /// other than a unit value or a kind of value, and once the root records
+    /// [`MAX_SWITCHES`] statements.
     fn exhaustive_switch(
         &mut self,
         statement: &JsSwitchStatement,
@@ -994,8 +996,8 @@ impl RootBuilder<'_, '_> {
         })
     }
 
-    /// Returns the kinds of value, one bit each as [`typeof_kind_bit`] gives
-    /// them, that the guard at `guard` tests `subject` with `typeof` for.
+    /// Returns the kinds of value that the guard at `guard` tests `subject`
+    /// for with `typeof`, one bit each, as in [`FlowSwitch::typeof_kinds`].
     fn typeof_kinds(&self, guard: usize, subject: FlowSubjectId) -> u8 {
         let mut kinds = 0;
         let mut pending = vec![guard];

@@ -174,21 +174,21 @@ enum FlatteningError {
     Cycle,
 }
 
-/// The state of one solve that its guards share: the subject it narrows, the
-/// subject's declared type at the root's start, whether the subject is a
-/// readonly path, as [`FlowGuard::ReadonlyPath`] requires, the `switch`
-/// statements found exhaustive, as [`FlowGuard::Bypass`] requires, one bit
-/// each, and the results of the property guards, `in` tests, `instanceof`
-/// tests, and calls to type-guard functions applied so far, keyed by guard
-/// index and incoming type.
+/// The state that the guards of one solve of a subject share.
 struct GuardSolve<'db> {
     /// The subject that the solve narrows.
     subject: FlowSubjectId,
-    /// The subject's declared type at the root's start, which decides whether
-    /// a tested property is a discriminant.
+    /// The subject's declared type at the root's start.
     declared: TypeData<'db>,
+    /// Whether the subject is a readonly path. The guard that a
+    /// [`FlowGuard::ReadonlyPath`] wraps applies only when it is.
     readonly_path: bool,
+    /// The `switch` statements found exhaustive, one bit per index in the
+    /// root's switches. The [`FlowGuard::Bypass`] of each gives `never`.
     exhaustive: u64,
+    /// The results of the property guards, `in` tests, `instanceof` tests,
+    /// and calls to type-guard functions applied so far, keyed by guard index
+    /// and incoming type.
     properties: FxHashMap<(usize, TypeData<'db>), TypeData<'db>>,
 }
 
@@ -333,8 +333,7 @@ pub(in crate::db) struct LocalFlow<'db> {
     /// subject.
     readonly_paths: FxHashMap<(usize, FlowSubjectId), bool>,
     /// Whether each `switch` statement asked about so far is exhaustive,
-    /// keyed by the index of its root and its own index there, as
-    /// [`ResolutionCtx::switch_is_exhaustive`] decides it.
+    /// keyed by the index of its root and its own index there.
     exhaustive_switches: FxHashMap<(usize, u32), bool>,
 }
 
@@ -456,10 +455,10 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns the type of the element declared at `element` at `read`,
-    /// whose expression starts at `start`, given the `pattern` that holds it:
-    /// the element's property on the type of the pattern narrowed at the
-    /// read, destructured as the element's collected type destructures the
-    /// pattern's declared type.
+    /// given the `pattern` that holds it: the element's property on the type
+    /// of the pattern narrowed at the read, destructured as the element's
+    /// collected type destructures the pattern's declared type. `start` is
+    /// where the expression of `read` starts.
     ///
     /// Returns `None` when no test can narrow the pattern, when the pattern
     /// keeps its declared type at the read, and when the property can't be
@@ -599,16 +598,16 @@ impl<'db> ResolutionCtx<'db, '_> {
         )
     }
 
-    /// Returns the `switch` statements of the root of `read` that are
-    /// exhaustive and whose bypass reaches the read, whose expression starts
-    /// at `start`, one bit each, as [`FlowSubjectRootInput::exhaustive`]
-    /// takes them.
+    /// Returns the exhaustive `switch` statements of the root of `read` whose
+    /// bypass reaches the read, one bit each, as the mask in
+    /// [`FlowSubjectRootInput::exhaustive`]. `start` is where the expression
+    /// of `read` starts.
     ///
     /// Only the statements whose cases start before `start` count. The read
     /// of a discriminant lies before its own statement's cases, so deciding
     /// whether a statement is exhaustive never asks about itself. A
-    /// statement that a loop's back edge brings before the read keeps its
-    /// bypass, which is wider.
+    /// statement that a loop's back edge brings before the read doesn't
+    /// count, so its bypass keeps its guard.
     fn exhaustive_switches(&mut self, read: FlowRead, start: TextSize) -> u64 {
         let Some(root) = self.js_info.flow.root(read.root) else {
             return 0;
@@ -631,9 +630,10 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns whether the `switch` statement at index `switch` of the root
-    /// at index `root` is exhaustive, through
-    /// [`crate::db::queries::infer_flow_switch_exhaustive`], or decided in
-    /// this context and kept per statement when it evaluates flow locally.
+    /// at index `root` is exhaustive. When the context evaluates flow
+    /// locally, it decides the statement itself and caches the answer per
+    /// statement. Otherwise it asks
+    /// [`crate::db::queries::infer_flow_switch_exhaustive`].
     fn is_exhaustive_switch(&mut self, root: usize, switch: u32) -> bool {
         if !self.evaluates_flow_locally() {
             return infer_flow_switch_exhaustive(
@@ -656,21 +656,21 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns whether the `switch` statement at index `switch` of the root
-    /// at index `root` is exhaustive, as TypeScript's
-    /// `computeExhaustiveSwitchStatement` decides it: whether every value
-    /// that the type of its discriminant at the statement allows matches a
-    /// case.
+    /// at index `root` is exhaustive, which holds when every value that the
+    /// type of its discriminant at the statement allows matches a case, as
+    /// in TypeScript.
     ///
-    /// That type is the flow-sensitive type of the read of the discriminant,
-    /// or of the operand of `typeof`, when narrowing changes it, so a
-    /// `string` that a test narrowed to `"a" | "b"` before the statement
-    /// counts, and its ordinary type otherwise. The statement is exhaustive
-    /// when the guard of its bypass, which tests that no case matched,
-    /// leaves that type `never`. For `switch (typeof x)` with `x: unknown` or
-    /// `x: any`, as in TypeScript, the cases must test every kind of value.
+    /// That type is the narrowed type of the discriminant, or of the operand
+    /// of `typeof`, at the statement, so a `string` that a test narrowed to
+    /// `"a" | "b"` before the statement counts as `"a" | "b"`. Without
+    /// narrowing, it is the ordinary type. The statement is exhaustive when
+    /// the guard of its bypass, which tests that no case matched, leaves that
+    /// type `never`. For `switch (typeof x)` with `x: unknown` or `x: any`,
+    /// the cases must test every kind of value, as in TypeScript.
     ///
-    /// Returns false when the type is unknown or `never`, as TypeScript's
-    /// `isLiteralType` is false for `never`.
+    /// Returns false when the type is `Unknown`, `never`, or `any` outside
+    /// `switch (typeof x)`. TypeScript gives false for `never` too, because
+    /// it requires a union of unit types, such as literals.
     pub(super) fn switch_is_exhaustive(&mut self, root: usize, switch: u32) -> bool {
         let info = self.js_info;
         let Some(root) = info.flow.root(root) else {
@@ -898,9 +898,10 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns the type of `subject` at each of `points`, given its `baseline`
-    /// type at the root's start, whether it is a readonly path, and the
-    /// `switch` statements found exhaustive, or `None` when the walk or the
-    /// solve exceeds the flow work limit.
+    /// type at the root's start, whether it is a readonly path, and the mask
+    /// of `switch` statements found exhaustive.
+    ///
+    /// Returns `None` when the walk or the solve exceeds the flow work limit.
     fn solve_subject(
         &mut self,
         root: &RootFlow,

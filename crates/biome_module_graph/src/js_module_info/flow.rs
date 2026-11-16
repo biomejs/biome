@@ -344,9 +344,11 @@ pub(crate) struct RootFlow {
     /// The subjects in [`Self::readonly_tested`] that no other guard tests or
     /// narrows, which need no solve when their path is not readonly.
     pub(crate) only_readonly_tested: FxHashSet<FlowSubjectId>,
-    /// The `switch` statements without `default` whose [`FlowGuard::Bypass`]
-    /// reaches a read, at most [`MAX_SWITCHES`] of them, in the order of
-    /// their guards' `switch` index. Empty when no such guard reaches a read.
+    /// The `switch` statements without `default` that inference may find
+    /// exhaustive, at most [`MAX_SWITCHES`] of them. The statement at index
+    /// `i` is the one whose [`FlowGuard::Bypass`] has `switch` `i`. Empty when
+    /// no such guard reaches a read, and when finding the reads they reach
+    /// exceeds the relevance work limit.
     pub(crate) switches: Box<[FlowSwitch]>,
     /// The read points that the [`FlowGuard::Bypass`] of a statement in
     /// [`Self::switches`] reaches, sorted.
@@ -357,18 +359,17 @@ pub(crate) struct RootFlow {
 /// reaches it: bit `i` stands for [`RootFlow::switches`]`[i]`.
 pub(crate) type BypassedPoint = (FlowNodeId, u64);
 
-/// The number of `switch` statements per execution root that can be found
-/// exhaustive, the bits of the mask that the solve takes.
+/// Limits how many `switch` statements per execution root can be found
+/// exhaustive, because the solve takes them as the bits of a `u64` mask.
 pub(crate) const MAX_SWITCHES: usize = 64;
 
 /// A `switch` statement whose [`FlowGuard::Bypass`] gives `never` when the
 /// statement is exhaustive.
 ///
-/// Collection records only statements that TypeScript's
-/// `computeExhaustiveSwitchStatement` can find exhaustive: without `default`,
-/// with a discriminant that is a subject or `typeof` of one, and with cases
-/// that all test a unit value, such as `"a"`, `1`, `null`, or `undefined`, or
-/// a kind of value, such as `"string"`.
+/// Collection records only statements that TypeScript can find exhaustive:
+/// statements without `default`, with a discriminant that is a subject or
+/// `typeof` of one, and with cases that all test a unit value, such as `"a"`,
+/// `1`, `null`, or `undefined`, or a kind of value, such as `"string"`.
 #[derive(Debug)]
 pub(crate) struct FlowSwitch {
     /// The range of the expression whose type at the statement decides
@@ -381,13 +382,15 @@ pub(crate) struct FlowSwitch {
     /// the statement's [`FlowGuard::Bypass`].
     pub(crate) guard: usize,
     /// Where the statement's cases start. A read before this offset never
-    /// asks whether the statement is exhaustive: the discriminant's own read
-    /// lies before it, so deciding a statement never needs itself.
+    /// asks whether the statement is exhaustive. The discriminant's own read
+    /// lies before it, so deciding whether a statement is exhaustive never
+    /// asks about the statement itself.
     pub(crate) start: TextSize,
     /// The kinds of value that the cases of `switch (typeof x)` test, one bit
-    /// per [`TypeofKind`] as [`typeof_kind_bit`] gives it, or `None` for any
-    /// other discriminant. TypeScript finds such a statement exhaustive for
-    /// `x: unknown` or `x: any` when its cases test every kind.
+    /// per [`TypeofKind`], or `None` for any other discriminant.
+    /// [`typeof_kind_bit`] maps each kind to its bit. TypeScript finds such a
+    /// statement exhaustive for `x: unknown` or `x: any` when its cases test
+    /// every kind.
     pub(crate) typeof_kinds: Option<u8>,
 }
 
@@ -407,7 +410,7 @@ pub(crate) const fn typeof_kind_bit(kind: TypeofKind) -> u8 {
 
 impl RootFlow {
     /// Returns the statements in [`Self::switches`] whose bypass reaches
-    /// `point`, as [`Self::bypassed`] describes.
+    /// `point`, one bit each, or zero when no bypass reaches it.
     pub(crate) fn bypassed_switches(&self, point: FlowNodeId) -> u64 {
         self.bypassed
             .binary_search_by_key(&point, |(point, _)| *point)
@@ -975,9 +978,10 @@ impl RootCollector<'_> {
         }
     }
 
-    /// Returns the `switch` statements of `switches` whose bypass reaches a
-    /// read point of `read_points`, and those points, as
-    /// [`RootFlow::switches`] and [`RootFlow::bypassed`] describe them.
+    /// Returns every statement of `switches`, in order, and the points of
+    /// `read_points` that their bypasses reach, sorted, each with one bit per
+    /// statement whose bypass reaches it. Keeping every statement keeps bit
+    /// `i` for the [`FlowGuard::Bypass`] with `switch` `i`.
     ///
     /// Returns no statement when no bypass reaches a read, and when the walk
     /// spends the relevance work limit, so no statement counts as exhaustive
