@@ -306,3 +306,13 @@ const qualifiedDefaultImportAlways = parseQualifiedDefaultImportAlways();
 
 if (!qualifiedDefaultImportAlways.truthy) {
 }
+
+// A parameter default that can't be `undefined` removes it from the parameter's type
+function defaultedString(parameter: string | undefined = "x") {
+  return parameter ?? "y";
+}
+
+type DefaultedObject = { x: number };
+function defaultedObject(parameter: DefaultedObject | undefined = { x: 1 }) {
+  return parameter?.x;
+}

@@ -11,9 +11,10 @@ use biome_js_syntax::{
     TsModuleDeclaration, TsTypeParameter, inner_string_text,
 };
 use biome_js_type_info::{
-    FunctionParameter, FunctionParameterBinding, GenericTypeParameter, RawTypeCollector,
-    RawTypeData, RawTypeId, TypeData, TypeId, TypeImportQualifier, TypeMember, TypeMemberKind,
-    TypeReference, TypeStore, UnionCollector, resolved::InferredLocalTypeId,
+    Function, FunctionParameter, FunctionParameterBinding, GenericTypeParameter, RawTypeCollector,
+    RawTypeData, RawTypeId, ReturnType, TypeData, TypeId, TypeImportQualifier, TypeMember,
+    TypeMemberKind, TypeReference, TypeStore, TypeofExpression, TypeofParameterExpression,
+    UnionCollector, resolved::InferredLocalTypeId,
 };
 use biome_rowan::{AstNode, SyntaxKindSet, Text, TextRange, TokenText};
 use indexmap::IndexMap;
@@ -526,10 +527,22 @@ impl JsModuleInfoCollector {
                 {
                     return ty;
                 }
-                return self
-                    .function_parameters
-                    .get(param.syntax())
-                    .map_or_default(|param| param.binding_type(binding_name));
+                let Some(parameter) = self.function_parameters.get(param.syntax()) else {
+                    return TypeReference::unknown();
+                };
+                // A write such as `param = undefined` restores `undefined`, so only
+                // never-reassigned parameters drop it.
+                if param
+                    .initializer()
+                    .and_then(|initializer| initializer.expression().ok())
+                    .and_then(|expression| is_never_undefined(&expression))
+                    .unwrap_or(false)
+                    && matches!(parameter, FunctionParameter::Named(_))
+                    && !self.has_writable_reference(semantic_model, binding.range)
+                {
+                    return self.defaulted_parameter_binding_type(parameter.clone());
+                }
+                return parameter.binding_type(binding_name);
             } else if let Some(param) = JsRestParameter::cast_ref(&ancestor) {
                 return self
                     .function_parameters
@@ -585,6 +598,27 @@ impl JsModuleInfoCollector {
             return Some(RawTypeId::Local(self.optional(ty)).into());
         }
         Some(ty)
+    }
+
+    /// Returns a defaulted parameter's type inside the function body, with `undefined`
+    /// removed from its declared union.
+    fn defaulted_parameter_binding_type(&mut self, parameter: FunctionParameter) -> TypeReference {
+        // A synthetic one-parameter function lets `has_initializer` resolve; the declared
+        // signature still accepts `undefined`.
+        let function = self.reference_to_owned_data(TypeData::from(Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: None,
+            parameters: Box::new([parameter]),
+            return_type: ReturnType::default(),
+        }));
+        self.reference_to_owned_data(TypeData::from(TypeofExpression::Parameter(
+            TypeofParameterExpression {
+                function,
+                index: 0,
+                has_initializer: true,
+            },
+        )))
     }
 
     /// Widen the type of binding from its writable references.
@@ -917,6 +951,40 @@ fn register_type_with_limit(
         diagnostics.push(JsModuleInfoDiagnostic::exceeded_types_limit());
     }
     unknown_id.unwrap_or_else(|| types.insert_cow(Cow::Owned(unknown)))
+}
+
+/// Whether `expression` can never evaluate to `undefined`, judged from its syntax alone.
+///
+/// Parentheses, `satisfies` and `as const` are looked through because they keep the type of
+/// the value. Any other assertion (`as T`, `<T>value`, `value!`) can hide `undefined`, so the
+/// result is `false` for it. A `new` expression is not listed either: its type comes from the
+/// constructor, which can be `any`.
+///
+/// Returns `None` if the syntax tree is incomplete.
+fn is_never_undefined(expression: &AnyJsExpression) -> Option<bool> {
+    let mut expression = expression.clone();
+    loop {
+        // `omit_type_wrappers` is skipped because it also looks through `as T`, `<T>` and `!`.
+        let inner = match &expression {
+            AnyJsExpression::JsParenthesizedExpression(parenthesized) => parenthesized.expression(),
+            AnyJsExpression::TsSatisfiesExpression(satisfies) => satisfies.expression(),
+            AnyJsExpression::TsAsExpression(assertion)
+                if assertion.ty().is_ok_and(|ty| ty.is_const_reference_type()) =>
+            {
+                assertion.expression()
+            }
+            AnyJsExpression::JsTemplateExpression(template) => {
+                return Some(template.tag().is_none());
+            }
+            AnyJsExpression::JsObjectExpression(_)
+            | AnyJsExpression::JsArrayExpression(_)
+            | AnyJsExpression::JsFunctionExpression(_)
+            | AnyJsExpression::JsArrowFunctionExpression(_)
+            | AnyJsExpression::JsClassExpression(_) => return Some(true),
+            expression => return Some(expression.is_literal_expression()),
+        };
+        expression = inner.ok()?;
+    }
 }
 
 #[cfg(test)]
