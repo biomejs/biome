@@ -609,8 +609,8 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// types, as [`may_narrow_by_property`] describes, so this is
     /// [`Self::narrowing_baseline`] when the flattened type is one. When
     /// `instance_tested` is true, an `instanceof` test narrows the subject
-    /// too, which also narrows a type with one object type, as
-    /// [`may_narrow_by_instanceof`] describes.
+    /// too. Such a test narrows any type with an object type or `unknown`, so
+    /// one object type is then enough.
     ///
     /// Unlike [`Self::narrowing_baseline`], flattening resolves handles to
     /// local types of this context's module through this context instead of
@@ -959,14 +959,13 @@ impl<'db> ResolutionCtx<'db, '_> {
         narrow_by_in_operator(self.db, ty, name, positive, self.narrowing_resolver())
     }
 
-    /// Returns `ty` narrowed by `value instanceof C`, where `test` is the
-    /// [`FlowTest::Instanceof`] that names `C`, given the subject's `declared`
-    /// type, as [`narrow_by_instanceof`] narrows it.
+    /// Returns `ty` narrowed by `value instanceof C` through
+    /// [`narrow_by_instanceof`], where `test` is the [`FlowTest::Instanceof`]
+    /// that names `C`.
     ///
-    /// Returns `ty` unchanged when `declared` has no object type and is not
-    /// `unknown`, as [`may_narrow_by_instanceof`] describes, because the test
-    /// could then only make a branch impossible. `C` is resolved only after
-    /// that check.
+    /// Returns `ty` unchanged when the subject's `declared` type has no object
+    /// type and is not `unknown`, because the test could then only make a
+    /// branch impossible. `C` is resolved only after that check.
     fn narrow_by_instance(
         &mut self,
         ty: TypeData<'db>,

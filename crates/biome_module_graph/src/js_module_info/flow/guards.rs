@@ -518,12 +518,15 @@ pub(super) struct DecomposedCondition {
     /// variable cannot change between the alias and its test. See
     /// [`narrows_through_aliases`] for the variables that qualify.
     pub(super) mentions: Vec<FlowSubjectId>,
-    /// Subjects whose type the condition may refine only through
-    /// [`FlowGuard::Property`], such as `s` in `s.kind === "c"`, through
-    /// [`FlowTest::In`], such as `x` in `"a" in x`, or through
-    /// [`FlowTest::Instanceof`], such as `x` in `x instanceof Date`, unless
-    /// `mentions` also lists them. The first two narrow only a union with two
-    /// object types, and `instanceof` only a type with an object type. When
+    /// Subjects whose type the condition may narrow only through these
+    /// tests, unless `mentions` also lists them:
+    ///
+    /// - [`FlowGuard::Property`], such as `s` in `s.kind === "c"`;
+    /// - [`FlowTest::In`], such as `x` in `"a" in x`;
+    /// - [`FlowTest::Instanceof`], such as `x` in `x instanceof Date`.
+    ///
+    /// The first two narrow only a union with two object types, and
+    /// `instanceof` only a type with an object type or `unknown`. When
     /// decomposition stops early, this also lists the pattern of every
     /// variable in `mentions` that is an element of a destructuring pattern
     /// that a test of the variable narrows.
@@ -763,7 +766,7 @@ impl Decomposer<'_, '_> {
             Some((test, subject)) if self.may_test(subject) => {
                 // `in` narrows only a union with two object types, as a test
                 // of a property narrows its object, and `instanceof` only a
-                // type with an object type.
+                // type with an object type or `unknown`.
                 match test {
                     FlowTest::In(_) => self.parents.push(subject),
                     FlowTest::Instanceof(_) => {
@@ -870,7 +873,8 @@ impl Decomposer<'_, '_> {
     /// `const { kind, v } = s`.
     ///
     /// Returns `None` for a call to a type-guard function, for `in`, and for
-    /// `instanceof`, as for [`Self::property_guard`]. Inside an inlined aliased condition,
+    /// `instanceof`, because TypeScript never narrows a pattern through these
+    /// tests of one of its elements. Inside an inlined aliased condition,
     /// every such pattern can be tested, because its values don't change
     /// after the destructuring.
     ///
@@ -2503,9 +2507,10 @@ mod tests {
             ("value[0] instanceof Date", Truthy, "value.0", true),
         ] {
             let decomposed = decomposed(source, outcome);
-            // `instanceof` narrows only a type with an object type, as a test
-            // of a property narrows its object, and it narrows no object that
-            // holds the tested value.
+            // Like the object of a property test, the subject of `instanceof`
+            // is a parent, because `instanceof` narrows only a type with an
+            // object type or `unknown`. It narrows no object that holds the
+            // tested value.
             assert!(decomposed.condition.mentions.is_empty(), "{source}");
             assert_eq!(parent_names(&decomposed), [subject], "{source}");
             let instance_tested: Vec<_> = decomposed

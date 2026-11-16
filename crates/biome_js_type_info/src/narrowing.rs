@@ -110,9 +110,10 @@ pub fn raw_may_be_object_union(reference: &TypeReference, raw_types: &[RawTypeDa
     raw_object_members(reference, raw_types) >= 2
 }
 
-/// Returns whether a collected type reference may resolve to a type that
-/// `instanceof` can narrow, as [`may_narrow_by_instanceof`] describes,
-/// without resolving it.
+/// Returns whether a collected type reference may resolve to a type with an
+/// object type or `unknown`, which `instanceof` can narrow, without resolving
+/// it. [`may_narrow_by_instanceof`] answers the same question for a resolved
+/// type.
 ///
 /// This returns false when the raw tables show that every member of the type
 /// is a primitive type, a literal type of a primitive, `null`, or
@@ -665,12 +666,12 @@ pub fn narrow_by_in_operator<'db>(
 }
 
 /// Narrows `ty` by the runtime test `value instanceof C`, where
-/// `constructor` is the type of `C`, as TypeScript's `narrowTypeByInstanceof`
-/// does.
+/// `constructor` is the type of `C`, matching TypeScript except where noted.
 ///
-/// The test compares the members of the union `ty` with the instance types of
-/// `constructor`, such as `Date` for `x instanceof Date`, by their
-/// declarations, as [`is_derived_from`] describes:
+/// The test compares each member of the union `ty` with the instance types
+/// of `constructor`, such as `Date` for `x instanceof Date`, by declaration.
+/// A type is derived from a class or an interface when its `extends` clauses
+/// lead to that declaration, and [`is_derived_from`] lists the other cases.
 ///
 /// - When `positive` is true, a member derived from an instance type stays,
 ///   a member that an instance type is derived from becomes that instance
@@ -681,21 +682,26 @@ pub fn narrow_by_in_operator<'db>(
 ///   where TypeScript gives the intersection of the two. `unknown` becomes
 ///   the instance type.
 /// - When `positive` is false, the members derived from the instance type
-///   are removed, which can give `never`. Nothing is removed when
-///   `constructor` has several instance types, or when the instance type is
-///   not an object type, as TypeScript does.
+///   are removed, which can give `never`. As in TypeScript, nothing is
+///   removed when `constructor` has several instance types, or when the
+///   instance type is `{}` or not an object type.
 ///
 /// TypeScript gives an instance of a generic class `any` type arguments,
 /// such as `Box<any>`. Biome has no such type, so `unknown` stays `unknown`,
 /// a member that an instance of a generic class is derived from stays as it
 /// is, and the result is `ty` when no member remains.
 ///
-/// `ty` is returned unchanged when [`instance_types`] can't tell the instance
-/// types, as for `Object`, `Function`, a generic construct signature, or a
-/// class with a static `[Symbol.hasInstance]` method, when a member is a
-/// generic or `unknown` in a union, when [`is_derived_from`] can't decide
-/// for a pair, and when the union traversal, which visits at most 256 types,
-/// runs out. `resolve` resolves handles as for [`narrow_type`].
+/// Returns `ty` unchanged when Biome can't tell the result:
+///
+/// - [`instance_types`] can't tell the instance types, as for `Object`,
+///   `Function`, a generic construct signature, or a class with a static
+///   `[Symbol.hasInstance]` method;
+/// - a member of the union is a generic, or `unknown` when `positive` is
+///   true;
+/// - [`is_derived_from`] can't decide for a pair of types;
+/// - the union traversal would visit more than 256 types.
+///
+/// `resolve` resolves handles as for [`narrow_type`].
 pub fn narrow_by_instanceof<'db>(
     db: &'db dyn TypeDb,
     ty: InferredTypeData<'db>,
@@ -726,8 +732,8 @@ fn instances_in<'db>(
     instances: &[InstanceType<'db>],
     resolve: &mut TypeResolver<'db, '_>,
 ) -> Option<InferredTypeData<'db>> {
-    // The type of a read, which an instance of a generic class without type
-    // arguments must never become.
+    // Gives the union of the instance types, or `None` when one is a generic
+    // class without type arguments, because a read must never have that type.
     let instance_type = || {
         instances
             .iter()
@@ -800,10 +806,10 @@ fn instances_excluded<'db>(
     })
 }
 
-/// Returns whether [`narrow_by_instanceof`] can narrow a value whose
-/// declared type is `declared` to a type other than `never`: whether
-/// `declared` is `unknown` or has a member that is neither `null`,
-/// `undefined`, nor a primitive type.
+/// Returns whether `declared` is `unknown` or has a member that is neither
+/// `null`, `undefined`, nor a primitive type. Only then can
+/// [`narrow_by_instanceof`] narrow a value of that declared type to a type
+/// other than `never`.
 ///
 /// No primitive is derived from a class, so `instanceof` can only make a
 /// branch impossible for a value of a primitive type, or leave it unchanged.
@@ -3287,8 +3293,9 @@ mod tests {
             narrow_instance(db, InferredTypeData::ObjectKeyword, a, true),
             ia
         );
-        // `A` is assignable to these types but not a subtype of them, as
-        // TypeScript decides it: it lacks the optional property `z`.
+        // `A` is not a subtype of these types, so the value keeps its type.
+        // `A` is assignable to the object type, but it lacks the optional
+        // property `z`, which TypeScript's subtype relation requires.
         for ty in [
             union(db, &[InferredTypeData::String, InferredTypeData::Number]),
             object(

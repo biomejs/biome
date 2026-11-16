@@ -44,10 +44,11 @@ pub(super) struct BuiltRoot {
     /// mentions it is `s.kind === "c"`, or through `in` or `instanceof`, as
     /// in `"a" in s` or `s instanceof Date`.
     pub(super) property_only: FxHashSet<FlowSubjectId>,
-    /// The subjects in `property_only` that an `instanceof` test refines.
+    /// The subjects in `property_only` that an `instanceof` test narrows.
     pub(super) instance_tested: FxHashSet<FlowSubjectId>,
-    /// The condition nodes, each with a subject in `mentions`, whose
-    /// condition mentions the subject only as the subject of `instanceof`.
+    /// The pairs in `mentions` where the condition tests the subject with
+    /// `instanceof`, and otherwise mentions it only as the object of a
+    /// [`FlowGuard::Property`] or the subject of `in`.
     pub(super) instance_mentions: FxHashSet<(FlowNodeId, FlowSubjectId)>,
     /// Reachable reads of subjects with their incoming flow.
     pub(super) reads: Vec<BuiltRead>,

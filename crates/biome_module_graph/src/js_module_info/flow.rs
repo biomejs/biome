@@ -308,14 +308,18 @@ pub(crate) struct RootFlow {
     /// The points of each subject's reads, sorted and without duplicates.
     pub(crate) read_points: FxHashMap<FlowSubjectId, Box<[FlowNodeId]>>,
     /// The subjects with reads that conditions narrow only through tests of
-    /// their shape: [`FlowGuard::Property`], such as `s` when the only
-    /// condition that mentions it is `s.kind === "c"`, `in`, which
-    /// [`FlowTest::In`] applies to `x` in `"a" in x`, and `instanceof`, which
-    /// [`FlowTest::Instanceof`] applies to `x` in `x instanceof Date`. A test
-    /// of a property or `in` narrows only a union with two object types, and
-    /// `instanceof` only a type with an object type or `unknown`, so these
-    /// subjects need no solve when their declared type is not one. Every
-    /// [`FlowSubject::Pattern`] with reads is one.
+    /// their shape:
+    ///
+    /// - [`FlowGuard::Property`], such as `s` when the only condition that
+    ///   mentions it is `s.kind === "c"`;
+    /// - [`FlowTest::In`], such as `x` in `"a" in x`;
+    /// - [`FlowTest::Instanceof`], such as `x` in `x instanceof Date`.
+    ///
+    /// A test of a property or `in` narrows only a union with two object
+    /// types, and `instanceof` only a type with an object type or `unknown`,
+    /// so these subjects need no solve when their tests can't narrow their
+    /// declared type. Every [`FlowSubject::Pattern`] with reads is in this
+    /// set.
     pub(crate) property_only: FxHashSet<FlowSubjectId>,
     /// The subjects in [`Self::property_only`] that an `instanceof` test
     /// narrows, whose declared type need not be a union.
@@ -399,13 +403,14 @@ pub(crate) struct ModuleFlow {
     property_only_bindings: FxHashSet<TextRange>,
     /// The declarations of the bindings in [`RootFlow::instance_tested`].
     instance_tested_bindings: FxHashSet<TextRange>,
-    /// The candidates that are candidates only because they are, or contain,
-    /// reads of one binding in [`Self::property_only_bindings`], reads of one
-    /// binding that only `instanceof` tests reach, or reads of elements of
-    /// one pattern in [`Self::pattern_types`] that no test of the elements
-    /// themselves reaches, keyed by range, with the range of that binding's
-    /// declaration or of that pattern. Such a candidate keeps its type when
-    /// the binding or the pattern has no type that narrowing starts from.
+    /// Maps the range of each candidate that is a candidate only because of
+    /// one binding or one pattern to the range of that binding's declaration
+    /// or of that pattern. Such a candidate is, or contains, reads of one
+    /// binding in [`Self::property_only_bindings`], reads of one binding that
+    /// only `instanceof` tests reach, or reads of elements of one pattern in
+    /// [`Self::pattern_types`] that no test of the elements themselves
+    /// reaches. The candidate keeps its type when the binding or the pattern
+    /// has no type that narrowing starts from.
     property_only_candidates: FxHashMap<TextRange, TextRange>,
     /// Maps the range of each [`FlowSubject::Pattern`] with reads to its
     /// declared type, which is the collected type of the value that the
@@ -587,11 +592,11 @@ impl RootCollector<'_> {
         }
         // A test of a property narrows its object only when the object's
         // declared type is a union with at least two object types, and
-        // `instanceof` only a type with an object type or `unknown`, so a
-        // variable or a pattern that only such tests mention keeps its
+        // `instanceof` narrows only a type with an object type or `unknown`.
+        // A variable or a pattern that only such tests mention keeps its
         // declared type when its collected type shows, without resolving it,
-        // that it is not one. Dropping it here spares its reads the flow
-        // queries.
+        // that its tests can't narrow it. Dropping it here spares its reads
+        // the flow queries.
         let unnarrowable: FxHashSet<FlowSubjectId> = property_only
             .iter()
             .copied()
@@ -720,10 +725,11 @@ impl RootCollector<'_> {
             })
             .flatten()
             .collect();
-        // Variables that other tests also mention, whose reads only an
-        // `instanceof` test may reach. Such a read narrows only when the
-        // variable's declared type can, so its candidate records the variable
-        // as a read of a variable in `property_only` does.
+        // The variables that both an `instanceof` test and other tests
+        // mention. A read of such a variable that only `instanceof` tests
+        // reach narrows only when the variable's declared type can, so its
+        // candidate records the variable, like a read of a variable in
+        // `property_only`.
         let instance_reached: Vec<FlowSubjectId> = walked
             .iter()
             .copied()
@@ -747,7 +753,8 @@ impl RootCollector<'_> {
         ) else {
             return;
         };
-        // Without this, every such read counts as reached by other tests too.
+        // `reachable` counts the `instanceof` mentions too, so the reads that
+        // other tests reach need a walk without them.
         let reached_by_other_tests = if instance_reached.is_empty() {
             None
         } else {

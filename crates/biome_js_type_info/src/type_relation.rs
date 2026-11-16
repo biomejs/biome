@@ -412,8 +412,8 @@ fn is_decimal_integer_name(name: &str) -> bool {
             .is_ok_and(|value| value <= MAX_SAFE_INTEGER)
 }
 
-/// Returns whether the normalized type `source` is a subtype of `target`, as
-/// TypeScript's subtype relation decides it.
+/// Returns whether the normalized type `source` is a subtype of `target`
+/// under TypeScript's subtype relation.
 ///
 /// This is assignability with two differences: `any` is a subtype only of
 /// `any` and `unknown`, and a source that lacks an optional property of an
@@ -442,8 +442,8 @@ pub(crate) fn is_empty_object_type<'db>(
     check.is_empty_object(ty)
 }
 
-/// The type of the instances of a constructor, which `value instanceof C`
-/// tests, as [`instance_types`] gives it.
+/// One type of the instances of a constructor, which `value instanceof C`
+/// tests `value` against. [`instance_types`] returns these.
 #[derive(Clone, Copy, Debug)]
 pub(crate) struct InstanceType<'db> {
     /// The instance type, whose declaration [`is_derived_from`] compares.
@@ -456,8 +456,8 @@ pub(crate) struct InstanceType<'db> {
 }
 
 /// Returns the types of the instances of the normalized constructor type
-/// `constructor`, which `value instanceof C` narrows `value` to, following
-/// TypeScript's `getInstanceType`:
+/// `constructor`, which `value instanceof C` narrows `value` to. They match
+/// TypeScript's instance types:
 ///
 /// - a class gives an instance of itself;
 /// - another object type gives the type of its `prototype` property, unless
@@ -465,13 +465,16 @@ pub(crate) struct InstanceType<'db> {
 ///   signatures, as `new () => Foo` gives `Foo`;
 /// - a union of constructors gives the instance types of its members.
 ///
-/// Returns `None` when `instance_types` can't tell, so the test must leave
-/// the value unchanged: for a constructor that is not one of the above, for
-/// `Object` and `Function`, whose instances TypeScript treats specially, for
-/// a generic construct signature, and for a constructor that declares or
-/// inherits a static `[Symbol.hasInstance]` method, or a static member with
-/// a computed key that may be one, because TypeScript narrows by that
-/// method's type predicate instead.
+/// Returns `None` when Biome can't tell the instance types, so the test must
+/// leave the value unchanged. This happens for:
+///
+/// - a constructor that is not one of the above;
+/// - `Object` and `Function`, whose instances TypeScript treats specially;
+/// - a generic construct signature;
+/// - a constructor that declares or inherits a static `[Symbol.hasInstance]`
+///   method, or a static member with a computed key that may be one, because
+///   TypeScript narrows by that method's type predicate instead;
+/// - a constructor whose walk exceeds the work limit.
 pub(crate) fn instance_types<'db>(
     db: &'db dyn TypeDb,
     constructor: TypeData<'db>,
@@ -502,8 +505,8 @@ pub(crate) fn instance_types<'db>(
 }
 
 /// Returns whether every value of the normalized type `source` is derived
-/// from `target`, an instance type or a member of a narrowed union, as
-/// TypeScript's `isTypeDerivedFrom` decides it for `instanceof`.
+/// from `target`, an instance type or a member of a narrowed union, matching
+/// the relation that TypeScript uses for `instanceof`.
 ///
 /// A class or an interface is derived from a class or an interface when its
 /// `extends` clauses lead to the same declaration, whatever their type
@@ -515,14 +518,14 @@ pub(crate) fn instance_types<'db>(
 /// another type without a declaration, and none of these is derived from a
 /// class or an interface.
 ///
-/// Biome identifies a declaration by the contents that it collects, together
-/// with the handle that names it when Biome reaches it through one, as for a
-/// class declared in a module or a namespace that a module exports. Two
-/// declarations with the same contents and different handles, such as two
-/// identical classes in two modules, can't be told from one declaration that
-/// Biome reaches through two handles, so they give `None`. Two such
-/// declarations without handles, as in two namespaces of one module, count
-/// as one.
+/// Biome identifies a declaration by its collected contents, together with
+/// the handle that names it when Biome reaches it through one. Biome reaches
+/// a class declared in a module, or in a namespace that a module exports,
+/// through a handle. Two declarations with the same contents and different
+/// handles, such as two identical classes in two modules, can't be told from
+/// one declaration that Biome reaches through two handles, so they give
+/// `None`. Two such declarations without handles, as in two namespaces of
+/// one module, count as one.
 ///
 /// Returns `None` when Biome can't tell: for a generic, an unresolved type,
 /// a parent that doesn't resolve, and when the walk exceeds its work limit.
@@ -992,7 +995,7 @@ struct AssignabilityCheck<'db, 'a> {
     parameter_position: InferencePosition,
     remaining_steps: usize,
     /// Whether the check follows TypeScript's subtype relation instead of
-    /// assignability, as [`is_subtype`] describes.
+    /// assignability. [`is_subtype`] lists the differences.
     is_subtype: bool,
 }
 
@@ -2443,8 +2446,9 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         }
 
         let target_is_weak = target_members.is_weak();
-        // The subtype relation requires the optional members of the target,
-        // except from the type of an object literal or a tuple.
+        // The subtype relation requires the source to have the optional
+        // members of the target, unless the source is the type of an object
+        // literal or a tuple.
         let requires_optional_members = self.is_subtype
             && !matches!(source, TypeData::Literal(_) | TypeData::Tuple(_))
             && !matches!(source, TypeData::Object(object) if object.kind(self.db) == ObjectKind::Expression);
@@ -2947,9 +2951,10 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         }
     }
 
-    /// Returns the instance types of the resolved constructor `resolved`, as
-    /// [`instance_types`] describes, where `handle` is the handle to a local
-    /// type of a module that resolves to it, if any.
+    /// Returns the instance types of the resolved constructor `resolved`, or
+    /// `None` when Biome can't tell them. `handle` is the handle to a local
+    /// type of a module that resolves to `resolved`, if any. [`instance_types`]
+    /// lists the cases.
     fn instance_type(
         &mut self,
         resolved: TypeData<'db>,
@@ -3038,9 +3043,9 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
     }
 
     /// Returns whether the constructor `ty`, or a class or an interface it
-    /// extends, declares a `[Symbol.hasInstance]` member, which a class
-    /// declares as static, or a member with a computed key that Biome can't
-    /// name, which may be one, as [`instance_types`] describes.
+    /// extends, declares a `[Symbol.hasInstance]` member, static in a class.
+    /// A member with a computed key that Biome can't name counts too, because
+    /// it may be one.
     ///
     /// Returns `None` when a parent doesn't resolve or the walk, which
     /// `depth` counts, exceeds its limit.
@@ -3116,8 +3121,8 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         Some(false)
     }
 
-    /// Returns what [`is_derived_from`] compares a type with when `target` is
-    /// the type it is compared with, or `None` when no comparison can decide.
+    /// Returns how [`is_derived_from`] compares types with `target`, or `None`
+    /// when no comparison with `target` can decide.
     #[expect(
         clippy::wildcard_enum_match_arm,
         reason = "Only declarations, `{}`, and types without a declaration are targets."
@@ -3178,9 +3183,9 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         })
     }
 
-    /// Returns whether every value of `source` is derived from `target`, as
-    /// [`is_derived_from`] describes. `depth` limits the nesting of unions
-    /// and intersections.
+    /// Returns whether every value of `source` is derived from `target`, or
+    /// `None` when Biome can't tell. [`is_derived_from`] defines the relation.
+    /// `depth` limits the nesting of unions and intersections.
     #[expect(
         clippy::wildcard_enum_match_arm,
         reason = "Types that Biome can't compare with a declaration are undecided."
@@ -3296,9 +3301,10 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
     }
 
     /// Returns whether the `extends` clauses of the class or interface
-    /// `source` lead to the declaration `target`, as [`is_derived_from`]
-    /// describes. `depth` and `visited` limit the walk as for
-    /// [`Self::find_member`].
+    /// `source` lead to the declaration `target`, or `None` when Biome can't
+    /// tell, as when a parent doesn't resolve or the walk exceeds its work
+    /// limit. `depth` limits the nesting of the walk, and `visited` holds the
+    /// declarations already walked, which the walk doesn't enter again.
     fn declaration_derives(
         &mut self,
         source: Declaration<'db>,
@@ -3341,11 +3347,11 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         result
     }
 
-    /// Returns whether `a` and `b` are the same declaration, as
-    /// [`is_derived_from`] identifies declarations, or `None` when they have
-    /// the same contents and different handles. Normalization can intern a
-    /// second copy of a built-in class, so built-in classes are also compared
-    /// by name.
+    /// Returns whether `a` and `b` are the same declaration, which they are
+    /// when they have the same contents, or `None` when they also have
+    /// different handles. [`is_derived_from`] explains why. Normalization can
+    /// intern a second copy of a built-in class, so built-in classes are also
+    /// compared by name.
     fn is_same_declaration(&self, a: Declaration<'db>, b: Declaration<'db>) -> Option<bool> {
         let is_same = a.data == b.data
             || matches!(
