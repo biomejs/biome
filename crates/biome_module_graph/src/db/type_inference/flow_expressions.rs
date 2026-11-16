@@ -7,7 +7,7 @@ use crate::db::queries::{ExpressionTypeInput, infer_flow_expression_type};
 use crate::js_module_info::flow::AnyFlowExpression;
 use biome_js_syntax::{AnyJsCallArgument, AnyJsExpression, JsLogicalOperator};
 use biome_js_type_info::{
-    NarrowingPredicate, RawTypeData, RawTypeId, TypeReference, TypeofExpression,
+    NarrowingPredicate, RawTypeData, RawTypeId, TypeReference, TypeofExpression, falsy_values,
     interned_types::{Literal, TypeData},
     narrow_type,
 };
@@ -86,7 +86,8 @@ impl<'db> ResolutionCtx<'db, '_> {
                     return None;
                 }
                 let left = left.or_else(|| self.raw_operand(&left_expression))?;
-                let (predicate, retained) = match logical.operator().ok()? {
+                let operator = logical.operator().ok()?;
+                let (predicate, retained) = match operator {
                     JsLogicalOperator::LogicalAnd => (NarrowingPredicate::Truthy, false),
                     JsLogicalOperator::LogicalOr => (NarrowingPredicate::Truthy, true),
                     JsLogicalOperator::NullishCoalescing => (NarrowingPredicate::Nullish, false),
@@ -96,7 +97,14 @@ impl<'db> ResolutionCtx<'db, '_> {
                     return Some(left);
                 }
                 let right = right.or_else(|| self.raw_operand(&right_expression))?;
-                let retained = narrow_type(self.db, left, predicate, retained);
+                // `&&` returns its left operand only when the operand is falsy,
+                // so a `string` or `bigint` operand contributes `""` or `0n`,
+                // although a read in a falsy branch keeps the broad type.
+                let retained = if operator == JsLogicalOperator::LogicalAnd {
+                    falsy_values(self.db, left)
+                } else {
+                    narrow_type(self.db, left, predicate, retained)
+                };
                 Some(TypeData::union_from_types(self.db, vec![retained, right]))
             }
             AnyFlowExpression::JsConditionalExpression(conditional) => {

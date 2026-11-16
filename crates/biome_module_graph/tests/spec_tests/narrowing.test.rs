@@ -1,4 +1,5 @@
 use super::*;
+use biome_js_type_info::interned_types::InternedLiteral;
 use biome_module_graph::{
     BindingTypeInput, ExpressionTypeInput, infer_binding_type, infer_expression_is_promise,
     infer_expression_type,
@@ -1179,6 +1180,106 @@ fn strict_literal_and_truthiness_guards_filter_literal_unions() {
             "{marker}: got {}",
             format_inferred_type(&db, ty)
         );
+    }
+}
+
+// Every expected type is the type that TypeScript 6.0.3 (`tsc --strict`) gives
+// the same read or expression. Reads inside `if (!value)` keep their declared
+// types, so `&&` and `||` there are typed as if no narrowing applied; only the
+// `typeof` cases type `&&` with a narrowed left operand.
+#[test]
+fn falsy_branch_reads_keep_broad_primitives_while_logical_and_keeps_falsy_literals() {
+    use InferredTypeData::{BigInt, Null, Number, String, Undefined};
+    const SOURCE: &str = r#"
+        declare const r: number;
+        function strings(value: string | null) {
+            if (!value) {
+                /*string*/value;
+                /*stringAnd*/value && r;
+                /*stringOr*/value || r;
+            }
+        }
+        function bigints(value: bigint | undefined) {
+            if (!value) {
+                /*bigint*/value;
+                /*bigintAnd*/value && r;
+            }
+        }
+        function literals(value: "" | "a" | null) {
+            if (!value) {
+                /*literal*/value;
+            }
+        }
+        function narrowedString(value: string | boolean) {
+            if (typeof value === "string") {
+                /*narrowedStringAnd*/value && r;
+            }
+        }
+        function narrowedBigint(value: bigint | boolean) {
+            if (typeof value === "bigint") {
+                /*narrowedBigintAnd*/value && r;
+            }
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    let empty = InferredTypeData::Literal(InternedLiteral::new(
+        &db,
+        InferredLiteral::String(Text::new_static("").into()),
+    ));
+    let zero = InferredTypeData::Literal(InternedLiteral::new(
+        &db,
+        InferredLiteral::BigInt(Text::new_static("0n")),
+    ));
+    for (marker, expression, expected) in [
+        ("string", "value", &[String, Null][..]),
+        ("bigint", "value", &[BigInt, Undefined]),
+        ("literal", "value", &[empty, Null]),
+        ("stringAnd", "value && r", &[empty, Null, Number]),
+        ("stringOr", "value || r", &[String, Number]),
+        ("bigintAnd", "value && r", &[zero, Undefined, Number]),
+        ("narrowedStringAnd", "value && r", &[empty, Number]),
+        ("narrowedBigintAnd", "value && r", &[zero, Number]),
+    ] {
+        let ty = normalized_type_at(&db, module, SOURCE, marker, expression);
+        assert_variants(&db, ty, expected, marker);
+    }
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) types these `&&` expressions as
+// `string | 0`, `string | 0 | null`, and `string | 0`. Biome deliberately keeps
+// `number` in place of `0`: `-0` and `NaN` are falsy numbers too, so
+// `NaN && s` evaluates to `NaN`, which `0` does not describe.
+#[test]
+fn logical_and_keeps_broad_number_as_its_falsy_part() {
+    use InferredTypeData::{Null, Number, String};
+    const SOURCE: &str = r#"
+        declare const s: string;
+        declare const plain: number;
+        /*plainAnd*/plain && s;
+        function falsyBranch(value: number | null) {
+            if (!value) {
+                /*falsyBranchAnd*/value && s;
+            }
+        }
+        function narrowed(value: number | string) {
+            if (typeof value === "number") {
+                /*narrowedAnd*/value && s;
+            }
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    for (marker, expression, expected) in [
+        // Non-flow path: no condition tests `plain`.
+        ("plainAnd", "plain && s", &[Number, String][..]),
+        // Non-flow path: the read keeps its declared type `number | null` in
+        // the falsy branch, so flow gives it no override.
+        ("falsyBranchAnd", "value && s", &[Number, Null, String]),
+        // Flow path: `typeof` narrows the read to `number`, so `falsy_values`
+        // gives the left operand's part of the value.
+        ("narrowedAnd", "value && s", &[Number, String]),
+    ] {
+        let ty = normalized_type_at(&db, module, SOURCE, marker, expression);
+        assert_variants(&db, ty, expected, marker);
     }
 }
 
