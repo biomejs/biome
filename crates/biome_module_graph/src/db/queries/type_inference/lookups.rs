@@ -232,17 +232,17 @@ pub(crate) fn infer_flow_switch_exhaustive<'db>(
 }
 
 /// Resolves the types of the values that the writes of one subject of an
-/// execution root assign, which the subject's solve narrows by, in the order
-/// of the root's collected writes of the subject.
+/// execution root assign, in the order of the root's collected writes of the
+/// subject. The subject's solve narrows by these types.
 ///
 /// Reads of the subject in that root share the result. Each value is typed as
 /// its expression is without narrowing, so no assigned type depends on a
 /// solve. Complete module inference resolves the same types in its own
 /// context instead.
 ///
-/// Returns `None` for an unavailable root and for a subject without a write
-/// that assigns a value, and when a query cycle passes through this lookup,
-/// so that the writes give the subject its declared type. A value whose type
+/// Returns `None` for an unavailable root, for a subject without a write
+/// that assigns a value, and when a query cycle passes through this lookup.
+/// The writes then give the subject its declared type. A value whose type
 /// can't be resolved is `Unknown`, which narrows nothing.
 #[salsa::tracked(returns(copy), cycle_result=infer_flow_assigned_types_cycle_result)]
 pub(crate) fn infer_flow_assigned_types<'db>(

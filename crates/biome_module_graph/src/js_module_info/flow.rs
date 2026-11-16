@@ -1,12 +1,13 @@
 //! Syntax-only flow facts that let type inference narrow reads of variables
 //! and their property paths.
 //!
-//! Collection records, for each execution root that tests or writes one of
-//! its own variables, a graph of possible paths whose conditions are already
-//! decomposed into guards on subjects and whose writes record the values they
-//! assign. It also records the incoming path of every read such a guard or
-//! write can reach. Type inference later applies the guards
-//! to resolved types without inspecting syntax again.
+//! Collection records a graph of possible paths for each execution root that
+//! tests or writes one of its own variables. The graph's conditions are
+//! already decomposed into guards on subjects, and its writes record the
+//! values they assign. Collection also records the incoming path of every
+//! read that such a guard or write can reach. Type inference later applies
+//! the guards and the writes to resolved types without inspecting syntax
+//! again.
 //!
 //! A subject is what a runtime test checks and a read narrows: a variable, or
 //! a property path that starts at a variable or at `this`, such as `o.v`,
@@ -19,20 +20,18 @@
 //!
 //! An execution root is a body analyzed independently, such as a module,
 //! function, or method. Only `let`, `const`, and parameter bindings read in
-//! the root that declares them participate, so refinements cannot cross
-//! closure boundaries. Each root has its own `this`, and paths on it narrow
-//! only where Biome types `this` as TypeScript does, as
-//! [`subjects::this_can_narrow`] describes. A property path narrows only when
-//! its variable or `this` does.
+//! the root that declares them participate, so narrowing cannot cross closure
+//! boundaries. Each root has its own `this`, and paths on it narrow only where
+//! Biome types `this` as TypeScript does (see [`subjects::this_can_narrow`]).
+//! A property path narrows only when its variable or `this` does.
 //!
-//! A write to a subject in the root's own flow is a write point of the graph,
-//! where the subject takes the type of the assigned value, reduced against
-//! its declared type, as TypeScript's `getTypeAtFlowAssignment` gives it, and
-//! the paths that extend it take their declared types. A write that runs with
-//! the root but outside that flow, as in a function called where it is
-//! defined or a class static block, has no write point, so the subject it
-//! writes doesn't narrow anywhere in the root. Calls never invalidate facts,
-//! as in TypeScript.
+//! A write to a subject in the root's own flow is a write point of the graph.
+//! After it, the subject has the members of its declared type that the
+//! assigned value can have, as in TypeScript, and the paths that extend the
+//! subject have their declared types. A write that runs with the root but
+//! outside that flow, as in a function called where it is defined or a class
+//! static block, has no write point, so the subject it writes doesn't narrow
+//! anywhere in the root. Calls never invalidate facts, as in TypeScript.
 
 mod builder;
 mod expressions;
@@ -306,8 +305,7 @@ pub(crate) enum FlowNode {
         /// Index of the condition's guard in [`RootFlow::guards`].
         guard: usize,
     },
-    /// The point right after a write to a subject, as TypeScript's
-    /// `FlowAssignment` node stands for one.
+    /// The point right after a write to a subject.
     Write {
         antecedent: FlowNodeId,
         /// Index of the write in [`RootFlow::writes`].
@@ -322,8 +320,7 @@ pub(crate) struct FlowWrite {
     pub(crate) effect: FlowWriteEffect,
 }
 
-/// How a write changes the type of its subject, as TypeScript's
-/// `getTypeAtFlowAssignment` gives it.
+/// How a write changes the type of its subject, matching TypeScript.
 ///
 /// An index refers to [`RootFlow::assigned`], the value that the write
 /// assigns. A write whose value Biome can't type as TypeScript does has no
@@ -339,8 +336,8 @@ pub(crate) enum FlowWriteEffect {
     Assign(Option<u32>),
     /// An assignment whose right operand is a binary expression with a shift
     /// or arithmetic operator, as `x = x + 1`: the primitive type of the
-    /// literal types of the declared type reduced by the assigned type, as
-    /// TypeScript's `isInCompoundLikeAssignment` gives it.
+    /// literal types of the declared type reduced by the assigned type, as in
+    /// TypeScript.
     CompoundLike(Option<u32>),
     /// A compound assignment, as `x += 1`, or `++` and `--`: the primitive
     /// type of the literal types of the type before the write, which can be
@@ -367,21 +364,21 @@ pub(crate) struct FlowAssigned {
     /// target, outermost first, each with the default that supplies it when
     /// it is `undefined`.
     pub(crate) steps: Box<[FlowDestructureStep]>,
-    /// The callees of the calls that the value and the defaults can give,
-    /// whose return types the reading context must confirm come from
-    /// annotations before a write reduces by the value.
+    /// The callees of the calls whose results the value and the defaults can
+    /// be. A write reduces by the value only after the reading context
+    /// confirms that the return types of these callees come from annotations.
     pub(crate) callees: Box<[FlowCallee]>,
 }
 
-/// The callee of a call that a value can give, whose return type collection
-/// can't tell comes from an annotation, as [`CalleeReturn::Resolved`]
-/// describes.
+/// The callee of a call whose result a value can be, when collection can't
+/// tell whether its return type comes from an annotation. The reading
+/// context decides it; see [`CalleeReturn::Resolved`].
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub(crate) enum FlowCallee {
     /// The binding at this range, which an import declares.
     Import(TextRange),
     /// The member that the static member expression at this range reads, as
-    /// `a.m`, whose object and name the reading context takes from the type
+    /// `a.m`. The reading context takes its object and name from the type
     /// that local inference collected for the expression.
     Member(TextRange),
 }
@@ -468,15 +465,15 @@ pub(crate) struct RootFlow {
     /// indices of those values in [`Self::assigned`], sorted. Inference
     /// resolves their types in this order and passes them to the solve.
     pub(crate) subject_writes: FxHashMap<FlowSubjectId, Box<[u32]>>,
-    /// The subjects with reads that only writes mention, which no condition
-    /// tests: a write narrows only a union or a type with a literal member,
+    /// The subjects with reads that only writes mention and no condition
+    /// tests. A write narrows only a union or a type with a literal member,
     /// so their reads need no solve when their declared type is neither.
     pub(crate) assignment_only: FxHashSet<FlowSubjectId>,
     /// The subjects with reads that may be read before they are assigned: a
     /// `let` declared without an initializer, and in a constructor, a
     /// property of `this` whose field has no initializer. Narrowing starts
-    /// them with `undefined` added to their declared type, as TypeScript's
-    /// `checkIdentifier` and `getFlowTypeOfAccessExpression` do.
+    /// them with `undefined` added to their declared type, as TypeScript
+    /// does.
     pub(crate) uninitialized: FxHashSet<FlowSubjectId>,
 }
 
@@ -607,8 +604,8 @@ impl RootFlow {
         }
     }
 
-    /// Returns the values that the writes of `subject` assign, as
-    /// [`Self::subject_writes`] lists them, or an empty slice when no write
+    /// Returns the indices in [`Self::assigned`] of the values that the
+    /// writes of `subject` assign, sorted, or an empty slice when no write
     /// with a value reduces it.
     pub(crate) fn subject_writes(&self, subject: FlowSubjectId) -> &[u32] {
         self.subject_writes
@@ -694,8 +691,8 @@ impl ModuleFlow {
     ///
     /// Reads are kept only when their binding has a narrowable collected type,
     /// as decided by [`is_raw_narrowing_invariant`], and a test or a write of
-    /// that binding can reach them. Execution roots that exceed a construction or relevance
-    /// work limit keep no reads.
+    /// that binding can reach them. Execution roots that exceed a construction
+    /// or relevance work limit keep no reads.
     pub(crate) fn collect(
         roots: FlowRootScanner,
         model: &SemanticModel,
@@ -1366,10 +1363,10 @@ impl RootCollector<'_> {
     }
 
     /// Returns whether `write` can change the type of its subject at a read,
-    /// as far as the collected types tell: an assignment or `delete` changes
-    /// only a union, and a compound assignment only a type with a literal
-    /// member. The declared type of a property path is not collected, so a
-    /// write of a path can always change it.
+    /// as far as the collected types tell. An assignment or `delete` changes
+    /// only a union, and a compound assignment changes only a type with a
+    /// literal member. The declared type of a property path is not collected,
+    /// so a write of a path can always change it.
     fn write_may_change(&self, write: &FlowWrite, subjects: &[FlowSubject]) -> bool {
         let declared = match subjects.get(write.subject as usize) {
             Some(FlowSubject::Binding(range)) => self.raw_binding_types.get(range),
@@ -1390,9 +1387,9 @@ impl RootCollector<'_> {
         }
     }
 
-    /// Returns the subjects of `subjects`, the table of `root`, that may be
-    /// read before they are assigned, as [`RootFlow::uninitialized`]
-    /// describes, among the variables of `eligible` and the paths on `this`.
+    /// Returns the subjects that may be read before they are assigned (see
+    /// [`RootFlow::uninitialized`]), among the variables of `eligible` and the
+    /// paths on `this`. `subjects` is the subject table of `root`.
     ///
     /// A `let` counts when it is declared without an initializer, outside the
     /// head of a `for...in` or `for...of` loop, without a definite assignment
@@ -1400,8 +1397,8 @@ impl RootCollector<'_> {
     /// `this` counts in a constructor, and in an arrow function that it calls
     /// where it is defined, when its first key names a field of the
     /// constructor's class that is not `static`, has no initializer and no
-    /// `!`, and is not declared with `declare` or `accessor`, as TypeScript's
-    /// `getFlowTypeOfAccessExpression` decides it.
+    /// `!`, and is not declared with `declare` or `accessor`. TypeScript
+    /// decides which paths on `this` start as `undefined` the same way.
     fn uninitialized_subjects(
         &self,
         root: &AnyJsControlFlowRoot,
@@ -1609,10 +1606,9 @@ const BINDING_PATTERN_KINDS: SyntaxKindSet<JsLanguage> = JsArrayBindingPattern::
     .union(JsObjectBindingPatternShorthandProperty::KIND_SET);
 
 /// Returns whether TypeScript gives the variable `binding` a type that evolves
-/// with its writes, as its `autoType` and `autoArrayType` do: a `let` or a
-/// `var` without a type annotation whose initializer is `null`, `undefined`,
-/// or an empty array literal. A variable without an initializer has no
-/// collected type in Biome.
+/// with its writes. Such a variable is a `let` or a `var` without a type
+/// annotation whose initializer is `null`, `undefined`, or an empty array
+/// literal. A variable without an initializer has no collected type in Biome.
 fn is_evolving_declaration(binding: &Binding) -> bool {
     let Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) =
         binding.tree().declaration()
@@ -1643,7 +1639,9 @@ fn is_evolving_declaration(binding: &Binding) -> bool {
 }
 
 /// Returns whether `binding` is declared by a `let` that may be read before
-/// it is assigned, as [`RootCollector::uninitialized_subjects`] describes.
+/// it is assigned. That is a `let` without an initializer and without a
+/// definite assignment assertion, outside the head of a `for...in` or
+/// `for...of` loop and outside a `declare` statement.
 fn is_uninitialized_declaration(binding: &Binding) -> bool {
     let Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) =
         binding.tree().declaration()

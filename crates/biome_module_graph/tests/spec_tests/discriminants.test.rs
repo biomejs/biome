@@ -1533,17 +1533,15 @@ fn destructured_elements_that_do_not_narrow_each_other() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `number` at every read below
-// (`narrowing-probes/m3/destructure.ts` L11, L23, `m3-l4/patterns.ts` L24,
-// L25, L29, L31, L33). Biome keeps the declared type: loose `==` with a
-// literal doesn't narrow an object yet, an element under a default of an
-// enclosing pattern never narrows because its declared type ignores the
-// default, and a read in a closure never sees the test. Biome also gives an
-// element
-// destructured from `s!`, a parameter destructured in a function that a
-// variable annotation types, and the parameters of a function typed by a
-// rest parameter whose type is a union of tuples the declared type
-// `unknown`, which no test narrows.
+// TypeScript 7.0.2 (`tsc --strict`) gives `number` at every read below.
+// Biome keeps the declared type: loose `==` with a literal doesn't narrow an
+// object yet, an element under a default of an enclosing pattern never
+// narrows because its declared type ignores the default, and a read in a
+// closure never sees the test. Biome also gives an element destructured from
+// `s!`, a parameter destructured in a function that a variable annotation
+// types, and the parameters of a function typed by a rest parameter whose
+// type is a union of tuples the declared type `unknown`, which no test
+// narrows.
 #[test]
 fn destructured_elements_that_biome_does_not_narrow_yet() {
     assert_element_reads(

@@ -165,16 +165,16 @@ pub fn raw_may_be_nullish(reference: &TypeReference, raw_types: &[RawTypeData]) 
 /// without resolving it.
 ///
 /// An assignment narrows a variable or a property only when its declared
-/// type is a union, as [`narrow_by_assignment`] describes. This returns false
-/// when the raw tables show that the type is something else: a primitive
-/// type, a literal type, `boolean`, which [`narrow_by_assignment`] keeps
-/// whole, an object, interface, class, function, constructor, or tuple type
-/// written in place, `object`, `any`, `unknown`, or the result of `new`, `+`,
-/// unary `-`, `~`, or `typeof`. A type name, an import, an intersection,
-/// other inferred types, and a chain of raw references longer than the step
-/// limit may be unions. The literal of a mutable location, which resolution
-/// widens to its primitive type, is followed to its value, because widening
-/// keeps a union a union. `raw_types` is the module table that local
+/// type is a union; see [`narrow_by_assignment`]. This returns false when the
+/// raw tables show that the type is a primitive type, a literal type,
+/// `boolean`, an object, interface, class, function, constructor, or tuple
+/// type written in place, `object`, `any`, `unknown`, or the result of `new`,
+/// `+`, unary `-`, `~`, or `typeof`. `boolean` counts as no union because an
+/// assignment keeps it whole. A type name, an import, an intersection, other
+/// inferred types, and a chain of raw references longer than the step limit
+/// may be unions. Resolution widens the literal type of a mutable location to
+/// its primitive type. This follows such a type to its value, because
+/// widening keeps a union a union. `raw_types` is the module table that local
 /// references index.
 pub fn raw_may_be_union(reference: &TypeReference, raw_types: &[RawTypeData]) -> bool {
     let Some(target) = raw_reference_target(reference, raw_types) else {
@@ -227,16 +227,16 @@ pub fn raw_may_be_union(reference: &TypeReference, raw_types: &[RawTypeData]) ->
 /// Returns whether a collected type reference may resolve to a type with a
 /// literal member, without resolving it.
 ///
-/// A compound assignment, `++`, or `--` gives a variable or a property the
-/// primitive type of its literal types, as [`base_literal_type`] does, so it
-/// changes only a type with a literal member. This returns false when the raw
-/// tables show that the type has none: a primitive type, `boolean`, an
-/// object type written in place, the result of `new`, or the value of a
-/// mutable location that resolution widens to its primitive type, as for
-/// `let i = 0`. A type name, an import, a union with a member that may have
-/// one, other inferred types, and a chain of raw references longer than the
-/// step limit may have literal members. `raw_types` is the module table that
-/// local references index.
+/// A compound assignment, `++`, or `--` replaces each literal member of the
+/// type of a variable or a property with its primitive type, so it changes
+/// only a type with a literal member; see [`base_literal_type`]. This returns
+/// false when the raw tables show that the type has none: a primitive type,
+/// `boolean`, an object type written in place, the result of `new`, or the
+/// literal value of a mutable location, as for `let i = 0`, because
+/// resolution widens it to its primitive type. A type name, an import, a
+/// union with a member that may have one, other inferred types, and a chain
+/// of raw references longer than the step limit may have literal members.
+/// `raw_types` is the module table that local references index.
 pub fn raw_may_have_literal(reference: &TypeReference, raw_types: &[RawTypeData]) -> bool {
     let mut pending = vec![reference];
     let mut remaining = MAX_RAW_REFERENCE_STEPS;
@@ -1221,24 +1221,25 @@ pub fn narrow_by_type_predicate<'db>(
 }
 
 /// Returns the type of a variable or a property right after a value of type
-/// `assigned` is assigned to it, given its `declared` type, following
-/// TypeScript's `getAssignmentReducedType`.
+/// `assigned` is assigned to it, given its `declared` type. TypeScript
+/// narrows an assignment the same way, except for `boolean` as described
+/// below.
 ///
-/// Only a union narrows: the result keeps the members of `declared` that a
+/// Only a union narrows. The result keeps the members of `declared` that a
 /// value of `assigned` may have, so `string | number` becomes `string` for
 /// `"a"`, and `"a" | "b"` becomes `"a"`. Members are filtered, not replaced
 /// by `assigned`. The result is `declared` itself when `declared` is not a
 /// union, when every member stays, and when `assigned` isn't assignable to
-/// the members that stay, which also covers `any` and an `assigned` type that
-/// inference couldn't determine. A `never` value gives `never`.
+/// the members that stay. The last case covers `any` and an `assigned` type
+/// that inference couldn't determine. A `never` value gives `never`.
 ///
 /// `boolean` stays whole, and a boolean value counts as both `true` and
-/// `false`, because Biome types some comparisons, as `1 === 1`, as `true`
-/// where TypeScript gives `boolean`. So `boolean | undefined` becomes
+/// `false`, because Biome types some comparisons, such as `1 === 1`, as
+/// `true` where TypeScript gives `boolean`. So `boolean | undefined` becomes
 /// `boolean` for `true`, where TypeScript gives `true`. A comparison that
-/// Biome can't decide keeps the member, and the comparisons visit at most 256
-/// pairs and types, after which the result is `declared`. `resolve` resolves
-/// handles as for [`narrow_type`].
+/// Biome can't decide keeps the member. The comparisons visit at most 256
+/// pairs and types, after which the result is `declared`. `resolve` replaces
+/// local and global handles with the types they stand for.
 pub fn narrow_by_assignment<'db>(
     db: &'db dyn TypeDb,
     declared: InferredTypeData<'db>,
@@ -1272,9 +1273,9 @@ pub fn narrow_by_assignment<'db>(
     assignment_reduced_members(db, &members, &expanded, assigned, resolve).unwrap_or(declared)
 }
 
-/// Returns `ty` with each literal member replaced by its primitive type, as
-/// TypeScript's `getBaseTypeOfLiteralType` does: `1 | 2 | "a"` becomes
-/// `number | string`, and other members stay as they are.
+/// Returns `ty` with each literal member replaced by its primitive type,
+/// matching TypeScript. For example, `1 | 2 | "a"` becomes `number | string`,
+/// and other members stay as they are.
 ///
 /// This is the type of a variable or a property after a compound assignment
 /// such as `x += 1`, `x++`, or `x--`, and the type that an assignment such as

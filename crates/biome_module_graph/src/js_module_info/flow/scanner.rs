@@ -31,11 +31,9 @@ declare_node_union! {
 }
 
 declare_node_union! {
-    /// Syntax that writes a variable or a property, which a write point of the
-    /// flow graph narrows by: an assignment, `++`, and `--`. `delete`, a
-    /// declarator with an initializer whose type annotation is a union or
-    /// that destructures a pattern, and the head of a `for...of` loop that
-    /// assigns a target count too.
+    /// Syntax that writes a variable or a property at a write point of the
+    /// flow graph: an assignment, `++`, and `--`. Other writes need a check
+    /// beyond their syntax kind; see [`is_write`].
     AnyFlowWriteSource = JsAssignmentExpression | JsPreUpdateExpression | JsPostUpdateExpression
 }
 
@@ -44,10 +42,10 @@ declare_node_union! {
 ///
 /// The visitor must report every node of the module in preorder through
 /// [`Self::enter`] and [`Self::leave`]. A root is selected when it directly
-/// contains a condition, a write that [`AnyFlowWriteSource`] describes, or a
-/// standalone call while the module declares an assertion, outside its
-/// nested roots, has fewer than [`MAX_ROOT_NODES`] syntax nodes, and uses
-/// only syntax the flow builder supports.
+/// contains a condition, a write to a variable or a property (see
+/// [`is_write`]), or a standalone call while the module declares an
+/// assertion, outside its nested roots, has fewer than [`MAX_ROOT_NODES`]
+/// syntax nodes, and uses only syntax the flow builder supports.
 ///
 /// The builder treats statements it does not model, such as a class
 /// declaration, as opaque regions, so they do not reject a root. A root is not
@@ -281,8 +279,11 @@ fn is_evaluation_condition(node: &JsSyntaxNode) -> bool {
     }
 }
 
-/// Returns whether `node` writes a variable or a property in a way that a
-/// write point narrows by, as [`AnyFlowWriteSource`] describes.
+/// Returns whether `node` may write a variable or a property at a write
+/// point of the flow graph. That is the case for an [`AnyFlowWriteSource`],
+/// `delete`, the head of a `for...of` loop that assigns a target, and a
+/// declarator with a type annotation and an initializer, when the annotation
+/// is a union or the declarator destructures a pattern.
 fn is_write(node: &JsSyntaxNode) -> bool {
     if AnyFlowWriteSource::can_cast(node.kind()) {
         return true;

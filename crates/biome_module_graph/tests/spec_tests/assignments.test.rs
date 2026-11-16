@@ -39,9 +39,9 @@ fn narrowing_db_with(source: &str, modules: &[(&str, &str)]) -> (TestModuleDb, M
 }
 
 /// Names each member of `ty`, sorted: an interface by its name, an object
-/// type literal by its members, Biome's Unknown, which a read on a path that
-/// no value takes has, as `Unknown`, and any other type by its formatted text
-/// on one line, such as `string`, `null`, or `string: a`.
+/// type literal by its members, Biome's Unknown as `Unknown`, and any other
+/// type by its formatted text on one line, such as `string`, `null`, or
+/// `string: a`. A read on a path that no value takes is Unknown.
 fn variant_names(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
     if ty == InferredTypeData::Unknown {
         return vec!["Unknown".to_owned()];
@@ -137,12 +137,11 @@ fn assert_reads_with(source: &str, modules: &[(&str, &str)], reads: &[(&str, &st
     assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5/assign.ts` L6 to L21, L23, L24, L26 to L34, L36 to
-// L44, and L46, L47), where Biome gives Unknown for `never`: an assignment
-// keeps the members of a declared union that the assigned value may have,
-// and keeps the declared type when it isn't a union, when every member
-// stays, and when the value is `any`.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// with `never` where Biome gives Unknown. An assignment keeps the members of a
+// declared union that the assigned value may have, and keeps the declared
+// type when it isn't a union, when every member stays, and when the value is
+// `any`.
 #[test]
 fn assignments_narrow_to_the_members_of_the_declared_union() {
     assert_reads(
@@ -211,15 +210,13 @@ fn assignments_narrow_to_the_members_of_the_declared_union() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives the narrower type in the comment for
-// each read below (`narrowing-probes/m5/assign.ts` L22, L25, L35, L45,
-// `m5-l2/order.ts` L12, L13, and `m5-l2/members/index.ts` L17, L23). Biome
-// is wider: it keeps `boolean` whole, types the value of an assignment
-// expression and an empty array as Unknown, types a right operand without
-// narrowing, gives a target behind `as` its declared type, where TypeScript
-// ignores the write, and doesn't reduce by a call to a method without a
-// return type annotation, even one that always returns, or to an
-// overloaded method whose implementation has none, which TypeScript never
-// calls through.
+// each read below. Biome is wider: it keeps `boolean` whole, types the value
+// of an assignment expression and an empty array as Unknown, types a right
+// operand without narrowing, gives a target behind `as` its declared type,
+// where TypeScript ignores the write, and doesn't reduce by a call to a
+// method without a return type annotation, even one that always returns, or
+// to an overloaded method whose implementation has none, which TypeScript
+// never calls through.
 #[test]
 fn assignments_that_biome_reduces_less_than_typescript() {
     assert_reads(
@@ -256,11 +253,11 @@ fn assignments_that_biome_reduces_less_than_typescript() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5-l2/values.ts` L7 to L13). Biome infers the return
-// type of a function without a return annotation without the `undefined` of
-// an end that the function can reach, and types `typeof` as one kind, so an
-// assignment of such a value keeps the declared type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// Biome infers the return type of a function without a return annotation
+// without the `undefined` of an end that the function can reach, and types
+// `typeof` as one kind, so an assignment of such a value keeps the declared
+// type.
 #[test]
 fn values_that_biome_types_narrower_than_typescript_keep_the_declared_type() {
     assert_reads(
@@ -285,10 +282,8 @@ fn values_that_biome_types_narrower_than_typescript_keep_the_declared_type() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5-l2/calls/index.ts` L10 to L12, L14 to L28, and L30
-// to L33, and `m5-l2/inherit/index.ts` L5). A call
-// keeps the declared type unless its callee's return type comes from an
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A call keeps the declared type unless its callee's return type comes from an
 // annotation: one that syntax shows, at the callee or at the declaration
 // that an import names, or a method of a lib global or of a type that a
 // declaration file declares. A method's or an imported function's return
@@ -413,8 +408,7 @@ fn calls_reduce_only_by_annotated_return_types() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5-l2/members/index.ts` L11 to L16, L18, L19, and L21).
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 // A method that a class or an interface declares with a return type
 // annotation reduces, whether the object's type declares it or inherits it,
 // and an override decides over the method it overrides. A method that some
@@ -462,12 +456,11 @@ fn calls_of_annotated_methods_reduce() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5/compound.ts` L5 to L9, L12 to L21): a compound
-// assignment, `++`, and `--` give the primitive type of the literal types
-// that the variable has before the write, even when that is wider than the
-// declared type, and `x = x * 2` reduces the primitive type of the literal
-// types of the declared type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A compound assignment, `++`, and `--` give the primitive type of the literal
+// types that the variable has before the write, even when that is wider than
+// the declared type, and `x = x * 2` reduces the primitive type of the
+// literal types of the declared type.
 #[test]
 fn compound_assignments_widen_literal_types() {
     assert_reads(
@@ -508,10 +501,9 @@ fn compound_assignments_widen_literal_types() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `number` at both reads
-// (`narrowing-probes/m5/compound.ts` L10, L11). Biome types the right operand
-// `x + 1` without narrowing, so it adds `string` from the declared type of
-// `x`, which the reduction keeps.
+// TypeScript 7.0.2 (`tsc --strict`) gives `number` at both reads. Biome types
+// the right operand `x + 1` without narrowing, so it adds `string` from the
+// declared type of `x`, which the reduction keeps.
 #[test]
 fn compound_like_assignments_type_their_right_operand_without_narrowing() {
     assert_reads(
@@ -527,12 +519,11 @@ fn compound_like_assignments_type_their_right_operand_without_narrowing() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5/compound.ts` L22 to L24, L28 to L35): a logical
-// assignment writes its target where its right operand runs, and the code
-// after it joins that path with the one that skipped the right operand. The
-// value of the assignment, as `v` in `const v = (x ??= "d")`, is Unknown in
-// Biome.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A logical assignment writes its target where its right operand runs, and
+// the code after it joins that path with the one that skipped the right
+// operand. The value of the assignment, as `v` in `const v = (x ??= "d")`,
+// is Unknown in Biome.
 #[test]
 fn logical_assignments_narrow_their_target() {
     assert_reads(
@@ -568,12 +559,11 @@ fn logical_assignments_narrow_their_target() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5/destructure.ts` L5 to L8, L10, L11, L13 to L23, L25,
-// L27): a target of a destructuring assignment, of the head of a
-// `for...in` or `for...of` loop, and a variable of a declarator with a type
-// annotation are assigned the field that destructuring reads, with the
-// default that supplies it.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A target of a destructuring assignment, of the head of a `for...in` or
+// `for...of` loop, and a variable of a declarator with a type annotation are
+// assigned the field that destructuring reads, with the default that supplies
+// it.
 #[test]
 fn destructuring_targets_narrow_to_their_fields() {
     assert_reads(
@@ -624,10 +614,9 @@ fn destructuring_targets_narrow_to_their_fields() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives the narrower type in the comment for
-// each read below (`narrowing-probes/m5/destructure.ts` L9, L12, L27).
-// Biome is wider: it types a missing element of an array literal as unknown,
-// and an element of an array as possibly `undefined`, which the declared type
-// lacks.
+// each read below. Biome is wider: it types a missing element of an array
+// literal as unknown, and an element of an array as possibly `undefined`,
+// which the declared type lacks.
 #[test]
 fn destructuring_targets_that_biome_narrows_less() {
     assert_reads(
@@ -647,9 +636,8 @@ fn destructuring_targets_that_biome_narrows_less() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5-l1/extra.ts` L10, L11, and `m5-l2/order.ts` L5 to
-// L7). TypeScript's binder evaluates a destructuring pattern, with its
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// TypeScript's binder evaluates a destructuring pattern, with its
 // defaults, before the value, and a declaration's pattern before its
 // initializer, although JavaScript runs them the other way around. A default
 // of a destructuring assignment runs unconditionally, and a default of a
@@ -676,11 +664,9 @@ fn destructuring_follows_the_order_of_typescripts_binder() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5/destructure.ts` L28, L30, L31, `m5/paths.ts` L6 to
-// L8, L13 to L19, L22, L24, L25): a write to a property narrows the path, a
-// write to a prefix gives it its declared type, and `delete o.p` assigns
-// `undefined`.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A write to a property narrows the path, a write to a prefix gives it its
+// declared type, and `delete o.p` assigns `undefined`.
 #[test]
 fn writes_narrow_property_paths() {
     assert_reads(
@@ -724,14 +710,12 @@ fn writes_narrow_property_paths() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives the narrower type in the comment for
-// each read below (`narrowing-probes/m5/destructure.ts` L29, `m5/paths.ts`
-// L9, L12, and `m5-l2/values.ts` L14, L15, L17). Biome is wider: `delete`
-// through an element access gives the path its declared type, where
-// TypeScript ignores it; a write through a key that is not a literal gives
-// every path of the object its declared type; and a subject that a function
-// called where it is defined, a class static block, or a field initializer
-// writes doesn't narrow anywhere in the function. Calls and callbacks never
-// cancel narrowing, as in TypeScript.
+// each read below. Biome is wider: `delete` through an element access gives
+// the path its declared type, where TypeScript ignores it; a write through a
+// key that is not a literal gives every path of the object its declared type;
+// and a subject that a function called where it is defined, a class static
+// block, or a field initializer writes doesn't narrow anywhere in the
+// function. Calls and callbacks never cancel narrowing, as in TypeScript.
 #[test]
 fn writes_that_biome_follows_less_than_typescript() {
     assert_reads(
@@ -764,11 +748,10 @@ fn writes_that_biome_follows_less_than_typescript() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5/flow.ts` L6 to L9, L11 to L14, L17 to L25, L27, L30,
-// L32): a write in a try block reaches its catch clause and finally block,
-// writes join where branches and loops meet, and expressions write in the
-// order in which they run.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A write in a try block reaches its catch clause and finally block, writes
+// join where branches and loops meet, and expressions write in the order in
+// which they run.
 #[test]
 fn writes_flow_through_statements_and_expressions() {
     assert_reads(
@@ -825,12 +808,11 @@ fn writes_flow_through_statements_and_expressions() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5/uninit.ts` L5 to L9, L12 to L30): a `let` without an
-// initializer, and in a constructor a field without an initializer, start
-// with `undefined`, and a read where `undefined` remains, although the
-// declared type lacks it, has the declared type, as TypeScript gives it
-// after TS2454 or TS2565.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A `let` without an initializer, and in a constructor a field without an
+// initializer, start with `undefined`. A read where `undefined` remains,
+// although the declared type lacks it, has the declared type, as TypeScript
+// gives it after TS2454 or TS2565.
 #[test]
 fn variables_and_fields_read_before_they_are_assigned_keep_their_declared_type() {
     assert_reads(

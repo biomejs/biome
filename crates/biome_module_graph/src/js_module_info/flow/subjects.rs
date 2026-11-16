@@ -693,11 +693,10 @@ impl UninitializedFields {
 }
 
 /// Returns the fields of `class` that its constructor may read before it
-/// assigns them, as TypeScript's `isPropertyWithoutInitializer` and
-/// `getFlowTypeOfAccessExpression` decide it: fields that are not `static`,
-/// have no initializer and no definite assignment assertion, as `x!: T`, and
-/// are not declared with `declare` or `accessor`. A parameter property, as
-/// `constructor(public x: T)`, is assigned before the body runs.
+/// assigns them, as in TypeScript. Those are the fields that are not
+/// `static`, have no initializer and no definite assignment assertion, as
+/// `x!: T`, and are not declared with `declare` or `accessor`. A parameter
+/// property, as `constructor(public x: T)`, is assigned before the body runs.
 pub(super) fn uninitialized_fields(class: &AnyJsClass) -> UninitializedFields {
     let mut fields = UninitializedFields {
         keys: Vec::new(),

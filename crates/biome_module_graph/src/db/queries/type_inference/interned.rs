@@ -76,16 +76,16 @@ pub(crate) struct FlowSubjectRootInput<'db> {
     #[returns(copy)]
     pub exhaustive: u64,
     /// The types of the values that the writes of the subject assign, in the
-    /// order of the root's collected writes of the subject, resolved by the
-    /// context that reads the subject, or `None` when no write with a value
-    /// reduces the subject, so that other subjects keep sharing their
-    /// solves.
+    /// order of the root's collected writes of the subject. The context that
+    /// reads the subject resolves them. `None` when no write with a value
+    /// reduces the subject, so that other subjects keep sharing their solves.
     #[returns(copy)]
     pub assigned: Option<FlowAssignedTypes<'db>>,
 }
 
-/// The types of the values that the writes of one subject assign, as
-/// [`super::infer_flow_assigned_types`] resolves them.
+/// The types of the values that the writes of one subject assign, in the
+/// order of the root's collected writes of the subject; see
+/// [`super::infer_flow_assigned_types`].
 #[salsa::interned]
 #[derive(Debug)]
 pub(crate) struct FlowAssignedTypes<'db> {
