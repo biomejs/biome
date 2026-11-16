@@ -53,6 +53,31 @@ function shadowedByLocal() {
 	return Boolean(a || 'default');
 }
 
+// `||` in a ternary branch or the last expression of a sequence: not reported
+declare const flag: boolean;
+const r10 = Boolean(flag ? a || b : 'default');
+const r11 = Boolean(flag ? 'default' : a || b);
+const r12 = Boolean((identity(flag), a || b));
+
+// `||` as an operand of `??` inside `Boolean()`: not reported
+const r13 = Boolean(a ?? (b || c));
+const r14 = Boolean((a || b) ?? c);
+
+// Negated inside `Boolean()`
+const r15 = Boolean(!(a || 'default'));
+
+// Earlier expression of a sequence
+const r16 = Boolean((a || 'default', flag));
+
+// Calls other than the global `Boolean()`, or a value that isn't the argument
+const r17 = new Boolean(a || b);
+const r18 = String(a || b);
+const r19 = Boolean(1 + (a || b));
+const r20 = Boolean(() => a || b);
+
+// Comparison ternary inside `Boolean()`
+const r21 = Boolean(a != null ? a : b);
+
 ```
 
 # Diagnostics
@@ -175,6 +200,156 @@ ignoreBooleanCoercionEnabled.ts:47:19 lint/nursery/useNullishCoalescing ━━�
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreBooleanCoercionEnabled.ts:61:25 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    60 │ // Negated inside `Boolean()`
+  > 61 │ const r15 = Boolean(!(a || 'default'));
+       │                         ^^
+    62 │ 
+    63 │ // Earlier expression of a sequence
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreBooleanCoercionEnabled.ts:64:24 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    63 │ // Earlier expression of a sequence
+  > 64 │ const r16 = Boolean((a || 'default', flag));
+       │                        ^^
+    65 │ 
+    66 │ // Calls other than the global `Boolean()`, or a value that isn't the argument
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreBooleanCoercionEnabled.ts:67:27 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    66 │ // Calls other than the global `Boolean()`, or a value that isn't the argument
+  > 67 │ const r17 = new Boolean(a || b);
+       │                           ^^
+    68 │ const r18 = String(a || b);
+    69 │ const r19 = Boolean(1 + (a || b));
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreBooleanCoercionEnabled.ts:68:22 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    66 │ // Calls other than the global `Boolean()`, or a value that isn't the argument
+    67 │ const r17 = new Boolean(a || b);
+  > 68 │ const r18 = String(a || b);
+       │                      ^^
+    69 │ const r19 = Boolean(1 + (a || b));
+    70 │ const r20 = Boolean(() => a || b);
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreBooleanCoercionEnabled.ts:69:28 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    67 │ const r17 = new Boolean(a || b);
+    68 │ const r18 = String(a || b);
+  > 69 │ const r19 = Boolean(1 + (a || b));
+       │                            ^^
+    70 │ const r20 = Boolean(() => a || b);
+    71 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreBooleanCoercionEnabled.ts:70:29 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    68 │ const r18 = String(a || b);
+    69 │ const r19 = Boolean(1 + (a || b));
+  > 70 │ const r20 = Boolean(() => a || b);
+       │                             ^^
+    71 │ 
+    72 │ // Comparison ternary inside `Boolean()`
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreBooleanCoercionEnabled.ts:73:21 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+    72 │ // Comparison ternary inside `Boolean()`
+  > 73 │ const r21 = Boolean(a != null ? a : b);
+       │                     ^^^^^^^^^
+    74 │ 
+  
+  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    71 71 │   
+    72 72 │   // Comparison ternary inside `Boolean()`
+    73    │ - const·r21·=·Boolean(a·!=·null·?·a·:·b);
+       73 │ + const·r21·=·Boolean(a·??·b);
+    74 74 │   
   
 
 ```

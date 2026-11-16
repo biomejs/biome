@@ -26,3 +26,11 @@ do {
 
 // Ternary test
 const result = (null || 42) ? 'yes' : 'no';
+
+// `||=` in a test
+declare let assigned: string | null;
+if ((assigned ||= 'fallback')) {}
+
+// Through `!` and a sequence
+if (!(null || a)) {}
+if ((b, null || a)) {}
