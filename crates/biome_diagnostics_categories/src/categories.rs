@@ -267,6 +267,7 @@ define_categories! {
     "lint/nursery/noExpectToHaveBeenCalledOnce": "https://biomejs.dev/linter/rules/no-expect-to-have-been-called-once",
     "lint/nursery/noExtendNative": "https://biomejs.dev/linter/rules/no-extend-native",
     "lint/nursery/noFloatingPromises": "https://biomejs.dev/linter/rules/no-floating-promises",
+    "lint/nursery/noImmediateMutation": "https://biomejs.dev/linter/rules/no-immediate-mutation",
     "lint/nursery/noImplicitCoercion": "https://biomejs.dev/linter/rules/no-implicit-coercion",
     "lint/nursery/noImpliedEval": "https://biomejs.dev/linter/rules/no-implied-eval",
     "lint/nursery/noInvalidFetchOptions": "https://biomejs.dev/linter/rules/no-invalid-fetch-options",

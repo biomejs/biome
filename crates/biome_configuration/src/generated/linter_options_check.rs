@@ -751,6 +751,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_img_element::NoImgElementOptions>(),
     ));
     result.push((
+        "nursery",
+        "noImmediateMutation",
+        TypeId::of::<biome_rule_options::no_immediate_mutation::NoImmediateMutationOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noImplicitAnyLet",
         TypeId::of::<biome_rule_options::no_implicit_any_let::NoImplicitAnyLetOptions>(),

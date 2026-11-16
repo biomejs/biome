@@ -5263,6 +5263,16 @@
 			]
 		},
 		"NoImgElementOptions": { "type": "object", "additionalProperties": false },
+		"NoImmediateMutationConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoImmediateMutationOptions" }
+			]
+		},
+		"NoImmediateMutationOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoImplicitAnyLetConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9676,6 +9686,13 @@
 					"description": "Require Promise-like statements to be handled appropriately.\nSee https://biomejs.dev/linter/rules/no-floating-promises",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoFloatingPromisesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noImmediateMutation": {
+					"description": "Disallow changing a value right after it is created.\nSee https://biomejs.dev/linter/rules/no-immediate-mutation",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoImmediateMutationConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14367,6 +14384,19 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoImgElementOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoImmediateMutationOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoImmediateMutationOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

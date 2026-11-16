@@ -3124,6 +3124,11 @@ export interface Nursery {
 	 */
 	noFloatingPromises?: NoFloatingPromisesConfiguration;
 	/**
+	 * Disallow changing a value right after it is created.
+	 * See https://biomejs.dev/linter/rules/no-immediate-mutation
+	 */
+	noImmediateMutation?: NoImmediateMutationConfiguration;
+	/**
 	 * Disallow the use of eval()-like methods.
 	 * See https://biomejs.dev/linter/rules/no-implied-eval
 	 */
@@ -6964,6 +6969,9 @@ export type NoExtendNativeConfiguration =
 export type NoFloatingPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoFloatingPromisesOptions;
+export type NoImmediateMutationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoImmediateMutationOptions;
 export type NoImpliedEvalConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoImpliedEvalOptions;
@@ -10177,6 +10185,14 @@ export interface RuleWithNoFloatingPromisesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoFloatingPromisesOptions;
+}
+export interface RuleWithNoImmediateMutationOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoImmediateMutationOptions;
 }
 export interface RuleWithNoImpliedEvalOptions {
 	level: RulePlainConfiguration;
@@ -14020,6 +14036,7 @@ export interface NoExtendNativeOptions {
 	ignore?: string[];
 }
 export type NoFloatingPromisesOptions = {};
+export type NoImmediateMutationOptions = {};
 export type NoImpliedEvalOptions = {};
 export type NoInvalidFetchOptionsOptions = {};
 export type NoInvalidFileInputAcceptOptions = {};
@@ -16450,6 +16467,7 @@ export type Category =
 	| "lint/nursery/noExpectToHaveBeenCalledOnce"
 	| "lint/nursery/noExtendNative"
 	| "lint/nursery/noFloatingPromises"
+	| "lint/nursery/noImmediateMutation"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImpliedEval"
 	| "lint/nursery/noInvalidFetchOptions"

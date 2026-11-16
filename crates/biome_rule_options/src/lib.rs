@@ -160,6 +160,7 @@ pub mod no_header_scope;
 pub mod no_hex_colors;
 pub mod no_identical_test_title;
 pub mod no_img_element;
+pub mod no_immediate_mutation;
 pub mod no_implicit_any_let;
 pub mod no_implicit_boolean;
 pub mod no_implicit_coercions;
