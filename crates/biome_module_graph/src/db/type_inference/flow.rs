@@ -909,14 +909,15 @@ impl<'db> ResolutionCtx<'db, '_> {
         })
     }
 
-    /// Returns `ty` narrowed by `name in value`, whose key is the literal at
-    /// `key`, given the subject's `declared` type, as
-    /// [`narrow_by_in_operator`] narrows it.
+    /// Narrows `ty` by `name in value`, where `name` is the string or number
+    /// literal at `key`. When `positive` is true, the members of `ty` that
+    /// lack the property are removed. When `positive` is false, the members
+    /// that declare it as required are removed. See [`narrow_by_in_operator`].
     ///
-    /// Returns `ty` unchanged when `declared` is not a union with two object
-    /// types, as [`may_narrow_by_property`] describes, because the test could
-    /// then only make a branch impossible. The key is resolved only after
-    /// that check.
+    /// Returns `ty` unchanged when the subject's `declared` type is not a
+    /// union with two object types, because the test could then only make a
+    /// branch impossible. Also returns `ty` unchanged when the key doesn't
+    /// resolve to a string or number literal.
     fn narrow_by_in(
         &mut self,
         ty: TypeData<'db>,

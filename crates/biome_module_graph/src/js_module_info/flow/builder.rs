@@ -39,7 +39,7 @@ pub(super) struct BuiltRoot {
     pub(super) subjects: FlowSubjectTable,
     /// Condition nodes paired with each subject their guard may narrow.
     pub(super) mentions: Vec<(FlowNodeId, FlowSubjectId)>,
-    /// The subjects that conditions refine only through
+    /// The subjects that conditions narrow only through
     /// [`FlowGuard::Property`], such as `s` when the only condition that
     /// mentions it is `s.kind === "c"`, or through `in`, as in `"a" in s`.
     pub(super) property_only: FxHashSet<FlowSubjectId>,

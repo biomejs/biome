@@ -325,9 +325,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 }
 
-/// Returns the member name that local inference collected for `member`, which
-/// spells a private name with its `#`, as class members store it, or `None`
-/// when `member` has no collected static member expression.
+/// Returns the member name that local inference collected for `member`, or
+/// `None` when it collected no static member expression for `member`. The
+/// name spells a private name with its `#`, as class members store it.
 fn collected_member_name<'a>(
     js_info: &'a JsModuleInfo,
     member: &JsStaticMemberExpression,

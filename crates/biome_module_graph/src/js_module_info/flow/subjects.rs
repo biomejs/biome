@@ -291,9 +291,9 @@ const INDEX_NAMES: [&str; 16] = [
     "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15",
 ];
 
-/// Returns the key that names the element at `index` of an array, as
-/// `t[0]` and `t["0"]` do, or `None` from index 16 on, where an array pattern
-/// element doesn't narrow.
+/// Returns the key that names the element at `index` of an array, as `t[0]`
+/// and `t["0"]` do. Returns `None` from index 16 on, so narrowing ignores
+/// array pattern elements at such indices.
 pub(super) fn index_key(index: usize) -> Option<PropertyKey> {
     INDEX_NAMES
         .get(index)

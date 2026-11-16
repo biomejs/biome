@@ -110,8 +110,9 @@ pub(crate) enum FlowTest {
     /// annotation states the tested type, as in `value is string` or
     /// `asserts value is string`.
     Predicate(TextRange),
-    /// The `in` operator, as in `"a" in value`, whose key is the string or
-    /// number literal at this range, spelled as [`literal_key`] requires.
+    /// The `in` operator, as in `"a" in value`. The range is the key, a string
+    /// or number literal that spells the property's name, such as `"a"` or `0`
+    /// but not `"a"` or `0x0`. See [`literal_key`].
     In(TextRange),
 }
 
@@ -513,13 +514,14 @@ pub(super) struct DecomposedCondition {
     /// variable cannot change between the alias and its test. See
     /// [`narrows_through_aliases`] for the variables that qualify.
     pub(super) mentions: Vec<FlowSubjectId>,
-    /// Subjects whose type the condition may refine only through
+    /// Subjects whose type the condition may narrow only through
     /// [`FlowGuard::Property`], such as `s` in `s.kind === "c"`, or through
     /// [`FlowTest::In`], such as `x` in `"a" in x`, unless `mentions` also
-    /// lists them. Both narrow only a union with two object types. When
-    /// decomposition stops early, this also lists the pattern of every
-    /// variable in `mentions` that is an element of a destructuring pattern
-    /// that a test of the variable narrows.
+    /// lists them. Both narrow only a union with two object types.
+    ///
+    /// When decomposition stops early, this also lists a destructuring
+    /// pattern when `mentions` lists one of its elements and a test of that
+    /// element narrows the pattern.
     pub(super) parents: Vec<FlowSubjectId>,
 }
 
@@ -745,8 +747,8 @@ impl Decomposer<'_, '_> {
             test.and_then(|test| Some((test, subject_of(operand, self.model, self.subjects)?)));
         let mut guard = match tested {
             Some((test, subject)) if self.may_test(subject) => {
-                // `in` narrows only a union with two object types, as a test
-                // of a property narrows its object.
+                // Like a test of a property, `in` narrows only a union with
+                // two object types, so its subject is a parent.
                 if matches!(test, FlowTest::In(_)) {
                     self.parents.push(subject);
                 } else {
@@ -845,10 +847,11 @@ impl Decomposer<'_, '_> {
     /// element, as `kind === "c"` applies to `{ kind, v }` in
     /// `const { kind, v } = s`.
     ///
-    /// Returns `None` for a call to a type-guard function and for `in`, as
-    /// for [`Self::property_guard`]. Inside an inlined aliased condition,
-    /// every such pattern can be tested, because its values don't change
-    /// after the destructuring.
+    /// Returns `None` for a call to a type-guard function and for `in`,
+    /// because TypeScript narrows no pattern through `isC(kind)` or
+    /// `"a" in kind`. Inside an inlined aliased condition, every such pattern
+    /// can be tested, because its values don't change after the
+    /// destructuring.
     ///
     /// [`subjects::narrowing_pattern`]: super::subjects::narrowing_pattern
     fn pattern_guard(
@@ -2349,8 +2352,8 @@ mod tests {
         assert!(names.contains(&"value.kind".to_owned()), "{names:?}");
     }
 
-    /// Names the subjects that the decomposed condition may refine only as
-    /// [`DecomposedCondition::parents`] lists them.
+    /// Names the subjects in [`DecomposedCondition::parents`] of the
+    /// decomposed condition.
     fn parent_names(decomposed: &Decomposed) -> Vec<String> {
         decomposed
             .condition
@@ -2374,9 +2377,9 @@ mod tests {
             (r#""a" in value?.v"#, Truthy, "value.v", true),
         ] {
             let decomposed = decomposed(source, outcome);
-            // `in` narrows only a union with two object types, as a test of a
-            // property narrows its object, and it narrows no object that
-            // holds the tested value.
+            // Like a test of a property, `in` narrows only a union with two
+            // object types, so its subject is a parent. It narrows no object
+            // that holds the tested value.
             assert!(decomposed.condition.mentions.is_empty(), "{source}");
             assert_eq!(parent_names(&decomposed), [object], "{source}");
             assert!(

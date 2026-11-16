@@ -560,19 +560,19 @@ pub fn may_narrow_by_property(db: &dyn TypeDb, declared: InferredTypeData) -> bo
         .is_some()
 }
 
-/// Narrows `ty` by the runtime test `name in value`, as TypeScript's
-/// `narrowTypeByInKeyword` does.
+/// Narrows `ty` by the runtime test `name in value`, as TypeScript does.
 ///
-/// Each member of the union `ty` is looked up as [`property_presence`]
-/// describes, treating object types as closed, as TypeScript does:
+/// Like TypeScript, Biome treats an object type as closed, so a member of the
+/// union `ty` lacks every property that it doesn't declare.
+/// [`property_presence`] looks up the property in each member.
 ///
 /// - When `positive` is true, the members that lack the property are
-///   removed. A member that declares it, even as optional, or whose index
-///   signature accepts its name stays, and so does a member that Biome can't
-///   decide, such as a primitive, a function, a tuple, or a class instance.
-///   When no member declares the property or has such an index signature,
-///   `ty` is returned unchanged, where TypeScript gives
-///   `ty & Record<name, unknown>`.
+///   removed. A member stays when it declares the property, even as
+///   optional, or when one of its index signatures accepts the name. A member
+///   also stays when Biome can't tell whether it has the property, as for a
+///   primitive, a function, a tuple, or a class instance. When no member
+///   declares the property or has such an index signature, `ty` is returned
+///   unchanged. TypeScript gives `ty & Record<name, unknown>` instead.
 /// - When `positive` is false, the members that declare the property as
 ///   required are removed, which can give `never`.
 ///
@@ -580,8 +580,8 @@ pub fn may_narrow_by_property(db: &dyn TypeDb, declared: InferredTypeData) -> bo
 /// leaves `ty` unchanged, because Biome spells a private name such as `#p`
 /// with its `#`, while the string `"#p"` never names a private member.
 /// `ty` is also returned unchanged when the union traversal, which visits at
-/// most 256 types, runs out. `resolve` resolves handles as for
-/// [`narrow_type`], and is also used to look up the properties.
+/// most 256 types, runs out. `resolve` replaces local and global handles with
+/// the types they stand for, both to narrow `ty` and to look up the property.
 pub fn narrow_by_in_operator<'db>(
     db: &'db dyn TypeDb,
     ty: InferredTypeData<'db>,

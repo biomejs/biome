@@ -316,8 +316,8 @@ fn tuple_element<'db>(
     PropertyLookup::Missing
 }
 
-/// Whether the values of a type have a property, as [`property_presence`]
-/// decides it for the `in` operator.
+/// Whether the values of a type have the property that an `in` operator
+/// tests. [`property_presence`] computes it.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum PropertyPresence {
     /// The type declares the property, so every value has it.
@@ -334,9 +334,8 @@ pub(crate) enum PropertyPresence {
     Unknown,
 }
 
-/// Returns whether the values of the normalized type `ty`, which is not a
-/// union, have the property `name`, as TypeScript's `isTypePresencePossible`
-/// decides it for `name in value`.
+/// Returns whether the values of the normalized type `ty` have the property
+/// `name`, as TypeScript decides it for `name in value`.
 ///
 /// The property is looked up with inheritance and then on `Object`, as a
 /// property access reads it. An index signature counts only when no type
@@ -349,7 +348,7 @@ pub(crate) enum PropertyPresence {
 /// - an instance of a class, because Biome doesn't collect the setters and
 ///   index signatures of classes;
 /// - a built-in class or interface, such as `Array` or `Error`, because
-///   Biome's built-in types come from the ES2015 library files, which lack
+///   Biome's built-in types come from the ES2015 library files and lack
 ///   members that newer ones add, such as `at` of arrays or `cause` of
 ///   errors;
 /// - a type with a call or construct signature, whose values also have the
@@ -361,9 +360,10 @@ pub(crate) enum PropertyPresence {
 ///   spells `a`, or a number other than a decimal integer, as `1.0` spells
 ///   `1`.
 ///
-/// `null` and `undefined` are missing every property. Primitives, functions,
-/// tuples, arrays, intersections, generics, and unresolved types give
-/// [`PropertyPresence::Unknown`].
+/// `null` and `undefined` are missing every property. Unions, primitives,
+/// functions, tuples, arrays, intersections, generics, and unresolved types
+/// give [`PropertyPresence::Unknown`], so callers look up each member of a
+/// union on its own.
 pub(crate) fn property_presence<'db>(
     db: &'db dyn TypeDb,
     ty: TypeData<'db>,
@@ -2633,9 +2633,13 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
 
     /// Returns whether `ty` or a type it inherits from declares the property
     /// `name`, or has an index signature that accepts it, without looking at
-    /// `Object`, as [`property_presence`] describes.
+    /// `Object`. [`property_presence`] lists the types that give
+    /// [`PropertyPresence::Unknown`].
     ///
-    /// `depth` and `visited` limit the walk as for [`Self::find_member`].
+    /// `visited` holds the types already searched. A type reached again
+    /// through another parent gives [`PropertyPresence::Missing`], because its
+    /// first search already decided the outcome. Inheritance deeper than
+    /// [`MAX_MEMBER_LOOKUP_DEPTH`] levels gives [`PropertyPresence::Unknown`].
     fn declared_presence(
         &mut self,
         ty: TypeData<'db>,

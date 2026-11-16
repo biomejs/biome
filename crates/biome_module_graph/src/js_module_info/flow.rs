@@ -308,12 +308,11 @@ pub(crate) struct RootFlow {
     /// The points of each subject's reads, sorted and without duplicates.
     pub(crate) read_points: FxHashMap<FlowSubjectId, Box<[FlowNodeId]>>,
     /// The subjects with reads that conditions narrow only through tests of
-    /// their properties: [`FlowGuard::Property`], such as `s` when the only
-    /// condition that mentions it is `s.kind === "c"`, and `in`, which
-    /// [`FlowTest::In`] applies to `x` in `"a" in x`. Such a test narrows only
-    /// a union with two object types, so these subjects need no solve when
-    /// their declared type is not one. Every [`FlowSubject::Pattern`] with
-    /// reads is one.
+    /// their properties, such as `s` when the only conditions that mention it
+    /// are `s.kind === "c"` ([`FlowGuard::Property`]) or `"a" in s`
+    /// ([`FlowTest::In`]). Such a test narrows only a union with two object
+    /// types, so these subjects need no solve when their declared type is not
+    /// one. Every [`FlowSubject::Pattern`] with reads is one.
     pub(crate) property_only: FxHashSet<FlowSubjectId>,
     /// The [`FlowSubject::Pattern`] of each element whose reads a test of the
     /// pattern can reach, keyed by the element's subject. Each such read is
@@ -336,7 +335,8 @@ impl RootFlow {
     }
 
     /// Returns whether conditions narrow `subject` only through tests of its
-    /// properties, as [`Self::property_only`] describes.
+    /// properties, such as `s.kind === "c"` or `"a" in s`. See
+    /// [`Self::property_only`].
     pub(crate) fn is_property_only(&self, subject: FlowSubjectId) -> bool {
         self.property_only.contains(&subject)
     }
@@ -461,8 +461,8 @@ impl ModuleFlow {
     }
 
     /// Returns whether conditions narrow the binding declared at `range` only
-    /// through tests of its properties, as [`RootFlow::property_only`]
-    /// describes.
+    /// through tests of its properties, such as `s.kind === "c"` or
+    /// `"a" in s`. See [`RootFlow::property_only`].
     pub(crate) fn is_property_only_binding(&self, range: TextRange) -> bool {
         self.property_only_bindings.contains(&range)
     }
