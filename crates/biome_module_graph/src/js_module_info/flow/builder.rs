@@ -10,7 +10,7 @@ use biome_js_syntax::{
     JsDoWhileStatement, JsForStatement, JsIdentifierExpression, JsIfStatement, JsSyntaxNode,
     JsWhileStatement, T,
 };
-use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, TokenText};
 
 const MAX_SYNTAX_NODES: usize = 16_384;
 /// Limits how deeply syntax can nest below the execution root that gets flow.
@@ -40,10 +40,23 @@ type Build<T> = Result<T, Unsupported>;
 
 /// Builds the flow of `root`, excluding nested execution roots.
 ///
-/// `root` must be selected by a [`FlowRootScanner`], which only selects roots
-/// whose syntax the builder supports. Expression-bodied arrows are supported.
-/// Parameter initializers, class members, and module export declarations are
-/// not evaluated, and unreachable code records no reads.
+/// `root` must be selected by a [`FlowRootScanner`], which rejects the roots
+/// that the builder cannot build, such as a root with a `with` statement.
+/// Expression-bodied arrows are supported. Parameter initializers, class
+/// members, `declare` statements, and the expressions of module export
+/// declarations other than classes and enums are not evaluated, and
+/// unreachable code records no reads.
+///
+/// The builder models the control flow of blocks, `if`, `while`, `do...while`,
+/// `for`, labeled statements, `break`, `continue`, `return`, and `throw`. Any
+/// other statement, such as `switch`, `try`, `for...in`, or `for...of`, is an
+/// opaque region: the builder evaluates its expressions in source order from
+/// the flow before it, and the code after it continues from that evaluation.
+/// A condition inside a region narrows only the rest of the expression that
+/// contains it, as in `x && x.length`. Each `break` or `continue` that leaves
+/// the region joins its target with the flow before the region. Because only
+/// variables that are never written narrow, the flow before a region is never
+/// narrower than the real flow at any point inside or after it.
 ///
 /// Returns `None` for inputs exceeding construction limits. Like the statement
 /// control-flow graph, it also returns `None` when any statement, including
@@ -81,24 +94,76 @@ pub(super) fn build_root(
 
 /// Checks every statement of `root`, reachable or not, for the syntax that the
 /// statement control-flow graph requires: tests of `if`, `while` and `do`
-/// statements, labels of labeled blocks, variable initializers, and a target
-/// for each `break` and `continue`.
+/// statements, labels of labeled blocks, variable initializers, the
+/// discriminant and case tests of `switch` statements, the heads of `for...in`
+/// and `for...of` loops, and a target for each `break` and `continue`.
 fn has_complete_statements(root: &AnyJsControlFlowRoot) -> bool {
-    StatementCheck {
-        targets: Vec::new(),
-    }
-    .statements(root.syntax())
+    let mut check = StatementCheck::default();
+    check.statements(root.syntax()) && check.escaping.is_empty()
 }
 
-/// A statement that `break` or `continue` can target during
-/// [`has_complete_statements`].
+/// A `break` or `continue` statement.
+struct Jump {
+    label: Option<TokenText>,
+    is_continue: bool,
+}
+
+impl Jump {
+    /// Returns the jump that `statement` performs, or `None` when it is not a
+    /// `break` or `continue` statement.
+    fn from_statement(statement: &AnyJsStatement) -> Option<Self> {
+        let (label, is_continue) = if let AnyJsStatement::JsBreakStatement(statement) = statement {
+            (statement.label_token(), false)
+        } else if let AnyJsStatement::JsContinueStatement(statement) = statement {
+            (statement.label_token(), true)
+        } else {
+            return None;
+        };
+        Some(Self {
+            label: label.map(|token| token.token_text_trimmed()),
+            is_continue,
+        })
+    }
+
+    /// Returns whether a statement of `kind` labeled `label` can be the target
+    /// of this jump. The target is the innermost enclosing statement for which
+    /// this holds. An unlabeled `break` targets the innermost loop or `switch`,
+    /// whether or not it has a label; only a labeled `break` leaves a block.
+    fn can_target(&self, kind: TargetKind, label: Option<&TokenText>) -> bool {
+        match (&self.label, self.is_continue) {
+            (Some(own), false) => label == Some(own),
+            (None, false) => kind != TargetKind::Block,
+            (own, true) => {
+                kind == TargetKind::Loop && own.as_ref().is_none_or(|own| label == Some(own))
+            }
+        }
+    }
+}
+
+/// The kind of statement that `break` or `continue` can target.
+#[derive(Clone, Copy, Eq, PartialEq)]
+enum TargetKind {
+    /// A labeled block, which only a labeled `break` targets.
+    Block,
+    /// A `switch` statement, which `break` but not `continue` targets.
+    Switch,
+    Loop,
+}
+
+/// A statement that `break` or `continue` can target during a
+/// [`StatementCheck`].
 struct CheckedTarget {
     label: Option<TokenText>,
-    is_loop: bool,
+    kind: TargetKind,
 }
 
+/// Checks the syntax of statements, as [`has_complete_statements`] describes,
+/// and collects the jumps that leave them.
+#[derive(Default)]
 struct StatementCheck {
     targets: Vec<CheckedTarget>,
+    /// The jumps that target a statement outside the checked statements.
+    escaping: Vec<Jump>,
 }
 
 impl StatementCheck {
@@ -120,14 +185,14 @@ impl StatementCheck {
 
     #[expect(
         clippy::wildcard_enum_match_arm,
-        reason = "Other statements require no syntax beyond what parsing guarantees."
+        reason = "Other statements require no syntax beyond what parsing guarantees, so only the statements they contain are checked."
     )]
     fn statement(&mut self, statement: AnyJsStatement, label: Option<TokenText>) -> bool {
         match statement {
             AnyJsStatement::JsBlockStatement(block) => match label {
-                Some(label) => {
-                    self.scoped(Some(label), false, |check| check.statements(block.syntax()))
-                }
+                Some(label) => self.scoped(Some(label), TargetKind::Block, |check| {
+                    check.statements(block.syntax())
+                }),
                 None => self.statements(block.syntax()),
             },
             AnyJsStatement::JsLabeledStatement(labeled) => {
@@ -162,22 +227,37 @@ impl StatementCheck {
             AnyJsStatement::JsForStatement(statement) => {
                 self.loop_body(statement.body().ok(), label)
             }
-            AnyJsStatement::JsBreakStatement(statement) => {
-                let label = statement
-                    .label_token()
-                    .map(|token| token.token_text_trimmed());
-                self.targets.iter().any(|target| match &label {
-                    Some(_) => target.label == label,
-                    None => target.is_loop,
-                })
+            AnyJsStatement::JsForInStatement(statement) => {
+                statement.initializer().is_ok()
+                    && statement.expression().is_ok()
+                    && self.loop_body(statement.body().ok(), label)
             }
-            AnyJsStatement::JsContinueStatement(statement) => {
-                let label = statement
-                    .label_token()
-                    .map(|token| token.token_text_trimmed());
-                self.targets
-                    .iter()
-                    .any(|target| target.is_loop && (label.is_none() || target.label == label))
+            AnyJsStatement::JsForOfStatement(statement) => {
+                statement.initializer().is_ok()
+                    && statement.expression().is_ok()
+                    && self.loop_body(statement.body().ok(), label)
+            }
+            AnyJsStatement::JsSwitchStatement(statement) => {
+                statement.discriminant().is_ok()
+                    && statement.cases().iter().all(|clause| {
+                        clause
+                            .as_js_case_clause()
+                            .is_none_or(|clause| clause.test().is_ok())
+                    })
+                    && self.scoped(label, TargetKind::Switch, |check| {
+                        check.statements(statement.syntax())
+                    })
+            }
+            AnyJsStatement::JsBreakStatement(_) | AnyJsStatement::JsContinueStatement(_) => {
+                if let Some(jump) = Jump::from_statement(&statement)
+                    && !self
+                        .targets
+                        .iter()
+                        .any(|target| jump.can_target(target.kind, target.label.as_ref()))
+                {
+                    self.escaping.push(jump);
+                }
+                true
             }
             AnyJsStatement::JsVariableStatement(statement) => {
                 statement.declaration().is_ok_and(|declaration| {
@@ -190,12 +270,16 @@ impl StatementCheck {
                     })
                 })
             }
-            _ => true,
+            // Nested execution roots are checked when they are built.
+            AnyJsStatement::JsFunctionDeclaration(_) | AnyJsStatement::TsModuleDeclaration(_) => {
+                true
+            }
+            _ => self.statements(statement.syntax()),
         }
     }
 
     fn loop_body(&mut self, body: Option<AnyJsStatement>, label: Option<TokenText>) -> bool {
-        self.scoped(label, true, |check| {
+        self.scoped(label, TargetKind::Loop, |check| {
             body.is_none_or(|body| check.statement(body, None))
         })
     }
@@ -203,10 +287,10 @@ impl StatementCheck {
     fn scoped(
         &mut self,
         label: Option<TokenText>,
-        is_loop: bool,
+        kind: TargetKind,
         check: impl FnOnce(&mut Self) -> bool,
     ) -> bool {
-        self.targets.push(CheckedTarget { label, is_loop });
+        self.targets.push(CheckedTarget { label, kind });
         let complete = check(self);
         self.targets.pop();
         complete
@@ -219,6 +303,15 @@ struct JumpTarget {
     /// The loop's continue point; `None` for a labeled block.
     continue_to: Option<FlowNodeId>,
     breaks: Vec<FlowNodeId>,
+}
+
+impl JumpTarget {
+    fn kind(&self) -> TargetKind {
+        match self.continue_to {
+            Some(_) => TargetKind::Loop,
+            None => TargetKind::Block,
+        }
+    }
 }
 
 struct RootBuilder<'a, 'raw> {
@@ -268,7 +361,7 @@ impl RootBuilder<'_, '_> {
 
     #[expect(
         clippy::wildcard_enum_match_arm,
-        reason = "Syntax validation rejects every other statement."
+        reason = "Every other statement is an opaque region."
     )]
     fn statement(&mut self, statement: AnyJsStatement, label: Option<TokenText>) -> Build<()> {
         let Some(current) = self.current else {
@@ -348,37 +441,10 @@ impl RootBuilder<'_, '_> {
             AnyJsStatement::JsForStatement(statement) => {
                 self.for_statement(&statement, current, label)
             }
-            AnyJsStatement::JsBreakStatement(statement) => {
-                let label = statement
-                    .label_token()
-                    .map(|token| token.token_text_trimmed());
-                // An unlabeled `break` targets the innermost loop, whether or
-                // not it has a label; only a labeled `break` leaves a block.
-                let target = self
-                    .jumps
-                    .iter_mut()
-                    .rev()
-                    .find(|target| match &label {
-                        Some(_) => target.label == label,
-                        None => target.continue_to.is_some(),
-                    })
-                    .ok_or(Unsupported)?;
-                target.breaks.push(current);
-                self.current = None;
-                Ok(())
-            }
-            AnyJsStatement::JsContinueStatement(statement) => {
-                let label = statement
-                    .label_token()
-                    .map(|token| token.token_text_trimmed());
-                let continue_to = self
-                    .jumps
-                    .iter()
-                    .rev()
-                    .filter(|target| label.is_none() || target.label == label)
-                    .find_map(|target| target.continue_to)
-                    .ok_or(Unsupported)?;
-                self.add_predecessor(continue_to, current)?;
+            AnyJsStatement::JsBreakStatement(_) | AnyJsStatement::JsContinueStatement(_) => {
+                let jump = Jump::from_statement(&statement).ok_or(Unsupported)?;
+                let target = self.jump_target(&jump)?;
+                self.connect_jump(target, &jump, current)?;
                 self.current = None;
                 Ok(())
             }
@@ -386,7 +452,58 @@ impl RootBuilder<'_, '_> {
             | AnyJsStatement::TsTypeAliasDeclaration(_)
             | AnyJsStatement::TsInterfaceDeclaration(_)
             | AnyJsStatement::TsDeclareFunctionDeclaration(_) => Ok(()),
-            _ => Err(Unsupported),
+            // Ambient declarations never run, and TypeScript analyzes the body
+            // of a module or global declaration apart from the code around it.
+            AnyJsStatement::TsDeclareStatement(_)
+            | AnyJsStatement::TsExternalModuleDeclaration(_)
+            | AnyJsStatement::TsGlobalDeclaration(_) => Ok(()),
+            _ => self.opaque_region(&statement, label, current),
+        }
+    }
+
+    /// Builds `statement` as an opaque region that starts at `current`, as
+    /// [`build_root`] describes. `label` is the label of `statement`, if any.
+    fn opaque_region(
+        &mut self,
+        statement: &AnyJsStatement,
+        label: Option<TokenText>,
+        current: FlowNodeId,
+    ) -> Build<()> {
+        let mut check = StatementCheck::default();
+        if !check.statement(statement.clone(), label) {
+            return Err(Unsupported);
+        }
+        let mut connected = Vec::new();
+        for jump in check.escaping {
+            let target = self.jump_target(&jump)?;
+            if !connected.contains(&(target, jump.is_continue)) {
+                connected.push((target, jump.is_continue));
+                self.connect_jump(target, &jump, current)?;
+            }
+        }
+        self.current = Some(self.evaluate(statement.syntax(), current, 0)?);
+        Ok(())
+    }
+
+    /// Returns the index in `jumps` of the target of `jump`.
+    fn jump_target(&self, jump: &Jump) -> Build<usize> {
+        self.jumps
+            .iter()
+            .rposition(|target| jump.can_target(target.kind(), target.label.as_ref()))
+            .ok_or(Unsupported)
+    }
+
+    /// Adds `from` to the flow that `jump` reaches at the target at `index` in
+    /// `jumps`: the flow after the target for a `break`, or its continue point
+    /// for a `continue`.
+    fn connect_jump(&mut self, index: usize, jump: &Jump, from: FlowNodeId) -> Build<()> {
+        let target = self.jumps.get_mut(index).ok_or(Unsupported)?;
+        if jump.is_continue {
+            let continue_to = target.continue_to.ok_or(Unsupported)?;
+            self.add_predecessor(continue_to, from)
+        } else {
+            target.breaks.push(from);
+            Ok(())
         }
     }
 
@@ -750,22 +867,27 @@ mod tests {
             let root = self.root();
             let mut result = Vec::new();
             let start = self.point(name, occurrence).expect("read must be recorded");
-            let mut pending = vec![(start, Vec::new())];
+            let mut pending = vec![(start, Vec::new(), vec![start])];
             let mut budget = 1_000usize;
-            while let Some((node, mut facts)) = pending.pop() {
-                budget = budget
-                    .checked_sub(1)
-                    .expect("cyclic or excessive test graph");
+            while let Some((node, mut facts, visited)) = pending.pop() {
+                budget = budget.checked_sub(1).expect("excessive test graph");
+                let mut follow = |predecessor: FlowNodeId, facts: Vec<String>| {
+                    if !visited.contains(&predecessor) {
+                        let mut visited = visited.clone();
+                        visited.push(predecessor);
+                        pending.push((predecessor, facts, visited));
+                    }
+                };
                 match &root.nodes[node as usize] {
                     FlowNode::Start => result.push(facts),
                     FlowNode::Join(predecessors) => {
                         for predecessor in predecessors {
-                            pending.push((*predecessor, facts.clone()));
+                            follow(*predecessor, facts.clone());
                         }
                     }
                     FlowNode::Condition { antecedent, guard } => {
                         self.facts(*guard, &mut facts);
-                        pending.push((*antecedent, facts));
+                        follow(*antecedent, facts);
                     }
                 }
             }
@@ -973,11 +1095,122 @@ mod tests {
         let built = function(source);
         assert_eq!(built.point("x", 2), None);
         assert!(contains(&built.paths("x", 3), "x:Truthy"));
-        assert!(
-            build(source, JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION)
-                .root
-                .is_none()
+        let arrow = build(source, JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION);
+        assert_eq!(arrow.paths("x", 2), [Vec::<String>::new()]);
+        assert_eq!(arrow.point("x", 3), None);
+    }
+
+    #[test]
+    fn reads_in_regions_keep_the_facts_from_before_them() {
+        let built = function(
+            "function f(q, y) { if (q) { switch (y) { case read(q): read(q); } try { read(q); } catch (e) { read(q); } finally { read(q); } for (const v of y) read(q); for (const k in y) read(q); class C extends read(q) {} enum E { A = read(q) } after(q); } }",
         );
+        for occurrence in 2..=11 {
+            assert_eq!(
+                built.paths("q", occurrence),
+                [vec!["q:Truthy".to_owned()]],
+                "{occurrence}"
+            );
+        }
+    }
+
+    #[test]
+    fn regions_narrow_only_within_expressions() {
+        let built = function(
+            "function f(x, b) { try { b && read(b); if (!x) return; read(x); } catch {} after(x); }",
+        );
+        assert!(contains(&built.paths("b", 2), "b:Truthy"));
+        // The `if` and the `return` inside the region are not modeled.
+        for occurrence in [2, 3] {
+            let paths = built.paths("x", occurrence);
+            assert!(
+                paths.iter().flatten().all(|fact| !fact.contains('x')),
+                "{occurrence}: {paths:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn jumps_leaving_regions_carry_the_entry_state() {
+        // `break` out of a `try`: the exit after the loop joins the loop's own
+        // exit with the state before the region.
+        let built = function(
+            "function f(x, y) { while (y) { if (x) { try { break; } catch {} } return; } after(x); }",
+        );
+        let paths = built.paths("x", 2);
+        assert_eq!(paths.len(), 2, "{paths:?}");
+        assert!(paths.iter().any(|path| path == &["!y:Truthy"]));
+        assert!(paths.iter().any(|path| path == &["x:Truthy", "y:Truthy"]));
+
+        // `continue` out of a `switch` reaches the loop update.
+        let built = function(
+            "function f(x, y) { for (;; read(x)) { if (!x) { switch (y) { case 1: continue; } } return; } }",
+        );
+        assert_eq!(built.paths("x", 1), [vec!["!x:Truthy".to_owned()]]);
+
+        // `continue` out of a `try` reaches the test of a `do...while` loop.
+        let built = function(
+            "function f(x) { do { if (x) { try { continue; } finally {} } return; } while (read(x)); }",
+        );
+        assert_eq!(built.paths("x", 2), [vec!["x:Truthy".to_owned()]]);
+
+        // A labeled `break` out of a `switch` leaves the labeled loop.
+        let built = function(
+            "function f(x, y) { outer: while (true) { if (x) { switch (y) { case 1: break outer; } } return; } after(x); }",
+        );
+        assert_eq!(built.paths("x", 2), [vec!["x:Truthy".to_owned()]]);
+    }
+
+    #[test]
+    fn labeled_breaks_leave_regions() {
+        let built = function(
+            "function f(x) { done: { if (x) { try { break done; } catch {} } return; } after(x); }",
+        );
+        assert_eq!(built.paths("x", 2), [vec!["x:Truthy".to_owned()]]);
+    }
+
+    #[test]
+    fn regions_connect_each_target_once() {
+        let built = function(
+            "function f(x, y) { while (true) { if (x) { try { if (y) break; break; } catch { break; } } return; } after(x); }",
+        );
+        assert_eq!(built.paths("x", 2), [vec!["x:Truthy".to_owned()]]);
+    }
+
+    #[test]
+    fn jumps_to_statements_inside_a_region_do_not_leave_it() {
+        for source in [
+            "function f(x, y) { while (true) { switch (y) { case 1: break; } return; } after(x); }",
+            "function f(x, y) { while (true) { label: switch (y) { case 1: break label; } return; } after(x); }",
+            "function f(x, y) { while (true) { try { while (y) { break; } } catch {} return; } after(x); }",
+            "function f(x, y) { while (true) { try { for (const v of y) { continue; } } finally {} return; } after(x); }",
+            "function f(x, y) { while (true) { try { each: for (const v in y) { for (const w of v) { continue each; } } } catch {} return; } after(x); }",
+            "function f(x, y) { while (true) { try { inner: { break inner; } } catch {} return; } after(x); }",
+        ] {
+            let built = function(source);
+            assert!(built.root.is_some(), "{source}");
+            assert_eq!(built.point("x", 1), None, "{source}");
+        }
+    }
+
+    #[test]
+    fn regions_need_a_target_for_each_jump() {
+        for source in [
+            "function f(x) { if (x) read(x); return; try { if () dead(x); } catch {} }",
+            "function f(x) { if (x) read(x); return; switch () {} }",
+        ] {
+            assert!(
+                build_parsed(source, JsSyntaxKind::JS_FUNCTION_DECLARATION)
+                    .root
+                    .is_none(),
+                "{source}"
+            );
+        }
+        // The statement control-flow graph gives no target to a label on a
+        // `try` statement.
+        let built =
+            function("function f(x) { if (x) read(x); out: try { break out; } finally {} }");
+        assert!(built.root.is_none());
     }
 
     #[test]

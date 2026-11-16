@@ -74,16 +74,30 @@ one of its own variables. Its parts live in `src/js_module_info/flow/`:
 - `scanner.rs` selects roots while the module visitor walks the syntax tree,
   so collection never walks the whole module again. A root is selected when
   its own code contains a condition or, in a module with an `asserts`
-  annotation, a standalone call. The scanner rejects a root whose own syntax
-  the builder does not support and a root over its node or depth limit.
-  Declaration files (`.d.ts`, `.d.mts`, `.d.cts`, in any letter case) contain
-  no code that runs, so the visitor does not look for roots in them.
+  annotation, a standalone call. The scanner rejects a root when its own code
+  contains a `with` statement or bogus syntax, and a root over its node or
+  depth limit. Declaration files (`.d.ts`, `.d.mts`, `.d.cts`, in any letter
+  case) contain no code that runs, so the visitor does not look for roots in
+  them.
 - `builder.rs` builds the graph of one selected root from start, join, and
   condition nodes. It records the incoming flow point of every reachable read
   and, for each condition node, the variables its guard may narrow. It skips
   class members: methods, accessors, constructors, and static blocks are roots
   of their own, and TypeScript analyzes a class field that has an initializer
-  apart from the code around the class.
+  apart from the code around the class. It also skips `declare` statements,
+  which never run.
+- The builder models the control flow of blocks, `if`, `while`, `do...while`,
+  `for`, labeled statements, `break`, `continue`, `return`, and `throw`. Any
+  other statement, such as `switch`, `try`, `for...in`, or `for...of`, is an
+  opaque region. The builder evaluates the expressions of a region in source
+  order from the flow point before it, without modelling the branches and
+  jumps inside it, and the next statement continues from the result. For each
+  `break` or `continue` inside the region that targets a statement outside it,
+  the builder adds the point before the region as a predecessor of that
+  target, once per target. Regions keep narrowing sound because only variables
+  that are never written narrow: the state before a region is never narrower
+  than the state at any point inside or after it. Replacing a region with a
+  model of its statement only makes narrowing more precise.
 - `guards.rs` decomposes every condition into guards on semantic bindings,
   combined the way `!`, `&&`, and `||` combine them. For example,
   `typeof value === "string"` becomes a runtime test of `value`. A call to a
@@ -114,7 +128,17 @@ Lookups skip flow for any expression that is not a candidate. For a candidate
 read, `infer_flow_binding_baseline` resolves the variable's declared type once.
 `infer_flow_binding_states` then applies the guards on every path to all reads
 of the variable in one root in a single solve, and `infer_flow_binding_type`
-takes the result at the read's incoming flow point.
+takes the result at the read's incoming flow point. Both solve queries take the
+type that narrowing starts from as part of their key.
+
+Complete module inference evaluates flow candidates in its own resolution
+context instead of through `infer_flow_expression_type` and
+`infer_flow_binding_baseline`. When it reaches expressions, that context has
+resolved every raw type of the module, so a variable's declared type costs a
+cache read there, while the queries would resolve it again in a fresh context.
+It still solves through `infer_flow_binding_states` and
+`infer_flow_binding_type`. Cycle fallback and the import-depth fallback read
+imports differently from the flow queries, so they keep using the queries.
 
 `src/db/type_inference/flow.rs` applies each runtime test with `narrow_type`
 from `biome_js_type_info`. Where branches meet, or a loop returns to an earlier
@@ -122,7 +146,8 @@ point, it keeps every type still possible on a reachable path. A read on a path
 that no value can take gets type Unknown, not `never`. `flow_expressions.rs`
 uses narrowed operands when inferring member accesses, calls, logical and
 conditional expressions, `await`, the comma operator, and `+`. Complete module
-inference uses the same read-specific results as individual expression queries.
+inference narrows each read as an individual expression query does, from the
+declared type its own context resolved.
 
 #### Caching
 
@@ -130,9 +155,10 @@ Collected flow belongs to the module input, so an edit replaces it together
 with the raw type tables, even when variable declarations and references stay
 the same. Salsa caches the type work: all reads of a variable share the type
 that narrowing starts from, its reads in one root share one narrowing
-calculation, and reads at the same flow point share their result. These caches
-recompute when the module input changes; they do not track edits separately
-for each function.
+calculation, and reads at the same flow point share their result. Lookups and
+complete module inference share the calculation and the results when they
+start from the same type. These caches recompute when the module input
+changes; they do not track edits separately for each function.
 
 #### Work limits
 
