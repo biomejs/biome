@@ -71,3 +71,15 @@ const r20 = Boolean(() => a || b);
 
 // Comparison ternary inside `Boolean()`
 const r21 = Boolean(a != null ? a : b);
+
+// Truthiness ternary under a logical operator inside `Boolean()`: not reported
+declare const maybeObject: Date | null;
+const r22 = Boolean(flag || (maybeObject ? maybeObject : new Date(b)));
+
+// Truthiness ternary passed directly to `Boolean()`: reported
+const r23 = Boolean(maybeObject ? maybeObject : new Date(b));
+const r24 = Boolean(!maybeObject ? new Date(b) : maybeObject);
+
+// Parentheses and a negation around a truthiness ternary inside `Boolean()`: reported
+const r25 = Boolean((maybeObject ? maybeObject : new Date(b)));
+const r26 = Boolean(!(maybeObject ? maybeObject : new Date(b)));

@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: ifStatementAsi.ts
+expression: asi.ts
 ---
 # Input
 ```ts
@@ -34,11 +34,30 @@ if ((obj as Holder).bar == null) (obj as Holder).bar = 'x'
 }
 if ((obj as Holder).bar == null) (obj as Holder).bar = 'x'
 
+// Truthiness check: a fix starting with `(` would continue the previous statement: no fix
+type ObjectHolder = { bar?: Date | null };
+declare const objectHolder: unknown;
+log()
+if (!(objectHolder as ObjectHolder).bar) (objectHolder as ObjectHolder).bar = new Date()
+
+// Previous statement ends with `;`
+log();
+if (!(objectHolder as ObjectHolder).bar) (objectHolder as ObjectHolder).bar = new Date()
+
+// Truthiness ternary: a fix starting with `(` would continue the previous statement: no fix
+declare const left: { c: Date | null };
+log()
+!(left).c ? new Date() : left.c
+
+// Previous statement ends with `;`
+log();
+!(left).c ? new Date() : left.c
+
 ```
 
 # Diagnostics
 ```
-ifStatementAsi.ts:2:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+asi.ts:2:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of an if statement for nullish assignment.
   
@@ -49,8 +68,6 @@ ifStatementAsi.ts:2:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━�
     4 │ type Holder = { bar?: string | null };
   
   i This if statement only assigns when the variable is nullish, which ??= expresses directly.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -66,7 +83,7 @@ ifStatementAsi.ts:2:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━�
 ```
 
 ```
-ifStatementAsi.ts:11:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+asi.ts:11:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of an if statement for nullish assignment.
   
@@ -79,15 +96,13 @@ ifStatementAsi.ts:11:1 lint/nursery/useNullishCoalescing ━━━━━━━�
   
   i This if statement only assigns when the variable is nullish, which ??= expresses directly.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
 
 ```
-ifStatementAsi.ts:15:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+asi.ts:15:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of an if statement for nullish assignment.
   
@@ -99,8 +114,6 @@ ifStatementAsi.ts:15:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━�
     17 │ // Previous statement ends with `;`
   
   i This if statement only assigns when the variable is nullish, which ??= expresses directly.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -117,7 +130,7 @@ ifStatementAsi.ts:15:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━�
 ```
 
 ```
-ifStatementAsi.ts:19:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+asi.ts:19:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of an if statement for nullish assignment.
   
@@ -129,8 +142,6 @@ ifStatementAsi.ts:19:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━�
     21 │ // First statement of a block
   
   i This if statement only assigns when the variable is nullish, which ??= expresses directly.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -147,7 +158,7 @@ ifStatementAsi.ts:19:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━�
 ```
 
 ```
-ifStatementAsi.ts:23:2 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+asi.ts:23:2 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of an if statement for nullish assignment.
   
@@ -159,8 +170,6 @@ ifStatementAsi.ts:23:2 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━�
     25 │ 
   
   i This if statement only assigns when the variable is nullish, which ??= expresses directly.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -177,7 +186,7 @@ ifStatementAsi.ts:23:2 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━�
 ```
 
 ```
-ifStatementAsi.ts:29:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+asi.ts:29:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of an if statement for nullish assignment.
   
@@ -186,12 +195,103 @@ ifStatementAsi.ts:29:1 lint/nursery/useNullishCoalescing ━━━━━━━�
   > 29 │ if ((obj as Holder).bar == null) (obj as Holder).bar = 'x'
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     30 │ 
+    31 │ // Truthiness check: a fix starting with `(` would continue the previous statement: no fix
   
   i This if statement only assigns when the variable is nullish, which ??= expresses directly.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+asi.ts:35:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ??= over an if statement that assigns when the value is falsy.
+  
+    33 │ declare const objectHolder: unknown;
+    34 │ log()
+  > 35 │ if (!(objectHolder as ObjectHolder).bar) (objectHolder as ObjectHolder).bar = new Date()
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ 
+    37 │ // Previous statement ends with `;`
+  
+  i ??= only assigns when the value is null or undefined.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+asi.ts:39:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ??= over an if statement that assigns when the value is falsy.
+  
+    37 │ // Previous statement ends with `;`
+    38 │ log();
+  > 39 │ if (!(objectHolder as ObjectHolder).bar) (objectHolder as ObjectHolder).bar = new Date()
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ 
+    41 │ // Truthiness ternary: a fix starting with `(` would continue the previous statement: no fix
+  
+  i ??= only assigns when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the if statement with ??=.
+  
+    37 37 │   // Previous statement ends with `;`
+    38 38 │   log();
+    39    │ - if·(!(objectHolder·as·ObjectHolder).bar)·(objectHolder·as·ObjectHolder).bar·=·new·Date()
+       39 │ + (objectHolder·as·ObjectHolder).bar·??=·new·Date();
+    40 40 │   
+    41 41 │   // Truthiness ternary: a fix starting with `(` would continue the previous statement: no fix
+  
+
+```
+
+```
+asi.ts:44:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    42 │ declare const left: { c: Date | null };
+    43 │ log()
+  > 44 │ !(left).c ? new Date() : left.c
+       │ ^^^^^^^^^
+    45 │ 
+    46 │ // Previous statement ends with `;`
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+asi.ts:48:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    46 │ // Previous statement ends with `;`
+    47 │ log();
+  > 48 │ !(left).c ? new Date() : left.c
+       │ ^^^^^^^^^
+    49 │ 
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    46 46 │   // Previous statement ends with `;`
+    47 47 │   log();
+    48    │ - !(left).c·?·new·Date()·:·left.c
+       48 │ + (left).c·??·new·Date()
+    49 49 │   
   
 
 ```

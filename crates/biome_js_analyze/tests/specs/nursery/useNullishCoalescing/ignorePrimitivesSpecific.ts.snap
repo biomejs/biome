@@ -27,15 +27,31 @@ const r5 = litStr || 'c';
 declare const sn: string | number | null;
 const r6 = sn || 'x';
 
-// Only some variants ignored
+// One ignored variant: not reported
 declare const sb: string | boolean | null;
 const r7 = sb || 'x';
 
-// Ternary on an ignored kind: not reported
-const r8 = s != null ? s : 'x';
+// Template literal type: not reported
+declare const template: `id-${number}` | undefined;
+const r8 = template || 'id-0';
 
-// Ternary on another kind
-const r9 = b != null ? b : false;
+// Branded string: not reported
+declare const branded: (string & { __brand: 'id' }) | null;
+const r9 = branded || 'x';
+
+// `any`: not reported
+declare const anyValue: any;
+const r10 = anyValue || 'x';
+
+// Truthiness ternary on a string: not reported
+const r11 = s ? s : 'x';
+
+// Truthiness ternary on a boolean: reported
+const r12 = b ? b : false;
+
+// Comparisons with `null`: reported
+const r13 = s != null ? s : 'x';
+const r14 = b != null ? b : false;
 
 ```
 
@@ -52,8 +68,6 @@ ignorePrimitivesSpecific.ts:13:14 lint/nursery/useNullishCoalescing ━━━━
     15 │ 
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -74,7 +88,23 @@ ignorePrimitivesSpecific.ts:14:16 lint/nursery/useNullishCoalescing ━━━━
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignorePrimitivesSpecific.ts:44:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    43 │ // Truthiness ternary on a boolean: reported
+  > 44 │ const r12 = b ? b : false;
+       │             ^
+    45 │ 
+    46 │ // Comparisons with `null`: reported
+  
+  i ?? only uses the fallback when the value is null or undefined.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -82,49 +112,54 @@ ignorePrimitivesSpecific.ts:14:16 lint/nursery/useNullishCoalescing ━━━━
 ```
 
 ```
-ignorePrimitivesSpecific.ts:26:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ?? instead of ||.
-  
-    24 │ // Only some variants ignored
-    25 │ declare const sb: string | boolean | null;
-  > 26 │ const r7 = sb || 'x';
-       │               ^^
-    27 │ 
-    28 │ // Ternary on an ignored kind: not reported
-  
-  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-ignorePrimitivesSpecific.ts:32:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+ignorePrimitivesSpecific.ts:47:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-    31 │ // Ternary on another kind
-  > 32 │ const r9 = b != null ? b : false;
-       │            ^^^^^^^^^
-    33 │ 
+    46 │ // Comparisons with `null`: reported
+  > 47 │ const r13 = s != null ? s : 'x';
+       │             ^^^^^^^^^
+    48 │ const r14 = b != null ? b : false;
+    49 │ 
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
   
-    30 30 │   
-    31 31 │   // Ternary on another kind
-    32    │ - const·r9·=·b·!=·null·?·b·:·false;
-       32 │ + const·r9·=·b·??·false;
-    33 33 │   
+    45 45 │   
+    46 46 │   // Comparisons with `null`: reported
+    47    │ - const·r13·=·s·!=·null·?·s·:·'x';
+       47 │ + const·r13·=·s·??·'x';
+    48 48 │   const r14 = b != null ? b : false;
+    49 49 │   
+  
+
+```
+
+```
+ignorePrimitivesSpecific.ts:48:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+    46 │ // Comparisons with `null`: reported
+    47 │ const r13 = s != null ? s : 'x';
+  > 48 │ const r14 = b != null ? b : false;
+       │             ^^^^^^^^^
+    49 │ 
+  
+  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    46 46 │   // Comparisons with `null`: reported
+    47 47 │   const r13 = s != null ? s : 'x';
+    48    │ - const·r14·=·b·!=·null·?·b·:·false;
+       48 │ + const·r14·=·b·??·false;
+    49 49 │   
   
 
 ```

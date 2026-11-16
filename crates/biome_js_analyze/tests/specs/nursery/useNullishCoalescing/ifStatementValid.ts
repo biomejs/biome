@@ -85,6 +85,9 @@ if (andAssign == null) {
 
 // Test that checks the value is present
 declare let present: string | null | undefined;
+if (present) {
+	present = 'x';
+}
 if (present != null) {
 	present = 'x';
 }
@@ -135,6 +138,8 @@ if (sequenced == null) {
 	(sequenced = 'v'), (other = 1);
 }
 
-// Type assertion that removes `null` from the tested value
-declare let pinned: string | null;
-if ((pinned as string) == null) pinned = 'v';
+// Strict check on `any`
+declare let anyStrict: any;
+if (anyStrict === null) {
+	anyStrict = 1;
+}

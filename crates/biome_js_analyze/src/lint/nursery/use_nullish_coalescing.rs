@@ -30,11 +30,22 @@ declare_lint_rule! {
     /// Enforce using the nullish coalescing operator (`??`) instead of logical or (`||`).
     ///
     /// `??` only checks for `null` and `undefined`, while `||` checks for any falsy value
-    /// including `0`, `''`, and `false`. The rule reports `||` and `||=` when type analysis
-    /// shows the left operand is possibly nullish, and ternary expressions that compare a
-    /// value with `null` or `undefined` to pick a fallback. A strict comparison with only
-    /// one of `null` and `undefined` is reported only when the value cannot hold the other
-    /// one.
+    /// including `0`, `''`, and `false`. The rule reports `||` and `||=`, along with ternary
+    /// expressions and `if` statements that pick a fallback for a missing value in a longer
+    /// way than `??` and `??=`.
+    ///
+    /// A check for a falsy value (`||`, `||=`, `x ? x : y`, or `if (!x)`) is reported when
+    /// type analysis shows that the value is possibly nullish or typed `any` or `unknown`.
+    /// A comparison that catches both `null` and `undefined`, such as `x == null`, is
+    /// reported whatever the type of the value. A strict comparison with only one of them
+    /// is reported only when the value cannot hold the other one.
+    ///
+    /// For a check for a falsy value, Biome offers the fix only when `??` picks the same
+    /// operand as `||` would, which rules out values typed `any` or `unknown`, and values
+    /// that can be `0`, `''`, or `false`. Object types such as `{ name: string }`, interfaces,
+    /// and instances of your own classes get no fix, because Biome can't always tell whether
+    /// a value like `''` can be assigned to them. Built-in objects such as arrays, `Date`, and `Map`, functions,
+    /// classes, and the `object` type keep the fix.
     ///
     /// A ternary expression or `if` statement is reported when the value it tests and the
     /// value it uses are the same variable or property. They match whichever way they are
@@ -71,6 +82,11 @@ declare_lint_rule! {
     /// const value = x == null ? 'default' : x;
     /// ```
     ///
+    /// ```ts,expect_diagnostic,file=invalid-ternary-truthiness.ts
+    /// declare const user: { name: string } | undefined;
+    /// const value = user ? user : { name: 'guest' };
+    /// ```
+    ///
     /// An `if` statement that only assigns a fallback to the value its test checks is also
     /// reported, since it can be rewritten as `??=`.
     ///
@@ -103,13 +119,13 @@ declare_lint_rule! {
     ///
     /// ### ignoreConditionalTests
     ///
-    /// By default, Biome ignores `||` and `||=` whose value decides the test of an `if`,
-    /// `while`, `for`, or `do-while` statement or of a ternary expression. The value may reach
-    /// the test through `!`, a logical operator (`&&`, `||`, or `??`), the branches of a
-    /// ternary expression, or the last expression of a comma-separated sequence. A value that
-    /// reaches the test through a function call, a function body, or another operator is
-    /// reported. Set this to `false` to also report the values that decide a test.
-    /// Default: `true`.
+    /// By default, Biome ignores `||`, `||=`, and ternary expressions such as `x ? x : y`
+    /// whose value decides the test of an `if`, `while`, `for`, or `do-while` statement or of
+    /// a ternary expression. The value may reach the test through `!`, a logical operator
+    /// (`&&`, `||`, or `??`), the branches of a ternary expression, or the last expression of
+    /// a comma-separated sequence. A value that reaches the test through a function call, a
+    /// function body, or another operator is reported. Set this to `false` to also report the
+    /// values that decide a test. Default: `true`.
     ///
     /// ```json,options
     /// {
@@ -144,8 +160,9 @@ declare_lint_rule! {
     ///
     /// ### ignoreTernaryTests
     ///
-    /// By default, Biome reports ternary expressions that compare a value with `null` or
-    /// `undefined` and can be replaced with `??`. Set this to `true` to ignore them.
+    /// By default, Biome reports ternary expressions that `??` can replace, both those that
+    /// compare a value with `null` or `undefined` and those that check whether the value is
+    /// truthy, such as `x ? x : y`. Set this to `true` to ignore those ternary expressions.
     /// Default: `false`.
     ///
     /// ```json,options
@@ -170,6 +187,11 @@ declare_lint_rule! {
     /// ```ts,use_options,file=valid-ternary-tests.ts
     /// declare const x: string | null;
     /// const value = x !== null ? x : 'default';
+    /// ```
+    ///
+    /// ```ts,use_options,file=valid-ternary-tests-truthiness.ts
+    /// declare const user: { name: string } | undefined;
+    /// const value = user ? user : { name: 'guest' };
     /// ```
     ///
     /// ### ignoreMixedLogicalExpressions
@@ -229,11 +251,13 @@ declare_lint_rule! {
     ///
     /// ### ignoreBooleanCoercion
     ///
-    /// By default, Biome reports `||` and `||=` even when their value is the argument of a
-    /// call to the global `Boolean()` function. Set this to `true` to ignore them there, where
-    /// coalescing on falsy values is intentional. The value may reach the call through a
-    /// logical operator (`&&`, `||`, or `??`), the branches of a ternary expression, or the
-    /// last expression of a comma-separated sequence. Default: `false`.
+    /// By default, Biome reports `||`, `||=`, and ternary expressions such as `x ? x : y`
+    /// even when their value is the argument of a call to the global `Boolean()` function.
+    /// Set this to `true` to ignore them there, where coalescing on falsy values is
+    /// intentional. The value may reach the call through a logical operator (`&&`, `||`, or
+    /// `??`), the branches of a ternary expression, or the last expression of a
+    /// comma-separated sequence. A ternary expression that is itself the argument is still
+    /// reported. Default: `false`.
     ///
     /// ```json,options
     /// {
@@ -259,6 +283,14 @@ declare_lint_rule! {
     /// const r = Boolean(!(a || 'default'));
     /// ```
     ///
+    /// A ternary expression that is the argument of `Boolean()` is still reported.
+    ///
+    /// ```ts,expect_diagnostic,use_options,file=invalid-boolean-coercion-ternary.ts
+    /// declare const a: { name: string } | null;
+    /// declare const b: { name: string };
+    /// const r = Boolean(a ? a : b);
+    /// ```
+    ///
     /// #### Valid
     ///
     /// `||` and `||=` that are the argument of a `Boolean()` call are not reported.
@@ -271,13 +303,15 @@ declare_lint_rule! {
     ///
     /// ### ignorePrimitives
     ///
-    /// By default, Biome reports `||`, `||=`, ternary expressions, and `if` statements
-    /// whatever primitive types their operand includes. Set this to `true` to ignore them
-    /// when the operand is a nullable union whose non-nullish variants are all `string`,
-    /// `number`, `boolean`, or `bigint`, or to an object with any of the keys `string`,
-    /// `number`, `boolean`, and `bigint` set to `true` to ignore only unions made of those
-    /// kinds. Other types, such as a `symbol | null` union or a non-union `string`, are
-    /// still reported. Default: none.
+    /// By default, Biome reports checks for a falsy value (`||`, `||=`, `x ? x : y`, and
+    /// `if (!x)`) whatever primitive types the checked value includes. Set this to `true` to
+    /// ignore those checks when the type includes a `string`, `number`, `boolean`, or
+    /// `bigint`, or to an object that sets some of the keys `string`, `number`, `boolean`,
+    /// and `bigint` to `true` to ignore only those kinds. A type is ignored when any part of
+    /// it is an ignored kind, so `string | number | null` is ignored when `string` is
+    /// ignored. When at least one kind is ignored, values typed `any` or `unknown` are
+    /// ignored too. Comparisons with `null` or `undefined` are not affected by this option.
+    /// Default: none.
     ///
     /// ```json,options
     /// {
@@ -296,6 +330,13 @@ declare_lint_rule! {
     /// const value = count || 0;
     /// ```
     ///
+    /// A comparison with `null` is reported even when its value is a `string`.
+    ///
+    /// ```ts,expect_diagnostic,use_options,file=invalid-primitives-comparison.ts
+    /// declare const name: string | null;
+    /// const value = name !== null ? name : 'default';
+    /// ```
+    ///
     /// #### Valid
     ///
     /// A `string` operand is not reported when `string` is ignored.
@@ -305,11 +346,19 @@ declare_lint_rule! {
     /// const value = name || 'default';
     /// ```
     ///
+    /// A union that includes a `string` is not reported either.
+    ///
+    /// ```ts,use_options,file=valid-primitives-union.ts
+    /// declare const id: string | number | null;
+    /// const value = id || 'default';
+    /// ```
+    ///
     /// ### ignoreIfStatements
     ///
-    /// By default, Biome reports an `if` statement that only assigns to a nullish variable,
-    /// since it can be rewritten as `??=`. Set this to `true` to ignore those statements.
-    /// Default: `false`.
+    /// By default, Biome reports an `if` statement without an `else` branch whose only
+    /// statement assigns a fallback to the value its test checks, since it can be rewritten
+    /// as `??=`. The test may compare the value with `null` or `undefined`, or check `!x`.
+    /// Set this to `true` to ignore those statements. Default: `false`.
     ///
     /// ```json,options
     /// {
@@ -330,7 +379,7 @@ declare_lint_rule! {
     ///
     /// #### Valid
     ///
-    /// An `if` statement performing a nullish assignment is not reported.
+    /// An `if` statement that assigns a fallback to a missing value is not reported.
     ///
     /// ```ts,use_options,file=valid-if-statements.ts
     /// declare let a: { x: string } | null;
@@ -349,7 +398,6 @@ declare_lint_rule! {
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
         domains: &[RuleDomain::Types],
-        issue_number: Some("8043"),
     }
 }
 
@@ -382,6 +430,7 @@ pub enum UseNullishCoalescingState {
         fallback: AnyJsExpression,
         /// Whether the consequent is the branch taken when `subject` is present.
         is_positive: bool,
+        is_truthiness_check: bool,
         can_fix: bool,
     },
     IfStatement {
@@ -389,6 +438,7 @@ pub enum UseNullishCoalescingState {
         /// The assigned variable or property, without parentheses.
         assignment_target: AnyJsAssignment,
         assignment_value: AnyJsExpression,
+        is_truthiness_check: bool,
         can_fix: bool,
     },
 }
@@ -440,6 +490,22 @@ impl Rule for UseNullishCoalescing {
                     "The "<Emphasis>"||="</Emphasis>" operator assigns when the left side is falsy, while "<Emphasis>"??="</Emphasis>" only assigns when it is null or undefined."
                 }),
             ),
+            UseNullishCoalescingState::Ternary {
+                test_range,
+                is_truthiness_check: true,
+                ..
+            } => Some(
+                RuleDiagnostic::new(
+                    rule_category!(),
+                    *test_range,
+                    markup! {
+                        "Prefer "<Emphasis>"??"</Emphasis>" over a ternary expression checking for a falsy value."
+                    },
+                )
+                .note(markup! {
+                    <Emphasis>"??"</Emphasis>" only uses the fallback when the value is null or undefined."
+                }),
+            ),
             UseNullishCoalescingState::Ternary { test_range, .. } => Some(
                 RuleDiagnostic::new(
                     rule_category!(),
@@ -450,6 +516,22 @@ impl Rule for UseNullishCoalescing {
                 )
                 .note(markup! {
                     "A ternary expression that checks for "<Emphasis>"null"</Emphasis>" or "<Emphasis>"undefined"</Emphasis>" does what "<Emphasis>"??"</Emphasis>" does, but "<Emphasis>"??"</Emphasis>" is shorter and easier to read."
+                }),
+            ),
+            UseNullishCoalescingState::IfStatement {
+                if_range,
+                is_truthiness_check: true,
+                ..
+            } => Some(
+                RuleDiagnostic::new(
+                    rule_category!(),
+                    *if_range,
+                    markup! {
+                        "Prefer "<Emphasis>"??="</Emphasis>" over an "<Emphasis>"if"</Emphasis>" statement that assigns when the value is falsy."
+                    },
+                )
+                .note(markup! {
+                    <Emphasis>"??="</Emphasis>" only assigns when the value is null or undefined."
                 }),
             ),
             UseNullishCoalescingState::IfStatement { if_range, .. } => Some(
@@ -615,6 +697,8 @@ enum Negation {
 
 /// A ternary or `if` test that decides whether a value is missing.
 enum NullishTest {
+    /// `x`, where `x` is a variable or a property.
+    Truthy(AnyJsExpression),
     /// `!x`, where `x` is a variable or a property.
     Falsy(AnyJsExpression),
     /// A comparison with `==`, `!=`, `===`, or `!==`, or two of them joined by `||` or `&&`.
@@ -632,6 +716,7 @@ impl NullishTest {
     /// `None` for any other test.
     fn from_test(test: AnyJsExpression) -> Option<Self> {
         match test.omit_parentheses() {
+            test if is_variable_or_property(&test) => Some(Self::Truthy(test)),
             AnyJsExpression::JsUnaryExpression(unary) => {
                 if unary.operator().ok()? != JsUnaryOperator::LogicalNot {
                     return None;
@@ -686,6 +771,7 @@ impl NullishTest {
     /// or the `if` body provides the fallback.
     fn is_true_when_missing(&self) -> bool {
         match self {
+            Self::Truthy(_) => false,
             Self::Falsy(_) => true,
             Self::Comparison { operator, .. } => matches!(
                 operator,
@@ -702,7 +788,7 @@ impl NullishTest {
         is_subject: impl Fn(&AnyJsExpression) -> bool,
     ) -> Option<NullishSubject> {
         let (operator, first, second) = match self {
-            Self::Falsy(expression) => {
+            Self::Truthy(expression) | Self::Falsy(expression) => {
                 return is_subject(&expression).then_some(NullishSubject {
                     expression,
                     check: NullishCheck::Truthiness,
@@ -763,7 +849,7 @@ struct NullishSubject {
 
 #[derive(Clone, Copy, Eq, PartialEq)]
 enum NullishCheck {
-    /// `!x`, which also treats `0`, `''`, and `false` as missing.
+    /// `x` or `!x`, which also treat `0`, `''`, and `false` as missing.
     Truthiness,
     /// Covers both `null` and `undefined`: a loose comparison with either, or strict
     /// comparisons with both.
@@ -799,6 +885,9 @@ impl NullishLiteral {
     /// Whether a strict comparison with this literal catches every nullish variant of
     /// `ty`, or `None` when the type cannot be resolved.
     fn covers_nullish_variants_of(self, ty: InferredType) -> Option<bool> {
+        if ty.includes_any_or_unknown_keyword() {
+            return Some(false);
+        }
         let misses_a_variant = match self {
             Self::Null => ty.has_undefined_variant()?,
             Self::Undefined => ty.has_null_variant()?,
@@ -856,15 +945,7 @@ fn run_logical_or_assignment(
         return None;
     }
 
-    let left = assignment.left().ok()?;
-    let left_ty = match &left {
-        AnyJsAssignmentPattern::AnyJsAssignment(assign) => {
-            let id = assign.as_js_identifier_assignment()?;
-            let name = id.name_token().ok()?;
-            ctx.type_of_named_value(assignment.range(), name.text_trimmed())?
-        }
-        _ => return None,
-    };
+    let left_ty = ctx.type_of_assignment(assignment.left().ok()?.as_any_js_assignment()?)?;
     let can_fix = report_truthiness(options, left_ty)?;
 
     Some(UseNullishCoalescingState::LogicalOrAssignment {
@@ -885,9 +966,6 @@ fn run_ternary(
     let consequent = ternary.consequent().ok()?;
     let alternate = ternary.alternate().ok()?;
     let nullish_test = NullishTest::from_test(test.clone())?;
-    if matches!(nullish_test, NullishTest::Falsy(_)) {
-        return None;
-    }
     let is_positive = !nullish_test.is_true_when_missing();
     let (present_branch, fallback) = if is_positive {
         (consequent.clone(), alternate)
@@ -900,6 +978,13 @@ fn run_ternary(
     let subject = nullish_test.into_subject(ctx, |operand| {
         is_equivalent_reference(operand.clone(), present_branch.clone()) == Some(true)
     })?;
+
+    let is_truthiness_check = subject.check == NullishCheck::Truthiness;
+    if is_truthiness_check
+        && is_ignored_truthiness_context(ctx, &AnyJsExpression::from(ternary.clone()))
+    {
+        return None;
+    }
 
     // The fix keeps comments before either branch and around the ternary; comments
     // elsewhere have no place in `subject ?? fallback`.
@@ -933,6 +1018,7 @@ fn run_ternary(
         subject: subject.expression,
         fallback,
         is_positive,
+        is_truthiness_check,
         can_fix,
     })
 }
@@ -962,14 +1048,6 @@ fn run_if_statement(
         is_equivalent_assignment(target.clone(), operand.clone()) == Some(true)
     })?;
 
-    // Unlike a ternary, an `if` is reported only for a subject that can be nullish.
-    if !ctx
-        .type_of_expression(&subject.expression)?
-        .has_nullish_variant()?
-    {
-        return None;
-    }
-
     let target = target.clone().omit_parentheses();
     // Inner comments would be discarded by the rewrite.
     let can_fix = report_check(ctx, &subject)?
@@ -980,6 +1058,7 @@ fn run_if_statement(
         if_range: if_stmt.syntax().text_trimmed_range(),
         assignment_target: target,
         assignment_value: assignment.right().ok()?,
+        is_truthiness_check: subject.check == NullishCheck::Truthiness,
         can_fix,
     })
 }
@@ -1021,54 +1100,38 @@ fn if_body_assignment(if_stmt: &JsIfStatement) -> Option<JsAssignmentExpression>
 /// Returns `None` when the check of `subject` is not reported, otherwise whether the
 /// `??` or `??=` rewrite keeps its behavior.
 fn report_check(ctx: &RuleContext<UseNullishCoalescing>, subject: &NullishSubject) -> Option<bool> {
-    let options = ctx.options();
-    let ty = ctx.type_of_expression(&subject.expression);
-    if subject.check == NullishCheck::Truthiness {
-        return report_truthiness(options, ty?);
+    match subject.check {
+        NullishCheck::Nullish => Some(subject.operands_match),
+        NullishCheck::Strict(literal) => literal
+            .covers_nullish_variants_of(ctx.type_of_expression(&subject.expression)?)?
+            .then_some(subject.operands_match),
+        NullishCheck::Truthiness => {
+            report_truthiness(ctx.options(), ctx.type_of_expression(&subject.expression)?)
+        }
     }
-
-    if options.has_any_ignore_primitives()
-        && let Some(ty) = ty
-        && should_ignore_for_primitives(options, ty)?
-    {
-        return None;
-    }
-
-    if let NullishCheck::Strict(literal) = subject.check {
-        return literal
-            .covers_nullish_variants_of(ty?)?
-            .then_some(subject.operands_match);
-    }
-    Some(subject.operands_match)
 }
 
 /// Returns `None` when a truthiness check of a value of type `ty` is not reported,
 /// otherwise whether `??` keeps its behavior.
 fn report_truthiness(options: &UseNullishCoalescingOptions, ty: InferredType) -> Option<bool> {
+    let ignores_primitives = options.ignores_any_primitive();
+    if ty.includes_any_or_unknown_keyword() {
+        return (!ignores_primitives).then_some(false);
+    }
     if !ty.has_nullish_variant()? {
         return None;
     }
-
-    if options.has_any_ignore_primitives() && should_ignore_for_primitives(options, ty)? {
+    if ignores_primitives
+        && ty.has_ignored_primitive_variant(IgnoredPrimitiveTypes {
+            string: options.should_ignore_primitive_string(),
+            number: options.should_ignore_primitive_number(),
+            boolean: options.should_ignore_primitive_boolean(),
+            bigint: options.should_ignore_primitive_bigint(),
+        })?
+    {
         return None;
     }
-
     ty.is_safe_for_nullish_coalescing()
-}
-
-/// Returns `true` when `ty` is a nullish union whose non-nullish variants are all
-/// primitives that the configured `ignorePrimitives` option suppresses. A non-union
-/// type is never ignored.
-fn should_ignore_for_primitives(
-    options: &UseNullishCoalescingOptions,
-    ty: InferredType,
-) -> Option<bool> {
-    ty.nullish_union_matches_ignored_primitives(IgnoredPrimitiveTypes {
-        string: options.should_ignore_primitive_string(),
-        number: options.should_ignore_primitive_number(),
-        boolean: options.should_ignore_primitive_boolean(),
-        bigint: options.should_ignore_primitive_bigint(),
-    })
 }
 
 /// Whether the options ignore a truthiness check by `expression` because of how its
@@ -1123,12 +1186,18 @@ fn is_conditional_test(expression: &AnyJsExpression) -> bool {
 }
 
 /// Whether the truthiness of `expression` is the first argument of a call to the global
-/// `Boolean` function, the only one it converts. A `Boolean` bound in scope is a different function.
+/// `Boolean` function, the only one it converts, unless `expression` is a ternary passed as
+/// the argument itself. A `Boolean` bound in scope is a different function.
 fn is_boolean_coercion(
     ctx: &RuleContext<UseNullishCoalescing>,
     expression: &AnyJsExpression,
 ) -> bool {
     let argument = truthiness_root(expression, Negation::Stops);
+    if matches!(expression, AnyJsExpression::JsConditionalExpression(_))
+        && argument.clone().omit_parentheses().syntax() == expression.syntax()
+    {
+        return false;
+    }
     argument
         .parent::<JsCallArgumentList>()
         .filter(|arguments| {

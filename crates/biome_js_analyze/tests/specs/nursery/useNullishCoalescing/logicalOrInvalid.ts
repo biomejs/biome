@@ -19,6 +19,13 @@ const f = maybeNumber || 0;
 declare const maybeValue: string | null | undefined;
 const g = maybeValue || 'fallback';
 
+// `any` and `unknown`: no fix
+declare const anyValue: any;
+const anyResult = anyValue || 'default';
+
+declare const unknownValue: unknown;
+const unknownResult = unknownValue || 'default';
+
 // Function return
 function getValue(x: string | null): string {
   return x || 'default';
@@ -185,3 +192,85 @@ declare const anyFallback: any;
 export function anyDefault(value: string | null | undefined = anyFallback) {
 	return value || "default";
 }
+
+// Types that a `0`, `''`, or `false` value can have: no fix
+declare const numberObject: Number | null;
+const primitive1 = numberObject || 1;
+declare const stringObject: String | null;
+const primitive2 = stringObject || 'x';
+declare const objectInstance: Object | null;
+const primitive3 = objectInstance || {};
+declare const emptyObject: {} | null;
+const primitive4 = emptyObject || {};
+declare const withToString: { toString(): string } | null;
+const primitive5 = withToString || { toString: () => '' };
+declare const withLength: { length: number } | null;
+const primitive6 = withLength || { length: 0 };
+interface WithLength {
+	length: number;
+}
+declare const interfaceWithLength: WithLength | null;
+const primitive7 = interfaceWithLength || { length: 0 };
+export function unconstrainedGeneric<T>(value: T | null, fallback: T) {
+	return value || fallback;
+}
+export function emptyObjectGeneric<T extends {} | null>(value: T, fallback: NonNullable<T>) {
+	return value || fallback;
+}
+
+// Object shapes, interfaces, and user class instances: no fix, because `''` can be assigned to a type whose members all exist on `String`
+class Box {
+	content = '';
+}
+declare const box: Box | null;
+const object1 = box || new Box();
+declare const named: { a: string } | null;
+const object4 = named || { a: '' };
+interface Named {
+	a: string;
+}
+declare const interfaceNamed: Named | null;
+const object5 = interfaceNamed || { a: '' };
+
+// An object expression type can be reassigned a falsy primitive that fits it: no fix
+let lengthObject = Math.random() > 0.5 ? { length: 0 } : null;
+const object6 = lengthObject || { length: 1 };
+let plainObject = Math.random() > 0.5 ? { a: 0 } : null;
+const object7 = plainObject || { a: 1 };
+
+// `''` can be assigned to a type that requires only a member of `String`, such as `padStart`: no fix
+interface Padded {
+	padStart(length: number): string;
+}
+declare const padded: Padded | undefined;
+const object9 = padded || { padStart: (length: number) => '' };
+
+// Built-in object classes, callables, and type parameters constrained to `object`: safe fix
+declare const strings: string[] | null;
+const object2 = strings || [];
+declare const callback: (() => void) | null;
+const object3 = callback || (() => {});
+export function objectGeneric<T extends object>(value: T | null, fallback: T) {
+	return value || fallback;
+}
+
+// A class constructor is always truthy: safe fix
+declare const BoxConstructor: typeof Box | undefined;
+const object8 = BoxConstructor || Box;
+
+// A branded string and an iterable: no fix
+declare const branded: (string & { __brand: 'id' }) | null;
+const primitive8 = branded || 'x';
+declare const iterable: Iterable<string> | null;
+const primitive9 = iterable || [];
+
+// Inherited members are not read: no fix
+interface Tagged extends String {
+	tag?: string;
+}
+declare const tagged: Tagged | undefined;
+const primitive10 = tagged || 'x';
+
+class Derived extends Box {}
+declare const derived: Derived | null;
+const primitive11 = derived || new Derived();

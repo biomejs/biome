@@ -1,14 +1,14 @@
 /* should generate diagnostics */
 
-declare let obj: { x: number } | null;
-declare function makeObj(): { x: number };
+declare let obj: Date | null;
+declare function makeObj(): Date;
 
-// `!obj` on an object union: no fix
+// `!obj` on a built-in object class union: safe fix
 if (!obj) {
 	obj = makeObj();
 }
 
-// Body without braces: no fix
+// Body without braces
 if (!obj) obj = makeObj();
 
 // Loose `== null`
@@ -45,6 +45,12 @@ if (onlyUndef === undefined) {
 declare let reversed: string | null;
 if (null == reversed) {
 	reversed = 'default';
+}
+
+// Loose check on a non-nullish type
+declare let definite: string;
+if (definite == null) {
+	definite = 'default';
 }
 
 // Static member subject
@@ -102,13 +108,13 @@ if (mixedCompound === null || mixedCompound == undefined) {
 }
 
 // `??=` body
-declare let nullishAssign: { x: number } | null;
+declare let nullishAssign: Date | null;
 if (nullishAssign == null) {
 	nullishAssign ??= makeObj();
 }
 
 // `||=` body: reported by the `if` and by the `||=`
-declare let assign: { x: number } | null;
+declare let assign: Date | null;
 if (!assign) {
 	assign ||= makeObj();
 }
@@ -133,4 +139,39 @@ declare let commented: string | null;
 if (commented == null) {
 	// keep me
 	commented = 'default';
+}
+
+// A type that a `0`, `''`, or `false` value can have: no fix
+declare let numberObject: Number | null;
+if (!numberObject) numberObject = 1;
+
+// An object shape: no fix, because `''` can be assigned to a shape whose members all exist on `String`
+declare let named: { a: string } | null;
+if (!named) named = { a: '' };
+
+// Type assertion that removes `null` from the tested value
+declare let pinned: string | null;
+if ((pinned as string) == null) pinned = 'v';
+
+// `any` and `unknown`: no fix
+declare let anyBraced: any;
+if (!anyBraced) {
+	anyBraced = 1;
+}
+declare let anyUnbraced: any;
+if (!anyUnbraced) anyUnbraced = 1;
+declare let unknownBraced: unknown;
+if (!unknownBraced) {
+	unknownBraced = 1;
+}
+declare let unknownUnbraced: unknown;
+if (!unknownUnbraced) unknownUnbraced = 1;
+
+declare let unknownOrAssign: unknown;
+if (!unknownOrAssign) {
+	unknownOrAssign ||= 1;
+}
+declare let unknownNullishAssign: unknown;
+if (!unknownNullishAssign) {
+	unknownNullishAssign ??= 1;
 }

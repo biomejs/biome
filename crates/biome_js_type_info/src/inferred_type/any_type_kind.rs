@@ -52,6 +52,25 @@ impl<'db> InferredType<'db> {
         )
     }
 
+    /// Returns whether this type is the explicit `any` or `unknown` keyword, or a union with
+    /// one of them as a variant.
+    ///
+    /// Assigning to a variable declared `unknown` can leave its type as a union such as
+    /// `unknown | number`, which is still `unknown` for every check that depends on what
+    /// the value can be.
+    pub fn includes_any_or_unknown_keyword(self) -> bool {
+        let is_keyword = |data: TypeData<'db>| {
+            matches!(
+                data.expand_canonical_global(self.db),
+                TypeData::AnyKeyword | TypeData::UnknownKeyword
+            )
+        };
+        match self.data {
+            TypeData::Union(union) => union.types(self.db).iter().any(|ty| is_keyword(*ty)),
+            data => is_keyword(data),
+        }
+    }
+
     /// Returns whether this type is an array of the explicit `unknown`
     /// keyword, such as `unknown[]` or `readonly unknown[]`.
     pub fn is_unknown_array(self) -> bool {

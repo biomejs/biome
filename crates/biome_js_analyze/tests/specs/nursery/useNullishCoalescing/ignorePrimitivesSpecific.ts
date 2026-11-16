@@ -21,12 +21,28 @@ const r5 = litStr || 'c';
 declare const sn: string | number | null;
 const r6 = sn || 'x';
 
-// Only some variants ignored
+// One ignored variant: not reported
 declare const sb: string | boolean | null;
 const r7 = sb || 'x';
 
-// Ternary on an ignored kind: not reported
-const r8 = s != null ? s : 'x';
+// Template literal type: not reported
+declare const template: `id-${number}` | undefined;
+const r8 = template || 'id-0';
 
-// Ternary on another kind
-const r9 = b != null ? b : false;
+// Branded string: not reported
+declare const branded: (string & { __brand: 'id' }) | null;
+const r9 = branded || 'x';
+
+// `any`: not reported
+declare const anyValue: any;
+const r10 = anyValue || 'x';
+
+// Truthiness ternary on a string: not reported
+const r11 = s ? s : 'x';
+
+// Truthiness ternary on a boolean: reported
+const r12 = b ? b : false;
+
+// Comparisons with `null`: reported
+const r13 = s != null ? s : 'x';
+const r14 = b != null ? b : false;

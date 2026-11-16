@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unresolvedValid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+// Values whose type can't be resolved
+import type { Foo } from './missing';
+
+declare const foo: Foo;
+
+export const u1 = undeclared !== null ? undeclared : 'x';
+export const u2 = undeclared === null ? 'x' : undeclared;
+export const u3 = foo !== null ? foo : 'x';
+export function strictIf() {
+	if (undeclared === null) {
+		undeclared = 'x';
+	}
+}
+
+// Deliberately not reported: an undeclared variable has no type to check
+export const u4 = undeclared || 'x';
+export const u5 = undeclared ? undeclared : 'x';
+export function truthinessIf() {
+	if (!undeclared) {
+		undeclared = 'x';
+	}
+	undeclared ||= 'x';
+}
+
+// Deliberately not reported: a self-referencing alias has no resolvable type, which TypeScript treats as `any`
+type Recursive = Recursive;
+declare const recursive: Recursive;
+export const u6 = recursive || 'x';
+export const u7 = recursive ? recursive : 'x';
+
+```

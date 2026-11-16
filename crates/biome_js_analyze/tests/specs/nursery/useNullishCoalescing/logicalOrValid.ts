@@ -31,10 +31,9 @@ function getString(): string {
 }
 const h = getString() || 'default';
 
-// Unresolved type
-type Recursive = Recursive;
-declare const value: Recursive;
-value || "fallback";
+// `never`
+declare const neverValue: never;
+const i = neverValue || 'default';
 
 // `||` on destructured parameters with a default
 type FormValues = {

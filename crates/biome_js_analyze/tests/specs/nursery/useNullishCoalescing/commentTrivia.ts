@@ -70,3 +70,49 @@ if (ifTrivia /* c */ == null) { ifTrivia = 'b'; }
 
 // `if` statement with a comment before the body: no fix
 if (ifTrivia == null) /* c */ { ifTrivia = 'c'; }
+
+// `if` statement with a comment in the test, the body, or the assignment: no fix
+declare let commentedIf: Date | null;
+if /* c */ (!commentedIf) { commentedIf = new Date(); }
+if (!commentedIf) /* c */ { commentedIf = new Date(); }
+if (!commentedIf) { commentedIf = new Date() /* c */; }
+if (!commentedIf) { commentedIf /* c */ = new Date(); }
+
+// Truthiness ternary: comments before the test and before the present branch are kept
+declare const truthy: Date | null;
+const t14 = /* lead */ truthy ? /* present */ truthy : new Date();
+
+// Truthiness ternary: comments in the dropped parts: no fix
+const t15 = truthy /* c */ ? truthy : new Date();
+const t16 = truthy ? truthy /* c */ : new Date();
+
+// Truthiness ternary: line breaks around the present branch
+export function returned(value: Date | null) {
+	return value ?
+		value :
+		new Date();
+}
+
+export function returnedInverted(value: Date | null) {
+	return !value ?
+		new Date() :
+		value;
+}
+
+export function returnedWithLineComment(value: Date | null) {
+	return value ? // note
+		value : new Date();
+}
+
+export function thrown(value: Error | null) {
+	throw value ?
+		value :
+		new Error('default');
+}
+
+export function formatted(value: Date | null) {
+	const result = value
+		? value
+		: new Date();
+	return result;
+}

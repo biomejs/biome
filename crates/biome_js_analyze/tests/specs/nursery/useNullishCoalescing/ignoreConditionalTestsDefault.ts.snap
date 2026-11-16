@@ -50,6 +50,9 @@ if ((assigned ||= 'fallback')) {}
 while ((assigned ||= 'fallback')) {}
 const assignedResult = (assigned ||= 'fallback') ? 'yes' : 'no';
 
+// A truthiness ternary in a test: not reported
+if (cond ? cond : other) {}
+
 // Through a call argument, a unary `+`, or a function body: reported
 declare function check(value: unknown): unknown;
 if (check(cond || 'fallback')) {}
@@ -90,20 +93,18 @@ if (!!(cond || 'fallback')) {}
 
 # Diagnostics
 ```
-ignoreConditionalTestsDefault.ts:49:16 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreConditionalTestsDefault.ts:52:16 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    47 │ // Through a call argument, a unary `+`, or a function body: reported
-    48 │ declare function check(value: unknown): unknown;
-  > 49 │ if (check(cond || 'fallback')) {}
+    50 │ // Through a call argument, a unary `+`, or a function body: reported
+    51 │ declare function check(value: unknown): unknown;
+  > 52 │ if (check(cond || 'fallback')) {}
        │                ^^
-    50 │ if (+(cond || 'fallback')) {}
-    51 │ if (() => cond || 'fallback') {}
+    53 │ if (+(cond || 'fallback')) {}
+    54 │ if (() => cond || 'fallback') {}
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -111,20 +112,18 @@ ignoreConditionalTestsDefault.ts:49:16 lint/nursery/useNullishCoalescing ━━�
 ```
 
 ```
-ignoreConditionalTestsDefault.ts:50:12 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreConditionalTestsDefault.ts:53:12 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    48 │ declare function check(value: unknown): unknown;
-    49 │ if (check(cond || 'fallback')) {}
-  > 50 │ if (+(cond || 'fallback')) {}
+    51 │ declare function check(value: unknown): unknown;
+    52 │ if (check(cond || 'fallback')) {}
+  > 53 │ if (+(cond || 'fallback')) {}
        │            ^^
-    51 │ if (() => cond || 'fallback') {}
-    52 │ if (
+    54 │ if (() => cond || 'fallback') {}
+    55 │ if (
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -132,20 +131,18 @@ ignoreConditionalTestsDefault.ts:50:12 lint/nursery/useNullishCoalescing ━━�
 ```
 
 ```
-ignoreConditionalTestsDefault.ts:51:16 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreConditionalTestsDefault.ts:54:16 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    49 │ if (check(cond || 'fallback')) {}
-    50 │ if (+(cond || 'fallback')) {}
-  > 51 │ if (() => cond || 'fallback') {}
+    52 │ if (check(cond || 'fallback')) {}
+    53 │ if (+(cond || 'fallback')) {}
+  > 54 │ if (() => cond || 'fallback') {}
        │                ^^
-    52 │ if (
-    53 │   function weird() {
+    55 │ if (
+    56 │   function weird() {
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -153,20 +150,18 @@ ignoreConditionalTestsDefault.ts:51:16 lint/nursery/useNullishCoalescing ━━�
 ```
 
 ```
-ignoreConditionalTestsDefault.ts:54:17 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreConditionalTestsDefault.ts:57:17 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    52 │ if (
-    53 │   function weird() {
-  > 54 │     return cond || 'fallback';
+    55 │ if (
+    56 │   function weird() {
+  > 57 │     return cond || 'fallback';
        │                 ^^
-    55 │   }
-    56 │ ) {}
+    58 │   }
+    59 │ ) {}
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -174,19 +169,17 @@ ignoreConditionalTestsDefault.ts:54:17 lint/nursery/useNullishCoalescing ━━�
 ```
 
 ```
-ignoreConditionalTestsDefault.ts:59:11 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreConditionalTestsDefault.ts:62:11 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    58 │ // Earlier expression of a sequence: reported
-  > 59 │ if ((cond || 'fallback', other)) {}
+    61 │ // Earlier expression of a sequence: reported
+  > 62 │ if ((cond || 'fallback', other)) {}
        │           ^^
-    60 │ 
-    61 │ // Comparison ternary in a test: reported
+    63 │ 
+    64 │ // Comparison ternary in a test: reported
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -194,48 +187,44 @@ ignoreConditionalTestsDefault.ts:59:11 lint/nursery/useNullishCoalescing ━━�
 ```
 
 ```
-ignoreConditionalTestsDefault.ts:62:5 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━
+ignoreConditionalTestsDefault.ts:65:5 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━
 
   i Prefer ?? over a ternary expression checking for nullish.
   
-    61 │ // Comparison ternary in a test: reported
-  > 62 │ if (cond != null ? cond : other) {}
+    64 │ // Comparison ternary in a test: reported
+  > 65 │ if (cond != null ? cond : other) {}
        │     ^^^^^^^^^^^^
-    63 │ 
-    64 │ // `for` initializer and update, and `switch` discriminant: reported
+    66 │ 
+    67 │ // `for` initializer and update, and `switch` discriminant: reported
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
   
-    60 60 │   
-    61 61 │   // Comparison ternary in a test: reported
-    62    │ - if·(cond·!=·null·?·cond·:·other)·{}
-       62 │ + if·(cond·??·other)·{}
     63 63 │   
-    64 64 │   // `for` initializer and update, and `switch` discriminant: reported
+    64 64 │   // Comparison ternary in a test: reported
+    65    │ - if·(cond·!=·null·?·cond·:·other)·{}
+       65 │ + if·(cond·??·other)·{}
+    66 66 │   
+    67 67 │   // `for` initializer and update, and `switch` discriminant: reported
   
 
 ```
 
 ```
-ignoreConditionalTestsDefault.ts:65:11 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreConditionalTestsDefault.ts:68:11 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    64 │ // `for` initializer and update, and `switch` discriminant: reported
-  > 65 │ for (cond || 'fallback'; ; ) {
+    67 │ // `for` initializer and update, and `switch` discriminant: reported
+  > 68 │ for (cond || 'fallback'; ; ) {
        │           ^^
-    66 │   break;
-    67 │ }
+    69 │   break;
+    70 │ }
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -243,41 +232,37 @@ ignoreConditionalTestsDefault.ts:65:11 lint/nursery/useNullishCoalescing ━━�
 ```
 
 ```
-ignoreConditionalTestsDefault.ts:68:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreConditionalTestsDefault.ts:71:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    66 │   break;
-    67 │ }
-  > 68 │ for (; ; cond || 'fallback') {
+    69 │   break;
+    70 │ }
+  > 71 │ for (; ; cond || 'fallback') {
        │               ^^
-    69 │   break;
-    70 │ }
-  
-  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-ignoreConditionalTestsDefault.ts:71:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ?? instead of ||.
-  
-    69 │   break;
-    70 │ }
-  > 71 │ switch (cond || 'fallback') {
-       │              ^^
-    72 │   default:
+    72 │   break;
     73 │ }
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreConditionalTestsDefault.ts:74:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    72 │   break;
+    73 │ }
+  > 74 │ switch (cond || 'fallback') {
+       │              ^^
+    75 │   default:
+    76 │ }
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -285,19 +270,17 @@ ignoreConditionalTestsDefault.ts:71:14 lint/nursery/useNullishCoalescing ━━�
 ```
 
 ```
-ignoreConditionalTestsDefault.ts:76:11 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreConditionalTestsDefault.ts:79:11 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    75 │ // Operand of a comparison or `typeof`, or the branch of a ternary that is not a test: reported
-  > 76 │ if ((cond || 'fallback') === other) {}
+    78 │ // Operand of a comparison or `typeof`, or the branch of a ternary that is not a test: reported
+  > 79 │ if ((cond || 'fallback') === other) {}
        │           ^^
-    77 │ if (typeof (cond || 'fallback')) {}
-    78 │ const notATest = other ? cond || 'fallback' : other;
+    80 │ if (typeof (cond || 'fallback')) {}
+    81 │ const notATest = other ? cond || 'fallback' : other;
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -305,20 +288,18 @@ ignoreConditionalTestsDefault.ts:76:11 lint/nursery/useNullishCoalescing ━━�
 ```
 
 ```
-ignoreConditionalTestsDefault.ts:77:18 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreConditionalTestsDefault.ts:80:18 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    75 │ // Operand of a comparison or `typeof`, or the branch of a ternary that is not a test: reported
-    76 │ if ((cond || 'fallback') === other) {}
-  > 77 │ if (typeof (cond || 'fallback')) {}
+    78 │ // Operand of a comparison or `typeof`, or the branch of a ternary that is not a test: reported
+    79 │ if ((cond || 'fallback') === other) {}
+  > 80 │ if (typeof (cond || 'fallback')) {}
        │                  ^^
-    78 │ const notATest = other ? cond || 'fallback' : other;
-    79 │ 
+    81 │ const notATest = other ? cond || 'fallback' : other;
+    82 │ 
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -326,20 +307,18 @@ ignoreConditionalTestsDefault.ts:77:18 lint/nursery/useNullishCoalescing ━━�
 ```
 
 ```
-ignoreConditionalTestsDefault.ts:78:31 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreConditionalTestsDefault.ts:81:31 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    76 │ if ((cond || 'fallback') === other) {}
-    77 │ if (typeof (cond || 'fallback')) {}
-  > 78 │ const notATest = other ? cond || 'fallback' : other;
+    79 │ if ((cond || 'fallback') === other) {}
+    80 │ if (typeof (cond || 'fallback')) {}
+  > 81 │ const notATest = other ? cond || 'fallback' : other;
        │                               ^^
-    79 │ 
-    80 │ // Double negation: not reported
+    82 │ 
+    83 │ // Double negation: not reported
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
