@@ -316,9 +316,8 @@ fn inlined_conditions_narrow_module_constants_and_nested_lets() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below `string`
-// (`narrowing-probes/m5-l3/existing.ts` L5, L9, `m5-l4/existing.ts` L9). A
-// test in the function that reads a variable of an enclosing root narrows it
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below `string`. A test
+// in the function that reads a variable of an enclosing root narrows it
 // there, also through an aliased condition that an enclosing root declares,
 // and a read in a closure created after a test sees the test.
 #[test]

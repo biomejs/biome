@@ -5,10 +5,10 @@
 //! [`crate::js_module_info::flow`]). This module resolves the type that the
 //! read's subject starts from and the types that its writes assign, and
 //! applies the guards and the writes along every path that reaches the read.
-//! A variable starts from its declared type, or, in a closure that continues
-//! the flow where it is created, from its type at that capture point, which
-//! the solve of the enclosing root gives and the solve key of the closure's
-//! root carries. The declared
+//! A variable starts from its declared type. In a closure that continues the
+//! flow where it is created, the variable starts instead from its type at
+//! that point, its capture point. The solve of the enclosing root gives that
+//! type, and the solve of the closure's root starts from it. The declared
 //! type of a property path at a read is the type of the member access there,
 //! given the narrowed type of its object, as TypeScript types property reads.
 //! Likewise, the declared type of an element of a destructuring pattern at a
@@ -475,9 +475,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// type, as tests of a property path narrow it from its type on the
     /// narrowed object.
     ///
-    /// A variable that the read's root continues from an enclosing root, as
-    /// a closure does, starts from its type at the capture point, as
-    /// [`Self::narrow_captured`] describes.
+    /// In a closure that continues the flow of an enclosing root, the
+    /// variable starts from its type at the capture point, where the
+    /// enclosing root creates the closure (see [`Self::narrow_captured`]).
     ///
     /// Returns `None` when collection kept no flow for the read, when no
     /// runtime test can change the variable's type, or when narrowing leaves
@@ -505,8 +505,8 @@ impl<'db> ResolutionCtx<'db, '_> {
             if let Some(capture) = root.capture(read.subject) {
                 return self.narrow_captured(read, start, capture, binding);
             }
-            // A read in a closure that the root creates sees the variable
-            // assigned where it is declared once some code assigns it.
+            // A read in a closure that the root creates assumes the variable
+            // assigned where it is declared when some code assigns it.
             if read.assumes_initialized && root.is_uninitialized(read.subject) {
                 let capture = FlowCapture {
                     root: read.root,
@@ -558,18 +558,20 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns the narrowed type of the variable declared at `binding` at
-    /// `read`, whose expression starts at `start`, when its root starts it
-    /// from `capture`: its type there, as [`Self::captured_type`] resolves
-    /// it, narrowed by the tests of the read's root.
+    /// `read` when the read's root continues the variable from `capture`.
+    /// Narrowing starts from the variable's type at the capture point and
+    /// applies the tests and writes of the read's root. `start` is where the
+    /// read's expression starts.
     ///
-    /// A variable that may be read before it is assigned where it is
-    /// declared starts there without `undefined` when some code assigns it,
-    /// as [`FlowCapture::assumes_initialized`] describes. Otherwise it keeps
-    /// its declared type when `undefined` remains, although its declared type
-    /// lacks it, as for a read in the root that declares it.
+    /// A variable that may be read before it is assigned starts at the
+    /// capture point without `undefined` when some code assigns it, as
+    /// [`FlowCapture::assumes_initialized`] records. Otherwise, when
+    /// `undefined` remains at the read although the declared type lacks it,
+    /// the read keeps its declared type, as a read in the root that declares
+    /// the variable does.
     ///
-    /// Returns `None` when the variable can't narrow, and when the type
-    /// equals its declared type.
+    /// Returns `None` when the variable can't narrow, or when the narrowed
+    /// type equals the declared type.
     fn narrow_captured(
         &mut self,
         read: FlowRead,
@@ -593,16 +595,17 @@ impl<'db> ResolutionCtx<'db, '_> {
         (narrowed != declared).then_some(narrowed)
     }
 
-    /// Returns `ty`, a type that a solve gave from a start with `undefined`
-    /// added to `declared`, as it is from a start with `declared` alone: `ty`
-    /// without `undefined` when `declared` lacks it.
+    /// Removes `undefined` from `ty` when `declared` lacks it. `ty` is a type
+    /// that a solve gave from `declared` with `undefined` added, and the
+    /// result stands for the type that the solve gives from `declared` alone.
+    /// Returns `Unknown` when nothing but `undefined` remains in `ty`,
+    /// because no value from `declared` reaches it, as for a read on a path
+    /// that no value takes.
     ///
-    /// A guard narrows each member of a union on its own, and a write
-    /// reduces `declared`, so the start's `undefined` reaches the type only
-    /// as a member of its own. A guard that can't decide keeps more members,
-    /// so the result is never narrower than the type from `declared`. A
-    /// type that only `undefined` reaches has no value from `declared`, and
-    /// is `Unknown`, as a read on such a path is.
+    /// A guard narrows each member of a union on its own, and a write reduces
+    /// `declared`, so the start's `undefined` reaches `ty` only as a member of
+    /// its own. A guard that can't decide keeps more members, so the result is
+    /// never narrower than the type from `declared`.
     fn assumed_initialized(&self, ty: TypeData<'db>, declared: TypeData<'db>) -> TypeData<'db> {
         if contains_undefined(self.db, declared) {
             return ty;
@@ -629,10 +632,10 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
-    /// Returns the type of the variable `read.subject` at `read`, whose
-    /// expression starts at `start`, narrowed by the tests and writes of its
-    /// root from `ty`, its type where the root starts: `ty` itself when no
-    /// test of the root can change it.
+    /// Returns the type of the variable `read.subject` at `read`, narrowed by
+    /// the tests and writes of its root from `ty`, its type where the root
+    /// starts. `start` is where the read's expression starts. Returns `ty`
+    /// itself when no test of the root can change it.
     fn narrow_from(&mut self, read: FlowRead, start: TextSize, ty: TypeData<'db>) -> TypeData<'db> {
         let Some(baseline) = self.subject_baseline(read, ty) else {
             return ty;
@@ -660,9 +663,10 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns the type that narrowing of `read.subject` in the root of
-    /// `read` starts from when the subject's type at the root's start is
-    /// `ty`: [`Self::property_baseline`] when the root narrows it only
-    /// through tests of its shape, and [`Self::narrowing_baseline`]
+    /// `read` starts from when the subject has type `ty` where the root
+    /// starts. That type is `ty` flattened for narrowing, through
+    /// [`Self::property_baseline`] when the root narrows the subject only
+    /// through tests of its shape, and through [`Self::narrowing_baseline`]
     /// otherwise. Returns `None` when no test of the root can change `ty`.
     fn subject_baseline(&mut self, read: FlowRead, ty: TypeData<'db>) -> Option<TypeData<'db>> {
         let root = self.js_info.flow.root(read.root)?;
@@ -674,20 +678,22 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns the type of the variable declared at `binding` at the capture
-    /// point of `capture`, with whether the root that declares it starts it
-    /// with `undefined`, as [`RootFlow::uninitialized`] describes.
+    /// point of `capture`, and whether the variable starts with `undefined`
+    /// in the outermost root of the capture chain, because it may be read
+    /// there before it is assigned (see [`RootFlow::uninitialized`]).
     ///
-    /// The enclosing root narrows the variable from its declared type, or,
-    /// when it continues the variable itself from a root around it, from its
-    /// type at that capture point, so the chain resolves outward. An element
-    /// of a destructuring pattern that the enclosing root narrows there
-    /// starts from its property on the narrowed pattern, as in
-    /// [`Self::narrow_reference`]. The type keeps the `undefined` of such a
-    /// start, which the read decides about.
+    /// The enclosing root narrows the variable from its declared type. When
+    /// that root itself continues the variable from a root around it,
+    /// narrowing starts instead from the type at that outer capture point, so
+    /// the chain resolves outward. An element of a destructuring pattern that
+    /// the enclosing root narrows at the capture point starts from its
+    /// property on the narrowed pattern, as in [`Self::narrow_reference`].
+    /// The returned type keeps the `undefined` of an uninitialized start, so
+    /// the caller decides whether the read keeps it.
     ///
-    /// Returns `None` when the variable can't narrow at all, and `Unknown`
-    /// when the solve of the enclosing root exceeds its work limit or meets a
-    /// cycle, and when no value reaches the capture point.
+    /// Returns `None` when the variable can't narrow at all. Returns
+    /// `Unknown` when the solve of the enclosing root exceeds its work limit
+    /// or meets a cycle, or when no value reaches the capture point.
     fn captured_type(
         &mut self,
         capture: FlowCapture,
@@ -708,7 +714,8 @@ impl<'db> ResolutionCtx<'db, '_> {
         captured
     }
 
-    /// Resolves the type that [`Self::captured_type`] returns.
+    /// Computes the type that [`Self::captured_type`] returns, without its
+    /// cache.
     fn resolve_captured_type(
         &mut self,
         capture: FlowCapture,
@@ -748,8 +755,10 @@ impl<'db> ResolutionCtx<'db, '_> {
                 Some(baseline) => (baseline, uninitialized),
                 None => return Some((start, uninitialized)),
             },
-            // The solve keeps the `undefined` of an uninitialized start,
-            // where a read of the enclosing root gets its declared type.
+            // The solve keeps the `undefined` of an uninitialized start. A
+            // read in the enclosing root itself gets its declared type when
+            // that `undefined` remains, so the caller decides for the
+            // closure's read.
             (None, None) => (
                 self.flow_binding_baseline(binding)?,
                 root.is_uninitialized(capture.subject),

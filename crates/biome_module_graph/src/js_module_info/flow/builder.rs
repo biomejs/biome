@@ -87,19 +87,19 @@ pub(super) struct BuiltRoot {
     /// The assignment targets and `delete` expressions that have a write
     /// point in the graph.
     pub(super) written: WrittenTargets,
-    /// The closures that the root creates in its reachable code, as
-    /// [`BuiltCapture`] describes, in the order the builder evaluates them.
+    /// The closures that the root creates in its reachable code, with their
+    /// capture points, in the order the builder evaluates them.
     pub(super) captures: Vec<BuiltCapture>,
 }
 
 declare_node_union! {
-    /// A function that continues the flow of the code that creates it, as
-    /// TypeScript's `checkIdentifier` lets a read inside it do: a function
-    /// or arrow expression, and a method or accessor of an object literal or
-    /// of a class expression, as [`Self::continues_outer_flow`] decides.
-    /// TypeScript starts the flow of a function declaration, a constructor,
-    /// a static block, and a method or accessor of a class declaration at
-    /// their own start.
+    /// A function that can continue the flow of the code that creates it, as
+    /// TypeScript lets a read inside it do: a function or arrow expression,
+    /// and a method or accessor of an object literal or of a class. A method
+    /// or accessor of a class continues the flow only in a class expression
+    /// (see [`Self::continues_outer_flow`]). TypeScript starts the flow of a
+    /// function declaration, a constructor, a static block, and a method or
+    /// accessor of a class declaration at their own start.
     pub(super) AnyContinuingClosure = JsFunctionExpression
         | JsArrowFunctionExpression
         | JsMethodObjectMember
@@ -112,10 +112,9 @@ declare_node_union! {
 
 impl AnyContinuingClosure {
     /// Returns whether a read inside the closure can see the flow where it
-    /// is created: always for a function or arrow expression and an object
-    /// literal member, and for a class member only in a class expression,
-    /// as TypeScript's `isObjectLiteralOrClassExpressionMethodOrAccessor`
-    /// decides.
+    /// is created. A read always can in a function or arrow expression and
+    /// in an object literal member, and in a class member only when the
+    /// class is a class expression, as in TypeScript.
     pub(super) fn continues_outer_flow(&self) -> bool {
         let member = match self {
             Self::JsFunctionExpression(_)
@@ -134,8 +133,9 @@ impl AnyContinuingClosure {
     }
 }
 
-/// A closure that a root creates, with the flow where it is created, which
-/// TypeScript continues from for a read inside it (its capture point).
+/// A closure that a root creates, with its capture point, the flow where the
+/// root creates it. A read inside the closure continues from that point, as
+/// in TypeScript.
 pub(super) struct BuiltCapture {
     pub(super) closure: AnyContinuingClosure,
     pub(super) point: FlowNodeId,

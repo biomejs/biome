@@ -22,12 +22,13 @@
 //! root that declares it, and a root nested in that one, such as a function
 //! that reads a module's variable or one of its imports. A root starts from
 //! the variable's declared type, except in a closure that continues the flow
-//! where it is created, as TypeScript's `checkIdentifier` decides: there the
-//! variable starts from its type at that point, its capture point, which
-//! [`FlowCapture`] records. Property paths and `this` never continue. Each
-//! root has its own `this`, and paths on it narrow only where Biome types
-//! `this` as TypeScript does, as [`subjects::this_can_narrow`] describes. A
-//! property path narrows only when its variable or `this` does.
+//! where it is created. There, as in TypeScript, the variable starts from its
+//! type at the point where the enclosing root creates the closure, its
+//! capture point, which [`FlowCapture`] records. Property paths and `this`
+//! never continue. Each root has its own `this`, and paths on it narrow only
+//! where Biome types `this` as TypeScript does, as
+//! [`subjects::this_can_narrow`] describes. A property path narrows only when
+//! its variable or `this` does.
 //!
 //! A write to a subject in the root's own flow is a write point of the graph,
 //! where the subject takes the type of the assigned value, reduced against
@@ -495,18 +496,21 @@ pub(crate) struct RootFlow {
     /// does. See [`RootCollector::uninitialized_subjects`] for the exact
     /// conditions.
     ///
-    /// A subject with a capture is never here: its type at the capture point
-    /// already starts where the variable is declared.
+    /// A subject with a capture is never here, because its type at the
+    /// capture point already comes from a flow that starts where the variable
+    /// is declared, `undefined` included.
     pub(crate) uninitialized: FxHashSet<FlowSubjectId>,
-    /// For each variable that the root reads and that starts, when the root
-    /// runs, with its type where an enclosing root creates the closure that
-    /// holds the root, that capture point, as [`FlowCapture`] describes.
+    /// The capture point of each variable that the root continues from an
+    /// enclosing root, keyed by the variable. When the root runs, such a
+    /// variable starts with its type where the enclosing root creates the
+    /// closure that holds the root.
     pub(crate) captures: FxHashMap<FlowSubjectId, FlowCapture>,
 }
 
-/// Where a variable that a closure reads continues the flow of an enclosing
-/// root, as TypeScript's `getFlowTypeOfReference` continues from the point
-/// where a function expression is created.
+/// The capture point of a variable that a closure reads, where an enclosing
+/// root creates the closure. A read in the closure continues the enclosing
+/// root's flow from there, as TypeScript continues the flow of a function
+/// expression from the point where the code creates it.
 ///
 /// A root that the closure holds, directly or through other closures, starts
 /// the variable with its type at [`Self::point`] instead of its declared
@@ -522,13 +526,14 @@ pub(crate) struct FlowCapture {
     pub(crate) point: FlowNodeId,
     /// The variable in the enclosing root's subject table.
     pub(crate) subject: FlowSubjectId,
-    /// Where that closure starts, which decides the `switch` statements whose
-    /// cases come before the point.
+    /// Where that closure starts. Narrowing at [`Self::point`] counts a
+    /// `switch` statement as exhaustive only when its cases start before this
+    /// offset.
     pub(crate) start: TextSize,
-    /// Whether some code assigns the variable. TypeScript's `checkIdentifier`
-    /// then assumes a variable that a closure reads assigned where it is
-    /// declared, so a `let` without an initializer starts there without
-    /// `undefined`, while a `let` that nothing assigns keeps it.
+    /// Whether some code assigns the variable. A read in a closure then
+    /// assumes the variable assigned where it is declared, as in TypeScript,
+    /// so a `let` without an initializer starts there without `undefined`. A
+    /// `let` that nothing assigns keeps `undefined`.
     pub(crate) assumes_initialized: bool,
 }
 
@@ -680,9 +685,9 @@ impl RootFlow {
         self.uninitialized.contains(&subject)
     }
 
-    /// Returns where `subject`, a variable, continues the flow of an
-    /// enclosing root, as [`Self::captures`] describes, or `None` when it
-    /// starts from its declared type.
+    /// Returns the capture point where the variable `subject` continues the
+    /// flow of an enclosing root, or `None` when it starts from its declared
+    /// type.
     pub(crate) fn capture(&self, subject: FlowSubjectId) -> Option<FlowCapture> {
         self.captures.get(&subject).copied()
     }
@@ -717,10 +722,11 @@ pub(crate) struct FlowRead {
     pub(crate) point: FlowNodeId,
     /// The subject the read refers to, in its root's subject table.
     pub(crate) subject: FlowSubjectId,
-    /// Whether the read lies in a closure that the root creates, of a
-    /// variable that some code assigns, which TypeScript then assumes
-    /// assigned where the variable is declared, as [`FlowCapture`]
-    /// describes. False for a read in the root's own code.
+    /// Whether the read lies in a closure that the root creates and reads a
+    /// variable that some code assigns. Such a read assumes the variable
+    /// assigned where it is declared, as in TypeScript (see
+    /// [`FlowCapture::assumes_initialized`]). False for a read in the root's
+    /// own code.
     pub(crate) assumes_initialized: bool,
 }
 
@@ -913,9 +919,9 @@ impl ModuleFlow {
     }
 
     /// Returns the outermost root of the capture chain that starts at the
-    /// variable `subject` of the root at index `root`, with the variable in
-    /// its subject table: the root itself when the variable has no capture
-    /// there.
+    /// variable `subject` of the root at index `root`, with the variable's id
+    /// in that root's subject table. Returns the root itself when the
+    /// variable has no capture there.
     ///
     /// Each capture points to a root collected later, so the chain ends.
     fn capture_holder(
@@ -953,35 +959,35 @@ struct RootCollector<'a> {
     binding_reads: FxHashMap<TextRange, BindingReads>,
     /// The ranges of the roots built so far.
     built: FxHashSet<TextRange>,
-    /// The closures that the roots built so far create in their reachable
-    /// code, and their reachable reads of variables that they don't declare,
-    /// which closures created in them can capture.
+    /// The ranges of the closures that the roots built so far create in
+    /// their reachable code, and of their reachable reads of variables that
+    /// they don't declare. Only such a read can continue the flow of a root
+    /// around it.
     evaluated: FxHashSet<TextRange>,
-    /// Where the first statement that ends every path ends in the own code
-    /// of each closure that no root built, as [`Self::first_exit`] finds it.
+    /// For each closure that no root built, keyed by its range, the end of
+    /// the first statement in its own code that ends every path (see
+    /// [`Self::first_exit`]).
     exits: FxHashMap<TextRange, TextSize>,
-    /// Whether a closure that reads each variable continues the flow where
-    /// it is created, as [`Self::capture_rule`] decides, keyed by its
-    /// declaration.
+    /// The [`CaptureRule`] of each variable that a closure reads, keyed by
+    /// its declaration.
     capture_rules: FxHashMap<TextRange, CaptureRule>,
 }
 
 /// Whether a read of a variable inside a closure continues the flow where the
-/// closure is created, as TypeScript's `checkIdentifier` decides with
-/// `isConstantVariable`, `isParameterOrMutableLocalVariable`, and
-/// `isPastLastAssignment`.
+/// closure is created. Biome follows TypeScript's rule, which depends on the
+/// kind of variable and on where the code assigns it.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum CaptureRule {
-    /// Every read does: the variable is a `const`, or a parameter, a `catch`
-    /// variable, or a `let` that nothing assigns.
+    /// Every read continues the flow. This is the rule of a `const`, and of
+    /// a parameter, a `catch` variable, or a `let` that nothing assigns.
     Always,
-    /// A read does when it starts after this offset, the end of the last
-    /// assignment of a parameter, a `catch` variable, or a `let`, as
-    /// [`assignment_position`] extends it.
+    /// A read continues the flow when it starts after this offset, the
+    /// position that [`assignment_position`] gives the last assignment of a
+    /// parameter, a `catch` variable, or a `let`.
     After(TextSize),
-    /// No read does: the variable is a `var`, an import, a function, or a
-    /// class, a `let` that is exported or declared at the top level of a
-    /// file, or a variable that another function assigns.
+    /// No read continues the flow. This is the rule of a `var`, an import, a
+    /// function, a class, a `let` that is exported or declared at the top
+    /// level of a file, and a variable that another function assigns.
     Never,
 }
 
@@ -996,11 +1002,13 @@ impl CaptureRule {
     }
 }
 
-/// A read inside a closure that a root nested in the root under collection
-/// keeps, where that nested root's start continues the collected root's flow.
+/// A capture that the root under collection gives a nested root, recorded
+/// once the collected root has its index. The nested root keeps a read inside
+/// a closure that the collected root creates, or a root that keeps such a
+/// read continues from the nested root.
 struct PendingCapture {
-    /// The root that keeps the read or that the read's root continues from,
-    /// with the variable in its subject table, which gets the capture.
+    /// The root that gets the capture, with the variable's id in its subject
+    /// table.
     holder: (usize, FlowSubjectId),
     /// The capture point of the outermost closure that holds the read.
     point: FlowNodeId,
@@ -1067,9 +1075,9 @@ impl RootCollector<'_> {
     /// relevance keeps no read when no subject can narrow.
     ///
     /// A read inside a closure that `root` creates, directly or through other
-    /// closures, continues the flow of `root` where it creates the outermost
-    /// one, as [`Self::closure_reads`] describes, so a test in `root` can
-    /// narrow it.
+    /// closures, continues the flow of `root` where `root` creates the
+    /// outermost one, so a test in `root` can narrow it (see
+    /// [`Self::closure_reads`]).
     fn add_root(
         &mut self,
         flow: &mut ModuleFlow,
@@ -1101,9 +1109,9 @@ impl RootCollector<'_> {
             return;
         };
         let root_range = root.syntax().text_trimmed_range();
-        // Closures created in this root's code, and their capture of the
-        // variables read here that the root doesn't declare, are reachable
-        // only where the builder evaluated them.
+        // The builder evaluates only reachable code, so the closures that it
+        // records and the reads here of variables that the root doesn't
+        // declare are the reachable ones.
         self.built.insert(root_range);
         for read in &reads {
             if let Some(FlowSubject::Binding(range)) =
@@ -1302,8 +1310,8 @@ impl RootCollector<'_> {
                 &mut reads,
             )
         };
-        // The pattern that narrows the element `subject`, which a test of the
-        // element itself need not mention.
+        // The pattern that narrows the element `subject`, even where no test
+        // mentions the element itself.
         let element_pattern = |subject: FlowSubjectId| {
             let Some(FlowSubject::Binding(binding)) = subjects.as_slice().get(subject as usize)
             else {
@@ -1708,26 +1716,27 @@ impl RootCollector<'_> {
         eligible
     }
 
-    /// Finds the reads, in the closures that the root at `root_range`
-    /// creates, of the variables that it narrows, and gives each read that
-    /// continues the root's flow, as TypeScript's `checkIdentifier` lets a
-    /// read in a closure do, the capture point of the outermost of those
-    /// closures, from `captures`, sorted by start.
+    /// Finds the reads of the variables that the root at `root_range` narrows
+    /// inside the closures that the root creates. Each read that continues
+    /// the root's flow, as TypeScript lets a read in a closure do, gets the
+    /// capture point of the outermost of those closures. `captures` lists the
+    /// closures with their capture points, sorted by start.
     ///
-    /// The variables are those of `narrowable`, the root's tested subjects,
-    /// and the elements of the patterns among them, which `subjects` and
-    /// `eligible` gain. A read continues when [`Self::capture_rule`] lets it,
-    /// and every function between it and the root is a closure that
-    /// continues the flow where it is created and is created in reachable
-    /// code, as [`Self::continues_to`] decides.
+    /// The variables are the bindings among `narrowable`, the root's tested
+    /// subjects, and the elements of the patterns among them. `subjects` and
+    /// `eligible` gain those elements. A read continues the flow when the
+    /// [`CaptureRule`] of its variable allows it at the read, and when every
+    /// function between the read and the root is a closure that continues the
+    /// flow where it is created, created in reachable code (see
+    /// [`Self::continues_to`]).
     ///
     /// A read that no nested root keeps is added to `reads` at the capture
-    /// point, so the root narrows it there, and its range is returned among
-    /// those whose variable some code assigns, as
-    /// [`FlowRead::assumes_initialized`] describes. For a read that a nested
-    /// root keeps, the returned [`PendingCapture`] names the outermost root
-    /// that keeps it or continues from it, whose start the capture point
-    /// gives.
+    /// point, so the root narrows it there. When some code assigns its
+    /// variable, its range is among the returned ranges, which mark the reads
+    /// that [`FlowRead::assumes_initialized`] describes. For a read that a
+    /// nested root keeps, the returned [`PendingCapture`] names the outermost
+    /// root that keeps the read or continues from it. That root starts the
+    /// variable from its type at the capture point.
     #[expect(
         clippy::too_many_arguments,
         reason = "The root's collection state is split across locals of `add_root`."
@@ -1830,14 +1839,15 @@ impl RootCollector<'_> {
         (pending, assumed_initialized)
     }
 
-    /// Returns whether a read of the variable declared at `range` inside a
-    /// closure continues the flow where the closure is created, as
-    /// [`CaptureRule`] describes, once per variable.
+    /// Returns the [`CaptureRule`] of the variable declared at `range`, which
+    /// tells whether a read of it inside a closure continues the flow where
+    /// the closure is created. Computes the rule once per variable.
     ///
-    /// As TypeScript's `isPastLastAssignment` decides, a parameter, a `catch`
-    /// variable, or a `let` continues past its last assignment in the
-    /// function that declares it, as [`assignment_position`] extends each
-    /// one, and never when another function assigns it.
+    /// As in TypeScript, a read of a parameter, a `catch` variable, or a
+    /// `let` continues the flow only past the variable's last assignment in
+    /// the function that declares it, and never when another function
+    /// assigns it. [`assignment_position`] gives the position of each
+    /// assignment.
     #[expect(
         clippy::wildcard_enum_match_arm,
         reason = "Only parameters, catch variables, and `const` and `let` declarations continue."
@@ -1908,15 +1918,18 @@ impl RootCollector<'_> {
         rule
     }
 
-    /// Returns whether the read `identifier` lies in code that runs where a
-    /// closure continues the flow of `outermost`, which the root under
-    /// collection creates: every function between them must be a closure
-    /// that [`AnyContinuingClosure::continues_outer_flow`] accepts, created
-    /// in the reachable code of the next one out, and the read must be in
-    /// the reachable code of its own. Code that its function doesn't run in
-    /// its flow, as a decorator, a computed key of a member, a field
-    /// initializer, a type, or a `declare` statement, and the body of a
-    /// `with` statement stop it.
+    /// Returns whether the read `identifier` continues the flow through every
+    /// closure up to `outermost`, the closure that the root under collection
+    /// creates. Every function between the read and that root must be a
+    /// closure that continues the flow where it is created (see
+    /// [`AnyContinuingClosure::continues_outer_flow`]), created in the
+    /// reachable code of the next closure out. The read must lie in the
+    /// reachable code of its own closure.
+    ///
+    /// Code that the function holding it doesn't run in its own flow stops
+    /// the read: a decorator, a computed key of a member, a field initializer,
+    /// a type, or a `declare` statement. The body of a `with` statement stops
+    /// it too.
     fn continues_to(
         &mut self,
         identifier: &JsIdentifierExpression,
@@ -1950,10 +1963,11 @@ impl RootCollector<'_> {
         false
     }
 
-    /// Returns whether `closure` reaches the read or the closure at `inner`
-    /// in its own code: as its builder found, when a root built it, and
-    /// otherwise when no statement that ends every path, as
-    /// [`Self::first_exit`] finds it, ends before `inner` starts.
+    /// Returns whether `closure` reaches the read or the nested closure at
+    /// `inner` in its own code. When a root built `closure`, the builder's
+    /// evaluation of reachable code answers. Otherwise, `closure` reaches
+    /// `inner` when no statement that ends every path ends before `inner`
+    /// starts (see [`Self::first_exit`]).
     fn reaches(&mut self, closure: &AnyContinuingClosure, inner: TextRange) -> bool {
         if self.built.contains(&closure.range()) {
             return self.evaluated.contains(&inner);
@@ -1961,14 +1975,17 @@ impl RootCollector<'_> {
         self.first_exit(closure) > inner.start()
     }
 
-    /// Returns where the first statement of the own code of `closure` that
-    /// ends every path through it ends, or the largest offset when it has
-    /// none: `return`, `throw`, `break`, `continue`, and a loop whose test is
-    /// missing or a truthy literal, once per closure.
+    /// Returns where the first statement in the own code of `closure` that
+    /// ends every path through it ends, or the largest offset when there is
+    /// none. Such a statement is a `return`, `throw`, `break`, or `continue`,
+    /// or a loop whose test is missing or a truthy literal. Computes the
+    /// offset once per closure.
     ///
-    /// Code after it may be unreachable, where TypeScript gives a read its
-    /// declared type. Code after a statement that only some paths end, such
-    /// as `if (c) return;`, counts too, which is wider.
+    /// Code after that statement may be unreachable, and TypeScript gives a
+    /// read in unreachable code its declared type. A statement that ends only
+    /// some paths of the closure, such as the `return` in `if (c) return;`,
+    /// counts too, so more reads keep their declared type than in
+    /// TypeScript.
     fn first_exit(&mut self, closure: &AnyContinuingClosure) -> TextSize {
         let range = closure.range();
         if let Some(exit) = self.exits.get(&range) {
@@ -2359,10 +2376,12 @@ fn readonly_tested_subjects(
     (readonly_tested, only_readonly_tested)
 }
 
-/// Code inside a closure that the function holding it doesn't run in its own
-/// flow, or where names may not mean what the semantic model resolves:
-/// class members that are not functions, such as fields, decorators, types,
-/// `declare` statements, and `with` statements.
+/// Syntax that stops a read inside it from continuing the flow of an
+/// enclosing root: class members that are not functions, such as fields, and
+/// decorators, types, `declare` statements, and `with` statements. The
+/// function that holds such code doesn't run it in its own flow, and in the
+/// body of a `with` statement, a name may not refer to the variable that the
+/// semantic model resolves.
 const CLOSURE_BARRIER_KINDS: SyntaxKindSet<JsLanguage> = AnyJsClassMember::KIND_SET
     .union(JsDecorator::KIND_SET)
     .union(AnyTsType::KIND_SET)
@@ -2375,8 +2394,8 @@ const MEMBER_KINDS: SyntaxKindSet<JsLanguage> =
     AnyJsClassMember::KIND_SET.union(AnyJsControlFlowRoot::KIND_SET);
 
 declare_node_union! {
-    /// A statement after which every path may end: a jump, or a loop that
-    /// [`RootCollector::first_exit`] finds infinite.
+    /// A jump or a loop. A jump ends every path through it, and so does a
+    /// loop whose test is missing or a truthy literal.
     AnyPathEnd = JsReturnStatement
         | JsThrowStatement
         | JsBreakStatement
@@ -2391,9 +2410,11 @@ declare_node_union! {
 const EXIT_SCAN_KINDS: SyntaxKindSet<JsLanguage> =
     AnyPathEnd::KIND_SET.union(AnyJsControlFlowRoot::KIND_SET);
 
-/// The roots that TypeScript's `isFunctionLike` accepts: an assignment in
-/// another one, or in a nested one, is in another function. Namespaces and
-/// class static blocks belong to the function around them.
+/// The roots that count as functions when deciding whether another function
+/// assigns a variable, as in TypeScript. An assignment is in another function
+/// when the nearest of these roots around it differs from the one around the
+/// declaration. Namespaces and class static blocks belong to the function
+/// around them.
 const FUNCTION_KINDS: SyntaxKindSet<JsLanguage> = AnyJsFunction::KIND_SET
     .union(JsMethodObjectMember::KIND_SET)
     .union(JsGetterObjectMember::KIND_SET)
@@ -2403,8 +2424,8 @@ const FUNCTION_KINDS: SyntaxKindSet<JsLanguage> = AnyJsFunction::KIND_SET
     .union(JsSetterClassMember::KIND_SET)
     .union(JsConstructorClassMember::KIND_SET);
 
-/// The statements that TypeScript's `extendAssignmentPosition` extends an
-/// assignment to the end of: variable and expression statements, `if`,
+/// The statements that extend the position of an assignment inside them to
+/// their end, as in TypeScript: variable and expression statements, `if`,
 /// loops, `with`, `switch`, `try`, and class declarations, including the
 /// exported and default-exported forms.
 const ASSIGNMENT_EXTENDING_KINDS: SyntaxKindSet<JsLanguage> = JsVariableStatement::KIND_SET
@@ -2431,16 +2452,18 @@ fn enclosing_function(node: &impl AstNode<Language = JsLanguage>) -> Option<JsSy
         .find(|ancestor| FUNCTION_KINDS.matches(ancestor.kind()))
 }
 
-/// Returns the position that the assignment of the variable `target` gives
-/// its last assignment, as TypeScript's `extendAssignmentPosition`
-/// does: the end of the outermost statement of [`ASSIGNMENT_EXTENDING_KINDS`]
-/// around `target` that starts after `declared_at`, where the variable is
-/// declared, or the start of `target` without one.
+/// Returns the position of the assignment to the variable `target`, which a
+/// read in a closure must start after to continue the flow, as in
+/// TypeScript. The position is the end of the outermost statement of
+/// [`ASSIGNMENT_EXTENDING_KINDS`] around `target` that starts after
+/// `declared_at`, where the variable is declared. Without such a statement,
+/// it is the start of `target`.
 ///
 /// So a read in a closure created inside such a statement, as in
 /// `if (c) { x = "a"; const h = () => x; }`, comes before the position and
-/// starts from the declared type, as in TypeScript, while one created after
-/// it, as in `{ x = "a"; } const h = () => x;`, comes after it.
+/// starts from the declared type, as in TypeScript. A read in a closure
+/// created after the statement, as in `{ x = "a"; } const h = () => x;`,
+/// comes after the position.
 fn assignment_position(target: &JsIdentifierAssignment, declared_at: TextSize) -> TextSize {
     let mut position = target.range().start();
     for ancestor in target.syntax().ancestors().skip(1) {

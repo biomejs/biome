@@ -233,11 +233,10 @@ const IMPORTED: &str = r#"
     export declare function g(): void;
 "#;
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m5/imports/main.ts` L5 to L14). An import narrows by the
-// tests of the root that reads it, from the declared type of what it
-// imports, a live `let` too, and a call never changes it. A test outside a
-// closure doesn't reach a read of an import inside it.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// An import narrows by the tests of the root that reads it, from the declared
+// type of what it imports, a live `let` too, and a call never changes it. A
+// test outside a closure doesn't reach a read of an import inside it.
 #[test]
 fn imported_bindings_narrow() {
     assert_reads_with(
@@ -353,11 +352,10 @@ fn variables_of_enclosing_roots_narrow_by_the_reading_root() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives the narrower type in the comment for
-// `invoked` (`narrowing-probes/m5-l3/extra.ts` L19), and `never` at
-// `captured` (L22), which Biome reads as Unknown. Biome keeps the declared
-// type of a variable that a function called where it is defined writes,
-// because the graph has no write point there. A closure continues the flow
-// where it is created, where `x` is `null`.
+// `invoked`, and `never` at `captured`, which Biome reads as Unknown. Biome
+// keeps the declared type of a variable that a function called where it is
+// defined writes, because the graph has no write point there. The closure in
+// `e15` continues the flow where it is created, and `x` is `null` there.
 #[test]
 fn variables_of_enclosing_roots_that_biome_narrows_less() {
     assert_reads(
