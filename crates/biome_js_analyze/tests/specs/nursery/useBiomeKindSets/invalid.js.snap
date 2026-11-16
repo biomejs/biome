@@ -1,0 +1,454 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+node.kind === "JS_CALL_EXPRESSION" || node.kind === "JS_NEW_EXPRESSION";
+"JS_CALL_EXPRESSION" === node.kind || node.kind == "JS_NEW_EXPRESSION";
+token.kind !== "EQ2" && token.kind !== "NEQ";
+node.parent.kind === "JS_CALL_EXPRESSION" || node.parent.kind === "JS_NEW_EXPRESSION" || node.parent.kind === "JS_IMPORT_CALL_EXPRESSION";
+node?.kind === "JS_CALL_EXPRESSION" || node?.kind === "JS_NEW_EXPRESSION";
+(node.kind === "JS_CALL_EXPRESSION" || node.kind === "JS_NEW_EXPRESSION") || node.kind === "JS_IMPORT_CALL_EXPRESSION";
+node.kind === "JS_CALL_EXPRESSION" || isSpecial(node) || node.kind === "JS_NEW_EXPRESSION";
+left.kind === "JS_CALL_EXPRESSION" || right.kind === "IDENT" || left.kind === "JS_NEW_EXPRESSION" || right.kind === "COMMA";
+token.kind === "JS_NUMBER_LITERAL" || token.kind === "JS_STRING_LITERAL";
+node.kind === `JS_CALL_EXPRESSION` || node.kind === "JS_NEW_EXPRESSION";
+
+["JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION"].includes(node.kind);
+!["EQ2", "NEQ"].includes(token.kind);
+new Set(["JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION"]).has(node.kind);
+
+const CALL_KINDS = ["JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION"];
+CALL_KINDS.includes(node.kind);
+ast(...CALL_KINDS);
+const CALL_KIND_SET = new Set(CALL_KINDS);
+CALL_KIND_SET.has(node.kind);
+const EQUALITY_TOKENS = new Set(["EQ2", "NEQ"]);
+EQUALITY_TOKENS.has(token.kind);
+
+const CALL = "JS_CALL_EXPRESSION";
+const NEW = "JS_NEW_EXPRESSION";
+node.kind === CALL || node.kind === NEW;
+node.kind === CALL || node.kind === "JS_IMPORT_CALL_EXPRESSION";
+[CALL, NEW].includes(node.kind);
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/useBiomeKindSets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code checks the kind of node by comparing it with several strings.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ node.kind === "JS_CALL_EXPRESSION" || node.kind === "JS_NEW_EXPRESSION";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ "JS_CALL_EXPRESSION" === node.kind || node.kind == "JS_NEW_EXPRESSION";
+    4 │ token.kind !== "EQ2" && token.kind !== "NEQ";
+  
+  i A kind set checks the kind directly, without comparing strings, so it's faster.
+  
+  i Create the set once in a top-level constant, such as const KINDS = nodeKinds(...), then replace this check with KINDS.has(node).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/useBiomeKindSets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code checks the kind of node by comparing it with several strings.
+  
+    1 │ /* should generate diagnostics */
+    2 │ node.kind === "JS_CALL_EXPRESSION" || node.kind === "JS_NEW_EXPRESSION";
+  > 3 │ "JS_CALL_EXPRESSION" === node.kind || node.kind == "JS_NEW_EXPRESSION";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ token.kind !== "EQ2" && token.kind !== "NEQ";
+    5 │ node.parent.kind === "JS_CALL_EXPRESSION" || node.parent.kind === "JS_NEW_EXPRESSION" || node.parent.kind === "JS_IMPORT_CALL_EXPRESSION";
+  
+  i A kind set checks the kind directly, without comparing strings, so it's faster.
+  
+  i Create the set once in a top-level constant, such as const KINDS = nodeKinds(...), then replace this check with KINDS.has(node).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/useBiomeKindSets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code checks the kind of token by comparing it with several strings.
+  
+    2 │ node.kind === "JS_CALL_EXPRESSION" || node.kind === "JS_NEW_EXPRESSION";
+    3 │ "JS_CALL_EXPRESSION" === node.kind || node.kind == "JS_NEW_EXPRESSION";
+  > 4 │ token.kind !== "EQ2" && token.kind !== "NEQ";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ node.parent.kind === "JS_CALL_EXPRESSION" || node.parent.kind === "JS_NEW_EXPRESSION" || node.parent.kind === "JS_IMPORT_CALL_EXPRESSION";
+    6 │ node?.kind === "JS_CALL_EXPRESSION" || node?.kind === "JS_NEW_EXPRESSION";
+  
+  i A kind set checks the kind directly, without comparing strings, so it's faster.
+  
+  i Create the set once in a top-level constant, such as const KINDS = tokenKinds(...), then replace this check with !KINDS.has(token).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/useBiomeKindSets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code checks the kind of node.parent by comparing it with several strings.
+  
+    3 │ "JS_CALL_EXPRESSION" === node.kind || node.kind == "JS_NEW_EXPRESSION";
+    4 │ token.kind !== "EQ2" && token.kind !== "NEQ";
+  > 5 │ node.parent.kind === "JS_CALL_EXPRESSION" || node.parent.kind === "JS_NEW_EXPRESSION" || node.parent.kind === "JS_IMPORT_CALL_EXPRESSION";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ node?.kind === "JS_CALL_EXPRESSION" || node?.kind === "JS_NEW_EXPRESSION";
+    7 │ (node.kind === "JS_CALL_EXPRESSION" || node.kind === "JS_NEW_EXPRESSION") || node.kind === "JS_IMPORT_CALL_EXPRESSION";
+  
+  i A kind set checks the kind directly, without comparing strings, so it's faster.
+  
+  i Create the set once in a top-level constant, such as const KINDS = nodeKinds(...), then replace this check with KINDS.has(node.parent).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/useBiomeKindSets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code checks the kind of node by comparing it with several strings.
+  
+    4 │ token.kind !== "EQ2" && token.kind !== "NEQ";
+    5 │ node.parent.kind === "JS_CALL_EXPRESSION" || node.parent.kind === "JS_NEW_EXPRESSION" || node.parent.kind === "JS_IMPORT_CALL_EXPRESSION";
+  > 6 │ node?.kind === "JS_CALL_EXPRESSION" || node?.kind === "JS_NEW_EXPRESSION";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ (node.kind === "JS_CALL_EXPRESSION" || node.kind === "JS_NEW_EXPRESSION") || node.kind === "JS_IMPORT_CALL_EXPRESSION";
+    8 │ node.kind === "JS_CALL_EXPRESSION" || isSpecial(node) || node.kind === "JS_NEW_EXPRESSION";
+  
+  i A kind set checks the kind directly, without comparing strings, so it's faster.
+  
+  i Create the set once in a top-level constant, such as const KINDS = nodeKinds(...), then replace this check with KINDS.has(node).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:2 lint/nursery/useBiomeKindSets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code checks the kind of node by comparing it with several strings.
+  
+    5 │ node.parent.kind === "JS_CALL_EXPRESSION" || node.parent.kind === "JS_NEW_EXPRESSION" || node.parent.kind === "JS_IMPORT_CALL_EXPRESSION";
+    6 │ node?.kind === "JS_CALL_EXPRESSION" || node?.kind === "JS_NEW_EXPRESSION";
+  > 7 │ (node.kind === "JS_CALL_EXPRESSION" || node.kind === "JS_NEW_EXPRESSION") || node.kind === "JS_IMPORT_CALL_EXPRESSION";
+      │  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ node.kind === "JS_CALL_EXPRESSION" || isSpecial(node) || node.kind === "JS_NEW_EXPRESSION";
+    9 │ left.kind === "JS_CALL_EXPRESSION" || right.kind === "IDENT" || left.kind === "JS_NEW_EXPRESSION" || right.kind === "COMMA";
+  
+  i A kind set checks the kind directly, without comparing strings, so it's faster.
+  
+  i Create the set once in a top-level constant, such as const KINDS = nodeKinds(...), then replace this check with KINDS.has(node).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/useBiomeKindSets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code checks the kind of node by comparing it with several strings.
+  
+     6 │ node?.kind === "JS_CALL_EXPRESSION" || node?.kind === "JS_NEW_EXPRESSION";
+     7 │ (node.kind === "JS_CALL_EXPRESSION" || node.kind === "JS_NEW_EXPRESSION") || node.kind === "JS_IMPORT_CALL_EXPRESSION";
+   > 8 │ node.kind === "JS_CALL_EXPRESSION" || isSpecial(node) || node.kind === "JS_NEW_EXPRESSION";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ left.kind === "JS_CALL_EXPRESSION" || right.kind === "IDENT" || left.kind === "JS_NEW_EXPRESSION" || right.kind === "COMMA";
+    10 │ token.kind === "JS_NUMBER_LITERAL" || token.kind === "JS_STRING_LITERAL";
+  
+  i A kind set checks the kind directly, without comparing strings, so it's faster.
+  
+  i Create the set once in a top-level constant, such as const KINDS = nodeKinds(...), then replace this check with KINDS.has(node).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/useBiomeKindSets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code checks the kind of left by comparing it with several strings.
+  
+     7 │ (node.kind === "JS_CALL_EXPRESSION" || node.kind === "JS_NEW_EXPRESSION") || node.kind === "JS_IMPORT_CALL_EXPRESSION";
+     8 │ node.kind === "JS_CALL_EXPRESSION" || isSpecial(node) || node.kind === "JS_NEW_EXPRESSION";
+   > 9 │ left.kind === "JS_CALL_EXPRESSION" || right.kind === "IDENT" || left.kind === "JS_NEW_EXPRESSION" || right.kind === "COMMA";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ token.kind === "JS_NUMBER_LITERAL" || token.kind === "JS_STRING_LITERAL";
+    11 │ node.kind === `JS_CALL_EXPRESSION` || node.kind === "JS_NEW_EXPRESSION";
+  
+  i A kind set checks the kind directly, without comparing strings, so it's faster.
+  
+  i Create the set once in a top-level constant, such as const KINDS = nodeKinds(...), then replace this check with KINDS.has(left).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:39 lint/nursery/useBiomeKindSets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code checks the kind of right by comparing it with several strings.
+  
+     7 │ (node.kind === "JS_CALL_EXPRESSION" || node.kind === "JS_NEW_EXPRESSION") || node.kind === "JS_IMPORT_CALL_EXPRESSION";
+     8 │ node.kind === "JS_CALL_EXPRESSION" || isSpecial(node) || node.kind === "JS_NEW_EXPRESSION";
+   > 9 │ left.kind === "JS_CALL_EXPRESSION" || right.kind === "IDENT" || left.kind === "JS_NEW_EXPRESSION" || right.kind === "COMMA";
+       │                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ token.kind === "JS_NUMBER_LITERAL" || token.kind === "JS_STRING_LITERAL";
+    11 │ node.kind === `JS_CALL_EXPRESSION` || node.kind === "JS_NEW_EXPRESSION";
+  
+  i A kind set checks the kind directly, without comparing strings, so it's faster.
+  
+  i Create the set once in a top-level constant, such as const KINDS = tokenKinds(...), then replace this check with KINDS.has(right).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/useBiomeKindSets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code checks the kind of token by comparing it with several strings.
+  
+     8 │ node.kind === "JS_CALL_EXPRESSION" || isSpecial(node) || node.kind === "JS_NEW_EXPRESSION";
+     9 │ left.kind === "JS_CALL_EXPRESSION" || right.kind === "IDENT" || left.kind === "JS_NEW_EXPRESSION" || right.kind === "COMMA";
+  > 10 │ token.kind === "JS_NUMBER_LITERAL" || token.kind === "JS_STRING_LITERAL";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ node.kind === `JS_CALL_EXPRESSION` || node.kind === "JS_NEW_EXPRESSION";
+    12 │ 
+  
+  i A kind set checks the kind directly, without comparing strings, so it's faster.
+  
+  i Create the set once in a top-level constant, such as const KINDS = tokenKinds(...), then replace this check with KINDS.has(token).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/useBiomeKindSets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code checks the kind of node by comparing it with several strings.
+  
+     9 │ left.kind === "JS_CALL_EXPRESSION" || right.kind === "IDENT" || left.kind === "JS_NEW_EXPRESSION" || right.kind === "COMMA";
+    10 │ token.kind === "JS_NUMBER_LITERAL" || token.kind === "JS_STRING_LITERAL";
+  > 11 │ node.kind === `JS_CALL_EXPRESSION` || node.kind === "JS_NEW_EXPRESSION";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ ["JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION"].includes(node.kind);
+  
+  i A kind set checks the kind directly, without comparing strings, so it's faster.
+  
+  i Create the set once in a top-level constant, such as const KINDS = nodeKinds(...), then replace this check with KINDS.has(node).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/useBiomeKindSets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code checks the kind of node by comparing it with several strings.
+  
+    11 │ node.kind === `JS_CALL_EXPRESSION` || node.kind === "JS_NEW_EXPRESSION";
+    12 │ 
+  > 13 │ ["JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION"].includes(node.kind);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ !["EQ2", "NEQ"].includes(token.kind);
+    15 │ new Set(["JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION"]).has(node.kind);
+  
+  i A kind set checks the kind directly, without comparing strings, so it's faster.
+  
+  i Create the set once in a top-level constant, such as const KINDS = nodeKinds(...), then replace this check with KINDS.has(node).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:2 lint/nursery/useBiomeKindSets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code checks the kind of token by comparing it with several strings.
+  
+    13 │ ["JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION"].includes(node.kind);
+  > 14 │ !["EQ2", "NEQ"].includes(token.kind);
+       │  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ new Set(["JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION"]).has(node.kind);
+    16 │ 
+  
+  i A kind set checks the kind directly, without comparing strings, so it's faster.
+  
+  i Create the set once in a top-level constant, such as const KINDS = tokenKinds(...), then replace this check with KINDS.has(token).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/useBiomeKindSets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code checks the kind of node by comparing it with several strings.
+  
+    13 │ ["JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION"].includes(node.kind);
+    14 │ !["EQ2", "NEQ"].includes(token.kind);
+  > 15 │ new Set(["JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION"]).has(node.kind);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ const CALL_KINDS = ["JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION"];
+  
+  i A kind set checks the kind directly, without comparing strings, so it's faster.
+  
+  i Create the set once in a top-level constant, such as const KINDS = nodeKinds(...), then replace this check with KINDS.has(node).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:1 lint/nursery/useBiomeKindSets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code checks the kind of node by comparing it with several strings.
+  
+    17 │ const CALL_KINDS = ["JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION"];
+  > 18 │ CALL_KINDS.includes(node.kind);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ ast(...CALL_KINDS);
+    20 │ const CALL_KIND_SET = new Set(CALL_KINDS);
+  
+  i A kind set checks the kind directly, without comparing strings, so it's faster.
+  
+  i Create the set once in a top-level constant, such as const KINDS = nodeKinds(...), then replace this check with KINDS.has(node).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:1 lint/nursery/useBiomeKindSets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code checks the kind of node by comparing it with several strings.
+  
+    19 │ ast(...CALL_KINDS);
+    20 │ const CALL_KIND_SET = new Set(CALL_KINDS);
+  > 21 │ CALL_KIND_SET.has(node.kind);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ const EQUALITY_TOKENS = new Set(["EQ2", "NEQ"]);
+    23 │ EQUALITY_TOKENS.has(token.kind);
+  
+  i A kind set checks the kind directly, without comparing strings, so it's faster.
+  
+  i Create the set once in a top-level constant, such as const KINDS = nodeKinds(...), then replace this check with KINDS.has(node).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:1 lint/nursery/useBiomeKindSets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code checks the kind of token by comparing it with several strings.
+  
+    21 │ CALL_KIND_SET.has(node.kind);
+    22 │ const EQUALITY_TOKENS = new Set(["EQ2", "NEQ"]);
+  > 23 │ EQUALITY_TOKENS.has(token.kind);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 
+    25 │ const CALL = "JS_CALL_EXPRESSION";
+  
+  i A kind set checks the kind directly, without comparing strings, so it's faster.
+  
+  i Create the set once in a top-level constant, such as const KINDS = tokenKinds(...), then replace this check with KINDS.has(token).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:1 lint/nursery/useBiomeKindSets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code checks the kind of node by comparing it with several strings.
+  
+    25 │ const CALL = "JS_CALL_EXPRESSION";
+    26 │ const NEW = "JS_NEW_EXPRESSION";
+  > 27 │ node.kind === CALL || node.kind === NEW;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ node.kind === CALL || node.kind === "JS_IMPORT_CALL_EXPRESSION";
+    29 │ [CALL, NEW].includes(node.kind);
+  
+  i A kind set checks the kind directly, without comparing strings, so it's faster.
+  
+  i Create the set once in a top-level constant, such as const KINDS = nodeKinds(...), then replace this check with KINDS.has(node).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:1 lint/nursery/useBiomeKindSets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code checks the kind of node by comparing it with several strings.
+  
+    26 │ const NEW = "JS_NEW_EXPRESSION";
+    27 │ node.kind === CALL || node.kind === NEW;
+  > 28 │ node.kind === CALL || node.kind === "JS_IMPORT_CALL_EXPRESSION";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ [CALL, NEW].includes(node.kind);
+    30 │ 
+  
+  i A kind set checks the kind directly, without comparing strings, so it's faster.
+  
+  i Create the set once in a top-level constant, such as const KINDS = nodeKinds(...), then replace this check with KINDS.has(node).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:1 lint/nursery/useBiomeKindSets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code checks the kind of node by comparing it with several strings.
+  
+    27 │ node.kind === CALL || node.kind === NEW;
+    28 │ node.kind === CALL || node.kind === "JS_IMPORT_CALL_EXPRESSION";
+  > 29 │ [CALL, NEW].includes(node.kind);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ 
+  
+  i A kind set checks the kind directly, without comparing strings, so it's faster.
+  
+  i Create the set once in a top-level constant, such as const KINDS = nodeKinds(...), then replace this check with KINDS.has(node).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

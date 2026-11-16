@@ -1,6 +1,5 @@
 ---
 source: crates/biome_configuration/tests/spec_tests.rs
-assertion_line: 64
 expression: domains.json
 ---
 domains.json:4:7 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -17,6 +16,7 @@ domains.json:4:7 deserialize ━━━━━━━━━━━━━━━━━
   i Accepted values:
   
   - astro
+  - biomePlugin
   - drizzle
   - react
   - reactNative

@@ -50,6 +50,7 @@
 /crates/biome_js_analyze/build.rs linguist-generated=true text=auto eol=lf
 /crates/biome_js_analyze/src/assist.rs linguist-generated=true text=auto eol=lf
 /crates/biome_js_analyze/src/assist/*.rs linguist-generated=true text=auto eol=lf
+/crates/biome_js_analyze/src/frameworks/biome_plugin/kind_names.rs linguist-generated=true text=auto eol=lf
 /crates/biome_js_analyze/src/lint.rs linguist-generated=true text=auto eol=lf
 /crates/biome_js_analyze/src/lint/*.rs linguist-generated=true text=auto eol=lf
 /crates/biome_tailwind_logic/src/use_tailwind_sorted_classes/tailwind_preset_v4.rs linguist-generated=true text=auto eol=lf

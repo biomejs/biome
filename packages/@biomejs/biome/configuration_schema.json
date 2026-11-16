@@ -10847,6 +10847,20 @@
 						{ "type": "null" }
 					]
 				},
+				"useBiomeKindSets": {
+					"description": "Require kind sets instead of comparing kind names one by one in Biome JS plugins.\nSee https://biomejs.dev/linter/rules/use-biome-kind-sets",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseBiomeKindSetsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useBiomeTopLevelTypes": {
+					"description": "Require kind sets in Biome JS plugins to be created at the top level of the module.\nSee https://biomejs.dev/linter/rules/use-biome-top-level-types",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseBiomeTopLevelTypesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useBlockStatementOverIife": {
 					"description": "Prefer block statements over functions that are called immediately only to create a scope.\nSee https://biomejs.dev/linter/rules/use-block-statement-over-iife",
 					"anyOf": [
@@ -12540,6 +12554,7 @@
 			"type": "object",
 			"properties": {
 				"astro": { "$ref": "#/$defs/RuleDomainValue" },
+				"biomePlugin": { "$ref": "#/$defs/RuleDomainValue" },
 				"drizzle": { "$ref": "#/$defs/RuleDomainValue" },
 				"next": { "$ref": "#/$defs/RuleDomainValue" },
 				"playwright": { "$ref": "#/$defs/RuleDomainValue" },
@@ -18165,6 +18180,24 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseBiomeIgnoreFolderOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseBiomeKindSetsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseBiomeKindSetsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseBiomeTopLevelTypesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseBiomeTopLevelTypesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -23882,6 +23915,26 @@
 			]
 		},
 		"UseBiomeIgnoreFolderOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseBiomeKindSetsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseBiomeKindSetsOptions" }
+			]
+		},
+		"UseBiomeKindSetsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseBiomeTopLevelTypesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseBiomeTopLevelTypesOptions" }
+			]
+		},
+		"UseBiomeTopLevelTypesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

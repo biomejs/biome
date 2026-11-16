@@ -674,6 +674,8 @@ impl RuleSourceKind {
 pub enum RuleDomain {
     /// Astro framework rules
     Astro,
+    /// Rules for authoring Biome JS plugins
+    BiomePlugin,
     /// Drizzle ORM rules
     Drizzle,
     /// React library rules
@@ -711,6 +713,7 @@ impl Display for RuleDomain {
         // use lower case naming, it needs to match the name of the configuration
         match self {
             Self::Astro => fmt.write_str("astro"),
+            Self::BiomePlugin => fmt.write_str("biomePlugin"),
             Self::Drizzle => fmt.write_str("drizzle"),
             Self::React => fmt.write_str("react"),
             Self::ReactNative => fmt.write_str("reactNative"),
@@ -750,6 +753,7 @@ impl RuleDomain {
     pub const fn manifest_dependencies(self) -> &'static [&'static (&'static str, &'static str)] {
         match self {
             Self::Astro => &[&("astro", ">=1.0.0")],
+            Self::BiomePlugin => &[],
             Self::React => &[&("react", ">=16.0.0")],
             Self::ReactNative => &[&("react-native", ">=0.60.0")],
             Self::Test => &[
@@ -786,6 +790,7 @@ impl RuleDomain {
     pub const fn globals(self) -> &'static [&'static str] {
         match self {
             Self::Astro => &[],
+            Self::BiomePlugin => &[],
             Self::React => &[],
             Self::ReactNative => &[],
             Self::Test => &[
@@ -830,6 +835,7 @@ impl RuleDomain {
     pub const fn as_str(&self) -> &'static str {
         match self {
             Self::Astro => "astro",
+            Self::BiomePlugin => "biomePlugin",
             Self::React => "react",
             Self::ReactNative => "reactNative",
             Self::Test => "test",
@@ -852,6 +858,9 @@ impl RuleDomain {
         match self {
             Self::Astro => {
                 "Use this domain inside Astro projects. This domain enables rules that are specific to Astro projects."
+            }
+            Self::BiomePlugin => {
+                "Use this domain when writing Biome JS plugins. This domain enables rules that help plugins use the plugin API efficiently. Biome doesn't enable this domain automatically, so enable it in your configuration."
             }
             Self::React => {
                 "Use this domain inside React projects. It enables a set of rules that can help catching bugs and enforce correct practices. This domain enables rules that might conflict with the Solid domain."
@@ -904,6 +913,7 @@ impl FromStr for RuleDomain {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "astro" => Ok(Self::Astro),
+            "biomePlugin" => Ok(Self::BiomePlugin),
             "react" => Ok(Self::React),
             "reactNative" => Ok(Self::ReactNative),
             "test" => Ok(Self::Test),

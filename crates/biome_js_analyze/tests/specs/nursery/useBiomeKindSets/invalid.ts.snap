@@ -1,0 +1,54 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+const CALL_KINDS = ["JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION"] as const;
+CALL_KINDS.includes(node.kind);
+(node as AnyNode).kind === "JS_CALL_EXPRESSION" || (node as AnyNode).kind === "JS_NEW_EXPRESSION";
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:1 lint/nursery/useBiomeKindSets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code checks the kind of node by comparing it with several strings.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const CALL_KINDS = ["JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION"] as const;
+  > 3 │ CALL_KINDS.includes(node.kind);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ (node as AnyNode).kind === "JS_CALL_EXPRESSION" || (node as AnyNode).kind === "JS_NEW_EXPRESSION";
+    5 │ 
+  
+  i A kind set checks the kind directly, without comparing strings, so it's faster.
+  
+  i Create the set once in a top-level constant, such as const KINDS = nodeKinds(...), then replace this check with KINDS.has(node).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:1 lint/nursery/useBiomeKindSets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code checks the kind of node as AnyNode by comparing it with several strings.
+  
+    2 │ const CALL_KINDS = ["JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION"] as const;
+    3 │ CALL_KINDS.includes(node.kind);
+  > 4 │ (node as AnyNode).kind === "JS_CALL_EXPRESSION" || (node as AnyNode).kind === "JS_NEW_EXPRESSION";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i A kind set checks the kind directly, without comparing strings, so it's faster.
+  
+  i Create the set once in a top-level constant, such as const KINDS = nodeKinds(...), then replace this check with KINDS.has(node as AnyNode).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
