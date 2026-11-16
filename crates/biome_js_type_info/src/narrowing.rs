@@ -875,28 +875,30 @@ pub fn may_narrow_by_instanceof(db: &dyn TypeDb, declared: InferredTypeData) -> 
 ///   branch keeps as it is rather than replacing it with a member of
 ///   `target`. As in TypeScript, this can give `never`.
 ///
-/// When a member and a member of `target` are subtypes of each other, the
-/// false branch keeps the member unless the two are the same type. In that
-/// case, TypeScript's strict subtype relation picks which of the two the
-/// true branch keeps, and that relation depends on modifiers that Biome
-/// doesn't record, such as `readonly`. With `interface Same { a: number }`
-/// and the target `Foo`, `Same | Bar` keeps `Same` in both branches, where
-/// TypeScript removes it from the false branch. The false branch also keeps
-/// a member when Biome can tell only that a member of `target` is a subtype
-/// of it. It keeps `unknown`, and it keeps every member when the true branch
-/// is empty.
+/// When a member and a member of `target` are subtypes of each other,
+/// TypeScript's strict subtype relation picks which of the two the true branch
+/// keeps. Biome can't always make the same choice: its subtype comparison does
+/// not compare properties whose only difference is `readonly`. Unless the two
+/// types are equal, Biome keeps the member in both branches.
+///
+/// For `interface Foo { a: number }`, `interface Same { a: number }`, and
+/// `interface Bar { c: number }`, testing a `Same | Bar` value with a type
+/// predicate targeting `Foo` gives `Same` in Biome's true branch and
+/// `Same | Bar` in its false branch. TypeScript gives `Same` and `Bar`,
+/// respectively. The false branch also keeps a member when Biome can tell only
+/// that a member of `target` is a subtype of it. It keeps `unknown`, and it
+/// keeps every member when the true branch is empty.
 ///
 /// `ty` is returned unchanged in these cases:
 ///
-/// TypeScript's strict subtype relation decides which of two members that
-/// are subtypes of each other the true branch keeps, and it depends on
-/// modifiers that Biome doesn't compare, such as `readonly`. So the false
-/// branch keeps such a member unless it is the same type as the member of
-/// `target`: with `interface Same { a: number }` and the target `Foo`,
-/// `Same | Bar` keeps `Same` in both branches, where TypeScript removes it
-/// from the false branch. The false branch also keeps a member when Biome
-/// can tell only that a member of `target` is a subtype of it, and so does
-/// it keep `unknown`, and every member when the true branch is empty.
+/// - A comparison of two members can't tell whether either is a subtype of
+///   the other, as for generics, classes that can declare private members,
+///   and literal types that TypeScript may widen. [`is_subtype`] describes
+///   these comparisons.
+/// - `ty` is a union with `unknown`.
+/// - Biome may reach two classes with the same contents as one.
+/// - `target` has `any` or an undetermined member.
+/// - The comparisons run out of their budget of 256 visited types and pairs.
 ///
 /// `resolve` resolves handles as for [`narrow_type`].
 pub fn narrow_by_type_predicate<'db>(

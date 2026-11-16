@@ -952,7 +952,7 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
 // `readonly`. Biome records `readonly`, so the two are different types, but
 // its subtype relation ignores `readonly`, so it can't tell which of the two
 // TypeScript's strict subtype relation prefers. A comment gives the type
-// that TypeScript 6.0.3 (`tsc --strict`) gives where it differs.
+// that TypeScript 7.0.2 (`tsc --strict`) gives where it differs.
 #[test]
 fn object_targets_that_differ_only_by_readonly_keep_both_members_in_the_else_branch() {
     assert_reads(
