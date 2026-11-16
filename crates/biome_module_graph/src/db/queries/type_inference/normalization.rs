@@ -6,7 +6,7 @@
 //! intersections, tuples, instances, merged references, and `typeof` types.
 //! Types that cannot contain these references are returned unchanged.
 //! Member types selected by member lookup are normalized without resolving
-//! their local handles.
+//! their local handles or the constraints of their generic parameters.
 //!
 //! Substitution rewrites a type without resolving any references, so it reads
 //! no module inputs and cannot join an inference cycle.
@@ -49,7 +49,7 @@ pub fn normalize_type<'db>(
 }
 
 /// Normalizes a member type selected by member lookup without resolving its
-/// local handles.
+/// local handles or normalizing generic parameters.
 ///
 /// Member lookup substitutes an instance's type arguments into the declared
 /// member type before normalizing it. Lookups of the same member on the same
@@ -68,7 +68,13 @@ pub(crate) fn normalize_member_type<'db>(
         TypeInferenceQueryKind::Normalization,
         TypeInferenceProfileOrigin::Inherited,
         "normalize_member_type",
-        || normalize_structural_type(db, input.ty(db), |ty| ty).ok(),
+        || {
+            input
+                .ty(db)
+                .normalize_nested_types_keeping_generics(db, |ty| ty.expand_structural_global(db))
+                .into_result()
+                .ok()
+        },
     )
 }
 
