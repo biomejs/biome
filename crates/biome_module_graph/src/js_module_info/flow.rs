@@ -1,10 +1,12 @@
-//! Syntax-only flow facts that let type inference refine variable reads.
+//! Syntax-only flow facts that let type inference narrow reads of variables
+//! and their property paths.
 //!
 //! Collection records a graph of possible paths for each execution root that
-//! tests one of its own variables. The graph's conditions are already
-//! decomposed into guards on subjects. Collection also records the incoming
-//! path of every read such a guard can reach. Type inference later applies the
-//! guards to resolved types without inspecting syntax again.
+//! tests one of its own variables or a property path that starts at one. The
+//! graph's conditions are already decomposed into guards on subjects.
+//! Collection also records the incoming path of every read such a guard can
+//! reach. Type inference later applies the guards to resolved types without
+//! inspecting syntax again.
 //!
 //! A subject is what a runtime test checks and a read narrows: a variable, or
 //! a property path that starts at a variable, such as `o.v` or `a.b.c`. Guards
@@ -15,10 +17,10 @@
 //! function, or method. Only `let`, `const`, and parameter bindings that are
 //! never reassigned and are read in the root that declares them participate,
 //! so refinements cannot cross closure boundaries. A property path narrows
-//! only when its variable does and the root never writes the path, one of its
-//! prefixes, or an unknown property of one of its prefixes. The graph does not
-//! invalidate facts on writes or calls, which is why written subjects are
-//! excluded.
+//! only when its variable can narrow and the root never writes the path, one
+//! of its prefixes, or any property of one of its prefixes through a computed
+//! key. The graph does not invalidate facts on writes or calls, which is why
+//! written subjects are excluded.
 
 mod builder;
 mod expressions;
@@ -189,8 +191,9 @@ impl RootFlow {
     }
 
     /// Returns the range of the variable that the path of `subject` starts
-    /// at, which is the variable itself for a [`FlowSubject::Binding`], or
-    /// `None` when the root has no such subject.
+    /// at. A [`FlowSubject::Binding`] starts at its own variable.
+    ///
+    /// Returns `None` when the root has no such subject.
     pub(crate) fn subject_binding(&self, subject: FlowSubjectId) -> Option<TextRange> {
         subject_binding(&self.subjects, subject)
     }
@@ -432,10 +435,10 @@ impl RootCollector<'_> {
     /// Returns the `(subject, point)` pairs that a test of the subject can
     /// reach, including the test itself.
     ///
-    /// Variables are walked before property paths, so the work limit never
-    /// takes narrowing away from a variable because of its paths. Returns no
-    /// pair of a path when the limit runs out on paths, and `None` when it runs
-    /// out on variables.
+    /// Returns `None` when the root's work limit runs out on a variable. When
+    /// it runs out on a property path, the result keeps only the pairs of
+    /// variables. Variables are walked first, so property paths never take the
+    /// work limit from a variable.
     fn reachable_from_tests(
         &self,
         nodes: &[FlowNode],
@@ -670,7 +673,7 @@ mod tests {
             )
         };
         // The smallest budget that keeps the variable leaves nothing for the
-        // path, which is then dropped alone.
+        // path, so collection drops the path and keeps the variable.
         let budget = (0..1024)
             .find(|budget| collect(*budget).is_candidate(x))
             .unwrap();

@@ -48,8 +48,9 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             AnyFlowExpression::JsStaticMemberExpression(member) => {
                 let object = self.flow_operand(&member.object().ok()?);
-                // The type of the access, from the narrowed object when there
-                // is one, is the declared type that a property path narrows.
+                // The declared type of a property path is the type of this
+                // access, computed on the object's narrowed type when the
+                // object has one.
                 let declared = match object {
                     Some(object) => {
                         let name = member.member().ok()?.value_token().ok()?;

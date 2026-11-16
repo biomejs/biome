@@ -3,7 +3,7 @@
 //! The flow graph has no write points, so a property path narrows only when
 //! its execution root never writes it. Like TypeScript, the scan counts the
 //! writes that run as part of the root's own flow and ignores the bodies of
-//! other functions, which run only when called: a call never cancels
+//! other functions, because those run only when called. A call never cancels
 //! narrowing, in TypeScript or in Biome.
 
 use super::subjects::property_key;
@@ -27,14 +27,14 @@ use rustc_hash::FxHashSet;
 ///
 /// The scan covers the whole root, including function and arrow expressions
 /// that are called where they are defined, class static blocks, field
-/// initializers, decorators, computed keys, and the parameters of nested
-/// functions. It skips the bodies of other functions, methods, accessors, and
-/// constructors. A write through another variable that holds the same object,
-/// as in `a.v = x` after `const a = o`, does not write `o.v`. Wherever the
-/// scan differs from TypeScript, it counts more writes: TypeScript ignores,
-/// for example, writes in `async` and generator functions called where they
-/// are defined, in field initializers and parameter defaults, and through
-/// `as` and `satisfies`.
+/// initializers, decorators, computed keys, and the parameters of methods,
+/// accessors, and constructors. It skips the bodies of other functions,
+/// methods, accessors, and constructors. A write through another variable that
+/// holds the same object, as in `a.v = x` after `const a = o`, does not write
+/// `o.v`. Wherever the scan differs from TypeScript, it counts more writes:
+/// TypeScript ignores, for example, writes in `async` and generator functions
+/// called where they are defined, in field initializers and parameter
+/// defaults, and through `as` and `satisfies`.
 pub(super) struct WrittenPaths {
     /// Subjects that an assignment or `delete` writes directly.
     written: FxHashSet<FlowSubjectId>,

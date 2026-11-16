@@ -822,10 +822,11 @@ fn comparison_step(
 }
 
 /// Returns whether `expression` has the shape of a subject: an identifier or a
-/// static member access, which [`subject_of`] accepts when its object is a
-/// subject too.
+/// static member access. A member access is a subject only when its object is
+/// one too, which [`subject_of`] checks.
 ///
-/// Returns `None` when the identifier or the member name is missing.
+/// Returns `None` when the identifier, the object, or the member name is
+/// missing.
 #[expect(
     clippy::wildcard_enum_match_arm,
     reason = "Only identifiers and static member accesses can be subjects."

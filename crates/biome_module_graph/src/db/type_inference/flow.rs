@@ -48,8 +48,10 @@ pub(in crate::db) fn flow_binding_baseline<'db>(
     info: &JsModuleInfo,
     range: TextRange,
 ) -> Option<TypeData<'db>> {
-    // Declaration queries can erase a cyclic object's shape. The raw baseline
-    // still lets flow detect an impossible branch and return an unknown override.
+    // The declared type is resolved from the raw binding type, not through a
+    // declaration query, because declaration queries can erase a cyclic
+    // object's shape. The raw type still lets flow detect an impossible branch
+    // and return an unknown override.
     let reference = info.raw_binding_types.get(&range)?;
     let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
     let declared = ctx.resolve(reference);
@@ -335,8 +337,9 @@ impl<'db> ResolutionCtx<'db, '_> {
         if let Some(baseline) = self.local_flow.as_ref()?.baselines.get(&binding) {
             return *baseline;
         }
-        // As in `flow_binding_baseline`, the raw binding type gives the
-        // declared type.
+        // The declared type is resolved from the raw binding type, not through
+        // a declaration query, so a cyclic object keeps its shape, as in
+        // `flow_binding_baseline`.
         let baseline = self
             .js_info
             .raw_binding_types

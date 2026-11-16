@@ -129,8 +129,9 @@ fn property_paths_narrow_like_variables() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type:
-// a path read starts from the property's type on the object's narrowed type.
+// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type,
+// because a path read starts from the property's type on the object's narrowed
+// type.
 #[test]
 fn path_reads_start_from_the_narrowed_object() {
     use InferredTypeData::{Number, String};
@@ -153,11 +154,11 @@ fn path_reads_start_from_the_narrowed_object() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) narrows each read below to `string`: a call
-// that may write `o.v`, a write through another variable, a write inside a
-// callback, and a write to a longer path never cancel property narrowing.
-// Biome copies this unsound narrowing; `NARROWING.md` lists it among the
-// deliberate choices.
+// TypeScript 6.0.3 (`tsc --strict`) narrows each read below to `string`,
+// because a call that may write `o.v`, a write through another variable, a
+// write inside a callback, and a write to a longer path never cancel property
+// narrowing. Biome copies this unsound narrowing; `NARROWING.md` lists it among
+// the deliberate choices.
 #[test]
 fn calls_aliases_and_callbacks_keep_property_narrowing() {
     use InferredTypeData::String;
@@ -186,7 +187,8 @@ fn calls_aliases_and_callbacks_keep_property_narrowing() {
         ],
     );
 
-    // TypeScript gives `{ w: string | null }`: writing `o.v.w` leaves `o.v`.
+    // TypeScript gives `{ w: string | null }`, because writing `o.v.w` does not
+    // change `o.v`.
     const EXTENSION: &str = r#"
         function extension(o: { v: { w: string | null } | null }) {
             /*declared*/o.v;
@@ -225,11 +227,11 @@ fn getters_narrow_like_fields() {
 // Each expected type is `string | null` (or `number | null`, or
 // `string | undefined`). TypeScript 6.0.3 (`tsc --strict`) gives the type in
 // the comment after each read. Where it differs, TypeScript narrows the path
-// at the write itself, which Biome does not model yet: a write anywhere in the
-// function stops the path from narrowing, so Biome is deliberately wider. A
-// write through a key that is not a literal (`unionKey`) also stops it, where
-// TypeScript ignores the write; `NARROWING.md` lists this among the deliberate
-// choices, and so does the `async` function called where it is defined.
+// at the write itself. Biome does not model that yet, so a write anywhere in
+// the function stops the path from narrowing and Biome is deliberately wider.
+// TypeScript instead ignores a write through a key that is not a literal
+// (`unionKey`) and a write in an `async` function called where it is defined
+// (`asyncIife`). `NARROWING.md` lists both among the deliberate choices.
 #[test]
 fn writes_to_the_path_a_prefix_or_any_property_cancel_narrowing() {
     use InferredTypeData::{Null, Number, String, Undefined};
@@ -300,10 +302,10 @@ fn writes_to_the_path_a_prefix_or_any_property_cancel_narrowing() {
 }
 
 // TypeScript 6.0.3 (`tsc --strict`) gives `string | null` at `arrow` and
-// `declaration`: property narrowing never reaches a function created later.
-// It gives `string` at `iife` and `enclosing`, where Biome is wider: the body
-// of a function called where it is defined does not continue the outer flow
-// yet, and a path narrows only in the execution root that declares its
+// `declaration`, because property narrowing never reaches a function created
+// later. It gives `string` at `iife` and `enclosing`, where Biome is wider. The
+// body of a function called where it is defined does not continue the outer
+// flow yet, and a path narrows only in the execution root that declares its
 // variable.
 #[test]
 fn reads_in_nested_functions_see_no_property_facts() {
@@ -365,8 +367,9 @@ fn type_guards_and_assertions_narrow_properties() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every call below the expected type:
-// a narrowed method is called with the narrowed type.
+// TypeScript 6.0.3 (`tsc --strict`) gives every expression below the expected
+// type, because a call or member access on a narrowed path uses the narrowed
+// type.
 #[test]
 fn narrowed_callees_resolve_their_calls() {
     use InferredTypeData::{Number, String};
