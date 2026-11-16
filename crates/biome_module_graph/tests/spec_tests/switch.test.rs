@@ -88,8 +88,9 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert_reads_importing(source, "", reads);
 }
 
-/// Asserts the reads of `source` as [`assert_reads`] does, in a module that
-/// can import `constants` from `./constants.ts`.
+/// Asserts the type of each `(marker, expression, expected)` read in `source`,
+/// which follows [`TYPES`], by the names of its members. `source` can import
+/// `constants` from `./constants.ts`.
 fn assert_reads_importing(source: &str, constants: &str, reads: &[(&str, &str, &[&str])]) {
     let source = format!("{TYPES}{source}");
     let fs = MemoryFileSystem::default();
@@ -297,12 +298,10 @@ fn statements_inside_cases_narrow() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m4/switch.ts` L20, L22, L49, and
-// `narrowing-probes/fix-e/switch.ts` L11 to L16): a case narrows by a value
-// whose type is a unit type, as `===` with it does, also when the value is
-// `-1`, a `const`, an imported `const`, `void 0`, or a template literal
-// without substitutions.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A case narrows by a value whose type is a unit type, as `===` with it does,
+// also when the value is `-1`, a `const`, an imported `const`, `void 0`, or a
+// template literal without substitutions.
 #[test]
 fn cases_narrow_by_unit_values() {
     assert_reads_importing(
@@ -336,10 +335,10 @@ fn cases_narrow_by_unit_values() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) narrows `e` to `E.A` and `E.B`, and `x`
-// to `"a"` at `nonNull` (`narrowing-probes/m4/switch.ts` L24, L50), and gives
-// `number` at `nan` (L48). Biome doesn't infer the type of an enum, so its
-// members aren't unit values, and a discriminant that isn't a subject, such
-// as `x!`, narrows nothing. Biome keeps the declared type, which is wider.
+// to `"a"` at `nonNull`, and gives `number` at `nan`. Biome doesn't infer the
+// type of an enum, so its members aren't unit values, and a discriminant that
+// isn't a subject, such as `x!`, narrows nothing. Biome keeps the declared
+// type, which is wider.
 #[test]
 fn cases_that_biome_does_not_compare_keep_the_declared_type() {
     assert_reads(
@@ -507,10 +506,9 @@ fn typeof_cases_narrow_the_operand() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m4/typeof.ts` L7, L12, L21, L22, `m4/more.ts` L4, L5,
-// and `fix-e/switch.ts` L34, L35). A case that is neither a string literal
-// nor a template literal without substitutions makes no case of
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below but `invalid` the
+// expected type. A case that is neither a string literal nor a template
+// literal without substitutions makes no case of
 // `switch (typeof x)` narrow, and a `typeof` case narrows only the operand,
 // not the object that holds it or the pattern that declares it. TypeScript
 // gives `never` for an invalid kind (`"strin"`), where Biome keeps the
@@ -753,11 +751,10 @@ fn exhaustive_switches_narrow_other_subjects() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives `string | null` for `y` at every
-// read below (`narrowing-probes/m4/switch.ts` L26, `m4-l1/extra.ts` L6, L14,
-// L19, L23, L37). A case is missing, the discriminant is `typeof` in
-// parentheses, which TypeScript checks as a string value, the discriminant is
-// `never` before the switch, which no literal type is, or the read comes
-// before the switch in a loop.
+// read below. A case is missing, the discriminant is `typeof` in parentheses,
+// which TypeScript checks as a string value, the discriminant is `never`
+// before the switch, which no literal type is, or the read comes before the
+// switch in a loop.
 #[test]
 fn switches_that_are_not_exhaustive_keep_the_path_that_matches_no_case() {
     assert_reads(
@@ -781,12 +778,11 @@ fn switches_that_are_not_exhaustive_keep_the_path_that_matches_no_case() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives `string` for `y` at every read
-// below (`narrowing-probes/m4-l1/extra.ts` L35, and `fix-e/switch.ts` L18 to
-// L22, L32, L36), and `never` for `x` at `discriminant` (L27), which Biome
-// reads as Unknown: a case whose value is a unit type, such as `-1`, a
-// `const`, an imported `const`, `void 0`, or a template literal without
-// substitutions, counts toward exhaustiveness as a literal does, also after
-// a comparison with a `const` that narrows the discriminant.
+// below, and `never` for `x` at `discriminant`, which Biome reads as Unknown.
+// A case whose value has a unit type counts toward exhaustiveness as a
+// literal does, also after a comparison with a `const` that narrows the
+// discriminant. Such a value can be `-1`, a `const`, an imported `const`,
+// `void 0`, or a template literal without substitutions.
 #[test]
 fn switches_with_cases_of_unit_values_are_exhaustive() {
     assert_reads_importing(
@@ -820,14 +816,13 @@ fn switches_with_cases_of_unit_values_are_exhaustive() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives `string | null` for `y` at every
-// read below but `function` (`narrowing-probes/fix-e/switch.ts` L23, L25,
-// L29 to L31, L58): a case whose value is `-(1)`, which is `number`, or an
-// imported `"a" as string` keeps a switch from being exhaustive, even when
-// the other cases cover every value, and so does a discriminant that a
+// read below but `function`. A case whose value is `-(1)`, which is `number`,
+// or an imported `"a" as string` keeps a switch from being exhaustive, even
+// when the other cases cover every value. So does a discriminant that a
 // comparison with a `const`, an imported `const`, or `-1` narrows to `never`
-// before the switch, as no literal type is `never`. TypeScript gives `string` at
-// `function` (L24), because `f()` returns `"c"`, where Biome doesn't compare
-// with a call and keeps the path that matches no case, which is wider.
+// before the switch, because no literal type is `never`. TypeScript gives
+// `string` at `function` because `f()` returns `"c"`. Biome doesn't compare
+// with a call, so it keeps the path that matches no case, which is wider.
 #[test]
 fn switches_with_cases_that_are_not_unit_values_are_not_exhaustive() {
     assert_reads_importing(
@@ -858,13 +853,13 @@ fn switches_with_cases_that_are_not_unit_values_are_not_exhaustive() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at both reads
-// (`narrowing-probes/fix-e/hazard.ts` L4, L5): the comparisons before the
-// switch narrow `x` to `never`, so no case type covers it. Biome doesn't
-// compare with an enum member or a variable with a type annotation, so `x`
-// is `"a"` at the switch, which is exhaustive, and `y` reads as `string`,
-// which is narrower than TypeScript in code that TypeScript types as
-// impossible, as the Limits in `NARROWING.md` describe.
+// TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at both reads,
+// because the comparisons before the switch narrow `x` to `never`, so no case
+// type covers it. Biome doesn't compare with an enum member or a variable
+// with a type annotation, so `x` is `"a"` at the switch, and the switch is
+// exhaustive. `y` reads as `string`, which is narrower than TypeScript in
+// code that TypeScript types as impossible, as the Limits in `NARROWING.md`
+// describe.
 #[test]
 fn switches_after_comparisons_that_biome_does_not_decompose_can_be_exhaustive() {
     assert_reads(

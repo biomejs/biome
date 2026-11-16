@@ -17,8 +17,8 @@ fn marked_range(source: &str, marker: &str, expression: &str) -> TextRange {
 }
 
 /// Names each member of `ty`, sorted: an object type literal by its members,
-/// Biome's Unknown, which a read on a path that no value takes has, as
-/// `Unknown`, and any other type by its formatted text on one line.
+/// Biome's Unknown as `Unknown`, and any other type by its formatted text on
+/// one line. A read on a path that no value takes has the type Unknown.
 fn variant_names(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
     if ty == InferredTypeData::Unknown {
         return vec!["Unknown".to_owned()];
@@ -81,11 +81,11 @@ const MORE: &str = r#"
     export const EK = "c";
 "#;
 
-/// Asserts the type of each `(marker, expression, expected)` read in
-/// `source`, which follows [`PRELUDE`] in `/src/index.ts` and can import
-/// [`CONSTANTS`] from `./constants.ts`, by the names of its members, as
-/// [`variant_names`] gives them. Each read has the same type in a lookup and
-/// in complete module inference.
+/// Asserts the type of each `(marker, expression, expected)` read in `source`
+/// by the names of its members, as [`variant_names`] gives them, and asserts
+/// that a lookup and complete module inference give each read the same type.
+/// `source` follows [`PRELUDE`] in `/src/index.ts` and can import
+/// [`CONSTANTS`] from `./constants.ts`.
 fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     let source = format!("{PRELUDE}{source}");
     let fs = MemoryFileSystem::default();
@@ -133,10 +133,9 @@ fn infer_expression_type_at<'db>(
     )
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/fix-e/equality.ts` L22 to L30, L34, L35, L47 to L49,
-// L54): a comparison with a `const` whose initializer is a literal narrows as
-// a comparison with the literal does, also through another such `const`, in
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A comparison with a `const` whose initializer is a literal narrows as a
+// comparison with the literal does, also through another such `const`, in
 // either order, and in parentheses.
 #[test]
 fn comparisons_with_constants_narrow_both_branches() {
@@ -187,13 +186,12 @@ fn comparisons_with_constants_narrow_both_branches() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/fix-e/equality.ts` L25, L26, L31 to L33, L52, L55): `-`
-// or `+` directly before a number literal, `-` directly before a bigint
-// literal, and a template literal without substitutions have literal types,
-// and `void` gives `undefined`, so a comparison with them narrows. Biome
-// gives `-1n` the type `bigint`, so it keeps `bigint` at `e31t`, where
-// TypeScript gives `-1n`, which is wider.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below but `e31t` the
+// expected type. `-` or `+` directly before a number literal, `-` directly
+// before a bigint literal, and a template literal without substitutions have
+// literal types, and `void` gives `undefined`, so a comparison with them
+// narrows. Biome gives `-1n` the type `bigint`, so it keeps `bigint` at
+// `e31t`, which is wider than the `-1n` that TypeScript gives.
 #[test]
 fn comparisons_with_negative_numbers_void_and_templates_narrow() {
     assert_reads(
@@ -225,15 +223,14 @@ fn comparisons_with_negative_numbers_void_and_templates_narrow() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) keeps the declared type at the first
-// eight reads (`narrowing-probes/fix-e/equality.ts` L36, L37, L39 to L41,
-// L51): `-(1)` and `-(-1)` are `number`, `1 === 1` is `boolean`, a `typeof`
-// expression is the union of the kinds, and a `let` widens its literal, so
-// none of them is a unit type. It narrows at the other reads (L42 to L46,
-// L50, L53) to `"a"`, `"a" | "b"`, and `"b" | "c" | null` where Biome keeps
-// the declared type, which is wider: Biome doesn't compare with a variable
-// that has a type annotation, a call, `as const`, a template literal with
-// substitutions, or a literal with loose equality yet.
+// TypeScript 7.0.2 (`tsc --strict`) keeps the declared type at every read up
+// to `e20f`, because none of the compared values has a unit type. `-(1)` and
+// `-(-1)` are `number`, `1 === 1` is `boolean`, a `typeof` expression is the
+// union of the kinds, and a `let` widens its literal. TypeScript narrows at
+// the other reads to `"a"`, `"a" | "b"`, and `"b" | "c" | null`, where Biome
+// keeps the declared type, which is wider. Biome doesn't compare with a
+// variable that has a type annotation, a call, `as const`, a template literal
+// with substitutions, or a literal with loose equality yet.
 #[test]
 fn comparisons_with_values_that_biome_does_not_compare_keep_the_type() {
     assert_reads(
@@ -293,11 +290,9 @@ fn comparisons_with_values_that_biome_does_not_compare_keep_the_type() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/fix-e/equality.ts` L56 to L58): a comparison of `x?.y`
-// with a unit value that isn't `undefined` shows, where they are equal, that
-// `x` is not nullish, and a comparison with `undefined` shows it where they
-// differ.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// Where `x?.y` equals a unit value other than `undefined`, `x` is not
+// nullish, and the same holds where `x?.y` differs from `undefined`.
 #[test]
 fn comparisons_with_unit_values_narrow_the_receivers_of_an_optional_chain() {
     assert_reads(
@@ -317,13 +312,14 @@ fn comparisons_with_unit_values_narrow_the_receivers_of_an_optional_chain() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/fix-e/imports.ts` L6 to L13): an imported `const`
-// narrows as a local one does, through the `const`s and imports of the
-// module that declares it and through a re-export, while one whose value is
-// `-(1)`, `1 === 1`, or a `let` is no unit value. A comparison with an
-// imported variable narrows no receiver of an optional chain, where
-// TypeScript removes `undefined` from `o` at `receiver`, which is wider.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below but `receiver` the
+// expected type. An imported `const` narrows as a local one does, through the
+// `const`s and imports of the module that declares it and through a
+// re-export. An imported `const` whose value is `-(1)` or `1 === 1` holds no
+// unit value, and neither does an imported `let`. TypeScript removes
+// `undefined` from `o` at `receiver`, where Biome keeps it, which is wider,
+// because a comparison with an imported variable narrows no receiver of an
+// optional chain.
 #[test]
 fn comparisons_with_imported_constants_narrow() {
     assert_reads(
@@ -370,10 +366,9 @@ fn comparisons_with_imported_constants_narrow() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) narrows `x` to `"a"` and `"b" | "c"` at
-// the first four reads, to `"c"` and `"a" | "b"` at the next two, and `x` to
-// `0` and `1` at the last two (`narrowing-probes/fix-e/imports.ts` L14 to
-// L16, L19, L23). Biome keeps the declared type, which is wider: it doesn't
+// TypeScript 7.0.2 (`tsc --strict`) narrows `x` to `"a"` and `"b" | "c"` in
+// `i9` and `i11`, to `"c"` and `"a" | "b"` in `i10`, and to `0` and `1` in
+// `i14`. Biome keeps the declared type, which is wider, because it doesn't
 // compare with an imported variable that has a type annotation, an export
 // written as an expression, a member of a namespace import, or an enum
 // member, whose type Biome doesn't infer yet.
@@ -402,9 +397,8 @@ fn comparisons_with_other_imported_values_keep_the_type() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/fix-e/switch.ts` L39, L41, L50 to L52, L55): a
-// comparison of a discriminant with a `const` narrows the object, loose
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A comparison of a discriminant with a `const` narrows the object, loose
 // equality with a `const` that holds `null` or `undefined` matches both, and
 // a local variable named `undefined` is compared as any other `const`.
 #[test]
@@ -438,12 +432,11 @@ fn comparisons_with_constants_narrow_discriminants_and_loose_nullish_tests() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `boolean` at both reads
-// (`narrowing-probes/fix-e/switch.ts` L45, L46): `D` is `never` where the
-// comparisons run, so they compare with no value and narrow nothing. Biome
-// takes `D` as `false` there, so it gives `false`, which is narrower than
-// TypeScript in code that TypeScript types as impossible, as the Limits in
-// `NARROWING.md` describe.
+// TypeScript 7.0.2 (`tsc --strict`) gives `boolean` at both reads, because
+// `D` is `never` where the comparisons run, so they compare with no value and
+// narrow nothing. Biome takes `D` as `false` there, so it gives `false`,
+// which is narrower than TypeScript in code that TypeScript types as
+// impossible, as the Limits in `NARROWING.md` describe.
 #[test]
 fn comparisons_with_constants_that_a_condition_makes_impossible_narrow() {
     assert_reads(
