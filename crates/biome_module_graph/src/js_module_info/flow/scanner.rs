@@ -43,11 +43,10 @@ declare_node_union! {
 /// The visitor must report every node of the module in preorder through
 /// [`Self::enter`] and [`Self::leave`]. A root is selected when it directly
 /// contains a condition, a write that [`AnyFlowWriteSource`] describes, or a
-/// statement call that may assert, as [`is_statement_call`] and
-/// [`may_assert`] describe, outside its nested roots, has fewer than
+/// statement call that may assert, outside its nested roots, has fewer than
 /// [`MAX_ROOT_NODES`] syntax nodes, and uses only syntax the flow builder
-/// supports. A root selected only by statement calls keeps them, so that
-/// collection, which has the semantic model, builds it only when one of their
+/// supports. A root selected only by statement calls keeps them. Collection,
+/// which has the semantic model, then builds the root only when one of their
 /// callees can assert.
 ///
 /// The builder treats statements it does not model, such as a class
@@ -286,11 +285,10 @@ fn is_evaluation_condition(node: &JsSyntaxNode) -> bool {
     }
 }
 
-/// Returns whether `call` is a statement call, as TypeScript's binder adds it
-/// to the flow (`bindExpressionStatement`, `maybeBindExpressionFlowIfCall`):
-/// the expression of an expression statement, or an operand of the comma
-/// operator there, through any parentheses around the comma expression. A
-/// call in parentheses is none, as in `(assert(x));`.
+/// Returns whether `call` is a statement call, one that TypeScript adds to
+/// the flow: the expression of an expression statement, or an operand of the
+/// comma operator there, through any parentheses around the comma
+/// expression. A call in parentheses is none, as in `(assert(x));`.
 fn is_statement_call(call: &JsCallExpression) -> bool {
     let mut parent = call.syntax().parent();
     let mut in_sequence = false;

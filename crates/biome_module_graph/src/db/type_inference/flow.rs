@@ -3,9 +3,9 @@
 //! Collection records the incoming flow of each refinable read, the guards
 //! that the conditions of its execution root apply, and its writes (see
 //! [`crate::js_module_info::flow`]). This module resolves the type that the
-//! read's subject starts from, the types that its writes assign, and what
-//! the call points that may narrow it do, and applies the guards and the
-//! writes along every path that reaches the read. The solve's key carries
+//! read's subject starts from, the types that its writes assign, and the
+//! effects of the call points that may narrow it, and applies the guards and
+//! the writes along every path that reaches the read. The solve's key carries
 //! all of these, so a solve resolves no declared type, assigned value, or
 //! callee.
 //! A variable starts from its declared type. In a closure that continues the
@@ -1065,13 +1065,13 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     /// Returns the type that narrowing of the binding declared at `binding`
     /// starts from in a root where one of its call points narrows: its
-    /// declared type flattened, as [`Self::narrowing_baseline`] gives it.
+    /// declared type, flattened for narrowing by [`Self::narrowing_baseline`].
     ///
-    /// That is the type that [`Self::flow_binding_baseline`] gives, unless
-    /// the roots that read the binding narrow it only through tests of its
-    /// shape or only through writes, which start it from a type that only
-    /// those can narrow. The declared type is then resolved here, in the
-    /// reading context, which a call that narrows makes rare.
+    /// [`Self::flow_binding_baseline`] gives that type unless the roots that
+    /// read the binding narrow it only through tests of its shape or only
+    /// through writes. It then gives a type that only those can narrow, so
+    /// this function resolves the declared type itself, in the reading
+    /// context. Only a call point that narrows needs this.
     fn called_binding_baseline(&mut self, binding: TextRange) -> Option<TypeData<'db>> {
         let info = self.js_info;
         if !info.flow.is_property_only_binding(binding)
@@ -1359,10 +1359,10 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns the effects of the call points of the root at index `root`
-    /// that may narrow `subject`, as [`RootFlow::subject_calls`] lists them,
-    /// keeping those that narrow, as [`FlowSubjectRootInput::calls`] takes
-    /// them, or `None` when none does. The answer is kept per root and
-    /// subject when this context evaluates flow locally.
+    /// that narrow `subject`, for [`FlowSubjectRootInput::calls`], or `None`
+    /// when none of them narrows. The call points checked are those that
+    /// [`RootFlow::subject_calls`] lists for the subject. The answer is
+    /// cached per root and subject when this context evaluates flow locally.
     fn call_effects(
         &mut self,
         root: usize,
@@ -1400,9 +1400,10 @@ impl<'db> ResolutionCtx<'db, '_> {
         effects
     }
 
-    /// Returns what the call point at `range` does, through
-    /// [`crate::db::queries::infer_flow_call_effect`], or resolved in this
-    /// context and kept per call when it evaluates flow locally.
+    /// Returns the effect of the call point at `range`. A context that
+    /// evaluates flow locally resolves it itself and caches it per call.
+    /// Other contexts read it from
+    /// [`crate::db::queries::infer_flow_call_effect`].
     fn flow_call_effect(&mut self, range: TextRange) -> FlowCallEffect<'db> {
         if !self.evaluates_flow_locally() {
             return infer_flow_call_effect(
@@ -1424,27 +1425,28 @@ impl<'db> ResolutionCtx<'db, '_> {
         effect
     }
 
-    /// Resolves what the call point at `range` does, as
-    /// [`crate::db::queries::infer_flow_call_effect`] describes, in this
-    /// context.
+    /// Resolves the effect of the call point at `range` in this context, or
+    /// [`FlowCallEffect::None`] when the call narrows nothing.
     pub(super) fn call_effect(&mut self, range: TextRange) -> FlowCallEffect<'db> {
         self.resolve_call_effect(range).unwrap_or_default()
     }
 
-    /// Resolves the effect that [`Self::call_effect`] returns, or `None` for
-    /// [`FlowCallEffect::None`].
+    /// Resolves the effect that [`Self::call_effect`] returns, or `None` when
+    /// the call narrows nothing.
     ///
     /// The callee's type is its ordinary type, without narrowing, as its raw
-    /// type resolves: for a call in a condition without `null` and
-    /// `undefined`, as TypeScript's `checkNonNullExpression` gives it, and
-    /// for a statement call only when every name along the callee has an
-    /// explicit type, as [`Self::has_explicit_callee`] decides, where the
-    /// ordinary type is that explicit type. The type must have one signature,
-    /// which is not generic, as TypeScript's `getEffectsSignature` requires
-    /// before overload resolution, which Biome doesn't do here. A call in a
-    /// condition takes a type predicate, and a statement call an assertion,
-    /// whose target is flattened as a declared type is. A target of `any`
-    /// or `unknown` narrows nothing.
+    /// type resolves. For a call in a condition, a union callee loses its
+    /// `null` and `undefined` members, as in TypeScript, and must keep exactly
+    /// one. A statement call resolves only when every name along its callee
+    /// has an explicit type, as [`Self::has_explicit_callee`] checks, so its
+    /// ordinary type is that explicit type, and its callee can't be a union.
+    /// The callee must have exactly one signature without type parameters.
+    /// TypeScript resolves the call to pick a signature otherwise, which Biome
+    /// doesn't do here.
+    ///
+    /// A call in a condition narrows only through a type predicate, and a
+    /// statement call only through an assertion. The target is flattened as a
+    /// declared type is, and a target of `any` or `unknown` narrows nothing.
     fn resolve_call_effect(&mut self, range: TextRange) -> Option<FlowCallEffect<'db>> {
         let info = self.js_info;
         let call = info.flow.call(range)?;
@@ -1529,16 +1531,16 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns whether every name along the callee of a statement call has
-    /// an explicit type, as TypeScript's `getTypeOfDottedName` requires, given
-    /// how collection found the name that it starts at, `root`, and the ranges
-    /// of its member accesses, `steps`, as [`FlowCallKind::Statement`]
-    /// records them.
+    /// an explicit type, which TypeScript requires before it applies an
+    /// assertion. `root` is how collection classified the name that the
+    /// callee starts at, and `steps` are the ranges of its member accesses,
+    /// as [`FlowCallKind::Statement`] records them.
     ///
-    /// An import has one when the declaration that it names has one, as
-    /// [`imported_declaration_is_explicit`] decides, and each member access
-    /// when every type that its object can have declares the member with
-    /// one, as [`has_explicit_member`] decides. The object's type is its
-    /// declared type, as its raw type resolves, as TypeScript reads the
+    /// An import has an explicit type when the declaration that it names has
+    /// one, as [`imported_declaration_is_explicit`] checks. A member access
+    /// has one when every type that its object can have declares the member
+    /// with one, as [`has_explicit_member`] checks. The object's type is its
+    /// declared type, as its raw type resolves, because TypeScript reads the
     /// explicit types along the callee.
     fn has_explicit_callee(&mut self, root: FlowCallRoot, steps: &[TextRange]) -> bool {
         let info = self.js_info;
@@ -2257,17 +2259,18 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns the type of the subject that `solve` narrows after the guard
-    /// at `index`, the [`FlowGuard::Call`] of the call point at index `call`
-    /// whose result is truthy when `positive` is true, holds, given its
-    /// incoming type `ty`, or `None` when the flow work limit runs out.
+    /// at `index` holds, given its incoming type `ty`, or `None` when the
+    /// flow work limit runs out. The guard is the [`FlowGuard::Call`] of the
+    /// call point at index `call`, whose result is truthy when `positive` is
+    /// true.
     ///
-    /// The effect comes from the solve's key, as the reading context resolved
+    /// The effect comes from the solve's key, where the reading context put
     /// it, so the solve resolves no callee. A type predicate narrows the
-    /// operand that it names as [`narrow_by_type_predicate`] does, by
-    /// `positive`, and an assertion narrows it as the true branch of a type
-    /// predicate, or, for `asserts value`, applies the guard of the argument
-    /// decomposed as a condition that holds. A call whose effect the key
-    /// lacks keeps `ty`.
+    /// operand that it names to its target where the call is truthy, and
+    /// removes the target where the call is falsy. An assertion narrows the
+    /// operand as a truthy type predicate does. `asserts value` instead
+    /// applies the guard of the argument decomposed as a condition that
+    /// holds. A call whose effect the key lacks keeps `ty`.
     #[expect(
         clippy::too_many_arguments,
         reason = "The arguments mirror `apply_guard`, with the call's guard."
@@ -2781,9 +2784,10 @@ fn imported_return_is_annotated(
 /// parameter.
 ///
 /// Returns `None` when no parameter has the name or more than one has it,
-/// when it is a rest or an optional parameter, whose argument a default can
-/// replace, when the call passes no argument there before a spread, and for
-/// a name spelled with an escape.
+/// when it is a rest or an optional parameter, when the call passes no
+/// argument there before a spread, and for a name spelled with an escape. An
+/// optional parameter is rejected because a default can replace its
+/// argument.
 fn predicate_parameter<'db>(
     db: &'db dyn ModuleDb,
     function: InternedFunction<'db>,
@@ -2839,17 +2843,17 @@ fn raw_member(js_info: &JsModuleInfo, range: TextRange) -> Option<(&TypeReferenc
     }
 }
 
-/// Returns whether the declaration that the imported binding at `binding` in
-/// `js_info`, the module `module`, names has an explicit type, as TypeScript's
-/// `getExplicitTypeOfSymbol` requires of a name along the callee of a
-/// statement call. For a namespace import, the declaration is the export
-/// that `member` names.
+/// Returns whether the declaration that an imported binding names has an
+/// explicit type, which TypeScript requires of every name along the callee
+/// of a statement call. `binding` is the range of the import in `js_info`,
+/// the module `module`. For a namespace import, the declaration is the
+/// export that `member` names.
 ///
 /// The import is followed through re-exports to the module that declares the
-/// export, as `find_export_origin` follows exports, and a binding that an
-/// import declares there is followed in turn, at most 16 of them. A
-/// declaration file declares only names with explicit types. Elsewhere, a
-/// function, a class, and a variable with a type annotation have one.
+/// export, and a binding that an import declares there is followed in turn,
+/// at most [`MAX_IMPORT_STEPS`] of them. A declaration file declares only
+/// names with explicit types. Elsewhere, a function, a class, a variable
+/// with a type annotation, and a namespace that `declare` declares have one.
 fn imported_declaration_is_explicit(
     db: &dyn ModuleDb,
     mut module: ModuleInfo,
@@ -2931,21 +2935,27 @@ fn imported_declaration_is_explicit(
 }
 
 /// Returns whether every type that `ty` can be declares its member `name`
-/// with an explicit type, as TypeScript's `getExplicitTypeOfSymbol` requires
-/// of a member along the callee of a statement call.
+/// with an explicit type, which TypeScript requires of every member along
+/// the callee of a statement call.
 ///
-/// That holds for a lib global or an instance of one, unless a module other
-/// than a declaration file merges an interface into it; a primitive, a
-/// literal that isn't an object, and a tuple, whose members are those of
-/// their lib types; a type literal, whose members all have explicit types;
-/// a type that a declaration file declares, when the classes and interfaces
-/// that it extends are such types too; and a class or an interface that a
-/// module other than a declaration file declares, whose own members named
-/// `name`, `static` ones for the class itself, are methods or properties
-/// with type annotations, or that inherits the member from such a type, as
-/// [`own_member`] decides. An object literal, a union, `null`, and
-/// `undefined` have none, and neither do namespaces and modules, whose
-/// members collection checks itself.
+/// These types qualify:
+///
+/// - a lib global or an instance of one, unless a module other than a
+///   declaration file merges an interface into it;
+/// - a primitive, a literal that isn't an object, and a tuple, because their
+///   members are those of their lib types;
+/// - a type literal, because all its members have explicit types;
+/// - a type that a declaration file declares, when the classes and
+///   interfaces that it extends qualify too;
+/// - a class or an interface that a module other than a declaration file
+///   declares, when its own members named `name` are methods, or properties
+///   with type annotations, or when it inherits the member from a type that
+///   qualifies. For the class itself, its `static` members count, as
+///   [`own_member`] checks.
+///
+/// An object literal, a union, `null`, and `undefined` don't qualify, and
+/// neither do namespaces and modules, whose members collection checks
+/// itself.
 fn has_explicit_member(db: &dyn ModuleDb, ty: TypeData, name: &str) -> bool {
     // Each type comes with whether a value of it is an instance, as the
     // object of a call of a class's method is.
@@ -3038,7 +3048,8 @@ fn has_explicit_member(db: &dyn ModuleDb, ty: TypeData, name: &str) -> bool {
                     (interface.extends(db).to_vec(), own)
                 } else {
                     // A type literal, a handle in another module, or a type
-                    // that an alias names, which its own module decides.
+                    // that an alias names is checked as the type that it
+                    // resolves to in its own module.
                     pending.push((resolved, instance));
                     continue;
                 };
@@ -3257,22 +3268,24 @@ enum MemberRule {
     /// A method of an instance with a return type annotation, as
     /// [`member_return`] finds it.
     AnnotatedReturn,
-    /// A method or a property with a type annotation, among the `static`
+    /// A method, or a property with a type annotation, among the `static`
     /// members when `is_static` is true and among the others otherwise, as
     /// [`member_explicitness`] finds it.
     Explicit { is_static: bool },
 }
 
-/// Returns where a class or an interface that `module`, a module other than
-/// a declaration file, declares gets its member `name`, given the scope that
-/// the class or interface records, the `members` that local inference
-/// collected for it, how many `contributions` other modules merge into it,
-/// and what `rule` requires of its own members: the members of an instance,
-/// unless the rule asks for `static` ones.
+/// Returns where a class or an interface gets its member `name`, among the
+/// members of an instance unless `rule` asks for `static` ones.
+///
+/// `module` declares the class or interface and is no declaration file.
+/// `scope_id` is the scope that the class or interface records, `members`
+/// are the members that local inference collected for it, `contributions`
+/// counts the declarations that other modules merge into it, and `rule` is
+/// what its own members must satisfy.
 ///
 /// Its own members are those that the rule finds in the declaration that
 /// opens the scope. Declarations merged into it can add members with the
-/// name: member lookup finds a class's own members before them, but can find
+/// name. Member lookup finds a class's own members before them, but can find
 /// those of a later interface declaration first. So the member is its own
 /// only when local inference collected no more members with the name than
 /// the declaration declares, and inherited only when it collected none.

@@ -197,12 +197,11 @@ type Build<T> = Result<T, Unsupported>;
 /// `for`, `for...in`, `for...of`, `switch`, `try`, labeled statements,
 /// `break`, `continue`, `return`, and `throw`, and evaluates expressions in
 /// the order in which JavaScript runs them, with a write point after each
-/// write to a subject and a condition node after each statement call, as
-/// [`decompose_statement_call`] describes. Any other statement, such as a
-/// class or enum
-/// declaration, is an opaque region. The builder evaluates its expressions
-/// from the flow before it, and the code after it continues from that
-/// evaluation. A condition inside a region narrows only the rest of the
+/// write to a subject and a condition node after each statement call (see
+/// [`decompose_statement_call`]). Any other statement, such as a class or
+/// enum declaration, is an opaque region: the builder evaluates its
+/// expressions from the flow before it, and the code after it continues from
+/// that evaluation. A condition inside a region narrows only the rest of the
 /// expression that contains it, as in `x && x.length`. Each `break` or
 /// `continue` that leaves the region joins its target with the flow before
 /// the region. That flow is never narrower than the flow at any point inside
@@ -907,12 +906,13 @@ pub(crate) fn member_return(owner: &AnyMemberDeclaration, name: &str) -> (usize,
     (declared, annotated_if(annotated))
 }
 
-/// Returns how many members named `name` `owner` declares itself, among its
-/// `static` members when `is_static` is true and among the others otherwise,
-/// and whether each of them has an explicit type, as TypeScript's
-/// `getExplicitTypeOfSymbol` requires of a member along the callee of a
-/// statement call: a method, or a property with a type annotation. An
-/// accessor and a property without a type annotation have none. A private
+/// Returns how many members named `name` `owner` declares itself, and
+/// whether each of them has an explicit type, which TypeScript requires of a
+/// member along the callee of a statement call. Only the `static` members
+/// count when `is_static` is true, and only the others otherwise.
+///
+/// A method, and a property with a type annotation, have an explicit type.
+/// An accessor and a property without a type annotation have none. A private
 /// name is spelled with its `#`, as local inference stores member names.
 pub(crate) fn member_explicitness(
     owner: &AnyMemberDeclaration,
@@ -1514,19 +1514,18 @@ impl RootBuilder<'_, '_> {
         }
     }
 
-    /// Evaluates `expression`, the expression of an expression statement,
-    /// which lies at `depth`, from `incoming`, and returns the flow after it.
+    /// Evaluates `expression`, the expression of an expression statement at
+    /// `depth`, from `incoming`, and returns the flow after it.
     ///
     /// Each statement call adds a condition node right after it, which holds
-    /// what the call establishes when it returns, as
-    /// [`decompose_statement_call`] describes, so the call's own arguments
-    /// still see the types from before it. Statement calls follow
-    /// TypeScript's `bindExpressionStatement` and
-    /// `maybeBindExpressionFlowIfCall`: the expression itself when it is a
-    /// call, and each operand of the comma operator that is a call, through
-    /// any parentheses around the comma expression. A call in parentheses,
-    /// as in `(assert(x));`, is none. The operands run in order, so a write
-    /// in an operand comes before the next operand.
+    /// what the call establishes when it returns (see
+    /// [`decompose_statement_call`]), so the call's own arguments still see
+    /// the types from before it. The statement calls are those that
+    /// TypeScript adds to the flow: the expression itself when it is a call,
+    /// and each operand of the comma operator that is a call, through any
+    /// parentheses around the comma expression. A call in parentheses, as in
+    /// `(assert(x));`, is none. The operands run in order, so a write in an
+    /// operand comes before the next operand.
     fn statement_calls(
         &mut self,
         expression: &AnyJsExpression,

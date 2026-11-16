@@ -34,10 +34,10 @@ fn narrowing_db_with(source: &str, modules: &[(&str, &str)]) -> (TestModuleDb, M
     (db, module)
 }
 
-/// Names each member of `ty`, sorted: an interface or a class instance by its
-/// name, Biome's Unknown, which a read on a path that no value takes has, as
-/// `Unknown`, and any other type by its formatted text on one line, such as
-/// `string`, `null`, or `string: a`.
+/// Names each member of `ty`, sorted: an interface by its name, Biome's
+/// unknown type as `Unknown`, and any other type by its formatted text on one
+/// line, such as `string`, `null`, or `instanceof LeafNode`. A read on a path
+/// that no value takes has the unknown type.
 fn variant_names(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
     if ty == InferredTypeData::Unknown {
         return vec!["Unknown".to_owned()];
@@ -65,9 +65,9 @@ fn variant_names(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
     names
 }
 
-/// Asserts the type of each `(marker, expression, expected)` read in `source`,
-/// by the names of its members, as [`variant_names`] gives them, with
-/// `modules` beside it, as [`narrowing_db_with`] takes them, and that
+/// Asserts the type of each `(marker, expression, expected)` read in `source`
+/// by the names of its members, from [`variant_names`]. `modules` are the
+/// other modules, as [`narrowing_db_with`] takes them. Also asserts that
 /// complete module inference gives each read the type that a lookup gives it.
 fn assert_reads_with(source: &str, modules: &[(&str, &str)], reads: &[(&str, &str, &[&str])]) {
     let lookups: Vec<_> = {
@@ -115,7 +115,9 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert_reads_with(source, &[], reads);
 }
 
-/// The module that `narrowing-probes/m6/imports/main.ts` imports.
+/// The module at `/src/guards.ts`. It exports type-guard functions, assertion
+/// functions, and functions that never return, each declared in several
+/// forms for the import tests.
 const GUARDS: &str = r#"
         export function isString(v: unknown): v is string { return typeof v === "string"; }
         export declare function isNumber(v: unknown): v is number;
@@ -140,12 +142,11 @@ const GUARDS: &str = r#"
         export { isString as isStringAlias };
 "#;
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m6/imports/main.ts` L6 to L15). A call of an imported
-// type-guard function narrows through a named, default, namespace, or
-// re-exported import, and through a method of an imported class or of an
-// instance whose type the export infers, because a call in a condition takes
-// its signature from the callee's ordinary type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A call of an imported type-guard function narrows through a named, default,
+// namespace, or re-exported import, and through a method of an imported class
+// or of an instance whose type the export infers, because a call in a
+// condition takes its signature from the callee's ordinary type.
 #[test]
 fn imported_type_guard_functions_narrow() {
     assert_reads_with(
@@ -182,12 +183,12 @@ fn imported_type_guard_functions_narrow() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m6/imports/main.ts` L16 to L23). A statement call
-// asserts only when every name along its callee has an explicit type: an
-// imported function, a function or a variable with a type annotation that a
-// namespace import names, and a method of an annotated import do, while a
-// variable that an unannotated arrow or `new` initializes doesn't (TS2775).
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A statement call asserts only when every name along its callee has an
+// explicit type. An imported function, a function or a variable with a type
+// annotation that a namespace import names, and a method of an annotated
+// import have one, while a variable that an unannotated arrow or `new`
+// initializes doesn't (TS2775).
 // Each function here has no condition of its own, so only its statement call
 // selects it for flow.
 #[test]
@@ -221,9 +222,8 @@ fn imported_assertions_follow_the_explicit_type_rule() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m6/preds.ts` L16 to L24, L31, L32, L37, L39, L40, L44,
-// L45): a type-guard function narrows through a namespace, an object type, a
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A type-guard function narrows through a namespace, an object type, a
 // class instance or the class itself, an object literal, an alias, a
 // variable or a parameter with a function type, an optional chain, a callee
 // in parentheses, `this`, and a destructured method.
@@ -283,10 +283,9 @@ fn dotted_and_aliased_type_guard_functions_narrow() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m6/preds.ts` L27 to L29, L38), except where a comment
-// says otherwise. `this is T` narrows the object that the callee reads its
-// method from.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment says otherwise. `this is T` narrows the object that
+// the callee reads its method from.
 #[test]
 fn this_type_predicates_narrow_their_receiver() {
     assert_reads(
@@ -316,18 +315,17 @@ fn this_type_predicates_narrow_their_receiver() {
             // declared `TreeNode`, as for other instances of classes.
             ("L28_45", "n", &["instanceof TreeNode"]),
             ("L29_69", "o2.n", &["instanceof LeafNode"]),
-            // TypeScript gives `this & { tag: 1 }`: Biome keeps the declared type
-            // where TypeScript gives an intersection.
+            // TypeScript gives `this & { tag: 1 }`. Biome keeps the declared
+            // type where TypeScript gives an intersection.
             ("L38_93", "this", &["instanceof E"]),
         ],
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m6/preds.ts` L25, L26, L30, L33 to L36, L41), except
-// where a comment says otherwise. A callee of `any`, a union of callees, a
-// spread argument, and `.call` narrow nothing, and an optional call narrows
-// only where it is truthy.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment says otherwise. A callee of `any`, a union of
+// callees, a spread argument, and `.call` narrow nothing, and an optional call
+// narrows only where it is truthy.
 #[test]
 fn calls_without_a_single_signature_or_a_dotted_callee_keep_their_types() {
     assert_reads(
@@ -355,9 +353,11 @@ fn calls_without_a_single_signature_or_a_dotted_callee_keep_their_types() {
         function q24(x: string | number) { if (c.isS.call(c, x)) /*L41_58*/x; } // L41
         "#,
         &[
-            // TypeScript gives `string`: an element access is no dotted name.
+            // TypeScript gives `string`. Biome narrows nothing, because an
+            // element access is no dotted name.
             ("L25_53", "x", &["number", "string"]),
-            // TypeScript gives `string`: a call result is no dotted name.
+            // TypeScript gives `string`. Biome narrows nothing, because a
+            // call result is no dotted name.
             ("L26_90", "x", &["number", "string"]),
             ("L30_81", "x", &["string"]),
             ("L30_103", "x", &["number", "string"]),
@@ -372,8 +372,7 @@ fn calls_without_a_single_signature_or_a_dotted_callee_keep_their_types() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m6/asserts.ts` L12 to L26, L30 to L36, L38 to L41),
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
 // except where a comment says otherwise. A statement call asserts through a
 // namespace, an object type, a class instance or the class itself, an
 // annotated variable or parameter, an optional chain, and a callee in
@@ -422,7 +421,7 @@ fn statement_calls_assert_through_names_with_explicit_types() {
         function s27(x: string | null) { assert(x !== null && x.length > 0); /*L41_70*/x; } // L41
         "#,
         &[
-            // TypeScript gives `string` through `this & { ready: string }`:
+            // TypeScript gives `string` through `this & { ready: string }`.
             // Biome keeps the declared type where TypeScript gives an
             // intersection.
             ("L12_94", "this.ready", &["string", "undefined"]),
@@ -457,8 +456,7 @@ fn statement_calls_assert_through_names_with_explicit_types() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) keeps the declared type after a statement
-// call in parentheses, which its binder doesn't add to the flow
-// (`narrowing-probes/m6/literals.ts` L14, L15).
+// call in parentheses, because it doesn't add such a call to the flow.
 #[test]
 fn parenthesized_statement_calls_assert_nothing() {
     assert_reads(
@@ -477,10 +475,9 @@ fn parenthesized_statement_calls_assert_nothing() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m6/lib.ts` L4 to L14), except where a comment says
-// otherwise. `Array.isArray` and `ArrayBuffer.isView` narrow as type-guard
-// functions of the lib.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment says otherwise. `Array.isArray` and
+// `ArrayBuffer.isView` narrow as type-guard functions of the lib.
 #[test]
 fn library_type_guard_functions_narrow() {
     assert_reads(
@@ -530,7 +527,7 @@ fn library_type_guard_functions_narrow() {
             ("L11_71", "x", &["instanceof Uint8Array"]),
             ("L11_93", "x", &["instanceof ArrayBuffer"]),
             ("L12_60", "x", &["number", "string"]),
-            // TypeScript gives `any[]`: Biome narrows no `any`.
+            // TypeScript gives `any[]`, but Biome narrows no `any`.
             ("L13_46", "x", &["any"]),
             ("L14_68", "x", &["[number, number]"]),
         ],
@@ -539,10 +536,9 @@ fn library_type_guard_functions_narrow() {
 
 // TypeScript 7.0.2 (`tsc --strict`) narrows the operand after a call that is
 // an operand of the comma operator, also inside the same expression
-// statement, and also in a `return` statement
-// (`narrowing-probes/m6-l1/existing.ts` L7, `m6-l1/comma.ts` L7). Biome adds
-// only the operands of an expression statement to the flow, so the read in
-// `return` keeps its declared type, which is wider.
+// statement, and also in a `return` statement. Biome adds only the operands
+// of an expression statement to the flow, so the read in `return` keeps its
+// declared type, which is wider.
 #[test]
 fn comma_operands_of_expression_statements_assert() {
     assert_reads(
@@ -559,10 +555,9 @@ fn comma_operands_of_expression_statements_assert() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives `string` in the branch and
-// `string | number` after it (`narrowing-probes/m6/preds.ts` L17). Lookups
-// resolve the effect of a call point once, through a tracked query that the
-// reads of every subject it may narrow share, and infer no module
-// completely.
+// `string | number` after it. Lookups resolve the effect of a call point once,
+// through a tracked query that the reads of every subject it may narrow
+// share, and infer no module completely.
 #[test]
 fn lookups_resolve_each_call_point_once() {
     const SOURCE: &str = r#"

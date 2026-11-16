@@ -152,8 +152,8 @@ fn cyclic_bindings_keep_unknown_overrides_for_impossible_branches() {
 }
 
 // Each `Promise.resolve(value)` statement is a call point that passes
-// `value`, so the reads after it are candidates, but its callee has no
-// assertion signature, so they resolve no declared type and run no solve.
+// `value`, so the reads after it are candidates. Its callee has no assertion
+// signature, so those reads resolve no declared type and run no solve.
 // Lookups resolve each call's effect once.
 #[test]
 fn branchless_promise_batches_skip_flow_solves() {

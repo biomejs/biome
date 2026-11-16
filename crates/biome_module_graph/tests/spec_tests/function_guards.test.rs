@@ -456,8 +456,7 @@ fn callee_and_subject_shadowing_use_semantic_binding_identity() {
         ("outer", &[String]),
         ("localCallee", &[Number]),
         // TypeScript 7.0.2 (`tsc --strict`) narrows through a parameter
-        // annotated with a function type that returns a type predicate
-        // (`narrowing-probes/m6/preds.ts` L24).
+        // annotated with a function type that returns a type predicate.
         ("parameterCallee", &[String]),
     ] {
         let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
@@ -663,9 +662,8 @@ fn unsupported_callees_signatures_and_arguments_do_not_refine() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) narrows through an alias of a type-guard
-// function and through an object literal method too
-// (`narrowing-probes/m6/preds.ts` L21, L22, `narrowing-probes/m6-l1/guards.ts`),
-// which are call points whose callee's type inference resolves.
+// function and through an object literal method too. Both calls are call
+// points, so inference resolves the type of their callees.
 #[test]
 fn guards_bound_to_variables_and_untested_parameters_narrow() {
     use InferredTypeData::{Number, String};
@@ -1485,9 +1483,8 @@ fn guards_narrow_in_modules_that_call_eval() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) narrows through an imported type-guard
-// function (`narrowing-probes/m6/imports/main.ts` L6). The callee is a call
-// point whose signature a lookup resolves without inferring either module
-// completely.
+// function. The call is a call point, and a lookup resolves its callee's
+// signature without inferring either module completely.
 #[test]
 fn imported_guards_refine_without_inferring_whole_modules() {
     use InferredTypeData::{Number, String};
