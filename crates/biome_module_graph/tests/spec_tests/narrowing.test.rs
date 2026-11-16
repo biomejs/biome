@@ -1442,7 +1442,7 @@ fn consumers_keep_structural_truthiness_and_void_results_uncertain() {
 }
 
 #[test]
-fn hoisted_initialization_and_escaped_dynamic_names_prevent_stale_facts() {
+fn hoisted_initialization_prevents_stale_facts() {
     const SOURCE: &str = r#"
         function hoisted(flag: boolean) {
             if (typeof value !== "object") {
@@ -1450,28 +1450,53 @@ fn hoisted_initialization_and_escaped_dynamic_names_prevent_stale_facts() {
                 /*hoisted*/value;
             }
         }
-        function dynamic(value: string | null) {
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    let ty = normalized_type_at(&db, module, SOURCE, "hoisted", "value");
+    assert_variants(
+        &db,
+        ty,
+        &[InferredTypeData::String, InferredTypeData::Null],
+        "hoisted",
+    );
+}
+
+// TypeScript 6.0.3 (`tsc --strict`) narrows every read below to `string`,
+// although a direct `eval` or a mapped `arguments` object can set `value` to
+// `null`. Biome deliberately copies this unsound narrowing; `NARROWING.md`
+// lists it among the deliberate choices.
+#[test]
+fn eval_and_arguments_do_not_prevent_narrowing() {
+    const SOURCE: &str = r#"
+        function reads(value: string | null) {
             if (value !== null) {
-                \u0065val("value = null");
+                arguments.length;
+                /*reads*/value;
+            }
+        }
+        function writes(value: string | null) {
+            if (value !== null) {
+                arguments[0] = null;
+                /*writes*/value;
+            }
+        }
+        function direct(value: string | null) {
+            if (value !== null) {
+                eval("value = null");
                 /*eval*/value;
             }
         }
-        function mapped(value: string | null) {
+        function nested(value: string | null) {
+            const all = () => arguments;
             if (value !== null) {
-                \u0061rguments[0] = null;
-                /*arguments*/value;
+                /*nested*/value;
             }
         }
     "#;
     let (db, module) = narrowing_db(SOURCE);
-    for marker in ["hoisted", "eval", "arguments"] {
+    for marker in ["reads", "writes", "eval", "nested"] {
         let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
-        assert_variants(
-            &db,
-            ty,
-            &[InferredTypeData::String, InferredTypeData::Null],
-            marker,
-        );
+        assert_variants(&db, ty, &[InferredTypeData::String], marker);
     }
 }
 

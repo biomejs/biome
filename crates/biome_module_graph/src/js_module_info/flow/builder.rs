@@ -702,7 +702,7 @@ mod tests {
             root: build_root(
                 &root,
                 &model,
-                &mut GuardFunctions::new(&[], &raw_binding_types, false),
+                &mut GuardFunctions::new(&[], &raw_binding_types),
             ),
         }
     }

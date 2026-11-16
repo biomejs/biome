@@ -75,13 +75,9 @@ one of its own variables. Its parts live in `src/js_module_info/flow/`:
   so collection never walks the whole module again. A root is selected when
   its own code contains a condition or, in a module with an `asserts`
   annotation, a standalone call. The scanner rejects a root whose own syntax
-  the builder does not support, a root over its node or depth limit, and a
-  root that may read the global `eval` or the implicit `arguments` object,
-  directly or in a nested function, because a direct `eval` and a mapped
-  `arguments` object can write any enclosing variable. The rustdoc of
-  `is_dynamic_scope_reference` states which references count. Declaration
-  files (`.d.ts`, `.d.mts`, `.d.cts`, in any letter case) contain no code that
-  runs, so the visitor does not look for roots in them.
+  the builder does not support and a root over its node or depth limit.
+  Declaration files (`.d.ts`, `.d.mts`, `.d.cts`, in any letter case) contain
+  no code that runs, so the visitor does not look for roots in them.
 - `builder.rs` builds the graph of one selected root from start, join, and
   condition nodes. It records the incoming flow point of every reachable read
   and, for each condition node, the variables its guard may narrow.
@@ -96,9 +92,7 @@ one of its own variables. Its parts live in `src/js_module_info/flow/`:
   arguments still use the types from before it. `asserts value is T` becomes a
   runtime test of the argument, as `value is T` does, while `asserts value`
   decomposes the argument as a condition that holds, so
-  `assert(value !== null)` excludes `null` from `value`. When some root of the
-  module may read `eval` or `arguments`, no function counts as a type-guard
-  function, because a direct `eval` can reassign it.
+  `assert(value !== null)` excludes `null` from `value`.
 
 Collection then keeps only the reads that a runtime test of their variable can
 reach, and only for variables that can narrow: declared in the root, never

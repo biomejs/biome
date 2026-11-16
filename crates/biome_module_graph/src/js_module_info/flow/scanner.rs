@@ -1,13 +1,12 @@
 use super::builder::MAX_DEPTH;
 use biome_js_control_flow::AnyJsControlFlowRoot;
-use biome_js_semantic::{JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
     AnyJsBinding, AnyJsStatement, AnyTsReturnType, JsAssignmentExpression, JsAssignmentOperator,
     JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIdentifierBinding,
-    JsIfStatement, JsLogicalExpression, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode,
-    JsWhileStatement, TsDeclareFunctionDeclaration, unescape_js_identifier,
+    JsIfStatement, JsLogicalExpression, JsSyntaxKind, JsSyntaxNode, JsWhileStatement,
+    TsDeclareFunctionDeclaration,
 };
-use biome_rowan::{AstNode, SyntaxKind, TextRange, declare_node_union};
+use biome_rowan::{AstNode, SyntaxKind, declare_node_union};
 use std::ops::Range;
 
 /// Limits the syntax nodes, including nested roots, of a root that gets flow.
@@ -30,10 +29,8 @@ declare_node_union! {
 /// [`Self::enter`] and [`Self::leave`]. A root is selected when it directly
 /// contains a condition, or a standalone call while the module declares an
 /// assertion, outside its nested roots, has fewer than
-/// [`MAX_ROOT_NODES`] syntax nodes, uses only syntax the flow builder supports,
-/// and neither it nor a nested root may read the global `eval` or the implicit
-/// `arguments` object: direct `eval` and mapped `arguments` can write any
-/// enclosing variable.
+/// [`MAX_ROOT_NODES`] syntax nodes, and uses only syntax the flow builder
+/// supports.
 ///
 /// The builder supports truthiness tests in `if`, `while`, `do` and ordinary
 /// `for` statements, and expression-level `&&`, `||`, `??` and `?:`. A root is
@@ -41,7 +38,7 @@ declare_node_union! {
 /// handlers, `switch`, `for-in`/`for-of`, `with`, classes, destructuring,
 /// logical assignments, bogus syntax, or nesting deeper than [`MAX_DEPTH`].
 ///
-/// Types never run, so the scanner ignores conditions and references inside
+/// Types never run, so the scanner ignores conditions and bindings inside
 /// them, skips type aliases and interfaces entirely, and skips everything but
 /// the name of a function overload declaration. Roots nested in types, such as
 /// a function in a computed property key, are therefore never selected.
@@ -69,9 +66,6 @@ pub(crate) struct FlowRootScanner {
     deferred: Vec<SelectedRoot>,
     /// The bindings of the selected and deferred roots.
     kept_bindings: Vec<JsIdentifierBinding>,
-    /// Whether some root of the module may read the global `eval` or the
-    /// implicit `arguments` object.
-    has_dynamic_scope: bool,
     /// Whether the module contains an `asserts` return annotation.
     has_assertion_signature: bool,
 }
@@ -84,7 +78,7 @@ pub(super) struct SelectedRoot {
 }
 
 impl FlowRootScanner {
-    pub(crate) fn enter(&mut self, node: &JsSyntaxNode, model: &SemanticModel) {
+    pub(crate) fn enter(&mut self, node: &JsSyntaxNode) {
         self.visited += 1;
         self.depth += 1;
         let kind = node.kind();
@@ -102,18 +96,8 @@ impl FlowRootScanner {
                 first_node: self.visited - 1,
                 first_binding: self.bindings.len(),
                 depth: self.depth,
-                range: node.text_range_with_trivia(),
-                // Arrow functions read the `arguments` object of the function
-                // that encloses them.
-                has_arguments: !matches!(
-                    kind,
-                    JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
-                        | JsSyntaxKind::JS_MODULE
-                        | JsSyntaxKind::JS_SCRIPT
-                ),
                 has_condition: false,
                 has_call_statement: false,
-                has_dynamic_scope: false,
                 is_unsupported: false,
             });
         }
@@ -159,12 +143,6 @@ impl FlowRootScanner {
             self.bindings.push(binding);
         } else if kind == JsSyntaxKind::JS_EXPRESSION_STATEMENT {
             self.statement_expression = Some(self.depth + 1);
-        } else if !root.has_dynamic_scope
-            && let Some(reference) = JsReferenceIdentifier::cast_ref(node)
-            && self.is_dynamic_scope_reference(&reference, model)
-            && let Some(root) = self.open.last_mut()
-        {
-            root.has_dynamic_scope = true;
         }
     }
 
@@ -186,12 +164,7 @@ impl FlowRootScanner {
         let Some(root) = self.open.pop() else {
             return;
         };
-        if root.has_dynamic_scope {
-            match self.open.last_mut() {
-                Some(parent) => parent.has_dynamic_scope = true,
-                None => self.has_dynamic_scope = true,
-            }
-        } else if (root.has_condition || root.has_call_statement)
+        if (root.has_condition || root.has_call_statement)
             && !root.is_unsupported
             && self.visited - root.first_node < MAX_ROOT_NODES
             && let Some(node) = AnyJsControlFlowRoot::cast_ref(node)
@@ -231,46 +204,6 @@ impl FlowRootScanner {
     pub(super) fn bindings(&self, root: &SelectedRoot) -> &[JsIdentifierBinding] {
         &self.kept_bindings[root.bindings.clone()]
     }
-
-    /// Returns whether some root of the module, at any depth, may read the
-    /// global `eval` or the implicit `arguments` object.
-    pub(super) fn has_dynamic_scope(&self) -> bool {
-        self.has_dynamic_scope
-    }
-
-    /// Returns whether `reference` may read the global `eval` or the implicit
-    /// `arguments` object, including escaped spellings.
-    ///
-    /// Every reference to `eval` counts: calling a variable named `eval` that
-    /// holds the global function is still a direct `eval`. A reference to
-    /// `arguments` is an ordinary read only when the semantic model resolves it
-    /// to a parameter, catch parameter, `let`, or `const` declared inside the
-    /// innermost root that has its own `arguments` object, or anywhere when no
-    /// enclosing root has one, such as at the top level of a script. A `var`
-    /// starts out as that object, and the object shadows the function's own
-    /// name and every declaration outside that root.
-    fn is_dynamic_scope_reference(
-        &self,
-        reference: &JsReferenceIdentifier,
-        model: &SemanticModel,
-    ) -> bool {
-        let Ok(token) = reference.value_token() else {
-            return false;
-        };
-        match unescape_js_identifier(token.text_trimmed()).as_ref() {
-            "eval" => true,
-            "arguments" => !model.binding(reference).is_some_and(|binding| {
-                binding.declaration_kind() == JsDeclarationKind::Value
-                    && self
-                        .open
-                        .iter()
-                        .rev()
-                        .find(|root| root.has_arguments)
-                        .is_none_or(|owner| owner.range.contains_range(binding.range()))
-            }),
-            _ => false,
-        }
-    }
 }
 
 struct OpenRoot {
@@ -279,14 +212,10 @@ struct OpenRoot {
     /// declares.
     first_binding: usize,
     depth: usize,
-    range: TextRange,
-    /// Whether the root has its own `arguments` object when it runs.
-    has_arguments: bool,
     has_condition: bool,
     /// Whether the root's own code has an expression statement that is a call,
     /// possibly in parentheses.
     has_call_statement: bool,
-    has_dynamic_scope: bool,
     is_unsupported: bool,
 }
 
@@ -353,7 +282,6 @@ impl OpenRoot {
 mod tests {
     use super::*;
     use biome_js_parser::{JsParserOptions, parse};
-    use biome_js_semantic::{SemanticModelOptions, semantic_model};
     use biome_js_syntax::AnyJsRoot;
     use biome_languages::JsFileSource;
     use biome_rowan::WalkEvent;
@@ -375,11 +303,10 @@ mod tests {
     }
 
     fn scan(root: &AnyJsRoot) -> FlowRootScanner {
-        let model = semantic_model(root, SemanticModelOptions::default());
         let mut scanner = FlowRootScanner::default();
         for event in root.syntax().preorder() {
             match event {
-                WalkEvent::Enter(node) => scanner.enter(&node, &model),
+                WalkEvent::Enter(node) => scanner.enter(&node),
                 WalkEvent::Leave(node) => scanner.leave(&node),
             }
         }
@@ -465,82 +392,6 @@ mod tests {
     fn type_declarations_are_not_inspected() {
         let source = "function f(x: string | null) { interface I { eval: { [K in keyof typeof arguments]: T } } type T = typeof eval; if (x) read(x); }";
         assert_eq!(selected(source).len(), 1);
-    }
-
-    #[test]
-    fn references_in_types_are_not_dynamic_scope() {
-        for source in [
-            "function f(x: typeof eval, y: arguments) { if (x) read(y); }",
-            "function f(x): asserts arguments { if (x) read(x); }",
-        ] {
-            assert_eq!(selected(source).len(), 1, "{source}");
-        }
-        let source = "function f(x) { if (x) read(arguments); }";
-        assert!(selected(source).is_empty());
-    }
-
-    /// Returns how many roots are selected in the sloppy-mode script `source`,
-    /// the only kind of source that can declare `eval` or `arguments`.
-    fn selected_in_script(source: &str) -> usize {
-        let parsed = parse(
-            source,
-            JsFileSource::js_script(),
-            JsParserOptions::default(),
-        );
-        assert!(!parsed.has_errors(), "{source}");
-        selected_in(&parsed.tree()).len()
-    }
-
-    #[test]
-    fn every_eval_reference_disables_flow() {
-        for source in [
-            "function f(x) { if (x) eval(x); }",
-            "function f(x) { var eval = read; if (x) eval(x); }",
-            "var eval; function f(x) { if (x) eval(x); }",
-        ] {
-            assert_eq!(selected_in_script(source), 0, "{source}");
-        }
-    }
-
-    #[test]
-    fn arguments_declared_in_its_own_function_is_an_ordinary_read() {
-        for (source, expected) in [
-            ("function f(x, arguments) { if (x) read(arguments); }", 1),
-            (
-                "function f(x) { let arguments = x; if (x) read(arguments); }",
-                1,
-            ),
-            (
-                "function f(x, arguments) { const g = () => arguments; if (x) read(x); }",
-                1,
-            ),
-            (
-                "function f(x) { const arguments = x; if (x) read(arguments); }",
-                1,
-            ),
-            (
-                "function f(x) { try {} catch (arguments) { const g = () => { if (x) read(arguments); }; } }",
-                1,
-            ),
-            ("let arguments = 0; if (x) read(arguments);", 1),
-            (
-                "function f(x) { var arguments; if (x) read(arguments); }",
-                0,
-            ),
-            ("function arguments(x) { if (x) read(arguments); }", 0),
-            ("(function arguments(x) { if (x) read(arguments); });", 0),
-            (
-                "function f(x) { function arguments() {} if (x) read(arguments); }",
-                0,
-            ),
-            (
-                "function outer(arguments) { function f(x) { if (x) read(arguments); } }",
-                0,
-            ),
-            ("function f(x) { if (x) \\u0061rguments; }", 0),
-        ] {
-            assert_eq!(selected_in_script(source), expected, "{source}");
-        }
     }
 
     #[test]
