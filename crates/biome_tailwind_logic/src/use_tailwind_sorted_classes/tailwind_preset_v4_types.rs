@@ -242,13 +242,16 @@ pub struct UtilityEntry {
 /// The `/modifier` a named branch accepts. A color branch takes an opacity
 /// modifier (`bg-red-500/50`); a font-size branch takes a line-height
 /// modifier (`text-lg/8`, `text-lg/loose`); every other branch takes none,
-/// so a modifier makes the candidate invalid (`w-1/foo`, `p-4/2`).
+/// so a modifier makes the candidate invalid (`w-1/foo`, `p-4/2`). A
+/// gradient branch takes any modifier as its interpolation method
+/// (`bg-linear-to-r/oklch`).
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[repr(u8)]
 pub enum ModifierKind {
     None,
     Opacity,
     LineHeight,
+    Any,
 }
 
 // Named-path dispatch branches inside a functional utility's compileFn.

@@ -38,6 +38,7 @@ import {
 	NAMESPACE_PROBE_VALUE,
 	NONSENSE_PROBE,
 	probeToken,
+	UNLISTED_KEYWORD_CLASSES,
 } from "./probe-samples.js";
 import {
 	THEME_NAMESPACES,
@@ -179,8 +180,15 @@ function sortKeyOf(sort: PropertySort): string {
 // that matches the branch (`bg-<colortoken>`, `text-<texttoken>`, `w-7`).
 // A numeric modifier compiling at all means the branch takes one; a
 // font-size utility additionally accepts a leading keyword (`/loose`),
-// which distinguishes line-height from opacity.
+// which distinguishes line-height from opacity. A branch that also compiles
+// a nonsense modifier takes any modifier (`bg-linear-to-r/oklch`, whose
+// modifier is a free-form interpolation method).
+function acceptsAnyModifier(ds: DesignSystem, base: string): boolean {
+	return propertySortOf(ds, `${base}/${NONSENSE_PROBE}`) !== null;
+}
+
 function modifierKindOf(ds: DesignSystem, base: string): ModifierKind {
+	if (acceptsAnyModifier(ds, base)) return "Any";
 	if (!propertySortOf(ds, `${base}/50`)) return "None";
 	return propertySortOf(ds, `${base}/loose`) ? "LineHeight" : "Opacity";
 }
@@ -339,7 +347,9 @@ function extractFunctionalBranches(
 		// A bare number/Percentage/Ratio value is never a color or a
 		// font-size, so a typed branch never carries an opacity or
 		// line-height modifier. (Probing would also misread `w-7/50` as
-		// the fraction `7/50` on a ratio-capable utility.)
+		// the fraction `7/50` on a ratio-capable utility.) It can still take
+		// any modifier (`bg-linear-90/oklch`); a nonsense modifier is never
+		// a fraction, so that probe is safe.
 		const numberSort = propertySortOf(
 			ds,
 			`${basename}-${NAMED_NUMBER_PROBES.integer}`,
@@ -354,19 +364,28 @@ function extractFunctionalBranches(
 					: accepts(NAMED_NUMBER_PROBES.multiplier)
 						? "Multiplier"
 						: "Integer",
-				modifier: "None",
+				modifier: acceptsAnyModifier(
+					ds,
+					`${basename}-${NAMED_NUMBER_PROBES.integer}`,
+				)
+					? "Any"
+					: "None",
 				sort: numberSort,
 			});
 		}
 		for (const p of NAMED_PREDICATE_PROBES) {
-			const sort = p.values
-				.map((value) => propertySortOf(ds, `${basename}-${value}`))
-				.find((found) => found !== null);
+			const value = p.values.find(
+				(value) => propertySortOf(ds, `${basename}-${value}`) !== null,
+			);
+			if (value === undefined) continue;
+			const sort = propertySortOf(ds, `${basename}-${value}`);
 			if (!sort) continue;
 			branches.namedBranches.push({
 				kind: "Typed",
 				value_type: p.type,
-				modifier: "None",
+				modifier: acceptsAnyModifier(ds, `${basename}-${value}`)
+					? "Any"
+					: "None",
 				sort,
 			});
 		}
@@ -412,10 +431,14 @@ function addKeywordBranches(
 	type KeywordGroup = {
 		basename: string;
 		sort: PropertySort;
+		modifier: ModifierKind;
 		keywords: Set<string>;
 	};
 	const groups = new Map<string, KeywordGroup>();
-	const classList = ds.getClassList().map(([n]) => n);
+	const classList = [
+		...ds.getClassList().map(([n]) => n),
+		...UNLISTED_KEYWORD_CLASSES,
+	];
 	for (const cls of classList) {
 		if (ctx.staticKeySet.has(cls)) continue;
 		const cands = ds.parseCandidate(cls);
@@ -424,14 +447,24 @@ function addKeywordBranches(
 		if (cand.value?.kind !== "named") continue;
 		const value = cand.value.value;
 		if (/[\d.]/.test(value)) continue;
-		if (ctx.allThemeKeys.has(value)) continue;
+		// A theme key is already matched by the utility's theme branch; a
+		// utility with no theme branch (`@container-normal`) has none to
+		// match it, so its keyword must still be recorded.
+		const hasThemeBranch = ctx.branchesByBasename
+			.get(cand.root)
+			?.namedBranches.some((b) => b.kind === "Theme");
+		if (hasThemeBranch && ctx.allThemeKeys.has(value)) continue;
 		if (ctx.probeTokens.has(value)) continue;
 		const sort = propertySortOf(ds, cls);
 		if (!sort) continue;
-		const key = `${cand.root}|${sortKeyOf(sort)}`;
+		// Keywords of one utility can differ in the modifier they take:
+		// `shadow-current/5` compiles, `shadow-inherit/5` does not. Grouping
+		// by modifier kind keeps each keyword's own answer.
+		const modifier = modifierKindOf(ds, cls);
+		const key = `${cand.root}|${sortKeyOf(sort)}|${modifier}`;
 		let group = groups.get(key);
 		if (!group) {
-			group = { basename: cand.root, sort, keywords: new Set() };
+			group = { basename: cand.root, sort, modifier, keywords: new Set() };
 			groups.set(key, group);
 		}
 		group.keywords.add(value);
@@ -444,8 +477,8 @@ function addKeywordBranches(
 			kind: "Keyword",
 			keywords,
 			// Color keywords (`bg-current`, `border-transparent`) take an
-			// opacity modifier; probe a representative keyword to find out.
-			modifier: modifierKindOf(ds, `${group.basename}-${keywords[0]}`),
+			// opacity modifier; each keyword was probed above.
+			modifier: group.modifier,
 			sort: group.sort,
 		});
 		ctx.branchesByBasename.set(group.basename, branches);

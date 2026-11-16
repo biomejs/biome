@@ -37,8 +37,9 @@ export type NamedValueType = (typeof NAMED_VALUE_TYPES)[number];
 // modifier (`text-lg/8`, `text-lg/loose`); every other branch takes none,
 // so a modifier makes the candidate invalid (`w-1/foo`, `p-4/2`). Probed
 // per branch — the same value that detects a branch is re-probed with a
-// numeric and a leading-keyword modifier.
-export const MODIFIER_KINDS = ["None", "Opacity", "LineHeight"] as const;
+// numeric and a leading-keyword modifier. Gradient utilities take any
+// modifier as the interpolation method (`bg-linear-to-r/oklch`).
+export const MODIFIER_KINDS = ["None", "Opacity", "LineHeight", "Any"] as const;
 
 export type ModifierKind = (typeof MODIFIER_KINDS)[number];
 
