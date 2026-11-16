@@ -401,7 +401,7 @@ fn narrowed_callees_resolve_their_calls() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type,
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
 // because an element access with a string or integer literal key reads the
 // same property as a named access. `o["a"]` and `o.a` share their narrowing,
 // and so do `t[0]` and `t["0"]`.
@@ -460,7 +460,7 @@ fn literal_keys_read_the_same_property_as_names() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) narrows every read below to `string`,
+// TypeScript 7.0.2 (`tsc --strict`) narrows every read below to `string`,
 // because a write through a literal key writes only the property it names, and
 // a call such as `a.shift()` never cancels narrowing.
 #[test]
@@ -510,10 +510,10 @@ fn literal_key_writes_keep_other_properties() {
     );
 }
 
-// Each expected type keeps `null` or `undefined`. TypeScript 6.0.3
+// Each expected type keeps `null` or `undefined`. TypeScript 7.0.2
 // (`tsc --strict`) gives the type in the comment after each read. Where it
 // differs, TypeScript either narrows the path at the write itself, which Biome
-// does not model yet, or ignores the write. It ignores a write through a key
+// does not model, or ignores the write. It ignores a write through a key
 // that is not a literal (`anyIndex` and `negativeZero`) and `delete` through
 // an element access (`deleted`). `NARROWING.md` lists both among the
 // deliberate choices. Biome's declared type of `a[0]` includes `undefined`.
@@ -561,7 +561,7 @@ fn literal_key_writes_cancel_their_path() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives the type in the comment after each
+// TypeScript 7.0.2 (`tsc --strict`) gives the type in the comment after each
 // read. Two keys match only when both are literals that name the same
 // property. `-0` is not a literal, and `"01"` names a different property than
 // `1`. An integer literal above 2^53 - 1 names the property of the nearest
