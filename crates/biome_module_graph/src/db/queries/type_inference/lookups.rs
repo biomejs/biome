@@ -198,10 +198,9 @@ pub(crate) fn infer_flow_subject_type<'db>(
     )
 }
 
-/// Decides whether one `switch` statement of an execution root is
-/// exhaustive, so that the path on which none of its cases matches adds
-/// nothing to the reads after it, as TypeScript's
-/// `isExhaustiveSwitchStatement` decides it.
+/// Returns whether one `switch` statement of an execution root is
+/// exhaustive, as in TypeScript. The path on which no case of an exhaustive
+/// statement matches adds nothing to the reads after it.
 ///
 /// Lookups of the reads that the statement's bypass reaches share the
 /// answer; complete module inference decides it in its own context instead.

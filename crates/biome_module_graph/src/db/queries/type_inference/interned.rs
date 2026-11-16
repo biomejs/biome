@@ -68,17 +68,18 @@ pub(crate) struct FlowSubjectRootInput<'db> {
     /// test narrows, so their reads share one solve.
     #[returns(copy)]
     pub readonly_path: bool,
-    /// The `switch` statements of the root found exhaustive, whose bypass
-    /// adds nothing to the subject: bit `i` stands for the statement at index
-    /// `i` of the root's collected switches. Only statements whose bypass
-    /// reaches a read count, so the reads that none reaches keep a mask of
-    /// zero and share one solve.
+    /// The exhaustive `switch` statements of the root, one bit each. Bit `i`
+    /// stands for the statement at index `i` of the root's collected switches.
+    /// The bypass of an exhaustive statement adds nothing to the subject.
+    /// Only statements whose bypass reaches the read count, so the reads that
+    /// no bypass reaches keep a mask of zero and share one solve.
     #[returns(copy)]
     pub exhaustive: u64,
 }
 
-/// Identifies one `switch` statement of an execution root, whose
-/// exhaustiveness [`super::infer_flow_switch_exhaustive`] decides.
+/// Identifies one `switch` statement of an execution root, for the query
+/// that returns whether the statement is exhaustive
+/// ([`super::infer_flow_switch_exhaustive`]).
 #[salsa::interned]
 #[derive(Debug)]
 pub(crate) struct FlowSwitchInput<'db> {

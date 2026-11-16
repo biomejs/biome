@@ -27,10 +27,11 @@ fn narrowing_db(source: &str) -> (TestModuleDb, ModuleInfo) {
     (db, module)
 }
 
-/// Names each member of `ty`, sorted: an interface by its name, an object
-/// type literal by its members, Biome's Unknown, which a read
-/// on a path that no value takes has, as `Unknown`, and any other type by its
-/// formatted text on one line, such as `unknown` for the `unknown` keyword.
+/// Names each member of `ty`, sorted. An interface is named by its name, an
+/// object type literal by its members, and Biome's Unknown as `Unknown`. Any
+/// other type is named by its formatted text on one line, such as `unknown`
+/// for the `unknown` keyword. A read on a path that no value takes has
+/// Biome's Unknown type.
 fn variant_names(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
     if ty == InferredTypeData::Unknown {
         return vec!["Unknown".to_owned()];
@@ -81,8 +82,8 @@ const TYPES: &str = r#"
 "#;
 
 /// Asserts the type of each `(marker, expression, expected)` read in `source`,
-/// which follows [`TYPES`], by the names of its members, as [`variant_names`]
-/// gives them.
+/// which follows [`TYPES`]. `expected` lists the sorted names of the type's
+/// members in the form that [`variant_names`] returns.
 fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     let source = format!("{TYPES}{source}");
     let (db, module) = narrowing_db(&source);
@@ -104,9 +105,7 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m4/switch.ts` L4 to L9, L33 to L36, L41 to L43, and
-// `m4/more.ts` L8).
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 #[test]
 fn literal_cases_narrow_the_discriminant() {
     assert_reads(
@@ -148,9 +147,8 @@ fn literal_cases_narrow_the_discriminant() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m4/switch.ts` L10, L11, L51, L54, and `m4/more.ts` L13):
-// the code after a `switch` joins the end of its last case, its `break`
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// The code after a `switch` joins the end of its last case, its `break`
 // statements, and, without `default`, the values that no case matches.
 #[test]
 fn the_code_after_a_switch_joins_its_exits() {
@@ -172,9 +170,8 @@ fn the_code_after_a_switch_joins_its_exits() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m4/switch.ts` L13 to L16, L18, L19, L40, L45 to L47). A
-// case narrows as `===` with its value does, so `{}` keeps its type, named
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A case narrows as `===` with its value does, so `{}` keeps its type, named
 // `[]` here by its empty list of members, while `default` removes only the
 // literal types that a case tests.
 #[test]
@@ -215,10 +212,9 @@ fn cases_narrow_broad_and_special_types() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m4/switch.ts` L37 to L39, L44): a group that contains
-// `default` starts where one of its cases matches and where no case of the
-// statement matches.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A group that contains `default` starts where one of its cases matches and
+// where no case of the statement matches.
 #[test]
 fn default_narrows_in_any_group() {
     assert_reads(
@@ -250,11 +246,10 @@ fn default_narrows_in_any_group() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m4/switch.ts` L26 to L29, L31, L32, L52, L55,
-// `m4-l1/extra.ts` L8, L10, L21, and `m4-l1/spec/` for `caseIf`): conditions and jumps inside a case narrow
-// as anywhere else, a `break` leaves the `switch`, a `continue` reaches the
-// loop around it, and a case test sees the state before the `switch`.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// Conditions and jumps inside a case narrow as anywhere else, a `break` leaves
+// the `switch`, a `continue` reaches the loop around it, and a case test sees
+// the state before the `switch`.
 #[test]
 fn statements_inside_cases_narrow() {
     assert_reads(
@@ -292,13 +287,13 @@ fn statements_inside_cases_narrow() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) narrows `x` to `-1` and `number`, to
-// `"a"` and `"b" | "c"`, to `E.A` and `E.B`, and to `"a"` at the last three
-// reads (`narrowing-probes/m4/switch.ts` L20, L22, L24, L49, L50), and gives
-// `number` at `nan` (L48). Biome compares only with literals that spell
-// their value, so `-1`, a `const`, an enum member, and a template literal
-// don't narrow, and neither does a discriminant that isn't a subject, such
-// as `x!`. Biome keeps the declared type, which is wider.
+// TypeScript 7.0.2 (`tsc --strict`) narrows the case and `default` reads to
+// `-1` and `number`, to `"a"` and `"b" | "c"`, and to `E.A` and `E.B`, and
+// narrows `template` and `nonNull` to `"a"`. It gives `number` at `nan`.
+// Biome compares only with literals that spell their value, so `-1`, a
+// `const`, an enum member, and a template literal don't narrow, and neither
+// does a discriminant that isn't a subject, such as `x!`. Biome keeps the
+// declared type, which is wider.
 #[test]
 fn cases_that_biome_does_not_compare_keep_the_declared_type() {
     assert_reads(
@@ -332,12 +327,10 @@ fn cases_that_biome_does_not_compare_keep_the_declared_type() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m4/discriminants.ts` L7 to L16, L18, L21 to L23, L28,
-// L29, and `m4/more.ts` L14): a case on a discriminant narrows the object
-// that holds it, as `===` does, through a property, an element access, a
-// tuple index, an optional chain, a `const` that holds the property, and an
-// element of a destructuring pattern.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A case on a discriminant narrows the object that holds it, as `===` does,
+// through a property, an element access, a tuple index, an optional chain, a
+// `const` that holds the property, and an element of a destructuring pattern.
 #[test]
 fn discriminant_cases_narrow_the_object() {
     assert_reads(
@@ -394,10 +387,10 @@ fn discriminant_cases_narrow_the_object() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives `{ kind: "c"; y: 2 }` at both
-// reads (`narrowing-probes/m4/discriminants.ts` L19, L20): `default` removes
-// every member whose discriminant is one of the case values, even when it is
-// a union of them. Biome removes a member only when a single case removes
-// all its values, so it keeps both members, which is wider.
+// reads, because its `default` removes every member whose discriminant is one
+// of the case values, even when the discriminant is a union of them. Biome
+// removes a member only when a single case removes all its values, so it
+// keeps both members, which is wider.
 #[test]
 fn default_keeps_members_whose_discriminant_is_a_union_of_case_values() {
     assert_reads(
@@ -415,12 +408,12 @@ fn default_keeps_members_whose_discriminant_is_a_union_of_case_values() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m4/typeof.ts` L5, L6, L8 to L11, L14 to L16, L20, L23 to
-// L25, L27 to L29). A case of `switch (typeof x)` narrows `x` as
-// `typeof x === "string"` does, and the receivers of an optional chain only
-// where every case of the group shows that the operand is not `undefined`.
-// TypeScript narrows `unknown` to `object | null` for `"object"` and to
-// `Function` for `"function"`, where Biome keeps `unknown`, as for `if`.
+// except `unknownObject` and `unknownFunction`. A case of `switch (typeof x)`
+// narrows `x` as `typeof x === "string"` does, and the receivers of an
+// optional chain only where every case of the group shows that the operand
+// is not `undefined`. TypeScript narrows `unknown` to `object | null` for
+// `"object"` and to `Function` for `"function"`, where Biome keeps
+// `unknown`, as for `if`.
 #[test]
 fn typeof_cases_narrow_the_operand() {
     assert_reads(
@@ -482,12 +475,11 @@ fn typeof_cases_narrow_the_operand() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m4/typeof.ts` L7, L12, L21, L22, and `m4/more.ts` L4,
-// L5). A case that isn't a string literal makes no case of
-// `switch (typeof x)` narrow, and a `typeof` case narrows only the operand,
-// not the object that holds it or the pattern that declares it. TypeScript
-// gives `never` for an invalid kind (`"strin"`) and `string` for a template
-// literal, where Biome keeps the declared type, which is wider.
+// except `invalid` and `template`. A case that isn't a string literal makes
+// no case of `switch (typeof x)` narrow, and a `typeof` case narrows only the
+// operand, not the object that holds it or the pattern that declares it.
+// TypeScript gives `never` for an invalid kind (`"strin"`) and `string` for a
+// template literal, where Biome keeps the declared type, which is wider.
 #[test]
 fn typeof_switches_narrow_only_their_operand() {
     assert_reads(
@@ -525,11 +517,10 @@ fn typeof_switches_narrow_only_their_operand() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m4/true.ts` L5 to L7, L9 to L19, L23 to L27, and
-// `m4-l1/extra.ts` L42, L44). A case of `switch (true)` narrows as its test
-// does when it is truthy, after every case before its group failed to
-// match; a group with `default` sees only the cases outside the group fail.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A case of `switch (true)` narrows as its test does when it is truthy, after
+// every case before its group failed to match; a group with `default` sees
+// only the cases outside the group fail.
 #[test]
 fn switch_true_narrows_by_each_case() {
     assert_reads(
@@ -599,8 +590,8 @@ fn switch_true_narrows_by_each_case() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) keeps the declared type at every read
-// below (`narrowing-probes/m4/true.ts` L20 to L22): only a discriminant that
-// is the literal `true` itself narrows the cases.
+// below, because only a discriminant that is the literal `true` itself
+// narrows the cases.
 #[test]
 fn switch_on_other_constants_narrows_nothing() {
     assert_reads(
@@ -618,13 +609,13 @@ fn switch_on_other_constants_narrows_nothing() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `null` for `x` and `null` for `o`
-// at the reads below (`narrowing-probes/m4/true.ts` L8, `m4-l1/extra.ts`
-// L25): it takes every case of `switch (true)` before `default` as falsy, so
-// `case x:` with `x: { a: 1 } | null` removes `{ a: 1 }`, although an object
-// is truthy without being `true` and reaches `default`. Biome narrows by a
-// case that failed to match only when the case gives a boolean, a
-// deliberate choice in `NARROWING.md`, so it keeps the declared type.
+// TypeScript 7.0.2 (`tsc --strict`) gives `null` at `object` and
+// `objectCase`, because it takes every case of `switch (true)` before
+// `default` as falsy. So `case x:` with `x: { a: 1 } | null` removes
+// `{ a: 1 }`, although an object is truthy without being `true` and reaches
+// `default`. Biome narrows by a case that failed to match only when the case
+// gives a boolean, so it keeps the declared type at those reads.
+// `NARROWING.md` lists this among the deliberate choices.
 #[test]
 fn switch_true_keeps_the_type_after_a_case_that_is_not_boolean() {
     assert_reads(
@@ -640,11 +631,9 @@ fn switch_true_keeps_the_type_after_a_case_that_is_not_boolean() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `never` at the first six reads
-// (`narrowing-probes/m4/exhaustive.ts` L14, L17, `m4/typeof.ts` L17, L26,
-// `m4/discriminants.ts` L17, L26), which Biome reads as Unknown, and `string`
-// at the last two (`m4/more.ts` L10, L11): the path on which no case matches
-// narrows the discriminant by every case.
+// TypeScript 7.0.2 (`tsc --strict`) gives `never` at the first six reads,
+// where Biome gives its Unknown type, and `string` at the last two. The path
+// on which no case matches narrows the discriminant by every case.
 #[test]
 fn the_path_that_matches_no_case_narrows_the_discriminant() {
     assert_reads(
@@ -672,12 +661,10 @@ fn the_path_that_matches_no_case_narrows_the_discriminant() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives `string` for `y` at every read
-// below (`narrowing-probes/m4/switch.ts` L25, L53, `m4/typeof.ts` L18, L19,
-// `m4/discriminants.ts` L24, L27, `m4/exhaustive.ts` L21, and
-// `m4-l1/extra.ts` L12, L28, L30, L31, L33, L38, L40), and `S` for `s` and
-// `string | number` for `r` after the switches that test them: a `switch`
-// whose cases cover every value of its discriminant leaves no path on which
-// no case matches, so `y` keeps the narrowing of every case.
+// below, and `S` for `s` and `string | number` for `r` after the switches that
+// test them. A `switch` whose cases cover every value of its discriminant
+// leaves no path on which no case matches, so `y` keeps the narrowing of
+// every case.
 #[test]
 fn exhaustive_switches_narrow_other_subjects() {
     assert_reads(
@@ -727,13 +714,13 @@ fn exhaustive_switches_narrow_other_subjects() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives `string | null` for `y` at every
-// read below (`narrowing-probes/m4/switch.ts` L26, `m4-l1/extra.ts` L6, L14,
-// L19, L23, L37), and `string` at `template` (L35). A case is missing, the
-// discriminant is `typeof` in parentheses, which TypeScript checks as a
-// string value, the discriminant is `never` before the switch, which no
-// literal type is, or the read comes before the switch in a loop. Biome
-// compares only with literals that spell their value, so a template literal
-// case keeps the switch from being exhaustive, which is wider.
+// read below except `template`, where it gives `string`. Where a switch isn't
+// exhaustive, a case is missing, the discriminant is `typeof` in parentheses,
+// which TypeScript checks as a string value, or the discriminant is `never`
+// before the switch, and `never` is no literal type. At `loop`, the read
+// comes before the switch in the loop. Biome compares only with literals that
+// spell their value, so a template literal case keeps the switch from being
+// exhaustive, and the type at `template` is wider.
 #[test]
 fn switches_that_are_not_exhaustive_keep_the_path_that_matches_no_case() {
     assert_reads(
@@ -758,10 +745,10 @@ fn switches_that_are_not_exhaustive_keep_the_path_that_matches_no_case() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `string` at every read below
-// (`narrowing-probes/m4-l1/spec/`). Lookups ask whether a `switch` is
-// exhaustive through a tracked query that the reads after it share, and only
-// for a read that the path matching no case reaches.
+// TypeScript 7.0.2 (`tsc --strict`) gives `string` at every read below.
+// Lookups ask whether a `switch` is exhaustive through a tracked query that
+// the reads after it share, and only for a read that the path matching no
+// case reaches.
 #[test]
 fn lookups_decide_whether_a_switch_is_exhaustive_once() {
     const SOURCE: &str = r#"
