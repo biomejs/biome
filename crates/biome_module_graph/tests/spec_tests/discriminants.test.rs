@@ -1148,7 +1148,7 @@ fn discriminants_held_at_the_top_level_follow_exports() {
 // `Circle` or the first tuple. Biome keeps the declared type at every read
 // except `inSwitch` and `forOf`. It doesn't follow `s!` and keys that are
 // spelled differently from the property, loose equality doesn't narrow an
-// object yet, a read in a closure never sees the test, and a `const`
+// object, a read in a closure never sees the test, and a `const`
 // exported by an `export { ... }` list holds nothing. A test inside a
 // `switch` or a `for...of` loop narrows as anywhere else, so `inSwitch` and
 // `forOf` give `Circle`, as in TypeScript.
@@ -1541,7 +1541,7 @@ fn destructured_elements_that_do_not_narrow_each_other() {
 
 // TypeScript 7.0.2 (`tsc --strict`) gives `number` at every read below.
 // Biome keeps the declared type at each of them. Loose `==` with a literal
-// doesn't narrow an object yet. An element under a default of an enclosing
+// doesn't narrow an object. An element under a default of an enclosing
 // pattern never narrows because its declared type ignores the default. A
 // read in a closure never sees the test. A written parameter variable never
 // narrows, while TypeScript narrows `v` by the assignment `v = 1`. Biome
