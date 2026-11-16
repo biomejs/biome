@@ -1,0 +1,15 @@
+---
+const html = '<b>Title</b>';
+const text = 'Title';
+const headings = [{ html, text }];
+---
+<!-- should not generate diagnostics -->
+
+<h3 set:html={html} />
+{html && <h3 set:html={html} />}
+{text && <h1 set:text={text} />}
+{html && <h2 set:html={html}></h2>}
+{text && <h4 set:text={text}></h4>}
+{headings.map((heading) => <h5 set:html={heading.html} />)}
+{headings.map((heading) => <h6 set:text={heading.text} />)}
+{html ? <h1 set:html={html} /> : <h2 set:text={text} />}
