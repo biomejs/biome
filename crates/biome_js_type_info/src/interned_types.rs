@@ -28,9 +28,7 @@ use crate::{
     type_data as raw,
 };
 
-pub use crate::type_transform::{
-    TypeNormalizationCache, TypeSubstitution, TypeTransformError, TypeTransformResult,
-};
+pub use crate::type_transform::{TypeSubstitution, TypeTransformError, TypeTransformResult};
 
 pub type RawTypeData = raw::TypeData;
 pub type ReferenceResolver<'db, 'resolver> =

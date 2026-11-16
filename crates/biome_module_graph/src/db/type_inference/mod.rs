@@ -5,8 +5,7 @@ use crate::type_inference::profiling::record_cycle_recovery;
 use crate::{JsModuleInfo, ModuleDb};
 use biome_css_syntax::TextRange;
 use biome_js_type_info::interned_types::{
-    LocalTypeId, ModuleKey, TypeData as InferredTypeData, TypeNormalizationCache,
-    TypeTransformError,
+    LocalTypeId, ModuleKey, TypeData as InferredTypeData, TypeTransformError,
 };
 use rustc_hash::{FxHashMap, FxHashSet};
 
@@ -155,17 +154,6 @@ pub(in crate::db) fn normalize_structural_type<'db>(
         ty.expand_structural_global(db)
     })
     .into_result()
-}
-
-/// Normalizes `ty` like [`normalize_structural_type`] without resolving local
-/// handles, reusing nested types normalized earlier with the same `cache`.
-pub(in crate::db) fn normalize_structural_type_with_cache<'db>(
-    db: &'db dyn ModuleDb,
-    ty: InferredTypeData<'db>,
-    cache: &mut TypeNormalizationCache<'db>,
-) -> Result<InferredTypeData<'db>, TypeTransformError> {
-    ty.normalize_nested_types_with_cache(db, |ty| ty.expand_structural_global(db), Some(cache))
-        .into_result()
 }
 
 pub(super) fn infer_module_types_cycle_result<'db>(

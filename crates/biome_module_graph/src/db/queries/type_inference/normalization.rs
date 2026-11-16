@@ -5,11 +5,13 @@
 //! Normalization resolves those references throughout wrappers such as unions,
 //! intersections, tuples, instances, merged references, and `typeof` types.
 //! Types that cannot contain these references are returned unchanged.
+//! Member types selected by member lookup are normalized without resolving
+//! their local handles.
 //!
 //! Substitution rewrites a type without resolving any references, so it reads
 //! no module inputs and cannot join an inference cycle.
 
-use super::{NormalizeTypeInput, TypeSubstitutionInput};
+use super::{MemberTypeInput, NormalizeTypeInput, TypeSubstitutionInput};
 use crate::ModuleDb;
 use crate::db::type_inference::{
     normalize_structural_type, normalize_type_cycle_result, resolve_local_type_on_demand,
@@ -43,6 +45,30 @@ pub fn normalize_type<'db>(
             normalize_structural_type(db, ty, |ty| resolve_local_type_on_demand(db, ty))
                 .unwrap_or(InferredTypeData::Unknown)
         },
+    )
+}
+
+/// Normalizes a member type selected by member lookup without resolving its
+/// local handles.
+///
+/// Member lookup substitutes an instance's type arguments into the declared
+/// member type before normalizing it. Lookups of the same member on the same
+/// instance therefore normalize the same type, including lookups from other
+/// modules and from separate resolution contexts. This query shares one result
+/// across them.
+///
+/// Returns `None` when normalization exceeds its work limit or rebuilds a type
+/// inconsistently.
+#[salsa::tracked(returns(copy))]
+pub(crate) fn normalize_member_type<'db>(
+    db: &'db dyn ModuleDb,
+    input: MemberTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    execute_query(
+        TypeInferenceQueryKind::Normalization,
+        TypeInferenceProfileOrigin::Inherited,
+        "normalize_member_type",
+        || normalize_structural_type(db, input.ty(db), |ty| ty).ok(),
     )
 }
 
@@ -112,6 +138,33 @@ pub(crate) fn substitute_types_in_root_body<'db>(
 // #endregion
 
 // #region QUERY HELPER FUNCTIONS
+
+/// Returns whether [`normalize_member_type`] could change `ty`.
+///
+/// Member type normalization leaves local handles unresolved and keeps generic
+/// parameters as they are. Primitives and keywords have no nested types. These
+/// types are returned unchanged, so callers can skip the query for them.
+pub(crate) fn member_type_needs_normalization(ty: InferredTypeData<'_>) -> bool {
+    !matches!(
+        ty,
+        InferredTypeData::Unknown
+            | InferredTypeData::BigInt
+            | InferredTypeData::Boolean
+            | InferredTypeData::Null
+            | InferredTypeData::Number
+            | InferredTypeData::String
+            | InferredTypeData::Symbol
+            | InferredTypeData::Undefined
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword
+            | InferredTypeData::VoidKeyword
+    )
+}
 
 fn type_needs_normalization(ty: InferredTypeData<'_>) -> bool {
     matches!(

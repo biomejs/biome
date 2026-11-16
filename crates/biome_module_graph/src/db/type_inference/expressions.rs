@@ -5,12 +5,12 @@ use super::{
         evaluate_mapped_type_with_resolver, find_member_key_type_with_resolver,
         find_member_type_with_resolver, substitutions_for_instance,
     },
-    normalize_structural_type_with_cache,
     resolver::ResolutionCtx,
 };
 use crate::db::queries::{
-    CallArgumentTypeInput, CallableFunctionInput, ResolvedCallArgument, infer_call_argument_type,
-    infer_call_expression_return_type_from_args, infer_constructor_argument_type,
+    CallArgumentTypeInput, CallableFunctionInput, MemberTypeInput, ResolvedCallArgument,
+    infer_call_argument_type, infer_call_expression_return_type_from_args,
+    infer_constructor_argument_type, member_type_needs_normalization, normalize_member_type,
     resolve_callable_function,
 };
 use biome_js_semantic::ScopeId;
@@ -96,9 +96,13 @@ impl<'db> MemberLookupResolver<'db> for ResolutionCtx<'db, '_> {
             ty
         };
         let ty = apply_substitutions(db, ty, substitutions);
-        let Ok(ty) = normalize_structural_type_with_cache(db, ty, &mut self.member_normalizations)
-        else {
-            return InferredTypeData::Unknown;
+        let ty = if member_type_needs_normalization(ty) {
+            match normalize_member_type(db, MemberTypeInput::new(db, ty)) {
+                Some(ty) => ty,
+                None => return InferredTypeData::Unknown,
+            }
+        } else {
+            ty
         };
         self.member_type(ty, is_optional)
     }
