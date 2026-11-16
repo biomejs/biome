@@ -27,13 +27,13 @@ camino                   = { workspace = true }
 # logging them with `console.error`. This is great for development, but requires
 # all the `std::fmt` and `std::panicking` infrastructure, so isn't great for
 # code size when deploying.
-console_error_panic_hook = { version = "0.1.7", optional = true }
-js-sys                   = "0.3.94"
+console_error_panic_hook = { workspace = true, optional = true }
+js-sys                   = { workspace = true }
 serde                    = { workspace = true }
 serde_json               = { workspace = true }
-serde-wasm-bindgen       = "0.6.5"
+serde-wasm-bindgen       = { workspace = true }
 # IMPORTANT: if you update this package, you must update justfile and workflows so we install the same CLI version
-wasm-bindgen             = { version = "=0.2.117", features = ["serde-serialize"] }
+wasm-bindgen             = { workspace = true, features = ["serde-serialize"] }
 
 [build-dependencies]
 biome_js_factory   = { workspace = true }
@@ -41,7 +41,7 @@ biome_js_formatter = { workspace = true }
 biome_languages    = { workspace = true, features = ["lang_js"] }
 biome_rowan        = { workspace = true }
 biome_service      = { workspace = true, features = ["schema"] }
-quote              = "1.0.14"
+quote              = { workspace = true }
 schemars           = { workspace = true }
 
 [features]
