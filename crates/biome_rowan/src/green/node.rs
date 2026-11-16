@@ -329,6 +329,45 @@ impl GreenNodeData {
         slots.splice(range, replace_with);
         GreenNode::new(self.kind(), slots)
     }
+
+    /// Returns a copy of this node in which each slot named in `edits` is
+    /// replaced with the elements of its replacement, which may be empty to
+    /// remove the slot.
+    ///
+    /// `edits` is expected in ascending slot order. An edit is ignored if its
+    /// index is not greater than the index of an earlier edit, or if it is past
+    /// the last slot. For edits in ascending order without duplicates that
+    /// only name existing slots, the result is the same as calling
+    /// [Self::splice_slots] once per edit in descending order, but the slots
+    /// are copied only once.
+    #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
+    pub(crate) fn splice_many_slots<E, R>(&self, edits: E) -> GreenNode
+    where
+        E: IntoIterator<Item = (usize, R)>,
+        R: IntoIterator<Item = Option<GreenElement>>,
+    {
+        let mut edits = edits.into_iter().peekable();
+        let mut slots = Vec::with_capacity(self.slice().len());
+
+        for (index, slot) in self.slots().enumerate() {
+            // Skip the edits of slots that were already passed
+            while edits
+                .next_if(|(edit_index, _)| *edit_index < index)
+                .is_some()
+            {}
+            if let Some((_, replacement)) = edits.next_if(|(edit_index, _)| *edit_index == index) {
+                slots.extend(replacement);
+            } else {
+                slots.push(match slot {
+                    Slot::Empty { .. } => None,
+                    Slot::Node { node, .. } => Some(NodeOrToken::Node(node.clone())),
+                    Slot::Token { token, .. } => Some(NodeOrToken::Token(token.clone())),
+                });
+            }
+        }
+
+        GreenNode::new(self.kind(), slots)
+    }
 }
 
 impl ops::Deref for GreenNode {
@@ -436,7 +475,7 @@ impl Slot {
         }
     }
     #[inline]
-    fn rel_range(&self) -> TextRange {
+    pub(crate) fn rel_range(&self) -> TextRange {
         let text_len = match self.as_ref() {
             None => TextSize::from(0),
             Some(element) => element.text_len(),
@@ -768,5 +807,27 @@ mod tests {
         );
         assert!(root.has_comments());
         assert!(root.has_skipped());
+    }
+
+    #[test]
+    fn splice_many_slots_ignores_out_of_order_and_out_of_range_edits() {
+        let root = build_test_list();
+        let token = |text| {
+            Some(GreenElement::Token(GreenToken::new_raw(
+                RawSyntaxKind(0),
+                text,
+            )))
+        };
+
+        let spliced = root.splice_many_slots([
+            (0, vec![token("x")]),
+            (0, vec![token("y")]),
+            (2, vec![]),
+            (1, vec![token("z")]),
+            (3, vec![token("w")]),
+        ]);
+
+        assert_eq!(spliced.slots().len(), 2);
+        assert_eq!(spliced.to_string(), "x∅");
     }
 }
