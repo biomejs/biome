@@ -92,17 +92,17 @@ pub(crate) enum FlowGuard {
         /// because no write changes the values it destructured.
         aliased: bool,
     },
-    /// The guard at this index, which applies only to a subject whose path is
-    /// readonly: each property along the path is one that every member of
-    /// the declared type of its object, other than `null` and `undefined`,
-    /// declares itself as readonly. A runtime test of a property path inside
+    /// Applies the guard at this index only to a subject whose path is
+    /// readonly. A path is readonly when, at every step, each member of the
+    /// object's declared type other than `null` and `undefined` declares the
+    /// property itself as readonly. A runtime test of a property path inside
     /// an inlined aliased condition is wrapped this way, because TypeScript
     /// applies such a test to a path only when no assignment through the
     /// path can change it between the `const` and its test.
     ///
     /// Whether the path is readonly depends on resolved types, so inference
-    /// decides it at the read, and the solve applies the wrapped guard only
-    /// when the read says so.
+    /// decides it at each read, and the solve applies the wrapped guard only
+    /// to a readonly path.
     ReadonlyPath(usize),
     /// The operands of `&&` or `||`. A sequential pair applies `right` to the
     /// result of `left`; otherwise both apply to the incoming type and their
@@ -853,10 +853,11 @@ impl Decomposer<'_, '_> {
             Some((test, subject)) => match self.testable(subject) {
                 Testable::Never => FlowGuard::Keep,
                 testable => {
-                    // `in` narrows only a union with two object types, as a
-                    // test of a property narrows its object, and `instanceof`
-                    // and a target with only object types only a type with an
-                    // object type or `unknown`.
+                    // Like a test of a property, which narrows its object,
+                    // `in` narrows only a union with two object types.
+                    // `instanceof` and a type-guard function whose target has
+                    // only object types narrow only a type with an object
+                    // type or `unknown`.
                     match test {
                         FlowTest::In(_) => self.parents.push(subject),
                         FlowTest::Instanceof(_)
@@ -1214,17 +1215,21 @@ enum Testable {
 /// Returns whether the condition inlined from an aliased condition may narrow
 /// `subject`, an id in `subjects`.
 ///
-/// Accepts only a variable whose value cannot change between the declaration
-/// of the alias and its test. The variable is never written, is not exported,
-/// and is declared by `const`, as a parameter or a catch variable, or by a
-/// `let` statement that is not at the top level of the file.
+/// TypeScript applies an inlined condition only to a reference whose value
+/// cannot change between the declaration of the alias and its test: a
+/// variable that is never written and is declared by `const`, as a parameter
+/// or a catch variable, or by `let` unless the `let` statement is at the top
+/// level of a script, where other scripts can write it. Biome cannot tell a
+/// script from a module, so it rejects a `let` statement at the top level of
+/// any file.
 ///
 /// Biome also rejects every exported variable, where TypeScript accepts a
 /// `const` exported by an `export { ... }` list. A destructuring pattern is
-/// accepted, as in TypeScript, because the table stores only patterns that a
-/// `const` or a parameter whose variables are never written declares. `this`
-/// is rejected, because no read of `this` itself narrows, and so is every
-/// property path, which [`narrows_through_aliases_when_readonly`] decides.
+/// accepted, as in TypeScript, because the table stores only patterns declared
+/// by a `const` or by a parameter whose variables are never written. `this` is
+/// rejected, because no read of `this` itself narrows. Every property path is
+/// rejected too, because it narrows only when it is readonly; see
+/// [`narrows_through_aliases_when_readonly`].
 fn narrows_through_aliases(
     subjects: &FlowSubjectTable,
     subject: FlowSubjectId,
@@ -1242,13 +1247,15 @@ fn narrows_through_aliases(
 /// the property path `subject`, an id in `subjects`, when the path is
 /// readonly, as [`FlowGuard::ReadonlyPath`] describes.
 ///
-/// TypeScript's `isConstantReference` accepts a property access whose object
-/// is itself such a reference and whose property is readonly. So the path
-/// must start at a variable that [`narrows_through_aliases`] accepts, or at
-/// `this`. The table stores `this` only for a `this` in the root's own code,
-/// so `this` qualifies only for an aliased condition that the root declares.
-/// TypeScript also accepts one that an enclosing method declares and an arrow
-/// function inside it tests, and one that reads another function's `this`.
+/// TypeScript applies an inlined condition to a property access only when the
+/// property is readonly and the object is itself a reference whose value
+/// cannot change. So the path must start at a variable that
+/// [`narrows_through_aliases`] accepts, or at `this`. The table stores `this`
+/// only for a `this` in the root's own code, so `this` qualifies only for an
+/// aliased condition that the root declares. Biome therefore rejects two
+/// cases that TypeScript accepts: an aliased condition that an enclosing
+/// method declares and an arrow function inside it tests, and one that reads
+/// another function's `this`.
 fn narrows_through_aliases_when_readonly(
     subjects: &FlowSubjectTable,
     subject: FlowSubjectId,
@@ -3100,11 +3107,11 @@ mod tests {
         }
     }
 
-    /// Names the subjects of the runtime tests and the objects of the
-    /// property guards that a [`FlowGuard::ReadonlyPath`] wraps, in the
-    /// guards that decomposing the test of the last `if` statement in
-    /// `program` produces. `this` is a subject in the first method or arrow
-    /// function of `program` whose `this` can narrow.
+    /// Decomposes the test of the last `if` statement in `program` and names
+    /// what each [`FlowGuard::ReadonlyPath`] wraps: the subject of a runtime
+    /// test, or the object and key of a property guard. `this` is a subject
+    /// in the first method or arrow function of `program` whose `this` can
+    /// narrow.
     fn readonly_names_in(program: &str) -> Vec<String> {
         let parsed = parse(program, JsFileSource::ts(), JsParserOptions::default());
         let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());

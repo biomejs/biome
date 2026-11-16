@@ -306,9 +306,9 @@ pub(in crate::db) struct LocalFlow<'db> {
     expressions: FxHashMap<TextRange, Option<TypeData<'db>>>,
     /// The type that narrowing starts from for each binding read so far.
     baselines: FxHashMap<TextRange, Option<TypeData<'db>>>,
-    /// Whether each property path read so far is readonly, keyed by the
-    /// index of its root and its subject, as
-    /// [`ResolutionCtx::is_readonly_path`] decides it.
+    /// Caches for [`ResolutionCtx::is_readonly_path`] whether each property
+    /// path read so far is readonly, keyed by the index of its root and its
+    /// subject.
     readonly_paths: FxHashMap<(usize, FlowSubjectId), bool>,
 }
 
@@ -522,8 +522,8 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// member access with its object's narrowed type.
     ///
     /// The runtime tests that aliased conditions apply to the path narrow it
-    /// only when the path is readonly, as [`Self::is_readonly_path`] decides
-    /// once the declared type can narrow.
+    /// only when every property along the path is readonly, which
+    /// [`Self::is_readonly_path`] checks.
     ///
     /// Returns `None` when collection kept no flow for the read, when no
     /// runtime test can change `declared`, or when narrowing leaves it
@@ -564,13 +564,16 @@ impl<'db> ResolutionCtx<'db, '_> {
         )
     }
 
-    /// Returns whether the property path that `member` reads, at `read`, is
-    /// readonly, as [`FlowGuard::ReadonlyPath`] requires: whether, at every
-    /// step of the path, the declared type of the object, the type of its
-    /// expression without narrowing, declares the property readonly in every
-    /// member other than `null` and `undefined`, as [`has_readonly_property`]
-    /// decides it. Every read of a path gives the same answer, so the answer
-    /// is kept per root and subject when this context evaluates flow locally.
+    /// Returns whether the property path that `member` reads at `read` is
+    /// readonly, as [`FlowGuard::ReadonlyPath`] requires. A path is readonly
+    /// when, at every step, the declared type of the object declares the
+    /// property readonly in every member other than `null` and `undefined`.
+    /// The declared type of an object is the type of its expression without
+    /// narrowing. [`has_readonly_property`] lists the properties that count as
+    /// readonly.
+    ///
+    /// Every read of a path gives the same answer, so this context caches the
+    /// answer per root and subject when it evaluates flow locally.
     ///
     /// Returns false when the syntax of `member` doesn't match the path of
     /// the subject, and when the declared type of an object is unknown.
@@ -590,9 +593,10 @@ impl<'db> ResolutionCtx<'db, '_> {
         is_readonly
     }
 
-    /// Checks the steps of the path as [`Self::is_readonly_path`] describes,
-    /// from the last property to the first, or returns `None` when the syntax
-    /// of `member` doesn't match the path.
+    /// Returns whether the object at every step of the path that `member`
+    /// reads declares the property readonly, checking from the last property
+    /// to the first. Returns `None` when the syntax of `member` doesn't match
+    /// the path, or when no type was collected for an object expression.
     fn readonly_path_steps(&mut self, read: FlowRead, member: &AnyJsExpression) -> Option<bool> {
         let info = self.js_info;
         let root = info.flow.root(read.root)?;

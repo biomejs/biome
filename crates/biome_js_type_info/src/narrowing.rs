@@ -590,7 +590,7 @@ pub fn may_narrow_by_property(db: &dyn TypeDb, declared: InferredTypeData) -> bo
 /// `Readonly<T>` makes it readonly, and when it is an element of a `readonly`
 /// tuple. A getter is never readonly, because Biome doesn't collect setters,
 /// so a getter may have one. A property that a member inherits, through an
-/// `extends` clause or a prototype, doesn't count: another declaration of an
+/// `extends` clause or a prototype, doesn't count. Another declaration of an
 /// interface or a class in the same module, or a module augmentation, can
 /// give the member a property of the same name that isn't readonly, and
 /// Biome's types include neither.
@@ -3524,8 +3524,9 @@ mod tests {
                 true,
             ),
             (union(db, &[declared, constant]), true),
-            // TypeScript also takes a union whose other members declare the
-            // property without `readonly` as readonly.
+            // TypeScript takes the property as readonly when one member of a
+            // union declares it `readonly`, but a write through another
+            // member can change it.
             (union(db, &[declared, mutable]), false),
             (mutable, false),
             // A setter may change a getter's value.

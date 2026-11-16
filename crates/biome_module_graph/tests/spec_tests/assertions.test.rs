@@ -695,9 +695,7 @@ fn alias_assertion_targets_narrow_like_the_types_they_name() {
     }
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3/predicates.ts` L26, `narrowing-probes/m3-l7/spec.ts`
-// L55 to L57, L68, and `narrowing-probes/m3-l7/unknown.ts` L27).
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 #[test]
 fn object_and_union_assertion_targets_narrow_the_following_reads() {
     const SOURCE: &str = r#"

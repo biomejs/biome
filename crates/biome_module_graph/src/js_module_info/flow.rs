@@ -209,9 +209,10 @@ impl FlowSubjectTable {
     /// `this` is the root's own, but Biome types it as an instance of the
     /// class or as the object.
     ///
-    /// Also returns `None` for a `this` outside the root, which the
-    /// initializer of an aliased condition that an enclosing function
-    /// declares can contain: it can be the `this` of another function.
+    /// Also returns `None` for a `this` outside the root, because it can be
+    /// the `this` of another function. The initializer of an aliased
+    /// condition that an enclosing function declares can contain such a
+    /// `this`.
     fn this(&mut self, expression: &JsThisExpression) -> Option<FlowSubjectId> {
         let root = self.this_root.as_ref()?;
         for node in expression.syntax().ancestors() {
@@ -1020,21 +1021,22 @@ impl RootCollector<'_> {
     }
 }
 
-/// Replaces with [`FlowGuard::Keep`] the [`FlowGuard::ReadonlyPath`] guards of
-/// `guards` whose path has an object that a test of the root can give a type
-/// with members that its declared type lacks, and returns the subjects of the
-/// other such guards, then those of them that no other guard tests or
+/// Replaces with [`FlowGuard::Keep`] each [`FlowGuard::ReadonlyPath`] guard in
+/// `guards` whose path has a replaceable object. Returns the subjects of the
+/// other such guards, then the subset of them that no other guard tests or
 /// narrows. `subjects` are the root's subjects, each at the index of its id.
 ///
+/// An object is replaceable when a test of the root can give it a type with
+/// members that its declared type lacks. `instanceof`, a type-guard function,
+/// and `typeof` with a primitive kind or `"function"` can replace a member
+/// with another type, as `o instanceof Derived` replaces `Base` with
+/// `Derived`, whose property can be mutable where `Base` declares it readonly.
 /// Inference decides whether a path is readonly from the declared types of the
 /// objects along it, while TypeScript decides it from their types at the
 /// read. Both agree while the tests of those objects only remove members
-/// from their types. `instanceof`, a type-guard function, and `typeof` with a
-/// primitive kind or `"function"` can replace a member with another type, as
-/// `o instanceof Derived` replaces `Base` with `Derived`, whose property can be
-/// mutable where `Base` declares it readonly. Biome keeps some members that
-/// TypeScript replaces in these tests, so it would see a readonly property
-/// where TypeScript doesn't.
+/// from their types. Biome's narrowed types can't stand in for TypeScript's,
+/// because Biome keeps a member that TypeScript replaces when, for example,
+/// it can't tell whether the member derives from the tested class.
 fn readonly_tested_subjects(
     guards: &mut [FlowGuard],
     subjects: &[FlowSubject],

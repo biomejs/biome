@@ -752,9 +752,9 @@ fn long_signatures_names_and_parenthesized_callees_narrow() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives every `then` read the target and
-// every `else` read `unknown`, except that in the `else` branch a target of
-// `{}` gives `null | undefined` and `void` gives `{} | null`, where Biome
-// keeps `unknown`.
+// every `else` read `unknown`, except that a target of `{}` gives
+// `null | undefined` and `void` gives `{} | null` in the `else` branch, where
+// Biome keeps `unknown`.
 #[test]
 fn predicate_targets_narrow_unknown_to_the_target() {
     for target in [
@@ -951,8 +951,7 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
 // different types. Its subtype relation ignores `readonly`, so it can't tell
 // which of the two TypeScript's strict subtype relation prefers, and the
 // `else` branch keeps both members of each pair. A comment gives the type
-// that TypeScript 7.0.2 (`tsc --strict`) gives where it differs
-// (`narrowing-probes/m3-l8/identity.ts` L6 and L7).
+// that TypeScript 7.0.2 (`tsc --strict`) gives where it differs.
 #[test]
 fn object_targets_that_differ_only_by_readonly_keep_both_members_in_the_else_branch() {
     assert_reads(
@@ -972,12 +971,9 @@ fn object_targets_that_differ_only_by_readonly_keep_both_members_in_the_else_bra
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3/predicates.ts` L17 to L21, L23 to L25, L27, L30 to
-// L33, L35, L38, `narrowing-probes/m3-l7/spec.ts` L35, L36, L38, L39, L41,
-// L42, L45 to L47, L60, L62 to L64, and `narrowing-probes/m3-l7/widened.ts`
-// L15). A branch that no value reaches is `never` in TypeScript, which Biome
-// reads as Unknown.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A branch that no value reaches is `never` in TypeScript, which Biome reads
+// as Unknown.
 #[test]
 fn object_targets_narrow_both_branches() {
     assert_reads(
@@ -1084,10 +1080,7 @@ fn object_targets_narrow_both_branches() {
 
 // Biome keeps the declared type in both branches of every read below, or in
 // the `else` branch where it narrows only the `then` branch. A comment gives
-// the type that TypeScript 7.0.2 (`tsc --strict`) gives where it differs
-// (`narrowing-probes/m3/predicates.ts` L22, L28, L29, L34, L37, and
-// `narrowing-probes/m3-l7/spec.ts` L37, L43, L44, L61, and
-// `narrowing-probes/m3-l7/widened.ts` L9 to L11).
+// the type that TypeScript 7.0.2 (`tsc --strict`) gives where it differs.
 #[test]
 fn object_targets_keep_the_declared_type_where_biome_cannot_tell() {
     assert_reads(
@@ -1168,9 +1161,7 @@ fn object_targets_keep_the_declared_type_where_biome_cannot_tell() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3-l7/spec.ts` L48 to L52, L66, L67, and
-// `narrowing-probes/m3-l7/flow.ts` L6 to L12).
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 #[test]
 fn object_targets_narrow_through_the_flow() {
     assert_reads(
@@ -1219,10 +1210,9 @@ fn object_targets_narrow_through_the_flow() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3-l7/widened.ts` L12, L13). Its union of `"a"` and `string`, the
-// types that the `then` branch gets, is `string`, so the `else` branch keeps
-// `"a"`.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// Its union of `"a"` and `string`, the types that the `then` branch gets, is
+// `string`, so the `else` branch keeps `"a"`.
 #[test]
 fn primitive_targets_keep_the_literals_that_the_then_branch_absorbs() {
     assert_reads(
@@ -1239,9 +1229,8 @@ fn primitive_targets_keep_the_literals_that_the_then_branch_absorbs() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3-l7/mods/index.ts` L5 to L8), except where a comment
-// gives TypeScript's type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment gives TypeScript's type.
 #[test]
 fn object_targets_resolve_types_of_other_modules() {
     let files = [

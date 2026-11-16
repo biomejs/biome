@@ -58,8 +58,8 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[InferredTypeData<'static>]
     }
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type:
-// testing a `const` tests the condition that initializes it.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// because testing a `const` tests the condition that initializes it.
 #[test]
 fn aliased_conditions_narrow_like_their_initializers() {
     use InferredTypeData::{Null, Number, String};
@@ -109,8 +109,9 @@ fn aliased_conditions_narrow_like_their_initializers() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `x` the type `{ y: string }`: the
-// inlined `x?.y` shows that `x` is not nullish, as `if (x?.y)` does.
+// TypeScript 7.0.2 (`tsc --strict`) gives `x` the type `{ y: string }`,
+// because the inlined `x?.y` shows that `x` is not nullish, as `if (x?.y)`
+// does.
 #[test]
 fn aliased_conditions_narrow_optional_chain_receivers() {
     const SOURCE: &str = r#"
@@ -161,8 +162,8 @@ fn aliases_combine_with_negation_logical_operators_and_loops() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) inlines five aliases into one another, not
-// six. It narrows `x` at `five`, but at `six` it tests only the truthiness of
-// `c1`, so `x` keeps `string | null` there.
+// six. It narrows `x` at `five`, but tests only the truthiness of `c1` at
+// `six`, so `x` keeps `string | null` there.
 #[test]
 fn aliases_inline_up_to_five_levels() {
     use InferredTypeData::{Null, String};
@@ -247,7 +248,7 @@ fn other_declarations_are_not_aliases() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below `string | null`,
-// except where a comment says otherwise: an inlined condition narrows only a
+// except where a comment says otherwise. An inlined condition narrows only a
 // variable that cannot change between the alias and its test.
 #[test]
 fn inlined_conditions_narrow_only_variables_that_cannot_change() {
@@ -283,15 +284,16 @@ fn inlined_conditions_narrow_only_variables_that_cannot_change() {
             ("writtenBetween", "y", &[String, Null]),
             ("writtenAfter", "x", &[String, Null]),
             ("mutable", "o.v", &[String, Null]),
-            // A readonly property cannot change either.
+            // A readonly property cannot change either, so TypeScript gives
+            // `string`.
             ("readonly", "o.v", &[String]),
         ],
     );
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below `string`, in a
-// script and in a module, because none of these variables is a top-level `let`
-// of a script.
+// script and in a module, because none of these variables is a top-level
+// `let` of a script.
 #[test]
 fn inlined_conditions_narrow_module_constants_and_nested_lets() {
     use InferredTypeData::String;
@@ -367,7 +369,8 @@ fn member_names(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
 }
 
 /// Asserts the type of each `(marker, expression, expected)` read in `source`
-/// by the names of its members, as [`member_names`] gives them.
+/// by the sorted names of its members. See [`member_names`] for how a member
+/// is named.
 fn assert_named_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     let (db, module) = narrowing_db(source);
     let mismatches: Vec<_> = reads
@@ -382,12 +385,10 @@ fn assert_named_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3/readonly.ts` L5, L6, L8, L11, L14, L16, L17, L21,
-// L22, and `m3-l9/spec.ts` L5 to L23): an inlined condition narrows a
-// property path when every property along it is readonly. TypeScript also
-// narrows an element of a readonly tuple (`readonly.ts` L15), which Biome
-// types as Unknown even without a condition.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// because an inlined condition narrows a property path when every property
+// along it is readonly. TypeScript also narrows an element of a readonly
+// tuple, which Biome types as Unknown even without a condition.
 #[test]
 fn readonly_property_paths_narrow_through_aliased_conditions() {
     use InferredTypeData::{Null, Number, String};
@@ -443,10 +444,9 @@ fn readonly_property_paths_narrow_through_aliased_conditions() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m3-l9/named.ts`): a readonly path narrows through an
-// aliased condition by `instanceof`, by a test of a discriminant, by `in`,
-// and as the receiver of an optional chain.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A readonly path narrows through an aliased condition by `instanceof`, by a
+// test of a discriminant, by `in`, and as the receiver of an optional chain.
 #[test]
 fn readonly_objects_narrow_through_aliased_conditions() {
     const SOURCE: &str = r#"
@@ -475,10 +475,9 @@ fn readonly_objects_narrow_through_aliased_conditions() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below `string | null`
-// (`narrowing-probes/m3/readonly.ts` L7, L10, L12, L23, and `m3-l9/spec.ts`
-// L31 to L39 and L41): the path, or an object on it, can change between the
-// alias and its test, or the read is outside the branch. A property of an
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below `string | null`.
+// In each case, the path, or an object on it, can change between the alias
+// and its test, or the read is outside the branch. A property of an
 // intersection is readonly only when every operand that declares it declares
 // it readonly.
 #[test]
@@ -510,10 +509,9 @@ fn mutable_property_paths_keep_their_declared_types() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below `string`
-// (`narrowing-probes/m3/readonly.ts` L9, L13, and `m3-l9/spec.ts` L47, L48,
-// L50 to L54 and L57 to L62). Biome keeps the declared type
-// where it can't tell that the path is readonly, as the comments say.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below `string`. Biome
+// keeps the declared type where it can't tell that the path is readonly, for
+// the reasons that the comments give.
 #[test]
 fn paths_that_biome_cannot_prove_readonly_keep_their_declared_types() {
     use InferredTypeData::{Null, String};
@@ -544,8 +542,8 @@ fn paths_that_biome_cannot_prove_readonly_keep_their_declared_types() {
             // collect setters.
             ("getter", "g.v", &[String, Null]),
             ("thisGetter", "this.v", &[String, Null]),
-            // TypeScript needs a readonly property in one member, which a
-            // write through another member could change.
+            // TypeScript needs the property to be readonly in only one
+            // member, but a write through another member could change it.
             ("oneReadonly", "o.v", &[String, Null]),
             ("unionStep", "o.a.v", &[String, Null]),
             // Biome can't look up a property of a generic.
@@ -571,13 +569,12 @@ fn paths_that_biome_cannot_prove_readonly_keep_their_declared_types() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below `string | null`
-// (`narrowing-probes/m3-l9/spec.ts` L68 to L71, which gives `string` for
-// `outerThis`): the type of the object at the read, or a declaration that
-// Biome doesn't see, has a property that isn't readonly, although Biome's
-// declared type has a readonly one. `outerThis` keeps `string | null` in
-// Biome too, because an aliased condition that an enclosing function declares
-// reads that function's `this`.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below `string | null`,
+// except `outerThis`, where it gives `string`. In the other cases, the type of
+// the object at the read, or a declaration that Biome doesn't see, has a
+// property that isn't readonly, although Biome's declared type has a readonly
+// one. Biome also keeps `string | null` at `outerThis`, because an aliased
+// condition that an enclosing function declares reads that function's `this`.
 #[test]
 fn readonly_paths_never_narrow_where_typescript_sees_a_mutable_property() {
     use InferredTypeData::{Null, String};
@@ -604,9 +601,9 @@ fn readonly_paths_never_narrow_where_typescript_sees_a_mutable_property() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at the read
-// (`narrowing-probes/m3-l9/aug2/`): the augmentation declares `v` on `X`
-// without `readonly`, which hides the readonly `v` that `X` inherits.
+// TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at the read, because
+// the augmentation declares `v` on `X` without `readonly`. That declaration
+// hides the readonly `v` that `X` inherits.
 #[test]
 fn readonly_paths_never_narrow_through_properties_that_an_augmentation_can_hide() {
     use InferredTypeData::{Null, String};
@@ -645,7 +642,7 @@ fn readonly_paths_never_narrow_through_properties_that_an_augmentation_can_hide(
 
 // TypeScript 7.0.2 (`tsc --strict`) reports TS2540 for the write and gives
 // `never` at the read, because the write assigns `null` after the alias.
-// Biome keeps the declared type: a path that the function writes never
+// Biome keeps the declared type, because a path that the function writes never
 // narrows.
 #[test]
 fn written_readonly_paths_keep_their_declared_types() {

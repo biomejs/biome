@@ -71,11 +71,11 @@ const MEMBER_BODY_KINDS: SyntaxKindSet<JsLanguage> = JsFunctionBody::KIND_SET
     .union(JsFormalParameter::KIND_SET)
     .union(JsInitializerClause::KIND_SET);
 
-/// The nodes that end the walk of [`this_can_narrow`] before it finds the
-/// member whose `this` the root has: execution roots, which have a `this` of
-/// their own, other class members, and classes, reached from their decorators
-/// or `extends` clause. The walk checks arrow functions and the members of
-/// [`AnyThisMember`] first.
+/// The nodes that stop the walk of [`this_can_narrow`] before it reaches the
+/// member that gives the root its `this`: execution roots, which have their
+/// own `this`, other class members, and classes, which the walk reaches from
+/// their decorators or `extends` clause. Arrow functions and the members of
+/// [`AnyThisMember`] are in this set too, so the walk checks them first.
 const THIS_BOUNDARY_KINDS: SyntaxKindSet<JsLanguage> = AnyJsControlFlowRoot::KIND_SET
     .union(AnyJsClassMember::KIND_SET)
     .union(AnyJsClass::KIND_SET);
@@ -362,8 +362,8 @@ pub(super) fn index_key(index: usize) -> Option<PropertyKey> {
 }
 
 /// Returns the key that names `element` in the array that its pattern
-/// destructures, from its index in the pattern, counting holes, as
-/// [`index_key`] does: `k` reads `t[1]` in `[, k]`.
+/// destructures, or `None` from index 16 on, where [`index_key`] has no key.
+/// The index counts holes, so `k` reads `t[1]` in `const [, k] = t`.
 pub(super) fn array_element_key(element: &JsArrayBindingPatternElement) -> Option<PropertyKey> {
     // Elements from index 16 on have no key, so the walk stops before them.
     let index = element
