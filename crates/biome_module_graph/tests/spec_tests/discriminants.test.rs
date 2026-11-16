@@ -584,7 +584,7 @@ fn discriminants_of_classes_and_inherited_properties_narrow() {
 // TypeScript 7.0.2 (`tsc --strict`) gives `{ ok: true; value: number }`.
 // Biome keeps the declared type, because the declared type of `r` is an
 // instance of the generic alias, not a union, and no runtime test narrows such
-// an instance yet.
+// an instance.
 #[test]
 fn instances_of_generic_aliases_keep_their_declared_type() {
     const SOURCE: &str = r#"
@@ -668,9 +668,11 @@ fn impossible_discriminant_tests_read_as_unknown() {
     }
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) keeps `o` as declared, because a test of
-// a property narrows only a union. Collection drops the first read, whose
-// annotation shows that `o` is not a union, and the second runs one solve.
+// TypeScript 7.0.2 (`tsc --strict`) keeps `o` as declared in the first source
+// and narrows it to `{ k: "a" }` in the second, because a test of a property
+// narrows only a union. The annotation of `o` in the first source shows that
+// it is not a union, so collection drops the read. The second source runs one
+// solve.
 #[test]
 fn property_tests_of_objects_that_are_not_unions_skip_the_solve() {
     for (source, solves) in [
@@ -800,10 +802,10 @@ fn reads_that_property_tests_cannot_narrow_skip_the_solve() {
 
 // TypeScript 7.0.2 (`tsc --strict`) removes the member whose property type
 // can't share a value with what the test leaves, and narrows `s` by a `const`
-// of a literal type. Biome keeps both members whenever a property type is an
-// object type and the test leaves a value other than `null` or `undefined`,
-// because it doesn't compare object types with other types, and a comparison
-// narrows only with a literal, so these reads are wider.
+// of a literal type. Biome doesn't compare object types with other types, so
+// it assumes that an object type shares a value with every type except `null`
+// and `undefined`. A comparison narrows only with a literal. Every read below
+// except `notNull` is therefore wider than TypeScript's.
 #[test]
 fn tests_that_biome_cannot_compare_keep_more_members() {
     assert_reads(
@@ -1145,7 +1147,7 @@ fn discriminants_held_at_the_top_level_follow_exports() {
 // TypeScript 7.0.2 (`tsc --strict`) narrows every read below, giving
 // `Circle` or the first tuple. Biome keeps the declared type, because it
 // doesn't follow `s!` and keys that are spelled differently from the property,
-// loose equality doesn't narrow an object yet, a read in a closure or inside
+// loose equality doesn't narrow an object, a read in a closure or inside
 // `for...of` or `switch` never sees the test, and a `const` exported by an
 // `export { ... }` list holds nothing.
 #[test]
@@ -1534,16 +1536,16 @@ fn destructured_elements_that_do_not_narrow_each_other() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives `number` at every read below.
-// Biome keeps the declared type for several reasons. Loose `==` with a literal
-// doesn't narrow an object yet. An element under a default of an enclosing
+// Biome keeps the declared type in these cases. Loose `==` with a literal
+// doesn't narrow an object. An element under a default of an enclosing
 // pattern never narrows, because its declared type ignores the default. An
-// `if` inside `for...of` and a read in a closure never see the test. A written
-// parameter variable never narrows, while TypeScript narrows `v` by the
-// assignment `v = 1`. Biome also gives the declared type
-// `unknown`, which no test narrows, to an element destructured from `s!`, to a
-// parameter destructured in a function that a variable annotation types, and
-// to the parameters of a function typed by a rest parameter whose type is a
-// union of tuples.
+// `if` inside `for...of` and a read in a closure never see the test. A
+// written parameter variable never narrows, while TypeScript narrows `v` by
+// the assignment `v = 1`. Biome also gives the declared type `unknown`, which
+// no test narrows, to an element destructured from `s!`, to a parameter
+// destructured in a function that a variable annotation types, and to the
+// parameters of a function typed by a rest parameter whose type is a union
+// of tuples.
 #[test]
 fn destructured_elements_that_biome_does_not_narrow_yet() {
     assert_element_reads(
@@ -1612,11 +1614,13 @@ fn impossible_tests_of_destructured_elements_read_as_unknown() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) keeps `b` as declared, because a test of
-// an element narrows only a pattern whose value is a union. Collection drops
-// the read of `b` when the annotation shows that the value is not a union,
-// without resolving anything. Otherwise the read checks the pattern's
-// declared type once, and solves the pattern only when it is a union.
+// TypeScript 7.0.2 (`tsc --strict`) keeps `b` as declared in the first two
+// sources, whose values are not unions, and gives `1` in the third, because a
+// test of an element narrows only a pattern whose value is a union.
+// Collection drops the read of `b` when the annotation shows that the value
+// is not a union, without resolving anything. Otherwise the read checks the
+// pattern's declared type once, and solves the pattern only when it is a
+// union.
 #[test]
 fn destructured_elements_of_values_that_are_not_unions_skip_the_solve() {
     for (source, candidate, solves) in [

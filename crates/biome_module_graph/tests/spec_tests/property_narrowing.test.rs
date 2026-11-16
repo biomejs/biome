@@ -306,7 +306,7 @@ fn writes_to_the_path_a_prefix_or_any_property_cancel_narrowing() {
 // `declaration`, because property narrowing never reaches a function created
 // later. It gives `string` at `iife` and `enclosing`, where Biome is wider. The
 // body of a function called where it is defined does not continue the outer
-// flow yet, and a path narrows only in the execution root that declares its
+// flow, and a path narrows only in the execution root that declares its
 // variable.
 #[test]
 fn reads_in_nested_functions_see_no_property_facts() {

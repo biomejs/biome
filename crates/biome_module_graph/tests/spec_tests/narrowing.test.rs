@@ -1921,7 +1921,7 @@ fn variables_written_by_destructuring_or_logical_assignments_do_not_narrow() {
 // except the read in `method`. TypeScript narrows that read to `string`,
 // because it keeps the narrowing of a parameter that a method of a class
 // expression captures when nothing writes the parameter. Biome does not narrow
-// reads in closures yet.
+// reads in closures.
 // TypeScript analyzes a class field with an initializer on its own, so reads
 // in the field keep their declared type.
 #[test]

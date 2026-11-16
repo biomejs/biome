@@ -527,8 +527,8 @@ fn optional_and_nested_assertion_calls_preserve_incoming_types() {
     }
 }
 
-// A comment gives the type that TypeScript 7.0.2 (`tsc --strict`) gives
-// where it differs.
+// TypeScript 7.0.2 (`tsc --strict`) gives `string | null` in each row without
+// a comment. A row comment gives TypeScript's type where Biome differs.
 #[test]
 fn unsupported_assertion_signatures_and_never_returns_do_not_add_facts() {
     use InferredTypeData::{Null, String};

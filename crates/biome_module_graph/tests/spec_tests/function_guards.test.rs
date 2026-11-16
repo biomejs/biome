@@ -811,9 +811,10 @@ fn predicate_targets_narrow_unknown_to_the_target() {
     }
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) keeps `unknown` in the `then` branch of
-// both targets and gives `never` in the `else` branch of `unknown`. Biome
-// supports neither target, so both branches keep the declared type.
+// TypeScript 7.0.2 (`tsc --strict`) gives `any` in the `then` branch of an
+// `any` target and `unknown` in the `then` branch of an `unknown` target.
+// Both `else` branches are `never`. Biome supports neither target, so both
+// branches keep the declared type.
 #[test]
 fn any_and_unknown_predicate_targets_preserve_unknown_and_indeterminate_classifications() {
     for target in ["any", "unknown"] {
