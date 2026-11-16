@@ -7,9 +7,10 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::BindingExtensions;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, JsConstructorClassMember, JsFunctionBody,
-    JsFunctionDeclaration, JsFunctionExportDefaultDeclaration, JsFunctionExpression,
-    JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember, JsMethodObjectMember, JsModule,
+    AnyJsClassMemberName, AnyJsExpression, AnyJsFunctionBody, AnyJsObjectMemberName,
+    AnyJsStatement, JsConstructorClassMember, JsFunctionBody, JsFunctionDeclaration,
+    JsFunctionExportDefaultDeclaration, JsFunctionExpression, JsGetterClassMember,
+    JsGetterObjectMember, JsMethodClassMember, JsMethodObjectMember, JsModule,
     JsNewTargetExpression, JsReferenceIdentifier, JsScript, JsSetterClassMember,
     JsSetterObjectMember, JsStaticInitializationBlockClassMember, JsSyntaxKind, JsThisExpression,
     T,
@@ -154,8 +155,13 @@ impl Rule for UseArrowFunction {
             match event {
                 WalkEvent::Enter(node) => {
                     if node != *root
-                        && let Some(_) = AnyThisScope::cast_ref(&node)
+                        && let Some(child_scope) = AnyThisScope::cast_ref(&node)
                     {
+                        if let Some(name_node) = computed_name_syntax(&child_scope) {
+                            if contains_this_or_arguments(&name_node, model) {
+                                return None;
+                            }
+                        }
                         // Stop crawling when we hit another function scope.
                         preorder.skip_subtree();
                     } else if matches!(
@@ -407,3 +413,74 @@ fn to_arrow_body(body: JsFunctionBody, in_for_initializer: bool) -> AnyJsFunctio
     // () => expression
     AnyJsFunctionBody::AnyJsExpression(return_arg)
 }
+
+fn computed_name_syntax(
+    scope: &AnyThisScope,
+) -> Option<biome_rowan::SyntaxNode<biome_js_syntax::JsLanguage>> {
+    match scope {
+        AnyThisScope::JsMethodClassMember(m) => match m.name().ok()? {
+            AnyJsClassMemberName::JsComputedMemberName(name) => Some(name.into_syntax()),
+            _ => None,
+        },
+        AnyThisScope::JsGetterClassMember(m) => match m.name().ok()? {
+            AnyJsClassMemberName::JsComputedMemberName(name) => Some(name.into_syntax()),
+            _ => None,
+        },
+        AnyThisScope::JsSetterClassMember(m) => match m.name().ok()? {
+            AnyJsClassMemberName::JsComputedMemberName(name) => Some(name.into_syntax()),
+            _ => None,
+        },
+        AnyThisScope::JsMethodObjectMember(m) => match m.name().ok()? {
+            AnyJsObjectMemberName::JsComputedMemberName(name) => Some(name.into_syntax()),
+            _ => None,
+        },
+        AnyThisScope::JsGetterObjectMember(m) => match m.name().ok()? {
+            AnyJsObjectMemberName::JsComputedMemberName(name) => Some(name.into_syntax()),
+            _ => None,
+        },
+        AnyThisScope::JsSetterObjectMember(m) => match m.name().ok()? {
+            AnyJsObjectMemberName::JsComputedMemberName(name) => Some(name.into_syntax()),
+            _ => None,
+        },
+        _ => None,
+    }
+}
+
+fn contains_this_or_arguments(
+    root: &biome_rowan::SyntaxNode<biome_js_syntax::JsLanguage>,
+    model: &biome_js_semantic::SemanticModel,
+) -> bool {
+    let mut preorder = root.preorder_of_kinds(
+        AnyThisScope::KIND_SET
+            .union(JsThisExpression::KIND_SET)
+            .union(JsNewTargetExpression::KIND_SET)
+            .union(JsReferenceIdentifier::KIND_SET),
+    );
+    while let Some(event) = preorder.next() {
+        match event {
+            WalkEvent::Enter(node) => {
+                if node != *root && let Some(child_scope) = AnyThisScope::cast_ref(&node) {
+                    if let Some(name_node) = computed_name_syntax(&child_scope) {
+                        if contains_this_or_arguments(&name_node, model) {
+                            return true;
+                        }
+                    }
+                    preorder.skip_subtree();
+                } else if matches!(
+                    node.kind(),
+                    JsSyntaxKind::JS_THIS_EXPRESSION | JsSyntaxKind::JS_NEW_TARGET_EXPRESSION
+                ) {
+                    return true;
+                } else if let Some(reference) = JsReferenceIdentifier::cast_ref(&node)
+                    && reference.name().is_ok_and(|name| name == "arguments")
+                    && reference.binding(model).is_none()
+                {
+                    return true;
+                }
+            }
+            WalkEvent::Leave(_) => {}
+        }
+    }
+    false
+}
+
