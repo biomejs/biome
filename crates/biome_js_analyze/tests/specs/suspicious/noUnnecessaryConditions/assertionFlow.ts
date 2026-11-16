@@ -20,7 +20,7 @@ function standalone(value: string | null) {
 }
 
 function parenthesized(value: string | null) {
-	(((assertString)((value))));
+	(assertString)((value));
 	return value ?? "fallback";
 }
 
@@ -75,5 +75,14 @@ function loop(value: string | null, flag: boolean) {
 	do {
 		assertString(value);
 	} while (flag);
+	return value?.length;
+}
+
+function commaOperand(value: string | null) {
+	(assertString(value), value?.length);
+}
+
+function annotatedParameter(value: string | null, check: (input: unknown) => asserts input is string) {
+	check(value);
 	return value?.length;
 }

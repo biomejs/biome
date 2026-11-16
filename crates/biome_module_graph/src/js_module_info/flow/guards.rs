@@ -2,17 +2,22 @@ use super::subjects::{
     AnyPatternElement, array_element_key, assigned_subject, identifier_key, literal_key,
     member_name_key, subject_of,
 };
-use super::{FlowSubject, FlowSubjectId, FlowSubjectTable, PropertyKey, subject_root};
+use super::{
+    FlowCall, FlowCallArgument, FlowCallKind, FlowCallRoot, FlowSubject, FlowSubjectId,
+    FlowSubjectTable, PropertyKey, subject_root,
+};
 use crate::js_module_info::TsBindingReferenceExt;
+use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::{Binding, JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
-    AnyJsArrowFunctionParameters, AnyJsAssignment, AnyJsCallArgument, AnyJsExpression,
-    AnyJsFormalParameter, AnyJsInProperty, AnyJsLiteralExpression, AnyJsMemberExpression,
-    AnyJsOptionalChainExpression, AnyJsParameter, AnyJsSwitchClause, AnyJsTemplateElement,
-    AnyJsVariableDeclaration, JsBinaryOperator, JsCallExpression, JsIdentifierExpression,
-    JsLanguage, JsLogicalOperator, JsModule, JsScript, JsSwitchStatement, JsTemplateExpression,
-    JsUnaryOperator, JsVariableDeclarator, JsVariableKind, JsVariableStatement, T,
-    binding_ext::AnyJsBindingDeclaration, unescape_js_identifier,
+    AnyJsArrowFunctionParameters, AnyJsAssignment, AnyJsCallArgument, AnyJsClassMember,
+    AnyJsExpression, AnyJsFormalParameter, AnyJsFunction, AnyJsInProperty, AnyJsLiteralExpression,
+    AnyJsMemberExpression, AnyJsObjectMember, AnyJsOptionalChainExpression, AnyJsParameter,
+    AnyJsSwitchClause, AnyJsTemplateElement, AnyJsVariableDeclaration, JsBinaryOperator,
+    JsCallExpression, JsComputedMemberName, JsDecorator, JsIdentifierExpression, JsLanguage,
+    JsLogicalOperator, JsModule, JsScript, JsSwitchStatement, JsTemplateExpression,
+    JsThisExpression, JsUnaryOperator, JsVariableDeclarator, JsVariableKind, JsVariableStatement,
+    T, TsDeclareStatement, binding_ext::AnyJsBindingDeclaration, unescape_js_identifier,
 };
 use biome_js_type_info::{
     Function, FunctionParameter, RawPredicateTarget, RawTypeData, RawTypeId, ReturnType,
@@ -128,6 +133,19 @@ pub(crate) enum FlowGuard {
     ///
     /// [`RootFlow::switches`]: super::RootFlow::switches
     Bypass { switch: u32, guard: usize },
+    /// The call point at index `call` in [`RootFlow::calls`], whose result
+    /// is truthy when `positive` is true and falsy otherwise. A statement
+    /// call's guard is always positive: it stands for the call returning.
+    ///
+    /// What the call narrows depends on its callee's signature, which
+    /// inference resolves in the context that reads a subject and passes to
+    /// the solve: a type predicate or an assertion narrows the argument or
+    /// the receiver that it names, and an `asserts value` signature applies
+    /// the guard of its argument decomposed as a condition that holds. A
+    /// call without such a signature keeps the incoming type.
+    ///
+    /// [`RootFlow::calls`]: super::RootFlow::calls
+    Call { call: u32, positive: bool },
 }
 
 /// A runtime test whose result a guard assumes.
@@ -231,7 +249,8 @@ pub(crate) fn guard_signature<'a>(
     Some((signature, contract))
 }
 
-/// Selects the argument that a call to a local type guard tests.
+/// Selects the argument that a call to a local type guard tests, and records
+/// the call points of the root under construction.
 ///
 /// A type guard's return annotation states a contract about one of its
 /// parameters. With a type predicate, such as `value is string`, the call's
@@ -239,12 +258,23 @@ pub(crate) fn guard_signature<'a>(
 /// as `asserts value is string` or `asserts value`, the call returns only when
 /// the contract holds. The guard's collected signature and its declaration
 /// select the tested argument. Collection never infers the guard's body.
+///
+/// A call of a local function is decided from its collected signature. Any
+/// other call whose callee is a dotted name is a call point, as [`FlowCall`]
+/// describes, whose callee inference resolves.
 pub(super) struct GuardFunctions<'a> {
     raw_types: &'a [RawTypeData],
     raw_binding_types: &'a FxHashMap<TextRange, TypeReference>,
     /// Maps each function binding to its guard, or to `None` when the
     /// function is not a supported guard.
     guards: FxHashMap<TextRange, Option<Guard>>,
+    /// The call points of the root under construction, in the order they are
+    /// first met, each with the subjects that it may narrow.
+    calls: Vec<(FlowCall, Box<[FlowSubjectId]>)>,
+    /// The index of each call point in `calls`, by the range of its call, so
+    /// that a call that a second build of a finally block or a second
+    /// decomposition of a condition meets again keeps its index.
+    call_ids: FxHashMap<TextRange, u32>,
 }
 
 /// A supported guard function.
@@ -277,6 +307,92 @@ impl<'a> GuardFunctions<'a> {
             raw_types,
             raw_binding_types,
             guards: FxHashMap::default(),
+            calls: Vec::new(),
+            call_ids: FxHashMap::default(),
+        }
+    }
+
+    /// Returns the call points recorded since the last call, each with the
+    /// subjects that it may narrow, and starts an empty list for the next
+    /// root.
+    pub(super) fn take_calls(&mut self) -> Vec<(FlowCall, Box<[FlowSubjectId]>)> {
+        self.call_ids.clear();
+        std::mem::take(&mut self.calls)
+    }
+
+    /// Returns the index of the call point `call`, which may narrow
+    /// `subjects`, adding it on first use, or `None` when the root has used
+    /// every index.
+    fn add_call(&mut self, call: FlowCall, subjects: Box<[FlowSubjectId]>) -> Option<u32> {
+        if let Some(id) = self.call_ids.get(&call.range) {
+            return Some(*id);
+        }
+        let id = u32::try_from(self.calls.len()).ok()?;
+        self.call_ids.insert(call.range, id);
+        self.calls.push((call, subjects));
+        Some(id)
+    }
+
+    /// Returns whether `call`, a statement call, can establish a condition
+    /// when it returns, as [`decompose_statement_call`] decides from syntax:
+    /// a call of a local assertion function, or a call point whose callee
+    /// passes TypeScript's explicit-type rule. A root that only such calls
+    /// select needs flow only when one of them can.
+    pub(super) fn keeps_statement_call(
+        &mut self,
+        call: &JsCallExpression,
+        model: &SemanticModel,
+    ) -> bool {
+        let mut remaining = MAX_CONDITION_STEPS;
+        if self.calls_local_function(call, model) {
+            return self
+                .guard_call(call, model, &mut remaining)
+                .is_some_and(|(guard, ..)| !matches!(guard.kind, GuardKind::Predicate { .. }));
+        }
+        call.type_arguments().is_none()
+            && call
+                .callee()
+                .ok()
+                .and_then(|callee| omit_parentheses(callee, &mut remaining))
+                .is_some_and(|callee| statement_callee(&callee, model, &mut remaining).is_some())
+    }
+
+    /// Returns whether `call` calls a function whose collected signature
+    /// decides whether a call of it narrows, as [`Self::guard`] reads it: a
+    /// function declaration or a `declare function` of the module, or a
+    /// variable without a type annotation that an arrow or function
+    /// expression initializes. Such a call is never a call point, because
+    /// the signature that the call point would resolve is that one.
+    fn calls_local_function(&self, call: &JsCallExpression, model: &SemanticModel) -> bool {
+        let Some(AnyJsExpression::JsIdentifierExpression(callee)) =
+            call.callee().ok().map(AnyJsExpression::omit_parentheses)
+        else {
+            return false;
+        };
+        let Some(function) = callee.name().ok().and_then(|name| model.binding(&name)) else {
+            return false;
+        };
+        if function.is_imported() {
+            return false;
+        }
+        match function.tree().declaration() {
+            Some(
+                AnyJsBindingDeclaration::JsFunctionDeclaration(_)
+                | AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_),
+            ) => true,
+            Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) => {
+                declarator.variable_annotation().is_none()
+                    && matches!(
+                        declarator
+                            .initializer()
+                            .and_then(|initializer| initializer.expression().ok()),
+                        Some(
+                            AnyJsExpression::JsArrowFunctionExpression(_)
+                                | AnyJsExpression::JsFunctionExpression(_)
+                        )
+                    )
+            }
+            _ => false,
         }
     }
 
@@ -568,27 +684,36 @@ fn named_binding(qualifier: &TypeReferenceQualifier, model: &SemanticModel) -> O
     }
 }
 
-/// Decomposes the condition that a standalone call `expression` establishes
-/// when it returns, or returns `None` when `expression` does not call a
-/// supported assertion.
+/// Decomposes the condition that a statement call `call` establishes when it
+/// returns, or returns `None` when it narrows nothing.
 ///
-/// `asserts value is T` tests an argument that is a subject against the
-/// guard's target. `asserts value` decomposes the argument as a condition that
-/// holds, so `assert(value !== null)` excludes `null` from `value`.
-pub(super) fn decompose_assertion(
-    expression: &AnyJsExpression,
+/// A statement call is the expression of an expression statement, or an
+/// operand of the comma operator there, without parentheses around it, as
+/// TypeScript's binder adds calls to the flow: `(assert(x));` is none, while
+/// `(assert(x), 0);` is one.
+///
+/// A call of a local assertion function, as [`GuardFunctions::guard`] decides
+/// it, applies its contract here: `asserts value is T` tests an argument that
+/// is a subject against the guard's target, and `asserts value` decomposes
+/// the argument as a condition that holds, so `assert(value !== null)`
+/// excludes `null` from `value`. A call of another local function narrows
+/// nothing. Any other callee that passes TypeScript's explicit-type rule, as
+/// [`statement_callee`] decides it, makes the call a call point, whose
+/// condition mentions every subject that it may narrow.
+pub(super) fn decompose_statement_call(
+    call: &JsCallExpression,
     model: &SemanticModel,
     functions: &mut GuardFunctions,
     subjects: &mut FlowSubjectTable,
     guards: &mut Vec<FlowGuard>,
 ) -> Option<DecomposedCondition> {
+    if !functions.calls_local_function(call, model) {
+        let mut decomposer = Decomposer::new(model, functions, subjects, guards);
+        let guard = decomposer.statement_call_point(call)?;
+        return Some(decomposer.finish(guard, std::iter::empty()));
+    }
     let mut remaining = MAX_CONDITION_STEPS;
-    let AnyJsExpression::JsCallExpression(call) =
-        omit_parentheses(expression.clone(), &mut remaining)?
-    else {
-        return None;
-    };
-    let (guard, function, argument) = functions.guard_call(&call, model, &mut remaining)?;
+    let (guard, function, argument) = functions.guard_call(call, model, &mut remaining)?;
     match guard.kind {
         GuardKind::Predicate { .. } => None,
         GuardKind::TruthyAssertion => Some(decompose_condition(
@@ -622,6 +747,7 @@ pub(super) fn decompose_assertion(
                 mentions,
                 instance_tested: parents.clone(),
                 parents,
+                call_mentions: Vec::new(),
             })
         }
     }
@@ -666,6 +792,13 @@ pub(super) struct DecomposedCondition {
     /// The subjects in `parents` that `instanceof` or a type-guard function
     /// whose target has only object types checks.
     pub(super) instance_tested: Vec<FlowSubjectId>,
+    /// Subjects that call points may narrow, as [`FlowGuard::Call`]
+    /// describes, unless `mentions` or `parents` also list them. Whether
+    /// such a call narrows depends on its callee's signature, which only
+    /// inference resolves, so the reads that only these subjects' call
+    /// points reach keep their declared types without a solve when no call
+    /// point narrows.
+    pub(super) call_mentions: Vec<FlowSubjectId>,
 }
 
 impl DecomposedCondition {
@@ -682,6 +815,7 @@ impl DecomposedCondition {
         self.mentions.extend(next.mentions);
         self.parents.extend(next.parents);
         self.instance_tested.extend(next.instance_tested);
+        self.call_mentions.extend(next.call_mentions);
         self
     }
 }
@@ -1111,6 +1245,8 @@ struct Decomposer<'a, 'raw> {
     /// [`FlowTest::Predicate`] tests whose targets have only object types
     /// decomposed so far.
     instance_tested: Vec<FlowSubjectId>,
+    /// The subjects that the call points decomposed so far may narrow.
+    call_mentions: Vec<FlowSubjectId>,
     complete: bool,
     /// The number of aliased conditions whose initializers enclose the
     /// expression being decomposed.
@@ -1141,6 +1277,7 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
             mentions: Vec::new(),
             parents: Vec::new(),
             instance_tested: Vec::new(),
+            call_mentions: Vec::new(),
             complete: true,
             aliases: 0,
             initializers: Vec::new(),
@@ -1165,6 +1302,7 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
             subjects,
             mut parents,
             instance_tested,
+            call_mentions,
             complete,
             mentions,
             initializers,
@@ -1176,6 +1314,7 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
                 mentions,
                 parents,
                 instance_tested,
+                call_mentions,
             };
         }
         let direct = scanned
@@ -1216,6 +1355,7 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
             mentions,
             parents,
             instance_tested,
+            call_mentions: Vec::new(),
         }
     }
 
@@ -1273,7 +1413,7 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
                         Some((subject, test)) => {
                             self.test(&subject, SyntaxGuard::Predicate(test), positive, false)
                         }
-                        None => FlowGuard::Keep,
+                        None => self.condition_call_point(&call, positive),
                     };
                 // A truthy result shows that an optional call ran.
                 if positive
@@ -1392,6 +1532,151 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
         } else {
             guard
         }
+    }
+
+    /// Returns the guard of `call`, a call whose result a condition tests,
+    /// truthy when `positive` is true, when it is a call point:
+    /// [`FlowGuard::Call`] when its callee is a dotted name that is no local
+    /// function, as [`GuardFunctions::calls_local_function`] decides, and it
+    /// passes a subject as an argument or as the object of its callee, as
+    /// TypeScript's `hasMatchingArgument` requires. Otherwise, and for an
+    /// optional call that is falsy, which TypeScript doesn't narrow by
+    /// (`isCallChain`), the guard is [`FlowGuard::Keep`]. So is the guard of a
+    /// call that starts at a parenthesized optional chain, as
+    /// [`chain_receivers`] describes for any test.
+    ///
+    /// Inside an inlined aliased condition, only subjects that
+    /// [`narrows_through_aliases`] accepts count.
+    fn condition_call_point(&mut self, call: &JsCallExpression, positive: bool) -> FlowGuard {
+        if (!positive && call.is_optional_chain())
+            || call.type_arguments().is_some()
+            || self.functions.calls_local_function(call, self.model)
+            || chain_receivers(&call.clone().into(), &mut self.remaining).is_none()
+        {
+            return FlowGuard::Keep;
+        }
+        let Some(callee) = call
+            .callee()
+            .ok()
+            .and_then(|callee| omit_parentheses(callee, &mut self.remaining))
+        else {
+            return FlowGuard::Keep;
+        };
+        if !is_dotted_name(&callee, &mut self.remaining) {
+            return FlowGuard::Keep;
+        }
+        let Some((arguments, receiver)) = self.call_operands(call, &callee, false) else {
+            return FlowGuard::Keep;
+        };
+        let narrowed: Box<[_]> = arguments
+            .iter()
+            .filter_map(|argument| argument.subject)
+            .chain(receiver)
+            .collect();
+        if narrowed.is_empty() {
+            return FlowGuard::Keep;
+        }
+        let call = FlowCall {
+            range: call.range(),
+            kind: FlowCallKind::Condition,
+            arguments,
+            receiver,
+        };
+        self.call_mentions.extend(narrowed.iter().copied());
+        match self.functions.add_call(call, narrowed) {
+            Some(call) => FlowGuard::Call { call, positive },
+            None => FlowGuard::Keep,
+        }
+    }
+
+    /// Returns the index of the guard of `call`, a statement call, when it is
+    /// a call point, as [`decompose_statement_call`] describes, after
+    /// decomposing each of its arguments as a condition that holds.
+    ///
+    /// The call mentions every subject that it may narrow: its subject
+    /// arguments, the subject of the object of its callee, and the subjects
+    /// that the decomposed arguments mention. Returns `None` when it may
+    /// narrow none, when its callee fails TypeScript's explicit-type rule, as
+    /// [`statement_callee`] decides, and when an argument can't be decomposed
+    /// completely.
+    fn statement_call_point(&mut self, call: &JsCallExpression) -> Option<usize> {
+        if call.type_arguments().is_some() {
+            return None;
+        }
+        let callee = omit_parentheses(call.callee().ok()?, &mut self.remaining)?;
+        let (root, steps) = statement_callee(&callee, self.model, &mut self.remaining)?;
+        let (arguments, receiver) = self.call_operands(call, &callee, true)?;
+        if !self.complete {
+            return None;
+        }
+        let mut narrowed: Vec<_> = std::mem::take(&mut self.mentions);
+        narrowed.append(&mut self.parents);
+        narrowed.append(&mut self.call_mentions);
+        narrowed.extend(
+            arguments
+                .iter()
+                .filter_map(|argument| argument.subject)
+                .chain(receiver),
+        );
+        narrowed.sort_unstable();
+        narrowed.dedup();
+        self.instance_tested.clear();
+        if narrowed.is_empty() {
+            return None;
+        }
+        let call = FlowCall {
+            range: call.range(),
+            kind: FlowCallKind::Statement { root, steps },
+            arguments,
+            receiver,
+        };
+        let call = self.functions.add_call(call, narrowed.clone().into())?;
+        self.call_mentions = narrowed;
+        Some(self.push(FlowGuard::Call {
+            call,
+            positive: true,
+        }))
+    }
+
+    /// Returns the arguments of `call`, up to its first spread argument, and
+    /// the subject of the object of `callee`, its callee without parentheses,
+    /// as [`FlowCall`] records them. For a statement call (`statement` is
+    /// true), each argument is also decomposed as a condition that holds.
+    ///
+    /// Returns `None` when an argument is missing.
+    fn call_operands(
+        &mut self,
+        call: &JsCallExpression,
+        callee: &AnyJsExpression,
+        statement: bool,
+    ) -> Option<(Box<[FlowCallArgument]>, Option<FlowSubjectId>)> {
+        let mut arguments = Vec::new();
+        for argument in call.arguments().ok()?.args().iter() {
+            let AnyJsCallArgument::AnyJsExpression(argument) = argument.ok()? else {
+                break;
+            };
+            let subject = self.narrowed_operand(&argument);
+            let condition = statement.then(|| self.guard(argument, FlowOutcome::Truthy, 0));
+            arguments.push(FlowCallArgument { subject, condition });
+        }
+        let receiver = match callee {
+            AnyJsExpression::JsStaticMemberExpression(member) => {
+                self.narrowed_operand(&member.object().ok()?)
+            }
+            _ => None,
+        };
+        Some((arguments.into_boxed_slice(), receiver))
+    }
+
+    /// Returns the subject of `operand`, an argument or the object of a
+    /// callee, when a call point may narrow it, as
+    /// [`Self::condition_call_point`] describes. A subject read through a
+    /// chain that starts at a parenthesized optional chain narrows nothing,
+    /// as for any other test, which [`chain_receivers`] describes.
+    fn narrowed_operand(&mut self, operand: &AnyJsExpression) -> Option<FlowSubjectId> {
+        chain_receivers(operand, &mut self.remaining)?;
+        let subject = subject_of(operand, self.model, self.subjects)?;
+        (self.testable(subject) == Testable::Always).then_some(subject)
     }
 
     /// Returns the guard for `test` applied to `subject`, the target of a
@@ -2432,6 +2717,209 @@ fn chain_receivers(
     Some(receivers)
 }
 
+/// Returns whether `callee` is a dotted name, as TypeScript's `isDottedName`
+/// requires of the callee of a call point: an identifier or `this`, followed
+/// by property accesses with `.` or `?.`, in parentheses or not, as `a.b.c`,
+/// `(a).b`, or `this.m`.
+///
+/// Returns false when the walk runs out of work.
+fn is_dotted_name(callee: &AnyJsExpression, remaining: &mut usize) -> bool {
+    let mut expression = callee.clone();
+    loop {
+        let Some(left) = remaining.checked_sub(1) else {
+            return false;
+        };
+        *remaining = left;
+        expression = match expression {
+            AnyJsExpression::JsIdentifierExpression(_) | AnyJsExpression::JsThisExpression(_) => {
+                return true;
+            }
+            AnyJsExpression::JsParenthesizedExpression(parenthesized) => {
+                match parenthesized.expression() {
+                    Ok(expression) => expression,
+                    Err(_) => return false,
+                }
+            }
+            AnyJsExpression::JsStaticMemberExpression(member) => match member.object() {
+                Ok(object) => object,
+                Err(_) => return false,
+            },
+            _ => return false,
+        };
+    }
+}
+
+/// Returns how the reading context confirms that `callee`, the callee of a
+/// statement call without parentheses, follows TypeScript's explicit-type
+/// rule (`getTypeOfDottedName`), with the ranges of its member accesses, as
+/// [`FlowCallKind::Statement`] records them.
+///
+/// The callee must be a dotted name, as [`is_dotted_name`] describes, and the
+/// name that it starts at must have an explicit type, as [`explicit_name`]
+/// decides for a variable. `this` has one in a method, an accessor, a
+/// constructor, or a field of a class, unless it is `static`, and in a
+/// function with a `this` parameter, as [`explicit_this`] decides. Returns
+/// `None` otherwise: TypeScript then ignores an assertion (TS2775).
+fn statement_callee(
+    callee: &AnyJsExpression,
+    model: &SemanticModel,
+    remaining: &mut usize,
+) -> Option<(FlowCallRoot, Box<[TextRange]>)> {
+    let mut steps = Vec::new();
+    let mut expression = callee.clone();
+    let root = loop {
+        *remaining = remaining.checked_sub(1)?;
+        expression = match expression {
+            AnyJsExpression::JsParenthesizedExpression(parenthesized) => {
+                parenthesized.expression().ok()?
+            }
+            AnyJsExpression::JsStaticMemberExpression(member) => {
+                steps.push(member.range());
+                member.object().ok()?
+            }
+            AnyJsExpression::JsIdentifierExpression(identifier) => {
+                break explicit_name(&identifier, !steps.is_empty(), model)?;
+            }
+            AnyJsExpression::JsThisExpression(this) => {
+                if !explicit_this(&this) {
+                    return None;
+                }
+                break FlowCallRoot::Explicit;
+            }
+            _ => return None,
+        };
+    };
+    steps.reverse();
+    Some((root, steps.into_boxed_slice()))
+}
+
+/// Returns how the reading context confirms that the variable that
+/// `identifier` reads has an explicit type, as TypeScript's
+/// `getExplicitTypeOfSymbol` requires of the name that the callee of a
+/// statement call starts at, or `None` when it has none. `has_steps` tells
+/// whether the callee accesses members of the variable.
+///
+/// A function, a class, a variable or a parameter with a type annotation,
+/// and a namespace that `declare` declares, whose members all have explicit
+/// types, have one. So does a global, which the lib or a declaration file
+/// declares. An import has one when the declaration that it names has one,
+/// which the reading context finds, and so does a namespace import, as
+/// [`FlowCallRoot::Import`] describes. A variable without a type annotation,
+/// an element of a destructuring pattern, and a namespace that can declare
+/// members without types have none.
+fn explicit_name(
+    identifier: &JsIdentifierExpression,
+    has_steps: bool,
+    model: &SemanticModel,
+) -> Option<FlowCallRoot> {
+    let Some(binding) = model.binding(&identifier.name().ok()?) else {
+        return Some(FlowCallRoot::Explicit);
+    };
+    let explicit = match binding.tree().declaration()? {
+        AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
+        | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
+        | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_) => {
+            return Some(FlowCallRoot::Import(binding.range()));
+        }
+        AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => {
+            return has_steps.then(|| FlowCallRoot::Import(binding.range()));
+        }
+        AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
+            declarator.variable_annotation().is_some()
+        }
+        AnyJsBindingDeclaration::JsFormalParameter(parameter) => {
+            parameter.type_annotation().is_some()
+        }
+        AnyJsBindingDeclaration::JsRestParameter(parameter) => {
+            parameter.type_annotation().is_some()
+        }
+        AnyJsBindingDeclaration::TsPropertyParameter(parameter) => {
+            matches!(
+                parameter.formal_parameter(),
+                Ok(AnyJsFormalParameter::JsFormalParameter(parameter))
+                    if parameter.type_annotation().is_some()
+            )
+        }
+        AnyJsBindingDeclaration::JsFunctionDeclaration(_)
+        | AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
+        | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_)
+        | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_)
+        | AnyJsBindingDeclaration::JsClassDeclaration(_)
+        | AnyJsBindingDeclaration::JsClassExportDefaultDeclaration(_) => true,
+        AnyJsBindingDeclaration::TsModuleDeclaration(module) => {
+            return (has_steps && module.parent::<TsDeclareStatement>().is_some())
+                .then_some(FlowCallRoot::Namespace);
+        }
+        _ => false,
+    };
+    explicit.then_some(FlowCallRoot::Explicit)
+}
+
+/// Returns whether TypeScript gives the `this` that `this` reads an explicit
+/// type, as its `getExplicitThisType` does, and Biome gives it the same type:
+/// in a method, an accessor, a constructor, or a field of a class, looking
+/// through arrow functions, unless the member is `static` or a static block,
+/// where Biome types `this` as an instance, and in a function with a `this`
+/// parameter. In an object literal method, TypeScript's `this` has no
+/// explicit type.
+fn explicit_this(this: &JsThisExpression) -> bool {
+    for node in this.syntax().ancestors().skip(1) {
+        // The decorators and computed keys of a member run where the class is
+        // created, with the `this` of the code around it.
+        if JsDecorator::can_cast(node.kind()) || JsComputedMemberName::can_cast(node.kind()) {
+            return false;
+        }
+        if let Some(member) = AnyJsClassMember::cast_ref(&node) {
+            return !is_static_member(&member);
+        }
+        match AnyJsFunction::cast_ref(&node) {
+            Some(AnyJsFunction::JsArrowFunctionExpression(_)) => {}
+            Some(function) => {
+                return function.parameters().is_ok_and(|parameters| {
+                    matches!(
+                        parameters,
+                        AnyJsArrowFunctionParameters::JsParameters(parameters)
+                            if matches!(
+                                parameters.items().first(),
+                                Some(Ok(AnyJsParameter::TsThisParameter(_)))
+                            )
+                    )
+                });
+            }
+            None => {}
+        }
+        if AnyJsObjectMember::can_cast(node.kind()) || AnyJsControlFlowRoot::can_cast(node.kind()) {
+            return false;
+        }
+    }
+    false
+}
+
+/// Returns whether `member` is a `static` member of its class, or a static
+/// block, whose `this` is the class itself.
+fn is_static_member(member: &AnyJsClassMember) -> bool {
+    match member {
+        AnyJsClassMember::JsStaticInitializationBlockClassMember(_) => true,
+        AnyJsClassMember::JsMethodClassMember(member) => member
+            .modifiers()
+            .iter()
+            .any(|modifier| modifier.as_js_static_modifier().is_some()),
+        AnyJsClassMember::JsGetterClassMember(member) => member
+            .modifiers()
+            .iter()
+            .any(|modifier| modifier.as_js_static_modifier().is_some()),
+        AnyJsClassMember::JsSetterClassMember(member) => member
+            .modifiers()
+            .iter()
+            .any(|modifier| modifier.as_js_static_modifier().is_some()),
+        AnyJsClassMember::JsPropertyClassMember(member) => member
+            .modifiers()
+            .iter()
+            .any(|modifier| modifier.as_js_static_modifier().is_some()),
+        _ => false,
+    }
+}
+
 fn omit_parentheses(
     mut expression: AnyJsExpression,
     remaining: &mut usize,
@@ -2807,10 +3295,11 @@ mod tests {
             mentioned_names("value?.a == 1", FlowOutcome::Truthy),
             ["value"]
         );
-        // A call that is not a type guard keeps its own result untested.
+        // A call of a function that the module doesn't declare is a call
+        // point, whose effect inference resolves.
         let (receivers, main) = receiver_names("value?.f()", FlowOutcome::Truthy);
         assert_eq!(receivers, ["value", "value.f"]);
-        assert_eq!(main, FlowGuard::Keep);
+        assert!(matches!(main, FlowGuard::Call { positive: true, .. }));
     }
 
     #[test]

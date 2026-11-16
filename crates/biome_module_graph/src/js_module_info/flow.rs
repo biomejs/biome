@@ -6,7 +6,10 @@
 //! decomposed into guards on subjects and whose writes record the values they
 //! assign. It also records the incoming path of every read such a guard or
 //! write can reach. Type inference later applies the guards
-//! to resolved types without inspecting syntax again.
+//! to resolved types without inspecting syntax again. A call whose effect
+//! depends on its callee's signature is a call point, as [`FlowCall`]
+//! describes, whose effect inference resolves where it reads a subject that
+//! the call may narrow.
 //!
 //! A subject is what a runtime test checks and a read narrows: a variable, or
 //! a property path that starts at a variable or at `this`, such as `o.v`,
@@ -47,7 +50,9 @@ mod scanner;
 mod subjects;
 mod writes;
 
-pub(crate) use builder::{AnyMemberDeclaration, CalleeReturn, declaration_return, member_return};
+pub(crate) use builder::{
+    AnyMemberDeclaration, CalleeReturn, declaration_return, member_explicitness, member_return,
+};
 pub(crate) use expressions::AnyFlowExpression;
 pub(crate) use guards::{FlowGuard, FlowTest, UnitValue, binding_unit_value, guard_signature};
 pub(crate) use scanner::FlowRootScanner;
@@ -478,6 +483,85 @@ pub(crate) struct FlowDestructureStep {
     pub(crate) default: Option<TextRange>,
 }
 
+/// A call whose effect on narrowing depends on its callee's type: a call
+/// point.
+///
+/// TypeScript narrows through a call whose callee's signature returns a type
+/// predicate or an assertion, as its `getEffectsSignature` finds it.
+/// Collection decides a local function from its collected signature, so such
+/// a call is never a call point. Every other call whose callee is a dotted
+/// name, an identifier or `this` followed by `.name` accesses, and that
+/// passes a subject, is one, and inference resolves its effect in the context
+/// that reads a subject it may narrow, as [`FlowGuard::Call`] describes.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub(crate) struct FlowCall {
+    /// The range of the call expression, which identifies the call to
+    /// inference.
+    pub(crate) range: TextRange,
+    pub(crate) kind: FlowCallKind,
+    /// The arguments in order, up to the first spread argument, which can
+    /// pass any value to the parameters from its position on.
+    pub(crate) arguments: Box<[FlowCallArgument]>,
+    /// The subject of the object that the callee reads its function from,
+    /// as `n` in `n.isLeaf()`, which a `this is T` or `asserts this`
+    /// signature narrows.
+    pub(crate) receiver: Option<FlowSubjectId>,
+}
+
+/// Where a call point sits, which decides how TypeScript finds its
+/// signature.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub(crate) enum FlowCallKind {
+    /// A call whose result a condition tests, as `isString(x)` in
+    /// `if (isString(x))`. TypeScript takes the signature from the callee's
+    /// ordinary type without `null` and `undefined`, and narrows only through
+    /// a type predicate.
+    Condition,
+    /// A call that an expression statement makes, as the whole statement or
+    /// as an operand of the comma operator, as TypeScript's binder adds it to
+    /// the flow. TypeScript takes the signature from the explicit type of
+    /// every name along the callee (`getTypeOfDottedName`), and narrows only
+    /// through an assertion.
+    Statement {
+        /// How the reading context confirms that the name that the callee
+        /// starts at has an explicit type.
+        root: FlowCallRoot,
+        /// The ranges of the member accesses along the callee, from the one
+        /// whose object is the root name outward, as `a.b` and `a.b.c` in
+        /// `a.b.c(x)`. Each must read a member with an explicit type.
+        steps: Box<[TextRange]>,
+    },
+}
+
+/// The name that the callee of a statement call starts at.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum FlowCallRoot {
+    /// A name whose explicit type the syntax shows: a variable or parameter
+    /// with a type annotation, a function, a class, a global, or `this` in a
+    /// class member that is not `static` or in a function with a `this`
+    /// parameter.
+    Explicit,
+    /// A namespace that `declare` declares, whose members all have explicit
+    /// types, so its first step needs no check.
+    Namespace,
+    /// The import declared at this range, whose type is explicit when the
+    /// declaration that it names has one. The first step of a namespace
+    /// import names that declaration.
+    Import(TextRange),
+}
+
+/// An argument of a call point.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) struct FlowCallArgument {
+    /// The subject that the argument reads, without parentheses, which a type
+    /// predicate or an assertion of its parameter narrows.
+    pub(crate) subject: Option<FlowSubjectId>,
+    /// For a statement call, the index of the guard of the argument
+    /// decomposed as a condition that holds, which an `asserts value`
+    /// signature applies.
+    pub(crate) condition: Option<usize>,
+}
+
 /// The paths through one execution root and the guards its conditions apply.
 #[derive(Debug)]
 pub(crate) struct RootFlow {
@@ -489,20 +573,17 @@ pub(crate) struct RootFlow {
     /// The points of each subject's reads, sorted and without duplicates.
     pub(crate) read_points: FxHashMap<FlowSubjectId, Box<[FlowNodeId]>>,
     /// The subjects with reads that conditions narrow only through tests of
-    /// their shape:
-    ///
-    /// - [`FlowGuard::Property`], such as `s` when the only condition that
-    ///   mentions it is `s.kind === "c"`.
-    /// - `in`, which [`FlowTest::In`] applies to `x` in `"a" in x`.
-    /// - `instanceof`, which [`FlowTest::Instanceof`] applies to `x` in
-    ///   `x instanceof Date`.
-    /// - Calls to type-guard functions whose targets have only object types,
-    ///   as `isFoo(x)` with `x is Foo`.
-    ///
-    /// A test of a property or `in` narrows only a union with two object
-    /// types, and the others narrow only a type with an object type or
-    /// `unknown`. So these subjects need no solve when their declared type is
-    /// not one. Every [`FlowSubject::Pattern`] with reads is in this set.
+    /// their shape: [`FlowGuard::Property`], such as `s` when the only
+    /// condition that mentions it is `s.kind === "c"`, `in`, which
+    /// [`FlowTest::In`] applies to `x` in `"a" in x`, `instanceof`, which
+    /// [`FlowTest::Instanceof`] applies to `x` in `x instanceof Date`, and
+    /// calls to type-guard functions whose targets have only object types, as
+    /// `isFoo(x)` with `x is Foo`. A test of a property or `in` narrows only a
+    /// union with two object types, and the others only a type with an object
+    /// type or `unknown`, so these subjects need no solve when their declared
+    /// type is not one. Every [`FlowSubject::Pattern`] with reads is one. A
+    /// call point doesn't count as a test here: inference starts a read from
+    /// the whole declared type when one of the subject's call points narrows.
     pub(crate) property_only: FxHashSet<FlowSubjectId>,
     /// The subjects in [`Self::property_only`] that `instanceof` or a
     /// type-guard function whose target has only object types narrows. Their
@@ -539,7 +620,8 @@ pub(crate) struct RootFlow {
     pub(crate) subject_writes: FxHashMap<FlowSubjectId, Box<[u32]>>,
     /// The subjects with reads that only writes mention and no condition
     /// tests. A write narrows only a union or a type with a literal member,
-    /// so their reads need no solve when their declared type is neither.
+    /// so their reads need no solve when their declared type is neither. As
+    /// for [`Self::property_only`], a call point doesn't count as a test.
     pub(crate) assignment_only: FxHashSet<FlowSubjectId>,
     /// The subjects with reads that may be read before they are assigned: a
     /// `let` declared without an initializer, a `var`, and in a constructor,
@@ -561,6 +643,13 @@ pub(crate) struct RootFlow {
     /// variable starts with its type where the enclosing root creates the
     /// closure that holds the root.
     pub(crate) captures: FxHashMap<FlowSubjectId, FlowCapture>,
+    /// The call points that the root's [`FlowGuard::Call`] guards stand for.
+    pub(crate) calls: Box<[FlowCall]>,
+    /// For each subject with reads, the indices in [`Self::calls`] of the
+    /// call points that may narrow it, sorted: those that pass it as an
+    /// argument or a receiver, and the statement calls whose arguments,
+    /// decomposed as conditions that hold, test it.
+    pub(crate) subject_calls: FxHashMap<FlowSubjectId, Box<[u32]>>,
 }
 
 /// The capture point of a variable that a closure reads, where an enclosing
@@ -771,6 +860,12 @@ impl RootFlow {
         self.captures.get(&subject).copied()
     }
 
+    /// Returns the call points that may narrow `subject`, as
+    /// [`Self::subject_calls`] lists them, or an empty slice when none may.
+    pub(crate) fn subject_calls(&self, subject: FlowSubjectId) -> &[u32] {
+        self.subject_calls.get(&subject).map_or(&[], |calls| calls)
+    }
+
     /// Returns whether the subject `prefix` is a proper prefix of the path
     /// of `subject`, as `o` and `o.v` are of `o.v.w`.
     pub(crate) fn is_proper_prefix(
@@ -836,10 +931,19 @@ pub(crate) struct ModuleFlow {
     /// or of that pattern. Such a candidate keeps its type when the binding
     /// or the pattern has no type that narrowing starts from.
     property_only_candidates: FxHashMap<TextRange, TextRange>,
+    /// The candidates that are candidates only because they are, or contain,
+    /// reads of one subject that only call points reach, keyed by range,
+    /// with the index of the root and the subject. Such a candidate keeps its
+    /// type when no call point of that subject in that root narrows, which
+    /// inference finds before it resolves the subject's declared type.
+    call_only_candidates: FxHashMap<TextRange, (usize, FlowSubjectId)>,
     /// Maps the range of each [`FlowSubject::Pattern`] with reads to its
     /// declared type, which is the collected type of the value that the
     /// pattern destructures.
     pattern_types: FxHashMap<TextRange, TypeReference>,
+    /// The call point of each call expression, keyed by its range, with the
+    /// index of its root and its index in [`RootFlow::calls`].
+    calls: FxHashMap<TextRange, (usize, u32)>,
 }
 
 impl ModuleFlow {
@@ -847,9 +951,11 @@ impl ModuleFlow {
     /// selected.
     ///
     /// Reads are kept only when their binding has a narrowable collected type,
-    /// as decided by [`is_raw_narrowing_invariant`], and a test or a write of
-    /// that binding can reach them. Execution roots that exceed a construction
-    /// or relevance work limit keep no reads.
+    /// as decided by [`is_raw_narrowing_invariant`], and a test, a write, or a
+    /// call point of that binding can reach them. A root that only statement
+    /// calls select is collected only when one of their callees can assert,
+    /// as [`GuardFunctions::keeps_statement_call`] decides. Execution roots
+    /// that exceed a construction or relevance work limit keep no reads.
     pub(crate) fn collect(
         roots: FlowRootScanner,
         model: &SemanticModel,
@@ -888,6 +994,15 @@ impl ModuleFlow {
             capture_rules: FxHashMap::default(),
         };
         for selected in roots.selected() {
+            // A root that only statement calls select needs flow only when one
+            // of them can establish a condition.
+            if let Some(calls) = roots.statement_calls(selected)
+                && !calls
+                    .iter()
+                    .any(|call| collector.functions.keeps_statement_call(call, model))
+            {
+                continue;
+            }
             collector.add_root(
                 &mut flow,
                 &selected.root,
@@ -959,6 +1074,21 @@ impl ModuleFlow {
         self.property_only_candidates.get(&range).copied()
     }
 
+    /// Returns the root and the subject whose reads, which only call points
+    /// reach, alone make the expression at `range` a candidate, as
+    /// [`Self::call_only_candidates`] describes.
+    pub(crate) fn call_only_candidate(&self, range: TextRange) -> Option<(usize, FlowSubjectId)> {
+        self.call_only_candidates.get(&range).copied()
+    }
+
+    /// Returns the call point of the call expression at `range`, as
+    /// [`FlowCall`] describes it, or `None` when the call is no call point of
+    /// a root with flow.
+    pub(crate) fn call(&self, range: TextRange) -> Option<&FlowCall> {
+        let (root, call) = *self.calls.get(&range)?;
+        self.roots.get(root)?.calls.get(call as usize)
+    }
+
     /// Returns the declared type of the [`FlowSubject::Pattern`] at `range`,
     /// which is the collected type of the value that the pattern
     /// destructures, or `None` when `range` is not a pattern with reads.
@@ -968,9 +1098,17 @@ impl ModuleFlow {
 
     /// Records `expression` as a candidate. `binding` is the declaration of
     /// the binding in [`Self::property_only_bindings`], or the range of the
-    /// pattern in [`Self::pattern_types`], whose read alone makes
-    /// `expression` a candidate. It is `None` for a read of another subject.
-    fn insert_candidate(&mut self, expression: &AnyFlowExpression, binding: Option<TextRange>) {
+    /// pattern in [`Self::pattern_types`], whose read alone makes it a
+    /// candidate, as [`Self::property_only_candidates`] describes, or `None`
+    /// for a read of another subject. `called` is the root and the subject
+    /// whose read, which only call points reach, makes it a candidate, as
+    /// [`Self::call_only_candidates`] describes, or `None` for another read.
+    fn insert_candidate(
+        &mut self,
+        expression: &AnyFlowExpression,
+        binding: Option<TextRange>,
+        called: Option<(usize, FlowSubjectId)>,
+    ) {
         let range = expression.range();
         let is_new = !self.candidates.contains_key(&range);
         if is_new {
@@ -983,6 +1121,15 @@ impl ModuleFlow {
             Some(binding) if self.property_only_candidates.get(&range) == Some(&binding) => {}
             _ => {
                 self.property_only_candidates.remove(&range);
+            }
+        }
+        match called {
+            Some(called) if is_new => {
+                self.call_only_candidates.insert(range, called);
+            }
+            Some(called) if self.call_only_candidates.get(&range) == Some(&called) => {}
+            _ => {
+                self.call_only_candidates.remove(&range);
             }
         }
     }
@@ -1183,6 +1330,8 @@ impl RootCollector<'_> {
             mut property_only,
             mut instance_tested,
             instance_mentions,
+            call_mentions,
+            calls,
             mut reads,
             switches,
             writes,
@@ -1288,9 +1437,18 @@ impl RootCollector<'_> {
         uninitialized.retain(|subject| !evolving.contains_key(subject));
         // A write mentions its subject where it can change the subject's
         // type, so the reads after it are kept, and the subject narrows as a
-        // tested one, not only through tests of its shape.
-        let condition_mentioned: FxHashSet<FlowSubjectId> =
-            mentions.iter().map(|(_, subject)| *subject).collect();
+        // tested one, not only through tests of its shape. A call point
+        // narrows only through a signature that inference finds, so the
+        // subjects that only call points mention keep their class, and
+        // inference starts a read from the subject's whole declared type when
+        // one of its call points narrows.
+        let call_mentioned: FxHashSet<FlowSubjectId> =
+            call_mentions.iter().map(|(_, subject)| *subject).collect();
+        let condition_mentioned: FxHashSet<FlowSubjectId> = mentions
+            .iter()
+            .filter(|mention| !call_mentions.contains(mention))
+            .map(|(_, subject)| *subject)
+            .collect();
         let mut write_mentioned: FxHashSet<FlowSubjectId> = FxHashSet::default();
         // TypeScript types every read of a variable whose type evolves with
         // its writes from the flow. Only a read that a write after the
@@ -1360,6 +1518,9 @@ impl RootCollector<'_> {
             .iter()
             .copied()
             .filter(|subject| {
+                if call_mentioned.contains(subject) {
+                    return false;
+                }
                 let reference = match subjects.as_slice().get(*subject as usize) {
                     Some(FlowSubject::Binding(binding)) => self.raw_binding_types.get(binding),
                     Some(FlowSubject::Pattern(_)) => pattern_types.get(subject),
@@ -1451,9 +1612,12 @@ impl RootCollector<'_> {
             }
         }
         let (mut readonly_tested, mut only_readonly_tested) =
-            readonly_tested_subjects(&mut guards, subjects.as_slice());
-        // A write narrows a path whether or not it is readonly.
-        only_readonly_tested.retain(|subject| !write_mentioned.contains(subject));
+            readonly_tested_subjects(&mut guards, subjects.as_slice(), &calls);
+        // A write narrows a path whether or not it is readonly, and so can a
+        // call point.
+        only_readonly_tested.retain(|subject| {
+            !write_mentioned.contains(subject) && !call_mentioned.contains(subject)
+        });
         let narrowable: FxHashSet<FlowSubjectId> = tested
             .iter()
             .copied()
@@ -1546,6 +1710,16 @@ impl RootCollector<'_> {
                         .any(|(_, mentioned)| mentioned == subject)
             })
             .collect();
+        // Variables and paths that call points mention, whose reads only call
+        // points may reach. Such a read narrows only when one of those calls
+        // has a signature that narrows, which inference finds before it
+        // resolves the subject's declared type, so its candidate records the
+        // subject.
+        let call_reached: Vec<FlowSubjectId> = walked
+            .iter()
+            .copied()
+            .filter(|subject| call_mentioned.contains(subject))
+            .collect();
         let Some(reachable) = self.reachable_from_tests(
             &nodes,
             subjects.as_slice(),
@@ -1554,6 +1728,30 @@ impl RootCollector<'_> {
             walked,
         ) else {
             return;
+        };
+        let reached_by_other_mentions = if call_reached.is_empty() {
+            None
+        } else {
+            let other_mentions: Vec<_> = mentions
+                .iter()
+                .filter(|mention| !call_mentions.contains(mention))
+                .copied()
+                .collect();
+            self.reachable_from_tests(
+                &nodes,
+                subjects.as_slice(),
+                &other_mentions,
+                &property_only,
+                call_reached,
+            )
+        };
+        // When the walk runs out of work, no read counts as reached only by
+        // call points.
+        let is_call_only = |subject: FlowSubjectId, point: FlowNodeId| {
+            call_mentioned.contains(&subject)
+                && reached_by_other_mentions
+                    .as_ref()
+                    .is_some_and(|reached| !reached.contains(&(subject, point)))
         };
         // `reachable` counts the `instanceof` mentions too, so the reads that
         // other tests reach need a walk without them.
@@ -1585,29 +1783,41 @@ impl RootCollector<'_> {
                 continue;
             }
             let mut binding = None;
+            let called =
+                (own && is_call_only(read.subject, read.point)).then_some((index, read.subject));
+            // A read that a call point may also narrow is never skipped by the
+            // class of its subject, because inference starts it from the
+            // whole declared type when the call narrows.
+            let skippable = !call_mentioned.contains(&read.subject);
             if own {
                 read_points
                     .entry(read.subject)
                     .or_default()
                     .push(read.point);
-                if let Some(FlowSubject::Binding(range)) =
-                    subjects.as_slice().get(read.subject as usize)
+                // A read that only call points reach doesn't decide how the
+                // variable's declared type starts narrowing, as in a root
+                // that doesn't read it.
+                if called.is_none()
+                    && let Some(FlowSubject::Binding(range)) =
+                        subjects.as_slice().get(read.subject as usize)
                 {
                     let reads = if property_only.contains(&read.subject) {
-                        binding = Some(*range);
+                        binding = skippable.then_some(*range);
                         BindingReads::PropertyOnly {
                             instance_tested: instance_tested.contains(&read.subject),
                         }
                     } else if assignment_only.contains(&read.subject) {
-                        binding = Some(*range);
+                        binding = skippable.then_some(*range);
                         BindingReads::AssignmentOnly
                     } else {
-                        if reached_by_other_tests.as_ref().is_some_and(|reached| {
-                            instance_mentions
-                                .iter()
-                                .any(|(_, mentioned)| *mentioned == read.subject)
-                                && !reached.contains(&(read.subject, read.point))
-                        }) {
+                        if skippable
+                            && reached_by_other_tests.as_ref().is_some_and(|reached| {
+                                instance_mentions
+                                    .iter()
+                                    .any(|(_, mentioned)| *mentioned == read.subject)
+                                    && !reached.contains(&(read.subject, read.point))
+                            })
+                        {
                             binding = Some(*range);
                         }
                         BindingReads::Tested
@@ -1632,9 +1842,9 @@ impl RootCollector<'_> {
                 }
             }
             let expression = read.expression;
-            flow.insert_candidate(&expression, binding);
+            flow.insert_candidate(&expression, binding, called);
             for ancestor in expression.evaluated_ancestors() {
-                flow.insert_candidate(&ancestor, binding);
+                flow.insert_candidate(&ancestor, binding, called);
             }
             flow.reads.insert(
                 expression.range(),
@@ -1737,6 +1947,19 @@ impl RootCollector<'_> {
                 .into_iter()
                 .filter(|(subject, _)| read_points.contains_key(subject))
                 .collect();
+            let mut subject_calls: FxHashMap<FlowSubjectId, Vec<u32>> = FxHashMap::default();
+            for (call, (flow_call, narrowed)) in (0..).zip(&calls) {
+                flow.calls.insert(flow_call.range, (index, call));
+                for subject in narrowed {
+                    if read_points.contains_key(subject) {
+                        subject_calls.entry(*subject).or_default().push(call);
+                    }
+                }
+            }
+            let subject_calls = subject_calls
+                .into_iter()
+                .map(|(subject, calls)| (subject, calls.into_boxed_slice()))
+                .collect();
             flow.roots.push(RootFlow {
                 nodes: nodes.into_boxed_slice(),
                 guards: guards.into_boxed_slice(),
@@ -1756,6 +1979,8 @@ impl RootCollector<'_> {
                 evolving,
                 assignment_only,
                 captures: FxHashMap::default(),
+                calls: calls.into_iter().map(|(call, _)| call).collect(),
+                subject_calls,
             });
             for capture in kept_captures {
                 let (holder, subject) = capture.holder;
@@ -2551,7 +2776,8 @@ fn successors(nodes: &[FlowNode]) -> Vec<Vec<FlowNodeId>> {
 /// Replaces with [`FlowGuard::Keep`] each [`FlowGuard::ReadonlyPath`] guard in
 /// `guards` whose path has a replaceable object. Returns the subjects of the
 /// other such guards, then the subset of them that no other guard tests or
-/// narrows. `subjects` are the root's subjects, each at the index of its id.
+/// narrows. `subjects` are the root's subjects, each at the index of its id,
+/// and `calls` its call points with the subjects that each may narrow.
 ///
 /// An object is replaceable when a test of the root can give it a type with
 /// members that its declared type lacks. `instanceof`, a type-guard function,
@@ -2561,12 +2787,16 @@ fn successors(nodes: &[FlowNode]) -> Vec<Vec<FlowNodeId>> {
 /// Inference decides whether a path is readonly from the declared types of the
 /// objects along it, while TypeScript decides it from their types at the
 /// read. Both agree while the tests of those objects only remove members
-/// from their types. Biome's narrowed types can't stand in for TypeScript's,
-/// because Biome keeps a member that TypeScript replaces when, for example,
-/// it can't tell whether the member derives from the tested class.
+/// from their types. `instanceof`, a type-guard function, and `typeof` with a
+/// primitive kind or `"function"` can replace a member with another type, as
+/// `o instanceof Derived` replaces `Base` with `Derived`, whose property can be
+/// mutable where `Base` declares it readonly. Biome keeps some members that
+/// TypeScript replaces in these tests, so it would see a readonly property
+/// where TypeScript doesn't. A call point can be such a type-guard function.
 fn readonly_tested_subjects(
     guards: &mut [FlowGuard],
     subjects: &[FlowSubject],
+    calls: &[(FlowCall, Box<[FlowSubjectId]>)],
 ) -> (FxHashSet<FlowSubjectId>, FxHashSet<FlowSubjectId>) {
     let tested = |guard: &FlowGuard| match guard {
         FlowGuard::Test { subject, .. } => Some(*subject),
@@ -2575,9 +2805,13 @@ fn readonly_tested_subjects(
         | FlowGuard::Incomplete
         | FlowGuard::ReadonlyPath(_)
         | FlowGuard::Both { .. }
-        | FlowGuard::Bypass { .. } => None,
+        | FlowGuard::Bypass { .. }
+        | FlowGuard::Call { .. } => None,
     };
-    let mut replaced = FxHashSet::default();
+    let mut replaced: FxHashSet<_> = calls
+        .iter()
+        .flat_map(|(_, narrowed)| narrowed.iter().copied())
+        .collect();
     let mut wrapped = FxHashSet::default();
     for guard in guards.iter() {
         match guard {
@@ -2930,6 +3164,42 @@ mod tests {
             TextSize::try_from(start).unwrap(),
             TextSize::try_from(expression.len()).unwrap(),
         )
+    }
+
+    #[test]
+    fn statement_calls_select_roots_only_through_callees_that_can_assert() {
+        // An arrow without a type annotation on its variable can't assert
+        // (TS2775), and a function declared without an assertion asserts
+        // nothing, so their calls select no root. An annotated variable, an
+        // import, and a global can, so the reads after their calls are
+        // candidates that only call points reach.
+        const SOURCE: &str = r#"
+            import { check } from "./check";
+            const arrow = (v: unknown): asserts v => {};
+            declare const annotated: (v: unknown) => asserts v;
+            declare function local(v: unknown): void;
+            function a(x: string | null) { arrow(x); /*arrow*/x; }
+            function b(x: string | null) { annotated(x); /*annotated*/x; }
+            function c(x: string | null) { check(x); /*imported*/x; }
+            function d(x: string | null) { assertGlobal(x); /*global*/x; }
+            function e(x: string | null) { local(x); /*local*/x; }
+        "#;
+        let info = module(SOURCE);
+        for (marker, selected) in [
+            ("arrow", false),
+            ("annotated", true),
+            ("imported", true),
+            ("global", true),
+            ("local", false),
+        ] {
+            let read = marked(SOURCE, marker, "x");
+            assert_eq!(info.flow.is_candidate(read), selected, "{marker}");
+            assert_eq!(
+                info.flow.call_only_candidate(read).is_some(),
+                selected,
+                "{marker}"
+            );
+        }
     }
 
     #[test]

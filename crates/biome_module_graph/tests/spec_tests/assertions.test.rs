@@ -70,6 +70,9 @@ fn assert_no_whole_module_inference(db: &TestModuleDb, events: &[salsa::Event]) 
     );
 }
 
+// TypeScript 7.0.2 (`tsc --strict`) narrows after a statement call whose
+// callee or arguments are in parentheses (`narrowing-probes/m6-l1/existing.ts`
+// L6).
 #[test]
 fn standalone_assertions_refine_after_all_arguments_without_changing_declarations() {
     use InferredTypeData::{Number, String};
@@ -83,7 +86,7 @@ fn standalone_assertions_refine_after_all_arguments_without_changing_declaration
                 declare function identity<T>(input: T): T;
                 function inspect(/*binding*/value: string | number) {{
                     /*before*/value;
-                    (((assertString)((/*argument*/value), /*laterArgument*/value)));
+                    (assertString)((/*argument*/value), /*laterArgument*/value);
                     /*after*/value;
                     /*laterCall*/identity(value);
                 }}
@@ -448,7 +451,9 @@ fn assertions_respect_binding_identity_writes_and_existing_subject_restrictions(
         ("innerAfter", "value", &[Number]),
         ("outer", "value", &[String]),
         ("localCallee", "value", &[Number]),
-        ("parameterCallee", "value", &[String, Number]),
+        // TypeScript 7.0.2 (`tsc --strict`) asserts through a parameter with
+        // a type annotation (`narrowing-probes/m6-l1/comma.ts` L15).
+        ("parameterCallee", "value", &[String]),
         ("let", "value", &[String]),
         // TypeScript 7.0.2 (`tsc --strict`) narrows a `var` too.
         ("var", "other", &[String]),
@@ -489,6 +494,11 @@ fn assertions_narrow_despite_a_following_eval() {
     assert_variants(&db, ty, &[InferredTypeData::String], "eval");
 }
 
+// TypeScript 7.0.2 (`tsc --strict`) also narrows the reads after
+// `assertString?.(value)` and after the calls in `return` and `throw`
+// (`narrowing-probes/m6-l1/comma.ts` L7, L8, L14): it adds a call that is an
+// operand of the comma operator to the flow wherever the comma operator
+// appears. Biome keeps the declared type there, which is wider.
 #[test]
 fn optional_and_nested_assertion_calls_preserve_incoming_types() {
     use InferredTypeData::{Number, String};
@@ -500,7 +510,6 @@ fn optional_and_nested_assertion_calls_preserve_incoming_types() {
         "flag || assertString(value); /*read*/value;",
         "assertString(value) ?? /*read*/value;",
         "flag ? assertString(value) : undefined; /*read*/value;",
-        "(assertString(value), /*read*/value);",
         "!assertString(value); /*read*/value;",
         "void assertString(value); /*read*/value;",
         "result = assertString(value); /*read*/value;",

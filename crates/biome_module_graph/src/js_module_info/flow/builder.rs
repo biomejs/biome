@@ -1,12 +1,12 @@
 use super::guards::{
     DecomposedCondition, FlowGuard, FlowOutcome, GuardFunctions, SwitchCase, SwitchKind,
-    decompose_assertion, decompose_assignment_target, decompose_condition, decompose_for_in,
+    decompose_assignment_target, decompose_condition, decompose_for_in, decompose_statement_call,
     decompose_switch_case, exhaustive_operand, is_unit_case,
 };
 use super::subjects::{identifier_key, literal_key, member_name_key, property_key, subject_of};
 use super::writes::WrittenTargets;
 use super::{
-    AnyFlowExpression, FlowAssigned, FlowAssignedValue, FlowCallee, FlowDestructureStep,
+    AnyFlowExpression, FlowAssigned, FlowAssignedValue, FlowCall, FlowCallee, FlowDestructureStep,
     FlowEvolving, FlowNode, FlowNodeId, FlowSubject, FlowSubjectId, FlowSubjectTable, FlowSwitch,
     FlowTest, FlowWrite, FlowWriteEffect, MAX_SWITCHES, PropertyKey, evolving_declaration,
     typeof_kind_bit,
@@ -78,6 +78,12 @@ pub(super) struct BuiltRoot {
     /// condition mentions the subject only as the subject of `instanceof` or
     /// of a type-guard function whose target has only object types.
     pub(super) instance_mentions: FxHashSet<(FlowNodeId, FlowSubjectId)>,
+    /// The condition nodes, each with a subject in `mentions`, whose
+    /// condition mentions the subject only through call points.
+    pub(super) call_mentions: FxHashSet<(FlowNodeId, FlowSubjectId)>,
+    /// The call points that the root's [`FlowGuard::Call`] guards stand for,
+    /// each with the subjects that it may narrow.
+    pub(super) calls: Vec<(FlowCall, Box<[FlowSubjectId]>)>,
     /// Reachable reads of subjects with their incoming flow.
     pub(super) reads: Vec<BuiltRead>,
     /// The `switch` statements that the root's [`FlowGuard::Bypass`] guards
@@ -191,7 +197,9 @@ type Build<T> = Result<T, Unsupported>;
 /// `for`, `for...in`, `for...of`, `switch`, `try`, labeled statements,
 /// `break`, `continue`, `return`, and `throw`, and evaluates expressions in
 /// the order in which JavaScript runs them, with a write point after each
-/// write to a subject. Any other statement, such as a class or enum
+/// write to a subject and a condition node after each statement call, as
+/// [`decompose_statement_call`] describes. Any other statement, such as a
+/// class or enum
 /// declaration, is an opaque region. The builder evaluates its expressions
 /// from the flow before it, and the code after it continues from that
 /// evaluation. A condition inside a region narrows only the rest of the
@@ -217,6 +225,8 @@ pub(super) fn build_root(
     if !has_complete_statements(root) {
         return None;
     }
+    // A build that failed may have left the call points of its root.
+    functions.take_calls();
     let mut builder = RootBuilder {
         model,
         functions,
@@ -228,6 +238,7 @@ pub(super) fn build_root(
         parents: FxHashSet::default(),
         instance_tested: FxHashSet::default(),
         instance_mentions: FxHashSet::default(),
+        call_mentions: FxHashSet::default(),
         reads: Vec::new(),
         switches: Vec::new(),
         writes: Vec::new(),
@@ -268,6 +279,8 @@ pub(super) fn build_root(
         property_only,
         instance_tested,
         instance_mentions: builder.instance_mentions,
+        call_mentions: builder.call_mentions,
+        calls: builder.functions.take_calls(),
         reads: builder.reads,
         switches: builder.switches,
         writes: builder.writes,
@@ -894,6 +907,107 @@ pub(crate) fn member_return(owner: &AnyMemberDeclaration, name: &str) -> (usize,
     (declared, annotated_if(annotated))
 }
 
+/// Returns how many members named `name` `owner` declares itself, among its
+/// `static` members when `is_static` is true and among the others otherwise,
+/// and whether each of them has an explicit type, as TypeScript's
+/// `getExplicitTypeOfSymbol` requires of a member along the callee of a
+/// statement call: a method, or a property with a type annotation. An
+/// accessor and a property without a type annotation have none. A private
+/// name is spelled with its `#`, as local inference stores member names.
+pub(crate) fn member_explicitness(
+    owner: &AnyMemberDeclaration,
+    name: &str,
+    is_static: bool,
+) -> (usize, bool) {
+    let mut declared = 0;
+    let mut explicit = true;
+    match owner {
+        AnyMemberDeclaration::AnyJsClass(class) => {
+            for member in class.members() {
+                let is_named = member
+                    .name()
+                    .ok()
+                    .flatten()
+                    .and_then(|member_name| member_name.name())
+                    .is_some_and(|member_name| match member_name {
+                        ClassMemberName::Private(own) => name.strip_prefix('#') == Some(own.text()),
+                        ClassMemberName::Public(own) => own.text() == name,
+                    });
+                if !is_named {
+                    continue;
+                }
+                let (member_is_static, member_is_explicit) = match &member {
+                    AnyJsClassMember::JsMethodClassMember(method) => (
+                        method
+                            .modifiers()
+                            .iter()
+                            .any(|modifier| modifier.as_js_static_modifier().is_some()),
+                        true,
+                    ),
+                    AnyJsClassMember::TsMethodSignatureClassMember(method) => (
+                        method
+                            .modifiers()
+                            .iter()
+                            .any(|modifier| modifier.as_js_static_modifier().is_some()),
+                        true,
+                    ),
+                    AnyJsClassMember::JsPropertyClassMember(property) => (
+                        property
+                            .modifiers()
+                            .iter()
+                            .any(|modifier| modifier.as_js_static_modifier().is_some()),
+                        property.property_annotation().is_some_and(|annotation| {
+                            matches!(annotation.type_annotation(), Ok(Some(_)))
+                        }),
+                    ),
+                    AnyJsClassMember::TsPropertySignatureClassMember(property) => (
+                        property
+                            .modifiers()
+                            .iter()
+                            .any(|modifier| modifier.as_js_static_modifier().is_some()),
+                        property.property_annotation().is_some_and(|annotation| {
+                            matches!(annotation.type_annotation(), Ok(Some(_)))
+                        }),
+                    ),
+                    // An accessor, or a member whose staticness Biome doesn't
+                    // read, counts as declared without an explicit type.
+                    _ => (is_static, false),
+                };
+                if member_is_static != is_static {
+                    continue;
+                }
+                declared += 1;
+                explicit &= member_is_explicit;
+            }
+        }
+        AnyMemberDeclaration::TsInterfaceDeclaration(interface) => {
+            if is_static {
+                return (0, false);
+            }
+            for member in interface.members() {
+                let (member_name, member_is_explicit) = match member {
+                    AnyTsTypeMember::TsMethodSignatureTypeMember(method) => (method.name(), true),
+                    AnyTsTypeMember::TsPropertySignatureTypeMember(property) => {
+                        (property.name(), property.type_annotation().is_some())
+                    }
+                    AnyTsTypeMember::TsGetterSignatureTypeMember(getter) => (getter.name(), false),
+                    AnyTsTypeMember::TsSetterSignatureTypeMember(setter) => (setter.name(), false),
+                    _ => continue,
+                };
+                if member_name
+                    .ok()
+                    .and_then(|member_name| member_name.name())
+                    .is_some_and(|member_name| member_name.text() == name)
+                {
+                    declared += 1;
+                    explicit &= member_is_explicit;
+                }
+            }
+        }
+    }
+    (declared, explicit)
+}
+
 /// Returns where the return type of a call to the variable that `binding`
 /// declares comes from: the return type annotation of a function
 /// declaration, or of the function or arrow expression that initializes a
@@ -1082,6 +1196,7 @@ struct RootBuilder<'a, 'raw> {
     /// functions whose targets have only object types, in all conditions.
     instance_tested: FxHashSet<FlowSubjectId>,
     instance_mentions: FxHashSet<(FlowNodeId, FlowSubjectId)>,
+    call_mentions: FxHashSet<(FlowNodeId, FlowSubjectId)>,
     reads: Vec<BuiltRead>,
     switches: Vec<BuiltSwitch>,
     writes: Vec<FlowWrite>,
@@ -1320,21 +1435,9 @@ impl RootBuilder<'_, '_> {
                 }
             }
             AnyJsStatement::JsExpressionStatement(statement) => {
-                let flow = self.evaluate(statement.syntax(), current, 0)?;
+                self.visit(0)?;
                 let expression = statement.expression().map_err(|_| Unsupported)?;
-                // An assertion call that returns has established its condition.
-                self.current = Some(
-                    match decompose_assertion(
-                        &expression,
-                        self.model,
-                        self.functions,
-                        &mut self.subjects,
-                        &mut self.guards,
-                    ) {
-                        Some(condition) => self.push_condition(flow, condition)?,
-                        None => flow,
-                    },
-                );
+                self.current = Some(self.statement_calls(&expression, current, 1)?);
                 Ok(())
             }
             AnyJsStatement::JsDebuggerStatement(_) | AnyJsStatement::JsEmptyStatement(_) => {
@@ -1408,6 +1511,62 @@ impl RootBuilder<'_, '_> {
             | AnyJsStatement::TsExternalModuleDeclaration(_)
             | AnyJsStatement::TsGlobalDeclaration(_) => Ok(()),
             _ => self.opaque_region(&statement, label, current),
+        }
+    }
+
+    /// Evaluates `expression`, the expression of an expression statement,
+    /// which lies at `depth`, from `incoming`, and returns the flow after it.
+    ///
+    /// Each statement call adds a condition node right after it, which holds
+    /// what the call establishes when it returns, as
+    /// [`decompose_statement_call`] describes, so the call's own arguments
+    /// still see the types from before it. Statement calls follow
+    /// TypeScript's `bindExpressionStatement` and
+    /// `maybeBindExpressionFlowIfCall`: the expression itself when it is a
+    /// call, and each operand of the comma operator that is a call, through
+    /// any parentheses around the comma expression. A call in parentheses,
+    /// as in `(assert(x));`, is none. The operands run in order, so a write
+    /// in an operand comes before the next operand.
+    fn statement_calls(
+        &mut self,
+        expression: &AnyJsExpression,
+        incoming: FlowNodeId,
+        depth: usize,
+    ) -> Build<FlowNodeId> {
+        match expression {
+            AnyJsExpression::JsSequenceExpression(sequence) => {
+                self.visit(depth)?;
+                let left = sequence.left().map_err(|_| Unsupported)?;
+                let right = sequence.right().map_err(|_| Unsupported)?;
+                let flow = self.statement_calls(&left, incoming, depth + 1)?;
+                self.statement_calls(&right, flow, depth + 1)
+            }
+            AnyJsExpression::JsParenthesizedExpression(parenthesized)
+                if matches!(
+                    parenthesized
+                        .expression()
+                        .map(AnyJsExpression::omit_parentheses),
+                    Ok(AnyJsExpression::JsSequenceExpression(_))
+                ) =>
+            {
+                self.visit(depth)?;
+                let inner = parenthesized.expression().map_err(|_| Unsupported)?;
+                self.statement_calls(&inner, incoming, depth + 1)
+            }
+            AnyJsExpression::JsCallExpression(call) => {
+                let flow = self.evaluate(call.syntax(), incoming, depth)?;
+                match decompose_statement_call(
+                    call,
+                    self.model,
+                    self.functions,
+                    &mut self.subjects,
+                    &mut self.guards,
+                ) {
+                    Some(condition) => self.push_condition(flow, condition),
+                    None => Ok(flow),
+                }
+            }
+            _ => self.evaluate(expression.syntax(), incoming, depth),
         }
     }
 
@@ -3610,6 +3769,7 @@ impl RootBuilder<'_, '_> {
     ) -> Build<FlowNodeId> {
         if condition.mentions.is_empty()
             && condition.parents.is_empty()
+            && condition.call_mentions.is_empty()
             && self.guards.get(condition.guard) == Some(&FlowGuard::Keep)
         {
             return Ok(antecedent);
@@ -3632,6 +3792,11 @@ impl RootBuilder<'_, '_> {
                 self.instance_mentions.insert((node, *subject));
             }
         }
+        for subject in &condition.call_mentions {
+            if !condition.mentions.contains(subject) && !condition.parents.contains(subject) {
+                self.call_mentions.insert((node, *subject));
+            }
+        }
         self.tested.extend(condition.mentions.iter().copied());
         self.parents.extend(condition.parents.iter().copied());
         self.instance_tested.extend(condition.instance_tested);
@@ -3640,6 +3805,7 @@ impl RootBuilder<'_, '_> {
                 .mentions
                 .into_iter()
                 .chain(condition.parents)
+                .chain(condition.call_mentions)
                 .map(|subject| (node, subject)),
         );
         Ok(node)
@@ -3863,6 +4029,17 @@ mod tests {
                             .into_iter()
                             .map(|fact| format!("bypass({fact})")),
                     );
+                }
+                // A call point is written `call(callee)` for a call whose
+                // result is truthy and `!call(callee)` otherwise. Its effect
+                // depends on its callee, which only inference resolves.
+                FlowGuard::Call { call, positive } => {
+                    let root = self.root();
+                    let (call, _) = &root.calls[*call as usize];
+                    let text = &self.source[call.range];
+                    let callee = &text[..text.find('(').unwrap_or(text.len())];
+                    let negation = if *positive { "" } else { "!" };
+                    facts.push(format!("{negation}call({callee})"));
                 }
             }
         }
@@ -4161,8 +4338,8 @@ mod tests {
         // Only a `?.` that a key or arguments follow tests its object, and an
         // object that is no subject adds no condition.
         for source in [
-            "function f(x) { x?.a.b; after(x); }",
-            "function f(x) { x?.read(); after(x); }",
+            "function f(x) { x?.a.b; x; }",
+            "function f(x) { x?.read(); x; }",
             "function f(x) { (x?.a).read(x); }",
             "function f(x) { g()?.read(x); }",
         ] {
@@ -4246,7 +4423,7 @@ mod tests {
         for name in ["vx", "pa"] {
             assert_eq!(
                 sorted_paths(&built, name, 2),
-                [facts(&["pa:Reset", "vx:Reset"])],
+                [facts(&["call(read)", "pa:Reset", "vx:Reset"])],
                 "{name}"
             );
         }
@@ -4379,6 +4556,7 @@ mod tests {
         assert_eq!(
             sorted_paths(&built, "q", 7),
             [facts(&[
+                "call(read)",
                 "q.0:Assign",
                 "q.0:Compound",
                 "q.k:Assign",
@@ -4393,10 +4571,10 @@ mod tests {
                 "y:Assign",
             ])]
         );
-        // `push` on an array that doesn't evolve is an ordinary call, and
-        // assigning an empty array literal to that array restarts nothing.
+        // `push` on an array that doesn't evolve is an ordinary call point,
+        // and an empty array that another variable declares restarts nothing.
         let built = function("function f(w: number[], v) { w.push(v); w = []; read(w); }");
-        assert_eq!(built.paths("w", 3), [facts(&["w:Assign"])]);
+        assert_eq!(built.paths("w", 3), [facts(&["w:Assign", "call(w.push)"])]);
         // A value that reads a variable whose type evolves with its writes
         // has Biome's type for that variable, which doesn't follow its
         // writes, so the write gives the declared type.
@@ -4542,10 +4720,10 @@ mod tests {
         assert_eq!(built.paths("x", 2), [facts(&["x:Truthy"])]);
         assert_eq!(built.paths("x", 3), [Vec::<String>::new()]);
         // The code after the statement continues from the ends of the try
-        // block and of the catch clause.
+        // block and of the catch clause, after the call points there.
         assert_eq!(
             sorted_paths(&built, "x", 4),
-            [Vec::new(), facts(&["x:Truthy"])]
+            [facts(&["call(read)"]), facts(&["call(read)", "x:Truthy"])]
         );
         // A catch clause that ends the path leaves the try block's end.
         let built = function(
@@ -4577,7 +4755,7 @@ mod tests {
         );
         // The second build starts from the normal exits only, and the code
         // after the statement continues from its end.
-        assert_eq!(built.paths("x", 3), [facts(&["x:Truthy"])]);
+        assert_eq!(built.paths("x", 3), [facts(&["call(read)", "x:Truthy"])]);
         let built = function(
             "function f(x, y) { try { if (!x) return; } catch { return; } finally { if (!y) return; } after(x); }",
         );
@@ -4594,9 +4772,8 @@ mod tests {
 
     #[test]
     fn finally_blocks_reach_the_joins_of_the_enclosing_try() {
-        let built = function(
-            "function f(x) { try { try { return; } finally { read(x); } } finally { read(x); } }",
-        );
+        let built =
+            function("function f(x) { try { try { return; } finally { x; } } finally { x; } }");
         let inner = built.point("x", 1).unwrap();
         let outer = built.point("x", 2).unwrap();
         let FlowNode::Join(predecessors) = &built.root().nodes[outer as usize] else {
@@ -4752,10 +4929,15 @@ mod tests {
             "function f(x) { switch (x) { case 1: read(x); case 2: case 3: read(x); break; default: read(x); } after(x); }",
         );
         assert_eq!(sorted_paths(&built, "x", 2), [facts(&["x:=1"])]);
-        // The group of `2` and `3` also continues the statements of `1`.
+        // The group of `2` and `3` also continues the statements of `1`,
+        // after its call point.
         assert_eq!(
             sorted_paths(&built, "x", 3),
-            [facts(&["x:=1"]), facts(&["x:=2"]), facts(&["x:=3"])]
+            [
+                facts(&["call(read)", "x:=1"]),
+                facts(&["x:=2"]),
+                facts(&["x:=3"])
+            ]
         );
         assert_eq!(
             sorted_paths(&built, "x", 4),
@@ -4765,10 +4947,10 @@ mod tests {
         assert_eq!(
             sorted_paths(&built, "x", 5),
             [
-                facts(&["!x:=1", "!x:=2", "!x:=3"]),
-                facts(&["x:=1"]),
-                facts(&["x:=2"]),
-                facts(&["x:=3"])
+                facts(&["!x:=1", "!x:=2", "!x:=3", "call(read)"]),
+                facts(&["call(read)", "call(read)", "x:=1"]),
+                facts(&["call(read)", "x:=2"]),
+                facts(&["call(read)", "x:=3"])
             ]
         );
     }

@@ -117,8 +117,13 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   or that destructures a pattern, the head of a `for...of` loop that
   assigns a target, or a call of `push` or `unshift` on a variable when the
   root also declares a variable without a type annotation initialized with
-  `[]`), or, in a module with an `asserts` annotation, a
-  standalone call. It also records whether the root's own code
+  `[]`), or a statement call that may assert: the expression of an
+  expression statement, or an operand of the comma operator there, not in
+  parentheses, whose callee is a dotted name and that passes an argument or
+  calls a method (`is_statement_call`, `may_assert`). A root that only such
+  calls select keeps them, and collection builds it only when one of their
+  callees can assert as far as the semantic model tells
+  (`GuardFunctions::keeps_statement_call`). It also records whether the root's own code
   uses `this`, so a root whose only subjects are paths on `this` still gets a
   graph. The scanner rejects a root when its own code contains a `with`
   statement or bogus syntax, and a root over its node or depth limit. Declaration files (`.d.ts`, `.d.mts`, `.d.cts`, in any letter
@@ -299,12 +304,34 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   with the objects of property guards and among the subjects that
   `instanceof` tests. An imported name can be an alias of a primitive, so it
   doesn't count as an object type, and a target of `any` or `unknown` makes
-  the function unsupported. For a standalone call to an assertion function,
-  the builder adds a condition node after the call, so the call and its
-  arguments still use the types from before it. `asserts value is T` becomes a
-  runtime test of the argument, as `value is T` does, while `asserts value`
-  decomposes the argument as a condition that holds, so
-  `assert(value !== null)` excludes `null` from `value`.
+  the function unsupported. After each statement call, the expression of an
+  expression statement or an operand of the comma operator there, not in
+  parentheses, as TypeScript's binder adds calls to the flow, the builder
+  adds a condition node (`statement_calls`), so the call and its arguments
+  still use the types from before it. For a local assertion function,
+  `asserts value is T` becomes a runtime test of the argument, as
+  `value is T` does, while `asserts value` decomposes the argument as a
+  condition that holds, so `assert(value !== null)` excludes `null` from
+  `value`.
+  A call whose callee is a dotted name, an identifier or `this` followed by
+  `.name` accesses, and that no local function decides from its collected
+  signature (`GuardFunctions::calls_local_function`), is a call point
+  (`FlowCall`), whose guard is `FlowGuard::Call`. Its effect depends on the
+  callee's signature, which only inference resolves, so collection records
+  the subjects that it may narrow: its subject arguments, the subject of the
+  object of its callee, which `this is T` narrows, and, for a statement
+  call, the subjects of each argument decomposed as a condition that holds,
+  whose guard `FlowCallArgument::condition` keeps for `asserts value`. A call
+  in a condition is a call point only when it passes a subject
+  (`condition_call_point`). A statement call is one only when its callee
+  follows TypeScript's explicit-type rule as far as the syntax tells
+  (`statement_callee`): the name that it starts at is a function, a class, a
+  namespace that `declare` declares, a variable or a parameter with a type
+  annotation, a global, an import, which inference checks, or `this` in a
+  class member that is not `static`, and the reading context checks each
+  member access along it (`FlowCallKind::Statement`). The decomposed
+  condition lists the subjects of call points apart from the others
+  (`DecomposedCondition::call_mentions`).
   A runtime test of a property of a subject other than `this`, as in
   `s.kind === "c"`, `s["kind"] === "c"`, or `t[0] === "a"`, also adds a
   property guard on that subject, the object that holds the property, unless
@@ -436,8 +463,17 @@ before they are assigned (`uninitialized_subjects`), and
 `RootFlow::subject_writes` the values that each read subject's writes
 assign.
 
-Collection then keeps only the reads that a runtime test or a write of their
-subject can reach, and only for subjects that can narrow. It keeps a recorded `switch`
+Collection then keeps only the reads that a runtime test, a write, or a call
+point of their subject can reach, and only for subjects that can narrow. A
+call point leaves the classes of its subjects below as they are: whether it
+narrows depends on its callee's signature, which inference finds before it
+resolves anything else. A candidate made only by reads of one subject that
+only call points reach records the root and the subject
+(`ModuleFlow::call_only_candidate`), so inference can skip it when none of
+the subject's call points narrows, and such a read doesn't decide how the
+variable's declared type starts narrowing. The other reads of a subject that
+call points mention are never skipped by the subject's class, and
+`RootFlow::subject_calls` lists the call points of each read subject. It keeps a recorded `switch`
 only when its bypass reaches a kept read, and lists those reads' points in
 `RootFlow::bypassed` with the statements whose bypass reaches them. A read of an element of a
 pattern is also kept when a test of the pattern reaches it: its point becomes
@@ -674,6 +710,27 @@ the read of a discriminant never needs its own statement's answer. Lookups
 share the answer through `infer_flow_switch_exhaustive`; complete module
 inference decides it in its own context and keeps it per root and
 statement.
+
+A read of a subject in `RootFlow::subject_calls` resolves what its call
+points do in the reading context (`call_effects`), never in the solve's
+fresh one, and the solve's key carries the effects that narrow
+(`FlowSubjectRootInput::calls`, `None` when none does, so other subjects
+share their solves). The effect of a call point (`FlowCallEffect`) follows
+TypeScript's `getEffectsSignature`: a call in a condition takes the single
+signature of its callee's type without `null` and `undefined`, which must
+return a type predicate, and a statement call takes that of its callee's
+explicit type, which must assert. `has_explicit_callee` checks an import
+through the declaration that it names (`imported_declaration_is_explicit`)
+and each member access through the declared type of its object
+(`has_explicit_member`). A generic signature or more than one signature
+gives no effect. `FlowGuard::Call` then narrows the argument or the object
+that the signature names with `narrow_by_type_predicate`, or applies the
+argument's decomposed condition for `asserts value`. Lookups share each
+effect through `infer_flow_call_effect`, keyed by the range of the call;
+complete module inference resolves it in its own context and keeps it per
+call. When a call point narrows a subject whose reads elsewhere narrow only
+through tests of its shape or only through writes, the read starts from the
+whole declared type (`called_binding_baseline`).
 
 `src/db/type_inference/flow.rs` applies each runtime test with `narrow_type`
 from `biome_js_type_info`. Where branches meet, or a loop returns to an earlier

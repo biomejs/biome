@@ -84,3 +84,34 @@ function aliasTarget(value: string | null) {
 		return value?.length;
 	}
 }
+
+const alias = isString;
+const owner = {
+	isString(input: unknown): input is string {
+		return typeof input === "string";
+	},
+};
+
+function annotatedParameterGuard(value: string | null, guard: (input: unknown) => input is string) {
+	if (guard(value)) {
+		return value?.length;
+	}
+}
+
+function aliasedGuard(value: string | null) {
+	if (alias(value)) return value?.length;
+}
+
+function methodGuard(value: string | null) {
+	if (owner.isString(value)) return value?.length;
+}
+
+function optionalGuard(value: string | null, guard: ((input: unknown) => input is string) | undefined) {
+	if (guard?.(value)) {
+		return value?.length;
+	}
+}
+
+function libraryGuard(value: string[] | null) {
+	if (Array.isArray(value)) return value?.length;
+}

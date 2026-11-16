@@ -44,6 +44,8 @@ mod assertions;
 mod assignments;
 #[path = "spec_tests/augmentations.test.rs"]
 mod augmentations;
+#[path = "spec_tests/call_points.test.rs"]
+mod call_points;
 #[path = "spec_tests/callback_parameters.test.rs"]
 mod callback_parameters;
 #[path = "spec_tests/calls.test.rs"]
