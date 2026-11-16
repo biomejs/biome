@@ -230,7 +230,7 @@ fn comparisons_with_negative_numbers_void_and_templates_narrow() {
 // the other reads to `"a"`, `"a" | "b"`, and `"b" | "c" | null`, where Biome
 // keeps the declared type, which is wider. Biome doesn't compare with a
 // variable that has a type annotation, a call, `as const`, a template literal
-// with substitutions, or a literal with loose equality yet.
+// with substitutions, or a literal with loose equality.
 #[test]
 fn comparisons_with_values_that_biome_does_not_compare_keep_the_type() {
     assert_reads(
@@ -371,7 +371,7 @@ fn comparisons_with_imported_constants_narrow() {
 // `i14`. Biome keeps the declared type, which is wider, because it doesn't
 // compare with an imported variable that has a type annotation, an export
 // written as an expression, a member of a namespace import, or an enum
-// member, whose type Biome doesn't infer yet.
+// member, whose type Biome doesn't infer.
 #[test]
 fn comparisons_with_other_imported_values_keep_the_type() {
     assert_reads(
