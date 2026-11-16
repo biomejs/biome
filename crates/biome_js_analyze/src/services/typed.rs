@@ -5,9 +5,9 @@ use biome_analyze::{
 };
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsFunction, AnyJsRoot, JsCallArgumentList,
-    JsClassDeclaration, JsClassExpression, JsLanguage, JsObjectExpression, JsReferenceIdentifier,
-    JsSyntaxNode,
+    AnyJsCallArgument, AnyJsExpression, AnyJsFunction, AnyJsRoot, AnyJsStatement,
+    JsCallArgumentList, JsClassDeclaration, JsClassExpression, JsLanguage, JsObjectExpression,
+    JsReferenceIdentifier, JsSyntaxNode,
 };
 use biome_js_type_info::InferredType;
 use biome_module_graph::{
@@ -19,7 +19,8 @@ use biome_module_graph::{
         NormalizedExpressionTypeRequest, PromiseClassificationRequest,
         PromiseReturningFunctionClassificationRequest, ThenableClassificationRequest,
         TypeInferenceArgument, TypeInferenceCaller, TypeInferenceClassification,
-        TypeInferenceRequest, TypeInferenceSource, execute_type_inference_request,
+        TypeInferenceRequest, TypeInferenceSource, UnreachableCodeClassificationRequest,
+        execute_type_inference_request,
     },
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
@@ -95,6 +96,24 @@ impl TypedService {
         self.execute_request(
             typed_module,
             PromiseClassificationRequest::new(typed_module.module, expression.range()),
+        )
+    }
+
+    /// Classifies whether no path reaches `statement`, as after `return`, in
+    /// the branch of `if (false)`, or after a call to a function whose
+    /// return type annotation is `never`.
+    ///
+    /// Returns `Indeterminate` when type inference is unavailable or inconclusive.
+    pub fn classify_statement_as_unreachable(
+        &self,
+        statement: &AnyJsStatement,
+    ) -> TypeInferenceClassification {
+        let Some(typed_module) = self.module.as_ref() else {
+            return TypeInferenceClassification::Indeterminate;
+        };
+        self.execute_request(
+            typed_module,
+            UnreachableCodeClassificationRequest::new(typed_module.module, statement.range()),
         )
     }
 

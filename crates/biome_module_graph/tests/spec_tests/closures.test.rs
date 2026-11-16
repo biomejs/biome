@@ -528,15 +528,13 @@ fn closures_in_unreachable_code_keep_the_declared_type() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at every read
-// below, because it finds the code after a call that returns `never` and the
-// branch of `if (false)` unreachable, and gives a read there the declared
-// type. Biome evaluates that code as reachable, so it narrows these reads,
-// including those in closures created there. Biome is narrower than
-// TypeScript only in code that TypeScript finds unreachable (a Limits bullet
-// of `NARROWING.md`).
+// TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at every read below
+// (`narrowing-probes/m5-l4/unreachable.ts` L6, L7, L9, `m5-l4/constant.ts`
+// L5, L9): it finds the code after a call that returns `never` and the
+// branch of `if (false)` unreachable, and gives a read there, and in a
+// closure created there, the declared type.
 #[test]
-fn closures_in_code_that_only_typescript_finds_unreachable() {
+fn closures_in_code_that_typescript_finds_unreachable() {
     assert_reads(
         r#"
         function b1() { const x: string | null = f(); if (x) { fail(); /*b1*/x; } }
@@ -546,11 +544,38 @@ fn closures_in_code_that_only_typescript_finds_unreachable() {
         function d5() { const x: string | null = f(); if (x) { if (false) { const g = () => /*d5*/x; } } }
         "#,
         &[
-            ("b1", "x", &["string"]),
-            ("b2", "x", &["string"]),
-            ("b4", "x", &["string"]),
-            ("d1", "x", &["string"]),
-            ("d5", "x", &["string"]),
+            ("b1", "x", &["null", "string"]),
+            ("b2", "x", &["null", "string"]),
+            ("b4", "x", &["null", "string"]),
+            ("d1", "x", &["null", "string"]),
+            ("d5", "x", &["null", "string"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`, `narrowing-probes/m6-l2/closures.ts` L7
+// to L11): a loop whose test is not the literal `true`, as `while (1)`, has
+// an exit, so a closure that a root doesn't analyze continues the flow past
+// it, while `while (true)` ends every path. A closure created after a call
+// to a method that returns `never` starts from that point, so its reads
+// keep the declared type, unless another path reaches it.
+#[test]
+fn closures_after_loops_and_calls_that_end_the_path() {
+    assert_reads(
+        r#"
+        declare const log: { fatal(): never };
+        function w1() { const x: string | null = f(); if (x) { const g = () => { while (1) { if (c) break; } /*w1*/x; }; } }
+        function w2() { const x: string | null = f(); if (x) { const g = () => { while (true) {} /*w2*/x; }; } }
+        function w3() { const x: string | null = f(); if (x) { log.fatal(); const g = () => /*w3*/x; } }
+        function w4() { const x: string | null = f(); if (x) { if (c) log.fatal(); const g = () => /*w4*/x; } }
+        function w5() { const x: string | null = f(); if (x) { const g = () => { do { if (c) break; } while (1); /*w5*/x; }; } }
+        "#,
+        &[
+            ("w1", "x", &["string"]),
+            ("w2", "x", &["null", "string"]),
+            ("w3", "x", &["null", "string"]),
+            ("w4", "x", &["string"]),
+            ("w5", "x", &["string"]),
         ],
     );
 }

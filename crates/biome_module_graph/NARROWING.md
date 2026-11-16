@@ -46,8 +46,9 @@ Every narrowing behaviour follows these rules:
    work limit or a query cycle stops the computation, the read has type
    Unknown instead.
 3. A read in a branch proven impossible has type Unknown, not `never`. A rule
-   that needs to know that a point is unreachable must get that answer from a
-   separate request, never from the read's type. Biome has no such request yet.
+   that needs to know that a point is unreachable gets that answer from a
+   separate request, `UnreachableCodeClassificationRequest`, never from the
+   read's type.
 
 A type wider than TypeScript's can still make a rule report a union member
 that TypeScript has removed, but a narrower type makes rules report code that
@@ -131,14 +132,19 @@ These limits apply to every *Supported* and *Partial* row below:
   in the execution root that declares them, as the rows on unannotated `let`
   declarations and on evolving arrays describe, and keep their declared
   types in other execution roots, including closures.
-- Biome evaluates the code after a call to a function that returns `never`,
-  and a branch that a condition written as the literal `true` or `false`
-  never takes, as reachable, where TypeScript finds the code unreachable and
-  gives a read there its declared type. A read there, and a read in a
-  closure created there, can be narrower than in TypeScript: with
-  `x: string | null`, `x` is `string` in Biome and `string | null` in
-  TypeScript in `if (x !== null) { fail(); x }` and in
-  `if (x !== null) { if (false) { () => x } }`.
+- A statement call ends the path only where Biome finds the signature that
+  TypeScript finds, as the rows on calls that never return describe: a
+  generic or overloaded signature ends nothing, and neither do the statement
+  calls of an execution root after its first 64. Biome then evaluates the
+  code after such a call as reachable, where TypeScript finds it unreachable
+  and gives a read there its declared type, so a read there can be narrower
+  than in TypeScript: with `x: string | null` and
+  `declare function fail<T>(): never`, `x` is `string` in Biome and
+  `string | null` in TypeScript in `if (x !== null) { fail(); x }`. So is a
+  read in a closure created after a call to a function that the module
+  doesn't declare, inside a function or arrow expression that Biome doesn't
+  analyze, as `g` in
+  `if (x !== null) { const g = () => { log.fatal(); return () => x; }; }`.
 - A property path, such as `o.v`, `a.b.c`, or `this.v`, narrows only when it
   starts at a variable that can narrow by the rule above, including a module
   variable read in a function, or at `this` where the next item allows it.
@@ -563,7 +569,7 @@ code as TS7027, an error with `allowUnreachableCode: false`.
 | A conditional expression has the types of both branches, whatever its test | `interface Foo { a: number }; x: Foo;`<br>`x ? 1 : "s"`; `true ? 1 : "s"`; `x ? 1 : x` | `1 \| "s"` at the first two; `1` at the third, whose `x` is `never` | Supported: a branch adds nothing to the type when its type is `never`, as a call to a function that never returns, or when it only reads the variable that the test reads and the test leaves that variable no value there, as `x` in `x ? 1 : x`. Another read that TypeScript narrows to `never` in a branch, as `x` in `x !== null ? 1 : x` with `x: string`, is Unknown in Biome, which makes the whole expression Unknown. |
 | Truthiness of a property narrows the property | `o: { v: string \| null }; if (o.v) o.v` | `string` | Supported |
 | Truthiness of a generic gives `NonNullable<T>` | `function f<T>(x: T) { x && x }` | `NonNullable<T>` at the right operand | Not yet |
-| A constant condition makes a branch unreachable | `x: string \| null;`<br>`if (x === null) { if (true) return; } x` | `string`; the branch of `if (false)` is unreachable (TS7027) | Partial: only `while` and `do...while` loops whose condition is a truthy literal, and `for` loops without a condition, have no exit other than `break`. The branches of `if (true)` and `if (false)` stay reachable, so the example gives `string \| null`. |
+| A constant condition makes a branch unreachable | `x: string \| null;`<br>`if (x === null) { if (true) return; } x` | `string`; the branch of `if (false)` is unreachable (TS7027) | Supported: as TypeScript's binder decides, only the literal `true` or `false` itself, without parentheses, makes the branch that it never takes unreachable, in `if`, `while`, `do...while`, `for`, a conditional expression, and an operand of `&&` or `\|\|`, so `if (c && false)` never runs its body and `while (c \|\| true)` exits only by `break`. A read there keeps its declared type, and the branch adds nothing where it joins the others. `!false`, `(false)`, `0`, a `const` that holds `false`, and the operands of `??` are ordinary conditions, so `while (1)`, `while ((true))`, and `do...while (1)` can exit by their test, as `for (;;)` can't. |
 
 ### Equality
 
@@ -650,7 +656,7 @@ The rows use `type Circle = { kind: "c"; r: number }` and
 | `default` removes the handled values | `x: "a" \| "b" \| "c";`<br>`switch (x) { case "a": break; case "b": break; default: x }` | `"c"` | Partial: `default` narrows in any position, by every case that Biome narrows by, and a group that contains it also starts where one of its cases matches. A member whose discriminant is a union of case values stays: with `s: { kind: "a" \| "b"; x: 1 } \| { kind: "c"; y: 2 }`, `default` after `case "a": case "b":` keeps both members, where TypeScript keeps `{ kind: "c"; y: 2 }`. As in TypeScript, `default` narrows no receiver of an optional chain, so `switch (o?.k) { case undefined: break; default: o }` keeps `undefined` in `o`. |
 | `switch (true)` | `x: string \| number;`<br>`switch (true) { case typeof x === "string": x }` | `string` | Partial: a case narrows as its test does when it is truthy, after every case before its group failed to match, and a group with `default` sees the cases outside the group fail, as in TypeScript. The discriminant must be the literal `true` itself, as in TypeScript, which narrows nothing for `(true)` either. A case that fails to match narrows only when it gives a boolean, as the deliberate choices above describe. |
 | `switch` on a discriminant | `s: Circle \| Square; switch (s.kind) { case "c": s }` | `Circle` | Supported: cases on a property, an element access, a tuple index, an optional chain, a `const` that holds a property, and an element of a destructuring pattern narrow the object or the pattern as `===` does, within the limits above. |
-| An exhaustive `switch` ends the path that matches no case | `x: "a" \| "b";`<br>`switch (x) { case "a": return 1; case "b": return 2; } x` | `never`; the read is unreachable (TS7027) | Partial: the path that matches no case narrows the discriminant by every case, so the read is Unknown, and an exhaustive `switch` leaves that path out for every other variable, as the limits above describe. No request reports the read as unreachable yet. |
+| An exhaustive `switch` ends the path that matches no case | `x: "a" \| "b";`<br>`switch (x) { case "a": return 1; case "b": return 2; } x` | `never`; the read is unreachable (TS7027) | Supported: the path that matches no case narrows the discriminant by every case, so the read is Unknown, and an exhaustive `switch` leaves that path out for every other variable, as the limits above describe. `UnreachableCodeClassificationRequest` reports the code after such a statement as unreachable when no other path reaches it. |
 
 ### Type predicates
 
@@ -699,7 +705,7 @@ body of a type-guard function.
 | A method, imported, or annotated assertion function | `x: string \| null; assert.ok(x); x`<br>`a: (v: unknown) => asserts v; a(x); x` | `string` | Supported, with the restrictions below the table |
 | An assertion function declared as a variable without a type annotation is ignored (TS2775) | `const a = (v: unknown): asserts v => {};`<br>`x: string \| null; a(x); x` | `string \| null`, with error TS2775 | Supported |
 | An assertion call as an operand of the comma operator | `x: string \| null; (assert(x), 0); x` | `string` | Partial: an operand of the comma operator in an expression statement asserts, as in the example, also for the operands after it. TypeScript also asserts through such an operand anywhere else, as in `return (assert(x), x)`, where it takes the signature from the callee's type even when a name along the callee has no explicit type; Biome keeps the declared type there. |
-| `assert(false)` ends the path | `x: string \| null; if (x === null) assert(false); x` | `string`; code after `assert(false)` is unreachable (TS7027) | Not yet |
+| `assert(false)` ends the path | `x: string \| null; if (x === null) assert(false); x` | `string`; code after `assert(false)` is unreachable (TS7027) | Supported: an `asserts value` signature never returns when its argument is always false as TypeScript's `isFalseExpression` reads it: `false`, `a && b` with either operand such, or `a \|\| b` with both, in parentheses or not. `assert(0)` and `assert(!true)` don't end the path, as in TypeScript. |
 
 A call asserts only as a statement call, as TypeScript's binder adds calls to
 the flow: the expression of an expression statement, or an operand of the
@@ -725,7 +731,7 @@ also ignores an assertion through an element access (TS2776).
 
 | Behaviour | Example | TypeScript | Status |
 | --- | --- | --- | --- |
-| A call to a function returning `never` ends the path | `declare function fail(): never;`<br>`x: string \| null; if (x === null) fail(); x` | `string`; code after `fail()` is unreachable (TS7027) | Not yet |
+| A call to a function returning `never` ends the path | `declare function fail(): never;`<br>`x: string \| null; if (x === null) fail(); x` | `string`; code after `fail()` is unreachable (TS7027) | Partial: a statement call, as the assertions above describe it, ends the path when the return type annotation of its signature's declaration is `never` and every name along the callee has an explicit type, as for an assertion: a function, a method, a variable or a parameter annotated with a function type, a method of a type literal, an import of one of these, or a global, so `function fail() { throw 0; }` and `const fail = (): never => {}` end nothing, as in TypeScript. The paths that it ends add nothing where they join the others, and a read that only such paths reach keeps its declared type, as in TypeScript. A generic or overloaded signature ends nothing yet, as the limits above describe. |
 | `return` and `throw` end the path | `x: string \| null; if (!x) throw new Error(); x` | `string` | Supported |
 
 ### Assignments
@@ -752,7 +758,7 @@ also ignores an assertion through an element access (TS2776).
 
 | Behaviour | Example | TypeScript | Status |
 | --- | --- | --- | --- |
-| A `const` read in an arrow or function expression keeps the outer narrowing | `const x: string \| null = get(); if (x) () => x` | `string` | Supported: a read in a function or arrow expression, including an `async` function and a generator, or in a method or accessor of an object literal or of a class expression, continues the flow where the closure is created, as TypeScript's `checkIdentifier` does, through any number of such closures nested in one another. A test inside a closure narrows further from there, and an element of a destructuring pattern continues the narrowing of its pattern. An import, a `var`, a function, and a class never continue, and neither do the narrowing of a property path and a path on `this`, as in `if (o.v) () => o.v`, which keeps `string \| null`, as in TypeScript; the type of `o` itself continues, so `o.v` reads its property on the narrowed object. A closure created in unreachable code, as after `return`, starts from the declared type, as the limits above describe for code that only TypeScript finds unreachable. |
+| A `const` read in an arrow or function expression keeps the outer narrowing | `const x: string \| null = get(); if (x) () => x` | `string` | Supported: a read in a function or arrow expression, including an `async` function and a generator, or in a method or accessor of an object literal or of a class expression, continues the flow where the closure is created, as TypeScript's `checkIdentifier` does, through any number of such closures nested in one another. A test inside a closure narrows further from there, and an element of a destructuring pattern continues the narrowing of its pattern. An import, a `var`, a function, and a class never continue, and neither do the narrowing of a property path and a path on `this`, as in `if (o.v) () => o.v`, which keeps `string \| null`, as in TypeScript; the type of `o` itself continues, so `o.v` reads its property on the narrowed object. A closure created in unreachable code, as after `return`, in the branch of `if (false)`, or after a call that never returns, starts from the declared type, as in TypeScript. |
 | A parameter or `let` read in a closure created after its last assignment | `function f(x: string \| null) { if (x) [1].forEach(() => x) }` | `string` | Partial: as TypeScript's `isPastLastAssignment` decides, a parameter, a `catch` variable, or a `let` continues when the closure is created after its last assignment in the function that declares it. An assignment counts until the end of the outermost variable or expression statement, `if`, loop, `with`, `switch`, `try`, or class declaration around it, so `if (c) { x = "a"; const h = () => x; }` keeps the declared type, as in TypeScript. An assignment in any other function, such as a closure or a function called where it is defined, means that no closure continues. TypeScript also continues a `let` declared at the top level of a module, where Biome keeps the declared type, because it can't tell a module from a script, whose top-level `let` other scripts can write. |
 | A function declaration never sees the outer narrowing | `x: string \| null; if (x) { function g() { x } }` | `string \| null` | Supported: a closure nested in a function declaration continues the flow of the declaration, which starts from the declared type. |
 | An immediately invoked function expression continues the outer flow | `x: string \| null; if (x) (() => x)()` | `string` | Partial: a read inside it continues the flow where it is created, as in any closure. A write inside it keeps the variable at its declared type in the whole execution root, where TypeScript narrows the code after the call, as `null` in `if (x) { (() => { x = null; })(); x }`, and a `let` assigned after the call keeps its declared type inside it, where TypeScript narrows it as code that runs in place. |
@@ -860,4 +866,4 @@ also ignores an assertion through an element access (TS2776).
 | Paths join with a union | `x: string \| number \| null;`<br>`if (typeof x === "string") {} else if (x === null) { return; } x` | `string \| number` | Supported |
 | A namespace narrows its own variables but never sees the narrowing around it | `o: string \| null; if (o === null) throw 0;`<br>`namespace N { const l: string \| null = get(); if (l) l; o }` | `string` at `l`; `string \| null` at `o` | Supported |
 | Reads in unreachable code | `x: string \| null; if (x === null) { return; x }` | `string \| null`; the read is unreachable (TS7027) | Supported |
-| A branch narrowed to an impossible type | `x: string; if (typeof x === "number") x` | `never` | Partial: the read has type Unknown, as the correctness contract requires, and no request reports the branch as unreachable yet. |
+| A branch narrowed to an impossible type | `x: string; if (typeof x === "number") x` | `never` | Partial: the read has type Unknown, as the correctness contract requires. As in TypeScript, such a branch is not unreachable code, so `UnreachableCodeClassificationRequest` reports it as reachable. |

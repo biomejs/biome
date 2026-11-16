@@ -1,3 +1,4 @@
+use super::builder::{CalleeReturn, declaration_return};
 use super::subjects::{
     AnyPatternElement, array_element_key, assigned_subject, identifier_key, literal_key,
     member_name_key, subject_of,
@@ -13,9 +14,9 @@ use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsAssignment, AnyJsCallArgument, AnyJsClassMember,
     AnyJsExpression, AnyJsFormalParameter, AnyJsFunction, AnyJsInProperty, AnyJsLiteralExpression,
     AnyJsMemberExpression, AnyJsObjectMember, AnyJsOptionalChainExpression, AnyJsParameter,
-    AnyJsSwitchClause, AnyJsTemplateElement, AnyJsVariableDeclaration, JsBinaryOperator,
-    JsCallExpression, JsComputedMemberName, JsDecorator, JsIdentifierExpression, JsLanguage,
-    JsLogicalOperator, JsModule, JsScript, JsSwitchStatement, JsTemplateExpression,
+    AnyJsSwitchClause, AnyJsTemplateElement, AnyJsVariableDeclaration, AnyTsReturnType, AnyTsType,
+    JsBinaryOperator, JsCallExpression, JsComputedMemberName, JsDecorator, JsIdentifierExpression,
+    JsLanguage, JsLogicalOperator, JsModule, JsScript, JsSwitchStatement, JsTemplateExpression,
     JsThisExpression, JsUnaryOperator, JsVariableDeclarator, JsVariableKind, JsVariableStatement,
     T, TsDeclareStatement, binding_ext::AnyJsBindingDeclaration, unescape_js_identifier,
 };
@@ -138,12 +139,15 @@ pub(crate) enum FlowGuard {
     /// call's guard is always positive, because it stands for the call
     /// returning.
     ///
-    /// What the call narrows depends on its callee's signature. Inference
-    /// resolves the signature in the context that reads a subject and passes
-    /// its effect to the solve. A type predicate or an assertion narrows the
-    /// argument or the receiver that it names, and an `asserts value`
-    /// signature applies the guard of its argument decomposed as a condition
-    /// that holds. A call without such a signature keeps the incoming type.
+    /// What the call narrows depends on its callee's signature, which
+    /// inference resolves in the context that reads a subject and passes to
+    /// the solve: a type predicate or an assertion narrows the argument or
+    /// the receiver that it names, and an `asserts value` signature applies
+    /// the guard of its argument decomposed as a condition that holds. A
+    /// call without such a signature keeps the incoming type. A statement
+    /// call whose signature never returns gives `never` in the solves whose
+    /// read the reading context found it to end, so the path adds nothing
+    /// after it.
     ///
     /// [`RootFlow::calls`]: super::RootFlow::calls
     Call { call: u32, positive: bool },
@@ -356,6 +360,61 @@ impl<'a> GuardFunctions<'a> {
                 .ok()
                 .and_then(|callee| omit_parentheses(callee, &mut remaining))
                 .is_some_and(|callee| statement_callee(&callee, model, &mut remaining).is_some())
+    }
+
+    /// Returns whether `call`, a statement call of a local function, never
+    /// returns, as the function's declaration tells: a function declaration
+    /// or a `declare function` whose collected type is one signature that is
+    /// not generic and whose return type annotation is `never`, as
+    /// TypeScript's `hasTypePredicateOrNeverReturnType` requires, or a local
+    /// assertion function with `asserts value` whose tested argument is
+    /// always false, as [`is_false_expression`] reads it. A call of any
+    /// other callee is decided by inference, as a call point.
+    pub(super) fn local_call_ends(
+        &mut self,
+        call: &JsCallExpression,
+        model: &SemanticModel,
+    ) -> bool {
+        if !self.calls_local_function(call, model) || call.type_arguments().is_some() {
+            return false;
+        }
+        let mut remaining = MAX_CONDITION_STEPS;
+        if let Some((guard, _, argument)) = self.guard_call(call, model, &mut remaining) {
+            return guard.kind == GuardKind::TruthyAssertion
+                && is_false_expression(&argument, &mut remaining);
+        }
+        let Some(AnyJsExpression::JsIdentifierExpression(callee)) =
+            call.callee().ok().map(AnyJsExpression::omit_parentheses)
+        else {
+            return false;
+        };
+        let Some(function) = callee.name().ok().and_then(|name| model.binding(&name)) else {
+            return false;
+        };
+        let annotation = match function.tree().declaration() {
+            Some(AnyJsBindingDeclaration::JsFunctionDeclaration(declaration)) => {
+                declaration.return_type_annotation()
+            }
+            Some(AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(declaration)) => {
+                declaration.return_type_annotation()
+            }
+            _ => return false,
+        };
+        let returns_never = annotation
+            .and_then(|annotation| annotation.ty().ok())
+            .is_some_and(|ty| matches!(ty, AnyTsReturnType::AnyTsType(AnyTsType::TsNeverType(_))));
+        // An overload set is a callable object, not a single function, and
+        // TypeScript resolves which of its signatures a call takes.
+        returns_never
+            && matches!(
+                self.raw_binding_types.get(&function.range()),
+                Some(TypeReference::Resolved(RawTypeId::Local(id)))
+                    if matches!(
+                        self.raw_types.get(id.index()),
+                        Some(RawTypeData::Function(signature))
+                            if signature.type_parameters.is_empty()
+                    )
+            )
     }
 
     /// Returns whether `call` calls a function whose collected signature
@@ -1597,16 +1656,17 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     ///
     /// The call mentions every subject that it may narrow: its subject
     /// arguments, the subject of the object of its callee, and the subjects
-    /// that the decomposed arguments mention. Returns `None` when it may
-    /// narrow none, when it has type arguments, when its callee fails
-    /// TypeScript's explicit-type rule, as [`statement_callee`] checks, and
-    /// when an argument can't be decomposed completely.
+    /// that the decomposed arguments mention. A call that mentions none is a
+    /// call point too, because its signature can end the path. Returns
+    /// `None` when its callee fails TypeScript's explicit-type rule, as
+    /// [`statement_callee`] decides, and when an argument can't be decomposed
+    /// completely.
     fn statement_call_point(&mut self, call: &JsCallExpression) -> Option<usize> {
         if call.type_arguments().is_some() {
             return None;
         }
         let callee = omit_parentheses(call.callee().ok()?, &mut self.remaining)?;
-        let (root, steps) = statement_callee(&callee, self.model, &mut self.remaining)?;
+        let (root, steps, annotated) = statement_callee(&callee, self.model, &mut self.remaining)?;
         let (arguments, receiver) = self.call_operands(call, &callee, true)?;
         if !self.complete {
             return None;
@@ -1623,12 +1683,14 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
         narrowed.sort_unstable();
         narrowed.dedup();
         self.instance_tested.clear();
-        if narrowed.is_empty() {
-            return None;
-        }
+        // A call that narrows no subject can still end the path.
         let call = FlowCall {
             range: call.range(),
-            kind: FlowCallKind::Statement { root, steps },
+            kind: FlowCallKind::Statement {
+                root,
+                steps,
+                annotated,
+            },
             arguments,
             receiver,
         };
@@ -1658,8 +1720,13 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
                 break;
             };
             let subject = self.narrowed_operand(&argument);
+            let is_false = statement && is_false_expression(&argument, &mut self.remaining);
             let condition = statement.then(|| self.guard(argument, FlowOutcome::Truthy, 0));
-            arguments.push(FlowCallArgument { subject, condition });
+            arguments.push(FlowCallArgument {
+                subject,
+                condition,
+                is_false,
+            });
         }
         let receiver = match callee {
             AnyJsExpression::JsStaticMemberExpression(member) => {
@@ -2754,9 +2821,9 @@ fn is_dotted_name(callee: &AnyJsExpression, remaining: &mut usize) -> bool {
 
 /// Returns how the reading context confirms that `callee`, the callee of a
 /// statement call without parentheses, follows TypeScript's explicit-type
-/// rule, with the ranges of its member accesses, as
-/// [`FlowCallKind::Statement`] records them. The rule requires every name
-/// along the callee to have an explicit type.
+/// rule (`getTypeOfDottedName`), with the ranges of its member accesses and
+/// whether the return type of a callee that is a name itself comes from an
+/// annotation, as [`FlowCallKind::Statement`] records them.
 ///
 /// The callee must be a dotted name, as [`is_dotted_name`] describes, and the
 /// name that it starts at must have an explicit type, as [`explicit_name`]
@@ -2768,9 +2835,10 @@ fn statement_callee(
     callee: &AnyJsExpression,
     model: &SemanticModel,
     remaining: &mut usize,
-) -> Option<(FlowCallRoot, Box<[TextRange]>)> {
+) -> Option<(FlowCallRoot, Box<[TextRange]>, bool)> {
     let mut steps = Vec::new();
     let mut expression = callee.clone();
+    let mut annotated = false;
     let root = loop {
         *remaining = remaining.checked_sub(1)?;
         expression = match expression {
@@ -2782,7 +2850,18 @@ fn statement_callee(
                 member.object().ok()?
             }
             AnyJsExpression::JsIdentifierExpression(identifier) => {
-                break explicit_name(&identifier, !steps.is_empty(), model)?;
+                let root = explicit_name(&identifier, !steps.is_empty(), model)?;
+                // A name that no scope declares is a global, which the lib or
+                // a declaration file declares with annotations.
+                annotated = steps.is_empty()
+                    && identifier
+                        .name()
+                        .ok()
+                        .and_then(|name| model.binding(&name))
+                        .is_none_or(|binding| {
+                            declaration_return(&binding) == CalleeReturn::Annotated
+                        });
+                break root;
             }
             AnyJsExpression::JsThisExpression(this) => {
                 if !explicit_this(&this) {
@@ -2794,7 +2873,44 @@ fn statement_callee(
         };
     };
     steps.reverse();
-    Some((root, steps.into_boxed_slice()))
+    Some((root, steps.into_boxed_slice(), annotated))
+}
+
+/// Returns whether `expression`, an argument of an assertion, is always
+/// false, as TypeScript's `isFalseExpression` reads it: the literal `false`,
+/// `a && b` when either operand is, and `a || b` when both are, through
+/// parentheses. An `asserts value` signature never returns for such an
+/// argument. Returns false when the walk runs out of work.
+pub(super) fn is_false_expression(expression: &AnyJsExpression, remaining: &mut usize) -> bool {
+    let Some(left) = remaining.checked_sub(1) else {
+        return false;
+    };
+    *remaining = left;
+    match expression {
+        AnyJsExpression::JsParenthesizedExpression(parenthesized) => parenthesized
+            .expression()
+            .is_ok_and(|inner| is_false_expression(&inner, remaining)),
+        AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
+        ) => literal
+            .value_token()
+            .is_ok_and(|token| token.kind() == T![false]),
+        AnyJsExpression::JsLogicalExpression(logical) => {
+            let (Ok(left), Ok(right)) = (logical.left(), logical.right()) else {
+                return false;
+            };
+            match logical.operator() {
+                Ok(JsLogicalOperator::LogicalAnd) => {
+                    is_false_expression(&left, remaining) || is_false_expression(&right, remaining)
+                }
+                Ok(JsLogicalOperator::LogicalOr) => {
+                    is_false_expression(&left, remaining) && is_false_expression(&right, remaining)
+                }
+                Ok(JsLogicalOperator::NullishCoalescing) | Err(_) => false,
+            }
+        }
+        _ => false,
+    }
 }
 
 /// Returns how the reading context confirms that the variable that

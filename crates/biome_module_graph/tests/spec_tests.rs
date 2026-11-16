@@ -108,6 +108,8 @@ mod promises;
 mod property_narrowing;
 #[path = "spec_tests/queries.test.rs"]
 mod queries;
+#[path = "spec_tests/reachability.test.rs"]
+mod reachability;
 #[path = "spec_tests/requests.test.rs"]
 mod requests;
 #[path = "spec_tests/substitutions.test.rs"]
