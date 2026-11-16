@@ -59,7 +59,7 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[InferredTypeData<'static>]
 }
 
 // Testing a `const` also tests the condition that initializes it. TypeScript
-// 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// 7.0.2 (`tsc --strict`) gives every read below the expected type.
 #[test]
 fn aliased_conditions_narrow_like_their_initializers() {
     use InferredTypeData::{Null, Number, String};
@@ -110,7 +110,7 @@ fn aliased_conditions_narrow_like_their_initializers() {
 }
 
 // The inlined `x?.y` shows that `x` is not nullish, as `if (x?.y)` does.
-// TypeScript 6.0.3 (`tsc --strict`) gives `x` the type `{ y: string }`.
+// TypeScript 7.0.2 (`tsc --strict`) gives `x` the type `{ y: string }`.
 #[test]
 fn aliased_conditions_narrow_optional_chain_receivers() {
     const SOURCE: &str = r#"
@@ -126,7 +126,7 @@ fn aliased_conditions_narrow_optional_chain_receivers() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below the expected type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 #[test]
 fn aliases_combine_with_negation_logical_operators_and_loops() {
     use InferredTypeData::{Null, String};
@@ -160,7 +160,7 @@ fn aliases_combine_with_negation_logical_operators_and_loops() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) inlines five aliases into one another, not
+// TypeScript 7.0.2 (`tsc --strict`) inlines five aliases into one another, not
 // six. It narrows `x` at `five`, but at `six` it tests only the truthiness of
 // `c1`, so `x` keeps `string | null` there.
 #[test]
@@ -179,7 +179,7 @@ fn aliases_inline_up_to_five_levels() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) applies the inlined condition to the type
+// TypeScript 7.0.2 (`tsc --strict`) applies the inlined condition to the type
 // that the subject has at the test, wherever the alias is declared. A branch
 // that the alias rules out is impossible. TypeScript gives `never` there, and
 // Biome gives Unknown.
@@ -214,7 +214,7 @@ fn aliases_apply_their_initializer_where_they_are_tested() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below `string | null`,
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below `string | null`,
 // except where a comment says otherwise. TypeScript inlines only an
 // unannotated `const` that binds an identifier to an initializer, and only
 // when the `const` is tested for truthiness.
@@ -247,7 +247,7 @@ fn other_declarations_are_not_aliases() {
 }
 
 // An inlined condition narrows only a variable that cannot change between the
-// alias and its test. TypeScript 6.0.3 (`tsc --strict`) gives every read below
+// alias and its test. TypeScript 7.0.2 (`tsc --strict`) gives every read below
 // `string | null`, except where a comment says otherwise.
 #[test]
 fn inlined_conditions_narrow_only_variables_that_cannot_change() {
@@ -290,7 +290,7 @@ fn inlined_conditions_narrow_only_variables_that_cannot_change() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below `string`, in a
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below `string`, in a
 // script and in a module, because none of these variables is a top-level `let`
 // of a script.
 #[test]
@@ -315,7 +315,7 @@ fn inlined_conditions_narrow_module_constants_and_nested_lets() {
     );
 }
 
-// TypeScript 6.0.3 (`tsc --strict`) gives every read below `string`. Biome
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below `string`. Biome
 // keeps `string | null` where the read is in a closure and its variable is
 // declared outside it, because no fact enters a nested function.
 #[test]
