@@ -1535,7 +1535,7 @@ fn destructured_elements_that_do_not_narrow_each_other() {
 
 // TypeScript 7.0.2 (`tsc --strict`) gives `number` at every read below.
 // Biome keeps the declared type: loose `==` with a literal doesn't narrow an
-// object yet, an element under a default of an enclosing pattern never
+// object, an element under a default of an enclosing pattern never
 // narrows because its declared type ignores the default, and a read in a
 // closure never sees the test. Biome also gives an element destructured from
 // `s!`, a parameter destructured in a function that a variable annotation

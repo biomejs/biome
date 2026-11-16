@@ -1363,13 +1363,14 @@ impl RootBuilder<'_, '_> {
         let flow = self.evaluate(expression.syntax(), current, 0)?;
         let header = self.push(FlowNode::Join(vec![flow]))?;
         let mut flow = match statement.initializer().map_err(|_| Unsupported)? {
-            // Each iteration assigns the variables of a declaration, after the
-            // defaults of its pattern, with no write point. The header joins
-            // the entry, where the variables have their declared types because
-            // no test or write before the loop can mention them. So the facts
-            // that the end of the body carries back from an earlier iteration
-            // never make a read narrower than the declared type, which is also
-            // the type of the value that each iteration assigns.
+            // Each iteration assigns the variables of a declaration after the
+            // defaults of its pattern, but the graph has no write point for
+            // them. None is needed because the header also joins the entry,
+            // where the variables and their paths have their declared types.
+            // Facts on the back edge from an earlier iteration therefore
+            // cannot narrow a read below its declared type. A `let`, `const`,
+            // or `using` declaration is scoped to the loop, so no test before
+            // the loop can mention its variables. Biome never narrows a `var`.
             AnyJsForInOrOfInitializer::JsForVariableDeclaration(declaration) => {
                 self.declaration(&declaration.into(), header, 0)?
             }
