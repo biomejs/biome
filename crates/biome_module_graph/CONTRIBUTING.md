@@ -125,7 +125,10 @@ predicate, so asserting `boolean` does not prove that the value is `true`.
 The assertion call must be non-optional and form the whole expression statement;
 parentheses around it are allowed. Calls inside assignments, logical or
 conditional expressions, return values, or other expressions do not add facts.
-The assertion function follows the same restrictions as a type guard. Calling a
+The assertion function follows the same restrictions as a type guard and must be
+declared with `function`. TypeScript reports TS2775 and does not narrow when the
+callee is a variable without a type annotation, so an assertion through an arrow
+or function expression that initializes a variable adds no facts. Calling a
 type guard without testing its result does not add facts. The visitor selects a
 function whose only flow construct is a standalone call only when the module
 contains an `asserts` annotation.
