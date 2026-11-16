@@ -391,31 +391,7 @@ impl GreenNode {
         I: IntoIterator<Item = Option<GreenElement>>,
         I::IntoIter: ExactSizeIterator,
     {
-        let mut text_len: TextSize = 0.into();
-        let mut flags = GreenElementFlags::default();
-        let slots = slots.into_iter().map(|el| {
-            let rel_offset = text_len;
-            match el {
-                Some(el) => {
-                    text_len += el.text_len();
-                    match &el {
-                        NodeOrToken::Node(node) => {
-                            flags.insert(node.flags());
-                        }
-                        NodeOrToken::Token(token) => {
-                            flags.insert(token.flags());
-                        }
-                    }
-                    match el {
-                        NodeOrToken::Node(node) => Slot::Node { rel_offset, node },
-                        NodeOrToken::Token(token) => Slot::Token { rel_offset, token },
-                    }
-                }
-                None => Slot::Empty { rel_offset },
-            }
-        });
-
-        let data = ThinArc::from_header_and_iter(
+        let data = ThinArc::from_header_and_iter_with(
             GreenNodeHead {
                 kind,
                 flags: GreenElementFlags::default(),
@@ -423,19 +399,24 @@ impl GreenNode {
                 #[cfg(feature = "countme")]
                 _c: countme::Count::new(),
             },
-            slots,
+            slots.into_iter(),
+            |head, el| {
+                let rel_offset = head.text_len;
+                match el {
+                    Some(NodeOrToken::Node(node)) => {
+                        head.text_len += node.text_len();
+                        head.flags.insert(node.flags());
+                        Slot::Node { rel_offset, node }
+                    }
+                    Some(NodeOrToken::Token(token)) => {
+                        head.text_len += token.text_len();
+                        head.flags.insert(token.flags());
+                        Slot::Token { rel_offset, token }
+                    }
+                    None => Slot::Empty { rel_offset },
+                }
+            },
         );
-
-        // XXX: fix up aggregate data after construction, because we can't
-        // iterate `slots` twice.
-        let data = {
-            let mut data = Arc::from_thin(data);
-            debug_assert!(data.is_unique());
-            let head = &mut Arc::get_mut(&mut data).unwrap().header;
-            head.text_len = text_len;
-            head.flags = flags;
-            Arc::into_thin(data)
-        };
 
         Self { ptr: data }
     }
@@ -649,6 +630,8 @@ impl FusedIterator for Children<'_> {}
 
 #[cfg(test)]
 mod tests {
+    use crate::TextSize;
+    use crate::green::node::Slot;
     use crate::green::{GreenElement, GreenTrivia};
     use crate::raw_language::{RawLanguageKind, RawSyntaxTreeBuilder};
     use crate::{GreenNode, GreenToken, RawSyntaxKind, TextRange, TriviaPiece, TriviaPieceKind};
@@ -772,6 +755,36 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn slot_offsets_and_text_len() {
+        let token = |text: &str| GreenElement::Token(GreenToken::new_raw(RawSyntaxKind(1), text));
+        let node = GreenNode::new(
+            RawSyntaxKind(0),
+            [
+                Some(token("ab")),
+                None,
+                Some(GreenElement::Node(GreenNode::new(
+                    RawSyntaxKind(2),
+                    [Some(token("c"))],
+                ))),
+                Some(token("")),
+                Some(token("def")),
+            ],
+        );
+
+        assert_eq!(node.kind(), RawSyntaxKind(0));
+        assert_eq!(node.text_len(), TextSize::from(6));
+        assert_eq!(
+            node.slots().map(Slot::rel_offset).collect::<Vec<_>>(),
+            [0, 2, 2, 3, 3].map(TextSize::from)
+        );
+        assert!(matches!(node.slice()[1], Slot::Empty { .. }));
+        assert!(matches!(node.slice()[2], Slot::Node { .. }));
+        let mut text = String::new();
+        node.write_source_text(&mut text);
+        assert_eq!(text, "abcdef");
     }
 
     #[test]
