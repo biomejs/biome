@@ -297,7 +297,7 @@ fn logical_assignments_test_their_target_before_their_right_operand() {
 
 // TypeScript 7.0.2 (`tsc --strict`) gives the narrower type in the comment for
 // each read below. A logical assignment writes its target, and a variable or a
-// property path that its execution root writes doesn't narrow yet. So the
+// property path that its execution root writes doesn't narrow. So the
 // target keeps its declared type in the right operand, which is wider than
 // TypeScript's type.
 #[test]
