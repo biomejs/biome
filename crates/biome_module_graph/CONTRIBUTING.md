@@ -51,122 +51,103 @@ read. For example, after `if (value === null) return`, a variable typed
 `string | null` can be read as `string`. The type stored for the variable's
 declaration does not change.
 
-An execution root is a body analyzed independently, such as a module, function,
-or method. Narrowing applies to `let`/`const` variables and parameters declared
-in the same execution root as the read, provided they are never reassigned.
-Reads inside a nested function do not inherit facts from the outer function.
-Biome uses its semantic model to distinguish variables with the same name.
+[`NARROWING.md`](./NARROWING.md) is the reference for what narrowing does: its
+correctness contract, which runtime tests narrow and which do not yet, its
+limits, and where Biome deliberately differs from TypeScript. A change to
+narrowing updates the rows it affects there. This section describes how
+narrowing is built.
 
-`src/db/type_inference/flow.rs` applies `typeof`, literal equality, nullish, and
-truthiness tests, and the tests that calls to local type guards report or
-assert. Where branches meet, or a loop returns to an earlier point,
-it keeps every type still possible on a reachable path. `flow_expressions.rs`
-uses narrowed operands when inferring member accesses, calls, logical and
-conditional expressions, and `await`. Complete module inference uses the same
-read-specific results as individual expression queries.
+An execution root is a body analyzed independently, such as a module,
+function, or method. Each root gets its own graph, and a read never sees facts
+from an enclosing root. Biome uses its semantic model to distinguish variables
+with the same name.
 
 Flow is split like types: collection gathers syntax-only facts, and tracked
-queries do everything that needs a resolved type. When type inference is
-enabled, collection (`src/js_module_info/flow.rs`) builds a graph of the
-possible paths through each execution root that tests one of its own
-variables. The module visitor selects the roots that contain a condition and
-only supported syntax during its own syntax walk, so collection never walks the
-whole module again. In a module with an `asserts` annotation, a standalone call
-also selects its root. A module without either builds no graph.
-Declaration files (`.d.ts`, `.d.mts`, `.d.cts`, in any letter case) contain no
-code that runs, so the visitor does not look for flow roots in them. Collection
-decomposes every condition into guards on semantic bindings. For
-example, `typeof value === "string"` can narrow `value`; `value.length` and a
-call to an imported `check(value)` cannot. Collection then records which reads a test of their
-variable can reach, and those reads plus the enclosing expressions that can use
-a narrowed operand become candidates. A test inside a nested function never
-reaches reads in the enclosing one, and an array or object literal ends the
-chain of enclosing candidates.
+queries do everything that needs a resolved type.
+
+#### Collection
+
+When type inference is enabled, collection (`src/js_module_info/flow.rs`)
+builds a graph of the possible paths through each execution root that tests
+one of its own variables. Its parts live in `src/js_module_info/flow/`:
+
+- `scanner.rs` selects roots while the module visitor walks the syntax tree,
+  so collection never walks the whole module again. A root is selected when
+  its own code contains a condition or, in a module with an `asserts`
+  annotation, a standalone call. The scanner rejects a root whose own syntax
+  the builder does not support, a root over its node or depth limit, and a
+  root that may read the global `eval` or the implicit `arguments` object,
+  directly or in a nested function, because a direct `eval` and a mapped
+  `arguments` object can write any enclosing variable. The rustdoc of
+  `is_dynamic_scope_reference` states which references count. Declaration
+  files (`.d.ts`, `.d.mts`, `.d.cts`, in any letter case) contain no code that
+  runs, so the visitor does not look for roots in them.
+- `builder.rs` builds the graph of one selected root from start, join, and
+  condition nodes. It records the incoming flow point of every reachable read
+  and, for each condition node, the variables its guard may narrow.
+- `guards.rs` decomposes every condition into guards on semantic bindings,
+  combined the way `!`, `&&`, and `||` combine them. For example,
+  `typeof value === "string"` becomes a runtime test of `value`. A call to a
+  local type-guard function becomes a runtime test of its argument: collection
+  selects the tested argument from the function's collected signature, and
+  inference later resolves only the target of its type predicate. Neither step
+  infers the function's body. For a standalone call to an assertion function,
+  the builder adds a condition node after the call, so the call and its
+  arguments still use the types from before it. `asserts value is T` becomes a
+  runtime test of the argument, as `value is T` does, while `asserts value`
+  decomposes the argument as a condition that holds, so
+  `assert(value !== null)` excludes `null` from `value`. When some root of the
+  module may read `eval` or `arguments`, no function counts as a type-guard
+  function, because a direct `eval` can reassign it.
+
+Collection then keeps only the reads that a runtime test of their variable can
+reach, and only for variables that can narrow: declared in the root, never
+written, and neither untyped nor annotated `any`. Those reads, plus the
+enclosing expressions that can use a narrowed operand, become candidates. A
+test inside a nested function never reaches reads in the enclosing one, and an
+array or object literal ends the chain of enclosing candidates. A root that
+declares no variable that can narrow gets no graph. Other variable types are
+resolved only when a candidate read is queried, because resolving them can be
+costly.
+
+#### Tracked solve
 
 Lookups skip flow for any expression that is not a candidate. For a candidate
-read, `infer_flow_binding_baseline` resolves the variable's type once.
+read, `infer_flow_binding_baseline` resolves the variable's declared type once.
 `infer_flow_binding_states` then applies the guards on every path to all reads
 of the variable in one root in a single solve, and `infer_flow_binding_type`
-takes the result at the read's incoming flow point. When that shared solve
-exceeds its work limit or meets a query cycle, `infer_flow_binding_type` solves
-the read's point on its own, so a read never loses precision because other
-reads share its root. If decomposing a condition cannot finish within its work
-limit, the guard makes the result unknown rather than assuming the expression is
-unaffected. The variable's ordinary type stays separate from the result at each
-read.
+takes the result at the read's incoming flow point.
 
-A call to a local type guard can also narrow a variable. A type guard returns a
-type predicate on one of its parameters, such as `value is string`. The guard is
-a function declaration, or an arrow or function expression that initializes a
-variable. It is declared in the same module, nothing reassigns it, and it has
-one signature that is not generic, async, or a generator. Collection selects
-the tested argument from the guard's collected signature. Inference resolves
-only the predicate's target, which must be a primitive type or a primitive
-literal, directly, through type aliases, or through a `typeof` query of a value.
-Neither step infers the guard's body.
+`src/db/type_inference/flow.rs` applies each runtime test with `narrow_type`
+from `biome_js_type_info`. Where branches meet, or a loop returns to an earlier
+point, it keeps every type still possible on a reachable path. A read on a path
+that no value can take gets type Unknown, not `never`. `flow_expressions.rs`
+uses narrowed operands when inferring member accesses, calls, logical and
+conditional expressions, `await`, the comma operator, and `+`. Complete module
+inference uses the same read-specific results as individual expression queries.
 
-Only identifier arguments can be narrowed by these guards. Imported or aliased
-guards, default-exported functions, `var` declarations, variables with a type
-annotation, methods, optional calls, and calls with type arguments are
-unsupported. A direct `eval` can reassign any guard, so a module that reads
-`eval` or the implicit `arguments` object in any function has no guards.
-So are spread arguments before or at the tested one, and predicates on `this`.
-The tested parameter must be named, must not be a rest parameter, and must not
-have a default value, because a default replaces an `undefined` argument.
-
-A standalone call to a local assertion function narrows later reads, because
-the call returns only when its assertion holds. Collection adds a condition
-after the call, so the call and its arguments still use the types from before
-it. `asserts value is T` narrows an identifier argument like a type guard's
-predicate, so asserting `boolean` does not prove that the value is `true`.
-`asserts value` decomposes the argument as a condition that holds, so
-`assert(value !== null)` excludes `null` from `value`.
-
-The assertion call must be non-optional and form the whole expression statement;
-parentheses around it are allowed. Calls inside assignments, logical or
-conditional expressions, return values, or other expressions do not add facts.
-The assertion function follows the same restrictions as a type guard and must be
-declared with `function`. TypeScript reports TS2775 and does not narrow when the
-callee is a variable without a type annotation, so an assertion through an arrow
-or function expression that initializes a variable adds no facts. Calling a
-type guard without testing its result does not add facts. The visitor selects a
-function whose only flow construct is a standalone call only when the module
-contains an `asserts` annotation.
-
-An object shape such as `{}` can also describe `0` or `""`. Removing `null`
-therefore does not prove that the value is truthy. A `void` return annotation
-does not guarantee runtime `undefined` either. These cases must retain
-uncertainty.
-
-Narrowing does not support `var`, imported variables, facts about individual
-object properties, or the effects of calls that never return. Unsupported control flow
-includes exception handlers, `switch`, `for-in`/`for-of`, destructuring, classes,
-and logical assignments. Roots that read the global `eval` or the implicit
-`arguments` object, directly or in a nested function, and roots that exceed a
-work limit while their flow is collected, also keep ordinary inference.
-References inside types never run, so the scanner ignores them. Every other
-reference to `eval` counts, because calling a variable named `eval` that holds
-the global function is still a direct `eval`. A reference to `arguments` is an
-ordinary read only when the semantic model resolves it to a parameter, catch
-parameter, `let`, or `const` declared inside the function that owns the
-`arguments` object, or anywhere when no enclosing function has one, such as at
-the top level of a script. Variables typed
-`any`, or whose type includes an undetermined part, never narrow because no
-supported test can change them. Collection already drops reads of untyped and
-`any`-annotated variables, and builds no graph for a root that declares none
-of the variables that can narrow; other variable types are resolved only when a
-candidate read is queried, because resolving them can be costly. If solving a
-read's flow point on its own exhausts its work limit or a query cycle occurs,
-the result is unknown.
-Callers must respect that result rather than replace it with a more confident
-answer from raw type information.
+#### Caching
 
 Collected flow belongs to the module input, so an edit replaces it together
 with the raw type tables, even when variable declarations and references stay
-the same. Salsa caches the type work: all reads of a variable share the type that
-narrowing starts from, its reads in one root share one narrowing calculation,
-and reads at the same flow point share their result. These caches recompute when the module input changes; they
-do not track edits separately for each function.
+the same. Salsa caches the type work: all reads of a variable share the type
+that narrowing starts from, its reads in one root share one narrowing
+calculation, and reads at the same flow point share their result. These caches
+recompute when the module input changes; they do not track edits separately
+for each function.
+
+#### Work limits
+
+Collection, condition decomposition, and the solve each have work limits. A
+root that exceeds a limit while its flow is collected gets no graph, so its
+reads keep their declared types. If decomposing a condition cannot finish
+within its work limit, the guard makes the result unknown rather than assuming
+the expression is unaffected. When the shared solve exceeds its work limit or
+meets a query cycle, `infer_flow_binding_type` solves the read's point on its
+own, so a read never loses precision because other reads share its root. If
+that solve also exhausts its work limit or a query cycle occurs, the result is
+unknown. Callers must respect that result rather than replace it with a more
+confident answer from raw type information.
 
 ### Analyzer-facing requests
 
