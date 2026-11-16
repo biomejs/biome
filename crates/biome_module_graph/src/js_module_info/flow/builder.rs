@@ -814,10 +814,13 @@ impl RootBuilder<'_, '_> {
         // Each iteration assigns the loop variable here, after the defaults
         // of its pattern, but the graph has no write point for it. None is
         // needed because the header also joins the entry, where the variable
-        // and its paths have their declared types, since no test before the
-        // loop can mention them. So the facts that the end of the body
-        // carries back from an earlier iteration never make a read narrower
-        // than its declared type.
+        // and its paths have their declared types. Facts on the back edge from
+        // an earlier iteration therefore cannot narrow a read below its
+        // declared type. Biome narrows a loop variable only when the head
+        // declares it with `let`, `const`, or `using`. Those declarations are
+        // scoped to the loop, so no test before the loop can mention the
+        // variable. Biome never narrows a `var` or an externally declared
+        // variable that the loop writes, such as `k` in `for (k of xs)`.
         if statement.assumes_non_nullish() {
             let condition = decompose_for_in(
                 &expression,
