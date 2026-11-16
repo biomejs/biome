@@ -27,7 +27,30 @@ const r6 = litNum || 2;
 const r7 = litBool || false;
 const r8 = litBig || 3n;
 
-// Object union: reported without a fix
+// Object union: reported
 declare const obj: { x: string } | null;
 declare const fallbackObj: { x: string };
 const r9 = obj || fallbackObj;
+
+// `any` and `unknown`: not reported
+declare const anyValue: any;
+declare const unknownValue: unknown;
+const r10 = anyValue || fallbackS;
+const r11 = unknownValue || fallbackS;
+
+// Truthiness ternary and `if` on a primitive: not reported
+const r12 = s ? s : fallbackS;
+declare let assignedInIf: string | null;
+if (!assignedInIf) {
+	assignedInIf = fallbackS;
+}
+
+// Comparisons with `null`: reported
+const r13 = s != null ? s : fallbackS;
+if (assignedInIf == null) {
+	assignedInIf = fallbackS;
+}
+
+// `||=` on `any`: not reported
+declare let anyAssigned: any;
+anyAssigned ||= 1;

@@ -8,27 +8,28 @@ use std::str::FromStr;
 
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsArrowFunctionParameters,
-    AnyJsAssignmentPattern, AnyJsBinding, AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMember,
-    AnyJsClassMemberName, AnyJsConstructorParameter, AnyJsDeclaration, AnyJsDeclarationClause,
-    AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter, AnyJsFunction,
-    AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember,
-    AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyJsTemplateElement,
-    AnyTsModuleName, AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
-    AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern, JsArrayExpression,
-    JsArrowFunctionExpression, JsAssignmentExpression, JsBinaryExpression, JsBinaryOperator,
-    JsCallArgumentList, JsCallArguments, JsCallExpression, JsClassDeclaration,
-    JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList, JsConstructorParameters,
-    JsExtendsClause, JsForInStatement, JsForOfStatement, JsForVariableDeclaration,
-    JsFormalParameter, JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression,
-    JsGetterObjectMember, JsInitializerClause, JsLogicalExpression, JsLogicalOperator,
-    JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern, JsObjectExpression,
-    JsParameterList, JsParameters, JsParenthesizedExpression, JsPropertyClassMember,
-    JsPropertyObjectMember, JsReferenceIdentifier, JsRestParameter, JsReturnStatement,
-    JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsTemplateExpression,
-    JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration, JsVariableDeclarator,
-    TsConditionalType, TsDeclareFunctionDeclaration, TsExternalModuleDeclaration, TsInferType,
-    TsInstantiationExpression, TsInterfaceDeclaration, TsMappedType, TsMethodSignatureTypeMember,
-    TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
+    AnyJsAssignment, AnyJsAssignmentPattern, AnyJsBinding, AnyJsBindingPattern, AnyJsCallArgument,
+    AnyJsClassMember, AnyJsClassMemberName, AnyJsConstructorParameter, AnyJsDeclaration,
+    AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter,
+    AnyJsFunction, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName,
+    AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter,
+    AnyJsTemplateElement, AnyTsModuleName, AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement,
+    AnyTsType, AnyTsTypeMember, AnyTsTypePredicateParameterName, ClassMemberName,
+    JsArrayBindingPattern, JsArrayExpression, JsArrowFunctionExpression, JsAssignmentExpression,
+    JsBinaryExpression, JsBinaryOperator, JsCallArgumentList, JsCallArguments, JsCallExpression,
+    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList,
+    JsConstructorParameters, JsExtendsClause, JsForInStatement, JsForOfStatement,
+    JsForVariableDeclaration, JsFormalParameter, JsFunctionBody, JsFunctionDeclaration,
+    JsFunctionExpression, JsGetterObjectMember, JsInitializerClause, JsLogicalExpression,
+    JsLogicalOperator, JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern,
+    JsObjectExpression, JsParameterList, JsParameters, JsParenthesizedExpression,
+    JsPropertyClassMember, JsPropertyObjectMember, JsReferenceIdentifier, JsRestParameter,
+    JsReturnStatement, JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+    JsTemplateExpression, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
+    JsVariableDeclarator, TsConditionalType, TsDeclareFunctionDeclaration,
+    TsExternalModuleDeclaration, TsInferType, TsInstantiationExpression, TsInterfaceDeclaration,
+    TsMappedType, TsMethodSignatureTypeMember, TsModuleDeclaration,
+    TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
     TsSatisfiesExpression, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
     TsTypeMemberList, TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text,
     unescape_js_string,
@@ -527,51 +528,13 @@ impl TypeData {
             }
             AnyJsExpression::JsComputedMemberExpression(expr) => {
                 match (expr.object(), expr.member()) {
-                    (
-                        Ok(object),
-                        Ok(AnyJsExpression::AnyJsLiteralExpression(
-                            AnyJsLiteralExpression::JsStringLiteralExpression(member),
-                        )),
-                    ) => unescaped_text_from_token(member.value_token()).map_or_default(|member| {
-                        let expression = TypeofStaticMemberExpression {
-                            object: collector.reference_to_resolved_expression(scope_id, &object),
-                            member,
-                        };
-                        Self::from(if expr.is_optional_chain() {
-                            TypeofExpression::OptionalChainStaticMember(expression)
-                        } else {
-                            TypeofExpression::StaticMember(expression)
-                        })
-                    }),
-                    (
-                        Ok(object),
-                        Ok(AnyJsExpression::AnyJsLiteralExpression(
-                            AnyJsLiteralExpression::JsNumberLiteralExpression(member),
-                        )),
-                    ) => unescaped_text_from_token(member.value_token()).map_or_default(|member| {
-                        match member.parse() {
-                            Ok(index) => {
-                                let expression = TypeofIndexExpression {
-                                    object: collector
-                                        .reference_to_resolved_expression(scope_id, &object),
-                                    index,
-                                };
-                                Self::from(if expr.is_optional_chain() {
-                                    TypeofExpression::OptionalChainIndex(expression)
-                                } else {
-                                    TypeofExpression::Index(expression)
-                                })
-                            }
-                            Err(_) => Self::unknown(),
-                        }
-                    }),
-                    (Ok(object), Ok(member)) => Self::from(TypeofExpression::ComputedMember(
-                        TypeofComputedMemberExpression {
-                            object: collector.reference_to_resolved_expression(scope_id, &object),
-                            member: collector.reference_to_resolved_expression(scope_id, &member),
-                            is_optional_chain: expr.is_optional_chain(),
-                        },
-                    )),
+                    (Ok(object), Ok(member)) => Self::from_computed_member(
+                        collector,
+                        scope_id,
+                        &object,
+                        &member,
+                        expr.is_optional_chain(),
+                    ),
                     _ => Self::unknown(),
                 }
             }
@@ -619,15 +582,13 @@ impl TypeData {
             {
                 (Ok(object), Ok(member)) => {
                     text_from_any_js_name(member).map_or_default(|member| {
-                        let expression = TypeofStaticMemberExpression {
-                            object: collector.reference_to_resolved_expression(scope_id, &object),
+                        Self::from_static_member(
+                            collector,
+                            scope_id,
+                            &object,
                             member,
-                        };
-                        Self::from(if expr.is_optional_chain() {
-                            TypeofExpression::OptionalChainStaticMember(expression)
-                        } else {
-                            TypeofExpression::StaticMember(expression)
-                        })
+                            expr.is_optional_chain(),
+                        )
                     })
                 }
                 _ => Self::unknown(),
@@ -649,14 +610,7 @@ impl TypeData {
                 if is_const_reference_type(&annotation) {
                     type_data_from_const_assertion_expression(collector, scope_id, &inner)
                 } else {
-                    let ty = Self::from_any_ts_type(collector, scope_id, &annotation);
-                    if matches!(ty, Self::Object(_) | Self::Tuple(_)) {
-                        // Keep asserted shapes behind a reference so const inference
-                        // does not mistake the annotation for a fresh literal.
-                        Self::Reference(collector.reference_to_owned_data(ty))
-                    } else {
-                        ty
-                    }
+                    Self::from_asserted_type(collector, scope_id, &annotation)
                 }
             }
             AnyJsExpression::TsInstantiationExpression(expr) => {
@@ -673,14 +627,7 @@ impl TypeData {
                 if is_const_reference_type(&annotation) {
                     type_data_from_const_assertion_expression(collector, scope_id, &inner)
                 } else {
-                    let ty = Self::from_any_ts_type(collector, scope_id, &annotation);
-                    if matches!(ty, Self::Object(_) | Self::Tuple(_)) {
-                        // Keep asserted shapes behind a reference so const inference
-                        // does not mistake the annotation for a fresh literal.
-                        Self::Reference(collector.reference_to_owned_data(ty))
-                    } else {
-                        ty
-                    }
+                    Self::from_asserted_type(collector, scope_id, &annotation)
                 }
             }
             AnyJsExpression::JsUnaryExpression(expr) => {
@@ -690,6 +637,129 @@ impl TypeData {
                 // TODO: Much
                 Self::unknown()
             }
+        }
+    }
+
+    /// Returns the type that a compound assignment target holds before the assignment.
+    ///
+    /// A static or computed member target has the type of the equivalent member
+    /// expression, and a `target as T` or `<T>target` target has the asserted type `T`.
+    ///
+    /// Returns `None` for other assignment targets.
+    pub fn from_any_js_assignment_target(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        target: &AnyJsAssignment,
+    ) -> Option<Self> {
+        match target {
+            AnyJsAssignment::JsStaticMemberAssignment(target) => {
+                let member = text_from_any_js_name(target.member().ok()?)?;
+                Some(Self::from_static_member(
+                    collector,
+                    scope_id,
+                    &target.object().ok()?,
+                    member,
+                    false,
+                ))
+            }
+            AnyJsAssignment::JsComputedMemberAssignment(target) => {
+                Some(Self::from_computed_member(
+                    collector,
+                    scope_id,
+                    &target.object().ok()?,
+                    &target.member().ok()?,
+                    false,
+                ))
+            }
+            AnyJsAssignment::TsAsAssignment(target) => Some(Self::from_asserted_type(
+                collector,
+                scope_id,
+                &target.ty().ok()?,
+            )),
+            AnyJsAssignment::TsTypeAssertionAssignment(target) => Some(Self::from_asserted_type(
+                collector,
+                scope_id,
+                &target.ty().ok()?,
+            )),
+            _ => None,
+        }
+    }
+
+    /// Returns the type of an `as T` or `<T>` assertion.
+    fn from_asserted_type(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        annotation: &AnyTsType,
+    ) -> Self {
+        let ty = Self::from_any_ts_type(collector, scope_id, annotation);
+        if matches!(ty, Self::Object(_) | Self::Tuple(_)) {
+            // Keep asserted shapes behind a reference so const inference
+            // does not mistake the annotation for a fresh literal.
+            Self::Reference(collector.reference_to_owned_data(ty))
+        } else {
+            ty
+        }
+    }
+
+    fn from_static_member(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        object: &AnyJsExpression,
+        member: Text,
+        is_optional_chain: bool,
+    ) -> Self {
+        let expression = TypeofStaticMemberExpression {
+            object: collector.reference_to_resolved_expression(scope_id, object),
+            member,
+        };
+        Self::from(if is_optional_chain {
+            TypeofExpression::OptionalChainStaticMember(expression)
+        } else {
+            TypeofExpression::StaticMember(expression)
+        })
+    }
+
+    fn from_computed_member(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        object: &AnyJsExpression,
+        member: &AnyJsExpression,
+        is_optional_chain: bool,
+    ) -> Self {
+        match member {
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsStringLiteralExpression(member),
+            ) => unescaped_text_from_token(member.value_token()).map_or_default(|member| {
+                Self::from_static_member(collector, scope_id, object, member, is_optional_chain)
+            }),
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsNumberLiteralExpression(member),
+            ) => {
+                unescaped_text_from_token(member.value_token()).map_or_default(
+                    |member| match member.parse() {
+                        Ok(index) => {
+                            let expression = TypeofIndexExpression {
+                                object: collector
+                                    .reference_to_resolved_expression(scope_id, object),
+                                index,
+                            };
+                            Self::from(if is_optional_chain {
+                                TypeofExpression::OptionalChainIndex(expression)
+                            } else {
+                                TypeofExpression::Index(expression)
+                            })
+                        }
+                        Err(_) => Self::unknown(),
+                    },
+                )
+            }
+            member => Self::from(TypeofExpression::ComputedMember(
+                TypeofComputedMemberExpression {
+                    object: collector.reference_to_resolved_expression(scope_id, object),
+                    member: collector.reference_to_resolved_expression(scope_id, member),
+                    is_optional_chain,
+                },
+            )),
         }
     }
 

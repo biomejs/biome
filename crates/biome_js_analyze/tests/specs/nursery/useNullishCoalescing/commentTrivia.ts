@@ -70,3 +70,49 @@ if (ifTrivia /* c */ == null) { ifTrivia = 'b'; }
 
 // `if` statement with a comment before the body: no fix
 if (ifTrivia == null) /* c */ { ifTrivia = 'c'; }
+
+// `if` statement with a comment in the test, the body, or the assignment: no fix
+declare let commentedIf: { a: number } | null;
+if /* c */ (!commentedIf) { commentedIf = { a: 1 }; }
+if (!commentedIf) /* c */ { commentedIf = { a: 1 }; }
+if (!commentedIf) { commentedIf = { a: 1 } /* c */; }
+if (!commentedIf) { commentedIf /* c */ = { a: 1 }; }
+
+// Truthiness ternary: comments before the test and before the present branch are kept
+declare const truthy: { a: string } | null;
+const t14 = /* lead */ truthy ? /* present */ truthy : { a: 'd' };
+
+// Truthiness ternary: comments in the dropped parts: no fix
+const t15 = truthy /* c */ ? truthy : { a: 'd' };
+const t16 = truthy ? truthy /* c */ : { a: 'd' };
+
+// Truthiness ternary: line breaks around the present branch
+export function returned(value: { a: string } | null) {
+	return value ?
+		value :
+		{ a: 'default' };
+}
+
+export function returnedInverted(value: { a: string } | null) {
+	return !value ?
+		{ a: 'default' } :
+		value;
+}
+
+export function returnedWithLineComment(value: { a: string } | null) {
+	return value ? // note
+		value : { a: 'default' };
+}
+
+export function thrown(value: Error | null) {
+	throw value ?
+		value :
+		new Error('default');
+}
+
+export function formatted(value: { a: string } | null) {
+	const result = value
+		? value
+		: { a: 'default' };
+	return result;
+}

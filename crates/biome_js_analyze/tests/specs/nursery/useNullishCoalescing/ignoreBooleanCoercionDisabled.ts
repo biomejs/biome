@@ -13,3 +13,7 @@ const r2 = Boolean(a || b || c);
 // `||=` inside `Boolean()`
 declare let assigned: string | null;
 const r3 = Boolean(assigned ||= b);
+
+// Truthiness ternary inside `Boolean()`
+declare const maybeObject: { a: string } | null;
+const r4 = Boolean(maybeObject ? maybeObject : { a: b });

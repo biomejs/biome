@@ -18,3 +18,7 @@ const r1 = s || 'x';
 // `||=`
 declare let b: string | null;
 b ||= 'y';
+
+// Truthiness ternary: reported
+declare const o: { a: number } | null;
+const r2 = o ? o : { a: 1 };

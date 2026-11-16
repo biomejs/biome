@@ -25,6 +25,13 @@ const f = maybeNumber || 0;
 declare const maybeValue: string | null | undefined;
 const g = maybeValue || 'fallback';
 
+// `any` and `unknown`: no fix
+declare const anyValue: any;
+const anyResult = anyValue || 'default';
+
+declare const unknownValue: unknown;
+const unknownResult = unknownValue || 'default';
+
 // Function return
 function getValue(x: string | null): string {
   return x || 'default';
@@ -169,6 +176,88 @@ function withDefault(value: string | undefined) {
 	return value || "default";
 }
 
+// Types that a `0`, `''`, or `false` value can have: no fix
+declare const numberObject: Number | null;
+const primitive1 = numberObject || 1;
+declare const stringObject: String | null;
+const primitive2 = stringObject || 'x';
+declare const objectInstance: Object | null;
+const primitive3 = objectInstance || {};
+declare const emptyObject: {} | null;
+const primitive4 = emptyObject || {};
+declare const withToString: { toString(): string } | null;
+const primitive5 = withToString || { toString: () => '' };
+declare const withLength: { length: number } | null;
+const primitive6 = withLength || { length: 0 };
+interface WithLength {
+	length: number;
+}
+declare const interfaceWithLength: WithLength | null;
+const primitive7 = interfaceWithLength || { length: 0 };
+export function unconstrainedGeneric<T>(value: T | null, fallback: T) {
+	return value || fallback;
+}
+export function emptyObjectGeneric<T extends {} | null>(value: T, fallback: NonNullable<T>) {
+	return value || fallback;
+}
+
+// Types that no `0`, `''`, or `false` value can have: safe fix
+class Box {
+	content = '';
+}
+declare const box: Box | null;
+const object1 = box || new Box();
+declare const strings: string[] | null;
+const object2 = strings || [];
+declare const callback: (() => void) | null;
+const object3 = callback || (() => {});
+declare const named: { a: string } | null;
+const object4 = named || { a: '' };
+interface Named {
+	a: string;
+}
+declare const interfaceNamed: Named | null;
+const object5 = interfaceNamed || { a: '' };
+export function objectGeneric<T extends object>(value: T | null, fallback: T) {
+	return value || fallback;
+}
+
+// An object expression type can be reassigned a falsy primitive that fits it: no fix
+let lengthObject = Math.random() > 0.5 ? { length: 0 } : null;
+const object6 = lengthObject || { length: 1 };
+
+// An object expression type that no falsy primitive fits: safe fix
+let plainObject = Math.random() > 0.5 ? { a: 0 } : null;
+const object7 = plainObject || { a: 1 };
+
+// A branded string and an iterable: no fix
+declare const branded: (string & { __brand: 'id' }) | null;
+const primitive8 = branded || 'x';
+declare const iterable: Iterable<string> | null;
+const primitive9 = iterable || [];
+
+// Inherited members are not read: no fix
+interface Tagged extends String {
+	tag?: string;
+}
+declare const tagged: Tagged | undefined;
+const primitive10 = tagged || 'x';
+
+class Derived extends Box {}
+declare const derived: Derived | null;
+const primitive11 = derived || new Derived();
+
+// A class constructor is always truthy: safe fix
+declare const BoxConstructor: typeof Box | undefined;
+const object8 = BoxConstructor || Box;
+
+// Members that the generated `String` type lacks, such as `padStart`: reported with a fix
+interface Padded {
+	padStart(length: number): string;
+}
+declare const padded: Padded | undefined;
+const object9 = padded || { padStart: (length: number) => '' };
+
 ```
 
 # Diagnostics
@@ -185,8 +274,6 @@ logicalOrInvalid.ts:5:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
     7 │ const c: undefined = undefined;
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -214,8 +301,6 @@ logicalOrInvalid.ts:8:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
     10 │ // Union with null
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -245,8 +330,6 @@ logicalOrInvalid.ts:12:23 lint/nursery/useNullishCoalescing ━━━━━━�
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -266,8 +349,6 @@ logicalOrInvalid.ts:16:23 lint/nursery/useNullishCoalescing ━━━━━━�
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -283,11 +364,9 @@ logicalOrInvalid.ts:20:22 lint/nursery/useNullishCoalescing ━━━━━━�
   > 20 │ const g = maybeValue || 'fallback';
        │                      ^^
     21 │ 
-    22 │ // Function return
+    22 │ // `any` and `unknown`: no fix
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -295,333 +374,18 @@ logicalOrInvalid.ts:20:22 lint/nursery/useNullishCoalescing ━━━━━━�
 ```
 
 ```
-logicalOrInvalid.ts:24:12 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalOrInvalid.ts:24:28 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    22 │ // Function return
-    23 │ function getValue(x: string | null): string {
-  > 24 │   return x || 'default';
-       │            ^^
-    25 │ }
-    26 │ 
-  
-  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-logicalOrInvalid.ts:28:49 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ?? instead of ||.
-  
-    27 │ // Arrow function
-  > 28 │ const getDefault = (x: number | undefined) => x || 42;
-       │                                                 ^^
-    29 │ 
-    30 │ // Inferred callback parameter
-  
-  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-logicalOrInvalid.ts:34:8 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ?? instead of ||.
-  
-    33 │ consume<string | null>((value) => {
-  > 34 │ 	value || "default";
-       │ 	      ^^
-    35 │ });
-    36 │ 
-  
-  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-logicalOrInvalid.ts:39:20 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ?? instead of ||.
-  
-    37 │ // Object property
-    38 │ declare const obj: { prop: string | null };
-  > 39 │ const h = obj.prop || 'default';
-       │                    ^^
-    40 │ 
-    41 │ // Array element
-  
-  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-logicalOrInvalid.ts:43:18 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ?? instead of ||.
-  
-    41 │ // Array element
-    42 │ declare const arr: (number | null)[];
-  > 43 │ const i = arr[0] || 0;
-       │                  ^^
-    44 │ 
-    45 │ // Nested in parentheses
-  
-  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-logicalOrInvalid.ts:47:16 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ?? instead of ||.
-  
-    45 │ // Nested in parentheses
-    46 │ declare const val: string | null;
-  > 47 │ const j = (val || 'default').toUpperCase();
-       │                ^^
-    48 │ 
-    49 │ // Assignment
-  
-  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-logicalOrInvalid.ts:52:17 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ?? instead of ||.
-  
-    50 │ let result: string;
-    51 │ declare const source: string | null;
-  > 52 │ result = source || 'fallback';
-       │                 ^^
-    53 │ 
-    54 │ // Chained `||`
-  
-  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-logicalOrInvalid.ts:57:18 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ?? instead of ||.
-  
-    55 │ declare const x: string | null;
-    56 │ declare const y: string | null;
-  > 57 │ const k = x || y || 'default';
-       │                  ^^
-    58 │ 
-    59 │ // Number union with `null`: no fix
-  
-  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-logicalOrInvalid.ts:57:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ?? instead of ||.
-  
-    55 │ declare const x: string | null;
-    56 │ declare const y: string | null;
-  > 57 │ const k = x || y || 'default';
-       │             ^^
-    58 │ 
-    59 │ // Number union with `null`: no fix
-  
-  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-logicalOrInvalid.ts:61:30 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ?? instead of ||.
-  
-    59 │ // Number union with `null`: no fix
-    60 │ declare const mixedValue: number | null;
-  > 61 │ const unsafeFix = mixedValue || 100;
-       │                              ^^
-    62 │ 
-    63 │ // Optional property in type alias
-  
-  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-logicalOrInvalid.ts:66:44 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ?? instead of ||.
-  
-    64 │ type TypeWithOptional = { a?: string; b: number };
-    65 │ declare const objWithOptional: TypeWithOptional;
-  > 66 │ const optionalFromType = objWithOptional.a || 'default';
-       │                                            ^^
-    67 │ 
-    68 │ // Optional property in interface
-  
-  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-logicalOrInvalid.ts:74:50 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ?? instead of ||.
-  
-    72 │ }
-    73 │ declare const objFromInterface: InterfaceWithOptional;
-  > 74 │ const optionalFromInterface = objFromInterface.a || 'default';
-       │                                                  ^^
-    75 │ 
-    76 │ // Optional property in Pick
-  
-  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-logicalOrInvalid.ts:78:33 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ?? instead of ||.
-  
-    76 │ // Optional property in Pick
-    77 │ declare const pickOptional: Pick<{a?: string, b: number}, "a">;
-  > 78 │ const vPickOpt = pickOptional.a || "default";
-       │                                 ^^
-    79 │ 
-    80 │ // Nullable property in Pick
-  
-  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-logicalOrInvalid.ts:82:34 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ?? instead of ||.
-  
-    80 │ // Nullable property in Pick
-    81 │ declare const pickNullable: Pick<{a: string | null}, "a">;
-  > 82 │ const vPickNull = pickNullable.a || "default";
-       │                                  ^^
-    83 │ 
-    84 │ // Nullable property in Omit
-  
-  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-logicalOrInvalid.ts:86:34 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ?? instead of ||.
-  
-    84 │ // Nullable property in Omit
-    85 │ declare const omitNullable: Omit<{x: number, y: string | null}, "x">;
-  > 86 │ const vOmitNull = omitNullable.y || "default";
-       │                                  ^^
-    87 │ 
-    88 │ // Nested nullable object in Pick
-  
-  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-logicalOrInvalid.ts:90:28 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ?? instead of ||.
-  
-    88 │ // Nested nullable object in Pick
-    89 │ declare const nestPick: Pick<{cfg: {name: string} | null}, "cfg">;
-  > 90 │ const nestV = nestPick.cfg || {name: "d"};
+    22 │ // `any` and `unknown`: no fix
+    23 │ declare const anyValue: any;
+  > 24 │ const anyResult = anyValue || 'default';
        │                            ^^
-    91 │ 
-    92 │ // Optional property in Omit
+    25 │ 
+    26 │ declare const unknownValue: unknown;
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -629,20 +393,17 @@ logicalOrInvalid.ts:90:28 lint/nursery/useNullishCoalescing ━━━━━━�
 ```
 
 ```
-logicalOrInvalid.ts:94:25 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalOrInvalid.ts:27:36 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    92 │ // Optional property in Omit
-    93 │ declare const omitOpt: Omit<{a: string, b?: number}, "a">;
-  > 94 │ const omitV = omitOpt.b || 0;
-       │                         ^^
-    95 │ 
-    96 │ // Partial type
+    26 │ declare const unknownValue: unknown;
+  > 27 │ const unknownResult = unknownValue || 'default';
+       │                                    ^^
+    28 │ 
+    29 │ // Function return
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -650,20 +411,348 @@ logicalOrInvalid.ts:94:25 lint/nursery/useNullishCoalescing ━━━━━━�
 ```
 
 ```
-logicalOrInvalid.ts:98:35 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalOrInvalid.ts:31:12 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-     96 │ // Partial type
-     97 │ declare const partialObj: Partial<{name: string}>;
-   > 98 │ const partialOr = partialObj.name || 'default';
+    29 │ // Function return
+    30 │ function getValue(x: string | null): string {
+  > 31 │   return x || 'default';
+       │            ^^
+    32 │ }
+    33 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:35:49 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    34 │ // Arrow function
+  > 35 │ const getDefault = (x: number | undefined) => x || 42;
+       │                                                 ^^
+    36 │ 
+    37 │ // Inferred callback parameter
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:41:8 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    40 │ consume<string | null>((value) => {
+  > 41 │ 	value || "default";
+       │ 	      ^^
+    42 │ });
+    43 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:46:20 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    44 │ // Object property
+    45 │ declare const obj: { prop: string | null };
+  > 46 │ const h = obj.prop || 'default';
+       │                    ^^
+    47 │ 
+    48 │ // Array element
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:50:18 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    48 │ // Array element
+    49 │ declare const arr: (number | null)[];
+  > 50 │ const i = arr[0] || 0;
+       │                  ^^
+    51 │ 
+    52 │ // Nested in parentheses
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:54:16 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    52 │ // Nested in parentheses
+    53 │ declare const val: string | null;
+  > 54 │ const j = (val || 'default').toUpperCase();
+       │                ^^
+    55 │ 
+    56 │ // Assignment
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:59:17 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    57 │ let result: string;
+    58 │ declare const source: string | null;
+  > 59 │ result = source || 'fallback';
+       │                 ^^
+    60 │ 
+    61 │ // Chained `||`
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:64:18 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    62 │ declare const x: string | null;
+    63 │ declare const y: string | null;
+  > 64 │ const k = x || y || 'default';
+       │                  ^^
+    65 │ 
+    66 │ // Number union with `null`: no fix
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:64:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    62 │ declare const x: string | null;
+    63 │ declare const y: string | null;
+  > 64 │ const k = x || y || 'default';
+       │             ^^
+    65 │ 
+    66 │ // Number union with `null`: no fix
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:68:30 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    66 │ // Number union with `null`: no fix
+    67 │ declare const mixedValue: number | null;
+  > 68 │ const unsafeFix = mixedValue || 100;
+       │                              ^^
+    69 │ 
+    70 │ // Optional property in type alias
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:73:44 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    71 │ type TypeWithOptional = { a?: string; b: number };
+    72 │ declare const objWithOptional: TypeWithOptional;
+  > 73 │ const optionalFromType = objWithOptional.a || 'default';
+       │                                            ^^
+    74 │ 
+    75 │ // Optional property in interface
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:81:50 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    79 │ }
+    80 │ declare const objFromInterface: InterfaceWithOptional;
+  > 81 │ const optionalFromInterface = objFromInterface.a || 'default';
+       │                                                  ^^
+    82 │ 
+    83 │ // Optional property in Pick
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:85:33 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    83 │ // Optional property in Pick
+    84 │ declare const pickOptional: Pick<{a?: string, b: number}, "a">;
+  > 85 │ const vPickOpt = pickOptional.a || "default";
+       │                                 ^^
+    86 │ 
+    87 │ // Nullable property in Pick
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:89:34 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    87 │ // Nullable property in Pick
+    88 │ declare const pickNullable: Pick<{a: string | null}, "a">;
+  > 89 │ const vPickNull = pickNullable.a || "default";
+       │                                  ^^
+    90 │ 
+    91 │ // Nullable property in Omit
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:93:34 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    91 │ // Nullable property in Omit
+    92 │ declare const omitNullable: Omit<{x: number, y: string | null}, "x">;
+  > 93 │ const vOmitNull = omitNullable.y || "default";
+       │                                  ^^
+    94 │ 
+    95 │ // Nested nullable object in Pick
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:97:28 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    95 │ // Nested nullable object in Pick
+    96 │ declare const nestPick: Pick<{cfg: {name: string} | null}, "cfg">;
+  > 97 │ const nestV = nestPick.cfg || {name: "d"};
+       │                            ^^
+    98 │ 
+    99 │ // Optional property in Omit
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace || with ??.
+  
+     95  95 │   // Nested nullable object in Pick
+     96  96 │   declare const nestPick: Pick<{cfg: {name: string} | null}, "cfg">;
+     97     │ - const·nestV·=·nestPick.cfg·||·{name:·"d"};
+         97 │ + const·nestV·=·nestPick.cfg·??·{name:·"d"};
+     98  98 │   
+     99  99 │   // Optional property in Omit
+  
+
+```
+
+```
+logicalOrInvalid.ts:101:25 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+     99 │ // Optional property in Omit
+    100 │ declare const omitOpt: Omit<{a: string, b?: number}, "a">;
+  > 101 │ const omitV = omitOpt.b || 0;
+        │                         ^^
+    102 │ 
+    103 │ // Partial type
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:105:35 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    103 │ // Partial type
+    104 │ declare const partialObj: Partial<{name: string}>;
+  > 105 │ const partialOr = partialObj.name || 'default';
         │                                   ^^
-     99 │ 
-    100 │ type P = Partial<{a: number}>;
+    106 │ 
+    107 │ type P = Partial<{a: number}>;
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -671,20 +760,18 @@ logicalOrInvalid.ts:98:35 lint/nursery/useNullishCoalescing ━━━━━━�
 ```
 
 ```
-logicalOrInvalid.ts:102:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalOrInvalid.ts:109:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    100 │ type P = Partial<{a: number}>;
-    101 │ declare const p: P;
-  > 102 │ const v = p.a || 0;
+    107 │ type P = Partial<{a: number}>;
+    108 │ declare const p: P;
+  > 109 │ const v = p.a || 0;
         │               ^^
-    103 │ 
-    104 │ // Partial<T> with nullable base member
+    110 │ 
+    111 │ // Partial<T> with nullable base member
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -692,20 +779,18 @@ logicalOrInvalid.ts:102:15 lint/nursery/useNullishCoalescing ━━━━━━�
 ```
 
 ```
-logicalOrInvalid.ts:106:30 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalOrInvalid.ts:113:30 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    104 │ // Partial<T> with nullable base member
-    105 │ declare const partNull: Partial<{a: string | null}>;
-  > 106 │ const vPartNull = partNull.a || "default";
+    111 │ // Partial<T> with nullable base member
+    112 │ declare const partNull: Partial<{a: string | null}>;
+  > 113 │ const vPartNull = partNull.a || "default";
         │                              ^^
-    107 │ 
-    108 │ // Required with nullable optional
+    114 │ 
+    115 │ // Required with nullable optional
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -713,20 +798,18 @@ logicalOrInvalid.ts:106:30 lint/nursery/useNullishCoalescing ━━━━━━�
 ```
 
 ```
-logicalOrInvalid.ts:110:28 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalOrInvalid.ts:117:28 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    108 │ // Required with nullable optional
-    109 │ declare const reqNull: Required<{a?: string | null}>;
-  > 110 │ const vReqNull = reqNull.a || "default";
+    115 │ // Required with nullable optional
+    116 │ declare const reqNull: Required<{a?: string | null}>;
+  > 117 │ const vReqNull = reqNull.a || "default";
         │                            ^^
-    111 │ 
-    112 │ // Readonly with optional property
+    118 │ 
+    119 │ // Readonly with optional property
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -734,20 +817,18 @@ logicalOrInvalid.ts:110:28 lint/nursery/useNullishCoalescing ━━━━━━�
 ```
 
 ```
-logicalOrInvalid.ts:114:24 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalOrInvalid.ts:121:24 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    112 │ // Readonly with optional property
-    113 │ declare const roOpt: Readonly<{a?: string}>;
-  > 114 │ const vRoOpt = roOpt.a || "default";
+    119 │ // Readonly with optional property
+    120 │ declare const roOpt: Readonly<{a?: string}>;
+  > 121 │ const vRoOpt = roOpt.a || "default";
         │                        ^^
-    115 │ 
-    116 │ // `||` on destructured parameters without a default
+    122 │ 
+    123 │ // `||` on destructured parameters without a default
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -755,20 +836,18 @@ logicalOrInvalid.ts:114:24 lint/nursery/useNullishCoalescing ━━━━━━�
 ```
 
 ```
-logicalOrInvalid.ts:133:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalOrInvalid.ts:140:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    131 │ 	inert,
-    132 │ }: GenericProps<T>) {
-  > 133 │ 	return inert || undefined;
+    138 │ 	inert,
+    139 │ }: GenericProps<T>) {
+  > 140 │ 	return inert || undefined;
         │ 	             ^^
-    134 │ }
-    135 │ 
+    141 │ }
+    142 │ 
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -776,19 +855,17 @@ logicalOrInvalid.ts:133:15 lint/nursery/useNullishCoalescing ━━━━━━�
 ```
 
 ```
-logicalOrInvalid.ts:137:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalOrInvalid.ts:144:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    136 │ export function plainWithoutDefault({ inert }: PlainProps) {
-  > 137 │ 	return inert || undefined;
+    143 │ export function plainWithoutDefault({ inert }: PlainProps) {
+  > 144 │ 	return inert || undefined;
         │ 	             ^^
-    138 │ }
-    139 │ 
+    145 │ }
+    146 │ 
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -796,20 +873,18 @@ logicalOrInvalid.ts:137:15 lint/nursery/useNullishCoalescing ━━━━━━�
 ```
 
 ```
-logicalOrInvalid.ts:146:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalOrInvalid.ts:153:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    144 │ 	value?: string | null;
-    145 │ }) {
-  > 146 │ 	return value || undefined;
+    151 │ 	value?: string | null;
+    152 │ }) {
+  > 153 │ 	return value || undefined;
         │ 	             ^^
-    147 │ }
-    148 │ 
+    154 │ }
+    155 │ 
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -817,20 +892,18 @@ logicalOrInvalid.ts:146:15 lint/nursery/useNullishCoalescing ━━━━━━�
 ```
 
 ```
-logicalOrInvalid.ts:152:33 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalOrInvalid.ts:159:33 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    150 │ declare const list: (number | undefined)[];
-    151 │ const [head] = list;
-  > 152 │ export const arrayResult = head || undefined;
+    157 │ declare const list: (number | undefined)[];
+    158 │ const [head] = list;
+  > 159 │ export const arrayResult = head || undefined;
         │                                 ^^
-    153 │ 
-    154 │ // `||` after an assertion function declared without a type annotation, which TypeScript ignores (TS2775)
+    160 │ 
+    161 │ // `||` after an assertion function declared without a type annotation, which TypeScript ignores (TS2775)
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -838,22 +911,536 @@ logicalOrInvalid.ts:152:33 lint/nursery/useNullishCoalescing ━━━━━━�
 ```
 
 ```
-logicalOrInvalid.ts:163:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalOrInvalid.ts:170:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    161 │ function withDefault(value: string | undefined) {
-    162 │ 	assertDefined(value);
-  > 163 │ 	return value || "default";
+    168 │ function withDefault(value: string | undefined) {
+    169 │ 	assertDefined(value);
+  > 170 │ 	return value || "default";
         │ 	             ^^
-    164 │ }
-    165 │ 
+    171 │ }
+    172 │ 
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:175:33 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    173 │ // Types that a `0`, `''`, or `false` value can have: no fix
+    174 │ declare const numberObject: Number | null;
+  > 175 │ const primitive1 = numberObject || 1;
+        │                                 ^^
+    176 │ declare const stringObject: String | null;
+    177 │ const primitive2 = stringObject || 'x';
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:177:33 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    175 │ const primitive1 = numberObject || 1;
+    176 │ declare const stringObject: String | null;
+  > 177 │ const primitive2 = stringObject || 'x';
+        │                                 ^^
+    178 │ declare const objectInstance: Object | null;
+    179 │ const primitive3 = objectInstance || {};
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:179:35 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    177 │ const primitive2 = stringObject || 'x';
+    178 │ declare const objectInstance: Object | null;
+  > 179 │ const primitive3 = objectInstance || {};
+        │                                   ^^
+    180 │ declare const emptyObject: {} | null;
+    181 │ const primitive4 = emptyObject || {};
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:181:32 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    179 │ const primitive3 = objectInstance || {};
+    180 │ declare const emptyObject: {} | null;
+  > 181 │ const primitive4 = emptyObject || {};
+        │                                ^^
+    182 │ declare const withToString: { toString(): string } | null;
+    183 │ const primitive5 = withToString || { toString: () => '' };
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:183:33 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    181 │ const primitive4 = emptyObject || {};
+    182 │ declare const withToString: { toString(): string } | null;
+  > 183 │ const primitive5 = withToString || { toString: () => '' };
+        │                                 ^^
+    184 │ declare const withLength: { length: number } | null;
+    185 │ const primitive6 = withLength || { length: 0 };
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:185:31 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    183 │ const primitive5 = withToString || { toString: () => '' };
+    184 │ declare const withLength: { length: number } | null;
+  > 185 │ const primitive6 = withLength || { length: 0 };
+        │                               ^^
+    186 │ interface WithLength {
+    187 │ 	length: number;
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:190:40 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    188 │ }
+    189 │ declare const interfaceWithLength: WithLength | null;
+  > 190 │ const primitive7 = interfaceWithLength || { length: 0 };
+        │                                        ^^
+    191 │ export function unconstrainedGeneric<T>(value: T | null, fallback: T) {
+    192 │ 	return value || fallback;
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:192:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    190 │ const primitive7 = interfaceWithLength || { length: 0 };
+    191 │ export function unconstrainedGeneric<T>(value: T | null, fallback: T) {
+  > 192 │ 	return value || fallback;
+        │ 	             ^^
+    193 │ }
+    194 │ export function emptyObjectGeneric<T extends {} | null>(value: T, fallback: NonNullable<T>) {
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:195:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    193 │ }
+    194 │ export function emptyObjectGeneric<T extends {} | null>(value: T, fallback: NonNullable<T>) {
+  > 195 │ 	return value || fallback;
+        │ 	             ^^
+    196 │ }
+    197 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:203:21 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    201 │ }
+    202 │ declare const box: Box | null;
+  > 203 │ const object1 = box || new Box();
+        │                     ^^
+    204 │ declare const strings: string[] | null;
+    205 │ const object2 = strings || [];
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace || with ??.
+  
+    201 201 │   }
+    202 202 │   declare const box: Box | null;
+    203     │ - const·object1·=·box·||·new·Box();
+        203 │ + const·object1·=·box·??·new·Box();
+    204 204 │   declare const strings: string[] | null;
+    205 205 │   const object2 = strings || [];
+  
+
+```
+
+```
+logicalOrInvalid.ts:205:25 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    203 │ const object1 = box || new Box();
+    204 │ declare const strings: string[] | null;
+  > 205 │ const object2 = strings || [];
+        │                         ^^
+    206 │ declare const callback: (() => void) | null;
+    207 │ const object3 = callback || (() => {});
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace || with ??.
+  
+    203 203 │   const object1 = box || new Box();
+    204 204 │   declare const strings: string[] | null;
+    205     │ - const·object2·=·strings·||·[];
+        205 │ + const·object2·=·strings·??·[];
+    206 206 │   declare const callback: (() => void) | null;
+    207 207 │   const object3 = callback || (() => {});
+  
+
+```
+
+```
+logicalOrInvalid.ts:207:26 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    205 │ const object2 = strings || [];
+    206 │ declare const callback: (() => void) | null;
+  > 207 │ const object3 = callback || (() => {});
+        │                          ^^
+    208 │ declare const named: { a: string } | null;
+    209 │ const object4 = named || { a: '' };
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace || with ??.
+  
+    205 205 │   const object2 = strings || [];
+    206 206 │   declare const callback: (() => void) | null;
+    207     │ - const·object3·=·callback·||·(()·=>·{});
+        207 │ + const·object3·=·callback·??·(()·=>·{});
+    208 208 │   declare const named: { a: string } | null;
+    209 209 │   const object4 = named || { a: '' };
+  
+
+```
+
+```
+logicalOrInvalid.ts:209:23 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    207 │ const object3 = callback || (() => {});
+    208 │ declare const named: { a: string } | null;
+  > 209 │ const object4 = named || { a: '' };
+        │                       ^^
+    210 │ interface Named {
+    211 │ 	a: string;
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace || with ??.
+  
+    207 207 │   const object3 = callback || (() => {});
+    208 208 │   declare const named: { a: string } | null;
+    209     │ - const·object4·=·named·||·{·a:·''·};
+        209 │ + const·object4·=·named·??·{·a:·''·};
+    210 210 │   interface Named {
+    211 211 │   	a: string;
+  
+
+```
+
+```
+logicalOrInvalid.ts:214:32 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    212 │ }
+    213 │ declare const interfaceNamed: Named | null;
+  > 214 │ const object5 = interfaceNamed || { a: '' };
+        │                                ^^
+    215 │ export function objectGeneric<T extends object>(value: T | null, fallback: T) {
+    216 │ 	return value || fallback;
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace || with ??.
+  
+    212 212 │   }
+    213 213 │   declare const interfaceNamed: Named | null;
+    214     │ - const·object5·=·interfaceNamed·||·{·a:·''·};
+        214 │ + const·object5·=·interfaceNamed·??·{·a:·''·};
+    215 215 │   export function objectGeneric<T extends object>(value: T | null, fallback: T) {
+    216 216 │   	return value || fallback;
+  
+
+```
+
+```
+logicalOrInvalid.ts:216:15 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    214 │ const object5 = interfaceNamed || { a: '' };
+    215 │ export function objectGeneric<T extends object>(value: T | null, fallback: T) {
+  > 216 │ 	return value || fallback;
+        │ 	             ^^
+    217 │ }
+    218 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace || with ??.
+  
+    214 214 │   const object5 = interfaceNamed || { a: '' };
+    215 215 │   export function objectGeneric<T extends object>(value: T | null, fallback: T) {
+    216     │ - → return·value·||·fallback;
+        216 │ + → return·value·??·fallback;
+    217 217 │   }
+    218 218 │   
+  
+
+```
+
+```
+logicalOrInvalid.ts:221:30 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    219 │ // An object expression type can be reassigned a falsy primitive that fits it: no fix
+    220 │ let lengthObject = Math.random() > 0.5 ? { length: 0 } : null;
+  > 221 │ const object6 = lengthObject || { length: 1 };
+        │                              ^^
+    222 │ 
+    223 │ // An object expression type that no falsy primitive fits: safe fix
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:225:29 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    223 │ // An object expression type that no falsy primitive fits: safe fix
+    224 │ let plainObject = Math.random() > 0.5 ? { a: 0 } : null;
+  > 225 │ const object7 = plainObject || { a: 1 };
+        │                             ^^
+    226 │ 
+    227 │ // A branded string and an iterable: no fix
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace || with ??.
+  
+    223 223 │   // An object expression type that no falsy primitive fits: safe fix
+    224 224 │   let plainObject = Math.random() > 0.5 ? { a: 0 } : null;
+    225     │ - const·object7·=·plainObject·||·{·a:·1·};
+        225 │ + const·object7·=·plainObject·??·{·a:·1·};
+    226 226 │   
+    227 227 │   // A branded string and an iterable: no fix
+  
+
+```
+
+```
+logicalOrInvalid.ts:229:28 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    227 │ // A branded string and an iterable: no fix
+    228 │ declare const branded: (string & { __brand: 'id' }) | null;
+  > 229 │ const primitive8 = branded || 'x';
+        │                            ^^
+    230 │ declare const iterable: Iterable<string> | null;
+    231 │ const primitive9 = iterable || [];
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:231:29 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    229 │ const primitive8 = branded || 'x';
+    230 │ declare const iterable: Iterable<string> | null;
+  > 231 │ const primitive9 = iterable || [];
+        │                             ^^
+    232 │ 
+    233 │ // Inherited members are not read: no fix
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:238:28 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    236 │ }
+    237 │ declare const tagged: Tagged | undefined;
+  > 238 │ const primitive10 = tagged || 'x';
+        │                            ^^
+    239 │ 
+    240 │ class Derived extends Box {}
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:242:29 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    240 │ class Derived extends Box {}
+    241 │ declare const derived: Derived | null;
+  > 242 │ const primitive11 = derived || new Derived();
+        │                             ^^
+    243 │ 
+    244 │ // A class constructor is always truthy: safe fix
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrInvalid.ts:246:32 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    244 │ // A class constructor is always truthy: safe fix
+    245 │ declare const BoxConstructor: typeof Box | undefined;
+  > 246 │ const object8 = BoxConstructor || Box;
+        │                                ^^
+    247 │ 
+    248 │ // Members that the generated `String` type lacks, such as `padStart`: reported with a fix
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace || with ??.
+  
+    244 244 │   // A class constructor is always truthy: safe fix
+    245 245 │   declare const BoxConstructor: typeof Box | undefined;
+    246     │ - const·object8·=·BoxConstructor·||·Box;
+        246 │ + const·object8·=·BoxConstructor·??·Box;
+    247 247 │   
+    248 248 │   // Members that the generated `String` type lacks, such as `padStart`: reported with a fix
+  
+
+```
+
+```
+logicalOrInvalid.ts:253:24 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    251 │ }
+    252 │ declare const padded: Padded | undefined;
+  > 253 │ const object9 = padded || { padStart: (length: number) => '' };
+        │                        ^^
+    254 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace || with ??.
+  
+    251 251 │   }
+    252 252 │   declare const padded: Padded | undefined;
+    253     │ - const·object9·=·padded·||·{·padStart:·(length:·number)·=>·''·};
+        253 │ + const·object9·=·padded·??·{·padStart:·(length:·number)·=>·''·};
+    254 254 │   
   
 
 ```

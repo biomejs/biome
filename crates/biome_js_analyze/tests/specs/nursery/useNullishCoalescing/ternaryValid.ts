@@ -100,10 +100,6 @@ declare const w: string | null;
 const m21 = w !== null ? 'default' : w;
 const m22 = w === null ? w : 'default';
 
-// Falsy test
-declare const falsy: string | null;
-const m23 = !falsy ? 'default' : falsy;
-
 // The test and the branch read different parts of the same value
 declare const o3: { a: string } | null;
 declare const o4: { a: { b: string } | null };
@@ -111,10 +107,10 @@ declare const p1: { a: string | null };
 declare const p2: { a: string | null };
 declare const idx: (string | null)[];
 declare let position: number;
-const m24 = o3 != null ? o3.a : 'z';
-const m25 = o4.a != null ? o4.a.b : 'z';
-const m26 = p1.a != null ? p2.a : 'z';
-const m27 = idx[position++] != null ? idx[position++] : 'z';
+const m23 = o3 != null ? o3.a : 'z';
+const m24 = o4.a != null ? o4.a.b : 'z';
+const m25 = p1.a != null ? p2.a : 'z';
+const m26 = idx[position++] != null ? idx[position++] : 'z';
 
 export async function awaited(pr: Promise<string | null>) {
 	return (await pr) != null ? await pr : 'z';
@@ -123,9 +119,9 @@ export async function awaited(pr: Promise<string | null>) {
 // Strict compounds that don't check for a missing value
 declare const s3: string | null | undefined;
 declare const fb: string;
-const m28 = s3 !== null || s3 !== undefined ? s3 : fb;
-const m29 = s3 === null && s3 === undefined ? fb : s3;
-const m30 = s3 !== null && s3 !== undefined && s3 !== 'a' ? s3 : fb;
+const m27 = s3 !== null || s3 !== undefined ? s3 : fb;
+const m28 = s3 === null && s3 === undefined ? fb : s3;
+const m29 = s3 !== null && s3 !== undefined && s3 !== 'a' ? s3 : fb;
 
 // Private name and string key are different properties
 class PrivateNames {
@@ -138,9 +134,16 @@ class PrivateNames {
 
 // `void 0` is not recognized as `undefined`
 declare const voided: string | undefined;
-const m31 = voided !== void 0 ? voided : 'default';
+const m30 = voided !== void 0 ? voided : 'default';
 
 // `undefined` shadowed by a parameter
 export function shadowedUndefined(undefined: string, shadowedValue: string | undefined) {
 	return shadowedValue !== undefined ? shadowedValue : 'default';
 }
+
+// Strict check on `any` or `unknown`
+declare const anyValue: any;
+const m31 = anyValue !== null ? anyValue : 'default';
+
+declare const unknownValue: unknown;
+const m32 = unknownValue === undefined ? 'default' : unknownValue;

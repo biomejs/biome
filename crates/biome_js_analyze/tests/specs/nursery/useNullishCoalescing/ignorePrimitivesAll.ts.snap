@@ -33,16 +33,39 @@ const r6 = litNum || 2;
 const r7 = litBool || false;
 const r8 = litBig || 3n;
 
-// Object union: reported without a fix
+// Object union: reported
 declare const obj: { x: string } | null;
 declare const fallbackObj: { x: string };
 const r9 = obj || fallbackObj;
+
+// `any` and `unknown`: not reported
+declare const anyValue: any;
+declare const unknownValue: unknown;
+const r10 = anyValue || fallbackS;
+const r11 = unknownValue || fallbackS;
+
+// Truthiness ternary and `if` on a primitive: not reported
+const r12 = s ? s : fallbackS;
+declare let assignedInIf: string | null;
+if (!assignedInIf) {
+	assignedInIf = fallbackS;
+}
+
+// Comparisons with `null`: reported
+const r13 = s != null ? s : fallbackS;
+if (assignedInIf == null) {
+	assignedInIf = fallbackS;
+}
+
+// `||=` on `any`: not reported
+declare let anyAssigned: any;
+anyAssigned ||= 1;
 
 ```
 
 # Diagnostics
 ```
-ignorePrimitivesAll.ts:33:16 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignorePrimitivesAll.ts:33:16 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
@@ -51,12 +74,80 @@ ignorePrimitivesAll.ts:33:16 lint/nursery/useNullishCoalescing ━━━━━�
   > 33 │ const r9 = obj || fallbackObj;
        │                ^^
     34 │ 
+    35 │ // `any` and `unknown`: not reported
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace || with ??.
+  
+    31 31 │   declare const obj: { x: string } | null;
+    32 32 │   declare const fallbackObj: { x: string };
+    33    │ - const·r9·=·obj·||·fallbackObj;
+       33 │ + const·r9·=·obj·??·fallbackObj;
+    34 34 │   
+    35 35 │   // `any` and `unknown`: not reported
+  
+
+```
+
+```
+ignorePrimitivesAll.ts:49:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+    48 │ // Comparisons with `null`: reported
+  > 49 │ const r13 = s != null ? s : fallbackS;
+       │             ^^^^^^^^^
+    50 │ if (assignedInIf == null) {
+    51 │ 	assignedInIf = fallbackS;
+  
+  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    47 47 │   
+    48 48 │   // Comparisons with `null`: reported
+    49    │ - const·r13·=·s·!=·null·?·s·:·fallbackS;
+       49 │ + const·r13·=·s·??·fallbackS;
+    50 50 │   if (assignedInIf == null) {
+    51 51 │   	assignedInIf = fallbackS;
+  
+
+```
+
+```
+ignorePrimitivesAll.ts:50:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+    48 │ // Comparisons with `null`: reported
+    49 │ const r13 = s != null ? s : fallbackS;
+  > 50 │ if (assignedInIf == null) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 51 │ 	assignedInIf = fallbackS;
+  > 52 │ }
+       │ ^
+    53 │ 
+    54 │ // `||=` on `any`: not reported
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the if statement with ??=.
+  
+    48 48 │   // Comparisons with `null`: reported
+    49 49 │   const r13 = s != null ? s : fallbackS;
+    50    │ - if·(assignedInIf·==·null)·{
+    51    │ - → assignedInIf·=·fallbackS;
+    52    │ - }
+       50 │ + assignedInIf·??=·fallbackS;
+    53 51 │   
+    54 52 │   // `||=` on `any`: not reported
   
 
 ```

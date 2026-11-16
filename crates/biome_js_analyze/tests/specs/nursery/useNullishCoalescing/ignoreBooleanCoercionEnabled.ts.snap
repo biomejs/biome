@@ -78,6 +78,18 @@ const r20 = Boolean(() => a || b);
 // Comparison ternary inside `Boolean()`
 const r21 = Boolean(a != null ? a : b);
 
+// Truthiness ternary under a logical operator inside `Boolean()`: not reported
+declare const maybeObject: { a: string } | null;
+const r22 = Boolean(flag || (maybeObject ? maybeObject : { a: b }));
+
+// Truthiness ternary passed directly to `Boolean()`: reported
+const r23 = Boolean(maybeObject ? maybeObject : { a: b });
+const r24 = Boolean(!maybeObject ? { a: b } : maybeObject);
+
+// Parentheses and a negation around a truthiness ternary inside `Boolean()`: reported
+const r25 = Boolean((maybeObject ? maybeObject : { a: b }));
+const r26 = Boolean(!(maybeObject ? maybeObject : { a: b }));
+
 ```
 
 # Diagnostics
@@ -93,8 +105,6 @@ ignoreBooleanCoercionEnabled.ts:30:14 lint/nursery/useNullishCoalescing ━━�
     32 │ 
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -115,8 +125,6 @@ ignoreBooleanCoercionEnabled.ts:31:14 lint/nursery/useNullishCoalescing ━━�
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -135,8 +143,6 @@ ignoreBooleanCoercionEnabled.ts:34:13 lint/nursery/useNullishCoalescing ━━�
   
   i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -154,8 +160,6 @@ ignoreBooleanCoercionEnabled.ts:37:23 lint/nursery/useNullishCoalescing ━━�
     39 │ // `Boolean` shadowed by a parameter
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -176,8 +180,6 @@ ignoreBooleanCoercionEnabled.ts:41:19 lint/nursery/useNullishCoalescing ━━�
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -197,8 +199,6 @@ ignoreBooleanCoercionEnabled.ts:47:19 lint/nursery/useNullishCoalescing ━━�
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -216,8 +216,6 @@ ignoreBooleanCoercionEnabled.ts:61:25 lint/nursery/useNullishCoalescing ━━�
     63 │ // Earlier expression of a sequence
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -237,8 +235,6 @@ ignoreBooleanCoercionEnabled.ts:64:24 lint/nursery/useNullishCoalescing ━━�
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -256,8 +252,6 @@ ignoreBooleanCoercionEnabled.ts:67:27 lint/nursery/useNullishCoalescing ━━�
     69 │ const r19 = Boolean(1 + (a || b));
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -278,8 +272,6 @@ ignoreBooleanCoercionEnabled.ts:68:22 lint/nursery/useNullishCoalescing ━━�
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -298,8 +290,6 @@ ignoreBooleanCoercionEnabled.ts:69:28 lint/nursery/useNullishCoalescing ━━�
     71 │ 
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -320,8 +310,6 @@ ignoreBooleanCoercionEnabled.ts:70:29 lint/nursery/useNullishCoalescing ━━�
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -336,10 +324,9 @@ ignoreBooleanCoercionEnabled.ts:73:21 lint/nursery/useNullishCoalescing  FIXABLE
   > 73 │ const r21 = Boolean(a != null ? a : b);
        │                     ^^^^^^^^^
     74 │ 
+    75 │ // Truthiness ternary under a logical operator inside `Boolean()`: not reported
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -350,6 +337,115 @@ ignoreBooleanCoercionEnabled.ts:73:21 lint/nursery/useNullishCoalescing  FIXABLE
     73    │ - const·r21·=·Boolean(a·!=·null·?·a·:·b);
        73 │ + const·r21·=·Boolean(a·??·b);
     74 74 │   
+    75 75 │   // Truthiness ternary under a logical operator inside `Boolean()`: not reported
+  
+
+```
+
+```
+ignoreBooleanCoercionEnabled.ts:80:21 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    79 │ // Truthiness ternary passed directly to `Boolean()`: reported
+  > 80 │ const r23 = Boolean(maybeObject ? maybeObject : { a: b });
+       │                     ^^^^^^^^^^^
+    81 │ const r24 = Boolean(!maybeObject ? { a: b } : maybeObject);
+    82 │ 
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    78 78 │   
+    79 79 │   // Truthiness ternary passed directly to `Boolean()`: reported
+    80    │ - const·r23·=·Boolean(maybeObject·?·maybeObject·:·{·a:·b·});
+       80 │ + const·r23·=·Boolean(maybeObject·??·{·a:·b·});
+    81 81 │   const r24 = Boolean(!maybeObject ? { a: b } : maybeObject);
+    82 82 │   
+  
+
+```
+
+```
+ignoreBooleanCoercionEnabled.ts:81:21 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    79 │ // Truthiness ternary passed directly to `Boolean()`: reported
+    80 │ const r23 = Boolean(maybeObject ? maybeObject : { a: b });
+  > 81 │ const r24 = Boolean(!maybeObject ? { a: b } : maybeObject);
+       │                     ^^^^^^^^^^^^
+    82 │ 
+    83 │ // Parentheses and a negation around a truthiness ternary inside `Boolean()`: reported
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    79 79 │   // Truthiness ternary passed directly to `Boolean()`: reported
+    80 80 │   const r23 = Boolean(maybeObject ? maybeObject : { a: b });
+    81    │ - const·r24·=·Boolean(!maybeObject·?·{·a:·b·}·:·maybeObject);
+       81 │ + const·r24·=·Boolean(maybeObject·??·{·a:·b·});
+    82 82 │   
+    83 83 │   // Parentheses and a negation around a truthiness ternary inside `Boolean()`: reported
+  
+
+```
+
+```
+ignoreBooleanCoercionEnabled.ts:84:22 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    83 │ // Parentheses and a negation around a truthiness ternary inside `Boolean()`: reported
+  > 84 │ const r25 = Boolean((maybeObject ? maybeObject : { a: b }));
+       │                      ^^^^^^^^^^^
+    85 │ const r26 = Boolean(!(maybeObject ? maybeObject : { a: b }));
+    86 │ 
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    82 82 │   
+    83 83 │   // Parentheses and a negation around a truthiness ternary inside `Boolean()`: reported
+    84    │ - const·r25·=·Boolean((maybeObject·?·maybeObject·:·{·a:·b·}));
+       84 │ + const·r25·=·Boolean((maybeObject·??·{·a:·b·}));
+    85 85 │   const r26 = Boolean(!(maybeObject ? maybeObject : { a: b }));
+    86 86 │   
+  
+
+```
+
+```
+ignoreBooleanCoercionEnabled.ts:85:23 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    83 │ // Parentheses and a negation around a truthiness ternary inside `Boolean()`: reported
+    84 │ const r25 = Boolean((maybeObject ? maybeObject : { a: b }));
+  > 85 │ const r26 = Boolean(!(maybeObject ? maybeObject : { a: b }));
+       │                       ^^^^^^^^^^^
+    86 │ 
+  
+  i ?? only uses the fallback when the value is null or undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    83 83 │   // Parentheses and a negation around a truthiness ternary inside `Boolean()`: reported
+    84 84 │   const r25 = Boolean((maybeObject ? maybeObject : { a: b }));
+    85    │ - const·r26·=·Boolean(!(maybeObject·?·maybeObject·:·{·a:·b·}));
+       85 │ + const·r26·=·Boolean(!(maybeObject·??·{·a:·b·}));
+    86 86 │   
   
 
 ```

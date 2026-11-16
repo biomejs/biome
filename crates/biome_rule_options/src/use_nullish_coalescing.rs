@@ -9,11 +9,11 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseNullishCoalescingOptions {
-    /// Ignore `||` and `||=` whose value decides the test of an `if`, `while`, `do-while`, `for`, or ternary expression (default: `true`).
+    /// Ignore `||`, `||=`, and ternary expressions such as `x ? x : y` when their value decides the test of an `if`, `while`, `do-while`, `for`, or ternary expression (default: `true`).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_conditional_tests: Option<bool>,
 
-    /// Ignore ternary expressions that check for `null` or `undefined` (default: `false`).
+    /// Ignore ternary expressions that `??` can replace, such as `x !== null ? x : y` and `x ? x : y` (default: `false`).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_ternary_tests: Option<bool>,
 
@@ -21,15 +21,15 @@ pub struct UseNullishCoalescingOptions {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_mixed_logical_expressions: Option<bool>,
 
-    /// Whether to ignore `||` and `||=` whose value is passed to the global `Boolean()` function (default: `false`).
+    /// Whether to ignore `||`, `||=`, and ternary expressions such as `x ? x : y` when their result is passed to the global `Boolean()` function. A ternary expression that is itself the argument is still reported (default: `false`).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_boolean_coercion: Option<bool>,
 
-    /// Whether to ignore `||` and `||=` operations whose non-nullish operand types are all primitives of the configured kinds. Accepts `true` for every primitive, or an object selecting `string`, `number`, `boolean`, `bigint` (default: none).
+    /// Whether to ignore `||`, `||=`, `x ? x : y`, and `if (!x)` when the type of the checked value includes a primitive of the configured kinds. Accepts `true` for every primitive, or an object that selects `string`, `number`, `boolean`, and `bigint`. A value typed `any` or `unknown` is ignored too when at least one kind is selected. Comparisons with `null` or `undefined` are not affected by this option (default: none).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_primitives: Option<IgnorePrimitives>,
 
-    /// Whether to ignore `if` statements that only assign to a nullish variable and could be rewritten as `??=` (default: `false`).
+    /// Whether to ignore `if` statements that only assign a fallback to a missing value and could be rewritten as `??=` (default: `false`).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_if_statements: Option<bool>,
 }
@@ -55,9 +55,13 @@ impl UseNullishCoalescingOptions {
         self.ignore_if_statements.unwrap_or(false)
     }
 
-    /// Whether any `ignorePrimitives` selection is configured.
-    pub fn has_any_ignore_primitives(&self) -> bool {
-        self.ignore_primitives.is_some()
+    /// Whether `ignorePrimitives` ignores at least one primitive kind.
+    /// `false` and an object whose kinds are all `false` ignore none.
+    pub fn ignores_any_primitive(&self) -> bool {
+        self.should_ignore_primitive_string()
+            || self.should_ignore_primitive_number()
+            || self.should_ignore_primitive_boolean()
+            || self.should_ignore_primitive_bigint()
     }
 
     pub fn should_ignore_primitive_string(&self) -> bool {
@@ -184,7 +188,7 @@ impl schemars::JsonSchema for IgnorePrimitives {
     }
 }
 
-/// Options for ignoring specific primitive types in `||` expressions.
+/// Selects the primitive types that `ignorePrimitives` ignores.
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]

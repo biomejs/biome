@@ -3,12 +3,12 @@
 declare let obj: { x: number } | null;
 declare function makeObj(): { x: number };
 
-// `!obj` on an object union: no fix
+// `!obj` on an object union: safe fix
 if (!obj) {
 	obj = makeObj();
 }
 
-// Body without braces: no fix
+// Body without braces
 if (!obj) obj = makeObj();
 
 // Loose `== null`
@@ -45,6 +45,12 @@ if (onlyUndef === undefined) {
 declare let reversed: string | null;
 if (null == reversed) {
 	reversed = 'default';
+}
+
+// Loose check on a non-nullish type
+declare let definite: string;
+if (definite == null) {
+	definite = 'default';
 }
 
 // Static member subject
@@ -133,4 +139,39 @@ declare let commented: string | null;
 if (commented == null) {
 	// keep me
 	commented = 'default';
+}
+
+// A type that a `0`, `''`, or `false` value can have: no fix
+declare let numberObject: Number | null;
+if (!numberObject) numberObject = 1;
+
+// A type that no `0`, `''`, or `false` value can have: safe fix
+declare let named: { a: string } | null;
+if (!named) named = { a: '' };
+
+// Type assertion that removes `null` from the tested value
+declare let pinned: string | null;
+if ((pinned as string) == null) pinned = 'v';
+
+// `any` and `unknown`: no fix
+declare let anyBraced: any;
+if (!anyBraced) {
+	anyBraced = 1;
+}
+declare let anyUnbraced: any;
+if (!anyUnbraced) anyUnbraced = 1;
+declare let unknownBraced: unknown;
+if (!unknownBraced) {
+	unknownBraced = 1;
+}
+declare let unknownUnbraced: unknown;
+if (!unknownUnbraced) unknownUnbraced = 1;
+
+declare let unknownOrAssign: unknown;
+if (!unknownOrAssign) {
+	unknownOrAssign ||= 1;
+}
+declare let unknownNullishAssign: unknown;
+if (!unknownNullishAssign) {
+	unknownNullishAssign ??= 1;
 }

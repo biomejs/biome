@@ -25,6 +25,10 @@ const r1 = s || 'x';
 declare let b: string | null;
 b ||= 'y';
 
+// Truthiness ternary: reported
+declare const o: { a: number } | null;
+const r2 = o ? o : { a: 1 };
+
 ```
 
 # Diagnostics
@@ -42,8 +46,6 @@ ignoreIfStatementsEnabled.ts:16:14 lint/nursery/useNullishCoalescing ━━━�
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -59,12 +61,37 @@ ignoreIfStatementsEnabled.ts:20:3 lint/nursery/useNullishCoalescing ━━━━
   > 20 │ b ||= 'y';
        │   ^^^
     21 │ 
+    22 │ // Truthiness ternary: reported
   
   i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreIfStatementsEnabled.ts:24:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for a falsy value.
+  
+    22 │ // Truthiness ternary: reported
+    23 │ declare const o: { a: number } | null;
+  > 24 │ const r2 = o ? o : { a: 1 };
+       │            ^
+    25 │ 
+  
+  i ?? only uses the fallback when the value is null or undefined.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    22 22 │   // Truthiness ternary: reported
+    23 23 │   declare const o: { a: number } | null;
+    24    │ - const·r2·=·o·?·o·:·{·a:·1·};
+       24 │ + const·r2·=·o·??·{·a:·1·};
+    25 25 │   
   
 
 ```

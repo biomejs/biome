@@ -44,6 +44,9 @@ if ((assigned ||= 'fallback')) {}
 while ((assigned ||= 'fallback')) {}
 const assignedResult = (assigned ||= 'fallback') ? 'yes' : 'no';
 
+// A truthiness ternary in a test: not reported
+if (cond ? cond : other) {}
+
 // Through a call argument, a unary `+`, or a function body: reported
 declare function check(value: unknown): unknown;
 if (check(cond || 'fallback')) {}

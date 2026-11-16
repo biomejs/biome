@@ -96,8 +96,6 @@ ignoreMixedLogicalExpressionsEnabled.ts:40:13 lint/nursery/useNullishCoalescing 
   
   i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -116,8 +114,6 @@ ignoreMixedLogicalExpressionsEnabled.ts:45:12 lint/nursery/useNullishCoalescing 
     47 │ // `||=` with a `&&` right-hand side inside `||`: the `||=` is not reported, both `||` are
   
   i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -138,8 +134,6 @@ ignoreMixedLogicalExpressionsEnabled.ts:51:28 lint/nursery/useNullishCoalescing 
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -159,8 +153,6 @@ ignoreMixedLogicalExpressionsEnabled.ts:51:18 lint/nursery/useNullishCoalescing 
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -178,8 +170,6 @@ ignoreMixedLogicalExpressionsEnabled.ts:54:15 lint/nursery/useNullishCoalescing 
     56 │ // `||` operand of a `||=` under `&&`: the `||=` is not reported, the `||` is
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -200,8 +190,6 @@ ignoreMixedLogicalExpressionsEnabled.ts:58:31 lint/nursery/useNullishCoalescing 
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -221,8 +209,6 @@ ignoreMixedLogicalExpressionsEnabled.ts:62:14 lint/nursery/useNullishCoalescing 
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -240,8 +226,6 @@ ignoreMixedLogicalExpressionsEnabled.ts:65:14 lint/nursery/useNullishCoalescing 
     67 │ // `||=` without `&&`
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -261,8 +245,6 @@ ignoreMixedLogicalExpressionsEnabled.ts:69:13 lint/nursery/useNullishCoalescing 
     71 │ // `&&` as the left operand of a `||` chain: not reported
   
   i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

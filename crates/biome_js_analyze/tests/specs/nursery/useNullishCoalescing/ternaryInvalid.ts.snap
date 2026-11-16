@@ -285,8 +285,6 @@ ternaryInvalid.ts:5:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━�
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -314,8 +312,6 @@ ternaryInvalid.ts:9:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━�
     11 │ // `!= null`
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -345,8 +341,6 @@ ternaryInvalid.ts:13:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -374,8 +368,6 @@ ternaryInvalid.ts:17:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     19 │ // `=== undefined`
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -405,8 +397,6 @@ ternaryInvalid.ts:21:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -434,8 +424,6 @@ ternaryInvalid.ts:25:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     27 │ // `!== null && !== undefined`
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -465,8 +453,6 @@ ternaryInvalid.ts:29:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -494,8 +480,6 @@ ternaryInvalid.ts:33:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     35 │ // `null` on the left
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -525,8 +509,6 @@ ternaryInvalid.ts:37:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -554,8 +536,6 @@ ternaryInvalid.ts:41:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     43 │ // Member access
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -585,8 +565,6 @@ ternaryInvalid.ts:45:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -614,8 +592,6 @@ ternaryInvalid.ts:49:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     51 │ // `=== null` with `null` on the left
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -645,8 +621,6 @@ ternaryInvalid.ts:53:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -674,8 +648,6 @@ ternaryInvalid.ts:57:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     59 │ // `||` fallback is parenthesized
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -705,8 +677,6 @@ ternaryInvalid.ts:61:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -734,8 +704,6 @@ ternaryInvalid.ts:61:32 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     63 │ // `&&` fallback is parenthesized
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -765,8 +733,6 @@ ternaryInvalid.ts:65:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -794,8 +760,6 @@ ternaryInvalid.ts:69:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     71 │ // `number | undefined`
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -825,8 +789,6 @@ ternaryInvalid.ts:73:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -854,8 +816,6 @@ ternaryInvalid.ts:77:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     79 │ // Optional property
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -885,8 +845,6 @@ ternaryInvalid.ts:82:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -914,8 +872,6 @@ ternaryInvalid.ts:90:10 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     92 │ 
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -945,8 +901,6 @@ ternaryInvalid.ts:95:14 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -974,8 +928,6 @@ ternaryInvalid.ts:101:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
     103 │ // `!== undefined` on a union with `undefined`
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1005,8 +957,6 @@ ternaryInvalid.ts:105:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -1034,8 +984,6 @@ ternaryInvalid.ts:111:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
     113 │ // `undefined` then `null`
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1065,8 +1013,6 @@ ternaryInvalid.ts:115:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -1094,8 +1040,6 @@ ternaryInvalid.ts:119:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
     121 │ const r29 = ((t1 === null)) ? 'default' : t1;
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1125,8 +1069,6 @@ ternaryInvalid.ts:120:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -1155,8 +1097,6 @@ ternaryInvalid.ts:121:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -1183,8 +1123,6 @@ ternaryInvalid.ts:124:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
     126 │ 
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1214,8 +1152,6 @@ ternaryInvalid.ts:125:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -1243,8 +1179,6 @@ ternaryInvalid.ts:129:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
     131 │ const r34 = mixed != undefined && mixed != null ? mixed : 'default';
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1274,8 +1208,6 @@ ternaryInvalid.ts:130:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -1303,8 +1235,6 @@ ternaryInvalid.ts:131:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
     133 │ const r36 = mixed == undefined || mixed == null ? 'default' : mixed;
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1334,8 +1264,6 @@ ternaryInvalid.ts:132:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -1363,8 +1291,6 @@ ternaryInvalid.ts:133:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
     135 │ // Optional chaining and bracket notation in the test
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1394,8 +1320,6 @@ ternaryInvalid.ts:137:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -1424,8 +1348,6 @@ ternaryInvalid.ts:138:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -1447,8 +1369,6 @@ ternaryInvalid.ts:141:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
     143 │ 
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1478,8 +1398,6 @@ ternaryInvalid.ts:142:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -1506,8 +1424,6 @@ ternaryInvalid.ts:145:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
     147 │ // Compound check with optional chaining on one side only: no fix
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1537,8 +1453,6 @@ ternaryInvalid.ts:149:13 lint/nursery/useNullishCoalescing ━━━━━━━
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -1558,8 +1472,6 @@ ternaryInvalid.ts:150:13 lint/nursery/useNullishCoalescing ━━━━━━━
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -1578,8 +1490,6 @@ ternaryInvalid.ts:154:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
     156 │ 
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1609,8 +1519,6 @@ ternaryInvalid.ts:155:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -1639,8 +1547,6 @@ ternaryInvalid.ts:159:13 lint/nursery/useNullishCoalescing ━━━━━━━
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -1658,8 +1564,6 @@ ternaryInvalid.ts:162:13 lint/nursery/useNullishCoalescing ━━━━━━━
     164 │ declare const bang: string | null;
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1679,8 +1583,6 @@ ternaryInvalid.ts:165:13 lint/nursery/useNullishCoalescing ━━━━━━━
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -1698,8 +1600,6 @@ ternaryInvalid.ts:168:13 lint/nursery/useNullishCoalescing ━━━━━━━
     170 │ declare const angle: unknown;
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1719,8 +1619,6 @@ ternaryInvalid.ts:171:13 lint/nursery/useNullishCoalescing ━━━━━━━
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -1738,8 +1636,6 @@ ternaryInvalid.ts:174:13 lint/nursery/useNullishCoalescing ━━━━━━━
     176 │ // Nested type assertions: no fix
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1760,8 +1656,6 @@ ternaryInvalid.ts:179:13 lint/nursery/useNullishCoalescing ━━━━━━━
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -1779,8 +1673,6 @@ ternaryInvalid.ts:182:13 lint/nursery/useNullishCoalescing ━━━━━━━
     184 │ // Line breaks and comments around the present branch
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1800,8 +1692,6 @@ ternaryInvalid.ts:186:9 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     188 │ 		'default';
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1831,8 +1721,6 @@ ternaryInvalid.ts:192:9 lint/nursery/useNullishCoalescing ━━━━━━━�
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -1850,8 +1738,6 @@ ternaryInvalid.ts:197:9 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     199 │ }
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1880,8 +1766,6 @@ ternaryInvalid.ts:202:9 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     204 │ 		value;
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1913,8 +1797,6 @@ ternaryInvalid.ts:208:8 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -1942,8 +1824,6 @@ ternaryInvalid.ts:214:17 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
     216 │ 		: 'default';
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1975,8 +1855,6 @@ ternaryInvalid.ts:223:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -2005,8 +1883,6 @@ ternaryInvalid.ts:223:41 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -2033,8 +1909,6 @@ ternaryInvalid.ts:234:10 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
     236 │ 
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -2063,8 +1937,6 @@ ternaryInvalid.ts:238:10 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -2092,8 +1964,6 @@ ternaryInvalid.ts:242:10 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -2120,8 +1990,6 @@ ternaryInvalid.ts:246:10 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
     248 │ }
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -2151,8 +2019,6 @@ ternaryInvalid.ts:252:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace the ternary with ??.
@@ -2180,8 +2046,6 @@ ternaryInvalid.ts:253:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
     255 │ // A fix starting with `(` would continue the previous statement: no fix
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -2211,8 +2075,6 @@ ternaryInvalid.ts:259:1 lint/nursery/useNullishCoalescing ━━━━━━━�
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -2230,8 +2092,6 @@ ternaryInvalid.ts:263:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     264 │ 
   
   i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
