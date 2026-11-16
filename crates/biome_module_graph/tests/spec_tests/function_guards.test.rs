@@ -494,7 +494,7 @@ fn unwritten_let_and_const_subjects_narrow_but_writes_captures_and_var_do_not() 
         ("written", "value", &[String, Number]),
         ("captured", "value", &[String, Number]),
         // TypeScript 7.0.2 (`tsc --strict`) narrows the read inside the try
-        // block (`narrowing-probes/m4-l3/extra.ts` L9).
+        // block.
         ("try", "value", &[String]),
     ] {
         let ty = normalized_type_at(&db, module, SOURCE, marker, expression);

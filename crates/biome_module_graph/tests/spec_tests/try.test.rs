@@ -56,7 +56,7 @@ fn variant_names(db: &TestModuleDb, ty: InferredTypeData) -> Vec<String> {
     names
 }
 
-/// Declarations shared by the tests.
+/// Declares the functions that the sources of [`assert_reads`] call.
 const DECLARATIONS: &str = r#"
     declare function g(): void;
     declare function check(): boolean;
@@ -64,10 +64,13 @@ const DECLARATIONS: &str = r#"
     declare function guard(input: unknown): input is string;
 "#;
 
-/// Asserts the type of each `(marker, expression, expected)` read in `source`,
-/// which follows [`DECLARATIONS`], by the names of its members, as
-/// [`variant_names`] gives them, and that complete module inference gives
-/// each read the type that a lookup gives it.
+/// Asserts the type of each `(marker, expression, expected)` read in
+/// `source`, which follows [`DECLARATIONS`]. `expected` lists the names of the
+/// type's members in sorted order, such as `["null", "string"]`; see
+/// [`variant_names`] for how each member is named.
+///
+/// Also asserts that complete module inference gives each read the same type
+/// as a lookup of that one expression.
 fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     let source = format!("{DECLARATIONS}{source}");
     let lookups: Vec<_> = {
@@ -109,11 +112,10 @@ fn assert_reads(source: &str, reads: &[(&str, &str, &[&str])]) {
     assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m4/try.ts` L4, L19, and `m4-l3/extra.ts` L15, L18,
-// L30, L31): an exception can leave the try block at any point, so the catch
-// clause starts from the state before the statement, and a test in the try
-// block never narrows it. A test in the catch clause narrows the rest of it.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// An exception can leave the try block at any point, so the catch clause
+// starts from the state before the statement, and a test in the try block
+// never narrows it. A test in the catch clause narrows the rest of it.
 #[test]
 fn catch_starts_from_the_state_before_try() {
     assert_reads(
@@ -137,12 +139,11 @@ fn catch_starts_from_the_state_before_try() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m4/try.ts` L5, L6, L9, L22, and `m4-l3/extra.ts` L8,
-// L9, L13 to L15, L18, L22, L23, L28): the code after the statement continues
-// from the ends of the try block and of the catch clause, so it keeps the
-// tests of a block whose other paths leave the function, and a `break` from
-// the try block reaches its target directly.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// The code after the statement continues from the ends of the try block and
+// of the catch clause, so it keeps the tests of a block whose other paths
+// leave the function. A `break` from the try block reaches its target
+// directly.
 #[test]
 fn the_code_after_try_continues_from_the_normal_exits() {
     assert_reads(
@@ -181,13 +182,11 @@ fn the_code_after_try_continues_from_the_normal_exits() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m4/try.ts` L7, L8, L10, L14 to L17, L19, L24, L25, and
-// `m4-l3/extra.ts` L7, L10, L11, L16, L19, L21, L24, L25, L29): a finally
-// block starts from every way into it, including exceptions and `return`s,
-// so its reads see the state before the statement, while the code after it
-// runs only when the try block or the catch clause ended normally, and the
-// tests in the finally block narrow it too.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A finally block starts from every way into it, including exceptions and
+// `return`s, so its reads see the state before the statement. The code after
+// the statement runs only when the try block or the catch clause ended
+// normally, and the tests in the finally block narrow it too.
 #[test]
 fn finally_joins_every_way_into_it_and_the_code_after_it_the_normal_exits() {
     assert_reads(
@@ -254,10 +253,10 @@ fn finally_joins_every_way_into_it_and_the_code_after_it_the_normal_exits() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m4/try.ts` L18, and `m4-l3/extra.ts` L12, L20): `break`
-// and `continue` reach their target directly, without passing through the
-// finally block, whose reads still see the state before the statement.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// `break` and `continue` reach their target directly, without passing through
+// the finally block. The reads in the finally block still see the state
+// before the statement.
 #[test]
 fn jumps_reach_their_target_without_the_finally_block() {
     assert_reads(
@@ -277,11 +276,11 @@ fn jumps_reach_their_target_without_the_finally_block() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// (`narrowing-probes/m4/try.ts` L11 to L13, L20): a catch variable is
-// `unknown`, or its annotation, and narrows like any other variable. `any`
-// never narrows, so Biome keeps `any` where TypeScript gives `any` too, and a
-// catch variable shadows a parameter of the same name.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A catch variable has the type of its annotation, or `unknown` without one,
+// and narrows like any other variable. Biome never narrows `any`, and
+// TypeScript also keeps `any` at the read marked `any`. A catch variable
+// shadows a parameter of the same name.
 #[test]
 fn catch_variables_narrow() {
     assert_reads(
@@ -302,10 +301,10 @@ fn catch_variables_narrow() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives the read below the declared type,
-// `string | null` (`narrowing-probes/m4/try.ts` L23), because the code after
-// the statement is unreachable: the try block returns, so nothing reaches the
-// code after the finally block. Biome records no read in unreachable code, so
-// the read keeps its declared type too.
+// `string | null`, because the code after the statement is unreachable. The
+// try block returns, so nothing reaches the code after the finally block.
+// Biome records no read in unreachable code, so the read keeps its declared
+// type too.
 #[test]
 fn the_code_after_try_is_unreachable_without_a_normal_exit() {
     assert_reads(
@@ -317,10 +316,9 @@ fn the_code_after_try_is_unreachable_without_a_normal_exit() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) narrows `x` to `string` at `afterLabel`
-// and at `beforeBreak` (`narrowing-probes/m4-l3/labeled.ts` L3, L4). Biome
-// keeps the declared type at every read of a root that contains a `break` to
-// the label of a `try` statement, because the statement control-flow graph
-// gives such a label no target.
+// and at `beforeBreak`. Biome keeps the declared type at every read of a
+// root that contains a `break` to the label of a `try` statement, because the
+// statement control-flow graph gives such a label no target.
 #[test]
 fn a_break_to_the_label_of_a_try_statement_stops_narrowing() {
     assert_reads(
