@@ -13,28 +13,29 @@ use biome_js_syntax::{
     AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter,
     AnyJsFunction, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName,
     AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter,
-    AnyJsStatement, AnyJsSwitchClause, AnyJsTemplateElement, AnyJsTryStatement, AnyTsModuleName,
-    AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
-    AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern, JsArrayExpression,
-    JsArrowFunctionExpression, JsAssignmentExpression, JsBinaryExpression, JsBinaryOperator,
-    JsBreakStatement, JsCallArgumentList, JsCallArguments, JsCallExpression, JsClassDeclaration,
-    JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList, JsConstructorParameters,
-    JsContinueStatement, JsDoWhileStatement, JsExport, JsExtendsClause, JsForInStatement,
-    JsForOfStatement, JsForStatement, JsForVariableDeclaration, JsFormalParameter, JsFunctionBody,
-    JsFunctionDeclaration, JsFunctionExpression, JsGetterObjectMember, JsInitializerClause,
-    JsLanguage, JsLogicalExpression, JsLogicalOperator, JsMethodObjectMember, JsModuleItemList,
-    JsNewExpression, JsObjectBindingPattern, JsObjectExpression, JsParameterList, JsParameters,
-    JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember,
-    JsReferenceIdentifier, JsRestParameter, JsReturnStatement, JsSetterObjectMember,
-    JsStatementList, JsSwitchStatement, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
-    JsTemplateExpression, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
-    JsVariableDeclarator, JsWhileStatement, TsConditionalType, TsDeclareFunctionDeclaration,
-    TsDeclareStatement, TsExternalModuleDeclaration, TsInferType, TsInstantiationExpression,
-    TsInterfaceDeclaration, TsMappedType, TsMethodSignatureTypeMember, TsModuleBlock,
-    TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
-    TsSatisfiesExpression, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
-    TsTypeMemberList, TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text,
-    unescape_js_string,
+    AnyJsStatement, AnyJsSwitchClause, AnyJsTemplateElement, AnyJsTryStatement,
+    AnyTsEnumMemberName, AnyTsModuleName, AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement,
+    AnyTsType, AnyTsTypeMember, AnyTsTypePredicateParameterName, ClassMemberName,
+    JsArrayBindingPattern, JsArrayExpression, JsArrowFunctionExpression, JsAssignmentExpression,
+    JsBinaryExpression, JsBinaryOperator, JsBreakStatement, JsCallArgumentList, JsCallArguments,
+    JsCallExpression, JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression,
+    JsClassMemberList, JsConstructorParameters, JsContinueStatement, JsDoWhileStatement, JsExport,
+    JsExtendsClause, JsForInStatement, JsForOfStatement, JsForStatement, JsForVariableDeclaration,
+    JsFormalParameter, JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression,
+    JsGetterObjectMember, JsInitializerClause, JsLanguage, JsLogicalExpression, JsLogicalOperator,
+    JsMethodObjectMember, JsModuleItemList, JsNewExpression, JsObjectBindingPattern,
+    JsObjectExpression, JsParameterList, JsParameters, JsParenthesizedExpression,
+    JsPropertyClassMember, JsPropertyObjectMember, JsReferenceIdentifier, JsRestParameter,
+    JsReturnStatement, JsSetterObjectMember, JsStatementList, JsSwitchStatement, JsSyntaxKind,
+    JsSyntaxNode, JsSyntaxToken, JsTemplateExpression, JsUnaryExpression, JsUnaryOperator,
+    JsVariableDeclaration, JsVariableDeclarator, JsWhileStatement, TsConditionalType,
+    TsDeclarationModule, TsDeclareFunctionDeclaration, TsDeclareStatement, TsEnumDeclaration,
+    TsExportDeclareClause, TsExternalModuleDeclaration, TsGlobalDeclaration, TsInferType,
+    TsInstantiationExpression, TsInterfaceDeclaration, TsMappedType, TsMethodSignatureTypeMember,
+    TsModuleBlock, TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType,
+    TsReturnTypeAnnotation, TsSatisfiesExpression, TsTypeAliasDeclaration, TsTypeAnnotation,
+    TsTypeArguments, TsTypeList, TsTypeMemberList, TsTypeParameter, TsTypeParameters, TsTypeofType,
+    inner_string_text, unescape_js_string,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, SyntaxResult, Text, TextRange,
@@ -336,10 +337,9 @@ impl TypeData {
             AnyJsDeclaration::TsDeclareFunctionDeclaration(decl) => {
                 Self::from_ts_declare_function_declaration(collector, scope_id, decl)
             }
-            AnyJsDeclaration::TsEnumDeclaration(_decl) => {
-                // TODO: Handle enum declarations.
-                Self::unknown()
-            }
+            AnyJsDeclaration::TsEnumDeclaration(decl) => Self::reference(
+                EnumTypes::from_ts_enum_declaration(collector, scope_id, decl).declaration,
+            ),
             AnyJsDeclaration::TsExternalModuleDeclaration(decl) => {
                 Self::from_ts_external_module_declaration(decl).unwrap_or_default()
             }
@@ -3783,6 +3783,544 @@ fn text_from_class_member_name(name: ClassMemberName) -> Text {
     }
 }
 
+/// The types that an enum declaration gives its name and its members.
+///
+/// TypeScript gives each member of an enum the literal type of its value, and
+/// the enum, used as a type, the union of those types. Used as a value, the
+/// enum is an object with a readonly property per member. Biome uses plain
+/// literal types, so `E.A` with the value `0` has the type `0`, the same
+/// values as TypeScript's `E.A`.
+#[derive(Clone, Debug, Default)]
+pub struct EnumTypes {
+    /// The type of the enum's name: a [`TypeData::MergedReference`] whose type
+    /// is the union of the member types and whose value is the enum object.
+    /// The object has a readonly property for each member with a name, and,
+    /// when a member is a number, the reverse mapping from values to names as
+    /// a `[n: number]: string` index signature.
+    pub declaration: TypeReference,
+
+    /// The type of each member, by the range of its name, in declaration
+    /// order.
+    pub members: Box<[(TextRange, TypeReference)]>,
+}
+
+impl EnumTypes {
+    /// Computes the types of `declaration` and its members from syntax.
+    ///
+    /// A member's type is the literal type of its value. Collection computes
+    /// the value as TypeScript does from number and string literals, template
+    /// literals without substitutions, `+`, `-`, and `~` before a value,
+    /// arithmetic and bitwise operators between values, `+` between strings,
+    /// and the earlier members of the declaration, named as `A`, `E.A`, or
+    /// `E["A"]`. A member without an initializer has the value of the member
+    /// before it plus one, or `0` for the first member. In an ambient enum
+    /// that isn't `const`, as one that `declare` declares, such a member has a
+    /// value that the code that defines the enum chooses, so its type is
+    /// `number`.
+    ///
+    /// When Biome can't compute a value, the member's type is `number` when
+    /// the value is a number in code that TypeScript accepts, such as a call
+    /// or `"c".length`, which TypeScript requires to be a number, `string`
+    /// for a string, such as a template literal with substitutions, and
+    /// Unknown otherwise, such as for a reference to a `const` or to a member
+    /// of another enum, because TypeScript also computes those and they can
+    /// be strings. A computed number without a decimal spelling that Biome
+    /// can borrow, one other than an integer from 0 to 255, also has the type
+    /// `number`. Each of these types holds the member's value, so none is
+    /// narrower than TypeScript's.
+    pub fn from_ts_enum_declaration(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        declaration: &TsEnumDeclaration,
+    ) -> Self {
+        let is_ambient = declaration.const_token().is_none()
+            && declaration
+                .syntax()
+                .ancestors()
+                .any(|node| AMBIENT_DECLARATION_KINDS.matches(node.kind()));
+        let mut evaluator = EnumEvaluator {
+            collector,
+            scope_id,
+            name: declaration
+                .id()
+                .ok()
+                .and_then(|id| id.as_js_identifier_binding()?.name_token().ok())
+                .map(|token| token.token_text_trimmed()),
+            members: Vec::new(),
+        };
+        let mut members = Vec::new();
+        for member in declaration.members() {
+            let Ok(member) = member else {
+                continue;
+            };
+            let Ok(name) = member.name() else {
+                continue;
+            };
+            let value = match member
+                .initializer()
+                .map(|initializer| initializer.expression())
+            {
+                Some(Ok(initializer)) => evaluator.value_of(&initializer, MAX_ENUM_VALUE_DEPTH),
+                Some(Err(_)) => EnumValue::Unknown,
+                None if is_ambient => EnumValue::SomeNumber,
+                None => match evaluator.members.last() {
+                    None => EnumValue::Number(0.0, None),
+                    Some((_, EnumValue::Number(value, _))) => EnumValue::number(value + 1.0, None),
+                    Some((_, EnumValue::SomeNumber)) => EnumValue::SomeNumber,
+                    // TypeScript requires an initializer after a string.
+                    Some((_, EnumValue::String(_) | EnumValue::Unknown)) => EnumValue::Unknown,
+                },
+            };
+            let ty = evaluator.member_type(value.clone());
+            let value = match value {
+                EnumValue::Number(value, _) => EnumValue::Number(value, Some(ty.clone())),
+                EnumValue::String(_) => EnumValue::String(Some(ty.clone())),
+                value @ (EnumValue::SomeNumber | EnumValue::Unknown) => value,
+            };
+            evaluator.members.push((enum_member_name(&name), value));
+            members.push((name.range(), ty));
+        }
+
+        let collector = evaluator.collector;
+        let has_number = evaluator
+            .members
+            .iter()
+            .any(|(_, value)| matches!(value, EnumValue::Number(..) | EnumValue::SomeNumber));
+        let union = match members.as_slice() {
+            [] => TypeReference::unknown(),
+            [(_, ty)] => ty.clone(),
+            members => collector.reference_to_owned_data(TypeData::Union(Box::new(Union(
+                members.iter().map(|(_, ty)| ty.clone()).collect(),
+            )))),
+        };
+        let object_members = evaluator
+            .members
+            .iter()
+            .zip(&members)
+            .filter_map(|((name, _), (_, ty))| {
+                Some(TypeMember {
+                    kind: TypeMemberKind::ReadonlyNamed(name.clone()?.into()),
+                    ty: ty.clone(),
+                })
+            })
+            .chain(has_number.then(|| TypeMember {
+                kind: TypeMemberKind::IndexSignature(GLOBAL_NUMBER_KEYWORD_ID.into()),
+                ty: GLOBAL_STRING_KEYWORD_ID.into(),
+            }))
+            .collect();
+        // A shape, because the literal types of the members aren't fresh, as
+        // those of the properties of an object expression are, so they don't
+        // widen.
+        let object = collector.reference_to_owned_data(TypeData::from(Object {
+            prototype: None,
+            members: object_members,
+            has_unknown_members: false,
+            kind: ObjectKind::Shape,
+        }));
+        let declaration = collector.reference_to_owned_data(TypeData::merged_reference(
+            Some(union),
+            Some(object),
+            None::<TypeReference>,
+        ));
+        Self {
+            declaration,
+            members: members.into_boxed_slice(),
+        }
+    }
+}
+
+/// Declarations whose contents are ambient: they describe values that code
+/// elsewhere defines.
+const AMBIENT_DECLARATION_KINDS: SyntaxKindSet<JsLanguage> = TsDeclareStatement::KIND_SET
+    .union(TsExportDeclareClause::KIND_SET)
+    .union(TsDeclarationModule::KIND_SET)
+    .union(TsGlobalDeclaration::KIND_SET)
+    .union(TsExternalModuleDeclaration::KIND_SET);
+
+/// Limits the nesting of the operators in the value of an enum member that
+/// [`EnumTypes::from_ts_enum_declaration`] computes.
+const MAX_ENUM_VALUE_DEPTH: usize = 32;
+
+/// Decimal spellings of the integers that a computed enum value can borrow
+/// for its literal type.
+const INTEGER_SPELLINGS: [&str; 256] = [
+    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16",
+    "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32",
+    "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48",
+    "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60", "61", "62", "63", "64",
+    "65", "66", "67", "68", "69", "70", "71", "72", "73", "74", "75", "76", "77", "78", "79", "80",
+    "81", "82", "83", "84", "85", "86", "87", "88", "89", "90", "91", "92", "93", "94", "95", "96",
+    "97", "98", "99", "100", "101", "102", "103", "104", "105", "106", "107", "108", "109", "110",
+    "111", "112", "113", "114", "115", "116", "117", "118", "119", "120", "121", "122", "123",
+    "124", "125", "126", "127", "128", "129", "130", "131", "132", "133", "134", "135", "136",
+    "137", "138", "139", "140", "141", "142", "143", "144", "145", "146", "147", "148", "149",
+    "150", "151", "152", "153", "154", "155", "156", "157", "158", "159", "160", "161", "162",
+    "163", "164", "165", "166", "167", "168", "169", "170", "171", "172", "173", "174", "175",
+    "176", "177", "178", "179", "180", "181", "182", "183", "184", "185", "186", "187", "188",
+    "189", "190", "191", "192", "193", "194", "195", "196", "197", "198", "199", "200", "201",
+    "202", "203", "204", "205", "206", "207", "208", "209", "210", "211", "212", "213", "214",
+    "215", "216", "217", "218", "219", "220", "221", "222", "223", "224", "225", "226", "227",
+    "228", "229", "230", "231", "232", "233", "234", "235", "236", "237", "238", "239", "240",
+    "241", "242", "243", "244", "245", "246", "247", "248", "249", "250", "251", "252", "253",
+    "254", "255",
+];
+
+/// The value of an enum member, as far as collection computes it.
+#[derive(Clone)]
+enum EnumValue {
+    /// A finite number that Biome knows, with the reference to its literal
+    /// type when an expression spells it, as a literal or a member does.
+    Number(f64, Option<TypeReference>),
+    /// A number that Biome doesn't know.
+    SomeNumber,
+    /// A string, with the reference to its literal type when an expression
+    /// spells it.
+    String(Option<TypeReference>),
+    /// A number or a string, or a value that TypeScript rejects for a member.
+    Unknown,
+}
+
+impl EnumValue {
+    /// Returns the number `value`, or [`Self::SomeNumber`] when `value` is
+    /// `NaN` or infinite, which have no literal type.
+    fn number(value: f64, ty: Option<TypeReference>) -> Self {
+        if value.is_finite() {
+            Self::Number(value, ty)
+        } else {
+            Self::SomeNumber
+        }
+    }
+}
+
+/// Computes the values of the members of one enum declaration, in order.
+struct EnumEvaluator<'a> {
+    collector: &'a mut dyn RawTypeCollector,
+    scope_id: ScopeId,
+    /// The name of the enum, which `E.A` names it by.
+    name: Option<TokenText>,
+    /// The name and the value of each member before the current one.
+    members: Vec<(Option<TokenText>, EnumValue)>,
+}
+
+impl EnumEvaluator<'_> {
+    /// Returns the value of `expression`, the initializer of a member or an
+    /// operand in one, which nests at most `depth` operators.
+    fn value_of(&mut self, expression: &AnyJsExpression, depth: usize) -> EnumValue {
+        let Some(depth) = depth.checked_sub(1) else {
+            return EnumValue::Unknown;
+        };
+        match expression {
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsNumberLiteralExpression(literal),
+            ) => {
+                match literal.value_token().ok().and_then(|token| {
+                    NumberLiteral::new(token.token_text_trimmed().into()).to_f64()
+                }) {
+                    Some(value) => EnumValue::number(value, self.literal_type(expression)),
+                    None => EnumValue::SomeNumber,
+                }
+            }
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsStringLiteralExpression(_),
+            ) => EnumValue::String(self.literal_type(expression)),
+            AnyJsExpression::JsTemplateExpression(template) if template.tag().is_none() => {
+                EnumValue::String(self.literal_type(expression))
+            }
+            AnyJsExpression::JsParenthesizedExpression(expression) => expression
+                .expression()
+                .map_or(EnumValue::Unknown, |inner| self.value_of(&inner, depth)),
+            AnyJsExpression::JsUnaryExpression(unary) => {
+                let (Ok(operator), Ok(argument)) = (unary.operator(), unary.argument()) else {
+                    return EnumValue::Unknown;
+                };
+                let operation: fn(f64) -> f64 = match operator {
+                    JsUnaryOperator::Minus => |value| -value,
+                    JsUnaryOperator::Plus => |value| value,
+                    JsUnaryOperator::BitwiseNot => |value| f64::from(!to_int32(value)),
+                    JsUnaryOperator::Delete
+                    | JsUnaryOperator::Void
+                    | JsUnaryOperator::Typeof
+                    | JsUnaryOperator::LogicalNot => return EnumValue::Unknown,
+                };
+                match self.value_of(&argument, depth) {
+                    // Collection types `-1` and `+1` as literals.
+                    EnumValue::Number(value, _) => {
+                        let ty = self.literal_type(expression);
+                        EnumValue::number(operation(value), ty)
+                    }
+                    _ => EnumValue::SomeNumber,
+                }
+            }
+            AnyJsExpression::JsBinaryExpression(binary) => {
+                let (Ok(operator), Ok(left), Ok(right)) =
+                    (binary.operator(), binary.left(), binary.right())
+                else {
+                    return EnumValue::Unknown;
+                };
+                let left = self.value_of(&left, depth);
+                let right = self.value_of(&right, depth);
+                binary_value(operator, &left, &right)
+            }
+            AnyJsExpression::JsIdentifierExpression(identifier) => identifier
+                .name()
+                .ok()
+                .and_then(|name| name.value_token().ok())
+                .map_or(EnumValue::Unknown, |token| {
+                    self.member_value(token.text_trimmed())
+                }),
+            AnyJsExpression::JsStaticMemberExpression(member) => {
+                let Ok(object) = member.object() else {
+                    return EnumValue::Unknown;
+                };
+                let name = member
+                    .member()
+                    .ok()
+                    .and_then(|member| member.as_js_name()?.value_token().ok());
+                match name {
+                    Some(name) if !member.is_optional_chain() && self.names_enum(&object) => {
+                        self.member_value(name.text_trimmed())
+                    }
+                    // A dotted name can name a constant that TypeScript
+                    // computes, such as a member of another enum.
+                    _ if is_entity_name(&object) => EnumValue::Unknown,
+                    // TypeScript computes no other member access, and
+                    // requires the value of such an initializer to be a
+                    // number, as `"c".length` is.
+                    _ => EnumValue::SomeNumber,
+                }
+            }
+            AnyJsExpression::JsComputedMemberExpression(member) => {
+                let (Ok(object), Ok(key)) = (member.object(), member.member()) else {
+                    return EnumValue::Unknown;
+                };
+                let key = match key {
+                    AnyJsExpression::AnyJsLiteralExpression(
+                        AnyJsLiteralExpression::JsStringLiteralExpression(key),
+                    ) => key.inner_string_text().ok(),
+                    _ => None,
+                };
+                match key {
+                    Some(key) if !member.is_optional_chain() && self.names_enum(&object) => {
+                        self.member_value(key.text())
+                    }
+                    _ => EnumValue::Unknown,
+                }
+            }
+            // TypeScript computes none of these, and requires the value of
+            // such an initializer to be a number.
+            AnyJsExpression::JsCallExpression(_)
+            | AnyJsExpression::JsConditionalExpression(_)
+            | AnyJsExpression::JsLogicalExpression(_)
+            | AnyJsExpression::JsAwaitExpression(_)
+            | AnyJsExpression::JsTemplateExpression(_)
+            | AnyJsExpression::TsAsExpression(_)
+            | AnyJsExpression::TsSatisfiesExpression(_)
+            | AnyJsExpression::TsNonNullAssertionExpression(_)
+            | AnyJsExpression::TsTypeAssertionExpression(_) => EnumValue::SomeNumber,
+            _ => EnumValue::Unknown,
+        }
+    }
+
+    /// Returns the value of the member named `name` before the current one,
+    /// or Unknown when no member before it has that name, because the name
+    /// then refers to a later member, which TypeScript rejects, or to a
+    /// variable outside the enum.
+    fn member_value(&self, name: &str) -> EnumValue {
+        self.members
+            .iter()
+            .rev()
+            .find(|(member, _)| member.as_ref().is_some_and(|member| member.text() == name))
+            .map_or(EnumValue::Unknown, |(_, value)| value.clone())
+    }
+
+    /// Returns whether `object` names the enum, as `E` in `E.A` does. When a
+    /// member has the enum's name, `E` names that member instead.
+    fn names_enum(&self, object: &AnyJsExpression) -> bool {
+        let Some(name) = &self.name else {
+            return false;
+        };
+        let AnyJsExpression::JsIdentifierExpression(identifier) = object else {
+            return false;
+        };
+        identifier
+            .name()
+            .ok()
+            .and_then(|reference| reference.value_token().ok())
+            .is_some_and(|token| token.text_trimmed() == name.text())
+            && !self
+                .members
+                .iter()
+                .any(|(member, _)| member.as_ref() == Some(name))
+    }
+
+    /// Returns the reference to the type of `expression` when collection
+    /// types it as a number or string literal, as it types `1`, `-1`, `"a"`,
+    /// and `` `a` ``.
+    fn literal_type(&mut self, expression: &AnyJsExpression) -> Option<TypeReference> {
+        let is_literal = matches!(
+            self.collector.resolve_expression(self.scope_id, expression).as_ref(),
+            TypeData::Literal(literal)
+                if matches!(literal.as_ref(), Literal::Number(_) | Literal::String(_))
+        );
+        is_literal.then(|| {
+            self.collector
+                .reference_to_resolved_expression(self.scope_id, expression)
+        })
+    }
+
+    /// Returns the type of a member with the value `value`.
+    fn member_type(&mut self, value: EnumValue) -> TypeReference {
+        match value {
+            EnumValue::Number(_, Some(ty)) | EnumValue::String(Some(ty)) => ty,
+            EnumValue::Number(value, None) => {
+                let spelling = (value.fract() == 0.0 && (0.0..256.0).contains(&value))
+                    .then(|| INTEGER_SPELLINGS[value as usize]);
+                match spelling {
+                    Some(spelling) => {
+                        self.collector
+                            .reference_to_owned_data(TypeData::from(Literal::Number(
+                                NumberLiteral::new(Text::new_static(spelling)),
+                            )))
+                    }
+                    None => GLOBAL_NUMBER_KEYWORD_ID.into(),
+                }
+            }
+            EnumValue::SomeNumber => GLOBAL_NUMBER_KEYWORD_ID.into(),
+            EnumValue::String(None) => GLOBAL_STRING_KEYWORD_ID.into(),
+            EnumValue::Unknown => TypeReference::unknown(),
+        }
+    }
+}
+
+/// Returns the value of `left` and `right` combined by `operator`, following
+/// JavaScript's arithmetic. Comparisons and `in` give booleans, which
+/// TypeScript rejects as values of members.
+fn binary_value(operator: JsBinaryOperator, left: &EnumValue, right: &EnumValue) -> EnumValue {
+    let numbers = match (left, right) {
+        (EnumValue::Number(left, _), EnumValue::Number(right, _)) => Some((*left, *right)),
+        _ => None,
+    };
+    let value = match operator {
+        JsBinaryOperator::Plus => {
+            return match (left, right) {
+                (EnumValue::Number(left, _), EnumValue::Number(right, _)) => {
+                    EnumValue::number(left + right, None)
+                }
+                (EnumValue::String(_), _) | (_, EnumValue::String(_)) => EnumValue::String(None),
+                (
+                    EnumValue::Number(..) | EnumValue::SomeNumber,
+                    EnumValue::Number(..) | EnumValue::SomeNumber,
+                ) => EnumValue::SomeNumber,
+                _ => EnumValue::Unknown,
+            };
+        }
+        JsBinaryOperator::Minus => numbers.map(|(left, right)| left - right),
+        JsBinaryOperator::Times => numbers.map(|(left, right)| left * right),
+        JsBinaryOperator::Divide => numbers.map(|(left, right)| left / right),
+        JsBinaryOperator::Remainder => numbers.map(|(left, right)| left % right),
+        JsBinaryOperator::Exponent => numbers.and_then(|(left, right)| integer_power(left, right)),
+        JsBinaryOperator::LeftShift => numbers
+            .map(|(left, right)| f64::from(to_int32(left).wrapping_shl(to_uint32(right) & 31))),
+        JsBinaryOperator::RightShift => {
+            numbers.map(|(left, right)| f64::from(to_int32(left) >> (to_uint32(right) & 31)))
+        }
+        JsBinaryOperator::UnsignedRightShift => {
+            numbers.map(|(left, right)| f64::from(to_uint32(left) >> (to_uint32(right) & 31)))
+        }
+        JsBinaryOperator::BitwiseAnd => {
+            numbers.map(|(left, right)| f64::from(to_int32(left) & to_int32(right)))
+        }
+        JsBinaryOperator::BitwiseOr => {
+            numbers.map(|(left, right)| f64::from(to_int32(left) | to_int32(right)))
+        }
+        JsBinaryOperator::BitwiseXor => {
+            numbers.map(|(left, right)| f64::from(to_int32(left) ^ to_int32(right)))
+        }
+        JsBinaryOperator::LessThan
+        | JsBinaryOperator::GreaterThan
+        | JsBinaryOperator::LessThanOrEqual
+        | JsBinaryOperator::GreaterThanOrEqual
+        | JsBinaryOperator::Equality
+        | JsBinaryOperator::StrictEquality
+        | JsBinaryOperator::Inequality
+        | JsBinaryOperator::StrictInequality => return EnumValue::Unknown,
+    };
+    value.map_or(EnumValue::SomeNumber, |value| {
+        EnumValue::number(value, None)
+    })
+}
+
+/// Returns `base ** exponent` when both are integers, the exponent isn't
+/// negative, and the result is an integer that a double holds exactly, so
+/// that it is the value that JavaScript computes.
+fn integer_power(base: f64, exponent: f64) -> Option<f64> {
+    if base.fract() != 0.0 || exponent.fract() != 0.0 || !(0.0..=64.0).contains(&exponent) {
+        return None;
+    }
+    let value = base.powi(exponent as i32);
+    (value.abs() <= MAX_SAFE_INTEGER).then_some(value)
+}
+
+/// The largest integer that a double holds exactly, with every integer below
+/// it, `2 ** 53 - 1`.
+const MAX_SAFE_INTEGER: f64 = 9_007_199_254_740_991.0;
+
+/// Converts the finite `value` to a 32-bit integer, as JavaScript's bitwise
+/// operators do.
+fn to_int32(value: f64) -> i32 {
+    to_uint32(value) as i32
+}
+
+/// Converts the finite `value` to an unsigned 32-bit integer, as JavaScript's
+/// `>>>` and shift counts do.
+fn to_uint32(value: f64) -> u32 {
+    value.trunc().rem_euclid(4_294_967_296.0) as u32
+}
+
+/// Returns whether `expression` is an identifier, or a chain of `.name`
+/// accesses on one, as `a.b.c`.
+fn is_entity_name(expression: &AnyJsExpression) -> bool {
+    let mut expression = expression.clone();
+    loop {
+        match expression {
+            AnyJsExpression::JsIdentifierExpression(_) => return true,
+            AnyJsExpression::JsStaticMemberExpression(member)
+                if !member.is_optional_chain()
+                    && member
+                        .member()
+                        .is_ok_and(|member| member.as_js_name().is_some()) =>
+            {
+                let Ok(object) = member.object() else {
+                    return false;
+                };
+                expression = object;
+            }
+            _ => return false,
+        }
+    }
+}
+
+/// Returns the name of an enum member: an identifier, or the text of a string
+/// literal, written as the name or as a computed name, as `["a"]`.
+fn enum_member_name(name: &AnyTsEnumMemberName) -> Option<TokenText> {
+    match name {
+        AnyTsEnumMemberName::TsLiteralEnumMemberName(name) => {
+            let token = name.value().ok()?;
+            Some(if token.kind() == JsSyntaxKind::JS_STRING_LITERAL {
+                inner_string_text(&token)
+            } else {
+                token.token_text_trimmed()
+            })
+        }
+        AnyTsEnumMemberName::JsComputedMemberName(name) => match name.expression().ok()? {
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsStringLiteralExpression(literal),
+            ) => literal.inner_string_text().ok(),
+            _ => None,
+        },
+    }
+}
+
 #[inline]
 fn text_from_token(token: SyntaxResult<JsSyntaxToken>) -> Option<Text> {
     Some(token.ok()?.token_text_trimmed().into())
@@ -4271,9 +4809,12 @@ fn field_initializer_reference(
 
 /// Returns whether the collected type at `reference` may be or include a
 /// fresh literal type. It may when the type is a primitive literal type, a
-/// conditional or logical expression, a unary minus of a literal, or a name,
-/// because a name may refer to a `const` declared without a type annotation.
-/// A reference to another local type is not fresh, because
+/// conditional or logical expression, a unary minus of a literal, a name,
+/// because a name may refer to a `const` declared without a type annotation,
+/// or a member access on a name with a name or a string literal as its key,
+/// as `E.A` and `E["A"]`, because the name may refer to an enum, whose
+/// members have fresh literal types. A reference to another local type is not
+/// fresh, because
 /// [`asserted_type`] and [`value_reference`] put assertions such as `1 as 1`
 /// behind such a reference.
 ///
@@ -4305,6 +4846,18 @@ fn may_have_fresh_literal(
                 | TypeofExpression::LogicalAnd(_)
                 | TypeofExpression::LogicalOr(_)
                 | TypeofExpression::NullishCoalescing(_) => true,
+                TypeofExpression::StaticMember(expression)
+                | TypeofExpression::OptionalChainStaticMember(expression) => {
+                    is_plain_name(collector, &expression.object)
+                }
+                TypeofExpression::ComputedMember(expression) => {
+                    is_plain_name(collector, &expression.object)
+                        && matches!(
+                            collector.get_by_reference(&expression.member),
+                            Some(TypeData::Literal(literal))
+                                if matches!(literal.as_ref(), Literal::String(_))
+                        )
+                }
                 _ => false,
             },
             TypeData::Reference(
@@ -4317,6 +4870,20 @@ fn may_have_fresh_literal(
             _ => false,
         },
     }
+}
+
+/// Returns whether the collected type at `reference` is the type of an
+/// identifier expression, a name without type arguments, as `E` in `E.A`.
+fn is_plain_name(collector: &dyn RawTypeCollector, reference: &TypeReference) -> bool {
+    let qualifier = match reference {
+        TypeReference::Qualifier(qualifier) => qualifier,
+        TypeReference::Resolved(RawTypeId::Local(id)) => match collector.get_by_id(*id) {
+            TypeData::Reference(TypeReference::Qualifier(qualifier)) => qualifier,
+            _ => return false,
+        },
+        TypeReference::Resolved(RawTypeId::Global(_)) | TypeReference::Import(_) => return false,
+    };
+    qualifier.type_parameters.is_empty() && qualifier.path.identifier().is_some()
 }
 
 /// Applies const assertion conversion to inferred tuple and object types.

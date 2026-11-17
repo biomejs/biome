@@ -14,13 +14,13 @@ use biome_module_graph::{
     ModuleDb, ModuleInfo,
     type_inference::{
         ArrayOfPromisesClassificationRequest, CallableMemberRequest,
-        ExpectedCallArgumentTypeRequest, ExpectedConstructorArgumentTypeRequest,
-        FunctionReturnTypeRequest, MemberReturnTypeRequest, NormalizedBindingTypeRequest,
-        NormalizedExpressionTypeRequest, PromiseClassificationRequest,
-        PromiseReturningFunctionClassificationRequest, ThenableClassificationRequest,
-        TypeInferenceArgument, TypeInferenceCaller, TypeInferenceClassification,
-        TypeInferenceRequest, TypeInferenceSource, UnreachableCodeClassificationRequest,
-        execute_type_inference_request,
+        EnumMemberClassificationRequest, ExpectedCallArgumentTypeRequest,
+        ExpectedConstructorArgumentTypeRequest, FunctionReturnTypeRequest, MemberReturnTypeRequest,
+        NormalizedBindingTypeRequest, NormalizedExpressionTypeRequest,
+        PromiseClassificationRequest, PromiseReturningFunctionClassificationRequest,
+        ThenableClassificationRequest, TypeInferenceArgument, TypeInferenceCaller,
+        TypeInferenceClassification, TypeInferenceRequest, TypeInferenceSource,
+        UnreachableCodeClassificationRequest, execute_type_inference_request,
     },
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
@@ -129,6 +129,25 @@ impl TypedService {
         self.execute_request(
             typed_module,
             ThenableClassificationRequest::new(typed_module.module, expression.range()),
+        )
+    }
+
+    /// Classifies whether an expression reads a member of an enum through an
+    /// identifier that names the enum, as `E.A` and `E["A"]` do, also inside
+    /// parentheses. The enum is declared in this module or imported.
+    ///
+    /// Returns `Indeterminate` when type inference is unavailable or an import
+    /// can't be followed to a single declaration.
+    pub fn classify_expression_as_enum_member(
+        &self,
+        expression: &AnyJsExpression,
+    ) -> TypeInferenceClassification {
+        let Some(typed_module) = self.module.as_ref() else {
+            return TypeInferenceClassification::Indeterminate;
+        };
+        self.execute_request(
+            typed_module,
+            EnumMemberClassificationRequest::new(typed_module.module, expression.range()),
         )
     }
 

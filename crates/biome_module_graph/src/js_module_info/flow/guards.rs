@@ -15,11 +15,12 @@ use biome_js_syntax::{
     AnyJsClassMemberName, AnyJsExpression, AnyJsFormalParameter, AnyJsFunction, AnyJsInProperty,
     AnyJsLiteralExpression, AnyJsMemberExpression, AnyJsName, AnyJsObjectMember,
     AnyJsOptionalChainExpression, AnyJsParameter, AnyJsSwitchClause, AnyJsTemplateElement,
-    AnyJsVariableDeclaration, AnyTsReturnType, AnyTsType, JsBinaryOperator, JsCallExpression,
-    JsComputedMemberName, JsDecorator, JsIdentifierExpression, JsLanguage, JsLogicalOperator,
-    JsModule, JsPrivateName, JsScript, JsStaticMemberExpression, JsSwitchStatement,
-    JsTemplateExpression, JsThisExpression, JsUnaryOperator, JsVariableDeclarator, JsVariableKind,
-    JsVariableStatement, T, TsDeclareStatement, binding_ext::AnyJsBindingDeclaration,
+    AnyJsVariableDeclaration, AnyTsEnumMemberName, AnyTsReturnType, AnyTsType, JsBinaryOperator,
+    JsCallExpression, JsComputedMemberName, JsDecorator, JsIdentifierExpression, JsLanguage,
+    JsLogicalOperator, JsModule, JsPrivateName, JsScript, JsStaticMemberExpression,
+    JsSwitchStatement, JsSyntaxKind, JsSyntaxToken, JsTemplateExpression, JsThisExpression,
+    JsUnaryOperator, JsVariableDeclarator, JsVariableKind, JsVariableStatement, T,
+    TsDeclareStatement, TsEnumDeclaration, binding_ext::AnyJsBindingDeclaration, inner_string_text,
     unescape_js_identifier,
 };
 use biome_js_type_info::{
@@ -189,13 +190,21 @@ pub(crate) enum FlowTest {
     Undefined {
         strict: bool,
     },
-    /// Equality with the value of the imported variable declared at `binding`.
+    /// Strict equality with the member of an enum that this module declares
+    /// whose name is at this range. The member's collected type is the
+    /// literal type of its value when collection computes the value, and the
+    /// test narrows nothing otherwise.
+    EnumMember(TextRange),
+    /// Equality with the value of the imported variable declared at
+    /// `binding`, or, when `member` is the range of a member's name, as `A`
+    /// in `E.A`, with that member of the enum that the variable imports.
     /// Inference reads that value in the module that declares the variable,
     /// and the test narrows nothing when the value isn't a unit value. With
     /// loose equality (`strict` false), the test narrows only when the value
     /// is `null` or `undefined`, and then matches both.
     Imported {
         binding: TextRange,
+        member: Option<TextRange>,
         strict: bool,
     },
     /// A call to the type-guard function declared at `function`. Its type
@@ -249,6 +258,7 @@ impl FlowTest {
             | Self::Null
             | Self::Literal(_)
             | Self::Undefined { .. }
+            | Self::EnumMember(_)
             | Self::Imported { .. }
             | Self::In(_) => false,
         }
@@ -1181,10 +1191,11 @@ pub(super) fn exhaustive_operand(
 /// [`SwitchKind::Typeof`], it must be a string literal or a template literal
 /// without substitutions that names a kind of value, as `"string"` does.
 ///
-/// Returns true for an imported variable because only inference can read its
-/// value, so inference finds the statement exhaustive only when the variable
-/// holds a unit value. A local variable named `undefined` counts only when it
-/// holds a unit value, as a variable of any other name does.
+/// Returns true for an imported variable and for a member of an enum because
+/// only inference can read their values, so inference finds the statement
+/// exhaustive only when they are unit values. A local variable named
+/// `undefined` counts only when it holds a unit value, as a variable of any
+/// other name does.
 pub(super) fn is_unit_case(
     discriminant: &AnyJsExpression,
     test: &AnyJsExpression,
@@ -1207,6 +1218,7 @@ pub(super) fn is_unit_case(
             guard: SyntaxGuard::Null
                 | SyntaxGuard::Literal(_)
                 | SyntaxGuard::Undefined { .. }
+                | SyntaxGuard::EnumMember(_)
                 | SyntaxGuard::Imported { .. }
                 | SyntaxGuard::Typeof(_),
             ..
@@ -1664,9 +1676,16 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
             SyntaxGuard::Literal(range) => Some(FlowTest::Literal(range)),
             SyntaxGuard::LooseLiteral => None,
             SyntaxGuard::Undefined { strict } => Some(FlowTest::Undefined { strict }),
-            SyntaxGuard::Imported { binding, strict } => {
-                Some(FlowTest::Imported { binding, strict })
-            }
+            SyntaxGuard::EnumMember(member) => Some(FlowTest::EnumMember(member)),
+            SyntaxGuard::Imported {
+                binding,
+                member,
+                strict,
+            } => Some(FlowTest::Imported {
+                binding,
+                member,
+                strict,
+            }),
             SyntaxGuard::Predicate(test) => Some(test),
             SyntaxGuard::In(key) => Some(FlowTest::In(key)),
             SyntaxGuard::Instanceof(constructor) => Some(FlowTest::Instanceof(constructor)),
@@ -2473,10 +2492,14 @@ enum SyntaxGuard {
     Undefined {
         strict: bool,
     },
-    /// Equality with the imported variable declared at `binding`, a
-    /// [`UnitValue::Imported`].
+    /// Strict equality with the member of an enum whose name is at this
+    /// range, a [`UnitValue::EnumMember`].
+    EnumMember(TextRange),
+    /// Equality with the imported variable declared at `binding`, or with
+    /// its member whose name is at `member`, a [`UnitValue::Imported`].
     Imported {
         binding: TextRange,
+        member: Option<TextRange>,
         strict: bool,
     },
     /// A call to a type-guard function, with the test it applies, a
@@ -2704,8 +2727,15 @@ fn comparison_step(
                 (UnitValue::Null, false) => SyntaxGuard::Nullish,
                 (UnitValue::Undefined, strict) => SyntaxGuard::Undefined { strict },
                 (UnitValue::Literal(range), true) => SyntaxGuard::Literal(range),
-                (UnitValue::Literal(_), false) => SyntaxGuard::LooseLiteral,
-                (UnitValue::Imported(binding), strict) => SyntaxGuard::Imported { binding, strict },
+                (UnitValue::EnumMember(member), true) => SyntaxGuard::EnumMember(member),
+                (UnitValue::Literal(_) | UnitValue::EnumMember(_), false) => {
+                    SyntaxGuard::LooseLiteral
+                }
+                (UnitValue::Imported { binding, member }, strict) => SyntaxGuard::Imported {
+                    binding,
+                    member,
+                    strict,
+                },
             };
             (subject.clone(), guard)
         }
@@ -2747,12 +2777,16 @@ fn comparison_step(
     };
     // TypeScript narrows the receivers of an optional chain in the branch
     // where the operand cannot be `undefined`: where it equals a primitive
-    // literal or, strictly, `null`, where it differs from `undefined` or,
-    // loosely, from `null`, and where its `typeof` is not `"undefined"`.
-    // Collection can't tell whether an imported value is `undefined`, `null`,
-    // or a primitive literal, so a comparison with one narrows no receiver.
+    // literal, a member of an enum, which is a number or a string, or,
+    // strictly, `null`, where it differs from `undefined` or, loosely, from
+    // `null`, and where its `typeof` is not `"undefined"`. Collection can't
+    // tell whether an imported value is `undefined`, `null`, or a primitive
+    // literal, so a comparison with one narrows no receiver.
     let receivers = match &guard {
-        SyntaxGuard::Null | SyntaxGuard::Literal(_) | SyntaxGuard::LooseLiteral => positive,
+        SyntaxGuard::Null
+        | SyntaxGuard::Literal(_)
+        | SyntaxGuard::EnumMember(_)
+        | SyntaxGuard::LooseLiteral => positive,
         SyntaxGuard::Nullish | SyntaxGuard::Undefined { .. } => !positive,
         SyntaxGuard::Typeof(kind) => positive == (*kind != TypeofKind::Undefined),
         SyntaxGuard::Truthy
@@ -2877,10 +2911,20 @@ pub(crate) enum UnitValue {
     /// `-1n` the type `bigint`, where TypeScript gives `-1n`, so it doesn't
     /// count either.
     Literal(TextRange),
-    /// The value of the variable declared at this range, which a named or a
-    /// default import binds. Only inference can tell whether the variable
-    /// holds a unit value, because the value is written in another module.
-    Imported(TextRange),
+    /// The value of the member of an enum that this module declares whose
+    /// name is at this range, read as `E.A` or `E["A"]`. Only inference can
+    /// tell whether the member has a unit value, from the literal type that
+    /// collection gives it when it computes its value.
+    EnumMember(TextRange),
+    /// The value of the variable declared at `binding`, which a named or a
+    /// default import binds, or, when `member` is the range of a member's
+    /// name, the value of that member of the enum that the variable imports,
+    /// as `A` in `E.A`. Only inference can tell whether it is a unit value,
+    /// because the value is written in another module.
+    Imported {
+        binding: TextRange,
+        member: Option<TextRange>,
+    },
 }
 
 /// Limits the `const` declarations followed to find the value that a
@@ -2895,7 +2939,10 @@ const MAX_HELD_VALUES: usize = 16;
 /// its initializer, because TypeScript gives such a `const` the type of its
 /// initializer. So `K` holds `"a"` after `const K = "a"`, also through such
 /// `const`s that name one another, at most 16 of them. A variable that a named
-/// or a default import binds is a [`UnitValue::Imported`].
+/// or a default import binds is a [`UnitValue::Imported`]. A member of an
+/// enum, read as `E.A` or `E["A"]` where `E` names an enum declaration of this
+/// module, is a [`UnitValue::EnumMember`], and one where `E` names an import
+/// is a [`UnitValue::Imported`] with the member's name.
 ///
 /// Other variables have no unit value, such as a `let`, whose literal type
 /// widens, and a variable with a type annotation. Other expressions have none
@@ -2908,8 +2955,13 @@ pub(crate) fn unit_value(
 ) -> Option<UnitValue> {
     let mut expression = omit_parentheses(expression, remaining)?;
     for _ in 0..MAX_HELD_VALUES {
-        let AnyJsExpression::JsIdentifierExpression(identifier) = &expression else {
-            return literal_unit_value(&expression);
+        let identifier = match &expression {
+            AnyJsExpression::JsIdentifierExpression(identifier) => identifier,
+            AnyJsExpression::JsStaticMemberExpression(_)
+            | AnyJsExpression::JsComputedMemberExpression(_) => {
+                return enum_member_unit_value(&expression, model);
+            }
+            _ => return literal_unit_value(&expression),
         };
         let reference = identifier.name().ok()?;
         let Some(binding) = model.binding(&reference) else {
@@ -2917,7 +2969,12 @@ pub(crate) fn unit_value(
             return is_undefined.then_some(UnitValue::Undefined);
         };
         match held_value(&binding)? {
-            HeldValue::Imported => return Some(UnitValue::Imported(binding.range())),
+            HeldValue::Imported => {
+                return Some(UnitValue::Imported {
+                    binding: binding.range(),
+                    member: None,
+                });
+            }
             HeldValue::Initializer(initializer) => {
                 expression = omit_parentheses(initializer, remaining)?;
             }
@@ -2926,12 +2983,97 @@ pub(crate) fn unit_value(
     None
 }
 
+/// Returns the unit value of `expression` when it reads a member of an enum
+/// through an identifier that names the enum, as `E.A` or `E["A"]` does:
+/// [`UnitValue::EnumMember`] when the identifier names an enum declaration of
+/// this module that has a member of that name, and [`UnitValue::Imported`]
+/// with the member's name when an import binds the identifier, because only
+/// inference can tell that the import is an enum.
+///
+/// Returns `None` for other member accesses, including an optional chain such
+/// as `E?.A`, and for a member declared with a computed name, as `["A"]`,
+/// which has no binding of its own, so the comparison keeps the type.
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Only enum declarations and value imports have members that are unit values."
+)]
+pub(crate) fn enum_member_unit_value(
+    expression: &AnyJsExpression,
+    model: &SemanticModel,
+) -> Option<UnitValue> {
+    let (object, name) = match expression {
+        AnyJsExpression::JsStaticMemberExpression(member) if !member.is_optional_chain() => (
+            member.object().ok()?,
+            member.member().ok()?.as_js_name()?.value_token().ok()?,
+        ),
+        AnyJsExpression::JsComputedMemberExpression(member) if !member.is_optional_chain() => {
+            let AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsStringLiteralExpression(key),
+            ) = member.member().ok()?
+            else {
+                return None;
+            };
+            (member.object().ok()?, key.value_token().ok()?)
+        }
+        _ => return None,
+    };
+    let AnyJsExpression::JsIdentifierExpression(identifier) = object else {
+        return None;
+    };
+    let binding = model.binding(&identifier.name().ok()?)?;
+    match binding.tree().declaration()? {
+        AnyJsBindingDeclaration::TsEnumDeclaration(declaration) => {
+            enum_member_name_range(&declaration, member_key(&name).text())
+                .map(UnitValue::EnumMember)
+        }
+        AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
+        | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
+        | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_) => Some(UnitValue::Imported {
+            binding: binding.range(),
+            member: Some(name.text_trimmed_range()),
+        }),
+        _ => None,
+    }
+}
+
+/// Returns the name that `token` gives a member when it follows `.`, or the
+/// text of the string literal `token` when it is the key of an element
+/// access, as `A` in `E.A` and in `E["A"]`.
+pub(crate) fn member_key(token: &JsSyntaxToken) -> TokenText {
+    if token.kind() == JsSyntaxKind::JS_STRING_LITERAL {
+        inner_string_text(token)
+    } else {
+        token.token_text_trimmed()
+    }
+}
+
+/// Returns the range of the name of the member of `declaration` named
+/// `name`, which is also the range of the member's binding, or `None` when
+/// the enum has no member of that name written as an identifier or a string
+/// literal.
+pub(crate) fn enum_member_name_range(
+    declaration: &TsEnumDeclaration,
+    name: &str,
+) -> Option<TextRange> {
+    declaration.members().iter().find_map(|member| {
+        let AnyTsEnumMemberName::TsLiteralEnumMemberName(member_name) = member.ok()?.name().ok()?
+        else {
+            return None;
+        };
+        let token = member_name.value().ok()?;
+        (member_key(&token).text() == name).then(|| member_name.range())
+    })
+}
+
 /// Returns the unit value that `binding` holds, which is also the unit value
 /// of a read of `binding`, or `None` when it holds none that Biome compares
 /// with.
 pub(crate) fn binding_unit_value(binding: &Binding, model: &SemanticModel) -> Option<UnitValue> {
     match held_value(binding)? {
-        HeldValue::Imported => Some(UnitValue::Imported(binding.range())),
+        HeldValue::Imported => Some(UnitValue::Imported {
+            binding: binding.range(),
+            member: None,
+        }),
         HeldValue::Initializer(initializer) => {
             let mut remaining = MAX_CONDITION_STEPS;
             unit_value(initializer, model, &mut remaining)
@@ -4746,9 +4888,10 @@ mod tests {
     /// Decomposes the condition of the last `if` statement in `program` and
     /// names the value that its first runtime test compares with: `=` and the
     /// source of a [`FlowTest::Literal`], `null`, `undefined`, `==null` or
-    /// `==undefined` for loose equality, `import` and the imported name, with
-    /// `==` before the name for loose equality, or `none` when the condition
-    /// tests nothing.
+    /// `==undefined` for loose equality, `enum` and the name of a
+    /// [`FlowTest::EnumMember`], `import` and the imported name, with `==`
+    /// before the name for loose equality and the member's name after it, or
+    /// `none` when the condition tests nothing.
     fn compared_value(program: &str) -> String {
         let decomposed = decomposed_last(program, FlowOutcome::Truthy);
         let source = decomposed.model.root().syntax().to_string();
@@ -4762,11 +4905,17 @@ mod tests {
             Some(FlowTest::Nullish) => "==null".to_owned(),
             Some(FlowTest::Undefined { strict: true }) => "undefined".to_owned(),
             Some(FlowTest::Undefined { strict: false }) => "==undefined".to_owned(),
-            Some(FlowTest::Imported { binding, strict }) => {
+            Some(FlowTest::EnumMember(member)) => format!("enum {}", &source[member]),
+            Some(FlowTest::Imported {
+                binding,
+                member,
+                strict,
+            }) => {
                 format!(
-                    "import {}{}",
+                    "import {}{}{}",
                     if strict { "" } else { "==" },
-                    &source[binding]
+                    &source[binding],
+                    member.map_or(String::new(), |member| format!(".{}", &source[member]))
                 )
             }
             Some(test) => format!("{test:?}"),
@@ -4822,6 +4971,25 @@ mod tests {
                 "import { A } from './k'; const K = A; function f(x) { if (x === K) {} }",
                 "import A",
             ),
+            // A member of an enum is compared with by the member's name, and
+            // inference reads its value from the member's collected type.
+            ("enum E { A } function f(x) { if (x === E.A) {} }", "enum A"),
+            (
+                "enum E { 'A' } function f(x) { if (E['A'] !== x) {} }",
+                "enum 'A'",
+            ),
+            (
+                "enum E { A } const K = E.A; function f(x) { if (x === K) {} }",
+                "enum A",
+            ),
+            (
+                "import { E } from './e'; function f(x) { if (x === E.A) {} }",
+                "import E.A",
+            ),
+            (
+                "import { E } from './e'; function f(x) { if (x == E['A']) {} }",
+                "import ==E.'A'",
+            ),
             // `-(1)` has the type `number`, Biome gives `-1n` the type
             // `bigint`, and a `let` widens its literal. Biome doesn't compare
             // with the other values below.
@@ -4852,7 +5020,20 @@ mod tests {
                 "import * as N from './k'; function f(x) { if (x === N) {} }",
                 "none",
             ),
-            ("enum E { A } function f(x) { if (x === E.A) {} }", "none"),
+            // An optional chain, parentheses around the enum, a member that
+            // the enum doesn't declare, a key that isn't a string literal,
+            // and a member of an object that isn't an enum compare with
+            // nothing.
+            ("enum E { A } function f(x) { if (x === E?.A) {} }", "none"),
+            ("enum E { A } function f(x) { if (x === (E).A) {} }", "none"),
+            ("enum E { A } function f(x) { if (x === E.B) {} }", "none"),
+            ("enum E { A } function f(x) { if (x === E[0]) {} }", "none"),
+            (
+                "const O = { A: 1 }; function f(x) { if (x === O.A) {} }",
+                "none",
+            ),
+            // Loose equality narrows only receivers of an optional chain.
+            ("enum E { A } function f(x) { if (x == E.A) {} }", "none"),
             ("function f(x) { if (x === NaN) {} }", "none"),
             (
                 "const A = B; const B = A; function f(x) { if (x === A) {} }",

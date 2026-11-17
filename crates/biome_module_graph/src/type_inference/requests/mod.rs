@@ -1,6 +1,7 @@
 //! Type-inference requests available to analyzers.
 
 mod call;
+mod enum_member;
 mod expression;
 mod member;
 mod promise;
@@ -10,6 +11,7 @@ mod return_type;
 pub use call::{
     ExpectedCallArgumentTypeRequest, ExpectedConstructorArgumentTypeRequest, TypeInferenceArgument,
 };
+pub use enum_member::EnumMemberClassificationRequest;
 pub use expression::{NormalizedBindingTypeRequest, NormalizedExpressionTypeRequest};
 pub use member::{CallableMemberRequest, ThenableClassificationRequest};
 pub use promise::{

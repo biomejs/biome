@@ -260,8 +260,10 @@ pub fn raw_may_be_union(reference: &TypeReference, raw_types: &[RawTypeData]) ->
 /// `boolean`, an object type written in place, the result of `new`, or the
 /// literal value of a mutable location, as for `let i = 0`, because
 /// resolution widens it to its primitive type. A type name, an import, a
-/// union with a member that may have one, other inferred types, and a chain
-/// of raw references longer than the step limit may have literal members.
+/// union with a member that may have one, other inferred types, a property
+/// read as the value of a mutable location, as `o.n` in `let i = o.n`, whose
+/// declared literal types resolution keeps, and a chain of raw references
+/// longer than the step limit may have literal members.
 /// `raw_types` is the module table that local references index.
 pub fn raw_may_have_literal(reference: &TypeReference, raw_types: &[RawTypeData]) -> bool {
     let mut pending = vec![reference];
@@ -291,7 +293,12 @@ pub fn raw_may_have_literal(reference: &TypeReference, raw_types: &[RawTypeData]
                 }
             }
             RawTypeData::TypeofExpression(expression) => match expression.as_ref() {
-                TypeofExpression::WidenedLiteral(_) | TypeofExpression::New(_) => {}
+                TypeofExpression::WidenedLiteral(widened) => {
+                    if is_raw_member_access(&widened.value, raw_types) {
+                        return true;
+                    }
+                }
+                TypeofExpression::New(_) => {}
                 _ => return true,
             },
             RawTypeData::AnyKeyword
@@ -315,6 +322,25 @@ pub fn raw_may_have_literal(reference: &TypeReference, raw_types: &[RawTypeData]
         }
     }
     false
+}
+
+/// Returns whether `reference` is the collected type of a member access, as
+/// `o.n` or `o["n"]`.
+fn is_raw_member_access(reference: &TypeReference, raw_types: &[RawTypeData]) -> bool {
+    matches!(
+        reference,
+        TypeReference::Resolved(RawTypeId::Local(local))
+            if matches!(
+                raw_types.get(local.index()),
+                Some(RawTypeData::TypeofExpression(expression))
+                    if matches!(
+                        expression.as_ref(),
+                        TypeofExpression::StaticMember(_)
+                            | TypeofExpression::OptionalChainStaticMember(_)
+                            | TypeofExpression::ComputedMember(_)
+                    )
+            )
+    )
 }
 
 /// Returns whether `target` may be nullish. A union may be nullish without

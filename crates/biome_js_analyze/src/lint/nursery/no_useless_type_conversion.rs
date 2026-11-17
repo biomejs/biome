@@ -9,6 +9,7 @@ use biome_js_syntax::{
     JsUnaryExpression, JsUnaryOperator, global_identifier,
 };
 use biome_js_type_info::InferredType;
+use biome_module_graph::type_inference::TypeInferenceClassification;
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, declare_node_union};
 use biome_rule_options::no_useless_type_conversion::NoUselessTypeConversionOptions;
 
@@ -48,6 +49,17 @@ declare_lint_rule! {
     /// Unboxing boxed values is allowed.
     /// ```ts
     /// String(new String());
+    /// ```
+    ///
+    /// Converting a member of an enum is allowed, even when its value is
+    /// already a string or a number. TypeScript gives the member the type of
+    /// the enum, so the conversion changes its type.
+    /// ```ts
+    /// enum Direction {
+    ///     Up = "up",
+    ///     Down = "down",
+    /// }
+    /// Direction.Up.toString();
     /// ```
     pub NoUselessTypeConversion {
         version: "2.4.11",
@@ -244,7 +256,7 @@ fn run_builtin_call(
     let argument = first_argument.as_any_js_expression()?;
     let ty = ctx.type_of_expression(argument)?;
 
-    matches_primitive_type(ty, primitive).then_some(RuleState {
+    is_useless_conversion(ctx, argument, ty, primitive).then_some(RuleState {
         kind: ConversionKind::BuiltinCall,
         primitive,
         range: callee.range(),
@@ -283,7 +295,7 @@ fn run_to_string_call(
     let object = member_expression.object().ok()?;
     let ty = ctx.type_of_expression(&object)?;
 
-    matches_primitive_type(ty, PrimitiveKind::String).then_some(RuleState {
+    is_useless_conversion(ctx, &object, ty, PrimitiveKind::String).then_some(RuleState {
         kind: ConversionKind::ToString,
         primitive: PrimitiveKind::String,
         range: member.range(),
@@ -326,7 +338,7 @@ fn run_binary_expression(
     };
 
     let ty = ctx.type_of_expression(&expression)?;
-    matches_primitive_type(ty, PrimitiveKind::String).then_some(RuleState {
+    is_useless_conversion(ctx, &expression, ty, PrimitiveKind::String).then_some(RuleState {
         kind: ConversionKind::StringConcatenation,
         primitive: PrimitiveKind::String,
         range: node.range(),
@@ -406,7 +418,7 @@ fn run_unary_expression(
     match node.operator().ok()? {
         JsUnaryOperator::Plus => {
             let ty = ctx.type_of_expression(&argument)?;
-            matches_primitive_type(ty, PrimitiveKind::Number).then_some(RuleState {
+            is_useless_conversion(ctx, &argument, ty, PrimitiveKind::Number).then_some(RuleState {
                 kind: ConversionKind::UnaryPlus,
                 primitive: PrimitiveKind::Number,
                 range: node.range(),
@@ -420,7 +432,11 @@ fn run_unary_expression(
 
             let nested_argument = nested.argument().ok()?;
             let ty = ctx.type_of_expression(&nested_argument)?;
-            matches_primitive_type(ty, PrimitiveKind::Boolean).then_some(RuleState {
+            if !is_useless_conversion(ctx, &nested_argument, ty, PrimitiveKind::Boolean) {
+                return None;
+            }
+
+            Some(RuleState {
                 kind: ConversionKind::DoubleNegation,
                 primitive: PrimitiveKind::Boolean,
                 range: node.range(),
@@ -441,6 +457,9 @@ fn run_unary_expression(
             } else {
                 return None;
             };
+            if may_be_enum_member(ctx, &nested_argument) {
+                return None;
+            }
 
             Some(RuleState {
                 kind: ConversionKind::DoubleBitwiseNot,
@@ -450,6 +469,33 @@ fn run_unary_expression(
         }
         _ => None,
     }
+}
+
+/// Returns whether converting `operand`, whose type is `ty`, to `primitive`
+/// leaves its type unchanged: `ty` is already that primitive, and `operand`
+/// isn't a member of an enum.
+fn is_useless_conversion(
+    ctx: &RuleContext<NoUselessTypeConversion>,
+    operand: &AnyJsExpression,
+    ty: InferredType,
+    primitive: PrimitiveKind,
+) -> bool {
+    matches_primitive_type(ty, primitive) && !may_be_enum_member(ctx, operand)
+}
+
+/// Returns whether `expression` may read a member of an enum, as `E.A` and
+/// `E["A"]` do where `E` names an enum declared in this module or imported.
+///
+/// TypeScript gives such a member the type of the enum, not the primitive type
+/// of its value, so converting the member changes its type. Biome types the
+/// member by its value, so the rule leaves these operands out. A member read
+/// through a variable that holds the enum, and a variable that holds a
+/// member's value, are still checked.
+fn may_be_enum_member(
+    ctx: &RuleContext<NoUselessTypeConversion>,
+    expression: &AnyJsExpression,
+) -> bool {
+    ctx.classify_expression_as_enum_member(expression) != TypeInferenceClassification::NoMatch
 }
 
 fn is_empty_string_expression(expression: &AnyJsExpression) -> bool {

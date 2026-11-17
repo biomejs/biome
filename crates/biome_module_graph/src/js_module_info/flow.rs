@@ -57,7 +57,10 @@ pub(crate) use builder::{
     AnyMemberDeclaration, CalleeReturn, declaration_return, member_explicitness, member_return,
 };
 pub(crate) use expressions::AnyFlowExpression;
-pub(crate) use guards::{FlowGuard, FlowTest, UnitValue, binding_unit_value, guard_signature};
+pub(crate) use guards::{
+    FlowGuard, FlowTest, UnitValue, binding_unit_value, enum_member_name_range,
+    enum_member_unit_value, guard_signature, member_key,
+};
 pub(crate) use scanner::FlowRootScanner;
 
 use biome_js_control_flow::AnyJsControlFlowRoot;
