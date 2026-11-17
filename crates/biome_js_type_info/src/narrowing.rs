@@ -170,45 +170,51 @@ pub fn raw_primitive_target<'a>(
     RawPrimitiveTarget::Other
 }
 
-/// Retains the values of `ty` that can pass a runtime test.
+/// Narrows `ty` to the values that can pass a runtime test when `positive` is
+/// true, or to the values that can fail it when `positive` is false.
 ///
-/// `positive` selects the test's true branch; `false` selects its complement.
-/// Inputs should be normalized. Unresolved handles, wrappers, unsupported
-/// structures, and [narrowing-invariant](is_narrowing_invariant) types stay
-/// unchanged. A `void` result becomes `Unknown` because its runtime value is
-/// unspecified. Explicit TypeScript `unknown` supports positive primitive
-/// `typeof` and literal tests. Only proven empty results become `NeverKeyword`.
+/// Pass a normalized `ty`. The result is `NeverKeyword` only when no member of
+/// `ty` can pass, and it is `ty` itself when the test removes nothing. A member
+/// stays unchanged when the test can't tell whether its values pass, which is
+/// the case for `any`, `Unknown`, generic types, and unresolved handles. Other
+/// members follow these rules:
 ///
-/// Union traversal visits at most 256 types and returns the original input on
-/// exhaustion. Literal decoding accepts at most 1024 bytes per operand. Escaped
-/// strings and template literals are not decoded. Broad primitive types cannot
-/// exclude individual literals, and the false branch of a truthiness test keeps
-/// `string`, `number`, and `bigint` unchanged, as TypeScript does at a read.
-/// [`falsy_values`] gives the narrower type of the value that `&&` returns.
+/// - A `void` member becomes `Unknown`, because a `void` value can be any value
+///   at runtime.
+/// - `unknown` narrows only in a true branch: to the primitive type of a
+///   primitive `typeof` test, or to the literal of an equality test. TypeScript
+///   also narrows it for `"object"` and `"function"`, so Biome is wider there.
+/// - The false branch of an equality test keeps a primitive type such as
+///   `string`, because a type can't exclude a single literal from it. The false
+///   branch of a truthiness test keeps `string`, `number`, and `bigint` for the
+///   same reason, as TypeScript does at a read. [`falsy_values`] gives the
+///   narrower type of the value that `&&` returns.
+/// - An equality test leaves `ty` unchanged when its literal is a template
+///   literal, a string with escapes, or longer than 1024 bytes, because Biome
+///   doesn't decode those.
+/// - A union with more than 256 types, counting nested unions and their
+///   members, is returned unchanged.
 ///
 /// A primitive or a function can have an object type, such as
-/// `{ length: number }`, which every string has. Falsy and `typeof` tests
-/// therefore compare an object type with the apparent types of the values that
-/// pass the test:
+/// `{ length: number }`, which every string has. So falsy and `typeof` tests
+/// compare an object type with the apparent types of the values that pass:
 ///
 /// - The false branch of a truthiness test removes it when no falsy string,
 ///   number, boolean, or bigint can have it.
 /// - The true branch of `typeof` with a primitive kind or `"function"` removes
-///   it when no value of that kind can have it, and replaces it with the
+///   it when no value of that kind can have it. It replaces it with the
 ///   primitive type or `Function` when every value of that kind has it, as
 ///   TypeScript does.
 /// - The true branch of `typeof` with `"undefined"` removes it.
 /// - The false branch of `typeof` with `"object"` removes it when no primitive
 ///   and no function can have it.
 ///
-/// Other branches keep it, and so does a comparison that cannot decide. Such
-/// object types are type literals, interfaces, and instances of classes,
-/// interfaces, and type literals. Generics and unresolved handles stay
-/// unchanged. `resolve` replaces local and global handles with the types they
-/// stand for, as for [`InternedExtendsType::select_branch`]. Narrowing calls it
-/// only to compare object types.
+/// Other branches keep object types, and so does a comparison that can't
+/// decide. An object type is a type literal, an interface, or an instance of a
+/// class, an interface, or a type literal.
 ///
-/// [`InternedExtendsType::select_branch`]: crate::interned_types::InternedExtendsType::select_branch
+/// `resolve` replaces a local or global handle with the type it stands for.
+/// Narrowing calls it only to compare object types.
 pub fn narrow_type<'db>(
     db: &'db dyn TypeDb,
     ty: InferredTypeData<'db>,

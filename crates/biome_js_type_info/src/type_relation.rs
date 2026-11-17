@@ -191,35 +191,43 @@ impl<'db> InternedExtendsType<'db> {
     }
 }
 
-/// Decides whether a value whose `typeof` is `kind` can have the object type
-/// `target`, by comparing the value's apparent type with `target`.
+/// Returns whether a value whose `typeof` is `kind` can have the object type
+/// `target`, by comparing `target` with the value's apparent type.
 ///
 /// The apparent type of a primitive is its wrapper, such as `String` for
 /// `"string"`, together with the members of `Object`. For `"function"` it is
-/// `Function`. `target` must be normalized. The result is:
+/// `Function`. `target` must be normalized.
 ///
-/// - `Assignable` when every such value has the type, as every string has
-///   `{ length: number }` and every value that is not nullish has `{}`;
-/// - `NotAssignable` when no such value has it: `target` requires a member
-///   that the apparent type lacks, all of its members are optional and the
-///   apparent type has none of them, or it has a call or construct signature,
-///   which only functions have;
-/// - `Undetermined` otherwise.
+/// Returns `Assignable` when every such value has `target`. For example, every
+/// string has `{ length: number }`, and every value that isn't nullish has
+/// `{}`.
 ///
-/// Only missing members are conclusive. A member whose type does not match
-/// leaves the result undetermined, because the generated globals come from
-/// the ES2015 library files, and newer ones add overloads to some members,
-/// such as `localeCompare` of `String`. For the same reason, a member that a
-/// newer TypeScript library adds to a wrapper, such as `padStart` of
-/// `String`, counts as present with an unknown type. So do the members
-/// `toString`, `toLocaleString`, and `valueOf` of a `bigint`, which has no
-/// wrapper among the generated globals. Members that the project adds to a
-/// wrapper through `declare global` are not seen.
+/// Returns `NotAssignable` when no such value has `target`:
 ///
-/// For `"function"`, a `target` that has or may inherit a call or construct
-/// signature is undetermined, because some functions have that type and others
-/// do not. The result is always `NotAssignable` for `"undefined"`, because no
-/// such value has an object type, and `Undetermined` for `"object"`.
+/// - `kind` is `"undefined"`.
+/// - `target` requires a member that the apparent type lacks.
+/// - Every member of `target` is optional, and the apparent type has none of
+///   them.
+/// - `target` has a call or construct signature, and `kind` isn't
+///   `"function"`.
+///
+/// Returns `Undetermined` in every other case, including these:
+///
+/// - `kind` is `"object"`.
+/// - `kind` is `"function"`, and `target` has or may inherit a call or
+///   construct signature. Some functions have such a type and others don't.
+/// - A member of the apparent type has a different type from the member of
+///   `target`. Only a missing member is conclusive, because the generated
+///   globals come from the ES2015 library files, and newer ones add overloads
+///   to some members, such as `localeCompare` of `String`.
+/// - `target` has a member that a newer library adds to the wrapper, such as
+///   `padStart` of `String`. The `toString`, `toLocaleString`, and `valueOf`
+///   members of a `bigint` count the same way, because the generated globals
+///   have no `BigInt` wrapper.
+/// - `target` has more than 64 members, or members that can't be listed.
+///
+/// Members that the project adds to a wrapper through `declare global` aren't
+/// seen, so a `target` that requires one gives `NotAssignable`.
 pub(crate) fn primitive_can_satisfy<'db>(
     db: &'db dyn TypeDb,
     kind: TypeofKind,
