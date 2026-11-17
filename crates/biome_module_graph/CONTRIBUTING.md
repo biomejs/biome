@@ -95,10 +95,13 @@ narrowing updates the rows it affects there. This section describes how
 narrowing is built.
 
 An execution root is a body analyzed independently, such as a module,
-function, or method. Each root gets its own graph. A read in a closure, such
-as an arrow function, continues the flow of the root that creates the
-closure from the point where it creates it, as TypeScript does; any other
-read never sees facts from an enclosing root. Biome uses its semantic model to
+function, or method. Each root gets its own graph. A function or arrow
+expression called where it is defined and a class static block are inline
+code: they run in the flow of the root around them, as TypeScript's binder
+runs them, so they are part of its graph. A read in a closure, such as an
+arrow function, continues the flow of the root that creates the closure from
+the point where it creates it, as TypeScript does; any other read never sees
+facts from an enclosing root. Biome uses its semantic model to
 distinguish variables with the same name.
 
 Flow is split like types: collection gathers syntax-only facts, and tracked
@@ -129,7 +132,17 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   (`GuardFunctions::keeps_statement_call`). It also records whether the root's own code
   uses `this`, so a root whose only subjects are paths on `this` still gets a
   graph. The scanner rejects a root when its own code contains a `with`
-  statement or bogus syntax, and a root over its node or depth limit. Declaration files (`.d.ts`, `.d.mts`, `.d.cts`, in any letter
+  statement or bogus syntax, and a root over its node or depth limit.
+  Inline code opens no root (`AnyInlineCode::runs_inline`, which the
+  builder and the closure code share), so its conditions, writes, statement
+  calls, and bindings belong to the root around it, unless it lies where that
+  root's builder doesn't evaluate it: in a class member other than a static
+  block, a decorator, a computed key of a method or accessor, a type, an
+  ambient declaration, or an export clause that is not a statement. Inline
+  code directly in a root is also selected after that root as a fallback
+  (`SelectedRoot::enclosing`), which collection builds as a root of its own
+  only when the root around it wasn't built, as when the scanner rejects it,
+  so its own tests still narrow its reads. Declaration files (`.d.ts`, `.d.mts`, `.d.cts`, in any letter
   case) contain no code that runs, so the visitor does not look for roots in
   them.
 - `builder.rs` builds the graph of one selected root from start, join,
@@ -206,15 +219,27 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   write node; then it joins each `?.`'s short circuit with the chain's end. A `?.` whose object the raw tables show can't be
   nullish (`raw_may_be_nullish` in `biome_js_type_info`), such as a variable
   that holds an object literal, adds no condition, so it doesn't make the
-  object a tested subject. The builder skips class members: methods, accessors,
-  constructors, and static blocks are roots of their own, and TypeScript
-  analyzes a class field that has an initializer apart from the code around
-  the class. It also skips `declare` statements, which never run. It records
-  each closure that it skips in reachable code and that continues the flow
-  where it is created (`AnyContinuingClosure`: a function or arrow
-  expression, or a method or accessor of an object literal or of a class
-  expression) with the flow point there, its capture point
-  (`BuiltRoot::captures`).
+  object a tested subject. The builder skips class members other than static
+  blocks: methods, accessors, and constructors are roots of their own, and
+  TypeScript analyzes a class field that has an initializer apart from the
+  code around the class. A static block runs where its class is evaluated,
+  after its `extends` clause and in member order. A call of inline code
+  evaluates its arguments, then the function's parameters and body
+  (`inline_body`), with jump targets and finally blocks of its own and a
+  return join that each `return` reaches, and the code after the call
+  continues from the end of the body joined with the returns. A `throw` and
+  each write point reach the exception joins of the `try` statements around
+  the call, so the writes reach a catch clause there, which TypeScript
+  doesn't do. A call with `?.` runs the body before its arguments, as
+  TypeScript's binder does. When no path leaves the inline code, the flow
+  after it is a join without predecessors, which ends the path at the end of
+  the statement. The builder also skips `declare` statements, which never
+  run. It records each closure that it skips in reachable code and that
+  continues the flow where it is created (`AnyContinuingClosure`: a function
+  or arrow expression that is not inline code, or a method or accessor of an
+  object literal or of a class expression) with the flow point there, its
+  capture point (`BuiltRoot::captures`), so a closure inside inline code
+  takes its capture point from the flow where the inline code runs.
 - The builder models the control flow of blocks, `if`, `while`, `do...while`,
   `for`, `for...in`, `for...of`, `switch`, `try`, labeled statements,
   `break`, `continue`, `return`, and `throw`, as TypeScript's binder does. A
@@ -531,7 +556,10 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   test such a variable as an ordinary subject, because its annotation
   already shows that these tests narrow it.
 - `writes.rs` finds the writes of a root that its graph doesn't model, as
-  in a function called where it is defined or a class static block. A
+  in an `async` function or a generator called where it is defined, a field
+  initializer, or unreachable code, and as a write through the `this` of a
+  static block or of a function expression called where it is defined, whose
+  `this` is not a subject of the root. A
   variable narrows only when each of its semantic writes in the root has a
   write node or runs only when called (`runs_only_when_called`). A write
   outside the root, of a variable that an enclosing root declares, never
@@ -665,10 +693,11 @@ exported or declared at the top level of a file, read after its last
 assignment. The last assignment comes from the variable's semantic writes,
 each extended to the end of the outermost statement of TypeScript's list
 around it that starts after the declaration (`assignment_position`, as
-`extendAssignmentPosition` does), and a write in another function means that
-no read continues. Every function between the read and the root must be such
-a closure, and each must reach the next one in, or the read, in its own
-reachable code (`continues_to`): as its builder found it, for a root that was
+`extendAssignmentPosition` does), and a write in another function, inline
+code included, means that no read continues. Every function between the read
+and the root, other than inline code, which belongs to the function around
+it, must be such a closure, and each must reach the next one in, or the read,
+in its own reachable code (`continues_to`): as its builder found it, for a root that was
 built, and otherwise when no `return`, `throw`, `break`, `continue`, or
 infinite loop ends before it (`first_exit`), which is wider. Decorators,
 computed keys of members, fields, types, `declare` statements, and `with`

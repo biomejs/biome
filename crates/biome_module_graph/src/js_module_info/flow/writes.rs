@@ -1,12 +1,13 @@
 //! Finds the writes of an execution root that its flow graph doesn't model.
 //!
-//! The builder adds a write point for each write in the root's own flow. A
-//! write that runs with the root but outside that flow, as in a function
-//! expression called where it is defined, a class static block, or a field
-//! initializer, has no point, so a subject that such code writes doesn't
-//! narrow anywhere in the root. Like TypeScript, the scan ignores the bodies
-//! of other functions, because they run only when called. A call never
-//! cancels narrowing, in TypeScript or in Biome.
+//! The builder adds a write point for each write in the root's own flow,
+//! including the functions called where they are defined and the class static
+//! blocks that run in it. A write that runs with the root but outside that
+//! flow, as in an `async` function or a generator called where it is defined
+//! or in a field initializer, has no point, so a subject that such code
+//! writes doesn't narrow anywhere in the root. Like TypeScript, the scan
+//! ignores the bodies of other functions, because they run only when called.
+//! A call never cancels narrowing, in TypeScript or in Biome.
 
 use super::subjects::{literal_key, property_key};
 use super::{FlowSubject, FlowSubjectId, FlowSubjectTable, PropertyKey};
@@ -103,9 +104,11 @@ const CALL_KINDS: SyntaxKindSet<JsLanguage> =
 /// differs from TypeScript, it counts more writes: TypeScript ignores, for
 /// example, writes in `async` and generator functions called where they are
 /// defined, in field initializers and the parameter defaults of methods,
-/// through `as` and `satisfies`, and through `super`. Like the scan, TypeScript 7.0.2 treats
-/// `this.v = x` in a static block as a write of the root's `this.v`, although
-/// the static block's `this` is the class.
+/// through `as` and `satisfies`, and through `super`. Like the scan,
+/// TypeScript treats `this.v = x` in a static block or in a function
+/// expression called where it is defined as a write of the root's `this.v`,
+/// although that code's `this` is another value. The builder gives such a
+/// write no write point, so the path doesn't narrow anywhere in the root.
 ///
 /// The scan tells apart the writes that the builder recorded with a write
 /// point in the graph from the others. The others run outside the root's
@@ -608,15 +611,12 @@ mod tests {
     #[test]
     fn writes_that_run_with_the_root_outside_its_flow_cancel() {
         for body in [
-            "(() => { o.v = null; })()",
-            "(() => o.v = null)()",
-            "(function () { o.v = null; })()",
             "(async () => { o.v = null; })()",
             "(function* () { o.v = null; })()",
             "new (function () { o.v = null; })()",
-            "(() => { (() => { o.v = null; })(); })()",
-            "class C { static { o.v = null; } }",
+            "((() => { o.v = null; }) as any)()",
             "class C { static x = (o.v = null); }",
+            "class C { x = ((() => { o.v = null; })()); }",
             "class C { x = (o.v = null); }",
             "class C { [(o.v = null, 'k')]() {} }",
             "class C { m(a = (o.v = null)) {} }",
@@ -638,6 +638,11 @@ mod tests {
         for body in [
             "if (q) { o.v = null; }",
             "o.v = null",
+            "(() => { o.v = null; })()",
+            "(() => o.v = null)()",
+            "(function () { o.v = null; })()",
+            "(() => { (() => { o.v = null; })(); })()",
+            "class C { static { o.v = null; } }",
             "o['v'] ??= 1",
             "o.v++",
             "[o.v] = xs",
@@ -744,9 +749,14 @@ mod tests {
         assert_eq!(cancelled("o = q"), ["o.v", "o.v.w", "o.w", "o.v.w.x"]);
         // The graph has a write point for it.
         assert_eq!(unmodeled_among(&PATHS, "o = q"), Vec::<&str>::new());
-        // A write in a function called where it is defined has none.
+        // So does a write in a function that runs inline, but not one in an
+        // `async` function called where it is defined.
         assert_eq!(
             unmodeled_among(&PATHS, "(() => { o = q; })()"),
+            Vec::<&str>::new()
+        );
+        assert_eq!(
+            unmodeled_among(&PATHS, "(async () => { o = q; })()"),
             ["o.v", "o.v.w", "o.w", "o.v.w.x"]
         );
     }

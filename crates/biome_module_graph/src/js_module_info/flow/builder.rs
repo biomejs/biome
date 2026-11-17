@@ -24,12 +24,14 @@ use biome_js_syntax::{
     AnyJsTryStatement, AnyJsVariableDeclaration, AnyTsType, AnyTsTypeMember, ClassMemberName,
     JsArrowFunctionExpression, JsAssignmentExpression, JsAssignmentOperator, JsBinaryOperator,
     JsCallExpression, JsClassExpression, JsClassMemberList, JsComputedMemberAssignment,
-    JsDoWhileStatement, JsForInStatement, JsForOfStatement, JsForStatement, JsFunctionExpression,
-    JsGetterClassMember, JsGetterObjectMember, JsIdentifierExpression, JsIfStatement,
-    JsInitializerClause, JsLanguage, JsMethodClassMember, JsMethodObjectMember, JsParameters,
-    JsParenthesizedExpression, JsSetterClassMember, JsSetterObjectMember, JsStaticMemberExpression,
-    JsSwitchStatement, JsSyntaxNode, JsThisExpression, JsUnaryExpression, JsUnaryOperator,
-    JsVariableDeclarator, JsWhileStatement, T, TsInterfaceDeclaration,
+    JsComputedMemberName, JsDecorator, JsDoWhileStatement, JsExport, JsForInStatement,
+    JsForOfStatement, JsForStatement, JsFunctionExpression, JsGetterClassMember,
+    JsGetterObjectMember, JsIdentifierExpression, JsIfStatement, JsInitializerClause, JsLanguage,
+    JsMethodClassMember, JsMethodObjectMember, JsParameters, JsParenthesizedExpression,
+    JsSetterClassMember, JsSetterObjectMember, JsStaticInitializationBlockClassMember,
+    JsStaticMemberExpression, JsSwitchStatement, JsSyntaxNode, JsThisExpression, JsUnaryExpression,
+    JsUnaryOperator, JsVariableDeclarator, JsWhileStatement, T, TsDeclareStatement,
+    TsExternalModuleDeclaration, TsGlobalDeclaration, TsInterfaceDeclaration,
     TsNonNullAssertionExpression, TsTypeAnnotation, binding_ext::AnyJsBindingDeclaration,
 };
 use biome_js_type_info::{DestructureField, own_returns};
@@ -45,14 +47,17 @@ const MAX_SYNTAX_NODES: usize = 16_384;
 pub(super) const MAX_DEPTH: usize = 128;
 const MAX_FLOW_NODES: usize = 65_536;
 
-/// Nodes below a statement list that contain no statement of the execution
-/// root: expressions, types, and nested execution roots.
+/// Nodes below a statement list that the statement walk doesn't enter:
+/// expressions, types, and nested execution roots. Evaluation builds the
+/// statements of inline code among them where it runs.
 const NON_STATEMENT_KINDS: SyntaxKindSet<JsLanguage> = AnyJsControlFlowRoot::KIND_SET
     .union(AnyJsExpression::KIND_SET)
     .union(AnyTsType::KIND_SET);
 
 /// Nodes that evaluation leaves out of the enclosing flow: nested execution
-/// roots, class members, and types.
+/// roots, class members, and types. Inline code among them, a static block or
+/// a function called where it is defined, still runs in the enclosing flow
+/// (see [`AnyInlineCode::runs_inline`]).
 const UNEVALUATED_KINDS: SyntaxKindSet<JsLanguage> = AnyJsControlFlowRoot::KIND_SET
     .union(AnyJsClassMember::KIND_SET)
     .union(AnyTsType::KIND_SET);
@@ -124,8 +129,10 @@ declare_node_union! {
     /// and a method or accessor of an object literal or of a class. A method
     /// or accessor of a class continues the flow only in a class expression
     /// (see [`Self::continues_outer_flow`]). TypeScript starts the flow of a
-    /// function declaration, a constructor, a static block, and a method or
-    /// accessor of a class declaration at their own start.
+    /// function declaration, a constructor, and a method or accessor of a
+    /// class declaration at their own start. A function or arrow expression
+    /// that runs inline is no closure: the builder evaluates it where it runs
+    /// (see [`AnyInlineCode::runs_inline`]).
     pub(super) AnyContinuingClosure = JsFunctionExpression
         | JsArrowFunctionExpression
         | JsMethodObjectMember
@@ -157,6 +164,130 @@ impl AnyContinuingClosure {
             .and_then(|members| JsClassMemberList::cast(members)?.parent::<JsClassExpression>())
             .is_some()
     }
+}
+
+declare_node_union! {
+    /// Code that may run inline, as part of the flow of the execution root
+    /// around it: a function or arrow expression called where it is defined,
+    /// or a class static block. See [`Self::runs_inline`].
+    pub(super) AnyInlineCode = JsFunctionExpression
+        | JsArrowFunctionExpression
+        | JsStaticInitializationBlockClassMember
+}
+
+/// Code inside which an inline function or static block never runs in the
+/// flow of the root around it: class members other than static blocks,
+/// decorators, types, and ambient declarations. Collection treats a function
+/// called where it is defined inside such code as a root of its own.
+const INLINE_BARRIER_KINDS: SyntaxKindSet<JsLanguage> = AnyJsClassMember::KIND_SET
+    .union(JsDecorator::KIND_SET)
+    .union(AnyTsType::KIND_SET)
+    .union(TsDeclareStatement::KIND_SET)
+    .union(TsExternalModuleDeclaration::KIND_SET)
+    .union(TsGlobalDeclaration::KIND_SET);
+
+impl AnyInlineCode {
+    /// Returns whether this code runs as part of the flow of the execution
+    /// root around it, as TypeScript's binder runs it, instead of being a
+    /// root of its own.
+    ///
+    /// A static block runs where its class is evaluated. A function or arrow
+    /// expression that is neither `async` nor a generator runs where a call
+    /// directly invokes it, through parentheses only, as in `(() => {})()`,
+    /// `(function () {})?.()`, or `!(() => {})()`. TypeScript runs an
+    /// `async` function or a generator called in place, a function called
+    /// through `.call`, a non-null assertion, or `as`, and a constructed one
+    /// apart from the code around them.
+    ///
+    /// The code must also lie where the builder of that root evaluates it:
+    /// in a statement or an expression of the root's own code, including
+    /// other inline code, but not in a class member other than a static
+    /// block, a decorator, the computed key of a method or accessor, a type,
+    /// an ambient declaration, or an export clause that is not a statement,
+    /// such as `export const v = (() => 1)();`. A function called in place
+    /// there stays a root of its own, so its own tests still narrow its
+    /// reads.
+    pub(super) fn runs_inline(&self) -> bool {
+        if !self.is_called_in_place() {
+            return false;
+        }
+        let mut in_statement = false;
+        for ancestor in self.syntax().ancestors().skip(1) {
+            let kind = ancestor.kind();
+            if AnyJsControlFlowRoot::can_cast(kind) {
+                match Self::cast(ancestor) {
+                    // Its context decides for both, so the walk goes on.
+                    Some(code) if code.is_called_in_place() => {
+                        in_statement = false;
+                        continue;
+                    }
+                    _ => return true,
+                }
+            }
+            if INLINE_BARRIER_KINDS.matches(kind)
+                || (JsComputedMemberName::can_cast(kind)
+                    && ancestor
+                        .parent()
+                        .is_some_and(|member| AnyJsControlFlowRoot::can_cast(member.kind())))
+            {
+                return false;
+            }
+            if AnyJsStatement::can_cast(kind) {
+                in_statement = true;
+            } else if JsExport::can_cast(kind) && !in_statement {
+                return false;
+            }
+        }
+        false
+    }
+
+    /// Returns whether this is a static block, or a function or arrow
+    /// expression that is neither `async` nor a generator and that a call
+    /// invokes where it is defined, whatever the code around the call.
+    fn is_called_in_place(&self) -> bool {
+        match self {
+            Self::JsStaticInitializationBlockClassMember(_) => true,
+            Self::JsFunctionExpression(_) | Self::JsArrowFunctionExpression(_) => {
+                let mut parent = self.syntax().parent();
+                while let Some(node) = parent
+                    .as_ref()
+                    .filter(|node| JsParenthesizedExpression::can_cast(node.kind()))
+                {
+                    parent = node.parent();
+                }
+                parent
+                    .and_then(JsCallExpression::cast)
+                    .and_then(|call| inline_callee(&call))
+                    .is_some_and(|callee| callee.syntax() == self.syntax())
+            }
+        }
+    }
+}
+
+/// Returns the function or arrow expression that `call` invokes, through
+/// parentheses, when it is neither `async` nor a generator, without checking
+/// where the call is.
+fn inline_callee(call: &JsCallExpression) -> Option<AnyJsFunction> {
+    match call.callee().ok()?.omit_parentheses() {
+        AnyJsExpression::JsFunctionExpression(function)
+            if function.async_token().is_none() && function.star_token().is_none() =>
+        {
+            Some(function.into())
+        }
+        AnyJsExpression::JsArrowFunctionExpression(arrow) if arrow.async_token().is_none() => {
+            Some(arrow.into())
+        }
+        _ => None,
+    }
+}
+
+/// Returns the function or arrow expression that `call` runs inline, as
+/// [`AnyInlineCode::runs_inline`] decides, or `None` when `call` invokes
+/// anything else.
+fn inline_function(call: &JsCallExpression) -> Option<AnyJsFunction> {
+    inline_callee(call).filter(|function| {
+        AnyInlineCode::cast_ref(function.syntax()).is_some_and(|code| code.runs_inline())
+    })
 }
 
 /// A closure that a root creates, with its capture point, the flow where the
@@ -196,11 +327,17 @@ type Build<T> = Result<T, Unsupported>;
 /// `root` must be selected by a [`FlowRootScanner`], which rejects the roots
 /// that the builder cannot build, such as a root with a `with` statement.
 /// Expression-bodied arrows are supported. Parameters run before the body.
-/// Class members, `declare` statements, and the expressions of module export
-/// declarations other than classes and enums are not evaluated, and
-/// unreachable code records no reads and adds no write points. A write there
-/// has no write point, so collection counts it as a write that the graph
-/// doesn't model, as [`BuiltRoot::written`] describes.
+/// Class members other than static blocks, `declare` statements, and the
+/// expressions of module export declarations other than classes and enums
+/// are not evaluated, and unreachable code records no reads and adds no write
+/// points. A write there has no write point, so collection counts it as a
+/// write that the graph doesn't model, as [`BuiltRoot::written`] describes.
+///
+/// A function or arrow expression called where it is defined and a class
+/// static block run inline, as [`AnyInlineCode::runs_inline`] decides: a call
+/// evaluates the function's parameters and body where it runs it, and the
+/// code after the call continues from the end of the body joined with each
+/// `return`. A static block runs where its class is evaluated.
 ///
 /// The builder models the control flow of blocks, `if`, `while`, `do...while`,
 /// `for`, `for...in`, `for...of`, `switch`, `try`, labeled statements,
@@ -1586,6 +1723,10 @@ impl RootBuilder<'_, '_> {
 
     /// Builds the statements found below `node`, without entering
     /// expressions, types, or nested execution roots.
+    ///
+    /// A statement whose evaluation reaches only a join without
+    /// predecessors, as after a function called in place that always throws,
+    /// ends the path, so the statements after it are unreachable.
     fn statements(&mut self, node: &JsSyntaxNode) -> Build<()> {
         for child in node.children() {
             if NON_STATEMENT_KINDS.matches(child.kind()) {
@@ -1594,6 +1735,11 @@ impl RootBuilder<'_, '_> {
             match AnyJsStatement::cast_ref(&child) {
                 Some(statement) => self.statement(statement, None)?,
                 None => self.statements(&child)?,
+            }
+            if let Some(current) = self.current
+                && matches!(self.nodes.get(current as usize), Some(FlowNode::Join(predecessors)) if predecessors.is_empty())
+            {
+                self.current = None;
             }
         }
         Ok(())
@@ -1813,6 +1959,81 @@ impl RootBuilder<'_, '_> {
             }
         }
         Ok(())
+    }
+
+    /// Evaluates `function`, which a call runs inline (see
+    /// [`AnyInlineCode::runs_inline`]), from `incoming`, the flow where the
+    /// call runs it, and returns the flow after the call: the end of its body
+    /// joined with each `return`. Returns `None` when no path leaves the
+    /// body, as when every path throws. `depth` is the depth of the call.
+    ///
+    /// The parameters run first, as for a root, and then the body. A `throw`
+    /// reaches the joins of the `try` statements around the call, and each
+    /// write point joins them, as anywhere in the root. Each build of the
+    /// body, as in a finally block that is built twice, has its own return
+    /// join, and the jump targets and the finally blocks around the call
+    /// never apply inside the body.
+    fn inline_body(
+        &mut self,
+        function: &AnyJsFunction,
+        incoming: FlowNodeId,
+        depth: usize,
+    ) -> Build<Option<FlowNodeId>> {
+        let root = AnyJsControlFlowRoot::AnyJsFunction(function.clone());
+        if !has_complete_statements(&root) {
+            return Err(Unsupported);
+        }
+        let jumps = std::mem::take(&mut self.jumps);
+        let returns = std::mem::replace(&mut self.returns, vec![Vec::new()]);
+        let current = self.current;
+        let start = self.parameters(&root, incoming)?;
+        let end = match function.body().map_err(|_| Unsupported)? {
+            AnyJsFunctionBody::AnyJsExpression(body) => {
+                Some(self.evaluate(body.syntax(), start, depth + 1)?)
+            }
+            AnyJsFunctionBody::JsFunctionBody(body) => {
+                self.current = Some(start);
+                self.statements(body.syntax())?;
+                self.current
+            }
+        };
+        let returned = std::mem::replace(&mut self.returns, returns)
+            .pop()
+            .ok_or(Unsupported)?;
+        self.jumps = jumps;
+        self.current = current;
+        self.join(end.into_iter().chain(returned))
+    }
+
+    /// Evaluates the statements of `block`, a static block that runs inline
+    /// where its class is evaluated, from `incoming`, and returns the flow
+    /// after them, or `None` when no path leaves them.
+    fn static_block(
+        &mut self,
+        block: &JsStaticInitializationBlockClassMember,
+        incoming: FlowNodeId,
+    ) -> Build<Option<FlowNodeId>> {
+        if !has_complete_statements(&block.clone().into()) {
+            return Err(Unsupported);
+        }
+        let jumps = std::mem::take(&mut self.jumps);
+        let returns = std::mem::take(&mut self.returns);
+        let current = self.current.replace(incoming);
+        self.statements(block.syntax())?;
+        let end = std::mem::replace(&mut self.current, current);
+        self.returns = returns;
+        self.jumps = jumps;
+        Ok(end)
+    }
+
+    /// Returns `end`, the flow after inline code inside an expression, or,
+    /// when no path leaves that code, a join without predecessors, which no
+    /// value reaches. [`Self::statements`] ends the path at such a join.
+    fn inline_end(&mut self, end: Option<FlowNodeId>) -> Build<FlowNodeId> {
+        match end {
+            Some(end) => Ok(end),
+            None => self.push(FlowNode::Join(Vec::new())),
+        }
     }
 
     /// Returns the index in `jumps` of the target of `jump`.
@@ -2457,16 +2678,26 @@ impl RootBuilder<'_, '_> {
     ) -> Build<FlowNodeId> {
         self.visit(depth)?;
         let kind = node.kind();
-        // Class members are left out of the enclosing flow: methods,
-        // accessors, constructors, and static blocks are execution roots of
-        // their own, and TypeScript analyzes a class field that has an
-        // initializer, including its decorators and computed key, apart from
-        // the code around the class. Only the decorators and computed keys of
-        // the other members lose the narrowing that TypeScript gives them.
+        // Class members other than static blocks are left out of the
+        // enclosing flow: methods, accessors, and constructors are execution
+        // roots of their own, and TypeScript analyzes a class field that has
+        // an initializer, including its decorators and computed key, apart
+        // from the code around the class. Only the decorators and computed
+        // keys of the other members lose the narrowing that TypeScript gives
+        // them. A static block runs here, in member order, after the class's
+        // `extends` clause.
         if UNEVALUATED_KINDS.matches(kind) {
+            if let Some(block) = JsStaticInitializationBlockClassMember::cast_ref(node)
+                && AnyInlineCode::cast_ref(node).is_some_and(|code| code.runs_inline())
+            {
+                let end = self.static_block(&block, incoming)?;
+                return self.inline_end(end);
+            }
+            // The call that runs an inline function evaluates its body.
             if self.records_reads
                 && let Some(closure) = AnyContinuingClosure::cast_ref(node)
                 && closure.continues_outer_flow()
+                && !AnyInlineCode::cast_ref(node).is_some_and(|code| code.runs_inline())
             {
                 self.captures.push(BuiltCapture {
                     closure,
@@ -2521,10 +2752,16 @@ impl RootBuilder<'_, '_> {
                 self.assignment(&assignment, incoming, depth)
             }
             // The callee and the arguments run before the call adds them to
-            // an array.
+            // an array, or before the body of an inline function runs.
             Some(AnyJsExpression::JsCallExpression(call)) => {
                 let flow = self.children(node, incoming, depth)?;
-                self.array_mutation(&call, flow)
+                match inline_function(&call) {
+                    Some(function) => {
+                        let end = self.inline_body(&function, flow, depth)?;
+                        self.inline_end(end)
+                    }
+                    None => self.array_mutation(&call, flow),
+                }
             }
             Some(AnyJsExpression::JsPreUpdateExpression(update)) => {
                 let operand = update.operand().map_err(|_| Unsupported)?;
@@ -2666,7 +2903,29 @@ impl RootBuilder<'_, '_> {
             }
         };
         let root = root.ok_or(Unsupported)?;
-        let after_root = self.evaluate(root.syntax(), incoming, depth + links.len())?;
+        let mut after_root = self.evaluate(root.syntax(), incoming, depth + links.len())?;
+        // An inline function that the innermost link calls runs before the
+        // rest of the chain, which continues from where the function ends. A
+        // plain call evaluates its arguments, then the body, as JavaScript
+        // does. For an optional call, as in `(() => {})?.(x)`, TypeScript's
+        // binder runs the body before the arguments, which the link evaluates
+        // afterwards. Biome follows it: a function expression is never
+        // nullish, and running the body after the arguments would give a
+        // read in them a type disjoint from TypeScript's.
+        if let Some((AnyJsOptionalChainExpression::JsCallExpression(call), _)) = links.last()
+            && let Some(function) = inline_function(call)
+        {
+            let link_depth = depth + links.len() - 1;
+            let is_optional = call.is_optional();
+            if !is_optional && let Ok(arguments) = call.arguments() {
+                after_root = self.evaluate(arguments.syntax(), after_root, link_depth + 1)?;
+            }
+            let end = self.inline_body(&function, after_root, link_depth)?;
+            after_root = self.inline_end(end)?;
+            if !is_optional {
+                links.pop();
+            }
+        }
         let write_points = self.write_points;
         // The flow where each `?.` gives `undefined` without evaluating the
         // rest of the chain.
@@ -4221,9 +4480,15 @@ mod tests {
         /// Lists, for each acyclic path from the start to the read, the tests
         /// that path assumed, written as `name:Test` or `!name:Test`.
         fn paths(&self, name: &str, occurrence: usize) -> Vec<Vec<String>> {
+            let start = self.point(name, occurrence).expect("read must be recorded");
+            self.paths_from(start)
+        }
+
+        /// Lists the tests that each acyclic path from the start to `start`
+        /// assumed, as [`Self::paths`] does for a read.
+        fn paths_from(&self, start: FlowNodeId) -> Vec<Vec<String>> {
             let root = self.root();
             let mut result = Vec::new();
-            let start = self.point(name, occurrence).expect("read must be recorded");
             let mut pending = vec![(start, Vec::new(), vec![start])];
             let mut budget = 1_000usize;
             while let Some((node, mut facts, visited)) = pending.pop() {
@@ -5420,17 +5685,17 @@ mod tests {
     }
 
     #[test]
-    fn class_expressions_evaluate_only_their_decorators_and_heritage() {
+    fn class_expressions_evaluate_their_decorators_heritage_and_static_blocks() {
         let built = function(
             "function f(v) { if (v) { const C = @use(v) class extends use(v) { [v] = v; static w = v; m() { v; } static { v; } }; after(v); } }",
         );
-        for occurrence in [2, 3, 9] {
+        for occurrence in [2, 3, 8, 9] {
             assert!(
                 contains(&built.paths("v", occurrence), "v:Truthy"),
                 "{occurrence}"
             );
         }
-        for occurrence in 4..=8 {
+        for occurrence in 4..=7 {
             assert_eq!(built.point("v", occurrence), None, "{occurrence}");
         }
     }
@@ -5443,5 +5708,108 @@ mod tests {
         );
         assert_eq!(built.paths("x", 1), [Vec::<String>::new()]);
         assert!(contains(&built.paths("x", 2), "x:Truthy"));
+    }
+
+    #[test]
+    fn inline_functions_run_where_they_are_called() {
+        let built = function("function f(x) { if (x) { (() => { read(x); })(); } after(x); }");
+        assert!(contains(&built.paths("x", 2), "x:Truthy"));
+        // The code after the call continues from the end of the body and from
+        // each `return`.
+        let built = function("function f(x) { (() => { if (x) return; x; })(); after(x); }");
+        assert_eq!(built.paths("x", 2), [vec!["!x:Truthy".to_owned()]]);
+        assert_eq!(
+            sorted_paths(&built, "x", 3),
+            [vec!["!x:Truthy".to_owned()], vec!["x:Truthy".to_owned()]]
+        );
+        let built = function("function f(x) { (function () { if (!x) throw 0; })(); after(x); }");
+        assert_eq!(built.paths("x", 2), [vec!["x:Truthy".to_owned()]]);
+        // A parameter's default runs where the argument is `undefined`.
+        let built = function("function f(x, y) { if (x) ((a = read(x)) => a)(y); }");
+        assert!(contains(&built.paths("x", 2), "x:Truthy"));
+    }
+
+    #[test]
+    fn statements_after_inline_functions_that_always_throw_are_unreachable() {
+        let built =
+            function("function f(x) { if (x) { (() => { throw 0; })(); read(x); } after(x); }");
+        assert_eq!(built.point("x", 2), None);
+        assert_eq!(built.paths("x", 3), [vec!["!x:Truthy".to_owned()]]);
+    }
+
+    #[test]
+    fn returns_in_inline_functions_never_reach_finally_blocks_around_the_call() {
+        let built = function(
+            "function f(x) { try { (() => { if (x) return; x; })(); after(x); } finally { last(x); } }",
+        );
+        assert_eq!(
+            sorted_paths(&built, "x", 3),
+            [vec!["!x:Truthy".to_owned()], vec!["x:Truthy".to_owned()]]
+        );
+        // Each build of a finally block joins the returns of the inline
+        // function that it calls.
+        let built = function(
+            "function f(x) { try { c; } finally { (() => { if (x) return; })(); x; } after(x); }",
+        );
+        for occurrence in [2, 3] {
+            let mut paths = sorted_paths(&built, "x", occurrence);
+            paths.dedup();
+            assert_eq!(
+                paths,
+                [vec!["!x:Truthy".to_owned()], vec!["x:Truthy".to_owned()]],
+                "{occurrence}"
+            );
+        }
+    }
+
+    #[test]
+    fn optional_inline_calls_run_their_body_before_their_arguments() {
+        let built =
+            function("function f(x) { (() => { if (!x) throw 0; })?.(read(x)); after(x); }");
+        assert_eq!(built.paths("x", 2), [vec!["x:Truthy".to_owned()]]);
+        assert_eq!(built.paths("x", 3), [vec!["x:Truthy".to_owned()]]);
+        let built = function("function f(x) { (() => { if (!x) throw 0; })(read(x)); after(x); }");
+        assert_eq!(built.paths("x", 2), [Vec::<String>::new()]);
+        assert_eq!(built.paths("x", 3), [vec!["x:Truthy".to_owned()]]);
+    }
+
+    #[test]
+    fn static_blocks_run_where_their_class_is_evaluated() {
+        let built = function(
+            "function f(v) { class C extends use(v) { static { if (!v) throw 0; } m() { v; } } after(v); }",
+        );
+        assert_eq!(built.paths("v", 1), [Vec::<String>::new()]);
+        assert_eq!(built.point("v", 3), None);
+        assert_eq!(built.paths("v", 4), [vec!["v:Truthy".to_owned()]]);
+    }
+
+    #[test]
+    fn inline_code_where_the_root_doesnt_run_it_stays_out_of_the_flow() {
+        let built = function(
+            "function f(x) { if (x) { class C { y = (() => read(x))(); static z = (() => read(x))(); } (async () => read(x))(); } }",
+        );
+        for occurrence in 2..=4 {
+            assert_eq!(built.point("x", occurrence), None, "{occurrence}");
+        }
+    }
+
+    #[test]
+    fn closures_inside_inline_functions_capture_the_inline_flow() {
+        let source = "function f(x) { if (x) { (() => { const g = () => x; })(); } }";
+        let built = function(source);
+        let captures = &built.root().captures;
+        assert_eq!(captures.len(), 1);
+        assert_eq!(captures[0].closure.range(), built.range("() => x", 0));
+        assert!(contains(&built.paths_from(captures[0].point), "x:Truthy"));
+    }
+
+    #[test]
+    fn this_in_inline_function_expressions_is_their_own() {
+        let built = build(
+            "class K { m() { if (this.v) { (function () { read(this.v); })(); (() => read(this.v))(); } } }",
+            JsSyntaxKind::JS_METHOD_CLASS_MEMBER,
+        );
+        assert_eq!(built.point("this.v", 1), None);
+        assert!(contains(&built.paths("this.v", 2), "this.v:Truthy"));
     }
 }

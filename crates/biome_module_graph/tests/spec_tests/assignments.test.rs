@@ -742,9 +742,10 @@ fn writes_narrow_property_paths() {
 // each read below. Biome is wider: `delete` through an element access gives
 // the path its declared type, where TypeScript ignores it; a write through a
 // key that is not a literal gives every path of the object its declared type;
-// and a subject that a function called where it is defined, a class static
-// block, or a field initializer writes doesn't narrow anywhere in the
-// function. Calls and callbacks never cancel narrowing, as in TypeScript.
+// and a subject that an `async` function called where it is defined or a
+// field initializer writes doesn't narrow anywhere in the function. Calls
+// and callbacks never cancel narrowing, as in TypeScript, and a function
+// called where it is defined and a class static block write in the flow.
 #[test]
 fn writes_that_biome_follows_less_than_typescript() {
     assert_reads(
@@ -753,6 +754,7 @@ fn writes_that_biome_follows_less_than_typescript() {
         function q4(o: { v: string | null }, k: "v") { if (o.v) { o[k] = null; /*anyKey*/o.v; } }
         function q5(o: { v: string | null }) { if (o.v) { [1].forEach(() => { o.v = null; }); /*callback*/o.v; } }
         function q7(o: { v: string | null }) { if (o.v) { (() => { o.v = null; })(); /*invoked*/o.v; } }
+        function q8(o: { v: string | null }) { if (o.v) { (async () => { o.v = null; })(); /*async*/o.v; } }
         function o1(x: string | null) { if (x) { (() => { x = null; })(); /*invokedVariable*/x; } }
         function o2(x: string | null) { if (x) { class C { static { x = null; } } /*staticBlock*/x; } }
         function o3(x: string | null) { if (x) { [1].forEach(() => { x = null; }); /*callbackVariable*/x; } }
@@ -764,12 +766,11 @@ fn writes_that_biome_follows_less_than_typescript() {
             // TypeScript: `string`.
             ("anyKey", "o.v", &["null", "string"]),
             ("callback", "o.v", &["string"]),
-            // TypeScript: `null`.
-            ("invoked", "o.v", &["null", "string"]),
-            // TypeScript: `null`.
-            ("invokedVariable", "x", &["null", "string"]),
-            // TypeScript: `null`.
-            ("staticBlock", "x", &["null", "string"]),
+            ("invoked", "o.v", &["null"]),
+            // TypeScript: `string`.
+            ("async", "o.v", &["null", "string"]),
+            ("invokedVariable", "x", &["null"]),
+            ("staticBlock", "x", &["null"]),
             ("callbackVariable", "x", &["string"]),
             // TypeScript: `string`.
             ("fieldInitializer", "x", &["null", "string"]),

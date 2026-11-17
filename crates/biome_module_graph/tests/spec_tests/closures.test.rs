@@ -223,26 +223,14 @@ fn closures_keep_the_declared_type_where_typescript_does() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives the narrower type in the comment for
-// each read below. In TypeScript, a class static block continues the flow of
-// the code around its class, and so does a function called where it is
-// defined, so its writes change the reads after the call. Biome analyzes both
-// on their own. Biome also evaluates no computed key of a class member.
+// the read below. Biome evaluates no computed key of a class member.
 #[test]
 fn closures_that_biome_narrows_less() {
     assert_reads(
         r#"
-        function k36() { const x: string | null = f(); if (x) (class { static { /*k36*/x; } }); }
-        function k37() { const x: string | null = f(); if (x) { class E { static { /*k37*/x; } } } }
-        function k41() { let x: string | null = f(); if (x) { (() => { x = null; })(); /*k41*/x; } }
         function k43() { const x: string | null = f(); if (x) { (class { [(/*k43*/x, "k")]() {} }); } }
         "#,
         &[
-            // TypeScript: `string`.
-            ("k36", "x", &["null", "string"]),
-            // TypeScript: `string`.
-            ("k37", "x", &["null", "string"]),
-            // TypeScript: `null`.
-            ("k41", "x", &["null", "string"]),
             // TypeScript: `string`.
             ("k43", "x", &["null", "string"]),
         ],
@@ -694,5 +682,273 @@ fn closures_share_the_solve_of_the_enclosing_root() {
         solves(&db, &events),
         0,
         "lookups after complete module inference must reuse its solves"
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A function or arrow expression that is neither `async` nor a generator and
+// that a call invokes where it is defined, through parentheses, also with
+// `?.()` or when the call is the operand of `!` or `void`, runs in the flow
+// of the code around the call: its arguments run,
+// then its parameters and body, and the code after the call continues from
+// the end of the body joined with each `return`. So a write in it narrows the
+// code after the call, and a `throw` ends the path, also inside a nested
+// inline function or a loop. A call through `.call`, a class constructed with
+// `new`, and a function called later run elsewhere, and keep the narrowing.
+// The body of an optional call, as in `(() => {})?.(x)`, runs before its
+// arguments, as TypeScript's binder runs it. A read after a function that
+// always throws is unreachable and keeps its declared type. A generator
+// called in place is analyzed on its own. TypeScript reports TS1345 for
+// testing the `void` result at `i15`, and still gives `null`.
+#[test]
+fn inline_functions_run_in_the_flow_where_they_are_called() {
+    assert_reads(
+        r#"
+        function i1(x: string | null) { if (x) (() => /*i1*/x)(); }
+        function i2(x: string | null) { if (x) { (() => { x = null; })(); /*i2*/x; } }
+        function i3(x: string | null) { (() => { if (x === null) throw 0; })(); /*i3*/x; }
+        function i4(x: string | null) { (function () { if (x === null) throw 0; })(); /*i4*/x; }
+        function i5(x: string | null) { (() => { if (x === null) return; })(); /*i5*/x; }
+        function i6(x: string | null) { (async () => { x = null; })(); /*i6*/x; }
+        function i9(x: string | null) { if (x) { (() => { x = "a"; })(); /*i9*/x; } }
+        function i10(x: string | null) { const r = (() => { if (x === null) throw 0; return 1; })(); /*i10*/x; }
+        function i11(x: string | null) { ((y: string | null) => { if (y === null) throw 0; })(x); /*i11*/x; }
+        function i13(x: string | null) { (() => { x = null; })(); /*i13*/x; }
+        function i14(x: string | null) { if (x) { (() => { if (c) x = null; })(); /*i14*/x; } }
+        function i15(x: string | null) { if (x) { !(() => { x = null; })(); /*i15*/x; } }
+        function i16(x: string | null) { if (x) { (() => { x = null; }).call(undefined); /*i16*/x; } }
+        function i17(x: string | null) { if (x) { new (class { constructor() { x = null; } })(); /*i17*/x; } }
+        function i18() { let x: string | null = f(); (() => { x = "a"; })(); /*i18*/x; }
+        function i19(x: string | null) { if (x) { void (() => { x = null; })(); /*i19*/x; } }
+        function i20(x: string | null) { (() => { while (true) { if (x !== null) break; } })(); /*i20*/x; }
+        function i21(x: string | null) { (() => { try { if (x === null) throw 0; } finally {} })(); /*i21*/x; }
+        function i22(x: string | null) { if (x) { const g = () => { x = null; }; g(); /*i22*/x; } }
+        function i23(x: string | null) { (() => { if (!x) return; /*i23*/x; })(); }
+        function i24(x: string | null) { if (x) { ((() => { x = null; }))(); /*i24*/x; } }
+        function i25(x: string | null) { if (x) { (() => { x = null; })?.(); /*i25*/x; } }
+        function i26(o: { v: string | null }) { if (o.v) { (() => { o.v = null; })(); /*i26*/o.v; } }
+        function i27(x: string | null) { let y: string | null = null; (() => { y = x; })(); /*i27*/y; }
+        function i28(x: string | null) { (() => { x = "a"; })(); /*i28*/x; }
+        function k41() { let x: string | null = f(); if (x) { (() => { x = null; })(); /*k41*/x; } }
+        function n1(x: string | null) { (() => { (() => { if (x === null) throw 0; })(); })(); /*n1*/x; }
+        function n2(x: string | null) { if (x) { (() => (() => { x = null; })())(); /*n2*/x; } }
+        function l1(x: string | null) { while (c) { (() => { for (;;) { if (x === null) break; return; } })(); /*l1*/x; } }
+        function d1(x: string | null) { ((y: string | null = x) => { if (y === null) throw 0; /*d1a*/y; })(); /*d1b*/x; }
+        function d2(x: string | null) { if (x) { ((y: string = x) => /*d2*/y)(); } }
+        function a1(x: string | null) { if (x) { ((v?: unknown) => { x = null; })(/*a1*/x); } }
+        function a2(x: string | null) { if (x) { ((v?: unknown) => { x = null; })?.(/*a2*/x); } }
+        function u1(x: string | null) { if (x) { (() => { throw 0; })(); /*u1*/x; } }
+        function u2(x: string | null) { const v = c ? (() => { throw 0; })() : 1; /*u2*/x; }
+        function y1(x: string | null) { (function* () { if (x === null) return; /*y1a*/x; })(); /*y1b*/x; }
+        export const ex = ((y: string | null) => { if (y) return /*e1*/y; })(f());
+        "#,
+        &[
+            ("i1", "x", &["string"]),
+            ("i2", "x", &["null"]),
+            ("i3", "x", &["string"]),
+            ("i4", "x", &["string"]),
+            ("i5", "x", &["null", "string"]),
+            ("i6", "x", &["null", "string"]),
+            ("i9", "x", &["string"]),
+            ("i10", "x", &["string"]),
+            ("i11", "x", &["null", "string"]),
+            ("i13", "x", &["null"]),
+            ("i14", "x", &["null", "string"]),
+            ("i15", "x", &["null"]),
+            ("i16", "x", &["string"]),
+            ("i17", "x", &["string"]),
+            ("i18", "x", &["string"]),
+            ("i19", "x", &["null"]),
+            ("i20", "x", &["string"]),
+            ("i21", "x", &["string"]),
+            ("i22", "x", &["string"]),
+            ("i23", "x", &["string"]),
+            ("i24", "x", &["null"]),
+            ("i25", "x", &["null"]),
+            ("i26", "o.v", &["null"]),
+            ("i27", "y", &["null", "string"]),
+            ("i28", "x", &["string"]),
+            ("k41", "x", &["null"]),
+            ("n1", "x", &["string"]),
+            ("n2", "x", &["null"]),
+            ("l1", "x", &["null", "string"]),
+            ("d1a", "y", &["string"]),
+            ("d1b", "x", &["null", "string"]),
+            ("d2", "y", &["string"]),
+            ("a1", "x", &["string"]),
+            ("a2", "x", &["null"]),
+            ("u1", "x", &["null", "string"]),
+            ("u2", "x", &["null", "string"]),
+            ("y1a", "x", &["string"]),
+            ("y1b", "x", &["null", "string"]),
+            ("e1", "y", &["string"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A class static block runs in the flow of the code around its class, where
+// the class is evaluated, in member order and after its `extends` clause,
+// also inside a function called where it is defined and inside another
+// static block. A field initializer doesn't continue the flow.
+#[test]
+fn static_blocks_run_where_their_class_is_evaluated() {
+    assert_reads(
+        r#"
+        function s1(x: string | null) { if (x) { class C { static { /*s1*/x; } } } }
+        function s2(x: string | null) { if (x) { class C { static { x = null; } } /*s2*/x; } }
+        function s3(x: string | null) { class C { static { if (x === null) throw 0; } } /*s3*/x; }
+        function s4(x: string | null) { if (x) { const C = class { static { /*s4*/x; } }; } }
+        function s8(x: string | null) { if (x) { class C { static a = /*s8*/x; } } }
+        function s10(x: string | null) { if (x) { class C { static { (() => { x = null; })(); } } /*s10*/x; } }
+        function s11(x: string | null) { if (x) { (() => { class C { static { x = null; } } })(); /*s11*/x; } }
+        function s12(x: string | null) { class C { static { class D { static { if (x === null) throw 0; } } } } /*s12*/x; }
+        function k36() { const x: string | null = f(); if (x) (class { static { /*k36*/x; } }); }
+        function k37() { const x: string | null = f(); if (x) { class E { static { /*k37*/x; } } } }
+        "#,
+        &[
+            ("s1", "x", &["string"]),
+            ("s2", "x", &["null"]),
+            ("s3", "x", &["string"]),
+            ("s4", "x", &["string"]),
+            ("s8", "x", &["null", "string"]),
+            ("s10", "x", &["null"]),
+            ("s11", "x", &["null"]),
+            ("s12", "x", &["string"]),
+            ("k36", "x", &["string"]),
+            ("k37", "x", &["string"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A closure created inside an inline function continues the flow where the
+// inline function creates it, and a read inside an inline function in a
+// closure continues the closure's flow. A write in an inline function still
+// counts as a write in another function for a closure that reads the
+// variable, so the closure at `c3` keeps the declared type while the read
+// beside it narrows. A read after an inline function that always throws is
+// unreachable and keeps its declared type, also in a closure.
+#[test]
+fn closures_inside_inline_functions_continue_their_flow() {
+    assert_reads(
+        r#"
+        function c1(x: string | null) { if (x) { (() => { const g = () => /*c1*/x; g(); })(); } }
+        function c2(x: string | null) { (() => { if (x) { [1].forEach(() => /*c2*/x); } })(); }
+        function c3(x: string | null) { (() => { x = "a"; })(); if (x) { [1].forEach(() => /*c3*/x); /*c3b*/x; } }
+        function c4() { let y: string | null = f(); (() => { if (y) { const h = () => /*c4*/y; h(); } })(); }
+        function c5(x: string | null) { if (x) { const g = () => { (() => { /*c5*/x; })(); }; } }
+        function c6(x: string | null) { if (x) { const g = () => { (() => { throw 0; })(); /*c6*/x; }; } }
+        "#,
+        &[
+            ("c1", "x", &["string"]),
+            ("c2", "x", &["string"]),
+            ("c3", "x", &["null", "string"]),
+            ("c3b", "x", &["string"]),
+            ("c4", "y", &["string"]),
+            ("c5", "x", &["string"]),
+            ("c6", "x", &["null", "string"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// An arrow function called where it is defined reads and writes the `this`
+// of the code around it, and `arguments` inside a function expression is its
+// own, so writing an element of it changes no parameter of the code around
+// it. TypeScript never narrows through `arguments`.
+#[test]
+fn inline_functions_keep_their_own_this_and_arguments() {
+    assert_reads(
+        r#"
+        class K {
+            v: string | null = null;
+            m1() { if (this.v) { (() => { /*t1*/this.v; })(); } }
+            m2() { if (this.v) { (() => { this.v = null; })(); /*t2*/this.v; } }
+            m3() { if (this.v) { (function () {})(); /*t3*/this.v; } }
+        }
+        function g1(x: string | null) { if (x) { (function () { arguments[0] = null; })(); /*g1*/x; } }
+        function g2(x: string | null) { if (x) { (() => { arguments[0] = null; })(); /*g2*/x; } }
+        "#,
+        &[
+            ("t1", "this.v", &["string"]),
+            ("t2", "this.v", &["null"]),
+            ("t3", "this.v", &["string"]),
+            ("g1", "x", &["string"]),
+            ("g2", "x", &["string"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A `return` in an inline function leaves only that function, through its
+// own finally blocks, and never reaches a finally block around the call. An
+// inline function in a finally block, which Biome builds twice, joins its
+// returns in each build.
+#[test]
+fn inline_functions_join_their_returns_through_finally_blocks() {
+    assert_reads(
+        r#"
+        function f1(x: string | null) { (() => { try { if (x === null) return; } finally { /*f1a*/x; } /*f1b*/x; })(); /*f1c*/x; }
+        function f2(x: string | null) { try { reset(); } finally { (() => { if (x === null) throw 0; })(); /*f2a*/x; } /*f2b*/x; }
+        function f3(x: string | null) { try { (() => { if (x === null) return; })(); /*f3a*/x; } finally { /*f3b*/x; } }
+        function f4(x: string | null) { try { reset(); } finally { (() => { if (x === null) return; })(); /*f4a*/x; } /*f4b*/x; }
+        function f5(x: string | null) { try { (() => { try { if (x === null) return; } finally { reset(); } })(); /*f5a*/x; } finally { /*f5b*/x; } /*f5c*/x; }
+        "#,
+        &[
+            ("f1a", "x", &["null", "string"]),
+            ("f1b", "x", &["string"]),
+            ("f1c", "x", &["null", "string"]),
+            ("f2a", "x", &["string"]),
+            ("f2b", "x", &["string"]),
+            ("f3a", "x", &["null", "string"]),
+            ("f3b", "x", &["null", "string"]),
+            ("f4a", "x", &["null", "string"]),
+            ("f4b", "x", &["null", "string"]),
+            ("f5a", "x", &["null", "string"]),
+            ("f5b", "x", &["null", "string"]),
+            ("f5c", "x", &["null", "string"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives the narrower type in the comment for
+// each read below. Biome is wider. A write in an `async` function or a
+// generator called where it is defined, or in a field initializer, keeps the
+// variable at its declared type in the whole function, where TypeScript
+// ignores the write. A function called in place inside a field initializer is
+// part of that initializer, which runs apart from the code around the class.
+// The parameter of an inline function gets no type from its argument. A
+// write in an inline function reaches a `catch` clause around the call, where
+// TypeScript starts the clause from the flow before the `try` statement and
+// the writes of the try block's own code.
+#[test]
+fn inline_functions_that_biome_narrows_less() {
+    assert_reads(
+        r#"
+        function i7(x: string | null) { if (x) { (async () => { x = null; })(); /*i7*/x; } }
+        function i8(x: string | null) { if (x) { (function* () { x = null; })(); /*i8*/x; } }
+        function i12(x: string | number) { ((y) => { /*i12*/y; })(x); }
+        function s5(x: string | null) { if (x) { class C { static f = (x = null); } /*s5*/x; } }
+        function s6(x: string | null) { if (x) { class C { f = (x = null); } /*s6*/x; } }
+        function k1(x: string | null) { if (x) { class C { f = (() => { x = null; })(); } /*k1*/x; } }
+        function t5(x: string | null) { if (x) { try { (() => { x = null; throw 0; })(); } catch { /*t5*/x; } } }
+        "#,
+        &[
+            // TypeScript: `string`.
+            ("i7", "x", &["null", "string"]),
+            // TypeScript: `string`.
+            ("i8", "x", &["null", "string"]),
+            // TypeScript: `string | number`.
+            ("i12", "y", &["Unknown"]),
+            // TypeScript: `string`.
+            ("s5", "x", &["null", "string"]),
+            // TypeScript: `string`.
+            ("s6", "x", &["null", "string"]),
+            // TypeScript: `string`.
+            ("k1", "x", &["null", "string"]),
+            // TypeScript: `string`.
+            ("t5", "x", &["null", "string"]),
+        ],
     );
 }

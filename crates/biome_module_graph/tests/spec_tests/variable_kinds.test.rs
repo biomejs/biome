@@ -351,21 +351,24 @@ fn variables_of_enclosing_roots_narrow_by_the_reading_root() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives the narrower type in the comment for
-// `invoked`, and `never` at `captured`, which Biome reads as Unknown. Biome
-// keeps the declared type of a variable that a function called where it is
-// defined writes, because the graph has no write point there. The closure in
-// `e15` continues the flow where it is created, and `x` is `null` there.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// and `never` at `captured`, which Biome reads as Unknown. A function called
+// where it is defined writes the variable in the flow of the function around
+// it, and a write in an `async` one keeps the declared type in that whole
+// function, where TypeScript gives `string`. The closure in `e15` continues
+// the flow where it is created, and `x` is `null` there.
 #[test]
-fn variables_of_enclosing_roots_that_biome_narrows_less() {
+fn variables_of_enclosing_roots_written_in_place_or_captured() {
     assert_reads(
         r#"
         let g4: string | null = f(); function e12() { if (g4) { (() => { g4 = null; })(); /*invoked*/g4; } }
+        let g5: string | null = f(); function e13() { if (g5) { (async () => { g5 = null; })(); /*async*/g5; } }
         function e15(x: string | null) { x = null; return () => { if (x) /*captured*/x; }; }
         "#,
         &[
-            // TypeScript: `null`.
-            ("invoked", "g4", &["null", "string"]),
+            ("invoked", "g4", &["null"]),
+            // TypeScript: `string`.
+            ("async", "g5", &["null", "string"]),
             ("captured", "x", &["Unknown"]),
         ],
     );

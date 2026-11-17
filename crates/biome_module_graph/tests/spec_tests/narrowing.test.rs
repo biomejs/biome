@@ -2329,8 +2329,8 @@ fn jumps_out_of_try_and_switch_statements_reach_their_targets() {
 // TypeScript 7.0.2 (`tsc --strict`) narrows the decorator, the `extends`
 // expression, the enum initializer, the static block, and the read after the
 // class to `string`, and gives `string | null` in the method, because a method
-// of a class declaration does not see the narrowing around the class. Biome
-// analyzes the static block on its own, so it keeps the declared type there.
+// of a class declaration does not see the narrowing around the class. The
+// static block runs where the class is evaluated.
 #[test]
 fn class_and_enum_declarations_keep_narrowing_outside_their_members() {
     use InferredTypeData::{Null, String};
@@ -2360,7 +2360,7 @@ fn class_and_enum_declarations_keep_narrowing_outside_their_members() {
         ("decorator", &[String][..]),
         ("extends", &[String]),
         ("method", &[String, Null]),
-        ("static", &[String, Null]),
+        ("static", &[String]),
         ("enum", &[String]),
         ("after", &[String]),
     ] {
