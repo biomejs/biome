@@ -142,6 +142,20 @@ resolution in the module graph gives `undefined` or `never` from the
 reachability of the function's end. A conversion without the module's flow
 gives `undefined`, which is never narrower than TypeScript's type.
 
+A function without a return type annotation whose body returns a boolean
+test of a parameter may have a type predicate that TypeScript infers from
+the body, as `(v: unknown) => typeof v === "string"` has `v is string`.
+Only the module's flow can tell, so the collector gives such a function
+`ReturnType::InferredPredicate` (`inferred_predicate_parameter` decides the
+shape and the parameter), which holds the parameter's name, the plain
+return type, and a reference to a `TypeofExpression::InferredPredicate`
+that the module graph resolves to the target, or to Unknown when there is
+none. The conversion to the inferred representation gives
+`ReturnType::Predicate` with the target, or `ReturnType::Type` with the
+plain return type for Unknown, so inferred types never hold the marker. A
+conversion without the module's flow gives the plain return type, which is
+never narrower than TypeScript's type.
+
 Interfaces of one name in one scope, and a class with the interfaces of its
 name, are one type in TypeScript. The module collector merges each such set
 into one raw `Interface` or `Class`, with the scope of the class or the first

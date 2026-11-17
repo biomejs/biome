@@ -402,7 +402,7 @@ pub(crate) fn guard_signature<'a>(
             .then_some(&assertion.ty),
             asserts: true,
         },
-        ReturnType::Type(_) => return None,
+        ReturnType::Type(_) | ReturnType::InferredPredicate(_) => return None,
     };
     Some((signature, contract))
 }
@@ -584,7 +584,9 @@ impl<'a> GuardFunctions<'a> {
     /// `declare function` of the module, or a variable without a type
     /// annotation that an arrow or function expression initializes.
     /// [`Self::guard`] reads that signature. Such a call is never a call
-    /// point, because a call point would resolve the same signature.
+    /// point, because a call point would resolve the same signature, except
+    /// in a condition when the signature leaves the type predicate to
+    /// inference (see [`Self::calls_inferred_predicate`]).
     ///
     /// A function whose collected type needs the call's arguments to select
     /// its signature, as [`Self::selects_signature_by_arguments`] checks, is
@@ -657,6 +659,11 @@ impl<'a> GuardFunctions<'a> {
     /// Returns whether `signature` returns a type predicate or an assertion,
     /// or has the return type annotation `never`, the signatures that
     /// TypeScript considers when it decides what a call does to the flow.
+    ///
+    /// A type predicate that TypeScript may infer from the function's body
+    /// doesn't count here: a call of such a function in a condition is a
+    /// call point (see [`Self::calls_inferred_predicate`]), and a statement
+    /// call of it narrows nothing, because the function never asserts.
     fn has_effect_return(&self, signature: &Function) -> bool {
         match &signature.return_type {
             ReturnType::Predicate(_) | ReturnType::Asserts(_) => true,
@@ -664,8 +671,34 @@ impl<'a> GuardFunctions<'a> {
                 self.raw_types.get(id.index()),
                 Some(RawTypeData::NeverKeyword)
             ),
-            ReturnType::Type(_) => false,
+            ReturnType::Type(_) | ReturnType::InferredPredicate(_) => false,
         }
+    }
+
+    /// Returns whether `call` calls a local function, as
+    /// [`Self::calls_local_function`] finds it, whose collected signature
+    /// leaves to inference whether the function has a type predicate that
+    /// TypeScript infers from its body ([`ReturnType::InferredPredicate`]).
+    /// Collection can't decide what such a call does, so a call of it in a
+    /// condition is a call point.
+    fn calls_inferred_predicate(&self, call: &JsCallExpression, model: &SemanticModel) -> bool {
+        let Some(AnyJsExpression::JsIdentifierExpression(callee)) =
+            call.callee().ok().map(AnyJsExpression::omit_parentheses)
+        else {
+            return false;
+        };
+        let Some(function) = callee.name().ok().and_then(|name| model.binding(&name)) else {
+            return false;
+        };
+        matches!(
+            self.raw_binding_types.get(&function.range()),
+            Some(TypeReference::Resolved(RawTypeId::Local(id)))
+                if matches!(
+                    self.raw_types.get(id.index()),
+                    Some(RawTypeData::Function(signature))
+                        if matches!(signature.return_type, ReturnType::InferredPredicate(_))
+                )
+        )
     }
 
     /// Returns whether `object`, the object of a `?.`, may be `null` or
@@ -1929,8 +1962,10 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     ///
     /// The guard is [`FlowGuard::Call`] when the callee is a dotted name that
     /// is no local function, as [`GuardFunctions::calls_local_function`]
-    /// checks, and the call passes a subject as an argument or as the object
-    /// of its callee, as TypeScript requires. Otherwise the guard is
+    /// checks, or a local function that may have a type predicate inferred
+    /// from its body ([`GuardFunctions::calls_inferred_predicate`]), and the
+    /// call passes a subject as an argument or as the object of its callee,
+    /// as TypeScript requires. Otherwise the guard is
     /// [`FlowGuard::Keep`]. So is the guard of a falsy optional call, which
     /// TypeScript doesn't narrow by, and of a call that starts at a
     /// parenthesized optional chain, which narrows nothing for any test (see
@@ -1940,7 +1975,8 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     /// [`narrows_through_aliases`] accepts count.
     fn condition_call_point(&mut self, call: &JsCallExpression, positive: bool) -> FlowGuard {
         if (!positive && call.is_optional_chain())
-            || self.functions.calls_local_function(call, self.model)
+            || (self.functions.calls_local_function(call, self.model)
+                && !self.functions.calls_inferred_predicate(call, self.model))
             || chain_receivers(&call.clone().into(), &mut self.remaining).is_none()
         {
             return FlowGuard::Keep;

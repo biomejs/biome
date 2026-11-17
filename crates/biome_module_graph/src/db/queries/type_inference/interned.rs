@@ -229,6 +229,19 @@ pub(crate) struct FlowReachabilityInput<'db> {
     pub root: TextRange,
 }
 
+/// Identifies a function of a module by its range, to infer the type
+/// predicate that TypeScript infers from its body. See
+/// [`super::infer_flow_inferred_predicate`].
+#[salsa::interned]
+#[derive(Debug)]
+pub(crate) struct FlowPredicateInput<'db> {
+    #[returns(copy)]
+    pub module: ModuleInfo,
+    /// The trimmed range of the function or method.
+    #[returns(copy)]
+    pub function: TextRange,
+}
+
 /// Which statements of one execution root some path reaches, and whether a
 /// path reaches the root's end. See [`super::infer_flow_reachability`].
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]

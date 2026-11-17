@@ -370,7 +370,17 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   collected type is generic or has overloads, one of them returning a type
   predicate, an assertion, or `never` (`selects_signature_by_arguments`),
   decides nothing at collection, because the call's arguments select its
-  signature. Its effect depends on the
+  signature. Neither does a local function whose collected return type is
+  `ReturnType::InferredPredicate`, which marks a function without a return
+  type annotation that may have a type predicate inferred from its body
+  (`GuardFunctions::calls_inferred_predicate`): a call of it in a condition
+  is a call point, and a statement call of it narrows nothing, because such
+  a function never asserts. For each such function, collection decomposes
+  the value that it returns, as a condition that holds and as one that
+  fails, into a `FlowPredicate` (`ModuleFlow::predicate`), with its own
+  subjects and call points, which `ModuleFlow::calls` doesn't list, and keeps
+  it only when a guard may narrow the parameter that the marker names.
+  Its effect depends on the
   callee's signature, which only inference resolves, so collection records
   the subjects that it may narrow: its subject arguments, the subject of the
   object of its callee, which `this is T` narrows, and, for a statement
@@ -876,6 +886,26 @@ complete module inference resolves it in its own context and keeps it per
 call. When a call point narrows a subject whose reads elsewhere narrow only
 through tests of its shape or only through writes, the read starts from the
 whole declared type (`called_binding_baseline`).
+
+A function's type predicate that TypeScript infers from its body is the
+target of a `TypeofExpression::InferredPredicate`, which resolution reads
+from `infer_flow_inferred_predicate` (`ResolutionCtx::inferred_predicate`).
+The parameter starts from its declared type, resolved in the context that
+resolves the function's type and flattened as a baseline is, and the guard
+of the `FlowPredicate` that holds narrows it. The function has a type
+predicate when that type differs from the declared type, isn't Unknown, and
+the guard that fails leaves `never` of it, which needs both branches, as
+TypeScript decides. A parameter declared `boolean` gets none. The call
+points of the returned value take their effects, and its comparisons by
+declared types their values, from the same context, and a work limit or a
+query cycle gives no type predicate. Lookups share the answer through the
+query, while complete module inference infers it in its own context while it
+resolves the function's type, and keeps it per function
+(`ResolutionCtx::local_predicates`), because that context resolves the
+parameter's type anyway. The parameter of a callback written in place takes
+its type from the call without the callback (`TypeofExpression::CallArgument`),
+so resolving the call never asks for the callback's type predicate through
+the parameter.
 
 A read whose point the node of a statement call reaches decides, after the
 cheap gates and once its baseline exists, which of those calls never

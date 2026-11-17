@@ -23,8 +23,8 @@ mod widening;
 
 pub(in crate::db) use flow::{
     classify_enum_member, flow_assigned_types, flow_binding_baseline, flow_call_effect,
-    flow_compared_types, flow_expression_type, flow_reachability, flow_subject_states,
-    flow_subject_type, flow_switch_exhaustive,
+    flow_compared_types, flow_expression_type, flow_inferred_predicate, flow_reachability,
+    flow_subject_states, flow_subject_type, flow_switch_exhaustive,
 };
 pub(in crate::db) use imports::{
     ExportOriginResult, collect_namespace_export_names, find_export_origin, module_for_import,
