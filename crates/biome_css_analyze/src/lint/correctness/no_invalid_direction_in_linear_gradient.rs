@@ -28,8 +28,9 @@ declare_lint_rule! {
     /// corner preceded by `to`, such as `to top` or `to bottom right`. Writing only `top` or a
     /// unitless number uses invalid or outdated syntax.
     ///
-    /// A direction that contains a function call, such as `var(--direction)`, or a Sass variable or
-    /// interpolation isn't checked, because its value isn't known until it is computed.
+    /// A direction that contains a function call, such as `var(--direction)`, a Sass variable, an
+    /// interpolation or a module member, such as `math.$pi`, isn't checked, because Biome doesn't
+    /// evaluate it.
     ///
     /// ## Examples
     ///
@@ -162,8 +163,9 @@ impl Rule for NoInvalidDirectionInLinearGradient {
     }
 }
 
-/// Whether the expression contains a value that is only known when Sass compiles the file or the
-/// browser computes the style, such as `$side`, `#{$dir}`, `var(--dir)` or a function call.
+/// Whether the expression contains a CSS or Sass function call, a Sass variable, an interpolation
+/// or a module member, such as `var(--dir)`, `$side`, `#{$dir}` or `math.$pi`. The rule doesn't
+/// evaluate these, so it can't check the direction.
 fn has_dynamic_value(expression: &AnyCssExpression) -> bool {
     expression.syntax().descendants().skip(1).any(|node| {
         let kind = node.kind();
