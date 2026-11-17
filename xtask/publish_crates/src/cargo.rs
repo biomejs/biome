@@ -89,6 +89,7 @@ impl CargoRunner for SystemCargo {
 
     fn publish(&mut self, workspace: &Workspace, package: &PublishPackage) -> Result<bool> {
         self.command(&workspace.root)
+            .env("CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE", "allow")
             .args([
                 "publish",
                 "--package",
