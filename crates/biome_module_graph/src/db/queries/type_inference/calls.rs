@@ -8,7 +8,9 @@
 mod implementation;
 
 pub(in crate::db) use implementation::{
-    ResolvedCallArgument, infer_call_expression_return_type_from_args,
+    ArgumentAcceptance, ArgumentRelation, ResolvedCallArgument, call_signatures,
+    callback_predicate_binding, generic_substitutions, infer_call_expression_return_type_from_args,
+    satisfies_constraint, signature_accepts_arguments,
 };
 
 use self::implementation::{

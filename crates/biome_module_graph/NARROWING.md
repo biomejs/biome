@@ -134,13 +134,15 @@ These limits apply to every *Supported* and *Partial* row below:
   types in other execution roots, including closures.
 - A statement call ends the path only where Biome finds the signature that
   TypeScript finds, as the rows on calls that never return describe: a
-  generic or overloaded signature ends nothing, and neither do the statement
-  calls of an execution root after its first 64. Biome then evaluates the
-  code after such a call as reachable, where TypeScript finds it unreachable
-  and gives a read there its declared type, so a read there can be narrower
-  than in TypeScript: with `x: string | null` and
-  `declare function fail<T>(): never`, `x` is `string` in Biome and
-  `string | null` in TypeScript in `if (x !== null) { fail(); x }`. So is a
+  generic or overloaded signature ends the path only where Biome can select
+  it as the rows on generic and overloaded type-guard functions describe,
+  and the statement calls of an execution root after its first 64 end
+  nothing. Biome then evaluates the code after such a call as reachable,
+  where TypeScript finds it unreachable and gives a read there its declared
+  type, so a read there can be narrower than in TypeScript: with
+  `x: string | null`, `xs: number[]`, and
+  `declare function fail<T>(v: T[]): never`, `x` is `string` in Biome and
+  `string | null` in TypeScript in `if (x !== null) { fail(xs); x }`. So is a
   read in a closure created after a call to a function that the module
   doesn't declare, inside a function or arrow expression that Biome doesn't
   analyze, as `g` in
@@ -634,7 +636,7 @@ code as TS7027, an error with `allowUnreachableCode: false`.
 | Behaviour | Example | TypeScript | Status |
 | --- | --- | --- | --- |
 | `Array.isArray` | `x: string \| string[]; if (Array.isArray(x)) x` | `string[]` | Supported, with the restrictions below the table of type predicates, except for `any`, which the row on `any` describes. Other type-guard functions of the lib, such as `ArrayBuffer.isView`, narrow too. |
-| `every` with a type predicate callback | `isString: (v: unknown) => v is string;`<br>`xs: (string \| number)[]; if (xs.every(isString)) xs` | `string[]` | Not yet |
+| `every` with a type predicate callback | `isString: (v: unknown) => v is string;`<br>`xs: (string \| number)[]; if (xs.every(isString)) xs` | `string[]` | Partial: `every` narrows an array or a `readonly` array, also through `xs?.every`, as TypeScript selects its signature `every<S extends T>(predicate: (value: T) => value is S): this is S[]`: `S` is the target of the callback's type predicate when it satisfies its constraint. So does any method of this shape, as the rows on generic and overloaded type-guard functions describe. A tuple keeps its declared type where TypeScript gives an intersection, such as `[string \| number, string \| number] & string[]`. A callback written in place, as `(v): v is string => typeof v === "string"`, narrows nothing, because Biome doesn't type a parameter without an annotation from the call, and neither does a callback whose type predicate TypeScript infers, which the row on inferred type predicates covers. The result of `filter` and `find` with such a callback has the same type argument, so `xs.filter(isString)` is `string[]` and `xs.find(isString)` is `string \| undefined`, also for a callback written in place. |
 | DOM `matches` | `el: Element; if (el.matches("a")) el` (with the `dom` library) | `HTMLAnchorElement` | Not yet |
 
 ### Discriminated unions
@@ -670,8 +672,8 @@ The rows use `type Circle = { kind: "c"; r: number }` and
 | The false branch excludes the target | `x: string \| number; if (!isString(x)) x` | `number` | Supported |
 | An object, interface, class, or union target | `function isFoo(v: unknown): v is Foo;`<br>`x: Foo \| string; if (isFoo(x)) x` | `Foo`; `string` in the `else` branch | Partial: both branches narrow by TypeScript's subtype relation, as the limits above describe. Biome keeps the type of `x` where TypeScript narrows a type without an object type by a target with only object types, or gives an intersection, and when two members can't be compared, as for instances of classes, which can declare private members, and the literal types that Biome keeps for properties whose values it can't tell are fresh literals, as `{ a: id(1) }`. The `else` branch also keeps a member that is a subtype of a member of the target and the other way around, as `{ a: number }` with the target `Foo`, and `unknown` with the target `{}`, where TypeScript gives `null \| undefined`. |
 | An imported, namespace, or method type-guard function | `import { isString } from "./guards"`; `u.isString(x)` | `string` | Supported, with the restrictions below the table |
-| A generic type-guard function | `function isNonNull<T>(v: T \| null): v is T;`<br>`x: string \| null; if (isNonNull(x)) x` | `string` | Not yet |
-| An overloaded type-guard function | `function isS(v: string \| number): v is string;`<br>`function isS(v: boolean): boolean;`<br>`x: string \| number; if (isS(x)) x` | `string` | Not yet |
+| A generic type-guard function | `function isNonNull<T>(v: T \| null): v is T;`<br>`x: string \| null; if (isNonNull(x)) x` | `string` | Partial: Biome infers a type argument where TypeScript infers the same one, as the restrictions below the table describe, and with explicit type arguments, as `isNonNull<string>(x)`. A call that infers a type argument otherwise keeps its declared type, and so does a target that TypeScript turns into an intersection, as `NonNullable<T>` for `v is NonNullable<T>`, or a generic read, as `x: T \| null` in a generic function, where TypeScript gives `T`. |
+| An overloaded type-guard function | `function isS(v: string \| number): v is string;`<br>`function isS(v: boolean): boolean;`<br>`x: string \| number; if (isS(x)) x` | `string` | Supported, with the restrictions below the table: the first signature that accepts the arguments decides, under the subtype relation before assignability, as in TypeScript. |
 | `this is T` | `class TreeNode { isLeaf(): this is Leaf }`<br>`n: TreeNode; if (n.isLeaf()) n` | `Leaf` | Partial: the object of the method narrows as the argument of a type-guard function does, so `n: Leaf \| Branch` gives `Leaf` and `Branch` in the two branches, and so does a property path, as `o.n` in `if (o.n.isLeaf())`. Biome keeps the type of the example, because it can't compare an instance of `TreeNode` with one of a class derived from it, as the limits above describe, and keeps the declared type where TypeScript gives an intersection, as `this & { tag: 1 }` for `isTagged(): this is { tag: 1 }`. |
 | The argument is a property or an optional chain | `o: { v: string \| number }; if (isString(o.v)) o.v`<br>`x: { y: string \| number } \| undefined; if (isString(x?.y)) x` | `string`; `{ y: string \| number }` | Partial: the property narrows, but the receiver of an optional chain does not, so the second example gives `{ y: string \| number } \| undefined`. |
 | Inferred type predicates | `const isStr = (v: unknown) => typeof v === "string";`<br>`x: string \| number; if (isStr(x)) x` | `string` | Not yet |
@@ -687,16 +689,47 @@ optional, has no type arguments, passes a variable as the tested argument,
 and has no spread argument before or at the tested one.
 
 Any other callee, such as an import, a method, a variable or a parameter
-with a type annotation, or a variable that holds a function, narrows through
-the signature of its type, as TypeScript's `getEffectsSignature` finds it,
-within the limits above on callees: the type, without `null` and `undefined`,
-must have a single signature that is not generic. The tested parameter is
-named, is not a rest or an optional parameter, and gets an argument before
-any spread argument, and the target is not `any` or `unknown`. A callee of
-`any`, a union of functions, and an overloaded function narrow nothing. The
-call has no type arguments, and an optional call, as `g?.(x)`, narrows only
-where it is truthy, as in TypeScript. Neither Biome nor TypeScript checks the
-body of a type-guard function.
+with a type annotation, a variable that holds a function, or a function that
+the module declares with type parameters or overloads, narrows through the
+signature of its type that TypeScript uses to decide what the call does,
+within the limits above on callees. The type, without `null` and
+`undefined`, has a single signature that is not generic, or the call selects
+one of its signatures as TypeScript's overload resolution does when some
+signature returns a type predicate, an assertion, or `never`. The tested
+parameter is named, is not a rest or an optional parameter, and gets an
+argument before any spread argument, and the target is not `any` or
+`unknown`. A callee of `any` and a union of functions narrow nothing. An
+optional call, as `g?.(x)`, narrows only where it is truthy, as in
+TypeScript. Neither Biome nor TypeScript checks the body of a type-guard
+function.
+
+A call selects a signature from the types of its arguments at the call,
+where a test before the call narrows them. As in TypeScript, the
+signatures are tried in order with the subtype relation, under which `any`
+is a subtype only of `any` and `unknown`, and when none applies, with
+assignability, and the first one that accepts the arguments decides.
+Biome decides only where it can tell what TypeScript does: when it can't
+tell whether a signature before that one accepts the arguments, as for an
+instance of a class passed for a parameter of another class, the call
+narrows nothing. A call that passes a spread argument narrows nothing, and
+neither does a signature with a `this` parameter among several. A
+generic signature infers a type argument from the argument for a parameter
+typed with the type parameter itself, as `sample: T`, from the argument
+without its `null` or `undefined` members for a parameter typed
+`T | null` or `T | undefined`, and from the target of the type predicate of
+a callback for a parameter typed as a callback whose type predicate targets
+the type parameter, as `predicate: (value: T) => value is S`. The inferred
+type must satisfy the type parameter's constraint, with the type arguments
+of an array or another instance whose method the call reads, as
+`S extends T` with `T` the array's element type. A literal type that
+TypeScript would widen there, as `"a"` for `v is T[]`, is widened. A type
+parameter that no parameter and no target of the type predicate mentions
+needs no type argument. Any other parameter that mentions a type
+parameter, a type argument that two arguments infer differently, and a
+constraint that Biome can't check make the call narrow nothing. A read in a
+loop that the call reaches again before the read gets the type that the
+calls before it in the code give it, which is never narrower than
+TypeScript's.
 
 ### Assertions
 
@@ -717,11 +750,13 @@ comma operator there, not in parentheses, so `(assert(x));` asserts nothing.
 Calls inside other expressions, and calls to a type-guard function whose
 result is not tested, do not narrow.
 
-An assertion function that the module declares follows the restrictions of
-such a type-guard function, must be declared with `function` or
-`declare function`, and its call must not be optional. Any other callee
-follows the restrictions of other type-guard functions and TypeScript's rule
-for assertions (TS2775): every name along the callee has an explicit type. A
+An assertion function that the module declares with one signature without
+type parameters follows the restrictions of such a type-guard function, must
+be declared with `function` or `declare function`, and its call must not be
+optional. Any other callee follows the restrictions of other type-guard
+functions, including how a call selects a signature among overloads and
+infers type arguments, and TypeScript's rule for assertions (TS2775): every
+name along the callee has an explicit type. A
 function, a class, a namespace that `declare` declares, a variable, a
 parameter, or a property with a type annotation, a method, an import of one
 of these, a global, and `this` in a class member that is not `static` have
@@ -735,7 +770,7 @@ also ignores an assertion through an element access (TS2776).
 
 | Behaviour | Example | TypeScript | Status |
 | --- | --- | --- | --- |
-| A call to a function returning `never` ends the path | `declare function fail(): never;`<br>`x: string \| null; if (x === null) fail(); x` | `string`; code after `fail()` is unreachable (TS7027) | Partial: a statement call, as the assertions above describe it, ends the path when the return type annotation of its signature's declaration is `never` and every name along the callee has an explicit type, as for an assertion: a function, a method, a variable or a parameter annotated with a function type, a method of a type literal, an import of one of these, or a global, so `function fail() { throw 0; }` and `const fail = (): never => {}` end nothing, as in TypeScript. The paths that it ends add nothing where they join the others, and a read that only such paths reach keeps its declared type, as in TypeScript. A generic or overloaded signature ends nothing yet, as the limits above describe. |
+| A call to a function returning `never` ends the path | `declare function fail(): never;`<br>`x: string \| null; if (x === null) fail(); x` | `string`; code after `fail()` is unreachable (TS7027) | Partial: a statement call, as the assertions above describe it, ends the path when the return type annotation of its signature's declaration is `never` and every name along the callee has an explicit type, as for an assertion: a function, a method, a variable or a parameter annotated with a function type, a method of a type literal, an import of one of these, or a global, so `function fail() { throw 0; }` and `const fail = (): never => {}` end nothing, as in TypeScript. The paths that it ends add nothing where they join the others, and a read that only such paths reach keeps its declared type, as in TypeScript. A generic or overloaded signature ends the path when the call selects one that returns `never`, as for type-guard functions, so `failOver("a")` with `declare function failOver(a: string): never` and `declare function failOver(a: number): void` ends it and `failOver(1)` doesn't. |
 | `return` and `throw` end the path | `x: string \| null; if (!x) throw new Error(); x` | `string` | Supported |
 
 ### Assignments

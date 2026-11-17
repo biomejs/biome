@@ -145,7 +145,11 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             RawTypeofExpression::Call(expression) => {
                 let callee = self.resolve(&expression.callee);
-                Some(self.resolve_call_expression(callee, &expression.arguments))
+                Some(self.resolve_call_expression(
+                    callee,
+                    &expression.arguments,
+                    &expression.callee,
+                ))
             }
             RawTypeofExpression::CallArgument(expression) => {
                 let callee = self.resolve(&expression.callee);
@@ -458,15 +462,45 @@ impl<'db> ResolutionCtx<'db, '_> {
         &mut self,
         callee: InferredTypeData<'db>,
         arguments: &[RawCallArgumentType],
+        raw_callee: &TypeReference,
     ) -> InferredTypeData<'db> {
-        self.resolve_call_expression_with_overrides(callee, arguments, &[])
+        self.resolve_call_expression_with_overrides(callee, arguments, &[], raw_callee)
     }
 
+    /// Returns the type of the object that the callee whose collected type
+    /// is `callee` reads its function from, as `xs` in `xs.filter(isString)`,
+    /// or `None` for a callee that is no static member access.
+    pub(super) fn callee_receiver(
+        &mut self,
+        callee: &TypeReference,
+    ) -> Option<InferredTypeData<'db>> {
+        let TypeReference::Resolved(biome_js_type_info::RawTypeId::Local(id)) = callee else {
+            return None;
+        };
+        let RawTypeData::TypeofExpression(expression) = self.js_info.raw_types.get(id.index())?
+        else {
+            return None;
+        };
+        let (RawTypeofExpression::StaticMember(member)
+        | RawTypeofExpression::OptionalChainStaticMember(member)) = expression.as_ref()
+        else {
+            return None;
+        };
+        let object = member.object.clone();
+        Some(self.resolve(&object))
+    }
+
+    /// Infers the result of a call to `callee` with `arguments`, where each
+    /// type of `overrides` replaces the type of the argument at its index.
+    /// `raw_callee` is the collected type of the callee, which gives the
+    /// object that a method is read from when call inference asks for it
+    /// (see [`infer_call_expression_return_type_from_args`]).
     pub(super) fn resolve_call_expression_with_overrides(
         &mut self,
         callee: InferredTypeData<'db>,
         arguments: &[RawCallArgumentType],
         overrides: &[Option<InferredTypeData<'db>>],
+        raw_callee: &TypeReference,
     ) -> InferredTypeData<'db> {
         let callee = self.resolve_call_callee(callee);
         let mut args = if self.has_const_call_parameters(callee) {
@@ -500,7 +534,10 @@ impl<'db> ResolutionCtx<'db, '_> {
                 };
             }
         }
-        infer_call_expression_return_type_from_args(self.db, callee, &args)
+        let db = self.db;
+        infer_call_expression_return_type_from_args(db, callee, &args, &mut || {
+            self.callee_receiver(raw_callee)
+        })
     }
 
     fn has_const_call_parameters(&mut self, callee: InferredTypeData<'db>) -> bool {
@@ -989,7 +1026,7 @@ impl<'db> ResolutionCtx<'db, '_> {
     ) -> InferredTypeData<'db> {
         let args = self.resolve_inferred_call_arguments(arguments);
         let callee = self.resolve_call_callee(callee);
-        infer_call_expression_return_type_from_args(self.db, callee, &args)
+        infer_call_expression_return_type_from_args(self.db, callee, &args, &mut || None)
     }
 
     fn resolve_call_callee(&mut self, mut callee: InferredTypeData<'db>) -> InferredTypeData<'db> {
