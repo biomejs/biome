@@ -4,40 +4,52 @@
 //!
 //! Where the specification and dart-sass differ, this follows dart-sass
 //! (`resolveImportPath` in `lib/src/importer/utils.dart`): a URL that ends in
-//! `.sass`, `.scss` or `.css` never resolves to an `index` file, and `_theme`
-//! also tries the partial `__theme`.
+//! one of the extensions never resolves to an index file, and `_theme` also
+//! tries the partial `__theme`.
 
 use std::borrow::Cow;
 
 use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::{
-    ResolveError, ResolveOptions, ResolvedPathInfo, ResolverFsProxy, is_relative_specifier,
-    normalize_owned_absolute_path, resolve, resolve_path_info,
+    Resolution, ResolveError, ResolveOptions, ResolvedPathInfo, ResolverFsProxy,
+    is_relative_specifier, normalize_owned_absolute_path, resolve_module, resolve_path_info,
 };
 
-/// The Sass rule that loads a stylesheet, which decides whether import-only
-/// files such as `_theme.import.scss` are considered.
+/// The Sass rule that loads a stylesheet.
+///
+/// Libraries that moved to the module system can ship an import-only file,
+/// such as `_theme.import.scss` next to `_theme.scss`, so that stylesheets
+/// still using `@import` keep getting the API they had before. Only `@import`
+/// loads these files.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum SassLoadRule {
-    /// `@use` and `@forward`.
+    /// `@use` and `@forward`, which load a stylesheet as a module. Import-only
+    /// files are ignored.
     Module,
-    /// `@import`, which prefers import-only files.
+    /// `@import`, which looks for an import-only file first, then for the
+    /// files `@use` would load.
     Import,
 }
 
-/// Resolves the Sass URL `specifier` relative to `base_dir`.
+/// Resolves the Sass URL `specifier` relative to `base_dir`, the way Sass finds
+/// the stylesheet to load:
+/// <https://sass-lang.com/documentation/at-rules/use/#finding-the-module>
 ///
-/// A URL without an extension tries `.sass`, `.scss`, then `.css`, each as
-/// written and as a partial with a leading `_`, and then the `index` file in
-/// the directory it names. When two candidates of equal precedence exist, such
-/// as `theme.scss` and `_theme.scss`, Sass fails, and this returns
-/// [ResolveError::AmbiguousSassUrl].
-///
-/// A bare URL, such as `normalize.css/normalize`, that matches no file
-/// relative to `base_dir` is resolved as a package with `package_options`, as
-/// bundlers do. That lookup doesn't apply the Sass rules, so it doesn't find
-/// partials inside packages.
+/// `options` configures the lookup:
+/// - [ResolveOptions::extensions] are tried in order, each on the URL as
+///   written and as a partial with a leading `_`, such as `theme.scss` and
+///   `_theme.scss`. Sass fails when both exist, and this returns
+///   [ResolveError::AmbiguousSassUrl]. A URL that already ends in one of the
+///   extensions only tries that one.
+/// - [ResolveOptions::default_files] are tried, with the same extensions and
+///   partials, in the directory that a URL without an extension names, when
+///   the URL itself matches no file.
+/// - With [ResolveOptions::assume_relative], a bare URL such as `theme` that
+///   matches no file relative to `base_dir` is resolved as a package, as
+///   bundlers do. Without it, bare URLs are only resolved as packages. The
+///   package lookup doesn't apply the Sass rules, so it doesn't find partials
+///   inside packages.
 ///
 /// URLs with a scheme, such as `sass:math` or `pkg:bootstrap`, aren't
 /// resolved, and neither are load paths.
@@ -46,29 +58,31 @@ pub fn resolve_sass(
     base_dir: &Utf8Path,
     fs: &dyn ResolverFsProxy,
     rule: SassLoadRule,
-    package_options: &ResolveOptions,
+    options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
     if has_url_scheme(specifier) {
         return Err(ResolveError::NotFound);
     }
+    let is_bare = !is_relative_specifier(specifier) && !specifier.starts_with('/');
+    if is_bare && !options.assume_relative {
+        return resolve_module(specifier, base_dir, fs, options).map(Resolution::into_path);
+    }
     let url = normalize_owned_absolute_path(base_dir.join(specifier));
     let resolved = match url
         .extension()
-        .filter(|extension| matches!(*extension, "sass" | "scss" | "css"))
+        .filter(|extension| options.extensions.contains(extension))
     {
         Some(extension) => resolve_with_extension(&url, extension, fs, rule)?,
-        None => match resolve_without_extension(url.as_str(), fs, rule)? {
+        None => match resolve_without_extension(url.as_str(), fs, rule, options.extensions)? {
             Some(path) => Some(path),
-            None if is_directory(&url, fs) => {
-                resolve_without_extension(url.join("index").as_str(), fs, rule)?
-            }
+            None if is_directory(&url, fs) => resolve_default_file(&url, fs, rule, options)?,
             None => None,
         },
     };
     match resolved {
         Some(path) => Ok(path),
-        None if !is_relative_specifier(specifier) && !specifier.starts_with('/') => {
-            resolve(specifier, base_dir, fs, package_options)
+        None if is_bare => {
+            resolve_module(specifier, base_dir, fs, options).map(Resolution::into_path)
         }
         None => Err(ResolveError::NotFound),
     }
@@ -89,33 +103,50 @@ fn resolve_with_extension(
         return Ok(None);
     };
     if rule == SassLoadRule::Import
-        && let Some(path) = candidates.find(".import", &[extension], fs)?
+        && let Some(path) = candidates.find(".import", extension, fs)?
     {
         return Ok(Some(path));
     }
-    candidates.find("", &[extension], fs)
+    candidates.find("", extension, fs)
 }
 
 fn resolve_without_extension(
     url: &str,
     fs: &dyn ResolverFsProxy,
     rule: SassLoadRule,
+    extensions: &[&str],
 ) -> Result<Option<Utf8PathBuf>, ResolveError> {
     let Some(mut candidates) = Candidates::new(url) else {
         return Ok(None);
     };
     if rule == SassLoadRule::Import {
-        if let Some(path) = candidates.find(".import", &["sass", "scss"], fs)? {
-            return Ok(Some(path));
+        for extension in extensions {
+            if let Some(path) = candidates.find(".import", extension, fs)? {
+                return Ok(Some(path));
+            }
         }
-        if let Some(path) = candidates.find(".import", &["css"], fs)? {
+    }
+    for extension in extensions {
+        if let Some(path) = candidates.find("", extension, fs)? {
             return Ok(Some(path));
         }
     }
-    if let Some(path) = candidates.find("", &["sass", "scss"], fs)? {
-        return Ok(Some(path));
+    Ok(None)
+}
+
+fn resolve_default_file(
+    dir: &Utf8Path,
+    fs: &dyn ResolverFsProxy,
+    rule: SassLoadRule,
+    options: &ResolveOptions,
+) -> Result<Option<Utf8PathBuf>, ResolveError> {
+    for default_file in options.default_files {
+        let url = dir.join(default_file);
+        if let Some(path) = resolve_without_extension(url.as_str(), fs, rule, options.extensions)? {
+            return Ok(Some(path));
+        }
     }
-    candidates.find("", &["css"], fs)
+    Ok(None)
 }
 
 /// The two paths Sass tries for a URL without its extension: as written, and
@@ -150,31 +181,29 @@ impl Candidates {
         })
     }
 
-    /// Returns the file among both paths with `infix` and one of `extensions`
-    /// appended, such as `_theme.import.scss`. These candidates have equal
-    /// precedence, so finding more than one is an error.
+    /// Returns the file among both paths with `infix` and `extension`
+    /// appended, such as `_theme.import.scss`. Both candidates have equal
+    /// precedence, so finding both is an error.
     fn find(
         &mut self,
         infix: &str,
-        extensions: &[&str],
+        extension: &str,
         fs: &dyn ResolverFsProxy,
     ) -> Result<Option<Utf8PathBuf>, ResolveError> {
         let mut found = None;
-        for extension in extensions {
-            for (buffer, len) in [
-                (&mut self.path, self.path_len),
-                (&mut self.partial, self.partial_len),
-            ] {
-                buffer.truncate(len);
-                buffer.push_str(infix);
-                buffer.push('.');
-                buffer.push_str(extension);
-                if let Some(path) = find_file(Utf8Path::new(buffer), fs) {
-                    if found.is_some() {
-                        return Err(ResolveError::AmbiguousSassUrl);
-                    }
-                    found = Some(path);
+        for (buffer, len) in [
+            (&mut self.path, self.path_len),
+            (&mut self.partial, self.partial_len),
+        ] {
+            buffer.truncate(len);
+            buffer.push_str(infix);
+            buffer.push('.');
+            buffer.push_str(extension);
+            if let Some(path) = find_file(Utf8Path::new(buffer), fs) {
+                if found.is_some() {
+                    return Err(ResolveError::AmbiguousSassUrl);
                 }
+                found = Some(path);
             }
         }
         Ok(found)

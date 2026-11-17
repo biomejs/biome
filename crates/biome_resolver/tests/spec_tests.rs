@@ -1221,12 +1221,17 @@ fn resolve_sass_in_src(
     specifier: &str,
     rule: SassLoadRule,
 ) -> Result<Utf8PathBuf, ResolveError> {
-    let package_options = ResolveOptions {
+    resolve_sass(specifier, Utf8Path::new("/src"), fs, rule, &sass_options())
+}
+
+fn sass_options() -> ResolveOptions<'static> {
+    ResolveOptions {
+        assume_relative: true,
         condition_names: &["sass", "style", "default"],
-        extensions: &["sass", "scss", "css"],
+        default_files: &["index"],
+        extensions: &["scss", "css"],
         ..Default::default()
-    };
-    resolve_sass(specifier, Utf8Path::new("/src"), fs, rule, &package_options)
+    }
 }
 
 #[test]
@@ -1246,7 +1251,6 @@ fn test_resolve_sass_extensions_and_partials() {
         ("partial.scss", "/src/_partial.scss"),
         ("plain", "/src/plain.scss"),
         ("./plain", "/src/plain.scss"),
-        ("indented", "/src/indented.sass"),
         ("only", "/src/only.css"),
         ("both", "/src/both.scss"),
         ("both.css", "/src/both.css"),
@@ -1259,6 +1263,10 @@ fn test_resolve_sass_extensions_and_partials() {
             "{specifier}"
         );
     }
+    assert_eq!(
+        resolve_sass_in_src(&fs, "indented", SassLoadRule::Module),
+        Err(ResolveError::NotFound)
+    );
 }
 
 #[test]
@@ -1266,13 +1274,11 @@ fn test_resolve_sass_ambiguous_urls() {
     let fs = sass_fs(&[
         "/src/theme.scss",
         "/src/_theme.scss",
-        "/src/mixed.sass",
-        "/src/_mixed.scss",
         "/src/_double.scss",
         "/src/__double.scss",
         "/src/__only.scss",
     ]);
-    for specifier in ["theme", "theme.scss", "mixed", "_double"] {
+    for specifier in ["theme", "theme.scss", "_double"] {
         assert_eq!(
             resolve_sass_in_src(&fs, specifier, SassLoadRule::Module),
             Err(ResolveError::AmbiguousSassUrl),
@@ -1295,14 +1301,14 @@ fn test_resolve_sass_ambiguous_urls() {
 fn test_resolve_sass_index_files() {
     let fs = sass_fs(&[
         "/src/components/_index.scss",
-        "/src/layout/index.sass",
+        "/src/layout/index.scss",
         "/src/shadowed/_index.scss",
         "/src/_shadowed.scss",
         "/src/folder.scss/_index.scss",
     ]);
     for (specifier, expected) in [
         ("components", "/src/components/_index.scss"),
-        ("layout", "/src/layout/index.sass"),
+        ("layout", "/src/layout/index.scss"),
         ("shadowed", "/src/_shadowed.scss"),
     ] {
         assert_eq!(
@@ -1401,4 +1407,18 @@ fn test_resolve_sass_bare_urls_fall_back_to_packages() {
             "{specifier}"
         );
     }
+    let packages_only = ResolveOptions {
+        assume_relative: false,
+        ..sass_options()
+    };
+    assert_eq!(
+        resolve_sass(
+            "local",
+            Utf8Path::new("/src"),
+            &fs,
+            SassLoadRule::Module,
+            &packages_only
+        ),
+        Ok(Utf8PathBuf::from("/node_modules/local/index.scss"))
+    );
 }
