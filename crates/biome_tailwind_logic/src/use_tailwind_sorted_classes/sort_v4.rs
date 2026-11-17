@@ -2176,6 +2176,26 @@ mod tests {
     }
 
     #[test]
+    fn arbitrary_text_shadow_color_takes_only_an_opacity_modifier() {
+        // An arbitrary color and an arbitrary shadow share one placement but
+        // not one modifier: the color's is an opacity, the shadow's is free.
+        assert!(matches!(
+            classify("text-shadow-[#fff]/foo"),
+            SortKey::Unknown
+        ));
+        for input in [
+            "text-shadow-[#fff]/50",
+            "text-shadow-[#fff]",
+            "text-shadow-[0_1px_red]/foo",
+        ] {
+            assert!(
+                matches!(classify(input), SortKey::Known { .. }),
+                "{input} should be known"
+            );
+        }
+    }
+
+    #[test]
     fn gradient_utilities_accept_any_modifier() {
         // Tailwind reads a gradient's modifier as the interpolation method
         // and compiles any value (`in <modifier>`), on every branch.

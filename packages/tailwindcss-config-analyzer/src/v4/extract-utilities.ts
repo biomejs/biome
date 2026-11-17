@@ -16,9 +16,9 @@
 //           type-blind fallback property, if any.
 //        b. (basename × every CssDataType, with explicit dataType marker)
 //           `<basename>-[<marker>:<sample>]` — emit `ArbitraryBranch::Typed`
-//           only when the resulting (property, count) differs from the nonsense
-//           fallback. Equal results are absorbed by the `ArbitraryBranch::Fallback`
-//           entry.
+//           only when the resulting (property, count) or accepted modifier
+//           differs from the nonsense fallback. Equal results are absorbed by
+//           the `ArbitraryBranch::Fallback` entry.
 //        c. If the utility produced a nonsense result, emit one
 //           `ArbitraryBranch::Fallback` entry carrying that fallback property.
 //   4. Iterate `getClassList()` for hardcoded keywords on functional
@@ -392,10 +392,11 @@ function extractFunctionalBranches(
 
 		const nonsenseProbe = `${basename}-[${NONSENSE_PROBE}]`;
 		const nonsense = propertySortOf(ds, nonsenseProbe);
+		const nonsenseModifier = modifierKindOf(ds, nonsenseProbe);
 		if (nonsense) {
 			branches.arbitraryBranches.push({
 				kind: "Fallback",
-				modifier: modifierKindOf(ds, nonsenseProbe),
+				modifier: nonsenseModifier,
 				sort: nonsense,
 			});
 		}
@@ -403,13 +404,21 @@ function extractFunctionalBranches(
 			const probe = `${basename}-[${p.marker}:${p.value}]`;
 			const sort = propertySortOf(ds, probe);
 			if (!sort) continue;
-			if (nonsense && sortKeyOf(sort) === sortKeyOf(nonsense)) {
+			const modifier = modifierKindOf(ds, probe);
+			// A typed value placed like the fallback still needs its own
+			// branch when it takes a different modifier: `text-shadow-[#fff]`
+			// takes only an opacity, other `text-shadow-[...]` values take any.
+			if (
+				nonsense &&
+				sortKeyOf(sort) === sortKeyOf(nonsense) &&
+				modifier === nonsenseModifier
+			) {
 				continue;
 			}
 			branches.arbitraryBranches.push({
 				kind: "Typed",
 				value_type: p.type,
-				modifier: modifierKindOf(ds, probe),
+				modifier,
 				sort,
 			});
 		}

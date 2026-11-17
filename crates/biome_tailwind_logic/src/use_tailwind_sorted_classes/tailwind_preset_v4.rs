@@ -4820,6 +4820,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             NamedBranch::Theme(ThemeNamespace::TextShadow, ModifierKind::Any, 40, 1),
         ],
         arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Color, ModifierKind::Opacity, 40, 1),
             ArbitraryBranch::Fallback(ModifierKind::Any, 40, 1),
         ],
         bare: None,
