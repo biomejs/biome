@@ -1,0 +1,878 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@use "sass:color";
+
+a {
+  opacity: color.alpha(#e1d7d2);
+  opacity: alpha(#e1d7d2);
+  opacity: opacity(#e1d7d2);
+  color: color.blackness(#e1d7d2);
+  color: blackness(#e1d7d2);
+  color: color.blue(#e1d7d2);
+  color: blue(#e1d7d2);
+  color: color.green(#e1d7d2);
+  color: green(#e1d7d2);
+  color: color.hue(#e1d7d2);
+  color: hue(#e1d7d2);
+  color: color.lightness(#e1d7d2);
+  color: lightness(#e1d7d2);
+  color: color.red(#e1d7d2);
+  color: red(#e1d7d2);
+  color: color.saturation(#e1d7d2);
+  color: saturation(#e1d7d2);
+  color: color.whiteness(#e1d7d2);
+}
+
+$alpha: alpha($brand);
+$map: (key: hue($brand));
+
+@function lightness($color) {
+  @return 50%;
+}
+
+a {
+  width: calc(100% * opacity($brand));
+  width: #{ alpha($brand) };
+  width: calc(2*alpha($brand));
+  width: fn(1,alpha($brand));
+  width: 1px/alpha($brand);
+  width: lightness($brand);
+  width: fn($amount: hue($brand));
+  margin: 0 hue($brand) * 1px;
+  opacity: opacity(50%);
+  opacity: opacity(var(--fade));
+  backdrop-filter: opacity(50%);
+  -webkit-filter: opacity(50%);
+  FILTER: opacity(50%);
+  --alpha: alpha($brand);
+  --module-alpha: color.alpha($brand);
+  --whiteness: color.whiteness($brand);
+  --spaced: color. alpha($brand);
+  font: 12px hue($brand) {
+    family: hue($brand);
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:5:12 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of color.alpha().
+  
+    4 │ a {
+  > 5 │   opacity: color.alpha(#e1d7d2);
+      │            ^^^^^^^^^^^
+    6 │   opacity: alpha(#e1d7d2);
+    7 │   opacity: opacity(#e1d7d2);
+  
+  i This function fails for colors outside the rgb, hsl and hwb color spaces, such as colors made with oklch().
+  
+  i Replace it with color.channel($color, "alpha").
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:6:12 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of alpha().
+  
+    4 │ a {
+    5 │   opacity: color.alpha(#e1d7d2);
+  > 6 │   opacity: alpha(#e1d7d2);
+      │            ^^^^^
+    7 │   opacity: opacity(#e1d7d2);
+    8 │   color: color.blackness(#e1d7d2);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "alpha").
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:7:12 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of opacity().
+  
+    5 │   opacity: color.alpha(#e1d7d2);
+    6 │   opacity: alpha(#e1d7d2);
+  > 7 │   opacity: opacity(#e1d7d2);
+      │            ^^^^^^^
+    8 │   color: color.blackness(#e1d7d2);
+    9 │   color: blackness(#e1d7d2);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "alpha").
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:8:10 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of color.blackness().
+  
+     6 │   opacity: alpha(#e1d7d2);
+     7 │   opacity: opacity(#e1d7d2);
+   > 8 │   color: color.blackness(#e1d7d2);
+       │          ^^^^^^^^^^^^^^^
+     9 │   color: blackness(#e1d7d2);
+    10 │   color: color.blue(#e1d7d2);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "blackness", $space: hwb).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:9:10 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of blackness().
+  
+     7 │   opacity: opacity(#e1d7d2);
+     8 │   color: color.blackness(#e1d7d2);
+   > 9 │   color: blackness(#e1d7d2);
+       │          ^^^^^^^^^
+    10 │   color: color.blue(#e1d7d2);
+    11 │   color: blue(#e1d7d2);
+  
+  i Sass has no global blackness() function, so it outputs this call unchanged instead of reading the blackness of the color.
+  
+  i Replace it with color.channel($color, "blackness", $space: hwb).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:10:10 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of color.blue().
+  
+     8 │   color: color.blackness(#e1d7d2);
+     9 │   color: blackness(#e1d7d2);
+  > 10 │   color: color.blue(#e1d7d2);
+       │          ^^^^^^^^^^
+    11 │   color: blue(#e1d7d2);
+    12 │   color: color.green(#e1d7d2);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "blue", $space: rgb).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:11:10 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of blue().
+  
+     9 │   color: blackness(#e1d7d2);
+    10 │   color: color.blue(#e1d7d2);
+  > 11 │   color: blue(#e1d7d2);
+       │          ^^^^
+    12 │   color: color.green(#e1d7d2);
+    13 │   color: green(#e1d7d2);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "blue", $space: rgb).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:12:10 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of color.green().
+  
+    10 │   color: color.blue(#e1d7d2);
+    11 │   color: blue(#e1d7d2);
+  > 12 │   color: color.green(#e1d7d2);
+       │          ^^^^^^^^^^^
+    13 │   color: green(#e1d7d2);
+    14 │   color: color.hue(#e1d7d2);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "green", $space: rgb).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:13:10 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of green().
+  
+    11 │   color: blue(#e1d7d2);
+    12 │   color: color.green(#e1d7d2);
+  > 13 │   color: green(#e1d7d2);
+       │          ^^^^^
+    14 │   color: color.hue(#e1d7d2);
+    15 │   color: hue(#e1d7d2);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "green", $space: rgb).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:14:10 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of color.hue().
+  
+    12 │   color: color.green(#e1d7d2);
+    13 │   color: green(#e1d7d2);
+  > 14 │   color: color.hue(#e1d7d2);
+       │          ^^^^^^^^^
+    15 │   color: hue(#e1d7d2);
+    16 │   color: color.lightness(#e1d7d2);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "hue", $space: hsl).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:15:10 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of hue().
+  
+    13 │   color: green(#e1d7d2);
+    14 │   color: color.hue(#e1d7d2);
+  > 15 │   color: hue(#e1d7d2);
+       │          ^^^
+    16 │   color: color.lightness(#e1d7d2);
+    17 │   color: lightness(#e1d7d2);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "hue", $space: hsl).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:16:10 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of color.lightness().
+  
+    14 │   color: color.hue(#e1d7d2);
+    15 │   color: hue(#e1d7d2);
+  > 16 │   color: color.lightness(#e1d7d2);
+       │          ^^^^^^^^^^^^^^^
+    17 │   color: lightness(#e1d7d2);
+    18 │   color: color.red(#e1d7d2);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "lightness", $space: hsl).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:17:10 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of lightness().
+  
+    15 │   color: hue(#e1d7d2);
+    16 │   color: color.lightness(#e1d7d2);
+  > 17 │   color: lightness(#e1d7d2);
+       │          ^^^^^^^^^
+    18 │   color: color.red(#e1d7d2);
+    19 │   color: red(#e1d7d2);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "lightness", $space: hsl).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:18:10 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of color.red().
+  
+    16 │   color: color.lightness(#e1d7d2);
+    17 │   color: lightness(#e1d7d2);
+  > 18 │   color: color.red(#e1d7d2);
+       │          ^^^^^^^^^
+    19 │   color: red(#e1d7d2);
+    20 │   color: color.saturation(#e1d7d2);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "red", $space: rgb).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:19:10 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of red().
+  
+    17 │   color: lightness(#e1d7d2);
+    18 │   color: color.red(#e1d7d2);
+  > 19 │   color: red(#e1d7d2);
+       │          ^^^
+    20 │   color: color.saturation(#e1d7d2);
+    21 │   color: saturation(#e1d7d2);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "red", $space: rgb).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:20:10 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of color.saturation().
+  
+    18 │   color: color.red(#e1d7d2);
+    19 │   color: red(#e1d7d2);
+  > 20 │   color: color.saturation(#e1d7d2);
+       │          ^^^^^^^^^^^^^^^^
+    21 │   color: saturation(#e1d7d2);
+    22 │   color: color.whiteness(#e1d7d2);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "saturation", $space: hsl).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:21:10 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of saturation().
+  
+    19 │   color: red(#e1d7d2);
+    20 │   color: color.saturation(#e1d7d2);
+  > 21 │   color: saturation(#e1d7d2);
+       │          ^^^^^^^^^^
+    22 │   color: color.whiteness(#e1d7d2);
+    23 │ }
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "saturation", $space: hsl).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:22:10 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of color.whiteness().
+  
+    20 │   color: color.saturation(#e1d7d2);
+    21 │   color: saturation(#e1d7d2);
+  > 22 │   color: color.whiteness(#e1d7d2);
+       │          ^^^^^^^^^^^^^^^
+    23 │ }
+    24 │ 
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "whiteness", $space: hwb).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:25:9 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of alpha().
+  
+    23 │ }
+    24 │ 
+  > 25 │ $alpha: alpha($brand);
+       │         ^^^^^
+    26 │ $map: (key: hue($brand));
+    27 │ 
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "alpha").
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:26:13 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of hue().
+  
+    25 │ $alpha: alpha($brand);
+  > 26 │ $map: (key: hue($brand));
+       │             ^^^
+    27 │ 
+    28 │ @function lightness($color) {
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "hue", $space: hsl).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:33:22 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of opacity().
+  
+    32 │ a {
+  > 33 │   width: calc(100% * opacity($brand));
+       │                      ^^^^^^^
+    34 │   width: #{ alpha($brand) };
+    35 │   width: calc(2*alpha($brand));
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "alpha").
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:34:13 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of alpha().
+  
+    32 │ a {
+    33 │   width: calc(100% * opacity($brand));
+  > 34 │   width: #{ alpha($brand) };
+       │             ^^^^^
+    35 │   width: calc(2*alpha($brand));
+    36 │   width: fn(1,alpha($brand));
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "alpha").
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:35:17 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of alpha().
+  
+    33 │   width: calc(100% * opacity($brand));
+    34 │   width: #{ alpha($brand) };
+  > 35 │   width: calc(2*alpha($brand));
+       │                 ^^^^^
+    36 │   width: fn(1,alpha($brand));
+    37 │   width: 1px/alpha($brand);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "alpha").
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:36:15 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of alpha().
+  
+    34 │   width: #{ alpha($brand) };
+    35 │   width: calc(2*alpha($brand));
+  > 36 │   width: fn(1,alpha($brand));
+       │               ^^^^^
+    37 │   width: 1px/alpha($brand);
+    38 │   width: lightness($brand);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "alpha").
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:37:14 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of alpha().
+  
+    35 │   width: calc(2*alpha($brand));
+    36 │   width: fn(1,alpha($brand));
+  > 37 │   width: 1px/alpha($brand);
+       │              ^^^^^
+    38 │   width: lightness($brand);
+    39 │   width: fn($amount: hue($brand));
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "alpha").
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:38:10 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of lightness().
+  
+    36 │   width: fn(1,alpha($brand));
+    37 │   width: 1px/alpha($brand);
+  > 38 │   width: lightness($brand);
+       │          ^^^^^^^^^
+    39 │   width: fn($amount: hue($brand));
+    40 │   margin: 0 hue($brand) * 1px;
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "lightness", $space: hsl).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:39:22 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of hue().
+  
+    37 │   width: 1px/alpha($brand);
+    38 │   width: lightness($brand);
+  > 39 │   width: fn($amount: hue($brand));
+       │                      ^^^
+    40 │   margin: 0 hue($brand) * 1px;
+    41 │   opacity: opacity(50%);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "hue", $space: hsl).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:40:13 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of hue().
+  
+    38 │   width: lightness($brand);
+    39 │   width: fn($amount: hue($brand));
+  > 40 │   margin: 0 hue($brand) * 1px;
+       │             ^^^
+    41 │   opacity: opacity(50%);
+    42 │   opacity: opacity(var(--fade));
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "hue", $space: hsl).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:41:12 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of opacity().
+  
+    39 │   width: fn($amount: hue($brand));
+    40 │   margin: 0 hue($brand) * 1px;
+  > 41 │   opacity: opacity(50%);
+       │            ^^^^^^^
+    42 │   opacity: opacity(var(--fade));
+    43 │   backdrop-filter: opacity(50%);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "alpha").
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:42:12 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of opacity().
+  
+    40 │   margin: 0 hue($brand) * 1px;
+    41 │   opacity: opacity(50%);
+  > 42 │   opacity: opacity(var(--fade));
+       │            ^^^^^^^
+    43 │   backdrop-filter: opacity(50%);
+    44 │   -webkit-filter: opacity(50%);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "alpha").
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:43:20 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of opacity().
+  
+    41 │   opacity: opacity(50%);
+    42 │   opacity: opacity(var(--fade));
+  > 43 │   backdrop-filter: opacity(50%);
+       │                    ^^^^^^^
+    44 │   -webkit-filter: opacity(50%);
+    45 │   FILTER: opacity(50%);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "alpha").
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:44:19 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of opacity().
+  
+    42 │   opacity: opacity(var(--fade));
+    43 │   backdrop-filter: opacity(50%);
+  > 44 │   -webkit-filter: opacity(50%);
+       │                   ^^^^^^^
+    45 │   FILTER: opacity(50%);
+    46 │   --alpha: alpha($brand);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "alpha").
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:45:11 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of opacity().
+  
+    43 │   backdrop-filter: opacity(50%);
+    44 │   -webkit-filter: opacity(50%);
+  > 45 │   FILTER: opacity(50%);
+       │           ^^^^^^^
+    46 │   --alpha: alpha($brand);
+    47 │   --module-alpha: color.alpha($brand);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "alpha").
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:46:12 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of alpha().
+  
+    44 │   -webkit-filter: opacity(50%);
+    45 │   FILTER: opacity(50%);
+  > 46 │   --alpha: alpha($brand);
+       │            ^^^^^
+    47 │   --module-alpha: color.alpha($brand);
+    48 │   --whiteness: color.whiteness($brand);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "alpha").
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:47:19 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of color.alpha().
+  
+    45 │   FILTER: opacity(50%);
+    46 │   --alpha: alpha($brand);
+  > 47 │   --module-alpha: color.alpha($brand);
+       │                   ^^^^^^^^^^^
+    48 │   --whiteness: color.whiteness($brand);
+    49 │   --spaced: color. alpha($brand);
+  
+  i This function fails for colors outside the rgb, hsl and hwb color spaces, such as colors made with oklch().
+  
+  i Replace it with color.channel($color, "alpha").
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:48:16 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of color.whiteness().
+  
+    46 │   --alpha: alpha($brand);
+    47 │   --module-alpha: color.alpha($brand);
+  > 48 │   --whiteness: color.whiteness($brand);
+       │                ^^^^^^^^^^^^^^^
+    49 │   --spaced: color. alpha($brand);
+    50 │   font: 12px hue($brand) {
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "whiteness", $space: hwb).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:49:20 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of alpha().
+  
+    47 │   --module-alpha: color.alpha($brand);
+    48 │   --whiteness: color.whiteness($brand);
+  > 49 │   --spaced: color. alpha($brand);
+       │                    ^^^^^
+    50 │   font: 12px hue($brand) {
+    51 │     family: hue($brand);
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "alpha").
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:50:14 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of hue().
+  
+    48 │   --whiteness: color.whiteness($brand);
+    49 │   --spaced: color. alpha($brand);
+  > 50 │   font: 12px hue($brand) {
+       │              ^^^
+    51 │     family: hue($brand);
+    52 │   }
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "hue", $space: hsl).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:51:13 lint/nursery/useScssColorChannel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use color.channel() instead of hue().
+  
+    49 │   --spaced: color. alpha($brand);
+    50 │   font: 12px hue($brand) {
+  > 51 │     family: hue($brand);
+       │             ^^^
+    52 │   }
+    53 │ }
+  
+  i Sass has deprecated this function and plans to remove it in a future version.
+  
+  i Replace it with color.channel($color, "hue", $space: hsl).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

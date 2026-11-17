@@ -11435,6 +11435,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useScssColorChannel": {
+					"description": "Require color.channel() instead of the older Sass functions that read one channel of a color.\nSee https://biomejs.dev/linter/rules/use-scss-color-channel",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseScssColorChannelConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSetSize": {
 					"description": "Prefer reading the size property of a Set over converting the Set to an array to read its length.\nSee https://biomejs.dev/linter/rules/use-set-size",
 					"anyOf": [
@@ -20274,6 +20281,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseScssColorChannelOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseScssColorChannelOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseSelfClosingElementsOptions": {
 			"type": "object",
 			"properties": {
@@ -26416,6 +26432,16 @@
 			]
 		},
 		"UseScopedStylesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseScssColorChannelConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseScssColorChannelOptions" }
+			]
+		},
+		"UseScssColorChannelOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

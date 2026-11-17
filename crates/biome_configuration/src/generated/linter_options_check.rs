@@ -3343,6 +3343,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_scoped_styles::UseScopedStylesOptions>(),
     ));
     result.push((
+        "nursery",
+        "useScssColorChannel",
+        TypeId::of::<biome_rule_options::use_scss_color_channel::UseScssColorChannelOptions>(),
+    ));
+    result.push((
         "style",
         "useSelfClosingElements",
         TypeId::of::<biome_rule_options::use_self_closing_elements::UseSelfClosingElementsOptions>(
