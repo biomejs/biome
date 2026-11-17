@@ -49,16 +49,20 @@ prettier.is
 ```diff
 --- Prettier
 +++ Biome
-@@ -8,27 +8,24 @@
+@@ -7,28 +7,26 @@
+   </head>
    <body>
      <style lang="unknown">
-       .prettier {
+-      .prettier {
 -      content:
 -      "awesome"
 -                }
-+        content: "awesome";
-+      }
-     </style>
+-    </style>
++.prettier {
++content:
++"awesome"
++          }
++</style>
  
      <script lang="unknown">
 -      prettier.is
@@ -102,10 +106,11 @@ prettier.is
   </head>
   <body>
     <style lang="unknown">
-      .prettier {
-        content: "awesome";
-      }
-    </style>
+.prettier {
+content:
+"awesome"
+          }
+</style>
 
     <script lang="unknown">
       prettier.is.awesome();
