@@ -254,12 +254,13 @@ fn assignments_that_biome_reduces_less_than_typescript() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
-// Biome infers the return type of a function without a return annotation
-// without the `undefined` of an end that the function can reach, and types
-// `typeof` as one kind, so an assignment of such a value keeps the declared
-// type.
+// A call to a local function without a return annotation reduces by the
+// return type that Biome infers from the function's body, which has the
+// `undefined` of an end that the function can reach. A function expression
+// called where it is defined, and `typeof`, which Biome types as one kind,
+// give the declared type.
 #[test]
-fn values_that_biome_types_narrower_than_typescript_keep_the_declared_type() {
+fn calls_to_local_functions_keep_the_undefined_of_a_reachable_end() {
     assert_reads(
         r#"
         function g1() { if (c) return 1; }
@@ -283,14 +284,16 @@ fn values_that_biome_types_narrower_than_typescript_keep_the_declared_type() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
-// A call keeps the declared type unless its callee's return type comes from an
-// annotation: one that syntax shows, at the callee or at the declaration
-// that an import names, or a method of a lib global or of a type that a
-// declaration file declares. A method's or an imported function's return
-// type that Biome infers lacks the `undefined` of an end that it can reach,
-// and so can the type of an element, of a member that a module other than a
-// declaration file merges into a global or that a declaration file's class
-// inherits from one, and of the object of `?.`.
+// A call to a method or an imported function keeps the declared type unless
+// its callee's return type comes from an annotation: one that syntax shows,
+// at the callee or at the declaration that an import names, or a method of a
+// lib global or of a type that a declaration file declares. Checking the
+// values that such a callee returns would need the syntax of another module
+// or the types of an object, so a return type that Biome infers for it keeps
+// the declared type, and so does the type of an element, of a member that a
+// module other than a declaration file merges into a global or that a
+// declaration file's class inherits from one, and of a `?.` whose object is
+// such a call.
 #[test]
 fn calls_reduce_only_by_annotated_return_types() {
     assert_reads_with(

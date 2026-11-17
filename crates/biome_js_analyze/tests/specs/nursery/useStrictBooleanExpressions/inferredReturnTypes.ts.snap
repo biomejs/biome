@@ -1,0 +1,52 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: inferredReturnTypes.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+declare const flag: boolean;
+declare const literal: 1 | undefined;
+
+function maybeCount() {
+	if (flag) return 1;
+}
+
+function maybeName(name: string) {
+	if (flag) return name;
+}
+
+if (literal) {
+}
+
+// A path reaches the end of `maybeCount`, so the call can give `undefined`.
+if (maybeCount()) {
+}
+
+if (maybeName("a")) {
+}
+
+```
+
+# Diagnostics
+```
+inferredReturnTypes.ts:21:5 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable string.
+  
+    19 │ }
+    20 │ 
+  > 21 │ if (maybeName("a")) {
+       │     ^^^^^^^^^^^^^^
+    22 │ }
+    23 │ 
+  
+  i This check treats empty strings and nullish values alike.
+  
+  i Check for nullish values and empty strings explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

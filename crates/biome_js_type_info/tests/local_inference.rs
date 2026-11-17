@@ -384,6 +384,47 @@ fn infer_type_of_async_function() {
 }
 
 #[test]
+fn infer_return_type_with_a_reachable_end() {
+    // The union holds the value of the first `return`, the `undefined` of the
+    // bare `return`, and the marker of the end, whose reachability only the
+    // module graph decides. The method's `return` returns from the method.
+    const CODE: &str = r#"function f(c: boolean) {
+	if (c) return 1;
+	if (!c) return;
+	const o = { m() { return "x"; } };
+}"#;
+
+    let root = parse_ts(CODE);
+    let decl = get_function_declaration(&root);
+    let mut resolver = TestTypeCollector::default();
+    let ty = TypeData::from_js_function_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
+    assert_type_data_snapshot(
+        CODE,
+        &ty,
+        &resolver,
+        "infer_return_type_with_a_reachable_end",
+    );
+}
+
+#[test]
+fn infer_void_return_type_of_returns_without_values() {
+    const CODE: &str = r#"function f(c: boolean) {
+	if (c) return;
+}"#;
+
+    let root = parse_ts(CODE);
+    let decl = get_function_declaration(&root);
+    let mut resolver = TestTypeCollector::default();
+    let ty = TypeData::from_js_function_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
+    assert_type_data_snapshot(
+        CODE,
+        &ty,
+        &resolver,
+        "infer_void_return_type_of_returns_without_values",
+    );
+}
+
+#[test]
 fn infer_type_of_array() {
     const CODE: &str = r#"const array: Array<string> = [];"#;
 

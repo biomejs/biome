@@ -727,7 +727,8 @@ fn classify_expression(
                         | TypeofExpression::NullishCoalescing(_)
                         | TypeofExpression::Super(_)
                         | TypeofExpression::Typeof(_)
-                        | TypeofExpression::UnaryMinus(_) => return Indeterminate,
+                        | TypeofExpression::UnaryMinus(_)
+                        | TypeofExpression::ImplicitReturn(_) => return Indeterminate,
                     },
                     RawTypeData::InstanceOf(_)
                         if matches!(state.mode, MemberLookupMode::Constructed { .. }) =>

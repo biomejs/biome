@@ -282,6 +282,9 @@ impl<'db> ResolutionCtx<'db, '_> {
             RawTypeofExpression::WidenedLiteral(expression) => {
                 Some(self.resolve_widened_literal(expression))
             }
+            RawTypeofExpression::ImplicitReturn(expression) => {
+                Some(self.resolve_implicit_return(expression.function))
+            }
         }
     }
 

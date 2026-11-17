@@ -195,10 +195,12 @@ fn fresh_literal_step(raw: &RawTypeData) -> Option<FreshLiteralStep<'_>> {
                 &expression.left,
                 &expression.right,
             )),
-            // A widened value has no fresh literal type left. Biome can't
+            // A widened value has no fresh literal type left, and the
+            // end of a function gives `undefined` or nothing. Biome can't
             // tell whether the others give one, as `id(1)` and `await 1`
             // do, so it takes them as giving none.
             RawTypeofExpression::WidenedLiteral(_)
+            | RawTypeofExpression::ImplicitReturn(_)
             | RawTypeofExpression::Addition(_)
             | RawTypeofExpression::Await(_)
             | RawTypeofExpression::BitwiseNot(_)

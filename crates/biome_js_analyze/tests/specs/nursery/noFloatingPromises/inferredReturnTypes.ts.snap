@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: inferredReturnTypes.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+declare const flag: boolean;
+
+function maybeTask() {
+	if (flag) return Promise.resolve(1);
+}
+
+// A path reaches the end of `maybeTask`, so the call can give `undefined`.
+maybeTask();
+
+```
+
+# Diagnostics
+```
+inferredReturnTypes.ts:10:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+     9 │ // A path reaches the end of `maybeTask`, so the call can give `undefined`.
+  > 10 │ maybeTask();
+       │ ^^^^^^^^^^^^
+    11 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

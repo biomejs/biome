@@ -244,9 +244,14 @@ pub(crate) fn infer_flow_switch_exhaustive<'db>(
 /// false (see [`infer_flow_call_effect`]), or on the path that matches no
 /// case of an exhaustive `switch`.
 ///
+/// A return type inferred from a function's body asks whether a path reaches
+/// the function's end, where it returns `undefined`.
+///
 /// Returns `None` for an unavailable root, when the root exceeds a work
 /// limit of its graph or of the walk, and when a query cycle passes through
-/// this lookup, so the caller can't tell whether code is reachable.
+/// this lookup, so the caller can't tell whether code is reachable. A cycle
+/// passes through it when a statement call or a `switch` statement of the
+/// root needs the root's own inferred return type.
 #[salsa::tracked(returns(ref), cycle_result=infer_flow_reachability_cycle_result)]
 pub(crate) fn infer_flow_reachability<'db>(
     db: &'db dyn ModuleDb,
