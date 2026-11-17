@@ -313,9 +313,14 @@ fn this_type_predicates_narrow_their_receiver() {
             ("L27_80", "n", &["instanceof BranchNode"]),
             ("L28_45", "n", &["instanceof LeafNode"]),
             ("L29_69", "o2.n", &["instanceof LeafNode"]),
-            // TypeScript gives `this & { tag: 1 }`. Biome keeps the declared
-            // type where TypeScript gives an intersection.
-            ("L38_93", "this", &["instanceof E"]),
+            // TypeScript gives `this & { tag: 1 }`. Normalization merges the
+            // operands of Biome's `E & { tag: 1 }` into an instance of an
+            // anonymous class.
+            (
+                "L38_93",
+                "this",
+                &["instanceof class { extends: none implements: [] type_args: [] }"],
+            ),
         ],
     );
 }
@@ -415,12 +420,9 @@ fn statement_calls_assert_through_names_with_explicit_types() {
         function s27(x: string | null) { assert(x !== null && x.length > 0); /*L41_70*/x; } // L41
         "#,
         &[
-            // TypeScript gives `string` through `this & { ready: string }`.
-            // Biome keeps the declared type where TypeScript gives an
-            // intersection.
-            ("L12_94", "this.ready", &["string", "undefined"]),
-            // TypeScript gives `string`, as above.
-            ("L13_101", "this.v", &["null", "string"]),
+            // The property of `this & { ready: string }`.
+            ("L12_94", "this.ready", &["string"]),
+            ("L13_101", "this.v", &["string"]),
             ("L15_42", "x", &["string"]),
             ("L16_42", "x", &["string"]),
             ("L17_44", "x", &["string"]),
@@ -433,8 +435,7 @@ fn statement_calls_assert_through_names_with_explicit_types() {
             ("L24_46", "x", &["null", "string"]),
             ("L25_50", "x", &["string"]),
             ("L26_50", "x", &["string"]),
-            // TypeScript gives `string`, as above.
-            ("L30_29", "r.ready", &["string", "undefined"]),
+            ("L30_29", "r.ready", &["string"]),
             ("L31_44", "x", &["string"]),
             ("L32_45", "x", &["string"]),
             ("L33_54", "o.v", &["string"]),
@@ -493,13 +494,9 @@ fn library_type_guard_functions_narrow() {
             ("L4_59", "x", &["instanceof Array<string>"]),
             ("L4_81", "x", &["string"]),
             ("L5_49", "x", &["instanceof Array<any>"]),
-            // TypeScript gives `any[]`, which every member that Biome keeps
-            // accepts.
-            (
-                "L6_68",
-                "x",
-                &["Readonly instanceof Array<string>", "string"],
-            ),
+            // No member is related to `any[]`, the target, which is
+            // assignable to the type.
+            ("L6_68", "x", &["instanceof Array<any>"]),
             (
                 "L6_90",
                 "x",
@@ -647,10 +644,8 @@ fn generic_and_overloaded_type_predicates_narrow() {
             ("L15_75", "x", &["null"]),
             ("L16_65", "x", &["string"]),
             ("L17_55", "x", &["string: a"]),
-            // TypeScript gives `string`. Biome keeps the declared type,
-            // because `NonNullable<string | null>` is an intersection.
-            ("L18_56", "x", &["null", "string"]),
-            ("L19_53", "x", &["null", "string"]),
+            ("L18_56", "x", &["string"]),
+            ("L19_53", "x", &["string"]),
             ("L20_61", "x", &["string"]),
             ("L21_49", "x", &["string"]),
             ("L22_49", "x", &["string"]),
@@ -665,17 +660,42 @@ fn generic_and_overloaded_type_predicates_narrow() {
             ("L25_87", "xs", &["instanceof Array<string | number>"]),
             ("L26_76", "xs", &["Readonly instanceof Array<string>"]),
             ("L29_66", "xs", &["instanceof Array<string | number>"]),
-            // TypeScript gives `[string | number, string | number] &
-            // string[]`. Biome keeps the declared type where TypeScript gives
-            // an intersection.
-            ("L30_80", "t", &["[string | number, string | number]"]),
+            (
+                "L30_80",
+                "t",
+                &["[string | number, string | number] & instanceof Array<string>"],
+            ),
             ("L31_75", "xs", &["instanceof Array<string>"]),
             ("L32_79", "x", &["boolean", "number", "string"]),
-            // TypeScript gives `T`. Biome can't compare `T` with `null`, so it
-            // keeps the declared type.
-            ("L33_52", "x", &["instanceof T", "null"]),
+            ("L33_52", "x", &["instanceof T"]),
             ("L34_89", "xs", &["instanceof Array<string>"]),
             ("L35_75", "xs", &["instanceof Array<string | number>"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// Overload selection compares an argument whose type is a type parameter of
+// the calling function as TypeScript does there: under the subtype relation,
+// the type parameter relates only through its constraint, so `t` skips a
+// first signature that takes a `string`, unless `T extends string`.
+#[test]
+fn overload_selection_relates_type_parameters_through_their_constraints() {
+    assert_reads(
+        r#"
+        declare function g(v: unknown, w: string): v is "a";
+        declare function g(v: unknown, w: unknown): v is string;
+        function o1<T>(x: string | number, t: T) { if (g(x, t)) /*unconstrained*/x; }
+        declare function h(v: unknown, w: string): v is number;
+        declare function h(v: unknown, w: unknown): v is string;
+        function o2<T extends string>(x: string | number, t: T) { if (h(x, t)) /*constrained*/x; }
+        declare function k<U>(v: unknown, w: U): v is string;
+        function o3<T>(x: string | number, t: T) { if (k(x, t)) /*inferred*/x; }
+        "#,
+        &[
+            ("unconstrained", "x", &["string"]),
+            ("constrained", "x", &["number"]),
+            ("inferred", "x", &["string"]),
         ],
     );
 }

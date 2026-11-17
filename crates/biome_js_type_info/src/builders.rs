@@ -133,9 +133,10 @@ pub(crate) const MAX_DISTRIBUTED_MEMBERS: usize = 32;
 ///   intersections, so `(A | B) & C` is `(A & C) | (B & C)`, as long as the
 ///   product has at most [`MAX_DISTRIBUTED_MEMBERS`] members;
 /// - operands that are all objects, interfaces, class instances, functions,
-///   or namespaces merge into one anonymous type. A property that several
-///   operands declare has the intersection of their types, and is optional
-///   only when every operand declares it optional (see [`merge_members`]).
+///   or namespaces merge into one anonymous type, unless the builder comes
+///   from [`Self::without_merging`]. A property that several operands
+///   declare has the intersection of their types, and is optional only when
+///   every operand declares it optional (see [`merge_members`]).
 ///
 /// The builder doesn't resolve handles. An operand that is a handle, a type
 /// parameter, or another type whose values the builder can't tell stays as it
@@ -147,6 +148,9 @@ pub(crate) struct IntersectionBuilder<'db> {
     /// a distributed intersection are built without distribution, which bounds
     /// the work to one product.
     distributes: bool,
+    /// Whether [`Self::build`] merges object operands into one anonymous
+    /// type. See [`Self::without_merging`].
+    merges: bool,
 }
 
 impl<'db> IntersectionBuilder<'db> {
@@ -155,14 +159,32 @@ impl<'db> IntersectionBuilder<'db> {
             db,
             types: Vec::new(),
             distributes: true,
+            merges: true,
         }
     }
 
-    fn without_distribution(db: &'db dyn TypeDb) -> Self {
+    /// Returns a builder that applies every rule except the merging of object
+    /// operands, so each operand keeps its name, its `extends` clauses, and
+    /// the handle that identifies it. Narrowing builds its intersections this
+    /// way, because a later `instanceof` or type predicate compares the
+    /// operands by declaration: `B & A` must still derive from `A`.
+    pub(crate) fn without_merging(db: &'db dyn TypeDb) -> Self {
         Self {
             db,
             types: Vec::new(),
+            distributes: true,
+            merges: false,
+        }
+    }
+
+    /// Returns a builder for one member of a distributed intersection, which
+    /// merges when `self` does.
+    fn without_distribution(&self) -> Self {
+        Self {
+            db: self.db,
+            types: Vec::new(),
             distributes: false,
+            merges: self.merges,
         }
     }
 
@@ -250,7 +272,9 @@ impl<'db> IntersectionBuilder<'db> {
             return TypeData::NeverKeyword;
         }
         self.remove_empty_objects();
-        if let Some(merged) = MergedType::from_types(self.db, &self.types) {
+        if self.merges
+            && let Some(merged) = MergedType::from_types(self.db, &self.types)
+        {
             return merged.into_type(self.db);
         }
 
@@ -296,7 +320,7 @@ impl<'db> IntersectionBuilder<'db> {
         let mut union = UnionBuilder::new(db);
         loop {
             let intersection = operands.iter().zip(&positions).fold(
-                Self::without_distribution(db),
+                self.without_distribution(),
                 |builder, (members, position)| builder.add(members[*position]),
             );
             union = union.add(intersection.build());

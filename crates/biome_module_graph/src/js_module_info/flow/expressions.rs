@@ -2,7 +2,7 @@ use biome_js_syntax::{
     AnyJsCallArgument, JsAwaitExpression, JsBinaryExpression, JsBinaryOperator, JsCallArgumentList,
     JsCallArguments, JsCallExpression, JsComputedMemberExpression, JsConditionalExpression,
     JsIdentifierExpression, JsLogicalExpression, JsParenthesizedExpression, JsSequenceExpression,
-    JsStaticMemberExpression,
+    JsStaticMemberExpression, JsThisExpression,
 };
 use biome_rowan::{AstNode, AstSeparatedList, declare_node_union};
 
@@ -14,6 +14,7 @@ declare_node_union! {
     /// [`Self::is_evaluated`] returns true; every other expression keeps its
     /// raw type.
     pub(crate) AnyFlowExpression = JsIdentifierExpression
+        | JsThisExpression
         | JsParenthesizedExpression
         | JsStaticMemberExpression
         | JsComputedMemberExpression
@@ -44,6 +45,7 @@ impl AnyFlowExpression {
                     })
             }
             Self::JsIdentifierExpression(_)
+            | Self::JsThisExpression(_)
             | Self::JsParenthesizedExpression(_)
             | Self::JsStaticMemberExpression(_)
             | Self::JsComputedMemberExpression(_)
@@ -81,6 +83,7 @@ impl AnyFlowExpression {
                 .right()
                 .is_ok_and(|right| right.syntax() == self.syntax()),
             Self::JsIdentifierExpression(_)
+            | Self::JsThisExpression(_)
             | Self::JsParenthesizedExpression(_)
             | Self::JsStaticMemberExpression(_)
             | Self::JsComputedMemberExpression(_)

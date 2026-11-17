@@ -46,6 +46,13 @@ impl<'db> ResolutionCtx<'db, '_> {
             AnyFlowExpression::JsIdentifierExpression(identifier) => {
                 self.narrow_reference(identifier)
             }
+            AnyFlowExpression::JsThisExpression(this) => {
+                // `this` narrows as a property path does, from the type of
+                // the expression.
+                let this = AnyJsExpression::from(this.clone());
+                let declared = self.raw_operand(&this)?;
+                self.narrow_path(&this, declared)
+            }
             AnyFlowExpression::JsParenthesizedExpression(parenthesized) => {
                 self.flow_operand(&parenthesized.expression().ok()?)
             }

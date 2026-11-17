@@ -176,7 +176,8 @@ These limits apply to every *Supported* and *Partial* row below:
   or expression, or outside any function. Neither
   does a path on `this` in the decorators or `extends` clause of a nested
   class or in the computed key of a nested object literal method, which Biome
-  types as the nested class or object.
+  types as the nested class or object. `this` itself narrows where its
+  paths do, as by a `this is T` or `asserts this is T` predicate.
 - A write to a prefix of a property path, as `o = q` or `o.v = q` for
   `o.v.w`, gives the path its declared type at the write, and so does a write
   of any property of a prefix through a key that is not a literal of the kind
@@ -316,18 +317,24 @@ These limits apply to every *Supported* and *Partial* row below:
   above, except that its `null` and `undefined` members don't count, because
   destructuring throws on them. The element's own tests then narrow the
   element further, as a property path's own tests do.
-- `"a" in x` and `0 in x` narrow `x` when its declared type is a union with
-  at least two object types, and `x` is a variable, `this`, or a property
-  path that can narrow by the rules above. The key must be a string literal
-  without escapes or a decimal integer literal of the kind that a property
-  path accepts. As in TypeScript, the true branch keeps the members that
-  declare the property, even as optional, or whose index signature accepts
-  its name, and removes the others only when some member does, and the false
-  branch removes the members that declare the property as required. A member
-  stays in both branches when Biome can't tell whether it has the property,
-  as the row on `in` lists. Only the value that `in` looks into narrows:
-  `"a" in s.k` narrows `s.k`, not `s`, as in TypeScript. The deliberate
-  choices above describe why object types count as closed.
+- `"a" in x` and `0 in x` narrow `x` when its declared type has an object
+  type or a type parameter, or is `unknown`, and `x` is a variable, `this`,
+  or a property path that can narrow by the rules above. The key must be a
+  string literal without escapes or a decimal integer literal of the kind
+  that a property path accepts. As in TypeScript, the true branch keeps the
+  members that declare the property, even as optional, or whose index
+  signature accepts its name, and removes the others when some member does,
+  and the false branch removes the members that declare the property as
+  required. When no member can have the property, because each is an object
+  type that doesn't declare it, `object`, `{}`, or a type parameter whose
+  constraint doesn't declare it, the true branch is the intersection of the
+  type with `Record<"a", unknown>`, which Biome writes as `{ a: unknown }`.
+  The members of `Object`, such as `toString`, count as declared there. A
+  member stays in both branches when Biome can't tell whether it has the
+  property, as the row on `in` lists, and then no intersection is made. Only
+  the value that `in` looks into narrows: `"a" in s.k` narrows `s.k`, not
+  `s`, as in TypeScript. The deliberate choices above describe why object
+  types count as closed.
 - `x instanceof C` narrows `x` when `x` is a variable or a property path that
   can narrow by the rules above, and its declared type is `unknown` or has a
   member other than `null`, `undefined`, and primitive types, because no
@@ -344,27 +351,29 @@ These limits apply to every *Supported* and *Partial* row below:
   interface is derived from another when its `extends` clauses lead to that
   declaration, whatever their type arguments, so `Box<string>` is derived
   from `Box`, and arrays and tuples are derived from `Array`. An object type
-  literal, a function type, or a primitive is derived from no class. The true
-  branch keeps the members derived from the instance type, replaces a member
-  that the instance type is derived from with the instance type, and removes
-  the others. When no member remains, it gives the instance type if that is a
-  subtype of the type of `x`, as `A` is of `{ a: number } | string` with
-  `class A { a = 1 }`, and keeps the type of `x` otherwise, where TypeScript
-  gives an intersection such as `(string | number) & A`. `unknown` becomes
-  the instance type. The false branch removes the members derived from the
-  instance type when `C` has a single instance type that is an object type
-  other than `{}`. The deliberate choices above describe why each branch
-  removes members that a value reaching it can have.
+  literal, a function type, or a primitive is derived from no class, and a
+  type parameter is derived from what its constraint is derived from. The
+  true branch keeps the members derived from the instance type, replaces a
+  member that the instance type is derived from with the instance type, and
+  removes the others. When no member relates to the instance type, such as
+  `A` for `class A`, a type parameter `T` without a constraint, or whose
+  constraint `A` is derived from, becomes `T & A`. When no member remains,
+  the true branch gives what a type-guard function gives, as the item on
+  those below describes, so `x: Bar` with `interface Bar { c: number }`
+  becomes `Bar & A`. `unknown` becomes the instance type. The false branch
+  removes the members derived from the instance type when `C` has a single
+  instance type that is an object type other than `{}`. The deliberate
+  choices above describe why each branch removes members that a value
+  reaching it can have.
 - `x instanceof C` keeps the type of `x`, where TypeScript narrows it, when
   `C` is `Object` or `Function`, when its type is `any` or has a generic
-  construct signature, as in `new <T>() => Box<T>`, when `C` declares or
+  construct signature, as in `new <T>() => Box<T>`, and when `C` declares or
   inherits a static `[Symbol.hasInstance]` method, or a static member with a
-  computed key that Biome can't name, and when a member of the type of `x` is
-  a type parameter, as in `x: T | C`. An instance of a generic class has no
-  type arguments in Biome, where TypeScript gives it `any` ones, as in
-  `Map<any, any>`, so `unknown` stays `unknown` for such a class, a member
-  that its instance type is derived from stays as it is, and the true branch
-  keeps the type of `x` when no member remains. Two classes with the same
+  computed key that Biome can't name. The instance type of a generic class
+  has an `any` type argument for each type parameter, as in `Map<any, any>`,
+  where it replaces `unknown` or `any` or where no member remains, as in
+  TypeScript, while a member that it is derived from stays as it is, with
+  its own type arguments. Two classes with the same
   name and members in two modules, such as `class K { k = 1 }` in `./a` and
   in `./b`, can't be told apart from one class that Biome reaches through two
   modules, so a test of one of them keeps the type of a value of the other.
@@ -392,21 +401,28 @@ These limits apply to every *Supported* and *Partial* row below:
   does. The true branch keeps a member that is a subtype of a member of the
   target, such as `Foo2` with `interface Foo2 extends Foo`, replaces a member
   with a member of the target that is a subtype of it, as `unknown` or
-  `object` becomes `Foo`, and removes the others. When no member remains, it
-  gives the target if that is a subtype of the type of `x`, and keeps the
-  type of `x` otherwise, where TypeScript gives an intersection such as
-  `(string | number) & Foo`. The false branch removes the members that the
-  true branch keeps as they are, and keeps `unknown`. A primitive is compared
-  with an object type through the members of its wrapper type, so `string`
-  is a subtype of `{ length: number }`.
+  `object` becomes `Foo`, and removes the others. A type parameter is a
+  subtype of what its constraint is a subtype of, and no other type is a
+  subtype of it. A member of the target that no member relates to gives its
+  intersection with each type parameter whose constraint it is a subtype of,
+  or that has no constraint, so `x: T | string` becomes `T & Foo`. When no
+  member remains, it gives the target if that is a subtype of the type of
+  `x`, the type of `x` if that is assignable to the target, the target if
+  that is assignable to the type of `x`, and otherwise the intersection of
+  the two, as `Bar & Foo` for `x: Bar`, as in TypeScript. Where Biome can't
+  tell one of these comparisons, it keeps the type of `x`. The false branch
+  removes the members that the true branch keeps as they are, and keeps
+  `unknown` and the type parameters that it intersects. A primitive is
+  compared with an object type through the members of its wrapper type, so
+  `string` is a subtype of `{ length: number }`.
 - A type-guard function keeps the type of `x` in both branches where
   TypeScript narrows it in these cases:
   - The target has only object types and the type of `x` has none and isn't
     `unknown`, as `string | number`, which TypeScript can narrow to a
     primitive, as to `string` with `{ length: number }`, or to an
-    intersection.
+    intersection, as `(string | number) & Foo`.
   - Biome can't tell whether one of two members is a subtype of the other in
-    the way that decides the result: for a generic, an index signature,
+    the way that decides the result: for an index signature,
     `unknown` in a union, instances of two different built-in classes, as
     `TypeError` and `Error`, and an instance of a class that is compared with
     a type that isn't derived from the class, because a class can declare
@@ -525,7 +541,9 @@ These limits apply to every *Supported* and *Partial* row below:
   an optional chain, where TypeScript narrows it as for a local value. Other
   values narrow nothing, even where TypeScript gives them a unit type, such
   as a variable with a type annotation, a call, `"a" as const`, a member of
-  a namespace, or an enum member. A `const` that a condition narrows to
+  a namespace, or an enum member. A comparison of `x.constructor` with a
+  class narrows `x` as the row on `x.constructor === C` describes. A
+  `const` that a condition narrows to
   `never`, as `D` in `const D = false; if (D) { if (x === D) x }`, still
   holds its value in Biome, so `x` reads as `false` there, where TypeScript
   gives `boolean`: Biome is narrower than TypeScript, in code that
@@ -576,7 +594,7 @@ code as TS7027, an error with `allowUnreachableCode: false`.
 | The branches of a conditional expression | `x: string \| null; x ? f(x) : g(x)` | `string` in `f(x)`, `string \| null` in `g(x)` | Supported |
 | A conditional expression has the types of both branches, whatever its test | `interface Foo { a: number }; x: Foo;`<br>`x ? 1 : "s"`; `true ? 1 : "s"`; `x ? 1 : x` | `1 \| "s"` at the first two; `1` at the third, whose `x` is `never` | Supported: a branch adds nothing to the type when its type is `never`, as a call to a function that never returns, or when it only reads the variable that the test reads and the test leaves that variable no value there, as `x` in `x ? 1 : x`. Another read that TypeScript narrows to `never` in a branch, as `x` in `x !== null ? 1 : x` with `x: string`, is Unknown in Biome, which makes the whole expression Unknown. |
 | Truthiness of a property narrows the property | `o: { v: string \| null }; if (o.v) o.v` | `string` | Supported |
-| Truthiness of a generic gives `NonNullable<T>` | `function f<T>(x: T) { x && x }` | `NonNullable<T>` at the right operand | Not yet |
+| Truthiness of a generic gives `NonNullable<T>` | `function f<T>(x: T) { x && x }` | `NonNullable<T>` at the right operand | Supported: as in TypeScript, truthiness and `!= null` give `T & {}`, which is `NonNullable<T>`, and `T` stays when its constraint excludes `null` and `undefined`, as `T extends {}`. `!== null` gives `T & ({} \| undefined)` and `!== undefined` gives `T & ({} \| null)`, or `T & {}` when another member of the union is the other nullish value, and Biome writes them distributed, as `(T & {}) \| (T & undefined)`. Where the constraint leaves no value, as the falsy branch of `T extends object`, Biome keeps `T` where TypeScript gives `never`, and where the constraint has an `undefined` member, `!== null` gives `T & ({} \| undefined)` where TypeScript gives `T & {}`, which has fewer values. A variable initialized with the narrowed value, as `y` in `if (x) { const y = x }`, has the declared type of `x`. |
 | A constant condition makes a branch unreachable | `x: string \| null;`<br>`if (x === null) { if (true) return; } x` | `string`; the branch of `if (false)` is unreachable (TS7027) | Supported: as TypeScript's binder decides, only the literal `true` or `false` itself, without parentheses, makes the branch that it never takes unreachable, in `if`, `while`, `do...while`, `for`, a conditional expression, and an operand of `&&` or `\|\|`, so `if (c && false)` never runs its body and `while (c \|\| true)` exits only by `break`. A read there keeps its declared type, and the branch adds nothing where it joins the others. `!false`, `(false)`, `0`, a `const` that holds `false`, and the operands of `??` are ordinary conditions, so `while (1)`, `while ((true))`, and `do...while (1)` can exit by their test, as `for (;;)` can't. |
 
 ### Equality
@@ -603,13 +621,13 @@ code as TS7027, an error with `allowUnreachableCode: false`.
 | --- | --- | --- | --- |
 | Primitive kinds, in both branches | `x: string \| number; if (typeof x === "string") x` | `string`; `number` in the `else` branch | Supported |
 | Reversed operands | `x: string \| number; if ("string" === typeof x) x` | `string` | Supported |
-| A primitive kind removes object types | `interface Foo { a: number }`<br>`x: string \| Foo; if (typeof x === "string") x` | `string` | Partial: removes the object types that no value of the kind can have, such as `Foo`, and, as TypeScript does, replaces an object type that every value of the kind has with the primitive, so `x: number \| { length: number }` gives `string`. `"undefined"` removes every object type. An object type stays when Biome cannot compare it with the primitive: a class instance whose members the primitive has, because the class can declare private members; a type with an index signature; a member whose type differs from the primitive's member of the same name; a member that a TypeScript library newer than ES2015 adds to the primitive, such as `padStart` of strings or `description` of symbols; and `toString`, `toLocaleString`, or `valueOf` for `"bigint"`. Generics stay unchanged. |
+| A primitive kind removes object types | `interface Foo { a: number }`<br>`x: string \| Foo; if (typeof x === "string") x` | `string` | Partial: removes the object types that no value of the kind can have, such as `Foo`, and, as TypeScript does, replaces an object type that every value of the kind has with the primitive, so `x: number \| { length: number }` gives `string`. `"undefined"` removes every object type. An object type stays when Biome cannot compare it with the primitive: a class instance whose members the primitive has, because the class can declare private members; a type with an index signature; a member whose type differs from the primitive's member of the same name; a member that a TypeScript library newer than ES2015 adds to the primitive, such as `padStart` of strings or `description` of symbols; and `toString`, `toLocaleString`, or `valueOf` for `"bigint"`. A type parameter becomes an intersection, as the row on `typeof` of a generic describes. |
 | `"object"` keeps object types and `null`; its negation removes them | `x: string \| Foo \| null; if (typeof x !== "object") x` | `string` | Deliberately different: the negative branch removes the object types that no primitive and no function can have, such as `Foo`, but keeps those that one can have, such as `{ length: number }`, where TypeScript removes them; see the deliberate choices above. The positive branch keeps object types with a call signature, such as `interface Callable { (): void }`, which TypeScript removes. |
 | `typeof` of `unknown` | `x: unknown; if (typeof x === "object") x`<br>`if (typeof x === "function") x` | `object \| null`; `Function` | Supported: `unknown` narrows as `{} \| null \| undefined`, as for equality with `null`, so `typeof x !== "object"` gives `{} \| undefined`, and a primitive kind gives the primitive and keeps `unknown` in the `else` branch. TypeScript gives `object \| null` for `typeof x === "object" \|\| typeof x === "function"`, where Biome gives `object \| null \| Function`, which has the same values. |
 | `typeof` of `{}` gives the primitive | `x: {}; if (typeof x === "string") x` | `string` | Supported |
 | `typeof` of `{}` with `"object"` gives `object` | `x: {}; if (typeof x === "object") x`<br>`interface E {}; y: E; if (typeof y === "object") y` | `object`; `E` | Supported: as in TypeScript, only a type literal or an object expression without members becomes `object`, also through an alias, while an empty interface or class stays as it is. |
 | `"function"` keeps functions and removes object types that no function can have | `interface Foo { a: number }`<br>`interface Len { length: number }`<br>`x: Foo \| (() => void); if (typeof x === "function") x`<br>`y: Len \| string; if (typeof y === "function") y` | `() => void`; `Function` | Partial: in the positive branch, as in TypeScript, an object type that no function can have is removed, one that every function has becomes `Function`, and one with a call or construct signature stays as it is. Object types that Biome cannot compare stay too, as listed for primitive kinds, and so do instances of classes derived from a built-in class. The negative branch keeps object types with a call or construct signature, which TypeScript removes, so `x: CallFoo \| string`, with `interface CallFoo { (): void; foo: string }`, gives `CallFoo \| string` where TypeScript gives `string`. |
-| `typeof` of a generic gives an intersection | `function f<T>(x: T) { if (typeof x === "string") x }` | `T & string` | Not yet |
+| `typeof` of a generic gives an intersection | `function f<T>(x: T) { if (typeof x === "string") x }` | `T & string` | Supported: as in TypeScript, each kind gives the intersection with its type, as `T & undefined` and `T & Function`, `"object"` gives `(T & object) \| (T & null)`, and the `else` branch of `"undefined"` gives `T & ({} \| null)`. `T` stays when its constraint has only values of the kind, as `T extends string`, and, where TypeScript gives `never`, when it has none. An intersection that narrowing gives narrows again by each operand, so `typeof x === "string"` after `if (x)` gives `T & string`. |
 | `typeof` of a property | `o: { v: string \| number }; if (typeof o.v === "string") o.v` | `string` | Supported |
 | `typeof` of a discriminant narrows the object | `o: { k: "a"; a: 1 } \| { k: 1; b: 2 };`<br>`if (typeof o.k === "string") o` | `{ k: "a"; a: 1 }` | Supported |
 | `typeof x?.y` removes nullish types from `x` | `x: { y: number } \| undefined;`<br>`if (typeof x?.y === "number") x` | `{ y: number }` | Supported |
@@ -623,15 +641,15 @@ code as TS7027, an error with `allowUnreachableCode: false`.
 | The false branch removes the class and its derived types | `x: Date \| string; if (!(x instanceof Date)) x` | `string` | Supported |
 | `unknown` and `any` become the instance type | `x: unknown; if (x instanceof Map) x` | `Map<any, any>` | Supported: as in TypeScript, an instance of a generic class gets an `any` type argument for each type parameter, `Object` and `Function` keep the type, and the `else` branch keeps `unknown` and `any`. |
 | `Symbol.hasInstance` with a type predicate | `class Checker { static [Symbol.hasInstance](v: unknown): v is string }`<br>`x: unknown; if (x instanceof Checker) x` | `string` | Not yet |
-| `x.constructor === C` | `class Foo { a = 1 }; class Bar { b = 2 }`<br>`x: Foo \| Bar; if (x.constructor === Foo) x` | `Foo` | Not yet |
+| `x.constructor === C` | `class Foo { a = 1 }; class Bar { b = 2 }`<br>`x: Foo \| Bar; if (x.constructor === Foo) x` | `Foo` | Supported: as in TypeScript, `===` and `==` in either order narrow the branch where they hold, and the other branch keeps the type. `C` must be a dotted name whose type is a class, or a constructor whose `prototype` property has a type other than `any`, `Object`, or `Function`. An instance of a class stays only when its class is `C` itself, not a class derived from it, as `x: Foo \| Sub` gives `Foo` with `class Sub extends Foo`, and another member stays when it is assignable to the type of `C.prototype`, as `string` for `String`. The receivers of an optional chain narrow too, as in `x?.constructor === Foo`. TypeScript removes a member that isn't a subtype, where Biome keeps one that is assignable, and removes `unknown`, which Biome keeps. |
 
 ### `in`
 
 | Behaviour | Example | TypeScript | Status |
 | --- | --- | --- | --- |
-| Keeps the union members that declare the property | `x: { a: 1 } \| { b: 2 }; if ("a" in x) x` | `{ a: 1 }`; `{ b: 2 }` in the `else` branch | Partial: the limits above describe the keys and subjects. A member stays in both branches when Biome can't tell whether it has the property: a primitive, a function, a tuple, an array, an intersection, a generic, an instance of a class, because Biome doesn't collect the setters and index signatures of classes, or of a built-in type such as `Date` or `Error`, because Biome's built-in types come from the ES2015 library files, which lack members that newer ones add, such as `at` of arrays and `cause` of errors. So does an object type with a call or construct signature, with a setter, a spread, or a computed key, or with a member whose name is spelled with an escape or as a number other than a decimal integer, such as `"\u0061"` or `1.0`. So `x: { a: 1 } \| Date` gives `{ a: 1 } \| Date`, where TypeScript gives `{ a: 1 }`, and `x: P \| Q`, with `class P { p = 1 }` and `class Q { q = 1 }`, gives `P \| Q` for `"p" in x` and `Q` in the `else` branch, where TypeScript gives `P` and `Q`. TypeScript also narrows with a key spelled otherwise, such as a `const` of a literal type, a template literal, `"\u0061"`, or `0x0`, with a key that starts with `#`, such as `"#a"`, and a declared type with a single object type, which can make the `else` branch impossible. |
-| An undeclared property adds a `Record` | `x: object; if ("a" in x) x` | `object & Record<"a", unknown>` | Not yet: Biome keeps the declared type when no member declares the property or has an index signature that accepts it. |
-| `#brand in x` | `class C { #p = 1 }`<br>`x: C \| Date; if (#p in x) x` (inside `C`) | `C` | Not yet |
+| Keeps the union members that declare the property | `x: { a: 1 } \| { b: 2 }; if ("a" in x) x` | `{ a: 1 }`; `{ b: 2 }` in the `else` branch | Partial: the limits above describe the keys and subjects. A member stays in both branches when Biome can't tell whether it has the property: a primitive, a function, a tuple, an array, an intersection, a generic, an instance of a class, because Biome doesn't collect the setters and index signatures of classes, or of a built-in type such as `Date` or `Error`, because Biome's built-in types come from the ES2015 library files, which lack members that newer ones add, such as `at` of arrays and `cause` of errors. So does an object type with a call or construct signature, with a setter, a spread, or a computed key, or with a member whose name is spelled with an escape or as a number other than a decimal integer, such as `"\u0061"` or `1.0`. So `x: { a: 1 } \| Date` gives `{ a: 1 } \| Date`, where TypeScript gives `{ a: 1 }`, and `x: P \| Q`, with `class P { p = 1 }` and `class Q { q = 1 }`, gives `P \| Q` for `"p" in x` and `Q` in the `else` branch, where TypeScript gives `P` and `Q`. TypeScript also narrows with a key spelled otherwise, such as a `const` of a literal type, a template literal, `"\u0061"`, or `0x0`, and with a key that starts with `#`, such as `"#a"`. |
+| An undeclared property adds a `Record` | `x: object; if ("a" in x) x` | `object & Record<"a", unknown>` | Partial: when no member can have the property, the true branch is the intersection with `{ a: unknown }`, which has the values of `Record<"a", unknown>`, so a read of `x.a` is `unknown`, and normalization merges it into the object types of the members, as `{ b: 1; a: unknown }` for `x: { b: 1 }`. A member that Biome can't tell, as listed in the row above, keeps the declared type, so `x: { b: 1 } \| string[]` gives `{ b: 1 } \| string[]`, where TypeScript gives `(string[] \| { b: 1 }) & Record<"a", unknown>`. |
+| `#brand in x` | `class C { #p = 1 }`<br>`x: C \| Date; if (#p in x) x` (inside `C`) | `C` | Supported: as in TypeScript, `x` narrows as for `x instanceof C`, where `C` is the innermost class around the test that declares `#p`, including the intersection when no member relates to `C`, as `{ a: 1 } & C` for `x: { a: 1 }`, and a static name narrows `x` to the class itself, as `typeof C`. A class expression counts only when Biome types it, and an anonymous default export doesn't. |
 | `in` and `hasOwnProperty` remove a missing optional property | `x: { a?: string }; if ("a" in x) x.a`<br>(with `exactOptionalPropertyTypes`) | `string`; `string \| undefined` without `exactOptionalPropertyTypes` | Not yet |
 
 ### Library type predicates
@@ -639,7 +657,7 @@ code as TS7027, an error with `allowUnreachableCode: false`.
 | Behaviour | Example | TypeScript | Status |
 | --- | --- | --- | --- |
 | `Array.isArray` | `x: string \| string[]; if (Array.isArray(x)) x` | `string[]` | Supported, with the restrictions below the table of type predicates. `unknown` and `any` become `any[]`. Other type-guard functions of the lib, such as `ArrayBuffer.isView`, narrow too. |
-| `every` with a type predicate callback | `isString: (v: unknown) => v is string;`<br>`xs: (string \| number)[]; if (xs.every(isString)) xs` | `string[]` | Partial: `every` narrows an array or a `readonly` array, also through `xs?.every`, as TypeScript selects its signature `every<S extends T>(predicate: (value: T) => value is S): this is S[]`: `S` is the target of the callback's type predicate when it satisfies its constraint. So does any method of this shape, as the rows on generic and overloaded type-guard functions describe. A tuple keeps its declared type where TypeScript gives an intersection, such as `[string \| number, string \| number] & string[]`. A callback written in place, as `(v): v is string => typeof v === "string"`, narrows nothing, because Biome doesn't type a parameter without an annotation from the call, and neither does a callback whose type predicate TypeScript infers, which the row on inferred type predicates covers. The result of `filter` and `find` with such a callback has the same type argument, so `xs.filter(isString)` is `string[]` and `xs.find(isString)` is `string \| undefined`, also for a callback written in place. |
+| `every` with a type predicate callback | `isString: (v: unknown) => v is string;`<br>`xs: (string \| number)[]; if (xs.every(isString)) xs` | `string[]` | Partial: `every` narrows an array or a `readonly` array, also through `xs?.every`, as TypeScript selects its signature `every<S extends T>(predicate: (value: T) => value is S): this is S[]`: `S` is the target of the callback's type predicate when it satisfies its constraint. So does any method of this shape, as the rows on generic and overloaded type-guard functions describe, and a tuple narrows to its intersection with the array, as `[string \| number, string \| number] & string[]`, whose elements keep their types. A callback written in place, as `(v): v is string => typeof v === "string"`, narrows nothing, because Biome doesn't type a parameter without an annotation from the call, and neither does a callback whose type predicate TypeScript infers, which the row on inferred type predicates covers. The result of `filter` and `find` with such a callback has the same type argument, so `xs.filter(isString)` is `string[]` and `xs.find(isString)` is `string \| undefined`, also for a callback written in place. |
 | DOM `matches` | `el: Element; if (el.matches("a")) el` (with the `dom` library) | `HTMLAnchorElement` | Not yet |
 
 ### Discriminated unions
@@ -673,11 +691,11 @@ The rows use `type Circle = { kind: "c"; r: number }` and
 | --- | --- | --- | --- |
 | A local, non-generic type-guard function with a primitive target | `function isString(v: unknown): v is string;`<br>`x: string \| number; if (isString(x)) x` | `string` | Supported, with the restrictions below the table |
 | The false branch excludes the target | `x: string \| number; if (!isString(x)) x` | `number` | Supported |
-| An object, interface, class, or union target | `function isFoo(v: unknown): v is Foo;`<br>`x: Foo \| string; if (isFoo(x)) x` | `Foo`; `string` in the `else` branch | Partial: both branches narrow by TypeScript's subtype relation, as the limits above describe. Biome keeps the type of `x` where TypeScript narrows a type without an object type by a target with only object types, or gives an intersection, and when two members can't be compared, as for instances of classes, which can declare private members, and the literal types that Biome keeps for properties whose values it can't tell are fresh literals, as `{ a: id(1) }`. The `else` branch also keeps a member that is a subtype of a member of the target and the other way around, as `{ a: number }` with the target `Foo`, and `unknown` with the target `{}`, where TypeScript gives `null \| undefined`. |
+| An object, interface, class, or union target | `function isFoo(v: unknown): v is Foo;`<br>`x: Foo \| string; if (isFoo(x)) x` | `Foo`; `string` in the `else` branch | Partial: both branches narrow by TypeScript's subtype relation, as the limits above describe, and the true branch gives the intersection with the target where no member relates to it, as `Bar & Foo` for `x: Bar`. Biome keeps the type of `x` where TypeScript narrows a type without an object type by a target with only object types, and when two members can't be compared, as for instances of classes, which can declare private members, and the literal types that Biome keeps for properties whose values it can't tell are fresh literals, as `{ a: id(1) }`. The `else` branch also keeps a member that is a subtype of a member of the target and the other way around, as `{ a: number }` with the target `Foo`, and `unknown` with the target `{}`, where TypeScript gives `null \| undefined`. |
 | An imported, namespace, or method type-guard function | `import { isString } from "./guards"`; `u.isString(x)` | `string` | Supported, with the restrictions below the table |
-| A generic type-guard function | `function isNonNull<T>(v: T \| null): v is T;`<br>`x: string \| null; if (isNonNull(x)) x` | `string` | Partial: Biome infers a type argument where TypeScript infers the same one, as the restrictions below the table describe, and with explicit type arguments, as `isNonNull<string>(x)`. A call that infers a type argument otherwise keeps its declared type, and so does a target that TypeScript turns into an intersection, as `NonNullable<T>` for `v is NonNullable<T>`, or a generic read, as `x: T \| null` in a generic function, where TypeScript gives `T`. |
+| A generic type-guard function | `function isNonNull<T>(v: T \| null): v is T;`<br>`x: string \| null; if (isNonNull(x)) x` | `string` | Partial: Biome infers a type argument where TypeScript infers the same one, as the restrictions below the table describe, and with explicit type arguments, as `isNonNull<string>(x)`. A call that infers a type argument otherwise keeps its declared type. A target that is an alias of an intersection takes the call's type argument, so `v is NonNullable<T>` gives `string` for `x: string \| null` and `T & {}` for `x: T` in a generic function, and `x: T \| null` gives `T` for the example. |
 | An overloaded type-guard function | `function isS(v: string \| number): v is string;`<br>`function isS(v: boolean): boolean;`<br>`x: string \| number; if (isS(x)) x` | `string` | Supported, with the restrictions below the table: the first signature that accepts the arguments decides, under the subtype relation before assignability, as in TypeScript. |
-| `this is T` | `class TreeNode { isLeaf(): this is Leaf }`<br>`n: TreeNode; if (n.isLeaf()) n` | `Leaf` | Partial: the object of the method narrows as the argument of a type-guard function does, so `n: Leaf \| Branch` gives `Leaf` and `Branch` in the two branches, and so does a property path, as `o.n` in `if (o.n.isLeaf())`. Biome keeps the type of the example, because it can't compare an instance of `TreeNode` with one of a class derived from it, as the limits above describe, and keeps the declared type where TypeScript gives an intersection, as `this & { tag: 1 }` for `isTagged(): this is { tag: 1 }`. |
+| `this is T` | `class TreeNode { isLeaf(): this is Leaf }`<br>`n: TreeNode; if (n.isLeaf()) n` | `Leaf` | Supported: the object of the method narrows as the argument of a type-guard function does, so `n: Leaf \| Branch` gives `Leaf` and `Branch` in the two branches, and so does a property path, as `o.n` in `if (o.n.isLeaf())`, and `this`, as in `if (this.isLeaf()) this`. A target that the class doesn't relate to gives the intersection, as `T1 & { tag: 1 }` for `isTagged(): this is { tag: 1 }` on `n: T1`, where TypeScript writes `this & { tag: 1 }` inside the class, because Biome types `this` as an instance of its class. |
 | The argument is a property or an optional chain | `o: { v: string \| number }; if (isString(o.v)) o.v`<br>`x: { y: string \| number } \| undefined; if (isString(x?.y)) x` | `string`; `{ y: string \| number }` | Partial: the property narrows, but the receiver of an optional chain does not, so the second example gives `{ y: string \| number } \| undefined`. |
 | Inferred type predicates | `const isStr = (v: unknown) => typeof v === "string";`<br>`x: string \| number; if (isStr(x)) x` | `string` | Not yet |
 | A variable annotated with a function type that returns a type predicate | `const g: (v: unknown) => v is string = ...;`<br>`if (g(x)) x` | `string` | Supported, with the restrictions below the table. So are a parameter annotated in the same way and a variable that holds another type-guard function, as `const alias = isString`. |
@@ -741,7 +759,7 @@ TypeScript's.
 | `asserts value` | `function assert(c: unknown): asserts c;`<br>`x: string \| null; assert(x !== null); x` | `string` | Supported, with the restrictions below the table |
 | `asserts value is T` with a primitive target | `function assertString(v: unknown): asserts v is string;`<br>`x: string \| number; assertString(x); x` | `string` | Supported |
 | `asserts value is T` with an object or union target | `function assertFoo(v: unknown): asserts v is Foo;`<br>`x: Foo \| string; assertFoo(x); x` | `Foo` | Partial: as the true branch of a type-guard function with the same target. |
-| `asserts this` and `asserts this is T` | `class R { ready?: string; assertReady(): asserts this is { ready: string } }`<br>`this.assertReady(); this` (inside `R`) | `this & { ready: string }` | Partial: `asserts this is T` narrows the object of the method as the true branch of a `this is T` predicate does, so Biome keeps the declared type where TypeScript gives an intersection, as in the example. |
+| `asserts this` and `asserts this is T` | `class R { ready?: string; assertReady(): asserts this is { ready: string } }`<br>`this.assertReady(); this` (inside `R`) | `this & { ready: string }` | Supported: `asserts this is T` narrows the object of the method as the true branch of a `this is T` predicate does, so Biome gives `R & { ready: string }`, and `this.ready` reads `string` after the call. |
 | A method, imported, or annotated assertion function | `x: string \| null; assert.ok(x); x`<br>`a: (v: unknown) => asserts v; a(x); x` | `string` | Supported, with the restrictions below the table |
 | An assertion function declared as a variable without a type annotation is ignored (TS2775) | `const a = (v: unknown): asserts v => {};`<br>`x: string \| null; a(x); x` | `string \| null`, with error TS2775 | Supported |
 | An assertion call as an operand of the comma operator | `x: string \| null; (assert(x), 0); x` | `string` | Partial: an operand of the comma operator in an expression statement asserts, as in the example, also for the operands after it. TypeScript also asserts through such an operand anywhere else, as in `return (assert(x), x)`, where it takes the signature from the callee's type even when a name along the callee has no explicit type; Biome keeps the declared type there. |
@@ -884,8 +902,8 @@ also ignores an assertion through an element access (TS2776).
 
 | Behaviour | Example | TypeScript | Status |
 | --- | --- | --- | --- |
-| The constraint replaces the type parameter where a value is used | `function f<T extends string \| undefined>(x: T) { if (x) x.length }` | `x` reads as `string` | Not yet |
-| A type predicate or `instanceof` on a generic gives an intersection | `function f<T>(x: T) { if (isFoo(x)) x }` | `T & Foo` | Not yet |
+| The constraint replaces the type parameter where a value is used | `function f<T extends string \| undefined>(x: T) { if (x) x.length }` | `x.length` reads as `number` | Supported: a property of `T & {}`, the narrowed `x`, is read on the constraint of `T`. |
+| A type predicate or `instanceof` on a generic gives an intersection | `function f<T>(x: T) { if (isFoo(x)) x }` | `T & Foo` | Supported: as in TypeScript, the intersection comes from a target that no other member relates to, for a type parameter without a constraint or whose constraint relates to the target, and the `else` branch keeps the type parameter. A type parameter whose constraint is a subtype of the target, or is derived from the class of `instanceof`, stays as it is. |
 
 ### `any`
 

@@ -1236,12 +1236,13 @@ fn conditional_lookup_states<'db>(
 /// parameters of the class or interface whose members a value of type
 /// `receiver` has, as `T` to `string` for `string[]`.
 ///
-/// A `readonly` array or tuple has the members of `ReadonlyArray`, and a
-/// union with one member other than `null` and `undefined` those of that
-/// member. Any other receiver that is not an instance of a generic class or
-/// interface gives no replacements, and so does a member that the instance
-/// inherits from a parent, whose type parameters member lookup replaces
-/// along the `extends` clauses.
+/// A `readonly` array or tuple has the members of `ReadonlyArray`, a tuple
+/// those of `Array`, with the union of its element types as the type
+/// argument, and a union with one member other than `null` and `undefined`
+/// those of that member. Any other receiver that is not an instance of a
+/// generic class or interface gives no replacements, and so does a member
+/// that the instance inherits from a parent, whose type parameters member
+/// lookup replaces along the `extends` clauses.
 pub(in crate::db) fn receiver_substitutions<'db>(
     db: &'db dyn ModuleDb,
     receiver: InferredTypeData<'db>,
@@ -1263,6 +1264,12 @@ pub(in crate::db) fn receiver_substitutions<'db>(
     }
     if let Some(apparent) = apparent_type(db, &mut resolver, ty) {
         ty = apparent;
+    }
+    // A tuple gets the methods of an array of its elements.
+    if let InferredTypeData::Tuple(tuple) = ty {
+        let element = readonly_tuple_element_type(db, &mut resolver, tuple.elements(db));
+        ty =
+            InferredTypeData::instance_of(db, InferredTypeData::array_class(), Box::new([element]));
     }
     let InferredTypeData::InstanceOf(instance) = ty else {
         return Vec::new();
