@@ -27,6 +27,9 @@
 //! - [`VueEvent`] runs the rule once per event name written in an emit
 //!   declaration or an emit call. Use it when the rule judges how one event
 //!   is declared or emitted.
+//! - [`VueElseIf`] runs the rule once on the condition of a `v-else-if`,
+//!   with the conditions of the branches before it. Use it when the rule
+//!   compares the conditions of a `v-if` / `v-else-if` chain.
 //!
 //! The model already folds the different ways Vue lets a declaration be
 //! written into one shape, so a rule never matches on syntax to find them.
@@ -38,21 +41,26 @@
 //! and one loop in [`VueSemanticVisitor`]. References have their own visitors,
 //! [`VueReferenceVisitor`] and [`VueEventVisitor`], so that files analyzed
 //! without a rule that asks for them don't pay for matching every reference.
+//! [`VueElseIfVisitor`] reads the trees of other snippets, so it has its own
+//! visitor for the same reason.
 
 use crate::services::semantic::SemanticModelBuilderVisitor;
+use crate::utils::condition::{is_same_condition, split_by_logical_operator};
 use biome_analyze::{
     AddVisitor, AnalyzedTree, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable,
     RuleKey, RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext,
     VisitorStartContext,
 };
 use biome_js_semantic::SemanticModel;
-use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange};
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsRoot, JsLanguage, JsLogicalOperator, JsSyntaxNode, TextRange,
+};
 use biome_languages::{JsFileSource, LanguageDb};
-use biome_parser::db::AnalyzedSource;
+use biome_parser::db::{AnalyzedSource, SourceExt};
 use biome_rowan::{AstNode, WalkEvent};
 use biome_vue_semantic::{
-    AnalyzedVueModel, Component, Emit, Prop, RefSite, Reference, Snippet, SnippetId, Symbol,
-    VueSemanticModel, component_model, vue_model_from_source,
+    AnalyzedVueModel, Component, DirectiveKind, Emit, Prop, RefSite, Reference, Snippet, SnippetId,
+    Symbol, VueSemanticModel, component_model, vue_model_from_source,
 };
 use std::rc::Rc;
 
@@ -250,6 +258,31 @@ impl Visitor for VueEventVisitor {
         {
             ctx.match_query(VueEventMatch(VueEventSite::Call(reference)));
         }
+    }
+}
+
+/// Emits a query match when the analyzed tree is the condition of a
+/// `v-else-if`, with the conditions of the branches before it in its chain.
+pub(crate) struct VueElseIfVisitor;
+
+impl Visitor for VueElseIfVisitor {
+    type Language = JsLanguage;
+
+    fn start(&mut self, mut ctx: VisitorStartContext<JsLanguage>) {
+        VueSemanticService::insert_into(&mut ctx);
+    }
+
+    fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, mut ctx: VisitorContext<JsLanguage>) {
+        let WalkEvent::Enter(node) = event else {
+            return;
+        };
+        if node.parent().is_some() {
+            return;
+        }
+        let Some(condition) = VueElseIfCondition::from_services(node, ctx.services) else {
+            return;
+        };
+        ctx.match_query(VueElseIfMatch(condition));
     }
 }
 
@@ -455,5 +488,113 @@ impl VueEventSite {
             Self::Declaration(emit) => emit.range(),
             Self::Call(reference) => reference.range(),
         }
+    }
+}
+
+define_vue_query!(
+    /// Matches the analyzed tree when it is the condition of a `v-else-if`.
+    VueElseIf,
+    VueElseIfMatch,
+    VueElseIfCondition,
+    VueElseIfVisitor
+);
+
+/// The condition of a `v-else-if`, written in the analyzed tree, and the
+/// conditions of the branches before it in its chain.
+#[derive(Clone)]
+pub struct VueElseIfCondition {
+    condition: AnyJsExpression,
+    earlier: Rc<[EarlierCondition]>,
+}
+
+impl VueElseIfCondition {
+    /// Returns the condition written in `root`, the root of the analyzed
+    /// tree, when the tree is the condition of a `v-else-if` and parsed
+    /// without errors.
+    fn from_services(root: &JsSyntaxNode, services: &ServiceBag) -> Option<Self> {
+        let service = services.get_service::<VueSemanticService>()?;
+        let snippet = service.model.snippet(service.snippet?);
+        let attr = snippet.attr()?;
+        if attr.directive_kind() != Some(DirectiveKind::ElseIf) {
+            return None;
+        }
+        let (chain, index) = attr.element().chain()?;
+        let db = services.get_service::<Rc<dyn LanguageDb>>()?.as_ref();
+        let source = services.get_service::<AnalyzedSource>()?;
+        if let AnalyzedSource::Snippet(analyzed) = source
+            && analyzed.has_errors()
+        {
+            return None;
+        }
+        let condition = AnyJsRoot::cast_ref(root)?
+            .as_js_expression_template_root()?
+            .expression()?;
+
+        // The model tells which snippets hold the earlier conditions, and the
+        // database holds their trees.
+        let stored = source.document().snippets(db);
+        let branches: Vec<_> = chain.branches().take(index).collect();
+        let earlier = branches
+            .into_iter()
+            .rev()
+            .filter_map(|branch| {
+                let offset = branch.condition?.offset();
+                // Only a JavaScript snippet can be cast to a JavaScript root.
+                let stored = stored.iter().find(|stored| {
+                    stored.content_offset(db) == offset
+                        && db
+                            .source_from_index(stored.document_source_index(db))
+                            .and_then(|source| source.to_js_file_source())
+                            .is_some()
+                })?;
+                if stored.has_errors(db) {
+                    return None;
+                }
+                let root: AnyJsRoot = stored.parsed(db).tree();
+                let expression = root.as_js_expression_template_root()?.expression()?;
+                Some(EarlierCondition(expression))
+            })
+            .collect();
+        Some(Self { condition, earlier })
+    }
+
+    /// The condition of the `v-else-if`, in the analyzed tree.
+    pub fn condition(&self) -> &AnyJsExpression {
+        &self.condition
+    }
+
+    /// The conditions of the `v-if` and `v-else-if` branches before this one
+    /// in its chain, nearest first. A branch without a condition, or whose
+    /// condition doesn't parse, has no entry.
+    pub fn earlier_conditions(&self) -> &[EarlierCondition] {
+        &self.earlier
+    }
+
+    /// The range of the condition, in the coordinates of the analyzed tree.
+    pub fn range(&self) -> TextRange {
+        self.condition.range()
+    }
+}
+
+/// A condition written in another snippet of the file than the analyzed one.
+///
+/// Its nodes belong to the tree of that snippet, whose positions don't match
+/// the ones of the analyzed tree, so a diagnostic must never point at them.
+/// This type only lets a rule split the condition and compare its parts with
+/// expressions of the analyzed tree.
+#[derive(Clone)]
+pub struct EarlierCondition(AnyJsExpression);
+
+impl EarlierCondition {
+    /// Splits the condition into the operands that, joined by `operator`,
+    /// make it. See [`split_by_logical_operator`].
+    pub fn split(&self, operator: JsLogicalOperator) -> impl Iterator<Item = Self> {
+        split_by_logical_operator(operator, self.0.clone()).map(Self)
+    }
+
+    /// Returns whether `expression` is the same condition as this one. See
+    /// [`is_same_condition`].
+    pub fn is_same_condition(&self, expression: &AnyJsExpression) -> bool {
+        is_same_condition(&self.0, expression)
     }
 }
