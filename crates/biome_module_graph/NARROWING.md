@@ -68,9 +68,10 @@ revisiting the row.
 | `??` used as a condition | `x: string \| null \| undefined; y: boolean;`<br>`if (x ?? y) {} else { x }` | `null \| undefined` | `string \| null \| undefined`: `??` in a condition narrows neither operand in either branch | `x` is `""` in the `else` branch when `x` is `""` and `y` is false, because `""` is not nullish. The pattern is rare, so the sound result loses little. |
 | Falsy part of a broad `number` in the value of `&&` | `n: number; s: string;`<br>`n && s` | `string \| 0` | `number \| string` | `-0` and `NaN` are falsy numbers too, so `0` is wrong at runtime. A `string` or `bigint` left operand still contributes `""` or `0n`, its only falsy value. |
 | `eval` and the `arguments` object do not stop narrowing | `x: string \| null;`<br>`if (x !== null) { eval("x = null"); x }`<br>`if (x !== null) { arguments[0] = null; x }` | `string` | `string`, the same as TypeScript | A direct `eval` can write any variable it can see, including a type-guard function. In a function that is not in strict mode and has no default, rest, or destructured parameter, `arguments[0] = null` also writes the first parameter. Either way, `x` can be `null` at the read. Excluding them would stop narrowing in every function that reads `arguments`, even only `arguments.length`, or that contains a direct `eval`, while code that writes a narrowed variable this way is rare. |
-| Calls, callbacks, and writes through other variables keep property narrowing | `o: { v: string \| null }; reset: () => void;`<br>`xs: (string \| null)[];`<br>`if (o.v) { reset(); o.v }`<br>`if (xs[0]) { xs.shift(); xs[0] }`<br>`if (o.v) { const a = o; a.v = null; o.v }`<br>`if (o.v) { [1].forEach(() => { o.v = null; }); o.v }` | `string` | `string`, the same as TypeScript. A write to `o.v` in the function's own code still stops the narrowing, including inside a function or arrow expression called where it is defined and inside a class static block. Biome also counts such a function when it is `async`, where TypeScript gives `string`. | `reset` or the callback can set `o.v` to `null`, and `a.v = null` sets it through another variable, so `o.v` can be `null` at the read. `xs.shift()` moves the next element, which can be `null`, into `xs[0]`. Stopping property narrowing at every call would make it useless, because most tests of a property are followed by a call, and rules would report code that TypeScript accepts. An `async` function called where it is defined runs until its first `await` before the code after the call, so Biome counts its writes. |
+| Calls, callbacks, and writes through other variables keep property narrowing | `o: { v: string \| null }; reset: () => void;`<br>`xs: (string \| null)[];`<br>`if (o.v) { reset(); o.v }`<br>`if (xs[0]) { xs.shift(); xs[0] }`<br>`if (o.v) { const a = o; a.v = null; o.v }`<br>`if (o.v) { [1].forEach(() => { o.v = null; }); o.v }`<br>`if (this.x) { this.reset(); this.x }` in a method of a class whose `reset` method sets `this.x = null` | `string` | `string`, the same as TypeScript. A write to `o.v` in the function's own code still stops the narrowing, including inside a function or arrow expression called where it is defined and inside a class static block. Biome also counts such a function when it is `async`, and a write through `super`, as in `super.x = null` before a read of `this.x`, where TypeScript gives `string` for both. | `reset` or the callback can set `o.v` to `null`, and `a.v = null` sets it through another variable, so `o.v` can be `null` at the read. `xs.shift()` moves the next element, which can be `null`, into `xs[0]`, and `this.reset()` sets `this.x` to `null`. Stopping property narrowing at every call would make it useless, because most tests of a property are followed by a call, and rules would report code that TypeScript accepts. An `async` function called where it is defined runs until its first `await` before the code after the call, so Biome counts its writes. `super.x = null` sets `x` on `this`, or calls a setter of the parent class with `this` as its receiver, so Biome counts it as a write of `this.x`. |
 | A write through an element access whose key is not a literal | `o: { v: string \| null; w: string \| null };`<br>`k: "v" \| "w";`<br>`if (o.v) { o[k] = null; o.v }` | `string` | `string \| null`: a write through a key that is not a string or integer literal, such as `k` or `-0`, stops the narrowing of every property of the object. A literal key writes only the property it names, so `o["w"] = null` keeps the narrowing of `o.v`. `delete o["v"]` also stops the narrowing of `o.v`, where TypeScript gives `string`. | TypeScript ignores the write unless the key is a literal or a `const` with a literal type, although `k` can be `"v"` here, and it ignores `delete` through an element access. Treating such a write as a write is sound, and such writes are rare next to tests of a property. |
 | A getter narrows like a field | `class G { get v(): string \| null }`<br>`g: G; if (g.v) g.v` | `string` | `string`, the same as TypeScript | A getter can return a different value each time it runs, so `g.v` can be `null` at the second read. Treating getters as fields keeps narrowing for classes that expose their state through getters, while getters that change between two reads close together are rare. |
+| A private name and a string key with the same text | `class K { #x: string \| null = null; "#x": string \| null = null; m() { if (this.#x) this["#x"] } }` | `string`: TypeScript treats `this.#x` and `this["#x"]` as the same reference | `string \| null`: `this.#x` and `this["#x"]` are different paths, so neither narrows the other | A private name is not a property, so `this["#x"]` reads the property named `"#x"`, another value, which can be `null` after the test of `this.#x`. Keeping them apart is sound and loses nothing in code that has no property whose name starts with `#`. |
 
 ## Limits
 
@@ -84,17 +85,34 @@ These limits apply to every *Supported* and *Partial* row below:
   declared type ignores the default. A read inside a nested function or class
   member never sees facts from the enclosing execution root, and a read in a
   class field, including its decorators and computed key, never narrows.
-- A property path, such as `o.v` or `a.b.c`, narrows only when its variable
-  can narrow by the rule above, so a path on a variable declared in an
-  enclosing execution root, such as a module variable read in a function,
-  does not narrow. Its declared type at a read is the property's type on the
-  narrowed type of its object at that read. A path is made of named
-  properties, written with `.` or `?.`, and of element accesses whose key is
-  a string literal without escapes or a decimal integer literal from 0 to
-  2^53 - 1 without leading zeros or separators, such as `o["v"]` or `t[0]`.
-  `o["v"]`, `o?.v`, and `(o).v` are the same path as `o.v`, and `t[0]` is
-  the same path as `t["0"]`. Element access with any other key, `this.x`, and
-  private names such as `o.#v` do not narrow yet.
+- A property path, such as `o.v`, `a.b.c`, or `this.v`, narrows only when it
+  starts at a variable that can narrow by the rule above, or at `this` where
+  the next item allows it. So a path on a variable declared in an enclosing
+  execution root, such as a module variable read in a function, does not
+  narrow. Its declared type at a read is the property's type on the narrowed
+  type of its object at that read. A path is made of named properties and
+  private names, such as `v` and `#v`, written with `.` or `?.`, and of
+  element accesses whose key is a string literal without escapes or a decimal
+  integer literal from 0 to 2^53 - 1 without leading zeros or separators,
+  such as `o["v"]` or `t[0]`. `o["v"]`, `o?.v`, and `(o).v` are the same path
+  as `o.v`, and `t[0]` is the same path as `t["0"]`, but `o["#v"]` is never
+  the same path as `o.#v`. Element access with any other key does not narrow
+  yet.
+- A path on `this` narrows in a class method or accessor that is not
+  `static`, in an object literal method or accessor, and in an arrow function
+  whose `this` comes from one of them or from the initializer of a field that
+  is not `static`. The method or accessor must not declare a `this`
+  parameter, and its class or object must have a name that Biome can find: a
+  class declaration, a class expression with its own name or assigned as the
+  initial value of a variable, as in `const C = class {}`, or an object
+  literal assigned as the initial value of a variable, as in
+  `const o = { ... }`. So a path on `this` does not narrow in an object
+  literal passed to a call. It never narrows in a constructor or in an arrow
+  function created in one, in a `static` method, accessor, field, or block,
+  in a function declaration or expression, or outside any function. Neither
+  does a path on `this` in the decorators or `extends` clause of a nested
+  class or in the computed key of a nested object literal method, which Biome
+  types as the nested class or object.
 - A property path does not narrow anywhere in its execution root when the
   root's own code writes the path or one of its prefixes, or writes any
   property of one of its prefixes through a key that is not a literal of the
@@ -106,7 +124,10 @@ These limits apply to every *Supported* and *Partial* row below:
   is defined, a class static block, a field initializer, a decorator, a
   computed key, or a parameter default. Writes in the body of any other
   function, method, accessor, or constructor do not count, and neither do
-  writes through another variable.
+  writes through another variable. Every `this` and `super` in the writes
+  that count stands for the root's `this`, even where it is another object,
+  as in a static block, so `this.v = x` and `super.v = x` both write
+  `this.v`.
 - Variables whose declared type is `any`, or includes a part that inference
   cannot determine, never narrow.
 - An execution root gets no narrowing at all when its own code, outside nested
@@ -363,7 +384,7 @@ whose result is not tested, do not narrow.
 | --- | --- | --- | --- |
 | Property paths such as `a.b.c` | `a: { b: { c: string \| null } }; if (a.b.c) a.b.c` | `string` | Supported |
 | An optional chain reads the same property as a plain access | `x: { y: string \| null } \| undefined; if (x?.y) x?.y` | `string` | Supported |
-| `this.x`, including assignments in a constructor | `class K { x: string \| null = null; m() { if (this.x) this.x } }` | `string` | Not yet |
+| `this.x`, including assignments in a constructor | `class K { x: string \| null = null; m() { if (this.x) this.x } }` | `string` | Partial: paths on `this`, including private names such as `this.#x`, narrow in methods and accessors, in object literal methods, and in arrow functions inside them or inside a field initializer, within the limits above. They do not narrow yet in a constructor or an arrow function created in one, where TypeScript narrows a field that has an initializer or a definite assignment assertion (`x!: T`), in a `static` method or static block, where Biome types `this` as an instance instead of the class, in a member with a `this` parameter, or in a member of an object literal or class without a name that Biome can find, such as an object literal passed to a call. No path narrows at an assignment such as `this.x = "a"` yet. |
 | Element access with a literal key | `o: { a: string \| null }; if (o["a"]) o["a"]` | `string` | Partial: `o["a"]` reads the same property as `o.a`, and `t[0]` the same as `t["0"]`, but only a string literal without escapes or a decimal integer from 0 to 2^53 - 1 without leading zeros or separators is a key. TypeScript also matches other spellings of the same key, so `if (t[0x0]) t[0]` and ``if (o[`a`]) o.a`` narrow there but not in Biome. |
 | Element access with a `const` key | `o: { a: string \| number }; const k = "a";`<br>`if (typeof o[k] === "string") o[k]` | `string` | Not yet |
 
