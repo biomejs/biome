@@ -9,6 +9,7 @@ use biome_js_syntax::{
     JsCallExpression, JsPropertyObjectMember, JsSyntaxNode, JsxAttribute, JsxElement,
     JsxSelfClosingElement,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, AstNodeList, TextRange, declare_node_union};
 use biome_rule_options::no_dangerously_set_inner_html_with_children::NoDangerouslySetInnerHtmlWithChildrenOptions;
 
@@ -80,6 +81,14 @@ impl Rule for NoDangerouslySetInnerHtmlWithChildren {
     type Options = NoDangerouslySetInnerHtmlWithChildrenOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        if ctx
+            .source_type::<JsFileSource>()
+            .as_embedding_kind()
+            .is_astro_template()
+        {
+            return None;
+        }
+
         let node = ctx.query();
         let model = ctx.model();
         if let Some(dangerous_prop) = node.find_dangerous_prop(model) {
