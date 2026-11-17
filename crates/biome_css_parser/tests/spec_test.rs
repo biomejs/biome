@@ -104,6 +104,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 
     if file_name.ends_with(".styled.css") {
         source_type = source_type.with_embedding_kind(CssEmbeddingKind::Styled);
+    } else if file_name.ends_with(".style-attribute.css") {
+        source_type = source_type.with_embedding_kind(CssEmbeddingKind::HtmlStyleAttribute);
     }
 
     if css_modules_enabled {
