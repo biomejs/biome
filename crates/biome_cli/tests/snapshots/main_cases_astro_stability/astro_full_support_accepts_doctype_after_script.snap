@@ -1,0 +1,48 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome check --write doctype-after-script.astro
+```
+
+## `biome.json`
+
+```json
+{
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "formatter": { "enabled": true }
+  },
+  "linter": { "enabled": false },
+  "assist": { "enabled": false }
+}
+```
+
+## `doctype-after-script.astro`
+
+```astro
+---
+const title = "Astro";
+---
+
+<script is:inline>
+console.log("ready");
+</script>
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>{title}</title>
+	</head>
+	<body></body>
+</html>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```
