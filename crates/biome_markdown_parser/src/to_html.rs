@@ -2345,6 +2345,24 @@ mod tests {
     }
 
     #[test]
+    fn test_emphasis_does_not_pair_across_blockquote_paragraphs() {
+        // A line holding only `>` ends the paragraph, so `___` and `__` sit in
+        // different paragraphs and must stay literal.
+        assert_eq!(
+            render("> a ___, b\n>\n> c 20__.\n"),
+            "<blockquote>\n<p>a ___, b</p>\n<p>c 20__.</p>\n</blockquote>\n"
+        );
+        assert_eq!(
+            render("> > a ___, b\n> >\n> > c 20__.\n"),
+            "<blockquote>\n<blockquote>\n<p>a ___, b</p>\n<p>c 20__.</p>\n</blockquote>\n</blockquote>\n"
+        );
+        assert_eq!(
+            render("> - a ___, b\n>\n>   c 20__.\n"),
+            "<blockquote>\n<ul>\n<li>\n<p>a ___, b</p>\n<p>c 20__.</p>\n</li>\n</ul>\n</blockquote>\n"
+        );
+    }
+
+    #[test]
     fn test_emphasis_complex_cases() {
         // Test: Nested
         let parsed = parse_markdown(
