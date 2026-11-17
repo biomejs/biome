@@ -1,0 +1,11 @@
+/* should not generate diagnostics */
+
+// TypeScript gives a member of an imported enum the type of the enum, so
+// converting the member to a string or a number changes its type.
+import { Counts, Ids } from "./ids";
+import { ReexportedIds } from "./reexport";
+
+Ids.A.toString();
+String(Ids["B"]);
+"" + ReexportedIds.A;
++Counts.One;

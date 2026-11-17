@@ -98,7 +98,9 @@ instead of the types: a `let` or `var` variable, a class field that isn't
 destructuring pattern takes apart, and a return type inferred from a
 function's body get a `TypeofExpression::WidenedLiteral` around the value's
 type, when the value may have a fresh literal type and no type annotation
-declares the location. Object literals and other array literals need no
+declares the location. A member access on a name, as `E.A`, may have one,
+because the name may be an enum, whose members have fresh literal types.
+Object literals and other array literals need no
 marker, because their kind already says that they are mutable. Type
 assertions, as `1 as 1` and `1 as const`, stay behind a raw `Reference`, so
 nothing takes their literal types as fresh. Resolution in the module graph
@@ -106,6 +108,27 @@ decides which literal types are fresh from the raw expressions behind the
 value, as
 [`widening.rs`](../biome_module_graph/src/db/type_inference/widening.rs)
 describes, and widens them.
+
+An enum is a value and a type in TypeScript. `EnumTypes` in
+[`local_inference.rs`](src/local_inference.rs) gives the name of an enum
+declaration a `TypeData::MergedReference`: its type is the union of the
+types of the members, and its value an object with a readonly property per
+member, plus a `[n: number]: string` index signature for the reverse
+mapping when a member is a number. TypeScript gives each member a literal
+type of its own, which it displays by the member's name; Biome gives it the
+plain literal type of the member's value, as `0` for `E.A`, so every type
+has TypeScript's values. Collection computes the values from syntax as
+TypeScript evaluates them: literals, operators, and earlier members, with
+`0` and increments for members without an initializer. When it can't, the
+member is `number` or `string` when the syntax shows the kind of its value,
+and Unknown otherwise, because TypeScript also evaluates references to
+constants and to other enums, which can be strings. A computed number gets a
+literal type only when its decimal spelling is one that collection can
+borrow, an integer from 0 to 255, and is `number` otherwise. The members are
+bindings of their own, typed by the module collector, which gives the
+enum's name and its members Unknown when the scope declares the name more
+than once, as two declarations of the enum or an enum and a namespace that
+TypeScript merges.
 
 A return type inferred from a function's body counts only the `return`
 statements of the function's own code (`own_returns`), not those of nested

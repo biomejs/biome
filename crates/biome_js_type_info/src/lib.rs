@@ -40,7 +40,7 @@ pub use inferred_type::{
 };
 pub use interned_types::{RawTypeData, TypeDb};
 pub use literal_widening::{FreshLiteralKinds, PrimitiveLiteralKind, widen_literal_of_kinds};
-pub use local_inference::own_returns;
+pub use local_inference::{EnumTypes, own_returns};
 pub use narrowing::{
     NarrowingPredicate, PropertyTest, RawPredicateTarget, TypeofKind, base_literal_type,
     evolving_array_element, evolving_assigned_type, falsy_values, has_readonly_property,

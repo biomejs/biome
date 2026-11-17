@@ -67,9 +67,12 @@ Resolution widens fresh literal types where TypeScript does, as in
 (`src/db/type_inference/widening.rs`). Collection marks the locations, as
 the type-info guide describes, and resolution tells a fresh literal type from
 a declared one by the raw expressions behind the value: a literal, the
-operands of a conditional or logical expression, and the initializer of a
-`const` declared without an annotation, also in another module, found with
-`find_export_origin` without resolving a type. The properties of an object
+operands of a conditional or logical expression, the initializer of a
+`const` declared without an annotation, and a member of an enum read as
+`E.A` or `E["A"]`, also in another module, found with `find_export_origin`
+without resolving a type. TypeScript widens an enum member to the enum's
+type, and Biome to the primitive type of the member's literal type, which
+holds the enum's values. The properties of an object
 literal are widened where the object is resolved. A call keeps their
 literal types to select an overload, as TypeScript's contextual typing
 does, and infers generic parameters from the widened type
@@ -289,17 +292,22 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   `o.v !== null` a runtime test of `o.v`. A comparison tests one operand
   only when the other is a unit value (`unit_value`), whose type has a
   single value: a literal, `void`, `-1`, a template literal without
-  substitutions, or a `const` without a type annotation whose initializer
-  is one, which the decomposer follows through the semantic model. The test
-  then names that literal by its range, so inference resolves it as it
-  resolves a literal written in the comparison. A value that a named or
-  default import binds is a test of the import's variable
-  (`FlowTest::Imported`): collection can't see the module that declares it,
-  so inference follows the import with `find_export_origin` and applies the
-  same rules to the declaration there, reading syntax and raw types without
-  resolving a type. Other values, such as variables with a type annotation
-  and calls, give no test, because Biome may infer their types narrower than
-  TypeScript does. When the tested operand is part of
+  substitutions, a member of an enum read as `E.A` or `E["A"]`, or a
+  `const` without a type annotation whose initializer is one, which the
+  decomposer follows through the semantic model. The test then names that
+  literal by its range, so inference resolves it as it resolves a literal
+  written in the comparison. A member of an enum that the module declares
+  is a test of the member's name (`FlowTest::EnumMember`), and inference
+  reads the member's collected type, the literal type of its value when
+  collection computes the value, and narrows nothing otherwise. A value that
+  a named or default import binds, or a member of one, as `E.A` where an
+  import binds `E`, is a test of the import's variable
+  (`FlowTest::Imported`, with the range of the member's name): collection
+  can't see the module that declares it, so inference follows the import
+  with `find_export_origin` and applies the same rules to the declaration
+  there, reading syntax and raw types without resolving a type. Other
+  values, such as variables with a type annotation and calls, give no test,
+  because Biome may infer their types narrower than TypeScript does. When the tested operand is part of
   an optional chain and the test's result shows that the operand is not
   `undefined`, as the true branch of `x?.y === 1` does, the guard also tests
   each receiver of the chain that is a subject as not nullish, such as `x`
@@ -770,7 +778,8 @@ TypeScript's `computeExhaustiveSwitchStatement` does: the guard of the
 bypass, applied to the type of the discriminant's read at the statement,
 must leave `never`. That type is the read's flow-sensitive type when
 narrowing changes it, and its ordinary type otherwise. A case that compares
-with an imported value counts only when inference finds a unit value there,
+with an imported value or a member of an enum counts only when inference
+finds a unit value there,
 because TypeScript finds no statement exhaustive when a case's type is not a
 unit type, while a case that narrows nothing would leave the other cases to
 decide. The answer is part of

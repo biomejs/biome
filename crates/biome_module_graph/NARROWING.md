@@ -530,7 +530,10 @@ These limits apply to every *Supported* and *Partial* row below:
   decides: a string, number, bigint, or boolean literal, `null`,
   `undefined`, `void` with any operand, `-` or `+` directly before a number
   literal, as in `-1`, and a template literal without a tag and without
-  substitutions, as `` `a` ``. A variable holds a unit value when it is a
+  substitutions, as `` `a` ``. A member of an enum, read as `E.A` or
+  `E["A"]` through the name of the enum, local or imported, is a unit value
+  when Biome computes its value, as the limits on enums below describe. A
+  variable holds a unit value when it is a
   `const` without a type annotation whose initializer is one, also through
   other such `const`s, as `K2` in `const K = "a"; const K2 = K`, at most 16
   of them, or when a named or default import binds it to such a `const` of
@@ -541,7 +544,8 @@ These limits apply to every *Supported* and *Partial* row below:
   an optional chain, where TypeScript narrows it as for a local value. Other
   values narrow nothing, even where TypeScript gives them a unit type, such
   as a variable with a type annotation, a call, `"a" as const`, a member of
-  a namespace, or an enum member. A comparison of `x.constructor` with a
+  a namespace, a member of an enum read as `E?.A` or `(E).A`, or a member
+  whose value Biome doesn't compute. A comparison of `x.constructor` with a
   class narrows `x` as the row on `x.constructor === C` describes. A
   `const` that a condition narrows to
   `never`, as `D` in `const D = false; if (D) { if (x === D) x }`, still
@@ -555,17 +559,42 @@ These limits apply to every *Supported* and *Partial* row below:
   literal or a template literal without substitutions that names a kind of
   value, and when the discriminant is a variable or a property path, or
   `typeof` of one without parentheses around `typeof`. A case that compares
-  with an imported value counts only when that value is a unit value. Then
+  with an imported value or a member of an enum counts only when that value
+  is a unit value. Then
   the code after the statement sees no value that matches no case, so a read
   of another variable there keeps the narrowing of every case. A
   discriminant that TypeScript narrows to `never` before the statement,
-  through a comparison that Biome doesn't narrow by, such as one with an
-  enum member in `if (x === E.A) return;`, makes Biome find such a statement
-  exhaustive where TypeScript doesn't, because no type that TypeScript
-  checks for exhaustiveness is `never`. Biome then reads another variable
+  through a comparison that Biome doesn't narrow by, such as one with a
+  variable with a type annotation in `if (x === k) return;`, makes Biome
+  find such a statement exhaustive where TypeScript doesn't, because no type
+  that TypeScript checks for exhaustiveness is `never`. Biome then reads another variable
   after the statement narrower than TypeScript does, in code that TypeScript
   types as impossible. Each execution root counts only its first 64 such
   statements; later ones never count as exhaustive.
+- A member of an enum has the literal type of its value, and the enum, used
+  as a type, the union of its members, as in TypeScript, which gives each
+  member a literal type of its own. Biome uses the plain literal type, so a
+  read of `E.A` in `enum E { A, B }` displays as `0`, where TypeScript
+  displays `E.A`, and `e: E` as `0 | 1`, with the same values. A string
+  literal is assignable to a string enum in Biome, as `"a"` to `S` in
+  `enum S { A = "a" }`, where TypeScript reports TS2322, and rules that tell
+  an enum's type from its values' primitive type, such as one that reports
+  converting a string to a string, see a member of a string enum as a
+  string. Biome computes a member's value from literals, operators, and
+  earlier members of the enum. A member whose value it doesn't compute is
+  `number` when TypeScript requires a number, as for `"c".length`, a
+  computed integer outside 0 to 255 and a computed number that isn't an
+  integer are `number`, and a concatenation or a template literal with
+  substitutions is `string`. A reference to a constant outside the enum,
+  such as a `const` or a member of another enum, is Unknown, because it can
+  be a string. A member without an initializer of an ambient enum that isn't
+  `const`, as in `declare enum D { P }`, is `number`, as its value is the
+  one that the code that defines the enum chooses. An enum whose name its
+  scope declares more than once, as two declarations of the enum or an enum
+  and a namespace, which TypeScript merges, is Unknown, with its members.
+  Where a member initializes a mutable location, as in `let n = E.A`,
+  TypeScript widens its type to the enum's type, `E`, and Biome to the
+  primitive type of its literal type, `number`, which is wider.
 
 ## Behaviour
 
@@ -607,7 +636,7 @@ code as TS7027, an error with `allowUnreachableCode: false`.
 | Strict equality with a string, number, bigint, or boolean literal | `x: "a" \| "b"; if (x === "a") x` | `"a"`; `"b"` in the `else` branch | Supported |
 | A broad primitive becomes the literal | `x: string; if (x === "a") x` | `"a"` | Supported |
 | Equality with a negative number, `void 0`, a template literal, or a `const` of a literal type | `x: number; if (x === -1) x`<br>`x: string \| undefined; if (x !== void 0) x`<br>`const K = "a"; x: "a" \| "b"; if (x === K) {} else x` | `-1`; `string`; `"b"` | Partial: a comparison narrows by every value that the limits above list as a unit value, as by a literal, in both branches, including a `const` imported from another module. TypeScript narrows by any value whose type is a unit type, where Biome keeps the declared type: a variable with a type annotation, as `k` in `k: "a"`, `"a" as const`, a call that returns a literal type, a template literal with substitutions, a member of a namespace, `export default "a"`, and `-1n`, which Biome types as `bigint`. |
-| Equality with an enum member | `enum E { A, B }; e: E; if (e === E.A) e`<br>`x: 0 \| 1; if (x === E.A) x` | `E.A`; `0` | Not yet: Biome doesn't infer the types of enums, so a variable of an enum type is unknown, and an enum member is no unit value. |
+| Equality with an enum member | `enum E { A, B }; e: E; if (e === E.A) e`<br>`x: 0 \| 1; if (x === E.A) x` | `E.A`; `0` | Supported: as a comparison with the member's value, as the limits above describe, in both branches, also through `E["A"]`, an imported enum, or a `const` that holds a member. Biome displays the member's type as its value, `0` for `E.A`, with the same values. A member whose value Biome doesn't compute, as `C` in `enum M { C = "c".length }` or a member of `declare enum`, narrows nothing, where TypeScript narrows by its own literal type. |
 | Loose `==` with a literal | `x: "a" \| "b" \| null; if (x == "a") x` | `"a"` | Not yet: loose equality narrows only with `null`, `undefined`, `void`, or a `const` that holds one of them. |
 | Equality with another variable | `x: string \| number; y: "a"; if (x === y) x` | `"a"` | Not yet: Biome compares only with the unit values that the limits above list, which leave out a variable with a type annotation, such as `y`. Where the operands are equal, TypeScript also narrows by a variable whose type is not a unit type, keeping the members that the other operand's type can equal. |
 | Equality with the result of a runtime test | `x: string \| number;`<br>`if ((typeof x === "string") === true) x` | `string` | Not yet |
@@ -667,7 +696,7 @@ The rows use `type Circle = { kind: "c"; r: number }` and
 
 | Behaviour | Example | TypeScript | Status |
 | --- | --- | --- | --- |
-| Equality of a discriminant | `s: Circle \| Square; if (s.kind === "c") s` | `Circle` | Partial: `===` and `!==` with a unit value, as the limits above list them, such as a literal, `null`, `undefined`, `-1`, or a `const` of a literal type, and `== null` and `!= undefined`, narrow the object, as they narrow a variable, so `const k = "c"; if (s.kind === k) s` gives `Circle`. Loose `==` and `!=` with a literal, and comparisons with other values, such as an enum member, don't narrow the object yet. |
+| Equality of a discriminant | `s: Circle \| Square; if (s.kind === "c") s` | `Circle` | Partial: `===` and `!==` with a unit value, as the limits above list them, such as a literal, `null`, `undefined`, `-1`, a `const` of a literal type, or a member of an enum, and `== null` and `!= undefined`, narrow the object, as they narrow a variable, so `const k = "c"; if (s.kind === k) s` gives `Circle`. Loose `==` and `!=` with a literal, and comparisons with other values, such as a variable with a type annotation, don't narrow the object yet. |
 | Truthiness of a discriminant | `r: { ok: true; v: number } \| { ok: false; e: string };`<br>`if (r.ok) r` | `{ ok: true; v: number }` | Supported |
 | Destructured `const` or parameter | `s: { kind: "c"; v: number } \| { kind: "s"; v: string };`<br>`const { kind, v } = s; if (kind === "c") v` | `number` | Partial: a test of an element narrows the other elements of the same pattern, as the limits above describe, including renamed elements, nested and array patterns, parameters with a type annotation or a default, and tests inside an aliased condition. The test of `kind` also narrows `s` itself, as the row on discriminants held in a `const` describes. Loose `==` and `!=` with a string, number, bigint, or boolean literal don't narrow the pattern yet, as for a test of a property. TypeScript also narrows the elements of a pattern under a default of an enclosing pattern, as in `const { a: { kind, v } = d } = w`, where Biome keeps their declared types because those ignore the default. Biome can't infer the types of the elements of a pattern whose initializer ends with `!`, as in `const { kind, v } = s!`, or of a parameter destructured in a function that only a variable's annotation types, as in `const f: (s: S) => void = ({ kind, v }) => {}`, so they don't narrow. |
 | Dependent rest parameters | `(...[k, p]: ["a", number] \| ["b", string]) => { if (k === "a") p }` | `number` | Partial: a rest parameter destructured by an array pattern narrows as a destructured parameter does. TypeScript also narrows the parameters of a function whose contextual type has a single rest parameter typed with a union of tuples, as in `const f: (...args: ["a", number] \| ["b", string]) => void = (k, p) => { if (k === "a") p }`, where Biome can't infer the types of `k` and `p` yet. |
@@ -678,7 +707,7 @@ The rows use `type Circle = { kind: "c"; r: number }` and
 
 | Behaviour | Example | TypeScript | Status |
 | --- | --- | --- | --- |
-| Literal cases | `x: "a" \| "b" \| "c"; switch (x) { case "a": x }` | `"a"` | Partial: a case narrows the discriminant as `===` does when it is a unit value, as the limits above list them, such as a literal, `null`, `undefined`, `-1`, `void 0`, a template literal without substitutions, or a `const` of a literal type, local or imported, and the discriminant is a variable or a property path, in parentheses or not. TypeScript also narrows by a case of any other value whose type is a unit type, such as an enum member, and a discriminant such as `x!`, where Biome keeps the declared type. Every case test sees the types from just before the `switch`, as in TypeScript. |
+| Literal cases | `x: "a" \| "b" \| "c"; switch (x) { case "a": x }` | `"a"` | Partial: a case narrows the discriminant as `===` does when it is a unit value, as the limits above list them, such as a literal, `null`, `undefined`, `-1`, `void 0`, a template literal without substitutions, a `const` of a literal type, local or imported, or a member of an enum, and the discriminant is a variable or a property path, in parentheses or not. TypeScript also narrows by a case of any other value whose type is a unit type, such as a variable with a type annotation or a member of an enum whose value Biome doesn't compute, and a discriminant such as `x!`, where Biome keeps the declared type. Every case test sees the types from just before the `switch`, as in TypeScript. |
 | Grouped cases and fallthrough | `x: "a" \| "b" \| "c"; switch (x) { case "a": case "b": x }` | `"a" \| "b"` | Supported: the statements of a group start where one of its cases matches and where the statements before them fall through. A `break` leaves the `switch`, and a `continue` reaches the loop around it. |
 | `default` removes the handled values | `x: "a" \| "b" \| "c";`<br>`switch (x) { case "a": break; case "b": break; default: x }` | `"c"` | Partial: `default` narrows in any position, by every case that Biome narrows by, and a group that contains it also starts where one of its cases matches. A member whose discriminant is a union of case values stays: with `s: { kind: "a" \| "b"; x: 1 } \| { kind: "c"; y: 2 }`, `default` after `case "a": case "b":` keeps both members, where TypeScript keeps `{ kind: "c"; y: 2 }`. As in TypeScript, `default` narrows no receiver of an optional chain, so `switch (o?.k) { case undefined: break; default: o }` keeps `undefined` in `o`. Where no case of a `switch` on a value or on `typeof` of one matches, in `default` or after a `switch` without one, `unknown` stays `unknown`, as in TypeScript, which removes the matched values from `unknown` as a whole there, so `switch (x) { case null: break; default: x }` reads `unknown` where `x !== null` gives `{} \| undefined`. |
 | `switch (true)` | `x: string \| number;`<br>`switch (true) { case typeof x === "string": x }` | `string` | Partial: a case narrows as its test does when it is truthy, after every case before its group failed to match, and a group with `default` sees the cases outside the group fail, as in TypeScript. The discriminant must be the literal `true` itself, as in TypeScript, which narrows nothing for `(true)` either. A case that fails to match narrows only when it gives a boolean, as the deliberate choices above describe. |

@@ -13,13 +13,15 @@ use super::{
 };
 use crate::ModuleDb;
 use crate::db::type_inference::{
-    ImportResolution, ResolutionCtx, find_member_type_on_demand as find_member_type_impl,
+    ImportResolution, ResolutionCtx, classify_enum_member,
+    find_member_type_on_demand as find_member_type_impl,
     find_value_member_type_on_demand as find_value_member_type_impl, flow_assigned_types,
     flow_binding_baseline, flow_call_effect, flow_expression_type, flow_reachability,
     flow_subject_states, flow_subject_type, flow_switch_exhaustive, resolve_local_type_on_demand,
 };
 use crate::js_module_info::flow::FlowNodeId;
 use crate::module_graph::ModuleInfoKind;
+use crate::type_inference::TypeInferenceClassification;
 use crate::type_inference::profiling::{
     TypeInferenceProfileOrigin, TypeInferenceQueryKind, execute_query,
 };
@@ -87,6 +89,46 @@ fn infer_flow_expression_type_impl<'db>(
                 return None;
             }
             flow_expression_type(db, module, info, expression)
+        },
+    )
+}
+
+/// Classifies whether an expression reads a member of an enum, as `E.A` and
+/// `E["A"]` do where `E` names an enum declaration or an import of one.
+///
+/// The classification reads syntax, semantic models, and module exports,
+/// without inferring any type. Returns `Indeterminate` when the module does
+/// not support inference, no expression has the requested range, or an import
+/// can't be followed to a single declaration.
+///
+/// Requesting `Color.Red` returns `Match`, and requesting `Palette.Red`
+/// returns `NoMatch`:
+///
+/// ```ts
+/// enum Color { Red = "red" }
+/// const Palette = { Red: "red" };
+/// Color.Red;
+/// Palette.Red;
+/// ```
+#[salsa::tracked(returns(copy))]
+pub(crate) fn infer_expression_is_enum_member<'db>(
+    db: &'db dyn ModuleDb,
+    input: ExpressionTypeInput<'db>,
+) -> TypeInferenceClassification {
+    let module = input.module(db);
+    let expression = input.expression(db);
+    execute_query(
+        TypeInferenceQueryKind::Lookups,
+        TypeInferenceProfileOrigin::exact(module, expression),
+        "infer_expression_is_enum_member",
+        || {
+            let ModuleInfoKind::Js(info) = module.kind(db) else {
+                return TypeInferenceClassification::Indeterminate;
+            };
+            if !info.infer_types {
+                return TypeInferenceClassification::Indeterminate;
+            }
+            classify_enum_member(db, module, info, expression)
         },
     )
 }

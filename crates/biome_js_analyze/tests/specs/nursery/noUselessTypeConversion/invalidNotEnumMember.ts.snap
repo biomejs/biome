@@ -1,0 +1,127 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNotEnumMember.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// Only a member read from the enum has the type of the enum. A variable
+// declared as `string`, a literal, and a member of an object that isn't an
+// enum are converted needlessly.
+enum Ids {
+    A = "a",
+}
+
+const id: string = Ids.A;
+id.toString();
+"a".toString();
+
+const NotAnEnum = { A: "a" } as const;
+NotAnEnum.A.toString();
+
+function shadowed() {
+    const Ids = { A: "a" } as const;
+    Ids.A.toString();
+}
+
+```
+
+# Diagnostics
+```
+invalidNotEnumMember.ts:11:4 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `toString()` on a string value.
+  
+    10 │ const id: string = Ids.A;
+  > 11 │ id.toString();
+       │    ^^^^^^^^
+    12 │ "a".toString();
+    13 │ 
+  
+  i This expression already evaluates to a string.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNotEnumMember.ts:12:5 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `toString()` on a string value.
+  
+    10 │ const id: string = Ids.A;
+    11 │ id.toString();
+  > 12 │ "a".toString();
+       │     ^^^^^^^^
+    13 │ 
+    14 │ const NotAnEnum = { A: "a" } as const;
+  
+  i This expression already evaluates to a string.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNotEnumMember.ts:15:13 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `toString()` on a string value.
+  
+    14 │ const NotAnEnum = { A: "a" } as const;
+  > 15 │ NotAnEnum.A.toString();
+       │             ^^^^^^^^
+    16 │ 
+    17 │ function shadowed() {
+  
+  i This expression already evaluates to a string.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNotEnumMember.ts:19:11 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `toString()` on a string value.
+  
+    17 │ function shadowed() {
+    18 │     const Ids = { A: "a" } as const;
+  > 19 │     Ids.A.toString();
+       │           ^^^^^^^^
+    20 │ }
+    21 │ 
+  
+  i This expression already evaluates to a string.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

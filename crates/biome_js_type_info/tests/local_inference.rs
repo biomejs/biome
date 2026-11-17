@@ -2,10 +2,12 @@ mod utils;
 
 use biome_js_semantic::ScopeId;
 use biome_js_syntax::{
-    JsArrowFunctionExpression, JsClassDeclaration, JsFormalParameter, TsTypeAliasDeclaration,
+    JsArrowFunctionExpression, JsClassDeclaration, JsFormalParameter, TsEnumDeclaration,
+    TsTypeAliasDeclaration,
 };
 use biome_js_type_info::{
-    Object, ObjectKind, RawTypeCollector, ReturnType, TypeData, TypeMember, TypeReference,
+    EnumTypes, Object, ObjectKind, RawTypeCollector, RawTypeId, ReturnType, TypeData, TypeMember,
+    TypeReference,
 };
 use biome_rowan::{AstNode, Text};
 
@@ -1081,5 +1083,181 @@ fn infer_widened_literal_types_of_destructured_array_elements() {
     variable_bindings_snapshot(
         "const [first, second] = [1n, 2];",
         "infer_widened_literal_types_of_destructured_array_elements",
+    );
+}
+
+/// Returns the type of each member of the first enum declaration in `code`,
+/// as `name: type`, with the types that collection gives them.
+fn enum_member_types(code: &str) -> Vec<String> {
+    let root = parse_ts(code);
+    let declaration = root
+        .syntax()
+        .descendants()
+        .find_map(TsEnumDeclaration::cast)
+        .expect("the code must declare an enum");
+    let mut collector = TestTypeCollector::default();
+    let types = EnumTypes::from_ts_enum_declaration(&mut collector, ScopeId::GLOBAL, &declaration);
+    let source = root.syntax().to_string();
+    types
+        .members
+        .iter()
+        .map(|(range, ty)| {
+            let ty = match ty {
+                TypeReference::Resolved(RawTypeId::Local(id)) => collector.get_by_id(*id).clone(),
+                ty => TypeData::reference(ty.clone()),
+            };
+            format!("{}: {ty}", &source[*range])
+        })
+        .collect()
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives each member the literal type of
+// the value below, unless a comment says otherwise.
+#[test]
+fn enum_members_have_the_types_of_their_values() {
+    for (code, expected) in [
+        // A member without an initializer counts up from the member before
+        // it, or from `0`.
+        (
+            "enum A { X, Y, Z }",
+            vec!["X: number: 0", "Y: number: 1", "Z: number: 2"],
+        ),
+        // TypeScript gives `W` the value `-1`. Biome has no spelling for a
+        // computed negative number, so it gives `number`, which is wider.
+        (
+            "enum B { X = 5, Y, Z = -2, W }",
+            vec!["X: number: 5", "Y: number: 6", "Z: number: -2", "W: number"],
+        ),
+        // Operators between known values give their results. TypeScript gives
+        // `Z` the value `-1` and `U` the value `2.5`, which Biome has no
+        // spelling for, so they are `number`.
+        (
+            "enum C { X = 1 << 3, Y = X | 1, Z = ~0, W = 7 % 4, V = 2 ** 3, U = 10 / 4, T = 0x10, S = 1e3 }",
+            vec![
+                "X: number: 8",
+                "Y: number: 9",
+                "Z: number",
+                "W: number: 3",
+                "V: number: 8",
+                "U: number",
+                "T: number: 0x10",
+                "S: number: 1e3",
+            ],
+        ),
+        // TypeScript gives `Y` the value `"ab"` and `W` the value `"d1"`.
+        // Biome doesn't build the text of a concatenation, so they are
+        // `string`.
+        (
+            r#"enum D { X = "a", Y = X + "b", Z = `c`, W = "d" + 1 }"#,
+            vec!["X: string: a", "Y: string", "Z: string: c", "W: string"],
+        ),
+        // Earlier members, read through the enum.
+        (
+            r#"enum E { X = 1, Y = E.X + 1, Z = E["Y"] * 2, W = (Z) }"#,
+            vec![
+                "X: number: 1",
+                "Y: number: 2",
+                "Z: number: 4",
+                "W: number: 4",
+            ],
+        ),
+        // TypeScript gives `X` the value `"k"`, `Y` the value `3`, `Z` the
+        // value of `A.Y`, and `W` the value `"kv"`: they read constants
+        // outside the enum, which Biome doesn't follow, because they can be
+        // numbers or strings. A call, a member of a value that isn't a name,
+        // and an assertion are numbers, as TypeScript requires for them.
+        (
+            "enum F { X = K, Y = N, Z = A.Y, W = `${K}v`, V = f(), U = \"c\".length, T = 1 as number, S = Math.PI }",
+            vec![
+                "X: unknown",
+                "Y: unknown",
+                "Z: unknown",
+                "W: string",
+                "V: number",
+                "U: number",
+                "T: number",
+                "S: unknown",
+            ],
+        ),
+        // A member after a number that Biome doesn't know is a number too.
+        // After a string, TypeScript requires an initializer.
+        (
+            r#"enum G { X = f(), Y, Z = "z", W }"#,
+            vec!["X: number", "Y: number", "Z: string: z", "W: unknown"],
+        ),
+        // `NaN` and infinite values have no literal type.
+        (
+            "enum L { X = 0 / 0, Y = 1 / 0, Z = 2 ** 64 }",
+            vec!["X: number", "Y: number", "Z: number"],
+        ),
+        (
+            "const enum P { X = 2, Y }",
+            vec!["X: number: 2", "Y: number: 3"],
+        ),
+        // In an ambient enum that isn't `const`, the code that defines the
+        // enum chooses the value of a member without an initializer.
+        (
+            r#"declare enum Q { X, Y = "y", Z }"#,
+            vec!["X: number", "Y: string: y", "Z: number"],
+        ),
+        ("declare namespace N { enum Q { X } }", vec!["X: number"]),
+        (
+            "declare const enum R { X, Y }",
+            vec!["X: number: 0", "Y: number: 1"],
+        ),
+    ] {
+        assert_eq!(enum_member_types(code), expected, "{code}");
+    }
+}
+
+/// Returns the type of the first enum declaration in `code`, with the types
+/// that it refers to, resolved within the collector.
+fn enum_declaration_type(code: &str) -> String {
+    let root = parse_ts(code);
+    let declaration = root
+        .syntax()
+        .descendants()
+        .find_map(TsEnumDeclaration::cast)
+        .expect("the code must declare an enum");
+    let mut collector = TestTypeCollector::default();
+    let types = EnumTypes::from_ts_enum_declaration(&mut collector, ScopeId::GLOBAL, &declaration);
+    let TypeReference::Resolved(RawTypeId::Local(id)) = types.declaration else {
+        panic!("an enum declaration must have a local type");
+    };
+    let TypeData::MergedReference(reference) = collector.get_by_id(id) else {
+        panic!("an enum declaration must be a merged reference");
+    };
+    let show = |ty: &Option<TypeReference>| match ty {
+        Some(TypeReference::Resolved(RawTypeId::Local(id))) => collector.get_by_id(*id).to_string(),
+        Some(ty) => TypeData::reference(ty.clone()).to_string(),
+        None => "none".to_owned(),
+    };
+    format!(
+        "type: {}\nvalue: {}\nnamespace: {}",
+        show(&reference.ty),
+        show(&reference.value_ty),
+        show(&reference.namespace_ty)
+    )
+}
+
+// An enum is the union of its members as a type, as TypeScript's `A` is
+// `A.X | A.Y`, and an object with a readonly property per member as a value.
+// The object maps numbers back to names when a member is a number, as
+// TypeScript's `A[0]` is `string`, and not for an enum of strings.
+#[test]
+fn enum_declarations_are_their_members_as_types_and_objects_as_values() {
+    assert_eq!(
+        enum_declaration_type("enum A { X, Y }"),
+        "type: Local TypeId(0) | Local TypeId(1)\n\
+         value: Object {\n  prototype: No prototype\n  members: [\n    \
+         readonly \"X\": Local TypeId(0),\n    readonly \"Y\": Local TypeId(1),\n    \
+         [number]: string\n  ]\n}\n\
+         namespace: none"
+    );
+    assert_eq!(
+        enum_declaration_type(r#"enum S { X = "x" }"#),
+        "type: string: x\n\
+         value: Object {\n  prototype: No prototype\n  members: [readonly \"X\": Local TypeId(0)]\n}\n\
+         namespace: none"
     );
 }

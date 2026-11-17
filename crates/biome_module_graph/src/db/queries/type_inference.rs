@@ -64,10 +64,10 @@ pub use lookups::{
     infer_local_type, resolve_callable_type,
 };
 pub(crate) use lookups::{
-    infer_binding_type_with_import_budget, infer_flow_assigned_types, infer_flow_binding_baseline,
-    infer_flow_call_effect, infer_flow_expression_type, infer_flow_reachability,
-    infer_flow_subject_states, infer_flow_subject_type, infer_flow_switch_exhaustive,
-    infer_local_type_with_import_budget,
+    infer_binding_type_with_import_budget, infer_expression_is_enum_member,
+    infer_flow_assigned_types, infer_flow_binding_baseline, infer_flow_call_effect,
+    infer_flow_expression_type, infer_flow_reachability, infer_flow_subject_states,
+    infer_flow_subject_type, infer_flow_switch_exhaustive, infer_local_type_with_import_budget,
 };
 pub use module_types::{infer_module_types, infer_module_types_bottom_up};
 pub(crate) use module_types::{

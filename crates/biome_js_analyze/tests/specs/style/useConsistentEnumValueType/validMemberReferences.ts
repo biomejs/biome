@@ -1,0 +1,15 @@
+/* should not generate diagnostics */
+
+// A member whose initializer names an earlier member has that member's value.
+enum Letters {
+	A = "a",
+	B = A,
+	C = Letters.A,
+	D = Letters["B"],
+}
+
+enum Numbers {
+	One = 1,
+	Two = One * 2,
+	Three = One,
+}

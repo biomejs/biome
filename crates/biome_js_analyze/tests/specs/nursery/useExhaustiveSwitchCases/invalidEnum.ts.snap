@@ -1,0 +1,113 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidEnum.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// Biome types a member of an enum by its value, so it names a missing member
+// by its value, as `2` for `Direction.Left` and `"green"` for `Color.Green`.
+enum Direction {
+	Up,
+	Down,
+	Left,
+}
+
+function move(direction: Direction) {
+	switch (direction) {
+		case Direction.Up:
+			break;
+		case Direction.Down:
+			break;
+	}
+}
+
+enum Color {
+	Red = "red",
+	Green = "green",
+}
+
+function paint(color: Color) {
+	switch (color) {
+		case Color.Red:
+			break;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidEnum.ts:12:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    11 │ function move(direction: Direction) {
+  > 12 │ 	switch (direction) {
+       │ 	^^^^^^^^^^^^^^^^^^^^
+  > 13 │ 		case Direction.Up:
+  > 14 │ 			break;
+  > 15 │ 		case Direction.Down:
+  > 16 │ 			break;
+  > 17 │ 	}
+       │ 	^
+    18 │ }
+    19 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - 2
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    14 14 │         break;
+    15 15 │       case Direction.Down:
+    16    │ - → → → break;
+       16 │ + → → → break;
+       17 │ + → → case·2:·throw·new·Error("TODO:·Not·implemented·yet");
+    17 18 │     }
+    18 19 │   }
+  
+
+```
+
+```
+invalidEnum.ts:26:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    25 │ function paint(color: Color) {
+  > 26 │ 	switch (color) {
+       │ 	^^^^^^^^^^^^^^^^
+  > 27 │ 		case Color.Red:
+  > 28 │ 			break;
+  > 29 │ 	}
+       │ 	^
+    30 │ }
+    31 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - "green"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    26 26 │     switch (color) {
+    27 27 │       case Color.Red:
+    28    │ - → → → break;
+       28 │ + → → → break;
+       29 │ + → → case·"green":·throw·new·Error("TODO:·Not·implemented·yet");
+    29 30 │     }
+    30 31 │   }
+  
+
+```

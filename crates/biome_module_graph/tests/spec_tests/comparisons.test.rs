@@ -74,11 +74,17 @@ const CONSTANTS: &str = r#"
     import { EK as EK2 } from "./more.ts";
     export { EK as EX } from "./more.ts";
     export default "c";
+    export enum EE { A, B }
+    export enum ES { A = "a", B = "b" }
+    export { EM } from "./more.ts";
+    import { EM as EM2 } from "./more.ts";
+    export const EMC = EM2.C;
 "#;
 
 /// The module that [`CONSTANTS`] imports.
 const MORE: &str = r#"
     export const EK = "c";
+    export enum EM { C = "c" }
 "#;
 
 /// Asserts the type of each `(marker, expression, expected)` read in `source`
@@ -367,22 +373,19 @@ fn comparisons_with_imported_constants_narrow() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) narrows `x` to `"a"` and `"b" | "c"` in
-// `i9` and `i11`, to `"c"` and `"a" | "b"` in `i10`, and to `0` and `1` in
-// `i14`. Biome keeps the declared type, which is wider, because it doesn't
-// compare with an imported variable that has a type annotation, an export
-// written as an expression, a member of a namespace import, or an enum
-// member, whose type Biome doesn't infer.
+// `i9` and `i11`, and to `"c"` and `"a" | "b"` in `i10`. Biome keeps the
+// declared type, which is wider, because it doesn't compare with an imported
+// variable that has a type annotation, an export written as an expression, or
+// a member of a namespace import.
 #[test]
 fn comparisons_with_other_imported_values_keep_the_type() {
     assert_reads(
         r#"
         import D, { EA } from "./constants.ts";
         import * as C from "./constants.ts";
-        enum E { A, B }
         function i9(x: ABC) { if (x === EA) /*i9t*/x; else /*i9f*/x; }
         function i10(x: ABC) { if (x === D) /*i10t*/x; else /*i10f*/x; }
         function i11(x: ABC) { if (x === C.EK) /*i11t*/x; else /*i11f*/x; }
-        function i14(x: 0 | 1) { if (x === E.A) /*i14t*/x; else /*i14f*/x; }
         "#,
         &[
             ("i9t", "x", &["string: a", "string: b", "string: c"]),
@@ -391,8 +394,6 @@ fn comparisons_with_other_imported_values_keep_the_type() {
             ("i10f", "x", &["string: a", "string: b", "string: c"]),
             ("i11t", "x", &["string: a", "string: b", "string: c"]),
             ("i11f", "x", &["string: a", "string: b", "string: c"]),
-            ("i14t", "x", &["number: 0", "number: 1"]),
-            ("i14f", "x", &["number: 0", "number: 1"]),
         ],
     );
 }
@@ -446,5 +447,190 @@ fn comparisons_with_constants_that_a_condition_makes_impossible_narrow() {
         function n2(x: boolean) { if (!D) return; if (x === D) /*n2*/x; }
         "#,
         &[("n1", "x", &["bool: false"]), ("n2", "x", &["bool: false"])],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the values of the
+// expected type, but displays the literal type of an enum member by the
+// member's name: `E.A` where Biome displays `0`, and `E` for the union of
+// an enum's members. A comparison with a member narrows as a comparison with
+// its value does, in both branches, through a discriminant, and through a
+// `const` that holds the member. At `e6t`, `D.P` is a member of an ambient
+// enum without an initializer, whose value the code that defines the enum
+// chooses, so Biome types it as `number` and keeps the declared type of `d`,
+// where TypeScript gives `D.P`. At `e15f`, `G.C` has a value that Biome
+// doesn't compute, so `m` keeps `number`, where TypeScript gives
+// `G.B | G.C`. Loose `==` narrows only by `null` and `undefined`, so `s`
+// keeps its declared type at `e10t`, where TypeScript gives `S.A`. These are
+// wider. At `e16t`, the discriminant's annotation `E.A` reads as an instance
+// of `0`, which has the same values.
+#[test]
+fn comparisons_with_enum_members_narrow() {
+    assert_reads(
+        r#"
+        enum E { A, B }
+        enum S { A = "a", B = "b" }
+        const enum C { X = 1, Y = 2 }
+        declare enum D { P, Q }
+        enum G { A = 1, B = A * 2, C = "c".length }
+        function e1(e: E) { if (e === E.A) /*e1t*/e; else /*e1f*/e; }
+        function e2(x: 0 | 1) { if (x === E.A) /*e2t*/x; else /*e2f*/x; }
+        function e3(s: S) { if (s === S.A) /*e3t*/s; else /*e3f*/s; }
+        function e4(x: "a" | "b") { if (x === S.A) /*e4t*/x; else /*e4f*/x; }
+        function e5(c: C) { if (c === C.X) /*e5t*/c; else /*e5f*/c; }
+        function e6(d: D) { if (d === D.P) /*e6t*/d; }
+        function e8(e: E | undefined) { if (e) /*e8t*/e; }
+        function e9(e: E) { if (e === 0) /*e9t*/e; }
+        function e10(s: S | null) { if (s == S.A) /*e10t*/s; }
+        function e11(e: E) { if (e !== E.A && e !== E.B) /*e11t*/e; }
+        function e12(e: E.A | E.B) { const v = E.A; if (e === v) /*e12t*/e; }
+        function e13(x: number) { if (x === E.B) /*e13t*/x; }
+        function e15(m: G) { if (m === G.A) /*e15t*/m; else /*e15f*/m; }
+        function e16(o: { k: E.A; a: 1 } | { k: E.B; b: 2 }) { if (o.k === E.A) /*e16t*/o; }
+        function e17(x: "a" | "b") { if (S["B"] !== x) /*e17t*/x; }
+        "#,
+        &[
+            ("e1t", "e", &["number: 0"]),
+            ("e1f", "e", &["number: 1"]),
+            ("e2t", "x", &["number: 0"]),
+            ("e2f", "x", &["number: 1"]),
+            ("e3t", "s", &["string: a"]),
+            ("e3f", "s", &["string: b"]),
+            ("e4t", "x", &["string: a"]),
+            ("e4f", "x", &["string: b"]),
+            ("e5t", "c", &["number: 1"]),
+            ("e5f", "c", &["number: 2"]),
+            ("e6t", "d", &["number"]),
+            ("e8t", "e", &["number: 1"]),
+            ("e9t", "e", &["number: 0"]),
+            ("e10t", "s", &["null", "string: a", "string: b"]),
+            ("e11t", "e", &["Unknown"]),
+            ("e12t", "e", &["number: 0"]),
+            ("e13t", "x", &["number: 1"]),
+            ("e15t", "m", &["number: 1"]),
+            ("e15f", "m", &["number"]),
+            (
+                "e16t",
+                "o",
+                &["[\"k\": instanceof number: 0, \"a\": number: 1]"],
+            ),
+            ("e17t", "x", &["string: a"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below but `i5t` the
+// values of the expected type, displaying `EE.A` and `EE.B` at `i1t` and
+// `i1f`. A member of an imported enum narrows as a member of a local one,
+// also when a re-export or a `const` of another module holds it. Loose `==`
+// narrows only by `null` and `undefined`, so `x` keeps its declared type at
+// `i5t`, where TypeScript gives `"a"`, which is wider.
+#[test]
+fn comparisons_with_members_of_imported_enums_narrow() {
+    assert_reads(
+        r#"
+        import { EE, ES, EM, EMC } from "./constants.ts";
+        function i1(e: EE) { if (e === EE.A) /*i1t*/e; else /*i1f*/e; }
+        function i2(x: ABC) { if (x === ES["A"]) /*i2t*/x; else /*i2f*/x; }
+        function i3(x: ABC) { if (x === EM.C) /*i3t*/x; else /*i3f*/x; }
+        function i4(x: ABC) { if (x === EMC) /*i4t*/x; else /*i4f*/x; }
+        function i5(x: ABC | null) { if (x == ES.A) /*i5t*/x; }
+        "#,
+        &[
+            ("i1t", "e", &["number: 0"]),
+            ("i1f", "e", &["number: 1"]),
+            ("i2t", "x", &["string: a"]),
+            ("i2f", "x", &["string: b", "string: c"]),
+            ("i3t", "x", &["string: c"]),
+            ("i3f", "x", &["string: a", "string: b"]),
+            ("i4t", "x", &["string: c"]),
+            ("i4f", "x", &["string: a", "string: b"]),
+            ("i5t", "x", &["null", "string: a", "string: b", "string: c"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the values of the
+// expected type, displaying a member's literal type by the member's name and
+// the union of an enum's members by the enum's name, except where a comment
+// says otherwise. A member has the literal type of its value: auto-incremented
+// from the member before it, computed from literals, operators, and earlier
+// members, or written as a template literal without substitutions.
+//
+// Biome is wider in these cases. `d` is `number` and `D.P` is `number`,
+// because a member of an ambient enum without an initializer has a value
+// that the code that defines the enum chooses; TypeScript gives `D` and
+// `D.P`, whose values it doesn't know either. `G.C` is `number`, because
+// Biome doesn't compute `"c".length`, so `m` is `number`; TypeScript gives
+// `G.C` and `G`. `H` has two declarations, and `NE` a namespace of its name,
+// which Biome doesn't merge, so `h`, `H.X`, and `NE.A` are Unknown;
+// TypeScript gives `H`, `H.X`, which is `0`, and `NE.A`, which is `0`.
+// `F.X = K` and `F.Y = E.B` reference values outside the enum, which Biome
+// doesn't follow, because they can be strings, so they are Unknown;
+// TypeScript gives `"k"` and `1`. `F.W` is a template literal with a
+// substitution, so it is `string`; TypeScript gives `"kw"`. Inside an enum,
+// a member's name reads the member, as `A` in `R.B = A`.
+//
+// TypeScript widens a member's literal type to the enum's type where it
+// initializes a mutable location: `wn`, the field `f`, and the return type of
+// `wr` are `E` and `S`. Biome widens it to its primitive type, `number` or
+// `string`, which is wider. `const` and `readonly` keep the member's type.
+#[test]
+fn enums_have_the_types_of_their_values() {
+    assert_reads(
+        r#"
+        enum E { A, B }
+        enum S { A = "a", B = "b" }
+        const enum C { X = 1, Y }
+        declare enum D { P, Q = 2 }
+        declare const enum DC { P, Q }
+        enum G { A = 1, B = A * 2, C = "c".length }
+        enum H { X }
+        enum H { Y = 1 }
+        enum NE { A }
+        namespace NE { export const x = 1; }
+        enum F { X = K, Y = E.B, Z = `z`, W = `${K}w` }
+        enum R { A = "a", B = /*rb*/A }
+        function t1(e: E, s: S, c: C, d: D, dc: DC, m: G, h: H) { /*e*/e; /*s*/s; /*c*/c; /*d*/d; /*dc*/dc; /*m*/m; /*h*/h; }
+        function t2(a: E.B, b: S.A) {
+            /*a*/a; /*b*/b; /*ea*/E.A; /*eb*/E["B"]; /*mb*/G.B; /*mc*/G.C; /*hx*/H.X; /*nea*/NE.A;
+            /*fx*/F.X; /*fy*/F.Y; /*fz*/F.Z; /*fw*/F.W; /*dp*/D.P; /*dq*/D.Q; /*cy*/C.Y;
+        }
+        let wn = E.A;
+        const wc = E.A;
+        class WK { f = S.A; readonly r = S.A; }
+        function wr() { return E.A; }
+        function t3(k: WK) { /*wn*/wn; /*wc*/wc; /*wf*/k.f; /*wro*/k.r; /*wr*/wr(); }
+        "#,
+        &[
+            ("e", "e", &["number: 0", "number: 1"]),
+            ("s", "s", &["string: a", "string: b"]),
+            ("c", "c", &["number: 1", "number: 2"]),
+            ("d", "d", &["number"]),
+            ("dc", "dc", &["number: 0", "number: 1"]),
+            ("m", "m", &["number"]),
+            ("h", "h", &["Unknown"]),
+            ("a", "a", &["number: 1"]),
+            ("b", "b", &["string: a"]),
+            ("ea", "E.A", &["number: 0"]),
+            ("eb", "E[\"B\"]", &["number: 1"]),
+            ("mb", "G.B", &["number: 2"]),
+            ("mc", "G.C", &["number"]),
+            ("hx", "H.X", &["Unknown"]),
+            ("nea", "NE.A", &["Unknown"]),
+            ("fx", "F.X", &["Unknown"]),
+            ("fy", "F.Y", &["Unknown"]),
+            ("fz", "F.Z", &["string: z"]),
+            ("fw", "F.W", &["string"]),
+            ("dp", "D.P", &["number"]),
+            ("dq", "D.Q", &["number: 2"]),
+            ("cy", "C.Y", &["number: 2"]),
+            ("rb", "A", &["string: a"]),
+            ("wn", "wn", &["number"]),
+            ("wc", "wc", &["number: 0"]),
+            ("wf", "k.f", &["string"]),
+            ("wro", "k.r", &["string: a"]),
+            ("wr", "wr()", &["number"]),
+        ],
     );
 }

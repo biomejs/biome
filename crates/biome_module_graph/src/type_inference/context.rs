@@ -15,8 +15,8 @@ use crate::db::queries::{
     BindingTypeInput, ExpressionTypeInput, FlowReachabilityInput, find_member_type,
     find_value_member_type, infer_binding_type, infer_export_type,
     infer_expression_function_returns_promise, infer_expression_is_array_of_promises,
-    infer_expression_is_promise, infer_expression_type, infer_flow_reachability,
-    resolve_callable_type,
+    infer_expression_is_enum_member, infer_expression_is_promise, infer_expression_type,
+    infer_flow_reachability, resolve_callable_type,
 };
 use crate::module_graph::ModuleInfoKind;
 use crate::{
@@ -90,6 +90,17 @@ impl<'db> TypeInferenceRequestContext<'db> {
             Some(true) => TypeInferenceClassification::NoMatch,
             None => TypeInferenceClassification::Indeterminate,
         }
+    }
+
+    /// Classifies whether the expression at `range` reads a member of an
+    /// enum. See [`super::EnumMemberClassificationRequest`].
+    pub(crate) fn classify_expression_as_enum_member(
+        &self,
+        module: ModuleInfo,
+        range: TextRange,
+    ) -> TypeInferenceClassification {
+        let db = self.db();
+        infer_expression_is_enum_member(db, ExpressionTypeInput::new(db, module, range))
     }
 
     pub(crate) fn classify_expression_as_array_of_promises(

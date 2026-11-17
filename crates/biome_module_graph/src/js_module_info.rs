@@ -223,11 +223,17 @@ pub(crate) fn order_merged_overloads<T>(
     ordered
 }
 
+/// Returns whether the raw type of a binding of `declaration_kind` names a
+/// type, which resolution keeps as a handle to the declaration.
+///
+/// Enums don't count. Their members are bindings of the same kind, typed by
+/// literal types that collection shares with every equal literal of the
+/// module. The enum's name holds a merged reference, and a type annotation
+/// selects its type from the resolved data, which a handle would hide.
 pub(crate) fn is_named_type_declaration(declaration_kind: JsDeclarationKind) -> bool {
     matches!(
         declaration_kind,
         JsDeclarationKind::Class
-            | JsDeclarationKind::Enum
             | JsDeclarationKind::Interface
             | JsDeclarationKind::Module
             | JsDeclarationKind::Namespace
