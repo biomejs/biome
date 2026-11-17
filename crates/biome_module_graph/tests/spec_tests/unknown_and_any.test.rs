@@ -192,11 +192,13 @@ fn unknown_narrows_as_an_empty_object_null_or_undefined() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
-// except where a comment gives TypeScript's type. Strict equality with a
-// literal gives the literal and keeps `unknown` in the `else` branch, and
-// loose equality with a literal keeps `unknown` in both branches. A
-// comparison with a value that is not a unit value narrows nothing yet.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// Strict equality with a literal gives the literal and keeps `unknown` in the
+// `else` branch, and loose equality with a literal keeps `unknown` in both
+// branches. Strict equality with a value that is not a unit value gives the
+// value's declared type when it is a single primitive type, `object` when it
+// is an object type, and keeps `unknown` for a union, for loose equality, and
+// in the `else` branch.
 #[test]
 fn unknown_compares_with_literals_and_keeps_other_comparisons() {
     assert_reads(
@@ -205,6 +207,7 @@ fn unknown_compares_with_literals_and_keeps_other_comparisons() {
         declare const o: { a: number };
         declare const s: string;
         declare const n: number | null;
+        declare const b: boolean;
         function q1(x: unknown) { if (x === "a") /*L27_44*/x; else /*L27_66*/x; } // L27
         function q2(x: unknown) { if (x == "a") /*L28_43*/x; else /*L28_65*/x; } // L28
         function q3(x: unknown) { if (x === o) /*L29_42*/x; else /*L29_64*/x; } // L29
@@ -212,20 +215,22 @@ fn unknown_compares_with_literals_and_keeps_other_comparisons() {
         function q5(x: unknown) { if (x === n) /*L31_42*/x; } // L31
         function q6(x: unknown) { if (x == o) /*L32_41*/x; } // L32
         function q7(x: unknown, y: unknown) { if (x === y) /*L33_54*/x; } // L33
+        function q8(x: unknown) { if (x === b) /*q8*/x; }
+        function q9(x: unknown, y: "a" | "b") { if (x === y) /*q9*/x; }
         "#,
         &[
             ("L27_44", "x", &["string: a"]),
             ("L27_66", "x", &["unknown"]),
             ("L28_43", "x", &["unknown"]),
             ("L28_65", "x", &["unknown"]),
-            // `object`
-            ("L29_42", "x", &["unknown"]),
+            ("L29_42", "x", &["object"]),
             ("L29_64", "x", &["unknown"]),
-            // `string`
-            ("L30_42", "x", &["unknown"]),
+            ("L30_42", "x", &["string"]),
             ("L31_42", "x", &["unknown"]),
             ("L32_41", "x", &["unknown"]),
             ("L33_54", "x", &["unknown"]),
+            ("q8", "x", &["boolean"]),
+            ("q9", "x", &["unknown"]),
         ],
     );
 }

@@ -239,9 +239,9 @@ fn loop_updates_keep_conditions_that_occur_later_in_the_source() {
 fn unsupported_condition_subjects_skip_flow_queries() {
     for condition in [
         "value.length",
-        "value === other",
+        "value === other()",
         "typeof value === other",
-        "value == 1",
+        "value == other()",
     ] {
         let source = format!(
             "function f(value: string | number, other: unknown) {{ if ({condition}) {{ /*read*/value; }} }}"

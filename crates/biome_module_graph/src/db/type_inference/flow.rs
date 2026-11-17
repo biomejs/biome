@@ -22,18 +22,18 @@ use super::imports::{ExportOriginResult, find_export_origin};
 use super::{ImportResolution, ResolutionCtx, resolve_local_type_on_demand};
 use crate::db::queries::{
     BindingTypeInput, CallableFunctionInput, FlowAssignedTypes, FlowCallEffect, FlowCallEffects,
-    FlowCallInput, FlowCallParameter, FlowReachability, FlowReachabilityInput,
+    FlowCallInput, FlowCallParameter, FlowComparedTypes, FlowReachability, FlowReachabilityInput,
     FlowSubjectRootInput, FlowSubjectTypeInput, FlowSubjectWritesInput, FlowSwitchInput,
     LocalTypeInput, global_contributions, infer_flow_assigned_types, infer_flow_binding_baseline,
-    infer_flow_call_effect, infer_flow_reachability, infer_flow_subject_states,
-    infer_flow_subject_type, infer_flow_switch_exhaustive, infer_local_type,
-    resolve_callable_function,
+    infer_flow_call_effect, infer_flow_compared_types, infer_flow_reachability,
+    infer_flow_subject_states, infer_flow_subject_type, infer_flow_switch_exhaustive,
+    infer_local_type, resolve_callable_function,
 };
 use crate::js_module_info::flow::{
     AnyMemberDeclaration, CalleeReturn, FlowAssigned, FlowAssignedValue, FlowCall, FlowCallKind,
-    FlowCallRoot, FlowCallee, FlowCapture, FlowEvolving, FlowGuard, FlowNode, FlowNodeId, FlowRead,
-    FlowSubject, FlowSubjectId, FlowSwitch, FlowTest, FlowWriteEffect, PropertyKey,
-    ReachabilityGraph, RootFlow, UnitValue, binding_unit_value, build_reachability,
+    FlowCallRoot, FlowCallee, FlowCapture, FlowComparedValue, FlowEvolving, FlowGuard, FlowNode,
+    FlowNodeId, FlowRead, FlowSubject, FlowSubjectId, FlowSwitch, FlowTest, FlowWriteEffect,
+    PropertyKey, ReachabilityGraph, RootFlow, UnitValue, binding_unit_value, build_reachability,
     declaration_return, enum_member_name_range, enum_member_unit_value, guard_signature,
     member_explicitness, member_key, member_return,
 };
@@ -242,6 +242,17 @@ fn may_narrow_by_assignment(baseline: TypeData) -> bool {
     )
 }
 
+pub(in crate::db) fn flow_compared_types<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    info: &JsModuleInfo,
+    root: usize,
+    subject: FlowSubjectId,
+) -> Option<FlowComparedTypes<'db>> {
+    let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
+    ctx.resolve_compared_types(root, subject)
+}
+
 pub(in crate::db) fn flow_call_effect<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
@@ -327,6 +338,9 @@ struct GuardSolve<'db> {
     evolving: FlowEvolving,
     calls: Option<FlowCallEffects<'db>>,
     ends: u64,
+    /// The declared types of the values that comparisons narrow the subject
+    /// by, as [`FlowTest::Compared`] requires.
+    compared: Option<FlowComparedTypes<'db>>,
     properties: FxHashMap<(usize, TypeData<'db>), TypeData<'db>>,
     /// The values of the imported variables and enum members that
     /// [`FlowTest::Imported`] compares with, found so far, keyed by the
@@ -352,6 +366,7 @@ impl<'db> GuardSolve<'db> {
         evolving: FlowEvolving,
         calls: Option<FlowCallEffects<'db>>,
         ends: u64,
+        compared: Option<FlowComparedTypes<'db>>,
     ) -> Self {
         Self {
             subject,
@@ -362,10 +377,34 @@ impl<'db> GuardSolve<'db> {
             evolving,
             calls,
             ends,
+            compared,
             properties: FxHashMap::default(),
             imported: FxHashMap::default(),
             writes: FxHashMap::default(),
         }
+    }
+}
+
+impl<'db> GuardSolve<'db> {
+    /// Returns the declared type of the compared value identified by `range`
+    /// in the solve's key, or `None` when the key has none.
+    fn compared_type(&self, db: &'db dyn ModuleDb, range: TextRange) -> Option<TypeData<'db>> {
+        let types = self.compared?.types(db);
+        let key = (u32::from(range.start()), u32::from(range.end()));
+        let index = types
+            .binary_search_by_key(&key, |(start, end, _)| (*start, *end))
+            .ok()?;
+        Some(types[index].2)
+    }
+}
+
+/// Returns the predicate of a strict or loose comparison with `value`, the
+/// type of a unit value, as a literal written in the comparison gives it.
+fn unit_predicate(value: TypeData, strict: bool) -> NarrowingPredicate {
+    if strict {
+        NarrowingPredicate::Literal(value)
+    } else {
+        NarrowingPredicate::LooseLiteral(value)
     }
 }
 
@@ -518,6 +557,10 @@ pub(in crate::db) struct LocalFlow<'db> {
     /// by the index of its root and its subject, as
     /// [`ResolutionCtx::assigned_types`] resolves them.
     assigned: FxHashMap<(usize, FlowSubjectId), Option<FlowAssignedTypes<'db>>>,
+    /// The declared types of the values that the comparisons of each subject
+    /// read so far narrow it by, keyed by the index of its root and its
+    /// subject, as [`ResolutionCtx::resolve_compared_types`] resolves them.
+    compared: FxHashMap<(usize, FlowSubjectId), Option<FlowComparedTypes<'db>>>,
     /// The type of each variable at each capture point resolved so far,
     /// keyed by the index of the enclosing root, the variable there, and the
     /// point, as [`ResolutionCtx::captured_type`] resolves it.
@@ -722,6 +765,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     FlowEvolving::None,
                     calls,
                     ends,
+                    self.compared_types(read.root, read.subject),
                 ),
                 read.point,
             ),
@@ -821,6 +865,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     evolving,
                     calls,
                     ends,
+                    self.compared_types(read.root, read.subject),
                 ),
                 read.point,
             ),
@@ -938,6 +983,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     FlowEvolving::None,
                     calls,
                     ends,
+                    self.compared_types(read.root, read.subject),
                 ),
                 read.point,
             ),
@@ -1106,6 +1152,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 FlowEvolving::None,
                 calls,
                 ends,
+                self.compared_types(capture.root, capture.subject),
             ),
         );
         let ty = states
@@ -1163,6 +1210,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     FlowEvolving::None,
                     calls,
                     ends,
+                    self.compared_types(read.root, pattern),
                 ),
                 read.point,
             ),
@@ -1301,6 +1349,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     FlowEvolving::None,
                     calls,
                     ends,
+                    self.compared_types(read.root, read.subject),
                 ),
                 read.point,
             ),
@@ -1462,6 +1511,96 @@ impl<'db> ResolutionCtx<'db, '_> {
             return Some(evolved);
         }
         Some(ty)
+    }
+
+    /// Returns the declared types of the values that the comparisons of
+    /// `subject` in the root at index `root` narrow it by, for
+    /// [`FlowSubjectRootInput::compared`]. When this context evaluates flow
+    /// locally, it resolves them itself and keeps them per root and subject.
+    /// Otherwise it queries [`crate::db::queries::infer_flow_compared_types`].
+    ///
+    /// Returns `None` without resolving anything when no comparison of the
+    /// subject narrows it by a declared type.
+    pub(super) fn compared_types(
+        &mut self,
+        root: usize,
+        subject: FlowSubjectId,
+    ) -> Option<FlowComparedTypes<'db>> {
+        if self
+            .js_info
+            .flow
+            .root(root)?
+            .subject_compared(subject)
+            .is_empty()
+        {
+            return None;
+        }
+        if !self.evaluates_flow_locally() {
+            return infer_flow_compared_types(
+                self.db,
+                FlowSubjectWritesInput::new(self.db, self.module, root, subject),
+            );
+        }
+        if let Some(cached) = self.local_flow.as_ref()?.compared.get(&(root, subject)) {
+            return *cached;
+        }
+        let compared = self.resolve_compared_types(root, subject);
+        self.local_flow
+            .as_mut()?
+            .compared
+            .insert((root, subject), compared);
+        compared
+    }
+
+    /// Resolves the declared types of the values that
+    /// [`RootFlow::subject_compared`] lists for `subject` in the root at index
+    /// `root`, flattened as a declared type is for narrowing, each with the
+    /// range that identifies its value.
+    ///
+    /// An expression is typed without narrowing, so the type of the other
+    /// operand of a comparison never depends on a solve. An imported
+    /// variable counts only when it holds no unit value, which the solve
+    /// reads from the module that declares it, and when the declaration that
+    /// it names has an explicit type, as a variable with a type annotation
+    /// has. A value whose type is Unknown, or whose flattening exceeds its
+    /// work limit, is left out. Returns `None` when no value is left.
+    pub(super) fn resolve_compared_types(
+        &mut self,
+        root: usize,
+        subject: FlowSubjectId,
+    ) -> Option<FlowComparedTypes<'db>> {
+        let info = self.js_info;
+        let values = info.flow.root(root)?.subject_compared(subject);
+        let mut types = Vec::with_capacity(values.len());
+        for value in values {
+            let ty = match *value {
+                FlowComparedValue::Expression(range) => self.raw_operand_at(range),
+                FlowComparedValue::Import(binding) => {
+                    if imported_unit_value(self.db, self.module, info, binding, None).is_some()
+                        || !imported_declaration_is_explicit(
+                            self.db,
+                            self.module,
+                            info,
+                            binding,
+                            None,
+                        )
+                    {
+                        continue;
+                    }
+                    info.raw_binding_types
+                        .get(&binding)
+                        .map(|reference| self.resolve(reference))
+                }
+            };
+            let Some(ty) = ty.and_then(|ty| self.flow_baseline(ty)) else {
+                continue;
+            };
+            if ty != TypeData::Unknown {
+                let range = value.range();
+                types.push((u32::from(range.start()), u32::from(range.end()), ty));
+            }
+        }
+        (!types.is_empty()).then(|| FlowComparedTypes::new(self.db, types.into_boxed_slice()))
     }
 
     /// Returns whether the return type of `callee` comes from an annotation.
@@ -2105,6 +2244,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             FlowEvolving::None,
             None,
             0,
+            None,
         );
         if !self.compares_with_unit_values(root, switch.guard, &mut solve) {
             return false;
@@ -2155,7 +2295,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }
                 Some(FlowGuard::Test {
                     subject,
-                    test: FlowTest::EnumMember(member),
+                    test: FlowTest::EnumMember { member, .. },
                     ..
                 }) if *subject == solve.subject => {
                     if self.enum_member_value(*member).is_none() {
@@ -2396,6 +2536,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 input.evolving(db),
                 input.calls(db),
                 input.ends(db),
+                input.compared(db),
             ),
         )?;
         Some(
@@ -2629,10 +2770,12 @@ impl<'db> ResolutionCtx<'db, '_> {
                         | FlowTest::Nullish
                         | FlowTest::Typeof(_)
                         | FlowTest::Null
-                        | FlowTest::Literal(_)
+                        | FlowTest::Literal { .. }
                         | FlowTest::Undefined { .. }
-                        | FlowTest::EnumMember(_)
-                        | FlowTest::Imported { .. } => ty,
+                        | FlowTest::EnumMember { .. }
+                        | FlowTest::Imported { .. }
+                        | FlowTest::Compared { .. }
+                        | FlowTest::ComparedReceiver { .. } => ty,
                     };
                     solve.properties.insert((index, ty), narrowed);
                     return Some(narrowed);
@@ -3126,44 +3269,78 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     /// Returns the predicate that `test` applies.
     ///
+    /// A comparison with a unit value narrows as by that value, strictly or
+    /// loosely ([`NarrowingPredicate::new_equality`]). A comparison by a
+    /// declared type narrows by the type in the solve's key, and so does a
+    /// comparison with an imported variable that holds no unit value when the
+    /// key has its type. The test of a receiver of such a comparison's
+    /// optional chain applies only when that type excludes `undefined`, and,
+    /// for a loose comparison, `null`.
+    ///
     /// Returns `None` for a call to a type-guard function, an `in` test, and an
-    /// `instanceof` test, which have no predicate. Also returns `None` for a
-    /// comparison with an imported variable or an enum member that holds no
-    /// unit value, or, with loose equality, that holds a unit value other than
-    /// `null` or `undefined`, because such a comparison narrows nothing.
+    /// `instanceof` test, which have no predicate, and for a comparison with a
+    /// value that has neither a unit value nor a type in the key, because such
+    /// a comparison narrows nothing.
     fn test_predicate(
         &mut self,
         test: FlowTest,
         solve: &mut GuardSolve<'db>,
     ) -> Option<NarrowingPredicate<'db>> {
+        let db = self.db;
         Some(match test {
             FlowTest::Truthy => NarrowingPredicate::Truthy,
             FlowTest::Nullish => NarrowingPredicate::Nullish,
             FlowTest::Typeof(kind) => NarrowingPredicate::Typeof(kind),
             FlowTest::Null => NarrowingPredicate::Literal(TypeData::Null),
-            FlowTest::Literal(range) => {
-                let reference = self.js_info.raw_expressions.get(&range)?.clone();
-                NarrowingPredicate::Literal(self.resolve(&reference))
+            FlowTest::Literal { value, strict } => {
+                let reference = self.js_info.raw_expressions.get(&value)?.clone();
+                unit_predicate(self.resolve(&reference), strict)
             }
             FlowTest::Undefined { strict: true } => {
                 NarrowingPredicate::Literal(TypeData::Undefined)
             }
             FlowTest::Undefined { strict: false } => NarrowingPredicate::Nullish,
-            FlowTest::EnumMember(member) => {
-                NarrowingPredicate::Literal(self.enum_member_value(member)?)
+            FlowTest::EnumMember { member, strict } => {
+                unit_predicate(self.enum_member_value(member)?, strict)
             }
             FlowTest::Imported {
                 binding,
                 member,
                 strict,
-            } => {
-                match (self.imported_value(binding, member, solve)?, strict) {
-                    (value, true) => NarrowingPredicate::Literal(value),
-                    (TypeData::Null | TypeData::Undefined, false) => NarrowingPredicate::Nullish,
-                    // Loose equality with any other value doesn't narrow the
-                    // subject, as loose equality with a literal doesn't.
-                    (_, false) => return None,
+            } => match self.imported_value(binding, member, solve) {
+                Some(value) => unit_predicate(value, strict),
+                None if member.is_none() => {
+                    NarrowingPredicate::new_equality(db, solve.compared_type(db, binding)?, strict)
                 }
+                None => return None,
+            },
+            FlowTest::Compared { value, strict } => {
+                NarrowingPredicate::new_equality(db, solve.compared_type(db, value)?, strict)
+            }
+            FlowTest::ComparedReceiver { value, strict } => {
+                let compared = solve.compared_type(db, value)?;
+                let nullish = narrow_type(
+                    db,
+                    compared,
+                    NarrowingPredicate::Nullish,
+                    true,
+                    self.narrowing_resolver(),
+                );
+                let excluded = if strict {
+                    narrow_type(
+                        db,
+                        nullish,
+                        NarrowingPredicate::Literal(TypeData::Undefined),
+                        true,
+                        self.narrowing_resolver(),
+                    )
+                } else {
+                    nullish
+                };
+                if excluded != TypeData::NeverKeyword {
+                    return None;
+                }
+                NarrowingPredicate::Nullish
             }
             FlowTest::Predicate { .. }
             | FlowTest::In(_)
@@ -4295,6 +4472,7 @@ mod tests {
             captures: Default::default(),
             calls: Box::default(),
             subject_calls: Default::default(),
+            subject_compared: Default::default(),
             ending_calls: Box::default(),
             called: Box::default(),
         };

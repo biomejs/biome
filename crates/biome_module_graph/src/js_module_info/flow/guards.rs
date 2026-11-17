@@ -180,31 +180,63 @@ pub(crate) enum FlowTest {
     Typeof(TypeofKind),
     /// Strict equality with `null`.
     Null,
-    /// Strict equality with the value of the expression at this range, whose
-    /// collected type is a primitive literal type. The expression is a literal
-    /// such as `"a"` or `1`, `-1`, `+1`, or a template literal without
-    /// substitutions. It is written in the comparison or as the initializer of
-    /// a `const` that the comparison names.
-    Literal(TextRange),
+    /// Equality, strict (`===`) or loose (`==`), with the value of the
+    /// expression at `value`, whose collected type is a primitive literal
+    /// type. The expression is a literal such as `"a"` or `1`, `-1`, `+1`, or
+    /// a template literal without substitutions. It is written in the
+    /// comparison or as the initializer of a `const` that the comparison
+    /// names.
+    Literal {
+        value: TextRange,
+        strict: bool,
+    },
     /// Equality with `undefined`; loose equality also matches `null`.
     Undefined {
         strict: bool,
     },
-    /// Strict equality with the member of an enum that this module declares
-    /// whose name is at this range. The member's collected type is the
+    /// Equality, strict or loose, with the member of an enum that this module
+    /// declares whose name is at `member`. The member's collected type is the
     /// literal type of its value when collection computes the value, and the
     /// test narrows nothing otherwise.
-    EnumMember(TextRange),
-    /// Equality with the value of the imported variable declared at
-    /// `binding`, or, when `member` is the range of a member's name, as `A`
-    /// in `E.A`, with that member of the enum that the variable imports.
-    /// Inference reads that value in the module that declares the variable,
-    /// and the test narrows nothing when the value isn't a unit value. With
-    /// loose equality (`strict` false), the test narrows only when the value
-    /// is `null` or `undefined`, and then matches both.
+    EnumMember {
+        member: TextRange,
+        strict: bool,
+    },
+    /// Equality, strict or loose, with the value of the imported variable
+    /// declared at `binding`, or, when `member` is the range of a member's
+    /// name, as `A` in `E.A`, with that member of the enum that the variable
+    /// imports. Inference reads that value in the module that declares the
+    /// variable. When the value isn't a unit value, a variable whose
+    /// declaration has an explicit type narrows by that type, as
+    /// [`Self::Compared`] does, and the test narrows nothing otherwise.
     Imported {
         binding: TextRange,
         member: Option<TextRange>,
+        strict: bool,
+    },
+    /// Equality, strict or loose, with the value of the expression at
+    /// `value`, which isn't a unit value, by the value's declared type. The
+    /// expression is a variable or a parameter declared with a type
+    /// annotation, a property path that starts at one, or an `as const`
+    /// expression, whose declared type TypeScript gives it too.
+    ///
+    /// TypeScript narrows by the value's narrowed type at the comparison.
+    /// The declared type is never narrower, so the true branch keeps at least
+    /// TypeScript's members, and the false branch narrows only when the
+    /// declared type is a single unit type, whose narrowed type is that value
+    /// too.
+    Compared {
+        value: TextRange,
+        strict: bool,
+    },
+    /// The receiver of an optional chain whose end a [`Self::Compared`] test
+    /// finds equal to the value at `value`: a test that the receiver is
+    /// nullish, which applies only when the value's declared type excludes
+    /// `undefined`, and, for a loose comparison, `null`. Only the branch where
+    /// the receiver is not nullish applies, as in `x?.v === y` with
+    /// `y: string`.
+    ComparedReceiver {
+        value: TextRange,
         strict: bool,
     },
     /// A call to the type-guard function declared at `function`. Its type
@@ -256,11 +288,66 @@ impl FlowTest {
             Self::Truthy
             | Self::Nullish
             | Self::Null
-            | Self::Literal(_)
+            | Self::Literal { .. }
             | Self::Undefined { .. }
-            | Self::EnumMember(_)
+            | Self::EnumMember { .. }
             | Self::Imported { .. }
+            | Self::Compared { .. }
+            | Self::ComparedReceiver { .. }
             | Self::In(_) => false,
+        }
+    }
+
+    /// Returns the value whose declared type inference resolves before the
+    /// test applies: the expression of a [`Self::Compared`] or
+    /// [`Self::ComparedReceiver`] test, or the variable that a
+    /// [`Self::Imported`] test without a member compares with, which narrows
+    /// by its declared type when it holds no unit value.
+    pub(crate) fn compared_value(self) -> Option<FlowComparedValue> {
+        match self {
+            Self::Compared { value, .. } | Self::ComparedReceiver { value, .. } => {
+                Some(FlowComparedValue::Expression(value))
+            }
+            Self::Imported {
+                binding,
+                member: None,
+                ..
+            } => Some(FlowComparedValue::Import(binding)),
+            Self::Truthy
+            | Self::Nullish
+            | Self::Typeof(_)
+            | Self::Null
+            | Self::Literal { .. }
+            | Self::Undefined { .. }
+            | Self::EnumMember { .. }
+            | Self::Imported { .. }
+            | Self::Predicate { .. }
+            | Self::In(_)
+            | Self::Instanceof(_)
+            | Self::PrivateName { .. }
+            | Self::Constructor(_) => None,
+        }
+    }
+}
+
+/// A value that a comparison narrows by its declared type, which inference
+/// resolves in the context that reads the narrowed subject.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum FlowComparedValue {
+    /// The expression at this range, typed without narrowing.
+    Expression(TextRange),
+    /// The variable that the import declared at this range binds, typed by
+    /// the declaration that it names when that declaration has an explicit
+    /// type.
+    Import(TextRange),
+}
+
+impl FlowComparedValue {
+    /// Returns the range that identifies the value in the solve: the range of
+    /// the expression or of the import.
+    pub(crate) fn range(self) -> TextRange {
+        match self {
+            Self::Expression(range) | Self::Import(range) => range,
         }
     }
 }
@@ -1216,9 +1303,9 @@ pub(super) fn is_unit_case(
         comparison_step(&discriminant, &test, true, true, model, &mut remaining),
         Some(ConditionStep::Guard {
             guard: SyntaxGuard::Null
-                | SyntaxGuard::Literal(_)
+                | SyntaxGuard::Literal { .. }
                 | SyntaxGuard::Undefined { .. }
-                | SyntaxGuard::EnumMember(_)
+                | SyntaxGuard::EnumMember { .. }
                 | SyntaxGuard::Imported { .. }
                 | SyntaxGuard::Typeof(_),
             ..
@@ -1254,8 +1341,8 @@ pub(super) struct SwitchCase<'a> {
 ///
 /// Returns `None` when the case narrows nothing: for a
 /// [`SwitchKind::Opaque`] statement, a case that fails to match and isn't
-/// boolean, and a case test that isn't a unit value, such as an enum member
-/// or a variable with a type annotation. TypeScript narrows by both of those.
+/// boolean, and a case test that isn't a unit value, such as a call or a
+/// variable with a type annotation. TypeScript narrows by both of those.
 pub(super) fn decompose_switch_case(
     case: SwitchCase,
     model: &SemanticModel,
@@ -1326,19 +1413,25 @@ pub(super) fn decompose_switch_case(
 
 /// Returns whether every value of `expression` that is truthy is `true`, so
 /// that a case of `switch (true)` whose test is `expression` fails to match
-/// only when the test is falsy.
+/// only when the test is falsy. See [`is_boolean_when`].
+fn is_boolean_valued(expression: &AnyJsExpression, remaining: &mut usize) -> bool {
+    is_boolean_when(expression, true, remaining)
+}
+
+/// Returns whether every value of `expression` that is truthy, when `truthy`
+/// is true, or falsy otherwise, is the boolean `truthy`.
 ///
 /// This holds for comparisons, `instanceof`, `in`, `!`, calls, and these in
-/// parentheses, for `a && b` when it holds for `b`, and for `a || b` when it
-/// holds for both. A call counts because only a call to a type-guard
-/// function narrows, and such a function returns a boolean. A falsy `a`
-/// makes `a && b` give `a`, which is never `true`, so `a` need not be a
-/// boolean.
+/// parentheses, which give booleans. A call counts because only a call to a
+/// type-guard function narrows, and such a function returns a boolean.
+/// `a && b` gives `a` when `a` is falsy and `b` otherwise, so its truthy
+/// values are those of `b` and its falsy values those of both. `a || b`
+/// gives `a` when `a` is truthy and `b` otherwise, the other way around.
 #[expect(
     clippy::wildcard_enum_match_arm,
-    reason = "Other expressions may give a truthy value other than `true`."
+    reason = "Other expressions may give a value other than a boolean."
 )]
-fn is_boolean_valued(expression: &AnyJsExpression, remaining: &mut usize) -> bool {
+fn is_boolean_when(expression: &AnyJsExpression, truthy: bool, remaining: &mut usize) -> bool {
     let Some(left) = remaining.checked_sub(1) else {
         return false;
     };
@@ -1366,20 +1459,22 @@ fn is_boolean_valued(expression: &AnyJsExpression, remaining: &mut usize) -> boo
         AnyJsExpression::JsUnaryExpression(unary) => {
             unary.operator().ok() == Some(JsUnaryOperator::LogicalNot)
         }
-        AnyJsExpression::JsLogicalExpression(logical) => match logical.operator() {
-            Ok(JsLogicalOperator::LogicalAnd) => logical
+        AnyJsExpression::JsLogicalExpression(logical) => {
+            // Whether the left operand also gives such values: the falsy
+            // ones of `&&` and the truthy ones of `||`.
+            let both = match logical.operator() {
+                Ok(JsLogicalOperator::LogicalAnd) => !truthy,
+                Ok(JsLogicalOperator::LogicalOr) => truthy,
+                Ok(JsLogicalOperator::NullishCoalescing) | Err(_) => return false,
+            };
+            logical
                 .right()
-                .is_ok_and(|right| is_boolean_valued(&right, remaining)),
-            Ok(JsLogicalOperator::LogicalOr) => {
-                logical
-                    .left()
-                    .is_ok_and(|left| is_boolean_valued(&left, remaining))
-                    && logical
-                        .right()
-                        .is_ok_and(|right| is_boolean_valued(&right, remaining))
-            }
-            Ok(JsLogicalOperator::NullishCoalescing) | Err(_) => false,
-        },
+                .is_ok_and(|right| is_boolean_when(&right, truthy, remaining))
+                && (!both
+                    || logical
+                        .left()
+                        .is_ok_and(|left| is_boolean_when(&left, truthy, remaining)))
+        }
         _ => false,
     }
 }
@@ -1646,15 +1741,68 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
                     sequential,
                 }
             }
+            ConditionStep::Boolean {
+                operand,
+                outcome: assumed,
+                assumption,
+                test,
+            } => {
+                let Some(test) = test else {
+                    return if assumption.holds(&operand, &mut self.remaining) {
+                        self.guard(operand, assumed, depth + 1)
+                    } else {
+                        self.push(FlowGuard::Keep)
+                    };
+                };
+                let left = self.step_guard(*test, outcome, depth);
+                let Some(initializer) = self
+                    .alias_initializer(&operand)
+                    .filter(|initializer| assumption.holds(initializer, &mut self.remaining))
+                else {
+                    return left;
+                };
+                self.initializers.push(initializer.clone());
+                self.aliases += 1;
+                let right = self.guard(initializer, assumed, depth + 1);
+                self.aliases -= 1;
+                FlowGuard::Both {
+                    left,
+                    right,
+                    sequential: true,
+                }
+            }
+            ConditionStep::Both { left, right } => {
+                // A subject compared with itself, as in `x === x`, learns
+                // nothing.
+                if let (
+                    ConditionStep::Guard { operand: first, .. },
+                    ConditionStep::Guard {
+                        operand: second, ..
+                    },
+                ) = (left.as_ref(), right.as_ref())
+                    && subject_of(first, self.model, self.subjects).is_some_and(|subject| {
+                        subject_of(second, self.model, self.subjects) == Some(subject)
+                    })
+                {
+                    return self.push(FlowGuard::Keep);
+                }
+                let left = self.step_guard(*left, outcome, depth);
+                let right = self.step_guard(*right, outcome, depth);
+                FlowGuard::Both {
+                    left,
+                    right,
+                    sequential: true,
+                }
+            }
         };
         self.push(guard)
     }
 
     /// Returns the guard for `guard` applied to `operand`: a runtime test of
-    /// `operand` when it is a subject and `guard` is not
-    /// [`SyntaxGuard::LooseLiteral`]. When `receivers` holds, the guard first
-    /// tests that each receiver of the optional chain around `operand` is not
-    /// nullish.
+    /// `operand` when it is a subject. When `receivers` holds, the guard
+    /// first tests that each receiver of the optional chain around `operand`
+    /// is not nullish, which a comparison by a declared type tests only when
+    /// that type excludes `undefined` ([`FlowTest::ComparedReceiver`]).
     ///
     /// Returns [`FlowGuard::Keep`] when the chain around `operand` starts at a
     /// parenthesized optional chain, as in `(o?.v)?.w`, and when finding its
@@ -1668,15 +1816,24 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
         positive: bool,
         receivers: bool,
     ) -> FlowGuard {
+        // The receivers of a chain whose end equals a value typed by its
+        // declaration are not nullish only when that type excludes
+        // `undefined`, which inference decides.
+        let receiver_test = match guard {
+            SyntaxGuard::Compared { value, strict } => FlowTest::ComparedReceiver { value, strict },
+            _ => FlowTest::Nullish,
+        };
         let test = match guard {
             SyntaxGuard::Truthy => Some(FlowTest::Truthy),
             SyntaxGuard::Nullish => Some(FlowTest::Nullish),
             SyntaxGuard::Typeof(kind) => Some(FlowTest::Typeof(kind)),
             SyntaxGuard::Null => Some(FlowTest::Null),
-            SyntaxGuard::Literal(range) => Some(FlowTest::Literal(range)),
-            SyntaxGuard::LooseLiteral => None,
+            SyntaxGuard::Literal { value, strict } => Some(FlowTest::Literal { value, strict }),
             SyntaxGuard::Undefined { strict } => Some(FlowTest::Undefined { strict }),
-            SyntaxGuard::EnumMember(member) => Some(FlowTest::EnumMember(member)),
+            SyntaxGuard::EnumMember { member, strict } => {
+                Some(FlowTest::EnumMember { member, strict })
+            }
+            SyntaxGuard::Compared { value, strict } => Some(FlowTest::Compared { value, strict }),
             SyntaxGuard::Imported {
                 binding,
                 member,
@@ -1761,7 +1918,7 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
             }
         }
         if receivers {
-            self.receiver_tests(chain, guard)
+            self.receiver_tests_by(chain, guard, receiver_test)
         } else {
             guard
         }
@@ -2185,6 +2342,17 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     /// receiver, which `receivers` lists last, is tested first. A receiver
     /// that is not a subject adds no test.
     fn receiver_tests(&mut self, receivers: Vec<AnyJsExpression>, guard: FlowGuard) -> FlowGuard {
+        self.receiver_tests_by(receivers, guard, FlowTest::Nullish)
+    }
+
+    /// Returns `guard` preceded by the negative `test` of each of
+    /// `receivers`, as [`Self::receiver_tests`] does with [`FlowTest::Nullish`].
+    fn receiver_tests_by(
+        &mut self,
+        receivers: Vec<AnyJsExpression>,
+        guard: FlowGuard,
+        test: FlowTest,
+    ) -> FlowGuard {
         let mut guard = guard;
         for receiver in receivers {
             let Some(subject) = subject_of(&receiver, self.model, self.subjects) else {
@@ -2197,7 +2365,7 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
             self.mentions.push(subject);
             let test = FlowGuard::Test {
                 subject,
-                test: FlowTest::Nullish,
+                test,
                 positive: false,
             };
             let test = self.applied_when(test, testable);
@@ -2221,6 +2389,14 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     /// Returns `None` once [`MAX_INLINED_ALIASES`] initializers enclose
     /// `operand`, as TypeScript stops there too.
     fn aliased_condition(&mut self, operand: &AnyJsExpression) -> Option<AnyJsExpression> {
+        let initializer = self.alias_initializer(operand)?;
+        self.initializers.push(initializer.clone());
+        Some(initializer)
+    }
+
+    /// Returns the initializer that [`Self::aliased_condition`] inlines for
+    /// `operand`, without recording it.
+    fn alias_initializer(&self, operand: &AnyJsExpression) -> Option<AnyJsExpression> {
         if self.aliases >= MAX_INLINED_ALIASES {
             return None;
         }
@@ -2237,9 +2413,7 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
         else {
             return None;
         };
-        let initializer = const_initializer(&declarator)?;
-        self.initializers.push(initializer.clone());
-        Some(initializer)
+        const_initializer(&declarator)
     }
 
     /// Returns whether `subject` is a variable whose annotation is `any`, or
@@ -2482,24 +2656,32 @@ enum SyntaxGuard {
     Typeof(TypeofKind),
     /// Strict equality with `null`.
     Null,
-    /// Strict equality with the value at this range, a
-    /// [`UnitValue::Literal`].
-    Literal(TextRange),
-    /// Loose equality with a value of a primitive literal type, which narrows
-    /// only the receivers of an optional chain.
-    LooseLiteral,
+    /// Equality with the value at `value`, a [`UnitValue::Literal`].
+    Literal {
+        value: TextRange,
+        strict: bool,
+    },
     /// Equality with `undefined`, the global variable or the value of `void`.
     Undefined {
         strict: bool,
     },
-    /// Strict equality with the member of an enum whose name is at this
-    /// range, a [`UnitValue::EnumMember`].
-    EnumMember(TextRange),
+    /// Equality with the member of an enum whose name is at `member`, a
+    /// [`UnitValue::EnumMember`].
+    EnumMember {
+        member: TextRange,
+        strict: bool,
+    },
     /// Equality with the imported variable declared at `binding`, or with
     /// its member whose name is at `member`, a [`UnitValue::Imported`].
     Imported {
         binding: TextRange,
         member: Option<TextRange>,
+        strict: bool,
+    },
+    /// Equality with the value at `value`, which a [`FlowTest::Compared`]
+    /// test narrows by its declared type.
+    Compared {
+        value: TextRange,
         strict: bool,
     },
     /// A call to a type-guard function, with the test it applies, a
@@ -2547,6 +2729,50 @@ enum ConditionStep {
         outcome: FlowOutcome,
         sequential: bool,
     },
+    /// A comparison of `operand` with a boolean literal, as in
+    /// `(typeof x === "string") === true`, which holds where `operand` has
+    /// `outcome` when `assumption` holds for it. `test` is the comparison's
+    /// own test of `operand` when `operand` is a variable, whose aliased
+    /// condition the comparison also inlines.
+    Boolean {
+        operand: AnyJsExpression,
+        outcome: FlowOutcome,
+        assumption: BooleanAssumption,
+        test: Option<Box<Self>>,
+    },
+    /// Two steps that hold together, as the tests of both operands of a
+    /// comparison of two subjects do.
+    Both {
+        left: Box<Self>,
+        right: Box<Self>,
+    },
+}
+
+/// What a comparison with a boolean literal requires of the compared
+/// expression before it decomposes the expression as truthy or falsy.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum BooleanAssumption {
+    /// Nothing: `c === true` and `c == true` hold only for a truthy `c`, and
+    /// `c === false` only for a falsy `c`.
+    Always,
+    /// Every truthy value of the expression is `true`
+    /// ([`is_boolean_valued`]), so a value that isn't `true`, or that
+    /// loosely equals `false`, is falsy.
+    TruthyIsTrue,
+    /// Every falsy value of the expression is `false`, so a value that isn't
+    /// `false` is truthy.
+    FalsyIsFalse,
+}
+
+impl BooleanAssumption {
+    /// Returns whether the assumption holds for `expression`.
+    fn holds(self, expression: &AnyJsExpression, remaining: &mut usize) -> bool {
+        match self {
+            Self::Always => true,
+            Self::TruthyIsTrue => is_boolean_when(expression, true, remaining),
+            Self::FalsyIsFalse => is_boolean_when(expression, false, remaining),
+        }
+    }
 }
 
 /// Decomposes one condition step, spending work on the step and on removing
@@ -2678,16 +2904,244 @@ fn condition_step(
                     return Some(step);
                 }
             }
+            for (operand, value) in [(&left, &right), (&right, &left)] {
+                if let Some(step) =
+                    boolean_comparison_step(operand, value, strict, equal, model, remaining)?
+                {
+                    return Some(step);
+                }
+            }
             for (subject, value) in [(&left, &right), (&right, &left)] {
                 let step = comparison_step(subject, value, strict, equal, model, remaining)?;
                 if !matches!(step, ConditionStep::Unsupported) {
                     return Some(step);
                 }
             }
-            Some(ConditionStep::Unsupported)
+            typed_comparison_step(&left, &right, strict, equal, model, remaining)
         }
         _ => Some(ConditionStep::Unsupported),
     }
+}
+
+/// Decomposes the comparison of `operand` with `value`, both without
+/// parentheses, when `value` is the literal `true` or `false`, as
+/// `operand === value` when `strict` is true and as `operand == value`
+/// otherwise, assuming that they are equal when `positive` is true. Returns
+/// `Some(None)` when `value` is no boolean literal or `operand` has the shape
+/// of a subject other than a variable, which [`comparison_step`] tests as a
+/// unit value.
+///
+/// As in TypeScript, the comparison holds where `operand` is truthy or falsy,
+/// so `(typeof x === "string") === true` narrows `x` as
+/// `typeof x === "string"` does. Each branch assumes only what the comparison
+/// shows:
+///
+/// - `=== true` and `== true` hold only for a truthy value, and `=== false`
+///   only for `false`, so these branches decompose `operand` unconditionally.
+/// - A value that isn't `true`, or that loosely equals `false`, is falsy only
+///   when every truthy value of `operand` is `true`.
+/// - A value that isn't `false`, strictly or loosely, is truthy only when
+///   every falsy value of `operand` is `false`.
+///
+/// TypeScript assumes the outcome in every branch, which is wrong for an
+/// object, which is truthy but not `true`, and for `0` or `null`, which are
+/// falsy but not `false`.
+///
+/// A variable is tested as a unit value, and when it names an aliased
+/// condition, the comparison also inlines its initializer under the same
+/// rules. TypeScript narrows nothing when `operand`, without parentheses and
+/// `!`, is `&&`, `||`, or `??`, so such a comparison is
+/// [`ConditionStep::Unsupported`].
+fn boolean_comparison_step(
+    operand: &AnyJsExpression,
+    value: &AnyJsExpression,
+    strict: bool,
+    positive: bool,
+    model: &SemanticModel,
+    remaining: &mut usize,
+) -> Option<Option<ConditionStep>> {
+    let AnyJsExpression::AnyJsLiteralExpression(
+        AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
+    ) = value
+    else {
+        return Some(None);
+    };
+    let is_true = literal.value_token().ok()?.kind() == T![true];
+    let (outcome, assumption) = match (strict, is_true, positive) {
+        (_, true, true) => (FlowOutcome::Truthy, BooleanAssumption::Always),
+        (_, true, false) | (false, false, true) => {
+            (FlowOutcome::Falsy, BooleanAssumption::TruthyIsTrue)
+        }
+        (true, false, true) => (FlowOutcome::Falsy, BooleanAssumption::Always),
+        (_, false, false) => (FlowOutcome::Truthy, BooleanAssumption::FalsyIsFalse),
+    };
+    if let AnyJsExpression::JsIdentifierExpression(_) = operand {
+        let test = comparison_step(operand, value, strict, positive, model, remaining)?;
+        return Some(Some(ConditionStep::Boolean {
+            operand: operand.clone(),
+            outcome,
+            assumption,
+            test: Some(Box::new(test)),
+        }));
+    }
+    if has_operand_shape(operand)? {
+        return Some(None);
+    }
+    let mut inner = operand.clone();
+    loop {
+        *remaining = remaining.checked_sub(1)?;
+        inner = match omit_parentheses(inner, remaining)? {
+            AnyJsExpression::JsUnaryExpression(unary)
+                if unary.operator().ok()? == JsUnaryOperator::LogicalNot =>
+            {
+                unary.argument().ok()?
+            }
+            AnyJsExpression::JsLogicalExpression(_) => {
+                return Some(Some(ConditionStep::Unsupported));
+            }
+            _ => break,
+        };
+    }
+    Some(Some(ConditionStep::Boolean {
+        operand: operand.clone(),
+        outcome,
+        assumption,
+        test: None,
+    }))
+}
+
+/// Decomposes the comparison of `left` with `right`, both without
+/// parentheses, by the declared type of each operand, when neither is a unit
+/// value: each operand that can be the operand of a comparison is tested
+/// when the other has a declared type that TypeScript gives it too
+/// ([`has_declared_type`]). Both tests hold together, so `x === y` tests `x`
+/// by the declared type of `y` and `y` by that of `x`. The comparison is
+/// strict when `strict` is true, and the operands are equal when `positive`
+/// is true.
+///
+/// Returns [`ConditionStep::Unsupported`] when no operand is tested, as for
+/// a value whose type Biome infers, because an inferred type can be
+/// narrower than TypeScript's.
+fn typed_comparison_step(
+    left: &AnyJsExpression,
+    right: &AnyJsExpression,
+    strict: bool,
+    positive: bool,
+    model: &SemanticModel,
+    remaining: &mut usize,
+) -> Option<ConditionStep> {
+    let mut steps = Vec::new();
+    for (operand, value) in [(left, right), (right, left)] {
+        if has_operand_shape(operand)? && has_declared_type(value, model, remaining)? {
+            steps.push(ConditionStep::Guard {
+                operand: operand.clone(),
+                guard: SyntaxGuard::Compared {
+                    value: value.range(),
+                    strict,
+                },
+                positive,
+                // Where the operands are equal, the receivers of an optional
+                // chain are not nullish when the value can't be `undefined`,
+                // which inference decides from its type.
+                receivers: positive,
+            });
+        }
+    }
+    let right = steps.pop();
+    Some(match (steps.pop(), right) {
+        (Some(left), Some(right)) => ConditionStep::Both {
+            left: Box::new(left),
+            right: Box::new(right),
+        },
+        (None, Some(step)) | (Some(step), None) => step,
+        (None, None) => ConditionStep::Unsupported,
+    })
+}
+
+/// Returns whether `value`, an expression without parentheses, has a declared
+/// type that TypeScript gives it too: a variable or a parameter declared with
+/// a type annotation, a property path that starts at one, such as `o.k` with
+/// `o: { k: "a" }`, or an `as const` expression.
+///
+/// Other values, such as a variable without an annotation or a call, have
+/// types that Biome infers, which can be narrower than TypeScript's. So does
+/// a variable named `undefined` or `globalThis`, whose reads inference types
+/// as the globals of those names whatever they refer to. An imported
+/// variable is a unit value of its own ([`UnitValue::Imported`]), whose
+/// declaration inference checks. Returns `None` when the syntax is
+/// incomplete or the walk runs out of work.
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Only annotated variables, their paths, and `as const` have declared types."
+)]
+fn has_declared_type(
+    value: &AnyJsExpression,
+    model: &SemanticModel,
+    remaining: &mut usize,
+) -> Option<bool> {
+    match value {
+        AnyJsExpression::TsAsExpression(expression) => {
+            return Some(expression.ty().is_ok_and(|ty| is_const_type(&ty)));
+        }
+        AnyJsExpression::TsTypeAssertionExpression(expression) => {
+            return Some(expression.ty().is_ok_and(|ty| is_const_type(&ty)));
+        }
+        _ => {}
+    }
+    if !has_subject_shape(value)? {
+        return Some(false);
+    }
+    let mut current = value.clone();
+    loop {
+        *remaining = remaining.checked_sub(1)?;
+        current = match current {
+            AnyJsExpression::JsIdentifierExpression(identifier) => {
+                let reference = identifier.name().ok()?;
+                if matches!(
+                    reference.value_token().ok()?.text_trimmed(),
+                    "undefined" | "globalThis"
+                ) {
+                    return Some(false);
+                }
+                let Some(binding) = model.binding(&reference) else {
+                    return Some(false);
+                };
+                return Some(match binding.tree().declaration() {
+                    Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) => {
+                        declarator.variable_annotation().is_some()
+                    }
+                    Some(AnyJsBindingDeclaration::JsFormalParameter(parameter)) => {
+                        parameter.type_annotation().is_some()
+                    }
+                    Some(AnyJsBindingDeclaration::JsRestParameter(parameter)) => {
+                        parameter.type_annotation().is_some()
+                    }
+                    _ => false,
+                });
+            }
+            AnyJsExpression::JsStaticMemberExpression(member) => {
+                omit_parentheses(member.object().ok()?, remaining)?
+            }
+            AnyJsExpression::JsComputedMemberExpression(member) => {
+                omit_parentheses(member.object().ok()?, remaining)?
+            }
+            _ => return Some(false),
+        };
+    }
+}
+
+/// Returns whether `ty` is the `const` of an `as const` or `<const>`
+/// assertion.
+fn is_const_type(ty: &AnyTsType) -> bool {
+    let Some(reference) = ty.as_ts_reference_type() else {
+        return false;
+    };
+    reference.type_arguments().is_none()
+        && reference.name().is_ok_and(|name| {
+            name.as_js_reference_identifier()
+                .and_then(|identifier| identifier.value_token().ok())
+                .is_some_and(|token| token.text_trimmed() == "const")
+        })
 }
 
 /// Decomposes the comparison of `subject` with `value`, both without
@@ -2699,9 +3153,8 @@ fn condition_step(
 /// is a unit value, such as `"a"`, `-1`, `null`, `undefined`, or a `const`
 /// that holds one. When `subject` is `typeof` of such an operand, the operand
 /// is tested when `value` names a kind of value, as `"string"` and
-/// `` `string` `` do. Other comparisons are [`ConditionStep::Unsupported`],
-/// because TypeScript narrows by a value whose type is not a unit type only
-/// through the comparability of types, which Biome doesn't check.
+/// `` `string` `` do. Other comparisons are [`ConditionStep::Unsupported`]
+/// here; [`typed_comparison_step`] tests them by declared types.
 #[expect(
     clippy::wildcard_enum_match_arm,
     reason = "Comparisons only support subjects and primitive guards."
@@ -2726,10 +3179,9 @@ fn comparison_step(
                 (UnitValue::Null, true) => SyntaxGuard::Null,
                 (UnitValue::Null, false) => SyntaxGuard::Nullish,
                 (UnitValue::Undefined, strict) => SyntaxGuard::Undefined { strict },
-                (UnitValue::Literal(range), true) => SyntaxGuard::Literal(range),
-                (UnitValue::EnumMember(member), true) => SyntaxGuard::EnumMember(member),
-                (UnitValue::Literal(_) | UnitValue::EnumMember(_), false) => {
-                    SyntaxGuard::LooseLiteral
+                (UnitValue::Literal(value), strict) => SyntaxGuard::Literal { value, strict },
+                (UnitValue::EnumMember(member), strict) => {
+                    SyntaxGuard::EnumMember { member, strict }
                 }
                 (UnitValue::Imported { binding, member }, strict) => SyntaxGuard::Imported {
                     binding,
@@ -2783,14 +3235,14 @@ fn comparison_step(
     // tell whether an imported value is `undefined`, `null`, or a primitive
     // literal, so a comparison with one narrows no receiver.
     let receivers = match &guard {
-        SyntaxGuard::Null
-        | SyntaxGuard::Literal(_)
-        | SyntaxGuard::EnumMember(_)
-        | SyntaxGuard::LooseLiteral => positive,
+        SyntaxGuard::Null | SyntaxGuard::Literal { .. } | SyntaxGuard::EnumMember { .. } => {
+            positive
+        }
         SyntaxGuard::Nullish | SyntaxGuard::Undefined { .. } => !positive,
         SyntaxGuard::Typeof(kind) => positive == (*kind != TypeofKind::Undefined),
         SyntaxGuard::Truthy
         | SyntaxGuard::Imported { .. }
+        | SyntaxGuard::Compared { .. }
         | SyntaxGuard::Predicate(_)
         | SyntaxGuard::In(_)
         | SyntaxGuard::Instanceof(_)
@@ -3875,7 +4327,7 @@ mod tests {
         assert!(matches!(
             main,
             FlowGuard::Test {
-                test: FlowTest::Literal(_),
+                test: FlowTest::Literal { strict: true, .. },
                 positive: true,
                 ..
             }
@@ -3884,13 +4336,21 @@ mod tests {
             mentioned_names("value?.a === 1", FlowOutcome::Truthy),
             ["value.a", "value"]
         );
-        // Loose equality with a literal tests only the receivers.
+        // Loose equality with a literal tests the end of the chain and its
+        // receivers too.
         let (receivers, main) = receiver_names("value?.a == 1", FlowOutcome::Truthy);
         assert_eq!(receivers, ["value"]);
-        assert_eq!(main, FlowGuard::Keep);
+        assert!(matches!(
+            main,
+            FlowGuard::Test {
+                test: FlowTest::Literal { strict: false, .. },
+                positive: true,
+                ..
+            }
+        ));
         assert_eq!(
             mentioned_names("value?.a == 1", FlowOutcome::Truthy),
-            ["value"]
+            ["value.a", "value"]
         );
         // A call of a function that the module doesn't declare is a call
         // point, whose effect inference resolves.
@@ -3927,9 +4387,7 @@ mod tests {
                 Truthy,
                 vec!["value[kind]", "other[ok]"],
             ),
-            // Loose equality with a literal narrows only the receivers of an
-            // optional chain.
-            ("value.kind == 'a'", Truthy, vec![]),
+            ("value.kind == 'a'", Truthy, vec!["value[kind]"]),
             ("value.kind === other", Truthy, vec![]),
             ("value[other] === 'a'", Truthy, vec![]),
             ("this.kind === 'a'", Truthy, vec![]),
@@ -4318,7 +4776,12 @@ mod tests {
             ("const k = (value?.a)?.kind;", "k === 'a'", Truthy, vec![]),
             ("const k = this.kind;", "k === 'a'", Truthy, vec![]),
             ("const k = value;", "k === 'a'", Truthy, vec![]),
-            ("const k = value.kind;", "k == 'a'", Truthy, vec![]),
+            (
+                "const k = value.kind;",
+                "k == 'a'",
+                Truthy,
+                vec!["value[kind]~"],
+            ),
             ("const k = value.kind;", "check(k)", Truthy, vec![]),
             (
                 "const { kind = 'a' } = value;",
@@ -4871,7 +5334,7 @@ mod tests {
             ("value.a === other.b", FlowOutcome::Truthy, vec![]),
             ("check(value)", FlowOutcome::Truthy, vec![]),
             ("value === other", FlowOutcome::Truthy, vec![]),
-            ("value == 1", FlowOutcome::Truthy, vec![]),
+            ("value == 1", FlowOutcome::Truthy, vec!["value"]),
             ("value === -1", FlowOutcome::Truthy, vec!["value"]),
             ("value === -(1)", FlowOutcome::Truthy, vec![]),
             ("value === void 0", FlowOutcome::Truthy, vec!["value"]),
@@ -4889,9 +5352,10 @@ mod tests {
     /// names the value that its first runtime test compares with: `=` and the
     /// source of a [`FlowTest::Literal`], `null`, `undefined`, `==null` or
     /// `==undefined` for loose equality, `enum` and the name of a
-    /// [`FlowTest::EnumMember`], `import` and the imported name, with `==`
-    /// before the name for loose equality and the member's name after it, or
-    /// `none` when the condition tests nothing.
+    /// [`FlowTest::EnumMember`], `import` and the imported name, with the
+    /// member's name after it, `typed` and the source of a
+    /// [`FlowTest::Compared`], or `none` when the condition tests nothing.
+    /// `==` before the source marks loose equality.
     fn compared_value(program: &str) -> String {
         let decomposed = decomposed_last(program, FlowOutcome::Truthy);
         let source = decomposed.model.root().syntax().to_string();
@@ -4900,12 +5364,19 @@ mod tests {
             _ => None,
         });
         match test {
-            Some(FlowTest::Literal(range)) => format!("={}", &source[range]),
+            Some(FlowTest::Literal { value, strict }) => {
+                format!("{}{}", if strict { "=" } else { "==" }, &source[value])
+            }
+            Some(FlowTest::Compared { value, strict }) => {
+                format!("typed {}{}", if strict { "" } else { "==" }, &source[value])
+            }
             Some(FlowTest::Null) => "null".to_owned(),
             Some(FlowTest::Nullish) => "==null".to_owned(),
             Some(FlowTest::Undefined { strict: true }) => "undefined".to_owned(),
             Some(FlowTest::Undefined { strict: false }) => "==undefined".to_owned(),
-            Some(FlowTest::EnumMember(member)) => format!("enum {}", &source[member]),
+            Some(FlowTest::EnumMember { member, strict }) => {
+                format!("enum {}{}", if strict { "" } else { "==" }, &source[member])
+            }
             Some(FlowTest::Imported {
                 binding,
                 member,
@@ -5005,7 +5476,7 @@ mod tests {
             ("let K = 'a'; function f(x) { if (x === K) {} }", "none"),
             (
                 "const K: 'a' = 'a'; function f(x) { if (x === K) {} }",
-                "none",
+                "typed K",
             ),
             (
                 "const K = 'a' as const; function f(x) { if (x === K) {} }",
@@ -5015,7 +5486,21 @@ mod tests {
                 "const { K } = { K: 'a' }; function f(x) { if (x === K) {} }",
                 "none",
             ),
-            ("function f(x, k: 'a') { if (x === k) {} }", "none"),
+            ("function f(x, k: 'a') { if (x === k) {} }", "typed k"),
+            (
+                "function f(x, o: { k: 'a' }) { if (x == o.k) {} }",
+                "typed ==o.k",
+            ),
+            (
+                "function f(x) { if (x === ('a' as const)) {} }",
+                "typed 'a' as const",
+            ),
+            (
+                "function f(x) { const k = 'a' as const; if (x === k) {} }",
+                "none",
+            ),
+            ("function f(x, k = 'a') { if (x === k) {} }", "none"),
+            ("function f(x) { if (x === f()) {} }", "none"),
             (
                 "import * as N from './k'; function f(x) { if (x === N) {} }",
                 "none",
@@ -5032,8 +5517,11 @@ mod tests {
                 "const O = { A: 1 }; function f(x) { if (x === O.A) {} }",
                 "none",
             ),
-            // Loose equality narrows only receivers of an optional chain.
-            ("enum E { A } function f(x) { if (x == E.A) {} }", "none"),
+            (
+                "enum E { A } function f(x) { if (x == E.A) {} }",
+                "enum ==A",
+            ),
+            ("function f(x) { if (x == 'a') {} }", "=='a'"),
             ("function f(x) { if (x === NaN) {} }", "none"),
             (
                 "const A = B; const B = A; function f(x) { if (x === A) {} }",
@@ -5082,9 +5570,14 @@ mod tests {
             ("((ok))", Truthy, vec!["ok", "value", "other"]),
             ("ok && other", Truthy, vec!["ok", "value", "other", "other"]),
             ("ok || other", Falsy, vec!["ok", "value", "other", "other"]),
-            // Only truthiness tests the alias as a condition.
+            // Only truthiness and comparisons with booleans test the alias
+            // as a condition, the latter only where the comparison shows its
+            // outcome.
             ("ok", FlowOutcome::Nullish, vec!["ok"]),
-            ("ok === true", Truthy, vec!["ok"]),
+            ("ok === true", Truthy, vec!["ok", "value", "other"]),
+            ("ok !== false", Truthy, vec!["ok"]),
+            ("ok === false", Truthy, vec!["ok", "value", "other"]),
+            ("ok === 1", Truthy, vec!["ok"]),
         ] {
             assert_eq!(
                 mentioned_names_in(&format!("{alias} if ({test}) {{}} }}"), outcome),

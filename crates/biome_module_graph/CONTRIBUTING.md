@@ -289,14 +289,16 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
 - `guards.rs` decomposes every condition into guards on subjects, combined
   the way `!`, `&&`, and `||` combine them. For example,
   `typeof value === "string"` becomes a runtime test of `value`, and
-  `o.v !== null` a runtime test of `o.v`. A comparison tests one operand
-  only when the other is a unit value (`unit_value`), whose type has a
-  single value: a literal, `void`, `-1`, a template literal without
-  substitutions, a member of an enum read as `E.A` or `E["A"]`, or a
-  `const` without a type annotation whose initializer is one, which the
-  decomposer follows through the semantic model. The test then names that
-  literal by its range, so inference resolves it as it resolves a literal
-  written in the comparison. A member of an enum that the module declares
+  `o.v !== null` a runtime test of `o.v`. A comparison, strict or loose,
+  tests one operand by the other when the other is a unit value
+  (`unit_value`), whose type has a single value: a literal, `void`, `-1`, a
+  template literal without substitutions, a member of an enum read as
+  `E.A` or `E["A"]`, or a `const` without a type annotation whose
+  initializer is one, which the decomposer follows through the semantic
+  model. The test then names that literal by its range, so inference
+  resolves it as it resolves a literal written in the comparison, and
+  records whether the comparison is strict: loose equality narrows by
+  `NarrowingPredicate::LooseLiteral`, as `NARROWING.md` describes. A member of an enum that the module declares
   is a test of the member's name (`FlowTest::EnumMember`), and inference
   reads the member's collected type, the literal type of its value when
   collection computes the value, and narrows nothing otherwise. A value that
@@ -305,9 +307,30 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   (`FlowTest::Imported`, with the range of the member's name): collection
   can't see the module that declares it, so inference follows the import
   with `find_export_origin` and applies the same rules to the declaration
-  there, reading syntax and raw types without resolving a type. Other
-  values, such as variables with a type annotation and calls, give no test,
-  because Biome may infer their types narrower than TypeScript does. When the tested operand is part of
+  there, reading syntax and raw types without resolving a type. When
+  neither operand is a unit value, each operand is tested by the declared
+  type of the other (`FlowTest::Compared`, `typed_comparison_step`), but
+  only when TypeScript gives the other that type too (`has_declared_type`):
+  a variable or a parameter with a type annotation, a property path that
+  starts at one, or an `as const` expression. An import that holds no unit
+  value narrows by its declared type in the same way when the declaration
+  that it names has an explicit type, which inference checks. Other values,
+  such as variables without a type annotation and calls, give no test,
+  because Biome may infer their types narrower than TypeScript does, and a
+  subject compared with itself gives `Keep`. Where the operands of such a
+  comparison are equal, each receiver of an optional chain around the
+  tested operand gets a `FlowTest::ComparedReceiver` test, which applies
+  only when the value's declared type excludes `undefined`. A comparison of
+  an expression with `true` or `false` that is not a subject, as
+  `(typeof x === "string") === true`, decomposes the expression as truthy
+  or falsy (`boolean_comparison_step`), and a comparison of an aliased
+  condition with one also inlines its initializer. A branch where the
+  expression isn't `false` assumes it truthy only when every falsy value
+  that it gives is `false`, and a branch where it isn't `true`, or loosely
+  equals `false`, assumes it falsy only when every truthy value is `true`
+  (`BooleanAssumption`, `is_boolean_when`). An expression that, without
+  parentheses and `!`, is `&&`, `||`, or `??` decomposes into nothing, as
+  TypeScript adds no condition for it. When the tested operand is part of
   an optional chain and the test's result shows that the operand is not
   `undefined`, as the true branch of `x?.y === 1` does, the guard also tests
   each receiver of the chain that is a subject as not nullish, such as `x`
@@ -705,6 +728,18 @@ solve. Lookups share them per root and subject through
 with `undefined`, and a read where `undefined` remains although the declared
 type lacks it gets the declared type.
 
+A comparison by a declared type narrows by the types of its values, which
+collection lists per subject in `RootFlow::subject_compared` from the tests
+of the subject and the property guards on it. The reading context resolves
+them without narrowing (`resolve_compared_types`), so the narrowed type of
+one operand never feeds the other's and no compared type depends on a solve,
+and the solve's key carries them (`FlowSubjectRootInput::compared`, `None`
+without such a comparison, so other subjects share their solves). Lookups
+share them per root and subject through `infer_flow_compared_types`. The
+solve narrows by `NarrowingPredicate::new_equality`, which compares with a
+unit value as with a literal and with any other type by
+`NarrowingPredicate::Equal`, whose false branch narrows nothing.
+
 A read of a subject in `RootFlow::evolving` has its own solve, selected by
 `FlowSubjectRootInput::evolving` (`narrow_evolving`), whose state is the type
 that the writes give, from `undefined` at the start, not the declared type
@@ -731,11 +766,12 @@ without a solve.
 
 Complete module inference evaluates flow candidates in its own resolution
 context instead of through `infer_flow_expression_type`,
-`infer_flow_binding_baseline`, and `infer_flow_assigned_types`. When it
-reaches expressions, that context has resolved every raw type of the module,
-so a variable's declared type, the member access that gives a property path
-its declared type, and the assigned types (kept in `LocalFlow`) read types
-it already holds, while the queries would resolve them again in a fresh
+`infer_flow_binding_baseline`, `infer_flow_assigned_types`, and
+`infer_flow_compared_types`. When it reaches expressions, that context has
+resolved every raw type of the module, so a variable's declared type, the
+member access that gives a property path its declared type, and the
+assigned and compared types (kept in `LocalFlow`) read types it already
+holds, while the queries would resolve them again in a fresh
 context. It still solves through `infer_flow_subject_states` and
 `infer_flow_subject_type`. Cycle
 fallback and the import-depth fallback read imports differently from the

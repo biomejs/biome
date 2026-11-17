@@ -57,7 +57,7 @@ pub(crate) use builder::{
 };
 pub(crate) use expressions::AnyFlowExpression;
 pub(crate) use guards::{
-    FlowGuard, FlowTest, UnitValue, binding_unit_value, enum_member_name_range,
+    FlowComparedValue, FlowGuard, FlowTest, UnitValue, binding_unit_value, enum_member_name_range,
     enum_member_unit_value, guard_signature, member_key,
 };
 pub(crate) use scanner::FlowRootScanner;
@@ -696,6 +696,12 @@ pub(crate) struct RootFlow {
     /// argument or a receiver, and the statement calls whose arguments,
     /// decomposed as conditions that hold, test it.
     pub(crate) subject_calls: FxHashMap<FlowSubjectId, Box<[u32]>>,
+    /// For each subject with reads, the values that its comparisons narrow
+    /// it by their declared types ([`FlowTest::compared_value`]), as the
+    /// tests of the subject and the property guards on it name them, sorted
+    /// by range. Inference resolves their types and passes them to the
+    /// solve.
+    pub(crate) subject_compared: FxHashMap<FlowSubjectId, Box<[FlowComparedValue]>>,
     /// The indices in [`Self::calls`] of the first [`MAX_ENDING_CALLS`]
     /// statement calls, which may end the path, sorted. Bit `i` of a mask in
     /// [`Self::called`] stands for the call at index `i` here. Empty when no
@@ -989,6 +995,15 @@ impl RootFlow {
         self.subject_calls.get(&subject).map_or(&[], |calls| calls)
     }
 
+    /// Returns the values that the comparisons of `subject` narrow it by
+    /// their declared types, as [`Self::subject_compared`] lists them, or an
+    /// empty slice when there are none.
+    pub(crate) fn subject_compared(&self, subject: FlowSubjectId) -> &[FlowComparedValue] {
+        self.subject_compared
+            .get(&subject)
+            .map_or(&[], |values| values)
+    }
+
     /// Returns whether the subject `prefix` is a proper prefix of the path
     /// of `subject`, as `o` and `o.v` are of `o.v.w`.
     pub(crate) fn is_proper_prefix(
@@ -1078,6 +1093,7 @@ pub(crate) fn build_reachability(
             captures: FxHashMap::default(),
             calls: calls.into_iter().map(|(call, _)| call).collect(),
             subject_calls: FxHashMap::default(),
+            subject_compared: FxHashMap::default(),
             ending_calls: Box::default(),
             called: Box::default(),
         },
@@ -2179,6 +2195,35 @@ impl RootCollector<'_> {
                 .into_iter()
                 .map(|(subject, calls)| (subject, calls.into_boxed_slice()))
                 .collect();
+            let mut subject_compared: FxHashMap<FlowSubjectId, Vec<FlowComparedValue>> =
+                FxHashMap::default();
+            for guard in &guards {
+                let (subject, test) = match guard {
+                    FlowGuard::Test { subject, test, .. } => (subject, test),
+                    FlowGuard::Property { object, test, .. } => (object, test),
+                    FlowGuard::Keep
+                    | FlowGuard::Incomplete
+                    | FlowGuard::ReadonlyPath(_)
+                    | FlowGuard::Both { .. }
+                    | FlowGuard::Bypass { .. }
+                    | FlowGuard::Unmatched(_)
+                    | FlowGuard::Call { .. } => continue,
+                };
+                if let Some(value) = test.compared_value()
+                    && read_points.contains_key(subject)
+                {
+                    subject_compared.entry(*subject).or_default().push(value);
+                }
+            }
+            let subject_compared = subject_compared
+                .into_iter()
+                .map(|(subject, mut values)| {
+                    values
+                        .sort_unstable_by_key(|value| (value.range().start(), value.range().end()));
+                    values.dedup();
+                    (subject, values.into_boxed_slice())
+                })
+                .collect();
             flow.roots.push(RootFlow {
                 nodes: nodes.into_boxed_slice(),
                 guards: guards.into_boxed_slice(),
@@ -2201,6 +2246,7 @@ impl RootCollector<'_> {
                 captures: FxHashMap::default(),
                 calls: calls.into_iter().map(|(call, _)| call).collect(),
                 subject_calls,
+                subject_compared,
                 ending_calls,
                 called,
             });

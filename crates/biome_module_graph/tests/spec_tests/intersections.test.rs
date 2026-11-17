@@ -1111,6 +1111,119 @@ mod narrowing {
     }
 
     // TypeScript 7.0.2 (`tsc --strict`) gives each read the type in the
+    // comment of its line, in order, except where a comment says otherwise.
+    // Loose equality and equality with a value of a declared type keep
+    // `T & string` and `T & boolean` whole or remove them, as strict equality
+    // with a literal does, except that the members of `T & boolean`,
+    // `(T & true) | (T & false)`, narrow one by one. Biome gives its unknown
+    // type to a read where TypeScript gives `never`.
+    #[test]
+    fn loose_and_typed_equality_keep_intersections_with_type_parameters() {
+        let source = format!(
+            "{DECLARATIONS}{}",
+            r#"
+            function r1<T>(x: T) { if (typeof x === "boolean") { if (x == true) p([/*r1*/x] as const); else p([/*r1Else*/x] as const); } } // T & true; T & false
+            function r2<T>(x: T) { if (typeof x === "boolean") { if (x == 1) p([/*r2*/x] as const); else p([/*r2Else*/x] as const); } } // never; T & boolean
+            function r3<T>(x: T) { if (typeof x === "boolean") { if (x == "a") p([/*r3*/x] as const); else p([/*r3Else*/x] as const); } } // never; T & boolean
+            function r4<T>(x: T) { if (typeof x === "boolean") { if (x == null) p([/*r4*/x] as const); else p([/*r4Else*/x] as const); } } // never; T & boolean
+            function r5<T>(x: T) { if (typeof x === "string") { if (x == true) p([/*r5*/x] as const); else p([/*r5Else*/x] as const); } } // never; T & string
+            function r6<T>(x: T) { if (typeof x === "string") { if (x == 1) p([/*r6*/x] as const); else p([/*r6Else*/x] as const); } } // never; T & string
+            function r7<T>(x: T) { if (typeof x === "string") { if (x == "a") p([/*r7*/x] as const); else p([/*r7Else*/x] as const); } } // T & string; T & string
+            function r8<T>(x: T) { if (typeof x === "string") { if (x == null) p([/*r8*/x] as const); else p([/*r8Else*/x] as const); } } // never; T & string
+            function r9<T>(x: T, y: true) { if (typeof x === "boolean") { if (x === y) p([/*r9*/x] as const); else p([/*r9Else*/x] as const); } } // T & true; T & false
+            function r10<T>(x: T, y: boolean) { if (typeof x === "boolean") { if (x === y) p([/*r10*/x] as const); else p([/*r10Else*/x] as const); } } // T & boolean; T & boolean
+            function r11<T>(x: T, y: "a" | "b") { if (typeof x === "boolean") { if (x === y) p([/*r11*/x] as const); else p([/*r11Else*/x] as const); } } // never; T & boolean
+            function r12<T>(x: T, y: true) { if (typeof x === "string") { if (x === y) p([/*r12*/x] as const); else p([/*r12Else*/x] as const); } } // never; T & string
+            function r13<T>(x: T, y: boolean) { if (typeof x === "string") { if (x === y) p([/*r13*/x] as const); else p([/*r13Else*/x] as const); } } // never; T & string
+            function r14<T>(x: T, y: "a" | "b") { if (typeof x === "string") { if (x === y) p([/*r14*/x] as const); else p([/*r14Else*/x] as const); } } // T & string; T & string
+            function r15<T>(x: T) { if (typeof x === "boolean") { if (x == 0) p([/*r15*/x] as const); else p([/*r15Else*/x] as const); } } // never; T & boolean
+            function r16<T>(x: T) { if (typeof x === "boolean") { if (x != true) p([/*r16*/x] as const); else p([/*r16Else*/x] as const); } } // T & false; T & true
+            function r17<T>(x: T, y: true) { if (typeof x === "boolean") { if (x == y) p([/*r17*/x] as const); else p([/*r17Else*/x] as const); } } // T & true; T & false
+            function r18<T>(x: T, y: "a" | "b") { if (typeof x === "boolean") { if (x == y) p([/*r18*/x] as const); else p([/*r18Else*/x] as const); } } // never; T & boolean
+            function r19<T>(x: T, y: true) { if (typeof x === "string") { if (x == y) p([/*r19*/x] as const); else p([/*r19Else*/x] as const); } } // never; T & string
+            function r20<T>(x: T, y: "a" | "b") { if (typeof x === "string") { if (x == y) p([/*r20*/x] as const); else p([/*r20Else*/x] as const); } } // T & string; T & string
+            function r21<T>(x: T, y: { a: 1 }) { if (typeof x === "string") { if (x === y) p([/*r21*/x] as const); else p([/*r21Else*/x] as const); } } // never; T & string
+            function r22<T>(x: T, y: { a: 1 }) { if (typeof x === "boolean") { if (x === y) p([/*r22*/x] as const); else p([/*r22Else*/x] as const); } } // never; T & boolean
+            function r23<T>(x: T) { if (typeof x === "string") { if (x === 1) p([/*r23*/x] as const); else p([/*r23Else*/x] as const); } } // never; T & string
+            function r24<T>(x: T) { if (typeof x === "boolean") { if (x === "a") p([/*r24*/x] as const); else p([/*r24Else*/x] as const); } } // never; T & boolean
+            "#
+        );
+        assert_reads(
+            &source,
+            &[
+                ("r1", "x", &["instanceof T & bool: true"]),
+                ("r1Else", "x", &["instanceof T & bool: false"]),
+                // Deliberate choice: loose equality keeps primitive types of
+                // other kinds, so Biome keeps the intersection, which is wider.
+                ("r2", "x", &["instanceof T & boolean"]),
+                ("r2Else", "x", &["instanceof T & boolean"]),
+                // Deliberate choice: loose equality keeps primitive types of
+                // other kinds, so Biome keeps the intersection, which is wider.
+                ("r3", "x", &["instanceof T & boolean"]),
+                ("r3Else", "x", &["instanceof T & boolean"]),
+                ("r4", "x", &["Unknown"]),
+                ("r4Else", "x", &["instanceof T & boolean"]),
+                // Deliberate choice: loose equality keeps primitive types of
+                // other kinds, so Biome keeps the intersection, which is wider.
+                ("r5", "x", &["instanceof T & string"]),
+                ("r5Else", "x", &["instanceof T & string"]),
+                // Deliberate choice: loose equality keeps primitive types of
+                // other kinds, so Biome keeps the intersection, which is wider.
+                ("r6", "x", &["instanceof T & string"]),
+                ("r6Else", "x", &["instanceof T & string"]),
+                ("r7", "x", &["instanceof T & string"]),
+                ("r7Else", "x", &["instanceof T & string"]),
+                ("r8", "x", &["Unknown"]),
+                ("r8Else", "x", &["instanceof T & string"]),
+                ("r9", "x", &["instanceof T & bool: true"]),
+                ("r9Else", "x", &["instanceof T & bool: false"]),
+                ("r10", "x", &["instanceof T & boolean"]),
+                ("r10Else", "x", &["instanceof T & boolean"]),
+                ("r11", "x", &["Unknown"]),
+                ("r11Else", "x", &["instanceof T & boolean"]),
+                ("r12", "x", &["Unknown"]),
+                ("r12Else", "x", &["instanceof T & string"]),
+                ("r13", "x", &["Unknown"]),
+                ("r13Else", "x", &["instanceof T & string"]),
+                ("r14", "x", &["instanceof T & string"]),
+                ("r14Else", "x", &["instanceof T & string"]),
+                // Deliberate choice: loose equality keeps primitive types of
+                // other kinds, so Biome keeps the intersection, which is wider.
+                ("r15", "x", &["instanceof T & boolean"]),
+                ("r15Else", "x", &["instanceof T & boolean"]),
+                ("r16", "x", &["instanceof T & bool: false"]),
+                ("r16Else", "x", &["instanceof T & bool: true"]),
+                ("r17", "x", &["instanceof T & bool: true"]),
+                ("r17Else", "x", &["instanceof T & bool: false"]),
+                ("r18", "x", &["Unknown"]),
+                ("r18Else", "x", &["instanceof T & boolean"]),
+                // Deliberate choice: loose equality keeps primitive types of
+                // other kinds, so Biome keeps the intersection, which is wider.
+                ("r19", "x", &["instanceof T & string"]),
+                ("r19Else", "x", &["instanceof T & string"]),
+                ("r20", "x", &["instanceof T & string"]),
+                ("r20Else", "x", &["instanceof T & string"]),
+                // Biome keeps a primitive compared with a value of an object
+                // type literal, such as `{ a: 1 }`, which it takes every value
+                // except `null` and `undefined` to possibly have, so it keeps
+                // the intersection, which is wider.
+                ("r21", "x", &["instanceof T & string"]),
+                ("r21Else", "x", &["instanceof T & string"]),
+                // Biome keeps a primitive compared with a value of an object
+                // type literal, such as `{ a: 1 }`, which it takes every value
+                // except `null` and `undefined` to possibly have, so it keeps
+                // the intersection, which is wider.
+                ("r22", "x", &["instanceof T & boolean"]),
+                ("r22Else", "x", &["instanceof T & boolean"]),
+                ("r23", "x", &["Unknown"]),
+                ("r23Else", "x", &["instanceof T & string"]),
+                ("r24", "x", &["Unknown"]),
+                ("r24Else", "x", &["instanceof T & boolean"]),
+            ],
+        );
+    }
+
+    // TypeScript 7.0.2 (`tsc --strict`) gives each read the type in the
     // comment of its line, in order. A `this is T` or `asserts this is T`
     // predicate whose target the class doesn't relate to gives the
     // intersection, which normalization merges into an instance of an

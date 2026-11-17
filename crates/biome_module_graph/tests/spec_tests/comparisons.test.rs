@@ -232,11 +232,13 @@ fn comparisons_with_negative_numbers_void_and_templates_narrow() {
 // TypeScript 7.0.2 (`tsc --strict`) keeps the declared type at every read up
 // to `e20f`, because none of the compared values has a unit type. `-(1)` and
 // `-(-1)` are `number`, `1 === 1` is `boolean`, a `typeof` expression is the
-// union of the kinds, and a `let` widens its literal. TypeScript narrows at
-// the other reads to `"a"`, `"a" | "b"`, and `"b" | "c" | null`, where Biome
-// keeps the declared type, which is wider. Biome doesn't compare with a
-// variable that has a type annotation, a call, `as const`, a template literal
-// with substitutions, or a literal with loose equality.
+// union of the kinds, and a `let` widens its literal. TypeScript gives every
+// other read the expected type, except `e22t`, `e23t`, and `e32t`, where it
+// gives `"a"` and Biome keeps the declared type, which is wider: Biome
+// doesn't compare with a call, a `const` that holds an `as const`
+// expression, or a template literal with substitutions, whose types it
+// infers. A variable with a type annotation narrows by its declared type, and
+// loose equality with a literal narrows the members of the literal's kind.
 #[test]
 fn comparisons_with_values_that_biome_does_not_compare_keep_the_type() {
     assert_reads(
@@ -275,22 +277,14 @@ fn comparisons_with_values_that_biome_does_not_compare_keep_the_type() {
             ("e19f", "x", &["string"]),
             ("e20t", "x", &["string: a", "string: b", "string: c"]),
             ("e20f", "x", &["string: a", "string: b", "string: c"]),
-            ("e21t", "x", &["string: a", "string: b", "string: c"]),
-            ("e21f", "x", &["string: a", "string: b", "string: c"]),
+            ("e21t", "x", &["string: a"]),
+            ("e21f", "x", &["string: b", "string: c"]),
             ("e22t", "x", &["string: a", "string: b", "string: c"]),
             ("e23t", "x", &["string: a", "string: b", "string: c"]),
-            ("e24t", "x", &["string: a", "string: b", "string: c"]),
-            ("e25t", "x", &["string: a", "string: b", "string: c"]),
-            (
-                "e29t",
-                "x",
-                &["null", "string: a", "string: b", "string: c"],
-            ),
-            (
-                "e29f",
-                "x",
-                &["null", "string: a", "string: b", "string: c"],
-            ),
+            ("e24t", "x", &["string: a"]),
+            ("e25t", "x", &["string: a", "string: b"]),
+            ("e29t", "x", &["string: a"]),
+            ("e29f", "x", &["null", "string: b", "string: c"]),
             ("e32t", "x", &["string: a", "string: b", "string: c"]),
         ],
     );
@@ -373,12 +367,13 @@ fn comparisons_with_imported_constants_narrow() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) narrows `x` to `"a"` and `"b" | "c"` in
-// `i9` and `i11`, and to `"c"` and `"a" | "b"` in `i10`. Biome keeps the
-// declared type, which is wider, because it doesn't compare with an imported
-// variable that has a type annotation, an export written as an expression, or
-// a member of a namespace import.
+// `i9` and `i11`, and to `"c"` and `"a" | "b"` in `i10`. An imported variable
+// with a type annotation narrows by its declared type, as a local one does.
+// Biome keeps the declared type in `i10` and `i11`, which is wider, because
+// it doesn't compare with an export written as an expression or a member of
+// a namespace import.
 #[test]
-fn comparisons_with_other_imported_values_keep_the_type() {
+fn comparisons_with_imported_values_that_hold_no_unit_value() {
     assert_reads(
         r#"
         import D, { EA } from "./constants.ts";
@@ -388,8 +383,8 @@ fn comparisons_with_other_imported_values_keep_the_type() {
         function i11(x: ABC) { if (x === C.EK) /*i11t*/x; else /*i11f*/x; }
         "#,
         &[
-            ("i9t", "x", &["string: a", "string: b", "string: c"]),
-            ("i9f", "x", &["string: a", "string: b", "string: c"]),
+            ("i9t", "x", &["string: a"]),
+            ("i9f", "x", &["string: b", "string: c"]),
             ("i10t", "x", &["string: a", "string: b", "string: c"]),
             ("i10f", "x", &["string: a", "string: b", "string: c"]),
             ("i11t", "x", &["string: a", "string: b", "string: c"]),
@@ -460,9 +455,9 @@ fn comparisons_with_constants_that_a_condition_makes_impossible_narrow() {
 // chooses, so Biome types it as `number` and keeps the declared type of `d`,
 // where TypeScript gives `D.P`. At `e15f`, `G.C` has a value that Biome
 // doesn't compute, so `m` keeps `number`, where TypeScript gives
-// `G.B | G.C`. Loose `==` narrows only by `null` and `undefined`, so `s`
-// keeps its declared type at `e10t`, where TypeScript gives `S.A`. These are
-// wider. At `e16t`, the discriminant's annotation `E.A` reads as an instance
+// `G.B | G.C`. These are wider. Loose `==` narrows the members of the
+// member's kind as `===` does, so `s` is `"a"` at `e10t`, the value of
+// `S.A`. At `e16t`, the discriminant's annotation `E.A` reads as an instance
 // of `0`, which has the same values.
 #[test]
 fn comparisons_with_enum_members_narrow() {
@@ -503,7 +498,7 @@ fn comparisons_with_enum_members_narrow() {
             ("e6t", "d", &["number"]),
             ("e8t", "e", &["number: 1"]),
             ("e9t", "e", &["number: 0"]),
-            ("e10t", "s", &["null", "string: a", "string: b"]),
+            ("e10t", "s", &["string: a"]),
             ("e11t", "e", &["Unknown"]),
             ("e12t", "e", &["number: 0"]),
             ("e13t", "x", &["number: 1"]),
@@ -519,12 +514,10 @@ fn comparisons_with_enum_members_narrow() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below but `i5t` the
-// values of the expected type, displaying `EE.A` and `EE.B` at `i1t` and
-// `i1f`. A member of an imported enum narrows as a member of a local one,
-// also when a re-export or a `const` of another module holds it. Loose `==`
-// narrows only by `null` and `undefined`, so `x` keeps its declared type at
-// `i5t`, where TypeScript gives `"a"`, which is wider.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the values of the
+// expected type, displaying `EE.A` and `EE.B` at `i1t` and `i1f`. A member of
+// an imported enum narrows as a member of a local one, also when a re-export
+// or a `const` of another module holds it, and also with loose `==`.
 #[test]
 fn comparisons_with_members_of_imported_enums_narrow() {
     assert_reads(
@@ -545,7 +538,7 @@ fn comparisons_with_members_of_imported_enums_narrow() {
             ("i3f", "x", &["string: a", "string: b"]),
             ("i4t", "x", &["string: c"]),
             ("i4f", "x", &["string: a", "string: b"]),
-            ("i5t", "x", &["null", "string: a", "string: b", "string: c"]),
+            ("i5t", "x", &["string: a"]),
         ],
     );
 }
@@ -631,6 +624,310 @@ fn enums_have_the_types_of_their_values() {
             ("wf", "k.f", &["string"]),
             ("wro", "k.r", &["string: a"]),
             ("wr", "wr()", &["number"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment says otherwise. Loose `==` and `!=` with a literal
+// narrow the members of the literal's kind as `===` does and remove `null`
+// and `undefined`, and their false branch removes only the members strictly
+// equal to the literal, as in TypeScript.
+//
+// Deliberate choice: TypeScript narrows loose equality as strict equality,
+// which also removes members of other kinds that convert to the literal. Biome
+// keeps primitive types and object types of other kinds, and removes a
+// literal of another kind only when JavaScript's `==` is certainly false for
+// it, as for `"a"` with a number. So Biome is wider than TypeScript at `l3t`
+// (TS `1`), `l4t` (TS `"1"`), `l5t` (TS `0`), `l6t` (TS `true`), `l10t`
+// (TS `1n`), `l12t` (TS `1`), `l13t` (TS `true`), `l14t` (TS `"a"`), `l16t`
+// (TS `-1`), and `l20t` (TS `0`).
+#[test]
+fn loose_equality_with_literals_narrows_the_members_of_their_kind() {
+    assert_reads(
+        r#"
+        function l1(x: "a" | "b" | null) { if (x == "a") /*l1t*/x; else /*l1f*/x; }
+        function l2(x: "a" | "b" | null) { if (x != "a") /*l2t*/x; else /*l2f*/x; }
+        function l3(x: string | number) { if (x == 1) /*l3t*/x; else /*l3f*/x; }
+        function l4(x: string | number) { if (x == "1") /*l4t*/x; else /*l4f*/x; }
+        function l5(x: boolean | number) { if (x == 0) /*l5t*/x; else /*l5f*/x; }
+        function l6(x: boolean | string) { if (x == true) /*l6t*/x; else /*l6f*/x; }
+        function l7(x: 0 | 1 | "a") { if (x == 0) /*l7t*/x; else /*l7f*/x; }
+        function l8(x: string) { if (x == "a") /*l8t*/x; else /*l8f*/x; }
+        function l9(x: number | undefined) { if (x == 1) /*l9t*/x; else /*l9f*/x; }
+        function l10(x: bigint | number) { if (x == 1n) /*l10t*/x; else /*l10f*/x; }
+        function l11(x: "a" | 1 | true) { if (x == "a") /*l11t*/x; else /*l11f*/x; }
+        function l12(x: "1" | 1) { if (x == 1) /*l12t*/x; else /*l12f*/x; }
+        function l13(x: 1 | "x" | true) { if (x == true) /*l13t*/x; else /*l13f*/x; }
+        function l14(x: { a: 1 } | "a") { if (x == "a") /*l14t*/x; else /*l14f*/x; }
+        function l15(x: "a" | "b") { if ("a" == x) /*l15t*/x; }
+        function l16(x: string | number) { if (x == -1) /*l16t*/x; }
+        function l17(x: string | undefined) { if (x == `a`) /*l17t*/x; }
+        function l18(x: "a" | "b") { const K = "a"; if (x == K) /*l18t*/x; else /*l18f*/x; }
+        function l19(x: boolean | null) { if (x == false) /*l19t*/x; else /*l19f*/x; }
+        function l20(x: 0 | "" | false | null) { if (x == 0) /*l20t*/x; else /*l20f*/x; }
+        function l21(x: unknown) { if (x == "a") /*l21t*/x; else /*l21f*/x; }
+        function l22(x: "a" | "b" | null, s: "a" | "b") { if (x == s) /*l22t*/x; }
+        "#,
+        &[
+            ("l1t", "x", &["string: a"]),
+            ("l1f", "x", &["null", "string: b"]),
+            ("l2t", "x", &["null", "string: b"]),
+            ("l2f", "x", &["string: a"]),
+            ("l3t", "x", &["number: 1", "string"]),
+            ("l3f", "x", &["number", "string"]),
+            ("l4t", "x", &["number", "string: 1"]),
+            ("l4f", "x", &["number", "string"]),
+            ("l5t", "x", &["boolean", "number: 0"]),
+            ("l5f", "x", &["boolean", "number"]),
+            ("l6t", "x", &["bool: true", "string"]),
+            ("l6f", "x", &["bool: false", "string"]),
+            ("l7t", "x", &["number: 0"]),
+            ("l7f", "x", &["number: 1", "string: a"]),
+            ("l8t", "x", &["string: a"]),
+            ("l8f", "x", &["string"]),
+            ("l9t", "x", &["number: 1"]),
+            ("l9f", "x", &["number", "undefined"]),
+            ("l10t", "x", &["bigint: 1n", "number"]),
+            ("l10f", "x", &["BigInt", "number"]),
+            ("l11t", "x", &["string: a"]),
+            ("l11f", "x", &["bool: true", "number: 1"]),
+            ("l12t", "x", &["number: 1", "string: 1"]),
+            ("l12f", "x", &["string: 1"]),
+            ("l13t", "x", &["bool: true", "number: 1"]),
+            ("l13f", "x", &["number: 1", "string: x"]),
+            ("l14t", "x", &["[\"a\": number: 1]", "string: a"]),
+            ("l14f", "x", &["[\"a\": number: 1]"]),
+            ("l15t", "x", &["string: a"]),
+            ("l16t", "x", &["number: -1", "string"]),
+            ("l17t", "x", &["string: a"]),
+            ("l18t", "x", &["string: a"]),
+            ("l18f", "x", &["string: b"]),
+            ("l19t", "x", &["bool: false"]),
+            ("l19f", "x", &["bool: true", "null"]),
+            ("l20t", "x", &["bool: false", "number: 0", "string:"]),
+            ("l20f", "x", &["bool: false", "null", "string:"]),
+            ("l21t", "x", &["unknown"]),
+            ("l21f", "x", &["unknown"]),
+            ("l22t", "x", &["string: a", "string: b"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment says otherwise. A comparison with a value that is
+// not a unit value narrows by the value's declared type, when an annotation
+// or `as const` gives it: the true branch keeps the members that may equal a
+// value of that type and replaces a primitive type with its literals of that
+// kind, and the false branch narrows only by a single unit type. Both
+// operands of a comparison of two subjects narrow.
+//
+// TypeScript narrows by the value's narrowed type at the comparison, so it
+// gives `"b"` at `c11t`, where Biome keeps `"a" | "b"` from the declared type
+// of `y`, which is wider. Deliberate choice: loose equality keeps members of
+// other kinds, so Biome gives `string | number` at `c8t`, where TypeScript
+// gives `string`.
+#[test]
+fn comparisons_with_annotated_values_narrow_by_their_declared_types() {
+    assert_reads(
+        r#"
+        type Circle = { kind: "c"; r: number };
+        type Square = { kind: "s"; w: number };
+        function c1(x: string | number, y: "a") { if (x === y) /*c1t*/x; else /*c1f*/x; }
+        function c2(x: string | number, y: string) { if (x === y) /*c2t*/x; else /*c2f*/x; }
+        function c3(x: string | null, y: string) { if (x === y) { /*c3x*/x; /*c3y*/y; } }
+        function c4(x: string | undefined, y: string | null) { if (x === y) { /*c4x*/x; /*c4y*/y; } else /*c4f*/x; }
+        function c5(x: "a" | "b" | "c", y: "a" | "b") { if (x === y) /*c5t*/x; else /*c5f*/x; }
+        function c6(x: "a" | "b", y: "a" | "b") { if (x !== y) /*c6t*/x; else /*c6f*/x; }
+        function c7(x: string | number, y: "a" | 1) { if (x === y) /*c7t*/x; }
+        function c8(x: string | number, y: string | null) { if (x == y) /*c8t*/x; else /*c8f*/x; }
+        function c9(x: number | null, y: number) { if (x !== y) /*c9t*/x; else /*c9f*/x; }
+        function c10(x: "a" | "b", y: "a") { if (x !== y) /*c10t*/x; else /*c10f*/x; }
+        function c11(x: "a" | "b", y: "a" | "b") { if (y === "a") { if (x !== y) /*c11t*/x; } }
+        function c12(s: Circle | Square, k: "c") { if (s.kind === k) /*c12t*/s; else /*c12f*/s; }
+        function c13(x: string | number, o: { k: "a" }) { if (x === o.k) /*c13t*/x; }
+        function c14(x: { a: 1 } | null, y: { a: 1 }) { if (x === y) /*c14t*/x; }
+        function c15(x: string | number) { const k: "a" = "a"; if (x === k) /*c15t*/x; }
+        function c16(x: string | number) { if (x === ("a" as const)) /*c16t*/x; }
+        function c18(x: string | number, y: unknown) { if (x === y) { /*c18x*/x; /*c18y*/y; } }
+        function c19(x: number | null, y: number) { if (y === x) /*c19t*/x; }
+        function c20(x: "a" | "b", y: "a" | null) { if (x === y) /*c20t*/x; else /*c20f*/x; }
+        function c21(x: string | null, y: { length: number }) { if (x === y) /*c21t*/x; }
+        function c22(x: boolean | string, y: boolean) { if (x === y) /*c22t*/x; }
+        function c23(x: string | null, y: null) { if (x == y) /*c23t*/x; else /*c23f*/x; }
+        function c24(x: string | number, y: "a" | 1) { if (x == y) /*c24t*/x; }
+        "#,
+        &[
+            ("c1t", "x", &["string: a"]),
+            ("c1f", "x", &["number", "string"]),
+            ("c2t", "x", &["string"]),
+            ("c2f", "x", &["number", "string"]),
+            ("c3x", "x", &["string"]),
+            ("c3y", "y", &["string"]),
+            ("c4x", "x", &["string"]),
+            ("c4y", "y", &["string"]),
+            ("c4f", "x", &["string", "undefined"]),
+            ("c5t", "x", &["string: a", "string: b"]),
+            ("c5f", "x", &["string: a", "string: b", "string: c"]),
+            ("c6t", "x", &["string: a", "string: b"]),
+            ("c6f", "x", &["string: a", "string: b"]),
+            ("c7t", "x", &["number: 1", "string: a"]),
+            ("c8t", "x", &["number", "string"]),
+            ("c8f", "x", &["number", "string"]),
+            ("c9t", "x", &["null", "number"]),
+            ("c9f", "x", &["number"]),
+            ("c10t", "x", &["string: b"]),
+            ("c10f", "x", &["string: a"]),
+            ("c11t", "x", &["string: a", "string: b"]),
+            ("c12t", "s", &["[\"kind\": string: c, \"r\": number]"]),
+            ("c12f", "s", &["[\"kind\": string: s, \"w\": number]"]),
+            ("c13t", "x", &["string: a"]),
+            ("c14t", "x", &["[\"a\": number: 1]"]),
+            ("c15t", "x", &["string: a"]),
+            ("c16t", "x", &["string: a"]),
+            ("c18x", "x", &["number", "string"]),
+            ("c18y", "y", &["unknown"]),
+            ("c19t", "x", &["number"]),
+            ("c20t", "x", &["string: a"]),
+            ("c20f", "x", &["string: a", "string: b"]),
+            ("c21t", "x", &["string"]),
+            ("c22t", "x", &["boolean"]),
+            ("c23t", "x", &["null"]),
+            ("c23f", "x", &["string"]),
+            ("c24t", "x", &["number: 1", "string"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment says otherwise. A comparison of a condition with
+// `true` or `false` narrows as the condition does where it is truthy or
+// falsy, also through an aliased condition, and narrows nothing when the
+// condition, without parentheses and `!`, is `&&` or `||`, as in TypeScript.
+//
+// Deliberate choice: TypeScript takes a condition that isn't `false` as
+// truthy, and one that isn't `true` as falsy. Biome does so only when every
+// falsy value of the condition is `false`, or every truthy value is `true`.
+// So it keeps `string | null` at `d1t` (TS `string`), where `x` is `null`
+// when it is `null`, because `null !== false`, and `{ a: 1 } | null` at
+// `d3f` (TS `{ a: 1 }`). It also keeps `string | null` at `d4t` (TS
+// `string`), where `y` is a boolean, which the syntax doesn't show.
+#[test]
+fn comparisons_with_booleans_narrow_by_the_compared_condition() {
+    assert_reads(
+        r#"
+        function b1(x: string | number) { if ((typeof x === "string") === true) /*b1t*/x; else /*b1f*/x; }
+        function b2(x: string | number) { if ((typeof x === "string") == false) /*b2t*/x; }
+        function b3(x: string | null) { if ((x !== null) !== false) /*b3t*/x; }
+        function b4(x: string | null) { const ok = x !== null; if (ok === true) /*b4t*/x; }
+        function b5(x: string | number | null) { if ((x !== null && x !== 1) === false) /*b5t*/x; else /*b5f*/x; }
+        function b6(x: string | null) { if ((x && x.length > 0) !== false) /*b6t*/x; }
+        function b7(x: string | null) { if ((x !== null) != false) /*b7t*/x; else /*b7f*/x; }
+        function b8(x: string | null) { if ((x !== null) != true) /*b8t*/x; else /*b8f*/x; }
+        function b9(x: string | null) { if (true === (x !== null)) /*b9t*/x; else /*b9f*/x; }
+        function b10(x: string | null, f: (v: unknown) => v is string) { if (f(x) === true) /*b10t*/x; }
+        function b11(x: string | null) { const ok = x !== null; if (ok !== false) /*b11t*/x; else /*b11f*/x; }
+        function b12(x: string | null) { const ok = x !== null; if (ok == false) /*b12t*/x; }
+        function b13(x: string | null) { if (!(x !== null && x.length > 0) === true) /*b13t*/x; }
+        function b14(x: string | number) { if (!(typeof x === "string") === true) /*b14t*/x; }
+        function b15(x: string | null) { const ok = x !== null && x.length > 0; if (ok === false) /*b15t*/x; else /*b15f*/x; }
+        function b16(x: string | null) { const ok = x !== null && x.length > 0; if (ok !== true) /*b16t*/x; else /*b16f*/x; }
+        function d1(x: string | null) { const ok = x && x.length > 0; if (ok !== false) /*d1t*/x; else /*d1f*/x; }
+        function d3(x: { a: 1 } | null) { const ok = x && x.a === 1; if (ok === false) /*d3t*/x; else /*d3f*/x; }
+        function d4(x: string | null, y: boolean) { const ok = y && x !== null; if (ok !== false) /*d4t*/x; }
+        "#,
+        &[
+            ("b1t", "x", &["string"]),
+            ("b1f", "x", &["number"]),
+            ("b2t", "x", &["number"]),
+            ("b3t", "x", &["string"]),
+            ("b4t", "x", &["string"]),
+            ("b5t", "x", &["null", "number", "string"]),
+            ("b5f", "x", &["null", "number", "string"]),
+            ("b6t", "x", &["null", "string"]),
+            ("b7t", "x", &["string"]),
+            ("b7f", "x", &["null"]),
+            ("b8t", "x", &["null"]),
+            ("b8f", "x", &["string"]),
+            ("b9t", "x", &["string"]),
+            ("b9f", "x", &["null"]),
+            ("b10t", "x", &["string"]),
+            ("b11t", "x", &["string"]),
+            ("b11f", "x", &["null"]),
+            ("b12t", "x", &["null"]),
+            ("b13t", "x", &["null", "string"]),
+            ("b14t", "x", &["number"]),
+            ("b15t", "x", &["null", "string"]),
+            ("b15f", "x", &["string"]),
+            ("b16t", "x", &["null", "string"]),
+            ("b16f", "x", &["string"]),
+            ("d1t", "x", &["null", "string"]),
+            ("d1f", "x", &["null", "string"]),
+            ("d3t", "x", &["[\"a\": number: 1]", "null"]),
+            ("d3f", "x", &["[\"a\": number: 1]", "null"]),
+            ("d4t", "x", &["null", "string"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment says otherwise. A subject compared with itself
+// learns nothing. A value whose type Biome infers, such as a variable without
+// a type annotation, `let y = "a" as const`, or a call, narrows nothing,
+// because Biome may infer it narrower than TypeScript does: TypeScript gives
+// `"a"` at `s3t` and `s4t`, where Biome keeps the declared type, which is
+// wider. Where `x?.v` equals a value whose declared type excludes
+// `undefined`, and `null` for a loose comparison, `x` is not nullish.
+#[test]
+fn comparisons_by_declared_types_need_an_annotation() {
+    assert_reads(
+        r#"
+        declare function make(): "a";
+        function s1(x: string | null) { if (x === x) /*s1t*/x; else /*s1f*/x; }
+        function s2(o: { v: string | null }) { if (o.v === o.v) /*s2t*/o.v; }
+        function s3(x: "a" | "b") { let y = "a" as const; if (x === y) /*s3t*/x; }
+        function s4(x: string | number) { const y = make(); if (x === y) /*s4t*/x; }
+        function s5(x: string | number, y = "a") { if (x === y) /*s5t*/x; }
+        function r1(x: { v: string } | undefined, y: string) { if (x?.v === y) /*r1t*/x; else /*r1f*/x; }
+        function r2(x: { v: string } | undefined, y: string | undefined) { if (x?.v === y) /*r2t*/x; }
+        function r3(x: { v: string } | undefined, y: string | null) { if (x?.v == y) /*r3t*/x; }
+        function r4(x: { v: string } | undefined, y: string) { if (x?.v == y) /*r4t*/x; }
+        function r5(x: { v: string } | undefined, y: string | null) { if (x?.v === y) /*r5t*/x; }
+        "#,
+        &[
+            ("s1t", "x", &["null", "string"]),
+            ("s1f", "x", &["null", "string"]),
+            ("s2t", "o.v", &["null", "string"]),
+            ("s3t", "x", &["string: a", "string: b"]),
+            ("s4t", "x", &["number", "string"]),
+            ("s5t", "x", &["number", "string"]),
+            ("r1t", "x", &["[\"v\": string]"]),
+            ("r1f", "x", &["[\"v\": string]", "undefined"]),
+            ("r2t", "x", &["[\"v\": string]", "undefined"]),
+            ("r3t", "x", &["[\"v\": string]", "undefined"]),
+            ("r4t", "x", &["[\"v\": string]"]),
+            ("r5t", "x", &["[\"v\": string]"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `T & string` at every read below:
+// a comparison keeps an intersection with a type parameter as it is when the
+// intersection may equal the value, and removes it otherwise.
+#[test]
+fn comparisons_keep_intersections_with_type_parameters() {
+    assert_reads(
+        r#"
+        function g1<T>(x: T) { if (typeof x === "string") { if (x === "a") /*g1*/x; } }
+        function g2<T>(x: T, y: "a" | "b") { if (typeof x === "string") { if (x === y) /*g2*/x; } }
+        function g3<T>(x: T) { if (typeof x === "string") { if (x == "a") /*g3*/x; } }
+        function g4<T>(x: T, y: string) { if (typeof x === "string") { if (x === y) /*g4*/x; } }
+        "#,
+        &[
+            ("g1", "x", &["instanceof T & string"]),
+            ("g2", "x", &["instanceof T & string"]),
+            ("g3", "x", &["instanceof T & string"]),
+            ("g4", "x", &["instanceof T & string"]),
         ],
     );
 }

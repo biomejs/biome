@@ -4348,7 +4348,9 @@ mod tests {
             match test {
                 FlowTest::Truthy => "Truthy".to_owned(),
                 FlowTest::Nullish => "Nullish".to_owned(),
-                FlowTest::Literal(range) => format!("={}", &self.source[range]),
+                FlowTest::Literal { value, strict } => {
+                    format!("{}{}", if strict { "=" } else { "==" }, &self.source[value])
+                }
                 _ => "Other".to_owned(),
             }
         }
