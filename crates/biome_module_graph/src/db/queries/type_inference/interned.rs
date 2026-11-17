@@ -100,6 +100,24 @@ pub(crate) struct FlowSubjectRootInput<'db> {
     /// zero and share one solve.
     #[returns(copy)]
     pub ends: u64,
+    /// The declared types of the values that the root's comparisons narrow
+    /// the subject by, resolved by the context that reads the subject. `None`
+    /// when no comparison of the subject has such a value, so that other
+    /// subjects keep sharing their solves.
+    #[returns(copy)]
+    pub compared: Option<FlowComparedTypes<'db>>,
+}
+
+/// The declared types of the values that the comparisons of one root
+/// narrow a subject by, each with the start and the end of the range that
+/// identifies its value, sorted by range; see
+/// [`super::infer_flow_compared_types`]. A value whose type can't be used,
+/// such as one that inference can't determine, is left out.
+#[salsa::interned]
+#[derive(Debug)]
+pub(crate) struct FlowComparedTypes<'db> {
+    #[returns(ref)]
+    pub types: Box<[(u32, u32, InferredTypeData<'db>)]>,
 }
 
 /// The effects of the call points of one root that narrow a subject, each

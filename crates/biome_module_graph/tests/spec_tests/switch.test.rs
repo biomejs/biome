@@ -900,19 +900,26 @@ fn switches_after_comparisons_with_enum_members_are_not_exhaustive() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at the read below,
-// because the comparisons before the switch narrow `x` to `never`, so no case
-// type covers it. Biome doesn't compare with a variable with a type
-// annotation, so `x` is `"a"` at the switch, and the switch is exhaustive.
-// `y` reads as `string`, which is narrower than TypeScript in code that
-// TypeScript types as impossible, as the Limits in `NARROWING.md` describe.
+// TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at both reads
+// below, because the comparisons before the switch narrow `x` to `never`, so
+// no case type covers it. A variable with a type annotation narrows `x` by its
+// declared type, as in TypeScript, so the switch at `annotated` isn't
+// exhaustive. Biome doesn't compare with a call, whose type it infers, so `x`
+// is `"a"` at the switch at `call`, and the switch is exhaustive. `y` reads as
+// `string` there, which is narrower than TypeScript in code that TypeScript
+// types as impossible, as the Limits in `NARROWING.md` describe.
 #[test]
 fn switches_after_comparisons_that_biome_does_not_decompose_can_be_exhaustive() {
     assert_reads(
         r#"
+        declare function unit(): "a";
         function g(x: "a" | "b", y: string | null, k: "a") { if (x === k) return; if (x === "b") return; switch (x) { case "a": if (y === null) return; } /*annotated*/y; }
+        function h(x: "a" | "b", y: string | null) { if (x === unit()) return; if (x === "b") return; switch (x) { case "a": if (y === null) return; } /*call*/y; }
         "#,
-        &[("annotated", "y", &["string"])],
+        &[
+            ("annotated", "y", &["null", "string"]),
+            ("call", "y", &["string"]),
+        ],
     );
 }
 

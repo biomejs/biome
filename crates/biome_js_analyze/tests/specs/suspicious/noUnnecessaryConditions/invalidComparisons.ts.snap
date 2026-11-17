@@ -1,0 +1,175 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidComparisons.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// Loose equality with a literal, a comparison with a value whose type comes
+// from an annotation, and a comparison of a condition with a boolean narrow
+// the compared value, so a check that the narrowed value can't fail is
+// reported, as in TypeScript.
+
+function looseLiteral(value: "a" | "b" | null) {
+	if (value == "a") {
+		return value ?? "b";
+	}
+}
+
+function looseDiscriminant(shape: { kind: "c"; r: number } | { kind: "s"; r: null }) {
+	if (shape.kind == "c") {
+		return shape.r ?? 0;
+	}
+}
+
+function annotatedValue(value: string | null, other: string) {
+	if (value === other) {
+		return value ?? "";
+	}
+}
+
+function booleanComparison(value: string | null) {
+	if ((value !== null) === true) {
+		return value ?? "";
+	}
+}
+
+function aliasNotFalse(value: string | null) {
+	const present = value !== null;
+	if (present !== false) {
+		return value ?? "";
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidComparisons.ts:9:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+     7 │ function looseLiteral(value: "a" | "b" | null) {
+     8 │ 	if (value == "a") {
+   > 9 │ 		return value ?? "b";
+       │ 		       ^^^^^
+    10 │ 	}
+    11 │ }
+  
+  i Drop ?? and the fallback expression.
+  
+     7 │ function looseLiteral(value: "a" | "b" | null) {
+     8 │ 	if (value == "a") {
+   > 9 │ 		return value ?? "b";
+       │ 		             ^^
+    10 │ 	}
+    11 │ }
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+invalidComparisons.ts:15:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    13 │ function looseDiscriminant(shape: { kind: "c"; r: number } | { kind: "s"; r: null }) {
+    14 │ 	if (shape.kind == "c") {
+  > 15 │ 		return shape.r ?? 0;
+       │ 		       ^^^^^^^
+    16 │ 	}
+    17 │ }
+  
+  i Drop ?? and the fallback expression.
+  
+    13 │ function looseDiscriminant(shape: { kind: "c"; r: number } | { kind: "s"; r: null }) {
+    14 │ 	if (shape.kind == "c") {
+  > 15 │ 		return shape.r ?? 0;
+       │ 		               ^^
+    16 │ 	}
+    17 │ }
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+invalidComparisons.ts:21:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    19 │ function annotatedValue(value: string | null, other: string) {
+    20 │ 	if (value === other) {
+  > 21 │ 		return value ?? "";
+       │ 		       ^^^^^
+    22 │ 	}
+    23 │ }
+  
+  i Drop ?? and the fallback expression.
+  
+    19 │ function annotatedValue(value: string | null, other: string) {
+    20 │ 	if (value === other) {
+  > 21 │ 		return value ?? "";
+       │ 		             ^^
+    22 │ 	}
+    23 │ }
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+invalidComparisons.ts:27:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    25 │ function booleanComparison(value: string | null) {
+    26 │ 	if ((value !== null) === true) {
+  > 27 │ 		return value ?? "";
+       │ 		       ^^^^^
+    28 │ 	}
+    29 │ }
+  
+  i Drop ?? and the fallback expression.
+  
+    25 │ function booleanComparison(value: string | null) {
+    26 │ 	if ((value !== null) === true) {
+  > 27 │ 		return value ?? "";
+       │ 		             ^^
+    28 │ 	}
+    29 │ }
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+invalidComparisons.ts:34:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    32 │ 	const present = value !== null;
+    33 │ 	if (present !== false) {
+  > 34 │ 		return value ?? "";
+       │ 		       ^^^^^
+    35 │ 	}
+    36 │ }
+  
+  i Drop ?? and the fallback expression.
+  
+    32 │ 	const present = value !== null;
+    33 │ 	if (present !== false) {
+  > 34 │ 		return value ?? "";
+       │ 		             ^^
+    35 │ 	}
+    36 │ }
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```

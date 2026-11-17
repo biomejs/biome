@@ -229,7 +229,6 @@ fn other_declarations_are_not_aliases() {
         function asserted(x: string | null) { const ok = (x !== null) as boolean; if (ok) /*as*/x; }
         function coalesced(x: string | null) { const ok = x !== null; ok ?? /*coalesced*/x; }
         function conditional(x: string | null) { const ok = x !== null; if (ok ? true : false) /*conditional*/x; }
-        function comparison(x: string | null) { const ok = x !== null; if (ok === true) /*comparison*/x; }
     "#;
     assert_reads(
         SOURCE,
@@ -240,9 +239,6 @@ fn other_declarations_are_not_aliases() {
             ("as", "x", &[String, Null]),
             ("coalesced", "x", &[String, Null]),
             ("conditional", "x", &[String, Null]),
-            // TypeScript gives `string` because it narrows through a comparison
-            // with `true`. Biome tests only the alias itself.
-            ("comparison", "x", &[String, Null]),
         ],
     );
 }

@@ -57,6 +57,43 @@ pub enum NarrowingPredicate<'db> {
     /// Strict equality with a primitive literal, `null`, or `undefined`.
     /// Other operand types leave the input unchanged.
     Literal(InferredTypeData<'db>),
+    /// Loose equality (`==`) with a string, number, bigint, or boolean
+    /// literal. Loose equality with `null` or `undefined` is [`Self::Nullish`].
+    /// Other operand types leave the input unchanged.
+    LooseLiteral(InferredTypeData<'db>),
+    /// Equality with a value of type `value` that is not a unit type, such
+    /// as `string` or `"a" | "b"`, strict or loose. [`Self::new_equality`]
+    /// gives the other predicates for a unit type.
+    Equal {
+        value: InferredTypeData<'db>,
+        strict: bool,
+    },
+}
+
+impl<'db> NarrowingPredicate<'db> {
+    /// Returns the predicate of an equality with a value of type `value`,
+    /// strict (`===`) when `strict` is true and loose (`==`) otherwise.
+    ///
+    /// A unit type, `null`, `undefined`, or a string, number, bigint, or
+    /// boolean literal that Biome decodes, gives the predicate of a
+    /// comparison with that value, so the false branch removes the members
+    /// equal to it. Any other type gives [`Self::Equal`], whose false branch
+    /// removes nothing, because a value of such a type can differ from each
+    /// member of the narrowed type.
+    pub fn new_equality(db: &'db dyn TypeDb, value: InferredTypeData<'db>, strict: bool) -> Self {
+        match value {
+            InferredTypeData::Null | InferredTypeData::Undefined if !strict => Self::Nullish,
+            InferredTypeData::Null | InferredTypeData::Undefined => Self::Literal(value),
+            InferredTypeData::Literal(_) if literal_value(db, value).is_some() => {
+                if strict {
+                    Self::Literal(value)
+                } else {
+                    Self::LooseLiteral(value)
+                }
+            }
+            _ => Self::Equal { value, strict },
+        }
+    }
 }
 
 /// Returns whether `ty` carries no information that a runtime test could
@@ -656,6 +693,22 @@ pub fn raw_predicate_target<'a>(
 /// - An equality test leaves `ty` unchanged when its literal is a template
 ///   literal, a string with escapes, or longer than 1024 bytes, because Biome
 ///   doesn't decode those.
+/// - Loose equality with a literal ([`NarrowingPredicate::LooseLiteral`])
+///   narrows the members of the literal's kind as strict equality does and
+///   removes `null` and `undefined`. It keeps primitive types of other kinds
+///   and object types, some of whose values convert to the literal, as
+///   `"1" == 1` shows, and removes a literal of another kind only when it
+///   never loosely equals the literal, as `"a"` for `== 1`. Its false branch
+///   is that of strict equality, and it keeps `unknown` in both branches.
+/// - Equality with a value whose type is not a unit type
+///   ([`NarrowingPredicate::Equal`]) keeps, in the true branch, the members
+///   that may equal a value of that type, and replaces a primitive type with
+///   the value's literals of its kind, so `string | number` compared with
+///   `"a" | 1` becomes `"a" | 1`. A loose comparison also keeps the members
+///   of other kinds whose values may convert to a compared value. A strict
+///   comparison gives `unknown` the value's type when that is a single
+///   primitive or literal type, and `object` when it is a single object
+///   type. The false branch keeps every member.
 /// - A union with more than 256 types, counting nested unions and their
 ///   members, is returned unchanged.
 ///
@@ -2457,11 +2510,14 @@ enum PreparedPredicate<'db> {
     Nullish,
     Typeof(TypeofKind),
     Literal(InferredTypeData<'db>, LiteralValue<'db>),
+    LooseLiteral(InferredTypeData<'db>, LiteralValue<'db>),
+    Equal(ComparedValues<'db>),
 }
 
 impl<'db> PreparedPredicate<'db> {
     /// Returns `predicate` with its literal decoded, or `None` for a literal
-    /// that can't be decoded, which leaves every type unchanged.
+    /// that can't be decoded, or a value whose members exceed the union
+    /// budget, which leave every type unchanged.
     fn new(db: &'db dyn TypeDb, predicate: NarrowingPredicate<'db>) -> Option<Self> {
         Some(match predicate {
             NarrowingPredicate::Truthy => Self::Truthy,
@@ -2470,8 +2526,361 @@ impl<'db> PreparedPredicate<'db> {
             NarrowingPredicate::Literal(literal) => {
                 Self::Literal(literal, literal_value(db, literal)?)
             }
+            NarrowingPredicate::LooseLiteral(literal) => match literal_value(db, literal)? {
+                LiteralValue::Null | LiteralValue::Undefined => Self::Nullish,
+                value => Self::LooseLiteral(literal, value),
+            },
+            NarrowingPredicate::Equal { value, strict } => {
+                Self::Equal(ComparedValues::new(db, value, strict)?)
+            }
         })
     }
+}
+
+/// The members of the type of a value that a narrowed value is compared
+/// with, sorted into the kinds that decide whether the two may be equal.
+struct ComparedValues<'db> {
+    /// The type of the value, which a strict comparison gives `unknown` when
+    /// it is a single primitive or literal type.
+    value: InferredTypeData<'db>,
+    strict: bool,
+    members: Vec<ComparedMember<'db>>,
+}
+
+/// One member of the type of a compared value; see [`ComparedValues`].
+enum ComparedMember<'db> {
+    /// `null`, `undefined`, or a string, number, bigint, or boolean literal
+    /// that Biome decodes.
+    Unit(InferredTypeData<'db>, LiteralValue<'db>),
+    /// The primitive type of a kind, or a literal of that kind that Biome
+    /// doesn't decode, such as a string with an escape.
+    Primitive(TypeofKind),
+    /// A type whose values are never primitives, such as `object`, a tuple,
+    /// a function, or an instance of a built-in class.
+    NonPrimitive,
+    /// A type literal, an interface, or an instance of one or of a class,
+    /// which every value except `null` and `undefined` may have, because a
+    /// primitive has the members of its wrapper type, as every string has
+    /// `length`.
+    Structural,
+    /// A type that Biome can't sort, such as `unknown`, `any`, or a type
+    /// parameter, whose values may be anything.
+    Any,
+}
+
+impl<'db> ComparedValues<'db> {
+    /// Sorts the members of `value`, or returns `None` when they exceed the
+    /// union budget.
+    fn new(db: &'db dyn TypeDb, value: InferredTypeData<'db>, strict: bool) -> Option<Self> {
+        let mut remaining = MAX_NARROWING_STEPS;
+        let members = union_members(db, value, &mut remaining)?
+            .into_iter()
+            .map(|member| ComparedMember::new(db, member))
+            .collect();
+        Some(Self {
+            value,
+            strict,
+            members,
+        })
+    }
+
+    /// Narrows `ty`, a member of the narrowed type that is not a union, to
+    /// the values that may equal one of the compared values, as TypeScript
+    /// narrows by a value whose type is not a unit type: the true branch
+    /// keeps the members that may equal a member of the value, and replaces
+    /// a primitive type with the value's literals of its kind. The false
+    /// branch keeps `ty`, because a value of a type that is not a unit type
+    /// can differ from every value of `ty`.
+    ///
+    /// A loose comparison keeps a member of another kind whenever one of its
+    /// values may coerce to a compared value, as the rules of
+    /// [`loosely_equal`] decide for literals.
+    fn narrow(
+        &self,
+        db: &'db dyn TypeDb,
+        ty: InferredTypeData<'db>,
+        positive: bool,
+    ) -> InferredTypeData<'db> {
+        if !positive {
+            return ty;
+        }
+        let keep = |kept: bool| retain_if(ty, Some(kept), true);
+        if let Some(actual) = literal_value(db, ty) {
+            return keep(
+                self.members
+                    .iter()
+                    .any(|member| member.may_equal_value(&actual, self.strict)),
+            );
+        }
+        if let Some(kind) = primitive_kind(ty) {
+            return self.narrow_primitive(db, ty, kind);
+        }
+        match ty {
+            // Every value of a structural type except `null` and `undefined`
+            // can have it, as every string has `{ length: number }`.
+            ty if is_structural_type(db, ty) && !is_non_primitive(db, ty) => {
+                keep(self.members.iter().any(|member| !member.is_nullish()))
+            }
+            ty if is_non_primitive(db, ty) || is_definite_non_primitive(db, ty) => {
+                keep(self.members.iter().any(|member| {
+                    if self.strict {
+                        matches!(
+                            member,
+                            ComparedMember::NonPrimitive
+                                | ComparedMember::Structural
+                                | ComparedMember::Any
+                        )
+                    } else {
+                        // An object can convert to any primitive.
+                        !member.is_nullish()
+                    }
+                }))
+            }
+            _ => ty,
+        }
+    }
+
+    /// Narrows `ty`, the primitive type of `kind`, as [`Self::narrow`]
+    /// describes: it stays when a compared value may be any value of the
+    /// kind, becomes the union of the compared literals of the kind when
+    /// only they may equal one of its values, and is removed when no
+    /// compared value may.
+    fn narrow_primitive(
+        &self,
+        db: &'db dyn TypeDb,
+        ty: InferredTypeData<'db>,
+        kind: TypeofKind,
+    ) -> InferredTypeData<'db> {
+        let mut literals = Vec::new();
+        for member in &self.members {
+            match member {
+                ComparedMember::Unit(literal, value) if value_kind(value) == Some(kind) => {
+                    // `NaN` equals no value.
+                    if !matches!(value, LiteralValue::Number(value) if value.is_nan()) {
+                        literals.push(*literal);
+                    }
+                }
+                ComparedMember::Unit(_, value) => {
+                    if !self.strict
+                        && !is_nullish_value(value)
+                        && !never_loosely_equals_kind(value, kind)
+                    {
+                        return ty;
+                    }
+                }
+                ComparedMember::Primitive(member_kind) => {
+                    if *member_kind == kind || !self.strict {
+                        return ty;
+                    }
+                }
+                ComparedMember::NonPrimitive => {
+                    if !self.strict {
+                        return ty;
+                    }
+                }
+                ComparedMember::Structural | ComparedMember::Any => return ty,
+            }
+        }
+        if literals.is_empty() {
+            InferredTypeData::NeverKeyword
+        } else {
+            InferredTypeData::union_from_types(db, literals)
+        }
+    }
+
+    /// Returns what a strict comparison gives `unknown` in its true branch:
+    /// the value's type when it is a single primitive or literal type,
+    /// `object` when it is a single object type, and `unknown` otherwise, as
+    /// in TypeScript.
+    fn narrow_unknown(&self) -> InferredTypeData<'db> {
+        if !self.strict {
+            return InferredTypeData::UnknownKeyword;
+        }
+        match self.members.as_slice() {
+            [ComparedMember::Unit(..) | ComparedMember::Primitive(_)] => self.value,
+            [ComparedMember::NonPrimitive | ComparedMember::Structural] => {
+                InferredTypeData::ObjectKeyword
+            }
+            _ => InferredTypeData::UnknownKeyword,
+        }
+    }
+}
+
+impl<'db> ComparedMember<'db> {
+    fn new(db: &'db dyn TypeDb, member: InferredTypeData<'db>) -> Self {
+        if let Some(value) = literal_value(db, member) {
+            return Self::Unit(member, value);
+        }
+        if let Some(kind) = primitive_kind(member) {
+            return Self::Primitive(kind);
+        }
+        match member {
+            InferredTypeData::Literal(literal) => match literal.literal(db) {
+                Literal::Boolean(_) => Self::Primitive(TypeofKind::Boolean),
+                Literal::Number(_) => Self::Primitive(TypeofKind::Number),
+                Literal::BigInt(_) => Self::Primitive(TypeofKind::BigInt),
+                Literal::String(_) | Literal::Template(_) => Self::Primitive(TypeofKind::String),
+                Literal::Object(_) | Literal::RegExp(_) => Self::NonPrimitive,
+            },
+            member if is_non_primitive(db, member) || is_definite_non_primitive(db, member) => {
+                Self::NonPrimitive
+            }
+            member if is_structural_type(db, member) => Self::Structural,
+            _ => Self::Any,
+        }
+    }
+
+    fn is_nullish(&self) -> bool {
+        matches!(self, Self::Unit(_, value) if is_nullish_value(value))
+    }
+
+    /// Returns whether a value of this member may equal `actual`, the value
+    /// of a literal member of the narrowed type.
+    fn may_equal_value(&self, actual: &LiteralValue, strict: bool) -> bool {
+        match self {
+            Self::Unit(_, value) => {
+                if strict {
+                    value == actual
+                } else {
+                    loosely_equal(value, actual)
+                }
+            }
+            Self::Primitive(kind) => {
+                if value_kind(actual) == Some(*kind) {
+                    true
+                } else {
+                    !strict
+                        && !is_nullish_value(actual)
+                        && !never_loosely_equals_kind(actual, *kind)
+                }
+            }
+            Self::NonPrimitive => !strict && !is_nullish_value(actual),
+            Self::Structural => !is_nullish_value(actual),
+            Self::Any => true,
+        }
+    }
+}
+
+/// Returns the kind of the primitive type `ty`, such as `string`, or `None`
+/// for other types, literals included.
+fn primitive_kind(ty: InferredTypeData) -> Option<TypeofKind> {
+    Some(match ty {
+        InferredTypeData::Boolean => TypeofKind::Boolean,
+        InferredTypeData::Number => TypeofKind::Number,
+        InferredTypeData::BigInt => TypeofKind::BigInt,
+        InferredTypeData::String => TypeofKind::String,
+        InferredTypeData::Symbol => TypeofKind::Symbol,
+        _ => return None,
+    })
+}
+
+/// Returns the kind of a decoded literal value, or `None` for `null` and
+/// `undefined`.
+fn value_kind(value: &LiteralValue) -> Option<TypeofKind> {
+    Some(match value {
+        LiteralValue::Null | LiteralValue::Undefined => return None,
+        LiteralValue::Boolean(_) => TypeofKind::Boolean,
+        LiteralValue::Number(_) => TypeofKind::Number,
+        LiteralValue::BigInt(_) => TypeofKind::BigInt,
+        LiteralValue::String(_) => TypeofKind::String,
+    })
+}
+
+fn is_nullish_value(value: &LiteralValue) -> bool {
+    matches!(value, LiteralValue::Null | LiteralValue::Undefined)
+}
+
+/// Returns whether `ty` is a type whose values are never primitives and that
+/// [`is_non_primitive`] doesn't list: a tuple, a function, a class, or a
+/// constructor.
+fn is_definite_non_primitive(db: &dyn TypeDb, ty: InferredTypeData) -> bool {
+    match ty {
+        InferredTypeData::Tuple(_)
+        | InferredTypeData::Function(_)
+        | InferredTypeData::Class(_)
+        | InferredTypeData::Constructor(_) => true,
+        InferredTypeData::Literal(literal) => {
+            matches!(literal.literal(db), Literal::Object(_) | Literal::RegExp(_))
+        }
+        _ => false,
+    }
+}
+
+/// Returns whether JavaScript's loose equality `a == b` may hold for the
+/// primitive values `a` and `b`.
+///
+/// Values of one kind compare as with strict equality, and `null` and
+/// `undefined` equal only each other. For values of different kinds, the
+/// result is false only where Biome can show it: a boolean converts to `0`
+/// or `1` before it is compared with a number, a bigint and a number compare
+/// by their mathematical values, and a string without any digit converts to
+/// `NaN`, which equals nothing, before it is compared with a number, a
+/// boolean, or a bigint. The string must not be empty, white space, or
+/// `Infinity` with an optional sign, which convert to numbers. Every other
+/// pair may be equal.
+fn loosely_equal(a: &LiteralValue, b: &LiteralValue) -> bool {
+    use LiteralValue::{BigInt, Boolean, Null, Number, String, Undefined};
+    match (a, b) {
+        (Null | Undefined, Null | Undefined) => true,
+        (Null | Undefined, _) | (_, Null | Undefined) => false,
+        (Boolean(boolean), Number(number)) | (Number(number), Boolean(boolean)) => {
+            f64::from(u8::from(*boolean)) == *number
+        }
+        (BigInt(bigint), Number(number)) | (Number(number), BigInt(bigint)) => {
+            !bigint_differs_from_number(bigint, *number)
+        }
+        (String(string), Number(_) | Boolean(_) | BigInt(_))
+        | (Number(_) | Boolean(_) | BigInt(_), String(string)) => !converts_to_nan(string),
+        (Boolean(_), BigInt(_)) | (BigInt(_), Boolean(_)) => true,
+        (Boolean(_), Boolean(_))
+        | (Number(_), Number(_))
+        | (BigInt(_), BigInt(_))
+        | (String(_), String(_)) => a == b,
+    }
+}
+
+/// Returns whether no value of the primitive kind `kind` loosely equals
+/// `value`, a value of another kind, as [`loosely_equal`] decides it for a
+/// string without any digit, which equals no number, boolean, or bigint.
+fn never_loosely_equals_kind(value: &LiteralValue, kind: TypeofKind) -> bool {
+    matches!(value, LiteralValue::String(string) if converts_to_nan(string))
+        && matches!(
+            kind,
+            TypeofKind::Number | TypeofKind::Boolean | TypeofKind::BigInt
+        )
+}
+
+/// Returns whether `bigint`, the canonical text of a bigint literal such as
+/// `12n`, certainly differs from `number`. Returns false when Biome can't
+/// compare them, as for a bigint outside the range of `i128`.
+fn bigint_differs_from_number(bigint: &str, number: f64) -> bool {
+    if !number.is_finite() || number.fract() != 0.0 {
+        return true;
+    }
+    let Some(Ok(bigint)) = bigint.strip_suffix('n').map(str::parse::<i128>) else {
+        return false;
+    };
+    // An integer below this bound converts to `i128` exactly, and one above
+    // it is larger than every `i128`.
+    if number.abs() >= 1e38 {
+        return true;
+    }
+    number as i128 != bigint
+}
+
+/// Returns whether the string `value` converts to `NaN` as a number: it has
+/// no decimal digit and isn't empty, white space, or `Infinity` with an
+/// optional sign.
+///
+/// Rust's white space and the byte order mark together include every
+/// character that JavaScript trims, so a string that JavaScript trims to
+/// nothing or to `Infinity` is never taken as `NaN`.
+fn converts_to_nan(value: &str) -> bool {
+    if value.bytes().any(|byte| byte.is_ascii_digit()) {
+        return false;
+    }
+    let trimmed = value.trim_matches(|c: char| c.is_whitespace() || c == '\u{feff}');
+    !matches!(trimmed, "" | "Infinity" | "+Infinity" | "-Infinity")
 }
 
 fn narrow_non_union<'db>(
@@ -2557,6 +2966,10 @@ fn narrow_non_union<'db>(
         PreparedPredicate::Literal(literal, value) => {
             narrow_literal(db, ty, *literal, value, positive)
         }
+        PreparedPredicate::LooseLiteral(literal, value) => {
+            narrow_loose_literal(db, ty, *literal, value, positive)
+        }
+        PreparedPredicate::Equal(compared) => compared.narrow(db, ty, positive),
     }
 }
 
@@ -2577,6 +2990,16 @@ fn narrow_unknown<'db>(
 ) -> InferredTypeData<'db> {
     let unknown = InferredTypeData::UnknownKeyword;
     let nullish_literal = match predicate {
+        // TypeScript keeps `unknown` where it is loosely equal to a literal,
+        // which many values of different kinds can be.
+        PreparedPredicate::LooseLiteral(..) => return unknown,
+        PreparedPredicate::Equal(compared) => {
+            return if positive {
+                compared.narrow_unknown()
+            } else {
+                unknown
+            };
+        }
         PreparedPredicate::Literal(_, LiteralValue::Null | LiteralValue::Undefined) => true,
         PreparedPredicate::Literal(_, LiteralValue::Number(value)) if value.is_nan() => {
             return if positive {
@@ -2763,11 +3186,11 @@ fn narrow_type_parameter<'db>(
 /// and the false branch of `typeof` with `"object"`, which TypeScript
 /// applies to an intersection when any operand passes them.
 ///
-/// Strict equality with a literal, `null`, or `undefined` removes the
-/// intersection when it removes every value of an operand and keeps the
-/// intersection as it is otherwise, as TypeScript keeps `T & string` where
-/// the value equals `"a"`. A `boolean` operand narrows to `true` or `false`
-/// instead, because TypeScript reads `T & boolean` as
+/// An equality test, strict or loose, with a literal, `null`, `undefined`, or
+/// a typed value removes the intersection when it removes every value of an
+/// operand and keeps the intersection as it is otherwise, as TypeScript keeps
+/// `T & string` where the value equals `"a"`. A `boolean` operand narrows to
+/// `true` or `false` instead, because TypeScript reads `T & boolean` as
 /// `(T & true) | (T & false)` and keeps the members that can be equal. A
 /// type predicate whose target is a literal, `null`, or `undefined` narrows
 /// as strict equality with the target does, so `value is "a"` keeps
@@ -2795,7 +3218,12 @@ fn narrow_intersection<'db>(
         (PreparedPredicate::Typeof(TypeofKind::Function), true)
             | (PreparedPredicate::Typeof(TypeofKind::Object), false)
     );
-    let is_equality = matches!(predicate, PreparedPredicate::Literal(..));
+    let is_equality = matches!(
+        predicate,
+        PreparedPredicate::Literal(..)
+            | PreparedPredicate::LooseLiteral(..)
+            | PreparedPredicate::Equal(_)
+    );
     let mut narrowed = Vec::with_capacity(operands.len());
     let mut changed = false;
     for operand in operands {
@@ -3202,6 +3630,41 @@ fn narrow_literal<'db>(
         if positive { literal } else { ty }
     } else {
         retain_if(ty, Some(false), positive)
+    }
+}
+
+/// Narrows `ty` by loose equality (`==`) with `literal`, whose value `value`
+/// is a string, number, bigint, or boolean.
+///
+/// The false branch narrows as strict equality does: it removes only the
+/// members strictly equal to `literal`, as TypeScript does. In the true
+/// branch, a member of the literal's kind narrows as for strict equality, so
+/// `string` becomes `"a"` for `== "a"`, and `null` and `undefined` are
+/// removed. A literal member of another kind is removed only when
+/// [`loosely_equal`] shows that it never equals `value`, as `"a"` for `== 1`.
+/// Primitive types of other kinds and object types stay, because some of
+/// their values convert to `value`: `"1" == 1` holds, and so does
+/// `["a"] == "a"`. TypeScript narrows loose equality as strict equality,
+/// which removes them.
+fn narrow_loose_literal<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    literal: InferredTypeData<'db>,
+    value: &LiteralValue<'db>,
+    positive: bool,
+) -> InferredTypeData<'db> {
+    if !positive {
+        return narrow_literal(db, ty, literal, value, false);
+    }
+    if let Some(actual) = literal_value(db, ty) {
+        return retain_if(ty, Some(loosely_equal(&actual, value)), true);
+    }
+    match (primitive_kind(ty), value_kind(value)) {
+        (Some(TypeofKind::Number), _) if matches!(value, LiteralValue::Number(number) if number.is_nan()) => {
+            InferredTypeData::NeverKeyword
+        }
+        (Some(kind), Some(literal_kind)) if kind == literal_kind => literal,
+        _ => ty,
     }
 }
 
@@ -3619,6 +4082,184 @@ mod tests {
                 false
             ),
             union(&db, &[string(&db, "b"), InferredTypeData::Number])
+        );
+    }
+
+    #[test]
+    fn loose_equality_removes_literals_only_when_they_never_equal() {
+        let loose = |a: LiteralValue, b: LiteralValue| loosely_equal(&a, &b);
+        use LiteralValue::{BigInt, Boolean, Null, Number, String, Undefined};
+        // Values of one kind compare strictly; nullish values equal only
+        // each other.
+        assert!(loose(Number(1.0), Number(1.0)));
+        assert!(!loose(Number(1.0), Number(2.0)));
+        assert!(loose(Number(0.0), Number(-0.0)));
+        assert!(!loose(Number(f64::NAN), Number(f64::NAN)));
+        assert!(loose(Null, Undefined));
+        assert!(!loose(Null, Boolean(false)));
+        assert!(!loose(Undefined, Number(0.0)));
+        // A boolean converts to `0` or `1`.
+        assert!(loose(Boolean(true), Number(1.0)));
+        assert!(loose(Number(0.0), Boolean(false)));
+        assert!(!loose(Boolean(true), Number(0.0)));
+        assert!(!loose(Boolean(false), Number(2.0)));
+        // A bigint and a number compare by value.
+        assert!(loose(BigInt("1n".into()), Number(1.0)));
+        assert!(loose(Number(-3.0), BigInt("-3n".into())));
+        assert!(!loose(BigInt("0n".into()), Number(1.0)));
+        assert!(!loose(BigInt("1n".into()), Number(1.5)));
+        assert!(!loose(BigInt("1n".into()), Number(f64::INFINITY)));
+        assert!(!loose(BigInt("1n".into()), Number(1e40)));
+        // A bigint too large to compare may equal the number.
+        assert!(loose(
+            BigInt("1234567890123456789012345678901234567890n".into()),
+            Number(1.0)
+        ));
+        // A string without digits converts to `NaN`, unless it is empty,
+        // white space, or `Infinity` with an optional sign.
+        assert!(!loose(String("a"), Number(1.0)));
+        assert!(!loose(Boolean(true), String("x")));
+        assert!(!loose(String("a"), BigInt("0n".into())));
+        assert!(loose(String("1"), Number(1.0)));
+        assert!(loose(String("0x"), Number(0.0)));
+        assert!(loose(String(""), Number(0.0)));
+        assert!(loose(String(" \t\u{feff}\u{2028}"), Boolean(false)));
+        assert!(loose(String(" -Infinity "), Number(f64::NEG_INFINITY)));
+        assert!(loose(String("+Infinity"), Number(0.0)));
+        assert!(!loose(String("infinity"), Number(0.0)));
+        // Booleans and bigints, and strings with each other, aren't
+        // compared by conversion.
+        assert!(loose(Boolean(true), BigInt("2n".into())));
+        assert!(!loose(String("a"), String("b")));
+    }
+
+    #[test]
+    fn loose_literal_equality_keeps_members_of_other_kinds() {
+        let db = TestDb::default();
+        let one = number(&db, "1");
+        let a = string(&db, "a");
+        let loose = |literal| NarrowingPredicate::LooseLiteral(literal);
+        // `null` and `undefined` go, and so do literals that never equal the
+        // value. Primitive types of other kinds and objects stay.
+        let ty = union(
+            &db,
+            &[
+                InferredTypeData::String,
+                InferredTypeData::Number,
+                InferredTypeData::Null,
+                InferredTypeData::Undefined,
+                a,
+                string(&db, "1"),
+                boolean_literal(&db, true),
+                InferredTypeData::ObjectKeyword,
+            ],
+        );
+        assert_eq!(
+            narrow_type(&db, ty, loose(one), true),
+            union(
+                &db,
+                &[
+                    InferredTypeData::String,
+                    one,
+                    string(&db, "1"),
+                    boolean_literal(&db, true),
+                    InferredTypeData::ObjectKeyword,
+                ]
+            )
+        );
+        // The false branch removes only the members strictly equal to the
+        // value.
+        let ty = union(&db, &[one, string(&db, "1"), InferredTypeData::Null]);
+        assert_eq!(
+            narrow_type(&db, ty, loose(one), false),
+            union(&db, &[string(&db, "1"), InferredTypeData::Null])
+        );
+        // `boolean` becomes the literal of its kind.
+        assert_eq!(
+            narrow_type(
+                &db,
+                InferredTypeData::Boolean,
+                loose(boolean_literal(&db, true)),
+                true
+            ),
+            boolean_literal(&db, true)
+        );
+        // Loose equality with `null` is a nullishness test.
+        let ty = union(&db, &[a, InferredTypeData::Undefined]);
+        assert_eq!(
+            narrow_type(&db, ty, loose(InferredTypeData::Null), true),
+            InferredTypeData::Undefined
+        );
+        // `unknown` stays in both branches.
+        for positive in [true, false] {
+            assert_eq!(
+                narrow_type(&db, InferredTypeData::UnknownKeyword, loose(a), positive),
+                InferredTypeData::UnknownKeyword
+            );
+        }
+    }
+
+    #[test]
+    fn equality_with_a_typed_value_keeps_the_members_that_may_equal_it() {
+        let db = TestDb::default();
+        let a = string(&db, "a");
+        let one = number(&db, "1");
+        let equal = |value, strict| NarrowingPredicate::new_equality(&db, value, strict);
+        let ty = union(
+            &db,
+            &[
+                InferredTypeData::String,
+                InferredTypeData::Number,
+                InferredTypeData::Null,
+            ],
+        );
+        // Primitive types become the value's literals of their kind.
+        let value = union(&db, &[a, one]);
+        assert_eq!(
+            narrow_type(&db, ty, equal(value, true), true),
+            union(&db, &[a, one])
+        );
+        // A primitive type of the value keeps the member, and a type that
+        // the value doesn't have goes.
+        let value = union(
+            &db,
+            &[InferredTypeData::String, InferredTypeData::Undefined],
+        );
+        assert_eq!(
+            narrow_type(&db, ty, equal(value, true), true),
+            InferredTypeData::String
+        );
+        // A loose comparison keeps the members of other kinds that may
+        // convert to a value, and `null` for `undefined`.
+        assert_eq!(narrow_type(&db, ty, equal(value, false), true), ty);
+        // The false branch narrows only by a unit type.
+        assert_eq!(narrow_type(&db, ty, equal(value, true), false), ty);
+        assert_eq!(
+            narrow_type(&db, ty, equal(InferredTypeData::Null, true), false),
+            union(&db, &[InferredTypeData::String, InferredTypeData::Number])
+        );
+        // An object type may hold any value other than `null` and
+        // `undefined`, as a string has `{ length: number }`.
+        let length = object(&db, vec![member("length", InferredTypeData::Number)]);
+        assert_eq!(
+            narrow_type(&db, ty, equal(length, true), true),
+            union(&db, &[InferredTypeData::String, InferredTypeData::Number])
+        );
+        // `unknown` takes a single primitive type, `object` for an object
+        // type, and stays for a union.
+        let unknown = InferredTypeData::UnknownKeyword;
+        assert_eq!(
+            narrow_type(&db, unknown, equal(InferredTypeData::String, true), true),
+            InferredTypeData::String
+        );
+        assert_eq!(
+            narrow_type(&db, unknown, equal(length, true), true),
+            InferredTypeData::ObjectKeyword
+        );
+        assert_eq!(narrow_type(&db, unknown, equal(value, true), true), unknown);
+        assert_eq!(
+            narrow_type(&db, unknown, equal(InferredTypeData::String, false), true),
+            unknown
         );
     }
 

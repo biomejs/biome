@@ -7,17 +7,18 @@
 
 use super::{
     BindingTypeInput, BindingTypeWithImportBudgetInput, ExpressionTypeInput, FlowAssignedTypes,
-    FlowCallEffect, FlowCallInput, FlowReachability, FlowReachabilityInput, FlowSubjectRootInput,
-    FlowSubjectTypeInput, FlowSubjectWritesInput, FlowSwitchInput, LocalTypeInput,
-    LocalTypeWithImportBudgetInput,
+    FlowCallEffect, FlowCallInput, FlowComparedTypes, FlowReachability, FlowReachabilityInput,
+    FlowSubjectRootInput, FlowSubjectTypeInput, FlowSubjectWritesInput, FlowSwitchInput,
+    LocalTypeInput, LocalTypeWithImportBudgetInput,
 };
 use crate::ModuleDb;
 use crate::db::type_inference::{
     ImportResolution, ResolutionCtx, classify_enum_member,
     find_member_type_on_demand as find_member_type_impl,
     find_value_member_type_on_demand as find_value_member_type_impl, flow_assigned_types,
-    flow_binding_baseline, flow_call_effect, flow_expression_type, flow_reachability,
-    flow_subject_states, flow_subject_type, flow_switch_exhaustive, resolve_local_type_on_demand,
+    flow_binding_baseline, flow_call_effect, flow_compared_types, flow_expression_type,
+    flow_reachability, flow_subject_states, flow_subject_type, flow_switch_exhaustive,
+    resolve_local_type_on_demand,
 };
 use crate::js_module_info::flow::FlowNodeId;
 use crate::module_graph::ModuleInfoKind;
@@ -352,6 +353,44 @@ pub(crate) fn infer_flow_assigned_types<'db>(
     )
 }
 
+/// Resolves the declared types of the values that the comparisons of one
+/// execution root narrow a subject by, sorted by the range that identifies
+/// each value. The subject's solve narrows by these types.
+///
+/// Reads of the subject in that root share the result. A value is a variable
+/// or a parameter with a type annotation, a property path that starts at
+/// one, an `as const` expression, or an import of a declaration with an
+/// explicit type, and it is typed without narrowing, so no compared type
+/// depends on a solve, and the narrowed type of one operand of a comparison
+/// never feeds the other. Complete module inference resolves the same types
+/// in its own context instead.
+///
+/// Returns `None` for an unavailable root, for a subject without such a
+/// comparison or whose values all have types that can't be used, and when a
+/// query cycle passes through this lookup. The comparisons then keep the
+/// subject's incoming type.
+#[salsa::tracked(returns(copy), cycle_result=infer_flow_compared_types_cycle_result)]
+pub(crate) fn infer_flow_compared_types<'db>(
+    db: &'db dyn ModuleDb,
+    input: FlowSubjectWritesInput<'db>,
+) -> Option<FlowComparedTypes<'db>> {
+    let module = input.module(db);
+    execute_query(
+        TypeInferenceQueryKind::Lookups,
+        TypeInferenceProfileOrigin::document(module),
+        "infer_flow_compared_types",
+        || {
+            let ModuleInfoKind::Js(info) = module.kind(db) else {
+                return None;
+            };
+            if !info.infer_types {
+                return None;
+            }
+            flow_compared_types(db, module, info, input.root(db), input.subject(db))
+        },
+    )
+}
+
 /// Resolves what one call point does from the signature of its callee, as
 /// TypeScript finds that signature. A call in a condition can apply a type
 /// predicate, and a statement call an assertion, each with its target. A
@@ -582,6 +621,14 @@ fn infer_flow_assigned_types_cycle_result<'db>(
     _id: salsa::Id,
     _input: FlowSubjectWritesInput<'db>,
 ) -> Option<FlowAssignedTypes<'db>> {
+    None
+}
+
+fn infer_flow_compared_types_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: FlowSubjectWritesInput<'db>,
+) -> Option<FlowComparedTypes<'db>> {
     None
 }
 
