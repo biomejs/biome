@@ -15,7 +15,7 @@ use crate::globals::{
     GLOBAL_STRING_KEYWORD_ID, GLOBAL_SYMBOL_KEYWORD_ID, GLOBAL_UNDEFINED_ID, GLOBAL_UNKNOWN_ID,
     GLOBAL_UNKNOWN_KEYWORD_ID,
 };
-use crate::interned_types::{InternedLiteral, Literal, TypeMemberKind};
+use crate::interned_types::{InternedLiteral, InternedObject, Literal, TypeMemberKind};
 use crate::resolved::InferredTypeData;
 use crate::type_relation::{
     Assignability, InstanceType, PropertyLookup, PropertyPresence, TypeResolver,
@@ -56,19 +56,22 @@ pub enum NarrowingPredicate<'db> {
 }
 
 /// Returns whether `ty` carries no information that a runtime test could
-/// filter: `any` and the internal `Unknown`.
+/// filter: the internal `Unknown`, which inference gives a type it couldn't
+/// determine.
 ///
-/// Either type absorbs every union it joins, and [`narrow_type`] returns it
-/// unchanged for every predicate and branch. No test can therefore refine it or
-/// prove a branch impossible, so callers can skip collecting tests for it.
-/// `never` is excluded: it also stays unchanged, but it already proves that a
-/// branch is impossible.
+/// `Unknown` absorbs every union it joins, and the narrowing functions
+/// return it unchanged for every test and branch. No test can therefore
+/// refine it or prove a branch impossible, so callers can skip collecting
+/// tests for it. `never` is excluded: it also stays unchanged, but it already
+/// proves that a branch is impossible. `any` is excluded too, because a
+/// primitive `typeof` test, `instanceof`, and a type predicate narrow it, as
+/// [`narrow_type`] describes.
 pub fn is_narrowing_invariant(ty: InferredTypeData<'_>) -> bool {
-    matches!(ty, InferredTypeData::AnyKeyword | InferredTypeData::Unknown)
+    ty == InferredTypeData::Unknown
 }
 
-/// Returns whether a collected type reference already denotes `any` or the
-/// internal `Unknown`, without resolving it.
+/// Returns whether a collected type reference already denotes the internal
+/// `Unknown`, without resolving it.
 ///
 /// This is the resolution-free counterpart of [`is_narrowing_invariant`];
 /// `raw_types` is the module table that local references index. It returns
@@ -78,11 +81,30 @@ pub fn is_raw_narrowing_invariant(reference: &TypeReference, raw_types: &[RawTyp
         return false;
     };
     match id {
-        RawTypeId::Global(_) => *id == GLOBAL_UNKNOWN_ID || *id == GLOBAL_ANY_KEYWORD_ID,
-        RawTypeId::Local(local) => matches!(
-            raw_types.get(local.index()),
-            Some(RawTypeData::Unknown | RawTypeData::AnyKeyword)
-        ),
+        RawTypeId::Global(_) => *id == GLOBAL_UNKNOWN_ID,
+        RawTypeId::Local(local) => {
+            matches!(raw_types.get(local.index()), Some(RawTypeData::Unknown))
+        }
+    }
+}
+
+/// Returns whether a collected type reference already denotes `any`, as the
+/// annotation `x: any` does, without resolving it.
+///
+/// Only some runtime tests narrow `any`, as [`narrow_type`] describes, so
+/// collection uses this to skip the other tests of such a variable.
+/// `raw_types` is the module table that local references index. It returns
+/// false for references that only resolve to `any`, such as an alias or an
+/// import.
+pub fn is_raw_any(reference: &TypeReference, raw_types: &[RawTypeData]) -> bool {
+    let TypeReference::Resolved(id) = reference else {
+        return false;
+    };
+    match id {
+        RawTypeId::Global(_) => *id == GLOBAL_ANY_KEYWORD_ID,
+        RawTypeId::Local(local) => {
+            matches!(raw_types.get(local.index()), Some(RawTypeData::AnyKeyword))
+        }
     }
 }
 
@@ -570,14 +592,26 @@ pub fn raw_predicate_target<'a>(
 /// Pass a normalized `ty`. The result is `NeverKeyword` only when no member of
 /// `ty` can pass, and it is `ty` itself when the test removes nothing. A member
 /// stays unchanged when the test can't tell whether its values pass, which is
-/// the case for `any`, `Unknown`, generic types, and unresolved handles. Other
+/// the case for `Unknown`, generic types, and unresolved handles. Other
 /// members follow these rules:
 ///
 /// - A `void` member becomes `Unknown`, because a `void` value can be any value
 ///   at runtime.
-/// - `unknown` narrows only in a true branch: to the primitive type of a
-///   primitive `typeof` test, or to the literal of an equality test. TypeScript
-///   also narrows it for `"object"` and `"function"`, so Biome is wider there.
+/// - `any` narrows only in the true branch of `typeof` with a primitive kind
+///   or `"undefined"`, to the type of that kind, as in TypeScript. Every other
+///   test and branch keeps `any`, including `typeof` with `"object"` or
+///   `"function"`. [`narrow_by_instanceof`] and [`narrow_by_type_predicate`]
+///   also narrow `any` in their true branches.
+/// - `unknown` narrows as the union `{} | null | undefined` for truthiness,
+///   nullishness, `typeof`, and strict equality with `null` or `undefined`, as
+///   in TypeScript: each of the three narrows by the rules here, and the result
+///   is `unknown` again when none of them changes. So a truthy `unknown` is
+///   `{}`, `!== null` gives `{} | undefined`, and `typeof` with `"object"`
+///   gives `object | null`. Strict equality with another literal gives the
+///   literal in the true branch and keeps `unknown` in the false branch.
+/// - `{}`, a type literal or an object expression without members, becomes
+///   `object` in the true branch of `typeof` with `"object"`, as in
+///   TypeScript. An empty interface or class stays as it is.
 /// - The false branch of an equality test keeps a primitive type such as
 ///   `string`, because a type can't exclude a single literal from it. The false
 ///   branch of a truthiness test keeps `string`, `number`, and `bigint` for the
@@ -957,17 +991,18 @@ pub fn narrow_by_in_operator<'db>(
 ///   with `class B extends A`. When no member remains, the result is the
 ///   instance type if it is a subtype of `ty`, as `A` is of
 ///   `{ a: number } | string` with `class A { a = 1 }`, and `ty` otherwise,
-///   where TypeScript gives the intersection of the two. `unknown` becomes
-///   the instance type.
+///   where TypeScript gives the intersection of the two. `unknown` and `any`
+///   become the instance type, which has an `any` type argument for each
+///   type parameter of a generic class, as `Map<any, any>` for `Map`.
 /// - When `positive` is false, the members derived from the instance type
 ///   are removed, which can give `never`. As in TypeScript, nothing is
 ///   removed when `constructor` has several instance types, or when the
-///   instance type is `{}` or not an object type.
+///   instance type is `{}` or not an object type, and `any` stays `any`.
 ///
-/// TypeScript gives an instance of a generic class `any` type arguments,
-/// such as `Box<any>`. Biome has no such type, so `unknown` stays `unknown`,
-/// a member that an instance of a generic class is derived from stays as it
-/// is, and the result is `ty` when no member remains.
+/// A member of a union that an instance of a generic class is derived from
+/// stays as it is, because it has its own type arguments, and the result is
+/// `ty` when no member remains, where TypeScript gives an intersection with
+/// the instance type that has `any` type arguments.
 ///
 /// Returns `ty` unchanged when Biome can't tell the result:
 ///
@@ -996,6 +1031,8 @@ pub fn narrow_by_instanceof<'db>(
     };
     let narrowed = if positive {
         instances_in(db, ty, &instances, resolve)
+    } else if ty == InferredTypeData::AnyKeyword {
+        None
     } else {
         instances_excluded(db, ty, &instances, resolve)
     };
@@ -1010,18 +1047,25 @@ fn instances_in<'db>(
     instances: &[InstanceType<'db>],
     resolve: &mut TypeResolver<'db, '_>,
 ) -> Option<InferredTypeData<'db>> {
+    if matches!(
+        ty,
+        InferredTypeData::UnknownKeyword | InferredTypeData::AnyKeyword
+    ) {
+        return instances
+            .iter()
+            .map(|instance| instance.with_any_arguments(db))
+            .collect::<Option<Vec<_>>>()
+            .map(|types| InferredTypeData::union_from_types(db, types));
+    }
     // Gives the union of the instance types, or `None` when one is a generic
     // class without type arguments, because a read must never have that type.
     let instance_type = || {
         instances
             .iter()
-            .map(|instance| (!instance.is_generic).then_some(instance.target))
+            .map(|instance| (!instance.is_generic()).then_some(instance.target))
             .collect::<Option<Vec<_>>>()
             .map(|types| InferredTypeData::union_from_types(db, types))
     };
-    if ty == InferredTypeData::UnknownKeyword {
-        return instance_type();
-    }
     let mut remaining = MAX_NARROWING_STEPS;
     let members = union_members(db, ty, &mut remaining)?;
     if members.contains(&InferredTypeData::UnknownKeyword) {
@@ -1036,7 +1080,7 @@ fn instances_in<'db>(
             } else if is_derived_from(db, instance.target, *member, resolve)? {
                 // A member keeps its own type arguments, which an instance
                 // of a generic class lacks.
-                narrowed.push(if instance.is_generic {
+                narrowed.push(if instance.is_generic() {
                     *member
                 } else {
                     instance.target
@@ -1084,8 +1128,8 @@ fn instances_excluded<'db>(
     })
 }
 
-/// Returns whether `declared` is `unknown` or has a member that is neither
-/// `null`, `undefined`, nor a primitive type. Only then can
+/// Returns whether `declared` is `unknown` or `any`, or has a member that is
+/// neither `null`, `undefined`, nor a primitive type. Only then can
 /// [`narrow_by_instanceof`] narrow a value of that declared type to a type
 /// other than `never`.
 ///
@@ -1162,6 +1206,10 @@ pub fn may_narrow_by_instanceof(db: &dyn TypeDb, declared: InferredTypeData) -> 
 /// that a member of `target` is a subtype of it. It keeps `unknown`, and it
 /// keeps every member when the true branch is empty.
 ///
+/// `any` becomes `target` when `positive` is true and stays `any` when it is
+/// false, as in TypeScript, whatever the target. TypeScript gives `never` in
+/// the false branch when `target` is `any` itself.
+///
 /// `ty` is returned unchanged in these cases:
 ///
 /// - A comparison of two members can't tell whether either is a subtype of
@@ -1170,7 +1218,8 @@ pub fn may_narrow_by_instanceof(db: &dyn TypeDb, declared: InferredTypeData) -> 
 ///   these comparisons.
 /// - `ty` is a union with `unknown`.
 /// - Biome may reach two classes with the same contents as one.
-/// - `target` has `any` or an undetermined member.
+/// - `target` has `any` or an undetermined member. When `ty` is `any`, only
+///   an undetermined `target` leaves it unchanged.
 /// - The comparisons run out of their budget of 256 visited types and pairs.
 ///
 /// `resolve` resolves handles as for [`narrow_type`].
@@ -1183,6 +1232,13 @@ pub fn narrow_by_type_predicate<'db>(
 ) -> InferredTypeData<'db> {
     if is_narrowing_invariant(ty) || ty == InferredTypeData::NeverKeyword {
         return ty;
+    }
+    if ty == InferredTypeData::AnyKeyword {
+        return if positive && !matches!(target, InferredTypeData::Unknown) {
+            target
+        } else {
+            ty
+        };
     }
     let resolve: &mut TypeResolver<'db, '_> = &mut resolve;
     let Some(predicate) = primitive_predicate(db, target) else {
@@ -1492,10 +1548,12 @@ fn predicate_branch<'db>(
 ) -> Option<InferredTypeData<'db>> {
     let mut remaining = MAX_NARROWING_STEPS;
     let candidates = union_members(db, target, &mut remaining)?;
-    if candidates
-        .iter()
-        .any(|candidate| is_narrowing_invariant(*candidate))
-    {
+    if candidates.iter().any(|candidate| {
+        matches!(
+            candidate,
+            InferredTypeData::AnyKeyword | InferredTypeData::Unknown
+        )
+    }) {
         return None;
     }
     if ty == InferredTypeData::UnknownKeyword {
@@ -1985,23 +2043,22 @@ fn narrow_non_union<'db>(
     positive: bool,
     resolve: &mut TypeResolver<'db, '_>,
 ) -> InferredTypeData<'db> {
-    if ty == InferredTypeData::VoidKeyword {
-        return InferredTypeData::Unknown;
-    }
-    if ty == InferredTypeData::UnknownKeyword && positive {
-        return match predicate {
-            PreparedPredicate::Typeof(TypeofKind::Undefined) => InferredTypeData::Undefined,
-            PreparedPredicate::Typeof(TypeofKind::Boolean) => InferredTypeData::Boolean,
-            PreparedPredicate::Typeof(TypeofKind::Number) => InferredTypeData::Number,
-            PreparedPredicate::Typeof(TypeofKind::BigInt) => InferredTypeData::BigInt,
-            PreparedPredicate::Typeof(TypeofKind::String) => InferredTypeData::String,
-            PreparedPredicate::Typeof(TypeofKind::Symbol) => InferredTypeData::Symbol,
-            PreparedPredicate::Literal(_, LiteralValue::Number(value)) if value.is_nan() => {
-                InferredTypeData::NeverKeyword
-            }
-            PreparedPredicate::Literal(literal, _) => *literal,
-            _ => ty,
-        };
+    match ty {
+        InferredTypeData::VoidKeyword => return InferredTypeData::Unknown,
+        InferredTypeData::AnyKeyword => {
+            return match (predicate, positive) {
+                (PreparedPredicate::Typeof(kind), true)
+                    if !matches!(kind, TypeofKind::Object | TypeofKind::Function) =>
+                {
+                    typeof_type(db, *kind).unwrap_or(ty)
+                }
+                _ => ty,
+            };
+        }
+        InferredTypeData::UnknownKeyword => {
+            return narrow_unknown(db, predicate, positive, resolve);
+        }
+        _ => {}
     }
     match predicate {
         PreparedPredicate::Truthy => match ty {
@@ -2051,14 +2108,103 @@ fn narrow_non_union<'db>(
     }
 }
 
+/// Narrows `unknown` by `predicate`, as [`narrow_type`] describes.
+///
+/// For truthiness, nullishness, `typeof`, and strict equality with `null` or
+/// `undefined`, `unknown` stands for `{} | null | undefined`, the values that
+/// TypeScript gives it for such tests. Each of the three is narrowed on its
+/// own, and the result is `unknown` again only when all three stay
+/// unchanged, so `!== null` gives `{} | undefined`. Strict equality with
+/// another literal gives the literal in the true branch, or `never` for
+/// `NaN`, and keeps `unknown` in the false branch.
+fn narrow_unknown<'db>(
+    db: &'db dyn TypeDb,
+    predicate: &PreparedPredicate<'db>,
+    positive: bool,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> InferredTypeData<'db> {
+    let unknown = InferredTypeData::UnknownKeyword;
+    let nullish_literal = match predicate {
+        PreparedPredicate::Literal(_, LiteralValue::Null | LiteralValue::Undefined) => true,
+        PreparedPredicate::Literal(_, LiteralValue::Number(value)) if value.is_nan() => {
+            return if positive {
+                InferredTypeData::NeverKeyword
+            } else {
+                unknown
+            };
+        }
+        PreparedPredicate::Literal(literal, _) => return if positive { *literal } else { unknown },
+        PreparedPredicate::Truthy
+        | PreparedPredicate::FalsyValues
+        | PreparedPredicate::Nullish
+        | PreparedPredicate::Typeof(_) => false,
+    };
+    let empty = empty_object(db);
+    let members = [empty, InferredTypeData::Null, InferredTypeData::Undefined];
+    let narrowed = members.map(|member| {
+        // `{}` has no value that equals `null` or `undefined`, which the
+        // comparison of literals doesn't tell for object types.
+        if nullish_literal && member == empty {
+            return if positive {
+                InferredTypeData::NeverKeyword
+            } else {
+                member
+            };
+        }
+        narrow_non_union(db, member, predicate, positive, resolve)
+    });
+    if narrowed == members {
+        unknown
+    } else {
+        InferredTypeData::union_from_types(db, narrowed.to_vec())
+    }
+}
+
+/// Returns `{}`, the type literal without members, which every value other
+/// than `null` and `undefined` has.
+fn empty_object(db: &dyn TypeDb) -> InferredTypeData<'_> {
+    InferredTypeData::Object(InternedObject::new(
+        db,
+        None,
+        Box::default(),
+        false,
+        ObjectKind::Shape,
+    ))
+}
+
+/// Returns whether `ty` is `{}`: a type literal or an object expression
+/// without members, also through an alias. An interface or a class without
+/// members is not, because TypeScript keeps such a type where it replaces `{}`
+/// with `object`.
+fn is_empty_object_literal<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> bool {
+    let ty = match ty {
+        InferredTypeData::InstanceOf(instance) if instance.type_parameters(db).is_empty() => {
+            resolve(instance.ty(db))
+        }
+        ty => ty,
+    };
+    matches!(
+        ty,
+        InferredTypeData::Object(object)
+            if object.prototype(db).is_none()
+                && !object.has_unknown_members(db)
+                && object.members(db).is_empty()
+    )
+}
+
 /// Narrows the object type `ty` by a falsy or `typeof` test that the type's
 /// truthiness or `typeof` result does not decide.
 ///
 /// Returns `NeverKeyword` when no value that passes the test can have `ty`. In
 /// the true branch of `typeof`, returns the tested kind's type when every value
-/// of that kind has `ty`. Returns `ty` unchanged otherwise, including when `ty`
-/// is not an object type or the branch keeps object types. [`narrow_type`]
-/// lists the branches that compare object types.
+/// of that kind has `ty`, and `object` for `"object"` when `ty` is `{}`.
+/// Returns `ty` unchanged otherwise, including when `ty` is not an object type
+/// or the branch keeps object types. [`narrow_type`] lists the branches that
+/// compare object types.
 fn narrow_object<'db>(
     db: &'db dyn TypeDb,
     ty: InferredTypeData<'db>,
@@ -2066,6 +2212,12 @@ fn narrow_object<'db>(
     positive: bool,
     resolve: &mut TypeResolver<'db, '_>,
 ) -> InferredTypeData<'db> {
+    if positive
+        && matches!(predicate, PreparedPredicate::Typeof(TypeofKind::Object))
+        && is_empty_object_literal(db, ty, resolve)
+    {
+        return InferredTypeData::ObjectKeyword;
+    }
     const FALSY_KINDS: [TypeofKind; 4] = [
         TypeofKind::String,
         TypeofKind::Number,
@@ -2804,11 +2956,7 @@ mod tests {
     #[test]
     fn uncertainty_and_never_are_preserved() {
         let db = TestDb::default();
-        for ty in [
-            InferredTypeData::Unknown,
-            InferredTypeData::AnyKeyword,
-            InferredTypeData::NeverKeyword,
-        ] {
+        for ty in [InferredTypeData::Unknown, InferredTypeData::NeverKeyword] {
             for predicate in [
                 NarrowingPredicate::Truthy,
                 NarrowingPredicate::Nullish,
@@ -2820,25 +2968,27 @@ mod tests {
                 }
             }
         }
-        for unknown in [InferredTypeData::Unknown, InferredTypeData::UnknownKeyword] {
+        for (unknown, expected) in [
+            (InferredTypeData::Unknown, InferredTypeData::Unknown),
+            (InferredTypeData::UnknownKeyword, empty_object(&db)),
+        ] {
             let ty = InferredTypeData::Union(InternedUnion::new(
                 &db,
                 Box::from([unknown, InferredTypeData::Null]),
             ));
             assert_eq!(
                 narrow_type(&db, ty, NarrowingPredicate::Nullish, false),
-                unknown
+                expected
             );
         }
     }
 
     #[test]
-    fn only_any_and_inference_failures_are_narrowing_invariant() {
+    fn only_inference_failures_are_narrowing_invariant() {
         let db = TestDb::default();
-        for ty in [InferredTypeData::AnyKeyword, InferredTypeData::Unknown] {
-            assert!(is_narrowing_invariant(ty), "{ty:?}");
-        }
+        assert!(is_narrowing_invariant(InferredTypeData::Unknown));
         for ty in [
+            InferredTypeData::AnyKeyword,
             InferredTypeData::UnknownKeyword,
             InferredTypeData::NeverKeyword,
             InferredTypeData::String,
@@ -2850,19 +3000,39 @@ mod tests {
     }
 
     #[test]
-    fn raw_narrowing_invariance_needs_no_resolution() {
+    fn raw_narrowing_invariance_and_any_need_no_resolution() {
         let local = TypeReference::Resolved(RawTypeId::Local(crate::TypeId::new(0)));
+        let alias = TypeReference::Resolved(RawTypeId::Local(crate::TypeId::new(1)));
+        // Each case gives whether the reference is invariant and whether it is
+        // `any`.
         for (reference, raw_types, expected) in [
-            (TypeReference::unknown(), vec![], true),
-            (TypeReference::Resolved(GLOBAL_ANY_KEYWORD_ID), vec![], true),
-            (local.clone(), vec![RawTypeData::AnyKeyword], true),
-            (local.clone(), vec![RawTypeData::Unknown], true),
-            (local.clone(), vec![RawTypeData::UnknownKeyword], false),
-            (local.clone(), vec![RawTypeData::String], false),
-            (local, vec![], false),
+            (TypeReference::unknown(), vec![], (true, false)),
+            (
+                TypeReference::Resolved(GLOBAL_ANY_KEYWORD_ID),
+                vec![],
+                (false, true),
+            ),
+            (local.clone(), vec![RawTypeData::AnyKeyword], (false, true)),
+            (local.clone(), vec![RawTypeData::Unknown], (true, false)),
+            (
+                local.clone(),
+                vec![RawTypeData::UnknownKeyword],
+                (false, false),
+            ),
+            (local.clone(), vec![RawTypeData::String], (false, false)),
+            // An alias of `any` is `any` only once resolved.
+            (
+                local.clone(),
+                vec![RawTypeData::Reference(alias), RawTypeData::AnyKeyword],
+                (false, false),
+            ),
+            (local, vec![], (false, false)),
         ] {
             assert_eq!(
-                is_raw_narrowing_invariant(&reference, &raw_types),
+                (
+                    is_raw_narrowing_invariant(&reference, &raw_types),
+                    is_raw_any(&reference, &raw_types),
+                ),
                 expected,
                 "{reference:?} in {raw_types:?}"
             );
@@ -2913,6 +3083,129 @@ mod tests {
                 InferredTypeData::Unknown
             );
         }
+    }
+
+    #[test]
+    fn unknown_narrows_as_an_empty_object_null_or_undefined() {
+        let db = TestDb::default();
+        let empty = empty_object(&db);
+        let unknown = InferredTypeData::UnknownKeyword;
+        let either = |types| union(&db, types);
+        let null = InferredTypeData::Null;
+        let undefined = InferredTypeData::Undefined;
+        for (predicate, positive, expected) in [
+            (NarrowingPredicate::Truthy, true, empty),
+            (NarrowingPredicate::Truthy, false, unknown),
+            (
+                NarrowingPredicate::Nullish,
+                true,
+                either(&[null, undefined]),
+            ),
+            (NarrowingPredicate::Nullish, false, empty),
+            (NarrowingPredicate::Literal(null), true, null),
+            (
+                NarrowingPredicate::Literal(null),
+                false,
+                either(&[empty, undefined]),
+            ),
+            (NarrowingPredicate::Literal(undefined), true, undefined),
+            (
+                NarrowingPredicate::Literal(undefined),
+                false,
+                either(&[empty, null]),
+            ),
+            (
+                NarrowingPredicate::Typeof(TypeofKind::Object),
+                true,
+                either(&[InferredTypeData::ObjectKeyword, null]),
+            ),
+            (
+                NarrowingPredicate::Typeof(TypeofKind::Object),
+                false,
+                either(&[empty, undefined]),
+            ),
+            (
+                NarrowingPredicate::Typeof(TypeofKind::Function),
+                true,
+                function_instance(&db),
+            ),
+            (
+                NarrowingPredicate::Typeof(TypeofKind::Function),
+                false,
+                unknown,
+            ),
+            (
+                NarrowingPredicate::Typeof(TypeofKind::Undefined),
+                true,
+                undefined,
+            ),
+            (
+                NarrowingPredicate::Typeof(TypeofKind::Undefined),
+                false,
+                either(&[empty, null]),
+            ),
+            (
+                NarrowingPredicate::Typeof(TypeofKind::String),
+                true,
+                InferredTypeData::String,
+            ),
+            (
+                NarrowingPredicate::Typeof(TypeofKind::String),
+                false,
+                unknown,
+            ),
+            (
+                NarrowingPredicate::Literal(string(&db, "a")),
+                true,
+                string(&db, "a"),
+            ),
+            (
+                NarrowingPredicate::Literal(string(&db, "a")),
+                false,
+                unknown,
+            ),
+        ] {
+            assert_eq!(
+                narrow_type(&db, unknown, predicate, positive),
+                expected,
+                "{predicate:?} {positive}"
+            );
+        }
+        assert_eq!(falsy_values(&db, unknown), unknown);
+    }
+
+    #[test]
+    fn any_narrows_only_by_primitive_typeof_in_the_true_branch() {
+        let db = TestDb::default();
+        let any = InferredTypeData::AnyKeyword;
+        for kind in typeof_kinds() {
+            let expected = match kind {
+                TypeofKind::Object | TypeofKind::Function => any,
+                kind => typeof_type(&db, kind).unwrap(),
+            };
+            assert_eq!(
+                narrow_type(&db, any, NarrowingPredicate::Typeof(kind), true),
+                expected,
+                "{kind:?}"
+            );
+            assert_eq!(
+                narrow_type(&db, any, NarrowingPredicate::Typeof(kind), false),
+                any,
+                "{kind:?}"
+            );
+        }
+        for predicate in [
+            NarrowingPredicate::Truthy,
+            NarrowingPredicate::Nullish,
+            NarrowingPredicate::Literal(InferredTypeData::Null),
+            NarrowingPredicate::Literal(InferredTypeData::Undefined),
+            NarrowingPredicate::Literal(string(&db, "a")),
+        ] {
+            for positive in [false, true] {
+                assert_eq!(narrow_type(&db, any, predicate, positive), any);
+            }
+        }
+        assert_eq!(falsy_values(&db, any), any);
     }
 
     #[test]
@@ -3057,17 +3350,29 @@ mod tests {
     #[test]
     fn empty_object_types_become_the_tested_kind() {
         let db = TestDb::default();
-        let object = InferredTypeData::Object(InternedObject::new(
+        let object = empty_object(&db);
+        let expression = InferredTypeData::Object(InternedObject::new(
             &db,
             None,
             Box::default(),
             false,
-            ObjectKind::Shape,
+            ObjectKind::Expression,
         ));
+        let empty_interface = interface(&db, &[], Vec::new());
+        // An object expression is never a primitive, and `{}` describes it.
+        let object_typeof = NarrowingPredicate::Typeof(TypeofKind::Object);
+        assert_eq!(
+            narrow_type(&db, expression, object_typeof, true),
+            InferredTypeData::ObjectKeyword
+        );
+        assert_eq!(
+            narrow_type(&db, expression, object_typeof, false),
+            expression
+        );
         for ty in [
             object,
             InferredTypeData::instance_of(&db, object, Box::default()),
-            interface(&db, &[], Vec::new()),
+            empty_interface,
         ] {
             assert_eq!(
                 narrow_type(&db, ty, NarrowingPredicate::Nullish, true),
@@ -3078,7 +3383,10 @@ mod tests {
             for kind in typeof_kinds() {
                 let expected = match kind {
                     TypeofKind::Undefined => InferredTypeData::NeverKeyword,
-                    TypeofKind::Object => ty,
+                    // As in TypeScript, `{}` becomes `object`, but an empty
+                    // interface stays as it is.
+                    TypeofKind::Object if ty == empty_interface => ty,
+                    TypeofKind::Object => InferredTypeData::ObjectKeyword,
                     TypeofKind::Boolean => InferredTypeData::Boolean,
                     TypeofKind::Number => InferredTypeData::Number,
                     TypeofKind::BigInt => InferredTypeData::BigInt,
@@ -4433,17 +4741,6 @@ mod tests {
             None,
             Text::new_static("T"),
         ));
-        let generic_class = InferredTypeData::Class(InternedClass::new(
-            db,
-            Box::from([generic]),
-            ClassParents::default(),
-            Box::default(),
-            Box::default(),
-            Some(Text::new_static("Box")),
-            false,
-            None,
-            0,
-        ));
         let has_instance = class(
             db,
             "Checker",
@@ -4467,8 +4764,8 @@ mod tests {
         let object_class = InferredTypeData::GlobalType(OBJECT_ID_GLOBAL_TYPE_ID);
         let value = union(db, &[ia, ic]);
         for (ty, constructor) in [
-            // TypeScript gives `Box<any>`.
-            (InferredTypeData::UnknownKeyword, generic_class),
+            (InferredTypeData::AnyKeyword, object_class),
+            (InferredTypeData::UnknownKeyword, object_class),
             (value, has_instance),
             (value, inherits_has_instance),
             (value, generic_constructor),
@@ -4487,6 +4784,60 @@ mod tests {
             InferredTypeData::union_from_types(db, vec![ia, ic])
         );
         assert_eq!(narrow_instance(db, value, constructors, false), value);
+    }
+
+    #[test]
+    fn instanceof_gives_unknown_and_any_the_instance_type_with_any_type_arguments() {
+        let db = &TestDb::default();
+        let a = class(db, "A", None, vec![member("a", InferredTypeData::Number)]);
+        let parameter = |name| {
+            InferredTypeData::Generic(InternedGenericTypeParameter::new(
+                db,
+                false,
+                None,
+                None,
+                Text::new_static(name),
+            ))
+        };
+        let pair = InferredTypeData::Class(InternedClass::new(
+            db,
+            Box::from([parameter("K"), parameter("V")]),
+            ClassParents::default(),
+            Box::default(),
+            Box::default(),
+            Some(Text::new_static("Pair")),
+            false,
+            None,
+            0,
+        ));
+        let any_pair = InferredTypeData::instance_of(
+            db,
+            pair,
+            Box::from([InferredTypeData::AnyKeyword, InferredTypeData::AnyKeyword]),
+        );
+        for ty in [
+            InferredTypeData::UnknownKeyword,
+            InferredTypeData::AnyKeyword,
+        ] {
+            assert_eq!(narrow_instance(db, ty, a, true), instance(db, a));
+            assert_eq!(narrow_instance(db, ty, pair, true), any_pair);
+            // As in TypeScript, the false branch removes nothing.
+            assert_eq!(narrow_instance(db, ty, a, false), ty);
+            assert_eq!(narrow_instance(db, ty, pair, false), ty);
+        }
+        // A member that a generic class is derived from keeps its own type
+        // arguments, and an unrelated member leaves the type unchanged.
+        let string_pair = InferredTypeData::instance_of(
+            db,
+            pair,
+            Box::from([InferredTypeData::String, InferredTypeData::Number]),
+        );
+        let ty = union(db, &[string_pair, InferredTypeData::Null]);
+        assert_eq!(narrow_instance(db, ty, pair, true), string_pair);
+        assert_eq!(
+            narrow_instance(db, InferredTypeData::String, pair, true),
+            InferredTypeData::String
+        );
     }
 
     #[test]
@@ -4522,7 +4873,7 @@ mod tests {
     }
 
     #[test]
-    fn only_object_types_and_unknown_may_narrow_by_instanceof() {
+    fn only_object_types_unknown_and_any_may_narrow_by_instanceof() {
         let db = &TestDb::default();
         let a = instance(db, class(db, "A", None, Vec::new()));
         for (ty, expected) in [
@@ -4530,6 +4881,7 @@ mod tests {
             (a, true),
             (InferredTypeData::ObjectKeyword, true),
             (InferredTypeData::UnknownKeyword, true),
+            (InferredTypeData::AnyKeyword, true),
             (
                 union(db, &[InferredTypeData::String, InferredTypeData::Null]),
                 false,
@@ -5295,6 +5647,28 @@ mod tests {
                 assert_eq!(narrow_predicate(db, ty, target, positive), ty, "{positive}");
             }
         }
+    }
+
+    #[test]
+    fn type_predicates_give_any_their_target_in_the_true_branch() {
+        let db = &TestDb::default();
+        let any = InferredTypeData::AnyKeyword;
+        let foo = named_interface(db, "Foo", &[], vec![member("a", InferredTypeData::Number)]);
+        for target in [
+            foo,
+            InferredTypeData::String,
+            string(db, "a"),
+            InferredTypeData::Null,
+            union(db, &[foo, InferredTypeData::Number]),
+            any,
+        ] {
+            assert_eq!(narrow_predicate(db, any, target, true), target);
+            assert_eq!(narrow_predicate(db, any, target, false), any);
+        }
+        assert_eq!(
+            narrow_predicate(db, any, InferredTypeData::Unknown, true),
+            any
+        );
     }
 
     #[test]

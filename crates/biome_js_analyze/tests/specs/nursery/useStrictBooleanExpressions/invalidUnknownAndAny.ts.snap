@@ -1,0 +1,70 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidUnknownAndAny.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// `typeof` with `"object"` and `!== null` narrow `unknown` to `object`, which
+// is always truthy, and tests that don't narrow `any` keep `any`.
+
+function objectNotNull(value: unknown) {
+	if (typeof value === "object" && value !== null) {
+		if (value) {
+			return 1;
+		}
+	}
+}
+
+function anyObject(value: any) {
+	if (typeof value === "object") {
+		if (value) {
+			return 1;
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidUnknownAndAny.ts:7:7 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses an always-truthy value.
+  
+    5 │ function objectNotNull(value: unknown) {
+    6 │ 	if (typeof value === "object" && value !== null) {
+  > 7 │ 		if (value) {
+      │ 		    ^^^^^
+    8 │ 			return 1;
+    9 │ 		}
+  
+  i Objects, functions, and symbols are always truthy.
+  
+  i Check a property of the value or remove the condition.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnknownAndAny.ts:15:7 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses an unrestricted type.
+  
+    13 │ function anyObject(value: any) {
+    14 │ 	if (typeof value === "object") {
+  > 15 │ 		if (value) {
+       │ 		    ^^^^^
+    16 │ 			return 1;
+    17 │ 		}
+  
+  i This type can contain both truthy and falsy values of different kinds.
+  
+  i Narrow the type before checking it, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

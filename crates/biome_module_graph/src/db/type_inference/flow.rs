@@ -2079,7 +2079,10 @@ impl<'db> ResolutionCtx<'db, '_> {
         {
             return kinds == u8::MAX;
         }
-        if matches!(ty, TypeData::Unknown | TypeData::NeverKeyword) || is_narrowing_invariant(ty) {
+        if matches!(
+            ty,
+            TypeData::Unknown | TypeData::NeverKeyword | TypeData::AnyKeyword
+        ) {
             return false;
         }
         let mut solve = GuardSolve::new(
@@ -2118,7 +2121,11 @@ impl<'db> ResolutionCtx<'db, '_> {
         while let Some(index) = pending.pop() {
             match root.guards.get(index) {
                 Some(FlowGuard::Both { left, right, .. }) => pending.extend([*left, *right]),
-                Some(FlowGuard::ReadonlyPath(guard) | FlowGuard::Bypass { guard, .. }) => {
+                Some(
+                    FlowGuard::ReadonlyPath(guard)
+                    | FlowGuard::Bypass { guard, .. }
+                    | FlowGuard::Unmatched(guard),
+                ) => {
                     pending.push(*guard);
                 }
                 Some(FlowGuard::Test {
@@ -2216,8 +2223,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// `typeof` types flattened.
     ///
     /// Returns `None` when no runtime test can change the type, because it
-    /// contains `any` or an undetermined member, and `Unknown` when flattening
-    /// exceeds its work limit.
+    /// contains an undetermined member, and `Unknown` when flattening exceeds
+    /// its work limit. `any` is a baseline, because a primitive `typeof`
+    /// test, `instanceof`, and a type predicate narrow it.
     fn narrowing_baseline(&mut self, declared: TypeData<'db>) -> Option<TypeData<'db>> {
         match self.flow_baseline(declared) {
             Some(baseline) if is_narrowing_invariant(baseline) => None,
@@ -2278,8 +2286,10 @@ impl<'db> ResolutionCtx<'db, '_> {
         } else {
             flattened
         };
-        (!is_narrowing_invariant(baseline) && may_narrow_by_property(self.db, baseline))
-            .then_some(baseline)
+        (!is_narrowing_invariant(baseline)
+            && baseline != TypeData::AnyKeyword
+            && may_narrow_by_property(self.db, baseline))
+        .then_some(baseline)
     }
 
     /// Returns the type that narrowing of a subject in
@@ -2291,8 +2301,10 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// [`Self::narrowing_baseline`] when the flattened type is one. When
     /// `instance_tested` is true, `instanceof` or a type-guard function whose
     /// target has only object types narrows the subject too. These tests also
-    /// narrow `unknown` and a type with one object type, which
-    /// [`may_narrow_by_instanceof`] checks.
+    /// narrow `unknown`, `any`, and a type with one object type, which
+    /// [`may_narrow_by_instanceof`] checks. No test of a property or `in`
+    /// narrows `any`, so the result is `any` only when `instance_tested` is
+    /// true.
     ///
     /// Unlike [`Self::narrowing_baseline`], flattening resolves handles to
     /// local types of this context's module through this context instead of
@@ -2646,6 +2658,16 @@ impl<'db> ResolutionCtx<'db, '_> {
                     return self.apply_guard(root, *guard, solve, ty, remaining);
                 }
             }
+            FlowGuard::Unmatched(guard) => {
+                let has_unknown = ty == TypeData::UnknownKeyword
+                    || matches!(ty, TypeData::Union(union)
+                        if union.types(self.db).contains(&TypeData::UnknownKeyword));
+                if has_unknown {
+                    ty
+                } else {
+                    return self.apply_guard(root, *guard, solve, ty, remaining);
+                }
+            }
             FlowGuard::Call { call, positive } => {
                 return self.apply_call(root, index, *call, *positive, solve, ty, remaining);
             }
@@ -2940,8 +2962,8 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// that names `C`.
     ///
     /// Returns `ty` unchanged when the subject's `declared` type has no object
-    /// type and is not `unknown`, because the test could then only make a
-    /// branch impossible. `C` is resolved only after that check.
+    /// type and is neither `unknown` nor `any`, because the test could then
+    /// only make a branch impossible. `C` is resolved only after that check.
     fn narrow_by_instance(
         &mut self,
         ty: TypeData<'db>,
@@ -3033,9 +3055,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     ///
     /// `object_target` is true when collection found that every member of the
     /// target is an object type. Biome narrows by such a target only a type
-    /// that has an object type or is `unknown`, so when `declared` is not one,
-    /// this returns `ty` unchanged without resolving the target. TypeScript
-    /// also narrows a primitive by such a target, as `string` by
+    /// that has an object type or is `unknown` or `any`, so when `declared` is
+    /// not one, this returns `ty` unchanged without resolving the target.
+    /// TypeScript also narrows a primitive by such a target, as `string` by
     /// `{ length: number }`. See [`may_narrow_by_instanceof`].
     fn narrow_by_predicate(
         &mut self,

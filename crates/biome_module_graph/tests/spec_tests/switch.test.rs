@@ -439,13 +439,12 @@ fn default_keeps_members_whose_discriminant_is_a_union_of_case_values() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type
-// except `unknownObject` and `unknownFunction`. A case of `switch (typeof x)`
-// narrows `x` as `typeof x === "string"` does, and the receivers of an
-// optional chain only where every case of the group shows that the operand
-// is not `undefined`. TypeScript narrows `unknown` to `object | null` for
-// `"object"` and to `Function` for `"function"`, where Biome keeps
-// `unknown`, as for `if`.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
+// A case of `switch (typeof x)` narrows `x` as `typeof x === "string"` does,
+// and the receivers of an optional chain only where every case of the group
+// shows that the operand is not `undefined`. `default` keeps `unknown`,
+// because TypeScript removes the matched kinds from `unknown` as a whole
+// there.
 #[test]
 fn typeof_cases_narrow_the_operand() {
     assert_reads(
@@ -473,8 +472,8 @@ fn typeof_cases_narrow_the_operand() {
             ("group", "x", &["number", "string"]),
             ("groupDefault", "x", &["boolean"]),
             ("unknownString", "x", &["string"]),
-            ("unknownObject", "x", &["unknown"]),
-            ("unknownFunction", "x", &["unknown"]),
+            ("unknownObject", "x", &["null", "object"]),
+            ("unknownFunction", "x", &["instanceof Function"]),
             ("unknownDefault", "x", &["unknown"]),
             ("object", "x", &["Foo", "null"]),
             ("objectDefault", "x", &["string"]),

@@ -1,8 +1,7 @@
 // should not generate diagnostics
 // The `else` branch of `instanceof` keeps the members that aren't derived
-// from the class, and the true branch keeps `unknown` for a generic class,
-// whose instance type Biome can't name. A class with the same name and
-// members in another namespace is another class.
+// from the class. A class with the same name and members in another namespace
+// is another class.
 
 class Loaded {
 	data = { size: 1 };
@@ -13,12 +12,6 @@ function falseBranch(result: Loaded | string | null) {
 		if (result) {
 			return 1;
 		}
-	}
-}
-
-function genericClass(value: unknown) {
-	if (value instanceof Map) {
-		return value?.size;
 	}
 }
 

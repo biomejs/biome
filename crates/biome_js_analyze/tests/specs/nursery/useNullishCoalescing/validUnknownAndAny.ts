@@ -1,0 +1,15 @@
+// should not generate diagnostics
+// A non-nullish `unknown` is `{}`, and `typeof` narrows `any` to a primitive,
+// so neither can be nullish.
+
+function notNullish(value: unknown) {
+	if (value != null) {
+		return value || 1;
+	}
+}
+
+function anyString(value: any) {
+	if (typeof value === "string") {
+		return value || "default";
+	}
+}
