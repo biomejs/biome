@@ -15,7 +15,7 @@ use std::fmt::{self, Debug, Formatter, Result as FormatResult};
 use std::str::FromStr;
 use std::sync::Arc;
 
-use biome_rowan::Text;
+use biome_rowan::{Text, TextRange};
 
 use crate::{
     globals::{GLOBAL_NUMBER_KEYWORD_ID, GLOBAL_STRING_KEYWORD_ID, GLOBAL_UNKNOWN_ID},
@@ -1502,6 +1502,7 @@ pub enum TypeofExpression {
     Destructure(TypeofDestructureExpression),
     Index(TypeofIndexExpression),
     OptionalChainIndex(TypeofIndexExpression),
+    ImplicitReturn(TypeofImplicitReturnExpression),
     IterableValueOf(TypeofIterableValueOfExpression),
     LogicalAnd(TypeofLogicalAndExpression),
     LogicalOr(TypeofLogicalOrExpression),
@@ -1553,6 +1554,24 @@ pub struct TypeofCallArgumentExpression {
     pub index: u16,
 
     pub is_constructor: bool,
+}
+
+/// The `undefined` that a function without a return type annotation returns
+/// when a path reaches the end of its body, or `never` when no path does.
+///
+/// The collector adds it to the union of the values that a function's
+/// `return` statements give, when one of them has a value and the last
+/// statement of the body doesn't end it as a `return` or a `throw` does. Only
+/// the function's control flow tells whether a path reaches the end, as in
+/// `function f() { if (c) return 1; fail(); }`, which returns `number` when
+/// `fail` never returns and `1 | undefined` otherwise.
+///
+/// Resolution without the module's flow gives `undefined`, which is never
+/// narrower than TypeScript's type.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct TypeofImplicitReturnExpression {
+    /// The trimmed range of the function, method, or accessor whose body ends.
+    pub function: TextRange,
 }
 
 /// Type of the parameter at `index` of a callable type, not counting a

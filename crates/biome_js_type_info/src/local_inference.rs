@@ -8,34 +8,35 @@ use std::str::FromStr;
 
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsArrowFunctionParameters,
-    AnyJsAssignmentPattern, AnyJsBinding, AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMember,
-    AnyJsClassMemberName, AnyJsConstructorParameter, AnyJsDeclaration, AnyJsDeclarationClause,
-    AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter, AnyJsFunction,
-    AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember,
-    AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyJsTemplateElement,
-    AnyTsModuleName, AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
-    AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern, JsArrayExpression,
-    JsArrowFunctionExpression, JsAssignmentExpression, JsBinaryExpression, JsBinaryOperator,
-    JsCallArgumentList, JsCallArguments, JsCallExpression, JsClassDeclaration,
-    JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList, JsConstructorParameters,
-    JsExport, JsExtendsClause, JsForInStatement, JsForOfStatement, JsForVariableDeclaration,
-    JsFormalParameter, JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression,
-    JsGetterObjectMember, JsInitializerClause, JsLanguage, JsLogicalExpression, JsLogicalOperator,
-    JsMethodObjectMember, JsModuleItemList, JsNewExpression, JsObjectBindingPattern,
-    JsObjectExpression, JsParameterList, JsParameters, JsParenthesizedExpression,
-    JsPropertyClassMember, JsPropertyObjectMember, JsReferenceIdentifier, JsRestParameter,
-    JsReturnStatement, JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
-    JsTemplateExpression, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
-    JsVariableDeclarator, TsConditionalType, TsDeclareFunctionDeclaration, TsDeclareStatement,
-    TsExternalModuleDeclaration, TsInferType, TsInstantiationExpression, TsInterfaceDeclaration,
-    TsMappedType, TsMethodSignatureTypeMember, TsModuleBlock, TsModuleDeclaration,
-    TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
+    AnyJsAssignmentPattern, AnyJsBinding, AnyJsBindingPattern, AnyJsCallArgument, AnyJsClass,
+    AnyJsClassMember, AnyJsClassMemberName, AnyJsConstructorParameter, AnyJsDeclaration,
+    AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter,
+    AnyJsFunction, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName,
+    AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter,
+    AnyJsStatement, AnyJsTemplateElement, AnyTsModuleName, AnyTsName, AnyTsReturnType,
+    AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember, AnyTsTypePredicateParameterName,
+    ClassMemberName, JsArrayBindingPattern, JsArrayExpression, JsArrowFunctionExpression,
+    JsAssignmentExpression, JsBinaryExpression, JsBinaryOperator, JsCallArgumentList,
+    JsCallArguments, JsCallExpression, JsClassDeclaration, JsClassExportDefaultDeclaration,
+    JsClassExpression, JsClassMemberList, JsConstructorParameters, JsExport, JsExtendsClause,
+    JsForInStatement, JsForOfStatement, JsForVariableDeclaration, JsFormalParameter,
+    JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression, JsGetterObjectMember,
+    JsInitializerClause, JsLanguage, JsLogicalExpression, JsLogicalOperator, JsMethodObjectMember,
+    JsModuleItemList, JsNewExpression, JsObjectBindingPattern, JsObjectExpression, JsParameterList,
+    JsParameters, JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember,
+    JsReferenceIdentifier, JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsSyntaxKind,
+    JsSyntaxNode, JsSyntaxToken, JsTemplateExpression, JsUnaryExpression, JsUnaryOperator,
+    JsVariableDeclaration, JsVariableDeclarator, TsConditionalType, TsDeclareFunctionDeclaration,
+    TsDeclareStatement, TsExternalModuleDeclaration, TsInferType, TsInstantiationExpression,
+    TsInterfaceDeclaration, TsMappedType, TsMethodSignatureTypeMember, TsModuleBlock,
+    TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
     TsSatisfiesExpression, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
     TsTypeMemberList, TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text,
     unescape_js_string,
 };
 use biome_rowan::{
-    AstNode, AstSeparatedList, SyntaxKindSet, SyntaxResult, Text, TextRange, TokenText,
+    AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, SyntaxResult, Text, TextRange,
+    TokenText, WalkEvent,
 };
 use rustc_hash::FxHashMap;
 
@@ -55,11 +56,11 @@ use crate::{
     TypeReferenceQualifier, TypeofAdditionExpression, TypeofAwaitExpression,
     TypeofBitwiseNotExpression, TypeofCallArgumentExpression, TypeofCallExpression,
     TypeofComputedMemberExpression, TypeofConditionalExpression, TypeofDestructureExpression,
-    TypeofExpression, TypeofIndexExpression, TypeofIterableValueOfExpression,
-    TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNewExpression,
-    TypeofNullishCoalescingExpression, TypeofParameterExpression, TypeofStaticMemberExpression,
-    TypeofThisOrSuperExpression, TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
-    TypeofWidenedLiteralExpression, Union,
+    TypeofExpression, TypeofImplicitReturnExpression, TypeofIndexExpression,
+    TypeofIterableValueOfExpression, TypeofLogicalAndExpression, TypeofLogicalOrExpression,
+    TypeofNewExpression, TypeofNullishCoalescingExpression, TypeofParameterExpression,
+    TypeofStaticMemberExpression, TypeofThisOrSuperExpression, TypeofTypeofExpression,
+    TypeofUnaryMinusExpression, TypeofValue, TypeofWidenedLiteralExpression, Union,
 };
 
 const MAX_CONST_ASSERTION_DEPTH: usize = 50;
@@ -3796,33 +3797,119 @@ fn type_from_annotation(
         .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
 }
 
-/// Returns the type of the values that the `return` statements of `body`
-/// return, outside nested functions: `void` without one, the type of the
-/// only one, or the union of their types. A `return` without a value returns
-/// `undefined`.
+/// The nodes whose `return` statements return from a function of their own,
+/// so [`own_returns`] skips them.
+const NESTED_FUNCTION_KINDS: SyntaxKindSet<JsLanguage> = AnyJsFunction::KIND_SET
+    .union(AnyJsClass::KIND_SET)
+    .union(JsMethodObjectMember::KIND_SET)
+    .union(JsGetterObjectMember::KIND_SET)
+    .union(JsSetterObjectMember::KIND_SET);
+
+/// The nodes that [`own_returns`] visits.
+const RETURN_SCAN_KINDS: SyntaxKindSet<JsLanguage> =
+    JsReturnStatement::KIND_SET.union(NESTED_FUNCTION_KINDS);
+
+/// Returns the `return` statements of `body`, the body of a function, that
+/// return from that function, in source order, including those in code that
+/// no path reaches. The `return` statements of nested functions, methods,
+/// accessors, and classes return from those instead, so they are skipped.
+pub fn own_returns(body: &JsFunctionBody) -> impl Iterator<Item = JsReturnStatement> + use<'_> {
+    let mut events = body.syntax().preorder_of_kinds(RETURN_SCAN_KINDS);
+    std::iter::from_fn(move || {
+        while let Some(event) = events.next() {
+            let WalkEvent::Enter(node) = event else {
+                continue;
+            };
+            if NESTED_FUNCTION_KINDS.matches(node.kind()) {
+                events.skip_subtree();
+                continue;
+            }
+            if let Some(statement) = JsReturnStatement::cast(node) {
+                return Some(statement);
+            }
+        }
+        None
+    })
+}
+
+/// Returns the type of the values that `body`, the body of a function
+/// without a return type annotation, returns, as TypeScript infers it.
+///
+/// Only the `return` statements of the function's own code count (see
+/// [`own_returns`]). When none of them has a value, the type is `void`.
+/// Otherwise it is the union of the types of their values, including those
+/// in code that no path reaches, with `undefined` when a `return` has no
+/// value. When the last statement of the body may complete, the union also
+/// holds a [`TypeofImplicitReturnExpression`], which resolves to `undefined`
+/// when a path reaches the end of the body.
 fn type_from_function_body(
     collector: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     body: JsFunctionBody,
 ) -> TypeData {
-    let mut return_types: Vec<_> = body
-        .syntax()
-        .pruned_descendents(|node| !AnyJsFunction::can_cast(node.kind()))
-        .filter_map(JsReturnStatement::cast)
-        .map(|return_statement| {
-            return_statement
-                .argument()
-                .map_or(GLOBAL_UNDEFINED_ID.into(), |argument| {
-                    value_reference(collector, scope_id, &argument)
-                })
-        })
-        .collect();
+    let mut return_types = Vec::new();
+    let mut has_bare_return = false;
+    for return_statement in own_returns(&body) {
+        match return_statement.argument() {
+            Some(argument) => return_types.push(value_reference(collector, scope_id, &argument)),
+            None => has_bare_return = true,
+        }
+    }
+
+    if return_types.is_empty() {
+        return TypeData::VoidKeyword;
+    }
+    if has_bare_return {
+        return_types.push(GLOBAL_UNDEFINED_ID.into());
+    }
+    let is_closed = body.statements().last().is_some_and(ends_by_exit);
+    if !is_closed && let Some(function) = body.syntax().parent() {
+        return_types.push(collector.reference_to_owned_data(TypeData::from(
+            TypeofExpression::ImplicitReturn(TypeofImplicitReturnExpression {
+                function: function.text_trimmed_range(),
+            }),
+        )));
+    }
 
     match return_types.len() {
-        0 => TypeData::VoidKeyword,
         1 => TypeData::Reference(return_types.remove(0)),
         _ => TypeData::Union(Box::new(Union(return_types.into_boxed_slice()))),
     }
+}
+
+/// Returns whether `statement` never completes, because each path through it
+/// ends at a `return` or a `throw`: the statement is one of them, a block
+/// whose last statement never completes, or an `if` with an `else` whose
+/// branches both never complete.
+///
+/// Other statements may complete, as far as their syntax shows.
+fn ends_by_exit(statement: AnyJsStatement) -> bool {
+    let mut pending = vec![statement];
+    while let Some(statement) = pending.pop() {
+        match statement {
+            AnyJsStatement::JsReturnStatement(_) | AnyJsStatement::JsThrowStatement(_) => {}
+            AnyJsStatement::JsBlockStatement(block) => {
+                let Some(last) = block.statements().last() else {
+                    return false;
+                };
+                pending.push(last);
+            }
+            AnyJsStatement::JsIfStatement(statement) => {
+                let (Ok(consequent), Some(alternate)) = (
+                    statement.consequent(),
+                    statement
+                        .else_clause()
+                        .and_then(|clause| clause.alternate().ok()),
+                ) else {
+                    return false;
+                };
+                pending.push(consequent);
+                pending.push(alternate);
+            }
+            _ => return false,
+        }
+    }
+    true
 }
 
 /// Checks for TypeScript's special `const` assertion target.

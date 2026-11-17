@@ -603,6 +603,7 @@ impl Format<FormatTypeContext> for TypeofExpression {
                     ]]
                 )
             }
+            Self::ImplicitReturn(_) => write!(f, [&format_args![token("implicit_return")]]),
             Self::IterableValueOf(expr) => {
                 write!(
                     f,

@@ -107,6 +107,18 @@ value, as
 [`widening.rs`](../biome_module_graph/src/db/type_inference/widening.rs)
 describes, and widens them.
 
+A return type inferred from a function's body counts only the `return`
+statements of the function's own code (`own_returns`), not those of nested
+functions, methods, accessors, or classes, and is `void` when none of them
+has a value. A function also returns `undefined` when a path reaches the end
+of its body, which depends on its control flow: a call that never returns or
+an exhaustive `switch` can end every path. When the last statement of the
+body may complete, the collector adds a
+`TypeofExpression::ImplicitReturn` to the union of the returned values, and
+resolution in the module graph gives `undefined` or `never` from the
+reachability of the function's end. A conversion without the module's flow
+gives `undefined`, which is never narrower than TypeScript's type.
+
 Interfaces of one name in one scope, and a class with the interfaces of its
 name, are one type in TypeScript. The module collector merges each such set
 into one raw `Interface` or `Class`, with the scope of the class or the first

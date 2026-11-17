@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+function f(c: boolean) {
+	if (c) return;
+}
+
+```
+
+## Result
+
+```
+sync Function "f" {
+  accepts: {
+    params: [
+      required c: Local TypeId(0)
+    ]
+    type_args: []
+  }
+  returns: Local TypeId(1)
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => boolean
+
+Module TypeId(1) => void
+```
