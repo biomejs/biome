@@ -1068,6 +1068,7 @@ fn modifier_accepted(
     };
     match kind {
         ModifierKind::None => false,
+        ModifierKind::Any => true,
         ModifierKind::Opacity => is_numeric_modifier(&value),
         ModifierKind::LineHeight => {
             is_numeric_modifier(&value)
@@ -2129,6 +2130,95 @@ mod tests {
             ),
             Some((10, 1))
         );
+    }
+
+    #[test]
+    fn shadow_inherit_takes_no_opacity_modifier() {
+        // Tailwind can't mix opacity into an inherited shadow color, but the
+        // other color keywords of the same utilities take one.
+        for input in [
+            "shadow-inherit/5",
+            "inset-shadow-inherit/5",
+            "text-shadow-inherit/0",
+        ] {
+            assert!(
+                matches!(classify(input), SortKey::Unknown),
+                "{input} should be unknown"
+            );
+        }
+        for input in [
+            "shadow-inherit",
+            "shadow-current/5",
+            "text-shadow-current/5",
+            "bg-inherit/5",
+        ] {
+            assert!(
+                matches!(classify(input), SortKey::Known { .. }),
+                "{input} should be known"
+            );
+        }
+    }
+
+    #[test]
+    fn keyword_named_like_a_theme_key_is_known_without_a_theme_branch() {
+        // `normal` is a theme key (`--leading-normal`), but `@container` has
+        // no theme branch, so the keyword is its own branch.
+        assert!(matches!(
+            classify("@container-normal"),
+            SortKey::Known { .. }
+        ));
+        assert!(matches!(
+            classify("@container-normal/main"),
+            SortKey::Known { .. }
+        ));
+        assert!(matches!(classify("@container-size"), SortKey::Known { .. }));
+        assert!(matches!(classify("@container-foo"), SortKey::Unknown));
+    }
+
+    #[test]
+    fn arbitrary_text_shadow_color_takes_only_an_opacity_modifier() {
+        // An arbitrary color and an arbitrary shadow share one placement but
+        // not one modifier: the color's is an opacity, the shadow's is free.
+        assert!(matches!(
+            classify("text-shadow-[#fff]/foo"),
+            SortKey::Unknown
+        ));
+        for input in [
+            "text-shadow-[#fff]/50",
+            "text-shadow-[#fff]",
+            "text-shadow-[0_1px_red]/foo",
+        ] {
+            assert!(
+                matches!(classify(input), SortKey::Known { .. }),
+                "{input} should be known"
+            );
+        }
+    }
+
+    #[test]
+    fn gradient_utilities_accept_any_modifier() {
+        // Tailwind reads a gradient's modifier as the interpolation method
+        // and compiles any value (`in <modifier>`), on every branch.
+        for input in [
+            "bg-linear-to-r/oklch",
+            "bg-linear-to-r/srgb",
+            "bg-linear-to-r/[in_hsl]",
+            "bg-linear-to-r/(--x)",
+            "bg-linear-90/oklch",
+            "-bg-linear-30/oklab",
+            "bg-linear-90/longer",
+            "bg-conic/hsl",
+            "bg-conic-90/oklab",
+            "bg-radial/oklch",
+        ] {
+            assert!(
+                matches!(classify(input), SortKey::Known { .. }),
+                "{input} should be known"
+            );
+        }
+        // A modifier on a branch that takes none still makes it unknown.
+        assert!(matches!(classify("w-1/foo"), SortKey::Unknown));
+        assert!(matches!(classify("bg-red-500/foo"), SortKey::Unknown));
     }
 
     #[test]

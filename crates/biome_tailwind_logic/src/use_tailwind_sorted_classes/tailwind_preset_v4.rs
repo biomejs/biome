@@ -409,7 +409,10 @@ pub(super) static KEYWORD_POOL: &[&[&str]] = &[
     &["all", "colors", "opacity", "shadow", "transform"],
     &["initial"],
     &["linear"],
-    &["current", "inherit", "none", "transparent"],
+    &["current", "transparent"],
+    &["inherit", "none"],
+    &["inherit"],
+    &["normal", "size"],
 ];
 
 pub(super) static SIGNATURE_POOL: &[&[u16]] = &[
@@ -2164,7 +2167,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "max-w-screen" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Theme(ThemeNamespace::Breakpoint, ModifierKind::LineHeight, 38, 1),
+            NamedBranch::Theme(ThemeNamespace::Breakpoint, ModifierKind::Any, 38, 1),
         ],
         arbitrary_branches: &[],
         bare: Some((38, 1)),
@@ -3603,8 +3606,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "bg-linear" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Keyword(12, ModifierKind::LineHeight, 188, 3),
-            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 188, 3),
+            NamedBranch::Keyword(12, ModifierKind::Any, 188, 3),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::Any, 188, 3),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 188, 3),
         ],
         arbitrary_branches: &[
@@ -3615,7 +3618,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         bare_name: None,
         negative: Some(Distinct {
             named_branches: &[
-                NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 188, 3),
+                NamedBranch::Typed(NamedValueType::Integer, ModifierKind::Any, 188, 3),
                 NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 188, 3),
             ],
             arbitrary_branches: &[
@@ -3625,7 +3628,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "bg-conic" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 188, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::Any, 188, 2),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 188, 2),
         ],
         arbitrary_branches: &[
@@ -4097,7 +4100,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 154, 1),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 154, 1),
-            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 310, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::Any, 310, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 310, 1),
         ],
         arbitrary_branches: &[
@@ -4812,11 +4815,13 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "text-shadow" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Keyword(16, ModifierKind::Opacity, 40, 1),
+            NamedBranch::Keyword(17, ModifierKind::None, 40, 1),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 40, 1),
-            NamedBranch::Theme(ThemeNamespace::TextShadow, ModifierKind::LineHeight, 40, 1),
+            NamedBranch::Theme(ThemeNamespace::TextShadow, ModifierKind::Any, 40, 1),
         ],
         arbitrary_branches: &[
-            ArbitraryBranch::Fallback(ModifierKind::LineHeight, 40, 1),
+            ArbitraryBranch::Typed(CssDataType::Color, ModifierKind::Opacity, 40, 1),
+            ArbitraryBranch::Fallback(ModifierKind::Any, 40, 1),
         ],
         bare: None,
         bare_opacity: None,
@@ -4825,14 +4830,15 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "shadow" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Keyword(10, ModifierKind::Opacity, 186, 1),
+            NamedBranch::Keyword(16, ModifierKind::Opacity, 186, 1),
+            NamedBranch::Keyword(18, ModifierKind::None, 186, 1),
             NamedBranch::Keyword(3, ModifierKind::None, 350, 2),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 186, 1),
-            NamedBranch::Theme(ThemeNamespace::Shadow, ModifierKind::LineHeight, 350, 2),
+            NamedBranch::Theme(ThemeNamespace::Shadow, ModifierKind::Any, 350, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Color, ModifierKind::Opacity, 186, 1),
-            ArbitraryBranch::Fallback(ModifierKind::LineHeight, 350, 2),
+            ArbitraryBranch::Fallback(ModifierKind::Any, 350, 2),
         ],
         bare: Some((350, 2)),
         bare_opacity: Some((350, 3)),
@@ -4841,14 +4847,15 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "inset-shadow" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Keyword(10, ModifierKind::Opacity, 187, 1),
+            NamedBranch::Keyword(16, ModifierKind::Opacity, 187, 1),
+            NamedBranch::Keyword(18, ModifierKind::None, 187, 1),
             NamedBranch::Keyword(3, ModifierKind::None, 351, 2),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 187, 1),
-            NamedBranch::Theme(ThemeNamespace::InsetShadow, ModifierKind::LineHeight, 351, 2),
+            NamedBranch::Theme(ThemeNamespace::InsetShadow, ModifierKind::Any, 351, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Color, ModifierKind::Opacity, 187, 1),
-            ArbitraryBranch::Fallback(ModifierKind::LineHeight, 351, 2),
+            ArbitraryBranch::Fallback(ModifierKind::Any, 351, 2),
         ],
         bare: None,
         bare_opacity: None,
@@ -4901,9 +4908,11 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "@container" => FunctionalEntry {
-        named_branches: &[],
+        named_branches: &[
+            NamedBranch::Keyword(19, ModifierKind::Any, 358, 1),
+        ],
         arbitrary_branches: &[
-            ArbitraryBranch::Fallback(ModifierKind::LineHeight, 358, 1),
+            ArbitraryBranch::Fallback(ModifierKind::Any, 358, 1),
         ],
         bare: Some((358, 1)),
         bare_opacity: Some((358, 2)),

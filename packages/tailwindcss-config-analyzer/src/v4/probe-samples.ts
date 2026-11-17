@@ -95,3 +95,9 @@ export const ARBITRARY_PROBES: {
 // predicate. Used as the type-blind baseline; if it compiles, the
 // utility has an `Arbitrary` fallback path.
 export const NONSENSE_PROBE = "abcxyz";
+
+// Keyword classes Tailwind compiles but leaves out of `getClassList()`, so
+// the class-list scan can't find them. `@container` registers only `normal`
+// as a suggestion but also compiles `size` (utilities.ts, `@container`).
+// shortcut: hand-maintained; re-check against utilities.ts when bumping tailwindcss.
+export const UNLISTED_KEYWORD_CLASSES = ["@container-size"];
