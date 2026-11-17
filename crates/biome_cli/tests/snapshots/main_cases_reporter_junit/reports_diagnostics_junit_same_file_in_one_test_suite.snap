@@ -39,8 +39,8 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
         <testcase name="org.biome.lint.suspicious.noDebugger" line="3" column="1">
             <failure message="This is an unexpected use of the debugger statement.">line 3, col 1, This is an unexpected use of the debugger statement.</failure>
         </testcase>
-        <testcase name="org.biome.format" line="1" column="2">
-            <failure message="Formatter would have printed the following content:">line 1, col 2, Formatter would have printed the following content:</failure>
+        <testcase name="org.biome.format" line="1" column="1">
+            <failure message="Formatter would have printed the following content:">line 1, col 1, Formatter would have printed the following content:</failure>
         </testcase>
     </testsuite>
 </testsuites>

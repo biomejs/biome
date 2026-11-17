@@ -53,13 +53,13 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites name="Biome" tests="2" failures="2" errors="2" time="<TIME>">
     <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
-        <testcase name="org.biome.format" line="1" column="2">
-            <failure message="Formatter would have printed the following content:">line 1, col 2, Formatter would have printed the following content:</failure>
+        <testcase name="org.biome.format" line="1" column="1">
+            <failure message="Formatter would have printed the following content:">line 1, col 1, Formatter would have printed the following content:</failure>
         </testcase>
     </testsuite>
     <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
-        <testcase name="org.biome.format" line="1" column="2">
-            <failure message="Formatter would have printed the following content:">line 1, col 2, Formatter would have printed the following content:</failure>
+        <testcase name="org.biome.format" line="1" column="1">
+            <failure message="Formatter would have printed the following content:">line 1, col 1, Formatter would have printed the following content:</failure>
         </testcase>
     </testsuite>
 </testsuites>

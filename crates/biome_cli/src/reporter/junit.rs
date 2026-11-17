@@ -4,7 +4,6 @@ use crate::{DiagnosticsPayload, TraversalSummary};
 use biome_console::markup;
 use biome_diagnostics::display::SourceFile;
 use biome_diagnostics::{Error, Resource};
-use biome_rowan::TextRange;
 use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexMap;
 use quick_junit::{NonSuccessKind, Report, TestCase, TestCaseStatus, TestSuite};
@@ -96,7 +95,7 @@ impl ReporterVisitor for JunitReporterVisitor {
             status.set_message(message.clone());
 
             let location = diagnostic.location();
-            let span = location.span.unwrap_or(TextRange::new(1.into(), 1.into()));
+            let span = location.span.unwrap_or_default();
 
             if let (Some(source_code), Some(resource)) = (location.source_code, location.resource) {
                 let source = SourceFile::new(source_code);
