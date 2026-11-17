@@ -396,12 +396,32 @@ fn unquoted_attribute_value_invalid_chars() {
 }
 
 #[test]
-fn cdata_full() {
+fn cdata_start_in_regular_context() {
+    assert_lex! {
+        HtmlLexContext::Regular {
+            framework: HtmlFramework::Plain,
+        },
+        "<![CDATA[",
+        CDATA_START: 9,
+    }
+}
+
+#[test]
+fn cdata_content() {
     assert_lex! {
         HtmlLexContext::CdataSection,
-        "<![CDATA[1]]>",
-        CDATA_START: 9,
+        "1]]>",
         HTML_LITERAL: 1,
+        CDATA_END: 3,
+    }
+}
+
+#[test]
+fn cdata_start_in_content_is_literal() {
+    assert_lex! {
+        HtmlLexContext::CdataSection,
+        "<![CDATA[x]]>",
+        HTML_LITERAL: 10,
         CDATA_END: 3,
     }
 }

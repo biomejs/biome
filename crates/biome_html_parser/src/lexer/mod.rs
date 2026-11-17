@@ -940,7 +940,6 @@ impl<'src> HtmlLexer<'src> {
         let dispatched = lookup_byte(current);
 
         match dispatched {
-            LSS if self.at_start_cdata() => self.consume_cdata_start(),
             BTC if self.at_end_cdata() => self.consume_cdata_end(),
             _ => {
                 while let Some(char) = self.current_byte() {
