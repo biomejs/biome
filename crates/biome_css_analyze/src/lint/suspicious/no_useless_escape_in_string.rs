@@ -14,8 +14,7 @@ declare_lint_rule! {
     /// Escaping non-special characters in string literals doesn't have any effect.
     /// Hence, they may confuse a reader.
     ///
-    /// In SCSS files, `\#{` isn't reported, because the backslash stops Sass from interpolating
-    /// what follows.
+    /// In SCSS files, `\#{` isn't reported, because the backslash stops Sass the interpolation.
     ///
     /// ## Examples
     ///
