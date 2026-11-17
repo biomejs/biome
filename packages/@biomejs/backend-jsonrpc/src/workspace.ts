@@ -3304,6 +3304,11 @@ export interface Nursery {
 	 */
 	noOctal?: NoOctalConfiguration;
 	/**
+	 * Disallow using variables, this, and super from outside an isolated function.
+	 * See https://biomejs.dev/linter/rules/no-outer-scope-in-isolated-functions
+	 */
+	noOuterScopeInIsolatedFunctions?: NoOuterScopeInIsolatedFunctionsConfiguration;
+	/**
 	 * Disallow building file paths and URLs by joining strings to __dirname, __filename, or import.meta values.
 	 * See https://biomejs.dev/linter/rules/no-path-concat
 	 */
@@ -7097,6 +7102,9 @@ export type NoObsoleteTagsConfiguration =
 export type NoOctalConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoOctalOptions;
+export type NoOuterScopeInIsolatedFunctionsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoOuterScopeInIsolatedFunctionsOptions;
 export type NoPathConcatConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPathConcatOptions;
@@ -10413,6 +10421,10 @@ export interface RuleWithNoObsoleteTagsOptions {
 export interface RuleWithNoOctalOptions {
 	level: RulePlainConfiguration;
 	options?: NoOctalOptions;
+}
+export interface RuleWithNoOuterScopeInIsolatedFunctionsOptions {
+	level: RulePlainConfiguration;
+	options?: NoOuterScopeInIsolatedFunctionsOptions;
 }
 export interface RuleWithNoPathConcatOptions {
 	level: RulePlainConfiguration;
@@ -14155,6 +14167,7 @@ export type NoObjectLiteralComparisonOptions = {};
 export type NoObsoleteAttributesOptions = {};
 export type NoObsoleteTagsOptions = {};
 export type NoOctalOptions = {};
+export type NoOuterScopeInIsolatedFunctionsOptions = {};
 export type NoPathConcatOptions = {};
 export type NoPlaywrightNthMethodsOptions = {};
 export type NoPlaywrightUnsafeReferencesOptions = {};
@@ -16564,6 +16577,7 @@ export type Category =
 	| "lint/nursery/noObsoleteAttributes"
 	| "lint/nursery/noObsoleteTags"
 	| "lint/nursery/noOctal"
+	| "lint/nursery/noOuterScopeInIsolatedFunctions"
 	| "lint/nursery/noPathConcat"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"

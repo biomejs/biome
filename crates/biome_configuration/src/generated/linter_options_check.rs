@@ -1143,6 +1143,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noOctalEscape",
         TypeId::of::<biome_rule_options::no_octal_escape::NoOctalEscapeOptions>(),
     ));
+    result.push(("nursery", "noOuterScopeInIsolatedFunctions", TypeId::of::<biome_rule_options::no_outer_scope_in_isolated_functions::NoOuterScopeInIsolatedFunctionsOptions>()));
     result.push((
         "style",
         "noParameterAssign",

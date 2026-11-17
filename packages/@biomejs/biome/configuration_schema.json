@@ -6158,6 +6158,16 @@
 		},
 		"NoOctalEscapeOptions": { "type": "object", "additionalProperties": false },
 		"NoOctalOptions": { "type": "object", "additionalProperties": false },
+		"NoOuterScopeInIsolatedFunctionsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoOuterScopeInIsolatedFunctionsOptions" }
+			]
+		},
+		"NoOuterScopeInIsolatedFunctionsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoParameterAssignConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9958,6 +9968,13 @@
 					"description": "Disallow numbers written with an extra leading zero.\nSee https://biomejs.dev/linter/rules/no-octal",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoOctalConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noOuterScopeInIsolatedFunctions": {
+					"description": "Disallow using variables, this, and super from outside an isolated function.\nSee https://biomejs.dev/linter/rules/no-outer-scope-in-isolated-functions",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoOuterScopeInIsolatedFunctionsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -15330,6 +15347,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoOctalOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoOuterScopeInIsolatedFunctionsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoOuterScopeInIsolatedFunctionsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
