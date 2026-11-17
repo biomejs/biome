@@ -298,7 +298,7 @@ fn subject_key<'a>(
         part.kind() != SimpleSelectorKind::PseudoClass
             || part.name().is_some_and(is_pseudo_elements)
     }));
-    parts.sort_unstable();
+    parts.sort_unstable_by(SimpleSelector::cmp_in_compound);
     for part in parts.iter() {
         part.write_normalized(key);
     }

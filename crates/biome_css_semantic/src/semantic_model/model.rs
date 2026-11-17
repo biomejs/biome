@@ -502,7 +502,7 @@ impl ResolvedSelector {
     /// 2. **Type selector case**: HTML tag names are case-insensitive, so bare
     ///    type selectors (`div`, `SPAN`, `P`) are lowercased.
     /// 3. **Compound selector ordering**: within a compound selector, the simple
-    ///    selectors are sorted as described by [SimpleSelector]'s `Ord`, so that
+    ///    selectors are sorted by [SimpleSelector::cmp_in_compound], so that
     ///    `.a.b` and `.b.a` are considered equal.
     ///
     /// The combinator representation is canonical: space-literal becomes `" "`,
@@ -522,7 +522,7 @@ impl ResolvedSelector {
             }
             simple_selectors.clear();
             simple_selectors.extend(compound.simple_selectors());
-            simple_selectors.sort_unstable();
+            simple_selectors.sort_unstable_by(SimpleSelector::cmp_in_compound);
             for selector in &simple_selectors {
                 selector.write_normalized(&mut result);
             }
@@ -675,9 +675,6 @@ pub enum SimpleSelectorKind {
 }
 
 /// One simple selector of a compound, such as `.a`, `[href]` or `:hover`.
-///
-/// Simple selectors are ordered with type and universal selectors first, because CSS requires
-/// them to start a compound, and the rest by their text.
 #[derive(Debug, Clone, Copy)]
 pub struct SimpleSelector<'a> {
     kind: SimpleSelectorKind,
@@ -740,35 +737,23 @@ impl<'a> SimpleSelector<'a> {
         self.tokens.iter().flat_map(|(_, text)| text.bytes())
     }
 
-    fn is_not_type(&self) -> bool {
-        !matches!(
+    fn is_type(&self) -> bool {
+        matches!(
             self.kind,
             SimpleSelectorKind::Type | SimpleSelectorKind::Universal
         )
     }
-}
 
-impl Ord for SimpleSelector<'_> {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.is_not_type()
-            .cmp(&other.is_not_type())
-            .then_with(|| self.bytes().cmp(other.bytes()))
+    /// Orders the simple selectors of a compound: type and universal selectors first, because CSS
+    /// requires them to start a compound, then the rest by their text.
+    pub fn cmp_in_compound(&self, other: &Self) -> Ordering {
+        match (self.is_type(), other.is_type()) {
+            (true, false) => Ordering::Less,
+            (false, true) => Ordering::Greater,
+            _ => self.bytes().cmp(other.bytes()),
+        }
     }
 }
-
-impl PartialOrd for SimpleSelector<'_> {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl PartialEq for SimpleSelector<'_> {
-    fn eq(&self, other: &Self) -> bool {
-        self.cmp(other) == Ordering::Equal
-    }
-}
-
-impl Eq for SimpleSelector<'_> {}
 
 impl std::fmt::Display for ResolvedSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
