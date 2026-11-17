@@ -44,7 +44,7 @@ pub use local_inference::own_returns;
 pub use narrowing::{
     NarrowingPredicate, PropertyTest, RawPredicateTarget, TypeofKind, base_literal_type,
     evolving_array_element, evolving_assigned_type, falsy_values, has_readonly_property,
-    is_narrowing_invariant, is_raw_narrowing_invariant, may_narrow_by_instanceof,
+    is_narrowing_invariant, is_raw_any, is_raw_narrowing_invariant, may_narrow_by_instanceof,
     may_narrow_by_property, narrow_by_assignment, narrow_by_in_operator, narrow_by_instanceof,
     narrow_by_property, narrow_by_type_predicate, narrow_type, raw_may_be_nullish,
     raw_may_be_object_union, raw_may_be_union, raw_may_have_literal, raw_may_narrow_by_instanceof,

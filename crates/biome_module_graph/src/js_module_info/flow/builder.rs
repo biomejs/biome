@@ -2154,7 +2154,10 @@ impl RootBuilder<'_, '_> {
                 if has_default {
                     let unmatched = self.unmatched_cases(cases);
                     entry.push(match unmatched {
-                        Some(unmatched) => self.push_condition(cases.pre, unmatched)?,
+                        Some(unmatched) => {
+                            let unmatched = self.unmatched_guard(unmatched);
+                            self.push_condition(cases.pre, unmatched)?
+                        }
                         None => cases.pre,
                     });
                 }
@@ -2201,7 +2204,9 @@ impl RootBuilder<'_, '_> {
     }
 
     /// Returns the condition that no case of `cases` matched, or `None` when
-    /// no case narrows anything.
+    /// no case narrows anything. Its guard is the conjunction of the cases
+    /// that did not match, without the [`FlowGuard::Unmatched`] wrapper that
+    /// [`Self::unmatched_guard`] adds.
     fn unmatched_cases(&mut self, cases: &SwitchCases) -> Option<DecomposedCondition> {
         let mut unmatched: Option<DecomposedCondition> = None;
         for test in cases.tests.iter().flatten() {
@@ -2219,6 +2224,15 @@ impl RootBuilder<'_, '_> {
                 None => case,
             });
         }
+        unmatched
+    }
+
+    /// Returns `unmatched`, the condition that no case of a `switch` on a
+    /// value or on `typeof` of one matched, with its guard wrapped in
+    /// [`FlowGuard::Unmatched`].
+    fn unmatched_guard(&mut self, mut unmatched: DecomposedCondition) -> DecomposedCondition {
+        self.guards.push(FlowGuard::Unmatched(unmatched.guard));
+        unmatched.guard = self.guards.len() - 1;
         unmatched
     }
 
@@ -2241,10 +2255,12 @@ impl RootBuilder<'_, '_> {
             // `boolean`, which is no unit type.
             SwitchKind::True => self.unmatched_cases_before(cases, cases.tests.len()),
             SwitchKind::Value | SwitchKind::Typeof => {
-                let Some(mut unmatched) = self.unmatched_cases(cases) else {
+                let Some(unmatched) = self.unmatched_cases(cases) else {
                     return Ok(cases.pre);
                 };
-                let Some(switch) = self.exhaustive_switch(statement, cases, unmatched.guard) else {
+                let switch = self.exhaustive_switch(statement, cases, unmatched.guard);
+                let mut unmatched = self.unmatched_guard(unmatched);
+                let Some(switch) = switch else {
                     return self.push_condition(cases.pre, unmatched);
                 };
                 let index = u32::try_from(self.switches.len()).map_err(|_| Unsupported)?;
@@ -4286,6 +4302,7 @@ mod tests {
                     self.facts(*left, facts);
                     self.facts(*right, facts);
                 }
+                FlowGuard::Unmatched(inner) => self.facts(*inner, facts),
                 // The bypass of a `switch` that may be exhaustive is written
                 // `bypass(Test)`.
                 FlowGuard::Bypass { guard, .. } => {

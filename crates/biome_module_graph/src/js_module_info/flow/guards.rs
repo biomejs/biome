@@ -22,8 +22,8 @@ use biome_js_syntax::{
 };
 use biome_js_type_info::{
     Function, FunctionParameter, RawPredicateTarget, RawTypeData, RawTypeId, ReturnType,
-    TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeofKind, raw_may_be_nullish,
-    raw_predicate_target,
+    TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeofKind, is_raw_any,
+    raw_may_be_nullish, raw_predicate_target,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, SyntaxKind, SyntaxKindSet, Text, TextRange, TokenText,
@@ -135,6 +135,18 @@ pub(crate) enum FlowGuard {
     ///
     /// [`RootFlow::switches`]: super::RootFlow::switches
     Bypass { switch: u32, guard: usize },
+    /// The guard at this index, which holds where no case of a `switch` on a
+    /// value or on `typeof` of one matches, applied to every incoming type
+    /// except one with an `unknown` member, which stays as it is.
+    ///
+    /// Other tests narrow `unknown` as `{} | null | undefined`, so
+    /// `x !== null` gives `{} | undefined`. Where no case of such a `switch`
+    /// matches, TypeScript removes the matched values from the type as a
+    /// whole instead, and `unknown` keeps every value, so
+    /// `switch (x) { case null: break; default: x }` reads `unknown` there.
+    /// `switch (true)` tests each case as a condition, as an `if` does, so its
+    /// guards need no such wrapper.
+    Unmatched(usize),
     /// The call point at index `call` in [`RootFlow::calls`], whose result
     /// is truthy when `positive` is true and falsy otherwise. A statement
     /// call's guard is always positive, because it stands for the call
@@ -188,7 +200,7 @@ pub(crate) enum FlowTest {
         function: TextRange,
         /// Whether every member of the tested type is an object type, as
         /// for `Foo` or `Foo | Bar`, so the test narrows only a type that
-        /// has an object type or is `unknown`.
+        /// has an object type or is `unknown` or `any`.
         object_target: bool,
     },
     /// The `in` operator, as in `"a" in value`. The range is the key, a string
@@ -198,6 +210,27 @@ pub(crate) enum FlowTest {
     /// The `instanceof` operator, as in `value instanceof Date`, whose right
     /// operand, the constructor, is the expression at this range.
     Instanceof(TextRange),
+}
+
+impl FlowTest {
+    /// Returns whether the test can narrow a value of type `any`, as in
+    /// TypeScript: `typeof` with a primitive kind or `"undefined"`,
+    /// `instanceof`, and a call to a type-guard function. Truthiness,
+    /// equality, `in`, and `typeof` with `"object"` or `"function"` keep
+    /// `any` in both branches.
+    pub(crate) fn narrows_any(self) -> bool {
+        match self {
+            Self::Typeof(kind) => !matches!(kind, TypeofKind::Object | TypeofKind::Function),
+            Self::Instanceof(_) | Self::Predicate { .. } => true,
+            Self::Truthy
+            | Self::Nullish
+            | Self::Null
+            | Self::Literal(_)
+            | Self::Undefined { .. }
+            | Self::Imported { .. }
+            | Self::In(_) => false,
+        }
+    }
 }
 
 /// What a guard's return annotation states about one of its parameters.
@@ -337,6 +370,15 @@ impl<'a> GuardFunctions<'a> {
         self.call_ids.insert(call.range, id);
         self.calls.push((call, subjects));
         Some(id)
+    }
+
+    /// Returns whether the variable declared at `binding` has the type `any`
+    /// written in its annotation, as the raw tables show without resolving
+    /// anything. An alias of `any` and an import don't count.
+    fn declares_any(&self, binding: TextRange) -> bool {
+        self.raw_binding_types
+            .get(&binding)
+            .is_some_and(|reference| is_raw_any(reference, self.raw_types))
     }
 
     /// Returns whether `call`, a statement call, can establish a condition
@@ -838,6 +880,10 @@ pub(super) fn decompose_statement_call(
         GuardKind::TypeAssertion { object_target } => {
             chain_receivers(&argument, &mut remaining)?;
             let subject = subject_of(&argument, model, subjects)?;
+            let any_root = AnyRoot::new(subjects, functions, subject);
+            if any_root == AnyRoot::Path {
+                return None;
+            }
             guards.push(FlowGuard::Test {
                 subject,
                 test: FlowTest::Predicate {
@@ -847,8 +893,10 @@ pub(super) fn decompose_statement_call(
                 positive: true,
             });
             // As for `instanceof`, a target whose members are all object
-            // types narrows only a type with an object type or `unknown`.
-            let (mentions, parents) = if object_target {
+            // types narrows only a type with an object type, `unknown`, or
+            // `any`, and a variable whose annotation is `any` is an ordinary
+            // subject.
+            let (mentions, parents) = if object_target && any_root == AnyRoot::None {
                 (Vec::new(), vec![subject])
             } else {
                 (vec![subject], Vec::new())
@@ -880,7 +928,8 @@ pub(super) struct DecomposedCondition {
     /// Subjects whose type the condition may narrow.
     ///
     /// When decomposition stops early, this conservatively lists every
-    /// variable and property path read directly in the condition. It also
+    /// variable and property path read directly in the condition, except a
+    /// variable whose annotation is `any` and the paths on one. It also
     /// lists every variable read directly in an inlined initializer when the
     /// variable cannot change between the alias and its test. See
     /// [`narrows_through_aliases`] for the variables that qualify.
@@ -895,10 +944,11 @@ pub(super) struct DecomposedCondition {
     ///   `x` in `isFoo(x)`.
     ///
     /// The first two narrow only a union with two object types, and the
-    /// others narrow only a type with an object type or `unknown`. When
-    /// decomposition stops early, this also lists the pattern of every
-    /// variable in `mentions` that is an element of a destructuring pattern
-    /// that a test of the variable narrows.
+    /// others narrow only a type with an object type, `unknown`, or `any`. A
+    /// variable whose annotation is `any` is never listed here (see
+    /// [`AnyRoot`]). When decomposition stops early, this also lists the
+    /// pattern of every variable in `mentions` that is an element of a
+    /// destructuring pattern that a test of the variable narrows.
     pub(super) parents: Vec<FlowSubjectId>,
     /// The subjects in `parents` that `instanceof` or a type-guard function
     /// whose target has only object types checks.
@@ -1400,9 +1450,11 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     /// decomposition found.
     ///
     /// When decomposition stopped early, the condition mentions every
-    /// variable and property path that `scanned` read directly instead. It
-    /// also mentions the variables that inlined initializers read when an
-    /// aliased condition can narrow them ([`narrows_through_aliases`]).
+    /// variable and property path that `scanned` read directly instead,
+    /// except a variable whose annotation is `any` and the paths on one (see
+    /// [`AnyRoot`]). It also mentions the variables that inlined initializers
+    /// read when an aliased condition can narrow them
+    /// ([`narrows_through_aliases`]).
     fn finish<'e>(
         self,
         guard: usize,
@@ -1410,6 +1462,7 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     ) -> DecomposedCondition {
         let Self {
             model,
+            functions,
             subjects,
             mut parents,
             instance_tested,
@@ -1451,6 +1504,11 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
                 continue;
             };
             if inlined && !narrows_through_aliases(subjects, subject, model) {
+                continue;
+            }
+            // An `any` variable keeps its type, rather than becoming
+            // unknown, when the tests that narrow it can't be told apart.
+            if AnyRoot::new(subjects, functions, subject) != AnyRoot::None {
                 continue;
             }
             mentions.push(subject);
@@ -1564,7 +1622,9 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     ///
     /// Returns [`FlowGuard::Keep`] when the chain around `operand` starts at a
     /// parenthesized optional chain, as in `(o?.v)?.w`, and when finding its
-    /// receivers runs out of work or meets missing syntax.
+    /// receivers runs out of work or meets missing syntax. A test that can't
+    /// narrow a variable whose annotation is `any`, or a property path on
+    /// one, mentions nothing (see [`AnyRoot`]).
     fn test(
         &mut self,
         operand: &AnyJsExpression,
@@ -1592,6 +1652,16 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
         };
         let tested =
             test.and_then(|test| Some((test, subject_of(operand, self.model, self.subjects)?)));
+        // A test that can't narrow `any` still applies to a variable declared
+        // `any`, because an earlier test can narrow it to a type that this one
+        // narrows further, as `x === "a"` narrows `x` after
+        // `typeof x === "string"`, and a `switch` on `typeof x` needs all its
+        // cases. It mentions nothing, so it makes no read a candidate.
+        let narrows = tested.is_none_or(|(test, subject)| match self.any_root(subject) {
+            AnyRoot::None => true,
+            AnyRoot::Variable => test.narrows_any(),
+            AnyRoot::Path => false,
+        });
         let mut guard = match tested {
             Some((test, subject)) => match self.testable(subject) {
                 Testable::Never => FlowGuard::Keep,
@@ -1600,14 +1670,17 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
                     // `in` narrows only a union with two object types.
                     // `instanceof` and a type-guard function whose target has
                     // only object types narrow only a type with an object
-                    // type or `unknown`.
+                    // type, `unknown`, or `any`. A variable declared `any` is
+                    // an ordinary subject, because its annotation already
+                    // shows that these tests narrow it.
                     match test {
+                        _ if !narrows => {}
                         FlowTest::In(_) => self.parents.push(subject),
                         FlowTest::Instanceof(_)
                         | FlowTest::Predicate {
                             object_target: true,
                             ..
-                        } => {
+                        } if self.any_root(subject) == AnyRoot::None => {
                             self.parents.push(subject);
                             self.instance_tested.push(subject);
                         }
@@ -1625,6 +1698,7 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
         };
         if let Some((test, subject)) = tested
             && self.shape_guards
+            && narrows
         {
             let property = self.property_guard(Some(operand), subject, test, positive);
             let pattern = self.pattern_guard(subject, test, positive);
@@ -1801,7 +1875,8 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     fn narrowed_operand(&mut self, operand: &AnyJsExpression) -> Option<FlowSubjectId> {
         chain_receivers(operand, &mut self.remaining)?;
         let subject = subject_of(operand, self.model, self.subjects)?;
-        (self.testable(subject) == Testable::Always).then_some(subject)
+        (self.testable(subject) == Testable::Always && self.any_root(subject) != AnyRoot::Path)
+            .then_some(subject)
     }
 
     /// Returns the guard for `test` applied to `subject`, the target of a
@@ -1810,6 +1885,9 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     /// as `s.kind ||= "c"` applies it to `s`. [`Self::property_guard`] builds
     /// the guard on the object.
     fn target_test(&mut self, subject: FlowSubjectId, test: FlowTest, positive: bool) -> FlowGuard {
+        if self.any_root(subject) != AnyRoot::None && !test.narrows_any() {
+            return FlowGuard::Keep;
+        }
         self.mentions.push(subject);
         let guard = FlowGuard::Test {
             subject,
@@ -1884,7 +1962,8 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
         if matches!(
             self.subjects.as_slice().get(object as usize)?,
             FlowSubject::This
-        ) {
+        ) || self.any_root(object) != AnyRoot::None
+        {
             return None;
         }
         let testable = self.testable(object);
@@ -2056,7 +2135,7 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
                 continue;
             };
             let testable = self.testable(subject);
-            if testable == Testable::Never {
+            if testable == Testable::Never || self.any_root(subject) != AnyRoot::None {
                 continue;
             }
             self.mentions.push(subject);
@@ -2107,6 +2186,12 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
         Some(initializer)
     }
 
+    /// Returns whether `subject` is a variable whose annotation is `any`, or
+    /// a property path that starts at one (see [`AnyRoot`]).
+    fn any_root(&self, subject: FlowSubjectId) -> AnyRoot {
+        AnyRoot::new(self.subjects, self.functions, subject)
+    }
+
     /// Returns whether a test may narrow `subject`: always outside inlined
     /// initializers, and inside one, always for the subjects that
     /// [`narrows_through_aliases`] accepts and only when the path is readonly
@@ -2133,6 +2218,52 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     fn push(&mut self, guard: FlowGuard) -> usize {
         self.guards.push(guard);
         self.guards.len() - 1
+    }
+}
+
+/// How a subject relates to a variable whose annotation is `any`, as
+/// [`Decomposer::any_root`] decides it from the raw tables.
+///
+/// Only some runtime tests narrow `any` (see [`FlowTest::narrows_any`]), so
+/// only those mention such a variable. TypeScript types a property of `any`
+/// as `any` without narrowing it, so no test mentions a property path on such
+/// a variable, and no property guard narrows the variable.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum AnyRoot {
+    /// The subject's variable has another annotation or none, or the subject
+    /// is `this` or a pattern, or a path on one.
+    None,
+    /// The subject is a variable whose annotation is `any`.
+    Variable,
+    /// The subject is a property path on a variable whose annotation is
+    /// `any`.
+    Path,
+}
+
+impl AnyRoot {
+    /// Returns how `subject`, an id in `subjects`, relates to a variable whose
+    /// annotation is `any`, which `functions` reads from the raw tables.
+    fn new(
+        subjects: &FlowSubjectTable,
+        functions: &GuardFunctions,
+        subject: FlowSubjectId,
+    ) -> Self {
+        let subjects = subjects.as_slice();
+        let mut root = subject;
+        // A table stores an object before its members, so this ends.
+        while let Some(FlowSubject::Member { object, .. }) = subjects.get(root as usize) {
+            root = *object;
+        }
+        match subjects.get(root as usize) {
+            Some(FlowSubject::Binding(range)) if functions.declares_any(*range) => {
+                if root == subject {
+                    Self::Variable
+                } else {
+                    Self::Path
+                }
+            }
+            _ => Self::None,
+        }
     }
 }
 

@@ -408,8 +408,6 @@ fn instanceof_keeps_the_declared_type_where_biome_cannot_tell() {
         class Checker { static [Symbol.hasInstance](v: unknown): v is string { return typeof v === "string"; } }
         class SubChecker extends Checker {}
         class BoolChecker { static [Symbol.hasInstance](v: unknown): boolean { return true; } }
-        function genericClass(x: unknown) { if (x instanceof Map) /*genericClass*/x; }
-        function genericBox(x: unknown) { if (x instanceof Box) /*genericBox*/x; }
         function primitives(x: string | number) { if (x instanceof A) /*primitives*/x; }
         function object(x: A | C) { if (x instanceof Object) /*object*/x; else /*objectElse*/x; }
         function functionClass(x: A | string) { if (x instanceof Function) /*function*/x; else /*functionElse*/x; }
@@ -421,10 +419,6 @@ fn instanceof_keeps_the_declared_type_where_biome_cannot_tell() {
         function generic<T extends A>(x: T | C) { if (x instanceof B) /*typeParameter*/x; else /*typeParameterElse*/x; }
         "#,
         &[
-            // `Map<any, any>`
-            ("genericClass", "x", &["unknown"]),
-            // `Box<any>`
-            ("genericBox", "x", &["unknown"]),
             // `(string | number) & A`
             ("primitives", "x", &["number", "string"]),
             ("object", "x", &["instanceof A", "instanceof C"]),

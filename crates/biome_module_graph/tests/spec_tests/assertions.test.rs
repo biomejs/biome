@@ -122,6 +122,8 @@ fn standalone_assertions_refine_after_all_arguments_without_changing_declaration
     }
 }
 
+// TypeScript 7.0.2 (`tsc --strict`) gives `{}` for `unknownBare`, as for the
+// truthy branch of `if (value)`.
 #[test]
 fn typed_assertions_preserve_falsy_targets_while_bare_assertions_filter_truthiness() {
     for (target, input, truthy) in [
@@ -146,8 +148,10 @@ fn typed_assertions_preserve_falsy_targets_while_bare_assertions_filter_truthine
                 declare function assertTruthy(condition: unknown): asserts condition;
                 declare const expectedTyped: {target};
                 declare const expectedTruthy: {truthy};
+                declare const expectedEmpty: {{}};
                 /*expectedTyped*/expectedTyped;
                 /*expectedTruthy*/expectedTruthy;
+                /*expectedEmpty*/expectedEmpty;
                 function typed(value: {input}) {{
                     assertTyped(value);
                     /*typed*/value;
@@ -169,11 +173,12 @@ fn typed_assertions_preserve_falsy_targets_while_bare_assertions_filter_truthine
         let (db, module) = assertion_db(&source);
         let typed = normalized_type_at(&db, module, &source, "expectedTyped", "expectedTyped");
         let truthy = normalized_type_at(&db, module, &source, "expectedTruthy", "expectedTruthy");
+        let empty = normalized_type_at(&db, module, &source, "expectedEmpty", "expectedEmpty");
         for (marker, expected) in [
             ("typed", typed),
             ("bare", truthy),
             ("unknownTyped", typed),
-            ("unknownBare", InferredTypeData::UnknownKeyword),
+            ("unknownBare", empty),
         ] {
             assert_eq!(
                 normalized_type_at(&db, module, &source, marker, "value"),

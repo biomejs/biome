@@ -317,9 +317,10 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   the declarations that the target's names refer to, whether every member of
   the target is an object type, as for an interface, a class, or a type
   literal. Such a test, as `isFoo(x)` with `x is Foo`, narrows only a type
-  with an object type or `unknown`, so the decomposed condition lists `x`
-  with the objects of property guards and among the subjects that
-  `instanceof` tests. An imported name can be an alias of a primitive, so it
+  with an object type, `unknown`, or `any`, so the decomposed condition lists
+  `x` with the objects of property guards and among the subjects that
+  `instanceof` tests, unless the annotation of `x` is `any`. An imported name
+  can be an alias of a primitive, so it
   doesn't count as an object type, and a target of `any` or `unknown` makes
   the function unsupported. After each statement call, the expression of an
   expression statement or an operand of the comma operator there, not in
@@ -413,11 +414,17 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   `switch (true)` is its test when it is truthy. The condition that a case
   did not match never tests the receivers of an optional chain, as in
   TypeScript, and for `switch (true)` it decomposes the test as falsy only
-  when the test gives a boolean (`is_boolean_valued`). A `switch` that
-  TypeScript can find exhaustive, without `default`, on a subject or `typeof`
-  of one, with cases that all test a unit value or a kind of value, wraps
-  its bypass guard in `FlowGuard::Bypass` and is recorded in
-  `RootFlow::switches`, at most 64 per root.
+  when the test gives a boolean (`is_boolean_valued`). The condition that no
+  case of a `switch` on a value or on `typeof` of one matched, for `default`
+  and for the bypass, is wrapped in `FlowGuard::Unmatched`, which leaves a
+  type with an `unknown` member as it is: TypeScript removes the matched
+  values from such a type as a whole, while the tests that the condition
+  combines narrow `unknown` as `{} | null | undefined`. `switch (true)` needs
+  no wrapper, because TypeScript tests each of its cases as an `if` does. A
+  `switch` that TypeScript can find exhaustive, without `default`, on a
+  subject or `typeof` of one, with cases that all test a unit value or a
+  kind of value, wraps its bypass guard in `FlowGuard::Bypass` and is
+  recorded in `RootFlow::switches`, at most 64 per root.
   The body of a `for...in` loop whose head declares a variable starts with
   the condition that the loop's expression is not nullish
   (`decompose_for_in`), as TypeScript's `getTypeAtFlowAssignment` assumes
@@ -429,8 +436,9 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   of `C`, which inference resolves only when the test can narrow. The
   decomposed condition lists `x` with the objects of property guards, and
   also among the subjects that `instanceof` tests, because `instanceof`
-  narrows only a type with an object type or `unknown`, which need not be a
-  union. It adds no property guard either. In the true branch, the receivers
+  narrows only a type with an object type, `unknown`, or `any`, which need
+  not be a union, unless the annotation of `x` is `any`. It adds no property
+  guard either. In the true branch, the receivers
   of an optional chain narrow too, as in `o?.v instanceof C`, because an
   instance is never nullish.
   A truthiness test of an aliased condition, a `const` that is not exported,
@@ -453,6 +461,21 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   inside an inlined initializer, is marked as aliased: the `const` holds the
   value that the property had where the `const` is declared, and a write can
   change the property before the test.
+  A variable whose annotation is `any`, as the raw tables show without
+  resolving anything (`AnyRoot`), narrows only by the tests that narrow
+  `any` in TypeScript (`FlowTest::narrows_any`): `typeof` with a primitive
+  kind or `"undefined"`, `instanceof`, and type-guard functions. The
+  decomposer keeps the guards of its other tests, which leave `any` as it
+  is, because an earlier test can narrow the variable to a type that they
+  narrow further, as in `if (typeof x === "string") { if (x === "a") x }`,
+  and `switch (typeof x)` needs every case. Those guards mention nothing,
+  so they make no read a candidate. TypeScript types a property of `any` as
+  `any` without narrowing it, so no test of a property path on such a
+  variable mentions the path, and no property guard, test of a receiver, or
+  condition of a decomposition that stops early mentions the variable.
+  `instanceof` and a type-guard function whose target has only object types
+  test such a variable as an ordinary subject, because its annotation
+  already shows that these tests narrow it.
 - `writes.rs` finds the writes of a root that its graph doesn't model, as
   in a function called where it is defined or a class static block. A
   variable narrows only when each of its semantic writes in the root has a
@@ -528,7 +551,7 @@ collected type shows that it has no object type
 (`raw_may_narrow_by_instanceof`). A
 variable whose type is a name, an import, or inferred from an expression stays. A variable can narrow in
 the root that declares it and in the roots nested in that one, including an
-import, when it is neither untyped nor annotated `any`, not supplied by a
+import, when it is not untyped, not supplied by a
 destructuring default, which the declared type ignores, and each of its writes
 in the root has a write node or runs only when called, as `writes.rs` decides
 (`eligible_range`, and `encloses_eligible` once per variable of an enclosing
@@ -700,8 +723,10 @@ A subject in `RootFlow::property_only` starts from `property_baseline`
 instead of `narrowing_baseline`. It has no baseline, so its reads keep their
 declared types without a solve, unless its flattened type is a union with at
 least two object types (`may_narrow_by_property`), or, for a subject in
-`RootFlow::instance_tested`, has an object type or is `unknown`
-(`may_narrow_by_instanceof`). A pattern starts from
+`RootFlow::instance_tested`, has an object type or is `unknown` or `any`
+(`may_narrow_by_instanceof`). No test of a property or `in` narrows `any`,
+so only a subject in `RootFlow::instance_tested` starts from `any` here. A
+pattern starts from
 `pattern_baseline`, which is `property_baseline` without the `null` and
 `undefined` members, because destructuring throws on them. To flatten it, local types
 of the module resolve through the context instead of `infer_local_type`, so in

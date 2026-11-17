@@ -586,9 +586,39 @@ pub(crate) struct InstanceType<'db> {
     /// For a generic class it has no type arguments, so it must not become
     /// the type of a read.
     pub(crate) target: TypeData<'db>,
-    /// Whether the instance type is a generic class without type arguments,
-    /// whose instance TypeScript gives `any` type arguments.
-    pub(crate) is_generic: bool,
+    /// The number of type parameters of the class when `target` is an
+    /// instance of a generic class without type arguments, and zero
+    /// otherwise.
+    pub(crate) type_parameters: usize,
+}
+
+impl<'db> InstanceType<'db> {
+    /// Returns whether `target` is an instance of a generic class without
+    /// type arguments.
+    pub(crate) fn is_generic(&self) -> bool {
+        self.type_parameters > 0
+    }
+
+    /// Returns the type that TypeScript gives an `unknown` or `any` value
+    /// that passes `instanceof`: `target` with an `any` type argument for
+    /// each type parameter of a generic class, as `Map<any, any>` for `Map`,
+    /// and `target` itself otherwise.
+    ///
+    /// Returns `None` when `target` is generic but not an instance of a
+    /// class, which [`instance_types`] never gives.
+    pub(crate) fn with_any_arguments(&self, db: &'db dyn TypeDb) -> Option<TypeData<'db>> {
+        if !self.is_generic() {
+            return Some(self.target);
+        }
+        let TypeData::InstanceOf(instance) = self.target else {
+            return None;
+        };
+        Some(TypeData::instance_of(
+            db,
+            instance.ty(db),
+            vec![TypeData::AnyKeyword; self.type_parameters].into_boxed_slice(),
+        ))
+    }
 }
 
 /// Returns the types of the instances of the normalized constructor type
@@ -3457,7 +3487,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 };
                 return Some(vec![InstanceType {
                     target: TypeData::instance_of(self.db, class_type, Box::default()),
-                    is_generic: !class.type_parameters(self.db).is_empty(),
+                    type_parameters: class.type_parameters(self.db).len(),
                 }]);
             }
             TypeData::Constructor(constructor) => {
@@ -3467,7 +3497,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 let target = constructor.return_type(self.db)?;
                 return Some(vec![InstanceType {
                     target,
-                    is_generic: false,
+                    type_parameters: 0,
                 }]);
             }
             TypeData::Interface(interface) => interface.members(self.db).to_vec(),
@@ -3499,7 +3529,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         {
             return Some(vec![InstanceType {
                 target: prototype,
-                is_generic: false,
+                type_parameters: 0,
             }]);
         }
         let mut instances = Vec::new();
@@ -3515,7 +3545,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             }
             instances.push(InstanceType {
                 target: signature.return_type(self.db)?,
-                is_generic: false,
+                type_parameters: 0,
             });
         }
         (!instances.is_empty()).then_some(instances)

@@ -2393,7 +2393,9 @@ impl RootCollector<'_> {
             }
             evolving => evolving,
         };
-        // Untyped and `any` bindings never narrow, so their reads need no flow.
+        // Bindings whose type inference can't determine never narrow, so their
+        // reads need no flow. An `any` binding narrows, but only by the tests
+        // that the decomposer keeps for it.
         if evolving == FlowEvolving::None
             && self
                 .raw_binding_types
@@ -3074,6 +3076,7 @@ fn readonly_tested_subjects(
         | FlowGuard::ReadonlyPath(_)
         | FlowGuard::Both { .. }
         | FlowGuard::Bypass { .. }
+        | FlowGuard::Unmatched(_)
         | FlowGuard::Call { .. } => None,
     };
     let mut replaced: FxHashSet<_> = calls
@@ -3470,6 +3473,57 @@ mod tests {
                 "{marker}"
             );
         }
+    }
+
+    #[test]
+    fn any_variables_become_candidates_only_through_tests_that_narrow_any() {
+        // Truthiness, equality, `in`, discriminants, and `typeof` with
+        // `"object"` or `"function"` keep `any` in TypeScript, so they make no
+        // read of a variable whose annotation is `any` a candidate, and no
+        // test makes a read of a property path on one a candidate.
+        // `typeof` with a primitive kind, `instanceof`, and a type-guard
+        // function do, and `instanceof` tests such a variable as an ordinary
+        // subject, not one that only tests of its shape narrow.
+        const SOURCE: &str = r#"
+            class A { a = 1 }
+            declare function isString(v: unknown): v is string;
+            function a(x: any) {
+                if (x) /*truthy*/x;
+                if (x === "a") /*literal*/x;
+                if (x != null) /*nullish*/x;
+                if ("a" in x) /*in*/x;
+                if (x.kind === "a") /*property*/x;
+                if (typeof x === "object") /*object*/x;
+                if (typeof x === "function") /*function*/x;
+                x?.v === 1 && /*receiver*/x;
+            }
+            function b(x: any) { if (typeof x === "string") /*typeof*/x; }
+            function c(x: any) { if (x instanceof A) /*instanceof*/x; }
+            function d(x: any) { if (isString(x)) /*predicate*/x; }
+            function e(x: any) { if (typeof x.v === "string") /*path*/x.v; }
+            function f(x: unknown) { if (x) /*unknown*/x; }
+        "#;
+        let info = module(SOURCE);
+        for (marker, expression, candidate) in [
+            ("truthy", "x", false),
+            ("literal", "x", false),
+            ("nullish", "x", false),
+            ("in", "x", false),
+            ("property", "x", false),
+            ("object", "x", false),
+            ("function", "x", false),
+            ("receiver", "x", false),
+            ("typeof", "x", true),
+            ("instanceof", "x", true),
+            ("predicate", "x", true),
+            ("path", "x.v", false),
+            ("unknown", "x", true),
+        ] {
+            let read = marked(SOURCE, marker, expression);
+            assert_eq!(info.flow.is_candidate(read), candidate, "{marker}");
+        }
+        let instanceof = marked(SOURCE, "instanceof", "x");
+        assert!(info.flow.property_only_candidate(instanceof).is_none());
     }
 
     #[test]

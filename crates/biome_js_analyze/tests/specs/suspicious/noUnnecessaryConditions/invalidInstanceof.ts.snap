@@ -44,6 +44,13 @@ function unknownValue(value: unknown) {
 	}
 }
 
+// An instance of a generic class has `any` type arguments, as `Map<any, any>`.
+function genericClass(value: unknown) {
+	if (value instanceof Map) {
+		return value?.size;
+	}
+}
+
 ```
 
 # Diagnostics
@@ -131,6 +138,32 @@ invalidInstanceof.ts:37:10 lint/suspicious/noUnnecessaryConditions ━━━━�
        │ 		            ^^
     38 │ 	}
     39 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidInstanceof.ts:44:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    42 │ function genericClass(value: unknown) {
+    43 │ 	if (value instanceof Map) {
+  > 44 │ 		return value?.size;
+       │ 		       ^^^^^
+    45 │ 	}
+    46 │ }
+  
+  i Replace ?. with ..
+  
+    42 │ function genericClass(value: unknown) {
+    43 │ 	if (value instanceof Map) {
+  > 44 │ 		return value?.size;
+       │ 		            ^^
+    45 │ 	}
+    46 │ }
   
   i The receiver is guaranteed to be non-nullish.
   
