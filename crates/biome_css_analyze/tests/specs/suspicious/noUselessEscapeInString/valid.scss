@@ -2,4 +2,5 @@
 .a::after {
   content: "\#{foo}";
   content: '\#{$bar}';
+  content: "#\{$baz}";
 }

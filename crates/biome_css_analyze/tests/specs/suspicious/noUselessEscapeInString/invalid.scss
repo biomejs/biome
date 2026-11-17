@@ -1,3 +1,4 @@
 /* should generate diagnostics */
 $content: "useless \z";
 .b::after { content: "\#foo"; }
+.c::after { content: "\{"; }

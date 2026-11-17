@@ -7,6 +7,7 @@ expression: invalid.scss
 /* should generate diagnostics */
 $content: "useless \z";
 .b::after { content: "\#foo"; }
+.c::after { content: "\{"; }
 
 ```
 
@@ -20,7 +21,7 @@ invalid.scss:2:21 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━
   > 2 │ $content: "useless \z";
       │                     ^
     3 │ .b::after { content: "\#foo"; }
-    4 │ 
+    4 │ .c::after { content: "\{"; }
   
   i Only quotes that enclose the string and special characters need to be escaped.
   
@@ -40,7 +41,8 @@ invalid.scss:3:24 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━
     2 │ $content: "useless \z";
   > 3 │ .b::after { content: "\#foo"; }
       │                        ^
-    4 │ 
+    4 │ .c::after { content: "\{"; }
+    5 │ 
   
   i Only quotes that enclose the string and special characters need to be escaped.
   
@@ -48,5 +50,25 @@ invalid.scss:3:24 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━
   
     3 │ .b::after·{·content:·"\#foo";·}
       │                       -        
+
+```
+
+```
+invalid.scss:4:24 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The character doesn't need to be escaped.
+  
+    2 │ $content: "useless \z";
+    3 │ .b::after { content: "\#foo"; }
+  > 4 │ .c::after { content: "\{"; }
+      │                        ^
+    5 │ 
+  
+  i Only quotes that enclose the string and special characters need to be escaped.
+  
+  i Safe fix: Unescape the character.
+  
+    4 │ .c::after·{·content:·"\{";·}
+      │                       -     
 
 ```
