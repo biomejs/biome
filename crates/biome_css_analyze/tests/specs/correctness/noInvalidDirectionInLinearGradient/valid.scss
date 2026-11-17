@@ -7,3 +7,4 @@ $side: left;
 .c { background: linear-gradient(#{$dir-top}, red, blue); }
 .d { background: linear-gradient(get-direction(top), red, blue); }
 .e { background: linear-gradient(math.div(90deg, 2), red, blue); }
+.f { background: linear-gradient(math.$pi, red, blue); }
