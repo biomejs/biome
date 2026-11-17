@@ -1,0 +1,90 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome migrate prettier --write
+biome format --write SKILL.md
+```
+
+## `biome.json`
+
+```json
+{
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": false,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 80,
+    "attributePosition": "auto",
+    "bracketSameLine": false,
+    "bracketSpacing": true,
+    "expand": "auto",
+    "useEditorconfig": true
+  },
+  "javascript": {
+    "formatter": {
+      "jsxQuoteStyle": "double",
+      "quoteProperties": "asNeeded",
+      "trailingCommas": "all",
+      "semicolons": "always",
+      "arrowParentheses": "always",
+      "bracketSameLine": false,
+      "quoteStyle": "double",
+      "attributePosition": "auto",
+      "bracketSpacing": true
+    }
+  },
+  "markdown": { "parser": { "frontmatter": true } },
+  "html": {
+    "formatter": {
+      "indentScriptAndStyle": false,
+      "selfCloseVoidElements": "always"
+    }
+  }
+}
+```
+
+## `.prettierrc`
+
+```prettierrc
+{}
+```
+
+## `SKILL.md`
+
+```md
+---
+name: choose-js-linter-formatter
+description: Use when initializing a Node.js project.
+---
+
+# choose-js-linter-formatter
+
+Choose Biome as the formatter and linter.
+
+```
+
+# Emitted Messages
+
+```block
+.prettierrc has been successfully migrated.
+```
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration successfully migrated.
+  
+
+```
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```
