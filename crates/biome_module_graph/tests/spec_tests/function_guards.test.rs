@@ -575,8 +575,8 @@ fn unsupported_callees_signatures_and_arguments_do_not_refine() {
             "guard(value)",
         ),
         (
-            "implicit predicate",
-            "function guard(input: unknown) { return typeof input === 'string'; }",
+            "implicit predicate with several returns",
+            "function guard(input: unknown) { if (typeof input === 'string') return true; return false; }",
             "guard(value)",
         ),
         (

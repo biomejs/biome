@@ -7,9 +7,9 @@
 
 use super::{
     BindingTypeInput, BindingTypeWithImportBudgetInput, ExpressionTypeInput, FlowAssignedTypes,
-    FlowCallEffect, FlowCallInput, FlowComparedTypes, FlowReachability, FlowReachabilityInput,
-    FlowSubjectRootInput, FlowSubjectTypeInput, FlowSubjectWritesInput, FlowSwitchInput,
-    LocalTypeInput, LocalTypeWithImportBudgetInput,
+    FlowCallEffect, FlowCallInput, FlowComparedTypes, FlowPredicateInput, FlowReachability,
+    FlowReachabilityInput, FlowSubjectRootInput, FlowSubjectTypeInput, FlowSubjectWritesInput,
+    FlowSwitchInput, LocalTypeInput, LocalTypeWithImportBudgetInput,
 };
 use crate::ModuleDb;
 use crate::db::type_inference::{
@@ -17,8 +17,8 @@ use crate::db::type_inference::{
     find_member_type_on_demand as find_member_type_impl,
     find_value_member_type_on_demand as find_value_member_type_impl, flow_assigned_types,
     flow_binding_baseline, flow_call_effect, flow_compared_types, flow_expression_type,
-    flow_reachability, flow_subject_states, flow_subject_type, flow_switch_exhaustive,
-    resolve_local_type_on_demand,
+    flow_inferred_predicate, flow_reachability, flow_subject_states, flow_subject_type,
+    flow_switch_exhaustive, resolve_local_type_on_demand,
 };
 use crate::js_module_info::flow::FlowNodeId;
 use crate::module_graph::ModuleInfoKind;
@@ -314,6 +314,52 @@ pub(crate) fn infer_flow_reachability<'db>(
                 return None;
             }
             flow_reachability(db, module, info, root)
+        },
+    )
+}
+
+/// Infers the type predicate that TypeScript infers from the body of one
+/// function without a return type annotation, as in
+/// `const isString = (v: unknown) => typeof v === "string"`, and returns
+/// its target, here `string`.
+///
+/// The function's returned value narrows its parameter from the declared
+/// type, which is resolved here, so a parameter of a callback takes its type
+/// from the call that the callback is passed to. That type never depends on
+/// the callback itself, so resolving the call doesn't reach this query
+/// through the callback. The function has a type predicate when the value
+/// narrows the parameter where it is `true`, and leaves nothing of that type
+/// where it is `false`.
+///
+/// Every resolution of the function's type reads the answer from here, so
+/// each function is inferred at most once.
+///
+/// Returns `None` when the function has no collected value to infer from
+/// (see [`crate::js_module_info::flow::FlowPredicate`]), when the parameter's
+/// declared type is `boolean` or can't narrow, when the narrowed type equals
+/// the declared type or is `Unknown`, when the type where the value is
+/// `false` isn't `never`, when narrowing exceeds its work limit, and when a
+/// query cycle passes through this lookup. The function then has no type
+/// predicate, which is never narrower than TypeScript's.
+#[salsa::tracked(returns(copy), cycle_result=infer_flow_inferred_predicate_cycle_result)]
+pub(crate) fn infer_flow_inferred_predicate<'db>(
+    db: &'db dyn ModuleDb,
+    input: FlowPredicateInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let module = input.module(db);
+    let function = input.function(db);
+    execute_query(
+        TypeInferenceQueryKind::Lookups,
+        TypeInferenceProfileOrigin::exact(module, function),
+        "infer_flow_inferred_predicate",
+        || {
+            let ModuleInfoKind::Js(info) = module.kind(db) else {
+                return None;
+            };
+            if !info.infer_types {
+                return None;
+            }
+            flow_inferred_predicate(db, module, info, function)
         },
     )
 }
@@ -638,6 +684,14 @@ fn infer_flow_call_effect_cycle_result<'db>(
     _input: FlowCallInput<'db>,
 ) -> FlowCallEffect<'db> {
     FlowCallEffect::None
+}
+
+fn infer_flow_inferred_predicate_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: FlowPredicateInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    None
 }
 
 fn infer_flow_reachability_cycle_result<'db>(

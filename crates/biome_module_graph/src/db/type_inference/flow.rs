@@ -22,20 +22,21 @@ use super::imports::{ExportOriginResult, find_export_origin};
 use super::{ImportResolution, ResolutionCtx, resolve_local_type_on_demand};
 use crate::db::queries::{
     BindingTypeInput, CallableFunctionInput, FlowAssignedTypes, FlowCallEffect, FlowCallEffects,
-    FlowCallInput, FlowCallParameter, FlowComparedTypes, FlowReachability, FlowReachabilityInput,
-    FlowSubjectRootInput, FlowSubjectTypeInput, FlowSubjectWritesInput, FlowSwitchInput,
-    LocalTypeInput, global_contributions, infer_flow_assigned_types, infer_flow_binding_baseline,
-    infer_flow_call_effect, infer_flow_compared_types, infer_flow_reachability,
-    infer_flow_subject_states, infer_flow_subject_type, infer_flow_switch_exhaustive,
-    infer_local_type, resolve_callable_function,
+    FlowCallInput, FlowCallParameter, FlowComparedTypes, FlowPredicateInput, FlowReachability,
+    FlowReachabilityInput, FlowSubjectRootInput, FlowSubjectTypeInput, FlowSubjectWritesInput,
+    FlowSwitchInput, LocalTypeInput, global_contributions, infer_flow_assigned_types,
+    infer_flow_binding_baseline, infer_flow_call_effect, infer_flow_compared_types,
+    infer_flow_inferred_predicate, infer_flow_reachability, infer_flow_subject_states,
+    infer_flow_subject_type, infer_flow_switch_exhaustive, infer_local_type,
+    resolve_callable_function,
 };
 use crate::js_module_info::flow::{
     AnyMemberDeclaration, CalleeReturn, FlowAssigned, FlowAssignedValue, FlowCall, FlowCallKind,
     FlowCallRoot, FlowCallee, FlowCapture, FlowComparedValue, FlowEvolving, FlowGuard, FlowNode,
-    FlowNodeId, FlowRead, FlowSubject, FlowSubjectId, FlowSwitch, FlowTest, FlowWriteEffect,
-    PropertyKey, ReachabilityGraph, RootFlow, UnitValue, binding_unit_value, build_reachability,
-    declaration_return, enum_member_name_range, enum_member_unit_value, guard_signature,
-    member_explicitness, member_key, member_return, reaches_end_by_syntax,
+    FlowNodeId, FlowPredicate, FlowRead, FlowSubject, FlowSubjectId, FlowSwitch, FlowTest,
+    FlowWriteEffect, PropertyKey, ReachabilityGraph, RootFlow, UnitValue, binding_unit_value,
+    build_reachability, declaration_return, enum_member_name_range, enum_member_unit_value,
+    guard_signature, member_explicitness, member_key, member_return, reaches_end_by_syntax,
 };
 use crate::module_graph::ModuleInfoKind;
 use crate::type_inference::TypeInferenceClassification;
@@ -291,6 +292,17 @@ fn control_flow_root(info: &JsModuleInfo, range: TextRange) -> Option<AnyJsContr
         .ancestors()
         .filter_map(AnyJsControlFlowRoot::cast)
         .find(|candidate| candidate.syntax().text_trimmed_range() == range)
+}
+
+pub(in crate::db) fn flow_inferred_predicate<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    info: &JsModuleInfo,
+    function: TextRange,
+) -> Option<TypeData<'db>> {
+    let predicate = info.flow.predicate(function)?;
+    let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
+    ctx.inferred_predicate(predicate)
 }
 
 pub(in crate::db) fn flow_switch_exhaustive(
@@ -1574,8 +1586,17 @@ impl<'db> ResolutionCtx<'db, '_> {
         root: usize,
         subject: FlowSubjectId,
     ) -> Option<FlowComparedTypes<'db>> {
+        let values = self.js_info.flow.root(root)?.subject_compared(subject);
+        self.resolve_compared_values(values)
+    }
+
+    /// Resolves the declared types of `values`, as
+    /// [`Self::resolve_compared_types`] does for the values of a subject.
+    fn resolve_compared_values(
+        &mut self,
+        values: &[FlowComparedValue],
+    ) -> Option<FlowComparedTypes<'db>> {
         let info = self.js_info;
-        let values = info.flow.root(root)?.subject_compared(subject);
         let mut types = Vec::with_capacity(values.len());
         for value in values {
             let ty = match *value {
@@ -1968,6 +1989,91 @@ impl<'db> ResolutionCtx<'db, '_> {
                 &info.raw_binding_types,
             )
         })
+    }
+
+    /// Resolves the target of the type predicate that TypeScript infers from
+    /// the body of the function whose trimmed range is `function` (see
+    /// [`biome_js_type_info::TypeofInferredPredicateExpression`]), or `Unknown` when it infers none.
+    ///
+    /// Lookups read the answer from [`infer_flow_inferred_predicate`], so
+    /// they share it. Complete module inference infers it in its own context
+    /// instead, which resolves the types that it needs anyway, and keeps it
+    /// per function. A work limit or a query cycle gives no type predicate,
+    /// which only widens.
+    pub(super) fn resolve_inferred_predicate(&mut self, function: TextRange) -> TypeData<'db> {
+        let Some(predicates) = self.local_predicates.as_ref() else {
+            let input = FlowPredicateInput::new(self.db, self.module, function);
+            return infer_flow_inferred_predicate(self.db, input).unwrap_or(TypeData::Unknown);
+        };
+        if let Some(target) = predicates.get(&function) {
+            return target.unwrap_or(TypeData::Unknown);
+        }
+        let js_info = self.js_info;
+        let target = js_info
+            .flow
+            .predicate(function)
+            .and_then(|predicate| self.inferred_predicate(predicate));
+        if let Some(predicates) = self.local_predicates.as_mut() {
+            predicates.insert(function, target);
+        }
+        target.unwrap_or(TypeData::Unknown)
+    }
+
+    /// Returns the target of the type predicate that the returned value
+    /// that `predicate` decomposes gives its function, as TypeScript infers
+    /// it, or `None` when it gives none. See
+    /// [`crate::db::queries::infer_flow_inferred_predicate`].
+    ///
+    /// The parameter's declared type is resolved in this context and
+    /// flattened as narrowing flattens it. TypeScript ignores a parameter
+    /// whose declared type is `boolean`, because a type predicate can only
+    /// tell `true` from `false` there. The call points of the value and its
+    /// comparisons by declared types narrow by what this context resolves.
+    fn inferred_predicate(&mut self, predicate: &FlowPredicate) -> Option<TypeData<'db>> {
+        let db = self.db;
+        let flow = &predicate.flow;
+        let parameter = predicate.parameter;
+        let reference = self.js_info.raw_binding_types.get(&predicate.binding)?;
+        let declared = self.resolve(reference);
+        // Handles to local types of this module resolve through this
+        // context, as for a subject that only tests of its shape narrow.
+        let declared = self.flatten_baseline(declared, true).ok()?;
+        if is_narrowing_invariant(declared) || is_boolean(db, declared) {
+            return None;
+        }
+        let mut effects = Vec::new();
+        for call in flow.subject_calls(parameter) {
+            let Some(flow_call) = flow.calls.get(*call as usize) else {
+                continue;
+            };
+            if let Some(effect) = self.resolve_call_effect(flow_call)
+                && effect.narrows()
+            {
+                effects.push((*call, effect));
+            }
+        }
+        let calls =
+            (!effects.is_empty()).then(|| FlowCallEffects::new(db, effects.into_boxed_slice()));
+        let compared = self.resolve_compared_values(flow.subject_compared(parameter));
+        let mut solve = GuardSolve::new(
+            parameter,
+            declared,
+            false,
+            0,
+            None,
+            FlowEvolving::None,
+            calls,
+            0,
+            compared,
+        );
+        let mut remaining = MAX_FLOW_STEPS;
+        let truthy =
+            self.apply_guard(flow, predicate.truthy, &mut solve, declared, &mut remaining)?;
+        if truthy == declared || truthy == TypeData::Unknown {
+            return None;
+        }
+        let falsy = self.apply_guard(flow, predicate.falsy, &mut solve, truthy, &mut remaining)?;
+        (falsy == TypeData::NeverKeyword).then_some(truthy)
     }
 
     /// Returns which statements of the root that `graph` holds some path
@@ -3458,6 +3564,25 @@ impl<'db> ResolutionCtx<'db, '_> {
         // that instance, as it does for a variable declared with the alias.
         self.flow_baseline(target)
     }
+}
+
+/// Returns whether `ty` is `boolean`, whether written so or as `true | false`.
+fn is_boolean(db: &dyn ModuleDb, ty: TypeData) -> bool {
+    if ty == TypeData::Boolean {
+        return true;
+    }
+    let TypeData::Union(union) = ty else {
+        return false;
+    };
+    let types = union.types(db);
+    types.len() == 2
+        && [true, false].iter().all(|value| {
+            types.iter().any(|member| {
+                matches!(member, TypeData::Literal(literal)
+                    if matches!(literal.literal(db), Literal::Boolean(boolean)
+                        if boolean.as_bool() == *value))
+            })
+        })
 }
 
 /// Limits the imports followed to find the value of an imported variable that

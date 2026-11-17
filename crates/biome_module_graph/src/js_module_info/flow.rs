@@ -44,6 +44,11 @@
 //! anywhere in the root. Calls never invalidate facts, as in TypeScript.
 //! Writes in other roots don't either, because they run before the root
 //! runs or while a call inside it runs.
+//!
+//! A function whose body returns a test of a parameter, for which TypeScript
+//! may infer a type predicate, gets the returned value decomposed as a
+//! condition, without a graph ([`FlowPredicate`]). Inference narrows the
+//! parameter by it to decide whether the function has a type predicate.
 
 mod builder;
 mod expressions;
@@ -85,18 +90,18 @@ use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration,
 };
 use biome_js_type_info::{
-    DestructureField, RawTypeData, RawTypeId, TypeReference, TypeofExpression, TypeofKind,
-    is_raw_narrowing_invariant, raw_may_be_object_union, raw_may_be_union, raw_may_have_literal,
-    raw_may_narrow_by_instanceof,
+    AnyPredicateFunction, DestructureField, RawTypeData, RawTypeId, TypeReference,
+    TypeofExpression, TypeofKind, inferred_predicate_parameter, is_raw_narrowing_invariant,
+    raw_may_be_object_union, raw_may_be_union, raw_may_have_literal, raw_may_narrow_by_instanceof,
 };
 use biome_rowan::{
-    AstNode, AstPtr, AstSeparatedList, SyntaxKindSet, Text, TextRange, TextSize, WalkEvent,
-    declare_node_union,
+    AstNode, AstPtr, AstSeparatedList, NodeOrToken, SyntaxKindSet, Text, TextRange, TextSize,
+    WalkEvent, declare_node_union,
 };
 use builder::{
     AnyContinuingClosure, BuiltCapture, BuiltRoot, BuiltSwitch, build_root, never_has_outcome,
 };
-use guards::GuardFunctions;
+use guards::{FlowOutcome, GuardFunctions, decompose_condition};
 use rustc_hash::{FxHashMap, FxHashSet};
 use writes::{WrittenPaths, WrittenTargets};
 
@@ -1144,6 +1149,161 @@ pub(crate) struct FlowRead {
     pub(crate) assumes_initialized: bool,
 }
 
+/// The value that a function without a return type annotation returns,
+/// decomposed as a condition, from which inference decides whether the
+/// function has a type predicate that TypeScript infers from its body (see
+/// [`biome_js_type_info::InferredPredicateReturnType`]).
+///
+/// The value is decomposed twice, as a condition that holds and as one that
+/// fails, into guards on the subjects that it reads. The parameter's type
+/// where the function returns `true` is its declared type narrowed by the
+/// first guard, and the function has a type predicate when that type differs
+/// from the declared type and the second guard leaves nothing of it.
+#[derive(Debug)]
+pub(crate) struct FlowPredicate {
+    /// The guards and the call points of the returned value, and its
+    /// subjects. It has no nodes and no reads, and lists the call points and
+    /// the compared values of the parameter only.
+    pub(crate) flow: RootFlow,
+    /// The index in the guards of `flow` of the guard that holds where the
+    /// function returns `true`.
+    pub(crate) truthy: usize,
+    /// The index of the guard that holds where the function returns `false`.
+    pub(crate) falsy: usize,
+    /// The id of the parameter in the subject table of `flow`.
+    pub(crate) parameter: FlowSubjectId,
+    /// The range of the parameter's declaration, whose collected type is its
+    /// declared type.
+    pub(crate) binding: TextRange,
+}
+
+impl FlowPredicate {
+    /// Decomposes the value that the function whose trimmed range is
+    /// `function` returns, when the function has the shape for a type
+    /// predicate that TypeScript infers (see
+    /// [`inferred_predicate_parameter`]).
+    ///
+    /// Returns `None` when the module has no such function there, and when
+    /// no guard of the value may narrow the parameter.
+    fn new(
+        function: TextRange,
+        model: &SemanticModel,
+        functions: &mut GuardFunctions,
+    ) -> Option<Self> {
+        let tree = model.root();
+        let start = match tree.syntax().covering_element(function) {
+            NodeOrToken::Node(node) => node,
+            NodeOrToken::Token(token) => token.parent()?,
+        };
+        let function = start
+            .ancestors()
+            .filter_map(AnyPredicateFunction::cast)
+            .find(|candidate| candidate.syntax().text_trimmed_range() == function)?;
+        let (returned, binding) = inferred_predicate_parameter(&function)?;
+        let binding = binding.syntax().text_trimmed_range();
+        // A failed build may have left the call points of its root.
+        functions.take_calls();
+        let mut subjects = FlowSubjectTable::default();
+        let mut guards = Vec::new();
+        let truthy = decompose_condition(
+            &returned,
+            FlowOutcome::Truthy,
+            model,
+            functions,
+            &mut subjects,
+            &mut guards,
+        );
+        let falsy = decompose_condition(
+            &returned,
+            FlowOutcome::Falsy,
+            model,
+            functions,
+            &mut subjects,
+            &mut guards,
+        );
+        let calls = functions.take_calls();
+        let parameter = subjects.get(&FlowSubject::Binding(binding))?;
+        let narrowed = |condition: &guards::DecomposedCondition| {
+            condition
+                .mentions
+                .iter()
+                .chain(&condition.parents)
+                .chain(&condition.call_mentions)
+                .any(|subject| *subject == parameter)
+        };
+        if !narrowed(&truthy) && !narrowed(&falsy) {
+            return None;
+        }
+        let parameter_calls: Box<[u32]> = (0..)
+            .zip(&calls)
+            .filter(|(_, (_, narrowed))| narrowed.contains(&parameter))
+            .map(|(call, _)| call)
+            .collect();
+        let mut compared: Vec<FlowComparedValue> = guards
+            .iter()
+            .filter_map(|guard| match guard {
+                FlowGuard::Test { subject, test, .. }
+                | FlowGuard::Property {
+                    object: subject,
+                    test,
+                    ..
+                } if *subject == parameter => test.compared_value(),
+                FlowGuard::Test { .. }
+                | FlowGuard::Property { .. }
+                | FlowGuard::Keep
+                | FlowGuard::Incomplete
+                | FlowGuard::ReadonlyPath(_)
+                | FlowGuard::Both { .. }
+                | FlowGuard::Bypass { .. }
+                | FlowGuard::Unmatched(_)
+                | FlowGuard::Call { .. } => None,
+            })
+            .collect();
+        compared.sort_unstable_by_key(|value| (value.range().start(), value.range().end()));
+        compared.dedup();
+        let mut subject_calls = FxHashMap::default();
+        if !parameter_calls.is_empty() {
+            subject_calls.insert(parameter, parameter_calls);
+        }
+        let mut subject_compared = FxHashMap::default();
+        if !compared.is_empty() {
+            subject_compared.insert(parameter, compared.into_boxed_slice());
+        }
+        Some(Self {
+            flow: RootFlow {
+                nodes: Box::default(),
+                guards: guards.into_boxed_slice(),
+                subjects: subjects.into_subjects().into_boxed_slice(),
+                read_points: FxHashMap::default(),
+                property_only: FxHashSet::default(),
+                instance_tested: FxHashSet::default(),
+                any_tested: FxHashSet::default(),
+                pattern_elements: FxHashMap::default(),
+                readonly_tested: FxHashSet::default(),
+                only_readonly_tested: FxHashSet::default(),
+                switches: Box::default(),
+                bypassed: Box::default(),
+                writes: Box::default(),
+                assigned: Box::default(),
+                subject_writes: FxHashMap::default(),
+                assignment_only: FxHashSet::default(),
+                uninitialized: FxHashSet::default(),
+                evolving: FxHashMap::default(),
+                captures: FxHashMap::default(),
+                calls: calls.into_iter().map(|(call, _)| call).collect(),
+                subject_calls,
+                subject_compared,
+                ending_calls: Box::default(),
+                called: Box::default(),
+            },
+            truthy: truthy.guard,
+            falsy: falsy.guard,
+            parameter,
+            binding,
+        })
+    }
+}
+
 /// Flow facts for one module.
 #[derive(Debug, Default)]
 pub(crate) struct ModuleFlow {
@@ -1184,6 +1344,10 @@ pub(crate) struct ModuleFlow {
     /// The call point of each call expression, keyed by its range, with the
     /// index of its root and its index in [`RootFlow::calls`].
     calls: FxHashMap<TextRange, (usize, u32)>,
+    /// The returned value of each function that may have a type predicate
+    /// that TypeScript infers from its body, keyed by the function's trimmed
+    /// range. Its call points are not in [`Self::calls`].
+    predicates: FxHashMap<TextRange, FlowPredicate>,
 }
 
 impl ModuleFlow {
@@ -1250,6 +1414,7 @@ impl ModuleFlow {
                 selected.has_this,
             );
         }
+        flow.predicates = collect_predicates(model, raw_types, &mut collector.functions);
         for (range, reads) in collector.binding_reads {
             match reads {
                 BindingReads::PropertyOnly { instance_tested } => {
@@ -1327,6 +1492,13 @@ impl ModuleFlow {
         self.roots.get(root)?.calls.get(call as usize)
     }
 
+    /// Returns the returned value of the function whose trimmed range is
+    /// `function`, decomposed for inferring its type predicate, or `None`
+    /// when the function can't have one.
+    pub(crate) fn predicate(&self, function: TextRange) -> Option<&FlowPredicate> {
+        self.predicates.get(&function)
+    }
+
     /// Returns the declared type of the [`FlowSubject::Pattern`] at `range`,
     /// which is the collected type of the value that the pattern
     /// destructures, or `None` when `range` is not a pattern with reads.
@@ -1402,6 +1574,33 @@ impl ModuleFlow {
         }
         (root, subject)
     }
+}
+
+/// Builds the [`FlowPredicate`] of each function that collection gave an
+/// [`biome_js_type_info::InferredPredicateReturnType`], whose
+/// [`TypeofExpression::InferredPredicate`] in `raw_types` names it, keyed by
+/// the function's trimmed range.
+fn collect_predicates(
+    model: &SemanticModel,
+    raw_types: &[RawTypeData],
+    functions: &mut GuardFunctions,
+) -> FxHashMap<TextRange, FlowPredicate> {
+    let mut predicates = FxHashMap::default();
+    for raw in raw_types {
+        let RawTypeData::TypeofExpression(expression) = raw else {
+            continue;
+        };
+        let TypeofExpression::InferredPredicate(marker) = expression.as_ref() else {
+            continue;
+        };
+        if predicates.contains_key(&marker.function) {
+            continue;
+        }
+        if let Some(predicate) = FlowPredicate::new(marker.function, model, functions) {
+            predicates.insert(marker.function, predicate);
+        }
+    }
+    predicates
 }
 
 struct RootCollector<'a> {

@@ -1077,15 +1077,9 @@ fn callback_type_predicates_infer_call_results() {
                 "xs.filter((v): v is string => typeof v === \"string\")",
                 &["instanceof Array<string>"],
             ),
-            // TypeScript gives `number[]` through the second signature of
-            // `filter`, because `string` doesn't satisfy `S extends number`.
-            // Biome selects the first signature for the call's result and
-            // infers nothing for `S` there.
-            (
-                "a4",
-                "nums.filter(isString)",
-                &["instanceof Array<S extends T>"],
-            ),
+            // The second signature of `filter`, because `string` doesn't
+            // satisfy `S extends number`.
+            ("a4", "nums.filter(isString)", &["instanceof Array<number>"]),
         ],
     );
 }

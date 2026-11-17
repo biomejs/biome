@@ -1020,6 +1020,7 @@ pub enum ReturnType {
     Type(TypeReference),
     Predicate(Box<PredicateReturnType>),
     Asserts(Box<AssertsReturnType>),
+    InferredPredicate(Box<InferredPredicateReturnType>),
 }
 
 impl Default for ReturnType {
@@ -1029,10 +1030,16 @@ impl Default for ReturnType {
 }
 
 impl ReturnType {
+    /// Returns the type that the function returns, or `None` when it returns
+    /// a type predicate or an assertion. For a function whose type predicate
+    /// inference decides ([`Self::InferredPredicate`]), returns the type of
+    /// the value that its body returns, which is its return type when it has
+    /// no type predicate.
     pub fn as_type(&self) -> Option<&TypeReference> {
         match self {
             Self::Type(ty) => Some(ty),
-            _ => None,
+            Self::InferredPredicate(predicate) => Some(&predicate.ty),
+            Self::Predicate(_) | Self::Asserts(_) => None,
         }
     }
 }
@@ -1054,6 +1061,26 @@ pub struct PredicateReturnType {
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct AssertsReturnType {
     pub parameter_name: Text,
+    pub ty: TypeReference,
+}
+
+/// The return type of a function without a return type annotation whose body
+/// returns a single boolean test of a parameter, as in
+/// `(v: unknown) => typeof v === "string"`, for which TypeScript may infer a
+/// type predicate, here `v is string`.
+///
+/// Only the module's flow tells whether the function has one, so the
+/// conversion to the inferred representation gives a type predicate about
+/// `parameter_name` when `target` resolves to a type, and the plain return
+/// type `ty` when it resolves to `Unknown`.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct InferredPredicateReturnType {
+    /// The name of the parameter that the type predicate would test.
+    pub parameter_name: Text,
+    /// A reference to a [`TypeofInferredPredicateExpression`] of the function.
+    pub target: TypeReference,
+    /// The type of the values that the body returns, as for a function
+    /// without a type predicate.
     pub ty: TypeReference,
 }
 
@@ -1503,6 +1530,7 @@ pub enum TypeofExpression {
     Index(TypeofIndexExpression),
     OptionalChainIndex(TypeofIndexExpression),
     ImplicitReturn(TypeofImplicitReturnExpression),
+    InferredPredicate(TypeofInferredPredicateExpression),
     IterableValueOf(TypeofIterableValueOfExpression),
     LogicalAnd(TypeofLogicalAndExpression),
     LogicalOr(TypeofLogicalOrExpression),
@@ -1576,6 +1604,18 @@ pub struct TypeofImplicitReturnExpression {
     /// `return` already adds `undefined` to the union, so resolution gives
     /// `undefined` without deciding whether a path reaches the end.
     pub has_bare_return: bool,
+}
+
+/// The target of the type predicate that TypeScript infers from the body of a
+/// function without a return type annotation (see
+/// [`InferredPredicateReturnType`]), or `Unknown` when it infers none.
+///
+/// Resolution without the module's flow gives `Unknown`, so the function
+/// returns its plain return type, which is never narrower than TypeScript's.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct TypeofInferredPredicateExpression {
+    /// The trimmed range of the function or method.
+    pub function: TextRange,
 }
 
 /// Type of the parameter at `index` of a callable type, not counting a

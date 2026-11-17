@@ -282,6 +282,7 @@ impl Format<FormatTypeContext> for ReturnType {
             }
             Self::Predicate(ty) => write!(f, [FmtVerbatim(&ty)]),
             Self::Asserts(ty) => write!(f, [FmtVerbatim(&ty)]),
+            Self::InferredPredicate(ty) => write!(f, [FmtVerbatim(&ty)]),
         }
     }
 }
@@ -604,6 +605,9 @@ impl Format<FormatTypeContext> for TypeofExpression {
                 )
             }
             Self::ImplicitReturn(_) => write!(f, [&format_args![token("implicit_return")]]),
+            Self::InferredPredicate(_) => {
+                write!(f, [&format_args![token("inferred_predicate")]])
+            }
             Self::IterableValueOf(expr) => {
                 write!(
                     f,

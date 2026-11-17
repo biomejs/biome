@@ -290,6 +290,9 @@ impl<'db> ResolutionCtx<'db, '_> {
             RawTypeofExpression::ImplicitReturn(expression) => {
                 Some(self.resolve_implicit_return(expression))
             }
+            RawTypeofExpression::InferredPredicate(expression) => {
+                Some(self.resolve_inferred_predicate(expression.function))
+            }
         }
     }
 

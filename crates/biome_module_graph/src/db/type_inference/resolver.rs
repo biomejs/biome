@@ -260,6 +260,12 @@ pub(in crate::db) struct ResolutionCtx<'db, 'a> {
     /// declarations, read on the first interface or class that this context
     /// resolves.
     contributions: Option<&'db DeclarationContributions>,
+    /// The target of the type predicate that each function resolved so far
+    /// infers from its body, keyed by the function's range, when this
+    /// context infers them itself, or `None` when it reads them from
+    /// [`crate::db::queries::infer_flow_inferred_predicate`].
+    pub(in crate::db::type_inference) local_predicates:
+        Option<FxHashMap<TextRange, Option<InferredTypeData<'db>>>>,
 }
 
 pub(in crate::db) fn resolve_raw_types<'db>(
@@ -269,6 +275,13 @@ pub(in crate::db) fn resolve_raw_types<'db>(
     import_resolution: ImportResolution<'_>,
 ) -> InferredModuleTypes<'db> {
     let mut ctx = ResolutionCtx::new(db, module, js_info, import_resolution);
+    // Resolving a function's type infers its type predicate, which resolves
+    // the types of its parameter and of the values that its body compares
+    // it with. This context resolves all of them anyway, while the query
+    // would resolve them again in a fresh context.
+    if import_resolution.is_on_demand() {
+        ctx.local_predicates = Some(FxHashMap::default());
+    }
 
     let types = (0..js_info.raw_types.len())
         .map(|index| ctx.resolve_raw_type_id(TypeId::new(index)))
@@ -353,6 +366,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
             local_flow: None,
             calls_before: None,
             contributions: None,
+            local_predicates: None,
         }
     }
 

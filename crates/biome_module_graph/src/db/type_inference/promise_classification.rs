@@ -728,7 +728,8 @@ fn classify_expression(
                         | TypeofExpression::Super(_)
                         | TypeofExpression::Typeof(_)
                         | TypeofExpression::UnaryMinus(_)
-                        | TypeofExpression::ImplicitReturn(_) => return Indeterminate,
+                        | TypeofExpression::ImplicitReturn(_)
+                        | TypeofExpression::InferredPredicate(_) => return Indeterminate,
                     },
                     RawTypeData::InstanceOf(_)
                         if matches!(state.mode, MemberLookupMode::Constructed { .. }) =>

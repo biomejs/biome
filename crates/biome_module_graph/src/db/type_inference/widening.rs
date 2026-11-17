@@ -238,11 +238,13 @@ fn fresh_literal_step<'a>(
             | RawTypeofExpression::Destructure(_)
             | RawTypeofExpression::Index(_)
             | RawTypeofExpression::OptionalChainIndex(_) => Some(FreshLiteralStep::Untraced),
-            // A widened value has no fresh literal type left, and the
-            // end of a function gives `undefined` or nothing. The others
-            // give no literal type, or one that a declaration states.
+            // A widened value has no fresh literal type left, the end of
+            // a function gives `undefined` or nothing, and the target of
+            // a type predicate is no value. The others give no literal
+            // type, or one that a declaration states.
             RawTypeofExpression::WidenedLiteral(_)
             | RawTypeofExpression::ImplicitReturn(_)
+            | RawTypeofExpression::InferredPredicate(_)
             | RawTypeofExpression::Addition(_)
             | RawTypeofExpression::BitwiseNot(_)
             | RawTypeofExpression::IterableValueOf(_)

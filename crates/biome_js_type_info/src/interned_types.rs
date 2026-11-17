@@ -1436,8 +1436,13 @@ impl<'db> TypeData<'db> {
                         Self::TypeofExpression(InternedTypeofExpression::new(db, expression))
                     }
                     // Only the module's flow tells whether a path reaches the
-                    // end of the function, so the end counts as reachable.
-                    None => Self::Undefined,
+                    // end of the function, so the end counts as reachable,
+                    // and whether the function has a type predicate, so it
+                    // has none.
+                    None => match expression.as_ref() {
+                        raw::TypeofExpression::InferredPredicate(_) => Self::Unknown,
+                        _ => Self::Undefined,
+                    },
                 }
             }
             raw::TypeData::TypeofType(ty) => {
@@ -3464,6 +3469,15 @@ fn convert_return_type<'db>(
             parameter_name: asserts.parameter_name.clone(),
             ty: resolve_reference(&asserts.ty),
         }),
+        raw::ReturnType::InferredPredicate(predicate) => {
+            match resolve_reference(&predicate.target) {
+                TypeData::Unknown => ReturnType::Type(resolve_reference(&predicate.ty)),
+                target => ReturnType::Predicate(PredicateReturnType {
+                    parameter_name: predicate.parameter_name.clone(),
+                    ty: target,
+                }),
+            }
+        }
     }
 }
 
@@ -3489,7 +3503,8 @@ fn convert_literal<'db>(
 }
 
 /// Converts a raw expression to its inferred form, or returns `None` for a
-/// [`raw::TypeofImplicitReturnExpression`], which has no inferred form.
+/// [`raw::TypeofImplicitReturnExpression`] or a
+/// [`raw::TypeofInferredPredicateExpression`], which have no inferred form.
 fn convert_typeof_expression<'db>(
     db: &'db dyn TypeDb,
     expression: &raw::TypeofExpression,
@@ -3629,7 +3644,9 @@ fn convert_typeof_expression<'db>(
                 is_return_type: expression.is_return_type,
             })
         }
-        raw::TypeofExpression::ImplicitReturn(_) => return None,
+        raw::TypeofExpression::ImplicitReturn(_) | raw::TypeofExpression::InferredPredicate(_) => {
+            return None;
+        }
     };
     Some(expression)
 }

@@ -1,0 +1,45 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+function f(a: number, v: unknown) {
+	return typeof v === "string";
+}
+
+```
+
+## Result
+
+```
+sync Function "f" {
+  accepts: {
+    params: [
+      required a: number
+      required v: Local TypeId(0)
+    ]
+    type_args: []
+  }
+  returns: InferredPredicateReturnType {
+    parameter_name: "v",
+    target: Resolved(
+        Local TypeId(2),
+    ),
+    ty: Resolved(
+        Local TypeId(1),
+    ),
+}
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => unknown
+
+Module TypeId(1) => boolean
+
+Module TypeId(2) => inferred_predicate
+```
