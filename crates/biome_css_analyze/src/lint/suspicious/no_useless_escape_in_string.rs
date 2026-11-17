@@ -109,10 +109,10 @@ impl Rule for NoUselessEscapeInString {
 
 /// Returns the index in `str` of the first useless escape.
 fn next_useless_escape(str: &str, quote: u8, is_scss: bool) -> Option<usize> {
-    let mut it = str.bytes().enumerate();
+    let mut it = str.bytes().enumerate().peekable();
     while let Some((i, c)) = it.next() {
         if c == b'\\'
-            && let Some((j, c)) = it.next()
+            && let Some((_, c)) = it.next()
         {
             match c {
                 // Meaningful escaped character
@@ -130,7 +130,7 @@ fn next_useless_escape(str: &str, quote: u8, is_scss: bool) -> Option<usize> {
                 | b'v'
                 | b'x' => {}
                 // Sass interpolates `#{` inside strings, and `\#{` is how it is written literally.
-                b'#' if is_scss && str.as_bytes().get(j + 1) == Some(&b'{') => {}
+                b'#' if is_scss && matches!(it.peek(), Some((_, b'{'))) => {}
                 // Preserve escaping of Unicode characters U+2028 and U+2029
                 0xE2 => {
                     if !(matches!(it.next(), Some((_, 0x80)))
