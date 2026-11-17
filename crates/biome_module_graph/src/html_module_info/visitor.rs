@@ -1,10 +1,8 @@
 use crate::ImportPathMap;
-use crate::css_module_info::{
-    CssClassDefinition, CssClassReference, CssModuleVisitor, decoded_class_name,
-};
+use crate::css_module_info::{CssClassDefinition, CssClassReference, CssModuleVisitor};
 use crate::html_module_info::{HtmlImport, HtmlModuleInfo};
 use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
-use biome_css_syntax::{AnyCssRoot, CssClassSelector};
+use biome_css_syntax::{AnyCssRoot, CssClassSelector, decoded_identifier_text};
 use biome_db::Source;
 use biome_html_syntax::{
     AnyHtmlAttributeInitializer, HtmlElement, HtmlRoot, HtmlSelfClosingElement,
@@ -348,7 +346,7 @@ pub(crate) fn collect_css_classes(
                         base_applicability
                     };
                     classes.insert(CssClassDefinition {
-                        name: decoded_class_name(&token),
+                        name: decoded_identifier_text(&token),
                         range: token.text_trimmed_range(),
                         content_offset: Some(content_offset),
                         applicability,

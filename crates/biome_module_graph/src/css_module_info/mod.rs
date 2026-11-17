@@ -3,13 +3,11 @@ pub(crate) mod traverse;
 mod visitor;
 
 use crate::{ImportPathMap, ModuleDb, ModuleInfo, ResolutionMode, resolve_module_import};
-use biome_css_syntax::{CssSyntaxToken, decode_css_identifier};
 use biome_languages::css::EmbeddingStyleApplicability;
 use biome_resolver::ResolvedSpecifier;
 use biome_rowan::{Text, TextRange, TextSize, TokenText};
 use camino::Utf8PathBuf;
 use indexmap::IndexMap;
-use std::borrow::Cow;
 use std::collections::BTreeSet;
 use std::hash::{Hash, Hasher};
 use std::ops::Deref;
@@ -21,18 +19,6 @@ pub use tailwind::{
 pub(crate) use tailwind::{TailwindImport, TailwindPosition};
 pub use traverse::{CssClassStep, CssTraversalStep, ImportTreeDisplay, ImportTreeNode};
 pub(crate) use visitor::CssModuleVisitor;
-
-/// Returns the class name that a class selector's identifier token matches,
-/// with CSS escapes decoded, so `.foo\+bar` yields `foo+bar`.
-///
-/// Only allocates when the token contains an escape.
-pub(crate) fn decoded_class_name(token: &CssSyntaxToken) -> Text {
-    let text = token.token_text_trimmed();
-    match decode_css_identifier(text.text()) {
-        Cow::Borrowed(_) => text.into(),
-        Cow::Owned(name) => name.into(),
-    }
-}
 
 /// Represents a CSS class definition.
 ///
@@ -193,15 +179,11 @@ pub struct CssModuleInfoInner {
     /// Preserves duplicate imports and source order.
     pub imports: CssImports,
 
-    /// Map of all CSS class names to their selector ranges in this file.
+    /// The class names defined in this file, including those inside nested
+    /// rules and at-rules, but not those inside `:global(...)`.
     ///
-    /// Collected by walking all `CssClassSelector` nodes in the CST, including
-    /// those inside nested rules and at-rules. Does not include classes inside
-    /// `:global(...)` pseudo-class selectors.
-    ///
-    /// Keys are the `TextRange` of the class name token in the source file,
-    /// values are class names with CSS escapes decoded (e.g., "header" from
-    /// `.header`, "foo+bar" from `.foo\+bar`).
+    /// Keys are the ranges of the class names in the source file. Values are
+    /// the names with CSS escapes decoded, so `.foo\+bar` is stored as `foo+bar`.
     pub classes: IndexMap<TextRange, Text>,
 
     /// The Tailwind CSS configuration this file declares, without the files it
