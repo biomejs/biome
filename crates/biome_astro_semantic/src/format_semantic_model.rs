@@ -43,7 +43,7 @@ impl Display for AstroSemanticModel {
         }
 
         for snippet in self.snippets() {
-            writeln!(
+            write!(
                 f,
                 "snippet#{} {} {:?} offset={} source={}",
                 snippet.id().0,
@@ -52,6 +52,10 @@ impl Display for AstroSemanticModel {
                 u32::from(snippet.content_offset()),
                 source_name(snippet.source())
             )?;
+            if let Some(scope) = snippet.scope() {
+                write!(f, " scope#{}", scope.id().0)?;
+            }
+            writeln!(f)?;
         }
 
         for scope in self.scopes() {
@@ -71,8 +75,13 @@ impl Display for AstroSemanticModel {
                 if symbol.origin() != Origin::None {
                     write!(f, " origin={:?}", symbol.origin())?;
                 }
-                if symbol.is_type_only() {
+                if symbol.declares_type() && symbol.declares_value() {
+                    write!(f, " type+value")?;
+                } else if symbol.is_type_only() {
                     write!(f, " type-only")?;
+                }
+                if symbol.declares_namespace() {
+                    write!(f, " namespace")?;
                 }
                 writeln!(f)?;
             }
