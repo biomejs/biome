@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validLiteralKeyWrites.ts
+---
+# Input
+```ts
+// should not generate diagnostics
+// A write through a literal key writes the property it names, so each
+// optional chain stays necessary. TypeScript types the receiver as
+// `Timer | null` in the first two functions. In `clearFirst` it gives `Timer`,
+// because it ignores a write through a key that is not a literal, such as
+// `-0`; Biome deliberately treats such a write as a write to every property of
+// the object.
+
+interface Timer {
+	cancel(): void;
+}
+
+declare function next(): Timer | null;
+
+function restart(options: { timer: Timer | null }) {
+	if (options.timer !== null) {
+		options["timer"] = next();
+		options.timer?.cancel();
+	}
+}
+
+function replaceFirst(pair: [Timer | null, number]) {
+	if (pair[0]) {
+		pair["0"] = next();
+		pair[0]?.cancel();
+	}
+}
+
+function clearFirst(pair: [Timer | null, number]) {
+	if (pair[0]) {
+		pair[-0] = null;
+		pair[0]?.cancel();
+	}
+}
+
+```

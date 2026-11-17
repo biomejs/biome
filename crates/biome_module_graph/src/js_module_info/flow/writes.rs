@@ -6,8 +6,8 @@
 //! other functions, because those run only when called. A call never cancels
 //! narrowing, in TypeScript or in Biome.
 
-use super::subjects::property_key;
-use super::{FlowSubject, FlowSubjectId, FlowSubjectTable};
+use super::subjects::{literal_key, property_key};
+use super::{FlowSubject, FlowSubjectId, FlowSubjectTable, PropertyKey};
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
@@ -23,7 +23,10 @@ use rustc_hash::FxHashSet;
 /// logical assignment, `++` or `--`, a destructuring target, or the target of
 /// a `for...in` or `for...of` loop, and so does `delete`. Parentheses, `!`,
 /// `as`, `satisfies`, and `<T>` around the objects of a written path are
-/// ignored, so `(o as T).v = x` writes `o.v`.
+/// ignored, so `(o as T).v = x` writes `o.v`. An element access whose key
+/// spells the property's name writes that property, so `o["v"] = x` writes
+/// `o.v`. With any other key, as in `o[k] = x` or `o[0x0] = x`, it counts as a
+/// write of every property of its object.
 ///
 /// The scan covers the whole root, including function and arrow expressions
 /// that are called where they are defined, class static blocks, field
@@ -38,8 +41,9 @@ use rustc_hash::FxHashSet;
 pub(super) struct WrittenPaths {
     /// Subjects that an assignment or `delete` writes directly.
     written: FxHashSet<FlowSubjectId>,
-    /// Subjects with a property written through a computed key, as in
-    /// `o[k] = x`, which can write any of their properties.
+    /// Subjects with a property written through a key that does not spell the
+    /// property's name, as in `o[k] = x`. Such a write counts as a write of
+    /// every property of the subject.
     wildcards: FxHashSet<FlowSubjectId>,
 }
 
@@ -74,7 +78,7 @@ impl WrittenPaths {
                 }
             } else if let Some(assignment) = JsComputedMemberAssignment::cast_ref(&node) {
                 if let Ok(object) = assignment.object() {
-                    paths.computed_member(object, model, subjects);
+                    paths.computed_member(object, assignment.member(), model, subjects);
                 }
             } else if let Some(unary) = JsUnaryExpression::cast_ref(&node)
                 && unary.operator() == Ok(JsUnaryOperator::Delete)
@@ -90,9 +94,10 @@ impl WrittenPaths {
     /// `subjects` of the root, each at the index of its id.
     ///
     /// That is the case when the root writes `subject` or one of its
-    /// prefixes, or writes a property of a proper prefix through a computed
-    /// key. A write to an extension of `subject`, such as `o.v.w` for `o.v`,
-    /// does not change the value of `subject`.
+    /// prefixes, or writes a property of a proper prefix through a key that
+    /// does not spell the property's name. A write to an extension of
+    /// `subject`, such as `o.v.w` for `o.v`, does not change the value of
+    /// `subject`.
     pub(super) fn cancels(&self, subjects: &[FlowSubject], subject: FlowSubjectId) -> bool {
         if self.written.contains(&subject) {
             return true;
@@ -123,34 +128,47 @@ impl WrittenPaths {
         let Some(object) = self.object(object, model, subjects) else {
             return;
         };
-        match name {
+        let key = match name {
             // A private name is never part of a subject's path.
-            Ok(AnyJsName::JsPrivateName(_)) => {}
-            Ok(name) => match property_key(&name) {
-                Some(key) => {
-                    if let Some(subject) = subjects.get(&FlowSubject::Member { object, key }) {
-                        self.written.insert(subject);
-                    }
-                }
-                None => {
-                    self.wildcards.insert(object);
-                }
-            },
-            Err(_) => {
-                self.wildcards.insert(object);
-            }
-        }
+            Ok(AnyJsName::JsPrivateName(_)) => return,
+            Ok(name) => property_key(&name),
+            Err(_) => None,
+        };
+        self.property(object, key, subjects);
     }
 
-    /// Records the write of a property of `object` through a computed key.
+    /// Records the write of the property that `key` names on `object`, or of
+    /// any property of `object` when `key` does not spell the property's name.
     fn computed_member(
         &mut self,
         object: AnyJsExpression,
+        key: SyntaxResult<AnyJsExpression>,
         model: &SemanticModel,
         subjects: &FlowSubjectTable,
     ) {
         if let Some(object) = self.object(object, model, subjects) {
-            self.wildcards.insert(object);
+            let key = key.ok().as_ref().and_then(literal_key);
+            self.property(object, key, subjects);
+        }
+    }
+
+    /// Records the write of the property `key` of the subject `object`, or of
+    /// any of its properties when `key` is `None`.
+    fn property(
+        &mut self,
+        object: FlowSubjectId,
+        key: Option<PropertyKey>,
+        subjects: &FlowSubjectTable,
+    ) {
+        match key {
+            Some(key) => {
+                if let Some(subject) = subjects.get(&FlowSubject::Member { object, key }) {
+                    self.written.insert(subject);
+                }
+            }
+            None => {
+                self.wildcards.insert(object);
+            }
         }
     }
 
@@ -169,7 +187,7 @@ impl WrittenPaths {
             }
             Some(AnyJsExpression::JsComputedMemberExpression(member)) => {
                 if let Ok(object) = member.object() {
-                    self.computed_member(object, model, subjects);
+                    self.computed_member(object, member.member(), model, subjects);
                 }
             }
             _ => {}
@@ -179,9 +197,9 @@ impl WrittenPaths {
     /// Returns the subject that `expression`, the object of a written
     /// property, refers to, or `None` when no stored subject starts with it.
     ///
-    /// A computed key along the object, as in `o[k].v`, can name any property,
-    /// so it records a write of every property of the object before it and
-    /// returns `None`.
+    /// A key along the object that does not spell the property's name, as in
+    /// `o[k].v`, can name any property, so it records a write of every
+    /// property of the object before it and returns `None`.
     #[expect(
         clippy::wildcard_enum_match_arm,
         reason = "Only variables and member accesses lead to a subject."
@@ -210,7 +228,7 @@ impl WrittenPaths {
                     expression = member.object().ok()?;
                 }
                 AnyJsExpression::JsComputedMemberExpression(member) => {
-                    keys.push(None);
+                    keys.push(member.member().ok().as_ref().and_then(literal_key));
                     expression = member.object().ok()?;
                 }
                 _ => return None,
@@ -312,10 +330,19 @@ mod tests {
 
     const PATHS: [&str; 5] = ["o.v", "o.v.w", "o.w", "q.v", "o.v.w.x"];
 
-    /// Returns the paths among [`PATHS`] that the function root
-    /// `function f(o, q, k, xs) { ... }` with `body` cancels.
+    /// Returns the paths among [`PATHS`] that `body` cancels in the function
+    /// root of [`cancelled_among`].
     fn cancelled(body: &str) -> Vec<&'static str> {
-        let source = format!("function f(o, q, k, xs) {{ {}; {body} }}", PATHS.join("; "));
+        cancelled_among(&PATHS, body)
+    }
+
+    /// Returns the paths among `paths` that the function root
+    /// `function f(o, q, k, xs, t) { ... }` with `body` cancels.
+    fn cancelled_among(paths: &[&'static str], body: &str) -> Vec<&'static str> {
+        let source = format!(
+            "function f(o, q, k, xs, t) {{ {}; {body} }}",
+            paths.join("; ")
+        );
         let parsed = parse(&source, JsFileSource::ts(), JsParserOptions::default());
         assert!(!parsed.has_errors(), "{source}");
         let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
@@ -324,7 +351,7 @@ mod tests {
             .syntax()
             .descendants()
             .filter_map(JsExpressionStatement::cast)
-            .take(PATHS.len())
+            .take(paths.len())
             .map(|statement| {
                 subject_of(&statement.expression().unwrap(), &model, &mut subjects).unwrap()
             })
@@ -336,8 +363,9 @@ mod tests {
             .find(|root| root.syntax().kind() == JsSyntaxKind::JS_FUNCTION_DECLARATION)
             .unwrap();
         let written = WrittenPaths::new(&root, &model, &subjects);
-        PATHS
-            .into_iter()
+        paths
+            .iter()
+            .copied()
             .zip(ids)
             .filter(|(_, id)| written.cancels(subjects.as_slice(), *id))
             .map(|(path, _)| path)
@@ -376,18 +404,60 @@ mod tests {
         assert_eq!(cancelled("q.v = null"), ["q.v"]);
         assert_eq!(cancelled("o.v.w = null"), ["o.v.w", "o.v.w.x"]);
         assert_eq!(cancelled("o.v[k] = null"), ["o.v.w", "o.v.w.x"]);
+        assert_eq!(cancelled("o['v'].w = null"), ["o.v.w", "o.v.w.x"]);
+        assert_eq!(cancelled("o['v']['w'] = null"), ["o.v.w", "o.v.w.x"]);
+        assert_eq!(cancelled("o['v'][k] = null"), ["o.v.w", "o.v.w.x"]);
     }
 
     #[test]
-    fn computed_keys_cancel_every_property_of_their_object() {
+    fn literal_keys_cancel_the_path_they_name() {
+        for body in [
+            "o['v'] = null",
+            "o[\"v\"] = null",
+            "o['v'] += 1",
+            "o['v']++",
+            "[o['v']] = xs",
+            "for (o['v'] of xs) {}",
+            "delete o['v']",
+            "(o as any)['v'] = null",
+            "o['v'] ??= 1",
+        ] {
+            assert_eq!(cancelled(body), ["o.v", "o.v.w", "o.v.w.x"], "{body}");
+        }
+        assert_eq!(cancelled("o['x'] = null"), Vec::<&str>::new());
+        assert_eq!(cancelled("o[0] = null"), Vec::<&str>::new());
+    }
+
+    #[test]
+    fn integer_keys_cancel_the_element_they_name() {
+        const ELEMENTS: [&str; 4] = ["t[0]", "t[1]", "t[0].v", "t['01']"];
+        for body in ["t[0] = null", "t['0'] = null", "t[0]++", "delete t[0]"] {
+            assert_eq!(
+                cancelled_among(&ELEMENTS, body),
+                ["t[0]", "t[0].v"],
+                "{body}"
+            );
+        }
+        assert_eq!(cancelled_among(&ELEMENTS, "t[1] = null"), ["t[1]"]);
+        assert_eq!(cancelled_among(&ELEMENTS, "t['01'] = null"), ["t['01']"]);
+        assert_eq!(cancelled_among(&ELEMENTS, "t[0].v = null"), ["t[0].v"]);
+    }
+
+    #[test]
+    fn keys_that_are_not_literals_cancel_every_property_of_their_object() {
         for body in [
             "o[k] = null",
-            "o['v'] = null",
-            "o[0] = null",
             "delete o[k]",
             "o[k].w = null",
             "(o as any)[k] = null",
             "o[k] += 1",
+            "o[-0] = null",
+            "o[0x0] = null",
+            "o[1e0] = null",
+            "o[9007199254740993] = null",
+            "o[`v`] = null",
+            "o['\\u0076'] = null",
+            "o[('v')] = null",
         ] {
             assert_eq!(
                 cancelled(body),
@@ -395,6 +465,10 @@ mod tests {
                 "{body}"
             );
         }
+        assert_eq!(
+            cancelled_among(&["t[0]", "t[1]"], "t[-0] = null"),
+            ["t[0]", "t[1]"]
+        );
     }
 
     #[test]
