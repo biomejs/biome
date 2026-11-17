@@ -68,8 +68,8 @@ fn assert_no_flow_queries(db: &TestModuleDb, events: &[salsa::Event]) {
     for query in [
         "infer_flow_expression_type_impl",
         "infer_flow_binding_baseline",
-        "infer_flow_binding_states",
-        "infer_flow_binding_type",
+        "infer_flow_subject_states",
+        "infer_flow_subject_type",
     ] {
         assert_eq!(
             function_query_will_execute_count_by_name(db, query, events),
@@ -438,7 +438,7 @@ fn unrefinable_binding_types_skip_flow_queries() {
         assert_eq!(read("after"), ordinary, "{parameter}");
         let events = db.take_salsa_events();
         // Only a type that resolves to `any` needs flow queries to find out.
-        for query in ["infer_flow_binding_type", "infer_flow_binding_baseline"] {
+        for query in ["infer_flow_subject_type", "infer_flow_binding_baseline"] {
             assert_eq!(
                 function_query_will_execute_count_by_name(&db, query, &events),
                 resolved_queries,
@@ -820,12 +820,12 @@ fn repeated_narrowed_reads_share_flow_states_and_agree_with_complete_tables() {
     let binding = BindingTypeInput::new(&db, module, marked_range(SOURCE, "binding", "value"));
     assert_function_query_was_not_run(&db, infer_binding_type, binding, &events);
     assert_eq!(
-        function_query_will_execute_count_by_name(&db, "infer_flow_binding_type", &events),
+        function_query_will_execute_count_by_name(&db, "infer_flow_subject_type", &events),
         2,
         "reads in each branch must share its incoming flow state"
     );
     assert_eq!(
-        function_query_will_execute_count_by_name(&db, "infer_flow_binding_states", &events),
+        function_query_will_execute_count_by_name(&db, "infer_flow_subject_states", &events),
         1,
         "reads at different flow points must share one solve of the binding"
     );
@@ -887,7 +887,7 @@ fn complete_module_inference_shares_narrowing_solves_with_lookups() {
         );
     }
     assert_eq!(
-        function_query_will_execute_count_by_name(&db, "infer_flow_binding_states", &events),
+        function_query_will_execute_count_by_name(&db, "infer_flow_subject_states", &events),
         1,
         "complete module inference must solve the binding's root once"
     );
@@ -905,7 +905,7 @@ fn complete_module_inference_shares_narrowing_solves_with_lookups() {
         1,
         "lookups must resolve the binding's starting type themselves"
     );
-    for query in ["infer_flow_binding_states", "infer_flow_binding_type"] {
+    for query in ["infer_flow_subject_states", "infer_flow_subject_type"] {
         assert_eq!(
             function_query_will_execute_count_by_name(&db, query, &events),
             0,
@@ -987,7 +987,7 @@ fn shared_flow_points_keep_different_bindings_separate() {
     );
     let events = db.take_salsa_events();
     assert_eq!(
-        function_query_will_execute_count_by_name(&db, "infer_flow_binding_type", &events),
+        function_query_will_execute_count_by_name(&db, "infer_flow_subject_type", &events),
         2
     );
 }
@@ -1017,7 +1017,7 @@ fn cached_unreachable_reads_keep_unknown_overrides() {
     }
     let events = db.take_salsa_events();
     assert_eq!(
-        function_query_will_execute_count_by_name(&db, "infer_flow_binding_type", &events),
+        function_query_will_execute_count_by_name(&db, "infer_flow_subject_type", &events),
         1
     );
 }
@@ -2107,7 +2107,7 @@ fn narrowing_requests_reuse_warm_and_unrelated_inputs_and_invalidate_changed_gua
             assert_function_query_was_not_run(&db, infer_expression_type, input, &events);
         }
         assert_eq!(
-            function_query_will_execute_count_by_name(&db, "infer_flow_binding_type", &events),
+            function_query_will_execute_count_by_name(&db, "infer_flow_subject_type", &events),
             usize::from(cold)
         );
         assert_function_query_was_not_run(&db, infer_module_types, module, &events);
@@ -2137,7 +2137,7 @@ fn narrowing_requests_reuse_warm_and_unrelated_inputs_and_invalidate_changed_gua
     let input = ExpressionTypeInput::new(&db, module, expression);
     assert_function_query_was_run(&db, infer_expression_type, input, &events);
     assert_eq!(
-        function_query_will_execute_count_by_name(&db, "infer_flow_binding_type", &events),
+        function_query_will_execute_count_by_name(&db, "infer_flow_subject_type", &events),
         1
     );
     for module in [module, unrelated] {
@@ -2184,7 +2184,7 @@ fn imported_type_edits_rerun_only_the_reads_whose_type_changes() {
     assert_eq!(type_at(&db, module, imported_read), Number);
     let events = db.take_salsa_events();
     assert_eq!(
-        function_query_will_execute_count_by_name(&db, "infer_flow_binding_states", &events),
+        function_query_will_execute_count_by_name(&db, "infer_flow_subject_states", &events),
         1,
         "the shared solve must recompute after the baseline changes"
     );
@@ -2271,7 +2271,7 @@ fn adding_and_removing_conditions_invalidates_flow_candidates_with_equal_semanti
         // replaces it even when declarations and references stay equal.
         if guarded {
             assert_eq!(
-                function_query_will_execute_count_by_name(&db, "infer_flow_binding_type", &events),
+                function_query_will_execute_count_by_name(&db, "infer_flow_subject_type", &events),
                 1
             );
         } else {
