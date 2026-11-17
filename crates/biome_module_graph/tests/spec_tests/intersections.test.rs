@@ -941,6 +941,104 @@ mod narrowing {
     }
 
     // TypeScript 7.0.2 (`tsc --strict`) gives each read the type in the
+    // comment of its line, in order. Equality keeps an intersection with a
+    // type parameter as it is when the intersection can equal the value, as
+    // `T & string` for `=== "a"`, and removes it when an operand can't, as
+    // `T & string` for `=== null`. `T & boolean` stands for
+    // `(T & true) | (T & false)`, so equality keeps the member that can be
+    // equal. Biome gives its unknown type to a read where TypeScript gives
+    // `never`.
+    #[test]
+    fn equality_keeps_intersections_with_type_parameters() {
+        let source = format!(
+            "{DECLARATIONS}{}",
+            r#"
+            declare function isA(v: unknown): v is "a";
+            declare function isNull(v: unknown): v is null;
+            function q1<T>(x: T) { if (typeof x === "string") { if (x === "a") p([/*q1*/x] as const); else p([/*q1Else*/x] as const); } } // T & string; T & string
+            function q2<T>(x: T) { if (typeof x === "number") { if (x === 1) p([/*q2*/x] as const); else p([/*q2Else*/x] as const); } } // T & number; T & number
+            function q3<T>(x: T) { if (typeof x === "bigint") { if (x === 1n) p([/*q3*/x] as const); else p([/*q3Else*/x] as const); } } // T & bigint; T & bigint
+            function q4<T>(x: T) { if (typeof x === "boolean") { if (x === true) p([/*q4*/x] as const); else p([/*q4Else*/x] as const); } } // T & true; T & false
+            function q5<T>(x: T) { if (typeof x === "string") { if (x !== "a") p([/*q5*/x] as const); else p([/*q5Else*/x] as const); } } // T & string; T & string
+            function q6<T>(x: T & string) { if (x === "a") p([/*q6*/x] as const); else p([/*q6Else*/x] as const); } // T & string; T & string
+            function q7<T>(x: (T & "a") | (T & "b")) { if (x === "a") p([/*q7*/x] as const); else p([/*q7Else*/x] as const); } // T & "a"; T & "b"
+            function q8<T>(x: T & "a") { if (x === "a") p([/*q8*/x] as const); else p([/*q8Else*/x] as const); } // T & "a"; never
+            function q9<T>(x: T) { if (x) { if (x === "a") p([/*q9*/x] as const); else p([/*q9Else*/x] as const); } } // NonNullable<T>; NonNullable<T>
+            function q10<T>(x: T) { if (x !== undefined) { if (x === "a") p([/*q10*/x] as const); else p([/*q10Else*/x] as const); } } // T & {}; T & ({} | null)
+            function q11<T>(x: T) { if (typeof x === "string") { switch (x) { case "a": p([/*q11*/x] as const); break; default: p([/*q11Else*/x] as const); } } } // T & string; T & string
+            function q12<T>(x: T) { if (typeof x === "string") { if (x === null) p([/*q12*/x] as const); else p([/*q12Else*/x] as const); } } // never; T & string
+            function q13<T>(x: T) { if (typeof x === "string") { if (x === undefined) p([/*q13*/x] as const); else p([/*q13Else*/x] as const); } } // never; T & string
+            function q14<T>(x: T) { if (typeof x === "object") { if (x === null) p([/*q14*/x] as const); else p([/*q14Else*/x] as const); } } // T & null; T & object
+            function q15<T>(x: T) { if (typeof x === "object") { if (x === undefined) p([/*q15*/x] as const); else p([/*q15Else*/x] as const); } } // never; (T & null) | (T & object)
+            function q16<T>(x: T) { if (x !== null) { if (x === undefined) p([/*q16*/x] as const); else p([/*q16Else*/x] as const); } } // T & undefined; T & {}
+            function q17<T>(x: T) { if (x) { if (x === null) p([/*q17*/x] as const); else p([/*q17Else*/x] as const); } } // never; NonNullable<T>
+            function q18<T>(x: T) { if (typeof x === "string") { if (x == null) p([/*q18*/x] as const); else p([/*q18Else*/x] as const); } } // never; T & string
+            function q19<T>(x: T) { if (typeof x === "object") { if (x == null) p([/*q19*/x] as const); else p([/*q19Else*/x] as const); } } // T & null; T & object
+            function q20<T>(x: T) { if (typeof x === "string") { if (isA(x)) p([/*q20*/x] as const); else p([/*q20Else*/x] as const); } } // T & "a"; T & string
+            function q21<T>(x: T) { if (isA(x)) p([/*q21*/x] as const); else p([/*q21Else*/x] as const); } // T & "a"; T
+            function q22<T>(x: T) { if (typeof x === "object") { if (isNull(x)) p([/*q22*/x] as const); else p([/*q22Else*/x] as const); } } // T & null; T & object
+            "#
+        );
+        assert_reads(
+            &source,
+            &[
+                ("q1", "x", &["instanceof T & string"]),
+                ("q1Else", "x", &["instanceof T & string"]),
+                ("q2", "x", &["instanceof T & number"]),
+                ("q2Else", "x", &["instanceof T & number"]),
+                ("q3", "x", &["instanceof T & BigInt"]),
+                ("q3Else", "x", &["instanceof T & BigInt"]),
+                ("q4", "x", &["instanceof T & bool: true"]),
+                ("q4Else", "x", &["instanceof T & bool: false"]),
+                ("q5", "x", &["instanceof T & string"]),
+                ("q5Else", "x", &["instanceof T & string"]),
+                ("q6", "x", &["instanceof T & string"]),
+                ("q6Else", "x", &["instanceof T & string"]),
+                ("q7", "x", &["instanceof T & string: a"]),
+                ("q7Else", "x", &["instanceof T & string: b"]),
+                ("q8", "x", &["instanceof T & string: a"]),
+                ("q8Else", "x", &["Unknown"]),
+                ("q9", "x", &[T_EMPTY]),
+                ("q9Else", "x", &[T_EMPTY]),
+                ("q10", "x", &[T_EMPTY]),
+                ("q10Else", "x", &[T_EMPTY, "instanceof T & null"]),
+                ("q11", "x", &["instanceof T & string"]),
+                ("q11Else", "x", &["instanceof T & string"]),
+                ("q12", "x", &["Unknown"]),
+                ("q12Else", "x", &["instanceof T & string"]),
+                ("q13", "x", &["Unknown"]),
+                ("q13Else", "x", &["instanceof T & string"]),
+                ("q14", "x", &["instanceof T & null"]),
+                ("q14Else", "x", &["instanceof T & object"]),
+                ("q15", "x", &["Unknown"]),
+                (
+                    "q15Else",
+                    "x",
+                    &["instanceof T & null", "instanceof T & object"],
+                ),
+                // Biome keeps `T & {}`, which can't be `undefined`.
+                ("q16", "x", &[T_EMPTY, "instanceof T & undefined"]),
+                ("q16Else", "x", &[T_EMPTY]),
+                // Biome keeps `T & {}`, which can't be `null`.
+                ("q17", "x", &[T_EMPTY]),
+                ("q17Else", "x", &[T_EMPTY]),
+                ("q18", "x", &["Unknown"]),
+                ("q18Else", "x", &["instanceof T & string"]),
+                ("q19", "x", &["instanceof T & null"]),
+                ("q19Else", "x", &["instanceof T & object"]),
+                // A type predicate with a literal target narrows as equality
+                // does, so Biome keeps `T & string` and `T`, which are wider.
+                ("q20", "x", &["instanceof T & string"]),
+                ("q20Else", "x", &["instanceof T & string"]),
+                ("q21", "x", &["instanceof T"]),
+                ("q21Else", "x", &["instanceof T"]),
+                ("q22", "x", &["instanceof T & null"]),
+                ("q22Else", "x", &["instanceof T & object"]),
+            ],
+        );
+    }
+
+    // TypeScript 7.0.2 (`tsc --strict`) gives each read the type in the
     // comment of its line, in order. A `this is T` or `asserts this is T`
     // predicate whose target the class doesn't relate to gives the
     // intersection, which normalization merges into an instance of an
