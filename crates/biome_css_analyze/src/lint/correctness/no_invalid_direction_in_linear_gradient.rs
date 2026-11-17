@@ -165,7 +165,7 @@ impl Rule for NoInvalidDirectionInLinearGradient {
 /// Whether the expression contains a value that is only known when Sass compiles the file or the
 /// browser computes the style, such as `$side`, `#{$dir}`, `var(--dir)` or a function call.
 fn has_dynamic_value(expression: &AnyCssExpression) -> bool {
-    expression.syntax().descendants().any(|node| {
+    expression.syntax().descendants().skip(1).any(|node| {
         let kind = node.kind();
         AnyCssFunction::can_cast(kind)
             || ScssVariable::can_cast(kind)
