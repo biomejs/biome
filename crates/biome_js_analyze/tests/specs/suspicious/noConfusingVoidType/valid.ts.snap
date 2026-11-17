@@ -27,6 +27,12 @@ type voidPromiseUnion = void | Promise<void>;
 type promiseNeverUnion = Promise<void> | never;
 const arrowGeneric1 = <T = void,>(arg: T) => {};
 declare function functionDeclaration1<T = void>(arg: T): void;
+const arrowGeneric2 = <T extends void>(arg: T) => {};
+const arrowGeneric3 = <T extends void = void>(arg: T) => {};
+function functionGeneric2<T extends void>(arg: T) {}
+function functionGeneric3<T extends void = void>(arg: T) {}
+declare function functionDeclaration2<T extends void>(arg: T): void;
+declare function functionDeclaration3<T extends void = void>(arg: T): void;
 
 type Allowed<T> = [T];
 type Banned<T> = [T];

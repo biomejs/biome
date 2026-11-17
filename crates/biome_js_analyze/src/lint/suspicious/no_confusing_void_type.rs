@@ -59,6 +59,10 @@ declare_lint_rule! {
     /// ```ts
     /// function printArg<T = void>(arg: T) {}
     /// ```
+    ///
+    /// ```ts
+    /// function printArg<T extends void>(arg: T) {}
+    /// ```
     pub NoConfusingVoidType {
         version: "1.2.0",
         name: "noConfusingVoidType",
@@ -155,10 +159,12 @@ fn decide_void_type_context(node: &JsSyntaxNode) -> Option<VoidTypeContext> {
             // string & void
             // arg: void
             // fn<T = void>() {}
+            // fn<T extends void>() {}
             JsSyntaxKind::TS_PARENTHESIZED_TYPE
             | JsSyntaxKind::TS_INTERSECTION_TYPE_ELEMENT_LIST
             | JsSyntaxKind::TS_TYPE_ANNOTATION
-            | JsSyntaxKind::TS_DEFAULT_TYPE_CLAUSE => {}
+            | JsSyntaxKind::TS_DEFAULT_TYPE_CLAUSE
+            | JsSyntaxKind::TS_TYPE_CONSTRAINT_CLAUSE => {}
 
             JsSyntaxKind::TS_UNION_TYPE => {
                 return Some(VoidTypeContext::Union);
@@ -185,6 +191,7 @@ fn decide_void_type_context(node: &JsSyntaxNode) -> Option<VoidTypeContext> {
             // function fn(): void;
             | JsSyntaxKind::TS_RETURN_TYPE_ANNOTATION
             // function fn<T = void>() {}
+            // function fn<T extends void>() {}
             | JsSyntaxKind::TS_TYPE_PARAMETER
             // () => void
             | JsSyntaxKind::TS_FUNCTION_TYPE => {
