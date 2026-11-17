@@ -1,0 +1,4 @@
+/* should not generate diagnostics */
+a {
+  opacity: alpha(#e1d7d2);
+}
