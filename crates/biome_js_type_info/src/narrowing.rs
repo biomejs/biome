@@ -2726,8 +2726,19 @@ fn narrow_type_parameter<'db>(
 /// `T & string & { __brand: 1 }`. A test that removes every value of an
 /// operand removes the intersection, except for `typeof` with `"function"`
 /// and the false branch of `typeof` with `"object"`, which TypeScript
-/// applies to an intersection when any operand passes them. An intersection
-/// without a type parameter stays as it is.
+/// applies to an intersection when any operand passes them.
+///
+/// Strict equality with a literal, `null`, or `undefined` removes the
+/// intersection when it removes every value of an operand and keeps the
+/// intersection as it is otherwise, as TypeScript keeps `T & string` where
+/// the value equals `"a"`. A `boolean` operand narrows to `true` or `false`
+/// instead, because TypeScript reads `T & boolean` as
+/// `(T & true) | (T & false)` and keeps the members that can be equal. A
+/// type predicate whose target is a literal, `null`, or `undefined` narrows
+/// as strict equality with the target does, so `value is "a"` keeps
+/// `T & string` where TypeScript gives `T & "a"`.
+///
+/// An intersection without a type parameter stays as it is.
 fn narrow_intersection<'db>(
     db: &'db dyn TypeDb,
     ty: InferredTypeData<'db>,
@@ -2749,6 +2760,7 @@ fn narrow_intersection<'db>(
         (PreparedPredicate::Typeof(TypeofKind::Function), true)
             | (PreparedPredicate::Typeof(TypeofKind::Object), false)
     );
+    let is_equality = matches!(predicate, PreparedPredicate::Literal(..));
     let mut narrowed = Vec::with_capacity(operands.len());
     let mut changed = false;
     for operand in operands {
@@ -2764,6 +2776,10 @@ fn narrow_intersection<'db>(
             if !any_operand_passes {
                 return result;
             }
+            narrowed.push(*operand);
+            continue;
+        }
+        if is_equality && *operand != InferredTypeData::Boolean {
             narrowed.push(*operand);
             continue;
         }
