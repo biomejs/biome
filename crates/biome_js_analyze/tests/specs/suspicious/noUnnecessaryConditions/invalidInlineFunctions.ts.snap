@@ -1,0 +1,116 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidInlineFunctions.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// A function called where it is defined and a class static block run in the
+// flow of the code around them, so their writes and the paths that they end
+// narrow the code after them, as in TypeScript.
+
+function assignedInPlace(value: string | null) {
+	(() => {
+		value = "a";
+	})();
+	return value ?? "b";
+}
+
+function throwsInPlace(value: string | null) {
+	(function () {
+		if (value === null) {
+			throw new Error("missing");
+		}
+	})();
+	return value ?? "b";
+}
+
+function assignedInStaticBlock(value: string | null) {
+	class Config {
+		static {
+			value = "a";
+		}
+	}
+	return value ?? "b";
+}
+
+```
+
+# Diagnostics
+```
+invalidInlineFunctions.ts:10:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+     8 │ 		value = "a";
+     9 │ 	})();
+  > 10 │ 	return value ?? "b";
+       │ 	       ^^^^^
+    11 │ }
+    12 │ 
+  
+  i Drop ?? and the fallback expression.
+  
+     8 │ 		value = "a";
+     9 │ 	})();
+  > 10 │ 	return value ?? "b";
+       │ 	             ^^
+    11 │ }
+    12 │ 
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+invalidInlineFunctions.ts:19:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    17 │ 		}
+    18 │ 	})();
+  > 19 │ 	return value ?? "b";
+       │ 	       ^^^^^
+    20 │ }
+    21 │ 
+  
+  i Drop ?? and the fallback expression.
+  
+    17 │ 		}
+    18 │ 	})();
+  > 19 │ 	return value ?? "b";
+       │ 	             ^^
+    20 │ }
+    21 │ 
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+invalidInlineFunctions.ts:28:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    26 │ 		}
+    27 │ 	}
+  > 28 │ 	return value ?? "b";
+       │ 	       ^^^^^
+    29 │ }
+    30 │ 
+  
+  i Drop ?? and the fallback expression.
+  
+    26 │ 		}
+    27 │ 	}
+  > 28 │ 	return value ?? "b";
+       │ 	             ^^
+    29 │ }
+    30 │ 
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```

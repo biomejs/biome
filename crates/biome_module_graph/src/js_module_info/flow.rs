@@ -35,12 +35,16 @@
 //! [`subjects::this_can_narrow`] describes. A property path narrows only when
 //! its variable or `this` does.
 //!
+//! A function or arrow expression called where it is defined and a class
+//! static block run in the flow of the root around them, as TypeScript's
+//! binder runs them, so they are part of that root's graph.
+//!
 //! A write to a subject in the root's own flow is a write point of the graph,
 //! where the subject takes the type of the assigned value, reduced against
 //! its declared type as in TypeScript, and the paths that extend it take
 //! their declared types. A write that runs with the root but outside that
-//! flow, as in a function called where it is defined or a class static
-//! block, has no write point, so the subject it writes doesn't narrow
+//! flow, as in an `async` function called where it is defined or a field
+//! initializer, has no write point, so the subject it writes doesn't narrow
 //! anywhere in the root. Calls never invalidate facts, as in TypeScript.
 //! Writes in other roots don't either, because they run before the root
 //! runs or while a call inside it runs.
@@ -79,9 +83,9 @@ use biome_js_syntax::{
     JsArrayBindingPatternRestElement, JsBreakStatement, JsClassDeclaration,
     JsClassExportDefaultDeclaration, JsComputedMemberName, JsConstructorClassMember,
     JsContinueStatement, JsDecorator, JsDoWhileStatement, JsExpressionStatement, JsForInStatement,
-    JsForOfStatement, JsForStatement, JsFunctionBody, JsGetterClassMember, JsGetterObjectMember,
-    JsIdentifierAssignment, JsIdentifierBinding, JsIdentifierExpression, JsIfStatement, JsLanguage,
-    JsMethodClassMember, JsMethodObjectMember, JsObjectBindingPattern,
+    JsForOfStatement, JsForStatement, JsFunctionBody, JsFunctionExpression, JsGetterClassMember,
+    JsGetterObjectMember, JsIdentifierAssignment, JsIdentifierBinding, JsIdentifierExpression,
+    JsIfStatement, JsLanguage, JsMethodClassMember, JsMethodObjectMember, JsObjectBindingPattern,
     JsObjectBindingPatternProperty, JsObjectBindingPatternPropertyList, JsObjectBindingPatternRest,
     JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSetterClassMember,
     JsSetterObjectMember, JsSwitchStatement, JsSyntaxKind, JsSyntaxNode, JsThisExpression,
@@ -99,7 +103,8 @@ use biome_rowan::{
     WalkEvent, declare_node_union,
 };
 use builder::{
-    AnyContinuingClosure, BuiltCapture, BuiltRoot, BuiltSwitch, build_root, never_has_outcome,
+    AnyContinuingClosure, AnyInlineCode, BuiltCapture, BuiltRoot, BuiltSwitch, build_root,
+    never_has_outcome,
 };
 use guards::{FlowOutcome, GuardFunctions, decompose_condition};
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -255,14 +260,18 @@ impl FlowSubjectTable {
     /// Also returns `None` for a `this` outside the root, because it can be
     /// the `this` of another function. The initializer of an aliased
     /// condition that an enclosing function declares can contain such a
-    /// `this`.
+    /// `this`. It returns `None` for a `this` inside a function expression
+    /// that runs inline in the root too, as in `(function () { this })()`,
+    /// because that `this` is the function's own, unlike an arrow
+    /// function's.
     pub(super) fn this(&mut self, expression: &JsThisExpression) -> Option<FlowSubjectId> {
         let root = self.this_root.as_ref()?;
         for node in expression.syntax().ancestors() {
             if node == *root {
                 return self.intern(FlowSubject::This);
             }
-            if OTHER_THIS_KINDS.matches(node.kind()) {
+            if OTHER_THIS_KINDS.matches(node.kind()) || JsFunctionExpression::can_cast(node.kind())
+            {
                 return None;
             }
         }
@@ -1352,7 +1361,8 @@ pub(crate) struct ModuleFlow {
 
 impl ModuleFlow {
     /// Collects flow for the execution roots that a [`FlowRootScanner`]
-    /// selected.
+    /// selected. Inline code that the scanner selects as a fallback gets
+    /// flow only when the root around it was not built.
     ///
     /// Reads are kept only when their binding has a narrowable collected type,
     /// as decided by [`is_raw_narrowing_invariant`], and a test, a write, or a
@@ -1398,6 +1408,15 @@ impl ModuleFlow {
             capture_rules: FxHashMap::default(),
         };
         for selected in roots.selected() {
+            // Inline code selected as a fallback is part of the graph of the
+            // root around it, which comes before it, so it gets a graph of its
+            // own only when that root wasn't built.
+            if selected
+                .enclosing()
+                .is_some_and(|enclosing| collector.built.contains(&enclosing))
+            {
+                continue;
+            }
             // A root that only statement calls select needs flow only when one
             // of them can establish a condition.
             if let Some(calls) = roots.statement_calls(selected)
@@ -1815,9 +1834,9 @@ impl RootCollector<'_> {
             }
         }
         // A variable narrows only where the graph has a write point for each
-        // write that can run in the root's flow. Other writes, as in a
-        // function called where it is defined or a class static block, run at
-        // points that the graph doesn't model.
+        // write that can run in the root's flow. Other writes, as in an
+        // `async` function called where it is defined or a field initializer,
+        // run at points that the graph doesn't model.
         eligible.retain(|range| {
             self.writes_are_modeled(*range, root, &written)
                 && (evolving_ranges.get(range) != Some(&FlowEvolving::Array)
@@ -2946,7 +2965,9 @@ impl RootCollector<'_> {
     /// Code that the function holding it doesn't run in its own flow stops
     /// the read: a decorator, a computed key of a member, a field initializer,
     /// a type, or a `declare` statement. The body of a `with` statement stops
-    /// it too.
+    /// it too. Inline code, a static block or a function called where it is
+    /// defined, is part of the function around it (see
+    /// [`AnyInlineCode::runs_inline`]).
     fn continues_to(
         &mut self,
         identifier: &JsIdentifierExpression,
@@ -2956,6 +2977,9 @@ impl RootCollector<'_> {
         for ancestor in identifier.syntax().ancestors().skip(1) {
             let kind = ancestor.kind();
             if AnyJsControlFlowRoot::can_cast(kind) {
+                if AnyInlineCode::cast_ref(&ancestor).is_some_and(|code| code.runs_inline()) {
+                    continue;
+                }
                 let Some(closure) = AnyContinuingClosure::cast(ancestor)
                     .filter(AnyContinuingClosure::continues_outer_flow)
                 else {
@@ -2997,7 +3021,10 @@ impl RootCollector<'_> {
     /// none. Such a statement is `return`, `throw`, `break`, `continue`, a
     /// loop whose test is missing or never falsy by the rules of TypeScript's
     /// binder, such as the literal `true`, or a call of a local function that
-    /// never returns. Each closure is scanned once.
+    /// never returns. Each closure is scanned once. The own code of `closure`
+    /// includes the inline code in it, a static block or a function called
+    /// where it is defined, whose `return`, `break`, and `continue` count
+    /// too.
     ///
     /// Code after that statement may be unreachable, and TypeScript gives a
     /// read in unreachable code its declared type. A statement that ends only
@@ -3018,7 +3045,9 @@ impl RootCollector<'_> {
             if node == *closure.syntax() {
                 continue;
             }
-            if AnyJsControlFlowRoot::can_cast(node.kind()) {
+            if AnyJsControlFlowRoot::can_cast(node.kind())
+                && !AnyInlineCode::cast_ref(&node).is_some_and(|code| code.runs_inline())
+            {
                 events.skip_subtree();
                 continue;
             }
@@ -3134,8 +3163,8 @@ impl RootCollector<'_> {
     /// never cancels narrowing, as in TypeScript. Neither does a write outside
     /// `root` to a variable that an enclosing root declares, because it runs
     /// in another function, or in the enclosing root before or after the
-    /// code of `root` runs. Any other write without a write point, as in a
-    /// function called where it is defined, a class static block, a field
+    /// code of `root` runs. Any other write without a write point, as in an
+    /// `async` function or a generator called where it is defined, a field
     /// initializer, or unreachable code, makes the variable keep its
     /// declared type in the whole root.
     fn writes_are_modeled(
@@ -3165,9 +3194,9 @@ impl RootCollector<'_> {
     ///
     /// Code that runs only when called doesn't count, because TypeScript
     /// ignores a `push` in a callback, as [`Self::writes_are_modeled`] ignores
-    /// other writes there. Any other such write without a write point, as in a
-    /// function called where it is defined, means that the array's type can't
-    /// follow its writes in the root.
+    /// other writes there. Any other such write without a write point, as in
+    /// an `async` function called where it is defined, means that the array's
+    /// type can't follow its writes in the root.
     fn mutations_are_modeled(
         &self,
         range: TextRange,
@@ -3481,7 +3510,7 @@ declare_node_union! {
 }
 
 /// The statements that [`RootCollector::first_exit`] looks for, and the
-/// nested roots it skips.
+/// nested roots it skips unless they run inline.
 const EXIT_SCAN_KINDS: SyntaxKindSet<JsLanguage> =
     AnyPathEnd::KIND_SET.union(AnyJsControlFlowRoot::KIND_SET);
 
@@ -3945,6 +3974,29 @@ mod tests {
     }
 
     #[test]
+    fn inline_code_gets_its_own_flow_when_the_root_around_it_gets_none() {
+        let source = |depth: usize| {
+            format!(
+                "function f(x: string | null) {{ if (x) /*outer*/x; ((y: string | null) => {{ if (y) /*inner*/y; }})(x); {}x{}; }}",
+                "(".repeat(depth),
+                ")".repeat(depth)
+            )
+        };
+        // The function runs in the flow of `f`, so `f` keeps both reads.
+        let built = source(1);
+        let info = module(&built);
+        let outer = info.flow.read(marked(&built, "outer", "x")).unwrap();
+        let inner = info.flow.read(marked(&built, "inner", "y")).unwrap();
+        assert_eq!(outer.root, inner.root);
+        // When syntax nested too deeply rejects `f`, the function is a root of
+        // its own, so its read still narrows.
+        let rejected = source(super::builder::MAX_DEPTH);
+        let info = module(&rejected);
+        assert!(info.flow.read(marked(&rejected, "outer", "x")).is_none());
+        assert!(info.flow.read(marked(&rejected, "inner", "y")).is_some());
+    }
+
+    #[test]
     fn declared_function_names_belong_to_the_enclosing_root() {
         for source in [
             "declare function g(): void; if (!g) { /*read*/g; }",
@@ -4144,6 +4196,10 @@ mod tests {
                 b.push(1);
                 (() => b.push(2))();
                 /*invoked*/b;
+                const d = [];
+                d.push(1);
+                (async () => d.push(2))();
+                /*async*/d;
                 var v = null;
                 /*hoisted*/v;
                 v = 1;
@@ -4158,8 +4214,8 @@ mod tests {
         // its declarator. A write without a value, as `w++`, counts, because
         // it makes the read Unknown. The declared type stays for a read in a
         // closure or in a nested root, for a variable without such a write,
-        // and for an array that a function called where it is defined adds
-        // to.
+        // and for an array that an `async` function called where it is
+        // defined adds to. A function that runs inline adds in the flow.
         for (marker, expression, evolving) in [
             ("before", "x", None),
             ("after", "x", Some(FlowEvolving::Variable)),
@@ -4167,7 +4223,8 @@ mod tests {
             ("called", "u", Some(FlowEvolving::Variable)),
             ("valueless", "w", Some(FlowEvolving::Variable)),
             ("array", "a", Some(FlowEvolving::Array)),
-            ("invoked", "b", None),
+            ("invoked", "b", Some(FlowEvolving::Array)),
+            ("async", "d", None),
             ("hoisted", "v", Some(FlowEvolving::Variable)),
             ("nested", "m", None),
         ] {

@@ -210,7 +210,8 @@ fn evolving_variables_take_the_types_of_their_writes() {
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 // A variable initialized with an empty array literal starts with the element
 // type `never` and joins the widened type of each value that `push`,
-// `unshift`, or an assignment to an element with a number key adds to it.
+// `unshift`, or an assignment to an element with a number key adds to it,
+// also in a function called where it is defined.
 #[test]
 fn evolving_arrays_take_the_types_of_their_elements() {
     assert_reads(
@@ -234,6 +235,7 @@ fn evolving_arrays_take_the_types_of_their_elements() {
         function a29() { const a = []; a.push(1); if (a) /*a29*/a; }
         function a32() { let a = []; a = f<string[]>(); /*a32*/a; }
         function a36() { const a = []; a.push(1); const g = () => a.push(2); /*a36*/a; }
+        function a8() { const a = []; a.push(1); (() => a.push("s"))(); /*a8*/a; }
         function a42() { const a = []; a.push([1]); /*a42*/a; }
         function a44() { var a = []; a.push(1); /*a44*/a; }
         function a45() { const a = [], b = []; a.push(1); b.push("s"); /*a45*/a; /*a45b*/b; }
@@ -265,6 +267,7 @@ fn evolving_arrays_take_the_types_of_their_elements() {
             ("a29", "a", &["instanceof Array<number>"]),
             ("a32", "a", &["instanceof Array<string>"]),
             ("a36", "a", &["instanceof Array<number>"]),
+            ("a8", "a", &["instanceof Array<number | string>"]),
             ("a42", "a", &["instanceof Array<instanceof Array<number>>"]),
             ("a44", "a", &["instanceof Array<number>"]),
             ("a45", "a", &["instanceof Array<number>"]),
@@ -280,9 +283,9 @@ fn evolving_arrays_take_the_types_of_their_elements() {
 // but `undefined`, is assigned, in a closure or a nested function, where
 // TypeScript reports an implicit `any` (TS7005), and for an array to which a
 // write that reaches the read adds a value that Biome may type differently
-// from TypeScript, or to which a function called where it is defined adds. A
-// value that reads such a variable has Biome's type for it, which is its
-// declared type.
+// from TypeScript, or to which an `async` function called where it is defined
+// adds. A value that reads such a variable has Biome's type for it, which is
+// its declared type.
 #[test]
 fn evolving_declarations_keep_their_declared_type_where_biome_cant_follow_them() {
     assert_reads(
@@ -294,9 +297,9 @@ fn evolving_declarations_keep_their_declared_type_where_biome_cant_follow_them()
         function v26() { let x; x = 1; const y = x; /*v26*/y; } // number
         function a1() { const a = []; a.push(...[1, 2]); /*a1*/a; } // number[]
         function a3() { const a = []; a[n] = 1; /*a3*/a; } // number[]
-        function a8() { const a = []; a.push(1); (() => a.push("s"))(); /*a8*/a; } // (string | number)[]
         function a21() { const a = []; a.push(null); /*a21*/a; } // null[]
         function a43() { const a = []; a.push(() => 1); /*a43*/a; } // (() => number)[]
+        function a46() { const a = []; a.push(1); (async () => a.push("s"))(); /*a46*/a; } // number[]
         function r1() { let e = null; e = "a"; let y: string | null = f(); y = e; /*r1*/y; } // string
         function r4() { let e; e = 1; let w: number | string = f(); w = e; /*r4*/w; } // number
         "#,
@@ -308,9 +311,9 @@ fn evolving_declarations_keep_their_declared_type_where_biome_cant_follow_them()
             ("v26", "y", &["Unknown"]),
             ("a1", "a", &["instanceof Array<unknown>"]),
             ("a3", "a", &["instanceof Array<unknown>"]),
-            ("a8", "a", &["instanceof Array<unknown>"]),
             ("a21", "a", &["instanceof Array<unknown>"]),
             ("a43", "a", &["instanceof Array<unknown>"]),
+            ("a46", "a", &["instanceof Array<unknown>"]),
             ("r1", "y", &["null", "string"]),
             ("r4", "w", &["number", "string"]),
         ],

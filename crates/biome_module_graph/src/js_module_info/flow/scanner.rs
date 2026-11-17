@@ -1,4 +1,4 @@
-use super::builder::{MAX_DEPTH, has_operands, mutated_array};
+use super::builder::{AnyInlineCode, MAX_DEPTH, has_operands, mutated_array};
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_syntax::{
     AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, AnyJsForInOrOfInitializer,
@@ -9,7 +9,7 @@ use biome_js_syntax::{
     JsSyntaxKind, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator, JsVariableDeclarator,
     JsWhileStatement, TsDeclareFunctionDeclaration,
 };
-use biome_rowan::{AstNode, AstSeparatedList, SyntaxKind, declare_node_union};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxKind, TextRange, declare_node_union};
 use std::ops::Range;
 
 /// Limits the syntax nodes, including nested roots, of a root that gets flow.
@@ -60,9 +60,23 @@ declare_node_union! {
 /// them, skips type aliases and interfaces entirely, and skips everything but
 /// the name of a function overload declaration. Roots nested in types, such as
 /// a function in a computed property key, are therefore never selected.
+///
+/// Inline code, a class static block or a function called where it is
+/// defined, opens no root when it runs in the flow of the root around it (see
+/// [`AnyInlineCode::runs_inline`]). Its conditions, writes, statement calls,
+/// and bindings belong to that root. Inline code directly in a root is also
+/// selected after that root as a fallback, which collection builds only when
+/// the root around it gets no graph, as when that root is over the node
+/// limit, so the code inside still narrows by its own tests.
 #[derive(Default)]
 pub(crate) struct FlowRootScanner {
     open: Vec<OpenRoot>,
+    /// The inline code entered and not yet left, which opened no root, with
+    /// what its own code contains.
+    inline: Vec<OpenInline>,
+    /// The fallbacks of the inline code directly in the open roots, each
+    /// root's after those of the roots that enclose it.
+    fallbacks: Vec<Fallback>,
     /// Bindings declared by the open roots, each root's after those of the
     /// roots that enclose it.
     bindings: Vec<JsIdentifierBinding>,
@@ -99,6 +113,37 @@ pub(super) struct SelectedRoot {
     /// For a root that only statement calls select, the range of those calls
     /// in [`FlowRootScanner::kept_calls`].
     calls: Option<Range<usize>>,
+    /// For inline code selected as a fallback, the range of the root around
+    /// it, which runs the code in its own flow when it gets a graph.
+    enclosing: Option<TextRange>,
+}
+
+impl SelectedRoot {
+    /// Returns the range of the root that runs this inline code in its own
+    /// flow, for inline code selected as a fallback, which collection builds
+    /// only when that root gets no graph.
+    pub(super) fn enclosing(&self) -> Option<TextRange> {
+        self.enclosing
+    }
+}
+
+/// Inline code that the walk entered and has not left yet.
+struct OpenInline {
+    /// What the inline code's own code contains, as for a root.
+    code: OpenRoot,
+    /// Whether the code lies directly in other inline code, which then gets
+    /// the fallback for both.
+    nested: bool,
+}
+
+/// Inline code directly in a root, selected as a fallback when it would be
+/// selected as a root of its own (see [`SelectedRoot::enclosing`]).
+struct Fallback {
+    root: AnyJsControlFlowRoot,
+    bindings: Vec<JsIdentifierBinding>,
+    has_this: bool,
+    /// The statement calls that alone select it, if any.
+    calls: Option<Vec<JsCallExpression>>,
 }
 
 impl FlowRootScanner {
@@ -110,26 +155,19 @@ impl FlowRootScanner {
             return;
         }
         if AnyJsControlFlowRoot::can_cast(kind) {
-            if let Some(parent) = self.open.last_mut() {
-                parent.check_depth(self.depth);
+            if AnyInlineCode::cast_ref(node).is_some_and(|code| code.runs_inline()) {
+                self.open_inline();
+            } else {
+                self.open_root();
             }
-            self.open.push(OpenRoot {
-                first_node: self.visited - 1,
-                first_binding: self.bindings.len(),
-                first_call: self.calls.len(),
-                depth: self.depth,
-                has_condition: false,
-                has_write: false,
-                has_array_mutation: false,
-                has_empty_array: false,
-                has_this: false,
-                is_unsupported: false,
-            });
         }
-        let Some(root) = self.open.last_mut() else {
+        if self.open.is_empty() {
             return;
-        };
-        root.check_depth(self.depth);
+        }
+        let depth = self.depth;
+        for code in current(&mut self.open, &mut self.inline) {
+            code.check_depth(depth);
+        }
         if matches!(
             kind,
             JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION
@@ -145,36 +183,48 @@ impl FlowRootScanner {
             self.declaration = Some(self.depth);
             return;
         }
-        root.check_node(kind);
+        for code in current(&mut self.open, &mut self.inline) {
+            code.check_node(kind);
+        }
         if self.type_region.is_some() {
             return;
         }
+        let mut has_array_mutation = false;
         if let Some(call) = JsCallExpression::cast_ref(node) {
-            root.has_array_mutation |= mutated_array(&call).is_some();
+            has_array_mutation = mutated_array(&call).is_some();
             if is_statement_call(&call) && may_assert(&call) {
                 self.calls.push(call);
             }
         }
+        let (mut has_condition, mut has_this, mut has_write, mut has_empty_array) =
+            (false, false, false, false);
         if AnyTsReturnType::can_cast(kind) {
             self.type_region = Some(self.depth);
         } else if AnyFlowConditionSource::can_cast(kind) {
-            root.has_condition = true;
+            has_condition = true;
         } else if kind == JsSyntaxKind::JS_THIS_EXPRESSION {
-            root.has_this = true;
+            has_this = true;
         } else if let Some(binding) = JsIdentifierBinding::cast_ref(node) {
             self.bindings.push(binding);
-        } else if !root.has_condition && is_evaluation_condition(node) {
-            root.has_condition = true;
-        } else if !root.has_write && is_write(node) {
-            root.has_write = true;
+        } else if is_evaluation_condition(node) {
+            has_condition = true;
+        } else if is_write(node) {
+            has_write = true;
         } else if let Some(declarator) = JsVariableDeclarator::cast_ref(node) {
-            root.has_empty_array |= declarator.variable_annotation().is_none()
+            has_empty_array = declarator.variable_annotation().is_none()
                 && declarator
                     .initializer()
                     .and_then(|initializer| initializer.expression().ok())
                     .is_some_and(|expression| {
                         matches!(expression, AnyJsExpression::JsArrayExpression(array) if array.elements().is_empty())
                     });
+        }
+        for code in current(&mut self.open, &mut self.inline) {
+            code.has_array_mutation |= has_array_mutation;
+            code.has_condition |= has_condition;
+            code.has_this |= has_this;
+            code.has_write |= has_write;
+            code.has_empty_array |= has_empty_array;
         }
     }
 
@@ -193,20 +243,39 @@ impl FlowRootScanner {
         if !AnyJsControlFlowRoot::can_cast(node.kind()) {
             return;
         }
+        if self
+            .inline
+            .last()
+            .is_some_and(|open| open.code.depth == depth)
+        {
+            let Some(OpenInline { code, nested }) = self.inline.pop() else {
+                return;
+            };
+            if !nested
+                && let Some(selection) = code.selection(self.visited, self.calls.len())
+                && let Some(node) = AnyJsControlFlowRoot::cast_ref(node)
+            {
+                self.fallbacks.push(Fallback {
+                    root: node,
+                    bindings: self.bindings[code.first_binding..].to_vec(),
+                    has_this: code.has_this,
+                    calls: (selection == Selection::Calls)
+                        .then(|| self.calls[code.first_call..].to_vec()),
+                });
+            }
+            return;
+        }
         let Some(root) = self.open.pop() else {
             return;
         };
-        let has_write = root.has_write || (root.has_array_mutation && root.has_empty_array);
-        let has_calls = self.calls.len() > root.first_call;
-        if (root.has_condition || has_write || has_calls)
-            && !root.is_unsupported
-            && self.visited - root.first_node < MAX_ROOT_NODES
+        let fallbacks = self.fallbacks.split_off(root.first_fallback);
+        if let Some(selection) = root.selection(self.visited, self.calls.len())
             && let Some(node) = AnyJsControlFlowRoot::cast_ref(node)
         {
             let start = self.kept_bindings.len();
             self.kept_bindings
                 .extend(self.bindings.drain(root.first_binding..));
-            let calls = (!root.has_condition && !has_write).then(|| {
+            let calls = (selection == Selection::Calls).then(|| {
                 let start = self.kept_calls.len();
                 self.kept_calls.extend(self.calls.drain(root.first_call..));
                 start..self.kept_calls.len()
@@ -216,10 +285,65 @@ impl FlowRootScanner {
                 bindings: start..self.kept_bindings.len(),
                 has_this: root.has_this,
                 calls,
+                enclosing: None,
             });
         }
         self.bindings.truncate(root.first_binding);
         self.calls.truncate(root.first_call);
+        let enclosing = node.text_trimmed_range();
+        for fallback in fallbacks {
+            let start = self.kept_bindings.len();
+            self.kept_bindings.extend(fallback.bindings);
+            let calls = fallback.calls.map(|calls| {
+                let start = self.kept_calls.len();
+                self.kept_calls.extend(calls);
+                start..self.kept_calls.len()
+            });
+            self.selected.push(SelectedRoot {
+                root: fallback.root,
+                bindings: start..self.kept_bindings.len(),
+                has_this: fallback.has_this,
+                calls,
+                enclosing: Some(enclosing),
+            });
+        }
+    }
+
+    /// Opens a root at the node just entered, which is nested in the root
+    /// open before it.
+    fn open_root(&mut self) {
+        for code in current(&mut self.open, &mut self.inline) {
+            code.check_depth(self.depth);
+        }
+        let root = self.new_open_root();
+        self.open.push(root);
+    }
+
+    /// Opens inline code at the node just entered.
+    fn open_inline(&mut self) {
+        let root_depth = self.open.last().map_or(0, |root| root.depth);
+        let nested = self
+            .inline
+            .last()
+            .is_some_and(|open| open.code.depth > root_depth);
+        let code = self.new_open_root();
+        self.inline.push(OpenInline { code, nested });
+    }
+
+    fn new_open_root(&self) -> OpenRoot {
+        OpenRoot {
+            first_node: self.visited - 1,
+            first_binding: self.bindings.len(),
+            first_call: self.calls.len(),
+            first_fallback: self.fallbacks.len(),
+            depth: self.depth,
+            has_condition: false,
+            has_write: false,
+            has_array_mutation: false,
+            has_empty_array: false,
+            has_this: false,
+            is_unsupported: false,
+        }
     }
 
     /// Returns the selected roots, each nested root before the roots that
@@ -374,6 +498,31 @@ fn is_write(node: &JsSyntaxNode) -> bool {
     })
 }
 
+/// Returns the innermost open root and the open inline code inside it, whose
+/// own code holds the node just entered.
+fn current<'a>(
+    open: &'a mut [OpenRoot],
+    inline: &'a mut [OpenInline],
+) -> impl Iterator<Item = &'a mut OpenRoot> {
+    let root = open.last_mut();
+    let depth = root.as_ref().map_or(0, |root| root.depth);
+    let inline = inline
+        .iter_mut()
+        .rev()
+        .take_while(move |open| open.code.depth > depth)
+        .map(|open| &mut open.code);
+    root.into_iter().chain(inline)
+}
+
+/// Why a root is selected.
+#[derive(Clone, Copy, Eq, PartialEq)]
+enum Selection {
+    /// A condition or a write of its own code.
+    Flow,
+    /// Only statement calls of its own code that may assert.
+    Calls,
+}
+
 struct OpenRoot {
     first_node: usize,
     /// Index in [`FlowRootScanner::bindings`] of the first binding the root
@@ -382,6 +531,9 @@ struct OpenRoot {
     /// Index in [`FlowRootScanner::calls`] of the first statement call of
     /// the root's own code.
     first_call: usize,
+    /// Index in [`FlowRootScanner::fallbacks`] of the first fallback of
+    /// inline code directly in the root.
+    first_fallback: usize,
     depth: usize,
     has_condition: bool,
     /// Whether the root's own code writes a variable or a property, as
@@ -401,6 +553,23 @@ struct OpenRoot {
 }
 
 impl OpenRoot {
+    /// Returns why the root is selected when the walk leaves it, after
+    /// `visited` nodes and with `calls` statement calls collected, or `None`
+    /// when it isn't: it needs a condition, a write, or a statement call of
+    /// its own code, only syntax that the builder supports, and fewer than
+    /// [`MAX_ROOT_NODES`] syntax nodes.
+    fn selection(&self, visited: usize, calls: usize) -> Option<Selection> {
+        if self.is_unsupported || visited - self.first_node >= MAX_ROOT_NODES {
+            return None;
+        }
+        if self.has_condition || self.has_write || (self.has_array_mutation && self.has_empty_array)
+        {
+            Some(Selection::Flow)
+        } else {
+            (calls > self.first_call).then_some(Selection::Calls)
+        }
+    }
+
     /// Marks the root unsupported when a node of its own syntax at `depth` is
     /// nested too deeply below it.
     fn check_depth(&mut self, depth: usize) {
@@ -441,13 +610,32 @@ mod tests {
     }
 
     /// Returns the texts of the roots that a condition or a write selects in
-    /// `root`, in selection order.
+    /// `root`, in selection order, without fallbacks of inline code.
     fn selected_in(root: &AnyJsRoot) -> Vec<String> {
         let scanner = scan(root);
         scanner
             .selected()
-            .filter(|selected| scanner.statement_calls(selected).is_none())
+            .filter(|selected| {
+                scanner.statement_calls(selected).is_none() && selected.enclosing().is_none()
+            })
             .map(|selected| selected.root.syntax().text_trimmed().to_string())
+            .collect()
+    }
+
+    /// Returns the texts of the inline code that the TypeScript `source`
+    /// selects as fallbacks, each with the text of the root around it.
+    fn fallbacks(source: &str) -> Vec<(String, String)> {
+        let parsed = parse(source, JsFileSource::ts(), JsParserOptions::default());
+        assert!(!parsed.has_errors(), "{source}");
+        scan(&parsed.tree())
+            .selected()
+            .filter_map(|selected| {
+                let enclosing = selected.enclosing()?;
+                Some((
+                    selected.root.syntax().text_trimmed().to_string(),
+                    source[enclosing].to_owned(),
+                ))
+            })
             .collect()
     }
 
@@ -816,5 +1004,95 @@ mod tests {
             );
             assert_eq!(selected(&source).len(), expected, "{statements}");
         }
+    }
+
+    #[test]
+    fn inline_code_belongs_to_the_root_around_it() {
+        // A function called where it is defined and a static block open no
+        // root, so their conditions select the root around them.
+        for source in [
+            "function f(x) { (() => { if (x) read(x); })(); }",
+            "function f(x) { (function () { if (x) read(x); })?.(); }",
+            "function f(x) { void ((() => x && read(x)))(); }",
+            "function f(x) { class C { static { if (x) read(x); } } }",
+        ] {
+            assert_eq!(selected(source), [source], "{source}");
+        }
+        // An `async` function, a generator, a function called through a
+        // non-null assertion, and inline code in a field initializer or in an
+        // export clause that is no statement keep roots of their own.
+        for (source, root) in [
+            (
+                "function f(x) { (async () => { if (x) read(x); })(); }",
+                "async () => { if (x) read(x); }",
+            ),
+            (
+                "function f(x) { (function* () { if (x) read(x); })(); }",
+                "function* () { if (x) read(x); }",
+            ),
+            (
+                "function f(x) { (() => { if (x) read(x); })!(); }",
+                "() => { if (x) read(x); }",
+            ),
+            (
+                "function f(x) { class C { y = (() => { if (x) read(x); })(); } }",
+                "() => { if (x) read(x); }",
+            ),
+            (
+                "export const v = (() => { if (x) read(x); })();",
+                "() => { if (x) read(x); }",
+            ),
+            (
+                "export default class { static { if (x) read(x); } }",
+                "static { if (x) read(x); }",
+            ),
+        ] {
+            assert_eq!(selected(source), [root], "{source}");
+        }
+    }
+
+    #[test]
+    fn inline_code_declares_its_bindings_in_the_root_around_it() {
+        const SOURCE: &str = "function f(a) { ((b) => { let c = b; if (c) read(c); })(a); class K { static { let d = a; } } }";
+        let parsed = parse(SOURCE, JsFileSource::ts(), JsParserOptions::default());
+        assert!(!parsed.has_errors());
+        let scanner = scan(&parsed.tree());
+        let bindings: Vec<Vec<String>> = scanner
+            .selected()
+            .map(|selected| {
+                scanner
+                    .bindings(selected)
+                    .iter()
+                    .map(|binding| binding.syntax().text_trimmed().to_string())
+                    .collect()
+            })
+            .collect();
+        // The fallback of the inline function declares its own bindings.
+        assert_eq!(
+            bindings,
+            [vec!["f", "a", "b", "c", "K", "d"], vec!["b", "c"]]
+        );
+    }
+
+    #[test]
+    fn inline_code_directly_in_a_root_is_also_a_fallback() {
+        // Only inline code that would be selected on its own gets a fallback,
+        // and code nested in other inline code belongs to that code's.
+        const SOURCE: &str = "function f(x) { (() => { if (x) read(x); (() => { if (x) read(x); })(); })(); class K { static { x; } } }";
+        assert_eq!(
+            fallbacks(SOURCE),
+            [(
+                "() => { if (x) read(x); (() => { if (x) read(x); })(); }".to_owned(),
+                SOURCE.to_owned()
+            )]
+        );
+        // Inline code in a root that the scanner rejects keeps its fallback.
+        let nested = format!(
+            "function f(x) {{ (() => {{ if (x) read(x); }})(); {}x{}; }}",
+            "(".repeat(MAX_DEPTH),
+            ")".repeat(MAX_DEPTH)
+        );
+        assert!(selected(&nested).is_empty());
+        assert_eq!(fallbacks(&nested).len(), 1);
     }
 }
