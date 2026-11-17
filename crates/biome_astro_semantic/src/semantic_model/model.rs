@@ -1,0 +1,651 @@
+//! The tables of the Astro semantic model and the handles that read them.
+//!
+//! Stored and analyzer-facing ranges use host-document coordinates. Snippet
+//! offsets retain the guest origin needed by integrations that operate on an
+//! embedded syntax tree.
+
+use super::table::{Table, TableId};
+use biome_languages::JsFileSource;
+use biome_rowan::{TextRange, TextSize, TokenText};
+use enumflags2::{BitFlags, bitflags};
+use std::sync::Arc;
+
+macro_rules! define_id {
+    ($(#[$meta:meta])* $name:ident) => {
+        $(#[$meta])*
+        #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+        pub struct $name(pub(crate) u32);
+
+        impl $name {
+            pub(crate) fn new(index: usize) -> Self {
+                Self(index as u32)
+            }
+
+            pub(crate) fn index(self) -> usize {
+                self.0 as usize
+            }
+        }
+
+        impl TableId for $name {
+            fn from_index(index: usize) -> Self {
+                Self::new(index)
+            }
+
+            fn to_index(self) -> usize {
+                self.index()
+            }
+        }
+    };
+}
+
+define_id!(
+    /// Identifies an Astro document block.
+    BlockId
+);
+define_id!(
+    /// Identifies an embedded JavaScript or TypeScript snippet.
+    SnippetId
+);
+define_id!(
+    /// Identifies a scope.
+    ScopeId
+);
+define_id!(
+    /// Identifies a declaration.
+    SymbolId
+);
+define_id!(
+    /// Identifies a use of a name.
+    ReferenceId
+);
+
+/// An answer that the source may not allow the model to give.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum Tri {
+    /// The condition is known to hold.
+    Yes,
+    /// The condition is known not to hold.
+    No,
+    /// The available source does not determine the condition.
+    #[default]
+    Unknown,
+}
+
+impl From<bool> for Tri {
+    fn from(value: bool) -> Self {
+        if value { Self::Yes } else { Self::No }
+    }
+}
+
+/// A group of names resolved under the same rules.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum Namespace {
+    /// Runtime and type-level JavaScript bindings.
+    Binding,
+}
+
+impl Namespace {
+    pub(crate) const COUNT: usize = 1;
+
+    pub(crate) fn index(self) -> usize {
+        self as usize
+    }
+}
+
+/// A reason declarations in a namespace may be incomplete.
+#[bitflags]
+#[repr(u8)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum OpenReason {
+    /// A spread may introduce declarations that are not visible in the source.
+    Spread = 1 << 0,
+    /// A computed value prevents the model from enumerating declarations.
+    NonLiteral = 1 << 1,
+    /// Declarations may come from source outside the document.
+    ExternalSource = 1 << 2,
+    /// A parse error prevents complete declaration collection.
+    ParseError = 1 << 3,
+}
+
+/// The reasons declarations in a namespace may be incomplete.
+pub type OpenReasons = BitFlags<OpenReason>;
+
+/// The kind of an Astro document block.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum BlockKind {
+    /// The server-side frontmatter block.
+    Frontmatter,
+    /// A `script` element.
+    Script,
+    /// A `style` element.
+    Style,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub(crate) struct BlockData {
+    pub(crate) kind: BlockKind,
+    pub(crate) range: TextRange,
+    pub(crate) content: Option<TextRange>,
+    pub(crate) scope: Option<ScopeId>,
+    pub(crate) snippet: Option<SnippetId>,
+}
+
+/// Where an embedded snippet sits in the host document.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum SnippetHost {
+    /// The snippet belongs to the given frontmatter block.
+    Frontmatter(BlockId),
+    /// The snippet belongs to the given script block.
+    Script(BlockId),
+    /// The snippet is an expression in the template.
+    Expression,
+    /// The model could not associate the snippet with a document block.
+    Unknown,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub(crate) struct SnippetData {
+    pub(crate) range: TextRange,
+    pub(crate) offset: TextSize,
+    pub(crate) source: JsFileSource,
+    pub(crate) host: SnippetHost,
+}
+
+/// What a scope belongs to.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ScopeKind {
+    /// A module scope, optionally associated with a document block.
+    Module(Option<BlockId>),
+    /// Framework-provided names available throughout the document.
+    Builtins,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub(crate) struct ScopeData {
+    pub(crate) kind: ScopeKind,
+    pub(crate) parent: Option<ScopeId>,
+    pub(crate) symbols: Vec<SymbolId>,
+    pub(crate) open: [OpenReasons; Namespace::COUNT],
+}
+
+/// What kind of declaration a symbol is.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum SymbolKind {
+    /// A declaration introduced by an import.
+    Import,
+    /// A declaration introduced by the document.
+    Local,
+    /// A declaration supplied by Astro.
+    Builtin,
+}
+
+/// What produced a declaration.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum Origin {
+    /// The declaration has no framework-specific origin.
+    #[default]
+    None,
+    /// Astro supplies the declaration as a built-in name.
+    AstroBuiltin,
+    /// A `define:vars` directive supplies the declaration.
+    DefineVars,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub(crate) struct SymbolData {
+    pub(crate) name: TokenText,
+    pub(crate) range: TextRange,
+    pub(crate) declaration: TextRange,
+    pub(crate) snippet: Option<SnippetId>,
+    pub(crate) scope: ScopeId,
+    pub(crate) namespace: Namespace,
+    pub(crate) kind: SymbolKind,
+    pub(crate) origin: Origin,
+    pub(crate) type_only: bool,
+}
+
+/// Where a reference is written.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum RefSite {
+    /// A JavaScript or TypeScript identifier.
+    Identifier,
+    /// An HTML-family tag name.
+    TagName,
+    /// An HTML-family attribute.
+    Attribute,
+    /// A framework directive.
+    Directive,
+}
+
+/// What a reference is reached through.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum RefBase {
+    /// The reference uses a name directly.
+    Bare,
+    /// The reference is reached through the given symbol.
+    Via(SymbolId),
+    /// The reference is reached through an Astro built-in.
+    Builtin,
+}
+
+/// What a reference does with a value.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Access {
+    /// Reads a value.
+    Read,
+    /// Assigns a value.
+    Write,
+    /// Mutates a value without replacing its binding.
+    Mutate,
+    /// Calls a value.
+    Call,
+    /// Passes a value to code whose behavior is not modeled.
+    Escape,
+    /// Uses a name in a type position.
+    Type,
+}
+
+/// What a reference resolves to.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Resolution {
+    /// The reference resolves to a declaration in this model.
+    Symbol(SymbolId),
+    /// The reference resolves as a global name.
+    Global,
+    /// No matching declaration or global is available.
+    Unresolved,
+    /// Open declarations prevent a definitive resolution.
+    Unknowable,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub(crate) struct ReferenceData {
+    pub(crate) range: TextRange,
+    pub(crate) name: TokenText,
+    pub(crate) snippet: Option<SnippetId>,
+    pub(crate) site: RefSite,
+    pub(crate) namespace: Namespace,
+    pub(crate) scope: Option<ScopeId>,
+    pub(crate) base: RefBase,
+    pub(crate) access: Access,
+    pub(crate) resolution: Resolution,
+}
+
+#[derive(Debug, Default, Eq, PartialEq)]
+pub(crate) struct SemanticModelData {
+    pub(crate) blocks: Table<BlockId, BlockData>,
+    pub(crate) snippets: Table<SnippetId, SnippetData>,
+    pub(crate) scopes: Table<ScopeId, ScopeData>,
+    pub(crate) symbols: Table<SymbolId, SymbolData>,
+    pub(crate) references: Table<ReferenceId, ReferenceData>,
+    pub(crate) uses: Table<SymbolId, Vec<ReferenceId>>,
+}
+
+/// The semantic model of one Astro document.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct AstroSemanticModel {
+    pub(crate) data: Arc<SemanticModelData>,
+}
+
+impl Default for AstroSemanticModel {
+    fn default() -> Self {
+        Self::new(SemanticModelData::default())
+    }
+}
+
+macro_rules! define_handle {
+    ($(#[$meta:meta])* $name:ident, $id:ident, $table:ident, $row:ident) => {
+        $(#[$meta])*
+        #[derive(Clone)]
+        pub struct $name {
+            pub(crate) data: Arc<SemanticModelData>,
+            pub(crate) id: $id,
+        }
+
+        impl $name {
+            /// Returns the identifier of this value within its semantic model.
+            pub fn id(&self) -> $id {
+                self.id
+            }
+
+            fn row(&self) -> &$row {
+                &self.data.$table[self.id]
+            }
+        }
+
+        impl PartialEq for $name {
+            fn eq(&self, other: &Self) -> bool {
+                self.id == other.id && Arc::ptr_eq(&self.data, &other.data)
+            }
+        }
+
+        impl Eq for $name {}
+
+        impl std::fmt::Debug for $name {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                f.debug_tuple(stringify!($name)).field(&self.id.0).finish()
+            }
+        }
+    };
+}
+
+define_handle!(
+    /// An Astro document block.
+    Block,
+    BlockId,
+    blocks,
+    BlockData
+);
+define_handle!(
+    /// An embedded JavaScript or TypeScript snippet.
+    Snippet,
+    SnippetId,
+    snippets,
+    SnippetData
+);
+define_handle!(
+    /// A scope.
+    Scope,
+    ScopeId,
+    scopes,
+    ScopeData
+);
+define_handle!(
+    /// A declaration.
+    Symbol,
+    SymbolId,
+    symbols,
+    SymbolData
+);
+define_handle!(
+    /// A use of a name.
+    Reference,
+    ReferenceId,
+    references,
+    ReferenceData
+);
+
+impl AstroSemanticModel {
+    pub(crate) fn new(data: SemanticModelData) -> Self {
+        Self {
+            data: Arc::new(data),
+        }
+    }
+
+    /// Returns the frontmatter, script, and style blocks in source order.
+    pub fn blocks(&self) -> impl Iterator<Item = Block> + '_ {
+        (0..self.data.blocks.len()).map(|index| Block {
+            data: self.data.clone(),
+            id: BlockId::new(index),
+        })
+    }
+
+    /// Returns the embedded JavaScript and TypeScript snippets in source order.
+    pub fn snippets(&self) -> impl Iterator<Item = Snippet> + '_ {
+        (0..self.data.snippets.len()).map(|index| Snippet {
+            data: self.data.clone(),
+            id: SnippetId::new(index),
+        })
+    }
+
+    /// Returns all scopes in the model.
+    pub fn scopes(&self) -> impl Iterator<Item = Scope> + '_ {
+        (0..self.data.scopes.len()).map(|index| Scope {
+            data: self.data.clone(),
+            id: ScopeId::new(index),
+        })
+    }
+
+    /// Returns all declarations in the model.
+    pub fn symbols(&self) -> impl Iterator<Item = Symbol> + '_ {
+        (0..self.data.symbols.len()).map(|index| Symbol {
+            data: self.data.clone(),
+            id: SymbolId::new(index),
+        })
+    }
+
+    /// Returns all name references in the model.
+    pub fn references(&self) -> impl Iterator<Item = Reference> + '_ {
+        (0..self.data.references.len()).map(|index| Reference {
+            data: self.data.clone(),
+            id: ReferenceId::new(index),
+        })
+    }
+
+    /// Returns the declaration with the given id.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `id` was not obtained from this model.
+    pub fn symbol(&self, id: SymbolId) -> Symbol {
+        Symbol {
+            data: self.data.clone(),
+            id,
+        }
+    }
+}
+
+impl Block {
+    /// Returns whether this is a frontmatter, script, or style block.
+    pub fn kind(&self) -> BlockKind {
+        self.row().kind
+    }
+
+    /// Returns the full block range in host-document coordinates.
+    pub fn host_range(&self) -> TextRange {
+        self.row().range
+    }
+
+    /// Returns the block content range in host-document coordinates.
+    pub fn content_range(&self) -> Option<TextRange> {
+        self.row().content
+    }
+
+    /// Returns the module scope associated with this block, if any.
+    pub fn scope(&self) -> Option<Scope> {
+        self.row().scope.map(|id| Scope {
+            data: self.data.clone(),
+            id,
+        })
+    }
+
+    /// Returns the embedded snippet associated with this block, if any.
+    pub fn snippet(&self) -> Option<Snippet> {
+        self.row().snippet.map(|id| Snippet {
+            data: self.data.clone(),
+            id,
+        })
+    }
+}
+
+impl Snippet {
+    /// Returns the snippet content range in host-document coordinates.
+    pub fn host_range(&self) -> TextRange {
+        self.row().range
+    }
+
+    pub(crate) fn content_offset(&self) -> TextSize {
+        self.row().offset
+    }
+
+    /// Returns the language and embedding mode used to parse the snippet.
+    pub fn source(&self) -> JsFileSource {
+        self.row().source
+    }
+
+    /// Returns where the snippet appears in the Astro document.
+    pub fn host(&self) -> SnippetHost {
+        self.row().host
+    }
+}
+
+impl Scope {
+    /// Returns what this scope belongs to.
+    pub fn kind(&self) -> ScopeKind {
+        self.row().kind
+    }
+
+    /// Returns the enclosing scope, if any.
+    pub fn parent(&self) -> Option<Self> {
+        self.row().parent.map(|id| Self {
+            data: self.data.clone(),
+            id,
+        })
+    }
+
+    /// Returns declarations introduced directly in this scope.
+    pub fn symbols(&self) -> impl Iterator<Item = Symbol> + '_ {
+        self.row().symbols.iter().map(|id| Symbol {
+            data: self.data.clone(),
+            id: *id,
+        })
+    }
+
+    /// Returns this scope followed by each enclosing scope.
+    pub fn ancestors(&self) -> impl Iterator<Item = Self> {
+        std::iter::successors(Some(self.clone()), Self::parent)
+    }
+
+    /// Finds the nearest visible declaration with the given name and namespace.
+    pub fn lookup(&self, namespace: Namespace, name: &str) -> Option<Symbol> {
+        self.ancestors().find_map(|scope| {
+            scope
+                .symbols()
+                .find(|symbol| symbol.namespace() == namespace && symbol.name() == name)
+        })
+    }
+
+    /// Returns why declarations in the namespace may be incomplete.
+    pub fn open_reasons(&self, namespace: Namespace) -> OpenReasons {
+        self.row().open[namespace.index()]
+    }
+}
+
+impl Symbol {
+    /// Returns the declared name.
+    pub fn name(&self) -> &str {
+        self.row().name.text()
+    }
+
+    /// Returns the name range in host-document coordinates.
+    pub fn range(&self) -> TextRange {
+        self.row().range
+    }
+
+    /// Returns the name range in host-document coordinates.
+    pub fn host_range(&self) -> TextRange {
+        self.row().range
+    }
+
+    /// Returns the full declaration range in host-document coordinates.
+    pub fn declaration_range(&self) -> TextRange {
+        self.row().declaration
+    }
+
+    /// Returns the full declaration range in host-document coordinates.
+    pub fn host_declaration_range(&self) -> TextRange {
+        self.row().declaration
+    }
+
+    /// Returns the embedded snippet containing the declaration, if any.
+    pub fn snippet(&self) -> Option<Snippet> {
+        self.row().snippet.map(|id| Snippet {
+            data: self.data.clone(),
+            id,
+        })
+    }
+
+    /// Returns the scope that introduces the declaration.
+    pub fn scope(&self) -> Scope {
+        Scope {
+            data: self.data.clone(),
+            id: self.row().scope,
+        }
+    }
+
+    /// Returns the namespace containing the declaration.
+    pub fn namespace(&self) -> Namespace {
+        self.row().namespace
+    }
+
+    /// Returns the kind of declaration.
+    pub fn kind(&self) -> SymbolKind {
+        self.row().kind
+    }
+
+    /// Returns the framework feature that produced the declaration.
+    pub fn origin(&self) -> Origin {
+        self.row().origin
+    }
+
+    /// Returns whether the declaration is available only in type positions.
+    pub fn is_type_only(&self) -> bool {
+        self.row().type_only
+    }
+
+    /// Returns references that resolve to this declaration.
+    pub fn uses(&self) -> impl Iterator<Item = Reference> + '_ {
+        self.data.uses[self.id].iter().map(|id| Reference {
+            data: self.data.clone(),
+            id: *id,
+        })
+    }
+}
+
+impl Reference {
+    /// Returns the referenced name.
+    pub fn name(&self) -> &str {
+        self.row().name.text()
+    }
+
+    /// Returns the reference range in host-document coordinates.
+    pub fn range(&self) -> TextRange {
+        self.row().range
+    }
+
+    /// Returns the reference range in host-document coordinates.
+    pub fn host_range(&self) -> TextRange {
+        self.row().range
+    }
+
+    /// Returns the embedded snippet containing the reference, if any.
+    pub fn snippet(&self) -> Option<Snippet> {
+        self.row().snippet.map(|id| Snippet {
+            data: self.data.clone(),
+            id,
+        })
+    }
+
+    /// Returns the source construct containing the reference.
+    pub fn site(&self) -> RefSite {
+        self.row().site
+    }
+
+    /// Returns the namespace used to resolve the reference.
+    pub fn namespace(&self) -> Namespace {
+        self.row().namespace
+    }
+
+    /// Returns the scope where resolution starts, if known.
+    pub fn scope(&self) -> Option<Scope> {
+        self.row().scope.map(|id| Scope {
+            data: self.data.clone(),
+            id,
+        })
+    }
+
+    /// Returns how the referenced name is reached.
+    pub fn base(&self) -> RefBase {
+        self.row().base
+    }
+
+    /// Returns how the reference uses its value.
+    pub fn access(&self) -> Access {
+        self.row().access
+    }
+
+    /// Returns the result of resolving the reference.
+    pub fn resolution(&self) -> Resolution {
+        self.row().resolution
+    }
+}
