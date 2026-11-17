@@ -1,0 +1,62 @@
+---
+source: crates/biome_astro_semantic/src/tests.rs
+expression: "semantic_snapshot(source, &model)"
+---
+## Input
+
+```astro
+---
+const foreground = "red";
+const vars = { dynamic: "blue" };
+---
+<style define:vars={{ foreground, accent: "blue", "\x66oo": 1, 1e2: "a", 0x64: "b", [0x64n]: "c", 0x100000000000000000000000000000000: "large", [-1]: "negative", [-1n]: "negativeBigint" }}>
+.card { color: var(--foreground); border-color: var(--100); outline-color: var(---1); }
+</style>
+<style define:vars={{ ...vars }}>
+.card { color: var(--maybe); }
+</style>
+<style define:vars={vars}>
+.card { color: var(--unknown); }
+</style>
+<style define:vars>
+.card { color: var(--missing); }
+</style>
+<style define:vars={{ [/x/]: "regex" }}>
+.card { color: var(--regex); }
+</style>
+<style is:raw define:vars={{ ignored: foreground }}>
+.card { color: var(--ignored); }
+</style>
+```
+
+## Semantic model
+
+```text
+block Frontmatter 0..67 content=4..64 scope#1 snippet#0
+block Style 68..354 content=257..346
+  define:vars foreground 90..100
+  define:vars accent 102..108
+  define:vars \x66oo 119..125
+  define:vars 0x64n 153..158
+  define:vars 0x100000000000000000000000000000000 166..201
+  define:vars -1n 231..234
+block Style 355..428 content=388..420 define-vars-open=Spread
+block Style 429..497 content=455..489 define-vars-open=NonLiteral
+block Style 498..559 content=517..551 define-vars-open=ParseError
+block Style 560..640 content=600..632 define-vars-open=Computed
+block Style 641..735 content=693..727
+snippet#0 4..64 Frontmatter(BlockId(0)) offset=4 source=astro-frontmatter scope#1
+snippet#1 88..255 StyleDefineVars(BlockId(1)) offset=88 source=astro-template scope#1
+snippet#2 375..386 StyleDefineVars(BlockId(2)) offset=375 source=astro-template scope#1
+snippet#3 449..453 StyleDefineVars(BlockId(3)) offset=449 source=astro-template scope#1
+snippet#4 580..598 StyleDefineVars(BlockId(5)) offset=580 source=astro-template scope#1
+snippet#5 668..691 Unknown offset=668 source=astro-template
+scope#0 Builtins
+  Builtin Astro 0..0 origin=AstroBuiltin
+scope#1 Module(Some(BlockId(0))) parent=scope#0
+  Local foreground 10..20
+  Local vars 36..40
+ref foreground 90..100 Value Identifier Read -> Local foreground
+ref vars 380..384 Value Identifier Read -> Local vars
+ref vars 449..453 Value Identifier Read -> Local vars
+```

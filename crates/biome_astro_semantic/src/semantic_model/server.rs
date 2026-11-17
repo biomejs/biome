@@ -30,7 +30,9 @@ pub(crate) fn collect_server_semantics(
     for (snippet, id) in snippets.iter().zip(ids) {
         if matches!(
             builder.data.snippets[*id].host,
-            SnippetHost::Expression | SnippetHost::ScriptDefineVars(_)
+            SnippetHost::Expression
+                | SnippetHost::ScriptDefineVars(_)
+                | SnippetHost::StyleDefineVars(_)
         ) {
             let scope = builder.data.snippets[*id].scope.unwrap_or(server_scope);
             collect_free_references(builder, snippet, *id, scope, globals);

@@ -6,6 +6,16 @@ pub(crate) struct ModelBuilder {
     pub(crate) data: SemanticModelData,
 }
 
+pub(crate) struct NewBlock {
+    pub(crate) kind: BlockKind,
+    pub(crate) range: TextRange,
+    pub(crate) content: Option<TextRange>,
+    pub(crate) supported: bool,
+    pub(crate) globally_scoped: bool,
+    pub(crate) external: bool,
+    pub(crate) scope: Option<ScopeId>,
+}
+
 pub(crate) struct NewSymbol {
     pub(crate) name: TokenText,
     pub(crate) semantic_name: Text,
@@ -35,21 +45,18 @@ impl ModelBuilder {
         self.data.scopes[scope].open[namespace.index()].insert(reason);
     }
 
-    pub(crate) fn add_block(
-        &mut self,
-        kind: BlockKind,
-        range: TextRange,
-        content: Option<TextRange>,
-        external: bool,
-        scope: Option<ScopeId>,
-    ) -> BlockId {
+    pub(crate) fn add_block(&mut self, block: NewBlock) -> BlockId {
         self.data.blocks.push(BlockData {
-            kind,
-            range,
-            content,
-            external,
-            scope,
+            kind: block.kind,
+            range: block.range,
+            content: block.content,
+            supported: block.supported,
+            globally_scoped: block.globally_scoped,
+            external: block.external,
+            scope: block.scope,
             snippet: None,
+            define_vars: Vec::new(),
+            define_vars_open: OpenReasons::default(),
         })
     }
 
@@ -72,7 +79,10 @@ impl ModelBuilder {
             SnippetHost::Frontmatter(block) | SnippetHost::Script(block) => {
                 self.data.blocks[block].snippet = Some(id);
             }
-            SnippetHost::ScriptDefineVars(_) | SnippetHost::Expression | SnippetHost::Unknown => {}
+            SnippetHost::ScriptDefineVars(_)
+            | SnippetHost::StyleDefineVars(_)
+            | SnippetHost::Expression
+            | SnippetHost::Unknown => {}
         }
         id
     }
