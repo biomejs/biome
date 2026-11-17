@@ -10,32 +10,26 @@ impl FormatRule<CssRelativeSelectorList> for FormatCssRelativeSelectorList {
         // preserving empty lines from the input source. See the comment in
         // [FormatCssSelectorList] for more information.
         let separator = soft_line_break_or_space();
+        let comments = f.comments().clone();
         let mut joiner = f.join_with(&separator);
 
         for formatted in node.format_separated(",") {
-            let has_leading_comments = formatted
-                .node()?
-                .as_css_relative_selector()
-                .and_then(|relative_selector| {
-                    relative_selector
-                        .selector()
-                        .ok()?
-                        .as_css_compound_selector()
-                        .cloned()
-                })
-                .and_then(|computed_selector| computed_selector.simple_selector())
-                .and_then(|simple_selector| simple_selector.as_css_type_selector().cloned())
-                .and_then(|type_selector| {
-                    type_selector
-                        .ident()
-                        .ok()?
-                        .as_css_identifier()
-                        .and_then(|ident| ident.value_token().ok())
-                })
-                .is_some_and(|value_token| value_token.has_leading_comments());
+            let entry = formatted.node()?.syntax();
+
+            // Only a comment attached to the entry itself is printed inside it. A
+            // comment before the first selector of a rule belongs to the rule, so
+            // the selector keeps its indent when it wraps.
+            let has_leading_comments = comments.has_leading_comments(entry)
+                && entry
+                    .first_token()
+                    .is_some_and(|token| token.has_leading_comments());
 
             if has_leading_comments {
-                // Computed Selector which contains a leading comments should be formatted without indent.
+                // The entry prints its own leading comments, which already set the
+                // indentation of the selector that follows them. Indenting the entry
+                // as well would move the selector away from its comment. The kind of
+                // selector that comes first (`div`, `.a`, `&`, a combinator) doesn't
+                // matter.
                 joiner.entry(&group(&formatted));
             } else {
                 // Each selector gets `indent` added in case it breaks over multiple
