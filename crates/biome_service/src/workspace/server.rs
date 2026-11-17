@@ -1724,6 +1724,7 @@ impl WorkspaceServerWithDb<'_> {
                 skip: &skip,
                 language: state.file_source,
                 categories,
+                rule_execution: Default::default(),
                 workspace_db: state.db.clone(),
                 #[cfg(feature = "html_embeds")]
                 embedded_data,
