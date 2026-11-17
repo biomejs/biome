@@ -1779,10 +1779,8 @@ fn inline_list_source_len(p: &mut MarkdownParser) -> usize {
 /// Returns `true` if the scan should stop (paragraph boundary reached),
 /// `false` if scanning should continue to the next line.
 fn scan_newline_in_inline_list(p: &mut MarkdownParser, has_content: bool) -> bool {
-    // Mirror `handle_inline_newline`: a blank line ends the paragraph, and so
-    // does a quote line holding only its `>` markers. Missing the second
-    // check let the emphasis context span two paragraphs of a blockquote and
-    // pair delimiters across them.
+    // Stop where `handle_inline_newline` ends the paragraph: at a blank line
+    // or at a quote line holding only `>` markers and whitespace.
     let quote_depth = p.state().block_quote_depth;
     if p.is_at_blank_line() || is_quote_blank_line_after_newline(p, quote_depth) {
         p.bump(NEWLINE);
