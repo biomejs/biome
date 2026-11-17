@@ -1750,8 +1750,9 @@ fn test_infer_module_types_merges_inline_object_intersections_on_build() {
     let duplicate_value_member_ty = inferred
         .find_member_type(&db, duplicate_value_ty, "value")
         .expect("merged duplicate member must expose value");
-    assert!(contains_inferred_string(&db, duplicate_value_member_ty));
-    assert!(contains_inferred_number(&db, duplicate_value_member_ty));
+    // A property that both operands declare has the intersection of their
+    // types, `string & number`, as in TypeScript 7.0.2.
+    assert_eq!(duplicate_value_member_ty, InferredTypeData::NeverKeyword);
 
     assert_inferred_type_snapshot(
         "test_infer_module_types_merges_inline_object_intersections_on_build",
