@@ -2,6 +2,7 @@ use crate::bindings::EmbeddedBinding;
 use crate::components::collect_embedded_elements;
 use crate::data::{EmbeddedData, VueDirectiveDeclarations};
 use crate::references::{EmbeddedTypeReference, EmbeddedValueReference};
+use biome_astro_semantic::{AstroSemanticModel, AstroSnippet, astro_model};
 use biome_db::Source;
 use biome_html_syntax::{
     AnyHtmlComponentObjectName, AnyHtmlTagName, AnySvelteBindingAssignmentBinding,
@@ -10,6 +11,7 @@ use biome_html_syntax::{
     AnyVueVForBinding, AnyVueVForBindingListElement, AnyVueVForDestructuredBinding, HtmlElement,
     HtmlRoot, HtmlSelfClosingElement, VueDirective, VueVForIdentifierBinding, VueVForValue,
 };
+use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{
     AnyJsArrayAssignmentPatternElement, AnyJsArrayBindingPatternElement, AnyJsArrayElement,
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsCallArgument, AnyJsDeclarationClause,
@@ -63,10 +65,22 @@ pub fn collect_embedded_data<'a>(
     host_parse: &AnyParse,
     snippets: Vec<EmbeddedSnippet<'a>>,
 ) -> EmbeddedData {
+    if matches!(host_source, DocumentFileSource::Html(html) if html.is_astro()) {
+        return EmbeddedData::new(
+            collect_astro_model(host_source, host_parse, &snippets),
+            Vec::new(),
+            Vec::new(),
+            Vec::new(),
+            VueDirectiveDeclarations::default(),
+            collect_embedded_elements(host_source, host_parse),
+        );
+    }
+
     let collected_bindings = collect_embedded_bindings(host_source, host_parse, &snippets);
     let references = collect_embedded_references(host_source, host_parse, &snippets);
 
     EmbeddedData::new(
+        None,
         collected_bindings.bindings,
         references
             .as_ref()
@@ -77,6 +91,51 @@ pub fn collect_embedded_data<'a>(
         collected_bindings.vue_directive_declarations,
         collect_embedded_elements(host_source, host_parse),
     )
+}
+
+fn collect_astro_model(
+    host_source: DocumentFileSource,
+    host_parse: &AnyParse,
+    snippets: &[EmbeddedSnippet<'_>],
+) -> Option<AstroSemanticModel> {
+    let DocumentFileSource::Html(html) = host_source else {
+        return None;
+    };
+    if !html.is_astro() {
+        return None;
+    }
+
+    let host: HtmlRoot = host_parse.tree();
+    let parsed: Vec<_> = snippets
+        .iter()
+        .filter_map(|snippet| {
+            let source = snippet.file_source.to_js_file_source()?;
+            let root: AnyJsRoot = snippet.parse.tree();
+            let js = semantic_model(&root, SemanticModelOptions::from(&source));
+            Some((
+                root,
+                js,
+                source,
+                snippet.content_range,
+                snippet.parse.has_errors(),
+            ))
+        })
+        .collect();
+    let snippets: Vec<_> = parsed
+        .iter()
+        .map(
+            |(root, js, source, content_range, has_errors)| AstroSnippet {
+                root,
+                js,
+                source: *source,
+                content_range: *content_range,
+                content_offset: content_range.start(),
+                has_errors: *has_errors,
+            },
+        )
+        .collect();
+
+    Some(astro_model(&host, &snippets))
 }
 
 #[derive(Debug, Default, Clone, Copy)]
