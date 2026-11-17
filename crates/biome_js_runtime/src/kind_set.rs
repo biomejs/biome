@@ -448,16 +448,8 @@ impl KindSetLanguage for JsLanguage {
 
     /// Adds the source-only kinds that `factory.token()` cannot construct.
     fn token_kind_from_name(name: &str) -> Option<JsSyntaxKind> {
-        JsAstNode::token_kind_from_name(name).or(match name {
-            "ERROR_TOKEN" => Some(JsSyntaxKind::ERROR_TOKEN),
-            "NEWLINE" => Some(JsSyntaxKind::NEWLINE),
-            "WHITESPACE" => Some(JsSyntaxKind::WHITESPACE),
-            "COMMENT" => Some(JsSyntaxKind::COMMENT),
-            "MULTILINE_COMMENT" => Some(JsSyntaxKind::MULTILINE_COMMENT),
-            "EOF" => Some(JsSyntaxKind::EOF),
-            "UNICODE_BOM" => Some(JsSyntaxKind::UNICODE_BOM),
-            _ => None,
-        })
+        JsAstNode::token_kind_from_name(name)
+            .or_else(|| JsAstNode::source_only_token_kind_from_name(name))
     }
 
     fn node_kind(object: &JsObject) -> Option<JsSyntaxKind> {

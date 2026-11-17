@@ -10,6 +10,12 @@ static ASTRO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "useAstroClientOnlyDirectiveValue"),
     ]
 });
+static BIOMEPLUGIN_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
+    vec![
+        RuleFilter::Rule("nursery", "useBiomeKindSets"),
+        RuleFilter::Rule("nursery", "useBiomeTopLevelTypes"),
+    ]
+});
 static DRIZZLE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noDrizzleDbObjectInsideTransaction"),
@@ -384,6 +390,7 @@ impl DomainSelector {
     pub fn as_rule_filters(&self) -> Vec<RuleFilter<'static>> {
         match self.0 {
             "astro" => ASTRO_FILTERS.clone(),
+            "biomePlugin" => BIOMEPLUGIN_FILTERS.clone(),
             "drizzle" => DRIZZLE_FILTERS.clone(),
             "next" => NEXT_FILTERS.clone(),
             "playwright" => PLAYWRIGHT_FILTERS.clone(),
@@ -411,6 +418,9 @@ impl DomainSelector {
     pub(crate) fn match_rule_name(&self, group_name: &str, rule_name: &str) -> bool {
         match self.0 {
             "astro" => ASTRO_FILTERS
+                .iter()
+                .any(|filter| filter.match_rule_name(group_name, rule_name)),
+            "biomePlugin" => BIOMEPLUGIN_FILTERS
                 .iter()
                 .any(|filter| filter.match_rule_name(group_name, rule_name)),
             "drizzle" => DRIZZLE_FILTERS

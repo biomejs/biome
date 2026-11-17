@@ -1,0 +1,50 @@
+/* should not generate diagnostics */
+import { nodeKinds } from "@biomejs/runtime/plugin";
+
+const CALLS = nodeKinds("JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION");
+CALLS.has(node);
+
+node.kind === "JS_CALL_EXPRESSION";
+node.kind === "JS_CALL_EXPRESSION" || node.kind === "JS_CALL_EXPRESSION";
+language.kind === "javascript" || language.kind === "typescript";
+fix.kind === "safe" || fix.kind === "JS_CALL_EXPRESSION";
+element.kind === "JS_CALL_EXPRESSION" || element.kind === "IDENT";
+left.kind === "JS_CALL_EXPRESSION" || right.kind === "JS_NEW_EXPRESSION";
+node.kind === "JS_CALL_EXPRESSION" && node.kind === "JS_NEW_EXPRESSION";
+node.kind !== "JS_CALL_EXPRESSION" || node.kind !== "JS_NEW_EXPRESSION";
+node.kind === "JS_CALL_EXPRESSION" ?? node.kind === "JS_NEW_EXPRESSION";
+node["kind"] === "JS_CALL_EXPRESSION" || node["kind"] === "JS_NEW_EXPRESSION";
+getNode().kind === "JS_CALL_EXPRESSION" || getNode().kind === "JS_NEW_EXPRESSION";
+node.type === "JS_CALL_EXPRESSION" || node.type === "JS_NEW_EXPRESSION";
+
+const { kind } = node;
+kind === "JS_CALL_EXPRESSION" || kind === "JS_NEW_EXPRESSION";
+
+["JS_CALL_EXPRESSION"].includes(node.kind);
+["JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION", other].includes(node.kind);
+["JS_CALL_EXPRESSION", ...MORE_KINDS].includes(node.kind);
+["JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION"].includes(node.kind, 1);
+["JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION"].includes(node.type);
+["javascript", "typescript"].includes(language.kind);
+new Set(["JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION"]).includes(node.kind);
+
+let MUTABLE_KINDS = ["JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION"];
+MUTABLE_KINDS.includes(node.kind);
+const [FIRST_KINDS] = [["JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION"]];
+FIRST_KINDS.includes(node.kind);
+function check(kinds) {
+	return kinds.includes(node.kind);
+}
+{
+	const Set = CustomSet;
+	new Set(["JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION"]).has(node.kind);
+}
+
+let MUTABLE_CALL = "JS_CALL_EXPRESSION";
+node.kind === MUTABLE_CALL || node.kind === "JS_NEW_EXPRESSION";
+const LANGUAGE = "typescript";
+node.kind === LANGUAGE || node.kind === "JS_NEW_EXPRESSION";
+Kinds.CALL === node.kind || Kinds.NEW === node.kind;
+function checkName(name) {
+	return node.kind === name || node.kind === "JS_NEW_EXPRESSION";
+}

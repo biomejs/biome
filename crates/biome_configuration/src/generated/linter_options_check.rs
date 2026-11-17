@@ -2534,6 +2534,16 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useBiomeKindSets",
+        TypeId::of::<biome_rule_options::use_biome_kind_sets::UseBiomeKindSetsOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "useBiomeTopLevelTypes",
+        TypeId::of::<biome_rule_options::use_biome_top_level_types::UseBiomeTopLevelTypesOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useBlockStatementOverIife",
         TypeId::of::<
             biome_rule_options::use_block_statement_over_iife::UseBlockStatementOverIifeOptions,

@@ -1019,6 +1019,20 @@ impl JsAstNode {
             _ => return None,
         })
     }
+    /// Resolves a token kind that only appears in parsed source, which
+    /// `factory.token()` can't construct, by its exact native enum name.
+    pub(crate) fn source_only_token_kind_from_name(name: &str) -> Option<JsSyntaxKind> {
+        Some(match name {
+            "ERROR_TOKEN" => JsSyntaxKind::ERROR_TOKEN,
+            "NEWLINE" => JsSyntaxKind::NEWLINE,
+            "WHITESPACE" => JsSyntaxKind::WHITESPACE,
+            "COMMENT" => JsSyntaxKind::COMMENT,
+            "MULTILINE_COMMENT" => JsSyntaxKind::MULTILINE_COMMENT,
+            "EOF" => JsSyntaxKind::EOF,
+            "UNICODE_BOM" => JsSyntaxKind::UNICODE_BOM,
+            _ => return None,
+        })
+    }
     /// Resolves a syntax kind from the name used in the plugin API type definitions,
     /// e.g. `"JS_CALL_EXPRESSION"`.
     pub(crate) fn syntax_kind_from_ast_name(name: &str) -> Option<JsSyntaxKind> {
