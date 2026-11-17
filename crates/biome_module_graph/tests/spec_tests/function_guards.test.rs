@@ -1156,7 +1156,6 @@ fn object_targets_keep_the_declared_type_where_biome_cannot_tell() {
         function g10(x: Error | string) { if (isTypeError(x)) /*g10*/x; else /*g10Else*/x; }
         function g27(x: { a: number } | string) { if (isA(x)) /*g27*/x; else /*g27Else*/x; }
         function w1(x: { a: 1 } | string) { if (isA(x)) /*w1*/x; else /*w1Else*/x; }
-        function w2(x: A2 | string) { if (isA1(x)) /*w2*/x; else /*w2Else*/x; }
         "#,
         &[
             // `(string | number) & Foo`
@@ -1202,8 +1201,30 @@ fn object_targets_keep_the_declared_type_where_biome_cannot_tell() {
             ("w1", "x", &[r#"["a": number: 1]"#, "string"]),
             // `string`
             ("w1Else", "x", &[r#"["a": number: 1]"#, "string"]),
-            // `(string | A2) & { a: 1 }`
-            ("w2", "x", &["instanceof A2", "string"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `(string | A2) & { a: 1 }` in the
+// `then` branch and `string | A2` in the `else` branch. No member of the type
+// relates to the target, and neither is assignable to the other, so the
+// `then` branch is their intersection, which normalization distributes and
+// merges into an instance of an anonymous class and `string & { a: 1 }`.
+#[test]
+fn object_targets_intersect_types_whose_members_relate_to_none() {
+    assert_reads(
+        r#"
+        function w2(x: A2 | string) { if (isA1(x)) /*w2*/x; else /*w2Else*/x; }
+        "#,
+        &[
+            (
+                "w2",
+                "x",
+                &[
+                    "instanceof class { extends: none implements: [] type_args: [] }",
+                    r#"string & Object { prototype: No prototype members: ["a": number: 1] }"#,
+                ],
+            ),
             ("w2Else", "x", &["instanceof A2", "string"]),
         ],
     );

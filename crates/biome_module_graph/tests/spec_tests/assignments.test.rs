@@ -253,6 +253,32 @@ fn assignments_that_biome_reduces_less_than_typescript() {
     );
 }
 
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment gives TypeScript's type. An assignment compares the
+// value with the declared members by assignability, which can't tell whether
+// a value relates to a type parameter, because a call may still replace the
+// type parameter, so Biome keeps a member that it can't compare.
+#[test]
+fn assignments_keep_type_parameters_that_biome_cant_compare() {
+    assert_reads(
+        r#"
+        function a1<T>(t: T, s: string) { let x: T | string = s; x = t; /*assignedT*/x; }
+        function a2<T>(t: T) { let x: T | null = null; x = t; /*assignedNull*/x; }
+        function a3<T>(t: T, n: number) { let x: T | string | number = t; x = n; /*assignedNumber*/x; }
+        function a4<T>(t: T) { let x: string | number = 1; x = "a"; /*concrete*/x; }
+        "#,
+        &[
+            // TypeScript: `T`.
+            ("assignedT", "x", &["instanceof T", "string"]),
+            // TypeScript: `T`.
+            ("assignedNull", "x", &["instanceof T", "null"]),
+            // TypeScript: `number`.
+            ("assignedNumber", "x", &["instanceof T", "number"]),
+            ("concrete", "x", &["string"]),
+        ],
+    );
+}
+
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 // A call to a local function without a return annotation reduces by the
 // return type that Biome infers from the function's body, which has the

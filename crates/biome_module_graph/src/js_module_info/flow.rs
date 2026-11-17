@@ -248,7 +248,7 @@ impl FlowSubjectTable {
     /// the `this` of another function. The initializer of an aliased
     /// condition that an enclosing function declares can contain such a
     /// `this`.
-    fn this(&mut self, expression: &JsThisExpression) -> Option<FlowSubjectId> {
+    pub(super) fn this(&mut self, expression: &JsThisExpression) -> Option<FlowSubjectId> {
         let root = self.this_root.as_ref()?;
         for node in expression.syntax().ancestors() {
             if node == *root {
@@ -608,20 +608,20 @@ pub(crate) struct RootFlow {
     /// The subjects with reads that conditions narrow only through tests of
     /// their shape: [`FlowGuard::Property`], such as `s` when the only
     /// condition that mentions it is `s.kind === "c"`, `in`, which
-    /// [`FlowTest::In`] applies to `x` in `"a" in x`, `instanceof`, which
-    /// [`FlowTest::Instanceof`] applies to `x` in `x instanceof Date`, and
-    /// calls to type-guard functions whose targets have only object types, as
-    /// `isFoo(x)` with `x is Foo`. A test of a property or `in` narrows only a
-    /// union with two object types, and the others only a type with an object
-    /// type or `unknown`, so these subjects need no solve when their declared
-    /// type is not one. Every [`FlowSubject::Pattern`] with reads is one. A
-    /// call point doesn't count as a test here, because inference starts a
-    /// read from the whole declared type when one of the subject's call
-    /// points narrows.
+    /// [`FlowTest::In`] applies to `x` in `"a" in x` and
+    /// [`FlowTest::PrivateName`] in `#p in x`, `instanceof`, which
+    /// [`FlowTest::Instanceof`] applies to `x` in `x instanceof Date`, a
+    /// comparison of `x.constructor`, and calls to type-guard functions whose
+    /// targets have only object types, as `isFoo(x)` with `x is Foo`. A test
+    /// of a property narrows only a union with two object types, and the
+    /// others only a type with an object type or `unknown`, so these subjects
+    /// need no solve when their declared type is not one. Every
+    /// [`FlowSubject::Pattern`] with reads is one. A call point doesn't count
+    /// as a test here, because inference starts a read from the whole
+    /// declared type when one of the subject's call points narrows.
     pub(crate) property_only: FxHashSet<FlowSubjectId>,
-    /// The subjects in [`Self::property_only`] that `instanceof` or a
-    /// type-guard function whose target has only object types narrows. Their
-    /// declared type need not be a union.
+    /// The subjects in [`Self::property_only`] that a test other than one of
+    /// a property narrows. Their declared type need not be a union.
     pub(crate) instance_tested: FxHashSet<FlowSubjectId>,
     /// The [`FlowSubject::Pattern`] of each element whose reads a test of the
     /// pattern can reach, keyed by the element's subject. Each such read is
@@ -3115,6 +3115,8 @@ fn readonly_tested_subjects(
                 subject,
                 test:
                     FlowTest::Instanceof(_)
+                    | FlowTest::PrivateName { .. }
+                    | FlowTest::Constructor(_)
                     | FlowTest::Predicate { .. }
                     | FlowTest::Typeof(
                         TypeofKind::BigInt
@@ -3983,10 +3985,11 @@ mod tests {
     #[test]
     fn subjects_of_in_are_property_only_subjects() {
         const SOURCE: &str = r#"
-            function f(x: { a: 1 } | { b: 2 }, y: { a: 1 } | { b: 2 } | null, z: string | { a: 1 }) {
+            function f(x: { a: 1 } | { b: 2 }, y: { a: 1 } | { b: 2 } | null, z: string | { a: 1 }, w: string | null) {
                 if ("a" in x) { /*x*/x; }
                 if (y && "a" in y) { /*y*/y; }
                 if ("a" in z) { /*z*/z; }
+                if ("a" in w) { /*w*/w; }
             }
         "#;
         let info = module(SOURCE);
@@ -4003,9 +4006,14 @@ mod tests {
         );
         let read = info.flow.read(marked(SOURCE, "y", "y")).unwrap();
         assert!(!root.is_property_only(read.subject));
-        // The annotation of `z` shows that it has one object type, so its read
-        // is dropped without resolving anything.
-        assert!(!info.flow.is_candidate(marked(SOURCE, "z", "z")));
+        // `in` can narrow a single object type to its intersection with the
+        // property, so `z` stays, while the annotation of `w` shows that it
+        // has no object type, so its read is dropped without resolving
+        // anything.
+        let read = info.flow.read(marked(SOURCE, "z", "z")).unwrap();
+        assert!(root.is_instance_tested(read.subject));
+        assert!(info.flow.is_candidate(marked(SOURCE, "z", "z")));
+        assert!(!info.flow.is_candidate(marked(SOURCE, "w", "w")));
     }
 
     #[test]

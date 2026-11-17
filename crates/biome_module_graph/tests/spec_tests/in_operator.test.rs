@@ -285,15 +285,57 @@ fn in_keeps_the_members_that_may_have_the_property() {
     );
 }
 
+// TypeScript 7.0.2 (`tsc --strict`) gives each read the type in its comment.
+// When every member lacks the property, the true branch is the intersection
+// with `Record<"a", unknown>`, which Biome writes as an object type with the
+// property `a: unknown`, and normalization merges into the object types of
+// the members. The `else` branch keeps the type.
+#[test]
+fn in_intersects_the_type_when_no_member_has_the_property() {
+    assert_reads(
+        r##"
+        function object(x: object) { if ("a" in x) /*object*/x; else /*objectElse*/x; } // object & Record<"a", unknown>; object
+        function undeclared(x: A | B) { if ("c" in x) /*undeclared*/x; else /*undeclaredElse*/x; } // (A | B) & Record<"c", unknown>; A | B
+        function numberDictName(x: NumberDict | B) { if ("a" in x) /*numberDictName*/x; } // (B | NumberDict) & Record<"a", unknown>
+        function single(x: B) { if ("a" in x) /*single*/x; } // B & Record<"a", unknown>
+        function prototypeMember(x: object) { if ("toString" in x) /*prototypeMember*/x; } // object
+        "##,
+        &[
+            (
+                "object",
+                "x",
+                &[r#"object & Object { prototype: No prototype members: ["a": unknown] }"#],
+            ),
+            ("objectElse", "x", &["object"]),
+            (
+                "undeclared",
+                "x",
+                &[
+                    r#"["a": number: 1, "c": unknown]"#,
+                    r#"["b": number: 2, "c": unknown]"#,
+                ],
+            ),
+            ("undeclaredElse", "x", &["A", "B"]),
+            (
+                "numberDictName",
+                "x",
+                &[
+                    r#"["b": number: 2, "a": unknown]"#,
+                    r#"[[number]: number: 1, "a": unknown]"#,
+                ],
+            ),
+            ("single", "x", &[r#"["b": number: 2, "a": unknown]"#]),
+            ("prototypeMember", "x", &["object"]),
+        ],
+    );
+}
+
 // Biome keeps the declared type of every read below. A comment gives the type
 // that TypeScript 7.0.2 (`tsc --strict`) gives where it differs.
 #[test]
 fn in_keeps_the_declared_type_where_biome_cannot_tell() {
     assert_reads(
         r##"
-        function object(x: object) { if ("a" in x) /*object*/x; }
-        function undeclared(x: A | B) { if ("c" in x) /*undeclared*/x; }
-        function numberDictName(x: NumberDict | B) { if ("a" in x) /*numberDictName*/x; }
         function constKey(x: A | B) { const k = "a"; if (k in x) /*constKey*/x; }
         function template(x: A | B) { if (`a` in x) /*template*/x; }
         function escapedKey(x: A | B) { if ("\u0061" in x) /*escapedKey*/x; }
@@ -309,12 +351,6 @@ fn in_keeps_the_declared_type_where_biome_cannot_tell() {
         function discriminant(s: { k: A | B; t: 1 } | { k: B; t: 2 }) { if ("a" in s.k) /*discriminant*/s; }
         "##,
         &[
-            // `object & Record<"a", unknown>`
-            ("object", "x", &["object"]),
-            // `(A | B) & Record<"c", unknown>`
-            ("undeclared", "x", &["A", "B"]),
-            // `(B | NumberDict) & Record<"a", unknown>`
-            ("numberDictName", "x", &["B", "NumberDict"]),
             // `A`
             ("constKey", "x", &["A", "B"]),
             // `A`

@@ -131,9 +131,10 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   them.
 - `builder.rs` builds the graph of one selected root from start, join,
   condition, and write nodes. It records the incoming flow point of every
-  reachable read of a subject and, for each condition node, the subjects its
-  guard may narrow. A read of a property path is recorded after its object
-  and key are evaluated. Expressions are evaluated in the order in which
+  reachable read of a subject, `this` included, and, for each condition
+  node, the subjects its guard may narrow. A read of a property path is
+  recorded after its object and key are evaluated. Expressions are evaluated
+  in the order in which
   JavaScript runs them, with the conditions that TypeScript's binder adds:
   the key and the arguments after a `?.` start from a condition that its
   object is not nullish, as `bindOptionalChain` does, and the right operand
@@ -399,9 +400,16 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   A test `"a" in x` becomes a runtime test of `x` whose key is the string or
   decimal integer literal, spelled as a property path requires, so `"a"` and
   `0` are keys while `` `a` ``, `0x0`, and a `const` are not. The decomposed
-  condition lists `x` with the objects of property guards, because `in` too
-  narrows only a union with two object types. It adds no property guard:
-  TypeScript narrows no object through `"a" in s.k`.
+  condition lists `x` with the objects of property guards and among the
+  subjects that `instanceof` tests, because `in` narrows only a type with an
+  object type, `unknown`, or a type parameter: a union by the members that
+  declare the property, and any such type to its intersection with the
+  property when no member has it. It adds no property guard: TypeScript
+  narrows no object through `"a" in s.k`. A test `#p in x` with a private
+  name becomes a runtime test of `x` that holds the range at which inference
+  finds the type of the innermost class around the test that declares `#p`
+  (`FlowTest::PrivateName`): the name that a class declaration binds, or a
+  class expression. It is listed as an `instanceof` test is.
   A case of a `switch` becomes the condition that `discriminant === test`
   holds (`decompose_switch_case`), so a case on `s.kind` adds the property
   guard on `s`, and a case on a `const` that holds a property or on an
@@ -440,7 +448,11 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   not be a union, unless the annotation of `x` is `any`. It adds no property
   guard either. In the true branch, the receivers
   of an optional chain narrow too, as in `o?.v instanceof C`, because an
-  instance is never nullish.
+  instance is never nullish. A comparison of `x.constructor` with a dotted
+  name `C`, with `===` or `==` and in either order, becomes the same kind of
+  test (`FlowTest::Constructor`) in the branch where the two are equal, also
+  testing the receivers of an optional chain there, and narrows nothing in
+  the other branch, as in TypeScript.
   A truthiness test of an aliased condition, a `const` that is not exported,
   has no type annotation, and binds a name to an initializer, as `ok` in
   `const ok = x !== null; if (ok)`, also decomposes that initializer and
@@ -464,7 +476,8 @@ a path on its own `this`. Its parts live in `src/js_module_info/flow/`:
   A variable whose annotation is `any`, as the raw tables show without
   resolving anything (`AnyRoot`), narrows only by the tests that narrow
   `any` in TypeScript (`FlowTest::narrows_any`): `typeof` with a primitive
-  kind or `"undefined"`, `instanceof`, and type-guard functions. The
+  kind or `"undefined"`, `instanceof`, `in` with a private name, a
+  comparison of `constructor`, and type-guard functions. The
   decomposer keeps the guards of its other tests, which leave `any` as it
   is, because an earlier test can narrow the variable to a type that they
   narrow further, as in `if (typeof x === "string") { if (x === "a") x }`,
@@ -638,7 +651,8 @@ its root's subject table, so a test and a read of the same subject match. For
 a candidate read of a variable, `infer_flow_binding_baseline` resolves the
 variable's declared type once, for every root that reads it. For an import,
 that is the type of what it imports, which the tracked queries of the
-import's resolution give. For a read of a property path, the declared
+import's resolution give. A read of `this` starts from the type of the
+`this` expression. For a read of a property path, the declared
 type is the type of the member access at that read, computed from the
 narrowed type of its object when the object has one, as TypeScript types
 property reads. Facts about the variable therefore reach its
@@ -800,12 +814,18 @@ the call narrow only where it is truthy (`narrows_falsy` on
 `FlowCallEffect::Predicate`). The arguments have their types at the call:
 a subject argument its flow-sensitive type, read with `calls_before` set on
 the context (`argument_type_at_call`), so that only the call points that end
-before the call apply. Such a read never depends on the effect that it
-helps decide, so selection has no cycle, and the context evaluates it
-without the flow queries and caches, whose results apply every call point.
-`FlowGuard::Call` then narrows the argument or the object
-that the signature names with `narrow_by_type_predicate`, or applies the
-argument's decomposed condition for `asserts value`. Lookups share each
+before the call apply. So does the subject that the callee is read from
+(`FlowCallReceiver`, read by `receiver_at_call`), whose type arguments a
+constraint such as `S extends T` refers to. Such a read never depends on the
+effect that it helps decide, so selection has no cycle, and the context
+evaluates it without the flow queries and caches, whose results apply every
+call point.
+A target that is an instance of a generic alias whose body is an
+intersection, as `NonNullable<T>`, takes the call's type arguments
+(`instantiate_intersection_alias`), so it gives `string` for an argument of
+type `string | null`. `FlowGuard::Call` then narrows the argument or the
+object that the signature names with `narrow_by_type_predicate`, or applies
+the argument's decomposed condition for `asserts value`. Lookups share each
 effect through `infer_flow_call_effect`, keyed by the range of the call;
 complete module inference resolves it in its own context and keeps it per
 call. When a call point narrows a subject whose reads elsewhere narrow only
@@ -844,7 +864,9 @@ expression query does, from the declared type its own context resolved.
 types do: `ResolutionCtx::narrowing_resolver` resolves handles in the context
 that solves the read. Narrowing calls it only to compare an object type with
 primitives and functions in a falsy or `typeof` test, for example to find that
-no falsy primitive has the members of `interface Foo { a: number }`. Tests of
+no falsy primitive has the members of `interface Foo { a: number }`, and to
+read the constraint of a type parameter, which narrows to its intersection
+with the type of the values that pass, as `T & {}` for truthiness. Tests of
 primitive types never call it. The comparison itself, including the member
 lookups on wrapper types such as `String`, lives in `biome_js_type_info`.
 A property guard applies `narrow_by_property`, which looks up the property in
@@ -855,25 +877,40 @@ applies `narrow_by_in_operator`, following TypeScript's
 `narrowTypeByInKeyword`: `property_presence` in `type_relation.rs` looks up the
 property in each member and treats object types as closed, but reports that
 it can't tell for a type whose member list Biome may not know completely,
-such as a class or a built-in type. The solve resolves the key from
-`raw_expressions` only when the subject's declared type is a union with two
-object types. An `instanceof` test applies `narrow_by_instanceof`, following
+such as a class or a built-in type. When every member lacks the property,
+the true branch is the intersection with an object type that has the
+property with the type `unknown`. The solve resolves the key from
+`raw_expressions` only when the subject's declared type has an object type
+or is `unknown` or `any`. An `instanceof` test applies `narrow_by_instanceof`, following
 TypeScript's `narrowTypeByInstanceof`: `instance_types` in `type_relation.rs`
 finds the instance types of the constructor, and `is_derived_from` compares
 the members of the narrowed type with them by following `extends` clauses to
 the same declaration. The solve resolves the constructor from
 `raw_expressions` only when `may_narrow_by_instanceof` accepts the subject's
+declared type. A `#p in x` test applies `narrow_by_private_name` to the
+class that it holds, resolved from `raw_binding_types` or `raw_expressions`
+at its range, and a comparison of `x.constructor` applies
+`narrow_by_constructor` to the constructor, both under the same check of the
 declared type. A call to a type-guard function applies
 `narrow_by_type_predicate`, following TypeScript's `getNarrowedType`: a
 primitive target, such as `string` or `"ready"`, stands for a `typeof` or
 equality test, and other targets compare the members of the narrowed type
 with those of the target in TypeScript's subtype relation (`is_subtype` in
-`type_relation.rs`). The solve resolves the target from the guard's
+`type_relation.rs`), where a type parameter of the narrowed code relates to
+another type only through its constraint. When no member relates to a
+member of the target, a type parameter gives its intersection with it, and
+when no member remains at all, the result is the target, the type, or their
+intersection, chosen by the subtype relation and by assignability with the
+same rule for type parameters (`is_assignable_in_generic_body`).
+`instanceof` and `#p in x` choose the same way. Narrowing builds every
+intersection with `intersect_narrowed`, which never merges object operands
+into one type, so a later `instanceof` or type predicate still compares each
+operand by its declaration. The solve resolves the target from the guard's
 collected signature, and, for a target with only object types, only when
 `may_narrow_by_instanceof` accepts the subject's declared type. It memoizes
-the result of each property guard, `in` test, `instanceof` test, and call to
-a type-guard function by guard and incoming type, because a loop applies the
-same guard again.
+the result of each property guard, `in` test, `instanceof` test, comparison
+of `constructor`, and call to a type-guard function by guard and incoming
+type, because a loop applies the same guard again.
 
 #### Caching
 

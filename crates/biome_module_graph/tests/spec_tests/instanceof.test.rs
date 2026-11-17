@@ -416,7 +416,6 @@ fn instanceof_keeps_the_declared_type_where_biome_cannot_tell() {
         function hasInstance(x: string | B) { if (x instanceof Checker) /*hasInstance*/x; else /*hasInstanceElse*/x; }
         function inherited(x: string | B) { if (x instanceof SubChecker) /*inherited*/x; }
         function booleanHasInstance(x: B | C) { if (x instanceof BoolChecker) /*booleanHasInstance*/x; }
-        function generic<T extends A>(x: T | C) { if (x instanceof B) /*typeParameter*/x; else /*typeParameterElse*/x; }
         "#,
         &[
             // `(string | number) & A`
@@ -448,9 +447,6 @@ fn instanceof_keeps_the_declared_type_where_biome_cannot_tell() {
             // `string`
             ("inherited", "x", &["instanceof B", "string"]),
             ("booleanHasInstance", "x", &["instanceof B", "instanceof C"]),
-            // `T & B`
-            ("typeParameter", "x", &["instanceof C", "instanceof T"]),
-            ("typeParameterElse", "x", &["instanceof C", "instanceof T"]),
         ],
     );
 }
@@ -597,6 +593,141 @@ fn instanceof_follows_the_extends_clauses_of_every_merged_declaration() {
             ("bothBasesElse", "x", &["unknown"]),
             ("baseAndClass", "x", &["instanceof B", "instanceof N"]),
             ("baseAndClassElse", "x", &["unknown"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives each read the type in the comment
+// of its line, in order. A type parameter is derived from what its constraint
+// is derived from, and an instance type that no member relates to gives its
+// intersection with each type parameter whose constraint it is derived from.
+#[test]
+fn instanceof_intersects_type_parameters() {
+    assert_reads(
+        r#"
+        function generic<T extends A>(x: T | C) { if (x instanceof B) /*typeParameter*/x; else /*typeParameterElse*/x; } // T & B; T | C
+        function derived<T extends B>(x: T | C) { if (x instanceof A) /*derived*/x; else /*derivedElse*/x; } // T; C
+        function unconstrained<T>(x: T | C) { if (x instanceof A) /*unconstrained*/x; } // T & A
+        "#,
+        &[
+            ("typeParameter", "x", &["instanceof T & instanceof B"]),
+            ("typeParameterElse", "x", &["instanceof C", "instanceof T"]),
+            ("derived", "x", &["instanceof T"]),
+            ("derivedElse", "x", &["instanceof C"]),
+            ("unconstrained", "x", &["instanceof T & instanceof A"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives each read the type in the comment
+// of its line, in order. `#p in x` narrows `x` as `x instanceof P` would,
+// where `P` declares `#p`, and a static name narrows `x` to the class
+// itself. Normalization merges an instance of `P` with an object type or an
+// instance of another class into an instance of an anonymous class, which
+// has the same values as TypeScript's intersection.
+#[test]
+fn private_names_narrow_to_the_class_that_declares_them() {
+    assert_reads(
+        r#"
+        class P {
+            #p = 1;
+            static #s = 2;
+            m1(x: P | Date) { if (#p in x) /*m1*/x; else /*m1Else*/x; } // P; Date
+            m2(x: unknown) { if (typeof x === "object" && x !== null && #p in x) /*m2*/x; } // P
+            m3(x: object) { if (#p in x) /*m3*/x; } // P
+            m4(x: Q | Date) { if (#p in x) /*m4*/x; else /*m4Else*/x; } // Q; Date
+            m6(x: typeof P | Date) { if (#s in x) /*m6*/x; } // typeof P
+        }
+        class Q extends P { q = 1 }
+        class R {
+            #r = 1;
+            m5(x: { a: 1 } | Date) { if (#r in x) /*m5*/x; else /*m5Else*/x; } // (Date | { a: 1 }) & R; Date | { a: 1 }
+            m6(x: { a: 1 }) { if (#r in x) /*m6R*/x; } // { a: 1 } & R
+            m7(x: { a: 1 } | string) { if (#r in x) /*m7*/x; } // (string | { a: 1 }) & R, with error TS2322
+        }
+        "#,
+        &[
+            ("m1", "x", &["instanceof P"]),
+            ("m1Else", "x", &["instanceof Date"]),
+            ("m2", "x", &["instanceof P"]),
+            ("m3", "x", &["instanceof P"]),
+            ("m4", "x", &["instanceof Q"]),
+            ("m4Else", "x", &["instanceof Date"]),
+            (
+                "m6",
+                "x",
+                &[r#"class "P" { extends: none implements: [] type_args: [] }"#],
+            ),
+            (
+                "m5",
+                "x",
+                &[
+                    "instanceof class { extends: none implements: [] type_args: [] }",
+                    "instanceof class { extends: none implements: [] type_args: [] }",
+                ],
+            ),
+            ("m5Else", "x", &[r#"["a": number: 1]"#, "instanceof Date"]),
+            (
+                "m6R",
+                "x",
+                &["instanceof class { extends: none implements: [] type_args: [] }"],
+            ),
+            (
+                "m7",
+                "x",
+                &[
+                    "instanceof class { extends: none implements: [] type_args: [] }",
+                    "string & instanceof R",
+                ],
+            ),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives each read the type in the comment
+// of its line, in order. `x.constructor === C` keeps the members that `C` may
+// have constructed: an instance of the class `C` itself, but not of a class
+// derived from it, or another member when it is assignable to the type of
+// `C.prototype`. Only the branch where the comparison holds narrows.
+#[test]
+fn constructor_comparisons_narrow_where_they_hold() {
+    assert_reads(
+        r#"
+        class K1 { k1 = 1 }
+        class K2 { k2 = 2 }
+        class K3 extends K1 { k3 = 3 }
+        function k1(x: K1 | K2) { if (x.constructor === K1) /*k1*/x; else /*k1Else*/x; } // K1; K1 | K2
+        function k2(x: K1 | K2 | K3) { if (x.constructor === K1) /*k2*/x; } // K1
+        function k3(x: K1 | string) { if (x.constructor === String) /*k3*/x; } // string
+        function k4(x: K1 | K2) { if (K1 === x.constructor) /*k4*/x; } // K1
+        function k5(x: K1 | K2) { if (x.constructor == K1) /*k5*/x; } // K1
+        function k6(x: K1 | K2) { if (x.constructor !== K1) /*k6*/x; else /*k6Else*/x; } // K1 | K2; K1
+        function k7(x: unknown) { if (x && (x as object).constructor === K1) /*k7*/x; } // {}
+        function k8(x: K1 | K2 | null) { if (x?.constructor === K1) /*k8*/x; } // K1
+        function k9(x: Date | string) { if (x.constructor === Date) /*k9*/x; } // Date
+        function k10(o: { v: K1 | K2 }) { if (o.v.constructor === K1) /*k10*/o.v; } // K1
+        function k11(x: K1 | number) { if (x.constructor === Number) /*k11*/x; } // number
+        function k12(x: Map<string, number> | Set<string>) { if (x.constructor === Map) /*k12*/x; } // Map<string, number>
+        function k13(x: any) { if (x.constructor === K1) /*k13*/x; } // K1
+        function k14(x: K1 | { k1: number }) { if (x.constructor === K1) /*k14*/x; } // K1
+        "#,
+        &[
+            ("k1", "x", &["instanceof K1"]),
+            ("k1Else", "x", &["instanceof K1", "instanceof K2"]),
+            ("k2", "x", &["instanceof K1"]),
+            ("k3", "x", &["string"]),
+            ("k4", "x", &["instanceof K1"]),
+            ("k5", "x", &["instanceof K1"]),
+            ("k6", "x", &["instanceof K1", "instanceof K2"]),
+            ("k6Else", "x", &["instanceof K1"]),
+            ("k7", "x", &["[]"]),
+            ("k8", "x", &["instanceof K1"]),
+            ("k9", "x", &["instanceof Date"]),
+            ("k10", "o.v", &["instanceof K1"]),
+            ("k11", "x", &["number"]),
+            ("k12", "x", &["instanceof Map<string, number>"]),
+            ("k13", "x", &["instanceof K1"]),
+            ("k14", "x", &["instanceof K1"]),
         ],
     );
 }

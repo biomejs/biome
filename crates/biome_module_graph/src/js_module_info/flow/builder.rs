@@ -28,9 +28,9 @@ use biome_js_syntax::{
     JsGetterClassMember, JsGetterObjectMember, JsIdentifierExpression, JsIfStatement,
     JsInitializerClause, JsLanguage, JsMethodClassMember, JsMethodObjectMember, JsParameters,
     JsParenthesizedExpression, JsSetterClassMember, JsSetterObjectMember, JsStaticMemberExpression,
-    JsSwitchStatement, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator, JsVariableDeclarator,
-    JsWhileStatement, T, TsInterfaceDeclaration, TsNonNullAssertionExpression, TsTypeAnnotation,
-    binding_ext::AnyJsBindingDeclaration,
+    JsSwitchStatement, JsSyntaxNode, JsThisExpression, JsUnaryExpression, JsUnaryOperator,
+    JsVariableDeclarator, JsWhileStatement, T, TsInterfaceDeclaration,
+    TsNonNullAssertionExpression, TsTypeAnnotation, binding_ext::AnyJsBindingDeclaration,
 };
 use biome_js_type_info::{DestructureField, own_returns};
 use biome_rowan::{
@@ -2484,6 +2484,18 @@ impl RootBuilder<'_, '_> {
             {
                 self.reads.push(BuiltRead {
                     expression: AnyFlowExpression::JsIdentifierExpression(identifier),
+                    point: incoming,
+                    subject,
+                });
+            }
+            return Ok(incoming);
+        }
+        if let Some(this) = JsThisExpression::cast_ref(node) {
+            if self.records_reads
+                && let Some(subject) = self.subjects.this(&this)
+            {
+                self.reads.push(BuiltRead {
+                    expression: AnyFlowExpression::JsThisExpression(this),
                     point: incoming,
                     subject,
                 });

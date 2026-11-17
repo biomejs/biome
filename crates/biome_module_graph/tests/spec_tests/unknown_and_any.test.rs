@@ -263,9 +263,7 @@ fn unknown_narrows_through_properties_instanceof_and_type_predicates() {
             ("L38_51", "x", &["instanceof Array<any>"]),
             ("L38_73", "x", &["unknown"]),
             ("L39_60", "x", &["instanceof Array<any>"]),
-            // `unknown`, the type of the property of
-            // `object & Record<"a", unknown>`
-            ("L42_73", "x.a", &["Unknown"]),
+            ("L42_73", "x.a", &["unknown"]),
             ("L17_51", "x", &["instanceof Box<any>"]),
             ("L21_45", "x", &["null"]),
             ("L21_67", "x", &[EMPTY, "undefined"]),
