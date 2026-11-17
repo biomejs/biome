@@ -15,7 +15,7 @@ use crate::db::type_inference::{
     find_value_member_type_on_demand as find_value_member_type_impl, flow_binding_baseline,
     flow_expression_type, flow_subject_states, flow_subject_type, resolve_local_type_on_demand,
 };
-use crate::js_module_info::flow::{FlowNodeId, FlowSubject};
+use crate::js_module_info::flow::FlowNodeId;
 use crate::module_graph::ModuleInfoKind;
 use crate::type_inference::profiling::{
     TypeInferenceProfileOrigin, TypeInferenceQueryKind, execute_query,
@@ -194,8 +194,8 @@ pub(crate) fn infer_flow_subject_type<'db>(
 }
 
 /// Attributes the flow queries of a subject to the declaration of the
-/// variable it refers to, or to the whole module when collection has no such
-/// subject.
+/// variable that its path starts at, or to the whole module when collection
+/// has no such subject.
 fn flow_subject_origin(
     db: &dyn ModuleDb,
     input: FlowSubjectRootInput<'_>,
@@ -207,9 +207,9 @@ fn flow_subject_origin(
     match info
         .flow
         .root(input.root(db))
-        .and_then(|root| root.subject(input.subject(db)))
+        .and_then(|root| root.subject_binding(input.subject(db)))
     {
-        Some(FlowSubject::Binding(range)) => TypeInferenceProfileOrigin::exact(module, *range),
+        Some(range) => TypeInferenceProfileOrigin::exact(module, range),
         None => TypeInferenceProfileOrigin::document(module),
     }
 }
