@@ -38,6 +38,25 @@ impl<S: Source> Document<S> {
     ///
     /// [`BestFitting`]: FormatElement::BestFitting
     pub(crate) fn propagate_expand(&mut self) {
+        fn reset_propagated_expands<S: Source>(elements: &[FormatElement<S>]) {
+            for element in elements {
+                match element {
+                    FormatElement::Tag(Tag::StartGroup(group)) => {
+                        group.reset_propagated_expand();
+                    }
+                    FormatElement::Interned(interned) => {
+                        reset_propagated_expands(interned);
+                    }
+                    FormatElement::BestFitting(variants) => {
+                        reset_propagated_expands(variants);
+                    }
+                    _ => {}
+                }
+            }
+        }
+
+        reset_propagated_expands(self);
+
         #[derive(Debug)]
         enum Enclosing<'a> {
             Group(&'a tag::Group),
@@ -938,6 +957,7 @@ impl<S: Source> FormatElements<S> for [FormatElement<S>] {
 mod tests {
     use biome_js_syntax::JsSyntaxKind;
     use biome_js_syntax::JsSyntaxToken;
+    use biome_rowan::TextRange;
 
     use crate::prelude::document::IrFormatOptions;
     use crate::prelude::tag::GroupMode;
@@ -969,6 +989,37 @@ mod tests {
         document.propagate_expand();
 
         assert_eq!(group.mode(), GroupMode::Flat);
+    }
+
+    #[test]
+    fn recomputes_propagated_expansion_after_replacing_embedded_content() {
+        use crate::format_element::tag::Tag::*;
+
+        let mut document = Document::from(vec![
+            FormatElement::Tag(StartGroup(tag::Group::new())),
+            FormatElement::Tag(StartEmbedded(TextRange::default())),
+            FormatElement::Interned(Interned::new(vec![FormatElement::Line(LineMode::Hard)])),
+            FormatElement::Tag(EndEmbedded),
+            FormatElement::Tag(EndGroup),
+        ]);
+
+        document.propagate_expand();
+        assert!(matches!(
+            &document.as_elements()[0],
+            FormatElement::Tag(StartGroup(group)) if group.mode() == GroupMode::Propagated
+        ));
+
+        document.replace_embedded(&mut |_| {
+            Some(Document::from(vec![FormatElement::Token {
+                text: "content",
+            }]))
+        });
+        document.propagate_expand();
+
+        assert!(matches!(
+            &document.as_elements()[0],
+            FormatElement::Tag(StartGroup(group)) if group.mode() == GroupMode::Flat
+        ));
     }
 
     #[test]
