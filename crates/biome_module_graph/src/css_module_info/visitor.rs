@@ -1,11 +1,11 @@
 use crate::ResolutionMode;
 use crate::css_module_info::{
-    CssImport, CssImports, CssModuleInfo, TailwindImport, TailwindStylesheet, decoded_class_name,
+    CssImport, CssImports, CssModuleInfo, TailwindImport, TailwindStylesheet,
 };
 use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
 use biome_css_syntax::{
     AnyCssImportUrl, AnyCssRoot, CssClassSelector, CssImportAtRule, CssLanguage, CssSyntaxKind,
-    TwCustomVariantAtRule, TwThemeAtRule, TwUtilityAtRule,
+    TwCustomVariantAtRule, TwThemeAtRule, TwUtilityAtRule, decoded_identifier_text,
 };
 use biome_resolver::SassLoadRule;
 use biome_rowan::{AstNode, SyntaxKindSet, Text, TextRange, WalkEvent};
@@ -95,8 +95,8 @@ impl CssModuleVisitor {
         )
     }
 
-    /// Inserts the decoded class name of a `CssClassSelector` (e.g., "header"
-    /// from `.header`), keyed by the range of its name token without the dot.
+    /// Records the class name, keyed by its range. CSS escapes in the name are
+    /// decoded, so `.foo\+bar` is recorded as `foo+bar`.
     fn visit_class_selector(node: CssClassSelector, classes: &mut IndexMap<TextRange, Text>) {
         if let Ok(name) = node.name()
             && let Some(name) = name.as_css_custom_identifier()
@@ -104,7 +104,7 @@ impl CssModuleVisitor {
         {
             classes
                 .entry(token.text_trimmed_range())
-                .or_insert_with(|| decoded_class_name(&token));
+                .or_insert_with(|| decoded_identifier_text(&token));
         }
     }
 
