@@ -368,7 +368,12 @@ fn parse_suppression_line(
         let (category, subcategory) = parse_category(base, category)?;
 
         // Skip over and match the separator
-        let (separator, rest) = rest.split_at(1);
+        let separator_len = rest
+            .chars()
+            .next()
+            .expect("`find` matched a character in `line`")
+            .len_utf8();
+        let (separator, rest) = rest.split_at(separator_len);
 
         match separator {
             // Colon token: stop parsing categories
@@ -786,6 +791,103 @@ mod tests_biome_ignore_inline {
     }
 
     #[test]
+    fn parse_non_ascii_whitespace_separator() {
+        assert_eq!(
+            parse_suppression_comment("// biome-ignore lint\u{a0}format: explanation")
+                .collect::<Vec<_>>(),
+            vec![Ok(Suppression {
+                categories: vec![
+                    (category!("lint"), None, None),
+                    (category!("format"), None, None),
+                ],
+                reason: "explanation",
+                kind: SuppressionKind::Classic,
+                range: TextRange::new(TextSize::from(3), TextSize::from(15)),
+                reason_range: TextRange::new(TextSize::from(30), TextSize::from(41))
+            })],
+        );
+
+        assert_eq!(
+            parse_suppression_comment("// biome-ignore lint\u{3000}format: explanation")
+                .collect::<Vec<_>>(),
+            vec![Ok(Suppression {
+                categories: vec![
+                    (category!("lint"), None, None),
+                    (category!("format"), None, None),
+                ],
+                reason: "explanation",
+                kind: SuppressionKind::Classic,
+                range: TextRange::new(TextSize::from(3), TextSize::from(15)),
+                reason_range: TextRange::new(TextSize::from(31), TextSize::from(42))
+            })],
+        );
+
+        assert_eq!(
+            parse_suppression_comment("// biome-ignore lint\u{a0}: explanation")
+                .collect::<Vec<_>>(),
+            vec![Ok(Suppression {
+                categories: vec![(category!("lint"), None, None)],
+                reason: "explanation",
+                kind: SuppressionKind::Classic,
+                range: TextRange::new(TextSize::from(3), TextSize::from(15)),
+                reason_range: TextRange::new(TextSize::from(24), TextSize::from(35))
+            })],
+        );
+
+        assert_eq!(
+            parse_suppression_comment("// biome-ignore lint\u{a0}format\u{a0}parse: explanation")
+                .collect::<Vec<_>>(),
+            vec![Ok(Suppression {
+                categories: vec![
+                    (category!("lint"), None, None),
+                    (category!("format"), None, None),
+                    (category!("parse"), None, None),
+                ],
+                reason: "explanation",
+                kind: SuppressionKind::Classic,
+                range: TextRange::new(TextSize::from(3), TextSize::from(15)),
+                reason_range: TextRange::new(TextSize::from(37), TextSize::from(48))
+            })],
+        );
+
+        for separator in (0x80..=0x0010_ffff)
+            .filter_map(char::from_u32)
+            .filter(|c| c.is_whitespace())
+        {
+            for (template, separators) in [
+                ("// biome-ignore lint{}format: explanation", 1),
+                ("// biome-ignore lint{}: explanation", 1),
+                ("// biome-ignore lint{}format{}parse: explanation", 2),
+            ] {
+                let ascii = template.replace("{}", " ");
+                let non_ascii = template.replace("{}", &separator.to_string());
+                let parsed_ascii = parse_suppression_comment(&ascii).collect::<Vec<_>>();
+                let [Ok(ascii)] = parsed_ascii.as_slice() else {
+                    panic!("expected one parsed suppression for the ASCII-space case")
+                };
+                let parsed_non_ascii = parse_suppression_comment(&non_ascii).collect::<Vec<_>>();
+                let [Ok(non_ascii)] = parsed_non_ascii.as_slice() else {
+                    panic!("expected one parsed suppression for separator {separator:?}")
+                };
+                assert_eq!(
+                    ascii.categories, non_ascii.categories,
+                    "unexpected categories for separator {separator:?}"
+                );
+                assert_eq!(
+                    ascii.reason, non_ascii.reason,
+                    "unexpected reason for separator {separator:?}"
+                );
+                assert_eq!(
+                    ascii.reason_range()
+                        + TextSize::from((separator.len_utf8() as u32 - 1) * separators),
+                    non_ascii.reason_range(),
+                    "unexpected reason range for separator {separator:?}"
+                );
+            }
+        }
+    }
+
+    #[test]
     fn diagnostic_missing_category() {
         assert_eq!(
             parse_suppression_comment("// biome-ignore (value): explanation").collect::<Vec<_>>(),
@@ -844,6 +946,14 @@ mod tests_biome_ignore_inline {
             vec![Err(SuppressionDiagnostic {
                 message: SuppressionDiagnosticKind::MissingColon,
                 span: TextRange::new(TextSize::from(23), TextSize::from(34))
+            })],
+        );
+
+        assert_eq!(
+            parse_suppression_comment("// biome-ignore lint\u{a0}").collect::<Vec<_>>(),
+            vec![Err(SuppressionDiagnostic {
+                message: SuppressionDiagnosticKind::MissingColon,
+                span: TextRange::new(TextSize::from(22), TextSize::from(22))
             })],
         );
     }
