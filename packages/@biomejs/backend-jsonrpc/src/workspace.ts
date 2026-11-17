@@ -3463,6 +3463,11 @@ export interface Nursery {
 	 */
 	noTailwindArbitraryValue?: NoTailwindArbitraryValueConfiguration;
 	/**
+	 * Disallow Tailwind CSS classes that set the same CSS properties on an element.
+	 * See https://biomejs.dev/linter/rules/no-tailwind-conflicting-classes
+	 */
+	noTailwindConflictingClasses?: NoTailwindConflictingClassesConfiguration;
+	/**
 	 * Disallow Tailwind CSS utility classes that Tailwind CSS only keeps for backward compatibility.
 	 * See https://biomejs.dev/linter/rules/no-tailwind-legacy-utilities
 	 */
@@ -7097,6 +7102,9 @@ export type NoSyncMethodsConfiguration =
 export type NoTailwindArbitraryValueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTailwindArbitraryValueOptions;
+export type NoTailwindConflictingClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTailwindConflictingClassesOptions;
 export type NoTailwindLegacyUtilitiesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTailwindLegacyUtilitiesOptions;
@@ -10416,6 +10424,10 @@ export interface RuleWithNoSyncMethodsOptions {
 export interface RuleWithNoTailwindArbitraryValueOptions {
 	level: RulePlainConfiguration;
 	options?: NoTailwindArbitraryValueOptions;
+}
+export interface RuleWithNoTailwindConflictingClassesOptions {
+	level: RulePlainConfiguration;
+	options?: NoTailwindConflictingClassesOptions;
 }
 export interface RuleWithNoTailwindLegacyUtilitiesOptions {
 	/**
@@ -13947,6 +13959,7 @@ export interface NoTailwindArbitraryValueOptions {
 	 */
 	allowedClasses?: string[];
 }
+export type NoTailwindConflictingClassesOptions = {};
 export type NoTailwindLegacyUtilitiesOptions = {};
 export interface NoTailwindRawColorsOptions {
 	/**
@@ -16288,6 +16301,7 @@ export type Category =
 	| "lint/nursery/noSvelteUselessDerivedBy"
 	| "lint/nursery/noSyncMethods"
 	| "lint/nursery/noTailwindArbitraryValue"
+	| "lint/nursery/noTailwindConflictingClasses"
 	| "lint/nursery/noTailwindLegacyUtilities"
 	| "lint/nursery/noTailwindRawColors"
 	| "lint/nursery/noTailwindRestrictedClasses"

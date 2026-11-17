@@ -1,7 +1,8 @@
 use biome_js_syntax::{JsTemplateChunkElement, JsTemplateElement};
 use biome_rowan::{AstNode, NodeCache, TextRange, TextSize, TokenText};
 use biome_tailwind_logic::syntax_service::TailwindSyntax;
-use biome_tailwind_logic::use_tailwind_sorted_classes::{TailwindDesignSystem, sort_class_list};
+use biome_tailwind_logic::tailwind_v4::TailwindDesignSystem;
+use biome_tailwind_logic::use_tailwind_sorted_classes::sort_class_list;
 use biome_tailwind_parser::parse_tailwind_with_options;
 
 use crate::tailwind::AnyTailwindClassString;
