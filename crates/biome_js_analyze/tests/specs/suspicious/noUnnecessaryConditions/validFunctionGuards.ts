@@ -2,9 +2,6 @@
 
 declare function isString(input: unknown): input is string;
 declare function read(): string | null;
-declare function generic<T>(input: unknown): input is string;
-declare function overloaded(input: string): input is string;
-declare function overloaded(input: unknown): input is string;
 
 function beforeAndAfterJoin(value: string | null) {
 	value?.length;
@@ -38,12 +35,6 @@ function written(value: string | null) {
 		value = read();
 		return value?.length;
 	}
-}
-
-function unsupportedCallees(value: string | null) {
-	if (generic(value)) value?.length;
-	if (overloaded(value)) value?.length;
-	return value?.length;
 }
 
 function optionalCalleeThatIsFalsy(value: string | null, guard: ((input: unknown) => input is string) | undefined) {

@@ -554,10 +554,6 @@ fn unsupported_assertion_signatures_and_never_returns_do_not_add_facts() {
         "declare function check(input: unknown): asserts input is Promise<void>;",
         "function check(this: unknown, input: unknown): asserts this is string {}",
         "function check(this: unknown, input: unknown): asserts this {}",
-        // TypeScript gives `string` after the generic truthiness assertion.
-        "declare function check<T>(input: unknown): asserts input;",
-        // TypeScript gives `string` after resolving the overload.
-        "declare function check(input: string): asserts input; declare function check(input: unknown): asserts input is string;",
         "declare function check(input: unknown): never;",
     ] {
         let source = format!(

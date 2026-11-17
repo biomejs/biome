@@ -5484,4 +5484,73 @@ mod tests {
             );
         }
     }
+
+    /// Returns a function with the parameters `(name, type)` that returns a
+    /// type predicate about the parameter `tested`, targeting `target`, or
+    /// `boolean` when `tested` is `None`.
+    fn predicate_function<'db>(
+        db: &'db TestDb,
+        parameters: &[(&'static str, InferredTypeData<'db>)],
+        tested: Option<(&'static str, InferredTypeData<'db>)>,
+    ) -> InferredTypeData<'db> {
+        let parameters: Box<[_]> = parameters
+            .iter()
+            .map(|(name, ty)| {
+                crate::interned_types::FunctionParameter::Named(
+                    crate::interned_types::NamedFunctionParameter {
+                        name: Text::new_static(name),
+                        ty: *ty,
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )
+            })
+            .collect();
+        let return_type = match tested {
+            Some((name, ty)) => ReturnType::Predicate(crate::interned_types::PredicateReturnType {
+                parameter_name: Text::new_static(name),
+                ty,
+            }),
+            None => ReturnType::Type(InferredTypeData::Boolean),
+        };
+        InferredTypeData::Function(InternedFunction::new(
+            db,
+            Box::default(),
+            parameters,
+            return_type,
+            false,
+            None,
+        ))
+    }
+
+    // TypeScript relates two signatures that return type predicates when the
+    // predicates test the parameter at the same position and the source's
+    // target is assignable to the target's, as for a type-guard function
+    // passed as the callback of `every` or `filter`.
+    #[test]
+    fn type_predicate_signatures_relate_by_position_and_target() {
+        use InferredTypeData::{Number, String, UnknownKeyword};
+        let db = TestDb::default();
+        let element = union(&db, &[String, Number]);
+        let is_string = predicate_function(&db, &[("v", UnknownKeyword)], Some(("v", String)));
+        let assignable = |source, target| crate::is_assignable_to(&db, source, target, |ty| ty);
+        let callback = predicate_function(
+            &db,
+            &[("value", element), ("index", Number)],
+            Some(("value", String)),
+        );
+        assert_eq!(assignable(is_string, callback), Some(true));
+        let other_target = predicate_function(&db, &[("value", element)], Some(("value", Number)));
+        assert_eq!(assignable(is_string, other_target), Some(false));
+        let other_position = predicate_function(
+            &db,
+            &[("index", Number), ("value", element)],
+            Some(("value", String)),
+        );
+        assert_eq!(assignable(is_string, other_position), Some(false));
+        // TypeScript infers a type predicate for some functions that return a
+        // `boolean` without an annotation.
+        let boolean = predicate_function(&db, &[("v", UnknownKeyword)], None);
+        assert_eq!(assignable(boolean, callback), None);
+    }
 }

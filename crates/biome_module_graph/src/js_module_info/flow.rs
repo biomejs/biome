@@ -566,6 +566,9 @@ pub(crate) enum FlowCallRoot {
 /// An argument of a call point.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) struct FlowCallArgument {
+    /// The range of the argument without parentheses, where inference reads
+    /// its type at the call when the callee's signature depends on it.
+    pub(crate) range: TextRange,
     /// The subject that the argument reads, without parentheses, which a type
     /// predicate or an assertion of its parameter narrows.
     pub(crate) subject: Option<FlowSubjectId>,

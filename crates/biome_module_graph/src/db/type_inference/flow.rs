@@ -595,6 +595,35 @@ impl<'db> ResolutionCtx<'db, '_> {
         self.local_flow.is_some()
     }
 
+    /// Returns the flow-sensitive type of the expression at `range`, as
+    /// [`Self::local_flow_expression_type`] does, evaluated in this context
+    /// whether or not it evaluates flow locally, and without reading or
+    /// filling a cache. [`Self::flow_operand_at`] uses it while the
+    /// arguments of a call point are read, whose types differ from those of
+    /// ordinary reads (see [`ResolutionCtx::calls_before`]).
+    pub(super) fn uncached_flow_expression_type(
+        &mut self,
+        range: TextRange,
+    ) -> Option<TypeData<'db>> {
+        let info = self.js_info;
+        if !info.flow.is_candidate(range) || !info.raw_expressions.contains_key(&range) {
+            return None;
+        }
+        if let Some(binding) = info.flow.property_only_candidate(range)
+            && self.flow_binding_baseline(binding).is_none()
+        {
+            return None;
+        }
+        if let Some((root, subject)) = info.flow.call_only_candidate(range)
+            && self.call_effects(root, subject).is_none()
+        {
+            return None;
+        }
+        let tree = info.semantic_model.root();
+        let expression = info.flow.candidate(range)?.try_to_node(tree.syntax())?;
+        self.resolve_flow_expression(&expression)
+    }
+
     /// Returns the narrowed type of the variable read at `identifier`.
     ///
     /// When the variable is an element of a destructuring pattern that a test
@@ -951,6 +980,9 @@ impl<'db> ResolutionCtx<'db, '_> {
         capture: FlowCapture,
         binding: TextRange,
     ) -> Option<(TypeData<'db>, bool)> {
+        if self.calls_before.is_some() {
+            return self.resolve_captured_type(capture, binding);
+        }
         let key = (capture.root, capture.subject, capture.point);
         if let Some(cached) = self
             .local_flow
@@ -1435,7 +1467,11 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// when none of them narrows. The call points checked are those that
     /// [`RootFlow::subject_calls`] lists for the subject. The answer is
     /// cached per root and subject when this context evaluates flow locally.
-    fn call_effects(
+    ///
+    /// While the arguments of a call point are read, only the call points
+    /// that end before that call starts count, and nothing is cached (see
+    /// [`ResolutionCtx::calls_before`]).
+    pub(super) fn call_effects(
         &mut self,
         root: usize,
         subject: FlowSubjectId,
@@ -1446,11 +1482,13 @@ impl<'db> ResolutionCtx<'db, '_> {
         if calls.is_empty() {
             return None;
         }
+        let bound = self.calls_before;
         let key = (root, subject);
-        if let Some(cached) = self
-            .local_flow
-            .as_ref()
-            .and_then(|local| local.subject_call_effects.get(&key))
+        if bound.is_none()
+            && let Some(cached) = self
+                .local_flow
+                .as_ref()
+                .and_then(|local| local.subject_call_effects.get(&key))
         {
             return *cached;
         }
@@ -1459,6 +1497,9 @@ impl<'db> ResolutionCtx<'db, '_> {
             let Some(flow_call) = flow.calls.get(*call as usize) else {
                 continue;
             };
+            if bound.is_some_and(|bound| flow_call.range.end() > bound) {
+                continue;
+            }
             let effect = self.flow_call_effect(flow_call.range);
             if effect.narrows() {
                 effects.push((*call, effect));
@@ -1466,7 +1507,9 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
         let effects = (!effects.is_empty())
             .then(|| FlowCallEffects::new(self.db, effects.into_boxed_slice()));
-        if let Some(local) = self.local_flow.as_mut() {
+        if bound.is_none()
+            && let Some(local) = self.local_flow.as_mut()
+        {
             local.subject_call_effects.insert(key, effects);
         }
         effects
@@ -1515,9 +1558,11 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// one. A statement call resolves only when every name along its callee
     /// has an explicit type, as [`Self::has_explicit_callee`] checks, so its
     /// ordinary type is that explicit type, and its callee can't be a union.
-    /// The callee must have exactly one signature without type parameters.
-    /// TypeScript resolves the call to pick a signature otherwise, which Biome
-    /// doesn't do here.
+    /// A callee with one signature without type parameters takes that
+    /// signature, and so does one with explicit type arguments, which replace
+    /// the type parameters of its only signature. Otherwise the signature
+    /// depends on the arguments, as [`Self::select_effect_signature`]
+    /// decides.
     ///
     /// A call in a condition narrows only through a type predicate, and a
     /// statement call only through an assertion. The target is flattened as a
@@ -1554,6 +1599,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
         };
         let statement = callee_steps.is_some();
+        let explicit_type_arguments = has_type_arguments(info, &raw.callee);
         let callee = self.resolve(&raw.callee);
         let mut callee = self.flow_baseline(callee)?;
         if let TypeData::Union(union) = callee {
@@ -1571,10 +1617,15 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
         }
         let function =
-            resolve_callable_function(self.db, CallableFunctionInput::new(self.db, callee))?;
-        if !function.type_parameters(self.db).is_empty() {
-            return None;
-        }
+            match resolve_callable_function(self.db, CallableFunctionInput::new(self.db, callee)) {
+                Some(function)
+                    if explicit_type_arguments || function.type_parameters(self.db).is_empty() =>
+                {
+                    function
+                }
+                _ if explicit_type_arguments => return None,
+                _ => self.select_effect_signature(call, raw, callee)?,
+            };
         let (name, target, asserts) = match function.return_type(self.db) {
             ReturnType::Predicate(predicate) => {
                 (&predicate.parameter_name, Some(predicate.ty), false)
@@ -1871,6 +1922,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         };
         let mut pending = root.called_calls(read.point);
         let mut ends = 0;
+        let bound = self.calls_before;
         while pending != 0 {
             let bit = pending.trailing_zeros();
             pending &= pending - 1;
@@ -1881,6 +1933,11 @@ impl<'db> ResolutionCtx<'db, '_> {
             else {
                 continue;
             };
+            // While the arguments of a call point are read, only the calls
+            // that end before it count (see `ResolutionCtx::calls_before`).
+            if bound.is_some_and(|bound| call.range.end() > bound) {
+                continue;
+            }
             if self.flow_call_effect(call.range) == FlowCallEffect::Ends {
                 ends |= 1 << bit;
             }
@@ -1943,6 +2000,12 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// statement. Otherwise it asks
     /// [`crate::db::queries::infer_flow_switch_exhaustive`].
     fn is_exhaustive_switch(&mut self, root: usize, switch: u32) -> bool {
+        // While the arguments of a call point are read, the discriminant's
+        // type depends on which call points count, so the answer is neither
+        // shared nor cached (see `ResolutionCtx::calls_before`).
+        if self.calls_before.is_some() {
+            return self.switch_is_exhaustive(root, switch);
+        }
         if !self.evaluates_flow_locally() {
             return infer_flow_switch_exhaustive(
                 self.db,
@@ -3178,6 +3241,21 @@ fn predicate_parameter<'db>(
         return None;
     }
     Some(FlowCallParameter::Argument(u32::try_from(index).ok()?))
+}
+
+/// Returns whether `callee`, the collected type of a call's callee, passes
+/// explicit type arguments, as `isNonNull<string>` in `isNonNull<string>(x)`.
+/// Collection records such a callee as an instance of the callee's type with
+/// the type arguments.
+fn has_type_arguments(js_info: &JsModuleInfo, callee: &TypeReference) -> bool {
+    matches!(
+        callee,
+        TypeReference::Resolved(RawTypeId::Local(id))
+            if matches!(
+                js_info.raw_types.get(id.index()),
+                Some(RawTypeData::InstanceOf(instance)) if !instance.type_parameters.is_empty()
+            )
+    )
 }
 
 /// Returns whether the binding at `binding` in `js_info` is a namespace

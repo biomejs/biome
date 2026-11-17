@@ -171,8 +171,10 @@ const NEVER: &str = r#"
 
 // TypeScript ends the path at a statement call whose callee is a dotted name
 // with an explicit type at every name, when the declaration of the call's
-// signature annotates the return type as `never`. Each read that keeps
-// `string | null` follows a call that fails one of these conditions.
+// signature annotates the return type as `never`. For a generic or an
+// overloaded callee, that signature is the one that the arguments select, so
+// `failOver("a")` ends the path and `failOver(1)` doesn't. Each read that
+// keeps `string | null` follows a call that fails one of these conditions.
 #[test]
 fn calls_that_never_return_end_the_path() {
     let source = format!(
@@ -189,6 +191,8 @@ fn calls_that_never_return_end_the_path() {
         function v8(x: string | null) { if (x === null) log.warn(); /*n25*/x; }
         function v9(x: string | null) { if (x === null) l.fail(); /*n26*/x; }
         function v10(x: string | null) { if (x === null) NS.fail(); /*n27*/x; }
+        function v11(x: string | null) { if (x === null) failGeneric(x); /*n28*/x; }
+        function v12(x: string | null) { if (x === null) failOver("a"); /*n29*/x; }
         function v13(x: string | null) { if (x === null) failOver(1); /*n30*/x; }
         function v16(x: string | null) { if (x === null) { (fail()); } /*n33*/x; }
         function v17(x: string | null) { if (x === null) log?.fatal(); /*n34*/x; }
@@ -218,6 +222,8 @@ fn calls_that_never_return_end_the_path() {
             ("n25", "x", declared),
             ("n26", "x", string),
             ("n27", "x", string),
+            ("n28", "x", string),
+            ("n29", "x", string),
             ("n30", "x", declared),
             ("n33", "x", declared),
             ("n34", "x", string),
@@ -235,11 +241,8 @@ fn calls_that_never_return_end_the_path() {
 
 // The paths that a call ends add nothing where they join others, and a `try`
 // block's exceptions still reach `catch`. A read that only ended paths reach
-// keeps its declared type, and TypeScript reports TS7027 there. Calls of
-// generic and overloaded signatures end the path in TypeScript, because it
-// resolves the call's signature. Biome keeps the declared type after them,
-// which is wider. A `never` return type that comes from a function body ends
-// nothing.
+// keeps its declared type, and TypeScript reports TS7027 there. A `never`
+// return type that comes from a function body ends nothing.
 #[test]
 fn reads_that_only_ended_paths_reach_keep_their_declared_type() {
     let source = format!(
@@ -253,8 +256,6 @@ fn reads_that_only_ended_paths_reach_keep_their_declared_type() {
         function v30(x: string | null) { do { fail(); } while (x === null); /*n47*/x; }
         function v31(x: string | null) { if (x === null) log.fatal(); else { fail(); } /*both*/x; }
         function v32(x: string | null) { if (x === null) { log.fatal(); /*after*/x; } }
-        function v11(x: string | null) { if (x === null) failGeneric(x); /*n28*/x; }
-        function v12(x: string | null) { if (x === null) failOver("a"); /*n29*/x; }
         function inferredMember(x: string | null) { if (x === null) typed.m(); /*m*/x; }
         declare const typed: { m: typeof failVia };
         function failVia() { return fail(); }
@@ -273,9 +274,29 @@ fn reads_that_only_ended_paths_reach_keep_their_declared_type() {
             ("n47", "x", declared),
             ("both", "x", declared),
             ("after", "x", declared),
-            ("n28", "x", declared),
-            ("n29", "x", declared),
             ("m", "x", declared),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `string | null` at both reads, which
+// it finds unreachable after the call. A generic signature ends the path once
+// Biome infers what TypeScript infers for its type parameters, as for `T` in
+// `fail<T>()`, which no parameter mentions. Biome can't infer `T` from
+// `v: T[]`, so `failAll(xs)` ends nothing and the read after it is narrower
+// than in TypeScript, only in code that TypeScript finds unreachable.
+#[test]
+fn generic_calls_that_never_return_end_the_path_once_inferred() {
+    assert_reads(
+        r#"
+        declare function fail<T>(): never;
+        declare function failAll<T>(v: T[]): never;
+        function a(x: string | null) { if (x !== null) { fail(); /*inferred*/x; } }
+        function b(x: string | null, xs: number[]) { if (x !== null) { failAll(xs); /*undetermined*/x; } }
+        "#,
+        &[
+            ("inferred", "x", &["null", "string"]),
+            ("undetermined", "x", &["string"]),
         ],
     );
 }

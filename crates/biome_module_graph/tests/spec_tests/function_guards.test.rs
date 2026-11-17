@@ -513,21 +513,6 @@ fn unsupported_callees_signatures_and_arguments_do_not_refine() {
     use InferredTypeData::{Number, String};
     for (name, declaration, call) in [
         (
-            "overloaded",
-            "declare function guard(input: string): input is string; declare function guard(input: unknown): input is number;",
-            "guard(value)",
-        ),
-        (
-            "generic",
-            "declare function guard<T>(input: unknown): input is string;",
-            "guard(value)",
-        ),
-        (
-            "explicit type arguments",
-            "declare function guard(input: unknown): input is string;",
-            "guard<unknown>(value)",
-        ),
-        (
             "call method",
             "declare function guard(input: unknown): input is string;",
             "guard.call(undefined, value)",

@@ -7,8 +7,9 @@
 use super::resolve_callable_function;
 use crate::db::queries::{CallableFunctionInput, resolve_callable_type};
 use crate::db::type_inference::{
-    apply_substitutions_to_root_body, collected_type_result, find_member_type_on_demand,
-    resolve_local_type_on_demand, substitutions_for_instance,
+    apply_substitutions, apply_substitutions_to_root_body, collected_type_result,
+    find_member_type_on_demand, receiver_substitutions, resolve_local_type_on_demand,
+    substitutions_for_instance,
 };
 use crate::module_graph::ModuleInfoKind;
 use crate::{ModuleDb, module_for_key};
@@ -17,14 +18,16 @@ use biome_js_type_info::{
     interned_types::{
         CallArgumentType as InferredCallArgumentType, ClassParents,
         FunctionParameter as InferredFunctionParameter, InternedConstructor as InferredConstructor,
-        InternedFunction as InferredFunction, InternedMergedReference as InferredMergedReference,
-        InternedTuple as InferredTuple, InternedTypeInstance as InferredTypeInstance,
-        Literal as InferredLiteral, LocalTypeHandle as InferredLocalTypeHandle,
-        LocalTypeId as InferredLocalTypeId, ModuleKey as InferredModuleKey, ReturnType,
-        TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
-        TypeMember as InferredTypeMember, TypeSubstitution as InferredTypeSubstitution,
-        TypeTransformResult,
+        InternedFunction as InferredFunction,
+        InternedGenericTypeParameter as InferredGenericTypeParameter,
+        InternedMergedReference as InferredMergedReference, InternedTuple as InferredTuple,
+        InternedTypeInstance as InferredTypeInstance, Literal as InferredLiteral,
+        LocalTypeHandle as InferredLocalTypeHandle, LocalTypeId as InferredLocalTypeId,
+        ModuleKey as InferredModuleKey, ReturnType, TupleElementType as InferredTupleElementType,
+        TypeData as InferredTypeData, TypeMember as InferredTypeMember,
+        TypeSubstitution as InferredTypeSubstitution, TypeTransformResult,
     },
+    is_assignable_to, is_subtype_of,
 };
 use biome_rowan::Text;
 use rustc_hash::FxHashSet;
@@ -48,7 +51,7 @@ pub(in crate::db) fn infer_call_expression_return_type<'db>(
         .copied()
         .map(ResolvedCallArgument::Argument)
         .collect::<Vec<_>>();
-    infer_call_expression_return_type_from_args(db, callee, &args)
+    infer_call_expression_return_type_from_args(db, callee, &args, &mut || None)
 }
 
 /// Infers a call result after optional and spread arguments are resolved.
@@ -57,6 +60,12 @@ pub(in crate::db) fn infer_call_expression_return_type<'db>(
 /// or `undefined` member contributes `undefined`. Other non-callable members
 /// are omitted. The result is `Unknown` when no supported callable member
 /// remains.
+///
+/// `receiver` gives the type of the object that the callee is read from, as
+/// `xs` in `xs.filter(isString)`, or `None` for another callee (see
+/// [`CallReceiver`]). Its type arguments let a type parameter of the method,
+/// such as `S` in `filter<S extends T>`, be checked against a constraint
+/// that names a type parameter of the class or interface, such as `T`.
 ///
 /// In this example, the result is `string | number`.
 ///
@@ -68,6 +77,7 @@ pub(in crate::db) fn infer_call_expression_return_type_from_args<'db>(
     db: &'db dyn ModuleDb,
     callee: InferredTypeData<'db>,
     args: &[ResolvedCallArgument<'db>],
+    receiver: &mut CallReceiver<'db, '_>,
 ) -> InferredTypeData<'db> {
     match callee {
         InferredTypeData::Union(union) => collected_type_result(
@@ -79,13 +89,14 @@ pub(in crate::db) fn infer_call_expression_return_type_from_args<'db>(
                     if matches!(callee, InferredTypeData::Null | InferredTypeData::Undefined) {
                         Some(InferredTypeData::Undefined)
                     } else {
-                        infer_function_call_type(db, *callee, args)
+                        infer_function_call_type(db, *callee, args, receiver)
                     }
                 })
                 .collect(),
         )
         .unwrap_or(InferredTypeData::Unknown),
-        callee => infer_function_call_type(db, callee, args).unwrap_or(InferredTypeData::Unknown),
+        callee => infer_function_call_type(db, callee, args, receiver)
+            .unwrap_or(InferredTypeData::Unknown),
     }
 }
 
@@ -93,9 +104,12 @@ fn infer_function_call_type<'db>(
     db: &'db dyn ModuleDb,
     callee: InferredTypeData<'db>,
     args: &[ResolvedCallArgument<'db>],
+    receiver: &mut CallReceiver<'db, '_>,
 ) -> Option<InferredTypeData<'db>> {
     match callee {
-        InferredTypeData::Function(function) => infer_function_return_type(db, function, args),
+        InferredTypeData::Function(function) => {
+            infer_function_return_type(db, function, args, receiver)
+        }
         InferredTypeData::InstanceOf(instance) => {
             let target = instance.ty(db);
             // A class's call signatures belong to its constructor value.
@@ -108,16 +122,16 @@ fn infer_function_call_type<'db>(
             let substitutions =
                 substitutions_for_instance(db, target, instance.type_parameters(db), &[]);
             let target = apply_substitutions_to_root_body(db, target, &substitutions);
-            infer_function_call_type(db, target, args)
+            infer_function_call_type(db, target, args, receiver)
         }
         InferredTypeData::Interface(interface) => {
             select_call_signature(db, interface.members(db), args)
-                .and_then(|function| infer_function_return_type(db, function, args))
+                .and_then(|function| infer_function_return_type(db, function, args, receiver))
         }
         InferredTypeData::Class(class) => select_call_signature(db, class.members(db), args)
-            .and_then(|function| infer_function_return_type(db, function, args)),
+            .and_then(|function| infer_function_return_type(db, function, args, receiver)),
         InferredTypeData::Object(object) => select_call_signature(db, object.members(db), args)
-            .and_then(|function| infer_function_return_type(db, function, args)),
+            .and_then(|function| infer_function_return_type(db, function, args, receiver)),
         InferredTypeData::Union(union) => collected_type_result(
             db,
             union
@@ -127,16 +141,16 @@ fn infer_function_call_type<'db>(
                     if matches!(callee, InferredTypeData::Null | InferredTypeData::Undefined) {
                         Some(InferredTypeData::Undefined)
                     } else {
-                        infer_function_call_type(db, *callee, args)
+                        infer_function_call_type(db, *callee, args, receiver)
                     }
                 })
                 .collect(),
         ),
         InferredTypeData::TypeofType(typeof_type) => {
-            infer_function_call_type(db, typeof_type.ty(db), args)
+            infer_function_call_type(db, typeof_type.ty(db), args, receiver)
         }
         InferredTypeData::TypeofValue(typeof_value) => {
-            infer_function_call_type(db, typeof_value.ty(db), args)
+            infer_function_call_type(db, typeof_value.ty(db), args, receiver)
         }
         _ => None,
     }
@@ -159,7 +173,7 @@ fn select_call_signature<'db>(
     [first, second]
         .into_iter()
         .chain(signatures)
-        .find(|function| signature_accepts_arguments(db, *function, args))
+        .find(|function| signature_may_accept_arguments(db, *function, args))
 }
 
 /// Expands tuple spreads and maps a source argument index to the expanded list.
@@ -632,7 +646,12 @@ fn select_constructor_argument_type<'db>(
         })
 }
 
-fn signature_accepts_arguments<'db>(
+/// Returns whether `function` may accept `args` during overload selection
+/// for a call's return type: false only when the arguments provably don't
+/// fit its parameters, and true for unsupported relations and when the
+/// matching runs out of work. [`signature_accepts_arguments`] tells a
+/// conclusive acceptance apart from a possible one.
+fn signature_may_accept_arguments<'db>(
     db: &'db dyn ModuleDb,
     function: InferredFunction<'db>,
     args: &[ResolvedCallArgument<'db>],
@@ -659,6 +678,352 @@ fn signature_accepts_arguments<'db>(
     }
 
     matched_parameter_types(db, parameters, args, None).is_some()
+}
+
+/// Gives the type of the object that a call's callee is read from, as `xs`
+/// in `xs.filter(isString)`, or `None` for a callee that reads no member.
+/// Call inference asks for it only to check a type parameter's constraint
+/// that names a type parameter of the method's class or interface, so the
+/// object, such as a namespace import, is resolved only then.
+pub(in crate::db) type CallReceiver<'db, 'a> = dyn FnMut() -> Option<InferredTypeData<'db>> + 'a;
+
+/// The relation between an argument and its parameter that TypeScript's
+/// overload resolution checks. It first tries every signature with the
+/// subtype relation, and only when none applies, with assignability.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(in crate::db) enum ArgumentRelation {
+    /// TypeScript's subtype relation, under which `any` is a subtype only of
+    /// `any` and `unknown`, and `{}` is not a subtype of `{ a?: number }`.
+    Subtype,
+    /// TypeScript's assignability.
+    Assignability,
+}
+
+/// Whether a signature accepts the arguments of a call, as TypeScript's
+/// overload resolution decides when it tries the signature.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(in crate::db) enum ArgumentAcceptance {
+    /// The signature takes as many arguments as the call passes, and each
+    /// argument is assignable to the parameter that it fills.
+    Accepts,
+    /// The call passes too few or too many arguments, or an argument is not
+    /// assignable to the parameter that it fills.
+    Rejects,
+    /// Biome can't tell.
+    Undetermined,
+}
+
+/// Returns whether `function` accepts `args` under `relation`, as
+/// TypeScript decides when overload resolution tries `function` for a call.
+///
+/// Each argument is checked against the parameter at its position with
+/// TypeScript's relation ([`is_assignable_to`] or [`is_subtype_of`]). An
+/// optional parameter also accepts `undefined`, and a rest parameter of an
+/// array type takes the remaining arguments. An argument that may be absent
+/// or a spread argument, and a tuple rest parameter, give
+/// [`ArgumentAcceptance::Undetermined`].
+///
+/// An acceptance is conclusive only when the matching that selects an
+/// overload for a call's return type, which rejects only what it can prove
+/// incompatible and accepts the rest, agrees, and so is a rejection under
+/// assignability. So a signature that this rejects under assignability is
+/// one that return-type inference skips, and one that this accepts is one
+/// that it may select. A rejection under the subtype relation needs no such
+/// agreement, because return-type inference only approximates
+/// assignability.
+///
+/// In this example, the first signature rejects `1` and the second accepts
+/// it:
+///
+/// ```ts
+/// declare function fail(code: string): never;
+/// declare function fail(code: number): void;
+/// fail(1);
+/// ```
+pub(in crate::db) fn signature_accepts_arguments<'db>(
+    db: &'db dyn ModuleDb,
+    function: InferredFunction<'db>,
+    args: &[ResolvedCallArgument<'db>],
+    relation: ArgumentRelation,
+) -> ArgumentAcceptance {
+    match (positional_relation(db, function, args, relation), relation) {
+        (Some(true), _) if signature_may_accept_arguments(db, function, args) => {
+            ArgumentAcceptance::Accepts
+        }
+        (Some(false), ArgumentRelation::Subtype) => ArgumentAcceptance::Rejects,
+        (Some(false), ArgumentRelation::Assignability)
+            if !signature_may_accept_arguments(db, function, args) =>
+        {
+            ArgumentAcceptance::Rejects
+        }
+        _ => ArgumentAcceptance::Undetermined,
+    }
+}
+
+/// Returns whether each of `args` relates to the parameter of `function` at
+/// its position under `relation`, and the call passes neither too few nor
+/// too many arguments, or `None` when Biome can't tell. See
+/// [`signature_accepts_arguments`].
+fn positional_relation<'db>(
+    db: &'db dyn ModuleDb,
+    function: InferredFunction<'db>,
+    args: &[ResolvedCallArgument<'db>],
+    relation: ArgumentRelation,
+) -> Option<bool> {
+    let parameters: Vec<_> = function
+        .parameters(db)
+        .iter()
+        .filter(|parameter| !parameter.is_this())
+        .collect();
+    let (fixed, rest) = match parameters.split_last() {
+        Some((rest, fixed)) if rest.is_rest() => (fixed, Some(rest.ty())),
+        _ => (parameters.as_slice(), None),
+    };
+    if fixed.iter().any(|parameter| parameter.is_rest()) {
+        return None;
+    }
+    let required = fixed
+        .iter()
+        .rposition(|parameter| !parameter.is_optional())
+        .map_or(0, |index| index + 1);
+    if args.len() < required || (rest.is_none() && args.len() > fixed.len()) {
+        return Some(false);
+    }
+    let mut result = Some(true);
+    for (index, argument) in args.iter().enumerate() {
+        let argument = match argument {
+            ResolvedCallArgument::Argument(ty) | ResolvedCallArgument::ConstArgument { ty, .. } => {
+                *ty
+            }
+            ResolvedCallArgument::WidenedArgument { literal_ty, .. } => *literal_ty,
+            ResolvedCallArgument::Optional(_) | ResolvedCallArgument::Spread(_) => return None,
+        };
+        let parameter = match fixed.get(index) {
+            Some(parameter) if parameter.is_optional() => InferredTypeData::union_from_types(
+                db,
+                Vec::from([parameter.ty(), InferredTypeData::Undefined]),
+            ),
+            Some(parameter) => parameter.ty(),
+            None => array_element_type(db, rest?)?,
+        };
+        let resolve = |ty| resolve_local_type_on_demand(db, ty).expand_structural_global(db);
+        let related = match relation {
+            ArgumentRelation::Subtype => is_subtype_of(db, argument, parameter, resolve),
+            ArgumentRelation::Assignability => is_assignable_to(db, argument, parameter, resolve),
+        };
+        match related {
+            Some(true) => {}
+            Some(false) => return Some(false),
+            None => result = None,
+        }
+    }
+    result
+}
+
+/// Returns the element type of `ty` when it is an array, as `number` for
+/// `number[]`, and `None` otherwise.
+fn array_element_type<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let InferredTypeData::InstanceOf(instance) = resolve_local_type_on_demand(db, ty) else {
+        return None;
+    };
+    if !resolve_local_type_on_demand(db, instance.ty(db))
+        .expand_canonical_global(db)
+        .is_array_class(db)
+    {
+        return None;
+    }
+    instance.type_parameters(db).first().copied()
+}
+
+/// Returns the call signatures of a value of type `callee`, in the order
+/// that TypeScript tries them for a call: the signature of a function, or
+/// the call signatures of an interface, an object type, or an object
+/// literal, which collection and member lookup put in that order for
+/// overloads, including those that declarations merge. An instance of a
+/// generic type gives its signatures with its type arguments substituted.
+///
+/// Returns `None` for a type without call signatures, for a class, whose
+/// call signatures belong to its constructor value, for a union, and when
+/// the walk exceeds its work limit.
+pub(in crate::db) fn call_signatures<'db>(
+    db: &'db dyn ModuleDb,
+    callee: InferredTypeData<'db>,
+) -> Option<Vec<InferredFunction<'db>>> {
+    let mut ty = callee;
+    for _ in 0..MAX_ARGUMENT_TYPE_STEPS {
+        ty = resolve_local_type_on_demand(db, ty).expand_canonical_global(db);
+        let members = match ty {
+            InferredTypeData::Function(function) => return Some(Vec::from([function])),
+            InferredTypeData::InstanceOf(instance) => {
+                let target = resolve_local_type_on_demand(db, instance.ty(db));
+                if matches!(
+                    target.expand_canonical_global(db),
+                    InferredTypeData::Class(_)
+                ) {
+                    return None;
+                }
+                let substitutions =
+                    substitutions_for_instance(db, target, instance.type_parameters(db), &[]);
+                ty = apply_substitutions_to_root_body(db, target, &substitutions);
+                continue;
+            }
+            InferredTypeData::TypeofType(typeof_type) => {
+                ty = typeof_type.ty(db);
+                continue;
+            }
+            InferredTypeData::TypeofValue(typeof_value) => {
+                ty = typeof_value.ty(db);
+                continue;
+            }
+            InferredTypeData::Interface(interface) => interface.members(db),
+            InferredTypeData::Object(object) => object.members(db),
+            InferredTypeData::Literal(literal) => match literal.literal(db) {
+                InferredLiteral::Object(members) => members,
+                _ => return None,
+            },
+            _ => return None,
+        };
+        let mut signatures = Vec::new();
+        for member in members
+            .iter()
+            .filter(|member| member.kind.is_call_signature())
+        {
+            signatures.push(
+                member
+                    .ty
+                    .expand_canonical_global(db)
+                    .callable_function(db)?,
+            );
+        }
+        return (!signatures.is_empty()).then_some(signatures);
+    }
+    None
+}
+
+/// Returns the type parameter of `function` that a callback argument binds
+/// through the type predicate of the parameter that it fills, and the type
+/// that it binds, as TypeScript infers `S` as `string` for
+/// `every<S extends T>(predicate: (value: T) => value is S)` with the
+/// argument `isString`, a `(v: unknown) => v is string`.
+///
+/// `parameter_ty` is the parameter's type and `argument_ty` the argument's.
+/// Each must have a single signature without type parameters that returns a
+/// type predicate about the same parameter, or about `this`, and the
+/// parameter's predicate must target a type parameter of `function` itself,
+/// as `S`. Returns `None` otherwise, as for a callback that returns a
+/// `boolean`.
+pub(in crate::db) fn callback_predicate_binding<'db>(
+    db: &'db dyn ModuleDb,
+    function: InferredFunction<'db>,
+    parameter_ty: InferredTypeData<'db>,
+    argument_ty: InferredTypeData<'db>,
+) -> Option<(InferredGenericTypeParameter<'db>, InferredTypeData<'db>)> {
+    let parameter = resolve_callable_function(db, CallableFunctionInput::new(db, parameter_ty))?;
+    let ReturnType::Predicate(parameter_predicate) = parameter.return_type(db) else {
+        return None;
+    };
+    let argument = resolve_callable_function(db, CallableFunctionInput::new(db, argument_ty))?;
+    let ReturnType::Predicate(argument_predicate) = argument.return_type(db) else {
+        return None;
+    };
+    if !parameter.type_parameters(db).is_empty() || !argument.type_parameters(db).is_empty() {
+        return None;
+    }
+    if predicate_position(db, parameter, &parameter_predicate.parameter_name)?
+        != predicate_position(db, argument, &argument_predicate.parameter_name)?
+    {
+        return None;
+    }
+    let generic = parameter_predicate.ty.as_generic_reference(db)?;
+    function
+        .type_parameters(db)
+        .iter()
+        .any(|ty| ty.as_generic_reference(db) == Some(generic))
+        .then_some((generic, argument_predicate.ty))
+}
+
+/// Returns which parameter of `function` a type predicate or an assertion
+/// that names `name` tests: `Some(None)` for `this`, and the position of the
+/// parameter, not counting a `this` parameter, otherwise. Returns `None` when
+/// `name` names no parameter or more than one.
+fn predicate_position<'db>(
+    db: &'db dyn ModuleDb,
+    function: InferredFunction<'db>,
+    name: &Text,
+) -> Option<Option<usize>> {
+    let name = name.text();
+    if name == "this" {
+        return Some(None);
+    }
+    let mut matching = function
+        .parameters(db)
+        .iter()
+        .filter(|parameter| !parameter.is_this())
+        .enumerate()
+        .filter(|(_, parameter)| {
+            matches!(parameter, InferredFunctionParameter::Named(named) if named.name.text() == name)
+        });
+    let (index, _) = matching.next()?;
+    matching.next().is_none().then_some(Some(index))
+}
+
+/// Returns whether `replacement` satisfies the constraint of `generic`, a
+/// type parameter of a called signature, as TypeScript requires before it
+/// infers `replacement` for it. The constraint is read with `bound`, the
+/// replacements already inferred for the signature's other type
+/// parameters, and with the type arguments of the object that a method is
+/// read from, which `receiver` gives (see [`receiver_substitutions`]), so
+/// `S extends T` in a method of `string[]` stands for `S extends string`.
+///
+/// Returns `Some(true)` for a type parameter without a constraint, and
+/// `None` when the constraint still names a type parameter that nothing
+/// replaces, or when Biome can't compare the two types.
+pub(in crate::db) fn satisfies_constraint<'db>(
+    db: &'db dyn ModuleDb,
+    generic: InferredGenericTypeParameter<'db>,
+    replacement: InferredTypeData<'db>,
+    receiver: &mut CallReceiver<'db, '_>,
+    bound: &[InferredTypeSubstitution<'db>],
+) -> Option<bool> {
+    let Some(constraint) = generic.constraint(db) else {
+        return Some(true);
+    };
+    let mut substitutions =
+        receiver().map_or_else(Vec::new, |receiver| receiver_substitutions(db, receiver));
+    substitutions.extend_from_slice(bound);
+    let constraint = apply_substitutions(db, constraint, &substitutions);
+    if constraint.may_refer_to_free_generic(db) {
+        return None;
+    }
+    is_assignable_to(db, replacement, constraint, |ty| {
+        resolve_local_type_on_demand(db, ty).expand_structural_global(db)
+    })
+}
+
+/// Returns the substitutions that replace `generic` with `replacement`,
+/// both where a type names an instance of the type parameter and where it
+/// names the type parameter itself, the two forms that references to a type
+/// parameter take. The instance comes first, so that it is replaced as a
+/// whole rather than around a replaced type parameter.
+pub(in crate::db) fn generic_substitutions<'db>(
+    db: &'db dyn ModuleDb,
+    generic: InferredGenericTypeParameter<'db>,
+    replacement: InferredTypeData<'db>,
+) -> [InferredTypeSubstitution<'db>; 2] {
+    let generic = InferredTypeData::Generic(generic);
+    [
+        InferredTypeSubstitution {
+            generic: InferredTypeData::instance_of(db, generic, Box::default()),
+            replacement,
+        },
+        InferredTypeSubstitution {
+            generic,
+            replacement,
+        },
+    ]
 }
 
 /// Finds an expected argument type without requiring a valid complete call.
@@ -1763,11 +2128,13 @@ fn infer_function_return_type<'db>(
     db: &'db dyn ModuleDb,
     function: InferredFunction<'db>,
     args: &[ResolvedCallArgument<'db>],
+    receiver: &mut CallReceiver<'db, '_>,
 ) -> Option<InferredTypeData<'db>> {
     match function.return_type(db) {
-        ReturnType::Type(ty) => {
-            Some(infer_generic_return_type(db, function, *ty, args).expand_structural_global(db))
-        }
+        ReturnType::Type(ty) => Some(
+            infer_generic_return_type(db, function, *ty, args, receiver)
+                .expand_structural_global(db),
+        ),
         ReturnType::Predicate(_) | ReturnType::Asserts(_) => Some(InferredTypeData::Boolean),
     }
 }
@@ -1775,11 +2142,24 @@ fn infer_function_return_type<'db>(
 /// Substitutes generic references in a function's return type.
 ///
 /// A direct generic parameter is inferred from its argument. A generic in a
-/// callback return type is inferred from the callback's return type. An
-/// unbound parameter uses its declared default. Defaults are processed in
+/// callback return type is inferred from the callback's return type. A
+/// generic that a callback parameter's type predicate targets is inferred
+/// from the type predicate of the callback argument, when that type
+/// satisfies the generic's constraint (see [`callback_predicate_binding`]
+/// and [`satisfies_constraint`], which reads `receiver`). An unbound
+/// parameter uses its declared default. Defaults are processed in
 /// declaration order, so a default may refer to an earlier parameter.
 /// Parameters with no inferred value or default remain generic. A failed type
 /// transformation returns `Unknown`.
+///
+/// In this example, `strings` is `string[]` because `S` is inferred from the
+/// type predicate of `isString`.
+///
+/// ```ts
+/// declare function isString(value: unknown): value is string;
+/// declare const values: (string | number)[];
+/// const strings = values.filter(isString);
+/// ```
 ///
 /// In this example, `value` is `number` because `T` is inferred from the
 /// callback's return type.
@@ -1801,6 +2181,7 @@ fn infer_generic_return_type<'db>(
     function: InferredFunction<'db>,
     mut return_ty: InferredTypeData<'db>,
     args: &[ResolvedCallArgument<'db>],
+    receiver: &mut CallReceiver<'db, '_>,
 ) -> InferredTypeData<'db> {
     let mut substitutions: Vec<InferredTypeSubstitution<'db>> = Vec::new();
     for (index, parameter) in function.parameters(db).iter().enumerate() {
@@ -1869,6 +2250,25 @@ fn infer_generic_return_type<'db>(
         else {
             continue;
         };
+        if let Some((generic, replacement)) =
+            callback_predicate_binding(db, function, parameter_ty, arg)
+        {
+            if satisfies_constraint(db, generic, replacement, receiver, &substitutions)
+                != Some(true)
+            {
+                continue;
+            }
+            for substitution in generic_substitutions(db, generic, replacement) {
+                let TypeTransformResult::Transformed(substituted) =
+                    return_ty.substitute_type(db, substitution)
+                else {
+                    return InferredTypeData::Unknown;
+                };
+                return_ty = substituted;
+                substitutions.push(substitution);
+            }
+            continue;
+        }
         let ReturnType::Type(parameter_return_ty) = parameter_function.return_type(db) else {
             continue;
         };
@@ -2362,3 +2762,217 @@ impl<'db> ArgumentMatchAction<'db> {
 }
 
 // #endregion
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_js_type_info::interned_types::{
+        InternedLiteral, NamedFunctionParameter, PredicateReturnType,
+    };
+    use biome_js_type_info::literal::{NumberLiteral, StringLiteral};
+
+    #[salsa::db]
+    #[derive(Default)]
+    struct TestDb {
+        storage: salsa::Storage<Self>,
+        fs: biome_fs::MemoryFileSystem,
+        resolver_paths: biome_resolver::ResolverPaths,
+    }
+
+    #[salsa::db]
+    impl salsa::Database for TestDb {}
+
+    #[salsa::db]
+    impl biome_db::Db for TestDb {
+        fn parsed_source_for_path(&self, _path: &camino::Utf8Path) -> Option<biome_db::Source> {
+            None
+        }
+    }
+
+    #[salsa::db]
+    impl biome_parser::db::ParseDb for TestDb {
+        fn parse_source(&self, _source: biome_db::Source) -> biome_parser::db::SourceOutput {
+            unreachable!("The database has no sources")
+        }
+    }
+
+    #[salsa::db]
+    impl biome_resolver::ResolverDb for TestDb {
+        fn resolver_fs(&self) -> &dyn biome_resolver::ResolverFsProxy {
+            &self.fs
+        }
+
+        fn resolver_paths(&self) -> &biome_resolver::ResolverPaths {
+            &self.resolver_paths
+        }
+    }
+
+    #[salsa::db]
+    impl biome_js_type_info::TypeDb for TestDb {}
+
+    #[salsa::db]
+    impl biome_languages::LanguageDb for TestDb {
+        fn source_from_index(&self, _index: usize) -> Option<biome_languages::DocumentFileSource> {
+            None
+        }
+    }
+
+    #[salsa::db]
+    impl ModuleDb for TestDb {
+        fn module_for_path(&self, _path: &camino::Utf8Path) -> Option<crate::ModuleInfo> {
+            None
+        }
+
+        fn for_each_module(&self, _f: &mut dyn FnMut(crate::ModuleInfo)) {}
+    }
+
+    /// Returns a signature `(v: parameters[0], ...): v is string`, where each
+    /// parameter is `(type, optional)`.
+    fn signature<'db>(
+        db: &'db TestDb,
+        parameters: &[(InferredTypeData<'db>, bool)],
+    ) -> InferredFunction<'db> {
+        let parameters: Box<[_]> = parameters
+            .iter()
+            .enumerate()
+            .map(|(index, (ty, is_optional))| {
+                InferredFunctionParameter::Named(NamedFunctionParameter {
+                    name: Text::new_static(["v", "w", "x"][index]),
+                    ty: *ty,
+                    is_optional: *is_optional,
+                    is_rest: false,
+                })
+            })
+            .collect();
+        InferredFunction::new(
+            db,
+            Box::default(),
+            parameters,
+            ReturnType::Predicate(PredicateReturnType {
+                parameter_name: Text::new_static("v"),
+                ty: InferredTypeData::String,
+            }),
+            false,
+            None,
+        )
+    }
+
+    fn string_literal<'db>(db: &'db TestDb, value: &str) -> InferredTypeData<'db> {
+        InferredTypeData::Literal(InternedLiteral::new(
+            db,
+            InferredLiteral::String(StringLiteral::from(value)),
+        ))
+    }
+
+    fn number_literal(db: &TestDb) -> InferredTypeData<'_> {
+        InferredTypeData::Literal(InternedLiteral::new(
+            db,
+            InferredLiteral::Number(NumberLiteral::new(Text::new_static("1"))),
+        ))
+    }
+
+    // `signature_accepts_arguments` answers conclusively only where the
+    // matching that overload selection uses for return types answers the
+    // same, so it never changes which signature that selection takes: an
+    // acceptance is a viable signature there, and a rejection is not.
+    #[test]
+    fn conclusive_acceptance_agrees_with_return_type_selection() {
+        use ArgumentAcceptance::{Accepts, Rejects, Undetermined};
+        use InferredTypeData::{Null, Number, String, Unknown};
+        let db = TestDb::default();
+        let a = string_literal(&db, "a");
+        let one = number_literal(&db);
+        let string_or_null = InferredTypeData::union_from_types(&db, Vec::from([String, Null]));
+        let string_or_number = InferredTypeData::union_from_types(&db, Vec::from([String, Number]));
+        let cases = [
+            // A literal is assignable to its primitive.
+            ("literal", &[(String, false)][..], Vec::from([a]), Accepts),
+            (
+                "union",
+                &[(string_or_number, false)],
+                Vec::from([String]),
+                Accepts,
+            ),
+            (
+                "missing optional",
+                &[(String, false), (Number, true)],
+                Vec::from([a]),
+                Accepts,
+            ),
+            (
+                "other primitive",
+                &[(String, false)],
+                Vec::from([one]),
+                Rejects,
+            ),
+            (
+                "nullable",
+                &[(String, false)],
+                Vec::from([string_or_null]),
+                Rejects,
+            ),
+            ("missing argument", &[(String, false)], Vec::new(), Rejects),
+            (
+                "extra argument",
+                &[(String, false)],
+                Vec::from([a, a]),
+                Rejects,
+            ),
+            // Return-type selection treats an unresolved argument as viable,
+            // and so does this, without accepting it.
+            (
+                "unresolved",
+                &[(String, false)],
+                Vec::from([Unknown]),
+                Undetermined,
+            ),
+            // Return-type selection compares the primitives of literals, so
+            // it keeps `"a"` viable for `string`, which TypeScript rejects.
+            (
+                "wider than a literal",
+                &[(a, false)],
+                Vec::from([String]),
+                Undetermined,
+            ),
+        ];
+        for (name, parameters, arguments, expected) in cases {
+            let function = signature(&db, parameters);
+            let arguments: Vec<_> = arguments
+                .into_iter()
+                .map(ResolvedCallArgument::Argument)
+                .collect();
+            let acceptance = signature_accepts_arguments(
+                &db,
+                function,
+                &arguments,
+                ArgumentRelation::Assignability,
+            );
+            assert_eq!(acceptance, expected, "{name}");
+            let viable = signature_may_accept_arguments(&db, function, &arguments);
+            match acceptance {
+                Accepts => assert!(viable, "{name}: accepted but not viable"),
+                Rejects => assert!(!viable, "{name}: rejected but viable"),
+                Undetermined => {}
+            }
+        }
+        // `any` is assignable to every type other than `never`, but a subtype
+        // only of `any` and `unknown`.
+        let function = signature(&db, &[(String, false)]);
+        let any = [ResolvedCallArgument::Argument(InferredTypeData::AnyKeyword)];
+        assert_eq!(
+            signature_accepts_arguments(&db, function, &any, ArgumentRelation::Assignability),
+            Accepts
+        );
+        assert_eq!(
+            signature_accepts_arguments(&db, function, &any, ArgumentRelation::Subtype),
+            Rejects
+        );
+        // A spread argument can fill any number of parameters.
+        let function = signature(&db, &[(String, false)]);
+        let spread = [ResolvedCallArgument::Spread(Unknown)];
+        assert_eq!(
+            signature_accepts_arguments(&db, function, &spread, ArgumentRelation::Assignability),
+            Undetermined
+        );
+    }
+}

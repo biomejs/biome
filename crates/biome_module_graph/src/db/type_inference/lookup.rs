@@ -1012,6 +1012,47 @@ fn conditional_lookup_states<'db>(
     Some(Vec::from([state.child(branch, state.collect_result)]))
 }
 
+/// Returns the replacements that member lookup applies to the type
+/// parameters of the class or interface whose members a value of type
+/// `receiver` has, as `T` to `string` for `string[]`.
+///
+/// A `readonly` array or tuple has the members of `ReadonlyArray`, and a
+/// union with one member other than `null` and `undefined` those of that
+/// member. Any other receiver that is not an instance of a generic class or
+/// interface gives no replacements, and so does a member that the instance
+/// inherits from a parent, whose type parameters member lookup replaces
+/// along the `extends` clauses.
+pub(in crate::db) fn receiver_substitutions<'db>(
+    db: &'db dyn ModuleDb,
+    receiver: InferredTypeData<'db>,
+) -> Vec<InferredTypeSubstitution<'db>> {
+    let mut resolver = OnDemandMemberLookupResolver;
+    let mut ty = resolver
+        .resolve_type(db, receiver)
+        .expand_canonical_global(db);
+    if let InferredTypeData::Union(union) = ty {
+        let mut members = union.types(db).iter().copied().filter(|member| {
+            !matches!(member, InferredTypeData::Null | InferredTypeData::Undefined)
+        });
+        let (Some(member), None) = (members.next(), members.next()) else {
+            return Vec::new();
+        };
+        ty = resolver
+            .resolve_type(db, member)
+            .expand_canonical_global(db);
+    }
+    if let Some(apparent) = apparent_type(db, &mut resolver, ty) {
+        ty = apparent;
+    }
+    let InferredTypeData::InstanceOf(instance) = ty else {
+        return Vec::new();
+    };
+    let target = resolver
+        .resolve_type(db, instance.ty(db))
+        .expand_canonical_global(db);
+    substitutions_for_instance(db, target, instance.type_parameters(db), &[])
+}
+
 /// Collects replacements for an instance's generic parameters.
 ///
 /// Arguments are substituted using the inherited replacements first. A new
@@ -1105,7 +1146,7 @@ fn declared_type_parameters<'db>(
 }
 
 /// Replaces each generic once without substituting inside its replacement.
-pub(in crate::db::type_inference) fn apply_substitutions<'db>(
+pub(in crate::db) fn apply_substitutions<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,
     substitutions: &[InferredTypeSubstitution<'db>],
