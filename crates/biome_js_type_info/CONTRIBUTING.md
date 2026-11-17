@@ -392,6 +392,51 @@ and infers the numeric literal type `1`. That type contains no handles or
 wrappers, so normalization leaves it as `1`. Normalization does not perform the
 generic substitution itself.
 
+Normalization does instantiate a generic alias whose body is an intersection
+or contains a conditional type, once its type arguments refer to no type
+parameter. So `NonNullable<string | null>`, whose body is `T & {}`, normalizes
+to `string`. Other generic aliases stay instances of their declarations.
+
+## Unions and Intersections
+
+Build unions and intersections with `TypeData::union_from_types` and
+`TypeData::intersection_from_types`, which normalize them in
+[`builders.rs`](src/builders.rs). Every rule there gives a type with the same
+values as the type written, as TypeScript's own normalization does, so it never
+makes a type narrower. Rebuilding a type from its slots, as substitution and
+normalization do, runs the builders again, so the rules apply once handles are
+resolved.
+
+The intersection builder:
+
+- flattens nested intersections, removes duplicates, and lets `never` absorb
+  the other operands;
+- keeps the narrower of two primitives, or gives `never` when they share no
+  value, so `string & "a"` is `"a"`;
+- gives `never` for `null` or `undefined` next to an object type;
+- removes `{}` next to an operand that is never `null` or `undefined`, so
+  `string & {}` is `string`, while `T & {}` stays;
+- distributes over union operands, so `(A | B) & C` is `(A & C) | (B & C)`,
+  while the product has at most 32 members; a larger product keeps its union
+  operands;
+- merges operands that are all objects, interfaces, class instances,
+  functions, or namespaces into one anonymous type, which loses their names.
+
+A property that several merged operands declare has the intersection of their
+types, where an optional property's type includes `undefined`, and it is
+optional or readonly only when every operand declares it so. Methods, and
+properties whose type is a function, get the union of their types instead:
+TypeScript intersects function types into overloads, which Biome doesn't
+model, and the union is wider. Member lookup reads a property of an
+intersection that isn't merged the same way: only the operands that declare
+it count, not their index signatures or the apparent members of primitives.
+
+The builders don't resolve handles. A rule that needs to know the values of an
+operand, such as whether it can be `null`, doesn't apply to a handle, a type
+parameter, or another type the builder can't tell, so the intersection keeps
+that operand. A new rule must keep this property: when the builder can't tell,
+the type stays as written, less simplified but never narrower.
+
 ## Cycles
 
 Salsa invokes `infer_module_types_cycle_result` when tracked module inference

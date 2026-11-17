@@ -24,9 +24,10 @@ use biome_js_type_info::{
         ConditionalType, InternedClass as InferredClass,
         InternedConstructor as InferredConstructor, InternedFunction as InferredFunction,
         InternedGenericTypeParameter as InferredGenericTypeParameter,
-        InternedLiteral as InferredInternedLiteral, InternedMappedType as InferredMappedType,
-        InternedTuple as InferredTuple, InternedTypeInstance as InferredTypeInstance,
-        Literal as InferredLiteral, LocalTypeHandle as InferredLocalTypeHandle,
+        InternedIntersection as InferredIntersection, InternedLiteral as InferredInternedLiteral,
+        InternedMappedType as InferredMappedType, InternedTuple as InferredTuple,
+        InternedTypeInstance as InferredTypeInstance, Literal as InferredLiteral,
+        LocalTypeHandle as InferredLocalTypeHandle,
         NamedFunctionParameter as InferredNamedFunctionParameter, ReturnType as InferredReturnType,
         TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
         TypeMember as InferredTypeMember, TypeofExpression as InferredTypeofExpression,
@@ -2482,6 +2483,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// rows?.[0];
     /// ```
     ///
+    /// An intersection contributes the element that its tuple operands
+    /// declare at a known index (see [`Self::intersection_element_type`]).
+    ///
     /// The result is `None` when nothing contributes. Nesting deeper than the
     /// work limit yields `Unknown`, because the unvisited members may hold any
     /// type.
@@ -2548,6 +2552,11 @@ impl<'db> ResolutionCtx<'db, '_> {
                     Some(branch) => pending.push(branch),
                     None => return Some(InferredTypeData::Unknown),
                 },
+                InferredTypeData::Intersection(intersection) => {
+                    if let Some(index) = index {
+                        types.extend(self.intersection_element_type(intersection, index));
+                    }
+                }
                 InferredTypeData::Unknown
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
@@ -2569,7 +2578,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredTypeData::Object(_)
                 | InferredTypeData::Generic(_)
                 | InferredTypeData::Local(_)
-                | InferredTypeData::Intersection(_)
                 | InferredTypeData::TypeOperator(_)
                 | InferredTypeData::IndexedAccess(_)
                 | InferredTypeData::MappedType(_)
@@ -2589,6 +2597,40 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
 
         collected_type_result(self.db, types)
+    }
+
+    /// Returns the type of the element at `index` of an intersection, which
+    /// is the intersection of the elements that tuple operands declare there,
+    /// as for a property that several operands declare. An array operand
+    /// declares no element: TypeScript reads its element type through an index
+    /// signature, which doesn't count when an operand declares the element.
+    /// So `t[0]` on `[string | number] & string[]` is `string | number`.
+    ///
+    /// Returns `None` when no tuple operand declares the element. A rest
+    /// element doesn't count, so the result can only be wider.
+    fn intersection_element_type(
+        &mut self,
+        intersection: InferredIntersection<'db>,
+        index: usize,
+    ) -> Option<InferredTypeData<'db>> {
+        let mut elements = Vec::new();
+        for operand in intersection.types(self.db) {
+            let mut operand = self.resolve_inferred_type(*operand);
+            if let InferredTypeData::TypeOperator(operator) = operand
+                && operator.operator(self.db) == biome_js_type_info::TypeOperator::Readonly
+            {
+                operand = self.resolve_inferred_type(operator.ty(self.db));
+            }
+            let InferredTypeData::Tuple(tuple) = operand else {
+                continue;
+            };
+            if let Some(element) = tuple.elements(self.db).get(index)
+                && !element.is_rest
+            {
+                elements.push(self.optional_element_type(element.ty, element.is_optional));
+            }
+        }
+        (!elements.is_empty()).then(|| InferredTypeData::intersection_from_types(self.db, elements))
     }
 
     fn resolve_element_types_from_index(

@@ -55,24 +55,24 @@ Binding readValue "readValue" => sync Function "readValue" {
     params: [
       required value: Object {
         prototype: No prototype
-        members: ["value": string | number]
+        members: ["value": never]
       }
     ]
     type_args: []
   }
   returns: Object {
     prototype: No prototype
-    members: ["value": string | number]
+    members: ["value": never]
   }
 }
 
 Binding value "value" => Object {
   prototype: No prototype
-  members: ["value": string | number]
+  members: ["value": never]
 }
 
 Expression "value" => Object {
   prototype: No prototype
-  members: ["value": string | number]
+  members: ["value": never]
 }
 ```

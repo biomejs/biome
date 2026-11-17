@@ -1,0 +1,130 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidIntersections.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// Intersections are normalized as in TypeScript: `NonNullable<T>` is `T & {}`,
+// `null` and `undefined` give `never` next to `{}` or an object type, and a
+// property that two operands declare has the intersection of their types, so
+// these values are never nullish.
+
+class Options {
+	label?: string;
+}
+
+function nonNullable(value: NonNullable<string | null>) {
+	return value ?? "";
+}
+
+function distributed(value: (string | undefined) & {}) {
+	return value ?? "";
+}
+
+function declaredTwice(options: Options & { label: string }) {
+	return options.label ?? "";
+}
+
+function nullishWithObject(value: (Options | null) & { size: number }) {
+	return value?.size;
+}
+
+```
+
+# Diagnostics
+```
+invalidIntersections.ts:12:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    11 │ function nonNullable(value: NonNullable<string | null>) {
+  > 12 │ 	return value ?? "";
+       │ 	       ^^^^^
+    13 │ }
+    14 │ 
+  
+  i Drop ?? and the fallback expression.
+  
+    11 │ function nonNullable(value: NonNullable<string | null>) {
+  > 12 │ 	return value ?? "";
+       │ 	             ^^
+    13 │ }
+    14 │ 
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+invalidIntersections.ts:16:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    15 │ function distributed(value: (string | undefined) & {}) {
+  > 16 │ 	return value ?? "";
+       │ 	       ^^^^^
+    17 │ }
+    18 │ 
+  
+  i Drop ?? and the fallback expression.
+  
+    15 │ function distributed(value: (string | undefined) & {}) {
+  > 16 │ 	return value ?? "";
+       │ 	             ^^
+    17 │ }
+    18 │ 
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+invalidIntersections.ts:20:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    19 │ function declaredTwice(options: Options & { label: string }) {
+  > 20 │ 	return options.label ?? "";
+       │ 	       ^^^^^^^^^^^^^
+    21 │ }
+    22 │ 
+  
+  i Drop ?? and the fallback expression.
+  
+    19 │ function declaredTwice(options: Options & { label: string }) {
+  > 20 │ 	return options.label ?? "";
+       │ 	                     ^^
+    21 │ }
+    22 │ 
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+invalidIntersections.ts:24:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    23 │ function nullishWithObject(value: (Options | null) & { size: number }) {
+  > 24 │ 	return value?.size;
+       │ 	       ^^^^^
+    25 │ }
+    26 │ 
+  
+  i Replace ?. with ..
+  
+    23 │ function nullishWithObject(value: (Options | null) & { size: number }) {
+  > 24 │ 	return value?.size;
+       │ 	            ^^
+    25 │ }
+    26 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```

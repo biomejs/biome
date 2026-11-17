@@ -317,6 +317,10 @@ struct MemberLookupState<'db> {
     mode: MemberLookupMode,
     collect_result: bool,
     crossed_instance: bool,
+    /// Whether the lookup reached `ty` through the apparent type of a
+    /// primitive or a `readonly` array (see [`apparent_type`]), whose members
+    /// don't count as declarations of an intersection operand.
+    through_apparent_type: bool,
     substitutions: Rc<[InferredTypeSubstitution<'db>]>,
 }
 
@@ -328,6 +332,7 @@ impl PartialEq for MemberLookupState<'_> {
             && self.mode == other.mode
             && self.collect_result == other.collect_result
             && self.crossed_instance == other.crossed_instance
+            && self.through_apparent_type == other.through_apparent_type
             && self.substitutions.len() == other.substitutions.len()
             && (self.substitutions == other.substitutions
                 || self
@@ -345,6 +350,7 @@ impl Hash for MemberLookupState<'_> {
         self.mode.hash(state);
         self.collect_result.hash(state);
         self.crossed_instance.hash(state);
+        self.through_apparent_type.hash(state);
         self.substitutions.len().hash(state);
         let mut hash = 0u64;
         for substitution in self.substitutions.iter() {
@@ -363,6 +369,7 @@ impl<'db> MemberLookupState<'db> {
             mode,
             collect_result: false,
             crossed_instance: false,
+            through_apparent_type: false,
             substitutions: Rc::default(),
         }
     }
@@ -373,25 +380,46 @@ impl<'db> MemberLookupState<'db> {
             mode: self.mode,
             collect_result,
             crossed_instance: self.crossed_instance,
+            through_apparent_type: self.through_apparent_type,
             substitutions: self.substitutions.clone(),
+        }
+    }
+
+    /// Returns the state that starts the lookup on an operand of an
+    /// intersection, as if the operand were the type looked up.
+    fn operand(&self, ty: InferredTypeData<'db>) -> Self {
+        Self {
+            through_apparent_type: false,
+            ..self.child(ty, false)
         }
     }
 }
 
+/// A member that a lookup found.
+#[derive(Clone, Copy)]
+struct FoundMember<'db> {
+    ty: InferredTypeData<'db>,
+    is_optional: bool,
+    /// Whether every value of the type looked up has the member, declared as
+    /// a property, a method, or another named member of the type or a type it
+    /// inherits from. A member found through an index signature, the apparent
+    /// type of a primitive, or the members of a union isn't declared.
+    is_declared: bool,
+}
+
+/// Maximum number of intersections that one member lookup looks into within
+/// each other. Deeper intersections give the union of the members of their
+/// operands.
+const MAX_NESTED_INTERSECTION_LOOKUPS: usize = 8;
+
 /// Finds a member through own properties, inheritance, and compound types.
 ///
 /// Instance wrappers contribute substitutions that are applied while the
-/// lookup advances. Members found through unions, intersections, or merged
-/// references are collected into a union. A branch without `name` contributes
-/// nothing; it does not discard members found on other branches. Consequently,
-/// `Some` may describe only part of a compound type, and `None` means only that
-/// no member was found in the supported portion that was traversed.
-///
-/// Traversal processes at most 1024 distinct states. A state includes the type,
-/// lookup mode, accumulated substitutions, and whether a compound or instance
-/// boundary has been crossed. Repeated states do not consume work. If the limit
-/// is reached, the result is `Unknown` because unvisited states may contain a
-/// different member type.
+/// lookup advances. Members found through unions or merged references are
+/// collected into a union. A branch without `name` contributes nothing; it
+/// does not discard members found on other branches. Consequently, `Some` may
+/// describe only part of a compound type, and `None` means only that no member
+/// was found in the supported portion that was traversed.
 ///
 /// For example, lookup of `item` on `Left | Right | Missing` returns
 /// `string | number`, even though `Missing` has no `item`:
@@ -401,6 +429,26 @@ impl<'db> MemberLookupState<'db> {
 /// type Right = { item: number };
 /// type Missing = {};
 /// ```
+///
+/// A member of an intersection is a member of an operand. When operands that
+/// declare the member exist, only they count, as in TypeScript: the member's
+/// type is the intersection of their types, where an optional member's type
+/// includes `undefined`, so `a` is `string` on
+/// `{ a?: string } & { a: string | null }`. Methods, and properties whose type
+/// is a function, get the union of their types instead, because Biome doesn't
+/// model the overloads that TypeScript makes of them. An operand declares the
+/// member when every value has it as a named member: a member found through an
+/// index signature, the apparent type of a primitive, or the members of a
+/// union doesn't count. Without such operands, the members found on the
+/// operands are collected into a union. Intersections nested more than 8 deep
+/// always collect a union.
+///
+/// Traversal processes at most 1024 distinct states, shared with the
+/// operands of intersections. A state includes the type, lookup mode,
+/// accumulated substitutions, and whether a compound or instance boundary has
+/// been crossed. Repeated states do not consume work. If the limit is reached,
+/// the result is `Unknown` because unvisited states may contain a different
+/// member type.
 pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
     db: &'db dyn ModuleDb,
     resolver: &mut impl MemberLookupResolver<'db>,
@@ -428,10 +476,38 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
     key: MemberLookupKey<'_, 'db>,
     mode: MemberLookupMode,
 ) -> Option<InferredTypeData<'db>> {
-    let mut seen = FxHashSet::default();
-    let mut pending = vec![MemberLookupState::new(ty, mode)];
-    let mut found = Vec::new();
     let mut remaining_steps = MAX_MEMBER_LOOKUP_STEPS;
+    match find_members(
+        db,
+        resolver,
+        MemberLookupState::new(ty, mode),
+        key,
+        &mut remaining_steps,
+        0,
+    ) {
+        Some(found) => {
+            collected_type_result(db, found.into_iter().map(|member| member.ty).collect())
+        }
+        None => Some(InferredTypeData::Unknown),
+    }
+}
+
+/// Finds the members `key` from `root`, as [`find_member_type_with_resolver`]
+/// describes, and returns each member that the lookup collected.
+///
+/// `depth` is the number of intersections that contain `root`. Returns `None`
+/// when the lookup runs out of `remaining_steps`.
+fn find_members<'db>(
+    db: &'db dyn ModuleDb,
+    resolver: &mut impl MemberLookupResolver<'db>,
+    root: MemberLookupState<'db>,
+    key: MemberLookupKey<'_, 'db>,
+    remaining_steps: &mut usize,
+    depth: usize,
+) -> Option<Vec<FoundMember<'db>>> {
+    let mut seen = FxHashSet::default();
+    let mut pending = vec![root];
+    let mut found = Vec::new();
 
     while let Some(mut state) = pending.pop() {
         let ty = resolver
@@ -455,10 +531,10 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
 
         // Deduplicated entries above don't count against the budget, so the
         // limit measures distinct traversal states rather than queue churn.
-        if remaining_steps == 0 {
-            return Some(InferredTypeData::Unknown);
+        if *remaining_steps == 0 {
+            return None;
         }
-        remaining_steps -= 1;
+        *remaining_steps -= 1;
 
         if let InferredTypeData::InstanceOf(instance) = ty {
             let target = resolver
@@ -498,23 +574,30 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
             }
             MemberLookupKey::Name(_) | MemberLookupKey::Symbol(_) => own_member,
         };
-        if let Some((member_ty, is_optional)) = own_member {
-            let member_ty = resolver.finalize_member_type(
-                db,
-                member_ty,
-                is_optional,
-                &state.substitutions,
-                state.crossed_instance,
-            );
+        if let Some(own_member) = own_member {
+            let member = FoundMember {
+                ty: resolver.finalize_member_type(
+                    db,
+                    own_member.ty,
+                    own_member.is_optional,
+                    &state.substitutions,
+                    state.crossed_instance,
+                ),
+                is_optional: own_member.is_optional,
+                is_declared: own_member.is_declared
+                    && !state.collect_result
+                    && !state.through_apparent_type,
+            };
             if state.collect_result {
-                found.push(member_ty);
+                found.push(member);
                 continue;
             }
-            return Some(member_ty);
+            return Some(Vec::from([member]));
         }
 
         if let Some(apparent) = apparent_type(db, resolver, ty) {
             state.ty = apparent;
+            state.through_apparent_type = true;
             pending.push(state);
             continue;
         }
@@ -579,7 +662,9 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
                     pending.push(state.child(constraint, state.collect_result));
                 }
             }
-            InferredTypeData::Intersection(intersection) => {
+            InferredTypeData::Intersection(intersection)
+                if depth >= MAX_NESTED_INTERSECTION_LOOKUPS =>
+            {
                 pending.extend(
                     intersection
                         .types(db)
@@ -588,6 +673,24 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
                         .copied()
                         .map(|ty| state.child(ty, true)),
                 );
+            }
+            InferredTypeData::Intersection(intersection) => {
+                let member = intersection_member(
+                    db,
+                    resolver,
+                    intersection.types(db),
+                    key,
+                    &state,
+                    remaining_steps,
+                    depth,
+                )?;
+                if let Some(mut member) = member {
+                    if !state.collect_result {
+                        return Some(Vec::from([member]));
+                    }
+                    member.is_declared = false;
+                    found.push(member);
+                }
             }
             InferredTypeData::MergedReference(reference) => {
                 pending.extend(reference.targets(db).map(|ty| state.child(ty, true)));
@@ -611,8 +714,17 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
                 match conditional_lookup_states(db, resolver, extends, &state) {
                     Some(states) => pending.extend(states),
                     // The member's type depends on a branch that can't be selected.
-                    None if state.collect_result => found.push(InferredTypeData::Unknown),
-                    None => return Some(InferredTypeData::Unknown),
+                    None => {
+                        let member = FoundMember {
+                            ty: InferredTypeData::Unknown,
+                            is_optional: false,
+                            is_declared: false,
+                        };
+                        if !state.collect_result {
+                            return Some(Vec::from([member]));
+                        }
+                        found.push(member);
+                    }
                 }
             }
             InferredTypeData::Unknown
@@ -650,7 +762,116 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
         }
     }
 
-    collected_type_result(db, found)
+    Some(found)
+}
+
+/// Finds the member `key` of the intersection of `operands`, reached in
+/// `state`, as [`find_member_type_with_resolver`] describes.
+///
+/// Returns `None` when the lookup runs out of `remaining_steps`, and
+/// `Some(None)` when no operand has the member.
+fn intersection_member<'db>(
+    db: &'db dyn ModuleDb,
+    resolver: &mut impl MemberLookupResolver<'db>,
+    operands: &[InferredTypeData<'db>],
+    key: MemberLookupKey<'_, 'db>,
+    state: &MemberLookupState<'db>,
+    remaining_steps: &mut usize,
+    depth: usize,
+) -> Option<Option<FoundMember<'db>>> {
+    let mut declared = Vec::new();
+    let mut others = Vec::new();
+    for operand in operands {
+        let found = find_members(
+            db,
+            resolver,
+            state.operand(*operand),
+            key,
+            remaining_steps,
+            depth + 1,
+        )?;
+        match found.as_slice() {
+            [member] if member.is_declared => declared.push(*member),
+            members => others.extend(members.iter().map(|member| member.ty)),
+        }
+    }
+
+    let member = match declared.as_slice() {
+        [] => collected_type_result(db, others).map(|ty| FoundMember {
+            ty,
+            is_optional: false,
+            is_declared: false,
+        }),
+        [member] => Some(*member),
+        members => {
+            let ty = if members
+                .iter()
+                .any(|member| is_function_member(db, resolver, member.ty))
+            {
+                InferredTypeData::union_from_types(
+                    db,
+                    members.iter().map(|member| member.ty).collect(),
+                )
+            } else {
+                // A lookup doesn't always add `undefined` to the type of an
+                // optional member, and TypeScript's type of it includes
+                // `undefined`. Adding it again changes nothing.
+                InferredTypeData::intersection_from_types(
+                    db,
+                    members
+                        .iter()
+                        .map(|member| {
+                            if member.is_optional {
+                                InferredTypeData::union_from_types(
+                                    db,
+                                    Vec::from([member.ty, InferredTypeData::Undefined]),
+                                )
+                            } else {
+                                member.ty
+                            }
+                        })
+                        .collect(),
+                )
+            };
+            Some(FoundMember {
+                ty,
+                is_optional: members.iter().all(|member| member.is_optional),
+                is_declared: true,
+            })
+        }
+    };
+    Some(member)
+}
+
+/// Returns whether the member type `ty` is a function: a method, an overload
+/// set, or a property whose type is a function, also when it is optional.
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Only function, constructor, and call-signature types are functions."
+)]
+fn is_function_member<'db>(
+    db: &'db dyn ModuleDb,
+    resolver: &mut impl MemberLookupResolver<'db>,
+    ty: InferredTypeData<'db>,
+) -> bool {
+    let is_function = |ty: InferredTypeData<'db>| match ty {
+        InferredTypeData::Function(_) | InferredTypeData::Constructor(_) => true,
+        InferredTypeData::Object(object) => {
+            let members = object.members(db);
+            !members.is_empty() && members.iter().all(|member| member.kind.is_call_signature())
+        }
+        _ => false,
+    };
+    match resolver.resolve_type(db, ty).expand_canonical_global(db) {
+        InferredTypeData::Union(union) => union.types(db).iter().any(|member| {
+            is_function(
+                resolver
+                    .resolve_type(db, *member)
+                    .expand_canonical_global(db),
+            )
+        }),
+        ty => is_function(ty),
+    }
 }
 
 /// Returns the contributions of the interface or class `ty`, the interfaces
@@ -699,19 +920,19 @@ fn merged_contributed_method<'db>(
     db: &'db dyn ModuleDb,
     resolver: &mut impl MemberLookupResolver<'db>,
     ty: InferredTypeData<'db>,
-    own_member: Option<(InferredTypeData<'db>, bool)>,
+    own_member: Option<OwnMember<'db>>,
     name: &str,
     mode: MemberLookupMode,
-) -> Option<(InferredTypeData<'db>, bool)> {
+) -> Option<OwnMember<'db>> {
     if !matches!(mode, MemberLookupMode::Any | MemberLookupMode::Instance) {
         return None;
     }
     let key = MemberLookupKey::Name(name);
     let mut declarations = Vec::new();
     let mut is_optional = None;
-    if let Some((own_ty, own_is_optional)) = own_member {
-        declarations.push(method_signatures(db, resolver, own_ty)?);
-        is_optional = Some(own_is_optional);
+    if let Some(own_member) = own_member {
+        declarations.push(method_signatures(db, resolver, own_member.ty)?);
+        is_optional = Some(own_member.is_optional);
     }
     for contribution in contributions(db, ty) {
         let contribution = resolver
@@ -728,14 +949,12 @@ fn merged_contributed_method<'db>(
         } else {
             (contribution, Vec::new())
         };
-        let Some((member_ty, member_is_optional)) =
-            find_own_member_type(db, target, key, MemberLookupMode::Instance)
-        else {
+        let Some(member) = find_own_member_type(db, target, key, MemberLookupMode::Instance) else {
             continue;
         };
-        let member_ty = apply_substitutions(db, member_ty, &substitutions);
+        let member_ty = apply_substitutions(db, member.ty, &substitutions);
         declarations.push(method_signatures(db, resolver, member_ty)?);
-        is_optional.get_or_insert(member_is_optional);
+        is_optional.get_or_insert(member.is_optional);
     }
     if declarations.len() < 2 {
         return None;
@@ -748,10 +967,11 @@ fn merged_contributed_method<'db>(
             ty,
         })
         .collect();
-    Some((
-        InferredTypeData::object_from_members(db, signatures),
-        is_optional.unwrap_or(false),
-    ))
+    Some(OwnMember {
+        ty: InferredTypeData::object_from_members(db, signatures),
+        is_optional: is_optional.unwrap_or(false),
+        is_declared: true,
+    })
 }
 
 /// Returns the call signatures of a method whose type is `ty`, each paired
@@ -1217,14 +1437,13 @@ fn class_side_type<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> Inf
 ///
 /// Named, computed, and index-signature members are filtered according to
 /// `mode`. Modules and namespaces accept members from either side. Getter
-/// members produce their return type. The returned boolean indicates whether
-/// the member declaration is optional.
+/// members produce their return type.
 fn find_own_member_type<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,
     key: MemberLookupKey<'_, 'db>,
     mode: MemberLookupMode,
-) -> Option<(InferredTypeData<'db>, bool)> {
+) -> Option<OwnMember<'db>> {
     let find = |members, mode: MemberLookupMode, allow_index_signature| {
         find_member_in_members(
             db,
@@ -1321,13 +1540,23 @@ fn find_own_member_type<'db>(
     }
 }
 
+/// A member that a type has itself.
+#[derive(Clone, Copy)]
+struct OwnMember<'db> {
+    ty: InferredTypeData<'db>,
+    is_optional: bool,
+    /// Whether the type declares the member by its name or symbol, rather than
+    /// through an index signature or a computed key of type `string`.
+    is_declared: bool,
+}
+
 fn find_member_in_members<'db>(
     db: &'db dyn ModuleDb,
     members: &[InferredTypeMember<'db>],
     key: MemberLookupKey<'_, 'db>,
     allows_named_member: impl Fn(&InferredTypeMemberKind<'db>) -> bool,
     allow_index_signature: bool,
-) -> Option<(InferredTypeData<'db>, bool)> {
+) -> Option<OwnMember<'db>> {
     let name = match key {
         MemberLookupKey::Name(name) => name,
         MemberLookupKey::Symbol(symbol) => {
@@ -1335,13 +1564,17 @@ fn find_member_in_members<'db>(
                 if !allows_named_member(&member.kind) {
                     return None;
                 }
-                let key = member.kind.computed_value_type().or_else(|| {
+                let computed = member.kind.computed_value_type();
+                let key = computed.or_else(|| {
                     allow_index_signature
                         .then(|| member.kind.index_signature_type())
                         .flatten()
                 })?;
-                (key == symbol)
-                    .then_some((member_value_type(db, member), member.kind.is_optional()))
+                (key == symbol).then_some(OwnMember {
+                    ty: member_value_type(db, member),
+                    is_optional: member.kind.is_optional(),
+                    is_declared: computed.is_some(),
+                })
             });
         }
     };
@@ -1352,7 +1585,11 @@ fn find_member_in_members<'db>(
                 && member.kind.computed_name().is_none()
                 && member.kind.has_name(name)
         })
-        .map(|member| (member_value_type(db, member), member.kind.is_optional()));
+        .map(|member| OwnMember {
+            ty: member_value_type(db, member),
+            is_optional: member.kind.is_optional(),
+            is_declared: true,
+        });
     if named_member.is_some() {
         return named_member;
     }
@@ -1361,14 +1598,13 @@ fn find_member_in_members<'db>(
         if !allows_named_member(&member.kind) {
             return None;
         }
-        member
-            .kind
-            .computed_value_type()
-            .is_some_and(|ty| {
-                ty.is_string_literal_key(db, name)
-                    || allow_index_signature && ty.is_string_key_type(db)
-            })
-            .then_some((member_value_type(db, member), false))
+        let ty = member.kind.computed_value_type()?;
+        let is_declared = ty.is_string_literal_key(db, name);
+        (is_declared || allow_index_signature && ty.is_string_key_type(db)).then_some(OwnMember {
+            ty: member_value_type(db, member),
+            is_optional: false,
+            is_declared,
+        })
     });
     if computed_member.is_some() {
         return computed_member;
@@ -1380,7 +1616,11 @@ fn find_member_in_members<'db>(
                 .kind
                 .index_signature_type()
                 .is_some_and(|ty| ty.is_string_key_type(db) || ty.is_string_literal_key(db, name))
-                .then_some((member.ty, false))
+                .then_some(OwnMember {
+                    ty: member.ty,
+                    is_optional: false,
+                    is_declared: false,
+                })
         })
     })?
 }
