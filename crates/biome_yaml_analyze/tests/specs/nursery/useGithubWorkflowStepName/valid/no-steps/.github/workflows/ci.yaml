@@ -1,0 +1,7 @@
+# should not generate diagnostics
+name: CI
+on: push
+jobs:
+  call:
+    name: Call
+    uses: ./.github/workflows/reusable.yml

@@ -1,0 +1,20 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: ci.yaml
+---
+# Input
+```yaml
+# should not generate diagnostics
+name: CI
+on: push
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+      - name: Test
+        run: cargo test
+
+```
