@@ -258,6 +258,38 @@ export {};
     );
 }
 
+// The top-level interfaces of a TypeScript file without imports or exports
+// that isn't a declaration file aren't globals, so `string` doesn't satisfy
+// `Fmt`. TypeScript treats such a file as a script whose interfaces are
+// globals. With `moduleDetection` set to `"force"`, TypeScript treats it as a
+// module and gives the expected types.
+#[test]
+fn scripts_that_arent_declaration_files_declare_no_globals() {
+    assert_file_reads(
+        &[
+            (
+                "/src/polyfills.ts",
+                "interface String { format(): string }\n",
+            ),
+            (
+                "/src/use.ts",
+                r#"
+interface Fmt { format(): string }
+declare function isFmt(v: unknown): v is Fmt;
+export function f(x: string | Fmt | null) { if (isFmt(x)) /*fmt*/x; else /*notFmt*/x; }
+"#,
+            ),
+        ],
+        "/src/use.ts",
+        &[
+            // TypeScript, with `polyfills.ts` in the program: `string | Fmt`.
+            ("fmt", "x", &["Fmt"]),
+            // TypeScript, with `polyfills.ts` in the program: `null`.
+            ("notFmt", "x", &["null", "string"]),
+        ],
+    );
+}
+
 #[test]
 fn in_sees_the_members_of_augmentations() {
     assert_file_reads(
