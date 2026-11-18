@@ -14,6 +14,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use crate::{
     Resolution, ResolveError, ResolveOptions, ResolvedPathInfo, ResolverFsProxy,
     is_relative_specifier, normalize_owned_absolute_path, resolve_module, resolve_path_info,
+    strip_query_and_fragment,
 };
 
 /// The Sass rule that loads a stylesheet.
@@ -44,7 +45,11 @@ pub enum SassLoadRule {
 ///   extensions only tries that one.
 /// - [ResolveOptions::default_files] are tried, with the same extensions and
 ///   partials, in the directory that a URL without an extension names, when
-///   the URL itself matches no file.
+///   the URL itself matches no file. A URL ending in `/` only names that
+///   directory.
+/// - With [SassLoadRule::Import], each lookup above first tries the
+///   import-only files, such as `_theme.import.scss`, for each extension it
+///   tries, and only then the regular files.
 /// - With [ResolveOptions::assume_relative], a bare URL such as `theme` that
 ///   matches no file relative to `base_dir` is resolved as a package, as
 ///   bundlers do. Without it, bare URLs are only resolved as packages. The
@@ -52,7 +57,7 @@ pub enum SassLoadRule {
 ///   inside packages.
 ///
 /// URLs with a scheme, such as `sass:math` or `pkg:bootstrap`, aren't
-/// resolved, and neither are load paths.
+/// resolved, and neither are load paths. A query or fragment is ignored.
 pub fn resolve_sass(
     specifier: &str,
     base_dir: &Utf8Path,
@@ -63,6 +68,7 @@ pub fn resolve_sass(
     if has_url_scheme(specifier) {
         return Err(ResolveError::NotFound);
     }
+    let specifier = strip_query_and_fragment(specifier);
     let is_bare = !is_relative_specifier(specifier) && !specifier.starts_with('/');
     if is_bare && !options.assume_relative {
         return resolve_module(specifier, base_dir, fs, options).map(Resolution::into_path);
@@ -73,10 +79,10 @@ pub fn resolve_sass(
         .filter(|extension| options.extensions.contains(extension))
     {
         Some(extension) => resolve_with_extension(&url, extension, fs, rule)?,
+        None if specifier.ends_with('/') => resolve_directory(&url, fs, rule, options)?,
         None => match resolve_without_extension(url.as_str(), fs, rule, options.extensions)? {
             Some(path) => Some(path),
-            None if is_directory(&url, fs) => resolve_default_file(&url, fs, rule, options)?,
-            None => None,
+            None => resolve_directory(&url, fs, rule, options)?,
         },
     };
     match resolved {
@@ -134,12 +140,19 @@ fn resolve_without_extension(
     Ok(None)
 }
 
-fn resolve_default_file(
-    dir: &Utf8Path,
+fn resolve_directory(
+    url: &Utf8Path,
     fs: &dyn ResolverFsProxy,
     rule: SassLoadRule,
     options: &ResolveOptions,
 ) -> Result<Option<Utf8PathBuf>, ResolveError> {
+    // Without trailing slashes, so `lstat` doesn't follow a symlinked directory.
+    let url = url.components().as_path();
+    let Ok((ResolvedPathInfo::Directory, dir)) =
+        resolve_path_info(Cow::Borrowed(url), fs, &ResolveOptions::default())
+    else {
+        return Ok(None);
+    };
     for default_file in options.default_files {
         let url = dir.join(default_file);
         if let Some(path) = resolve_without_extension(url.as_str(), fs, rule, options.extensions)? {
@@ -216,13 +229,6 @@ fn find_file(path: &Utf8Path, fs: &dyn ResolverFsProxy) -> Option<Utf8PathBuf> {
         Ok((ResolvedPathInfo::File, real_path)) => Some(real_path),
         _ => None,
     }
-}
-
-fn is_directory(path: &Utf8Path, fs: &dyn ResolverFsProxy) -> bool {
-    matches!(
-        resolve_path_info(Cow::Borrowed(path), fs, &ResolveOptions::default()),
-        Ok((ResolvedPathInfo::Directory, _))
-    )
 }
 
 /// Returns whether `specifier` starts with a URL scheme, such as `sass:` or

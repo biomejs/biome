@@ -1422,3 +1422,33 @@ fn test_resolve_sass_bare_urls_fall_back_to_packages() {
         Ok(Utf8PathBuf::from("/node_modules/local/index.scss"))
     );
 }
+#[test]
+fn test_resolve_rejects_bare_export_targets() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/package.json".into(), "{}");
+    fs.insert(
+        "/node_modules/cycle/package.json".into(),
+        r#"{"name":"cycle","exports":{"sass":"cycle"}}"#,
+    );
+    fs.insert(
+        "/node_modules/string/package.json".into(),
+        r#"{"name":"string","exports":"string"}"#,
+    );
+    fs.insert(
+        "/src/package.json".into(),
+        r##"{"name":"app","imports":{"#dep":"dep/style.css"}}"##,
+    );
+    fs.insert("/node_modules/dep/package.json".into(), r#"{"name":"dep"}"#);
+    fs.insert("/node_modules/dep/style.css".into(), "");
+    assert_eq!(
+        resolve("#dep", Utf8Path::new("/src"), &fs, &sass_options()),
+        Ok(Utf8PathBuf::from("/node_modules/dep/style.css"))
+    );
+    for specifier in ["cycle", "string"] {
+        assert_eq!(
+            resolve(specifier, Utf8Path::new("/src"), &fs, &sass_options()),
+            Err(ResolveError::InvalidMappingTarget),
+            "{specifier}"
+        );
+    }
+}
