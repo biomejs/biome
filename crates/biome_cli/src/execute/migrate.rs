@@ -4,7 +4,8 @@ use crate::execute::migrate::eslint_to_biome::MigrationOptions;
 use crate::runner::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
 use crate::{CliDiagnostic, CliSession};
 use biome_analyze::{ActionFilter, AnalysisFilter};
-use biome_configuration::Configuration;
+use biome_configuration::bool::Bool;
+use biome_configuration::{Configuration, ConfigurationPathHint};
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{Console, ConsoleExt, markup};
 use biome_deserialize::Merge;
@@ -17,8 +18,10 @@ use biome_json_parser::{JsonParserOptions, parse_json_with_cache};
 use biome_json_syntax::JsonRoot;
 use biome_languages::JsonFileSource;
 use biome_migrate::{ControlFlow, migrate_configuration};
+use biome_resolver::FsWithResolverProxy;
 use biome_rowan::{AstNode, NodeCache};
 use biome_service::Workspace;
+use biome_service::configuration::{LoadedConfiguration, read_config};
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
     ChangeFileParams, FileContent, FixAction, FormatFileParams, OpenFileParams,
@@ -55,8 +58,7 @@ pub(crate) struct MigratePayload<'a> {
     pub(crate) configuration_file_path: Utf8PathBuf,
     pub(crate) sub_command: Option<MigrateSubCommand>,
     pub(crate) nested_configuration_files: Vec<BiomePath>,
-    /// The configuration of the root configuration file, merged with the
-    /// configurations it extends.
+    /// The root configuration merged with the configurations it extends.
     pub(crate) resolved_configuration: Option<Configuration>,
 }
 
@@ -80,6 +82,17 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
     let mut diagnostic_result = MigrationResultDiagnostic::default();
 
     for configuration_file_path in configuration_list {
+        let file_resolved_configuration = if configuration_file_path == root_configuration_path {
+            resolved_configuration.clone()
+        } else if matches!(sub_command, Some(MigrateSubCommand::Prettier)) {
+            resolve_nested_configuration(
+                workspace.fs(),
+                &configuration_file_path,
+                resolved_configuration.as_ref(),
+            )
+        } else {
+            None
+        };
         let migrate_file_payload = MigrateFile {
             workspace,
             console,
@@ -87,11 +100,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
             project_key,
             sub_command: sub_command.as_ref(),
             write,
-            resolved_configuration: if configuration_file_path == root_configuration_path {
-                resolved_configuration.as_ref()
-            } else {
-                None
-            },
+            resolved_configuration: file_resolved_configuration.as_ref(),
         };
 
         let result = migrate_file(migrate_file_payload)?;
@@ -105,6 +114,40 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
     Ok(())
 }
 
+/// Returns the configuration of the nested file at `path` merged with the
+/// configurations it extends, including `root_configuration` for `"//"`.
+/// Returns `None` when the file or a configuration it extends can't be loaded.
+fn resolve_nested_configuration(
+    fs: &dyn FsWithResolverProxy,
+    path: &BiomePath,
+    root_configuration: Option<&Configuration>,
+) -> Option<Configuration> {
+    // Pass the file path like the workspace does. `extends` entries resolve
+    // from it, so passing the directory can pick different files.
+    let payload = read_config(
+        fs,
+        ConfigurationPathHint::FromWorkspace(path.to_path_buf()),
+        false,
+    )
+    .ok()??;
+    let loaded_configuration = LoadedConfiguration::try_from_payload(Some(payload), fs).ok()?;
+    if loaded_configuration.has_errors() {
+        return None;
+    }
+    let nested_configuration = loaded_configuration.resolved_configuration();
+    if nested_configuration.extends_root()
+        && let Some(root_configuration) = root_configuration
+    {
+        let mut configuration = root_configuration.clone();
+        configuration.merge_with(nested_configuration);
+        // Otherwise the merge keeps `root: true` from the root configuration.
+        configuration.root = Some(Bool(false));
+        Some(configuration)
+    } else {
+        Some(nested_configuration)
+    }
+}
+
 struct MigrateFile<'a> {
     pub(crate) workspace: &'a dyn Workspace,
     pub(crate) console: &'a mut dyn Console,
@@ -112,8 +155,8 @@ struct MigrateFile<'a> {
     pub(crate) write: bool,
     pub(crate) configuration_file_path: &'a BiomePath,
     pub(crate) sub_command: Option<&'a MigrateSubCommand>,
-    /// The configuration of this file, merged with the configurations it
-    /// extends. It is `None` for nested configuration files.
+    /// This file's configuration merged with the configurations it extends.
+    /// Nested files have it only in the Prettier migration.
     pub(crate) resolved_configuration: Option<&'a Configuration>,
 }
 
@@ -289,12 +332,9 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
                     inline_config: None,
                     editor_features: None,
                 })?;
-                // The project settings still hold the configuration read before
-                // the migration. The inline configuration replaces each of its
-                // sections as a whole, so it must also carry the options this
-                // file inherits through `extends`. Nested configuration files
-                // don't provide them, so their inherited options that the
-                // migration doesn't set fall back to the defaults.
+                // The project settings predate the migration. The inline
+                // configuration replaces whole sections, so it needs the options
+                // inherited through `extends`.
                 let printed = workspace.format_file(FormatFileParams {
                     project_key,
                     path: biome_path,

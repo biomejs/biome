@@ -22,8 +22,7 @@ pub(crate) struct MigrateCommandPayload {
     pub(crate) sub_command: Option<MigrateSubCommand>,
     pub(crate) configuration_file_path: Option<Utf8PathBuf>,
     pub(crate) configuration_directory_path: Option<Utf8PathBuf>,
-    /// The configuration of the root configuration file, merged with the
-    /// configurations it extends.
+    /// The root configuration merged with the configurations it extends.
     pub(crate) resolved_configuration: Option<Configuration>,
 }
 
