@@ -1763,13 +1763,12 @@ impl RootCollector<'_> {
     /// and uses `this` there when `has_this` is true.
     ///
     /// A variable that an enclosing root declares, or an import read in a
-    /// function, narrows in `root` too, from its declared type, by the tests
-    /// and writes of `root` alone. TypeScript uses the flow at a closure's
-    /// creation to narrow a read when the variable is a `const`, or when
-    /// nothing assigns the variable after the closure is created. Biome
-    /// starts the captured variable from its declared type instead. So `root`
-    /// gets a graph even when it declares no variable that can narrow, and
-    /// relevance keeps no read when no subject can narrow.
+    /// function, narrows in `root` too, by the tests and writes of `root`. It
+    /// starts from its declared type, or, when the read continues the flow
+    /// of an enclosing root, from its type where that root creates the
+    /// closure that holds `root`. So `root` gets a graph even when it
+    /// declares no variable that can narrow, and relevance keeps no read when
+    /// no subject can narrow.
     ///
     /// A read inside a closure that `root` creates, directly or through other
     /// closures, continues the flow of `root` where `root` creates the
@@ -3334,11 +3333,11 @@ impl RootCollector<'_> {
     /// nested in the one that declares it, a `let` or a `var` counts only
     /// when it has no initializer and no write at all. TypeScript treats such
     /// a `let` the same way but assumes such a `var` initialized there. A
-    /// path on `this` counts in a constructor, and in an arrow function that
-    /// it calls where it is defined, when its first key names a field of the
-    /// constructor's class that is not `static`, has no initializer and no
-    /// `!`, and is not declared with `declare` or `accessor`, as in
-    /// TypeScript.
+    /// property of `this`, as `this.x` but not `this.x.y`, counts in a
+    /// constructor, and in an arrow function that it calls where it is
+    /// defined, when its key names a field of the constructor's class that is
+    /// not `static`, has no initializer and no `!`, and is not declared with
+    /// `declare` or `accessor`, as in TypeScript.
     fn uninitialized_subjects(
         &self,
         root: &AnyJsControlFlowRoot,
