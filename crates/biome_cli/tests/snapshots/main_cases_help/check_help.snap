@@ -254,6 +254,11 @@ The configuration contained in `biome.json` or `biome.jsonc`.
                               `rgb(0, 0, 0)` becomes `rgb( 0, 0, 0 )` and `[data-attr]` becomes `[
                               data-attr ]`. Empty delimiters are unchanged.
                               If unset, inherits the global delimiter spacing setting.
+        --css-formatter-expand=<auto|always|never>  Controls whether SCSS maps, and lists used as
+                              map values, are expanded onto multiple lines. `auto` and `always`
+                              expand them regardless of width, matching Prettier. `never` keeps them
+                              on one line when they fit within the line width.
+                              If unset, inherits the global expansion setting.
         --css-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
                               of the file. If unset, inherits the global trailing newline setting.
         --css-linter-enabled=<true|false>  Enables or disables the linter for CSS.

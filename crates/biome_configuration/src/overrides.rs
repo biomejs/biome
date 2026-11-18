@@ -242,6 +242,7 @@ impl OverridePattern {
             formatter.line_ending = formatter.line_ending.or(global.line_ending);
             formatter.line_width = formatter.line_width.or(global.line_width);
             formatter.delimiter_spacing = formatter.delimiter_spacing.or(global.delimiter_spacing);
+            formatter.expand = formatter.expand.or(global.expand);
             formatter.trailing_newline = formatter.trailing_newline.or(global.trailing_newline);
         }
         #[cfg(feature = "lang_graphql")]
