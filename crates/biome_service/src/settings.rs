@@ -102,6 +102,8 @@ pub struct Settings {
 
     configuration_provider: Option<Arc<dyn ExtendedConfigurationProvider>>,
 
+    configuration_dependency_paths: FxHashSet<Utf8PathBuf>,
+
     pub(crate) module_graph_resolution_kind: ModuleGraphResolutionKind,
 
     /// Formatter settings applied to all files in the project.
@@ -269,6 +271,10 @@ impl Settings {
         self.source.as_ref()?.source_path()
     }
 
+    pub(crate) fn uses_configuration_file(&self, path: &Utf8Path) -> bool {
+        self.configuration_dependency_paths.contains(path)
+    }
+
     /// Merges the [Configuration] into the settings.
     #[tracing::instrument(level = "debug", skip_all)]
     pub fn merge_with_configuration(
@@ -277,6 +283,10 @@ impl Settings {
         working_directory: Option<Utf8PathBuf>,
         extended_configurations: Vec<(Utf8PathBuf, Configuration)>,
     ) -> Result<(), WorkspaceError> {
+        self.configuration_dependency_paths = extended_configurations
+            .iter()
+            .map(|(path, _)| path.clone())
+            .collect();
         let extended_configurations = ExtendedConfigurations::from(extended_configurations);
         self.configuration_provider = Some(Arc::new(extended_configurations));
         self.source = Some(Arc::new(ConfigurationSource {
@@ -298,6 +308,12 @@ impl Settings {
         source: impl Into<Arc<ConfigurationSource>>,
     ) -> Result<(), WorkspaceError> {
         let source = source.into();
+        self.configuration_dependency_paths = source
+            .extended_configurations
+            .as_slice()
+            .iter()
+            .filter_map(|extended| extended.source.file_path.clone())
+            .collect();
         let configuration = source.resolve();
         let working_directory = source.directory_path.clone();
         self.configuration_provider = Some(source.clone());
