@@ -684,10 +684,8 @@ fn generic_and_overloaded_type_predicates_narrow() {
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
 // except where a comment says otherwise. The call's arguments select the
 // signature with their types at the call, which a test before the call can
-// narrow. TypeScript tries every signature with the subtype relation before
-// it tries assignability, so `any` and `{}` skip a first signature that they
-// are assignable to but not subtypes of. A signature that Biome can't tell
-// accepts the arguments, before the one that does, leaves the call without a
+// narrow. A signature before the one that accepts the arguments, which
+// Biome can't skip whatever narrowing gives them, leaves the call without a
 // signature.
 #[test]
 fn overload_selection_uses_argument_types_at_the_call() {
@@ -740,16 +738,237 @@ fn overload_selection_uses_argument_types_at_the_call() {
             ("a11", "x", &["instanceof Array<string>"]),
             ("a15", "x", &["string"]),
             ("a16", "x", &["string"]),
-            ("a17then", "x", &["number"]),
-            ("a17else", "x", &["string"]),
+            // TypeScript gives `number` and `string`. A test that Biome
+            // doesn't decompose could narrow `x` to `string`, which the first
+            // signature accepts.
+            ("a17then", "x", &["number", "string"]),
+            ("a17else", "x", &["number", "string"]),
             ("a18", "x", &["string"]),
             // TypeScript gives `string`, and reports TS2558 for a type
             // argument of a function without type parameters. Biome keeps the
             // declared type when a call passes type arguments to a local
             // type-guard function without type parameters.
             ("a19", "x", &["number", "string"]),
+            // TypeScript takes the second signature, because `any` is a
+            // subtype only of `any` and `unknown`. Biome takes none, because
+            // a test could narrow `y` to `string`, so `x` keeps its type,
+            // which is the same here.
             ("a20", "x", &["string: a", "string: b"]),
-            ("a21", "x", &["string: a", "string: b"]),
+            // TypeScript gives `"a" | "b"` through the second signature,
+            // because `{}` is not a subtype of `{ a?: number }`. A test that
+            // Biome doesn't decompose could narrow `o` to a type that the
+            // first signature accepts.
+            ("a21", "x", &["number: 1", "string: a", "string: b"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment says otherwise. TypeScript selects the signature by
+// the argument types at the call, which a test that Biome doesn't decompose
+// can make narrower than Biome's, as `isStr`, whose type predicate TypeScript
+// infers, does for `x`. Biome skips a signature only when no narrowing of the
+// arguments can make it accept them, so a call that depends on such a
+// narrowing narrows nothing, and a call with a type argument inferred from an
+// argument other than the one that it narrows narrows only where it is
+// truthy.
+#[test]
+fn overload_selection_skips_only_signatures_that_reject_every_narrowing() {
+    assert_reads(
+        r#"
+        const isStr = (v: unknown) => typeof v === "string";
+        declare function g(v: string): v is "a";
+        declare function g(v: string | number): v is string;
+        function s1(x: string | number) { if (isStr(x) && !g(x)) /*s1*/x; }
+        function s2(x: string | number) { if (isStr(x) && g(x)) /*s2*/x; }
+        declare function h(v: string): v is "a";
+        declare function h(v: string | number): v is string;
+        function s3(x: "a" | "b") { if (h(x)) /*s3then*/x; else /*s3else*/x; }
+        declare function m(v: number): v is 1;
+        declare function m(v: string): v is "a";
+        function s4(x: "a" | "b") { if (m(x)) /*s4then*/x; else /*s4else*/x; }
+        class A { a = 1; }
+        const isA = (v: unknown) => v instanceof A;
+        declare function k(x: unknown, o: { a?: number }): x is "a";
+        declare function k(x: unknown, o: {}): x is string;
+        function s5(x: "a" | "b" | 1, o: {}) { if (isA(o) && !k(x, o)) /*s5*/x; }
+        function s6(x: "a" | "b" | 1, o: {}) { if (isA(o) && k(x, o)) /*s6*/x; }
+        declare function q(v: "a"): v is "a";
+        declare function q(v: string): v is "b";
+        declare const K: "a";
+        function s7(x: string) { if (x === K && q(x)) /*s7*/x; }
+        function s8(x: string) { if (q(x)) /*s8then*/x; else /*s8else*/x; }
+        declare function isOf<T>(v: unknown, sample: T): v is T;
+        function s9(x: string | number | boolean, y: string | number) { if (isStr(y) && !isOf(x, y)) /*s9*/x; }
+        function s10(x: string | number | boolean, y: string | number) { if (isStr(y) && isOf(x, y)) /*s10*/x; }
+        declare function same(input: string): input is string;
+        declare function same(input: unknown): input is string;
+        function s11(x: string | null) { if (same(x)) /*s11then*/x; else /*s11else*/x; }
+        "#,
+        &[
+            // TypeScript gives `string`. Biome doesn't infer the type
+            // predicate of `isStr`, so `x` may be `number` at the call, and
+            // the first signature of `g` accepts the `string` that
+            // TypeScript sees.
+            ("s1", "x", &["number", "string"]),
+            // TypeScript gives `"a"`.
+            ("s2", "x", &["number", "string"]),
+            // The first signature accepts every member of `x`.
+            ("s3then", "x", &["string: a"]),
+            ("s3else", "x", &["string: b"]),
+            // No narrowing of `x` gives a `number`, so `m` takes its second
+            // signature.
+            ("s4then", "x", &["string: a"]),
+            ("s4else", "x", &["string: b"]),
+            // TypeScript gives `"b" | 1`, because `isA`, whose type
+            // predicate TypeScript infers, narrows `o` to `A`, which the
+            // first signature accepts.
+            ("s5", "x", &["number: 1", "string: a", "string: b"]),
+            // TypeScript gives `"a"`.
+            ("s6", "x", &["number: 1", "string: a", "string: b"]),
+            // TypeScript gives `"a"`, because the comparison with `K`
+            // narrows `x` to `"a"`, which the first signature of `q`
+            // accepts.
+            ("s7", "x", &["string"]),
+            // TypeScript gives `"b"`. A test that Biome doesn't decompose
+            // could narrow `x` to `"a"` before the call, as in `s7`.
+            ("s8then", "x", &["string"]),
+            ("s8else", "x", &["string"]),
+            // TypeScript gives `number | boolean`. `T` is `string` in
+            // TypeScript, while Biome infers `string | number` from `y`.
+            ("s9", "x", &["boolean", "number", "string"]),
+            // TypeScript gives `string`.
+            ("s10", "x", &["number", "string"]),
+            // Both signatures narrow alike, so it doesn't matter which one
+            // TypeScript selects.
+            ("s11then", "x", &["string"]),
+            ("s11else", "x", &["null"]),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment says otherwise. TypeScript keeps the literal type
+// that a type parameter infers from an argument when the type parameter has
+// a primitive or literal constraint, when the argument's literal type isn't
+// fresh, as that of a declared or annotated variable, and when the type
+// parameter is at the top level of the type predicate, also through an
+// intersection. Otherwise it widens the literal type, as `"a"` to `string`.
+#[test]
+fn literal_type_arguments_widen_as_typescript_widens_them() {
+    assert_reads(
+        r#"
+        declare function hasKind<K extends string>(v: unknown, kind: K): v is { kind: K };
+        function l1(s: { kind: "a"; x: 1 } | { kind: "b"; y: 2 } | number) { if (hasKind(s, "a")) /*l1then*/s; else /*l1else*/s; }
+        declare function hasTag<K>(v: unknown, tag: K): v is { tag: K };
+        declare function hasTagIn<K extends "a" | "b">(v: unknown, tag: K): v is { tag: K };
+        function l2(s: { tag: "a" } | { tag: "b" } | number) { if (hasTagIn(s, "a")) /*l2then*/s; else /*l2else*/s; }
+        function l3(s: { tag: "a" } | { tag: "b" } | number) { if (hasTag(s, "a")) /*l3then*/s; else /*l3else*/s; }
+        declare const lit: "a";
+        function l4(s: { tag: "a" } | { tag: "b" } | number) { if (hasTag(s, lit)) /*l4then*/s; else /*l4else*/s; }
+        function l5(s: { tag: "a" } | { tag: "b" } | number, y: "a") { if (hasTag(s, y)) /*l5then*/s; else /*l5else*/s; }
+        declare function isK<K>(v: unknown, k: K): v is K & string;
+        function l6(s: "a" | "b" | number) { if (isK(s, "a")) /*l6then*/s; else /*l6else*/s; }
+        function l7(s: { tag: "a" } | { tag: "b" } | number, y: string) { if (y === "a" && hasTag(s, y)) /*l7*/s; }
+        function l8(s: { tag: "a" } | { tag: "b" } | number, y: string) { if (y === "a" && !hasTag(s, y)) /*l8*/s; }
+        const c = "a";
+        function l9(s: { tag: "a" } | { tag: "b" } | number) { if (hasTag(s, c)) /*l9then*/s; else /*l9else*/s; }
+        "#,
+        &[
+            (
+                "l1then",
+                "s",
+                &[
+                    "Object { prototype: No prototype members: [\"kind\": string: a, \"x\": number: 1] }",
+                ],
+            ),
+            (
+                "l1else",
+                "s",
+                &[
+                    "Object { prototype: No prototype members: [\"kind\": string: b, \"y\": number: 2] }",
+                    "number",
+                ],
+            ),
+            (
+                "l2then",
+                "s",
+                &["Object { prototype: No prototype members: [\"tag\": string: a] }"],
+            ),
+            (
+                "l2else",
+                "s",
+                &[
+                    "Object { prototype: No prototype members: [\"tag\": string: b] }",
+                    "number",
+                ],
+            ),
+            (
+                "l3then",
+                "s",
+                &[
+                    "Object { prototype: No prototype members: [\"tag\": string: a] }",
+                    "Object { prototype: No prototype members: [\"tag\": string: b] }",
+                ],
+            ),
+            ("l3else", "s", &["number"]),
+            (
+                "l4then",
+                "s",
+                &["Object { prototype: No prototype members: [\"tag\": string: a] }"],
+            ),
+            (
+                "l4else",
+                "s",
+                &[
+                    "Object { prototype: No prototype members: [\"tag\": string: b] }",
+                    "number",
+                ],
+            ),
+            (
+                "l5then",
+                "s",
+                &["Object { prototype: No prototype members: [\"tag\": string: a] }"],
+            ),
+            (
+                "l5else",
+                "s",
+                &[
+                    "Object { prototype: No prototype members: [\"tag\": string: b] }",
+                    "number",
+                ],
+            ),
+            ("l6then", "s", &["string: a"]),
+            ("l6else", "s", &["number", "string: b"]),
+            (
+                "l7",
+                "s",
+                &[
+                    "Object { prototype: No prototype members: [\"tag\": string: a] }",
+                    "Object { prototype: No prototype members: [\"tag\": string: b] }",
+                ],
+            ),
+            // TypeScript gives `number`, because the comparison gives `y`
+            // a fresh literal type. Biome can't tell whether a narrowed
+            // literal type is fresh, so a false call removes nothing.
+            (
+                "l8",
+                "s",
+                &[
+                    "Object { prototype: No prototype members: [\"tag\": string: a] }",
+                    "Object { prototype: No prototype members: [\"tag\": string: b] }",
+                    "number",
+                ],
+            ),
+            (
+                "l9then",
+                "s",
+                &[
+                    "Object { prototype: No prototype members: [\"tag\": string: a] }",
+                    "Object { prototype: No prototype members: [\"tag\": string: b] }",
+                ],
+            ),
+            ("l9else", "s", &["number"]),
         ],
     );
 }
@@ -773,7 +992,10 @@ fn generic_and_overloaded_assertions_narrow() {
         &[
             ("a6", "x", &["string"]),
             ("a7", "x", &["string"]),
-            ("a9", "x", &["string"]),
+            // TypeScript gives `string` through the second signature. A test
+            // that Biome doesn't decompose could narrow `x` to `string`,
+            // which the first signature accepts.
+            ("a9", "x", &["null", "string"]),
         ],
     );
 }
@@ -839,6 +1061,39 @@ fn callback_type_predicates_infer_call_results() {
                 "nums.filter(isString)",
                 &["instanceof Array<S extends T>"],
             ),
+        ],
+    );
+}
+
+// TypeScript 7.0.2 (`tsc --strict`) gives `number[]` in every read below. A
+// constraint that names a type parameter of the array, as `S extends T` in
+// `filter` and `every`, reads it from the array's type at the call, which
+// `xs.every(isNumber)` narrows to `number[]`, so `S = string` violates it.
+#[test]
+fn constraints_read_the_receiver_at_the_call() {
+    assert_reads(
+        r#"
+        declare function isNumber(v: unknown): v is number;
+        declare function isString(v: unknown): v is string;
+        function r1(xs: (string | number)[]) { if (xs.every(isNumber)) /*r1*/xs.filter(isString); }
+        function r2(xs: (string | number)[]) { if (xs.every(isNumber) && xs.every(isString)) /*r2*/xs; }
+        function r3(xs: (string | number)[]) { if (xs.every(isNumber) && !xs.every(isString)) /*r3*/xs; }
+        function r4(xs: (string | number)[]) { if (xs.every(isNumber)) { const r = xs.filter(isString); /*r4*/r; } }
+        "#,
+        &[
+            // Biome selects the first signature of `filter` for the call's
+            // result and infers nothing for `S` there.
+            (
+                "r1",
+                "xs.filter(isString)",
+                &["instanceof Array<S extends T>"],
+            ),
+            ("r2", "xs", &["instanceof Array<number>"]),
+            ("r3", "xs", &["instanceof Array<number>"]),
+            // Narrower than TypeScript: the type of `r` comes from its
+            // initializer without narrowing, where `xs` is
+            // `(string | number)[]`, so `S = string` satisfies `S extends T`.
+            ("r4", "r", &["instanceof Array<string>"]),
         ],
     );
 }

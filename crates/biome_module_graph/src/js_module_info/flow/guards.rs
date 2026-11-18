@@ -4,8 +4,8 @@ use super::subjects::{
     member_name_key, subject_of,
 };
 use super::{
-    FlowCall, FlowCallArgument, FlowCallKind, FlowCallRoot, FlowSubject, FlowSubjectId,
-    FlowSubjectTable, PropertyKey, subject_root,
+    FlowCall, FlowCallArgument, FlowCallKind, FlowCallReceiver, FlowCallRoot, FlowSubject,
+    FlowSubjectId, FlowSubjectTable, PropertyKey, subject_root,
 };
 use crate::js_module_info::TsBindingReferenceExt;
 use biome_js_control_flow::AnyJsControlFlowRoot;
@@ -1682,7 +1682,7 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
         let narrowed: Box<[_]> = arguments
             .iter()
             .filter_map(|argument| argument.subject)
-            .chain(receiver)
+            .chain(receiver.map(|receiver| receiver.subject))
             .collect();
         if narrowed.is_empty() {
             return FlowGuard::Keep;
@@ -1725,7 +1725,7 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
             arguments
                 .iter()
                 .filter_map(|argument| argument.subject)
-                .chain(receiver),
+                .chain(receiver.map(|receiver| receiver.subject)),
         );
         narrowed.sort_unstable();
         narrowed.dedup();
@@ -1750,9 +1750,10 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
     }
 
     /// Returns the arguments of `call`, up to its first spread argument, and
-    /// the subject of the object of `callee`, its callee without parentheses,
-    /// as [`FlowCall`] records them. For a statement call (`statement` is
-    /// true), each argument is also decomposed as a condition that holds.
+    /// the object of `callee`, its callee without parentheses, when it is a
+    /// subject, as [`FlowCall`] records them. For a statement call
+    /// (`statement` is true), each argument is also decomposed as a condition
+    /// that holds.
     ///
     /// Returns `None` when an argument is missing.
     fn call_operands(
@@ -1760,7 +1761,7 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
         call: &JsCallExpression,
         callee: &AnyJsExpression,
         statement: bool,
-    ) -> Option<(Box<[FlowCallArgument]>, Option<FlowSubjectId>)> {
+    ) -> Option<(Box<[FlowCallArgument]>, Option<FlowCallReceiver>)> {
         let mut arguments = Vec::new();
         for argument in call.arguments().ok()?.args().iter() {
             let AnyJsCallArgument::AnyJsExpression(argument) = argument.ok()? else {
@@ -1779,7 +1780,12 @@ impl<'a, 'raw> Decomposer<'a, 'raw> {
         }
         let receiver = match callee {
             AnyJsExpression::JsStaticMemberExpression(member) => {
-                self.narrowed_operand(&member.object().ok()?)
+                let object = member.object().ok()?;
+                self.narrowed_operand(&object)
+                    .map(|subject| FlowCallReceiver {
+                        subject,
+                        range: object.omit_parentheses().range(),
+                    })
             }
             _ => None,
         };
