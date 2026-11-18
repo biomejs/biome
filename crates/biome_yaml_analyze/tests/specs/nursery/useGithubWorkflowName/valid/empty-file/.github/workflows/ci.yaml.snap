@@ -1,0 +1,9 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: ci.yaml
+---
+# Input
+```yaml
+# should not generate diagnostics
+
+```
