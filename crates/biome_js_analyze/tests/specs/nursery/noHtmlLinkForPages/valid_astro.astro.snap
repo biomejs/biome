@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_astro.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+{show && <a href="/about">About</a>}
+
+```

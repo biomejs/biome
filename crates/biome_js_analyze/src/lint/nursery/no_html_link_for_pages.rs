@@ -5,7 +5,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
-use biome_module_graph::next_pages;
+use biome_languages::JsFileSource;
+use biome_module_graph::{ModuleGraphGeneration, next_pages};
 use biome_package::PackageJson;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_html_link_for_pages::NoHtmlLinkForPagesOptions;
@@ -27,6 +28,9 @@ declare_lint_rule! {
     ///
     /// Links with a `download` attribute or with `target="_blank"` are allowed, because `<Link />`
     /// cannot replace them.
+    ///
+    /// The rule assumes the default Next.js configuration: it doesn't read `next.config.js`, so
+    /// `basePath`, custom `pageExtensions`, and i18n locale prefixes aren't taken into account.
     ///
     /// ## Examples
     ///
@@ -101,6 +105,14 @@ impl Rule for NoHtmlLinkForPages {
     type Options = NoHtmlLinkForPagesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        if ctx
+            .source_type::<JsFileSource>()
+            .as_embedding_kind()
+            .is_astro()
+        {
+            return None;
+        }
+
         let element = ctx.query();
         if !element.matches_name("a").ok()?
             || element.find_attribute_by_name("download").is_some()
@@ -121,10 +133,10 @@ impl Rule for NoHtmlLinkForPages {
         let (package_path, _) = ctx
             .get_service::<Option<(Utf8PathBuf, Arc<PackageJson>)>>()?
             .as_ref()?;
-        let path_segments: Vec<&str> = path.split('/').filter(|segment| !segment.is_empty()).collect();
-        let links_to_page = next_pages(ctx.db())
+        let db = ctx.db();
+        let links_to_page = next_pages(db, ModuleGraphGeneration::get(db))
             .iter()
-            .any(|page| page.project_path == *package_path && page.matches(&path_segments));
+            .any(|page| page.project_path == *package_path && page.matches(path));
 
         links_to_page.then(|| HtmlLinkToPage {
             href_range: href.range(),
