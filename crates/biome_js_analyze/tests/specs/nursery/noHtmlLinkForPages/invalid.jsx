@@ -11,6 +11,7 @@ export function Links({ props }) {
 			<a href="/docs/getting-started/installation">Docs, catch-all</a>
 			<a href="/settings">Settings, in a parallel route slot</a>
 			<a href="/contact">Contact, pages router</a>
+			<a href="/stores">Stores, pages router index</a>
 			<a href="/shop">Shop, optional catch-all without segments</a>
 			<a href="/shop/shoes/red">Shop, optional catch-all</a>
 			<a href={"/about"}>About, in an expression</a>

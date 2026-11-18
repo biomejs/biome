@@ -16,6 +16,7 @@ export function Links({ href, props }) {
 			<a href={href}>Dynamic href</a>
 			<a href={`/blog/${href}`}>Template literal</a>
 			<a href="/about" target="_blank">About, in a new tab</a>
+			<a href="/about" target="_BLANK">About, in a new tab, in upper case</a>
 			<a href="/about" download>About, downloaded</a>
 			<a href="/about" {...props}>About, overridable by a spread</a>
 			<a href="https://example.com/about">Other origin</a>
@@ -29,6 +30,7 @@ export function Links({ href, props }) {
 			<a href="/blog/report.pdf">Dynamic segment with a file name</a>
 			<a href="/docs">Catch-all without segments</a>
 			<a href="/status">Route handler</a>
+			<a href="/api">API route at the root of pages</a>
 			<a href="/api/users">API route</a>
 			<a href="/_app">Pages router special file</a>
 			<a href="/_components">Private folder</a>

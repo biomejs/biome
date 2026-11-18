@@ -75,14 +75,18 @@ fn route_of_file(router: &str, path: &[&str]) -> Option<Box<[Box<str>]>> {
                 .collect()
         }
         "pages" => {
-            if directories.first() == Some(&"api") || file_stem.starts_with('_') {
+            if file_stem.starts_with('_') {
                 return None;
             }
-            directories
+            let route: Vec<&str> = directories
                 .iter()
                 .copied()
                 .chain((file_stem != "index").then_some(file_stem))
-                .collect()
+                .collect();
+            if route.first() == Some(&"api") {
+                return None;
+            }
+            route
         }
         _ => return None,
     };

@@ -107,7 +107,7 @@ impl Rule for NoHtmlLinkForPages {
             || element
                 .find_attribute_by_name("target")
                 .and_then(|target| target.as_static_value())
-                .is_some_and(|target| target.text() == "_blank")
+                .is_some_and(|target| target.text().eq_ignore_ascii_case("_blank"))
         {
             return None;
         }
@@ -142,7 +142,7 @@ impl Rule for NoHtmlLinkForPages {
                 },
             )
             .note(markup! {
-                "An "<Emphasis>"<a>"</Emphasis>" element reloads the whole document, so the client loses its state and downloads the page's scripts again."
+                "An "<Emphasis>"<a>"</Emphasis>" element reloads the whole document, so the client loses its state."
             })
             .note(markup! {
                 "Use "<Emphasis>"<Link />"</Emphasis>" from "<Emphasis>"next/link"</Emphasis>" instead, which navigates on the client and prefetches the page."
