@@ -674,11 +674,12 @@ fn generic_and_overloaded_type_predicates_narrow() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
-// Overload selection compares an argument whose type is a type parameter of
-// the calling function as TypeScript does there: under the subtype relation,
-// the type parameter relates only through its constraint, so `t` skips a
-// first signature that takes a `string`, unless `T extends string`.
+// TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type,
+// except where a comment says otherwise. Overload selection compares an
+// argument whose type is a type parameter of the calling function as
+// TypeScript does there: under the subtype relation, the type parameter
+// relates only through its constraint, so with `T extends string`, `t`
+// selects a first signature that takes a `string`.
 #[test]
 fn overload_selection_relates_type_parameters_through_their_constraints() {
     assert_reads(
@@ -693,7 +694,12 @@ fn overload_selection_relates_type_parameters_through_their_constraints() {
         function o3<T>(x: string | number, t: T) { if (k(x, t)) /*inferred*/x; }
         "#,
         &[
-            ("unconstrained", "x", &["string"]),
+            // TypeScript gives `string`, because `T` doesn't relate to
+            // `string`. Biome keeps the declared type, which is wider: it
+            // skips a signature only when no narrowing of the arguments could
+            // make it accept them, and `typeof t === "string"` would give `t`
+            // the type `T & string`, which the first signature accepts.
+            ("unconstrained", "x", &["number", "string"]),
             ("constrained", "x", &["number"]),
             ("inferred", "x", &["string"]),
         ],
