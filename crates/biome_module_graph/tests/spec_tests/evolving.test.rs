@@ -380,6 +380,7 @@ fn evolving_variables_take_the_types_of_writes_that_biome_types() {
         function t08() { let x = null; x = service.method(); /*t08*/x; }
         function t09() { let x = null; x = k.annotated(); /*t09*/x; }
         function t11() { let x = null; x = map.get(s); /*t11*/x; }
+        function t12() { let x = null; x = vs.find((v) => v > 1); /*t12*/x; }
         function t13() { let x = null; x = s.trim(); /*t13*/x; }
         async function t15() { let x = null; x = await fetchNumber(); /*t15*/x; }
         async function t16() { let x = null; x = await fetchLocal(); /*t16*/x; }
@@ -403,6 +404,7 @@ fn evolving_variables_take_the_types_of_writes_that_biome_types() {
             ("t08", "x", &["number"]),
             ("t09", "x", &["number"]),
             ("t11", "x", &["number", "undefined"]),
+            ("t12", "x", &["number", "undefined"]),
             ("t13", "x", &["string"]),
             ("t15", "x", &["number"]),
             ("t16", "x", &["number"]),
@@ -445,7 +447,6 @@ fn evolving_variables_are_unknown_after_writes_that_biome_cant_type() {
         function t06() { let x = null; x = store.load(); /*t06*/x; } // number
         function t07() { let x = null; x = literal.method(); /*t07*/x; } // number
         function t10() { let x = null; x = k.inferred(); /*t10*/x; } // number
-        function t12() { let x = null; x = vs.find((v) => v > 1); /*t12*/x; } // number | undefined
         function t14() { let x = null; x = JSON.parse(s); /*t14*/x; } // any
         async function t17() { let x = null; x = await fetchInferred(); /*t17*/x; } // { id: number; }
         function t21() { let x = null; x = new Map(); /*t21*/x; } // Map<any, any>
@@ -493,7 +494,6 @@ fn evolving_variables_are_unknown_after_writes_that_biome_cant_type() {
             ("t06", "x", &["Unknown"]),
             ("t07", "x", &["Unknown"]),
             ("t10", "x", &["Unknown"]),
-            ("t12", "x", &["Unknown"]),
             ("t14", "x", &["Unknown"]),
             ("t17", "x", &["Unknown"]),
             ("t21", "x", &["Unknown"]),
