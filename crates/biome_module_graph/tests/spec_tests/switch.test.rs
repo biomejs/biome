@@ -907,7 +907,7 @@ fn switches_after_comparisons_with_enum_members_are_not_exhaustive() {
 // exhaustive. Biome doesn't compare with a call, whose type it infers, so `x`
 // is `"a"` at the switch at `call`, and the switch is exhaustive. `y` reads as
 // `string` there, which is narrower than TypeScript in code that TypeScript
-// types as impossible, as the Limits in `NARROWING.md` describe.
+// types as impossible, as the deliberate choices in `NARROWING.md` describe.
 #[test]
 fn switches_after_comparisons_that_biome_does_not_decompose_can_be_exhaustive() {
     assert_reads(
