@@ -47,10 +47,12 @@ impl JsModuleVisitor {
     pub fn collect_info(mut self) -> JsModuleInfo {
         let mut collector = JsModuleInfoCollector::new(self.semantic_model.clone());
         let mut flow_roots = FlowRootScanner::default();
+        let is_definition_file = JsFileSource::try_from(self.file_path.as_path())
+            .is_ok_and(|source| source.language().is_definition_file());
+        collector.is_definition_file = is_definition_file;
         // Declaration files contain no code that runs, so no root can need flow.
-        let scan_flow_roots = self.inference_mode != TypeInferenceMode::Disabled
-            && !JsFileSource::try_from(self.file_path.as_path())
-                .is_ok_and(|source| source.language().is_definition_file());
+        let scan_flow_roots =
+            self.inference_mode != TypeInferenceMode::Disabled && !is_definition_file;
 
         let kinds = AnyJsImportLike::KIND_SET
             .union(JsExport::KIND_SET)

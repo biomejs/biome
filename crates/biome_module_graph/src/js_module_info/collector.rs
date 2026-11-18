@@ -5,10 +5,10 @@ use std::{borrow::Cow, sync::Arc};
 use biome_js_semantic::{Reference, ScopeId, SemanticModel, TsBindingReference};
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsDeclaration,
-    AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause, JsArrowFunctionExpression,
-    JsAssignmentExpression, JsForVariableDeclaration, JsFormalParameter, JsLanguage,
-    JsRestParameter, JsSyntaxKind, JsSyntaxNode, JsVariableDeclaration, TsInferType, TsMappedType,
-    TsModuleDeclaration, TsTypeParameter, inner_string_text,
+    AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause,
+    JsArrowFunctionExpression, JsAssignmentExpression, JsForVariableDeclaration, JsFormalParameter,
+    JsLanguage, JsRestParameter, JsSyntaxKind, JsSyntaxNode, JsVariableDeclaration, TsInferType,
+    TsMappedType, TsModuleBlock, TsModuleDeclaration, TsTypeParameter, inner_string_text,
 };
 use biome_js_type_info::{
     FunctionParameter, FunctionParameterBinding, GenericTypeParameter, RawTypeCollector,
@@ -84,6 +84,10 @@ pub(super) struct JsModuleInfoCollector {
     /// How much type inference work to perform when finalizing the module info
     inference_mode: TypeInferenceMode,
 
+    /// Whether the module is a declaration file (`.d.ts`), where namespaces
+    /// are ambient and their members are implicitly exported.
+    pub(super) is_definition_file: bool,
+
     /// CSS class references from JSX `className` or `class` attributes
     /// (static string literals only).
     pub(super) referenced_classes: Vec<CssClassReference>,
@@ -154,6 +158,7 @@ impl JsModuleInfoCollector {
             static_imports: IndexMap::new(),
             diagnostics: Vec::new(),
             inference_mode: TypeInferenceMode::Disabled,
+            is_definition_file: false,
             referenced_classes: Vec::new(),
         }
     }
@@ -662,15 +667,25 @@ impl JsModuleInfoCollector {
             return;
         }
 
-        let Some(body) = self
+        let Some(declaration) = self
             .semantic_model
             .as_binding_by_range(binding.range)
             .and_then(|binding| binding.tree().declaration())
             .and_then(|declaration| TsModuleDeclaration::cast(declaration.into_syntax()))
-            .and_then(|declaration| declaration.body().ok())
         else {
             return;
         };
+        let Ok(body) = declaration.body() else {
+            return;
+        };
+
+        // Members of an ambient namespace (`declare namespace`, or any
+        // namespace in a declaration file) are exported implicitly, unless the
+        // body has an export declaration such as `export {}`. Otherwise, only
+        // members with an `export` modifier are exported.
+        let exports_all_members = (self.is_definition_file
+            || is_in_ambient_context(declaration.syntax()))
+            && !has_export_declaration(&body);
 
         // We look at the syntax rather than at scopes, because members such as
         // `const` declarations live in the namespace's own scope while
@@ -682,14 +697,16 @@ impl JsModuleInfoCollector {
                 continue;
             }
 
-            let is_direct_member = self
+            let membership = self
                 .semantic_model
                 .as_binding_by_range(child_binding.range)
-                .and_then(|binding| binding.tree().declaration())
-                .is_some_and(|declaration| {
-                    is_direct_namespace_member(declaration.syntax(), body.syntax())
-                });
-            if is_direct_member {
+                .and_then(|binding| namespace_membership(binding.tree().syntax(), body.syntax()));
+            let is_exported = match membership {
+                Some(NamespaceMembership::Exported) => true,
+                Some(NamespaceMembership::NotExported) => exports_all_members,
+                None => false,
+            };
+            if is_exported {
                 exports
                     .entry(child_binding.name.clone())
                     .or_insert_with(|| JsExport::Own(JsOwnExport::Binding(child_binding.range)));
@@ -1072,10 +1089,47 @@ impl JsModuleInfo {
     }
 }
 
-/// Returns whether `declaration` declares a member directly inside the
-/// namespace body `body`, as opposed to a binding nested inside one of its
-/// members (such as a parameter or a type parameter).
-fn is_direct_namespace_member(declaration: &JsSyntaxNode, body: &JsSyntaxNode) -> bool {
+/// Whether a binding declared directly in a namespace body is exported.
+enum NamespaceMembership {
+    /// The member has an `export` modifier.
+    Exported,
+    /// The member has no `export` modifier.
+    NotExported,
+}
+
+/// Returns how the binding with the identifier `binding` is a member of the
+/// namespace body `body`, or `None` if it isn't declared directly in it, such
+/// as a parameter, a type parameter, or a member of a nested namespace.
+fn namespace_membership(
+    binding: &JsSyntaxNode,
+    body: &JsSyntaxNode,
+) -> Option<NamespaceMembership> {
+    let mut declaration = binding.parent()?;
+
+    // In `namespace B.C {}`, only `B` is a member of the enclosing namespace.
+    while declaration.kind() == JsSyntaxKind::TS_QUALIFIED_MODULE_NAME {
+        if declaration.text_trimmed_range().start() != binding.text_trimmed_range().start() {
+            return None;
+        }
+        declaration = declaration.parent()?;
+    }
+
+    // In `const { a, b: [c] } = value`, the declaration is the declarator.
+    while matches!(
+        declaration.kind(),
+        JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY
+            | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY
+            | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST
+            | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST
+            | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN
+            | JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_ELEMENT
+            | JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_REST_ELEMENT
+            | JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST
+            | JsSyntaxKind::JS_ARRAY_BINDING_PATTERN
+    ) {
+        declaration = declaration.parent()?;
+    }
+
     if !matches!(
         declaration.kind(),
         JsSyntaxKind::JS_VARIABLE_DECLARATOR
@@ -1087,24 +1141,64 @@ fn is_direct_namespace_member(declaration: &JsSyntaxNode, body: &JsSyntaxNode) -
             | JsSyntaxKind::TS_MODULE_DECLARATION
             | JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION
     ) {
-        return false;
+        return None;
     }
 
+    let mut is_exported = false;
     for ancestor in declaration.ancestors().skip(1) {
         match ancestor.kind() {
-            JsSyntaxKind::TS_MODULE_BLOCK => return &ancestor == body,
+            JsSyntaxKind::TS_MODULE_BLOCK => {
+                if &ancestor != body {
+                    return None;
+                }
+                return Some(if is_exported {
+                    NamespaceMembership::Exported
+                } else {
+                    NamespaceMembership::NotExported
+                });
+            }
+            JsSyntaxKind::JS_EXPORT => is_exported = true,
             JsSyntaxKind::JS_VARIABLE_DECLARATOR_LIST
             | JsSyntaxKind::JS_VARIABLE_DECLARATION
             | JsSyntaxKind::JS_VARIABLE_STATEMENT
             | JsSyntaxKind::JS_VARIABLE_DECLARATION_CLAUSE
-            | JsSyntaxKind::JS_EXPORT
             | JsSyntaxKind::JS_MODULE_ITEM_LIST
-            | JsSyntaxKind::TS_DECLARE_STATEMENT => {}
-            _ => return false,
+            | JsSyntaxKind::TS_DECLARE_STATEMENT
+            | JsSyntaxKind::TS_EXPORT_DECLARE_CLAUSE => {}
+            _ => return None,
         }
     }
 
-    false
+    None
+}
+
+/// Returns whether the namespace `declaration` is in an ambient context, that
+/// is, declared with `declare` or nested in a namespace declared with it.
+fn is_in_ambient_context(declaration: &JsSyntaxNode) -> bool {
+    declaration.ancestors().skip(1).any(|ancestor| {
+        matches!(
+            ancestor.kind(),
+            JsSyntaxKind::TS_DECLARE_STATEMENT | JsSyntaxKind::TS_EXPORT_DECLARE_CLAUSE
+        )
+    })
+}
+
+/// Returns whether the namespace body has an export declaration such as
+/// `export {}` or `export * from "..."`, which turns off the implicit export
+/// of the members of an ambient namespace.
+fn has_export_declaration(body: &TsModuleBlock) -> bool {
+    body.items().into_iter().any(|item| {
+        biome_js_syntax::JsExport::cast(item.into_syntax())
+            .and_then(|export| export.export_clause().ok())
+            .is_some_and(|clause| {
+                matches!(
+                    clause,
+                    AnyJsExportClause::JsExportNamedClause(_)
+                        | AnyJsExportClause::JsExportNamedFromClause(_)
+                        | AnyJsExportClause::JsExportFromClause(_)
+                )
+            })
+    })
 }
 
 /// Groups the bindings declared inside each `namespace` or `module`
