@@ -14,7 +14,7 @@ use crate::db::type_inference::{
 use crate::module_graph::ModuleInfoKind;
 use crate::{ModuleDb, module_for_key};
 use biome_js_type_info::{
-    Class, RawTypeData, TypeReference, TypeResolverLevel, global_types,
+    Class, PrimitiveLiteralKind, RawTypeData, TypeReference, TypeResolverLevel, global_types,
     interned_types::{
         CallArgumentType as InferredCallArgumentType, ClassParents,
         FunctionParameter as InferredFunctionParameter, InternedConstructor as InferredConstructor,
@@ -687,53 +687,23 @@ fn signature_may_accept_arguments<'db>(
 /// object, such as a namespace import, is resolved only then.
 pub(in crate::db) type CallReceiver<'db, 'a> = dyn FnMut() -> Option<InferredTypeData<'db>> + 'a;
 
-/// The relation between an argument and its parameter that TypeScript's
-/// overload resolution checks. It first tries every signature with the
-/// subtype relation, and only when none applies, with assignability.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(in crate::db) enum ArgumentRelation {
-    /// TypeScript's subtype relation, under which `any` is a subtype only of
-    /// `any` and `unknown`, and `{}` is not a subtype of `{ a?: number }`.
-    Subtype,
-    /// TypeScript's assignability.
-    Assignability,
-}
-
-/// Whether a signature accepts the arguments of a call, as TypeScript's
-/// overload resolution decides when it tries the signature.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(in crate::db) enum ArgumentAcceptance {
-    /// The signature takes as many arguments as the call passes, and each
-    /// argument is assignable to the parameter that it fills.
-    Accepts,
-    /// The call passes too few or too many arguments, or an argument is not
-    /// assignable to the parameter that it fills.
-    Rejects,
-    /// Biome can't tell.
-    Undetermined,
-}
-
-/// Returns whether `function` accepts `args` under `relation`, as
-/// TypeScript decides when overload resolution tries `function` for a call.
+/// Returns whether `function` conclusively accepts `args` under TypeScript's
+/// subtype relation ([`is_subtype_of`]), the relation that TypeScript's
+/// overload resolution tries first, under which `any` is a subtype only of
+/// `any` and `unknown`, and `{}` is not a subtype of `{ a?: number }`.
 ///
-/// Each argument is checked against the parameter at its position with
-/// TypeScript's relation ([`is_assignable_to`] or [`is_subtype_of`]). An
+/// Each argument is checked against the parameter at its position. An
 /// optional parameter also accepts `undefined`, and a rest parameter of an
 /// array type takes the remaining arguments. An argument that may be absent
-/// or a spread argument, and a tuple rest parameter, give
-/// [`ArgumentAcceptance::Undetermined`].
+/// or a spread argument, and a tuple rest parameter, give `false`, and so
+/// does a relation that Biome can't decide.
 ///
 /// An acceptance is conclusive only when the matching that selects an
 /// overload for a call's return type, which rejects only what it can prove
-/// incompatible and accepts the rest, agrees, and so is a rejection under
-/// assignability. So a signature that this rejects under assignability is
-/// one that return-type inference skips, and one that this accepts is one
-/// that it may select. A rejection under the subtype relation needs no such
-/// agreement, because return-type inference only approximates
-/// assignability.
+/// incompatible and accepts the rest, agrees, so a signature that this
+/// accepts is one that return-type inference may select.
 ///
-/// In this example, the first signature rejects `1` and the second accepts
-/// it:
+/// In this example, the second signature accepts `1`:
 ///
 /// ```ts
 /// declare function fail(code: string): never;
@@ -744,49 +714,118 @@ pub(in crate::db) fn signature_accepts_arguments<'db>(
     db: &'db dyn ModuleDb,
     function: InferredFunction<'db>,
     args: &[ResolvedCallArgument<'db>],
-    relation: ArgumentRelation,
-) -> ArgumentAcceptance {
-    match (positional_relation(db, function, args, relation), relation) {
-        (Some(true), _) if signature_may_accept_arguments(db, function, args) => {
-            ArgumentAcceptance::Accepts
-        }
-        (Some(false), ArgumentRelation::Subtype) => ArgumentAcceptance::Rejects,
-        (Some(false), ArgumentRelation::Assignability)
-            if !signature_may_accept_arguments(db, function, args) =>
-        {
-            ArgumentAcceptance::Rejects
-        }
-        _ => ArgumentAcceptance::Undetermined,
-    }
+) -> bool {
+    positional_subtypes(db, function, args) == Some(true)
+        && signature_may_accept_arguments(db, function, args)
 }
 
-/// Returns whether each of `args` relates to the parameter of `function` at
-/// its position under `relation`, and the call passes neither too few nor
-/// too many arguments, or `None` when Biome can't tell. See
-/// [`signature_accepts_arguments`].
-fn positional_relation<'db>(
+/// Returns whether `function` rejects `args` whatever narrowing gives them:
+/// the call passes too few or too many arguments, or an argument shares no
+/// value with the parameter that it fills, as `1 | 2` shares none with
+/// `string`.
+///
+/// TypeScript checks the arguments with their types at the call, which a
+/// test that Biome doesn't decompose can make narrower than Biome's. A
+/// signature that rejects Biome's types can accept TypeScript's, as
+/// `(v: string)` accepts `x: string | number` once such a test narrows it to
+/// `string`, and `(v: "a")` accepts `x: string` narrowed to `"a"`. Only a
+/// rejection that holds for every narrowing shows that TypeScript rejects
+/// the signature too, under either relation that it tries.
+///
+/// Narrowing only removes values, so an argument shares no value with its
+/// parameter when every member of the argument's type excludes every member
+/// of the parameter's type: two primitive types of different kinds, two
+/// literal types of one kind with different values, or `null` or
+/// `undefined` and an object type. A primitive type and an object type can
+/// share values through an intersection, as `string & { brand: 1 }`, so
+/// they count as sharing them, and so does any type that Biome can't
+/// classify, such as `any`, `unknown`, or a type parameter.
+pub(in crate::db) fn rejects_every_narrowing<'db>(
     db: &'db dyn ModuleDb,
     function: InferredFunction<'db>,
     args: &[ResolvedCallArgument<'db>],
-    relation: ArgumentRelation,
-) -> Option<bool> {
-    let parameters: Vec<_> = function
-        .parameters(db)
-        .iter()
-        .filter(|parameter| !parameter.is_this())
-        .collect();
-    let (fixed, rest) = match parameters.split_last() {
-        Some((rest, fixed)) if rest.is_rest() => (fixed, Some(rest.ty())),
-        _ => (parameters.as_slice(), None),
+) -> bool {
+    let Some(parameters) = PositionalParameters::new(db, function) else {
+        return false;
     };
-    if fixed.iter().any(|parameter| parameter.is_rest()) {
-        return None;
+    if !parameters.fits(args.len()) {
+        return true;
     }
-    let required = fixed
-        .iter()
-        .rposition(|parameter| !parameter.is_optional())
-        .map_or(0, |index| index + 1);
-    if args.len() < required || (rest.is_none() && args.len() > fixed.len()) {
+    args.iter().enumerate().any(|(index, argument)| {
+        let argument = match argument {
+            ResolvedCallArgument::Argument(ty) | ResolvedCallArgument::ConstArgument { ty, .. } => {
+                *ty
+            }
+            ResolvedCallArgument::WidenedArgument { literal_ty, .. } => *literal_ty,
+            ResolvedCallArgument::Optional(_) | ResolvedCallArgument::Spread(_) => return false,
+        };
+        parameters
+            .parameter_type(db, index)
+            .is_some_and(|parameter| shares_no_value(db, argument, parameter))
+    })
+}
+
+/// The parameters of a signature that positional arguments fill: the fixed
+/// ones, which may be optional, and the type of a final rest parameter.
+struct PositionalParameters<'db> {
+    fixed: Vec<&'db InferredFunctionParameter<'db>>,
+    rest: Option<InferredTypeData<'db>>,
+}
+
+impl<'db> PositionalParameters<'db> {
+    /// Returns the parameters of `function` other than a `this` parameter,
+    /// or `None` when a rest parameter comes before the last one.
+    fn new(db: &'db dyn ModuleDb, function: InferredFunction<'db>) -> Option<Self> {
+        let mut fixed: Vec<_> = function
+            .parameters(db)
+            .iter()
+            .filter(|parameter| !parameter.is_this())
+            .collect();
+        let rest = match fixed.last() {
+            Some(last) if last.is_rest() => fixed.pop().map(|rest| rest.ty()),
+            _ => None,
+        };
+        (!fixed.iter().any(|parameter| parameter.is_rest())).then_some(Self { fixed, rest })
+    }
+
+    /// Returns whether a call with `count` arguments passes neither too few
+    /// nor too many.
+    fn fits(&self, count: usize) -> bool {
+        let required = self
+            .fixed
+            .iter()
+            .rposition(|parameter| !parameter.is_optional())
+            .map_or(0, |index| index + 1);
+        count >= required && (self.rest.is_some() || count <= self.fixed.len())
+    }
+
+    /// Returns the type that the argument at `index` must have: that of its
+    /// parameter, with `undefined` for an optional one, or the element type
+    /// of an array rest parameter. Returns `None` for a rest parameter of
+    /// another type, and past the parameters without one.
+    fn parameter_type(&self, db: &'db dyn ModuleDb, index: usize) -> Option<InferredTypeData<'db>> {
+        match self.fixed.get(index) {
+            Some(parameter) if parameter.is_optional() => Some(InferredTypeData::union_from_types(
+                db,
+                Vec::from([parameter.ty(), InferredTypeData::Undefined]),
+            )),
+            Some(parameter) => Some(parameter.ty()),
+            None => array_element_type(db, self.rest?),
+        }
+    }
+}
+
+/// Returns whether each of `args` is a subtype of the parameter of
+/// `function` at its position, and the call passes neither too few nor too
+/// many arguments, or `None` when Biome can't tell. See
+/// [`signature_accepts_arguments`].
+fn positional_subtypes<'db>(
+    db: &'db dyn ModuleDb,
+    function: InferredFunction<'db>,
+    args: &[ResolvedCallArgument<'db>],
+) -> Option<bool> {
+    let parameters = PositionalParameters::new(db, function)?;
+    if !parameters.fits(args.len()) {
         return Some(false);
     }
     let mut result = Some(true);
@@ -798,26 +837,161 @@ fn positional_relation<'db>(
             ResolvedCallArgument::WidenedArgument { literal_ty, .. } => *literal_ty,
             ResolvedCallArgument::Optional(_) | ResolvedCallArgument::Spread(_) => return None,
         };
-        let parameter = match fixed.get(index) {
-            Some(parameter) if parameter.is_optional() => InferredTypeData::union_from_types(
-                db,
-                Vec::from([parameter.ty(), InferredTypeData::Undefined]),
-            ),
-            Some(parameter) => parameter.ty(),
-            None => array_element_type(db, rest?)?,
-        };
+        let parameter = parameters.parameter_type(db, index)?;
         let resolve = |ty| resolve_local_type_on_demand(db, ty).expand_structural_global(db);
-        let related = match relation {
-            ArgumentRelation::Subtype => is_subtype_of(db, argument, parameter, resolve),
-            ArgumentRelation::Assignability => is_assignable_to(db, argument, parameter, resolve),
-        };
-        match related {
+        match is_subtype_of(db, argument, parameter, resolve) {
             Some(true) => {}
             Some(false) => return Some(false),
             None => result = None,
         }
     }
     result
+}
+
+/// What a member of a union can be after any narrowing, as far as
+/// [`shares_no_value`] tells members apart.
+#[derive(Clone, Copy, Eq, PartialEq)]
+enum ValueKind<'db> {
+    /// `bigint`, `boolean`, `number`, or `string`, with the literal type
+    /// when the member is one, as `"a"`.
+    Primitive(PrimitiveLiteralKind, Option<InferredTypeData<'db>>),
+    Symbol,
+    Null,
+    Undefined,
+    /// A type whose values are objects, which are never `null` or
+    /// `undefined`.
+    Object,
+}
+
+impl<'db> ValueKind<'db> {
+    /// Returns whether no value of a member of this kind can be a value of a
+    /// member of `other`'s kind, whatever narrowing gives either.
+    fn excludes(self, other: Self, db: &'db dyn ModuleDb) -> bool {
+        match (self, other) {
+            (Self::Primitive(kind, literal), Self::Primitive(other_kind, other_literal)) => {
+                kind != other_kind
+                    || matches!(
+                        (literal, other_literal),
+                        (Some(literal), Some(other)) if literals_differ(db, literal, other)
+                    )
+            }
+            (Self::Object, Self::Null | Self::Undefined)
+            | (Self::Null | Self::Undefined, Self::Object) => true,
+            (Self::Object, _) | (_, Self::Object) => false,
+            (kind, other) => kind != other,
+        }
+    }
+}
+
+/// Returns whether the literal types `a` and `b` have different values.
+///
+/// Biome keeps the spelling of a literal, so this compares numbers by value
+/// and takes a string with an escape sequence, as `"a"`, or a bigint,
+/// which has several spellings, as equal to any other literal of its kind.
+fn literals_differ<'db>(
+    db: &'db dyn ModuleDb,
+    a: InferredTypeData<'db>,
+    b: InferredTypeData<'db>,
+) -> bool {
+    let (InferredTypeData::Literal(a), InferredTypeData::Literal(b)) = (a, b) else {
+        return false;
+    };
+    match (a.literal(db), b.literal(db)) {
+        (InferredLiteral::Boolean(a), InferredLiteral::Boolean(b)) => a.as_bool() != b.as_bool(),
+        (InferredLiteral::Number(a), InferredLiteral::Number(b)) => {
+            matches!((a.to_f64(), b.to_f64()), (Some(a), Some(b)) if a != b)
+        }
+        (InferredLiteral::String(a), InferredLiteral::String(b)) => {
+            !a.as_str().contains('\\') && !b.as_str().contains('\\') && a.as_str() != b.as_str()
+        }
+        _ => false,
+    }
+}
+
+/// Returns whether no value of `argument` is a value of `parameter`, after
+/// any narrowing of either (see [`rejects_every_narrowing`]).
+fn shares_no_value<'db>(
+    db: &'db dyn ModuleDb,
+    argument: InferredTypeData<'db>,
+    parameter: InferredTypeData<'db>,
+) -> bool {
+    let (Some(arguments), Some(parameters)) =
+        (value_kinds(db, argument), value_kinds(db, parameter))
+    else {
+        return false;
+    };
+    arguments.iter().all(|argument| {
+        parameters
+            .iter()
+            .all(|parameter| argument.excludes(*parameter, db))
+    })
+}
+
+/// Returns the kinds of the members of `ty`, a union or a single type, or
+/// `None` when a member has no [`ValueKind`] or the members exceed
+/// [`MAX_ARGUMENT_TYPE_STEPS`].
+fn value_kinds<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+) -> Option<Vec<ValueKind<'db>>> {
+    let mut pending = Vec::from([ty]);
+    let mut kinds = Vec::new();
+    for _ in 0..MAX_ARGUMENT_TYPE_STEPS {
+        let Some(ty) = pending.pop() else {
+            return Some(kinds);
+        };
+        let ty = resolve_local_type_on_demand(db, ty).expand_structural_global(db);
+        let kind = match ty {
+            InferredTypeData::Union(union) => {
+                pending.extend(union.types(db).iter().copied());
+                continue;
+            }
+            InferredTypeData::BigInt => ValueKind::Primitive(PrimitiveLiteralKind::BigInt, None),
+            InferredTypeData::Boolean => ValueKind::Primitive(PrimitiveLiteralKind::Boolean, None),
+            InferredTypeData::Number => ValueKind::Primitive(PrimitiveLiteralKind::Number, None),
+            InferredTypeData::String => ValueKind::Primitive(PrimitiveLiteralKind::String, None),
+            InferredTypeData::Symbol => ValueKind::Symbol,
+            InferredTypeData::Null => ValueKind::Null,
+            InferredTypeData::Undefined => ValueKind::Undefined,
+            InferredTypeData::Literal(literal) => match literal.literal(db) {
+                InferredLiteral::BigInt(_) => {
+                    ValueKind::Primitive(PrimitiveLiteralKind::BigInt, Some(ty))
+                }
+                InferredLiteral::Boolean(_) => {
+                    ValueKind::Primitive(PrimitiveLiteralKind::Boolean, Some(ty))
+                }
+                InferredLiteral::Number(_) => {
+                    ValueKind::Primitive(PrimitiveLiteralKind::Number, Some(ty))
+                }
+                InferredLiteral::String(_) => {
+                    ValueKind::Primitive(PrimitiveLiteralKind::String, Some(ty))
+                }
+                // A template literal type stands for the strings that match
+                // its pattern, which Biome doesn't compare with literals.
+                InferredLiteral::Template(_) => {
+                    ValueKind::Primitive(PrimitiveLiteralKind::String, None)
+                }
+                InferredLiteral::Object(_) | InferredLiteral::RegExp(_) => ValueKind::Object,
+            },
+            InferredTypeData::Object(_)
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::Function(_)
+            | InferredTypeData::Tuple(_)
+            | InferredTypeData::Class(_)
+            | InferredTypeData::Interface(_) => ValueKind::Object,
+            InferredTypeData::InstanceOf(instance)
+                if matches!(
+                    resolve_local_type_on_demand(db, instance.ty(db)).expand_canonical_global(db),
+                    InferredTypeData::Class(_) | InferredTypeData::Interface(_)
+                ) =>
+            {
+                ValueKind::Object
+            }
+            _ => return None,
+        };
+        kinds.push(kind);
+    }
+    None
 }
 
 /// Returns the element type of `ty` when it is an array, as `number` for
@@ -2871,52 +3045,72 @@ mod tests {
         ))
     }
 
-    // `signature_accepts_arguments` answers conclusively only where the
-    // matching that overload selection uses for return types answers the
-    // same, so it never changes which signature that selection takes: an
-    // acceptance is a viable signature there, and a rejection is not.
+    // `signature_accepts_arguments` accepts only where the matching that
+    // overload selection uses for return types finds the signature viable,
+    // so it never accepts a signature that that selection skips.
+    // `rejects_every_narrowing` rejects only arguments that no narrowing can
+    // make acceptable.
     #[test]
     fn conclusive_acceptance_agrees_with_return_type_selection() {
-        use ArgumentAcceptance::{Accepts, Rejects, Undetermined};
-        use InferredTypeData::{Null, Number, String, Unknown};
+        use InferredTypeData::{AnyKeyword, Null, Number, ObjectKeyword, String, Unknown};
         let db = TestDb::default();
         let a = string_literal(&db, "a");
         let one = number_literal(&db);
         let string_or_null = InferredTypeData::union_from_types(&db, Vec::from([String, Null]));
         let string_or_number = InferredTypeData::union_from_types(&db, Vec::from([String, Number]));
+        // Each case gives whether the signature accepts the arguments, and
+        // whether it rejects them whatever narrowing gives them.
         let cases = [
-            // A literal is assignable to its primitive.
-            ("literal", &[(String, false)][..], Vec::from([a]), Accepts),
+            // A literal is a subtype of its primitive.
+            (
+                "literal",
+                &[(String, false)][..],
+                Vec::from([a]),
+                true,
+                false,
+            ),
             (
                 "union",
                 &[(string_or_number, false)],
                 Vec::from([String]),
-                Accepts,
+                true,
+                false,
             ),
             (
                 "missing optional",
                 &[(String, false), (Number, true)],
                 Vec::from([a]),
-                Accepts,
+                true,
+                false,
             ),
             (
                 "other primitive",
                 &[(String, false)],
                 Vec::from([one]),
-                Rejects,
+                false,
+                true,
             ),
+            // Narrowing can remove `null`.
             (
                 "nullable",
                 &[(String, false)],
                 Vec::from([string_or_null]),
-                Rejects,
+                false,
+                false,
             ),
-            ("missing argument", &[(String, false)], Vec::new(), Rejects),
+            (
+                "missing argument",
+                &[(String, false)],
+                Vec::new(),
+                false,
+                true,
+            ),
             (
                 "extra argument",
                 &[(String, false)],
                 Vec::from([a, a]),
-                Rejects,
+                false,
+                true,
             ),
             // Return-type selection treats an unresolved argument as viable,
             // and so does this, without accepting it.
@@ -2924,55 +3118,69 @@ mod tests {
                 "unresolved",
                 &[(String, false)],
                 Vec::from([Unknown]),
-                Undetermined,
+                false,
+                false,
             ),
-            // Return-type selection compares the primitives of literals, so
-            // it keeps `"a"` viable for `string`, which TypeScript rejects.
+            // Narrowing can give `string` the literal type `"a"`.
             (
                 "wider than a literal",
                 &[(a, false)],
                 Vec::from([String]),
-                Undetermined,
+                false,
+                false,
+            ),
+            // `any` is assignable to every type other than `never`, but a
+            // subtype only of `any` and `unknown`, and narrowing can give it
+            // any type.
+            (
+                "any",
+                &[(String, false)],
+                Vec::from([AnyKeyword]),
+                false,
+                false,
+            ),
+            // No object is `null`.
+            (
+                "null object",
+                &[(ObjectKeyword, false)],
+                Vec::from([Null]),
+                false,
+                true,
+            ),
+            // A primitive can share values with an object type through an
+            // intersection.
+            (
+                "primitive object",
+                &[(ObjectKeyword, false)],
+                Vec::from([one]),
+                false,
+                false,
             ),
         ];
-        for (name, parameters, arguments, expected) in cases {
+        for (name, parameters, arguments, accepts, rejects) in cases {
             let function = signature(&db, parameters);
             let arguments: Vec<_> = arguments
                 .into_iter()
                 .map(ResolvedCallArgument::Argument)
                 .collect();
-            let acceptance = signature_accepts_arguments(
-                &db,
-                function,
-                &arguments,
-                ArgumentRelation::Assignability,
+            let acceptance = signature_accepts_arguments(&db, function, &arguments);
+            assert_eq!(acceptance, accepts, "{name}: acceptance");
+            assert_eq!(
+                rejects_every_narrowing(&db, function, &arguments),
+                rejects,
+                "{name}: rejection"
             );
-            assert_eq!(acceptance, expected, "{name}");
-            let viable = signature_may_accept_arguments(&db, function, &arguments);
-            match acceptance {
-                Accepts => assert!(viable, "{name}: accepted but not viable"),
-                Rejects => assert!(!viable, "{name}: rejected but viable"),
-                Undetermined => {}
+            if acceptance {
+                assert!(
+                    signature_may_accept_arguments(&db, function, &arguments),
+                    "{name}: accepted but not viable"
+                );
             }
         }
-        // `any` is assignable to every type other than `never`, but a subtype
-        // only of `any` and `unknown`.
-        let function = signature(&db, &[(String, false)]);
-        let any = [ResolvedCallArgument::Argument(InferredTypeData::AnyKeyword)];
-        assert_eq!(
-            signature_accepts_arguments(&db, function, &any, ArgumentRelation::Assignability),
-            Accepts
-        );
-        assert_eq!(
-            signature_accepts_arguments(&db, function, &any, ArgumentRelation::Subtype),
-            Rejects
-        );
         // A spread argument can fill any number of parameters.
         let function = signature(&db, &[(String, false)]);
         let spread = [ResolvedCallArgument::Spread(Unknown)];
-        assert_eq!(
-            signature_accepts_arguments(&db, function, &spread, ArgumentRelation::Assignability),
-            Undetermined
-        );
+        assert!(!signature_accepts_arguments(&db, function, &spread));
+        assert!(!rejects_every_narrowing(&db, function, &spread));
     }
 }

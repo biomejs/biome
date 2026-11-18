@@ -760,15 +760,21 @@ return type, takes the signature that the call's arguments select
 (`select_effect_signature` in `flow_signatures.rs`), as TypeScript's
 overload resolution selects it: the signatures in their order, each with
 the type arguments that the arguments infer from a few parameter shapes
-(`instantiate_signature`), checked by `signature_accepts_arguments` first
-under TypeScript's subtype relation and then, when no signature applies,
-under assignability (`ArgumentRelation`). An acceptance is conclusive only
-where that relation and the matching that call inference uses for return
-types agree. A signature that Biome
-can't decide on before the one that accepts the arguments leaves the call
-without an effect. The arguments have their types at the call: a subject
-argument its flow-sensitive type, read with `calls_before` set on the
-context (`argument_type_at_call`), so that only the call points that end
+(`instantiate_signature`), and the first one that
+`signature_accepts_arguments` accepts under TypeScript's subtype relation.
+An acceptance is conclusive only where that relation and the matching that
+call inference uses for return types agree. TypeScript checks the arguments
+with their types at the call, which are narrower than Biome's wherever
+Biome lacks a narrowing, so a signature before the accepted one is skipped
+only when no narrowing of the arguments makes it acceptable
+(`rejects_every_narrowing`) or when it narrows as the accepted one does;
+otherwise the call has no effect. A type argument that may be wider than
+TypeScript's, such as one inferred from an argument other than the one that
+the call narrows, or a literal type whose widening Biome can't tell, lets
+the call narrow only where it is truthy (`narrows_falsy` on
+`FlowCallEffect::Predicate`). The arguments have their types at the call:
+a subject argument its flow-sensitive type, read with `calls_before` set on
+the context (`argument_type_at_call`), so that only the call points that end
 before the call apply. Such a read never depends on the effect that it
 helps decide, so selection has no cycle, and the context evaluates it
 without the flow queries and caches, whose results apply every call point.

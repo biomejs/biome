@@ -40,8 +40,8 @@ pub(crate) use augmentations::{
     global_name_declaration, module_new_exports,
 };
 pub(in crate::db) use calls::{
-    ArgumentAcceptance, ArgumentRelation, ResolvedCallArgument, call_signatures,
-    callback_predicate_binding, generic_substitutions, infer_call_expression_return_type_from_args,
+    ResolvedCallArgument, call_signatures, callback_predicate_binding, generic_substitutions,
+    infer_call_expression_return_type_from_args, rejects_every_narrowing,
     resolve_callable_function, satisfies_constraint, signature_accepts_arguments,
 };
 pub use calls::{

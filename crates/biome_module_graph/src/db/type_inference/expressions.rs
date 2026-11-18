@@ -464,7 +464,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         arguments: &[RawCallArgumentType],
         raw_callee: &TypeReference,
     ) -> InferredTypeData<'db> {
-        self.resolve_call_expression_with_overrides(callee, arguments, &[], raw_callee)
+        self.resolve_call_expression_with_overrides(callee, arguments, &[], raw_callee, None)
     }
 
     /// Returns the type of the object that the callee whose collected type
@@ -492,15 +492,18 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     /// Infers the result of a call to `callee` with `arguments`, where each
     /// type of `overrides` replaces the type of the argument at its index.
-    /// `raw_callee` is the collected type of the callee, which gives the
-    /// object that a method is read from when call inference asks for it
-    /// (see [`infer_call_expression_return_type_from_args`]).
+    /// The object that a method is read from, which call inference asks for
+    /// (see [`infer_call_expression_return_type_from_args`]), is `receiver`,
+    /// the object's type where `callee` was read from a narrowed object, and
+    /// otherwise the ordinary type of the object that the collected callee,
+    /// `raw_callee`, reads.
     pub(super) fn resolve_call_expression_with_overrides(
         &mut self,
         callee: InferredTypeData<'db>,
         arguments: &[RawCallArgumentType],
         overrides: &[Option<InferredTypeData<'db>>],
         raw_callee: &TypeReference,
+        receiver: Option<InferredTypeData<'db>>,
     ) -> InferredTypeData<'db> {
         let callee = self.resolve_call_callee(callee);
         let mut args = if self.has_const_call_parameters(callee) {
@@ -536,7 +539,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
         let db = self.db;
         infer_call_expression_return_type_from_args(db, callee, &args, &mut || {
-            self.callee_receiver(raw_callee)
+            receiver.or_else(|| self.callee_receiver(raw_callee))
         })
     }
 

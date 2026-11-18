@@ -1562,7 +1562,8 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// signature, and so does one with explicit type arguments, which replace
     /// the type parameters of its only signature. Otherwise the signature
     /// depends on the arguments, as [`Self::select_effect_signature`]
-    /// decides.
+    /// decides, and a call that it lets narrow only where it is truthy
+    /// removes nothing where it is falsy.
     ///
     /// A call in a condition narrows only through a type predicate, and a
     /// statement call only through an assertion. The target is flattened as a
@@ -1616,15 +1617,18 @@ impl<'db> ResolutionCtx<'db, '_> {
                 return None;
             }
         }
-        let function =
+        let (function, narrows_falsy) =
             match resolve_callable_function(self.db, CallableFunctionInput::new(self.db, callee)) {
                 Some(function)
                     if explicit_type_arguments || function.type_parameters(self.db).is_empty() =>
                 {
-                    function
+                    (function, true)
                 }
                 _ if explicit_type_arguments => return None,
-                _ => self.select_effect_signature(call, raw, callee)?,
+                _ => {
+                    let selected = self.select_effect_signature(call, raw, callee)?;
+                    (selected.function, selected.narrows_falsy)
+                }
             };
         let (name, target, asserts) = match function.return_type(self.db) {
             ReturnType::Predicate(predicate) => {
@@ -1680,7 +1684,11 @@ impl<'db> ResolutionCtx<'db, '_> {
             None => None,
         };
         Some(match target {
-            Some(target) if !statement => FlowCallEffect::Predicate { parameter, target },
+            Some(target) if !statement => FlowCallEffect::Predicate {
+                parameter,
+                target,
+                narrows_falsy,
+            },
             None if !statement => return None,
             target => FlowCallEffect::Assertion { parameter, target },
         })
@@ -2364,7 +2372,7 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     /// Returns `ty` with its unions, aliases, and `typeof` types flattened, or
     /// `None` when flattening exceeds its work limit.
-    fn flow_baseline(&mut self, ty: TypeData<'db>) -> Option<TypeData<'db>> {
+    pub(super) fn flow_baseline(&mut self, ty: TypeData<'db>) -> Option<TypeData<'db>> {
         self.flatten_baseline(ty, false).ok()
     }
 
@@ -2672,10 +2680,12 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// The effect comes from the solve's key, where the reading context put
     /// it, so the solve resolves no callee. A type predicate narrows the
     /// operand that it names to its target where the call is truthy, and
-    /// removes the target where the call is falsy. An assertion narrows the
-    /// operand as a truthy type predicate does. `asserts value` instead
-    /// applies the guard of the argument decomposed as a condition that
-    /// holds. A call whose effect the key lacks keeps `ty`.
+    /// removes the target where the call is falsy, unless its target may be
+    /// wider than TypeScript's (see [`FlowCallEffect::Predicate`]). An
+    /// assertion narrows the operand as a truthy type predicate does.
+    /// `asserts value` instead applies the guard of the argument decomposed
+    /// as a condition that holds. A call whose effect the key lacks keeps
+    /// `ty`.
     #[expect(
         clippy::too_many_arguments,
         reason = "The arguments mirror `apply_guard`, with the call's guard."
@@ -2706,7 +2716,14 @@ impl<'db> ResolutionCtx<'db, '_> {
                 .map(|position| effects[position].1)
         });
         let (parameter, target, positive) = match effect {
-            Some(FlowCallEffect::Predicate { parameter, target }) => {
+            Some(FlowCallEffect::Predicate {
+                parameter,
+                target,
+                narrows_falsy,
+            }) => {
+                if !positive && !narrows_falsy {
+                    return Some(ty);
+                }
                 (parameter, Some(target), positive)
             }
             Some(FlowCallEffect::Assertion { parameter, target }) => (parameter, target, true),
@@ -2729,7 +2746,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         };
         let tested = match parameter {
             FlowCallParameter::Argument(_) => operand.and_then(|operand| operand.subject),
-            FlowCallParameter::Receiver => flow_call.receiver,
+            FlowCallParameter::Receiver => flow_call.receiver.map(|receiver| receiver.subject),
         };
         if tested != Some(solve.subject) || solve.evolving == FlowEvolving::Array {
             return Some(ty);

@@ -189,6 +189,15 @@ impl<'db> ResolutionCtx<'db, '_> {
             AnyFlowExpression::JsCallExpression(call) => {
                 let callee_expression = call.callee().ok()?;
                 let callee = self.flow_operand(&callee_expression);
+                // A method read from a narrowed object checks the constraints
+                // of its type parameters with that object's type arguments.
+                let receiver = match (callee, callee_expression.clone().omit_parentheses()) {
+                    (Some(_), AnyJsExpression::JsStaticMemberExpression(member)) => member
+                        .object()
+                        .ok()
+                        .and_then(|object| self.flow_operand(&object)),
+                    _ => None,
+                };
                 let mut overrides = Vec::new();
                 for argument in call.arguments().ok()?.args().iter() {
                     let AnyJsCallArgument::AnyJsExpression(argument) = argument.ok()? else {
@@ -219,6 +228,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     &arguments,
                     &overrides,
                     &raw_callee,
+                    receiver,
                 );
                 Some(if call.is_optional_chain() {
                     self.optional_chain_result(callee, result)
