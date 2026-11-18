@@ -7,7 +7,7 @@ use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsDeclaration,
     AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause, JsArrowFunctionExpression,
     JsAssignmentExpression, JsForVariableDeclaration, JsFormalParameter, JsLanguage,
-    JsRestParameter, JsSyntaxNode, JsVariableDeclaration, TsInferType, TsMappedType,
+    JsRestParameter, JsSyntaxKind, JsSyntaxNode, JsVariableDeclaration, TsInferType, TsMappedType,
     TsModuleDeclaration, TsTypeParameter, inner_string_text,
 };
 use biome_js_type_info::{
@@ -643,8 +643,8 @@ impl JsModuleInfoCollector {
     }
 
     /// Given a binding name and scope, looks up the binding and, if it is a
-    /// namespace or module declaration, inserts all direct child-scope bindings
-    /// into `exports`.
+    /// namespace or module declaration, inserts the bindings declared directly
+    /// in its body into `exports`.
     fn collect_namespace_exports_for_binding(
         &self,
         name: &str,
@@ -662,18 +662,34 @@ impl JsModuleInfoCollector {
             return;
         }
 
-        // Collect bindings from immediate child scopes of the namespace
-        // binding's scope.
+        let Some(body) = self
+            .semantic_model
+            .as_binding_by_range(binding.range)
+            .and_then(|binding| binding.tree().declaration())
+            .and_then(|declaration| TsModuleDeclaration::cast(declaration.into_syntax()))
+            .and_then(|declaration| declaration.body().ok())
+        else {
+            return;
+        };
+
+        // We look at the syntax rather than at scopes, because members such as
+        // `const` declarations live in the namespace's own scope while
+        // functions, interfaces and type aliases each create a child scope.
+        // This also keeps nested bindings, such as type parameters, out of the
+        // exports.
         for child_binding in &self.bindings {
             if child_binding.name.is_empty() {
                 continue;
             }
 
-            let child_scope = &self.semantic_model.scope_from_id(child_binding.scope_id);
-            if child_scope
-                .parent()
-                .is_some_and(|parent| parent.id() == binding.scope_id)
-            {
+            let is_direct_member = self
+                .semantic_model
+                .as_binding_by_range(child_binding.range)
+                .and_then(|binding| binding.tree().declaration())
+                .is_some_and(|declaration| {
+                    is_direct_namespace_member(declaration.syntax(), body.syntax())
+                });
+            if is_direct_member {
                 exports
                     .entry(child_binding.name.clone())
                     .or_insert_with(|| JsExport::Own(JsOwnExport::Binding(child_binding.range)));
@@ -1054,6 +1070,41 @@ impl JsModuleInfo {
             referenced_classes: collector.referenced_classes,
         }))
     }
+}
+
+/// Returns whether `declaration` declares a member directly inside the
+/// namespace body `body`, as opposed to a binding nested inside one of its
+/// members (such as a parameter or a type parameter).
+fn is_direct_namespace_member(declaration: &JsSyntaxNode, body: &JsSyntaxNode) -> bool {
+    if !matches!(
+        declaration.kind(),
+        JsSyntaxKind::JS_VARIABLE_DECLARATOR
+            | JsSyntaxKind::JS_FUNCTION_DECLARATION
+            | JsSyntaxKind::JS_CLASS_DECLARATION
+            | JsSyntaxKind::TS_DECLARE_FUNCTION_DECLARATION
+            | JsSyntaxKind::TS_ENUM_DECLARATION
+            | JsSyntaxKind::TS_INTERFACE_DECLARATION
+            | JsSyntaxKind::TS_MODULE_DECLARATION
+            | JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION
+    ) {
+        return false;
+    }
+
+    for ancestor in declaration.ancestors().skip(1) {
+        match ancestor.kind() {
+            JsSyntaxKind::TS_MODULE_BLOCK => return &ancestor == body,
+            JsSyntaxKind::JS_VARIABLE_DECLARATOR_LIST
+            | JsSyntaxKind::JS_VARIABLE_DECLARATION
+            | JsSyntaxKind::JS_VARIABLE_STATEMENT
+            | JsSyntaxKind::JS_VARIABLE_DECLARATION_CLAUSE
+            | JsSyntaxKind::JS_EXPORT
+            | JsSyntaxKind::JS_MODULE_ITEM_LIST
+            | JsSyntaxKind::TS_DECLARE_STATEMENT => {}
+            _ => return false,
+        }
+    }
+
+    false
 }
 
 /// Groups the bindings declared inside each `namespace` or `module`
