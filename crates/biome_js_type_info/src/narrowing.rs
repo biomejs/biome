@@ -1313,17 +1313,16 @@ pub fn base_literal_type<'db>(
 ///
 /// The result replaces the variable's type instead of narrowing a declared
 /// one, so a value whose type Biome may infer differently from TypeScript
-/// gives `Unknown`, which leaves a read with its declared type. Biome's type
-/// matches TypeScript's when it is built from primitive types, `null`,
-/// `undefined`, `never`, interfaces, instances of classes and interfaces with
-/// such type arguments, as `Array<number>` or `Date`, and object types whose
-/// members are all properties of such types, as `{ k: number }`. A literal
-/// type inside an object type or a type argument gives `Unknown`, because
-/// TypeScript widens both `{ k: 1 }` and `{ k: id(1) }` to `{ k: number }`,
-/// while Biome keeps `1` in the second. Functions, methods, getters, tuples,
-/// generics, `any`, `unknown`, and `void` give `Unknown` too. `resolve`
-/// resolves handles as for [`narrow_type`], and a type with more than 256
-/// parts gives `Unknown`.
+/// gives `Unknown`. Biome's type matches TypeScript's when it is built from
+/// primitive types, `null`, `undefined`, `never`, interfaces, instances of
+/// classes and interfaces with such type arguments, as `Array<number>` or
+/// `Date`, and object types whose members are all properties of such types,
+/// as `{ k: number }`. A literal type inside an object type or a type
+/// argument gives `Unknown`, because TypeScript widens both `{ k: 1 }` and
+/// `{ k: id(1) }` to `{ k: number }`, while Biome keeps `1` in the second.
+/// Functions, methods, getters, tuples, generics, `any`, `unknown`, and
+/// `void` give `Unknown` too. `resolve` resolves handles as for
+/// [`narrow_type`], and a type with more than 256 parts gives `Unknown`.
 pub fn evolving_assigned_type<'db>(
     db: &'db dyn TypeDb,
     ty: InferredTypeData<'db>,

@@ -16,3 +16,32 @@ function counted(items: string[]) {
 	for (const item of items) count = item.length;
 	return count === null ? "none" : count;
 }
+
+// Biome can't type a call to a method whose return type is inferred as
+// TypeScript does, so after such a write the variable can hold any value.
+const store = {
+	compute() {
+		return 1;
+	},
+};
+declare const fallback: number;
+
+function computed() {
+	let result = null;
+	result = store.compute();
+	if (result) {
+	}
+}
+
+function computedWithoutBraces() {
+	let result = null;
+	if (enabled) result = store.compute();
+	if (result) {
+	}
+}
+
+function computedWithFallback() {
+	let result = null;
+	result = store.compute();
+	return result || fallback;
+}
