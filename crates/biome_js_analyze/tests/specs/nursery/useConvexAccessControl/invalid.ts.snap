@@ -1,0 +1,66 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import { mutation } from "./_generated/server";
+
+export const send = mutation({
+	args: {},
+	handler: (async (ctx) => {
+		await ctx.db.insert("messages", { body: "hello" });
+	}) satisfies Handler,
+}) as RegisteredMutation;
+
+export const expressionBody = mutation({
+	args: {},
+	handler: async (ctx) => ctx.db.insert("messages", { body: "hello" }),
+});
+
+```
+
+# Diagnostics
+```
+invalid.ts:4:21 lint/nursery/useConvexAccessControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This public Convex mutation doesn't call an access control function.
+  
+    2 │ import { mutation } from "./_generated/server";
+    3 │ 
+  > 4 │ export const send = mutation({
+      │                     ^^^^^^^^
+    5 │ 	args: {},
+    6 │ 	handler: (async (ctx) => {
+  
+  i Anyone on the internet can call this function, so without an access control check, any user can read or change data they shouldn't have access to.
+  
+  i Call an access control function, such as requireUser(ctx) or canEditNote(ctx), at the top level of the handler. If this function shouldn't be callable from outside, use internalMutation instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:11:31 lint/nursery/useConvexAccessControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This public Convex mutation doesn't call an access control function.
+  
+     9 │ }) as RegisteredMutation;
+    10 │ 
+  > 11 │ export const expressionBody = mutation({
+       │                               ^^^^^^^^
+    12 │ 	args: {},
+    13 │ 	handler: async (ctx) => ctx.db.insert("messages", { body: "hello" }),
+  
+  i Anyone on the internet can call this function, so without an access control check, any user can read or change data they shouldn't have access to.
+  
+  i Call an access control function, such as requireUser(ctx) or canEditNote(ctx), at the top level of the handler. If this function shouldn't be callable from outside, use internalMutation instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

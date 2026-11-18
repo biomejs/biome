@@ -4109,6 +4109,11 @@ export interface Nursery {
 	 */
 	useControlLabel?: UseControlLabelConfiguration;
 	/**
+	 * Require public Convex functions to call an access control function.
+	 * See https://biomejs.dev/linter/rules/use-convex-access-control
+	 */
+	useConvexAccessControl?: UseConvexAccessControlConfiguration;
+	/**
 	 * Detects a disposable object assigned to a variable without using or await using syntax.
 	 * See https://biomejs.dev/linter/rules/use-disposables
 	 */
@@ -7505,6 +7510,9 @@ export type UseConsistentUnicodeBomConfiguration =
 export type UseControlLabelConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseControlLabelOptions;
+export type UseConvexAccessControlConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConvexAccessControlOptions;
 export type UseDisposablesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDisposablesOptions;
@@ -11118,6 +11126,10 @@ export interface RuleWithUseControlLabelOptions {
 	level: RulePlainConfiguration;
 	options?: UseControlLabelOptions;
 }
+export interface RuleWithUseConvexAccessControlOptions {
+	level: RulePlainConfiguration;
+	options?: UseConvexAccessControlOptions;
+}
 export interface RuleWithUseDisposablesOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -14364,6 +14376,21 @@ export interface UseConsistentUnicodeBomOptions {
  * Configuration for the `useControlLabel` lint rule.
  */
 export type UseControlLabelOptions = {};
+export interface UseConvexAccessControlOptions {
+	/**
+	 * Names of functions that count as access control functions, in addition to the names
+	 * matched by `prefixes`.
+	 */
+	functions?: string[];
+	/**
+	 * Words that start the name of an access control function. A name matches a prefix when it's
+	 * the prefix on its own, or the prefix followed by an uppercase letter or `_`.
+	 *
+	 * Setting this option replaces the default prefixes: `assert`, `can`, `check`, `ensure`,
+	 * `has` and `require`.
+	 */
+	prefixes?: string[];
+}
 export type UseDisposablesOptions = {};
 export interface UseExhaustiveSwitchCasesOptions {
 	/**
@@ -16258,8 +16285,6 @@ export type Category =
 	| "lint/nursery/noDynamicRequire"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
-	| "lint/nursery/noTestHooks"
-	| "lint/nursery/noYamlEmptySequenceEntries"
 	| "lint/nursery/noErasingOperation"
 	| "lint/nursery/noExcessiveNestedBlocks"
 	| "lint/nursery/noExcessiveNestedCallbacks"
@@ -16363,6 +16388,7 @@ export type Category =
 	| "lint/nursery/noTanstackQueryRestDestructuring"
 	| "lint/nursery/noTanstackQueryVoidQueryFn"
 	| "lint/nursery/noTestGlobals"
+	| "lint/nursery/noTestHooks"
 	| "lint/nursery/noThisOutsideOfClass"
 	| "lint/nursery/noTripleSlashReference"
 	| "lint/nursery/noUndeclaredClasses"
@@ -16403,10 +16429,10 @@ export type Category =
 	| "lint/nursery/noVueComputedPropertiesInData"
 	| "lint/nursery/noVueDefineModelDefault"
 	| "lint/nursery/noVueDeprecatedConfigKeyCodes"
-	| "lint/nursery/noVueDeprecatedFilter"
 	| "lint/nursery/noVueDeprecatedDeleteSet"
 	| "lint/nursery/noVueDeprecatedDestroyedLifecycle"
 	| "lint/nursery/noVueDeprecatedEventsApi"
+	| "lint/nursery/noVueDeprecatedFilter"
 	| "lint/nursery/noVueDeprecatedFunctionalTemplate"
 	| "lint/nursery/noVueDeprecatedHtmlElementIs"
 	| "lint/nursery/noVueDeprecatedInlineTemplate"
@@ -16463,6 +16489,7 @@ export type Category =
 	| "lint/nursery/noYamlBooleanKeys"
 	| "lint/nursery/noYamlEmptyMapKeys"
 	| "lint/nursery/noYamlEmptyMapValues"
+	| "lint/nursery/noYamlEmptySequenceEntries"
 	| "lint/nursery/noZeroFractions"
 	| "lint/nursery/noZeroLengthUnit"
 	| "lint/nursery/useAccessorPairs"
@@ -16489,6 +16516,7 @@ export type Category =
 	| "lint/nursery/useConsistentTupleLabels"
 	| "lint/nursery/useConsistentUnicodeBom"
 	| "lint/nursery/useControlLabel"
+	| "lint/nursery/useConvexAccessControl"
 	| "lint/nursery/useDisposables"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExpectToContain"
