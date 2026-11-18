@@ -16,20 +16,9 @@ impl FormatRule<CssRelativeSelectorList> for FormatCssRelativeSelectorList {
         for formatted in node.format_separated(",") {
             let entry = formatted.node()?.syntax();
 
-            // Only a comment attached to the entry itself is printed inside it. A
-            // comment before the first selector of a rule belongs to the rule, so
-            // the selector keeps its indent when it wraps.
-            let has_leading_comments = comments.has_leading_comments(entry)
-                && entry
-                    .first_token()
-                    .is_some_and(|token| token.has_leading_comments());
-
-            if has_leading_comments {
-                // The entry prints its own leading comments, which already set the
-                // indentation of the selector that follows them. Indenting the entry
-                // as well would move the selector away from its comment. The kind of
-                // selector that comes first (`div`, `.a`, `&`, a combinator) doesn't
-                // matter.
+            // The entry prints its own leading comments, so indenting it as well
+            // would move the selector away from its comment.
+            if comments.has_leading_comments(entry) && entry.has_leading_comments() {
                 joiner.entry(&group(&formatted));
             } else {
                 // Each selector gets `indent` added in case it breaks over multiple
