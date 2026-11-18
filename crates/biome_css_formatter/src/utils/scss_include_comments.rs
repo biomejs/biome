@@ -301,8 +301,7 @@ fn is_block_group_before_map_closing(
     };
 
     let Some(comma) = node
-        .last_token()
-        .and_then(|token| token.next_token())
+        .next_token()
         .filter(|token| token.kind() == CssSyntaxKind::COMMA)
     else {
         return false;
@@ -312,10 +311,10 @@ fn is_block_group_before_map_closing(
         return false;
     }
 
+    debug_assert_eq!(comma.next_token().as_ref(), Some(closing_paren));
+
     comma
-        .trailing_trivia()
-        .pieces()
-        .chain(closing_paren.leading_trivia().pieces())
+        .trivia_after()
         .filter(|piece| {
             is_block_style_comment(piece)
                 && piece.text_range().start() >= comma.text_trimmed_range().end()
@@ -333,14 +332,12 @@ fn is_trailing_separator_comment(
 ) -> bool {
     let comment_piece = comment.piece().as_piece();
 
-    node.last_token()
-        .and_then(|token| token.next_token())
-        .is_some_and(|token| {
-            token.kind() == CssSyntaxKind::COMMA
-                && token == comment_piece.token()
-                && token
-                    .trailing_trivia()
-                    .text_range()
-                    .contains_range(comment_piece.text_range())
-        })
+    node.next_token().is_some_and(|token| {
+        token.kind() == CssSyntaxKind::COMMA
+            && token == comment_piece.token()
+            && token
+                .trailing_trivia()
+                .text_range()
+                .contains_range(comment_piece.text_range())
+    })
 }

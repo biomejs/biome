@@ -46,7 +46,7 @@ declare_lint_rule! {
     /// - To disallow the use of `arguments` entirely, see [`noArguments`](https://biomejs.dev/linter/rules/no-arguments/).
     ///
     pub NoArgumentsCallerOrCallee {
-        version: "next",
+        version: "2.6.0",
         name: "noArgumentsCallerOrCallee",
         language: "js",
         sources: &[RuleSource::Eslint("no-caller").same()],

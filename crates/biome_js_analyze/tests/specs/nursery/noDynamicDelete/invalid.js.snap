@@ -1,0 +1,366 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const container = {};
+const name = "name";
+const getName = () => "aaa";
+const nested = { foo: { bar: "bar" } };
+
+delete container["aa" + "b"];
+delete container[+7];
+delete container[-Infinity];
+delete container[+Infinity];
+delete container[NaN];
+delete container[name];
+delete container[getName()];
+delete container[nested.foo.bar];
+delete container[+"Infinity"];
+delete container[typeof 1];
+delete container[`aaa`];
+delete container[-"1"];
+delete container[1n];
+delete container?.[name];
+delete (container[name]);
+delete container.inner[name];
+
+```
+
+# Diagnostics
+```
+invalid.js:7:18 lint/nursery/noDynamicDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using delete with a property name that is computed at runtime.
+  
+    5 │ const nested = { foo: { bar: "bar" } };
+    6 │ 
+  > 7 │ delete container["aa" + "b"];
+      │                  ^^^^^^^^^^
+    8 │ delete container[+7];
+    9 │ delete container[-Infinity];
+  
+  i Removing properties by a changing name makes it hard to tell which property gets removed.
+  
+  i Use a Map or a Set and call its delete() method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:18 lint/nursery/noDynamicDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using delete with a property name that is computed at runtime.
+  
+     7 │ delete container["aa" + "b"];
+   > 8 │ delete container[+7];
+       │                  ^^
+     9 │ delete container[-Infinity];
+    10 │ delete container[+Infinity];
+  
+  i Removing properties by a changing name makes it hard to tell which property gets removed.
+  
+  i Use a Map or a Set and call its delete() method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:18 lint/nursery/noDynamicDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using delete with a property name that is computed at runtime.
+  
+     7 │ delete container["aa" + "b"];
+     8 │ delete container[+7];
+   > 9 │ delete container[-Infinity];
+       │                  ^^^^^^^^^
+    10 │ delete container[+Infinity];
+    11 │ delete container[NaN];
+  
+  i Removing properties by a changing name makes it hard to tell which property gets removed.
+  
+  i Use a Map or a Set and call its delete() method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:18 lint/nursery/noDynamicDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using delete with a property name that is computed at runtime.
+  
+     8 │ delete container[+7];
+     9 │ delete container[-Infinity];
+  > 10 │ delete container[+Infinity];
+       │                  ^^^^^^^^^
+    11 │ delete container[NaN];
+    12 │ delete container[name];
+  
+  i Removing properties by a changing name makes it hard to tell which property gets removed.
+  
+  i Use a Map or a Set and call its delete() method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:18 lint/nursery/noDynamicDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using delete with a property name that is computed at runtime.
+  
+     9 │ delete container[-Infinity];
+    10 │ delete container[+Infinity];
+  > 11 │ delete container[NaN];
+       │                  ^^^
+    12 │ delete container[name];
+    13 │ delete container[getName()];
+  
+  i Removing properties by a changing name makes it hard to tell which property gets removed.
+  
+  i Use a Map or a Set and call its delete() method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:18 lint/nursery/noDynamicDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using delete with a property name that is computed at runtime.
+  
+    10 │ delete container[+Infinity];
+    11 │ delete container[NaN];
+  > 12 │ delete container[name];
+       │                  ^^^^
+    13 │ delete container[getName()];
+    14 │ delete container[nested.foo.bar];
+  
+  i Removing properties by a changing name makes it hard to tell which property gets removed.
+  
+  i Use a Map or a Set and call its delete() method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:18 lint/nursery/noDynamicDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using delete with a property name that is computed at runtime.
+  
+    11 │ delete container[NaN];
+    12 │ delete container[name];
+  > 13 │ delete container[getName()];
+       │                  ^^^^^^^^^
+    14 │ delete container[nested.foo.bar];
+    15 │ delete container[+"Infinity"];
+  
+  i Removing properties by a changing name makes it hard to tell which property gets removed.
+  
+  i Use a Map or a Set and call its delete() method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:18 lint/nursery/noDynamicDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using delete with a property name that is computed at runtime.
+  
+    12 │ delete container[name];
+    13 │ delete container[getName()];
+  > 14 │ delete container[nested.foo.bar];
+       │                  ^^^^^^^^^^^^^^
+    15 │ delete container[+"Infinity"];
+    16 │ delete container[typeof 1];
+  
+  i Removing properties by a changing name makes it hard to tell which property gets removed.
+  
+  i Use a Map or a Set and call its delete() method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:18 lint/nursery/noDynamicDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using delete with a property name that is computed at runtime.
+  
+    13 │ delete container[getName()];
+    14 │ delete container[nested.foo.bar];
+  > 15 │ delete container[+"Infinity"];
+       │                  ^^^^^^^^^^^
+    16 │ delete container[typeof 1];
+    17 │ delete container[`aaa`];
+  
+  i Removing properties by a changing name makes it hard to tell which property gets removed.
+  
+  i Use a Map or a Set and call its delete() method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:18 lint/nursery/noDynamicDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using delete with a property name that is computed at runtime.
+  
+    14 │ delete container[nested.foo.bar];
+    15 │ delete container[+"Infinity"];
+  > 16 │ delete container[typeof 1];
+       │                  ^^^^^^^^
+    17 │ delete container[`aaa`];
+    18 │ delete container[-"1"];
+  
+  i Removing properties by a changing name makes it hard to tell which property gets removed.
+  
+  i Use a Map or a Set and call its delete() method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:18 lint/nursery/noDynamicDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using delete with a property name that is computed at runtime.
+  
+    15 │ delete container[+"Infinity"];
+    16 │ delete container[typeof 1];
+  > 17 │ delete container[`aaa`];
+       │                  ^^^^^
+    18 │ delete container[-"1"];
+    19 │ delete container[1n];
+  
+  i Removing properties by a changing name makes it hard to tell which property gets removed.
+  
+  i Use a Map or a Set and call its delete() method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:18 lint/nursery/noDynamicDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using delete with a property name that is computed at runtime.
+  
+    16 │ delete container[typeof 1];
+    17 │ delete container[`aaa`];
+  > 18 │ delete container[-"1"];
+       │                  ^^^^
+    19 │ delete container[1n];
+    20 │ delete container?.[name];
+  
+  i Removing properties by a changing name makes it hard to tell which property gets removed.
+  
+  i Use a Map or a Set and call its delete() method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:18 lint/nursery/noDynamicDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using delete with a property name that is computed at runtime.
+  
+    17 │ delete container[`aaa`];
+    18 │ delete container[-"1"];
+  > 19 │ delete container[1n];
+       │                  ^^
+    20 │ delete container?.[name];
+    21 │ delete (container[name]);
+  
+  i Removing properties by a changing name makes it hard to tell which property gets removed.
+  
+  i Use a Map or a Set and call its delete() method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:20 lint/nursery/noDynamicDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using delete with a property name that is computed at runtime.
+  
+    18 │ delete container[-"1"];
+    19 │ delete container[1n];
+  > 20 │ delete container?.[name];
+       │                    ^^^^
+    21 │ delete (container[name]);
+    22 │ delete container.inner[name];
+  
+  i Removing properties by a changing name makes it hard to tell which property gets removed.
+  
+  i Use a Map or a Set and call its delete() method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:19 lint/nursery/noDynamicDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using delete with a property name that is computed at runtime.
+  
+    19 │ delete container[1n];
+    20 │ delete container?.[name];
+  > 21 │ delete (container[name]);
+       │                   ^^^^
+    22 │ delete container.inner[name];
+    23 │ 
+  
+  i Removing properties by a changing name makes it hard to tell which property gets removed.
+  
+  i Use a Map or a Set and call its delete() method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:24 lint/nursery/noDynamicDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using delete with a property name that is computed at runtime.
+  
+    20 │ delete container?.[name];
+    21 │ delete (container[name]);
+  > 22 │ delete container.inner[name];
+       │                        ^^^^
+    23 │ 
+  
+  i Removing properties by a changing name makes it hard to tell which property gets removed.
+  
+  i Use a Map or a Set and call its delete() method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

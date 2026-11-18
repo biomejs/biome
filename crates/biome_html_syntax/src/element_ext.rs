@@ -501,7 +501,7 @@ impl AnyHtmlTagName {
         get_tag_name_text(self)
     }
 
-    /// Returns the token kind of a plain HTML/SVG tag name.
+    /// Returns the token kind of a plain HTML/SVG/MathML tag name.
     ///
     /// Known tags resolve to their keyword kind (e.g. `<div>` -> `DIV_KW`), and
     /// unknown or custom tags to `HTML_UNKNOWN_TAG`. Returns `None` for component

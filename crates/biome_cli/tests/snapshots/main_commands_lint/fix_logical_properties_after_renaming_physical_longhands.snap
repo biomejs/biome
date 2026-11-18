@@ -1,0 +1,23 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --write --unsafe --only=nursery/useLogicalProperties styles.css
+```
+
+## `styles.css`
+
+```css
+.card {
+  margin-block: 1px 2px;
+}
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

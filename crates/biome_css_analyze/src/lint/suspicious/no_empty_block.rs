@@ -81,7 +81,10 @@ impl Rule for NoEmptyBlock {
                 },
             )
             .note(markup! {
-                    "Consider removing the empty block or adding styles inside it."
+                "An empty block has no effect. It often means that styles were forgotten or removed."
+            })
+            .note(markup! {
+                "Consider removing the empty block or adding styles inside it."
             }),
         )
     }

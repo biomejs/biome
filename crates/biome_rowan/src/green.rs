@@ -53,7 +53,7 @@ impl GreenElementFlags {
 }
 
 pub use self::node_cache::NodeCache;
-pub(crate) use self::node_cache::NodeCacheNodeEntryMut;
+pub(crate) use self::node_cache::{CacheChild, NodeCacheNodeEntryMut};
 
 /// RawSyntaxKind is a type tag for each token or node.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -75,6 +75,7 @@ mod tests {
         f::<GreenNode>();
         f::<GreenToken>();
         f::<GreenElement>();
+        f::<CacheChild>();
     }
 
     #[test]

@@ -164,7 +164,10 @@ impl Rule for UseSimplifiedLogicExpression {
             markup! {
                 "Logical expression contains unnecessary complexity."
             },
-        ))
+        )
+        .note(markup! {
+            "A simpler expression is easier to read and less likely to hide a mistake."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {

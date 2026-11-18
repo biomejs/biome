@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-not-vue-computed.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import { defineComponent } from "vue";
+import { computed } from "./my-computed";
+
+export default defineComponent({
+  setup() {
+    const state = { count: 0 };
+    const test = computed(() => state.count++);
+    return { test };
+  },
+});
+
+```

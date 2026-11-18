@@ -1,7 +1,8 @@
 use crate::html::auxiliary::text_expression::FormatHtmlTextExpressionOptions;
 use crate::prelude::*;
 use biome_formatter::write;
-use biome_html_syntax::{VueVForValue, VueVForValueFields};
+use biome_html_syntax::{HtmlTextExpression, VueVForValue, VueVForValueFields};
+use biome_rowan::AstNode;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatVueVForValue;
@@ -15,15 +16,8 @@ impl FormatNodeRule<VueVForValue> for FormatVueVForValue {
             r_quote,
         } = node.as_fields();
         let expression = expression?;
-        let is_embedded = f.context().should_delegate_fmt_embedded_nodes()
-            && f.context().is_embedded_node_range(expression.range());
 
-        // The value is written between double quotes, unless its expression
-        // isn't formatted as JavaScript and contains a double quote. That
-        // expression is written as it is in the source, so the value keeps its
-        // own quotes. The binding can't contain the quote of the value, which
-        // would end the value.
-        if !is_embedded && expression.syntax().text_trimmed().contains_char('"') {
+        if keeps_source_quotes(node, f) {
             return write!(
                 f,
                 [
@@ -59,4 +53,21 @@ impl FormatNodeRule<VueVForValue> for FormatVueVForValue {
             ]
         )
     }
+}
+
+/// Returns whether a `v-for` value keeps the quotes of the source instead of
+/// being written between double quotes.
+///
+/// The value keeps its quotes when one of its expressions, the iterable or a
+/// default value, isn't formatted as JavaScript and contains a double quote.
+/// That expression is written as it is in the source.
+pub(crate) fn keeps_source_quotes(node: &VueVForValue, f: &HtmlFormatter) -> bool {
+    node.syntax()
+        .descendants()
+        .filter_map(HtmlTextExpression::cast)
+        .any(|expression| {
+            let is_embedded = f.context().should_delegate_fmt_embedded_nodes()
+                && f.context().is_embedded_node_range(expression.range());
+            !is_embedded && expression.syntax().text_trimmed().contains_char('"')
+        })
 }

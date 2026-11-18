@@ -46,6 +46,8 @@ test1.js:4:2 lint/complexity/noArguments ━━━━━━━━━━━━━
   
   i arguments does not have Array.prototype methods and can be inconvenient to use.
   
+  i Declare a rest parameter, such as ...args, in the function signature and use it instead.
+  
 
 ```
 
@@ -62,6 +64,8 @@ test2.js:4:2 lint/complexity/noArguments ━━━━━━━━━━━━━
     6 │ 
   
   i arguments does not have Array.prototype methods and can be inconvenient to use.
+  
+  i Declare a rest parameter, such as ...args, in the function signature and use it instead.
   
 
 ```

@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <div class="static-class" />
+  <div :class="dynamicClass" />
+  <div :class="`dynamic-class-${foo}`" />
+  <div :class="`${foo}-dynamic-class`" />
+  <div :class="'dynamic-class-' + foo" />
+  <div class="static-class" :class="dynamicClass" />
+  <div class="static-class" :class="[dynamicClass]" />
+  <div class="static-class" :class="{'dynamic-class': foo}" />
+  <div class="static-class" :class="{foo, [computedName]: true}" />
+  <div class="static-class" :class="[dynamicClass, {'dynamic-class': foo}]" />
+  <div :class="foo ? 'a' : 'b'" />
+  <div :class="foo && 'a'" />
+  <div :class="getClasses('a')" />
+  <div :class="{a: false, b: 1, 1: true, [`c-${d}`]: true}" />
+  <div :class="['']" />
+  <div :class="' '" />
+  <div :class="[...classes]" />
+  <div :class="tag`static-class`" />
+  <div :style="'color: red'" />
+  <div :title="'static-class'" />
+  <div v-bind:title="'static-class'" />
+</template>
+
+```

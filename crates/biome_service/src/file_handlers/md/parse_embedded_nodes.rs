@@ -215,7 +215,8 @@ fn parse_code(
             let options = context
                 .settings
                 .parse_options::<CssLanguage>(context.path, &file_source);
-            parse_css_with_offset_and_cache(code, css_source, offset, context.cache, options).into()
+            parse_css_with_offset_and_cache(code, css_source, offset, context.cache, options, &[])
+                .into()
         }
         #[cfg(feature = "lang_graphql")]
         DocumentFileSource::Graphql(_) => {

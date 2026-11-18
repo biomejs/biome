@@ -76,6 +76,13 @@ class G extends A {
     }
 }
 
+// invalid
+class ParameterDefault extends A {
+    constructor(options = this.defaults()) {
+        super(options);
+    }
+}
+
 ```
 
 # Diagnostics
@@ -228,6 +235,35 @@ thisBeforeSuper.js:64:5 lint/correctness/noUnreachableSuper ━━━━━━�
        │             ^^^^
     67 │         } catch {
     68 │             super();
+  
+  i If this is intentional, add an explicit throw statement in unsupported paths.
+  
+
+```
+
+```
+thisBeforeSuper.js:75:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This constructor has code paths accessing `this` without calling `super()` first.
+  
+    73 │ // invalid
+    74 │ class ParameterDefault extends A {
+  > 75 │     constructor(options = this.defaults()) {
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 76 │         super(options);
+  > 77 │     }
+       │     ^
+    78 │ }
+    79 │ 
+  
+  i `this` is accessed here:
+  
+    73 │ // invalid
+    74 │ class ParameterDefault extends A {
+  > 75 │     constructor(options = this.defaults()) {
+       │                           ^^^^
+    76 │         super(options);
+    77 │     }
   
   i If this is intentional, add an explicit throw statement in unsupported paths.
   

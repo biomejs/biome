@@ -1,0 +1,211 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<script setup>
+/* should generate diagnostics */
+const props = defineProps(['foo']);
+const propsWithDefaults = withDefaults(defineProps(['foo']), { foo: 'default' });
+const { foo } = withDefaults(defineProps(['foo']), { foo: 'default' });
+withDefaults(defineProps(['foo']), { foo: 'default' });
+const [first] = defineProps(['foo']);
+const parenthesized = (defineProps(['foo']));
+const { bar } = withDefaults((defineProps(['bar'])), { bar: 'default' });
+import { propsObject } from './props';
+const fromObject = defineProps(propsObject);
+let reassignable = defineProps({ foo: String });
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:15 lint/nursery/useVueDefinePropsDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The props returned by defineProps() are not destructured.
+  
+    1 │ <script setup>
+    2 │ /* should generate diagnostics */
+  > 3 │ const props = defineProps(['foo']);
+      │               ^^^^^^^^^^^^^^^^^^^^
+    4 │ const propsWithDefaults = withDefaults(defineProps(['foo']), { foo: 'default' });
+    5 │ const { foo } = withDefaults(defineProps(['foo']), { foo: 'default' });
+  
+  i Destructured props stay reactive and can be read as plain variables.
+  
+  i Destructure the props you need, for example const { foo } = defineProps(...).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:40 lint/nursery/useVueDefinePropsDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The props returned by defineProps() are not destructured.
+  
+    2 │ /* should generate diagnostics */
+    3 │ const props = defineProps(['foo']);
+  > 4 │ const propsWithDefaults = withDefaults(defineProps(['foo']), { foo: 'default' });
+      │                                        ^^^^^^^^^^^^^^^^^^^^
+    5 │ const { foo } = withDefaults(defineProps(['foo']), { foo: 'default' });
+    6 │ withDefaults(defineProps(['foo']), { foo: 'default' });
+  
+  i Destructured props stay reactive and can be read as plain variables.
+  
+  i Destructure the props you need, for example const { foo } = defineProps(...).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:17 lint/nursery/useVueDefinePropsDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Default values for props are set with withDefaults() instead of in the destructuring.
+  
+    3 │ const props = defineProps(['foo']);
+    4 │ const propsWithDefaults = withDefaults(defineProps(['foo']), { foo: 'default' });
+  > 5 │ const { foo } = withDefaults(defineProps(['foo']), { foo: 'default' });
+      │                 ^^^^^^^^^^^^
+    6 │ withDefaults(defineProps(['foo']), { foo: 'default' });
+    7 │ const [first] = defineProps(['foo']);
+  
+  i With destructuring, each default value sits next to the variable that holds the prop, so withDefaults() isn't needed.
+  
+  i Remove withDefaults() and give each prop its default value in the destructuring, for example const { foo = "default" } = defineProps(...).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:1 lint/nursery/useVueDefinePropsDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Default values for props are set with withDefaults() instead of in the destructuring.
+  
+    4 │ const propsWithDefaults = withDefaults(defineProps(['foo']), { foo: 'default' });
+    5 │ const { foo } = withDefaults(defineProps(['foo']), { foo: 'default' });
+  > 6 │ withDefaults(defineProps(['foo']), { foo: 'default' });
+      │ ^^^^^^^^^^^^
+    7 │ const [first] = defineProps(['foo']);
+    8 │ const parenthesized = (defineProps(['foo']));
+  
+  i With destructuring, each default value sits next to the variable that holds the prop, so withDefaults() isn't needed.
+  
+  i Remove withDefaults() and give each prop its default value in the destructuring, for example const { foo = "default" } = defineProps(...).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:17 lint/nursery/useVueDefinePropsDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The props returned by defineProps() are not destructured.
+  
+    5 │ const { foo } = withDefaults(defineProps(['foo']), { foo: 'default' });
+    6 │ withDefaults(defineProps(['foo']), { foo: 'default' });
+  > 7 │ const [first] = defineProps(['foo']);
+      │                 ^^^^^^^^^^^^^^^^^^^^
+    8 │ const parenthesized = (defineProps(['foo']));
+    9 │ const { bar } = withDefaults((defineProps(['bar'])), { bar: 'default' });
+  
+  i Destructured props stay reactive and can be read as plain variables.
+  
+  i Destructure the props you need, for example const { foo } = defineProps(...).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:24 lint/nursery/useVueDefinePropsDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The props returned by defineProps() are not destructured.
+  
+     6 │ withDefaults(defineProps(['foo']), { foo: 'default' });
+     7 │ const [first] = defineProps(['foo']);
+   > 8 │ const parenthesized = (defineProps(['foo']));
+       │                        ^^^^^^^^^^^^^^^^^^^^
+     9 │ const { bar } = withDefaults((defineProps(['bar'])), { bar: 'default' });
+    10 │ import { propsObject } from './props';
+  
+  i Destructured props stay reactive and can be read as plain variables.
+  
+  i Destructure the props you need, for example const { foo } = defineProps(...).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:17 lint/nursery/useVueDefinePropsDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Default values for props are set with withDefaults() instead of in the destructuring.
+  
+     7 │ const [first] = defineProps(['foo']);
+     8 │ const parenthesized = (defineProps(['foo']));
+   > 9 │ const { bar } = withDefaults((defineProps(['bar'])), { bar: 'default' });
+       │                 ^^^^^^^^^^^^
+    10 │ import { propsObject } from './props';
+    11 │ const fromObject = defineProps(propsObject);
+  
+  i With destructuring, each default value sits next to the variable that holds the prop, so withDefaults() isn't needed.
+  
+  i Remove withDefaults() and give each prop its default value in the destructuring, for example const { foo = "default" } = defineProps(...).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:20 lint/nursery/useVueDefinePropsDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The props returned by defineProps() are not destructured.
+  
+     9 │ const { bar } = withDefaults((defineProps(['bar'])), { bar: 'default' });
+    10 │ import { propsObject } from './props';
+  > 11 │ const fromObject = defineProps(propsObject);
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ let reassignable = defineProps({ foo: String });
+    13 │ </script>
+  
+  i Destructured props stay reactive and can be read as plain variables.
+  
+  i Destructure the props you need, for example const { foo } = defineProps(...).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:12:20 lint/nursery/useVueDefinePropsDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The props returned by defineProps() are not destructured.
+  
+    10 │ import { propsObject } from './props';
+    11 │ const fromObject = defineProps(propsObject);
+  > 12 │ let reassignable = defineProps({ foo: String });
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ </script>
+    14 │ 
+  
+  i Destructured props stay reactive and can be read as plain variables.
+  
+  i Destructure the props you need, for example const { foo } = defineProps(...).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

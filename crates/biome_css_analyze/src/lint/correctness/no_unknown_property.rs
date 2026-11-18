@@ -13,7 +13,9 @@ use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_unknown_property::NoUnknownPropertyOptions;
 use biome_string_case::StrLikeExtension;
 
-use crate::utils::{is_known_properties, vendor_prefixed};
+use crate::utils::{
+    AnyPropertyStatement, is_known_properties, nested_property_name, vendor_prefixed,
+};
 
 declare_lint_rule! {
     /// Disallow unrecognized CSS properties.
@@ -27,6 +29,11 @@ declare_lint_rule! {
     ///
     /// Property names containing SCSS interpolation are ignored because the emitted name cannot be
     /// determined statically.
+    ///
+    /// SCSS lets you write properties that share a prefix inside a block named after that prefix,
+    /// such as `border: { radius: 4px; }`. These nested properties are checked by the full name
+    /// Sass emits for them, so `radius` here is checked as `border-radius`. If the name of a
+    /// surrounding block contains interpolation, the properties inside that block are ignored.
     ///
     /// ## Examples
     ///
@@ -101,7 +108,7 @@ declare_lint_rule! {
 
 impl Rule for NoUnknownProperty {
     type Query = Ast<CssGenericProperty>;
-    type State = TextRange;
+    type State = NoUnknownPropertyState;
     type Signals = Option<Self::State>;
     type Options = NoUnknownPropertyOptions;
 
@@ -118,7 +125,22 @@ impl Rule for NoUnknownProperty {
 
         let property_name = node.name().ok()?;
         let property_name_token = declaration_name_value_token(&property_name)?;
-        let property_name_lower = property_name_token.text_trimmed().to_ascii_lowercase_cow();
+        let nested_name = match node
+            .syntax()
+            .grand_parent()
+            .and_then(AnyPropertyStatement::cast)
+            .and_then(|statement| statement.group())
+        {
+            Some(group) => Some(nested_property_name(
+                property_name_token.text_trimmed(),
+                group,
+            )?),
+            None => None,
+        };
+        let property_name_lower = nested_name
+            .as_deref()
+            .unwrap_or(property_name_token.text_trimmed())
+            .to_ascii_lowercase_cow();
 
         let in_function_at_rule = node
             .syntax()
@@ -138,28 +160,48 @@ impl Rule for NoUnknownProperty {
             && !vendor_prefixed(&property_name_lower)
             && !should_ignore(&property_name_lower, ctx.options())
         {
-            return Some(property_name.range());
+            return Some(NoUnknownPropertyState {
+                range: property_name.range(),
+                nested_name,
+            });
         }
         None
     }
 
-    fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let mut diagnostic = RuleDiagnostic::new(
+            rule_category!(),
+            state.range,
+            markup! {
+                "Unknown property is not allowed."
+            },
+        );
+        if let Some(nested_name) = &state.nested_name {
+            diagnostic = diagnostic.note(markup! {
+                "Sass emits this nested property as "<Emphasis>{nested_name}</Emphasis>"."
+            });
+        }
         Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                range,
-                markup! {
-                    "Unknown property is not allowed."
-                },
-            )
+            diagnostic
+            .note(markup! {
+                "Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo."
+            })
+           .note(markup! {
+                "Use a known CSS property instead."
+            })
             .note(markup! {
                 "See "<Hyperlink href="https://stylelint.io/user-guide/rules/property-no-unknown/">"CSS Specifications and browser specific properties"</Hyperlink>" for more details."
             })
-           .note(markup! {
-                "To resolve this issue, replace the unknown property with a valid CSS property."
-            })
         )
     }
+}
+
+pub struct NoUnknownPropertyState {
+    range: TextRange,
+    /// The name Sass emits for a property nested in an SCSS group, such as
+    /// `border-radius` for `radius` in `border: { radius: 4px; }`, or `None`
+    /// outside a group.
+    nested_name: Option<String>,
 }
 
 declare_node_union! {

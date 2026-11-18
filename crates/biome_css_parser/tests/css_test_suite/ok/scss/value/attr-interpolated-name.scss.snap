@@ -291,8 +291,8 @@ CssRoot {
                                                             },
                                                             r_curly_token: R_CURLY@189..190 "}" [] [],
                                                         },
-                                                        CssNumber {
-                                                            value_token: CSS_NUMBER_LITERAL@190..192 "1" [] [Whitespace(" ")],
+                                                        CssIdentifier {
+                                                            value_token: IDENT@190..192 "1" [] [Whitespace(" ")],
                                                         },
                                                     ],
                                                 },
@@ -516,8 +516,8 @@ CssRoot {
                                     1: CSS_IDENTIFIER@184..189
                                       0: IDENT@184..189 "index" [] []
                               3: R_CURLY@189..190 "}" [] []
-                            2: CSS_NUMBER@190..192
-                              0: CSS_NUMBER_LITERAL@190..192 "1" [] [Whitespace(" ")]
+                            2: CSS_IDENTIFIER@190..192
+                              0: IDENT@190..192 "1" [] [Whitespace(" ")]
                       3: CSS_REGULAR_ATTR_UNIT@192..194
                         0: IDENT@192..194 "px" [] []
                       4: CSS_ATTR_FALLBACK_VALUE@194..200

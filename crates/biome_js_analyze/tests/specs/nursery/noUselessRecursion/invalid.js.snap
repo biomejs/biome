@@ -1,0 +1,271 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+function returnsFromBranch(bar) {
+	if (bar.baz) {
+		return returnsFromBranch(bar.baz);
+	}
+
+	return bar;
+}
+
+const bar = function namedExpression(value) {
+	return namedExpression(value.next);
+};
+
+function multipleArguments(first, second) {
+	return multipleArguments(first.next, second.next);
+}
+
+function noArguments() {
+	return noArguments();
+}
+
+async function asyncFunction(value) {
+	if (value) {
+		return asyncFunction(value.next);
+	}
+
+	return value;
+}
+
+function parenthesized(value) {
+	return (parenthesized)((value.next));
+}
+
+export default function exportedDefault(value) {
+	return exportedDefault(value.next);
+}
+
+function usingInSiblingBlock(value) {
+	{
+		using resource = acquire(value);
+	}
+	return usingInSiblingBlock(value.next);
+}
+
+function usingAfterReturn(value) {
+	if (value.next) {
+		return usingAfterReturn(value.next);
+	}
+	using resource = acquire(value);
+	return resource;
+}
+
+function regularForLoop(value) {
+	for (let i = 0; i < value.length; i++) {
+		return regularForLoop(value[i]);
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:4:10 lint/nursery/noUselessRecursion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a call to itself, which can be replaced with a loop.
+  
+    2 │ function returnsFromBranch(bar) {
+    3 │ 	if (bar.baz) {
+  > 4 │ 		return returnsFromBranch(bar.baz);
+      │ 		       ^^^^^^^^^^^^^^^^^
+    5 │ 	}
+    6 │ 
+  
+  i Each nested call uses more memory, and too many nested calls crash the program with a stack overflow error.
+  
+  i Use a loop, such as while, that updates the values on each step instead of calling the function again.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:9 lint/nursery/noUselessRecursion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a call to itself, which can be replaced with a loop.
+  
+    10 │ const bar = function namedExpression(value) {
+  > 11 │ 	return namedExpression(value.next);
+       │ 	       ^^^^^^^^^^^^^^^
+    12 │ };
+    13 │ 
+  
+  i Each nested call uses more memory, and too many nested calls crash the program with a stack overflow error.
+  
+  i Use a loop, such as while, that updates the values on each step instead of calling the function again.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:9 lint/nursery/noUselessRecursion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a call to itself, which can be replaced with a loop.
+  
+    14 │ function multipleArguments(first, second) {
+  > 15 │ 	return multipleArguments(first.next, second.next);
+       │ 	       ^^^^^^^^^^^^^^^^^
+    16 │ }
+    17 │ 
+  
+  i Each nested call uses more memory, and too many nested calls crash the program with a stack overflow error.
+  
+  i Use a loop, such as while, that updates the values on each step instead of calling the function again.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:9 lint/nursery/noUselessRecursion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a call to itself, which can be replaced with a loop.
+  
+    18 │ function noArguments() {
+  > 19 │ 	return noArguments();
+       │ 	       ^^^^^^^^^^^
+    20 │ }
+    21 │ 
+  
+  i Each nested call uses more memory, and too many nested calls crash the program with a stack overflow error.
+  
+  i Use a loop, such as while, that updates the values on each step instead of calling the function again.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:10 lint/nursery/noUselessRecursion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a call to itself, which can be replaced with a loop.
+  
+    22 │ async function asyncFunction(value) {
+    23 │ 	if (value) {
+  > 24 │ 		return asyncFunction(value.next);
+       │ 		       ^^^^^^^^^^^^^
+    25 │ 	}
+    26 │ 
+  
+  i Each nested call uses more memory, and too many nested calls crash the program with a stack overflow error.
+  
+  i Use a loop, such as while, that updates the values on each step instead of calling the function again.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:10 lint/nursery/noUselessRecursion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a call to itself, which can be replaced with a loop.
+  
+    30 │ function parenthesized(value) {
+  > 31 │ 	return (parenthesized)((value.next));
+       │ 	        ^^^^^^^^^^^^^
+    32 │ }
+    33 │ 
+  
+  i Each nested call uses more memory, and too many nested calls crash the program with a stack overflow error.
+  
+  i Use a loop, such as while, that updates the values on each step instead of calling the function again.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:9 lint/nursery/noUselessRecursion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a call to itself, which can be replaced with a loop.
+  
+    34 │ export default function exportedDefault(value) {
+  > 35 │ 	return exportedDefault(value.next);
+       │ 	       ^^^^^^^^^^^^^^^
+    36 │ }
+    37 │ 
+  
+  i Each nested call uses more memory, and too many nested calls crash the program with a stack overflow error.
+  
+  i Use a loop, such as while, that updates the values on each step instead of calling the function again.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:42:9 lint/nursery/noUselessRecursion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a call to itself, which can be replaced with a loop.
+  
+    40 │ 		using resource = acquire(value);
+    41 │ 	}
+  > 42 │ 	return usingInSiblingBlock(value.next);
+       │ 	       ^^^^^^^^^^^^^^^^^^^
+    43 │ }
+    44 │ 
+  
+  i Each nested call uses more memory, and too many nested calls crash the program with a stack overflow error.
+  
+  i Use a loop, such as while, that updates the values on each step instead of calling the function again.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:47:10 lint/nursery/noUselessRecursion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a call to itself, which can be replaced with a loop.
+  
+    45 │ function usingAfterReturn(value) {
+    46 │ 	if (value.next) {
+  > 47 │ 		return usingAfterReturn(value.next);
+       │ 		       ^^^^^^^^^^^^^^^^
+    48 │ 	}
+    49 │ 	using resource = acquire(value);
+  
+  i Each nested call uses more memory, and too many nested calls crash the program with a stack overflow error.
+  
+  i Use a loop, such as while, that updates the values on each step instead of calling the function again.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:55:10 lint/nursery/noUselessRecursion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a call to itself, which can be replaced with a loop.
+  
+    53 │ function regularForLoop(value) {
+    54 │ 	for (let i = 0; i < value.length; i++) {
+  > 55 │ 		return regularForLoop(value[i]);
+       │ 		       ^^^^^^^^^^^^^^
+    56 │ 	}
+    57 │ }
+  
+  i Each nested call uses more memory, and too many nested calls crash the program with a stack overflow error.
+  
+  i Use a loop, such as while, that updates the values on each step instead of calling the function again.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

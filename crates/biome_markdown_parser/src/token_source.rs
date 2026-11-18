@@ -2,7 +2,7 @@ use crate::MarkdownParserOptions;
 use crate::lexer::{MarkdownLexContext, MarkdownLexer, MarkdownReLexContext, html_comment_len};
 use crate::syntax::TAB_STOP_SPACES;
 use biome_markdown_syntax::MarkdownSyntaxKind;
-use biome_markdown_syntax::MarkdownSyntaxKind::{EOF, WHITESPACE};
+use biome_markdown_syntax::MarkdownSyntaxKind::{EOF, PIPE, WHITESPACE};
 use biome_parser::lexer::BufferedLexer;
 use biome_parser::prelude::{BumpWithContext, TokenSource};
 use biome_parser::token_source::{TokenSourceWithBufferedLexer, Trivia};
@@ -85,7 +85,9 @@ impl<'source> MarkdownTokenSource<'source> {
         context: MarkdownLexContext,
         first_token: bool,
     ) {
-        let mut trailing = !first_token;
+        // GFM trims the spaces between pipes and cell content, so in a table row the
+        // whitespace on either side of a pipe is the pipe's trivia.
+        let mut trailing = !first_token && (!TABLE || self.current() == PIPE);
 
         loop {
             let kind = self.lexer.next_token(context);

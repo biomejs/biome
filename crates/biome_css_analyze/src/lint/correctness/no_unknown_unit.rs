@@ -210,6 +210,9 @@ impl Rule for NoUnknownUnit {
             .note(markup! {
                 "See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Values_and_units#lengths">"MDN web docs"</Hyperlink>" for more details."
             })
+            .note(markup! {
+                "Browsers ignore a declaration that contains an unknown unit, so the value is not applied."
+            })
             .footer_list(
                 markup! {
                     "Use a known unit instead, such as:"

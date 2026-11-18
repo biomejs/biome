@@ -22,6 +22,7 @@ b { font: 1em/1.5 "Whatever Fanciness", cursive; }
 a { font-family: Helvetica Neue, sans-serif, Apple Color Emoji; }
 @font-face { font-family: Gentium; }
 @FONT-FACE { font-family: Gentium; }
+@font-palette-values --palette { font-family: Dutch801 Coverage; override-colors: 0 red; }
 a { font: inherit; }
 a { font: caption; }
 a { font: icon; }

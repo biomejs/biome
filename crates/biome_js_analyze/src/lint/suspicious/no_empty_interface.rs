@@ -8,8 +8,7 @@ use biome_js_factory::{
     syntax::{AnyTsType, T},
 };
 use biome_js_syntax::{
-    AnyJsDeclarationClause, JsSyntaxKind, TriviaPieceKind, TsInterfaceDeclaration,
-    TsTypeAliasDeclaration,
+    AnyJsDeclarationClause, JsSyntaxKind, TsInterfaceDeclaration, TsTypeAliasDeclaration,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxResult};
 use biome_rule_options::no_empty_interface::NoEmptyInterfaceOptions;
@@ -81,7 +80,10 @@ impl Rule for NoEmptyInterface {
             rule_category!(),
             ctx.query().range(),
             markup! { "An "<Emphasis>"empty interface"</Emphasis>" is equivalent to "<Emphasis>"{}"</Emphasis>"." },
-        ))
+        )
+        .note(markup! {
+            "An empty interface has no members, so when "<Emphasis>"strictNullChecks"</Emphasis>" is enabled, any value other than "<Emphasis>"null"</Emphasis>" or "<Emphasis>"undefined"</Emphasis>" can be assigned to it. This is rarely what is intended."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
@@ -115,9 +117,9 @@ fn make_type_alias_from_interface(
     ts_type: AnyTsType,
 ) -> SyntaxResult<TsTypeAliasDeclaration> {
     let new_node = make::ts_type_alias_declaration(
-        make::token(T![type]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        make::token(T![type]).with_trailing_space(),
         node.id()?,
-        make::token(T![=]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        make::token(T![=]).with_trailing_space(),
         ts_type,
     );
     let new_node = if let Some(type_params) = node.type_parameters() {

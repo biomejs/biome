@@ -32,7 +32,12 @@ pub(super) use try_catch::*;
 pub(super) use variable::*;
 pub(super) use while_stmt::*;
 
-pub(super) fn is_truthy_literal(expression: &biome_js_syntax::AnyJsExpression) -> bool {
+/// Returns whether `expression`, ignoring parentheses, is a literal that is
+/// always truthy.
+///
+/// A `while` or `do`-`while` test that satisfies this never exits the loop, so
+/// the loop can only be left through a jump such as `break` or `return`.
+pub fn is_truthy_literal(expression: &biome_js_syntax::AnyJsExpression) -> bool {
     use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression, numbers::parse_js_number};
 
     let AnyJsExpression::AnyJsLiteralExpression(literal) = expression.clone().omit_parentheses()

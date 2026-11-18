@@ -35,6 +35,10 @@ invalid.html:2:20 lint/nursery/noInvalidFileInputAccept ━━━━━━━━
     3 │ <input type="file" accept="">
     4 │ <input type="file" accept="TEXT/*">
   
+  i An empty accept attribute does not limit the files that the user can select.
+  
+  i Add comma-separated filename extensions, such as .png, or valid MIME types, such as image/png, or remove the attribute.
+  
   i File input accept values must contain comma-separated filename extensions or valid MIME types.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -55,6 +59,8 @@ invalid.html:3:27 lint/nursery/noInvalidFileInputAccept ━━━━━━━━
     5 │ <input type="file" accept="*/plain">
   
   i Empty entries are not allowed.
+  
+  i Replace the value with comma-separated filename extensions, such as .png, or valid MIME types, such as image/png.
   
   i File input accept values must contain comma-separated filename extensions or valid MIME types.
   
@@ -77,6 +83,8 @@ invalid.html:4:28 lint/nursery/noInvalidFileInputAccept ━━━━━━━━
   
   i Wildcard MIME types must be audio/*, image/*, or video/*.
   
+  i Replace the value with comma-separated filename extensions, such as .png, or valid MIME types, such as image/png.
+  
   i File input accept values must contain comma-separated filename extensions or valid MIME types.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -97,6 +105,8 @@ invalid.html:5:28 lint/nursery/noInvalidFileInputAccept ━━━━━━━━
     7 │ <input type="file" accept="file name">
   
   i Wildcard MIME types must be audio/*, image/*, or video/*.
+  
+  i Replace the value with comma-separated filename extensions, such as .png, or valid MIME types, such as image/png.
   
   i File input accept values must contain comma-separated filename extensions or valid MIME types.
   
@@ -119,6 +129,8 @@ invalid.html:6:28 lint/nursery/noInvalidFileInputAccept ━━━━━━━━
   
   i Empty entries are not allowed.
   
+  i Replace the value with comma-separated filename extensions, such as .png, or valid MIME types, such as image/png.
+  
   i File input accept values must contain comma-separated filename extensions or valid MIME types.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -139,6 +151,8 @@ invalid.html:7:28 lint/nursery/noInvalidFileInputAccept ━━━━━━━━
     9 │ <input type="file" accept="image/svg">
   
   i File extensions must start with . and cannot contain whitespace, commas, slashes, wildcards, or template markers.
+  
+  i Replace the value with comma-separated filename extensions, such as .png, or valid MIME types, such as image/png.
   
   i File input accept values must contain comma-separated filename extensions or valid MIME types.
   

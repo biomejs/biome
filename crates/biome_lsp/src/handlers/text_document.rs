@@ -131,6 +131,10 @@ async fn ensure_project_for_opened_document(
         })
     } else {
         error!("Configuration could not be loaded for {path}");
+        let folder = resolve_workspace_base_path(session, path.parent().unwrap_or(path));
+        session
+            .notify_broken_configuration_for_folder(&folder, status)
+            .await;
         None
     }
 }
@@ -148,10 +152,7 @@ async fn load_from_workspace_root_for_path(
             .await;
     }
 
-    let project_path = path
-        .parent()
-        .map(|parent| parent.to_path_buf())
-        .unwrap_or_default();
+    let project_path = path.parent().map_or_default(|parent| parent.to_path_buf());
     info!("Loading configuration from text_document {}", &project_path);
     let project_path = resolve_workspace_base_path(session, &project_path);
 

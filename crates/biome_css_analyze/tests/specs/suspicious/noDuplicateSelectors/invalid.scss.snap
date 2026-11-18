@@ -34,6 +34,8 @@ invalid.scss:6:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━�
     4 │ }
     5 │ 
   
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
   i Remove or merge the duplicate rule to keep the stylesheet clean.
   
 

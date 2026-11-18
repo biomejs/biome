@@ -1,0 +1,37 @@
+name: Verify crate publication
+
+on:
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: Release revision to verify
+        required: true
+        type: string
+
+concurrency:
+  group: verify-crates-${{ inputs.revision }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  verify:
+    name: Verify crate publication
+    if: github.sha == inputs.revision
+    runs-on: depot-ubuntu-24.04-arm-16
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.revision }}
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
+        with:
+          cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify crate publication
+        run: cargo run --locked -p xtask_publish_crates -- verify

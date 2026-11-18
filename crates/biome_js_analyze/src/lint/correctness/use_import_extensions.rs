@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{JsRuleAction, services::database::ResolvedImports};
 use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
@@ -135,6 +135,7 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "useImportExtensions",
         language: "js",
+        sources: &[RuleSource::EslintImport("extensions").inspired()],
         recommended: false,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,

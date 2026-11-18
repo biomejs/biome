@@ -1,0 +1,22 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid-ignore-parents.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <LinkList>
+    <one slot="one" />
+    <MyComponent slot="MyComponent-slot" />
+    <a :slot="name" />
+  </LinkList>
+  <link-list>
+    <one slot="one" />
+  </link-list>
+  <my-web-component>
+    <span slot="header">Title</span>
+  </my-web-component>
+</template>
+
+```

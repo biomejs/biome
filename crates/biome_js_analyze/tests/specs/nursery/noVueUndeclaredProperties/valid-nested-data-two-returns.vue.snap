@@ -1,0 +1,25 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-nested-data-two-returns.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+export default {
+  props: ["guest"],
+  data() {
+    if (this.guest) {
+      return { user: { name: "" } };
+    }
+    return { user: { email: "" } };
+  },
+  methods: {
+    read() {
+      return this.user.name + this.user.email;
+    },
+  },
+};
+</script>
+
+```

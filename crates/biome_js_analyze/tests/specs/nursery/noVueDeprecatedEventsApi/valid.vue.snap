@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+import mitt from "mitt";
+
+const emitter = mitt();
+
+export default {
+  mounted() {
+    this.$emit("start");
+    emitter.on("start", (event) => console.log(event));
+    emitter.off("start", handler);
+    a(this.$on);
+    this.$on?.("start", handler);
+    this.$off?.("start", handler);
+    this.$once?.("start", handler);
+    this.$onx("start");
+    other.$on("start");
+
+    let mutableAlias = this;
+    mutableAlias.$on("start");
+
+    const indirectAlias = this;
+    const anotherAlias = indirectAlias;
+    anotherAlias.$on("start");
+  },
+};
+
+function outsideComponent() {
+  this.$on("start", handler);
+}
+</script>
+
+```

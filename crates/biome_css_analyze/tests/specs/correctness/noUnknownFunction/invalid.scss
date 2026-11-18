@@ -4,3 +4,13 @@
   color: If(true, red, blue);
   color: \49 F(true, red, blue);
 }
+
+@function spacing($value) {
+  @return $value * 4px;
+}
+
+.b {
+  margin: spacing(1);
+  padding: undeclared(1);
+  width: spacingx(1);
+}

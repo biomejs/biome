@@ -106,7 +106,10 @@ impl Rule for UseGroupedAccessorPairs {
                 markup! {
                     "Move this setter after the getter."
                 },
-            ),
+            )
+            .note(markup! {
+                "Keeping a getter and its setter next to each other makes it clear that they belong to the same property."
+            })
         )
     }
 }

@@ -2,10 +2,10 @@ use biome_css_syntax::{
     AnyCssDashedIdentifier, AnyCssDeclarationName, AnyCssFunction, AnyCssGenericComponentValue,
     AnyCssGenericPropertyValueOrExpression, AnyCssProperty, AnyCssRelativeSelector, AnyCssSelector,
     AnyCssValue, CssDashedIdentifier, CssDeclaration, CssLanguage, CssNestedQualifiedRule,
-    CssPropertyAtRule, CssQualifiedRule, CssString,
+    CssPropertyAtRule, CssQualifiedRule, CssRelativeSelectorList, CssSelectorList, CssString,
     CssSyntaxKind::*,
-    ScssAtRootSelector, ScssBinaryExpression, ScssExpression, ScssInterpolation,
-    ScssUnaryExpression, ScssVariable, decode_css_identifier,
+    CssSyntaxToken, ScssAtRootSelector, ScssBinaryExpression, ScssExpression, ScssFunctionAtRule,
+    ScssInterpolation, ScssUnaryExpression, ScssVariable, decode_css_identifier,
     property_syntax::{
         PropertySyntaxErrorKind, PropertySyntaxParseDiagnostic, PropertySyntaxResult, encode,
     },
@@ -61,6 +61,10 @@ pub enum SemanticEvent {
         inherits_requires_evaluation: bool,
         range: TextRange,
     },
+    /// An SCSS `@function` rule
+    ScssFunctionDeclaration {
+        name: CssSyntaxToken,
+    },
 }
 
 #[derive(Default, Debug)]
@@ -70,7 +74,16 @@ pub struct SemanticEventExtractor {
 }
 
 impl SemanticEventExtractor {
+    /// The kinds of the nodes that [Self::enter] and [Self::leave] read.
+    pub const VISITED_KINDS: SyntaxKindSet<CssLanguage> = AnyRuleStart::KIND_SET
+        .union(CssSelectorList::KIND_SET)
+        .union(CssRelativeSelectorList::KIND_SET)
+        .union(CssDeclaration::KIND_SET)
+        .union(CssPropertyAtRule::KIND_SET)
+        .union(ScssFunctionAtRule::KIND_SET);
+
     pub fn enter(&mut self, node: &biome_css_syntax::CssSyntaxNode) {
+        // If you read a new node kind, add it to [Self::VISITED_KINDS].
         match node.kind() {
             // Begin a new CSS rule context
             // This tracks the hierarchical structure of rules, including:
@@ -201,6 +214,14 @@ impl SemanticEventExtractor {
                 // SAFETY: the match checks for its kind already.
                 let property = CssPropertyAtRule::cast_ref(node).unwrap();
                 self.process_at_property(property);
+            }
+            SCSS_FUNCTION_AT_RULE => {
+                // SAFETY: the match checks for its kind already.
+                let function = ScssFunctionAtRule::cast_ref(node).unwrap();
+                if let Ok(name) = function.name().and_then(|name| name.value_token()) {
+                    self.stash
+                        .push_back(SemanticEvent::ScssFunctionDeclaration { name });
+                }
             }
             _ => {}
         }

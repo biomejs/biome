@@ -19,7 +19,6 @@ use std::{
     any::type_name,
     borrow::Cow,
     io,
-    ops::Deref,
     panic::RefUnwindSafe,
     str::{FromStr, from_utf8},
     sync::{Arc, Mutex},
@@ -34,7 +33,7 @@ use tokio::{
     sync::{
         Notify,
         mpsc::{Receiver, Sender, channel},
-        oneshot,
+        oneshot, watch,
     },
     time::sleep,
 };
@@ -99,41 +98,17 @@ type PendingChannel = Mutex<Option<oneshot::Sender<JsonRpcResult>>>;
 /// requests map using the request ID as a key, then serialize the content of
 /// the request and send it over the write channel. Finally, the task blocks
 /// the current thread until a response is received over the oneshot channel
-/// from the read task, or the request times out
+/// from the read task, the read task stops, or the request times out
 pub struct SocketTransport {
     runtime: Runtime,
     write_send: Sender<(Vec<u8>, bool)>,
     pending_requests: PendingRequests,
+    /// Becomes `true` when the read task stops, after which no response can
+    /// arrive anymore.
+    connection_closed: watch::Receiver<bool>,
 }
 
-/// Stores a handle to the map of pending requests, and clears the map
-/// automatically when the handle is dropped
-#[derive(Clone, Default)]
-struct PendingRequests {
-    inner: Arc<HashMap<u64, PendingChannel>>,
-}
-
-impl Deref for PendingRequests {
-    type Target = HashMap<u64, PendingChannel>;
-
-    fn deref(&self) -> &Self::Target {
-        self.inner.as_ref()
-    }
-}
-
-/// There are two live handles to the pending requests map: one is in the
-/// `SocketTransport` and the other in the `read_task`. The `SocketTransport`
-/// instance can only be dropped if it's empty (since the `request` method
-/// blocks until the request is resolved, `&self` will always outlive any
-/// pending request), but the `read_task` may abort if it encounters an error
-/// or receives a shutdown broadcast while there are still pending requests. In
-/// this case the `Drop` implementation will ensure that all pending requests
-/// are cancelled immediately instead of timing out.
-impl Drop for PendingRequests {
-    fn drop(&mut self) {
-        self.inner.pin().clear();
-    }
-}
+type PendingRequests = Arc<HashMap<u64, PendingChannel>>;
 
 impl SocketTransport {
     pub fn open<R, W>(runtime: Runtime, socket_read: R, socket_write: W) -> Self
@@ -154,6 +129,7 @@ impl SocketTransport {
 
         let pending_requests = PendingRequests::default();
         let pending_requests_2 = pending_requests.clone();
+        let (connection_closed_send, connection_closed) = watch::channel(false);
 
         let socket_read = BufReader::new(socket_read);
         let socket_write = BufWriter::new(socket_write);
@@ -171,12 +147,14 @@ impl SocketTransport {
                 _ = read_task(socket_read, &pending_requests) => {}
                 _ = broadcast_shutdown.notified() => {}
             }
+            connection_closed_send.send_replace(true);
         });
 
         Self {
             runtime,
             write_send,
             pending_requests: pending_requests_2,
+            connection_closed,
         }
     }
 }
@@ -190,11 +168,18 @@ impl WorkspaceTransport for SocketTransport {
         P: Serialize,
         R: DeserializeOwned,
     {
+        // Once the read task has stopped, no response can arrive anymore, so
+        // the request isn't sent at all.
+        if *self.connection_closed.borrow() {
+            return Err(TransportError::ChannelClosed);
+        }
+
         let (send, recv) = oneshot::channel();
 
+        let id = request.id;
         self.pending_requests
             .pin()
-            .insert(request.id, Mutex::new(Some(send)));
+            .insert(id, Mutex::new(Some(send)));
 
         let is_shutdown = request.method == "biome/shutdown";
 
@@ -212,25 +197,42 @@ impl WorkspaceTransport for SocketTransport {
             ))
         })?;
 
-        let response = self.runtime.block_on(async move {
+        let mut connection_closed = self.connection_closed.clone();
+        let exchange = async move {
             self.write_send
                 .send((request, is_shutdown))
                 .await
                 .map_err(|_| TransportError::ChannelClosed)?;
 
+            match recv.await {
+                Ok(Ok(response)) => Ok(response),
+                Ok(Err(error)) => Err(error),
+                Err(_) => Err(TransportError::ChannelClosed),
+            }
+        };
+        let response = self.runtime.block_on(async move {
             tokio::select! {
-                result = recv => {
-                    match result {
-                        Ok(Ok(response)) => Ok(response),
-                        Ok(Err(error)) => Err(error),
-                        Err(_) => Err(TransportError::ChannelClosed),
-                    }
+                // A response that arrived before the read task stopped must
+                // win over the closed connection.
+                biased;
+
+                result = exchange => result,
+                // Also completes with an error if the read task was dropped
+                // without signalling, which means it stopped as well.
+                _ = connection_closed.wait_for(|closed| *closed) => {
+                    Err(TransportError::ChannelClosed)
                 }
                 _ = sleep(Duration::from_secs(15)) => {
                     Err(TransportError::Timeout)
                 }
             }
-        })?;
+        });
+
+        // Without a response, nothing else removes the request from the map.
+        if response.is_err() {
+            self.pending_requests.pin().remove(&id);
+        }
+        let response = response?;
 
         let response = response.get();
         let result = from_str(response).map_err(|err| {
@@ -283,6 +285,9 @@ where
         if let Some(channel) = channel {
             let response = match (response.result, response.error) {
                 (Some(result), None) => Ok(result),
+                (None, Some(err)) if err.code == CONTENT_MODIFIED => {
+                    Err(TransportError::ContentModified)
+                }
                 (None, Some(err)) => match err.data.and_then(|data| from_str(data.get()).ok()) {
                     Some(diagnostic) => Err(TransportError::RemoteDiagnostic(Box::new(diagnostic))),
                     None => Err(TransportError::RPCError(err.message)),
@@ -381,11 +386,17 @@ async fn write_task<W>(
     W: AsyncWrite + Unpin,
 {
     while let Some((message, is_shutdown)) = write_recv.recv().await {
+        let result = write_message(&mut socket_write, message).await;
+
+        // The shutdown request returns once the read task stops, after which
+        // the client may drop the runtime and cancel this task. Stopping the
+        // read task only after the write ensures the server receives the
+        // request.
         if is_shutdown {
             broadcast_shutdown.notify_waiters();
         }
 
-        if let Err(err) = write_message(&mut socket_write, message).await {
+        if let Err(err) = result {
             eprintln!(
                 "{:?}",
                 err.context("remote connection write task exited with an error")
@@ -440,9 +451,13 @@ struct JsonRpcResponse {
     error: Option<JsonRpcError>,
 }
 
+/// The `ContentModified` error code of the Language Server Protocol. The
+/// server answers with it when a concurrent change to the workspace cancelled
+/// the request.
+const CONTENT_MODIFIED: i64 = -32801;
+
 #[derive(Debug, Deserialize)]
 struct JsonRpcError {
-    #[expect(dead_code)]
     code: i64,
     message: String,
     data: Option<Box<RawValue>>,
@@ -483,5 +498,211 @@ impl FromStr for TransportHeader {
             }
             _ => Ok(Self::Unknown(name.into())),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_fs::{BiomePath, MemoryFileSystem};
+    use biome_service::projects::ProjectKey;
+    use biome_service::workspace::{
+        FileExistsParams, ScanKind, ScanProjectParams, WorkspaceClient,
+    };
+    use biome_service::{Workspace, WorkspaceError};
+    use serde_json::json;
+    use tokio::io::{duplex, split};
+
+    /// Answers the requests read from `stream` with `responses`, in order,
+    /// then reads further requests without answering them until the client
+    /// disconnects. Returns the methods of all requests.
+    async fn scripted_server<S>(stream: S, responses: Vec<Value>) -> Vec<String>
+    where
+        S: AsyncRead + AsyncWrite,
+    {
+        let (read, mut write) = split(stream);
+        let mut read = BufReader::new(read);
+        let mut responses = responses.into_iter();
+        let mut methods = Vec::new();
+
+        while let Ok(message) = read_message(&mut read).await {
+            let request: Value = from_slice(&message).unwrap();
+            methods.push(request["method"].as_str().unwrap().to_string());
+
+            if let Some(mut response) = responses.next() {
+                response["jsonrpc"] = json!("2.0");
+                response["id"] = request["id"].clone();
+                write_message(&mut write, to_vec(&response).unwrap())
+                    .await
+                    .unwrap();
+            }
+        }
+
+        methods
+    }
+
+    /// Returns a client connected to a [scripted_server] that answers
+    /// `initialize` and then the requests of the test with `responses`, and a
+    /// function that returns the methods the server received once the client
+    /// has disconnected.
+    fn scripted_client(
+        responses: Vec<Value>,
+    ) -> (
+        WorkspaceClient<SocketTransport>,
+        impl FnOnce() -> Vec<String>,
+    ) {
+        let server_runtime = Runtime::new().unwrap();
+        let (client, server) = duplex(4096);
+        let mut all_responses = vec![json!({ "result": {} })];
+        all_responses.extend(responses);
+        let server = server_runtime.spawn(scripted_server(server, all_responses));
+
+        let (client_read, client_write) = split(client);
+        let transport = SocketTransport::open(Runtime::new().unwrap(), client_read, client_write);
+        let workspace =
+            WorkspaceClient::new(transport, Box::new(MemoryFileSystem::default())).unwrap();
+
+        (workspace, move || server_runtime.block_on(server).unwrap())
+    }
+
+    fn content_modified() -> Value {
+        json!({
+            "error": {
+                "code": CONTENT_MODIFIED,
+                "message": "cancelled because of pending write",
+                "data": "PendingWrite",
+            }
+        })
+    }
+
+    #[test]
+    fn resends_request_cancelled_by_content_change() {
+        let (workspace, received_methods) =
+            scripted_client(vec![content_modified(), json!({ "result": true })]);
+
+        let exists = workspace.file_exists(FileExistsParams {
+            file_path: BiomePath::new("file.js"),
+        });
+
+        assert!(matches!(exists, Ok(true)), "unexpected result {exists:?}");
+        drop(workspace);
+        assert_eq!(
+            received_methods(),
+            ["initialize", "biome/file_exists", "biome/file_exists"]
+        );
+    }
+
+    #[test]
+    fn does_not_resend_project_scan_cancelled_by_content_change() {
+        let (workspace, received_methods) = scripted_client(vec![content_modified()]);
+
+        let result = workspace.scan_project(ScanProjectParams {
+            project_key: ProjectKey::new(),
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::KnownFiles,
+            verbose: false,
+        });
+
+        assert!(
+            matches!(
+                result,
+                Err(WorkspaceError::TransportError(
+                    TransportError::ContentModified
+                ))
+            ),
+            "unexpected result {result:?}"
+        );
+        drop(workspace);
+        assert_eq!(received_methods(), ["initialize", "biome/scan_project"]);
+    }
+
+    #[test]
+    fn shutdown_returns_without_waiting_for_an_answer() {
+        let (workspace, received_methods) = scripted_client(vec![]);
+
+        let result = workspace.shutdown();
+
+        assert!(
+            matches!(
+                result,
+                Err(WorkspaceError::TransportError(
+                    TransportError::ChannelClosed
+                ))
+            ),
+            "unexpected result {result:?}"
+        );
+        assert_eq!(received_methods(), ["initialize", "biome/shutdown"]);
+    }
+
+    #[test]
+    fn shutdown_returns_after_sending_its_request() {
+        let server_runtime = Runtime::new().unwrap();
+        // The buffer is smaller than the shutdown request, so writing it
+        // waits until the server reads it.
+        let (client, server) = duplex(64);
+        let server = server_runtime.spawn(async move {
+            let (read, mut write) = split(server);
+            let mut read = BufReader::new(read);
+            let initialize: Value = from_slice(&read_message(&mut read).await.unwrap()).unwrap();
+            let response = json!({ "jsonrpc": "2.0", "id": initialize["id"], "result": {} });
+            write_message(&mut write, to_vec(&response).unwrap())
+                .await
+                .unwrap();
+
+            sleep(Duration::from_millis(100)).await;
+            let request: Value = from_slice(&read_message(&mut read).await.ok()?).unwrap();
+            request["method"].as_str().map(str::to_string)
+        });
+
+        let (client_read, client_write) = split(client);
+        let transport = SocketTransport::open(Runtime::new().unwrap(), client_read, client_write);
+        let workspace =
+            WorkspaceClient::new(transport, Box::new(MemoryFileSystem::default())).unwrap();
+
+        let result = workspace.shutdown();
+
+        assert!(
+            matches!(
+                result,
+                Err(WorkspaceError::TransportError(
+                    TransportError::ChannelClosed
+                ))
+            ),
+            "unexpected result {result:?}"
+        );
+        assert_eq!(
+            server_runtime.block_on(server).unwrap().as_deref(),
+            Some("biome/shutdown")
+        );
+    }
+
+    #[test]
+    fn requests_fail_once_responses_can_no_longer_be_read() {
+        // The client rejects a response with unknown fields, which stops the
+        // read task while the connection stays writable.
+        let (workspace, received_methods) = scripted_client(vec![json!({ "unknown": true })]);
+        let file_exists = || {
+            workspace.file_exists(FileExistsParams {
+                file_path: BiomePath::new("file.js"),
+            })
+        };
+
+        let pending = file_exists();
+        let after_close = file_exists();
+
+        for result in [pending, after_close] {
+            assert!(
+                matches!(
+                    result,
+                    Err(WorkspaceError::TransportError(
+                        TransportError::ChannelClosed
+                    ))
+                ),
+                "unexpected result {result:?}"
+            );
+        }
+        drop(workspace);
+        assert_eq!(received_methods(), ["initialize", "biome/file_exists"]);
     }
 }

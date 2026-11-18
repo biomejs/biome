@@ -49,7 +49,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseSvelteShorthandDirective {
-        version: "next",
+        version: "2.6.0",
         name: "useSvelteShorthandDirective",
         language: "html",
         domains: &[RuleDomain::Svelte],

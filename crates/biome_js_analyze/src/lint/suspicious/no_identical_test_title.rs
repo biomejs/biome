@@ -7,7 +7,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsModuleItem, AnyJsStatement,
     AnyJsTemplateElement, JsCallExpression, JsModule, JsScript,
 };
-use biome_rowan::{AstNode, TokenText, declare_node_union};
+use biome_rowan::{AstNode, TextRange, TokenText, declare_node_union};
 use biome_rule_options::no_identical_test_title::NoIdenticalTestTitleOptions;
 
 use crate::frameworks::unit_tests::{is_describe_call, is_unit_test};
@@ -83,15 +83,9 @@ declare_lint_rule! {
     }
 }
 
-declare_node_union! {
-    /// A node that represents a scope containing test/describe calls:
-    /// either the top-level module/script, or a `describe(...)` call.
-    pub AnyTestScope = JsModule | JsScript | JsCallExpression
-}
-
 impl Rule for NoIdenticalTestTitle {
-    type Query = Ast<AnyTestScope>;
-    type State = JsCallExpression;
+    type Query = Ast<AnyTestScopeQuery>;
+    type State = DuplicateTitle;
     type Signals = Vec<Self::State>;
     type Options = NoIdenticalTestTitleOptions;
 
@@ -99,7 +93,7 @@ impl Rule for NoIdenticalTestTitle {
         let scope = ctx.query();
 
         // For a JsCallExpression, only act when it is a describe block.
-        if let AnyTestScope::JsCallExpression(call) = scope {
+        if let AnyTestScopeQuery::JsCallExpression(call) = scope {
             if !is_describe_call(call) {
                 return vec![];
             }
@@ -111,7 +105,7 @@ impl Rule for NoIdenticalTestTitle {
 
         // For the top-level module or script, gather the top-level statements.
         let stmts: Vec<AnyJsStatement> = match scope {
-            AnyTestScope::JsModule(module) => module
+            AnyTestScopeQuery::JsModule(module) => module
                 .items()
                 .into_iter()
                 .filter_map(|item| {
@@ -122,35 +116,75 @@ impl Rule for NoIdenticalTestTitle {
                     }
                 })
                 .collect(),
-            AnyTestScope::JsScript(script) => script.statements().into_iter().collect(),
-            AnyTestScope::JsCallExpression(_) => unreachable!(),
+            AnyTestScopeQuery::JsScript(script) => script.statements().into_iter().collect(),
+            AnyTestScopeQuery::JsCallExpression(_) => unreachable!(),
         };
         check_direct_children(&stmts)
     }
 
-    fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
-        let kind = if is_describe_call(node) {
-            "describe"
-        } else {
-            "test"
-        };
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let DuplicateTitle {
+            kind,
+            title,
+            first,
+            duplicates,
+        } = state;
+        let kind = kind.as_str();
+        let title = title.text();
 
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                node.range(),
+        let mut diagnostic = RuleDiagnostic::new(
+            rule_category!(),
+            first,
+            markup! {
+                "The "<Emphasis>{kind}</Emphasis>" title \""<Emphasis>{title}</Emphasis>"\" is used more than once in the same scope."
+            },
+        );
+
+        for range in duplicates {
+            diagnostic = diagnostic.detail(
+                range,
                 markup! {
-                    "Duplicate "<Emphasis>{kind}</Emphasis>" title found."
+                    "The "<Emphasis>{kind}</Emphasis>" title \""<Emphasis>{title}</Emphasis>"\" is repeated here."
                 },
-            )
-            .note(markup! {
-                "A "<Emphasis>{kind}</Emphasis>" with this title already exists in the same scope."
-            })
-            .note(markup! {
-                "Rename the "<Emphasis>{kind}</Emphasis>" to give it a unique, descriptive title."
-            }),
-        )
+            );
+        }
+
+        Some(diagnostic.note(markup! {
+            "Rename the duplicated "<Emphasis>{kind}</Emphasis>" calls to give each a unique, descriptive title."
+        }))
     }
+}
+
+declare_node_union! {
+    /// A node that represents a scope containing test/describe calls:
+    /// either the top-level module/script, or a `describe(...)` call.
+    pub AnyTestScopeQuery = JsModule | JsScript | JsCallExpression
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum TestTitleKind {
+    Describe,
+    Test,
+}
+
+impl TestTitleKind {
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::Describe => "describe",
+            Self::Test => "test",
+        }
+    }
+}
+
+/// A title used by more than one sibling `describe` or test call.
+#[derive(Debug)]
+pub struct DuplicateTitle {
+    pub(crate) kind: TestTitleKind,
+    pub(crate) title: TokenText,
+    /// The title at its first occurrence.
+    pub(crate) first: TextRange,
+    /// The title at every later occurrence, in source order. Never empty.
+    pub(crate) duplicates: Vec<TextRange>,
 }
 
 /// Checks a flat list of statements for duplicate test/describe titles.
@@ -159,38 +193,43 @@ impl Rule for NoIdenticalTestTitle {
 /// recurse. Recursion is handled by the query firing again for each nested
 /// `describe` call.
 ///
-/// Returns every call expression that is a duplicate (i.e. the second or later
-/// occurrence of a given title at this level).
-fn check_direct_children(statements: &[AnyJsStatement]) -> Vec<JsCallExpression> {
-    let mut describe_titles = vec![];
-    let mut test_titles = vec![];
-    let mut duplicates = vec![];
+/// Returns one entry per title used more than once, ordered by first
+/// occurrence. `describe` and test titles are tracked separately.
+fn check_direct_children(statements: &[AnyJsStatement]) -> Vec<DuplicateTitle> {
+    let mut groups: Vec<DuplicateTitle> = vec![];
 
     for stmt in statements {
         let Some(call) = call_from_statement(stmt) else {
             continue;
         };
 
-        if is_describe_call(&call) {
-            if let Some(title) = extract_call_title(&call) {
-                if describe_titles.contains(&title) {
-                    duplicates.push(call);
-                } else {
-                    describe_titles.push(title);
-                }
-            }
-        } else if is_unit_test(&call)
-            && let Some(title) = extract_call_title(&call)
+        let kind = if is_describe_call(&call) {
+            TestTitleKind::Describe
+        } else if is_unit_test(&call) {
+            TestTitleKind::Test
+        } else {
+            continue;
+        };
+        let Some((title, range)) = extract_call_title(&call) else {
+            continue;
+        };
+
+        match groups
+            .iter_mut()
+            .find(|group| group.kind == kind && group.title == title)
         {
-            if test_titles.contains(&title) {
-                duplicates.push(call);
-            } else {
-                test_titles.push(title);
-            }
+            Some(group) => group.duplicates.push(range),
+            None => groups.push(DuplicateTitle {
+                kind,
+                title,
+                first: range,
+                duplicates: vec![],
+            }),
         }
     }
 
-    duplicates
+    groups.retain(|group| !group.duplicates.is_empty());
+    groups
 }
 
 /// Returns the list of direct-child statements from the callback passed to a
@@ -225,16 +264,21 @@ fn call_from_statement(stmt: &AnyJsStatement) -> Option<JsCallExpression> {
     expr.as_js_call_expression().cloned()
 }
 
-/// Extracts the static title (first argument) from a test/describe call.
+/// Extracts the static title (first argument) from a test/describe call,
+/// along with the range of the title expression.
 ///
 /// Returns `None` for dynamic titles (template literals with substitutions,
 /// non-string first arguments, etc.). Only static string literals and
 /// no-substitution template literals are compared.
-fn extract_call_title(call: &JsCallExpression) -> Option<TokenText> {
+fn extract_call_title(call: &JsCallExpression) -> Option<(TokenText, TextRange)> {
     let args = call.arguments().ok()?;
     let first_arg = args.args().into_iter().next()?.ok()?;
     let expr = first_arg.as_any_js_expression()?;
+    let title = static_title_text(expr)?;
+    Some((title, expr.range()))
+}
 
+fn static_title_text(expr: &AnyJsExpression) -> Option<TokenText> {
     match expr {
         AnyJsExpression::AnyJsLiteralExpression(
             AnyJsLiteralExpression::JsStringLiteralExpression(s),

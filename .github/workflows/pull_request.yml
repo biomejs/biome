@@ -75,6 +75,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run clippy
         run: cargo lint
+      - name: Check biome_formatter without the rowan feature
+        run: cargo check -p biome_formatter --no-default-features
 
   #  NOTE: enable once it becomes stable again
   #  check-dependencies:

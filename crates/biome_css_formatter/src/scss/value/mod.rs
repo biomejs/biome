@@ -3,3 +3,4 @@
 pub(crate) mod hash_value;
 pub(crate) mod interpolated_dashed_identifier;
 pub(crate) mod interpolated_identifier;
+pub(crate) mod percent_value;

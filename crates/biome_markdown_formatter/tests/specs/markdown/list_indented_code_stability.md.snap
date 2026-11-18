@@ -66,7 +66,7 @@ info: markdown/list_indented_code_stability.md
 
 1. item 1
    1. item 1-1
-      2. item 1-2
+   2. item 1-2
 2.   item 1
 
     top level indented code block

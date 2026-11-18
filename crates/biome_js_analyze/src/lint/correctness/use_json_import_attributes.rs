@@ -4,9 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsImportAssertionEntry, JsImport, JsImportDefaultClause, T};
-use biome_rowan::{
-    AstNode, AstSeparatedElement, AstSeparatedList, BatchMutationExt, TriviaPieceKind,
-};
+use biome_rowan::{AstNode, AstSeparatedElement, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::use_json_import_attributes::UseJsonImportAttributesOptions;
 
 use crate::{JsRuleAction, services::database::ResolvedImports};
@@ -165,7 +163,7 @@ impl Rule for UseJsonImportAttributes {
         // Create the new type: "json" entry
         let entry = make::js_import_assertion_entry(
             make::ident("type"),
-            make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            make::token(T![:]).with_trailing_space(),
             make::js_string_literal("json"),
         );
         let entry = AnyJsImportAssertionEntry::JsImportAssertionEntry(entry);
@@ -185,13 +183,11 @@ impl Rule for UseJsonImportAttributes {
 
                 // Create a new assertion block from scratch
                 make::js_import_assertion(
-                    make::token(T![with])
-                        .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")])
-                        .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                    make::token(T!['{']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                    make::token(T![with]).with_surrounding_spaces(),
+                    make::token(T!['{']).with_trailing_space(),
                     make::js_import_assertion_entry_list([entry], []),
                     make::token(T!['}'])
-                        .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")])
+                        .with_leading_space()
                         .with_trailing_trivia_pieces(trailing_trivia.pieces())
                         .trim_trailing_trivia(),
                 )
@@ -205,10 +201,7 @@ impl Rule for UseJsonImportAttributes {
 
                 // if there is more than 1 assertion, we need to add a comma after the first attribute
                 if prev_assertions.len() > 0 {
-                    separators.push(
-                        make::token(T![,])
-                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                    );
+                    separators.push(make::token(T![,]).with_trailing_space());
                 }
 
                 for AstSeparatedElement {

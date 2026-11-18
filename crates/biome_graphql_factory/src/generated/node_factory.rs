@@ -444,17 +444,51 @@ pub fn graphql_fragment_definition(
     type_condition: GraphqlTypeCondition,
     directives: GraphqlDirectiveList,
     selection_set: GraphqlSelectionSet,
-) -> GraphqlFragmentDefinition {
-    GraphqlFragmentDefinition::unwrap_cast(SyntaxNode::new_detached(
-        GraphqlSyntaxKind::GRAPHQL_FRAGMENT_DEFINITION,
-        [
-            Some(SyntaxElement::Token(fragment_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(type_condition.into_syntax())),
-            Some(SyntaxElement::Node(directives.into_syntax())),
-            Some(SyntaxElement::Node(selection_set.into_syntax())),
-        ],
-    ))
+) -> GraphqlFragmentDefinitionBuilder {
+    GraphqlFragmentDefinitionBuilder {
+        fragment_token,
+        name,
+        type_condition,
+        directives,
+        selection_set,
+        description: None,
+        variables: None,
+    }
+}
+pub struct GraphqlFragmentDefinitionBuilder {
+    fragment_token: SyntaxToken,
+    name: GraphqlNameBinding,
+    type_condition: GraphqlTypeCondition,
+    directives: GraphqlDirectiveList,
+    selection_set: GraphqlSelectionSet,
+    description: Option<GraphqlDescription>,
+    variables: Option<GraphqlVariableDefinitions>,
+}
+impl GraphqlFragmentDefinitionBuilder {
+    pub fn with_description(mut self, description: GraphqlDescription) -> Self {
+        self.description = Some(description);
+        self
+    }
+    pub fn with_variables(mut self, variables: GraphqlVariableDefinitions) -> Self {
+        self.variables = Some(variables);
+        self
+    }
+    pub fn build(self) -> GraphqlFragmentDefinition {
+        GraphqlFragmentDefinition::unwrap_cast(SyntaxNode::new_detached(
+            GraphqlSyntaxKind::GRAPHQL_FRAGMENT_DEFINITION,
+            [
+                self.description
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.fragment_token)),
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                self.variables
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.type_condition.into_syntax())),
+                Some(SyntaxElement::Node(self.directives.into_syntax())),
+                Some(SyntaxElement::Node(self.selection_set.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn graphql_fragment_spread(
     dotdotdot_token: SyntaxToken,
@@ -990,6 +1024,7 @@ pub fn graphql_operation_definition(
         ty,
         directives,
         selection_set,
+        description: None,
         name: None,
         variables: None,
     }
@@ -998,10 +1033,15 @@ pub struct GraphqlOperationDefinitionBuilder {
     ty: GraphqlOperationType,
     directives: GraphqlDirectiveList,
     selection_set: GraphqlSelectionSet,
+    description: Option<GraphqlDescription>,
     name: Option<GraphqlNameBinding>,
     variables: Option<GraphqlVariableDefinitions>,
 }
 impl GraphqlOperationDefinitionBuilder {
+    pub fn with_description(mut self, description: GraphqlDescription) -> Self {
+        self.description = Some(description);
+        self
+    }
     pub fn with_name(mut self, name: GraphqlNameBinding) -> Self {
         self.name = Some(name);
         self
@@ -1014,6 +1054,8 @@ impl GraphqlOperationDefinitionBuilder {
         GraphqlOperationDefinition::unwrap_cast(SyntaxNode::new_detached(
             GraphqlSyntaxKind::GRAPHQL_OPERATION_DEFINITION,
             [
+                self.description
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Node(self.ty.into_syntax())),
                 self.name
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
@@ -1388,6 +1430,7 @@ pub fn graphql_variable_definition(
         colon_token,
         ty,
         directives,
+        description: None,
         default: None,
     }
 }
@@ -1396,9 +1439,14 @@ pub struct GraphqlVariableDefinitionBuilder {
     colon_token: SyntaxToken,
     ty: AnyGraphqlType,
     directives: GraphqlDirectiveList,
+    description: Option<GraphqlDescription>,
     default: Option<GraphqlDefaultValue>,
 }
 impl GraphqlVariableDefinitionBuilder {
+    pub fn with_description(mut self, description: GraphqlDescription) -> Self {
+        self.description = Some(description);
+        self
+    }
     pub fn with_default(mut self, default: GraphqlDefaultValue) -> Self {
         self.default = Some(default);
         self
@@ -1407,6 +1455,8 @@ impl GraphqlVariableDefinitionBuilder {
         GraphqlVariableDefinition::unwrap_cast(SyntaxNode::new_detached(
             GraphqlSyntaxKind::GRAPHQL_VARIABLE_DEFINITION,
             [
+                self.description
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Node(self.variable.into_syntax())),
                 Some(SyntaxElement::Token(self.colon_token)),
                 Some(SyntaxElement::Node(self.ty.into_syntax())),

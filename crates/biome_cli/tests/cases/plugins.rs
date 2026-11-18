@@ -626,6 +626,27 @@ export const noAssign = defineRule({
 }
 
 #[test]
+fn throwing_javascript_plugin_fails_lint() {
+    let mut fs = TemporaryFs::new("throwing_javascript_plugin_fails_lint");
+
+    fs.create_file("biome.json", r#"{ "plugins": ["./rule.js"] }"#);
+    fs.create_file(
+        "rule.js",
+        r#"import { ast, defineRule } from "@biomejs/runtime/plugin";
+
+export default defineRule({
+    query: ast("JS_CALL_EXPRESSION"),
+    run() {
+        throw new Error("boom");
+    },
+});"#,
+    );
+    fs.create_file("main.js", "console.log(\"hello\");\n");
+
+    lint_project(fs, "throwing_javascript_plugin_fails_lint");
+}
+
+#[test]
 fn package_preset_includes_apply_to_every_rule() {
     let mut fs = TemporaryFs::new("package_preset_includes_apply_to_every_rule");
 

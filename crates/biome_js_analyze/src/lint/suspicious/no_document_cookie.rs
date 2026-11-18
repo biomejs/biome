@@ -100,6 +100,9 @@ impl Rule for NoDocumentCookie {
                 },
             )
             .note(markup! {
+                "Writing to "<Emphasis>"document.cookie"</Emphasis>" directly is error-prone, because the value is a string that must be built and escaped by hand. It is also a synchronous API that can slow the page down."
+            })
+            .note(markup! {
                 "Consider using the "<Hyperlink href = "https://developer.mozilla.org/en-US/docs/Web/API/CookieStore">"Cookie Store API"</Hyperlink>"."
             }),
         )

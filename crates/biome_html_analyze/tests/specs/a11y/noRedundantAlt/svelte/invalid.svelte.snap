@@ -30,6 +30,8 @@ invalid.svelte:4:10 lint/a11y/noRedundantAlt ━━━━━━━━━━━�
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
   
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
+  
 
 ```
 
@@ -46,6 +48,8 @@ invalid.svelte:5:10 lint/a11y/noRedundantAlt ━━━━━━━━━━━�
     7 │ <img alt="image of {person}" />
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
+  
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
   
 
 ```
@@ -64,6 +68,8 @@ invalid.svelte:7:10 lint/a11y/noRedundantAlt ━━━━━━━━━━━�
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
   
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
+  
 
 ```
 
@@ -80,6 +86,8 @@ invalid.svelte:8:10 lint/a11y/noRedundantAlt ━━━━━━━━━━━�
     10 │ 
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
+  
+  i Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows.
   
 
 ```

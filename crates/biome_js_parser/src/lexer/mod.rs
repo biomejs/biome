@@ -576,7 +576,7 @@ impl<'src> JsLexer<'src> {
             b'<' => self.eat_byte(T![<]),
             // `{`: empty jsx text, directly followed by an expression
             b'{' => self.eat_byte(T!['{']),
-            _ if self.is_metavariable_start() => self.consume_metavariable(GRIT_METAVARIABLE),
+            b'$' if self.is_metavariable_start() => self.consume_metavariable(GRIT_METAVARIABLE),
             _ => {
                 while let Some(chr) = self.current_byte() {
                     // but not one of: { or < or > or }
@@ -1157,6 +1157,31 @@ impl<'src> JsLexer<'src> {
         }
     }
 
+    /// Returns the identifier token that starts with the ASCII identifier byte at the current
+    /// position, or the keyword token if the identifier is a keyword.
+    ///
+    /// Same result as [Self::resolve_identifier]. An identifier made of ASCII identifier
+    /// characters only is its own source text, so it is matched against the keywords in place
+    /// instead of being decoded into a buffer first. Identifiers that contain an escape or a
+    /// non-ASCII character take the decoding path.
+    #[inline]
+    fn resolve_ascii_identifier(&mut self) -> JsSyntaxKind {
+        let start = self.position;
+        let bytes = self.source.as_bytes();
+        let mut end = start + 1;
+
+        while let Some(&byte) = bytes.get(end) {
+            match lookup_byte(byte) {
+                IDT | DOL | DIG | ZER => end += 1,
+                BSL | UNI => return self.resolve_identifier(bytes[start] as char),
+                _ => break,
+            }
+        }
+
+        self.position = end;
+        keyword_or_identifier_kind(&bytes[start..end])
+    }
+
     /// Returns the identifier token at the current position, or the keyword token if
     /// the identifier is a keyword.
     ///
@@ -1164,8 +1189,6 @@ impl<'src> JsLexer<'src> {
     /// but is still part of the identifier, and the characters position.
     #[inline]
     fn resolve_identifier(&mut self, first: char) -> JsSyntaxKind {
-        use JsSyntaxKind::*;
-
         // Note to keep the buffer large enough to fit every possible keyword that
         // the lexer can return
         let mut buf = [0u8; 16];
@@ -1177,96 +1200,7 @@ impl<'src> JsLexer<'src> {
             self.current_flags |= TokenFlags::UNICODE_ESCAPE;
         }
 
-        match &buf[..count + len] {
-            // Keywords
-            b"break" => BREAK_KW,
-            b"case" => CASE_KW,
-            b"catch" => CATCH_KW,
-            b"class" => CLASS_KW,
-            b"const" => CONST_KW,
-            b"continue" => CONTINUE_KW,
-            b"debugger" => DEBUGGER_KW,
-            b"default" => DEFAULT_KW,
-            b"defer" => DEFER_KW,
-            b"delete" => DELETE_KW,
-            b"do" => DO_KW,
-            b"else" => ELSE_KW,
-            b"enum" => ENUM_KW,
-            b"export" => EXPORT_KW,
-            b"extends" => EXTENDS_KW,
-            b"false" => FALSE_KW,
-            b"finally" => FINALLY_KW,
-            b"for" => FOR_KW,
-            b"function" => FUNCTION_KW,
-            b"if" => IF_KW,
-            b"in" => IN_KW,
-            b"import" => IMPORT_KW,
-            b"instanceof" => INSTANCEOF_KW,
-            b"new" => NEW_KW,
-            b"null" => NULL_KW,
-            b"return" => RETURN_KW,
-            b"source" => SOURCE_KW,
-            b"super" => SUPER_KW,
-            b"switch" => SWITCH_KW,
-            b"this" => THIS_KW,
-            b"throw" => THROW_KW,
-            b"try" => TRY_KW,
-            b"true" => TRUE_KW,
-            b"typeof" => TYPEOF_KW,
-            b"var" => VAR_KW,
-            b"void" => VOID_KW,
-            b"while" => WHILE_KW,
-            b"with" => WITH_KW,
-            // Strict mode contextual Keywords
-            b"implements" => IMPLEMENTS_KW,
-            b"interface" => INTERFACE_KW,
-            b"let" => LET_KW,
-            b"package" => PACKAGE_KW,
-            b"private" => PRIVATE_KW,
-            b"protected" => PROTECTED_KW,
-            b"public" => PUBLIC_KW,
-            b"static" => STATIC_KW,
-            b"yield" => YIELD_KW,
-            // contextual keywords
-            b"abstract" => ABSTRACT_KW,
-            b"accessor" => ACCESSOR_KW,
-            b"as" => AS_KW,
-            b"asserts" => ASSERTS_KW,
-            b"assert" => ASSERT_KW,
-            b"any" => ANY_KW,
-            b"async" => ASYNC_KW,
-            b"await" => AWAIT_KW,
-            b"boolean" => BOOLEAN_KW,
-            b"constructor" => CONSTRUCTOR_KW,
-            b"declare" => DECLARE_KW,
-            b"get" => GET_KW,
-            b"infer" => INFER_KW,
-            b"is" => IS_KW,
-            b"keyof" => KEYOF_KW,
-            b"module" => MODULE_KW,
-            b"namespace" => NAMESPACE_KW,
-            b"never" => NEVER_KW,
-            b"readonly" => READONLY_KW,
-            b"require" => REQUIRE_KW,
-            b"number" => NUMBER_KW,
-            b"object" => OBJECT_KW,
-            b"satisfies" => SATISFIES_KW,
-            b"set" => SET_KW,
-            b"string" => STRING_KW,
-            b"symbol" => SYMBOL_KW,
-            b"type" => TYPE_KW,
-            b"undefined" => UNDEFINED_KW,
-            b"unique" => UNIQUE_KW,
-            b"unknown" => UNKNOWN_KW,
-            b"from" => FROM_KW,
-            b"global" => GLOBAL_KW,
-            b"bigint" => BIGINT_KW,
-            b"override" => OVERRIDE_KW,
-            b"of" => OF_KW,
-            b"out" => OUT_KW,
-            b"using" => USING_KW,
-            _ => T![ident],
-        }
+        keyword_or_identifier_kind(&buf[..count + len])
     }
 
     #[inline]
@@ -2073,10 +2007,6 @@ impl<'src> JsLexer<'src> {
         // to do more aggressive optimizations on the match regarding how to map it to instructions
         let dispatched = lookup_byte(byte);
 
-        if self.is_metavariable_start() {
-            return self.consume_metavariable(GRIT_METAVARIABLE);
-        }
-
         match dispatched {
             WHS => {
                 let kind = self.consume_newline_or_whitespaces();
@@ -2146,7 +2076,9 @@ impl<'src> JsLexer<'src> {
                     ERROR_TOKEN
                 }
             }
-            IDT | DOL => self.resolve_identifier(byte as char),
+            // Grit metavariables always start with `$`.
+            DOL if self.is_metavariable_start() => self.consume_metavariable(GRIT_METAVARIABLE),
+            IDT | DOL => self.resolve_ascii_identifier(),
             DIG => {
                 self.read_number(false);
                 self.verify_number_end()
@@ -2277,4 +2209,102 @@ impl<'src> JsLexer<'src> {
 /// Check if a char is a JS linebreak
 fn is_linebreak(chr: char) -> bool {
     matches!(chr, '\n' | '\r' | '\u{2028}' | '\u{2029}')
+}
+
+/// Returns the keyword kind for `ident`, the UTF-8 text of an identifier, or `T![ident]` if it is
+/// not a keyword.
+#[inline]
+fn keyword_or_identifier_kind(ident: &[u8]) -> JsSyntaxKind {
+    use JsSyntaxKind::*;
+
+    match ident {
+        // Keywords
+        b"break" => BREAK_KW,
+        b"case" => CASE_KW,
+        b"catch" => CATCH_KW,
+        b"class" => CLASS_KW,
+        b"const" => CONST_KW,
+        b"continue" => CONTINUE_KW,
+        b"debugger" => DEBUGGER_KW,
+        b"default" => DEFAULT_KW,
+        b"defer" => DEFER_KW,
+        b"delete" => DELETE_KW,
+        b"do" => DO_KW,
+        b"else" => ELSE_KW,
+        b"enum" => ENUM_KW,
+        b"export" => EXPORT_KW,
+        b"extends" => EXTENDS_KW,
+        b"false" => FALSE_KW,
+        b"finally" => FINALLY_KW,
+        b"for" => FOR_KW,
+        b"function" => FUNCTION_KW,
+        b"if" => IF_KW,
+        b"in" => IN_KW,
+        b"import" => IMPORT_KW,
+        b"instanceof" => INSTANCEOF_KW,
+        b"new" => NEW_KW,
+        b"null" => NULL_KW,
+        b"return" => RETURN_KW,
+        b"source" => SOURCE_KW,
+        b"super" => SUPER_KW,
+        b"switch" => SWITCH_KW,
+        b"this" => THIS_KW,
+        b"throw" => THROW_KW,
+        b"try" => TRY_KW,
+        b"true" => TRUE_KW,
+        b"typeof" => TYPEOF_KW,
+        b"var" => VAR_KW,
+        b"void" => VOID_KW,
+        b"while" => WHILE_KW,
+        b"with" => WITH_KW,
+        // Strict mode contextual Keywords
+        b"implements" => IMPLEMENTS_KW,
+        b"interface" => INTERFACE_KW,
+        b"let" => LET_KW,
+        b"package" => PACKAGE_KW,
+        b"private" => PRIVATE_KW,
+        b"protected" => PROTECTED_KW,
+        b"public" => PUBLIC_KW,
+        b"static" => STATIC_KW,
+        b"yield" => YIELD_KW,
+        // contextual keywords
+        b"abstract" => ABSTRACT_KW,
+        b"accessor" => ACCESSOR_KW,
+        b"as" => AS_KW,
+        b"asserts" => ASSERTS_KW,
+        b"assert" => ASSERT_KW,
+        b"any" => ANY_KW,
+        b"async" => ASYNC_KW,
+        b"await" => AWAIT_KW,
+        b"boolean" => BOOLEAN_KW,
+        b"constructor" => CONSTRUCTOR_KW,
+        b"declare" => DECLARE_KW,
+        b"get" => GET_KW,
+        b"infer" => INFER_KW,
+        b"is" => IS_KW,
+        b"keyof" => KEYOF_KW,
+        b"module" => MODULE_KW,
+        b"namespace" => NAMESPACE_KW,
+        b"never" => NEVER_KW,
+        b"readonly" => READONLY_KW,
+        b"require" => REQUIRE_KW,
+        b"number" => NUMBER_KW,
+        b"object" => OBJECT_KW,
+        b"satisfies" => SATISFIES_KW,
+        b"set" => SET_KW,
+        b"string" => STRING_KW,
+        b"symbol" => SYMBOL_KW,
+        b"type" => TYPE_KW,
+        b"undefined" => UNDEFINED_KW,
+        b"unique" => UNIQUE_KW,
+        b"unknown" => UNKNOWN_KW,
+        b"from" => FROM_KW,
+        b"global" => GLOBAL_KW,
+        b"bigint" => BIGINT_KW,
+        b"override" => OVERRIDE_KW,
+        b"of" => OF_KW,
+        b"out" => OUT_KW,
+        b"using" => USING_KW,
+        _ => T![ident],
+    }
 }

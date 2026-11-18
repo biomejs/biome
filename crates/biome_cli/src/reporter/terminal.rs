@@ -59,20 +59,20 @@ impl ReporterVisitor for ConsoleReporterVisitor {
         verbose: bool,
     ) -> io::Result<()> {
         if execution.is_check() && summary.suggested_fixes_skipped > 0 {
-            writer.log(markup! {
+            writer.error(markup! {
                 <Warn>"Skipped "{summary.suggested_fixes_skipped}" suggested fixes.\n"</Warn>
                 <Info>"If you wish to apply the suggested (unsafe) fixes, use the command "<Emphasis>"biome check --write --unsafe\n"</Emphasis></Info>
             })
         }
 
         if !execution.is_ci() && summary.diagnostics_not_printed > 0 {
-            writer.log(markup! {
+            writer.error(markup! {
                 <Warn>"The number of diagnostics exceeds the limit allowed. Use "<Emphasis>"--max-diagnostics"</Emphasis>" to increase it.\n"</Warn>
                 <Info>"Diagnostics not shown: "</Info><Emphasis>{summary.diagnostics_not_printed}</Emphasis><Info>"."</Info>
             })
         }
 
-        writer.log(markup! {
+        writer.error(markup! {
             {ConsoleTraversalSummary(execution, &summary, verbose)}
         });
         Ok(())

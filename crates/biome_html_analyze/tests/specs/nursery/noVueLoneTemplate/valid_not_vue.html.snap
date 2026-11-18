@@ -1,0 +1,14 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid_not_vue.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<div>
+  <template>
+    <p>Hi</p>
+  </template>
+</div>
+
+```

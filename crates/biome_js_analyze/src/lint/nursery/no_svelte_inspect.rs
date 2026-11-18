@@ -50,7 +50,7 @@ declare_lint_rule! {
     ///
     /// - [Svelte `$inspect`](https://svelte.dev/docs/svelte/$inspect)
     pub NoSvelteInspect {
-        version: "next",
+        version: "2.6.0",
         name: "noSvelteInspect",
         language: "js",
         domains: &[RuleDomain::Svelte],

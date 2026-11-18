@@ -71,6 +71,8 @@ invalid.jsx:2:2 lint/correctness/noReactPropAssignments ━━━━━━━━
     3 │ 
     4 │ 	return <div>{props.bar}</div>;
   
+  i Props are read-only. Changing them can change data that belongs to the parent component, and React does not rerender when a prop is mutated.
+  
   i Consider using a local variable instead.
   
 
@@ -86,6 +88,8 @@ invalid.jsx:8:2 lint/correctness/noReactPropAssignments ━━━━━━━━
        │ 	^^^^^
      9 │ 
     10 │ 	return <div>{props.bar}</div>;
+  
+  i Props are read-only. Changing them can change data that belongs to the parent component, and React does not rerender when a prop is mutated.
   
   i Consider using a local variable instead.
   
@@ -103,6 +107,8 @@ invalid.jsx:14:2 lint/correctness/noReactPropAssignments ━━━━━━━�
     15 │ 
     16 │ 	return <div>{props.bar}</div>;
   
+  i Props are read-only. Changing them can change data that belongs to the parent component, and React does not rerender when a prop is mutated.
+  
   i Consider using a local variable instead.
   
 
@@ -118,6 +124,8 @@ invalid.jsx:23:3 lint/correctness/noReactPropAssignments ━━━━━━━�
        │ 		^^^^^
     24 │ 	}, [props.bar]);
     25 │ 
+  
+  i Props are read-only. Changing them can change data that belongs to the parent component, and React does not rerender when a prop is mutated.
   
   i Consider using a local variable instead.
   
@@ -135,6 +143,8 @@ invalid.jsx:31:2 lint/correctness/noReactPropAssignments ━━━━━━━�
     32 │ 	return <div>{props.bar}</div>;
     33 │ });
   
+  i Props are read-only. Changing them can change data that belongs to the parent component, and React does not rerender when a prop is mutated.
+  
   i Consider using a local variable instead.
   
 
@@ -151,6 +161,8 @@ invalid.jsx:36:2 lint/correctness/noReactPropAssignments ━━━━━━━�
     37 │ 	return <div>{props.bar}</div>;
     38 │ });
   
+  i Props are read-only. Changing them can change data that belongs to the parent component, and React does not rerender when a prop is mutated.
+  
   i Consider using a local variable instead.
   
 
@@ -166,6 +178,8 @@ invalid.jsx:44:3 lint/correctness/noReactPropAssignments ━━━━━━━�
        │ 		^^^^^
     45 │ 	}, [props.bar]);
     46 │ 
+  
+  i Props are read-only. Changing them can change data that belongs to the parent component, and React does not rerender when a prop is mutated.
   
   i Consider using a local variable instead.
   

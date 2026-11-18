@@ -87,6 +87,7 @@ use biome_yaml_syntax::YamlLanguage;
 use camino::{Utf8Path, Utf8PathBuf};
 use enumflags2::BitFlags;
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
+use rustc_hash::FxHashSet;
 use std::borrow::Cow;
 use std::ops::Deref;
 use std::sync::{Arc, RwLock};
@@ -138,6 +139,57 @@ pub struct Settings {
 }
 
 impl Settings {
+    /// Returns `file_source` with the variants that the parser settings
+    /// select: JSX in JavaScript files, CSS modules or Tailwind CSS directives
+    /// in CSS files, and CJK-friendly emphasis in Markdown files.
+    #[cfg_attr(
+        not(any(feature = "lang_js", feature = "lang_css", feature = "lang_md")),
+        expect(unused_mut)
+    )]
+    pub(crate) fn file_source_with_parser_variants(
+        &self,
+        mut file_source: DocumentFileSource,
+    ) -> DocumentFileSource {
+        #[cfg(feature = "lang_js")]
+        if let DocumentFileSource::Js(js) = &mut file_source
+            && !js.is_typescript()
+            && !js.is_jsx()
+            && self
+                .languages
+                .javascript
+                .parser
+                .jsx_everywhere
+                .unwrap_or_default()
+                .into()
+        {
+            js.set_variant(biome_languages::javascript::LanguageVariant::Jsx);
+        }
+
+        #[cfg(feature = "lang_css")]
+        if let DocumentFileSource::Css(css) = &mut file_source {
+            let parser = &self.languages.css.parser;
+            if parser.css_modules_enabled.unwrap_or_default().into() {
+                css.set_variant(biome_languages::css::CssVariant::CssModules)
+            } else if parser.tailwind_directives.unwrap_or_default().into() {
+                css.set_variant(biome_languages::css::CssVariant::TailwindCss)
+            }
+        }
+
+        #[cfg(feature = "lang_md")]
+        if let DocumentFileSource::Markdown(markdown) = &mut file_source {
+            markdown.set_cjk_friendly_emphasis(
+                self.languages
+                    .markdown
+                    .parser
+                    .cjk_friendly_emphasis
+                    .unwrap_or_default()
+                    .into(),
+            );
+        }
+
+        file_source
+    }
+
     pub fn format_options<L>(
         &self,
         override_indices: &[usize],
@@ -358,6 +410,13 @@ impl Settings {
             }
         }
 
+        #[cfg(feature = "lang_grit")]
+        {
+            if let Some(grit) = configuration.grit {
+                self.languages.grit = grit.into();
+            }
+        }
+
         // plugin settings
         #[cfg(feature = "plugins")]
         {
@@ -454,6 +513,33 @@ impl Settings {
                     Some(Cow::Borrowed(pattern_rules))
                 };
             }
+        }
+        result
+    }
+
+    /// Returns the rules explicitly enabled by the base configuration and selected overrides.
+    ///
+    /// Each configuration layer is inspected separately because merging a group-wide severity with
+    /// per-rule overrides expands the severity into individual rule settings.
+    pub(crate) fn as_linter_explicitly_enabled_rules_by_indices(
+        &self,
+        indices: &[usize],
+    ) -> FxHashSet<biome_analyze::RuleFilter<'static>> {
+        let mut result = self
+            .linter
+            .rules
+            .as_ref()
+            .map_or_default(Rules::as_explicitly_enabled_rules);
+        for &index in indices {
+            let Some(pattern_rules) = self
+                .override_settings
+                .patterns
+                .get(index)
+                .and_then(|pattern| pattern.linter.rules.as_ref())
+            else {
+                continue;
+            };
+            result.extend(pattern_rules.as_explicitly_enabled_rules());
         }
         result
     }
@@ -2390,7 +2476,7 @@ pub fn to_override_settings(
     for mut pattern in overrides.0 {
         let formatter = pattern
             .formatter
-            .map(|formatter| OverrideFormatSettings {
+            .map_or_default(|formatter| OverrideFormatSettings {
                 enabled: formatter.enabled.or(current_settings.formatter.enabled),
                 format_with_errors: formatter
                     .format_with_errors
@@ -2407,30 +2493,24 @@ pub fn to_override_settings(
                 #[cfg(feature = "lang_js")]
                 trailing_commas: formatter.trailing_commas,
                 trailing_newline: formatter.trailing_newline,
-            })
-            .unwrap_or_default();
+            });
         let linter = pattern
             .linter
-            .map(|linter| OverrideLinterSettings {
+            .map_or_default(|linter| OverrideLinterSettings {
                 enabled: linter.enabled.or(current_settings.linter.enabled),
                 rules: linter.rules,
                 domains: linter.domains,
-            })
-            .unwrap_or_default();
+            });
         let assist = pattern
             .assist
-            .map(|assist| OverrideAssistSettings {
+            .map_or_default(|assist| OverrideAssistSettings {
                 enabled: assist.enabled.or(current_settings.assist.enabled),
                 actions: assist.actions,
-            })
-            .unwrap_or_default();
+            });
 
-        let files = pattern
-            .files
-            .map(|files| OverrideFilesSettings {
-                max_size: files.max_size,
-            })
-            .unwrap_or_default();
+        let files = pattern.files.map_or_default(|files| OverrideFilesSettings {
+            max_size: files.max_size,
+        });
 
         let mut languages = LanguageListSettings::default();
         #[cfg(feature = "lang_js")]

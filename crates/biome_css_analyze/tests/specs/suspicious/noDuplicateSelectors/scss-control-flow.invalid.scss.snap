@@ -46,6 +46,8 @@ scss-control-flow.invalid.scss:5:3 lint/suspicious/noDuplicateSelectors ━━�
     5 │   .conditional {}
     6 │ }
   
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
   i Remove or merge the duplicate rule to keep the stylesheet clean.
   
 
@@ -71,6 +73,8 @@ scss-control-flow.invalid.scss:10:3 lint/suspicious/noDuplicateSelectors ━━�
     10 │   .mixin-selector {}
     11 │ }
   
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
   i Remove or merge the duplicate rule to keep the stylesheet clean.
   
 
@@ -95,6 +99,8 @@ scss-control-flow.invalid.scss:16:3 lint/suspicious/noDuplicateSelectors ━━�
        │   ^^^^^^^^^^^^^^^^^
     16 │   .loop-selector {}
     17 │ }
+  
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
   
   i Remove or merge the duplicate rule to keep the stylesheet clean.
   

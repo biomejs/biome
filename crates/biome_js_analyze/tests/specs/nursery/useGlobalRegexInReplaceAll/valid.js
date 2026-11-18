@@ -1,0 +1,39 @@
+/* should not generate diagnostics */
+withSpaces.replaceAll(/\s+/g, ",");
+withSpaces.replaceAll(/\s+/gi, ",");
+withSpaces.replaceAll(new RegExp("\\s+", "g"), ",");
+withSpaces.replaceAll(RegExp("\\s+", "gi"), ",");
+withSpaces.replaceAll(new RegExp(/\s+/g), ",");
+withSpaces.replaceAll(new RegExp(/\s+/, "g"), ",");
+withSpaces.replaceAll(" ", ",");
+withSpaces.replaceAll();
+withSpaces.replace(/\s+/, ",");
+replaceAll(/\s+/, ",");
+new replaceAll(/\s+/, ",");
+withSpaces[replaceAll](/\s+/, ",");
+
+// Flags that can't be known without running the code.
+withSpaces.replaceAll(new RegExp("\\s+", flags), ",");
+withSpaces.replaceAll(new RegExp("\\s+", isWindows ? "g" : "gi"), ",");
+withSpaces.replaceAll(new RegExp(pattern), ",");
+withSpaces.replaceAll(new RegExp(...args), ",");
+withSpaces.replaceAll(new RegExp(tag`\s+`), ",");
+withSpaces.replaceAll(new RegExp("\\s+", tag`g`), ",");
+withSpaces.replaceAll(unknownRegex, ",");
+
+const literal = /\s+/g;
+withSpaces.replaceAll(literal, ",");
+
+const constructed = new RegExp("\\s+", "g");
+withSpaces.replaceAll(constructed, ",");
+
+const text = "string";
+withSpaces.replaceAll(text, ",");
+
+let reassigned = /\s+/;
+reassigned = /\s+/g;
+withSpaces.replaceAll(reassigned, ",");
+
+function shadowed(RegExp) {
+	withSpaces.replaceAll(new RegExp("\\s+"), ",");
+}

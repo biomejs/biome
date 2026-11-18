@@ -1,6 +1,6 @@
 use super::EmbedContent;
 use biome_languages::{CssFileSource, DocumentFileSource, GraphqlFileSource};
-use biome_rowan::TokenText;
+use biome_rowan::{TextRange, TokenText};
 
 /// Language embedded in JavaScript source.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -23,6 +23,8 @@ pub(crate) enum EmbedCandidate {
     TaggedTemplate {
         tag: TemplateTagKind,
         content: EmbedContent,
+        /// Ranges of the `${...}` interpolations in the template.
+        interpolations: Vec<TextRange>,
     },
     JsxStyleAttribute {
         content: EmbedContent,

@@ -88,7 +88,10 @@ declare_lint_rule! {
         version: "2.3.3",
         name: "noParametersOnlyUsedInRecursion",
         language: "js",
-        sources: &[RuleSource::Clippy("only_used_in_recursion").inspired()],
+        sources: &[
+            RuleSource::Clippy("only_used_in_recursion").inspired(),
+            RuleSource::Oxc("only-used-in-recursion").same(),
+        ],
         recommended: false,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,

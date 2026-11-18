@@ -1,0 +1,1536 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// Boolean values without a prefix
+const completed = true;
+const failed = false;
+const finished = progress === 100;
+const converted = Boolean(value);
+const negated = !value;
+const list = Array.isArray(value);
+const found = "hello".includes("h");
+const matched = /unicorn/.test(value);
+const either = condition ? true : false;
+const last = (doSomething(), true);
+const inside = "key" in object;
+const instance = value instanceof Date;
+const removed = delete object.key;
+const both = a === b && c !== d;
+const flags = Number.isInteger(value) || Object.is(a, b);
+const global = globalThis.Boolean(value);
+const nested = a === 1 && (b === 2 || (c ? d === 3 : !e)) && (f, await g instanceof Date);
+
+// Prefix-like words that aren't separate words
+const island = true;
+const area = true;
+const haven = false;
+const candy = true;
+const willow = true;
+const haste = true;
+const doesntMatch = true;
+const ISREADY = true;
+
+// Values that refer to other booleans
+const alias = both;
+
+// Variables that only receive booleans
+let toggled;
+toggled = true;
+toggled = false;
+let flipped = true;
+flipped &&= false;
+
+// Functions that return booleans
+function done() {
+	return true;
+}
+function check(value) {
+	if (value) {
+		return value === 1;
+	}
+	return false;
+}
+const arrow = () => true;
+const expression = function () {
+	return false;
+};
+export function exported() {
+	return true;
+}
+
+// Parameters with boolean default values
+function download(showProgress = false) {}
+const handler = (verbose = true) => {};
+class Downloader {
+	constructor(showProgress = false) {}
+	download(retry = true) {}
+}
+const object = {
+	method(silent = false) {},
+};
+
+// Non-boolean values with a prefix
+const hasName = "Sindre";
+const wasRed = 2;
+const requiresLogin = "yes";
+const isList = [];
+const isObject = {};
+const hasTemplate = `template`;
+const isNew = new Boolean(value);
+const isSum = a + b;
+const isType = typeof value;
+const is_ready = 1;
+const IS_READY = 1;
+const _isReady = 1;
+const is2FA = 1;
+let isChanged = true;
+isChanged = "yes";
+let isCount = true;
+isCount++;
+let isLoop = true;
+for (isLoop in object) {}
+
+// Functions with a prefix that don't return booleans
+const isReadyArrow = () => "yes";
+function hasTitle() {
+	return "Unicorn";
+}
+function isEmptyBody() {}
+function isBareReturn() {
+	return;
+}
+async function isAsyncString() {
+	return "yes";
+}
+function* isGenerator() {
+	yield true;
+}
+function isFunctionFactory() {
+	return () => true;
+}
+function hasNestedReturn() {
+	function inner() {
+		return getValue();
+	}
+	return "outer";
+}
+
+// Hooks
+function useReady() {
+	return true;
+}
+const isTemplate = `text`;
+function use2FA() {
+	return true;
+}
+let check = () => true;
+check = () => false;
+function useIS_COOL() {
+	return 1;
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:4:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i completed holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    3 │ // Boolean values without a prefix
+  > 4 │ const completed = true;
+      │       ^^^^^^^^^
+    5 │ const failed = false;
+    6 │ const finished = progress === 100;
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i failed holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    3 │ // Boolean values without a prefix
+    4 │ const completed = true;
+  > 5 │ const failed = false;
+      │       ^^^^^^
+    6 │ const finished = progress === 100;
+    7 │ const converted = Boolean(value);
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i finished holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    4 │ const completed = true;
+    5 │ const failed = false;
+  > 6 │ const finished = progress === 100;
+      │       ^^^^^^^^
+    7 │ const converted = Boolean(value);
+    8 │ const negated = !value;
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i converted holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    5 │ const failed = false;
+    6 │ const finished = progress === 100;
+  > 7 │ const converted = Boolean(value);
+      │       ^^^^^^^^^
+    8 │ const negated = !value;
+    9 │ const list = Array.isArray(value);
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i negated holds a boolean, but its name doesn't start with a boolean prefix.
+  
+     6 │ const finished = progress === 100;
+     7 │ const converted = Boolean(value);
+   > 8 │ const negated = !value;
+       │       ^^^^^^^
+     9 │ const list = Array.isArray(value);
+    10 │ const found = "hello".includes("h");
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i list holds a boolean, but its name doesn't start with a boolean prefix.
+  
+     7 │ const converted = Boolean(value);
+     8 │ const negated = !value;
+   > 9 │ const list = Array.isArray(value);
+       │       ^^^^
+    10 │ const found = "hello".includes("h");
+    11 │ const matched = /unicorn/.test(value);
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i found holds a boolean, but its name doesn't start with a boolean prefix.
+  
+     8 │ const negated = !value;
+     9 │ const list = Array.isArray(value);
+  > 10 │ const found = "hello".includes("h");
+       │       ^^^^^
+    11 │ const matched = /unicorn/.test(value);
+    12 │ const either = condition ? true : false;
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i matched holds a boolean, but its name doesn't start with a boolean prefix.
+  
+     9 │ const list = Array.isArray(value);
+    10 │ const found = "hello".includes("h");
+  > 11 │ const matched = /unicorn/.test(value);
+       │       ^^^^^^^
+    12 │ const either = condition ? true : false;
+    13 │ const last = (doSomething(), true);
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i either holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    10 │ const found = "hello".includes("h");
+    11 │ const matched = /unicorn/.test(value);
+  > 12 │ const either = condition ? true : false;
+       │       ^^^^^^
+    13 │ const last = (doSomething(), true);
+    14 │ const inside = "key" in object;
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i last holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    11 │ const matched = /unicorn/.test(value);
+    12 │ const either = condition ? true : false;
+  > 13 │ const last = (doSomething(), true);
+       │       ^^^^
+    14 │ const inside = "key" in object;
+    15 │ const instance = value instanceof Date;
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i inside holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    12 │ const either = condition ? true : false;
+    13 │ const last = (doSomething(), true);
+  > 14 │ const inside = "key" in object;
+       │       ^^^^^^
+    15 │ const instance = value instanceof Date;
+    16 │ const removed = delete object.key;
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i instance holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    13 │ const last = (doSomething(), true);
+    14 │ const inside = "key" in object;
+  > 15 │ const instance = value instanceof Date;
+       │       ^^^^^^^^
+    16 │ const removed = delete object.key;
+    17 │ const both = a === b && c !== d;
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i removed holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    14 │ const inside = "key" in object;
+    15 │ const instance = value instanceof Date;
+  > 16 │ const removed = delete object.key;
+       │       ^^^^^^^
+    17 │ const both = a === b && c !== d;
+    18 │ const flags = Number.isInteger(value) || Object.is(a, b);
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i both holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    15 │ const instance = value instanceof Date;
+    16 │ const removed = delete object.key;
+  > 17 │ const both = a === b && c !== d;
+       │       ^^^^
+    18 │ const flags = Number.isInteger(value) || Object.is(a, b);
+    19 │ const global = globalThis.Boolean(value);
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i flags holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    16 │ const removed = delete object.key;
+    17 │ const both = a === b && c !== d;
+  > 18 │ const flags = Number.isInteger(value) || Object.is(a, b);
+       │       ^^^^^
+    19 │ const global = globalThis.Boolean(value);
+    20 │ const nested = a === 1 && (b === 2 || (c ? d === 3 : !e)) && (f, await g instanceof Date);
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i global holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    17 │ const both = a === b && c !== d;
+    18 │ const flags = Number.isInteger(value) || Object.is(a, b);
+  > 19 │ const global = globalThis.Boolean(value);
+       │       ^^^^^^
+    20 │ const nested = a === 1 && (b === 2 || (c ? d === 3 : !e)) && (f, await g instanceof Date);
+    21 │ 
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i nested holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    18 │ const flags = Number.isInteger(value) || Object.is(a, b);
+    19 │ const global = globalThis.Boolean(value);
+  > 20 │ const nested = a === 1 && (b === 2 || (c ? d === 3 : !e)) && (f, await g instanceof Date);
+       │       ^^^^^^
+    21 │ 
+    22 │ // Prefix-like words that aren't separate words
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i island holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    22 │ // Prefix-like words that aren't separate words
+  > 23 │ const island = true;
+       │       ^^^^^^
+    24 │ const area = true;
+    25 │ const haven = false;
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i area holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    22 │ // Prefix-like words that aren't separate words
+    23 │ const island = true;
+  > 24 │ const area = true;
+       │       ^^^^
+    25 │ const haven = false;
+    26 │ const candy = true;
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i haven holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    23 │ const island = true;
+    24 │ const area = true;
+  > 25 │ const haven = false;
+       │       ^^^^^
+    26 │ const candy = true;
+    27 │ const willow = true;
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i candy holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    24 │ const area = true;
+    25 │ const haven = false;
+  > 26 │ const candy = true;
+       │       ^^^^^
+    27 │ const willow = true;
+    28 │ const haste = true;
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i willow holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    25 │ const haven = false;
+    26 │ const candy = true;
+  > 27 │ const willow = true;
+       │       ^^^^^^
+    28 │ const haste = true;
+    29 │ const doesntMatch = true;
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i haste holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    26 │ const candy = true;
+    27 │ const willow = true;
+  > 28 │ const haste = true;
+       │       ^^^^^
+    29 │ const doesntMatch = true;
+    30 │ const ISREADY = true;
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i doesntMatch holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    27 │ const willow = true;
+    28 │ const haste = true;
+  > 29 │ const doesntMatch = true;
+       │       ^^^^^^^^^^^
+    30 │ const ISREADY = true;
+    31 │ 
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:30:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i ISREADY holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    28 │ const haste = true;
+    29 │ const doesntMatch = true;
+  > 30 │ const ISREADY = true;
+       │       ^^^^^^^
+    31 │ 
+    32 │ // Values that refer to other booleans
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:33:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i alias holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    32 │ // Values that refer to other booleans
+  > 33 │ const alias = both;
+       │       ^^^^^
+    34 │ 
+    35 │ // Variables that only receive booleans
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:36:5 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toggled holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    35 │ // Variables that only receive booleans
+  > 36 │ let toggled;
+       │     ^^^^^^^
+    37 │ toggled = true;
+    38 │ toggled = false;
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:5 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i flipped holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    37 │ toggled = true;
+    38 │ toggled = false;
+  > 39 │ let flipped = true;
+       │     ^^^^^^^
+    40 │ flipped &&= false;
+    41 │ 
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:43:10 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i done returns a boolean, but its name doesn't start with a boolean prefix.
+  
+    42 │ // Functions that return booleans
+  > 43 │ function done() {
+       │          ^^^^
+    44 │ 	return true;
+    45 │ }
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:46:10 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i check returns a boolean, but its name doesn't start with a boolean prefix.
+  
+    44 │ 	return true;
+    45 │ }
+  > 46 │ function check(value) {
+       │          ^^^^^
+    47 │ 	if (value) {
+    48 │ 		return value === 1;
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:52:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i arrow returns a boolean, but its name doesn't start with a boolean prefix.
+  
+    50 │ 	return false;
+    51 │ }
+  > 52 │ const arrow = () => true;
+       │       ^^^^^
+    53 │ const expression = function () {
+    54 │ 	return false;
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:53:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i expression returns a boolean, but its name doesn't start with a boolean prefix.
+  
+    51 │ }
+    52 │ const arrow = () => true;
+  > 53 │ const expression = function () {
+       │       ^^^^^^^^^^
+    54 │ 	return false;
+    55 │ };
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:56:17 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i exported returns a boolean, but its name doesn't start with a boolean prefix.
+  
+    54 │ 	return false;
+    55 │ };
+  > 56 │ export function exported() {
+       │                 ^^^^^^^^
+    57 │ 	return true;
+    58 │ }
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:61:19 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i showProgress holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    60 │ // Parameters with boolean default values
+  > 61 │ function download(showProgress = false) {}
+       │                   ^^^^^^^^^^^^
+    62 │ const handler = (verbose = true) => {};
+    63 │ class Downloader {
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:62:18 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i verbose holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    60 │ // Parameters with boolean default values
+    61 │ function download(showProgress = false) {}
+  > 62 │ const handler = (verbose = true) => {};
+       │                  ^^^^^^^
+    63 │ class Downloader {
+    64 │ 	constructor(showProgress = false) {}
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:64:14 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i showProgress holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    62 │ const handler = (verbose = true) => {};
+    63 │ class Downloader {
+  > 64 │ 	constructor(showProgress = false) {}
+       │ 	            ^^^^^^^^^^^^
+    65 │ 	download(retry = true) {}
+    66 │ }
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:65:11 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i retry holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    63 │ class Downloader {
+    64 │ 	constructor(showProgress = false) {}
+  > 65 │ 	download(retry = true) {}
+       │ 	         ^^^^^
+    66 │ }
+    67 │ const object = {
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:68:9 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i silent holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    66 │ }
+    67 │ const object = {
+  > 68 │ 	method(silent = false) {},
+       │ 	       ^^^^^^
+    69 │ };
+    70 │ 
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:72:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i hasName starts with the boolean prefix has, but doesn't hold a boolean.
+  
+    71 │ // Non-boolean values with a prefix
+  > 72 │ const hasName = "Sindre";
+       │       ^^^^^^^
+    73 │ const wasRed = 2;
+    74 │ const requiresLogin = "yes";
+  
+  i Readers expect a name that starts with has to be either true or false.
+  
+  i Rename it so that it doesn't start with has.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:73:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i wasRed starts with the boolean prefix was, but doesn't hold a boolean.
+  
+    71 │ // Non-boolean values with a prefix
+    72 │ const hasName = "Sindre";
+  > 73 │ const wasRed = 2;
+       │       ^^^^^^
+    74 │ const requiresLogin = "yes";
+    75 │ const isList = [];
+  
+  i Readers expect a name that starts with was to be either true or false.
+  
+  i Rename it so that it doesn't start with was.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:74:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i requiresLogin starts with the boolean prefix requires, but doesn't hold a boolean.
+  
+    72 │ const hasName = "Sindre";
+    73 │ const wasRed = 2;
+  > 74 │ const requiresLogin = "yes";
+       │       ^^^^^^^^^^^^^
+    75 │ const isList = [];
+    76 │ const isObject = {};
+  
+  i Readers expect a name that starts with requires to be either true or false.
+  
+  i Rename it so that it doesn't start with requires.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:75:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i isList starts with the boolean prefix is, but doesn't hold a boolean.
+  
+    73 │ const wasRed = 2;
+    74 │ const requiresLogin = "yes";
+  > 75 │ const isList = [];
+       │       ^^^^^^
+    76 │ const isObject = {};
+    77 │ const hasTemplate = `template`;
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:76:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i isObject starts with the boolean prefix is, but doesn't hold a boolean.
+  
+    74 │ const requiresLogin = "yes";
+    75 │ const isList = [];
+  > 76 │ const isObject = {};
+       │       ^^^^^^^^
+    77 │ const hasTemplate = `template`;
+    78 │ const isNew = new Boolean(value);
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:77:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i hasTemplate starts with the boolean prefix has, but doesn't hold a boolean.
+  
+    75 │ const isList = [];
+    76 │ const isObject = {};
+  > 77 │ const hasTemplate = `template`;
+       │       ^^^^^^^^^^^
+    78 │ const isNew = new Boolean(value);
+    79 │ const isSum = a + b;
+  
+  i Readers expect a name that starts with has to be either true or false.
+  
+  i Rename it so that it doesn't start with has.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:78:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i isNew starts with the boolean prefix is, but doesn't hold a boolean.
+  
+    76 │ const isObject = {};
+    77 │ const hasTemplate = `template`;
+  > 78 │ const isNew = new Boolean(value);
+       │       ^^^^^
+    79 │ const isSum = a + b;
+    80 │ const isType = typeof value;
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:79:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i isSum starts with the boolean prefix is, but doesn't hold a boolean.
+  
+    77 │ const hasTemplate = `template`;
+    78 │ const isNew = new Boolean(value);
+  > 79 │ const isSum = a + b;
+       │       ^^^^^
+    80 │ const isType = typeof value;
+    81 │ const is_ready = 1;
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:80:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i isType starts with the boolean prefix is, but doesn't hold a boolean.
+  
+    78 │ const isNew = new Boolean(value);
+    79 │ const isSum = a + b;
+  > 80 │ const isType = typeof value;
+       │       ^^^^^^
+    81 │ const is_ready = 1;
+    82 │ const IS_READY = 1;
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:81:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i is_ready starts with the boolean prefix is, but doesn't hold a boolean.
+  
+    79 │ const isSum = a + b;
+    80 │ const isType = typeof value;
+  > 81 │ const is_ready = 1;
+       │       ^^^^^^^^
+    82 │ const IS_READY = 1;
+    83 │ const _isReady = 1;
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:82:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i IS_READY starts with the boolean prefix IS, but doesn't hold a boolean.
+  
+    80 │ const isType = typeof value;
+    81 │ const is_ready = 1;
+  > 82 │ const IS_READY = 1;
+       │       ^^^^^^^^
+    83 │ const _isReady = 1;
+    84 │ const is2FA = 1;
+  
+  i Readers expect a name that starts with IS to be either true or false.
+  
+  i Rename it so that it doesn't start with IS.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:83:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i _isReady starts with the boolean prefix is, but doesn't hold a boolean.
+  
+    81 │ const is_ready = 1;
+    82 │ const IS_READY = 1;
+  > 83 │ const _isReady = 1;
+       │       ^^^^^^^^
+    84 │ const is2FA = 1;
+    85 │ let isChanged = true;
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:84:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i is2FA starts with the boolean prefix is, but doesn't hold a boolean.
+  
+    82 │ const IS_READY = 1;
+    83 │ const _isReady = 1;
+  > 84 │ const is2FA = 1;
+       │       ^^^^^
+    85 │ let isChanged = true;
+    86 │ isChanged = "yes";
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:85:5 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i isChanged starts with the boolean prefix is, but doesn't hold a boolean.
+  
+    83 │ const _isReady = 1;
+    84 │ const is2FA = 1;
+  > 85 │ let isChanged = true;
+       │     ^^^^^^^^^
+    86 │ isChanged = "yes";
+    87 │ let isCount = true;
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:87:5 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i isCount starts with the boolean prefix is, but doesn't hold a boolean.
+  
+    85 │ let isChanged = true;
+    86 │ isChanged = "yes";
+  > 87 │ let isCount = true;
+       │     ^^^^^^^
+    88 │ isCount++;
+    89 │ let isLoop = true;
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:89:5 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i isLoop starts with the boolean prefix is, but doesn't hold a boolean.
+  
+    87 │ let isCount = true;
+    88 │ isCount++;
+  > 89 │ let isLoop = true;
+       │     ^^^^^^
+    90 │ for (isLoop in object) {}
+    91 │ 
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:93:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i isReadyArrow starts with the boolean prefix is, but doesn't return a boolean.
+  
+    92 │ // Functions with a prefix that don't return booleans
+  > 93 │ const isReadyArrow = () => "yes";
+       │       ^^^^^^^^^^^^
+    94 │ function hasTitle() {
+    95 │ 	return "Unicorn";
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:94:10 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i hasTitle starts with the boolean prefix has, but doesn't return a boolean.
+  
+    92 │ // Functions with a prefix that don't return booleans
+    93 │ const isReadyArrow = () => "yes";
+  > 94 │ function hasTitle() {
+       │          ^^^^^^^^
+    95 │ 	return "Unicorn";
+    96 │ }
+  
+  i Readers expect a name that starts with has to be either true or false.
+  
+  i Rename it so that it doesn't start with has.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:97:10 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i isEmptyBody starts with the boolean prefix is, but doesn't return a boolean.
+  
+    95 │ 	return "Unicorn";
+    96 │ }
+  > 97 │ function isEmptyBody() {}
+       │          ^^^^^^^^^^^
+    98 │ function isBareReturn() {
+    99 │ 	return;
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:98:10 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i isBareReturn starts with the boolean prefix is, but doesn't return a boolean.
+  
+     96 │ }
+     97 │ function isEmptyBody() {}
+   > 98 │ function isBareReturn() {
+        │          ^^^^^^^^^^^^
+     99 │ 	return;
+    100 │ }
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:101:16 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i isAsyncString starts with the boolean prefix is, but doesn't return a boolean.
+  
+     99 │ 	return;
+    100 │ }
+  > 101 │ async function isAsyncString() {
+        │                ^^^^^^^^^^^^^
+    102 │ 	return "yes";
+    103 │ }
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:104:11 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i isGenerator starts with the boolean prefix is, but doesn't return a boolean.
+  
+    102 │ 	return "yes";
+    103 │ }
+  > 104 │ function* isGenerator() {
+        │           ^^^^^^^^^^^
+    105 │ 	yield true;
+    106 │ }
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:107:10 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i isFunctionFactory starts with the boolean prefix is, but doesn't return a boolean.
+  
+    105 │ 	yield true;
+    106 │ }
+  > 107 │ function isFunctionFactory() {
+        │          ^^^^^^^^^^^^^^^^^
+    108 │ 	return () => true;
+    109 │ }
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:110:10 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i hasNestedReturn starts with the boolean prefix has, but doesn't return a boolean.
+  
+    108 │ 	return () => true;
+    109 │ }
+  > 110 │ function hasNestedReturn() {
+        │          ^^^^^^^^^^^^^^^
+    111 │ 	function inner() {
+    112 │ 		return getValue();
+  
+  i Readers expect a name that starts with has to be either true or false.
+  
+  i Rename it so that it doesn't start with has.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:118:10 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i useReady returns a boolean, but its name doesn't start with a boolean prefix.
+  
+    117 │ // Hooks
+  > 118 │ function useReady() {
+        │          ^^^^^^^^
+    119 │ 	return true;
+    120 │ }
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that the part of its name after use starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:121:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i isTemplate starts with the boolean prefix is, but doesn't hold a boolean.
+  
+    119 │ 	return true;
+    120 │ }
+  > 121 │ const isTemplate = `text`;
+        │       ^^^^^^^^^^
+    122 │ function use2FA() {
+    123 │ 	return true;
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:122:10 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i use2FA returns a boolean, but its name doesn't start with a boolean prefix.
+  
+    120 │ }
+    121 │ const isTemplate = `text`;
+  > 122 │ function use2FA() {
+        │          ^^^^^^
+    123 │ 	return true;
+    124 │ }
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that the part of its name after use starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:125:5 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i check returns a boolean, but its name doesn't start with a boolean prefix.
+  
+    123 │ 	return true;
+    124 │ }
+  > 125 │ let check = () => true;
+        │     ^^^^^
+    126 │ check = () => false;
+    127 │ function useIS_COOL() {
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:127:10 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i useIS_COOL starts with the boolean prefix IS, but doesn't return a boolean.
+  
+    125 │ let check = () => true;
+    126 │ check = () => false;
+  > 127 │ function useIS_COOL() {
+        │          ^^^^^^^^^^
+    128 │ 	return 1;
+    129 │ }
+  
+  i Readers expect a name that starts with IS to be either true or false.
+  
+  i Rename it so that it doesn't start with IS.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

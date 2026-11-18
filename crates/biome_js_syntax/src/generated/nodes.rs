@@ -6554,6 +6554,46 @@ pub struct JsSvelteDeclarationRootFields {
     pub eof_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct JsSvelteLegacyConstRoot {
+    pub(crate) syntax: SyntaxNode,
+}
+impl JsSvelteLegacyConstRoot {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> JsSvelteLegacyConstRootFields {
+        JsSvelteLegacyConstRootFields {
+            declarator: self.declarator(),
+            eof_token: self.eof_token(),
+        }
+    }
+    pub fn declarator(&self) -> SyntaxResult<AnyJsSvelteLegacyConstDeclarator> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+impl Serialize for JsSvelteLegacyConstRoot {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct JsSvelteLegacyConstRootFields {
+    pub declarator: SyntaxResult<AnyJsSvelteLegacyConstDeclarator>,
+    pub eof_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsSvelteSnippetRoot {
     pub(crate) syntax: SyntaxNode,
 }
@@ -7182,6 +7222,46 @@ impl Serialize for JsVariableStatement {
 pub struct JsVariableStatementFields {
     pub declaration: SyntaxResult<JsVariableDeclaration>,
     pub semicolon_token: Option<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct JsVueGenericRoot {
+    pub(crate) syntax: SyntaxNode,
+}
+impl JsVueGenericRoot {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> JsVueGenericRootFields {
+        JsVueGenericRootFields {
+            items: self.items(),
+            eof_token: self.eof_token(),
+        }
+    }
+    pub fn items(&self) -> SyntaxResult<AnyJsVueGenericTypeParameters> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+impl Serialize for JsVueGenericRoot {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct JsVueGenericRootFields {
+    pub items: SyntaxResult<AnyJsVueGenericTypeParameters>,
+    pub eof_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsVueSlotPropsRoot {
@@ -8100,14 +8180,14 @@ impl JsxShorthandAttribute {
     pub fn as_fields(&self) -> JsxShorthandAttributeFields {
         JsxShorthandAttributeFields {
             l_curly_token: self.l_curly_token(),
-            name: self.name(),
+            expression: self.expression(),
             r_curly_token: self.r_curly_token(),
         }
     }
     pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<JsReferenceIdentifier> {
+    pub fn expression(&self) -> SyntaxResult<AnyJsExpression> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -8125,7 +8205,7 @@ impl Serialize for JsxShorthandAttribute {
 #[derive(Serialize)]
 pub struct JsxShorthandAttributeFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<JsReferenceIdentifier>,
+    pub expression: SyntaxResult<AnyJsExpression>,
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -15417,7 +15497,9 @@ pub enum AnyJsRoot {
     JsModule(JsModule),
     JsScript(JsScript),
     JsSvelteDeclarationRoot(JsSvelteDeclarationRoot),
+    JsSvelteLegacyConstRoot(JsSvelteLegacyConstRoot),
     JsSvelteSnippetRoot(JsSvelteSnippetRoot),
+    JsVueGenericRoot(JsVueGenericRoot),
     JsVueSlotPropsRoot(JsVueSlotPropsRoot),
     TsDeclarationModule(TsDeclarationModule),
 }
@@ -15452,9 +15534,21 @@ impl AnyJsRoot {
             _ => None,
         }
     }
+    pub fn as_js_svelte_legacy_const_root(&self) -> Option<&JsSvelteLegacyConstRoot> {
+        match &self {
+            Self::JsSvelteLegacyConstRoot(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_js_svelte_snippet_root(&self) -> Option<&JsSvelteSnippetRoot> {
         match &self {
             Self::JsSvelteSnippetRoot(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_vue_generic_root(&self) -> Option<&JsVueGenericRoot> {
+        match &self {
+            Self::JsVueGenericRoot(item) => Some(item),
             _ => None,
         }
     }
@@ -15727,6 +15821,25 @@ impl AnyJsSvelteDeclaration {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyJsSvelteLegacyConstDeclarator {
+    JsBogus(JsBogus),
+    JsVariableDeclarator(JsVariableDeclarator),
+}
+impl AnyJsSvelteLegacyConstDeclarator {
+    pub fn as_js_bogus(&self) -> Option<&JsBogus> {
+        match &self {
+            Self::JsBogus(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_variable_declarator(&self) -> Option<&JsVariableDeclarator> {
+        match &self {
+            Self::JsVariableDeclarator(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsSwitchClause {
     JsCaseClause(JsCaseClause),
     JsDefaultClause(JsDefaultClause),
@@ -15760,6 +15873,25 @@ impl AnyJsTemplateElement {
     pub fn as_js_template_element(&self) -> Option<&JsTemplateElement> {
         match &self {
             Self::JsTemplateElement(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyJsVueGenericTypeParameters {
+    JsBogus(JsBogus),
+    TsTypeParameterList(TsTypeParameterList),
+}
+impl AnyJsVueGenericTypeParameters {
+    pub fn as_js_bogus(&self) -> Option<&JsBogus> {
+        match &self {
+            Self::JsBogus(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_ts_type_parameter_list(&self) -> Option<&TsTypeParameterList> {
+        match &self {
+            Self::TsTypeParameterList(item) => Some(item),
             _ => None,
         }
     }
@@ -24415,6 +24547,54 @@ impl From<JsSvelteDeclarationRoot> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for JsSvelteLegacyConstRoot {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JS_SVELTE_LEGACY_CONST_ROOT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JS_SVELTE_LEGACY_CONST_ROOT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsSvelteLegacyConstRoot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsSvelteLegacyConstRoot")
+                .field("declarator", &support::DebugSyntaxResult(self.declarator()))
+                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+                .finish()
+        } else {
+            f.debug_struct("JsSvelteLegacyConstRoot").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<JsSvelteLegacyConstRoot> for SyntaxNode {
+    fn from(n: JsSvelteLegacyConstRoot) -> Self {
+        n.syntax
+    }
+}
+impl From<JsSvelteLegacyConstRoot> for SyntaxElement {
+    fn from(n: JsSvelteLegacyConstRoot) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for JsSvelteSnippetRoot {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -25173,6 +25353,54 @@ impl From<JsVariableStatement> for SyntaxNode {
 }
 impl From<JsVariableStatement> for SyntaxElement {
     fn from(n: JsVariableStatement) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for JsVueGenericRoot {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JS_VUE_GENERIC_ROOT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JS_VUE_GENERIC_ROOT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsVueGenericRoot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsVueGenericRoot")
+                .field("items", &support::DebugSyntaxResult(self.items()))
+                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+                .finish()
+        } else {
+            f.debug_struct("JsVueGenericRoot").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<JsVueGenericRoot> for SyntaxNode {
+    fn from(n: JsVueGenericRoot) -> Self {
+        n.syntax
+    }
+}
+impl From<JsVueGenericRoot> for SyntaxElement {
+    fn from(n: JsVueGenericRoot) -> Self {
         n.syntax.into()
     }
 }
@@ -26293,7 +26521,7 @@ impl std::fmt::Debug for JsxShorthandAttribute {
                     "l_curly_token",
                     &support::DebugSyntaxResult(self.l_curly_token()),
                 )
-                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
                 .field(
                     "r_curly_token",
                     &support::DebugSyntaxResult(self.r_curly_token()),
@@ -37479,9 +37707,19 @@ impl From<JsSvelteDeclarationRoot> for AnyJsRoot {
         Self::JsSvelteDeclarationRoot(node)
     }
 }
+impl From<JsSvelteLegacyConstRoot> for AnyJsRoot {
+    fn from(node: JsSvelteLegacyConstRoot) -> Self {
+        Self::JsSvelteLegacyConstRoot(node)
+    }
+}
 impl From<JsSvelteSnippetRoot> for AnyJsRoot {
     fn from(node: JsSvelteSnippetRoot) -> Self {
         Self::JsSvelteSnippetRoot(node)
+    }
+}
+impl From<JsVueGenericRoot> for AnyJsRoot {
+    fn from(node: JsVueGenericRoot) -> Self {
+        Self::JsVueGenericRoot(node)
     }
 }
 impl From<JsVueSlotPropsRoot> for AnyJsRoot {
@@ -37501,7 +37739,9 @@ impl AstNode for AnyJsRoot {
         .union(JsModule::KIND_SET)
         .union(JsScript::KIND_SET)
         .union(JsSvelteDeclarationRoot::KIND_SET)
+        .union(JsSvelteLegacyConstRoot::KIND_SET)
         .union(JsSvelteSnippetRoot::KIND_SET)
+        .union(JsVueGenericRoot::KIND_SET)
         .union(JsVueSlotPropsRoot::KIND_SET)
         .union(TsDeclarationModule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
@@ -37512,7 +37752,9 @@ impl AstNode for AnyJsRoot {
                 | JS_MODULE
                 | JS_SCRIPT
                 | JS_SVELTE_DECLARATION_ROOT
+                | JS_SVELTE_LEGACY_CONST_ROOT
                 | JS_SVELTE_SNIPPET_ROOT
+                | JS_VUE_GENERIC_ROOT
                 | JS_VUE_SLOT_PROPS_ROOT
                 | TS_DECLARATION_MODULE
         )
@@ -37528,7 +37770,11 @@ impl AstNode for AnyJsRoot {
             JS_SVELTE_DECLARATION_ROOT => {
                 Self::JsSvelteDeclarationRoot(JsSvelteDeclarationRoot { syntax })
             }
+            JS_SVELTE_LEGACY_CONST_ROOT => {
+                Self::JsSvelteLegacyConstRoot(JsSvelteLegacyConstRoot { syntax })
+            }
             JS_SVELTE_SNIPPET_ROOT => Self::JsSvelteSnippetRoot(JsSvelteSnippetRoot { syntax }),
+            JS_VUE_GENERIC_ROOT => Self::JsVueGenericRoot(JsVueGenericRoot { syntax }),
             JS_VUE_SLOT_PROPS_ROOT => Self::JsVueSlotPropsRoot(JsVueSlotPropsRoot { syntax }),
             TS_DECLARATION_MODULE => Self::TsDeclarationModule(TsDeclarationModule { syntax }),
             _ => return None,
@@ -37542,7 +37788,9 @@ impl AstNode for AnyJsRoot {
             Self::JsModule(it) => it.syntax(),
             Self::JsScript(it) => it.syntax(),
             Self::JsSvelteDeclarationRoot(it) => it.syntax(),
+            Self::JsSvelteLegacyConstRoot(it) => it.syntax(),
             Self::JsSvelteSnippetRoot(it) => it.syntax(),
+            Self::JsVueGenericRoot(it) => it.syntax(),
             Self::JsVueSlotPropsRoot(it) => it.syntax(),
             Self::TsDeclarationModule(it) => it.syntax(),
         }
@@ -37554,7 +37802,9 @@ impl AstNode for AnyJsRoot {
             Self::JsModule(it) => it.into_syntax(),
             Self::JsScript(it) => it.into_syntax(),
             Self::JsSvelteDeclarationRoot(it) => it.into_syntax(),
+            Self::JsSvelteLegacyConstRoot(it) => it.into_syntax(),
             Self::JsSvelteSnippetRoot(it) => it.into_syntax(),
+            Self::JsVueGenericRoot(it) => it.into_syntax(),
             Self::JsVueSlotPropsRoot(it) => it.into_syntax(),
             Self::TsDeclarationModule(it) => it.into_syntax(),
         }
@@ -37568,7 +37818,9 @@ impl std::fmt::Debug for AnyJsRoot {
             Self::JsModule(it) => std::fmt::Debug::fmt(it, f),
             Self::JsScript(it) => std::fmt::Debug::fmt(it, f),
             Self::JsSvelteDeclarationRoot(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsSvelteLegacyConstRoot(it) => std::fmt::Debug::fmt(it, f),
             Self::JsSvelteSnippetRoot(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsVueGenericRoot(it) => std::fmt::Debug::fmt(it, f),
             Self::JsVueSlotPropsRoot(it) => std::fmt::Debug::fmt(it, f),
             Self::TsDeclarationModule(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -37582,7 +37834,9 @@ impl From<AnyJsRoot> for SyntaxNode {
             AnyJsRoot::JsModule(it) => it.into_syntax(),
             AnyJsRoot::JsScript(it) => it.into_syntax(),
             AnyJsRoot::JsSvelteDeclarationRoot(it) => it.into_syntax(),
+            AnyJsRoot::JsSvelteLegacyConstRoot(it) => it.into_syntax(),
             AnyJsRoot::JsSvelteSnippetRoot(it) => it.into_syntax(),
+            AnyJsRoot::JsVueGenericRoot(it) => it.into_syntax(),
             AnyJsRoot::JsVueSlotPropsRoot(it) => it.into_syntax(),
             AnyJsRoot::TsDeclarationModule(it) => it.into_syntax(),
         }
@@ -38113,6 +38367,66 @@ impl From<AnyJsSvelteDeclaration> for SyntaxElement {
         node.into()
     }
 }
+impl From<JsBogus> for AnyJsSvelteLegacyConstDeclarator {
+    fn from(node: JsBogus) -> Self {
+        Self::JsBogus(node)
+    }
+}
+impl From<JsVariableDeclarator> for AnyJsSvelteLegacyConstDeclarator {
+    fn from(node: JsVariableDeclarator) -> Self {
+        Self::JsVariableDeclarator(node)
+    }
+}
+impl AstNode for AnyJsSvelteLegacyConstDeclarator {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        JsBogus::KIND_SET.union(JsVariableDeclarator::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, JS_BOGUS | JS_VARIABLE_DECLARATOR)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            JS_BOGUS => Self::JsBogus(JsBogus { syntax }),
+            JS_VARIABLE_DECLARATOR => Self::JsVariableDeclarator(JsVariableDeclarator { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::JsBogus(it) => it.syntax(),
+            Self::JsVariableDeclarator(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::JsBogus(it) => it.into_syntax(),
+            Self::JsVariableDeclarator(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyJsSvelteLegacyConstDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::JsBogus(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsVariableDeclarator(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyJsSvelteLegacyConstDeclarator> for SyntaxNode {
+    fn from(n: AnyJsSvelteLegacyConstDeclarator) -> Self {
+        match n {
+            AnyJsSvelteLegacyConstDeclarator::JsBogus(it) => it.into_syntax(),
+            AnyJsSvelteLegacyConstDeclarator::JsVariableDeclarator(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyJsSvelteLegacyConstDeclarator> for SyntaxElement {
+    fn from(n: AnyJsSvelteLegacyConstDeclarator) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<JsCaseClause> for AnyJsSwitchClause {
     fn from(node: JsCaseClause) -> Self {
         Self::JsCaseClause(node)
@@ -38231,6 +38545,66 @@ impl From<AnyJsTemplateElement> for SyntaxNode {
 }
 impl From<AnyJsTemplateElement> for SyntaxElement {
     fn from(n: AnyJsTemplateElement) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<JsBogus> for AnyJsVueGenericTypeParameters {
+    fn from(node: JsBogus) -> Self {
+        Self::JsBogus(node)
+    }
+}
+impl From<TsTypeParameterList> for AnyJsVueGenericTypeParameters {
+    fn from(node: TsTypeParameterList) -> Self {
+        Self::TsTypeParameterList(node)
+    }
+}
+impl AstNode for AnyJsVueGenericTypeParameters {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        JsBogus::KIND_SET.union(TsTypeParameterList::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, JS_BOGUS | TS_TYPE_PARAMETER_LIST)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            JS_BOGUS => Self::JsBogus(JsBogus { syntax }),
+            TS_TYPE_PARAMETER_LIST => Self::TsTypeParameterList(TsTypeParameterList::cast(syntax)?),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::JsBogus(it) => it.syntax(),
+            Self::TsTypeParameterList(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::JsBogus(it) => it.into_syntax(),
+            Self::TsTypeParameterList(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyJsVueGenericTypeParameters {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::JsBogus(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsTypeParameterList(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyJsVueGenericTypeParameters> for SyntaxNode {
+    fn from(n: AnyJsVueGenericTypeParameters) -> Self {
+        match n {
+            AnyJsVueGenericTypeParameters::JsBogus(it) => it.into_syntax(),
+            AnyJsVueGenericTypeParameters::TsTypeParameterList(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyJsVueGenericTypeParameters> for SyntaxElement {
+    fn from(n: AnyJsVueGenericTypeParameters) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -41106,12 +41480,22 @@ impl std::fmt::Display for AnyJsSvelteDeclaration {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyJsSvelteLegacyConstDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyJsSwitchClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
 impl std::fmt::Display for AnyJsTemplateElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyJsVueGenericTypeParameters {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -41951,6 +42335,11 @@ impl std::fmt::Display for JsSvelteDeclarationRoot {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for JsSvelteLegacyConstRoot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for JsSvelteSnippetRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -42017,6 +42406,11 @@ impl std::fmt::Display for JsVariableDeclarator {
     }
 }
 impl std::fmt::Display for JsVariableStatement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for JsVueGenericRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

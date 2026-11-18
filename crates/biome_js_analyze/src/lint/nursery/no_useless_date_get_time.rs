@@ -33,7 +33,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUselessDateGetTime {
-        version: "next",
+        version: "2.6.0",
         name: "noUselessDateGetTime",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("consistent-date-clone").same()],

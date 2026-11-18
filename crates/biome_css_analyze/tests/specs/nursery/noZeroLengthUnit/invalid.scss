@@ -1,0 +1,8 @@
+/* should generate diagnostics */
+a { top: 0px; }
+a { top: 0px + $offset; }
+a { font: 0px/0px cursive; }
+a { @include border-left-radius($input-top-left-radius: 0px); }
+@mixin foo($x: 0px) { width: $x; }
+@function foo($x: 0px) { @return $x; }
+a { --x: 0px; }

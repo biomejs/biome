@@ -146,14 +146,14 @@ const mixed1 = true || false;  // Left side makes right irrelevant
 const mixed2 = false && true;  // Left side makes right irrelevant
 const mixed3 = null ?? "default";  // Left side is always nullish
 
-// Always truthy Pick/Omit object
+// Pick/Omit object shapes can also describe primitives, so they are not flagged
 declare const pickedObj: Pick<{a: string}, "a">;
 if (pickedObj) console.log(pickedObj.a);
 
 declare const omitObj: Omit<{a: string, b: number}, "b">;
 if (omitObj) console.log();
 
-// Always truthy Readonly/Partial object
+// Readonly/Partial object shapes are not flagged either
 declare const ro: Readonly<{a: string}>;
 if (ro) console.log();
 
@@ -330,6 +330,8 @@ invalid.ts:5:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━�
   
   i The value's type can never be falsy, so this check is redundant.
   
+  i Remove the condition, or check the value you meant to test.
+  
 
 ```
 
@@ -346,6 +348,8 @@ invalid.ts:12:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
     14 │ }
   
   i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
   
 
 ```
@@ -415,6 +419,8 @@ invalid.ts:34:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
   
   i The value's type can never be falsy, so this check is redundant.
   
+  i Remove the condition, or check the value you meant to test.
+  
 
 ```
 
@@ -431,6 +437,8 @@ invalid.ts:38:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
     40 │ }
   
   i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
   
 
 ```
@@ -449,6 +457,8 @@ invalid.ts:42:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
   
   i The value's type can never be falsy, so this check is redundant.
   
+  i Remove the condition, or check the value you meant to test.
+  
 
 ```
 
@@ -465,6 +475,8 @@ invalid.ts:46:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
     48 │ }
   
   i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
   
 
 ```
@@ -483,6 +495,8 @@ invalid.ts:50:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
   
   i The value's type can never be falsy, so this check is redundant.
   
+  i Remove the condition, or check the value you meant to test.
+  
 
 ```
 
@@ -498,6 +512,8 @@ invalid.ts:55:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
     57 │ }
   
   i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
   
 
 ```
@@ -516,6 +532,8 @@ invalid.ts:59:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
   
   i The value's type can never be truthy, so this check is redundant.
   
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
 
 ```
 
@@ -532,6 +550,8 @@ invalid.ts:63:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
     65 │ }
   
   i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
   
 
 ```
@@ -550,6 +570,8 @@ invalid.ts:67:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
   
   i The value's type can never be truthy, so this check is redundant.
   
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
 
 ```
 
@@ -566,6 +588,8 @@ invalid.ts:71:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
     73 │ }
   
   i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
   
 
 ```
@@ -634,6 +658,8 @@ invalid.ts:86:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be falsy, so this check is redundant.
   
+  i Remove the condition, or check the value you meant to test.
+  
 
 ```
 
@@ -651,6 +677,8 @@ invalid.ts:91:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be falsy, so this check is redundant.
   
+  i Remove the condition, or check the value you meant to test.
+  
 
 ```
 
@@ -666,6 +694,8 @@ invalid.ts:95:17 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     97 │ 
   
   i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
   
 
 ```
@@ -684,6 +714,8 @@ invalid.ts:96:17 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be truthy, so this check is redundant.
   
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
 
 ```
 
@@ -699,6 +731,8 @@ invalid.ts:99:15 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     101 │ const comp3 = 5 > 3;  // Always true
   
   i The operands' types make the outcome statically known.
+  
+  i Remove the comparison, or compare the values you meant to compare.
   
 
 ```
@@ -717,6 +751,8 @@ invalid.ts:100:15 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The operands' types make the outcome statically known.
   
+  i Remove the comparison, or compare the values you meant to compare.
+  
 
 ```
 
@@ -733,6 +769,8 @@ invalid.ts:101:15 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     103 │ 
   
   i The operands' types make the outcome statically known.
+  
+  i Remove the comparison, or compare the values you meant to compare.
   
 
 ```
@@ -751,6 +789,8 @@ invalid.ts:102:15 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The operands' types make the outcome statically known.
   
+  i Remove the comparison, or compare the values you meant to compare.
+  
 
 ```
 
@@ -766,6 +806,8 @@ invalid.ts:105:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     107 │   break;
   
   i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
   
 
 ```
@@ -784,6 +826,8 @@ invalid.ts:110:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be truthy, so this check is redundant.
   
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
 
 ```
 
@@ -801,6 +845,8 @@ invalid.ts:117:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be truthy, so this check is redundant.
   
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
 
 ```
 
@@ -816,6 +862,8 @@ invalid.ts:120:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     122 │ }
   
   i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
   
 
 ```
@@ -833,6 +881,8 @@ invalid.ts:124:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     126 │ }
   
   i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
   
 
 ```
@@ -902,6 +952,8 @@ invalid.ts:139:16 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be falsy, so this check is redundant.
   
+  i Remove the condition, or check the value you meant to test.
+  
 
 ```
 
@@ -919,6 +971,8 @@ invalid.ts:140:16 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be truthy, so this check is redundant.
   
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
 
 ```
 
@@ -932,7 +986,7 @@ invalid.ts:141:16 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   > 141 │ const mixed3 = null ?? "default";  // Left side is always nullish
         │                ^^^^
     142 │ 
-    143 │ // Always truthy Pick/Omit object
+    143 │ // Pick/Omit object shapes can also describe primitives, so they are not flagged
   
   i Drop ?? and the fallback expression.
   
@@ -941,75 +995,9 @@ invalid.ts:141:16 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   > 141 │ const mixed3 = null ?? "default";  // Left side is always nullish
         │                ^^^^
     142 │ 
-    143 │ // Always truthy Pick/Omit object
+    143 │ // Pick/Omit object shapes can also describe primitives, so they are not flagged
   
   i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
-  
-
-```
-
-```
-invalid.ts:145:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This condition is always truthy.
-  
-    143 │ // Always truthy Pick/Omit object
-    144 │ declare const pickedObj: Pick<{a: string}, "a">;
-  > 145 │ if (pickedObj) console.log(pickedObj.a);
-        │     ^^^^^^^^^
-    146 │ 
-    147 │ declare const omitObj: Omit<{a: string, b: number}, "b">;
-  
-  i The value's type can never be falsy, so this check is redundant.
-  
-
-```
-
-```
-invalid.ts:148:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This condition is always truthy.
-  
-    147 │ declare const omitObj: Omit<{a: string, b: number}, "b">;
-  > 148 │ if (omitObj) console.log();
-        │     ^^^^^^^
-    149 │ 
-    150 │ // Always truthy Readonly/Partial object
-  
-  i The value's type can never be falsy, so this check is redundant.
-  
-
-```
-
-```
-invalid.ts:152:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This condition is always truthy.
-  
-    150 │ // Always truthy Readonly/Partial object
-    151 │ declare const ro: Readonly<{a: string}>;
-  > 152 │ if (ro) console.log();
-        │     ^^
-    153 │ 
-    154 │ declare const partialObj2: Partial<{a: string}>;
-  
-  i The value's type can never be falsy, so this check is redundant.
-  
-
-```
-
-```
-invalid.ts:155:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This condition is always truthy.
-  
-    154 │ declare const partialObj2: Partial<{a: string}>;
-  > 155 │ if (partialObj2) console.log();
-        │     ^^^^^^^^^^^
-    156 │ 
-    157 │ // Falsy detection via logical-not on always-truthy operand
-  
-  i The value's type can never be falsy, so this check is redundant.
   
 
 ```
@@ -1028,6 +1016,8 @@ invalid.ts:159:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be truthy, so this check is redundant.
   
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
 
 ```
 
@@ -1044,6 +1034,8 @@ invalid.ts:164:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be truthy, so this check is redundant.
   
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
 
 ```
 
@@ -1059,6 +1051,8 @@ invalid.ts:169:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     171 │ }
   
   i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
   
 
 ```
@@ -1077,6 +1071,8 @@ invalid.ts:173:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be falsy, so this check is redundant.
   
+  i Remove the condition, or check the value you meant to test.
+  
 
 ```
 
@@ -1092,6 +1088,8 @@ invalid.ts:185:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     187 │ 
   
   i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
   
 
 ```
@@ -1110,6 +1108,8 @@ invalid.ts:190:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be falsy, so this check is redundant.
   
+  i Remove the condition, or check the value you meant to test.
+  
 
 ```
 
@@ -1126,6 +1126,8 @@ invalid.ts:197:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     199 │ 
   
   i The operands' types make the outcome statically known.
+  
+  i Remove the comparison, or compare the values you meant to compare.
   
 
 ```
@@ -1144,6 +1146,8 @@ invalid.ts:202:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The operands' types make the outcome statically known.
   
+  i Remove the comparison, or compare the values you meant to compare.
+  
 
 ```
 
@@ -1160,6 +1164,8 @@ invalid.ts:209:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     211 │ }
   
   i The value passed to switch can never equal this value.
+  
+  i Remove the unreachable case, or change it to a value that the switch expression can have.
   
 
 ```
@@ -1178,6 +1184,8 @@ invalid.ts:216:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value passed to switch can never equal this value.
   
+  i Remove the unreachable case, or change it to a value that the switch expression can have.
+  
 
 ```
 
@@ -1194,6 +1202,8 @@ invalid.ts:224:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     226 │ }
   
   i The value passed to switch can never equal this value.
+  
+  i Remove the unreachable case, or change it to a value that the switch expression can have.
   
 
 ```
@@ -1212,6 +1222,8 @@ invalid.ts:231:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value passed to switch can never equal this value.
   
+  i Remove the unreachable case, or change it to a value that the switch expression can have.
+  
 
 ```
 
@@ -1228,6 +1240,8 @@ invalid.ts:232:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     234 │     case 1_000: return "sep";     // 1000 - unreachable
   
   i The value passed to switch can never equal this value.
+  
+  i Remove the unreachable case, or change it to a value that the switch expression can have.
   
 
 ```
@@ -1246,6 +1260,8 @@ invalid.ts:233:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value passed to switch can never equal this value.
   
+  i Remove the unreachable case, or change it to a value that the switch expression can have.
+  
 
 ```
 
@@ -1262,6 +1278,8 @@ invalid.ts:234:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     236 │ }
   
   i The value passed to switch can never equal this value.
+  
+  i Remove the unreachable case, or change it to a value that the switch expression can have.
   
 
 ```
@@ -1280,6 +1298,8 @@ invalid.ts:241:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be falsy, so this check is redundant.
   
+  i Remove the condition, or check the value you meant to test.
+  
 
 ```
 
@@ -1297,6 +1317,8 @@ invalid.ts:251:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be falsy, so this check is redundant.
   
+  i Remove the condition, or check the value you meant to test.
+  
 
 ```
 
@@ -1313,6 +1335,8 @@ invalid.ts:256:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     258 │ 
   
   i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
   
 
 ```
@@ -1383,6 +1407,8 @@ invalid.ts:273:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The operands' types make the outcome statically known.
   
+  i Remove the comparison, or compare the values you meant to compare.
+  
 
 ```
 
@@ -1399,6 +1425,8 @@ invalid.ts:278:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     280 │ 
   
   i The operands' types make the outcome statically known.
+  
+  i Remove the comparison, or compare the values you meant to compare.
   
 
 ```
@@ -1417,6 +1445,8 @@ invalid.ts:284:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be truthy, so this check is redundant.
   
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
 
 ```
 
@@ -1434,6 +1464,8 @@ invalid.ts:294:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value passed to switch can never equal this value.
   
+  i Remove the unreachable case, or change it to a value that the switch expression can have.
+  
 
 ```
 
@@ -1449,6 +1481,8 @@ invalid.ts:299:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     301 │ // Types.Always.success` is always `true`, so `!...success` is always false and must be flagged.
   
   i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
   
 
 ```
@@ -1466,6 +1500,8 @@ invalid.ts:307:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     309 │ 
   
   i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
   
 
 ```

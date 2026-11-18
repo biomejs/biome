@@ -48,7 +48,7 @@ MdRoot {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@8..10 "  " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@8..12 "   \t" [] [],
                                 },
                             ],
                         },
@@ -56,11 +56,7 @@ MdRoot {
                             md_bullet_list: MdBulletList [
                                 MdBullet {
                                     prefix: MdListMarkerPrefix {
-                                        pre_marker_indent: MdIndentTokenList [
-                                            MdIndentToken {
-                                                md_indent_char_token: MD_INDENT_CHAR@10..12 " \t" [] [],
-                                            },
-                                        ],
+                                        pre_marker_indent: MdIndentTokenList [],
                                         marker: MINUS@12..13 "-" [] [],
                                         post_marker_space_token: MD_LIST_POST_MARKER_SPACE@13..14 " " [] [],
                                         content_indent: MdIndentTokenList [],
@@ -161,17 +157,15 @@ MdRoot {
                   0: MD_TEXTUAL_LITERAL@6..7 "\n" [] []
             1: MD_NEWLINE@7..8
               0: NEWLINE@7..8 "\n" [] []
-            2: MD_CONTINUATION_INDENT@8..10
-              0: MD_INDENT_TOKEN_LIST@8..10
-                0: MD_INDENT_TOKEN@8..10
-                  0: MD_INDENT_CHAR@8..10 "  " [] []
-            3: MD_BULLET_LIST_ITEM@10..40
-              0: MD_BULLET_LIST@10..40
-                0: MD_BULLET@10..18
-                  0: MD_LIST_MARKER_PREFIX@10..14
-                    0: MD_INDENT_TOKEN_LIST@10..12
-                      0: MD_INDENT_TOKEN@10..12
-                        0: MD_INDENT_CHAR@10..12 " \t" [] []
+            2: MD_CONTINUATION_INDENT@8..12
+              0: MD_INDENT_TOKEN_LIST@8..12
+                0: MD_INDENT_TOKEN@8..12
+                  0: MD_INDENT_CHAR@8..12 "   \t" [] []
+            3: MD_BULLET_LIST_ITEM@12..40
+              0: MD_BULLET_LIST@12..40
+                0: MD_BULLET@12..18
+                  0: MD_LIST_MARKER_PREFIX@12..14
+                    0: MD_INDENT_TOKEN_LIST@12..12
                     1: MINUS@12..13 "-" [] []
                     2: MD_LIST_POST_MARKER_SPACE@13..14 " " [] []
                     3: MD_INDENT_TOKEN_LIST@14..14

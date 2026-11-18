@@ -1,0 +1,5 @@
+.controls {
+  width: 75%;
+  width: attr(data-progress %, 0%);
+  arithmetic: calc(10% + 5%);
+}

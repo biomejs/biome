@@ -74,6 +74,9 @@ pub(crate) enum EmbedCandidate {
         is_class_attribute: bool,
         /// Whether the value holds the props of a Vue slot (`v-slot="{ item }"`)
         is_slot_props: bool,
+        /// Whether the value holds component type parameters from a Vue
+        /// `generic` attribute or a Svelte `generics` attribute.
+        is_generics_list: bool,
     },
     Attribute {
         name: TokenText,

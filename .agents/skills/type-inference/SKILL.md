@@ -30,18 +30,6 @@ Read both guides when changing the architecture across their boundary. Then
 inspect the implementation files for the specific request, query family, or
 representation being changed.
 
-Do not use these checked-in files as current examples:
-
-- `crates/biome_js_type_info/src/resolver.rs`
-- `crates/biome_js_type_info/src/flattening.rs`
-- `crates/biome_js_type_info/src/type.rs`
-- `crates/biome_js_type_info/src/conditionals.rs`
-- `crates/biome_js_type_info/src/helpers.rs`
-- `crates/biome_module_graph/src/js_module_info/module_resolver.rs`
-
-They are not declared by the active crate module trees. Treat them as legacy
-residue unless the task explicitly concerns removing or migrating them.
-
 ## Mental Model
 
 Type inference has five layers:
@@ -218,3 +206,7 @@ must not be added together. Load `testing-codegen` for snapshot mechanics.
 - New query keys and dependencies are stable Salsa values.
 - Whole-module inference is absent or explicitly justified.
 - Correctness and selective-execution tests cover the changed boundary.
+- Narrowing changes update their rows in
+  [`biome_module_graph/NARROWING.md`](../../../crates/biome_module_graph/NARROWING.md),
+  the reference for what narrowing does and where it deliberately differs from
+  TypeScript.

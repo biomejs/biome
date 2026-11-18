@@ -1,0 +1,294 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+array.flat(2);
+array?.flat(2);
+array.flat(99,);
+array.flat(0b10,);
+array.flat(-2);
+array.flat(+2);
+array.flat(-1.5);
+array.flat(-1);
+array.flat(0);
+array.flat((2));
+(array.flat)(2);
+array.flat(2) // comment outside the parentheses
+/* comment outside the parentheses */ array.flat(2);
+
+```
+
+# Diagnostics
+```
+invalid.js:2:12 lint/nursery/noMagicArrayFlatDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The depth passed to flat() is an unexplained number.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ array.flat(2);
+      │            ^
+    3 │ array?.flat(2);
+    4 │ array.flat(99,);
+  
+  i A bare number doesn't say why the array needs to be flattened to this depth.
+  
+  i Store the depth in a variable with a descriptive name, or add a comment inside the parentheses that explains it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:13 lint/nursery/noMagicArrayFlatDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The depth passed to flat() is an unexplained number.
+  
+    1 │ /* should generate diagnostics */
+    2 │ array.flat(2);
+  > 3 │ array?.flat(2);
+      │             ^
+    4 │ array.flat(99,);
+    5 │ array.flat(0b10,);
+  
+  i A bare number doesn't say why the array needs to be flattened to this depth.
+  
+  i Store the depth in a variable with a descriptive name, or add a comment inside the parentheses that explains it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:12 lint/nursery/noMagicArrayFlatDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The depth passed to flat() is an unexplained number.
+  
+    2 │ array.flat(2);
+    3 │ array?.flat(2);
+  > 4 │ array.flat(99,);
+      │            ^^
+    5 │ array.flat(0b10,);
+    6 │ array.flat(-2);
+  
+  i A bare number doesn't say why the array needs to be flattened to this depth.
+  
+  i Store the depth in a variable with a descriptive name, or add a comment inside the parentheses that explains it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:12 lint/nursery/noMagicArrayFlatDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The depth passed to flat() is an unexplained number.
+  
+    3 │ array?.flat(2);
+    4 │ array.flat(99,);
+  > 5 │ array.flat(0b10,);
+      │            ^^^^
+    6 │ array.flat(-2);
+    7 │ array.flat(+2);
+  
+  i A bare number doesn't say why the array needs to be flattened to this depth.
+  
+  i Store the depth in a variable with a descriptive name, or add a comment inside the parentheses that explains it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:12 lint/nursery/noMagicArrayFlatDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The depth passed to flat() is an unexplained number.
+  
+    4 │ array.flat(99,);
+    5 │ array.flat(0b10,);
+  > 6 │ array.flat(-2);
+      │            ^^
+    7 │ array.flat(+2);
+    8 │ array.flat(-1.5);
+  
+  i A bare number doesn't say why the array needs to be flattened to this depth.
+  
+  i Store the depth in a variable with a descriptive name, or add a comment inside the parentheses that explains it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:12 lint/nursery/noMagicArrayFlatDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The depth passed to flat() is an unexplained number.
+  
+    5 │ array.flat(0b10,);
+    6 │ array.flat(-2);
+  > 7 │ array.flat(+2);
+      │            ^^
+    8 │ array.flat(-1.5);
+    9 │ array.flat(-1);
+  
+  i A bare number doesn't say why the array needs to be flattened to this depth.
+  
+  i Store the depth in a variable with a descriptive name, or add a comment inside the parentheses that explains it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:12 lint/nursery/noMagicArrayFlatDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The depth passed to flat() is an unexplained number.
+  
+     6 │ array.flat(-2);
+     7 │ array.flat(+2);
+   > 8 │ array.flat(-1.5);
+       │            ^^^^
+     9 │ array.flat(-1);
+    10 │ array.flat(0);
+  
+  i A bare number doesn't say why the array needs to be flattened to this depth.
+  
+  i Store the depth in a variable with a descriptive name, or add a comment inside the parentheses that explains it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:12 lint/nursery/noMagicArrayFlatDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The depth passed to flat() is an unexplained number.
+  
+     7 │ array.flat(+2);
+     8 │ array.flat(-1.5);
+   > 9 │ array.flat(-1);
+       │            ^^
+    10 │ array.flat(0);
+    11 │ array.flat((2));
+  
+  i A bare number doesn't say why the array needs to be flattened to this depth.
+  
+  i Store the depth in a variable with a descriptive name, or add a comment inside the parentheses that explains it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:12 lint/nursery/noMagicArrayFlatDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The depth passed to flat() is an unexplained number.
+  
+     8 │ array.flat(-1.5);
+     9 │ array.flat(-1);
+  > 10 │ array.flat(0);
+       │            ^
+    11 │ array.flat((2));
+    12 │ (array.flat)(2);
+  
+  i A bare number doesn't say why the array needs to be flattened to this depth.
+  
+  i Store the depth in a variable with a descriptive name, or add a comment inside the parentheses that explains it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:12 lint/nursery/noMagicArrayFlatDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The depth passed to flat() is an unexplained number.
+  
+     9 │ array.flat(-1);
+    10 │ array.flat(0);
+  > 11 │ array.flat((2));
+       │            ^^^
+    12 │ (array.flat)(2);
+    13 │ array.flat(2) // comment outside the parentheses
+  
+  i A bare number doesn't say why the array needs to be flattened to this depth.
+  
+  i Store the depth in a variable with a descriptive name, or add a comment inside the parentheses that explains it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:14 lint/nursery/noMagicArrayFlatDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The depth passed to flat() is an unexplained number.
+  
+    10 │ array.flat(0);
+    11 │ array.flat((2));
+  > 12 │ (array.flat)(2);
+       │              ^
+    13 │ array.flat(2) // comment outside the parentheses
+    14 │ /* comment outside the parentheses */ array.flat(2);
+  
+  i A bare number doesn't say why the array needs to be flattened to this depth.
+  
+  i Store the depth in a variable with a descriptive name, or add a comment inside the parentheses that explains it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:12 lint/nursery/noMagicArrayFlatDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The depth passed to flat() is an unexplained number.
+  
+    11 │ array.flat((2));
+    12 │ (array.flat)(2);
+  > 13 │ array.flat(2) // comment outside the parentheses
+       │            ^
+    14 │ /* comment outside the parentheses */ array.flat(2);
+    15 │ 
+  
+  i A bare number doesn't say why the array needs to be flattened to this depth.
+  
+  i Store the depth in a variable with a descriptive name, or add a comment inside the parentheses that explains it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:50 lint/nursery/noMagicArrayFlatDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The depth passed to flat() is an unexplained number.
+  
+    12 │ (array.flat)(2);
+    13 │ array.flat(2) // comment outside the parentheses
+  > 14 │ /* comment outside the parentheses */ array.flat(2);
+       │                                                  ^
+    15 │ 
+  
+  i A bare number doesn't say why the array needs to be flattened to this depth.
+  
+  i Store the depth in a variable with a descriptive name, or add a comment inside the parentheses that explains it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

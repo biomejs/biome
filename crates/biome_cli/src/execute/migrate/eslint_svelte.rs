@@ -45,12 +45,12 @@ impl RestrictedHtmlElement {
     }
 }
 impl Deserializable for RestrictedHtmlElement {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Str {
+        if value.visitable_type(ctx)? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, name).map(Self::Plain)
         } else {
             Deserializable::deserialize(ctx, value, name).map(Self::WithMessage)
@@ -71,12 +71,12 @@ pub(crate) struct RestrictedHtmlElementsWithMessage {
 #[derive(Debug)]
 pub(crate) struct NullableString(Option<Box<str>>);
 impl Deserializable for NullableString {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Null {
+        if value.visitable_type(ctx)? == DeserializableType::Null {
             Some(Self(None))
         } else {
             Deserializable::deserialize(ctx, value, name).map(|text| Self(Some(text)))

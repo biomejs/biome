@@ -34,9 +34,11 @@ scss-computed-supports.scss:12:5 lint/correctness/noUnknownProperty ━━━━
     13 │   }
     14 │ }
   
-  i See CSS Specifications and browser specific properties for more details.
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property.
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
   
 
 ```

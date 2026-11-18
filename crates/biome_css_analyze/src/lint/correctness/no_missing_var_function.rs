@@ -181,34 +181,19 @@ impl Rule for NoMissingVarFunction {
         }
 
         let model = ctx.model();
-        let rule = model.get_rule_by_range(node.range())?;
+        let is_declared = model
+            .get_ancestor_declarations_by_range(node.range())
+            .any(|declaration| {
+                declaration
+                    .property()
+                    .value()
+                    .is_ok_and(|value| value.text() == custom_variable_name.text())
+            });
 
-        if rule
-            .declarations()
-            .iter()
-            .flat_map(|decl| decl.property().value())
-            .any(|value| value.text() == custom_variable_name.text())
-        {
-            return Some(node.clone());
-        }
-
-        let mut parent_id = rule.parent_id();
-        while let Some(id) = parent_id {
-            let parent_rule = model.get_rule_by_id(&id)?;
-            if parent_rule
-                .declarations()
-                .iter()
-                .flat_map(|decl| decl.property().value())
-                .any(|value| value.text() == custom_variable_name.text())
-            {
-                return Some(node.clone());
-            }
-            parent_id = parent_rule.parent_id();
-        }
-
-        if model
-            .global_custom_variables()
-            .contains_key(custom_variable_name.text())
+        if is_declared
+            || model
+                .global_custom_variables()
+                .contains_key(custom_variable_name.text())
         {
             return Some(node.clone());
         }
@@ -230,6 +215,9 @@ impl Rule for NoMissingVarFunction {
             )
             .note(markup! {
                     "CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility."
+            })
+            .note(markup! {
+                    "Wrap the variable in 'var()', for example "<Emphasis>"var("{custom_variable_name}")"</Emphasis>"."
             }),
         )
     }

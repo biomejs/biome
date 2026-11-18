@@ -1,0 +1,585 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: invalidYaml11.yaml
+---
+# Input
+```yaml
+# should generate diagnostics
+%YAML 1.1
+---
+- y: 1
+- Y: 2
+- yes: 3
+- Yes: 4
+- YES: 5
+- n: 6
+- N: 7
+- no: 8
+- No: 9
+- NO: 10
+- true: 11
+- True: 12
+- TRUE: 13
+- false: 14
+- False: 15
+- FALSE: 16
+- on: 17
+- On: 18
+- ON: 19
+- off: 20
+- Off: 21
+- OFF: 22
+- flow: { On: 23, OFF: 24 }
+- outer:
+    yes: 25
+- ? no
+  : 26
+
+```
+
+# Diagnostics
+```
+invalidYaml11.yaml:4:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    2 │ %YAML 1.1
+    3 │ ---
+  > 4 │ - y: 1
+      │   ^
+    5 │ - Y: 2
+    6 │ - yes: 3
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:5:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    3 │ ---
+    4 │ - y: 1
+  > 5 │ - Y: 2
+      │   ^
+    6 │ - yes: 3
+    7 │ - Yes: 4
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:6:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    4 │ - y: 1
+    5 │ - Y: 2
+  > 6 │ - yes: 3
+      │   ^^^
+    7 │ - Yes: 4
+    8 │ - YES: 5
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:7:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    5 │ - Y: 2
+    6 │ - yes: 3
+  > 7 │ - Yes: 4
+      │   ^^^
+    8 │ - YES: 5
+    9 │ - n: 6
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:8:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+     6 │ - yes: 3
+     7 │ - Yes: 4
+   > 8 │ - YES: 5
+       │   ^^^
+     9 │ - n: 6
+    10 │ - N: 7
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:9:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+     7 │ - Yes: 4
+     8 │ - YES: 5
+   > 9 │ - n: 6
+       │   ^
+    10 │ - N: 7
+    11 │ - no: 8
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:10:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+     8 │ - YES: 5
+     9 │ - n: 6
+  > 10 │ - N: 7
+       │   ^
+    11 │ - no: 8
+    12 │ - No: 9
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:11:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+     9 │ - n: 6
+    10 │ - N: 7
+  > 11 │ - no: 8
+       │   ^^
+    12 │ - No: 9
+    13 │ - NO: 10
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:12:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    10 │ - N: 7
+    11 │ - no: 8
+  > 12 │ - No: 9
+       │   ^^
+    13 │ - NO: 10
+    14 │ - true: 11
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:13:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    11 │ - no: 8
+    12 │ - No: 9
+  > 13 │ - NO: 10
+       │   ^^
+    14 │ - true: 11
+    15 │ - True: 12
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:14:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    12 │ - No: 9
+    13 │ - NO: 10
+  > 14 │ - true: 11
+       │   ^^^^
+    15 │ - True: 12
+    16 │ - TRUE: 13
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:15:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    13 │ - NO: 10
+    14 │ - true: 11
+  > 15 │ - True: 12
+       │   ^^^^
+    16 │ - TRUE: 13
+    17 │ - false: 14
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:16:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    14 │ - true: 11
+    15 │ - True: 12
+  > 16 │ - TRUE: 13
+       │   ^^^^
+    17 │ - false: 14
+    18 │ - False: 15
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:17:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    15 │ - True: 12
+    16 │ - TRUE: 13
+  > 17 │ - false: 14
+       │   ^^^^^
+    18 │ - False: 15
+    19 │ - FALSE: 16
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:18:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    16 │ - TRUE: 13
+    17 │ - false: 14
+  > 18 │ - False: 15
+       │   ^^^^^
+    19 │ - FALSE: 16
+    20 │ - on: 17
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:19:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    17 │ - false: 14
+    18 │ - False: 15
+  > 19 │ - FALSE: 16
+       │   ^^^^^
+    20 │ - on: 17
+    21 │ - On: 18
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:20:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    18 │ - False: 15
+    19 │ - FALSE: 16
+  > 20 │ - on: 17
+       │   ^^
+    21 │ - On: 18
+    22 │ - ON: 19
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:21:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    19 │ - FALSE: 16
+    20 │ - on: 17
+  > 21 │ - On: 18
+       │   ^^
+    22 │ - ON: 19
+    23 │ - off: 20
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:22:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    20 │ - on: 17
+    21 │ - On: 18
+  > 22 │ - ON: 19
+       │   ^^
+    23 │ - off: 20
+    24 │ - Off: 21
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:23:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    21 │ - On: 18
+    22 │ - ON: 19
+  > 23 │ - off: 20
+       │   ^^^
+    24 │ - Off: 21
+    25 │ - OFF: 22
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:24:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    22 │ - ON: 19
+    23 │ - off: 20
+  > 24 │ - Off: 21
+       │   ^^^
+    25 │ - OFF: 22
+    26 │ - flow: { On: 23, OFF: 24 }
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:25:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    23 │ - off: 20
+    24 │ - Off: 21
+  > 25 │ - OFF: 22
+       │   ^^^
+    26 │ - flow: { On: 23, OFF: 24 }
+    27 │ - outer:
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:26:11 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    24 │ - Off: 21
+    25 │ - OFF: 22
+  > 26 │ - flow: { On: 23, OFF: 24 }
+       │           ^^
+    27 │ - outer:
+    28 │     yes: 25
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:26:19 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    24 │ - Off: 21
+    25 │ - OFF: 22
+  > 26 │ - flow: { On: 23, OFF: 24 }
+       │                   ^^^
+    27 │ - outer:
+    28 │     yes: 25
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:28:5 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    26 │ - flow: { On: 23, OFF: 24 }
+    27 │ - outer:
+  > 28 │     yes: 25
+       │     ^^^
+    29 │ - ? no
+    30 │   : 26
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidYaml11.yaml:29:5 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    27 │ - outer:
+    28 │     yes: 25
+  > 29 │ - ? no
+       │     ^^
+    30 │   : 26
+    31 │ 
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

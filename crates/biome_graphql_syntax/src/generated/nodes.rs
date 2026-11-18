@@ -906,27 +906,35 @@ impl GraphqlFragmentDefinition {
     }
     pub fn as_fields(&self) -> GraphqlFragmentDefinitionFields {
         GraphqlFragmentDefinitionFields {
+            description: self.description(),
             fragment_token: self.fragment_token(),
             name: self.name(),
+            variables: self.variables(),
             type_condition: self.type_condition(),
             directives: self.directives(),
             selection_set: self.selection_set(),
         }
     }
+    pub fn description(&self) -> Option<GraphqlDescription> {
+        support::node(&self.syntax, 0usize)
+    }
     pub fn fragment_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+        support::required_token(&self.syntax, 1usize)
     }
     pub fn name(&self) -> SyntaxResult<GraphqlNameBinding> {
-        support::required_node(&self.syntax, 1usize)
-    }
-    pub fn type_condition(&self) -> SyntaxResult<GraphqlTypeCondition> {
         support::required_node(&self.syntax, 2usize)
     }
+    pub fn variables(&self) -> Option<GraphqlVariableDefinitions> {
+        support::node(&self.syntax, 3usize)
+    }
+    pub fn type_condition(&self) -> SyntaxResult<GraphqlTypeCondition> {
+        support::required_node(&self.syntax, 4usize)
+    }
     pub fn directives(&self) -> GraphqlDirectiveList {
-        support::list(&self.syntax, 3usize)
+        support::list(&self.syntax, 5usize)
     }
     pub fn selection_set(&self) -> SyntaxResult<GraphqlSelectionSet> {
-        support::required_node(&self.syntax, 4usize)
+        support::required_node(&self.syntax, 6usize)
     }
 }
 impl Serialize for GraphqlFragmentDefinition {
@@ -939,8 +947,10 @@ impl Serialize for GraphqlFragmentDefinition {
 }
 #[derive(Serialize)]
 pub struct GraphqlFragmentDefinitionFields {
+    pub description: Option<GraphqlDescription>,
     pub fragment_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<GraphqlNameBinding>,
+    pub variables: Option<GraphqlVariableDefinitions>,
     pub type_condition: SyntaxResult<GraphqlTypeCondition>,
     pub directives: GraphqlDirectiveList,
     pub selection_set: SyntaxResult<GraphqlSelectionSet>,
@@ -1951,6 +1961,7 @@ impl GraphqlOperationDefinition {
     }
     pub fn as_fields(&self) -> GraphqlOperationDefinitionFields {
         GraphqlOperationDefinitionFields {
+            description: self.description(),
             ty: self.ty(),
             name: self.name(),
             variables: self.variables(),
@@ -1958,20 +1969,23 @@ impl GraphqlOperationDefinition {
             selection_set: self.selection_set(),
         }
     }
+    pub fn description(&self) -> Option<GraphqlDescription> {
+        support::node(&self.syntax, 0usize)
+    }
     pub fn ty(&self) -> SyntaxResult<GraphqlOperationType> {
-        support::required_node(&self.syntax, 0usize)
+        support::required_node(&self.syntax, 1usize)
     }
     pub fn name(&self) -> Option<GraphqlNameBinding> {
-        support::node(&self.syntax, 1usize)
-    }
-    pub fn variables(&self) -> Option<GraphqlVariableDefinitions> {
         support::node(&self.syntax, 2usize)
     }
+    pub fn variables(&self) -> Option<GraphqlVariableDefinitions> {
+        support::node(&self.syntax, 3usize)
+    }
     pub fn directives(&self) -> GraphqlDirectiveList {
-        support::list(&self.syntax, 3usize)
+        support::list(&self.syntax, 4usize)
     }
     pub fn selection_set(&self) -> SyntaxResult<GraphqlSelectionSet> {
-        support::required_node(&self.syntax, 4usize)
+        support::required_node(&self.syntax, 5usize)
     }
 }
 impl Serialize for GraphqlOperationDefinition {
@@ -1984,6 +1998,7 @@ impl Serialize for GraphqlOperationDefinition {
 }
 #[derive(Serialize)]
 pub struct GraphqlOperationDefinitionFields {
+    pub description: Option<GraphqlDescription>,
     pub ty: SyntaxResult<GraphqlOperationType>,
     pub name: Option<GraphqlNameBinding>,
     pub variables: Option<GraphqlVariableDefinitions>,
@@ -2691,6 +2706,7 @@ impl GraphqlVariableDefinition {
     }
     pub fn as_fields(&self) -> GraphqlVariableDefinitionFields {
         GraphqlVariableDefinitionFields {
+            description: self.description(),
             variable: self.variable(),
             colon_token: self.colon_token(),
             ty: self.ty(),
@@ -2698,20 +2714,23 @@ impl GraphqlVariableDefinition {
             directives: self.directives(),
         }
     }
+    pub fn description(&self) -> Option<GraphqlDescription> {
+        support::node(&self.syntax, 0usize)
+    }
     pub fn variable(&self) -> SyntaxResult<GraphqlVariableBinding> {
-        support::required_node(&self.syntax, 0usize)
+        support::required_node(&self.syntax, 1usize)
     }
     pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+        support::required_token(&self.syntax, 2usize)
     }
     pub fn ty(&self) -> SyntaxResult<AnyGraphqlType> {
-        support::required_node(&self.syntax, 2usize)
+        support::required_node(&self.syntax, 3usize)
     }
     pub fn default(&self) -> Option<GraphqlDefaultValue> {
-        support::node(&self.syntax, 3usize)
+        support::node(&self.syntax, 4usize)
     }
     pub fn directives(&self) -> GraphqlDirectiveList {
-        support::list(&self.syntax, 4usize)
+        support::list(&self.syntax, 5usize)
     }
 }
 impl Serialize for GraphqlVariableDefinition {
@@ -2724,6 +2743,7 @@ impl Serialize for GraphqlVariableDefinition {
 }
 #[derive(Serialize)]
 pub struct GraphqlVariableDefinitionFields {
+    pub description: Option<GraphqlDescription>,
     pub variable: SyntaxResult<GraphqlVariableBinding>,
     pub colon_token: SyntaxResult<SyntaxToken>,
     pub ty: SyntaxResult<AnyGraphqlType>,
@@ -4206,10 +4226,18 @@ impl std::fmt::Debug for GraphqlFragmentDefinition {
             DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlFragmentDefinition")
                 .field(
+                    "description",
+                    &support::DebugOptionalElement(self.description()),
+                )
+                .field(
                     "fragment_token",
                     &support::DebugSyntaxResult(self.fragment_token()),
                 )
                 .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "variables",
+                    &support::DebugOptionalElement(self.variables()),
+                )
                 .field(
                     "type_condition",
                     &support::DebugSyntaxResult(self.type_condition()),
@@ -5414,6 +5442,10 @@ impl std::fmt::Debug for GraphqlOperationDefinition {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlOperationDefinition")
+                .field(
+                    "description",
+                    &support::DebugOptionalElement(self.description()),
+                )
                 .field("ty", &support::DebugSyntaxResult(self.ty()))
                 .field("name", &support::DebugOptionalElement(self.name()))
                 .field(
@@ -6290,6 +6322,10 @@ impl std::fmt::Debug for GraphqlVariableDefinition {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlVariableDefinition")
+                .field(
+                    "description",
+                    &support::DebugOptionalElement(self.description()),
+                )
                 .field("variable", &support::DebugSyntaxResult(self.variable()))
                 .field(
                     "colon_token",

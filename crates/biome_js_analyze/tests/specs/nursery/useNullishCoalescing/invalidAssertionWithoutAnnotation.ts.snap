@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAssertionWithoutAnnotation.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// TypeScript ignores assertion functions declared as variables without a type
+// annotation (TS2775), so `value` keeps its declared type after the call.
+const assertDefined = (value: unknown): asserts value => {
+	if (!value) {
+		throw new Error();
+	}
+};
+
+function withDefault(value: string | undefined) {
+	assertDefined(value);
+	return value || "default";
+}
+
+```
+
+# Diagnostics
+```
+invalidAssertionWithoutAnnotation.ts:12:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    10 │ function withDefault(value: string | undefined) {
+    11 │ 	assertDefined(value);
+  > 12 │ 	return value || "default";
+       │ 	             ^^
+    13 │ }
+    14 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

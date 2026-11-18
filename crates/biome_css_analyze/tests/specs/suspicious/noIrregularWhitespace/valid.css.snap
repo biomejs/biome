@@ -14,5 +14,9 @@ expression: valid.css
 	padding: 10px;
 }
 
+.foo::before {
+	content: '　';
+}
+
 
 ```

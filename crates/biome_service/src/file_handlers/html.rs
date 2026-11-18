@@ -50,18 +50,20 @@ use biome_configuration::html::{
 use biome_css_parser::{CssParserOptions, parse_css};
 #[cfg(feature = "html_embeds")]
 use biome_css_syntax::CssLanguage;
-use biome_db::AnyParsedSource;
 #[cfg(feature = "html_embeds")]
-use biome_formatter::prelude::{
-    Document, Interned, SimpleFormatContext, format_args, format_with, group, indent,
+use biome_formatter::rowan::FormatElement;
+use biome_formatter::rowan::Printed;
+#[cfg(feature = "html_embeds")]
+use biome_formatter::rowan::prelude::{
+    Document, Interned, RowanSource, SimpleFormatContext, format_args, format_with, group, indent,
     line_suffix_boundary, soft_line_break, token,
 };
 use biome_formatter::{
-    AttributePosition, BracketSameLine, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
+    AttributePosition, BracketSameLine, IndentStyle, IndentWidth, LineEnding, LineWidth,
     TrailingNewline,
 };
 #[cfg(feature = "html_embeds")]
-use biome_formatter::{Buffer, FormatElement, QuoteStyle};
+use biome_formatter::{Buffer, QuoteStyle, SimpleFormatOptions};
 use biome_fs::BiomePath;
 #[cfg(feature = "html_embeds")]
 use biome_html_analyze::analyze_with_snippets;
@@ -96,6 +98,7 @@ use biome_json_syntax::JsonLanguage;
 use biome_languages::HtmlFileSource;
 #[cfg(feature = "html_embeds")]
 use biome_parser::AnyParse;
+use biome_parser::db::AnalyzedSource;
 use biome_rowan::{AstNode, BatchMutation, NodeCache, SendNode, TextRange, TextSize};
 #[cfg(feature = "html_embeds")]
 use biome_rowan::{AstNodeList, TokenAtOffset};
@@ -247,7 +250,7 @@ pub(crate) fn is_astro_template_comment(
     else {
         return false;
     };
-    HtmlSuppressionService::host_comment_token(&host.tree(db), snippet.content_range(db), token)
+    HtmlSuppressionService::host_comment_token(&host.tree(db), snippet.content_range(), token)
         .is_some()
 }
 
@@ -288,6 +291,11 @@ impl Suppression for HtmlSuppressionService {
     #[cfg(not(feature = "html_embeds"))]
     fn parse_snippet(&self, _range: TextRange) -> Vec<SuppressionComment<'_, Self::Diagnostic>> {
         Vec::new()
+    }
+
+    #[cfg(feature = "html_embeds")]
+    fn has_snippet_comments(&self) -> bool {
+        !self.snippets.is_empty()
     }
 }
 
@@ -750,7 +758,7 @@ struct EmbedParseContext<'a, 'b> {
 
 fn debug_syntax_tree(
     _biome_path: &BiomePath,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     workspace_db: WorkspaceDb,
 ) -> GetSyntaxTreeResult {
     let syntax: HtmlSyntaxNode = parse.syntax(&workspace_db);
@@ -764,7 +772,7 @@ fn debug_syntax_tree(
 fn debug_formatter_ir(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
@@ -814,7 +822,7 @@ fn format_embedded(
     // formatted keeps the HTML formatter's output.
     let snippets: FxHashMap<TextRange, super::ParsedSnippetOrigin> = embedded_nodes
         .into_iter()
-        .map(|snippet| (snippet.content_range(&workspace_db), snippet))
+        .map(|snippet| (snippet.content_range(), snippet))
         .collect();
     let mut formatted = format_node(options, &tree, snippets.keys().copied().collect())?;
     formatted.format_embedded(move |range| {
@@ -839,6 +847,7 @@ fn format_embedded(
                     // event handler, such as `@click="count++"`.
                     AnyJsRoot::JsExpressionTemplateRoot(_)
                     | AnyJsRoot::JsVueSlotPropsRoot(_)
+                    | AnyJsRoot::JsVueGenericRoot(_)
                     | AnyJsRoot::JsScript(_) => {}
                     _ if attribute_snippet.is_some() => return None,
                     _ => {}
@@ -876,6 +885,15 @@ fn format_embedded(
                 if attribute_snippet.is_some() {
                     let printed = formatted.print().ok()?;
                     if printed.as_code().contains('"') {
+                        return None;
+                    }
+                    // Vue splits a `v-for` value at the first `in` or `of`
+                    // between whitespace, so a default value can't contain
+                    // one that its source didn't have, such as `'k' in obj`
+                    // formatted from `'k'in obj`.
+                    if matches!(attribute_snippet, Some(AttributeSnippet::VForDefault))
+                        && contains_v_for_operator(printed.as_code())
+                    {
                         return None;
                     }
                     // Removing an empty statement, such as the `;` of
@@ -940,6 +958,9 @@ enum AttributeSnippet {
     /// The snippet is the expression of a `v-for`, which follows the binding
     /// and the operator.
     VForExpression,
+    /// The snippet is the default value of a binding of a `v-for`, such as
+    /// `fallback` in `{ item = fallback } in items`.
+    VForDefault,
 }
 
 #[cfg(feature = "html_embeds")]
@@ -951,16 +972,25 @@ impl AttributeSnippet {
         let parent = token.parent()?;
         match parent.kind() {
             HtmlSyntaxKind::HTML_STRING => Some(Self::Value),
-            HtmlSyntaxKind::HTML_TEXT_EXPRESSION
-                if parent
-                    .parent()
-                    .is_some_and(|node| node.kind() == HtmlSyntaxKind::VUE_V_FOR_VALUE) =>
-            {
-                Some(Self::VForExpression)
-            }
+            HtmlSyntaxKind::HTML_TEXT_EXPRESSION => match parent.parent()?.kind() {
+                HtmlSyntaxKind::VUE_V_FOR_VALUE => Some(Self::VForExpression),
+                HtmlSyntaxKind::VUE_V_FOR_DEFAULT_BINDING => Some(Self::VForDefault),
+                _ => None,
+            },
             _ => None,
         }
     }
+}
+
+/// Returns `true` if `code` contains `in` or `of` between whitespace, where
+/// Vue splits the value of a `v-for`.
+#[cfg(feature = "html_embeds")]
+fn contains_v_for_operator(code: &str) -> bool {
+    code.as_bytes().windows(4).any(|window| {
+        window[0].is_ascii_whitespace()
+            && matches!(&window[1..3], b"in" | b"of")
+            && window[3].is_ascii_whitespace()
+    })
 }
 
 /// Returns `true` if the statements of a Vue event handler are a single
@@ -1002,7 +1032,7 @@ fn format_attribute_value(root: &AnyJsRoot, document: Document) -> Option<Docume
             }
             _ => false,
         },
-        AnyJsRoot::JsScript(_) => false,
+        AnyJsRoot::JsScript(_) | AnyJsRoot::JsVueGenericRoot(_) => false,
         _ => true,
     };
 
@@ -1010,7 +1040,7 @@ fn format_attribute_value(root: &AnyJsRoot, document: Document) -> Option<Docume
     let content = format_with(|f| f.write_element(FormatElement::Interned(content.clone())));
     let formatted = if hugs_quotes {
         biome_formatter::format!(
-            SimpleFormatContext::default(),
+            SimpleFormatContext::<RowanSource>::from_options(SimpleFormatOptions::default()),
             [
                 token("\""),
                 group(&content),
@@ -1021,7 +1051,7 @@ fn format_attribute_value(root: &AnyJsRoot, document: Document) -> Option<Docume
         )
     } else {
         biome_formatter::format!(
-            SimpleFormatContext::default(),
+            SimpleFormatContext::<RowanSource>::from_options(SimpleFormatOptions::default()),
             [
                 token("\""),
                 group(&format_args![
@@ -1113,7 +1143,7 @@ pub(super) fn lint_with_inspector(
             let Some(language) = snippet.file_source(&params.workspace_db) else {
                 continue;
             };
-            let offset = snippet.content_offset(&params.workspace_db);
+            let offset = snippet.content_offset();
             let snippet_params = params.for_snippet(&snippet, language);
             let analyzer = if language.to_js_file_source().is_some() {
                 LintSnippetAnalyzer::new(
@@ -1159,6 +1189,7 @@ pub(super) fn lint_with_inspector(
             }
         },
         project_layout: Some(params.project_layout.clone()),
+        document: params.parsed_source.document(),
         ..HtmlAnalyzerServices::default()
     }
     .with_language_db(params.workspace_db.rc_language_db());
@@ -1272,7 +1303,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         disabled_rules: &disabled_rules,
         range,
     };
-    let action_offset = parsed_source.diagnostic_offset(&workspace_db);
+    let action_offset = parsed_source.diagnostic_offset();
     let html_services = HtmlAnalyzerServices {
         module_db: {
             #[cfg(feature = "module_graph")]
@@ -1285,6 +1316,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             }
         },
         project_layout: Some(project_layout),
+        document: Some(parsed_source.document()),
         ..HtmlAnalyzerServices::default()
     }
     .with_language_db(workspace_db.rc_language_db());
@@ -1390,6 +1422,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                     }
                 },
                 project_layout: Some(params.project_layout.clone()),
+                document: params.parsed_source.document(),
                 ..HtmlAnalyzerServices::default()
             }
             .with_language_db(params.workspace_db.rc_language_db());
@@ -1456,6 +1489,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                 }
             },
             project_layout: Some(params.project_layout.clone()),
+            document: params.parsed_source.document(),
             ..HtmlAnalyzerServices::default()
         }
         .with_language_db(params.workspace_db.rc_language_db());
@@ -1505,6 +1539,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                 }
             },
             project_layout: Some(params.project_layout.clone()),
+            document: params.parsed_source.document(),
             ..HtmlAnalyzerServices::default()
         }
         .with_language_db(params.workspace_db.rc_language_db());

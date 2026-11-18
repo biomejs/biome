@@ -35,6 +35,8 @@ check.js:1:28 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━�
   > 1 │ debugger; delete obj.prop; a === -0;
       │                            ^^^^^^^^
   
+  i The comparison treats -0 and 0 as equal, so comparing against -0 gives the same result as comparing against 0.
+  
   i Safe fix: Replace -0 with 0
   
     1 │ debugger;·delete·obj.prop;·a·===·-0;

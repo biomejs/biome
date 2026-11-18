@@ -137,7 +137,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueConsistentEventHyphenation {
-        version: "next",
+        version: "2.6.0",
         name: "useVueConsistentEventHyphenation",
         language: "html",
         recommended: false,

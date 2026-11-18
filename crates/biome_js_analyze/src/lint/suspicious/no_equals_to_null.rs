@@ -78,7 +78,10 @@ impl Rule for NoEqualsToNull {
             markup! {
                 ""<Emphasis>"null"</Emphasis>" comparison with "<Emphasis>{text_trimmed}</Emphasis>" is disallowed."
             },
-        ))
+        )
+        .note(markup! {
+            "A loose comparison with "<Emphasis>"null"</Emphasis>" is also true for "<Emphasis>"undefined"</Emphasis>", which is easy to overlook."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, op: &Self::State) -> Option<JsRuleAction> {

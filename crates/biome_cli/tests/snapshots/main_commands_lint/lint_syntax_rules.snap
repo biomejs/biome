@@ -35,6 +35,8 @@ check.js:1:11 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━�
   > 1 │ class A { #foo; #foo }
       │           ^^^^
   
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
+  
   i Unsafe fix: Remove unused declaration.
   
     1 │ class·A·{·#foo;·#foo·}
@@ -49,6 +51,8 @@ check.js:1:17 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━�
   
   > 1 │ class A { #foo; #foo }
       │                 ^^^^
+  
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
   
   i Unsafe fix: Remove unused declaration.
   

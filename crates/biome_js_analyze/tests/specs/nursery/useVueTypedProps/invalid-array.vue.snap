@@ -1,0 +1,58 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid-array.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  props: ["foo", "bar"],
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-array.vue:4:11 lint/nursery/useVueTypedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prop foo has no type.
+  
+    2 │ <script>
+    3 │ export default {
+  > 4 │   props: ["foo", "bar"],
+      │           ^^^^^
+    5 │ };
+    6 │ </script>
+  
+  i Without a type, Vue accepts any value for this prop and can't warn when a component receives the wrong kind of value.
+  
+  i Declare the type of the prop, for example with String or { type: String }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-array.vue:4:18 lint/nursery/useVueTypedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prop bar has no type.
+  
+    2 │ <script>
+    3 │ export default {
+  > 4 │   props: ["foo", "bar"],
+      │                  ^^^^^
+    5 │ };
+    6 │ </script>
+  
+  i Without a type, Vue accepts any value for this prop and can't warn when a component receives the wrong kind of value.
+  
+  i Declare the type of the prop, for example with String or { type: String }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

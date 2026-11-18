@@ -14,8 +14,7 @@ use biome_js_syntax::{
     JsModuleItemList, JsSyntaxKind, T, TsDeclarationModule, TsModuleBlock,
 };
 use biome_rowan::{
-    AstNode, AstNodeList, BatchMutationExt, TextRange, TriviaPieceKind, chain_trivia_pieces,
-    declare_node_union,
+    AstNode, AstNodeList, BatchMutationExt, TextRange, chain_trivia_pieces, declare_node_union,
 };
 use biome_rule_options::{organize_imports::OrganizeImportsOptions, sort_order::SortOrder};
 use import_key::{ImportInfo, ImportKey, ImportStatementKind};
@@ -1325,9 +1324,7 @@ impl Rule for OrganizeImports {
                         } else if key.slot_index == 0 && leading_newlines(&new_item).count() == 0 {
                             // Don't copy the header trivia
                             let first_token = new_item.first_token()?;
-                            let new_first_token = first_token
-                                .clone()
-                                .with_leading_trivia([(TriviaPieceKind::Newline, "\n")]);
+                            let new_first_token = first_token.clone().with_leading_newline();
                             new_item = new_item
                                 .replace_child(first_token.into(), new_first_token.into())?;
                         }
@@ -1464,8 +1461,7 @@ fn merge(
                 ) => {
                     let default_specifier = clause1.default_specifier().ok()?;
                     let namespace_specifier = clause2.namespace_specifier().ok()?;
-                    let comma_token = make::token(T![,])
-                        .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+                    let comma_token = make::token(T![,]).with_trailing_space();
                     let merged_clause = make::js_import_combined_clause(
                         default_specifier.trim_trailing_trivia()?,
                         comma_token,
@@ -1516,8 +1512,7 @@ fn merge(
                 ) => {
                     let default_specifier = clause1.default_specifier().ok()?;
                     let named_specifiers = clause2.named_specifiers().ok()?;
-                    let comma_token = make::token(T![,])
-                        .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+                    let comma_token = make::token(T![,]).with_trailing_space();
                     let merged_clause = make::js_import_combined_clause(
                         default_specifier.trim_trailing_trivia()?,
                         comma_token,

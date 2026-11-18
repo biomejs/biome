@@ -84,7 +84,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noConstantCondition",
         language: "js",
-        sources: &[RuleSource::Eslint("no-constant-condition").same()],
+        sources: &[
+            RuleSource::Eslint("no-constant-condition").same(),
+            RuleSource::EslintVueJs("no-constant-condition").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
     }

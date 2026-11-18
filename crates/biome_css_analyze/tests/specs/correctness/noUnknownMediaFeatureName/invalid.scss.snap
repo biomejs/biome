@@ -16,14 +16,14 @@ expression: invalid.scss
 ```
 invalid.scss:1:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use unknown media feature names.
+  × Unexpected unknown media feature name.
   
   > 1 │ @media (#{$dyn}) and (unknown-feature) {}
       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ 
     3 │ @media ($min < unknown-feature) {}
   
-  i Unexpected unknown media feature name.
+  i Browsers treat a media query that contains an unknown feature as not matching. Another query in a comma-separated list can still match.
   
   i You should use media feature names defined in the CSS Specifications.
   
@@ -33,7 +33,7 @@ invalid.scss:1:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━�
 ```
 invalid.scss:3:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use unknown media feature names.
+  × Unexpected unknown media feature name.
   
     1 │ @media (#{$dyn}) and (unknown-feature) {}
     2 │ 
@@ -42,7 +42,7 @@ invalid.scss:3:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━�
     4 │ @media ($min < width) and ($min < unknown-feature < $max) {}
     5 │ @media (#{$feature}) and ($min + 1rem < unknown-feature < $max - 1rem) {}
   
-  i Unexpected unknown media feature name.
+  i Browsers treat a media query that contains an unknown feature as not matching. Another query in a comma-separated list can still match.
   
   i You should use media feature names defined in the CSS Specifications.
   
@@ -52,7 +52,7 @@ invalid.scss:3:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━�
 ```
 invalid.scss:4:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use unknown media feature names.
+  × Unexpected unknown media feature name.
   
     3 │ @media ($min < unknown-feature) {}
   > 4 │ @media ($min < width) and ($min < unknown-feature < $max) {}
@@ -60,7 +60,7 @@ invalid.scss:4:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━�
     5 │ @media (#{$feature}) and ($min + 1rem < unknown-feature < $max - 1rem) {}
     6 │ 
   
-  i Unexpected unknown media feature name.
+  i Browsers treat a media query that contains an unknown feature as not matching. Another query in a comma-separated list can still match.
   
   i You should use media feature names defined in the CSS Specifications.
   
@@ -70,7 +70,7 @@ invalid.scss:4:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━�
 ```
 invalid.scss:5:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use unknown media feature names.
+  × Unexpected unknown media feature name.
   
     3 │ @media ($min < unknown-feature) {}
     4 │ @media ($min < width) and ($min < unknown-feature < $max) {}
@@ -78,7 +78,7 @@ invalid.scss:5:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━�
       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ 
   
-  i Unexpected unknown media feature name.
+  i Browsers treat a media query that contains an unknown feature as not matching. Another query in a comma-separated list can still match.
   
   i You should use media feature names defined in the CSS Specifications.
   

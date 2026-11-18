@@ -1,10 +1,11 @@
 use crate::YamlCommentStyle;
 use crate::comments::{FormatYamlLeadingComment, YamlComments};
+use biome_formatter::rowan::RowanSource;
 use biome_formatter::{
     BracketSpacing, CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding,
     LineWidth, QuoteStyle, TrailingNewline, TransformSourceMap,
 };
-use biome_formatter::{IndentWidth, prelude::*};
+use biome_formatter::{IndentWidth, rowan::prelude::*};
 use biome_yaml_syntax::YamlLanguage;
 use std::default::Default;
 use std::fmt;
@@ -35,6 +36,7 @@ impl YamlFormatContext {
 
 impl FormatContext for YamlFormatContext {
     type Options = YamlFormatOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &self.options

@@ -40,6 +40,8 @@ invalid.ts:3:5 lint/complexity/noUselessConstructor  FIXABLE  ━━━━━━
     4 │ }
     5 │ 
   
+  i A constructor that only does what the default constructor already does adds code without changing behavior.
+  
   i Unsafe fix: Remove the unnecessary constructor.
   
      1  1 │   /* should generate diagnostics */
@@ -64,6 +66,8 @@ invalid.ts:7:5 lint/complexity/noUselessConstructor  FIXABLE  ━━━━━━
        │     ^
     10 │ }
     11 │ 
+  
+  i A constructor that only does what the default constructor already does adds code without changing behavior.
   
   i Unsafe fix: Remove the unnecessary constructor.
   
@@ -91,6 +95,8 @@ invalid.ts:17:5 lint/complexity/noUselessConstructor  FIXABLE  ━━━━━�
        │     ^
     20 │ }
     21 │ 
+  
+  i A constructor that only does what the default constructor already does adds code without changing behavior.
   
   i Unsafe fix: Remove the unnecessary constructor.
   

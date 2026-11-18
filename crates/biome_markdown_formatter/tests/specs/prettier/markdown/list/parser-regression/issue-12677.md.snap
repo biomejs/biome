@@ -24,10 +24,7 @@ Why is this section indented?
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,9 +1,8 @@
- 5.1 **Section 1**
--
- - apple
+@@ -4,6 +4,6 @@
  - banana
  - cherry
  
@@ -41,6 +38,7 @@ Why is this section indented?
 
 ```md
 5.1 **Section 1**
+
 - apple
 - banana
 - cherry

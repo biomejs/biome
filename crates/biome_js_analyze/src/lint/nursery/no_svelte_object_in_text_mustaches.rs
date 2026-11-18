@@ -43,7 +43,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoSvelteObjectInTextMustaches {
-        version: "next",
+        version: "2.6.0",
         name: "noSvelteObjectInTextMustaches",
         language: "js",
         domains: &[RuleDomain::Svelte],

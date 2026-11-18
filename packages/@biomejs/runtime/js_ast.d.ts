@@ -1985,6 +1985,17 @@ export interface JsSvelteDeclarationRoot extends JsAstNode {
 	token(field: "semicolonToken" | "eofToken"): JsAstToken | undefined;
 	token(field: string): JsAstToken | undefined;
 }
+export interface JsSvelteLegacyConstRoot extends JsAstNode {
+	readonly kind: "JS_SVELTE_LEGACY_CONST_ROOT";
+	readonly declarator: AnyJsSvelteLegacyConstDeclarator | undefined;
+	withDeclarator(
+		value: AnyJsSvelteLegacyConstDeclarator,
+	): JsSvelteLegacyConstRoot;
+	readonly eofToken: string | undefined;
+	withEofToken(value: JsAstToken): JsSvelteLegacyConstRoot;
+	token(field: "eofToken"): JsAstToken | undefined;
+	token(field: string): JsAstToken | undefined;
+}
 export interface JsSvelteSnippetRoot extends JsAstNode {
 	readonly kind: "JS_SVELTE_SNIPPET_ROOT";
 	readonly name: AnyJsBinding | undefined;
@@ -2146,6 +2157,15 @@ export interface JsVariableStatement extends JsAstNode {
 	readonly semicolonToken: string | undefined;
 	withSemicolonToken(value: JsAstToken | undefined): JsVariableStatement;
 	token(field: "semicolonToken"): JsAstToken | undefined;
+	token(field: string): JsAstToken | undefined;
+}
+export interface JsVueGenericRoot extends JsAstNode {
+	readonly kind: "JS_VUE_GENERIC_ROOT";
+	readonly items: AnyJsVueGenericTypeParameters | undefined;
+	withItems(value: AnyJsVueGenericTypeParameters): JsVueGenericRoot;
+	readonly eofToken: string | undefined;
+	withEofToken(value: JsAstToken): JsVueGenericRoot;
+	token(field: "eofToken"): JsAstToken | undefined;
 	token(field: string): JsAstToken | undefined;
 }
 export interface JsVueSlotPropsRoot extends JsAstNode {
@@ -2378,8 +2398,8 @@ export interface JsxShorthandAttribute extends JsAstNode {
 	readonly kind: "JSX_SHORTHAND_ATTRIBUTE";
 	readonly lCurlyToken: string | undefined;
 	withLCurlyToken(value: JsAstToken): JsxShorthandAttribute;
-	readonly name: JsReferenceIdentifier | undefined;
-	withName(value: JsReferenceIdentifier): JsxShorthandAttribute;
+	readonly expression: AnyJsExpression | undefined;
+	withExpression(value: AnyJsExpression): JsxShorthandAttribute;
 	readonly rCurlyToken: string | undefined;
 	withRCurlyToken(value: JsAstToken): JsxShorthandAttribute;
 	token(field: "lCurlyToken" | "rCurlyToken"): JsAstToken | undefined;
@@ -4185,7 +4205,9 @@ export type AnyJsRoot =
 	| JsModule
 	| JsScript
 	| JsSvelteDeclarationRoot
+	| JsSvelteLegacyConstRoot
 	| JsSvelteSnippetRoot
+	| JsVueGenericRoot
 	| JsVueSlotPropsRoot
 	| TsDeclarationModule;
 export type AnyJsStatement =
@@ -4225,8 +4247,10 @@ export type AnyJsStatement =
 export type AnyJsSvelteDeclaration =
 	| JsBogusVariableDeclaration
 	| JsVariableDeclaration;
+export type AnyJsSvelteLegacyConstDeclarator = JsBogus | JsVariableDeclarator;
 export type AnyJsSwitchClause = JsCaseClause | JsDefaultClause;
 export type AnyJsTemplateElement = JsTemplateChunkElement | JsTemplateElement;
+export type AnyJsVueGenericTypeParameters = JsBogus | TsTypeParameterList;
 export type AnyJsxAttribute =
 	| JsMetavariable
 	| JsxAttribute
@@ -4506,6 +4530,7 @@ export interface JsNodeByKind {
 	readonly JS_STRING_LITERAL_EXPRESSION: JsStringLiteralExpression;
 	readonly JS_SUPER_EXPRESSION: JsSuperExpression;
 	readonly JS_SVELTE_DECLARATION_ROOT: JsSvelteDeclarationRoot;
+	readonly JS_SVELTE_LEGACY_CONST_ROOT: JsSvelteLegacyConstRoot;
 	readonly JS_SVELTE_SNIPPET_ROOT: JsSvelteSnippetRoot;
 	readonly JS_SWITCH_STATEMENT: JsSwitchStatement;
 	readonly JS_TEMPLATE_CHUNK_ELEMENT: JsTemplateChunkElement;
@@ -4520,6 +4545,7 @@ export interface JsNodeByKind {
 	readonly JS_VARIABLE_DECLARATION_CLAUSE: JsVariableDeclarationClause;
 	readonly JS_VARIABLE_DECLARATOR: JsVariableDeclarator;
 	readonly JS_VARIABLE_STATEMENT: JsVariableStatement;
+	readonly JS_VUE_GENERIC_ROOT: JsVueGenericRoot;
 	readonly JS_VUE_SLOT_PROPS_ROOT: JsVueSlotPropsRoot;
 	readonly JS_WHILE_STATEMENT: JsWhileStatement;
 	readonly JS_WITH_STATEMENT: JsWithStatement;

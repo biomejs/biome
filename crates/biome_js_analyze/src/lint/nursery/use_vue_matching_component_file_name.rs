@@ -69,7 +69,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueMatchingComponentFileName {
-        version: "next",
+        version: "2.6.0",
         name: "useVueMatchingComponentFileName",
         language: "js",
         recommended: false,
@@ -129,7 +129,7 @@ impl Rule for UseVueMatchingComponentFileName {
                             component.definition_expression()
                         }
                         AnyVueComponent::CreateApp(component) => component.definition_expression(),
-                        AnyVueComponent::OptionsApi(_) | AnyVueComponent::Setup(_) => None,
+                        AnyVueComponent::OptionsApi(_) | AnyVueComponent::Setup => None,
                     };
                     name_expressions.extend(definition.as_ref().and_then(name_option));
                 } else if source_type.as_embedding_kind().is_vue_setup()

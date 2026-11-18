@@ -1,0 +1,355 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+color: ${(props) => props.color};
+${mixin};
+${truncate}
+@media ${({ theme }) => theme.mobile} {
+	display: none;
+}
+${Button}:hover & {
+	content: "${a ? '"' : "'"}";
+	background: url(${image("logo.png")});
+}
+.child ${Icon} {
+	margin: 0;
+}
+/* ${"*/"} */
+// ${"\n"}
+
+```
+
+
+## AST
+
+```
+CssSnippetRoot {
+    items: CssDeclarationOrRuleList [
+        CssDeclarationWithSemicolon {
+            declaration: CssDeclaration {
+                property: CssGenericProperty {
+                    name: CssIdentifier {
+                        value_token: IDENT@0..5 "color" [] [],
+                    },
+                    colon_token: COLON@5..7 ":" [] [Whitespace(" ")],
+                    value: CssGenericComponentValueList [
+                        CssMetavariable {
+                            value_token: GRIT_METAVARIABLE@7..32 "${(props) => props.color}" [] [],
+                        },
+                    ],
+                },
+                important: missing (optional),
+            },
+            semicolon_token: SEMICOLON@32..33 ";" [] [],
+        },
+        CssMetavariable {
+            value_token: GRIT_METAVARIABLE@33..42 "${mixin}" [Newline("\n")] [],
+        },
+        CssEmptyDeclaration {
+            semicolon_token: SEMICOLON@42..43 ";" [] [],
+        },
+        CssMetavariable {
+            value_token: GRIT_METAVARIABLE@43..55 "${truncate}" [Newline("\n")] [],
+        },
+        CssAtRule {
+            at_token: AT@55..57 "@" [Newline("\n")] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@57..63 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssMetavariable {
+                            value_token: GRIT_METAVARIABLE@63..94 "${({ theme }) => theme.mobile}" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@94..95 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@95..104 "display" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@104..106 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@106..110 "none" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@110..111 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@111..113 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selectors: CssNestedSelectorList [],
+                        simple_selector: CssMetavariable {
+                            value_token: GRIT_METAVARIABLE@113..123 "${Button}" [Newline("\n")] [],
+                        },
+                        sub_selectors: CssSubSelectorList [
+                            CssPseudoClassSelector {
+                                colon_token: COLON@123..124 ":" [] [],
+                                class: CssPseudoClassIdentifier {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@124..129 "hover" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@129..130 " " [] [],
+                    right: CssCompoundSelector {
+                        nesting_selectors: CssNestedSelectorList [
+                            CssNestedSelector {
+                                amp_token: AMP@130..132 "&" [] [Whitespace(" ")],
+                            },
+                        ],
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [],
+                    },
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@132..133 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@133..142 "content" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@142..144 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssString {
+                                        value_token: CSS_STRING_LITERAL@144..162 "\"${a ? '\"' : \"'\"}\"" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@162..163 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@163..175 "background" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@175..177 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@177..180 "url" [] [],
+                                        l_paren_token: L_PAREN@180..181 "(" [] [],
+                                        value: CssUrlValueRaw {
+                                            value_token: CSS_URL_VALUE_RAW_LITERAL@181..201 "${image(\"logo.png\")}" [] [],
+                                        },
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@201..202 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@202..203 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@203..205 "}" [Newline("\n")] [],
+            },
+        },
+        CssNestedQualifiedRule {
+            prelude: CssRelativeSelectorList [
+                CssRelativeSelector {
+                    combinator: missing (optional),
+                    selector: CssComplexSelector {
+                        left: CssCompoundSelector {
+                            nesting_selectors: CssNestedSelectorList [],
+                            simple_selector: missing (optional),
+                            sub_selectors: CssSubSelectorList [
+                                CssClassSelector {
+                                    dot_token: DOT@205..207 "." [Newline("\n")] [],
+                                    name: CssCustomIdentifier {
+                                        value_token: IDENT@207..212 "child" [] [],
+                                    },
+                                },
+                            ],
+                        },
+                        combinator: CSS_SPACE_LITERAL@212..213 " " [] [],
+                        right: CssMetavariable {
+                            value_token: GRIT_METAVARIABLE@213..221 "${Icon}" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@221..222 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@222..230 "margin" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@230..232 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@232..233 "0" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@233..234 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@234..236 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@236..262 "" [Newline("\n"), Comments("/* ${\"*/\"} */"), Newline("\n"), Comments("// ${\"\\n\"}"), Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_SNIPPET_ROOT@0..262
+  0: CSS_DECLARATION_OR_RULE_LIST@0..236
+    0: CSS_DECLARATION_WITH_SEMICOLON@0..33
+      0: CSS_DECLARATION@0..32
+        0: CSS_GENERIC_PROPERTY@0..32
+          0: CSS_IDENTIFIER@0..5
+            0: IDENT@0..5 "color" [] []
+          1: COLON@5..7 ":" [] [Whitespace(" ")]
+          2: CSS_GENERIC_COMPONENT_VALUE_LIST@7..32
+            0: CSS_METAVARIABLE@7..32
+              0: GRIT_METAVARIABLE@7..32 "${(props) => props.color}" [] []
+        1: (empty)
+      1: SEMICOLON@32..33 ";" [] []
+    1: CSS_METAVARIABLE@33..42
+      0: GRIT_METAVARIABLE@33..42 "${mixin}" [Newline("\n")] []
+    2: CSS_EMPTY_DECLARATION@42..43
+      0: SEMICOLON@42..43 ";" [] []
+    3: CSS_METAVARIABLE@43..55
+      0: GRIT_METAVARIABLE@43..55 "${truncate}" [Newline("\n")] []
+    4: CSS_AT_RULE@55..113
+      0: AT@55..57 "@" [Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@57..113
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@57..94
+          0: MEDIA_KW@57..63 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@63..94
+            0: CSS_METAVARIABLE@63..94
+              0: GRIT_METAVARIABLE@63..94 "${({ theme }) => theme.mobile}" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_BLOCK@94..113
+          0: L_CURLY@94..95 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@95..111
+            0: CSS_DECLARATION_WITH_SEMICOLON@95..111
+              0: CSS_DECLARATION@95..110
+                0: CSS_GENERIC_PROPERTY@95..110
+                  0: CSS_IDENTIFIER@95..104
+                    0: IDENT@95..104 "display" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@104..106 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@106..110
+                    0: CSS_IDENTIFIER@106..110
+                      0: IDENT@106..110 "none" [] []
+                1: (empty)
+              1: SEMICOLON@110..111 ";" [] []
+          2: R_CURLY@111..113 "}" [Newline("\n")] []
+    5: CSS_QUALIFIED_RULE@113..205
+      0: CSS_SELECTOR_LIST@113..132
+        0: CSS_COMPLEX_SELECTOR@113..132
+          0: CSS_COMPOUND_SELECTOR@113..129
+            0: CSS_NESTED_SELECTOR_LIST@113..113
+            1: CSS_METAVARIABLE@113..123
+              0: GRIT_METAVARIABLE@113..123 "${Button}" [Newline("\n")] []
+            2: CSS_SUB_SELECTOR_LIST@123..129
+              0: CSS_PSEUDO_CLASS_SELECTOR@123..129
+                0: COLON@123..124 ":" [] []
+                1: CSS_PSEUDO_CLASS_IDENTIFIER@124..129
+                  0: CSS_IDENTIFIER@124..129
+                    0: IDENT@124..129 "hover" [] []
+          1: CSS_SPACE_LITERAL@129..130 " " [] []
+          2: CSS_COMPOUND_SELECTOR@130..132
+            0: CSS_NESTED_SELECTOR_LIST@130..132
+              0: CSS_NESTED_SELECTOR@130..132
+                0: AMP@130..132 "&" [] [Whitespace(" ")]
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@132..132
+      1: CSS_DECLARATION_OR_RULE_BLOCK@132..205
+        0: L_CURLY@132..133 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@133..203
+          0: CSS_DECLARATION_WITH_SEMICOLON@133..163
+            0: CSS_DECLARATION@133..162
+              0: CSS_GENERIC_PROPERTY@133..162
+                0: CSS_IDENTIFIER@133..142
+                  0: IDENT@133..142 "content" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@142..144 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@144..162
+                  0: CSS_STRING@144..162
+                    0: CSS_STRING_LITERAL@144..162 "\"${a ? '\"' : \"'\"}\"" [] []
+              1: (empty)
+            1: SEMICOLON@162..163 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@163..203
+            0: CSS_DECLARATION@163..202
+              0: CSS_GENERIC_PROPERTY@163..202
+                0: CSS_IDENTIFIER@163..175
+                  0: IDENT@163..175 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@175..177 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@177..202
+                  0: CSS_URL_FUNCTION@177..202
+                    0: URL_KW@177..180 "url" [] []
+                    1: L_PAREN@180..181 "(" [] []
+                    2: CSS_URL_VALUE_RAW@181..201
+                      0: CSS_URL_VALUE_RAW_LITERAL@181..201 "${image(\"logo.png\")}" [] []
+                    3: CSS_URL_MODIFIER_LIST@201..201
+                    4: R_PAREN@201..202 ")" [] []
+              1: (empty)
+            1: SEMICOLON@202..203 ";" [] []
+        2: R_CURLY@203..205 "}" [Newline("\n")] []
+    6: CSS_NESTED_QUALIFIED_RULE@205..236
+      0: CSS_RELATIVE_SELECTOR_LIST@205..221
+        0: CSS_RELATIVE_SELECTOR@205..221
+          0: (empty)
+          1: CSS_COMPLEX_SELECTOR@205..221
+            0: CSS_COMPOUND_SELECTOR@205..212
+              0: CSS_NESTED_SELECTOR_LIST@205..205
+              1: (empty)
+              2: CSS_SUB_SELECTOR_LIST@205..212
+                0: CSS_CLASS_SELECTOR@205..212
+                  0: DOT@205..207 "." [Newline("\n")] []
+                  1: CSS_CUSTOM_IDENTIFIER@207..212
+                    0: IDENT@207..212 "child" [] []
+            1: CSS_SPACE_LITERAL@212..213 " " [] []
+            2: CSS_METAVARIABLE@213..221
+              0: GRIT_METAVARIABLE@213..221 "${Icon}" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@221..236
+        0: L_CURLY@221..222 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@222..234
+          0: CSS_DECLARATION_WITH_SEMICOLON@222..234
+            0: CSS_DECLARATION@222..233
+              0: CSS_GENERIC_PROPERTY@222..233
+                0: CSS_IDENTIFIER@222..230
+                  0: IDENT@222..230 "margin" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@230..232 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@232..233
+                  0: CSS_NUMBER@232..233
+                    0: CSS_NUMBER_LITERAL@232..233 "0" [] []
+              1: (empty)
+            1: SEMICOLON@233..234 ";" [] []
+        2: R_CURLY@234..236 "}" [Newline("\n")] []
+  1: EOF@236..262 "" [Newline("\n"), Comments("/* ${\"*/\"} */"), Newline("\n"), Comments("// ${\"\\n\"}"), Newline("\n")] []
+
+```

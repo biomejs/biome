@@ -1,0 +1,40 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome check '<TEMP_DIR>/check_missing_path/missing.js'
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+missing.js fs/cantRead ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Cannot read file.
+    
+    Caused by:
+      <OS_ERROR>
+  
+  × Biome can't read the following file, maybe for permissions reasons or it doesn't exist.
+  
+
+```
+
+```block
+Checked 0 files in <TIME>. No fixes applied.
+Found 1 error.
+```

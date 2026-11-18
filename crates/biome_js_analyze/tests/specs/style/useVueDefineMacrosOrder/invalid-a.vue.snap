@@ -43,18 +43,17 @@ invalid-a.vue:13:1 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━�
   
   i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
   
-  i Unsafe fix: Reorder macro defineModel.
+  i Unsafe fix: Reorder compiler macros.
   
      9  9 │   
     10 10 │   debugger
        11 │ + defineModel()
-       12 │ + 
-    11 13 │   
+    11 12 │   
     12    │ - const·emit·=·defineEmits([])
     13    │ - defineModel()
-       14 │ + const·emit·=·defineEmits([])
-    14 15 │   
-    15 16 │   withDefaults(defineNotProps({}), { a: 1 })
+       13 │ + const·emit·=·defineEmits([])
+    14 14 │   
+    15 15 │   withDefaults(defineNotProps({}), { a: 1 })
   
 
 ```

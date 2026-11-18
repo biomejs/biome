@@ -73,6 +73,8 @@ multiline.invalid.js:1:26 lint/style/useConsistentArrowReturn  FIXABLE  ━━�
     4 │ 
     5 │ const multipleChainedMethods = (arr) =>
   
+  i Using a block body consistently makes the function easier to extend later with more statements.
+  
   i Safe fix: Add braces to the arrow function body.
   
      1  1 │   const chainedOnNewLine = (l) =>
@@ -104,6 +106,8 @@ multiline.invalid.js:5:32 lint/style/useConsistentArrowReturn  FIXABLE  ━━�
      9 │ 
     10 │ const objectWithMultipleProperties = () =>
   
+  i Using a block body consistently makes the function easier to extend later with more statements.
+  
   i Safe fix: Add braces to the arrow function body.
   
      4  4 │   
@@ -133,6 +137,8 @@ multiline.invalid.js:7:13 lint/style/useConsistentArrowReturn  FIXABLE  ━━�
     8 │     .map(x => x * 2)
     9 │ 
   
+  i Using a block body consistently makes the function easier to extend later with more statements.
+  
   i Safe fix: Add braces to the arrow function body.
   
      5  5 │   const multipleChainedMethods = (arr) =>
@@ -158,6 +164,8 @@ multiline.invalid.js:8:10 lint/style/useConsistentArrowReturn  FIXABLE  ━━�
        │          ^^^^^^^^^^
      9 │ 
     10 │ const objectWithMultipleProperties = () =>
+  
+  i Using a block body consistently makes the function easier to extend later with more statements.
   
   i Safe fix: Add braces to the arrow function body.
   
@@ -189,6 +197,8 @@ multiline.invalid.js:10:38 lint/style/useConsistentArrowReturn  FIXABLE  ━━�
        │   ^^
     15 │ 
     16 │ const arrayWithMultipleElements = () =>
+  
+  i Using a block body consistently makes the function easier to extend later with more statements.
   
   i Safe fix: Add braces to the arrow function body.
   
@@ -226,6 +236,8 @@ multiline.invalid.js:16:35 lint/style/useConsistentArrowReturn  FIXABLE  ━━�
     22 │ 
     23 │ const nested = () =>
   
+  i Using a block body consistently makes the function easier to extend later with more statements.
+  
   i Safe fix: Add braces to the arrow function body.
   
     15 15 │   
@@ -262,6 +274,8 @@ multiline.invalid.js:23:16 lint/style/useConsistentArrowReturn  FIXABLE  ━━�
     28 │ 
     29 │ const withInlineComment = (l) =>
   
+  i Using a block body consistently makes the function easier to extend later with more statements.
+  
   i Safe fix: Add braces to the arrow function body.
   
     22 22 │   
@@ -291,6 +305,8 @@ multiline.invalid.js:37:13 lint/style/useConsistentArrowReturn  FIXABLE  ━━�
        │             ^^^^^^^^^^
     38 │ 
     39 │ const withCommentInObject = () =>
+  
+  i Using a block body consistently makes the function easier to extend later with more statements.
   
   i Safe fix: Add braces to the arrow function body.
   

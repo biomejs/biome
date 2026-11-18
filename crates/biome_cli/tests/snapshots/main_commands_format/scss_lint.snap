@@ -37,6 +37,8 @@ lint.scss:2:23 lint/correctness/noUnknownFunction ━━━━━━━━━━
   > 2 │ .element { transform: unknown(1); color: $color; }
       │                       ^^^^^^^
   
+  i Browsers ignore a declaration that contains an unknown function, so the style is not applied.
+  
   i Use a known function instead.
   
   i See MDN web docs for more details.

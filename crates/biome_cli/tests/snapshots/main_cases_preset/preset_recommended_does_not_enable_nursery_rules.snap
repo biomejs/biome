@@ -45,6 +45,8 @@ test.js:3:9 lint/complexity/noUselessContinue  FIXABLE  ━━━━━━━━
     4 │     }
     5 │ }
   
+  i The loop already moves on to the next iteration at this point, so the statement has no effect.
+  
   i Safe fix: Delete the unnecessary continue statement
   
     1 1 │   for (let i = 0; i < 10; i++) {

@@ -111,6 +111,8 @@ invalid.jsx:3:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━━
     4 │     <main onClick={() => void 0} />
     5 │     <article onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -127,6 +129,8 @@ invalid.jsx:4:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━━
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │     <article onClick={() => { }} />
     6 │     <aside onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -145,6 +149,8 @@ invalid.jsx:5:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━━
     6 │     <aside onClick={() => { }} />
     7 │     <blockquote onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -161,6 +167,8 @@ invalid.jsx:6:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━━
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     7 │     <blockquote onClick={() => { }} />
     8 │     <body onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -179,6 +187,8 @@ invalid.jsx:7:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━━
     8 │     <body onClick={() => { }} />
     9 │     <br onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -195,6 +205,8 @@ invalid.jsx:8:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━━
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
      9 │     <br onClick={() => { }} />
     10 │     <caption onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -213,6 +225,8 @@ invalid.jsx:9:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━━
     10 │     <caption onClick={() => { }} />
     11 │     <dd onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -229,6 +243,8 @@ invalid.jsx:10:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     11 │     <dd onClick={() => { }} />
     12 │     <details onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -247,6 +263,8 @@ invalid.jsx:11:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     12 │     <details onClick={() => { }} />
     13 │     <dfn onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -263,6 +281,8 @@ invalid.jsx:12:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     13 │     <dfn onClick={() => { }} />
     14 │     <dl onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -281,6 +301,8 @@ invalid.jsx:13:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     14 │     <dl onClick={() => { }} />
     15 │     <dir onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -297,6 +319,8 @@ invalid.jsx:15:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     16 │     <dt onClick={() => { }} />
     17 │     <fieldset onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -315,6 +339,8 @@ invalid.jsx:16:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     17 │     <fieldset onClick={() => { }} />
     18 │     <figcaption onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -331,6 +357,8 @@ invalid.jsx:17:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     18 │     <figcaption onClick={() => { }} />
     19 │     <figure onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -349,6 +377,8 @@ invalid.jsx:18:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     19 │     <figure onClick={() => { }} />
     20 │     <footer onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -365,6 +395,8 @@ invalid.jsx:19:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     20 │     <footer onClick={() => { }} />
     21 │     <form onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -383,6 +415,8 @@ invalid.jsx:20:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     21 │     <form onClick={() => { }} />
     22 │     <frame onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -399,6 +433,8 @@ invalid.jsx:21:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     22 │     <frame onClick={() => { }} />
     23 │     <h1 onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -417,6 +453,8 @@ invalid.jsx:22:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     23 │     <h1 onClick={() => { }} />
     24 │     <h2 onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -433,6 +471,8 @@ invalid.jsx:23:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
     24 │     <h2 onClick={() => { }} />
     25 │     <h3 onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -451,6 +491,8 @@ invalid.jsx:24:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     25 │     <h3 onClick={() => { }} />
     26 │     <h4 onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -467,6 +509,8 @@ invalid.jsx:25:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
     26 │     <h4 onClick={() => { }} />
     27 │     <h5 onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -485,6 +529,8 @@ invalid.jsx:26:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     27 │     <h5 onClick={() => { }} />
     28 │     <h6 onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -501,6 +547,8 @@ invalid.jsx:27:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
     28 │     <h6 onClick={() => { }} />
     29 │     <iframe onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -519,6 +567,8 @@ invalid.jsx:28:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     29 │     <iframe onClick={() => { }} />
     30 │     <img onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -535,6 +585,8 @@ invalid.jsx:29:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     30 │     <img onClick={() => { }} />
     31 │     <label onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -553,6 +605,8 @@ invalid.jsx:30:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     31 │     <label onClick={() => { }} />
     32 │     <legend onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -569,6 +623,8 @@ invalid.jsx:31:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     32 │     <legend onClick={() => { }} />
     33 │     <li onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -587,6 +643,8 @@ invalid.jsx:32:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     33 │     <li onClick={() => { }} />
     34 │     <mark onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -603,6 +661,8 @@ invalid.jsx:33:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
     34 │     <mark onClick={() => { }} />
     35 │     <marquee onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -621,6 +681,8 @@ invalid.jsx:34:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     35 │     <marquee onClick={() => { }} />
     36 │     <menu onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -637,6 +699,8 @@ invalid.jsx:35:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     36 │     <menu onClick={() => { }} />
     37 │     <meter onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -655,6 +719,8 @@ invalid.jsx:36:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     37 │     <meter onClick={() => { }} />
     38 │     <nav onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -671,6 +737,8 @@ invalid.jsx:37:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     38 │     <nav onClick={() => { }} />
     39 │     <ol onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -689,6 +757,8 @@ invalid.jsx:38:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     39 │     <ol onClick={() => { }} />
     40 │     <optgroup onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -705,6 +775,8 @@ invalid.jsx:39:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
     40 │     <optgroup onClick={() => { }} />
     41 │     <output onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -723,6 +795,8 @@ invalid.jsx:40:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     41 │     <output onClick={() => { }} />
     42 │     <p onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -739,6 +813,8 @@ invalid.jsx:41:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     42 │     <p onClick={() => { }} />
     43 │     <pre onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -757,6 +833,8 @@ invalid.jsx:42:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     43 │     <pre onClick={() => { }} />
     44 │     <progress onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -773,6 +851,8 @@ invalid.jsx:43:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     44 │     <progress onClick={() => { }} />
     45 │     <ruby onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -791,6 +871,8 @@ invalid.jsx:44:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     45 │     <ruby onClick={() => { }} />
     46 │     <section onClick={() => { }} aria-label="Aardvark" />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -807,6 +889,8 @@ invalid.jsx:45:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     46 │     <section onClick={() => { }} aria-label="Aardvark" />
     47 │     <section onClick={() => { }} aria-labelledby="js_1" />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -825,6 +909,8 @@ invalid.jsx:46:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     47 │     <section onClick={() => { }} aria-labelledby="js_1" />
     48 │     <table onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -841,6 +927,8 @@ invalid.jsx:47:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     48 │     <table onClick={() => { }} />
     49 │     <tbody onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -859,6 +947,8 @@ invalid.jsx:48:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     49 │     <tbody onClick={() => { }} />
     50 │     <td onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -875,6 +965,8 @@ invalid.jsx:49:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     50 │     <td onClick={() => { }} />
     51 │     <tfoot onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -893,6 +985,8 @@ invalid.jsx:50:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     51 │     <tfoot onClick={() => { }} />
     52 │     <thead onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -909,6 +1003,8 @@ invalid.jsx:51:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     52 │     <thead onClick={() => { }} />
     53 │     <time onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -927,6 +1023,8 @@ invalid.jsx:52:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     53 │     <time onClick={() => { }} />
     54 │     <ul onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -943,6 +1041,8 @@ invalid.jsx:53:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     54 │     <ul onClick={() => { }} />
     55 │     <ul contentEditable="false" onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -961,6 +1061,8 @@ invalid.jsx:54:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     55 │     <ul contentEditable="false" onClick={() => { }} />
     56 │     <div role="alert" onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -977,6 +1079,8 @@ invalid.jsx:55:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     56 │     <div role="alert" onClick={() => { }} />
     57 │     <div role="alertdialog" onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -995,6 +1099,8 @@ invalid.jsx:56:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     57 │     <div role="alertdialog" onClick={() => { }} />
     58 │     <div role="application" onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -1011,6 +1117,8 @@ invalid.jsx:57:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     58 │     <div role="application" onClick={() => { }} />
     59 │     <div role="banner" onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1029,6 +1137,8 @@ invalid.jsx:58:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     59 │     <div role="banner" onClick={() => { }} />
     60 │     <div role="cell" onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -1045,6 +1155,8 @@ invalid.jsx:59:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     60 │     <div role="cell" onClick={() => { }} />
     61 │     <div role="complementary" onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1063,6 +1175,8 @@ invalid.jsx:60:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     61 │     <div role="complementary" onClick={() => { }} />
     62 │     <div role="contentinfo" onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -1079,6 +1193,8 @@ invalid.jsx:61:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     62 │     <div role="contentinfo" onClick={() => { }} />
     63 │     <div role="definition" onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1097,6 +1213,8 @@ invalid.jsx:62:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     63 │     <div role="definition" onClick={() => { }} />
     64 │     <div role="dialog" onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -1113,6 +1231,8 @@ invalid.jsx:63:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     64 │     <div role="dialog" onClick={() => { }} />
     65 │     <div role="directory" onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1131,6 +1251,8 @@ invalid.jsx:64:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     65 │     <div role="directory" onClick={() => { }} />
     66 │     <div role="document" onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -1147,6 +1269,8 @@ invalid.jsx:65:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     66 │     <div role="document" onClick={() => { }} />
     67 │     <div role="feed" onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1165,6 +1289,8 @@ invalid.jsx:66:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     67 │     <div role="feed" onClick={() => { }} />
     68 │     <div role="figure" onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -1181,6 +1307,8 @@ invalid.jsx:67:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     68 │     <div role="figure" onClick={() => { }} />
     69 │     <div role="form" onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1199,6 +1327,8 @@ invalid.jsx:68:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     69 │     <div role="form" onClick={() => { }} />
     70 │     <div role="group" onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -1215,6 +1345,8 @@ invalid.jsx:69:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     70 │     <div role="group" onClick={() => { }} />
     71 │     <div role="heading" onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1233,6 +1365,8 @@ invalid.jsx:70:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     71 │     <div role="heading" onClick={() => { }} />
     72 │     <div role="img" onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -1249,6 +1383,8 @@ invalid.jsx:71:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     72 │     <div role="img" onClick={() => { }} />
     73 │     <div role="list" onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1267,6 +1403,8 @@ invalid.jsx:72:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     73 │     <div role="list" onClick={() => { }} />
     74 │     <div role="listitem" onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -1283,6 +1421,8 @@ invalid.jsx:73:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     74 │     <div role="listitem" onClick={() => { }} />
     75 │     <div role="log" onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1301,6 +1441,8 @@ invalid.jsx:74:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     75 │     <div role="log" onClick={() => { }} />
     76 │     <div role="main" onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -1317,6 +1459,8 @@ invalid.jsx:75:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     76 │     <div role="main" onClick={() => { }} />
     77 │     <div role="marquee" onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1335,6 +1479,8 @@ invalid.jsx:76:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     77 │     <div role="marquee" onClick={() => { }} />
     78 │     <div role="math" onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -1351,6 +1497,8 @@ invalid.jsx:77:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     78 │     <div role="math" onClick={() => { }} />
     79 │     <div role="navigation" onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1369,6 +1517,8 @@ invalid.jsx:78:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     79 │     <div role="navigation" onClick={() => { }} />
     80 │     <div role="note" onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -1385,6 +1535,8 @@ invalid.jsx:79:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     80 │     <div role="note" onClick={() => { }} />
     81 │     <div role="region" onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1403,6 +1555,8 @@ invalid.jsx:80:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     81 │     <div role="region" onClick={() => { }} />
     82 │     <div role="rowgroup" onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -1419,6 +1573,8 @@ invalid.jsx:81:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     82 │     <div role="rowgroup" onClick={() => { }} />
     83 │     <div role="search" onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1437,6 +1593,8 @@ invalid.jsx:82:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     83 │     <div role="search" onClick={() => { }} />
     84 │     <div role="status" onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -1453,6 +1611,8 @@ invalid.jsx:83:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     84 │     <div role="status" onClick={() => { }} />
     85 │     <div role="table" onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1471,6 +1631,8 @@ invalid.jsx:84:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     85 │     <div role="table" onClick={() => { }} />
     86 │     <div role="tabpanel" onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -1487,6 +1649,8 @@ invalid.jsx:85:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     86 │     <div role="tabpanel" onClick={() => { }} />
     87 │     <div role="term" onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1505,6 +1669,8 @@ invalid.jsx:86:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     87 │     <div role="term" onClick={() => { }} />
     88 │     <div role="timer" onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -1521,6 +1687,8 @@ invalid.jsx:87:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     88 │     <div role="timer" onClick={() => { }} />
     89 │     <div role="tooltip" onClick={() => { }} />
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1539,6 +1707,8 @@ invalid.jsx:88:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     89 │     <div role="tooltip" onClick={() => { }} />
     90 │ 	  <div role="progressbar" onClick={() => { }} />
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -1556,6 +1726,8 @@ invalid.jsx:89:5 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
     90 │ 	  <div role="progressbar" onClick={() => { }} />
     91 │ </>
   
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
+  
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
@@ -1572,6 +1744,8 @@ invalid.jsx:90:4 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
        │ 	  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     91 │ </>
     92 │ 
+  
+  i A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on.
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   

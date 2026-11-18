@@ -21,6 +21,8 @@ valid.jsonc:1:11 lint/complexity/noUselessConstructor  FIXABLE  ━━━━━�
   > 1 │ class A { constructor(a, b = 0){ } }
       │           ^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i A constructor that only does what the default constructor already does adds code without changing behavior.
+  
   i Unsafe fix: Remove the unnecessary constructor.
   
     1 │ class·A·{·constructor(a,·b·=·0){·}·}

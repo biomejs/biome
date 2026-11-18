@@ -1,0 +1,17 @@
+<!-- should not generate diagnostics -->
+<template>
+  <div />
+  <div is="vue:foo" />
+  <tr is="vue:my-row"></tr>
+  <component is="foo" />
+  <component :is="'foo'" />
+  <component v-bind:is="foo" />
+  <Foo is="foo" />
+  <Foo :is="foo" />
+  <my-element is="foo" />
+  <unknown is="foo" />
+  <div :id="is" />
+  <div v-bind:[is]="foo" />
+  <div v-on:is="foo" />
+  <div data-is="foo" />
+</template>

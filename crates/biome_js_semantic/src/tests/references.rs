@@ -435,3 +435,40 @@ assert_semantics! {
     ok_typescript_escaped_enum_member_name,
         r#"enum E { \u0041/*#A*/ = 1, B = A/*READ A*/ }"#,
 }
+
+#[test]
+fn syntax_near_returns_the_node_of_syntax() {
+    let parse = biome_js_parser::parse(
+        r#"import { imported } from "mod";
+let a = 1;
+a += 1;
+function f(p) {
+    const inner = () => inner(p, a);
+    return <Component value={imported}>{a}</Component>;
+}
+class C { m() { return f(C); } }
+type T<U> = { [K in keyof U]: K };
+let b: T<C>;
+[a, b] = [b, a];"#,
+        JsFileSource::tsx(),
+        JsParserOptions::default(),
+    );
+    let model = semantic_model(&parse.tree(), SemanticModelOptions::default());
+    let mut reference_count = 0;
+    for binding in model.all_bindings() {
+        for reference in binding.all_references() {
+            reference_count += 1;
+            let expected = reference.syntax();
+            for node in parse.syntax().descendants() {
+                let actual = reference.syntax_near(&node);
+                assert_eq!(actual, expected, "from {node:?}");
+                assert_eq!(actual.kind(), expected.kind());
+                assert_eq!(
+                    actual.text_range_with_trivia(),
+                    expected.text_range_with_trivia()
+                );
+            }
+        }
+    }
+    assert!(reference_count >= 14, "{reference_count} references");
+}

@@ -40,15 +40,15 @@ YamlRoot {
                 flow: YamlFlowYamlNode {
                     properties: YamlPropertyList [],
                     content: YamlPlainScalar {
-                        value_token: PLAIN_LITERAL@13..20 "second\n" [] [],
+                        value_token: PLAIN_LITERAL@13..19 "second" [] [],
                     },
                 },
-                flow_end_token: FLOW_END@20..20 "" [] [],
+                flow_end_token: FLOW_END@19..19 "" [] [],
             },
             dotdotdot_token: missing (optional),
         },
     ],
-    eof_token: EOF@20..20 "" [] [],
+    eof_token: EOF@19..20 "" [Newline("\n")] [],
 }
 ```
 
@@ -56,7 +56,7 @@ YamlRoot {
 
 ```
 0: YAML_ROOT@0..20
-  0: YAML_DOCUMENT_LIST@0..20
+  0: YAML_DOCUMENT_LIST@0..19
     0: YAML_DOCUMENT@0..5
       0: (empty)
       1: YAML_DIRECTIVE_LIST@0..0
@@ -69,18 +69,18 @@ YamlRoot {
             0: PLAIN_LITERAL@0..5 "first" [] []
         2: FLOW_END@5..5 "" [] []
       4: (empty)
-    1: YAML_DOCUMENT@5..20
+    1: YAML_DOCUMENT@5..19
       0: UNICODE_BOM@5..9 "\u{feff}" [Newline("\n")] []
       1: YAML_DIRECTIVE_LIST@9..9
       2: DIRECTIVE_END@9..12 "---" [] []
-      3: YAML_FLOW_IN_BLOCK_NODE@12..20
+      3: YAML_FLOW_IN_BLOCK_NODE@12..19
         0: FLOW_START@12..13 "" [Newline("\n")] []
-        1: YAML_FLOW_YAML_NODE@13..20
+        1: YAML_FLOW_YAML_NODE@13..19
           0: YAML_PROPERTY_LIST@13..13
-          1: YAML_PLAIN_SCALAR@13..20
-            0: PLAIN_LITERAL@13..20 "second\n" [] []
-        2: FLOW_END@20..20 "" [] []
+          1: YAML_PLAIN_SCALAR@13..19
+            0: PLAIN_LITERAL@13..19 "second" [] []
+        2: FLOW_END@19..19 "" [] []
       4: (empty)
-  1: EOF@20..20 "" [] []
+  1: EOF@19..20 "" [Newline("\n")] []
 
 ```

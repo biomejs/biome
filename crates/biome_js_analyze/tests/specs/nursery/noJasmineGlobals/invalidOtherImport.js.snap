@@ -1,0 +1,56 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidOtherImport.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { expect } from "chai";
+import jest from "./jest-helpers";
+
+// `expect` and `jest` aren't Jest's globals here, so no fix is offered.
+expect(total).to.equal(jasmine.any(Number));
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+
+```
+
+# Diagnostics
+```
+invalidOtherImport.js:6:24 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    5 │ // `expect` and `jest` aren't Jest's globals here, so no fix is offered.
+  > 6 │ expect(total).to.equal(jasmine.any(Number));
+      │                        ^^^^^^^^^^^
+    7 │ jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+    8 │ 
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use expect.any() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidOtherImport.js:7:1 lint/nursery/noJasmineGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of a Jasmine global.
+  
+    5 │ // `expect` and `jest` aren't Jest's globals here, so no fix is offered.
+    6 │ expect(total).to.equal(jasmine.any(Number));
+  > 7 │ jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i Jest only provides Jasmine globals when it runs tests with the jest-jasmine2 runner. Its default runner doesn't provide them, so this code fails there.
+  
+  i Use jest.setTimeout() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

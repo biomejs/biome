@@ -81,7 +81,7 @@ declare_source_rule! {
     /// Sort such definitions manually, or put each definition on its own line.
     ///
     pub UseGraphqlSortedDefinitions {
-        version: "next",
+        version: "2.6.0",
         name: "useGraphqlSortedDefinitions",
         language: "graphql",
         recommended: false,

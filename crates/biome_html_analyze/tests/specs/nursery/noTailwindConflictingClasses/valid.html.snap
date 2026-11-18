@@ -1,0 +1,24 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<div class="flex"></div>
+<div class="flex w-full"></div>
+<div class="flex flex"></div>
+<div class="p-2 px-4"></div>
+<div class="w-4 h-4 size-4"></div>
+<div class="text-lg text-red-500"></div>
+<div class="border border-red-500 border-dashed"></div>
+<div class="flex md:grid"></div>
+<div class="hover:flex focus:grid"></div>
+<div class="sm:hover:flex hover:sm:grid"></div>
+<div class="flex hover:[display:grid]"></div>
+<div class="text-sm text-[14px]"></div>
+<div class="foo bar"></div>
+<div title="flex grid"></div>
+<div data-classes="flex grid"></div>
+
+```

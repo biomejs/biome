@@ -5,11 +5,10 @@ use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsNamedImportSpecifier, JsCallExpression, JsImport,
-    T,
+    AnyJsCallArgument, AnyJsExpression, AnyJsNamedImportSpecifier, JsCallExpression, JsImport, T,
 };
 use biome_languages::JsFileSource;
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::no_svelte_add_event_listener::NoSvelteAddEventListenerOptions;
 
 use crate::JsRuleAction;
@@ -57,7 +56,7 @@ declare_lint_rule! {
     /// - [Svelte event delegation](https://svelte.dev/docs/svelte/basic-markup#Events-Event-delegation)
     /// - [`on` from `svelte/events`](https://svelte.dev/docs/svelte/svelte-events#on)
     pub NoSvelteAddEventListener {
-        version: "next",
+        version: "2.6.0",
         name: "noSvelteAddEventListener",
         language: "js",
         domains: &[RuleDomain::Svelte],
@@ -84,7 +83,11 @@ impl Rule for NoSvelteAddEventListener {
     type Options = NoSvelteAddEventListenerOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        if !ctx.source_type::<JsFileSource>().as_embedding_kind().is_svelte() {
+        if !ctx
+            .source_type::<JsFileSource>()
+            .as_embedding_kind()
+            .is_svelte()
+        {
             return None;
         }
 
@@ -153,10 +156,8 @@ impl Rule for NoSvelteAddEventListener {
                 if resolve_in_scope(model, call, "window").is_some() {
                     return None;
                 }
-                make::js_identifier_expression(make::js_reference_identifier(make::ident(
-                    "window",
-                )))
-                .into()
+                make::js_identifier_expression(make::js_reference_identifier(make::ident("window")))
+                    .into()
             }
         };
 
@@ -172,9 +173,7 @@ impl Rule for NoSvelteAddEventListener {
         let mut items = vec![AnyJsCallArgument::AnyJsExpression(target.trim_trivia()?)];
         let mut separators = Vec::new();
         if !args.is_empty() {
-            separators.push(
-                make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-            );
+            separators.push(make::token(T![,]).with_trailing_space());
         }
         for element in args.elements() {
             items.push(element.node().ok()?.clone());

@@ -1,0 +1,47 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+var foo_bar = 1;
+function foo_bar2() {}
+foo.bar.__proto__;
+foo.__proto__ = null;
+console.log(__filename);
+console.log(__dirname);
+var _ = require("underscore");
+var a = b._;
+function foo(_bar) {}
+function foo2(bar_) {}
+function foo3(_bar = 0) {}
+function foo4(..._bar) {}
+const foo5 = (_bar) => {};
+const foo6 = { onClick(_bar) {} };
+(function _foo() {});
+const handler = function _handler() {};
+export default function () {}
+const [_first] = arr;
+const { _id } = obj;
+const { bar: _bar } = obj;
+const { foo: [_x, { a: _a }] } = obj;
+const [foo7, ...rest] = arr;
+class Foo {
+	_field;
+	#_privateField;
+	_onClick() {}
+	onClick_() {}
+	#_method() {}
+	read() {
+		return this.#_privateField;
+	}
+}
+const o = { _onClick() {}, _foo: "bar", foo_: "bar" };
+foo["_bar"];
+foo[_bar];
+import foo8 from "foo.json" with { _type: "json" };
+try {} catch (_error) {}
+class _Foo {}
+
+```

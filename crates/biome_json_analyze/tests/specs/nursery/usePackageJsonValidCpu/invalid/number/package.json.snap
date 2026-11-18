@@ -1,0 +1,34 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+	"name": "my-package",
+	"cpu": 64
+}
+
+```
+
+# Diagnostics
+```
+package.json:3:9 lint/nursery/usePackageJsonValidCpu ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value of the cpu field isn't an array.
+  
+    1 │ {
+    2 │ 	"name": "my-package",
+  > 3 │ 	"cpu": 64
+      │ 	       ^^
+    4 │ }
+    5 │ 
+  
+  i Package managers expect a list of the processor types that the package supports. They compare the list with the processor type of the machine to decide whether the package can be installed there.
+  
+  i List the supported processor types in an array, for example ["x64", "arm64"].
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

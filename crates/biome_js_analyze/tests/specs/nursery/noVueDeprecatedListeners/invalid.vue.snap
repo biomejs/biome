@@ -1,0 +1,269 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-on="$listeners" />
+  <div v-for="listener in $listeners" />
+  <div :foo="$listeners" />
+  <p>{{ $listeners.click }}</p>
+  <button @click="$listeners = replacement" />
+</template>
+
+<script>
+export default {
+  computed: {
+    foo() {
+      fn(this.$listeners);
+      return this.$listeners;
+    },
+    bar() {
+      const vm = this;
+      function inner() {
+        return vm.$listeners;
+      }
+      const a = vm?.$listeners;
+      const b = this?.$listeners;
+      (this).$listeners = {};
+      return inner();
+    },
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.vue:14:15 lint/nursery/noVueDeprecatedListeners ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Vue $listeners API is deprecated.
+  
+    12 │   computed: {
+    13 │     foo() {
+  > 14 │       fn(this.$listeners);
+       │               ^^^^^^^^^^
+    15 │       return this.$listeners;
+    16 │     },
+  
+  i Vue 3 removed $listeners and passes event listeners to the component through $attrs instead.
+  
+  i Use $attrs. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:15:19 lint/nursery/noVueDeprecatedListeners ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Vue $listeners API is deprecated.
+  
+    13 │     foo() {
+    14 │       fn(this.$listeners);
+  > 15 │       return this.$listeners;
+       │                   ^^^^^^^^^^
+    16 │     },
+    17 │     bar() {
+  
+  i Vue 3 removed $listeners and passes event listeners to the component through $attrs instead.
+  
+  i Use $attrs. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:20:19 lint/nursery/noVueDeprecatedListeners ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Vue $listeners API is deprecated.
+  
+    18 │       const vm = this;
+    19 │       function inner() {
+  > 20 │         return vm.$listeners;
+       │                   ^^^^^^^^^^
+    21 │       }
+    22 │       const a = vm?.$listeners;
+  
+  i Vue 3 removed $listeners and passes event listeners to the component through $attrs instead.
+  
+  i Use $attrs. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:22:21 lint/nursery/noVueDeprecatedListeners ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Vue $listeners API is deprecated.
+  
+    20 │         return vm.$listeners;
+    21 │       }
+  > 22 │       const a = vm?.$listeners;
+       │                     ^^^^^^^^^^
+    23 │       const b = this?.$listeners;
+    24 │       (this).$listeners = {};
+  
+  i Vue 3 removed $listeners and passes event listeners to the component through $attrs instead.
+  
+  i Use $attrs. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:23:23 lint/nursery/noVueDeprecatedListeners ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Vue $listeners API is deprecated.
+  
+    21 │       }
+    22 │       const a = vm?.$listeners;
+  > 23 │       const b = this?.$listeners;
+       │                       ^^^^^^^^^^
+    24 │       (this).$listeners = {};
+    25 │       return inner();
+  
+  i Vue 3 removed $listeners and passes event listeners to the component through $attrs instead.
+  
+  i Use $attrs. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:24:14 lint/nursery/noVueDeprecatedListeners ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Vue $listeners API is deprecated.
+  
+    22 │       const a = vm?.$listeners;
+    23 │       const b = this?.$listeners;
+  > 24 │       (this).$listeners = {};
+       │              ^^^^^^^^^^
+    25 │       return inner();
+    26 │     },
+  
+  i Vue 3 removed $listeners and passes event listeners to the component through $attrs instead.
+  
+  i Use $attrs. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:9 lint/nursery/noVueDeprecatedListeners ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Vue $listeners API is deprecated.
+  
+    4 │   <div v-for="listener in $listeners" />
+    5 │   <div :foo="$listeners" />
+  > 6 │   <p>{{ $listeners.click }}</p>
+      │         ^^^^^^^^^^
+    7 │   <button @click="$listeners = replacement" />
+    8 │ </template>
+  
+  i Vue 3 removed $listeners and passes event listeners to the component through $attrs instead.
+  
+  i Use $attrs. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:27 lint/nursery/noVueDeprecatedListeners ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Vue $listeners API is deprecated.
+  
+    2 │ <template>
+    3 │   <div v-on="$listeners" />
+  > 4 │   <div v-for="listener in $listeners" />
+      │                           ^^^^^^^^^^
+    5 │   <div :foo="$listeners" />
+    6 │   <p>{{ $listeners.click }}</p>
+  
+  i Vue 3 removed $listeners and passes event listeners to the component through $attrs instead.
+  
+  i Use $attrs. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:3:14 lint/nursery/noVueDeprecatedListeners ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Vue $listeners API is deprecated.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-on="$listeners" />
+      │              ^^^^^^^^^^
+    4 │   <div v-for="listener in $listeners" />
+    5 │   <div :foo="$listeners" />
+  
+  i Vue 3 removed $listeners and passes event listeners to the component through $attrs instead.
+  
+  i Use $attrs. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:14 lint/nursery/noVueDeprecatedListeners ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Vue $listeners API is deprecated.
+  
+    3 │   <div v-on="$listeners" />
+    4 │   <div v-for="listener in $listeners" />
+  > 5 │   <div :foo="$listeners" />
+      │              ^^^^^^^^^^
+    6 │   <p>{{ $listeners.click }}</p>
+    7 │   <button @click="$listeners = replacement" />
+  
+  i Vue 3 removed $listeners and passes event listeners to the component through $attrs instead.
+  
+  i Use $attrs. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:19 lint/nursery/noVueDeprecatedListeners ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Vue $listeners API is deprecated.
+  
+    5 │   <div :foo="$listeners" />
+    6 │   <p>{{ $listeners.click }}</p>
+  > 7 │   <button @click="$listeners = replacement" />
+      │                   ^^^^^^^^^^
+    8 │ </template>
+    9 │ 
+  
+  i Vue 3 removed $listeners and passes event listeners to the component through $attrs instead.
+  
+  i Use $attrs. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

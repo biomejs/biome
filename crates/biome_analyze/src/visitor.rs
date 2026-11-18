@@ -4,7 +4,7 @@ use crate::{
     matcher::{MatchQueryParams, Query},
     registry::{NodeLanguage, Phases},
 };
-use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, WalkEvent};
+use biome_rowan::{AstNode, Language, SyntaxKindSet, SyntaxNode, TextRange, WalkEvent};
 use std::collections::BinaryHeap;
 
 /// Mutable context objects shared by all visitors
@@ -41,6 +41,57 @@ impl<'phase, L: Language> VisitorContext<'phase, '_, L> {
 pub struct VisitorStartContext<'a, L: Language> {
     pub root: &'a LanguageRoot<L>,
     pub services: &'a mut ServiceBag,
+    tree: AnalyzedTree<'a, L>,
+}
+
+impl<'a, L: Language> VisitorStartContext<'a, L> {
+    pub(crate) fn new(root: &'a LanguageRoot<L>, services: &'a mut ServiceBag) -> Self {
+        Self {
+            root,
+            services,
+            tree: AnalyzedTree { root },
+        }
+    }
+
+    /// The tree the analyzer is running on.
+    pub fn tree(&self) -> AnalyzedTree<'a, L> {
+        self.tree
+    }
+}
+
+/// The tree an analyzer is running on.
+///
+/// Only the analyzer creates a value of this type, for the tree it analyzes,
+/// and hands it to its visitors through [`VisitorStartContext::tree`]. Holding
+/// one proves that the holder runs inside an analysis of that tree, not just
+/// that it holds its root. A service shared between the analyzers of several
+/// languages can therefore require it before giving out syntax nodes of `L`,
+/// so that holding a root of another language's tree is not enough to reach
+/// them.
+///
+/// It does not prove which analyzer runs: code that starts an [`Analyzer`] of
+/// its own on a root receives a value for that root.
+///
+/// [`Analyzer`]: crate::Analyzer
+///
+/// A value can't be created from a root obtained elsewhere:
+///
+/// ```compile_fail
+/// # use biome_analyze::AnalyzedTree;
+/// # use biome_rowan::raw_language::{RawLanguage, RawLanguageRoot};
+/// fn forge(root: &RawLanguageRoot) -> AnalyzedTree<'_, RawLanguage> {
+///     AnalyzedTree { root }
+/// }
+/// ```
+#[derive(Clone, Copy)]
+pub struct AnalyzedTree<'a, L: Language> {
+    root: &'a LanguageRoot<L>,
+}
+
+impl<'a, L: Language> AnalyzedTree<'a, L> {
+    pub fn root(&self) -> &'a LanguageRoot<L> {
+        self.root
+    }
 }
 
 /// Mutable context objects provided to the finish hook of visitors
@@ -65,6 +116,26 @@ pub trait Visitor {
         event: &WalkEvent<SyntaxNode<Self::Language>>,
         ctx: VisitorContext<Self::Language>,
     );
+
+    /// Returns the kinds of the nodes whose [WalkEvent]s this visitor reads, or
+    /// `None` if it reads every event.
+    ///
+    /// When every visitor of a phase returns a set, the phase walks only the
+    /// nodes whose kind is in the union of these sets. A visitor still receives
+    /// the events of the other kinds in that union, so returning a set promises
+    /// that events for nodes outside it leave the visitor and its output
+    /// unchanged. The tree root is reached only if its kind is in the union.
+    ///
+    /// `syntax_query_kinds` holds the kinds of [SyntaxNode] queries that the
+    /// query matcher can match in this phase, or `None` if the matcher can't
+    /// tell. Visitors that emit every node as a query return it.
+    fn visited_kinds(
+        &self,
+        syntax_query_kinds: Option<SyntaxKindSet<Self::Language>>,
+    ) -> Option<SyntaxKindSet<Self::Language>> {
+        let _ = syntax_query_kinds;
+        None
+    }
 
     fn finish(self: Box<Self>, ctx: VisitorFinishContext<Self::Language>) {
         let _ = ctx;

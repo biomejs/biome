@@ -1,0 +1,30 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: valid.jsonc
+---
+# Input
+```md
+
+```
+
+# Input
+```md
+# Heading
+```
+
+# Input
+```md
+<!-- header -->
+# Heading
+```
+
+# Input
+```md
+text﻿text
+```
+
+# Input
+```md
+
+﻿# Heading
+```

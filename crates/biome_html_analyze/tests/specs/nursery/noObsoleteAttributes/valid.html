@@ -1,0 +1,41 @@
+<!-- should not generate diagnostics -->
+<html lang="en">
+<head>
+<link rel="stylesheet" href="/style.css">
+<meta name="viewport" content="width=device-width">
+<script src="/script.js"></script>
+<script type="module" src="/module.js"></script>
+<style>p { color: red; }</style>
+</head>
+<body style="background-color: #ffffff">
+<a id="anchor" href="/page" rel="author">Link</a>
+<img id="photo" src="/photo.jpg" alt="" width="100" height="100">
+<input name="email" type="email" accept="image/*">
+<button name="submit" type="submit">Submit</button>
+<table style="width: 100%">
+	<caption>Results</caption>
+	<tr>
+		<th scope="col" abbr="Name">Name</th>
+	</tr>
+	<tr>
+		<td>Value</td>
+	</tr>
+</table>
+<iframe src="/page" style="border: 0" width="300" height="200"></iframe>
+<ol type="a"></ol>
+<label for="email">Email</label>
+<output for="email"></output>
+<map name="map">
+	<area href="/page" shape="rect" coords="0,0,10,10" alt="Page">
+</map>
+<img src="/map.png" alt="Map" usemap="#map">
+<object data="/movie.swf" type="application/x-shockwave-flash" width="100" height="100"></object>
+<canvas width="100" height="100"></canvas>
+<svg width="100" height="100">
+	<style type="text/css">circle { fill: red; }</style>
+	<a href="/page"><text x="0" y="10">Link</text></a>
+	<foreignObject dropzone="copy" />
+	<foreignObject dropzone="copy"><p>Text</p></foreignObject>
+</svg>
+</body>
+</html>

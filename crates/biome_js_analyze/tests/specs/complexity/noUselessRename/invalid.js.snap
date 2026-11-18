@@ -53,6 +53,8 @@ invalid.js:1:18 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━�
     2 │ 
     3 │ let { a, foo: foo } = obj;
   
+  i Renaming a name to the same name has no effect.
+  
   i Safe fix: Remove the renaming.
   
     1 │ let·{·/*before*/·foo:·foo·/*after*/·}·=·obj;
@@ -71,6 +73,8 @@ invalid.js:3:10 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━�
       │          ^^^^^^^^
     4 │ 
     5 │ let { foo: foo, b } = obj;
+  
+  i Renaming a name to the same name has no effect.
   
   i Safe fix: Remove the renaming.
   
@@ -91,6 +95,8 @@ invalid.js:5:7 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━�
     6 │ 
     7 │ let {
   
+  i Renaming a name to the same name has no effect.
+  
   i Safe fix: Remove the renaming.
   
     5 │ let·{·foo:·foo,·b·}·=·obj;
@@ -108,6 +114,8 @@ invalid.js:8:9 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━�
        │ 	       ^^^^^^^^
      9 │ } = obj;
     10 │ 
+  
+  i Renaming a name to the same name has no effect.
   
   i Safe fix: Remove the renaming.
   
@@ -128,6 +136,8 @@ invalid.js:11:18 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━
     12 │ 	obj;
     13 │ 
   
+  i Renaming a name to the same name has no effect.
+  
   i Safe fix: Remove the renaming.
   
     11 │ let·{·/*before*/·foo:·foo·/*after*/·=·/*before·default*/·a·/*after·default*/·}·=
@@ -146,6 +156,8 @@ invalid.js:14:14 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━
        │              ^^^^^^^^
     15 │ 
     16 │ ({ foo: foo }) => {};
+  
+  i Renaming a name to the same name has no effect.
   
   i Safe fix: Remove the renaming.
   
@@ -166,6 +178,8 @@ invalid.js:16:4 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━�
     17 │ 
     18 │ import { /*before*/ foo as foo /*after*/ } from "foo";
   
+  i Renaming a name to the same name has no effect.
+  
   i Safe fix: Remove the renaming.
   
     16 │ ({·foo:·foo·})·=>·{};
@@ -184,6 +198,8 @@ invalid.js:18:21 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━
        │                     ^^^^^^^^^^
     19 │ 
     20 │ import { a as a } from "foo";
+  
+  i Renaming a name to the same name has no effect.
   
   i Safe fix: Remove the renaming.
   
@@ -204,6 +220,8 @@ invalid.js:20:10 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━
     21 │ 
     22 │ export { /*before*/ foo as foo /*after*/ };
   
+  i Renaming a name to the same name has no effect.
+  
   i Safe fix: Remove the renaming.
   
     20 │ import·{·a·as·a·}·from·"foo";
@@ -223,6 +241,8 @@ invalid.js:22:21 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━
     23 │ 
     24 │ export { /*before*/ foo as foo /*after*/ } from "foo";
   
+  i Renaming a name to the same name has no effect.
+  
   i Safe fix: Remove the renaming.
   
     22 │ export·{·/*before*/·foo·as·foo·/*after*/·};
@@ -241,6 +261,8 @@ invalid.js:24:21 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━
        │                     ^^^^^^^^^^
     25 │ 
     26 │ // following cases are supported by ESLint
+  
+  i Renaming a name to the same name has no effect.
   
   i Safe fix: Remove the renaming.
   

@@ -1,0 +1,130 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import { computed, defineComponent } from "vue";
+import { computed as otherComputed } from "other-library";
+
+async function resolveComponents(components) {
+	return await Promise.all(
+		components.map(async (component) => {
+			if (typeof component === "function") {
+				return await component();
+			}
+			return component;
+		}),
+	);
+}
+
+function setup() {
+	const empty = computed(() => {});
+	const tryCatchFinally = computed(function () {
+		let bar = 0;
+		try {
+			bar = bar / 0;
+		} catch (e) {
+			return e;
+		} finally {
+			return bar;
+		}
+	});
+	const setterOnly = computed({
+		set() {
+			new Promise((resolve, reject) => {});
+		},
+	});
+	const returnsObject = computed(() => {
+		return {
+			async bar() {
+				const data = await baz(this.a);
+				return data;
+			},
+		};
+	});
+	const returnsArray = computed(() => {
+		const a = "test";
+		return [
+			async () => {
+				const baz = await bar(a);
+				return baz;
+			},
+			"b",
+			{},
+		];
+	});
+	const returnsFunction = computed(() => function () {
+		return async () => await bar();
+	});
+	const newPromiseMember = computed(() => new Promise.resolve());
+	const asyncArgument = computed(() => {
+		return new Bar(async () => await baz());
+	});
+	const asyncMethodArgument = computed(() => {
+		return someFunc.doSomething({
+			async bar() {
+				return await baz();
+			},
+		});
+	});
+	const conditionalObject = computed(() => {
+		return this.bar ? { baz: () => Promise.resolve(1) } : {};
+	});
+	const conditionalArrow = computed(() => {
+		return this.bar ? () => Promise.resolve(1) : null;
+	});
+	const conditionalAsyncArrow = computed(() => {
+		return this.bar ? async () => 1 : null;
+	});
+	const plainCall = computed(() => {
+		bar();
+	});
+	return { empty };
+}
+
+function shadowedGlobals() {
+	const Promise = { all: () => 1, resolve: () => 1 };
+	const setTimeout = (callback) => callback();
+	return computed(() => {
+		setTimeout(() => {});
+		new Promise(() => {});
+		return Promise.all([]) + Promise.resolve();
+	});
+}
+
+function shadowedWindow() {
+	const window = { setTimeout: (callback) => callback(), Promise: class {} };
+	return computed(() => {
+		window.setTimeout(() => {}, 0);
+		return new window.Promise();
+	});
+}
+
+function shadowedNextTick() {
+	const nextTick = (callback) => callback();
+	return computed(() => nextTick(() => 1));
+}
+
+const notVueComputed = otherComputed(async () => await Promise.resolve(1));
+const notComputed = notAComputed(async () => await Promise.resolve(1));
+
+defineComponent({
+	methods: {
+		async load() {
+			return Promise.all([]);
+		},
+	},
+});
+
+export default {
+	computed: {
+		// Options API objects in plain script files aren't treated as Vue components.
+		async foo() {
+			return 1;
+		},
+	},
+};
+
+```

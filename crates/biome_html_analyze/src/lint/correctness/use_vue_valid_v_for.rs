@@ -20,7 +20,7 @@ declare_lint_rule! {
     /// - The directive has an argument. E.g. `<div v-for:aaa="item in items"></div>`
     /// - The directive has a modifier. E.g. `<div v-for.bbb="item in items"></div>`
     /// - The directive does not have a value. E.g. `<div v-for></div>`
-    /// - The second or third aliases are empty or are not simple identifiers.
+    /// - The second or third aliases are empty or are not simple identifiers, for example because they use destructuring or a default value.
     /// - A custom component rendered with `v-for` is missing `v-bind:key`.
     /// - The `v-bind:key` expression does not use any variable introduced by the `v-for` directive.
     ///
@@ -181,7 +181,7 @@ impl Rule for UseVueValidVFor {
                 },
             )
             .note(markup! {
-                "Only the main item alias may use destructuring. The optional key and index aliases must be simple names."
+                "Only the main item alias may use destructuring or a default value. The optional key and index aliases must be simple names."
             })
             .note(markup! {
                 "Replace this alias with an identifier such as "<Emphasis>"index"</Emphasis>"."

@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-shadowed-macro.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+import { defineEmits } from "./macros";
+
+const events = ["notify"];
+defineEmits(events);
+defineEmits();
+</script>
+
+```

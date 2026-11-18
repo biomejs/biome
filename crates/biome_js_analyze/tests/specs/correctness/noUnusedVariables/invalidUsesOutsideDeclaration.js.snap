@@ -1,0 +1,233 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidUsesOutsideDeclaration.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// Reads whose value is discarded and updates in statement position are not uses.
+let onlyDiscarded = 0;
+onlyDiscarded;
+(onlyDiscarded, 1);
+for (onlyDiscarded; ; ) {}
+
+let onlyUpdated = 0;
+onlyUpdated++;
+--onlyUpdated;
+onlyUpdated += 1;
+(onlyUpdated = 2), 0;
+
+// References inside the declaration only.
+function onlyRecursive() {
+    return onlyRecursive();
+}
+
+const onlySelfScheduling = () => {
+    setTimeout(onlySelfScheduling);
+};
+
+class OnlySelfReferencing {
+    clone() {
+        return new OnlySelfReferencing();
+    }
+}
+
+// An arrow function parameter without parentheses, discarded or not read.
+[1].map(bareUnused => 0);
+[1].map(bareDiscarded => {
+    bareDiscarded;
+});
+
+```
+
+# Diagnostics
+```
+invalidUsesOutsideDeclaration.js:4:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! This variable onlyDiscarded is unused.
+  
+    3 │ // Reads whose value is discarded and updates in statement position are not uses.
+  > 4 │ let onlyDiscarded = 0;
+      │     ^^^^^^^^^^^^^
+    5 │ onlyDiscarded;
+    6 │ (onlyDiscarded, 1);
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend onlyDiscarded with an underscore.
+  
+     2  2 │   
+     3  3 │   // Reads whose value is discarded and updates in statement position are not uses.
+     4    │ - let·onlyDiscarded·=·0;
+     5    │ - onlyDiscarded;
+     6    │ - (onlyDiscarded,·1);
+     7    │ - for·(onlyDiscarded;·;·)·{}
+        4 │ + let·_onlyDiscarded·=·0;
+        5 │ + _onlyDiscarded;
+        6 │ + (_onlyDiscarded,·1);
+        7 │ + for·(_onlyDiscarded;·;·)·{}
+     8  8 │   
+     9  9 │   let onlyUpdated = 0;
+  
+
+```
+
+```
+invalidUsesOutsideDeclaration.js:9:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! This variable onlyUpdated is unused.
+  
+     7 │ for (onlyDiscarded; ; ) {}
+     8 │ 
+   > 9 │ let onlyUpdated = 0;
+       │     ^^^^^^^^^^^
+    10 │ onlyUpdated++;
+    11 │ --onlyUpdated;
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend onlyUpdated with an underscore.
+  
+     7  7 │   for (onlyDiscarded; ; ) {}
+     8  8 │   
+     9    │ - let·onlyUpdated·=·0;
+    10    │ - onlyUpdated++;
+    11    │ - --onlyUpdated;
+    12    │ - onlyUpdated·+=·1;
+    13    │ - (onlyUpdated·=·2),·0;
+        9 │ + let·_onlyUpdated·=·0;
+       10 │ + _onlyUpdated++;
+       11 │ + --_onlyUpdated;
+       12 │ + _onlyUpdated·+=·1;
+       13 │ + (_onlyUpdated·=·2),·0;
+    14 14 │   
+    15 15 │   // References inside the declaration only.
+  
+
+```
+
+```
+invalidUsesOutsideDeclaration.js:16:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  ! This function onlyRecursive is unused.
+  
+    15 │ // References inside the declaration only.
+  > 16 │ function onlyRecursive() {
+       │          ^^^^^^^^^^^^^
+    17 │     return onlyRecursive();
+    18 │ }
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend onlyRecursive with an underscore.
+  
+    14 14 │   
+    15 15 │   // References inside the declaration only.
+    16    │ - function·onlyRecursive()·{
+    17    │ - ····return·onlyRecursive();
+       16 │ + function·_onlyRecursive()·{
+       17 │ + ····return·_onlyRecursive();
+    18 18 │   }
+    19 19 │   
+  
+
+```
+
+```
+invalidUsesOutsideDeclaration.js:20:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  ! This variable onlySelfScheduling is unused.
+  
+    18 │ }
+    19 │ 
+  > 20 │ const onlySelfScheduling = () => {
+       │       ^^^^^^^^^^^^^^^^^^
+    21 │     setTimeout(onlySelfScheduling);
+    22 │ };
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend onlySelfScheduling with an underscore.
+  
+    18 18 │   }
+    19 19 │   
+    20    │ - const·onlySelfScheduling·=·()·=>·{
+    21    │ - ····setTimeout(onlySelfScheduling);
+       20 │ + const·_onlySelfScheduling·=·()·=>·{
+       21 │ + ····setTimeout(_onlySelfScheduling);
+    22 22 │   };
+    23 23 │   
+  
+
+```
+
+```
+invalidUsesOutsideDeclaration.js:24:7 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This class OnlySelfReferencing is unused.
+  
+    22 │ };
+    23 │ 
+  > 24 │ class OnlySelfReferencing {
+       │       ^^^^^^^^^^^^^^^^^^^
+    25 │     clone() {
+    26 │         return new OnlySelfReferencing();
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+```
+
+```
+invalidUsesOutsideDeclaration.js:31:9 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  ! This variable bareUnused is unused.
+  
+    30 │ // An arrow function parameter without parentheses, discarded or not read.
+  > 31 │ [1].map(bareUnused => 0);
+       │         ^^^^^^^^^^
+    32 │ [1].map(bareDiscarded => {
+    33 │     bareDiscarded;
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend bareUnused with an underscore.
+  
+    29 29 │   
+    30 30 │   // An arrow function parameter without parentheses, discarded or not read.
+    31    │ - [1].map(bareUnused·=>·0);
+       31 │ + [1].map(_bareUnused·=>·0);
+    32 32 │   [1].map(bareDiscarded => {
+    33 33 │       bareDiscarded;
+  
+
+```
+
+```
+invalidUsesOutsideDeclaration.js:32:9 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  ! This variable bareDiscarded is unused.
+  
+    30 │ // An arrow function parameter without parentheses, discarded or not read.
+    31 │ [1].map(bareUnused => 0);
+  > 32 │ [1].map(bareDiscarded => {
+       │         ^^^^^^^^^^^^^
+    33 │     bareDiscarded;
+    34 │ });
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend bareDiscarded with an underscore.
+  
+    30 30 │   // An arrow function parameter without parentheses, discarded or not read.
+    31 31 │   [1].map(bareUnused => 0);
+    32    │ - [1].map(bareDiscarded·=>·{
+    33    │ - ····bareDiscarded;
+       32 │ + [1].map(_bareDiscarded·=>·{
+       33 │ + ····_bareDiscarded;
+    34 34 │   });
+    35 35 │   
+  
+
+```

@@ -54,7 +54,7 @@ impl SearchQuery for GritSearchQuery {
             .get(&pattern_id)
             .ok_or_else(WorkspaceError::invalid_pattern)?;
         let result = query
-            .execute(GritTargetFile::new(path.as_path(), parse))
+            .execute_optimized(GritTargetFile::new(path.as_path(), parse))
             .map_err(|err| {
                 WorkspaceError::SearchError(SearchError::QueryError(QueryDiagnostic(
                     err.to_string(),

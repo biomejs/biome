@@ -45,7 +45,7 @@ pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<Definition
         }
 
         if let Some(reference) = JsReferenceIdentifier::cast_ref(&ancestor)
-            && let Some(binding) = semantic_model.binding(&reference)
+            && let Some(binding) = semantic_model.and_then(|model| model.binding(&reference))
         {
             let binding_syntax = binding.syntax();
             if let Some(specifier) = is_under_import_clause(&binding_syntax) {
@@ -64,7 +64,7 @@ pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<Definition
         }
 
         if let Some(reference) = JsxReferenceIdentifier::cast_ref(&ancestor)
-            && let Some(binding) = semantic_model.binding(&reference)
+            && let Some(binding) = semantic_model.and_then(|model| model.binding(&reference))
         {
             let binding_syntax = binding.syntax();
             if let Some(specifier) = is_under_import_clause(&binding_syntax) {
@@ -195,7 +195,7 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
         #[cfg(not(feature = "module_graph"))]
         DefinitionReference::HtmlComponent { .. } => return None,
         DefinitionReference::LocalEmbedded { range, .. } => {
-            let offset = params.parsed_source.diagnostic_offset(&params.workspace_db);
+            let offset = params.parsed_source.diagnostic_offset();
             if let Some(offset) = offset {
                 result.store(params.path.clone(), range.add(offset))
             }
@@ -234,7 +234,7 @@ fn resolve_import_definition(
                 module_db,
                 SymbolFromModuleInfo::new(module_db, local_name, target_module),
             );
-            if !matches!(lookup, JsExportedSymbolLookup::Found(_)) {
+            if !matches!(lookup, JsExportedSymbolLookup::Found(..)) {
                 lookup = find_js_exported_symbol(
                     module_db,
                     SymbolFromModuleInfo::new(module_db, "default", target_module),
@@ -247,7 +247,7 @@ fn resolve_import_definition(
                         TextRange::new(TextSize::from(0), TextSize::from(0)),
                     );
                 }
-                JsExportedSymbolLookup::Found(own_export) => match own_export {
+                JsExportedSymbolLookup::Found(own_export, _) => match own_export {
                     JsOwnExport::Binding(range) => {
                         result.store(BiomePath::new(target_path), *range)
                     }
@@ -278,7 +278,7 @@ fn resolve_import_definition(
                             TextRange::new(TextSize::from(0), TextSize::from(0)),
                         );
                     }
-                    JsExportedSymbolLookup::Found(own_export) => match own_export {
+                    JsExportedSymbolLookup::Found(own_export, _) => match own_export {
                         JsOwnExport::Binding(range) => {
                             result.store(BiomePath::new(target_path), *range)
                         }

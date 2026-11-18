@@ -41,6 +41,8 @@ file.astro:2:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━�
     3 │ ---
     4 │ <div></div>
   
+  i A debugger statement pauses the program when a debugger is open. It is meant for debugging only, and it should not be left in code that is shipped.
+  
   i Unsafe fix: Remove debugger statement
   
     1   │ - 

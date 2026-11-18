@@ -37,6 +37,8 @@ check.js:1:28 lint/suspicious/noUnusedExpressions ━━━━━━━━━━
   
   i This expression may be unintentionally unused or it might be a function that you forgot to call.
   
+  i Remove the expression, or change it so that it has an effect, for example by assigning its value or calling the function.
+  
 
 ```
 
@@ -47,6 +49,8 @@ check.js:1:28 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━�
   
   > 1 │ debugger; delete obj.prop; a === -0;
       │                            ^^^^^^^^
+  
+  i The comparison treats -0 and 0 as equal, so comparing against -0 gives the same result as comparing against 0.
   
   i Safe fix: Replace -0 with 0
   

@@ -30,6 +30,8 @@ invalidWithoutAutofix.js:2:1 lint/style/useExponentiationOperator ━━━━�
     3 │ Math.pow(a)
     4 │ Math.pow(a, b, c)
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
 
 ```
 
@@ -44,6 +46,8 @@ invalidWithoutAutofix.js:3:1 lint/style/useExponentiationOperator ━━━━�
       │ ^^^^^^^^^^^
     4 │ Math.pow(a, b, c)
     5 │ Math.pow(a, b, c, d)
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
 
 ```
@@ -60,6 +64,8 @@ invalidWithoutAutofix.js:4:1 lint/style/useExponentiationOperator ━━━━�
     5 │ Math.pow(a, b, c, d)
     6 │ 
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
 
 ```
 
@@ -75,6 +81,8 @@ invalidWithoutAutofix.js:5:1 lint/style/useExponentiationOperator ━━━━�
     6 │ 
     7 │ // shouldn't autofix if any of the arguments is spread
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
 
 ```
 
@@ -88,6 +96,8 @@ invalidWithoutAutofix.js:8:1 lint/style/useExponentiationOperator ━━━━�
        │ ^^^^^^^^^^^^^^
      9 │ Math.pow(...a, b)
     10 │ Math.pow(a, ...b)
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
 
 ```
@@ -104,6 +114,8 @@ invalidWithoutAutofix.js:9:1 lint/style/useExponentiationOperator ━━━━�
     10 │ Math.pow(a, ...b)
     11 │ Math.pow(a, b, ...c)
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
 
 ```
 
@@ -119,6 +131,8 @@ invalidWithoutAutofix.js:10:1 lint/style/useExponentiationOperator ━━━━�
     11 │ Math.pow(a, b, ...c)
     12 │ 
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
 
 ```
 
@@ -132,6 +146,8 @@ invalidWithoutAutofix.js:11:1 lint/style/useExponentiationOperator ━━━━�
   > 11 │ Math.pow(a, b, ...c)
        │ ^^^^^^^^^^^^^^^^^^^^
     12 │ 
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
 
 ```

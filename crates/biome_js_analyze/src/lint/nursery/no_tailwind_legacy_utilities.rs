@@ -73,7 +73,7 @@ declare_lint_rule! {
     /// [`tailwind` configuration](https://biomejs.dev/reference/configuration/#tailwind).
     ///
     pub NoTailwindLegacyUtilities {
-        version: "next",
+        version: "2.6.0",
         name: "noTailwindLegacyUtilities",
         language: "jsx",
         domains: &[RuleDomain::Tailwind],

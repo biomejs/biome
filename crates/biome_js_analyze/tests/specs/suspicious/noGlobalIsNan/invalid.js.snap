@@ -30,12 +30,14 @@ localIsNaN(isNaN);
 ```
 invalid.js:1:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
+  ! Use Number.isNaN instead of the global isNaN.
   
   > 1 │ isNaN({});
       │ ^^^^^
     2 │ 
     3 │ (isNaN)({});
+  
+  i The global isNaN converts its argument to a number first, so a non-numeric value such as "foo" is converted to NaN and the function returns true.
   
   i See the MDN documentation for more details.
   
@@ -52,7 +54,7 @@ invalid.js:1:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:3:2 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
+  ! Use Number.isNaN instead of the global isNaN.
   
     1 │ isNaN({});
     2 │ 
@@ -60,6 +62,8 @@ invalid.js:3:2 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━�
       │  ^^^^^
     4 │ 
     5 │ globalThis.isNaN({});
+  
+  i The global isNaN converts its argument to a number first, so a non-numeric value such as "foo" is converted to NaN and the function returns true.
   
   i See the MDN documentation for more details.
   
@@ -78,7 +82,7 @@ invalid.js:3:2 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:5:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
+  ! Use Number.isNaN instead of the global isNaN.
   
     3 │ (isNaN)({});
     4 │ 
@@ -86,6 +90,8 @@ invalid.js:5:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━�
       │ ^^^^^^^^^^^^^^^^
     6 │ 
     7 │ (globalThis).isNaN({});
+  
+  i The global isNaN converts its argument to a number first, so a non-numeric value such as "foo" is converted to NaN and the function returns true.
   
   i See the MDN documentation for more details.
   
@@ -104,7 +110,7 @@ invalid.js:5:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:7:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
+  ! Use Number.isNaN instead of the global isNaN.
   
     5 │ globalThis.isNaN({});
     6 │ 
@@ -112,6 +118,8 @@ invalid.js:7:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━�
       │ ^^^^^^^^^^^^^^^^^^
     8 │ 
     9 │ globalThis.globalThis.window.isNaN({});
+  
+  i The global isNaN converts its argument to a number first, so a non-numeric value such as "foo" is converted to NaN and the function returns true.
   
   i See the MDN documentation for more details.
   
@@ -130,7 +138,7 @@ invalid.js:7:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:9:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
+  ! Use Number.isNaN instead of the global isNaN.
   
      7 │ (globalThis).isNaN({});
      8 │ 
@@ -138,6 +146,8 @@ invalid.js:9:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     10 │ 
     11 │ globalThis["isNaN"]({});
+  
+  i The global isNaN converts its argument to a number first, so a non-numeric value such as "foo" is converted to NaN and the function returns true.
   
   i See the MDN documentation for more details.
   
@@ -156,7 +166,7 @@ invalid.js:9:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:11:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
+  ! Use Number.isNaN instead of the global isNaN.
   
      9 │ globalThis.globalThis.window.isNaN({});
     10 │ 
@@ -164,6 +174,8 @@ invalid.js:11:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^
     12 │ 
     13 │ (globalThis)[("isNaN")]({});
+  
+  i The global isNaN converts its argument to a number first, so a non-numeric value such as "foo" is converted to NaN and the function returns true.
   
   i See the MDN documentation for more details.
   
@@ -182,7 +194,7 @@ invalid.js:11:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━
 ```
 invalid.js:13:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
+  ! Use Number.isNaN instead of the global isNaN.
   
     11 │ globalThis["isNaN"]({});
     12 │ 
@@ -190,6 +202,8 @@ invalid.js:13:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^
     14 │ 
     15 │ function localIsNaN(isNaN) {
+  
+  i The global isNaN converts its argument to a number first, so a non-numeric value such as "foo" is converted to NaN and the function returns true.
   
   i See the MDN documentation for more details.
   
@@ -203,13 +217,15 @@ invalid.js:13:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━
 ```
 invalid.js:16:5 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
+  ! Use Number.isNaN instead of the global isNaN.
   
     15 │ function localIsNaN(isNaN) {
   > 16 │     globalThis.isNaN({});
        │     ^^^^^^^^^^^^^^^^
     17 │ }
     18 │ 
+  
+  i The global isNaN converts its argument to a number first, so a non-numeric value such as "foo" is converted to NaN and the function returns true.
   
   i See the MDN documentation for more details.
   
@@ -228,13 +244,15 @@ invalid.js:16:5 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━
 ```
 invalid.js:19:12 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
+  ! Use Number.isNaN instead of the global isNaN.
   
     17 │ }
     18 │ 
   > 19 │ localIsNaN(isNaN);
        │            ^^^^^
     20 │ 
+  
+  i The global isNaN converts its argument to a number first, so a non-numeric value such as "foo" is converted to NaN and the function returns true.
   
   i See the MDN documentation for more details.
   

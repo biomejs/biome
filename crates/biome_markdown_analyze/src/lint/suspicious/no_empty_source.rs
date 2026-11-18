@@ -61,7 +61,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoEmptySource {
-        version: "next",
+        version: "2.6.0",
         name: "noEmptySource",
         language: "md",
         recommended: false,

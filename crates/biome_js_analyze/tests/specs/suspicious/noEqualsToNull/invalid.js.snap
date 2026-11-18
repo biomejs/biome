@@ -22,6 +22,8 @@ invalid.js:2:5 lint/suspicious/noEqualsToNull  FIXABLE  ━━━━━━━━
     3 │ foo != null;
     4 │ 
   
+  i A loose comparison with null is also true for undefined, which is easy to overlook.
+  
   i Unsafe fix: Use === instead.
   
     2 │ foo·===·null;
@@ -39,6 +41,8 @@ invalid.js:3:5 lint/suspicious/noEqualsToNull  FIXABLE  ━━━━━━━━
   > 3 │ foo != null;
       │     ^^
     4 │ 
+  
+  i A loose comparison with null is also true for undefined, which is easy to overlook.
   
   i Unsafe fix: Use !== instead.
   

@@ -1,8 +1,9 @@
+use crate::cursor::node_rc::NodeRc;
 use crate::cursor::{NodeData, SyntaxElement, SyntaxToken, SyntaxTrivia};
 use crate::green::{Child, Children, GreenElementRef, Slot};
 use crate::{
-    Direction, GreenNode, GreenNodeData, NodeOrToken, RawSyntaxKind, SyntaxNodeText, TokenAtOffset,
-    WalkEvent,
+    Direction, GreenNode, GreenNodeData, Language, NodeOrToken, RawSyntaxKind, SyntaxKindSet,
+    SyntaxNodeText, TokenAtOffset, WalkEvent,
 };
 use biome_text_size::{TextRange, TextSize};
 use std::borrow::Cow;
@@ -10,26 +11,25 @@ use std::hash::{Hash, Hasher};
 use std::iter::FusedIterator;
 use std::ops;
 use std::ptr::NonNull;
-use std::rc::Rc;
 use std::{fmt, iter};
 
 use super::{GreenElement, NodeKind, WeakGreenElement};
 
 #[derive(Clone)]
 pub(crate) struct SyntaxNode {
-    pub(super) ptr: Rc<NodeData>,
+    pub(super) ptr: NodeRc,
 }
 
 impl SyntaxNode {
     pub(crate) fn new_root(green: GreenNode) -> Self {
         Self {
-            ptr: NodeData::new(
+            ptr: NodeRc::new(NodeData::new(
                 NodeKind::Root {
                     green: GreenElement::Node(green),
                 },
                 0,
                 0.into(),
-            ),
+            )),
         }
     }
 
@@ -40,14 +40,14 @@ impl SyntaxNode {
         offset: TextSize,
     ) -> Self {
         Self {
-            ptr: NodeData::new(
+            ptr: NodeRc::new(NodeData::new(
                 NodeKind::Child {
                     green: WeakGreenElement::new(GreenElementRef::Node(green)),
                     parent: parent.ptr,
                 },
                 slot,
                 offset,
-            ),
+            )),
         }
     }
 
@@ -57,7 +57,7 @@ impl SyntaxNode {
 
     #[inline]
     pub(super) fn data(&self) -> &NodeData {
-        self.ptr.as_ref()
+        &self.ptr
     }
 
     #[inline]
@@ -96,7 +96,34 @@ impl SyntaxNode {
         self.data().text_range()
     }
 
+    /// Returns the range of this node's text without the leading trivia of
+    /// its first token and the trailing trivia of its last token.
+    ///
+    /// Tokens whose text without trivia is empty, such as the EOF token, are
+    /// skipped over. When every token of the node is empty, the search
+    /// continues past the node's bounds, so the range can lie outside the
+    /// node's own range.
     pub fn text_trimmed_range(&self) -> TextRange {
+        let green = self.green();
+
+        match (
+            trimmed_start_in_subtree(green),
+            trimmed_end_in_subtree(green),
+        ) {
+            (Some(start), Some(end)) => {
+                let offset = self.offset();
+                TextRange::new(offset + start, offset + end)
+            }
+            _ => self.text_trimmed_range_from_tokens(),
+        }
+    }
+
+    /// Computes [Self::text_trimmed_range] by walking red tokens, which can
+    /// leave this node. Handles the cases the green-tree search gives up on:
+    /// nodes without a token with non-empty text, and nodes where such a
+    /// token comes after a child node whose text is all trivia.
+    #[cold]
+    fn text_trimmed_range_from_tokens(&self) -> TextRange {
         let range = self.text_range();
         let mut start = range.start();
         let mut end = range.end();
@@ -169,8 +196,22 @@ impl SyntaxNode {
     }
 
     #[inline]
+    pub fn grand_parent(&self) -> Option<Self> {
+        self.data().parent()?.parent_node()
+    }
+
+    #[inline]
     pub fn ancestors(&self) -> impl Iterator<Item = Self> + use<> {
         iter::successors(Some(self.clone()), Self::parent)
+    }
+
+    #[inline]
+    pub fn tree_top(&self) -> Self {
+        let mut top = self.clone();
+        while let Some(parent) = top.parent() {
+            top = parent;
+        }
+        top
     }
 
     #[inline]
@@ -179,8 +220,24 @@ impl SyntaxNode {
     }
 
     #[inline]
+    pub fn children_of_kinds<L: Language>(
+        &self,
+        kinds: SyntaxKindSet<L>,
+    ) -> SyntaxNodeChildrenOfKinds<L> {
+        SyntaxNodeChildrenOfKinds::new(self.clone(), kinds)
+    }
+
+    #[inline]
     pub fn children_with_tokens(&self) -> SyntaxElementChildren {
         SyntaxElementChildren::new(self.clone())
+    }
+
+    #[inline]
+    pub fn children_with_tokens_of_kinds<L: Language>(
+        &self,
+        kinds: SyntaxKindSet<L>,
+    ) -> SyntaxElementChildrenOfKinds<L> {
+        SyntaxElementChildrenOfKinds::new(self.clone(), kinds)
     }
 
     #[inline]
@@ -210,6 +267,10 @@ impl SyntaxNode {
         })
     }
 
+    pub fn first_child_of_kinds<L: Language>(&self, kinds: SyntaxKindSet<L>) -> Option<Self> {
+        self.children_of_kinds(kinds).next()
+    }
+
     pub fn last_child(&self) -> Option<Self> {
         self.green().children().rev().find_map(|child| {
             child.element().into_node().map(|green| {
@@ -233,6 +294,14 @@ impl SyntaxNode {
             )
         })
     }
+
+    pub fn first_child_or_token_of_kinds<L: Language>(
+        &self,
+        kinds: SyntaxKindSet<L>,
+    ) -> Option<SyntaxElement> {
+        self.children_with_tokens_of_kinds(kinds).next()
+    }
+
     pub fn last_child_or_token(&self) -> Option<SyntaxElement> {
         self.green().children().next_back().map(|child| {
             SyntaxElement::new(
@@ -247,12 +316,40 @@ impl SyntaxNode {
     pub fn next_sibling(&self) -> Option<Self> {
         self.data().next_sibling()
     }
+
+    pub fn next_sibling_of_kinds<L: Language>(&self, kinds: SyntaxKindSet<L>) -> Option<Self> {
+        self.data().green_siblings()?.following().find_map(|child| {
+            let green = child.element().into_node()?;
+            if !kinds.matches_raw(green.kind()) {
+                return None;
+            }
+            let parent = self.parent()?;
+            let offset = parent.offset() + child.rel_offset();
+            Some(Self::new_child(green, parent, child.slot(), offset))
+        })
+    }
+
     pub fn prev_sibling(&self) -> Option<Self> {
         self.data().prev_sibling()
     }
 
     pub fn next_sibling_or_token(&self) -> Option<SyntaxElement> {
         self.data().next_sibling_or_token()
+    }
+
+    pub fn next_sibling_or_token_of_kinds<L: Language>(
+        &self,
+        kinds: SyntaxKindSet<L>,
+    ) -> Option<SyntaxElement> {
+        self.data().green_siblings()?.following().find_map(|child| {
+            let element = child.element();
+            if !kinds.matches_raw(element.kind()) {
+                return None;
+            }
+            let parent = self.parent()?;
+            let offset = parent.offset() + child.rel_offset();
+            Some(SyntaxElement::new(element, parent, child.slot(), offset))
+        })
     }
     pub fn prev_sibling_or_token(&self) -> Option<SyntaxElement> {
         self.data().prev_sibling_or_token()
@@ -264,6 +361,14 @@ impl SyntaxNode {
 
     pub fn last_token(&self) -> Option<SyntaxToken> {
         self.edge_token(Direction::Prev)
+    }
+
+    pub fn next_token(&self) -> Option<SyntaxToken> {
+        SyntaxElement::Node(self.clone()).next_token()
+    }
+
+    pub fn prev_token(&self) -> Option<SyntaxToken> {
+        SyntaxElement::Node(self.clone()).prev_token()
     }
 
     /// Starts at this node and searches its subtree left to right (`Next`) or
@@ -354,6 +459,14 @@ impl SyntaxNode {
     #[inline]
     pub fn preorder(&self) -> Preorder {
         Preorder::new(self.clone())
+    }
+
+    #[inline]
+    pub fn preorder_matching<L: Language>(
+        &self,
+        kinds: SyntaxKindSet<L>,
+    ) -> PreorderMatching<'_, L> {
+        PreorderMatching::new(self, kinds)
     }
 
     #[inline]
@@ -455,6 +568,39 @@ impl SyntaxNode {
             })
     }
 
+    /// Returns the first node with the given range and kind on the path that
+    /// repeated calls to [Self::child_or_token_at_range] take from this node,
+    /// this node included. The path ends at the first slot that is empty or
+    /// holds a token.
+    ///
+    /// Each level's red node is created once, and the search stops at the
+    /// match without looking at its children.
+    pub(crate) fn descendant_at_range_with_kind(
+        &self,
+        range: TextRange,
+        kind: RawSyntaxKind,
+    ) -> Option<Self> {
+        if self.text_range() == range && self.kind() == kind {
+            return Some(self.clone());
+        }
+
+        // `green` borrows from `self`, which keeps the whole tree alive, so
+        // `node` can move into its child without being borrowed.
+        let mut green = self.green();
+        let mut node = self.clone();
+        loop {
+            let offset = node.offset();
+            let (index, rel_offset, slot) = green.slot_at_range(range - offset)?;
+            let child = slot.as_ref()?.into_node()?;
+            let child_offset = offset + rel_offset;
+            node = Self::new_child(child, node, index as u32, child_offset);
+            if TextRange::at(child_offset, child.text_len()) == range && child.kind() == kind {
+                return Some(node);
+            }
+            green = child;
+        }
+    }
+
     #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
     pub fn detach(self) -> Self {
         Self {
@@ -482,10 +628,99 @@ impl SyntaxNode {
     }
 
     #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
+    pub(crate) fn splice_many_slots<E, R>(self, edits: E) -> Self
+    where
+        E: IntoIterator<Item = (usize, R)>,
+        R: IntoIterator<Item = Option<SyntaxElement>>,
+    {
+        let green =
+            self.green()
+                .splice_many_slots(edits.into_iter().map(|(index, replacement)| {
+                    (
+                        index,
+                        replacement.into_iter().map(|element| {
+                            element.map(|child| match child.detach() {
+                                NodeOrToken::Node(it) => it.ptr.into_green(),
+                                NodeOrToken::Token(it) => it.into_green(),
+                            })
+                        }),
+                    )
+                }));
+
+        Self {
+            ptr: self.ptr.into_root_with_green(GreenElement::Node(green)),
+        }
+    }
+
+    #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
     pub fn replace_child(self, prev_elem: SyntaxElement, next_elem: SyntaxElement) -> Option<Self> {
         Some(Self {
             ptr: self.ptr.replace_child(prev_elem, next_elem)?,
         })
+    }
+}
+
+/// Returns the offset, relative to `node`, at which the text of the first
+/// token with non-empty text starts, leading trivia excluded.
+///
+/// Descends into the first child node with a non-zero length without
+/// remembering the siblings that follow it, so the search runs in constant
+/// memory on deep trees. Returns `None` when the text of that child is all
+/// trivia, as well as when the subtree has no token with non-empty text.
+fn trimmed_start_in_subtree(mut node: &GreenNodeData) -> Option<TextSize> {
+    let mut offset = TextSize::from(0);
+
+    'descend: loop {
+        for child in node.children() {
+            match child.element() {
+                NodeOrToken::Token(token) => {
+                    let (leading_len, trailing_len, total_len) = token.leading_trailing_total_len();
+                    if total_len > leading_len + trailing_len {
+                        return Some(offset + child.rel_offset() + leading_len);
+                    }
+                }
+                NodeOrToken::Node(child_node) => {
+                    // A node without text only holds empty tokens.
+                    if child_node.text_len() > TextSize::from(0) {
+                        offset += child.rel_offset();
+                        node = child_node;
+                        continue 'descend;
+                    }
+                }
+            }
+        }
+
+        return None;
+    }
+}
+
+/// Returns the offset, relative to `node`, at which the text of the last
+/// token with non-empty text ends, trailing trivia excluded.
+///
+/// The mirror image of [trimmed_start_in_subtree], with the same limits.
+fn trimmed_end_in_subtree(mut node: &GreenNodeData) -> Option<TextSize> {
+    let mut offset = TextSize::from(0);
+
+    'descend: loop {
+        for child in node.children().rev() {
+            match child.element() {
+                NodeOrToken::Token(token) => {
+                    let (leading_len, trailing_len, total_len) = token.leading_trailing_total_len();
+                    if total_len > leading_len + trailing_len {
+                        return Some(offset + child.rel_offset() + total_len - trailing_len);
+                    }
+                }
+                NodeOrToken::Node(child_node) => {
+                    if child_node.text_len() > TextSize::from(0) {
+                        offset += child.rel_offset();
+                        node = child_node;
+                        continue 'descend;
+                    }
+                }
+            }
+        }
+
+        return None;
     }
 }
 
@@ -552,6 +787,51 @@ impl Iterator for SyntaxNodeChildren {
 
 impl FusedIterator for SyntaxNodeChildren {}
 
+#[derive(Clone, Debug)]
+pub(crate) struct SyntaxNodeChildrenOfKinds<L: Language> {
+    parent: SyntaxNode,
+    kinds: SyntaxKindSet<L>,
+    next_slot: usize,
+}
+
+impl<L: Language> SyntaxNodeChildrenOfKinds<L> {
+    fn new(parent: SyntaxNode, kinds: SyntaxKindSet<L>) -> Self {
+        Self {
+            parent,
+            kinds,
+            next_slot: 0,
+        }
+    }
+}
+
+impl<L: Language> Iterator for SyntaxNodeChildrenOfKinds<L> {
+    type Item = SyntaxNode;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            let index = self.next_slot;
+            let slot = self.parent.green().slice().get(index)?;
+            self.next_slot += 1;
+
+            let Slot::Node { node, rel_offset } = slot else {
+                continue;
+            };
+            if !self.kinds.matches_raw(node.kind()) {
+                continue;
+            }
+
+            return Some(SyntaxNode::new_child(
+                node,
+                self.parent.clone(),
+                index as u32,
+                self.parent.offset() + *rel_offset,
+            ));
+        }
+    }
+}
+
+impl<L: Language> FusedIterator for SyntaxNodeChildrenOfKinds<L> {}
+
 #[derive(Clone, Debug, Default)]
 pub(crate) struct SyntaxElementChildren {
     next: Option<SyntaxElement>,
@@ -576,6 +856,52 @@ impl Iterator for SyntaxElementChildren {
 
 impl FusedIterator for SyntaxElementChildren {}
 
+#[derive(Clone, Debug)]
+pub(crate) struct SyntaxElementChildrenOfKinds<L: Language> {
+    parent: SyntaxNode,
+    kinds: SyntaxKindSet<L>,
+    next_slot: usize,
+}
+
+impl<L: Language> SyntaxElementChildrenOfKinds<L> {
+    fn new(parent: SyntaxNode, kinds: SyntaxKindSet<L>) -> Self {
+        Self {
+            parent,
+            kinds,
+            next_slot: 0,
+        }
+    }
+}
+
+impl<L: Language> Iterator for SyntaxElementChildrenOfKinds<L> {
+    type Item = SyntaxElement;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            let index = self.next_slot;
+            let slot = self.parent.green().slice().get(index)?;
+            self.next_slot += 1;
+
+            let Some(element) = slot.as_ref() else {
+                continue;
+            };
+            if !self.kinds.matches_raw(element.kind()) {
+                continue;
+            }
+
+            return Some(SyntaxElement::new(
+                element,
+                self.parent.clone(),
+                index as u32,
+                self.parent.offset() + slot.rel_offset(),
+            ));
+        }
+    }
+}
+
+impl<L: Language> FusedIterator for SyntaxElementChildrenOfKinds<L> {}
+
+#[derive(Clone, Debug)]
 pub(crate) struct Preorder {
     start: SyntaxNode,
     next: Option<WalkEvent<SyntaxNode>>,
@@ -637,6 +963,143 @@ impl Iterator for Preorder {
 
 impl FusedIterator for Preorder {}
 
+/// Preorder traversal that yields only the nodes whose kind is in `kinds`.
+///
+/// The traversal reads the green tree. It allocates a cursor node for each
+/// yielded node and for the ancestors of that node, and for nothing else.
+pub(crate) struct PreorderMatching<'a, L: Language> {
+    start: &'a SyntaxNode,
+    kinds: SyntaxKindSet<L>,
+    /// Path from `start` to the node whose children are being read. Empty before
+    /// the first call to `next` and after the traversal has left `start`.
+    ///
+    /// Below `start`, a node is on the path only if it matches `kinds` or has a
+    /// child node: any other node has no events to yield and nothing below it
+    /// to read.
+    path: Vec<PathSegment<'a>>,
+    entered_start: bool,
+}
+
+struct PathSegment<'a> {
+    green: &'a GreenNodeData,
+    /// Index of the next slot of `green` to read.
+    next_slot: u32,
+    slot: u32,
+    offset: TextSize,
+    is_match: bool,
+    /// Allocated when this node or one of its descendants is yielded.
+    node: Option<SyntaxNode>,
+}
+
+impl<'a, L: Language> PreorderMatching<'a, L> {
+    fn new(start: &'a SyntaxNode, kinds: SyntaxKindSet<L>) -> Self {
+        Self {
+            start,
+            kinds,
+            path: Vec::new(),
+            entered_start: false,
+        }
+    }
+
+    pub fn skip_subtree(&mut self) {
+        if let Some(segment) = self.path.last_mut() {
+            segment.next_slot = u32::MAX;
+        }
+    }
+
+    /// Returns the cursor node of the last path segment, allocating the cursor
+    /// nodes that the path is still missing.
+    fn current_node(&mut self) -> Option<SyntaxNode> {
+        let allocated = self
+            .path
+            .iter()
+            .rposition(|segment| segment.node.is_some())?;
+        let (ancestors, missing) = self.path.split_at_mut(allocated + 1);
+        let mut node = ancestors.last()?.node.clone()?;
+        for segment in missing {
+            node = SyntaxNode::new_child(segment.green, node, segment.slot, segment.offset);
+            segment.node = Some(node.clone());
+        }
+        Some(node)
+    }
+}
+
+impl<L: Language> Iterator for PreorderMatching<'_, L> {
+    type Item = WalkEvent<SyntaxNode>;
+
+    fn next(&mut self) -> Option<WalkEvent<SyntaxNode>> {
+        if !self.entered_start {
+            self.entered_start = true;
+            let green = self.start.green();
+            let is_match = self.kinds.matches_raw(green.kind());
+            self.path.push(PathSegment {
+                green,
+                next_slot: 0,
+                slot: self.start.data().slot(),
+                offset: self.start.offset(),
+                is_match,
+                node: Some(self.start.clone()),
+            });
+            if is_match {
+                return Some(WalkEvent::Enter(self.start.clone()));
+            }
+        }
+
+        loop {
+            let parent = self.path.last_mut()?;
+            let slots = parent.green.slice();
+            let next_child = slots
+                .get(parent.next_slot as usize..)
+                .unwrap_or_default()
+                .iter()
+                .enumerate()
+                .find_map(|(index, slot)| match slot {
+                    Slot::Node { rel_offset, node } => Some((index, *rel_offset, &**node)),
+                    Slot::Token { .. } | Slot::Empty { .. } => None,
+                });
+            let Some((index, rel_offset, green)) = next_child else {
+                // Only `is_match` and `node` are needed, so they are read in
+                // place instead of copying the whole segment out with `pop`.
+                let node = if parent.is_match {
+                    parent.node.take()
+                } else {
+                    None
+                };
+                self.path.truncate(self.path.len() - 1);
+                match node {
+                    Some(node) => return Some(WalkEvent::Leave(node)),
+                    None => continue,
+                }
+            };
+            let slot = parent.next_slot + index as u32;
+            parent.next_slot = slot + 1;
+            let is_match = self.kinds.matches_raw(green.kind());
+            let has_child_node = green
+                .slice()
+                .iter()
+                .any(|slot| matches!(slot, Slot::Node { .. }));
+            if !is_match && !has_child_node {
+                continue;
+            }
+            let offset = parent.offset + rel_offset;
+            self.path.push(PathSegment {
+                green,
+                next_slot: 0,
+                slot,
+                offset,
+                is_match,
+                node: None,
+            });
+            if is_match {
+                return self.current_node().map(WalkEvent::Enter);
+            }
+        }
+    }
+}
+
+impl<L: Language> FusedIterator for PreorderMatching<'_, L> {}
+
+#[derive(Clone, Debug)]
 pub(crate) struct PreorderWithTokens {
     start: SyntaxElement,
     next: Option<WalkEvent<SyntaxElement>>,
@@ -1008,12 +1471,194 @@ impl<'a> Siblings<'a> {
 #[cfg(test)]
 mod tests {
     use crate::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
-    use crate::{SyntaxNode, SyntaxSlot, TextRange, TextSize, TokenAtOffset, TriviaPiece};
+    use crate::{
+        SyntaxKindSet, SyntaxNode, SyntaxSlot, SyntaxToken, TextRange, TextSize, TokenAtOffset,
+        TriviaPiece, WalkEvent,
+    };
 
     fn token_texts_at_offset(node: &SyntaxNode<RawLanguage>, offset: u32) -> Vec<String> {
         node.token_at_offset(TextSize::from(offset))
             .map(|token| token.text_trimmed().to_string())
             .collect()
+    }
+
+    fn detached_node(
+        kind: RawLanguageKind,
+        slots: Vec<Option<crate::SyntaxElement<RawLanguage>>>,
+    ) -> SyntaxNode<RawLanguage> {
+        SyntaxNode::new_detached(kind, slots)
+    }
+
+    fn literal(text: &str) -> Option<crate::SyntaxElement<RawLanguage>> {
+        let token = SyntaxToken::new_detached(RawLanguageKind::NUMBER_TOKEN, text, [], []);
+        Some(
+            detached_node(
+                RawLanguageKind::LITERAL_EXPRESSION,
+                vec![Some(token.into())],
+            )
+            .into(),
+        )
+    }
+
+    /// What a consumer can observe of a node yielded by a traversal.
+    #[derive(Debug, PartialEq)]
+    struct ObservedEvent {
+        is_enter: bool,
+        node: SyntaxNode<RawLanguage>,
+        range: TextRange,
+        index: usize,
+        ancestors: Vec<SyntaxNode<RawLanguage>>,
+    }
+
+    fn observed(
+        events: impl Iterator<Item = WalkEvent<SyntaxNode<RawLanguage>>>,
+    ) -> Vec<ObservedEvent> {
+        events
+            .map(|event| {
+                let (is_enter, node) = match event {
+                    WalkEvent::Enter(node) => (true, node),
+                    WalkEvent::Leave(node) => (false, node),
+                };
+                ObservedEvent {
+                    is_enter,
+                    range: node.text_range_with_trivia(),
+                    index: node.index(),
+                    ancestors: node.ancestors().collect(),
+                    node,
+                }
+            })
+            .collect()
+    }
+
+    fn preorder_test_tree() -> SyntaxNode<RawLanguage> {
+        use RawLanguageKind::{CONDITION, EXPRESSION_LIST, LITERAL_EXPRESSION, ROOT};
+
+        let nested_literal = detached_node(
+            LITERAL_EXPRESSION,
+            vec![Some(
+                detached_node(EXPRESSION_LIST, vec![literal("3")]).into(),
+            )],
+        );
+        let condition = detached_node(
+            CONDITION,
+            vec![
+                None,
+                literal("1"),
+                Some(
+                    detached_node(
+                        EXPRESSION_LIST,
+                        vec![Some(
+                            detached_node(CONDITION, vec![None, literal("22")]).into(),
+                        )],
+                    )
+                    .into(),
+                ),
+            ],
+        );
+        // Nodes without child nodes, between and after nodes of the kinds they
+        // contain elsewhere.
+        let childless = detached_node(
+            EXPRESSION_LIST,
+            vec![
+                literal("4"),
+                Some(detached_node(CONDITION, vec![None]).into()),
+                Some(SyntaxToken::new_detached(RawLanguageKind::PLUS_TOKEN, "+", [], []).into()),
+                literal("5"),
+                Some(detached_node(CONDITION, vec![]).into()),
+            ],
+        );
+        let leading_token = SyntaxToken::new_detached(RawLanguageKind::STRING_TOKEN, "'a'", [], []);
+        detached_node(
+            ROOT,
+            vec![
+                Some(leading_token.into()),
+                Some(condition.into()),
+                None,
+                Some(nested_literal.into()),
+                Some(childless.into()),
+                Some(detached_node(EXPRESSION_LIST, vec![]).into()),
+            ],
+        )
+    }
+
+    fn preorder_kind_sets() -> [SyntaxKindSet<RawLanguage>; 6] {
+        use RawLanguageKind::{CONDITION, EXPRESSION_LIST, LITERAL_EXPRESSION, ROOT};
+
+        [
+            SyntaxKindSet::EMPTY,
+            SyntaxKindSet::of(LITERAL_EXPRESSION),
+            SyntaxKindSet::of(CONDITION),
+            SyntaxKindSet::of(ROOT).union(SyntaxKindSet::of(EXPRESSION_LIST)),
+            SyntaxKindSet::of(LITERAL_EXPRESSION).union(SyntaxKindSet::of(CONDITION)),
+            SyntaxKindSet::of(ROOT)
+                .union(SyntaxKindSet::of(EXPRESSION_LIST))
+                .union(SyntaxKindSet::of(LITERAL_EXPRESSION))
+                .union(SyntaxKindSet::of(CONDITION)),
+        ]
+    }
+
+    #[test]
+    fn preorder_of_kinds_yields_the_matching_preorder_events() {
+        let root = preorder_test_tree();
+        let mut yielded = 0;
+        for start in root.descendants() {
+            for kinds in preorder_kind_sets() {
+                let expected = observed(start.preorder().filter(|event| match event {
+                    WalkEvent::Enter(node) | WalkEvent::Leave(node) => kinds.matches(node.kind()),
+                }));
+                let actual = observed(start.preorder_of_kinds(kinds));
+                assert_eq!(actual, expected, "from {start:?}");
+                yielded += actual.len();
+            }
+        }
+        assert!(yielded > 0);
+    }
+
+    #[test]
+    fn preorder_of_kinds_skips_subtrees_like_preorder() {
+        use RawLanguageKind::{CONDITION, EXPRESSION_LIST, LITERAL_EXPRESSION, ROOT};
+
+        let root = preorder_test_tree();
+        let mut skipped = 0;
+        for start in root.descendants() {
+            for kinds in preorder_kind_sets() {
+                for skipped_kind in [ROOT, CONDITION, EXPRESSION_LIST, LITERAL_EXPRESSION] {
+                    let skips = |event: &WalkEvent<SyntaxNode<RawLanguage>>| matches!(event, WalkEvent::Enter(node) if node.kind() == skipped_kind);
+
+                    let mut preorder = start.preorder();
+                    let mut expected = Vec::new();
+                    while let Some(event) = preorder.next() {
+                        let node = match &event {
+                            WalkEvent::Enter(node) | WalkEvent::Leave(node) => node,
+                        };
+                        if !kinds.matches(node.kind()) {
+                            continue;
+                        }
+                        if skips(&event) {
+                            preorder.skip_subtree();
+                        }
+                        expected.push(event);
+                    }
+
+                    let mut preorder = start.preorder_of_kinds(kinds);
+                    let mut actual = Vec::new();
+                    while let Some(event) = preorder.next() {
+                        if skips(&event) {
+                            preorder.skip_subtree();
+                            skipped += 1;
+                        }
+                        actual.push(event);
+                    }
+
+                    assert_eq!(
+                        observed(actual.into_iter()),
+                        observed(expected.into_iter()),
+                        "from {start:?} skipping {skipped_kind:?}"
+                    );
+                }
+            }
+        }
+        assert!(skipped > 0);
     }
 
     #[test]

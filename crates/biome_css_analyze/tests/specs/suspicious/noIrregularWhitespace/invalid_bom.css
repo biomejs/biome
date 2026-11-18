@@ -1,0 +1,5 @@
+﻿
+/* should generate diagnostics: U+000C form feed */
+.foo {
+	color: red;
+}

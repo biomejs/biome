@@ -1,6 +1,6 @@
 use crate::cursor::{SyntaxNode, SyntaxToken};
 use crate::green::{GreenElement, GreenElementRef};
-use crate::{NodeOrToken, RawSyntaxKind};
+use crate::{Direction, NodeOrToken, RawSyntaxKind, WalkEvent};
 use biome_text_size::{TextRange, TextSize};
 use std::iter;
 
@@ -60,16 +60,69 @@ impl SyntaxElement {
         iter::successors(first, SyntaxNode::parent)
     }
 
+    #[inline]
+    pub fn tree_top(&self) -> Option<SyntaxNode> {
+        self.ancestors().last()
+    }
+
     pub fn first_token(&self) -> Option<SyntaxToken> {
         match self {
             Self::Node(it) => it.first_token(),
             Self::Token(it) => Some(it.clone()),
         }
     }
+
     pub fn last_token(&self) -> Option<SyntaxToken> {
         match self {
             Self::Node(it) => it.last_token(),
             Self::Token(it) => Some(it.clone()),
+        }
+    }
+
+    pub fn next_token(&self) -> Option<SyntaxToken> {
+        self.token_in_direction(Direction::Next)
+    }
+
+    pub fn prev_token(&self) -> Option<SyntaxToken> {
+        self.token_in_direction(Direction::Prev)
+    }
+
+    fn token_in_direction(&self, direction: Direction) -> Option<SyntaxToken> {
+        let mut current = WalkEvent::Leave(self.clone());
+
+        loop {
+            current = match current {
+                WalkEvent::Enter(element) => match element {
+                    Self::Token(token) => return Some(token),
+                    Self::Node(node) => {
+                        let child = match direction {
+                            Direction::Next => node.first_child_or_token(),
+                            Direction::Prev => node.last_child_or_token(),
+                        };
+
+                        match child {
+                            Some(child) => WalkEvent::Enter(child),
+                            None => WalkEvent::Leave(Self::Node(node)),
+                        }
+                    }
+                },
+                WalkEvent::Leave(element) => {
+                    let mut element = element;
+
+                    loop {
+                        let sibling = match direction {
+                            Direction::Next => element.next_sibling_or_token(),
+                            Direction::Prev => element.prev_sibling_or_token(),
+                        };
+
+                        if let Some(sibling) = sibling {
+                            break WalkEvent::Enter(sibling);
+                        }
+
+                        element = element.parent()?.into();
+                    }
+                }
+            };
         }
     }
 

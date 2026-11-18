@@ -111,7 +111,10 @@ impl Rule for UseConsistentGraphqlDescriptions {
                 },
             )
             .note(markup! {
-                    "To stay consistent within the project, write the description "{style}" style."
+                "Using different description styles in the same project makes a schema harder to read and maintain."
+            })
+            .note(markup! {
+                "To stay consistent within the project, write the description "{style}" style."
             }),
         )
     }

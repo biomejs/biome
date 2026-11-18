@@ -1,0 +1,42 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/declaration/parity-custom-property-urls.css
+---
+
+# Input
+
+```css
+.icon{
+--icon:url(data:image/svg+xml,%3Csvg%20xmlns=%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width=%2210%22%20height=%2210%22%3E%3Crect%20width=%2210%22%20height=%2210%22%20fill=%22red%22/%3E%3C/svg%3E);
+background-image:var(--icon);
+}
+
+.ordinary{background-image:url(data:image/svg+xml,%3Csvg%20xmlns=%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width=%2210%22%20height=%2210%22%3E%3Crect%20width=%2210%22%20height=%2210%22%20fill=%22red%22/%3E%3C/svg%3E);color:  red}
+.following{margin:0}
+
+```
+
+
+# Formatted
+
+```css
+.icon {
+	--icon: url(data:image/svg+xml,%3Csvg%20xmlns=%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width=%2210%22%20height=%2210%22%3E%3Crect%20width=%2210%22%20height=%2210%22%20fill=%22red%22/%3E%3C/svg%3E);
+	background-image: var(--icon);
+}
+
+.ordinary {
+	background-image: url(data:image/svg+xml,%3Csvg%20xmlns=%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width=%2210%22%20height=%2210%22%3E%3Crect%20width=%2210%22%20height=%2210%22%20fill=%22red%22/%3E%3C/svg%3E);
+	color: red;
+}
+.following {
+	margin: 0;
+}
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2: 	--icon: url(data:image/svg+xml,%3Csvg%20xmlns=%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width=%2210%22%20height=%2210%22%3E%3Crect%20width=%2210%22%20height=%2210%22%20fill=%22red%22/%3E%3C/svg%3E);
+    7: 	background-image: url(data:image/svg+xml,%3Csvg%20xmlns=%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width=%2210%22%20height=%2210%22%3E%3Crect%20width=%2210%22%20height=%2210%22%20fill=%22red%22/%3E%3C/svg%3E);
+```

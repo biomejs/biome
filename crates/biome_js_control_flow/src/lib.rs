@@ -19,6 +19,7 @@ pub use db::{
     control_flow_model_from_snippet, control_flow_model_from_source, js_control_flow_model,
 };
 pub use model::ControlFlowModel;
+pub use nodes::is_truthy_literal;
 pub use visitor::AnyJsControlFlowRoot;
 
 use biome_js_syntax::{AnyJsRoot, JsLanguage};
@@ -34,7 +35,10 @@ pub(crate) type FunctionBuilder = biome_control_flow::builder::FunctionBuilder<J
 pub fn control_flow_model(root: &AnyJsRoot) -> ControlFlowModel {
     let mut visitor = visitor::ControlFlowVisitor::new();
     let mut graphs = Vec::new();
-    for event in root.syntax().preorder() {
+    for event in root
+        .syntax()
+        .preorder_of_kinds(visitor::ControlFlowVisitor::VISITED_KINDS)
+    {
         visitor.visit(event, &mut graphs);
     }
     ControlFlowModel::new(root, graphs)

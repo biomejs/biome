@@ -1,0 +1,22 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid-return.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+export default {
+  methods: {
+    getRefs() {
+      return this.$refs;
+    },
+  },
+};
+</script>
+
+<template>
+  <input ref="a" />
+</template>
+
+```

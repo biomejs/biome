@@ -65,7 +65,7 @@ declare_source_rule! {
     /// Sort such arguments manually, or put each argument on its own line.
     ///
     pub UseGraphqlSortedArguments {
-        version: "next",
+        version: "2.6.0",
         name: "useGraphqlSortedArguments",
         language: "graphql",
         recommended: false,

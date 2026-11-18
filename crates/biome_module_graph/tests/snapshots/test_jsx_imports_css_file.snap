@@ -35,19 +35,6 @@ Referenced classes: [
 ]
 ```
 
-## Exported Bindings
-
-```
-App => BindingTypeData {
-  Types unknown,
-}
-```
-
-## Registered types
-
-```
-Module TypeId(0) => unknown
-```
 
 # `/src/styles.css`
 

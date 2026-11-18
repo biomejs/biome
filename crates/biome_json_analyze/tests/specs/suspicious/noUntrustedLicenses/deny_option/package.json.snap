@@ -28,5 +28,7 @@ package.json:4:9 lint/suspicious/noUntrustedLicenses ━━━━━━━━━
   
   i This license is explicitly listed in the deny option.
   
+  i Remove or replace the dependency, or remove the license from the deny option if it is acceptable.
+  
 
 ```

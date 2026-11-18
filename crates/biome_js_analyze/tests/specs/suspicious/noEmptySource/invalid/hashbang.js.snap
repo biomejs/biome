@@ -20,5 +20,7 @@ hashbang.js:1:1 lint/suspicious/noEmptySource ━━━━━━━━━━━�
   
   i Empty sources can clutter the codebase and increase cognitive load; deleting empty sources can help reduce it.
   
+  i Delete the file, or add the code it is meant to contain.
+  
 
 ```

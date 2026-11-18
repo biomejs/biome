@@ -384,46 +384,13 @@ CssRoot {
                                                                     colon_token: COLON@265..267 ":" [] [Whitespace(" ")],
                                                                     value: CssCustomPropertyValue {
                                                                         components: CssCustomPropertyComponentList [
-                                                                            CssCustomPropertyFunction {
-                                                                                name: CssCustomIdentifier {
-                                                                                    value_token: IDENT@267..270 "url" [] [],
-                                                                                },
+                                                                            CssUrlFunction {
+                                                                                name: URL_KW@267..270 "url" [] [],
                                                                                 l_paren_token: L_PAREN@270..271 "(" [] [],
-                                                                                components: CssCustomPropertyComponentList [
-                                                                                    CssCustomIdentifier {
-                                                                                        value_token: IDENT@271..275 "http" [] [],
-                                                                                    },
-                                                                                    CssCustomPropertyDelimiter {
-                                                                                        value: COLON@275..276 ":" [] [],
-                                                                                    },
-                                                                                    CssCustomPropertyDelimiter {
-                                                                                        value: SLASH@276..277 "/" [] [],
-                                                                                    },
-                                                                                    CssCustomPropertyDelimiter {
-                                                                                        value: SLASH@277..278 "/" [] [],
-                                                                                    },
-                                                                                    CssCustomIdentifier {
-                                                                                        value_token: IDENT@278..285 "example" [] [],
-                                                                                    },
-                                                                                    CssCustomPropertyDelimiter {
-                                                                                        value: DOT@285..286 "." [] [],
-                                                                                    },
-                                                                                    CssCustomIdentifier {
-                                                                                        value_token: IDENT@286..289 "com" [] [],
-                                                                                    },
-                                                                                    CssCustomPropertyDelimiter {
-                                                                                        value: SLASH@289..290 "/" [] [],
-                                                                                    },
-                                                                                    CssCustomIdentifier {
-                                                                                        value_token: IDENT@290..291 "a" [] [],
-                                                                                    },
-                                                                                    CssCustomPropertyDelimiter {
-                                                                                        value: DOT@291..292 "." [] [],
-                                                                                    },
-                                                                                    CssCustomIdentifier {
-                                                                                        value_token: IDENT@292..295 "svg" [] [],
-                                                                                    },
-                                                                                ],
+                                                                                value: CssUrlValueRaw {
+                                                                                    value_token: CSS_URL_VALUE_RAW_LITERAL@271..295 "http://example.com/a.svg" [] [],
+                                                                                },
+                                                                                modifiers: CssUrlModifierList [],
                                                                                 r_paren_token: R_PAREN@295..296 ")" [] [],
                                                                             },
                                                                         ],
@@ -1158,34 +1125,13 @@ CssRoot {
                                   1: COLON@265..267 ":" [] [Whitespace(" ")]
                                   2: CSS_CUSTOM_PROPERTY_VALUE@267..296
                                     0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@267..296
-                                      0: CSS_CUSTOM_PROPERTY_FUNCTION@267..296
-                                        0: CSS_CUSTOM_IDENTIFIER@267..270
-                                          0: IDENT@267..270 "url" [] []
+                                      0: CSS_URL_FUNCTION@267..296
+                                        0: URL_KW@267..270 "url" [] []
                                         1: L_PAREN@270..271 "(" [] []
-                                        2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@271..295
-                                          0: CSS_CUSTOM_IDENTIFIER@271..275
-                                            0: IDENT@271..275 "http" [] []
-                                          1: CSS_CUSTOM_PROPERTY_DELIMITER@275..276
-                                            0: COLON@275..276 ":" [] []
-                                          2: CSS_CUSTOM_PROPERTY_DELIMITER@276..277
-                                            0: SLASH@276..277 "/" [] []
-                                          3: CSS_CUSTOM_PROPERTY_DELIMITER@277..278
-                                            0: SLASH@277..278 "/" [] []
-                                          4: CSS_CUSTOM_IDENTIFIER@278..285
-                                            0: IDENT@278..285 "example" [] []
-                                          5: CSS_CUSTOM_PROPERTY_DELIMITER@285..286
-                                            0: DOT@285..286 "." [] []
-                                          6: CSS_CUSTOM_IDENTIFIER@286..289
-                                            0: IDENT@286..289 "com" [] []
-                                          7: CSS_CUSTOM_PROPERTY_DELIMITER@289..290
-                                            0: SLASH@289..290 "/" [] []
-                                          8: CSS_CUSTOM_IDENTIFIER@290..291
-                                            0: IDENT@290..291 "a" [] []
-                                          9: CSS_CUSTOM_PROPERTY_DELIMITER@291..292
-                                            0: DOT@291..292 "." [] []
-                                          10: CSS_CUSTOM_IDENTIFIER@292..295
-                                            0: IDENT@292..295 "svg" [] []
-                                        3: R_PAREN@295..296 ")" [] []
+                                        2: CSS_URL_VALUE_RAW@271..295
+                                          0: CSS_URL_VALUE_RAW_LITERAL@271..295 "http://example.com/a.svg" [] []
+                                        3: CSS_URL_MODIFIER_LIST@295..295
+                                        4: R_PAREN@295..296 ")" [] []
                                 1: (empty)
                               2: R_PAREN@296..297 ")" [] []
                             3: R_PAREN@297..298 ")" [] []

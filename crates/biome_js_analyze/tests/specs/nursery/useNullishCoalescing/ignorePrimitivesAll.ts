@@ -1,5 +1,5 @@
 // Tests for ignorePrimitives: true
-// `||` and `||=` on primitive-typed operands should NOT report; non-primitives still do.
+// Primitive-typed operands are suppressed; object-shaped annotations still report.
 
 declare const s: string | null;
 declare const n: number | null;
@@ -28,7 +28,7 @@ const r6 = litNum || 2;
 const r7 = litBool || false;
 const r8 = litBig || 3n;
 
-// non-primitive (object) left operand: SHOULD still report
+// Object-shaped annotations still report, but do not prove a safe fix.
 declare const obj: { x: string } | null;
 declare const fallbackObj: { x: string };
 const r9 = obj || fallbackObj;

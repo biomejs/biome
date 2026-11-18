@@ -1,0 +1,282 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-options-api.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+export default {
+  props: {
+    a: String,
+    b: {
+      default() {
+        return this.a;
+      },
+    },
+    c: {
+      type: Array,
+      default: function () {
+        return [this.a];
+      },
+    },
+    d: {
+      default() {
+        return () => this.a;
+      },
+    },
+    e: {
+      type: Object,
+      default: (function () {
+        return { a: this.a };
+      }),
+    },
+    f: {
+      default(value = this.a) {
+        return value;
+      },
+    },
+    g: {
+      type: [String, Number],
+      default() {
+        if (this.a) {
+          return this.a;
+        }
+        return 0;
+      },
+    },
+    h: {
+      type: Object,
+      default() {
+        return {
+          [this.a]() {},
+        };
+      },
+    },
+    i: {
+      default() {
+        return class extends this.a {};
+      },
+    },
+    j: {
+      type: [Function, String],
+      default() {
+        return this.a;
+      },
+    },
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-options-api.vue:8:16 lint/nursery/noVueDeprecatedPropsDefaultThis ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in the default value function of a prop.
+  
+     6 │     b: {
+     7 │       default() {
+   > 8 │         return this.a;
+       │                ^^^^
+     9 │       },
+    10 │     },
+  
+  i Vue doesn't give this function access to the component, so this doesn't point to the component.
+  
+  i Read other props from the first argument of the function instead, for example default(props) { return props.size }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:14:17 lint/nursery/noVueDeprecatedPropsDefaultThis ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in the default value function of a prop.
+  
+    12 │       type: Array,
+    13 │       default: function () {
+  > 14 │         return [this.a];
+       │                 ^^^^
+    15 │       },
+    16 │     },
+  
+  i Vue doesn't give this function access to the component, so this doesn't point to the component.
+  
+  i Read other props from the first argument of the function instead, for example default(props) { return props.size }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:19:22 lint/nursery/noVueDeprecatedPropsDefaultThis ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in the default value function of a prop.
+  
+    17 │     d: {
+    18 │       default() {
+  > 19 │         return () => this.a;
+       │                      ^^^^
+    20 │       },
+    21 │     },
+  
+  i Vue doesn't give this function access to the component, so this doesn't point to the component.
+  
+  i Read other props from the first argument of the function instead, for example default(props) { return props.size }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:25:21 lint/nursery/noVueDeprecatedPropsDefaultThis ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in the default value function of a prop.
+  
+    23 │       type: Object,
+    24 │       default: (function () {
+  > 25 │         return { a: this.a };
+       │                     ^^^^
+    26 │       }),
+    27 │     },
+  
+  i Vue doesn't give this function access to the component, so this doesn't point to the component.
+  
+  i Read other props from the first argument of the function instead, for example default(props) { return props.size }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:29:23 lint/nursery/noVueDeprecatedPropsDefaultThis ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in the default value function of a prop.
+  
+    27 │     },
+    28 │     f: {
+  > 29 │       default(value = this.a) {
+       │                       ^^^^
+    30 │         return value;
+    31 │       },
+  
+  i Vue doesn't give this function access to the component, so this doesn't point to the component.
+  
+  i Read other props from the first argument of the function instead, for example default(props) { return props.size }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:36:13 lint/nursery/noVueDeprecatedPropsDefaultThis ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in the default value function of a prop.
+  
+    34 │       type: [String, Number],
+    35 │       default() {
+  > 36 │         if (this.a) {
+       │             ^^^^
+    37 │           return this.a;
+    38 │         }
+  
+  i Vue doesn't give this function access to the component, so this doesn't point to the component.
+  
+  i Read other props from the first argument of the function instead, for example default(props) { return props.size }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:37:18 lint/nursery/noVueDeprecatedPropsDefaultThis ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in the default value function of a prop.
+  
+    35 │       default() {
+    36 │         if (this.a) {
+  > 37 │           return this.a;
+       │                  ^^^^
+    38 │         }
+    39 │         return 0;
+  
+  i Vue doesn't give this function access to the component, so this doesn't point to the component.
+  
+  i Read other props from the first argument of the function instead, for example default(props) { return props.size }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:46:12 lint/nursery/noVueDeprecatedPropsDefaultThis ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in the default value function of a prop.
+  
+    44 │       default() {
+    45 │         return {
+  > 46 │           [this.a]() {},
+       │            ^^^^
+    47 │         };
+    48 │       },
+  
+  i Vue doesn't give this function access to the component, so this doesn't point to the component.
+  
+  i Read other props from the first argument of the function instead, for example default(props) { return props.size }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:52:30 lint/nursery/noVueDeprecatedPropsDefaultThis ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in the default value function of a prop.
+  
+    50 │     i: {
+    51 │       default() {
+  > 52 │         return class extends this.a {};
+       │                              ^^^^
+    53 │       },
+    54 │     },
+  
+  i Vue doesn't give this function access to the component, so this doesn't point to the component.
+  
+  i Read other props from the first argument of the function instead, for example default(props) { return props.size }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:58:16 lint/nursery/noVueDeprecatedPropsDefaultThis ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in the default value function of a prop.
+  
+    56 │       type: [Function, String],
+    57 │       default() {
+  > 58 │         return this.a;
+       │                ^^^^
+    59 │       },
+    60 │     },
+  
+  i Vue doesn't give this function access to the component, so this doesn't point to the component.
+  
+  i Read other props from the first argument of the function instead, for example default(props) { return props.size }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,78 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidDefaultParameters.js
+---
+# Input
+```js
+class DefaultParametersWithoutThis {
+    print(content, header = "header") {
+        console.log(header, content);
+    }
+
+    read(callback = function () {
+        return this.value;
+    }) {
+        return callback();
+    }
+
+    arrowField = (value = 1) => value;
+}
+
+```
+
+# Diagnostics
+```
+invalidDefaultParameters.js:2:5 lint/style/useThisInClassMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this to be used by class method print.
+  
+    1 │ class DefaultParametersWithoutThis {
+  > 2 │     print(content, header = "header") {
+      │     ^^^^^
+    3 │         console.log(header, content);
+    4 │     }
+  
+  i Adding functions as class members can be a convenient way to organize code related to a class, but when those functions do not use instance state, it can be misleading to readers. Consider whether static or a module-level function would better communicate the intent of this code.
+  
+  i If this member does not depend on instance state, make it static or move it outside the class.
+  
+
+```
+
+```
+invalidDefaultParameters.js:6:5 lint/style/useThisInClassMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this to be used by class method read.
+  
+    4 │     }
+    5 │ 
+  > 6 │     read(callback = function () {
+      │     ^^^^
+    7 │         return this.value;
+    8 │     }) {
+  
+  i Adding functions as class members can be a convenient way to organize code related to a class, but when those functions do not use instance state, it can be misleading to readers. Consider whether static or a module-level function would better communicate the intent of this code.
+  
+  i If this member does not depend on instance state, make it static or move it outside the class.
+  
+
+```
+
+```
+invalidDefaultParameters.js:12:5 lint/style/useThisInClassMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this to be used by class field arrowField.
+  
+    10 │     }
+    11 │ 
+  > 12 │     arrowField = (value = 1) => value;
+       │     ^^^^^^^^^^
+    13 │ }
+    14 │ 
+  
+  i Adding functions as class members can be a convenient way to organize code related to a class, but when those functions do not use instance state, it can be misleading to readers. Consider whether static or a module-level function would better communicate the intent of this code.
+  
+  i If this member does not depend on instance state, make it static or move it outside the class.
+  
+
+```

@@ -1,0 +1,188 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+	import {
+		createInfiniteQuery,
+		createQueries,
+		createQuery,
+		createQuery as createData,
+	} from "@tanstack/svelte-query";
+
+	const { data, ...rest } = createQuery(() => ({ queryKey: ["todos"] }));
+
+	const { data: pages, ...infiniteRest } = createInfiniteQuery(() => ({
+		queryKey: ["pages"],
+	}));
+
+	const { data: renamed, ...renamedRest } = createData(() => ({
+		queryKey: ["renamed"],
+	}));
+
+	const [first, { data: second, ...secondRest }] = createQueries(() => ({
+		queries: [{ queryKey: ["first"] }, { queryKey: ["second"] }],
+	}));
+
+	const query = createQuery(() => ({ queryKey: ["users"] }));
+	const { data: users, ...usersRest } = query;
+	const copy = { ...query, users: query.data };
+
+	const infiniteQuery = createInfiniteQuery(() => ({ queryKey: ["posts"] }));
+	const infiniteCopy = { ...infiniteQuery };
+</script>
+
+<p>{data} {rest} {pages} {infiniteRest} {renamed} {renamedRest}</p>
+<p>{first} {second} {secondRest} {users} {usersRest} {copy} {infiniteCopy}</p>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:10:16 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rest element collects every remaining property of a TanStack Query result.
+  
+     8 │ 	} from "@tanstack/svelte-query";
+     9 │ 
+  > 10 │ 	const { data, ...rest } = createQuery(() => ({ queryKey: ["todos"] }));
+       │ 	              ^^^^^^^
+    11 │ 
+    12 │ 	const { data: pages, ...infiniteRest } = createInfiniteQuery(() => ({
+  
+  i A query result only updates the component when a property that the component reads changes. Collecting the remaining properties reads all of them, so the component updates on every change to the query.
+  
+  i Remove the rest element and list the properties that you need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:12:23 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rest element collects every remaining property of a TanStack Query result.
+  
+    10 │ 	const { data, ...rest } = createQuery(() => ({ queryKey: ["todos"] }));
+    11 │ 
+  > 12 │ 	const { data: pages, ...infiniteRest } = createInfiniteQuery(() => ({
+       │ 	                     ^^^^^^^^^^^^^^^
+    13 │ 		queryKey: ["pages"],
+    14 │ 	}));
+  
+  i A query result only updates the component when a property that the component reads changes. Collecting the remaining properties reads all of them, so the component updates on every change to the query.
+  
+  i Remove the rest element and list the properties that you need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:16:25 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rest element collects every remaining property of a TanStack Query result.
+  
+    14 │ 	}));
+    15 │ 
+  > 16 │ 	const { data: renamed, ...renamedRest } = createData(() => ({
+       │ 	                       ^^^^^^^^^^^^^^
+    17 │ 		queryKey: ["renamed"],
+    18 │ 	}));
+  
+  i A query result only updates the component when a property that the component reads changes. Collecting the remaining properties reads all of them, so the component updates on every change to the query.
+  
+  i Remove the rest element and list the properties that you need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:20:32 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rest element collects every remaining property of a TanStack Query result.
+  
+    18 │ 	}));
+    19 │ 
+  > 20 │ 	const [first, { data: second, ...secondRest }] = createQueries(() => ({
+       │ 	                              ^^^^^^^^^^^^^
+    21 │ 		queries: [{ queryKey: ["first"] }, { queryKey: ["second"] }],
+    22 │ 	}));
+  
+  i A query result only updates the component when a property that the component reads changes. Collecting the remaining properties reads all of them, so the component updates on every change to the query.
+  
+  i Remove the rest element and list the properties that you need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:25:23 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rest element collects every remaining property of a TanStack Query result.
+  
+    24 │ 	const query = createQuery(() => ({ queryKey: ["users"] }));
+  > 25 │ 	const { data: users, ...usersRest } = query;
+       │ 	                     ^^^^^^^^^^^^
+    26 │ 	const copy = { ...query, users: query.data };
+    27 │ 
+  
+  i A query result only updates the component when a property that the component reads changes. Collecting the remaining properties reads all of them, so the component updates on every change to the query.
+  
+  i Remove the rest element and list the properties that you need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:26:17 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This spread copies every property of a TanStack Query result.
+  
+    24 │ 	const query = createQuery(() => ({ queryKey: ["users"] }));
+    25 │ 	const { data: users, ...usersRest } = query;
+  > 26 │ 	const copy = { ...query, users: query.data };
+       │ 	               ^^^^^^^^
+    27 │ 
+    28 │ 	const infiniteQuery = createInfiniteQuery(() => ({ queryKey: ["posts"] }));
+  
+  i A query result only updates the component when a property that the component reads changes. Copying the result reads all of its properties, so the component updates on every change to the query.
+  
+  i Remove the spread and copy the properties that you need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:29:25 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This spread copies every property of a TanStack Query result.
+  
+    28 │ 	const infiniteQuery = createInfiniteQuery(() => ({ queryKey: ["posts"] }));
+  > 29 │ 	const infiniteCopy = { ...infiniteQuery };
+       │ 	                       ^^^^^^^^^^^^^^^^
+    30 │ </script>
+    31 │ 
+  
+  i A query result only updates the component when a property that the component reads changes. Copying the result reads all of its properties, so the component updates on every change to the query.
+  
+  i Remove the spread and copy the properties that you need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

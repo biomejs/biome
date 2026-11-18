@@ -1,0 +1,12 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: except-valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <MyComp :value="true" :foo-bar="true" show />
+</template>
+
+```

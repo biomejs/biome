@@ -2,8 +2,8 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_markdown_syntax::{AnyMdHeader, MarkdownSyntaxKind::*, MdHtmlBlock};
-use biome_rowan::{AstNode, Direction, TextRange};
+use biome_markdown_syntax::{AnyMdBlock, AnyMdHeader, AnyMdLeafBlock};
+use biome_rowan::{AstNode, AstNodeList, TextRange};
 use biome_rule_options::use_single_top_level_heading::UseSingleTopLevelHeadingOptions;
 
 declare_lint_rule! {
@@ -84,7 +84,10 @@ declare_lint_rule! {
         name: "useSingleTopLevelHeading",
         language: "md",
         recommended: true,
-        sources: &[RuleSource::MarkdownLint("md025", "single-title").inspired()],
+        sources: &[
+            RuleSource::MarkdownLint("md025", "single-title").inspired(),
+            RuleSource::EslintMarkdown("no-multiple-h1").inspired(),
+        ],
     }
 }
 
@@ -104,7 +107,7 @@ impl Rule for UseSingleTopLevelHeading {
 
         let root = ctx.root();
 
-        // Front matter isn't a sibling in the block list, so `is_document_title` can't see it.
+        // Front matter isn't in the block list, so the title search below can't see it.
         // A document with front matter may already carry its title there, so body headings
         // aren't necessarily duplicates: stay silent rather than risk a false positive.
         if root.frontmatter().is_some() {
@@ -117,17 +120,12 @@ impl Rule for UseSingleTopLevelHeading {
             return None;
         }
 
-        let title = header
-            .syntax()
-            .siblings(Direction::Prev)
-            .skip(1)
-            .filter_map(AnyMdHeader::cast)
-            .filter(|header| header.level() == level)
-            .last()?;
-
-        if !is_document_title(&title) {
-            return None;
-        }
+        // The title is the first block of the document, ignoring blank lines and HTML comments.
+        let title = block_list
+            .iter()
+            .find(|block| !may_precede_document_title(block))
+            .and_then(|block| AnyMdHeader::cast(block.into_syntax()))
+            .filter(|title| title.level() == level && title != header)?;
 
         Some(title.range())
     }
@@ -157,19 +155,11 @@ impl Rule for UseSingleTopLevelHeading {
     }
 }
 
-/// Returns whether a header is a top-level document title.
-///
-/// A document title may be preceded only by blank lines and HTML comments.
-fn is_document_title(header: &AnyMdHeader) -> bool {
-    header
-        .syntax()
-        .siblings(Direction::Prev)
-        .skip(1)
-        .all(|sibling| match sibling.kind() {
-            MD_NEWLINE => true,
-            MD_HTML_BLOCK => {
-                MdHtmlBlock::cast(sibling).is_some_and(|block| block.is_html_comment())
-            }
-            _ => false,
-        })
+/// Returns whether a block may appear before the document title: blank lines and HTML comments.
+fn may_precede_document_title(block: &AnyMdBlock) -> bool {
+    match block {
+        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(_)) => true,
+        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdHtmlBlock(block)) => block.is_html_comment(),
+        _ => false,
+    }
 }

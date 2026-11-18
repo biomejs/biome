@@ -1,0 +1,319 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: invalid.yaml
+---
+# Input
+```yaml
+# should generate diagnostics
+empty:
+trailing_space: 
+nested:
+  child:
+tagged: !!str
+anchored: &anchor
+tagged_and_anchored: !!null &other
+flow: { a: , b }
+flow_tagged: { a: !!str }
+pair_in_sequence: [a: ]
+? explicit_without_value
+? explicit_with_colon
+:
+flow_explicit: { ? a }
+"quoted":
+
+```
+
+# Diagnostics
+```
+invalid.yaml:2:1 lint/nursery/noYamlEmptyMapValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key has no value.
+  
+    1 │ # should generate diagnostics
+  > 2 │ empty:
+      │ ^^^^^^
+    3 │ trailing_space:·
+    4 │ nested:
+  
+  i An empty value is easy to miss, and is often a value that was forgotten.
+  
+  i Add a value. If the value is meant to be empty, write it out, for example as null.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:3:1 lint/nursery/noYamlEmptyMapValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key has no value.
+  
+    1 │ # should generate diagnostics
+    2 │ empty:
+  > 3 │ trailing_space:·
+      │ ^^^^^^^^^^^^^^^
+    4 │ nested:
+    5 │   child:
+  
+  i An empty value is easy to miss, and is often a value that was forgotten.
+  
+  i Add a value. If the value is meant to be empty, write it out, for example as null.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:5:3 lint/nursery/noYamlEmptyMapValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key has no value.
+  
+    3 │ trailing_space:·
+    4 │ nested:
+  > 5 │   child:
+      │   ^^^^^^
+    6 │ tagged: !!str
+    7 │ anchored: &anchor
+  
+  i An empty value is easy to miss, and is often a value that was forgotten.
+  
+  i Add a value. If the value is meant to be empty, write it out, for example as null.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:6:1 lint/nursery/noYamlEmptyMapValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key has no value.
+  
+    4 │ nested:
+    5 │   child:
+  > 6 │ tagged: !!str
+      │ ^^^^^^^^^^^^^
+    7 │ anchored: &anchor
+    8 │ tagged_and_anchored: !!null &other
+  
+  i An empty value is easy to miss, and is often a value that was forgotten.
+  
+  i Add a value. If the value is meant to be empty, write it out, for example as null.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:7:1 lint/nursery/noYamlEmptyMapValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key has no value.
+  
+    5 │   child:
+    6 │ tagged: !!str
+  > 7 │ anchored: &anchor
+      │ ^^^^^^^^^^^^^^^^^
+    8 │ tagged_and_anchored: !!null &other
+    9 │ flow: { a: , b }
+  
+  i An empty value is easy to miss, and is often a value that was forgotten.
+  
+  i Add a value. If the value is meant to be empty, write it out, for example as null.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:8:1 lint/nursery/noYamlEmptyMapValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key has no value.
+  
+     6 │ tagged: !!str
+     7 │ anchored: &anchor
+   > 8 │ tagged_and_anchored: !!null &other
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ flow: { a: , b }
+    10 │ flow_tagged: { a: !!str }
+  
+  i An empty value is easy to miss, and is often a value that was forgotten.
+  
+  i Add a value. If the value is meant to be empty, write it out, for example as null.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:9:9 lint/nursery/noYamlEmptyMapValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key has no value.
+  
+     7 │ anchored: &anchor
+     8 │ tagged_and_anchored: !!null &other
+   > 9 │ flow: { a: , b }
+       │         ^^
+    10 │ flow_tagged: { a: !!str }
+    11 │ pair_in_sequence: [a: ]
+  
+  i An empty value is easy to miss, and is often a value that was forgotten.
+  
+  i Add a value. If the value is meant to be empty, write it out, for example as null.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:9:14 lint/nursery/noYamlEmptyMapValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key has no value.
+  
+     7 │ anchored: &anchor
+     8 │ tagged_and_anchored: !!null &other
+   > 9 │ flow: { a: , b }
+       │              ^
+    10 │ flow_tagged: { a: !!str }
+    11 │ pair_in_sequence: [a: ]
+  
+  i An empty value is easy to miss, and is often a value that was forgotten.
+  
+  i Add a value. If the value is meant to be empty, write it out, for example as null.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:10:16 lint/nursery/noYamlEmptyMapValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key has no value.
+  
+     8 │ tagged_and_anchored: !!null &other
+     9 │ flow: { a: , b }
+  > 10 │ flow_tagged: { a: !!str }
+       │                ^^^^^^^^
+    11 │ pair_in_sequence: [a: ]
+    12 │ ? explicit_without_value
+  
+  i An empty value is easy to miss, and is often a value that was forgotten.
+  
+  i Add a value. If the value is meant to be empty, write it out, for example as null.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:11:20 lint/nursery/noYamlEmptyMapValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key has no value.
+  
+     9 │ flow: { a: , b }
+    10 │ flow_tagged: { a: !!str }
+  > 11 │ pair_in_sequence: [a: ]
+       │                    ^^
+    12 │ ? explicit_without_value
+    13 │ ? explicit_with_colon
+  
+  i An empty value is easy to miss, and is often a value that was forgotten.
+  
+  i Add a value. If the value is meant to be empty, write it out, for example as null.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:12:1 lint/nursery/noYamlEmptyMapValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key has no value.
+  
+    10 │ flow_tagged: { a: !!str }
+    11 │ pair_in_sequence: [a: ]
+  > 12 │ ? explicit_without_value
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ ? explicit_with_colon
+    14 │ :
+  
+  i An empty value is easy to miss, and is often a value that was forgotten.
+  
+  i Add a value. If the value is meant to be empty, write it out, for example as null.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:13:1 lint/nursery/noYamlEmptyMapValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key has no value.
+  
+    11 │ pair_in_sequence: [a: ]
+    12 │ ? explicit_without_value
+  > 13 │ ? explicit_with_colon
+       │ ^^^^^^^^^^^^^^^^^^^^^
+  > 14 │ :
+       │ ^
+    15 │ flow_explicit: { ? a }
+    16 │ "quoted":
+  
+  i An empty value is easy to miss, and is often a value that was forgotten.
+  
+  i Add a value. If the value is meant to be empty, write it out, for example as null.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:15:18 lint/nursery/noYamlEmptyMapValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key has no value.
+  
+    13 │ ? explicit_with_colon
+    14 │ :
+  > 15 │ flow_explicit: { ? a }
+       │                  ^^^
+    16 │ "quoted":
+    17 │ 
+  
+  i An empty value is easy to miss, and is often a value that was forgotten.
+  
+  i Add a value. If the value is meant to be empty, write it out, for example as null.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:16:1 lint/nursery/noYamlEmptyMapValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key has no value.
+  
+    14 │ :
+    15 │ flow_explicit: { ? a }
+  > 16 │ "quoted":
+       │ ^^^^^^^^^
+    17 │ 
+  
+  i An empty value is easy to miss, and is often a value that was forgotten.
+  
+  i Add a value. If the value is meant to be empty, write it out, for example as null.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

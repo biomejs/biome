@@ -1,0 +1,89 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-script-setup-ts.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+const props = withDefaults(
+  defineProps<{
+    value?: string;
+    items: string[];
+  }>(),
+  {
+    value: "",
+  },
+);
+
+function update() {
+  props.value = "test";
+  props.items!.push("item");
+  (props.items as string[]).unshift("item");
+}
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-script-setup-ts.vue:14:9 lint/nursery/noVueMutatingProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes the prop value.
+  
+    13 │ function update() {
+  > 14 │   props.value = "test";
+       │         ^^^^^
+    15 │   props.items!.push("item");
+    16 │   (props.items as string[]).unshift("item");
+  
+  i A prop belongs to the parent component. Changing it from the child either fails, or changes the parent's data without the parent knowing.
+  
+  i Emit an event so the parent can change the value, or copy the prop into a local ref() or computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-script-setup-ts.vue:15:9 lint/nursery/noVueMutatingProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes the prop items.
+  
+    13 │ function update() {
+    14 │   props.value = "test";
+  > 15 │   props.items!.push("item");
+       │         ^^^^^
+    16 │   (props.items as string[]).unshift("item");
+    17 │ }
+  
+  i A prop belongs to the parent component. Changing it from the child either fails, or changes the parent's data without the parent knowing.
+  
+  i Emit an event so the parent can change the value, or copy the prop into a local ref() or computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-script-setup-ts.vue:16:10 lint/nursery/noVueMutatingProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes the prop items.
+  
+    14 │   props.value = "test";
+    15 │   props.items!.push("item");
+  > 16 │   (props.items as string[]).unshift("item");
+       │          ^^^^^
+    17 │ }
+    18 │ </script>
+  
+  i A prop belongs to the parent component. Changing it from the child either fails, or changes the parent's data without the parent knowing.
+  
+  i Emit an event so the parent can change the value, or copy the prop into a local ref() or computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

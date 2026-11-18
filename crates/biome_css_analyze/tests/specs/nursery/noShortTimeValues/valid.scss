@@ -1,0 +1,14 @@
+// should not generate diagnostics
+$duration: 10ms;
+
+a { transition-duration: 0.8s; }
+a { transition: foo 0.8s linear, bar 200ms; }
+a { transition-duration: $duration; }
+a { transition-delay: -20ms; }
+
+// Nested properties
+a { transition: opacity 0.5s { delay: 0.2s; } }
+a { transition: { duration: 0.8s; timing-function: linear; } }
+a { font: { duration: 10ms; } }
+a { foo: { transition: { duration: 10ms; } } }
+a { transition: { $delay: 10ms; delay: $delay; } }

@@ -1,0 +1,4 @@
+﻿
+/* should not generate diagnostics */
+/* biome-ignore-all lint/nursery/useConsistentUnicodeBom: encoding required */
+p { color: red; }

@@ -100,7 +100,9 @@ impl Rule for UseValidAriaProps {
             markup! {
                     <Emphasis>{attribute_name.text_trimmed()}</Emphasis>" is not a valid ARIA attribute."
                 },
-        ))
+        ).note(markup! {
+            "Assistive technologies ignore ARIA attributes that do not exist, so the attribute has no effect. It is often a typo."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, attribute: &Self::State) -> Option<JsRuleAction> {

@@ -43,17 +43,22 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
        1 │ + {
        2 │ + → "linter":·{
        3 │ + → → "enabled":·true,
-       4 │ + → → "rules":·{·"preset":·"none",·"suspicious":·{·"noDoubleEquals":·"off"·}·},
-       5 │ + → → "includes":·[
-       6 │ + → → → "**",
-       7 │ + → → → "!./src",
-       8 │ + → → → "!**/*.test.js",
-       9 │ + → → → "!**/*.spec.js",
-      10 │ + → → → "!test/main.js"
-      11 │ + → → ]
-      12 │ + → }
-      13 │ + }
-      14 │ + 
+       4 │ + → → "rules":·{
+       5 │ + → → → "preset":·"none",
+       6 │ + → → → "suspicious":·{
+       7 │ + → → → → "noDoubleEquals":·{·"level":·"off",·"options":·{·"ignoreNull":·false·}·}
+       8 │ + → → → }
+       9 │ + → → },
+      10 │ + → → "includes":·[
+      11 │ + → → → "**",
+      12 │ + → → → "!./src",
+      13 │ + → → → "!**/*.test.js",
+      14 │ + → → → "!**/*.spec.js",
+      15 │ + → → → "!test/main.js"
+      16 │ + → → ]
+      17 │ + → }
+      18 │ + }
+      19 │ + 
   
 
 ```

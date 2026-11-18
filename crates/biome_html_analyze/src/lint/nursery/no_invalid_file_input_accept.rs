@@ -119,7 +119,13 @@ impl Rule for NoInvalidFileInputAccept {
                 rule_category!(),
                 state.range,
                 markup! { "The file input "<Emphasis>"accept"</Emphasis>" attribute has no value." },
-            ),
+            )
+            .note(markup! {
+                "An empty "<Emphasis>"accept"</Emphasis>" attribute does not limit the files that the user can select."
+            })
+            .note(markup! {
+                "Add comma-separated filename extensions, such as "<Emphasis>".png"</Emphasis>", or valid MIME types, such as "<Emphasis>"image/png"</Emphasis>", or remove the attribute."
+            }),
             Problem::Invalid(error) => {
                 RuleDiagnostic::new(
                     rule_category!(),
@@ -127,6 +133,9 @@ impl Rule for NoInvalidFileInputAccept {
                     markup! { "The file input "<Emphasis>"accept"</Emphasis>" value is invalid." },
                 )
                 .note(error.explanation())
+                .note(markup! {
+                    "Replace the value with comma-separated filename extensions, such as "<Emphasis>".png"</Emphasis>", or valid MIME types, such as "<Emphasis>"image/png"</Emphasis>"."
+                })
             }
             Problem::NeedsNormalization(string) => {
                 let value = string.inner_string_text().ok()?;

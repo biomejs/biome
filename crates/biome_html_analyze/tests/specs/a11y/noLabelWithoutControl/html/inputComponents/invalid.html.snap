@@ -29,6 +29,8 @@ invalid.html:2:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━�
       │ ^^^^^^^^
     7 │ 
   
+  i Assistive technologies rely on a label being associated with a control to announce it. Without the association, screen reader users cannot tell what the control is for.
+  
   i Consider adding an accessible text content to the label element.
   
 

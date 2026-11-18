@@ -3,11 +3,12 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::{
-    JsAwaitExpression, JsDoWhileStatement, JsForInStatement, JsForOfStatement, JsForStatement,
-    JsForVariableDeclaration, JsSyntaxKind, JsSyntaxNode, JsVariableDeclaration, JsWhileStatement,
-    JsWithStatement,
+    JsArrowFunctionExpression, JsAwaitExpression, JsDoWhileStatement, JsForInStatement,
+    JsForOfStatement, JsForStatement, JsForVariableDeclaration, JsFunctionDeclaration,
+    JsFunctionExpression, JsLanguage, JsMethodClassMember, JsSyntaxNode, JsVariableDeclaration,
+    JsWhileStatement, JsWithStatement,
 };
-use biome_rowan::{AstNode, WalkEvent, declare_node_union};
+use biome_rowan::{AstNode, SyntaxKindSet, WalkEvent, declare_node_union};
 use biome_rule_options::no_await_in_loops::NoAwaitInLoopsOptions;
 
 declare_lint_rule! {
@@ -64,7 +65,13 @@ impl Rule for NoAwaitInLoops {
             return None;
         }
 
-        let mut preorder = loop_node.syntax().preorder();
+        let mut preorder = loop_node.syntax().preorder_of_kinds(
+            BOUNDARY_KINDS
+                .union(JsForOfStatement::KIND_SET)
+                .union(JsVariableDeclaration::KIND_SET)
+                .union(JsForVariableDeclaration::KIND_SET)
+                .union(JsAwaitExpression::KIND_SET),
+        );
         while let Some(event) = preorder.next() {
             match event {
                 WalkEvent::Enter(node) => {
@@ -128,14 +135,13 @@ impl Rule for NoAwaitInLoops {
     }
 }
 
+/// The kinds of the nodes at which [is_boundary] stops the traversal.
+const BOUNDARY_KINDS: SyntaxKindSet<JsLanguage> = JsFunctionDeclaration::KIND_SET
+    .union(JsFunctionExpression::KIND_SET)
+    .union(JsArrowFunctionExpression::KIND_SET)
+    .union(JsMethodClassMember::KIND_SET);
+
 /// check whether it should stop traversing ancestors at the given node
 fn is_boundary(node: &JsSyntaxNode) -> bool {
-    let kind = node.kind();
-    matches!(
-        kind,
-        JsSyntaxKind::JS_FUNCTION_DECLARATION
-            | JsSyntaxKind::JS_FUNCTION_EXPRESSION
-            | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
-            | JsSyntaxKind::JS_METHOD_CLASS_MEMBER
-    )
+    BOUNDARY_KINDS.matches(node.kind())
 }

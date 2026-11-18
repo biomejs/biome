@@ -1,0 +1,95 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: validShorthand.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+.single-values-and-dynamic {
+	margin: 1px;
+	border-width: initial 1px;
+}
+
+.conflicts-and-duplicates {
+	margin-block-start: 1px;
+	margin: 2px;
+	margin-block-end: 3px;
+	padding-block-start: 1px;
+	padding-block-start: 2px;
+	padding-block-end: 3px;
+	inset-block-start: 1px !important;
+	inset-block-end: 2px;
+	scroll-margin-block-start: 1px;
+	/* retained comments prevent combining */
+	scroll-margin-block-end: 2px;
+	scroll-padding-block-start: 1px;
+	&:hover {
+		color: red;
+	}
+	scroll-padding-block-end: 2px;
+}
+
+.at-rule-between-members {
+	inset-inline-start: 1px;
+	@media (width > 1px) {
+		color: red;
+	}
+	inset-inline-end: 2px;
+}
+
+.axis-pairs-remain-separate {
+	margin-block: 1px;
+	margin-inline: 1px;
+	padding-block: 1px;
+	padding-inline: 2px;
+}
+
+.merge-dynamic-values {
+	margin-block-start: var(--offset);
+	margin-block-end: 2px;
+}
+
+.merge-css-wide-keyword {
+	margin-block-start: initial;
+	margin-block-end: 2px;
+}
+
+.merge-different-border-values {
+	border-block-start: 1px solid blue;
+	border-block-end: 2px solid red;
+}
+
+.merge-conflicting-logical-shorthand {
+	border-block-start-width: 1px;
+	border-block: 4px solid red;
+	border-block-end-width: 2px;
+}
+
+.merge-conflicting-border-component {
+	border-block-start: 1px solid red;
+	border-block-color: green;
+	border-block-end: 1px solid red;
+}
+
+.merge-member-comments {
+	margin-block-start: 1px;
+	margin-block-end: 2px; /* retained */
+}
+
+.merge-nested-dynamic-value {
+	margin-block-start: calc(var(--spacing));
+	margin-block-end: 2px;
+}
+
+.merge-all-reset {
+	margin-block-start: 1px;
+	all: unset;
+	margin-block-end: 2px;
+}
+
+.merge-conditional-values {
+	margin-block-start: if(media(width > 1px): 1px; else: 0);
+	margin-block-end: 2px;
+}
+
+```

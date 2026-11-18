@@ -219,19 +219,159 @@
 }
 
 .bar {
-  position-anchor: --position-anchor;
   position: relative;
   box-sizing: border-box;
+  position-anchor: --position-anchor;
 }
 
 .baz {
   position: relative;
-  position-anchor: --position-anchor;
   box-sizing: border-box;
+  position-anchor: --position-anchor;
 }
 
 .qux {
   position: relative;
   box-sizing: border-box;
   position-anchor: --position-anchor;
+}
+
+.scroll-behavior {
+  display: block;
+  overflow: auto;
+  scroll-behavior: smooth;
+  color: red;
+}
+
+.multi-column {
+  display: block;
+  columns: auto;
+  column-width: 10em;
+  column-count: 2;
+  column-span: all;
+  column-fill: balance;
+}
+
+.column-rule {
+  column-gap: 1em;
+  column-rule: 1px solid red;
+  column-rule-width: 1px;
+  column-rule-style: solid;
+  column-rule-color: red;
+  align-items: center;
+}
+
+.anchor-positioning {
+  display: block;
+  anchor-name: --anchor;
+  anchor-scope: all;
+  position-area: top;
+  position-anchor: --anchor;
+  position-try: normal;
+  position-try-order: normal;
+  position-try-fallbacks: flip-block;
+  position-visibility: always;
+  color: red;
+}
+
+.text-box {
+  line-height: 1;
+  text-box: normal;
+  text-box-trim: none;
+  text-box-edge: auto;
+  color: red;
+  text-autospace: normal;
+}
+
+.field-sizing {
+  display: block;
+  field-sizing: content;
+  resize: both;
+}
+
+.logical-borders {
+  border-block: 1px solid red;
+  border-block-color: red;
+  border-block-style: solid;
+  border-block-width: 1px;
+  border-inline: 1px solid red;
+  border-inline-color: red;
+  border-inline-style: solid;
+  border-inline-width: 1px;
+}
+
+.corner-shape {
+  border-radius: 1em;
+  corner-shape: round;
+  corner-top-left-shape: bevel;
+  corner-bottom-left-shape: bevel;
+}
+
+.svg-geometry {
+  x: 1px;
+  y: 1px;
+  rx: 1px;
+  ry: 1px;
+  cx: 1px;
+  cy: 1px;
+  r: 1px;
+  d: none;
+  fill: red;
+  vector-effect: non-scaling-stroke;
+}
+
+.math {
+  math-style: normal;
+  math-shift: normal;
+  math-depth: 0;
+  transform: none;
+}
+
+.transition-behavior {
+  color: red;
+  transition: opacity 1s;
+  transition-behavior: allow-discrete;
+}
+
+.paged-media {
+  will-change: auto;
+  page: wide;
+  break-before: page;
+}
+
+.unsupported-property {
+  color: red;
+  column-height: 10em;
+  display: block;
+}
+
+.unknown-property {
+  color: red;
+  unknown-property: none;
+  display: block;
+}
+
+.overlapping-logical-borders-in-order {
+  border-block-color: blue;
+  border-block-start: 1px solid red;
+}
+
+.overlapping-corner-sides-in-order {
+  corner-top-shape: round;
+  corner-left-shape: bevel;
+}
+
+.logical-before-physical-corner {
+  corner-start-start-shape: round;
+  corner-top-left-shape: bevel;
+}
+
+.logical-before-physical-border {
+  border-block-color: blue;
+  border-top: 1px solid red;
+}
+
+.repeated-all {
+  all: initial;
+  all: unset;
 }

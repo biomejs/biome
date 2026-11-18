@@ -1,0 +1,334 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import type { Generator } from "./other";
+
+for (const item of items.map(callback) as string[]) {}
+for (const item of items.map(callback)!) {}
+for (const item of items.filter(callback) satisfies string[]) {}
+
+function arrayAssertion(items: unknown) {
+	for (const item of (items as string[]).map((item) => item.trim())) {}
+}
+
+function arrayParameter(items: string[]) {
+	for (const item of items.map(callback)) {}
+}
+
+function annotatedArrayVariable(source: Iterable<string>) {
+	const list: string[] = [...source];
+	for (const item of list.filter(callback)) {}
+}
+
+function arrayOrIterator(items: Iterator<string> | string[]) {
+	for (const item of items.map(callback)) {}
+}
+
+function arrayReturnType() {
+	function getItems(): string[] {
+		return [];
+	}
+	for (const item of getItems().map(callback)) {}
+}
+
+function locallyDeclaredType() {
+	interface Iterator<T> {
+		map(callback: (item: T) => T): T[];
+	}
+	function inner(items: Iterator<string>) {
+		for (const item of items.map(callback)) {}
+	}
+}
+
+function typeParameterNamedIterator<Iterator extends string[]>(items: Iterator) {
+	for (const item of items.map(callback)) {}
+}
+
+function importedType(items: Generator<string>) {
+	for (const item of items.map(callback)) {}
+}
+
+type List = string[];
+
+function arrayTypeAlias(items: List) {
+	for (const item of items.filter(callback)) {}
+}
+
+type First = Second;
+type Second = First;
+
+function typeAliasesReferringToEachOther(items: First) {
+	for (const item of items.map(callback)) {}
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:4:20 lint/nursery/noEagerArrayMethodsInLoops ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .map() call builds a new array that is only used by the for...of loop.
+  
+    2 │ import type { Generator } from "./other";
+    3 │ 
+  > 4 │ for (const item of items.map(callback) as string[]) {}
+      │                    ^^^^^^^^^
+    5 │ for (const item of items.map(callback)!) {}
+    6 │ for (const item of items.filter(callback) satisfies string[]) {}
+  
+  i .map() visits every item to build the array before the loop starts, and the loop then visits every item again. The array is discarded after the loop.
+  
+  i Loop over the original items and do the callback's work inside the loop body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:5:20 lint/nursery/noEagerArrayMethodsInLoops ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .map() call builds a new array that is only used by the for...of loop.
+  
+    4 │ for (const item of items.map(callback) as string[]) {}
+  > 5 │ for (const item of items.map(callback)!) {}
+      │                    ^^^^^^^^^
+    6 │ for (const item of items.filter(callback) satisfies string[]) {}
+    7 │ 
+  
+  i .map() visits every item to build the array before the loop starts, and the loop then visits every item again. The array is discarded after the loop.
+  
+  i Loop over the original items and do the callback's work inside the loop body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:6:20 lint/nursery/noEagerArrayMethodsInLoops ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .filter() call builds a new array that is only used by the for...of loop.
+  
+    4 │ for (const item of items.map(callback) as string[]) {}
+    5 │ for (const item of items.map(callback)!) {}
+  > 6 │ for (const item of items.filter(callback) satisfies string[]) {}
+      │                    ^^^^^^^^^^^^
+    7 │ 
+    8 │ function arrayAssertion(items: unknown) {
+  
+  i .filter() visits every item to build the array before the loop starts, and the loop then visits every item again. The array is discarded after the loop.
+  
+  i Loop over the original items and skip the unwanted ones inside the loop body, for example with an if statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:9:21 lint/nursery/noEagerArrayMethodsInLoops ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .map() call builds a new array that is only used by the for...of loop.
+  
+     8 │ function arrayAssertion(items: unknown) {
+   > 9 │ 	for (const item of (items as string[]).map((item) => item.trim())) {}
+       │ 	                   ^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ }
+    11 │ 
+  
+  i .map() visits every item to build the array before the loop starts, and the loop then visits every item again. The array is discarded after the loop.
+  
+  i Loop over the original items and do the callback's work inside the loop body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:13:21 lint/nursery/noEagerArrayMethodsInLoops ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .map() call builds a new array that is only used by the for...of loop.
+  
+    12 │ function arrayParameter(items: string[]) {
+  > 13 │ 	for (const item of items.map(callback)) {}
+       │ 	                   ^^^^^^^^^
+    14 │ }
+    15 │ 
+  
+  i .map() visits every item to build the array before the loop starts, and the loop then visits every item again. The array is discarded after the loop.
+  
+  i Loop over the original items and do the callback's work inside the loop body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:18:21 lint/nursery/noEagerArrayMethodsInLoops ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .filter() call builds a new array that is only used by the for...of loop.
+  
+    16 │ function annotatedArrayVariable(source: Iterable<string>) {
+    17 │ 	const list: string[] = [...source];
+  > 18 │ 	for (const item of list.filter(callback)) {}
+       │ 	                   ^^^^^^^^^^^
+    19 │ }
+    20 │ 
+  
+  i .filter() visits every item to build the array before the loop starts, and the loop then visits every item again. The array is discarded after the loop.
+  
+  i Loop over the original items and skip the unwanted ones inside the loop body, for example with an if statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:22:21 lint/nursery/noEagerArrayMethodsInLoops ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .map() call builds a new array that is only used by the for...of loop.
+  
+    21 │ function arrayOrIterator(items: Iterator<string> | string[]) {
+  > 22 │ 	for (const item of items.map(callback)) {}
+       │ 	                   ^^^^^^^^^
+    23 │ }
+    24 │ 
+  
+  i .map() visits every item to build the array before the loop starts, and the loop then visits every item again. The array is discarded after the loop.
+  
+  i Loop over the original items and do the callback's work inside the loop body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:29:21 lint/nursery/noEagerArrayMethodsInLoops ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .map() call builds a new array that is only used by the for...of loop.
+  
+    27 │ 		return [];
+    28 │ 	}
+  > 29 │ 	for (const item of getItems().map(callback)) {}
+       │ 	                   ^^^^^^^^^^^^^^
+    30 │ }
+    31 │ 
+  
+  i .map() visits every item to build the array before the loop starts, and the loop then visits every item again. The array is discarded after the loop.
+  
+  i Loop over the original items and do the callback's work inside the loop body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:37:22 lint/nursery/noEagerArrayMethodsInLoops ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .map() call builds a new array that is only used by the for...of loop.
+  
+    35 │ 	}
+    36 │ 	function inner(items: Iterator<string>) {
+  > 37 │ 		for (const item of items.map(callback)) {}
+       │ 		                   ^^^^^^^^^
+    38 │ 	}
+    39 │ }
+  
+  i .map() visits every item to build the array before the loop starts, and the loop then visits every item again. The array is discarded after the loop.
+  
+  i Loop over the original items and do the callback's work inside the loop body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:42:21 lint/nursery/noEagerArrayMethodsInLoops ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .map() call builds a new array that is only used by the for...of loop.
+  
+    41 │ function typeParameterNamedIterator<Iterator extends string[]>(items: Iterator) {
+  > 42 │ 	for (const item of items.map(callback)) {}
+       │ 	                   ^^^^^^^^^
+    43 │ }
+    44 │ 
+  
+  i .map() visits every item to build the array before the loop starts, and the loop then visits every item again. The array is discarded after the loop.
+  
+  i Loop over the original items and do the callback's work inside the loop body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:46:21 lint/nursery/noEagerArrayMethodsInLoops ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .map() call builds a new array that is only used by the for...of loop.
+  
+    45 │ function importedType(items: Generator<string>) {
+  > 46 │ 	for (const item of items.map(callback)) {}
+       │ 	                   ^^^^^^^^^
+    47 │ }
+    48 │ 
+  
+  i .map() visits every item to build the array before the loop starts, and the loop then visits every item again. The array is discarded after the loop.
+  
+  i Loop over the original items and do the callback's work inside the loop body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:52:21 lint/nursery/noEagerArrayMethodsInLoops ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .filter() call builds a new array that is only used by the for...of loop.
+  
+    51 │ function arrayTypeAlias(items: List) {
+  > 52 │ 	for (const item of items.filter(callback)) {}
+       │ 	                   ^^^^^^^^^^^^
+    53 │ }
+    54 │ 
+  
+  i .filter() visits every item to build the array before the loop starts, and the loop then visits every item again. The array is discarded after the loop.
+  
+  i Loop over the original items and skip the unwanted ones inside the loop body, for example with an if statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:59:21 lint/nursery/noEagerArrayMethodsInLoops ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .map() call builds a new array that is only used by the for...of loop.
+  
+    58 │ function typeAliasesReferringToEachOther(items: First) {
+  > 59 │ 	for (const item of items.map(callback)) {}
+       │ 	                   ^^^^^^^^^
+    60 │ }
+    61 │ 
+  
+  i .map() visits every item to build the array before the loop starts, and the loop then visits every item again. The array is discarded after the loop.
+  
+  i Loop over the original items and do the callback's work inside the loop body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

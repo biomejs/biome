@@ -1,0 +1,9 @@
+// should generate diagnostics
+[
+  "",
+  "var value = 1;",
+  "  var value = 1;",
+  "\nvar value = 1;",
+  "// header\nvar value = 1;",
+  "#! /usr/bin/env node\nvar value = 1;"
+]

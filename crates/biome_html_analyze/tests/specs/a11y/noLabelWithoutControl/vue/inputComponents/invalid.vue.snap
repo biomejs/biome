@@ -33,6 +33,8 @@ invalid.vue:3:2 lint/a11y/noLabelWithoutControl ━━━━━━━━━━�
     8 │ </template>
     9 │ 
   
+  i Assistive technologies rely on a label being associated with a control to announce it. Without the association, screen reader users cannot tell what the control is for.
+  
   i Consider adding an accessible text content to the label element.
   
 

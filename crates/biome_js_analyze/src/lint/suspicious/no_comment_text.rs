@@ -149,7 +149,10 @@ impl Rule for NoCommentText {
             markup! {
                 "Wrap "<Emphasis>"comments"</Emphasis>" inside children within "<Emphasis>"braces"</Emphasis>"."
             },
-        ))
+        )
+        .note(markup! {
+            "In JSX children, text that starts with "<Emphasis>"//"</Emphasis>" or "<Emphasis>"/*"</Emphasis>" is rendered as text. It is not treated as a comment."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, range: &Self::State) -> Option<JsRuleAction> {

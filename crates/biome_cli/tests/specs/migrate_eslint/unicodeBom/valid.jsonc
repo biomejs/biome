@@ -1,0 +1,43 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "unicode-bom": "error"
+    },
+    "overrides": [
+      {
+        "files": [
+          "always.js"
+        ],
+        "rules": {
+          "unicode-bom": [
+            "warn",
+            "always"
+          ]
+        }
+      },
+      {
+        "files": [
+          "never.js"
+        ],
+        "rules": {
+          "unicode-bom": [
+            "error",
+            "never"
+          ]
+        }
+      },
+      {
+        "files": [
+          "off.js"
+        ],
+        "rules": {
+          "unicode-bom": [
+            "off",
+            "always"
+          ]
+        }
+      }
+    ]
+  }
+}

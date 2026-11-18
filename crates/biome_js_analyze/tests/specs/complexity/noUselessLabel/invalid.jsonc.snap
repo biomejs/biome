@@ -16,6 +16,8 @@ invalid.jsonc:1:20 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
   > 1 │ A: while (a) break A;
       │                    ^
   
+  i The statement already applies to the innermost enclosing loop or switch, so the label has no effect.
+  
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.
   
@@ -37,6 +39,8 @@ invalid.jsonc:1:30 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
   
   > 1 │ A: while (a) { B: { continue A; } }
       │                              ^
+  
+  i The statement already applies to the innermost enclosing loop or switch, so the label has no effect.
   
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.
@@ -60,6 +64,8 @@ invalid.jsonc:1:42 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
   > 1 │ X: while (x) { A: while (a) { B: { break A; break B; continue X; } } }
       │                                          ^
   
+  i The statement already applies to the innermost enclosing loop or switch, so the label has no effect.
+  
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.
   
@@ -81,6 +87,8 @@ invalid.jsonc:1:15 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
   
   > 1 │ A: do { break A; } while (a);
       │               ^
+  
+  i The statement already applies to the innermost enclosing loop or switch, so the label has no effect.
   
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.
@@ -104,6 +112,8 @@ invalid.jsonc:1:21 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
   > 1 │ A: for (;;) { break A; }
       │                     ^
   
+  i The statement already applies to the innermost enclosing loop or switch, so the label has no effect.
+  
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.
   
@@ -125,6 +135,8 @@ invalid.jsonc:1:27 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
   
   > 1 │ A: for (a in obj) { break A; }
       │                           ^
+  
+  i The statement already applies to the innermost enclosing loop or switch, so the label has no effect.
   
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.
@@ -148,6 +160,8 @@ invalid.jsonc:1:27 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
   > 1 │ A: for (a of ary) { break A; }
       │                           ^
   
+  i The statement already applies to the innermost enclosing loop or switch, so the label has no effect.
+  
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.
   
@@ -169,6 +183,8 @@ invalid.jsonc:1:31 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
   
   > 1 │ A: switch (a) { case 0: break A; }
       │                               ^
+  
+  i The statement already applies to the innermost enclosing loop or switch, so the label has no effect.
   
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.
@@ -192,6 +208,8 @@ invalid.jsonc:1:46 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
   > 1 │ X: while (x) { A: switch (a) { case 0: break A; } }
       │                                              ^
   
+  i The statement already applies to the innermost enclosing loop or switch, so the label has no effect.
+  
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.
   
@@ -213,6 +231,8 @@ invalid.jsonc:1:44 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
   
   > 1 │ X: switch (a) { case 0: A: while (b) break A; }
       │                                            ^
+  
+  i The statement already applies to the innermost enclosing loop or switch, so the label has no effect.
   
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.
@@ -236,6 +256,8 @@ invalid.jsonc:1:25 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
   > 1 │ A: while (true) { break A; while (true) { break A; } }
       │                         ^
   
+  i The statement already applies to the innermost enclosing loop or switch, so the label has no effect.
+  
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.
   
@@ -257,6 +279,8 @@ invalid.jsonc:1:34 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
   
   > 1 │ A: while(true) { /*before*/break A; }
       │                                  ^
+  
+  i The statement already applies to the innermost enclosing loop or switch, so the label has no effect.
   
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.
@@ -280,6 +304,8 @@ invalid.jsonc:1:28 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
   > 1 │ A: while(true) { break/**/ A; }
       │                            ^
   
+  i The statement already applies to the innermost enclosing loop or switch, so the label has no effect.
+  
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.
   
@@ -301,6 +327,8 @@ invalid.jsonc:1:32 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
   
   > 1 │ A: while(true) { continue /**/ A; }
       │                                ^
+  
+  i The statement already applies to the innermost enclosing loop or switch, so the label has no effect.
   
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.
@@ -324,6 +352,8 @@ invalid.jsonc:1:28 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
   > 1 │ A: while(true) { break /**/A; }
       │                            ^
   
+  i The statement already applies to the innermost enclosing loop or switch, so the label has no effect.
+  
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.
   
@@ -346,6 +376,8 @@ invalid.jsonc:1:30 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
   > 1 │ A: while(true) { continue/**/A; }
       │                              ^
   
+  i The statement already applies to the innermost enclosing loop or switch, so the label has no effect.
+  
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.
   
@@ -367,6 +399,8 @@ invalid.jsonc:1:27 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
   
   > 1 │ A: while(true) { continue A/*after*/; }
       │                           ^
+  
+  i The statement already applies to the innermost enclosing loop or switch, so the label has no effect.
   
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.
@@ -392,6 +426,8 @@ invalid.jsonc:1:24 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
   > 1 │ A: while(true) { break A //after
       │                        ^
     2 │  }
+  
+  i The statement already applies to the innermost enclosing loop or switch, so the label has no effect.
   
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.
@@ -419,6 +455,8 @@ invalid.jsonc:1:24 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
       │                        ^
     2 │ foo() }
   
+  i The statement already applies to the innermost enclosing loop or switch, so the label has no effect.
+  
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.
   
@@ -443,6 +481,8 @@ invalid.jsonc:1:49 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
   > 1 │ A: while(true) { while(true) { break A; } break A; }
       │                                                 ^
   
+  i The statement already applies to the innermost enclosing loop or switch, so the label has no effect.
+  
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.
   
@@ -464,6 +504,8 @@ invalid.jsonc:1:58 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
   
   > 1 │ A: while(true) { (() => { A: while(true) {} } )(); break A; }
       │                                                          ^
+  
+  i The statement already applies to the innermost enclosing loop or switch, so the label has no effect.
   
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.

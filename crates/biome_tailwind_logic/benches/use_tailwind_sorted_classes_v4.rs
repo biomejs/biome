@@ -1,4 +1,5 @@
-use biome_tailwind_logic::use_tailwind_sorted_classes::{TailwindDesignSystem, sort_class_list};
+use biome_tailwind_logic::tailwind_v4::TailwindDesignSystem;
+use biome_tailwind_logic::use_tailwind_sorted_classes::sort_class_list;
 use biome_tailwind_parser::parse_tailwind;
 use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};
 
@@ -8,7 +9,7 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 #[cfg(all(
     any(target_os = "macos", target_os = "linux"),
-    not(target_env = "musl")
+    not(all(target_env = "musl", target_arch = "aarch64"))
 ))]
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;

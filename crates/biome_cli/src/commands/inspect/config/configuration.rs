@@ -55,8 +55,7 @@ impl<'source> ConfigurationInspector<'source> {
         let override_patterns = base_configuration
             .overrides
             .as_ref()
-            .map(|overrides| overrides.0.as_slice())
-            .unwrap_or_default();
+            .map_or_default(|overrides| overrides.0.as_slice());
         let mut configuration = base_configuration.clone();
 
         for &override_index in matching_overrides {
@@ -93,8 +92,7 @@ impl<'source> ConfigurationInspector<'source> {
             .configuration
             .overrides
             .as_ref()
-            .map(|overrides| overrides.0.as_slice())
-            .unwrap_or_default();
+            .map_or_default(|overrides| overrides.0.as_slice());
         let mut effective_configuration = self.configuration.clone();
 
         for &override_index in matching_overrides {
@@ -628,6 +626,7 @@ struct SourceRangeCollector {
     entries: BTreeMap<String, TextRange>,
     diagnostics: Vec<Error>,
     path: Vec<PathSegment>,
+    state: (),
 }
 
 impl SourceRangeCollector {
@@ -646,12 +645,22 @@ impl SourceRangeCollector {
 }
 
 impl DeserializationContext for SourceRangeCollector {
+    type State = ();
+
     fn id(&self) -> Option<&str> {
         None
     }
 
     fn report(&mut self, diagnostic: DeserializationDiagnostic) {
         self.diagnostics.push(Error::from(diagnostic));
+    }
+
+    fn state(&self) -> &Self::State {
+        &self.state
+    }
+
+    fn state_mut(&mut self) -> &mut Self::State {
+        &mut self.state
     }
 
     fn enter_property(&mut self, name: &str, _key_range: TextRange, value_range: TextRange) {

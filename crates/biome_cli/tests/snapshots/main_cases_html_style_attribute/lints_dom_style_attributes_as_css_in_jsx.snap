@@ -51,9 +51,11 @@ index.jsx:2:17 lint/correctness/noUnknownProperty ━━━━━━━━━━
     3 │     <div style="colr: blue"/>
     4 │     <my-element style="colr: blue"></my-element>
   
-  i See CSS Specifications and browser specific properties for more details.
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property.
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
   
 
 ```
@@ -70,9 +72,11 @@ index.jsx:3:17 lint/correctness/noUnknownProperty ━━━━━━━━━━
     4 │     <my-element style="colr: blue"></my-element>
     5 │     <div css:style="colr: blue"/>
   
-  i See CSS Specifications and browser specific properties for more details.
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property.
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
   
 
 ```
@@ -89,9 +93,11 @@ index.jsx:4:24 lint/correctness/noUnknownProperty ━━━━━━━━━━
     5 │     <div css:style="colr: blue"/>
     6 │     <Component style="colr: blue"></Component>
   
-  i See CSS Specifications and browser specific properties for more details.
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property.
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
   
 
 ```

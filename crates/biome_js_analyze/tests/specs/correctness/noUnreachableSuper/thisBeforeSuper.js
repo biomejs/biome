@@ -69,3 +69,10 @@ class G extends A {
         }
     }
 }
+
+// invalid
+class ParameterDefault extends A {
+    constructor(options = this.defaults()) {
+        super(options);
+    }
+}

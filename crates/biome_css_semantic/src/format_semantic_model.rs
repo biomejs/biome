@@ -1,5 +1,6 @@
 use crate::model::{Selector, SemanticModel, Specificity};
-use biome_formatter::prelude::*;
+use biome_formatter::rowan::RowanSource;
+use biome_formatter::rowan::prelude::*;
 use biome_formatter::write;
 use biome_formatter::{
     FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
@@ -49,6 +50,7 @@ struct FormatSemanticModelContext {
 
 impl FormatContext for FormatSemanticModelContext {
     type Options = FormatSemanticModelOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &self.options

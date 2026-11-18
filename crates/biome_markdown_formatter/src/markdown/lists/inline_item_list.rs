@@ -228,7 +228,9 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
             return self.fmt_inside_list(node, f);
         } else if self.print_mode.is_auto_link_like() {
             return self.fmt_auto_link_like(node, f);
-        } else if self.print_mode.is_normalize_words() {
+        } else if self.print_mode.is_normalize_words()
+            || self.print_mode.is_normalize_words_preserve_lines()
+        {
             return self.fmt_normalize_words(node, f);
         } else if self.print_mode.is_trim_all() {
             return self.fmt_trim_all(node, f);
@@ -655,9 +657,10 @@ impl FormatMdInlineItemList {
         joiner.finish()
     }
 
-    /// Normalizes all whitespace in textual nodes to `hard_space`.
+    /// Normalizes whitespace in textual nodes to `hard_space`.
     ///
-    /// For example, `[  Foo   Bar  ]` becomes `[ Foo Bar ]`.
+    /// `NormalizeWordsPreserveLines` keeps textual line breaks unchanged. For example,
+    /// `[  Foo   Bar  ]` becomes `[ Foo Bar ]` in both modes.
     fn fmt_normalize_words(
         &self,
         node: &MdInlineItemList,
@@ -667,6 +670,12 @@ impl FormatMdInlineItemList {
 
         for item in node.iter() {
             match item {
+                AnyMdInline::MdTextual(text)
+                    if self.print_mode.is_normalize_words_preserve_lines()
+                        && text.is_newline()? =>
+                {
+                    joiner.entry(&text.format());
+                }
                 AnyMdInline::MdTextual(text) => {
                     joiner.entry(&text.format().with_options(FormatMdTextualOptions {
                         print_mode: TextPrintMode::Trim(TrimMode::NormalizeWords),
@@ -860,16 +869,40 @@ impl FormatMdInlineItemList {
     ) -> FormatResult<()> {
         let mut items = ProseItemList::from_inline_item_list(node, f)?;
         let inside_list = text_context.is_list();
+        let prose_wrap = f.options().prose_wrap();
+        // Must run before the indentation is removed below.
+        let indented_block_marker_lines = if prose_wrap == ProseWrap::Preserve {
+            items.indented_block_marker_lines(inside_list)
+        } else {
+            Vec::new()
+        };
 
         if inside_list {
             items.remove_spaces_after_soft_breaks();
         }
         let items = items.as_slice();
+        let task_list_indent = if inside_list {
+            node.iter().next().and_then(|item| match item {
+                AnyMdInline::GfmTaskListItem(task_list_item) => {
+                    Some(usize::from(task_list_item.range().len()) + 1)
+                }
+                _ => None,
+            })
+        } else {
+            None
+        };
+        let prose = format_with(|f| match prose_wrap {
+            ProseWrap::Preserve => {
+                self.fmt_prose_preserve(node, items, &indented_block_marker_lines, f, inside_list)
+            }
+            ProseWrap::Always => self.fmt_prose_always(items, f),
+            ProseWrap::Never => self.fmt_prose_never(items, f),
+        });
 
-        match f.options().prose_wrap() {
-            ProseWrap::Preserve => self.fmt_prose_preserve(node, items, f, inside_list)?,
-            ProseWrap::Always => self.fmt_prose_always(items, f)?,
-            ProseWrap::Never => self.fmt_prose_never(items, f)?,
+        if let Some(task_list_indent) = task_list_indent {
+            write!(f, [align(" ".repeat(task_list_indent), &prose)])?;
+        } else {
+            prose.fmt(f)?;
         }
 
         if !inside_list {
@@ -879,10 +912,19 @@ impl FormatMdInlineItemList {
         Ok(())
     }
 
+    /// Prints each source line of `items` on its own line, with two exceptions.
+    ///
+    /// A line that would start a list item, heading, or blockquote at its
+    /// printed indentation joins the previous line with a space. These are the
+    /// lines in `indented_block_marker_lines` and, inside a list item, the
+    /// indented lazy continuation lines that start with a list marker.
+    /// An unindented lazy continuation line that starts with a list marker
+    /// stays at the start of the line, outside the list item's indentation.
     fn fmt_prose_preserve(
         &self,
         node: &MdInlineItemList,
         items: &[ProseItem],
+        indented_block_marker_lines: &[usize],
         f: &mut MarkdownFormatter,
         inside_list: bool,
     ) -> FormatResult<()> {
@@ -928,17 +970,17 @@ impl FormatMdInlineItemList {
                 ProseItem::SoftBreak => {
                     let line_items = &items[line_start..i];
                     if !line_items.is_empty() {
-                        let next_line_is_outdented_list_marker =
-                            indented_outdented_lines.contains(&(line_index + 1));
+                        let join_next_line = indented_outdented_lines.contains(&(line_index + 1))
+                            || indented_block_marker_lines.contains(&(line_index + 1));
                         format_source_line(
                             line_items,
                             line_index,
                             !is_first_line,
-                            !inside_list,
+                            !inside_list && !join_next_line,
                             &outdented_lines,
                             f,
                         )?;
-                        if next_line_is_outdented_list_marker {
+                        if join_next_line {
                             write!(f, [space()])?;
                             is_first_line = true;
                         } else {

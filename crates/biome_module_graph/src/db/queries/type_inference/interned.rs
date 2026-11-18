@@ -5,6 +5,7 @@
 //! cached by interning.
 
 use crate::ModuleInfo;
+use crate::js_module_info::flow::{FlowNodeId, FlowSubjectId};
 use biome_js_type_info::interned_types::{
     CallArgumentType as InferredCallArgumentType, LocalTypeId as InferredLocalTypeId,
     TypeData as InferredTypeData, TypeSubstitution as InferredTypeSubstitution,
@@ -33,6 +34,45 @@ pub struct BindingTypeInput<'db> {
     /// Source range used to identify the binding.
     #[returns(copy)]
     pub range: TextRange,
+}
+
+/// Identifies a subject within one execution root, together with the type
+/// that narrowing starts from.
+///
+/// Reads of the subject in that root share this key, and with it one solve of
+/// the root's flow, when they start from the same type, whether a lookup or
+/// complete module inference resolved that type.
+#[salsa::interned]
+#[derive(Debug)]
+pub(crate) struct FlowSubjectRootInput<'db> {
+    #[returns(copy)]
+    pub module: ModuleInfo,
+    /// Index of the execution root in the module's collected flow.
+    #[returns(copy)]
+    pub root: usize,
+    /// Id of the subject in that root's subject table.
+    #[returns(copy)]
+    pub subject: FlowSubjectId,
+    /// The type that narrowing starts from: the subject's declared type
+    /// flattened for narrowing, or `None` when no runtime test can change that
+    /// type. For a variable, lookups take it from
+    /// [`super::infer_flow_binding_baseline`]. For a property path, it is the
+    /// type of the member access at the read, so reads of one path can start
+    /// from different types.
+    #[returns(copy)]
+    pub baseline: Option<InferredTypeData<'db>>,
+}
+
+/// Identifies a subject's incoming state at one point of its execution root.
+#[salsa::interned]
+#[derive(Debug)]
+pub(crate) struct FlowSubjectTypeInput<'db> {
+    /// The subject, its root, and the type that narrowing starts from.
+    #[returns(copy)]
+    pub states: FlowSubjectRootInput<'db>,
+    /// Node index in that root's flow graph.
+    #[returns(copy)]
+    pub point: FlowNodeId,
 }
 
 /// Interned input for [`super::infer_local_type`].

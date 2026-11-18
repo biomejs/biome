@@ -99,7 +99,10 @@ impl Rule for NoUselessContinue {
             markup! {
                 "Unnecessary continue statement"
             },
-        ))
+        )
+        .note(markup! {
+            "The loop already moves on to the next iteration at this point, so the statement has no effect."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

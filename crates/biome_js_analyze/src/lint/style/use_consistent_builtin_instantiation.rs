@@ -94,8 +94,11 @@ impl Rule for UseConsistentBuiltinInstantiation {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let (callee, creation_rule) = extract_callee_and_rule(node)?;
-        let (reference, name) =
-            global_identifier(&callee.omit_parentheses().as_any_global_identifier_expression()?)?;
+        let (reference, name) = global_identifier(
+            &callee
+                .omit_parentheses()
+                .as_any_global_identifier_expression()?,
+        )?;
 
         if creation_rule
             .forbidden_builtins_list()
@@ -122,13 +125,23 @@ impl Rule for UseConsistentBuiltinInstantiation {
             BuiltinCreationRule::MustNotUseNew => ("", "new "),
         };
 
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            node.range(),
-            markup! {
-                "Use "<Emphasis>{use_this}{name}"()"</Emphasis>" instead of "<Emphasis>{instead_of}{name}"()"</Emphasis>"."
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup! {
+                    "Use "<Emphasis>{use_this}{name}"()"</Emphasis>" instead of "<Emphasis>{instead_of}{name}"()"</Emphasis>"."
+                },
+            )
+            .note(match state.creation_rule {
+                BuiltinCreationRule::MustUseNew => markup! {
+                    "Using "<Emphasis>"new"</Emphasis>" for builtins keeps the code consistent with other constructors."
+                },
+                BuiltinCreationRule::MustNotUseNew => markup! {
+                    "Using "<Emphasis>"new"</Emphasis>" with this builtin creates a wrapper object instead of a primitive value."
+                },
+            }),
+        )
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

@@ -17,7 +17,7 @@ biome_html_syntax  = { workspace = true }
 biome_js_syntax    = { workspace = true }
 biome_languages    = { workspace = true }
 biome_module_graph = { workspace = true }
-biome_parser       = { workspace = true }
+biome_parser       = { workspace = true, features = ["db"] }
 biome_rowan        = { workspace = true }
 camino             = { workspace = true }
 papaya             = { workspace = true }

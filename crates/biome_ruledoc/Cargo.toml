@@ -1,0 +1,21 @@
+[package]
+name                 = "biome_ruledoc"
+version              = "0.0.1"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Intermediate representation for Biome rule documentation"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = false
+
+[dependencies]
+biome_markdown_parser = { workspace = true }
+biome_markdown_syntax = { workspace = true }
+biome_parser          = { workspace = true }
+biome_rowan           = { workspace = true }
+
+[lints]
+workspace = true

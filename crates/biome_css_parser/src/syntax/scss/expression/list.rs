@@ -53,7 +53,7 @@ pub(crate) fn parse_scss_optional_value_until(
 pub(crate) fn parse_scss_optional_value_until_with_boundary(
     p: &mut CssParser,
     end_ts: TokenSet<CssSyntaxKind>,
-    boundary: fn(&mut CssParser) -> bool,
+    boundary: fn(&mut CssParser, usize) -> bool,
 ) -> ParsedSyntax {
     parse_scss_optional_value_with_options(
         p,
@@ -470,6 +470,6 @@ impl ParseRecovery for ScssExpressionParseRecovery {
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         p.at_ts(self.options.recovery_end_ts())
             || p.has_preceding_line_break()
-            || self.options.boundary.is_some_and(|boundary| boundary(p))
+            || self.options.boundary.is_some_and(|boundary| boundary(p, 0))
     }
 }

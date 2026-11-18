@@ -1,13 +1,14 @@
 use crate::CssCommentStyle;
 use crate::utils::case::CssCase;
+use biome_formatter::rowan::RowanSource;
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TrailingNewline, TransformSourceMap,
 };
-use biome_formatter::{DelimiterSpacing, IndentWidth, QuoteStyle, prelude::*};
+use biome_formatter::{DelimiterSpacing, IndentWidth, QuoteStyle, rowan::prelude::*};
 
 use crate::comments::{CssComments, FormatCssLeadingComment};
-use biome_css_syntax::CssLanguage;
+use biome_css_syntax::{CssLanguage, TextRange};
 use biome_languages::CssFileSource;
 use std::fmt;
 use std::rc::Rc;
@@ -19,6 +20,8 @@ pub struct CssFormatContext {
     comments: Rc<CssComments>,
     source_map: Option<TransformSourceMap>,
     identifier_case: CssCase,
+    /// Ranges of the metavariables that are written as embedded elements.
+    metavariable_ranges: Box<[TextRange]>,
 }
 
 impl CssFormatContext {
@@ -28,12 +31,29 @@ impl CssFormatContext {
             comments: Rc::new(comments),
             source_map: None,
             identifier_case: CssCase::Auto,
+            metavariable_ranges: Box::default(),
         }
     }
 
     pub fn with_source_map(mut self, source_map: Option<TransformSourceMap>) -> Self {
         self.source_map = source_map;
         self
+    }
+
+    pub fn with_metavariable_ranges(mut self, metavariable_ranges: Box<[TextRange]>) -> Self {
+        self.metavariable_ranges = metavariable_ranges;
+        self
+    }
+
+    /// Returns the ranges of the metavariables inside `range`.
+    pub(crate) fn metavariable_ranges_in(
+        &self,
+        range: TextRange,
+    ) -> impl Iterator<Item = TextRange> {
+        self.metavariable_ranges
+            .iter()
+            .copied()
+            .filter(move |metavariable| range.contains_range(*metavariable))
     }
 
     pub(crate) fn identifier_case(&self) -> CssCase {
@@ -47,6 +67,7 @@ impl CssFormatContext {
 
 impl FormatContext for CssFormatContext {
     type Options = CssFormatOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &self.options

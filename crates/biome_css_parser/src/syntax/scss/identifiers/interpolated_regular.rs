@@ -8,9 +8,10 @@ use crate::syntax::scss::identifiers::interpolated_identifier::{
     parse_scss_interpolated_identifier_parts,
 };
 use crate::syntax::scss::{
-    is_at_scss_interpolation, is_nth_at_scss_interpolated_identifier, is_nth_at_scss_interpolation,
+    is_at_scss_interpolation, is_nth_at_scss_interpolated_dashed_identifier,
+    is_nth_at_scss_interpolated_identifier, is_nth_at_scss_interpolation,
 };
-use crate::syntax::{is_nth_at_identifier, parse_regular_identifier};
+use crate::syntax::{is_at_identifier, is_nth_at_identifier, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::{SCSS_INTERPOLATED_IDENTIFIER, SCSS_INTERPOLATION};
 use biome_css_syntax::T;
 use biome_parser::Parser;
@@ -72,14 +73,30 @@ pub(crate) fn parse_scss_interpolated_attribute_name(p: &mut CssParser) -> Parse
     parse_scss_interpolated_identifier_with_part(p, parse_attribute_name_identifier_part)
 }
 
-/// Parses adjacent at-rule name parts, stopping before comments or whitespace.
+/// Recognizes interpolation within one adjacent name, not a following name.
+///
+/// ```scss
+/// .card { width: attr(data-width p#{$suffix}, 10px); }
+/// ```
+#[inline]
+pub(crate) fn is_at_scss_interpolated_name_with_suffixes(p: &mut CssParser) -> bool {
+    is_at_scss_interpolation(p)
+        || ((is_at_identifier(p) || p.at(T![-]))
+            && is_nth_at_scss_interpolation(p, 1)
+            && p.source_mut().is_nth_source_tight(1))
+        || (is_nth_at_scss_interpolated_dashed_identifier(p, 0)
+            && p.source_mut().is_nth_source_tight(1)
+            && p.source_mut().is_nth_source_tight(2))
+}
+
+/// Parses adjacent name parts, including numeric suffixes, up to comments or whitespace.
 ///
 /// ```scss
 /// @custom-#{$name}2 token;
 /// @#{$name} /* prelude */ token;
 /// ```
 #[inline]
-pub(crate) fn parse_scss_interpolated_at_rule_name(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_scss_interpolated_name_with_suffixes(p: &mut CssParser) -> ParsedSyntax {
     let head = if p.at(T![-]) {
         parse_identifier_hyphen_part(p, CssLexContext::Regular)
     } else {
@@ -89,17 +106,17 @@ pub(crate) fn parse_scss_interpolated_at_rule_name(p: &mut CssParser) -> ParsedS
         return Absent;
     };
 
-    if head.kind(p) == SCSS_INTERPOLATION && !is_at_scss_at_rule_name_part(p) {
+    if head.kind(p) == SCSS_INTERPOLATION && !is_at_scss_name_suffix(p) {
         return Present(head);
     }
 
-    let parts = parse_scss_interpolated_identifier_parts(p, head, parse_scss_at_rule_name_part);
+    let parts = parse_scss_interpolated_identifier_parts(p, head, parse_scss_name_suffix);
     Present(parts.precede(p).complete(p, SCSS_INTERPOLATED_IDENTIFIER))
 }
 
 /// Recognizes adjacent name suffixes in `@custom-#{$name}2-end token;`.
 #[inline]
-fn is_at_scss_at_rule_name_part(p: &mut CssParser) -> bool {
+fn is_at_scss_name_suffix(p: &mut CssParser) -> bool {
     p.last_end() == Some(p.cur_range().start())
         && (is_nth_at_scss_interpolated_identifier(p, 0)
             || matches!(p.cur_text().as_bytes().first(), Some(b'0'..=b'9' | b'-')))
@@ -107,8 +124,8 @@ fn is_at_scss_at_rule_name_part(p: &mut CssParser) -> bool {
 
 /// Parses one suffix in `@custom-#{$name}2-end token;`.
 #[inline]
-fn parse_scss_at_rule_name_part(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_scss_at_rule_name_part(p) {
+fn parse_scss_name_suffix(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_scss_name_suffix(p) {
         return Absent;
     }
 

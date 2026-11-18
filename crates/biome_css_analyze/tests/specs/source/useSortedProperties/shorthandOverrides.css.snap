@@ -1,0 +1,1325 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: shorthandOverrides.css
+---
+# Input
+```css
+.border-block-start-color-before-border-block-color {
+  border-block-start-color: initial;
+  border-block-color: initial;
+}
+
+.border-block-end-color-before-border-block-color {
+  border-block-end-color: initial;
+  border-block-color: initial;
+}
+
+.border-block-start-style-before-border-block-style {
+  border-block-start-style: initial;
+  border-block-style: initial;
+}
+
+.border-block-end-style-before-border-block-style {
+  border-block-end-style: initial;
+  border-block-style: initial;
+}
+
+.border-block-start-width-before-border-block-width {
+  border-block-start-width: initial;
+  border-block-width: initial;
+}
+
+.border-block-end-width-before-border-block-width {
+  border-block-end-width: initial;
+  border-block-width: initial;
+}
+
+.border-inline-start-color-before-border-inline-color {
+  border-inline-start-color: initial;
+  border-inline-color: initial;
+}
+
+.border-inline-end-color-before-border-inline-color {
+  border-inline-end-color: initial;
+  border-inline-color: initial;
+}
+
+.border-inline-start-style-before-border-inline-style {
+  border-inline-start-style: initial;
+  border-inline-style: initial;
+}
+
+.border-inline-end-style-before-border-inline-style {
+  border-inline-end-style: initial;
+  border-inline-style: initial;
+}
+
+.border-inline-start-width-before-border-inline-width {
+  border-inline-start-width: initial;
+  border-inline-width: initial;
+}
+
+.border-inline-end-width-before-border-inline-width {
+  border-inline-end-width: initial;
+  border-inline-width: initial;
+}
+
+.corner-end-start-shape-before-corner-block-end-shape {
+  corner-end-start-shape: bevel;
+  corner-block-end-shape: round;
+}
+
+.corner-end-end-shape-before-corner-block-end-shape {
+  corner-end-end-shape: bevel;
+  corner-block-end-shape: round;
+}
+
+.corner-start-start-shape-before-corner-block-start-shape {
+  corner-start-start-shape: bevel;
+  corner-block-start-shape: round;
+}
+
+.corner-start-end-shape-before-corner-block-start-shape {
+  corner-start-end-shape: bevel;
+  corner-block-start-shape: round;
+}
+
+.corner-bottom-left-shape-before-corner-bottom-shape {
+  corner-bottom-left-shape: bevel;
+  corner-bottom-shape: round;
+}
+
+.corner-bottom-right-shape-before-corner-bottom-shape {
+  corner-bottom-right-shape: bevel;
+  corner-bottom-shape: round;
+}
+
+.corner-start-end-shape-before-corner-inline-end-shape {
+  corner-start-end-shape: bevel;
+  corner-inline-end-shape: round;
+}
+
+.corner-end-end-shape-before-corner-inline-end-shape {
+  corner-end-end-shape: bevel;
+  corner-inline-end-shape: round;
+}
+
+.corner-start-start-shape-before-corner-inline-start-shape {
+  corner-start-start-shape: bevel;
+  corner-inline-start-shape: round;
+}
+
+.corner-end-start-shape-before-corner-inline-start-shape {
+  corner-end-start-shape: bevel;
+  corner-inline-start-shape: round;
+}
+
+.corner-top-left-shape-before-corner-left-shape {
+  corner-top-left-shape: bevel;
+  corner-left-shape: round;
+}
+
+.corner-bottom-left-shape-before-corner-left-shape {
+  corner-bottom-left-shape: bevel;
+  corner-left-shape: round;
+}
+
+.corner-top-right-shape-before-corner-right-shape {
+  corner-top-right-shape: bevel;
+  corner-right-shape: round;
+}
+
+.corner-bottom-right-shape-before-corner-right-shape {
+  corner-bottom-right-shape: bevel;
+  corner-right-shape: round;
+}
+
+.corner-top-left-shape-before-corner-top-shape {
+  corner-top-left-shape: bevel;
+  corner-top-shape: round;
+}
+
+.corner-top-right-shape-before-corner-top-shape {
+  corner-top-right-shape: bevel;
+  corner-top-shape: round;
+}
+
+.corner-top-left-shape-before-corner-shape {
+  corner-top-left-shape: bevel;
+  corner-shape: round;
+}
+
+.corner-top-right-shape-before-corner-shape {
+  corner-top-right-shape: bevel;
+  corner-shape: round;
+}
+
+.corner-bottom-left-shape-before-corner-shape {
+  corner-bottom-left-shape: bevel;
+  corner-shape: round;
+}
+
+.corner-bottom-right-shape-before-corner-shape {
+  corner-bottom-right-shape: bevel;
+  corner-shape: round;
+}
+
+.position-try-fallbacks-before-position-try {
+  position-try-fallbacks: flip-block;
+  position-try: none;
+}
+
+.position-try-order-before-position-try {
+  position-try-order: initial;
+  position-try: initial;
+}
+
+.transition-behavior-before-transition {
+  transition-behavior: allow-discrete;
+  transition: display 1s;
+}
+
+.text-box-trim-before-text-box {
+  text-box-trim: trim-both;
+  text-box: normal;
+}
+
+.text-box-edge-before-text-box {
+  text-box-edge: initial;
+  text-box: initial;
+}
+
+.border-block-start-color-before-border-block {
+  border-block-start-color: initial;
+  border-block: initial;
+}
+
+.border-block-start-style-before-border-block {
+  border-block-start-style: initial;
+  border-block: initial;
+}
+
+.border-block-start-width-before-border-block {
+  border-block-start-width: initial;
+  border-block: initial;
+}
+
+.border-block-end-color-before-border-block {
+  border-block-end-color: initial;
+  border-block: initial;
+}
+
+.border-block-end-style-before-border-block {
+  border-block-end-style: initial;
+  border-block: initial;
+}
+
+.border-block-end-width-before-border-block {
+  border-block-end-width: initial;
+  border-block: initial;
+}
+
+.border-inline-start-color-before-border-inline {
+  border-inline-start-color: initial;
+  border-inline: initial;
+}
+
+.border-inline-start-style-before-border-inline {
+  border-inline-start-style: initial;
+  border-inline: initial;
+}
+
+.border-inline-start-width-before-border-inline {
+  border-inline-start-width: initial;
+  border-inline: initial;
+}
+
+.border-inline-end-color-before-border-inline {
+  border-inline-end-color: initial;
+  border-inline: initial;
+}
+
+.border-inline-end-style-before-border-inline {
+  border-inline-end-style: initial;
+  border-inline: initial;
+}
+
+.border-inline-end-width-before-border-inline {
+  border-inline-end-width: initial;
+  border-inline: initial;
+}
+
+.overlapping-logical-borders {
+  border-block-start: 1px solid red;
+  border-block-color: blue;
+}
+
+.overlapping-corner-sides {
+  corner-left-shape: bevel;
+  corner-top-shape: round;
+}
+
+.physical-before-logical-corner {
+  corner-top-left-shape: bevel;
+  corner-start-start-shape: round;
+}
+
+.physical-before-logical-border {
+  border-top: 1px solid red;
+  border-block-color: blue;
+}
+
+.property-before-all {
+  transition-behavior: allow-discrete;
+  all: initial;
+}
+
+.prefixed-property-before-all {
+  -webkit-line-clamp: 3;
+  all: initial;
+}
+
+```
+
+# Diagnostics
+```
+shorthandOverrides.css:1:53 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+  > 1 │ .border-block-start-color-before-border-block-color {
+      │                                                     ^
+  > 2 │   border-block-start-color: initial;
+  > 3 │   border-block-color: initial;
+  > 4 │ }
+      │ ^
+    5 │ 
+    6 │ .border-block-end-color-before-border-block-color {
+  
+
+```
+
+```
+shorthandOverrides.css:6:51 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+     4 │ }
+     5 │ 
+   > 6 │ .border-block-end-color-before-border-block-color {
+       │                                                   ^
+   > 7 │   border-block-end-color: initial;
+   > 8 │   border-block-color: initial;
+   > 9 │ }
+       │ ^
+    10 │ 
+    11 │ .border-block-start-style-before-border-block-style {
+  
+
+```
+
+```
+shorthandOverrides.css:11:53 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+     9 │ }
+    10 │ 
+  > 11 │ .border-block-start-style-before-border-block-style {
+       │                                                     ^
+  > 12 │   border-block-start-style: initial;
+  > 13 │   border-block-style: initial;
+  > 14 │ }
+       │ ^
+    15 │ 
+    16 │ .border-block-end-style-before-border-block-style {
+  
+
+```
+
+```
+shorthandOverrides.css:16:51 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    14 │ }
+    15 │ 
+  > 16 │ .border-block-end-style-before-border-block-style {
+       │                                                   ^
+  > 17 │   border-block-end-style: initial;
+  > 18 │   border-block-style: initial;
+  > 19 │ }
+       │ ^
+    20 │ 
+    21 │ .border-block-start-width-before-border-block-width {
+  
+
+```
+
+```
+shorthandOverrides.css:21:53 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    19 │ }
+    20 │ 
+  > 21 │ .border-block-start-width-before-border-block-width {
+       │                                                     ^
+  > 22 │   border-block-start-width: initial;
+  > 23 │   border-block-width: initial;
+  > 24 │ }
+       │ ^
+    25 │ 
+    26 │ .border-block-end-width-before-border-block-width {
+  
+
+```
+
+```
+shorthandOverrides.css:26:51 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    24 │ }
+    25 │ 
+  > 26 │ .border-block-end-width-before-border-block-width {
+       │                                                   ^
+  > 27 │   border-block-end-width: initial;
+  > 28 │   border-block-width: initial;
+  > 29 │ }
+       │ ^
+    30 │ 
+    31 │ .border-inline-start-color-before-border-inline-color {
+  
+
+```
+
+```
+shorthandOverrides.css:31:55 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    29 │ }
+    30 │ 
+  > 31 │ .border-inline-start-color-before-border-inline-color {
+       │                                                       ^
+  > 32 │   border-inline-start-color: initial;
+  > 33 │   border-inline-color: initial;
+  > 34 │ }
+       │ ^
+    35 │ 
+    36 │ .border-inline-end-color-before-border-inline-color {
+  
+
+```
+
+```
+shorthandOverrides.css:36:53 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    34 │ }
+    35 │ 
+  > 36 │ .border-inline-end-color-before-border-inline-color {
+       │                                                     ^
+  > 37 │   border-inline-end-color: initial;
+  > 38 │   border-inline-color: initial;
+  > 39 │ }
+       │ ^
+    40 │ 
+    41 │ .border-inline-start-style-before-border-inline-style {
+  
+
+```
+
+```
+shorthandOverrides.css:41:55 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    39 │ }
+    40 │ 
+  > 41 │ .border-inline-start-style-before-border-inline-style {
+       │                                                       ^
+  > 42 │   border-inline-start-style: initial;
+  > 43 │   border-inline-style: initial;
+  > 44 │ }
+       │ ^
+    45 │ 
+    46 │ .border-inline-end-style-before-border-inline-style {
+  
+
+```
+
+```
+shorthandOverrides.css:46:53 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    44 │ }
+    45 │ 
+  > 46 │ .border-inline-end-style-before-border-inline-style {
+       │                                                     ^
+  > 47 │   border-inline-end-style: initial;
+  > 48 │   border-inline-style: initial;
+  > 49 │ }
+       │ ^
+    50 │ 
+    51 │ .border-inline-start-width-before-border-inline-width {
+  
+
+```
+
+```
+shorthandOverrides.css:51:55 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    49 │ }
+    50 │ 
+  > 51 │ .border-inline-start-width-before-border-inline-width {
+       │                                                       ^
+  > 52 │   border-inline-start-width: initial;
+  > 53 │   border-inline-width: initial;
+  > 54 │ }
+       │ ^
+    55 │ 
+    56 │ .border-inline-end-width-before-border-inline-width {
+  
+
+```
+
+```
+shorthandOverrides.css:56:53 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    54 │ }
+    55 │ 
+  > 56 │ .border-inline-end-width-before-border-inline-width {
+       │                                                     ^
+  > 57 │   border-inline-end-width: initial;
+  > 58 │   border-inline-width: initial;
+  > 59 │ }
+       │ ^
+    60 │ 
+    61 │ .corner-end-start-shape-before-corner-block-end-shape {
+  
+
+```
+
+```
+shorthandOverrides.css:61:55 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    59 │ }
+    60 │ 
+  > 61 │ .corner-end-start-shape-before-corner-block-end-shape {
+       │                                                       ^
+  > 62 │   corner-end-start-shape: bevel;
+  > 63 │   corner-block-end-shape: round;
+  > 64 │ }
+       │ ^
+    65 │ 
+    66 │ .corner-end-end-shape-before-corner-block-end-shape {
+  
+
+```
+
+```
+shorthandOverrides.css:66:53 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    64 │ }
+    65 │ 
+  > 66 │ .corner-end-end-shape-before-corner-block-end-shape {
+       │                                                     ^
+  > 67 │   corner-end-end-shape: bevel;
+  > 68 │   corner-block-end-shape: round;
+  > 69 │ }
+       │ ^
+    70 │ 
+    71 │ .corner-start-start-shape-before-corner-block-start-shape {
+  
+
+```
+
+```
+shorthandOverrides.css:71:59 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    69 │ }
+    70 │ 
+  > 71 │ .corner-start-start-shape-before-corner-block-start-shape {
+       │                                                           ^
+  > 72 │   corner-start-start-shape: bevel;
+  > 73 │   corner-block-start-shape: round;
+  > 74 │ }
+       │ ^
+    75 │ 
+    76 │ .corner-start-end-shape-before-corner-block-start-shape {
+  
+
+```
+
+```
+shorthandOverrides.css:76:57 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    74 │ }
+    75 │ 
+  > 76 │ .corner-start-end-shape-before-corner-block-start-shape {
+       │                                                         ^
+  > 77 │   corner-start-end-shape: bevel;
+  > 78 │   corner-block-start-shape: round;
+  > 79 │ }
+       │ ^
+    80 │ 
+    81 │ .corner-bottom-left-shape-before-corner-bottom-shape {
+  
+
+```
+
+```
+shorthandOverrides.css:81:54 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    79 │ }
+    80 │ 
+  > 81 │ .corner-bottom-left-shape-before-corner-bottom-shape {
+       │                                                      ^
+  > 82 │   corner-bottom-left-shape: bevel;
+  > 83 │   corner-bottom-shape: round;
+  > 84 │ }
+       │ ^
+    85 │ 
+    86 │ .corner-bottom-right-shape-before-corner-bottom-shape {
+  
+
+```
+
+```
+shorthandOverrides.css:86:55 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    84 │ }
+    85 │ 
+  > 86 │ .corner-bottom-right-shape-before-corner-bottom-shape {
+       │                                                       ^
+  > 87 │   corner-bottom-right-shape: bevel;
+  > 88 │   corner-bottom-shape: round;
+  > 89 │ }
+       │ ^
+    90 │ 
+    91 │ .corner-start-end-shape-before-corner-inline-end-shape {
+  
+
+```
+
+```
+shorthandOverrides.css:91:56 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    89 │ }
+    90 │ 
+  > 91 │ .corner-start-end-shape-before-corner-inline-end-shape {
+       │                                                        ^
+  > 92 │   corner-start-end-shape: bevel;
+  > 93 │   corner-inline-end-shape: round;
+  > 94 │ }
+       │ ^
+    95 │ 
+    96 │ .corner-end-end-shape-before-corner-inline-end-shape {
+  
+
+```
+
+```
+shorthandOverrides.css:96:54 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+     94 │ }
+     95 │ 
+   > 96 │ .corner-end-end-shape-before-corner-inline-end-shape {
+        │                                                      ^
+   > 97 │   corner-end-end-shape: bevel;
+   > 98 │   corner-inline-end-shape: round;
+   > 99 │ }
+        │ ^
+    100 │ 
+    101 │ .corner-start-start-shape-before-corner-inline-start-shape {
+  
+
+```
+
+```
+shorthandOverrides.css:101:60 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+     99 │ }
+    100 │ 
+  > 101 │ .corner-start-start-shape-before-corner-inline-start-shape {
+        │                                                            ^
+  > 102 │   corner-start-start-shape: bevel;
+  > 103 │   corner-inline-start-shape: round;
+  > 104 │ }
+        │ ^
+    105 │ 
+    106 │ .corner-end-start-shape-before-corner-inline-start-shape {
+  
+
+```
+
+```
+shorthandOverrides.css:106:58 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    104 │ }
+    105 │ 
+  > 106 │ .corner-end-start-shape-before-corner-inline-start-shape {
+        │                                                          ^
+  > 107 │   corner-end-start-shape: bevel;
+  > 108 │   corner-inline-start-shape: round;
+  > 109 │ }
+        │ ^
+    110 │ 
+    111 │ .corner-top-left-shape-before-corner-left-shape {
+  
+
+```
+
+```
+shorthandOverrides.css:111:49 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    109 │ }
+    110 │ 
+  > 111 │ .corner-top-left-shape-before-corner-left-shape {
+        │                                                 ^
+  > 112 │   corner-top-left-shape: bevel;
+  > 113 │   corner-left-shape: round;
+  > 114 │ }
+        │ ^
+    115 │ 
+    116 │ .corner-bottom-left-shape-before-corner-left-shape {
+  
+
+```
+
+```
+shorthandOverrides.css:116:52 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    114 │ }
+    115 │ 
+  > 116 │ .corner-bottom-left-shape-before-corner-left-shape {
+        │                                                    ^
+  > 117 │   corner-bottom-left-shape: bevel;
+  > 118 │   corner-left-shape: round;
+  > 119 │ }
+        │ ^
+    120 │ 
+    121 │ .corner-top-right-shape-before-corner-right-shape {
+  
+
+```
+
+```
+shorthandOverrides.css:121:51 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    119 │ }
+    120 │ 
+  > 121 │ .corner-top-right-shape-before-corner-right-shape {
+        │                                                   ^
+  > 122 │   corner-top-right-shape: bevel;
+  > 123 │   corner-right-shape: round;
+  > 124 │ }
+        │ ^
+    125 │ 
+    126 │ .corner-bottom-right-shape-before-corner-right-shape {
+  
+
+```
+
+```
+shorthandOverrides.css:126:54 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    124 │ }
+    125 │ 
+  > 126 │ .corner-bottom-right-shape-before-corner-right-shape {
+        │                                                      ^
+  > 127 │   corner-bottom-right-shape: bevel;
+  > 128 │   corner-right-shape: round;
+  > 129 │ }
+        │ ^
+    130 │ 
+    131 │ .corner-top-left-shape-before-corner-top-shape {
+  
+
+```
+
+```
+shorthandOverrides.css:131:48 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    129 │ }
+    130 │ 
+  > 131 │ .corner-top-left-shape-before-corner-top-shape {
+        │                                                ^
+  > 132 │   corner-top-left-shape: bevel;
+  > 133 │   corner-top-shape: round;
+  > 134 │ }
+        │ ^
+    135 │ 
+    136 │ .corner-top-right-shape-before-corner-top-shape {
+  
+
+```
+
+```
+shorthandOverrides.css:136:49 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    134 │ }
+    135 │ 
+  > 136 │ .corner-top-right-shape-before-corner-top-shape {
+        │                                                 ^
+  > 137 │   corner-top-right-shape: bevel;
+  > 138 │   corner-top-shape: round;
+  > 139 │ }
+        │ ^
+    140 │ 
+    141 │ .corner-top-left-shape-before-corner-shape {
+  
+
+```
+
+```
+shorthandOverrides.css:141:44 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    139 │ }
+    140 │ 
+  > 141 │ .corner-top-left-shape-before-corner-shape {
+        │                                            ^
+  > 142 │   corner-top-left-shape: bevel;
+  > 143 │   corner-shape: round;
+  > 144 │ }
+        │ ^
+    145 │ 
+    146 │ .corner-top-right-shape-before-corner-shape {
+  
+
+```
+
+```
+shorthandOverrides.css:146:45 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    144 │ }
+    145 │ 
+  > 146 │ .corner-top-right-shape-before-corner-shape {
+        │                                             ^
+  > 147 │   corner-top-right-shape: bevel;
+  > 148 │   corner-shape: round;
+  > 149 │ }
+        │ ^
+    150 │ 
+    151 │ .corner-bottom-left-shape-before-corner-shape {
+  
+
+```
+
+```
+shorthandOverrides.css:151:47 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    149 │ }
+    150 │ 
+  > 151 │ .corner-bottom-left-shape-before-corner-shape {
+        │                                               ^
+  > 152 │   corner-bottom-left-shape: bevel;
+  > 153 │   corner-shape: round;
+  > 154 │ }
+        │ ^
+    155 │ 
+    156 │ .corner-bottom-right-shape-before-corner-shape {
+  
+
+```
+
+```
+shorthandOverrides.css:156:48 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    154 │ }
+    155 │ 
+  > 156 │ .corner-bottom-right-shape-before-corner-shape {
+        │                                                ^
+  > 157 │   corner-bottom-right-shape: bevel;
+  > 158 │   corner-shape: round;
+  > 159 │ }
+        │ ^
+    160 │ 
+    161 │ .position-try-fallbacks-before-position-try {
+  
+
+```
+
+```
+shorthandOverrides.css:161:45 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    159 │ }
+    160 │ 
+  > 161 │ .position-try-fallbacks-before-position-try {
+        │                                             ^
+  > 162 │   position-try-fallbacks: flip-block;
+  > 163 │   position-try: none;
+  > 164 │ }
+        │ ^
+    165 │ 
+    166 │ .position-try-order-before-position-try {
+  
+
+```
+
+```
+shorthandOverrides.css:166:41 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    164 │ }
+    165 │ 
+  > 166 │ .position-try-order-before-position-try {
+        │                                         ^
+  > 167 │   position-try-order: initial;
+  > 168 │   position-try: initial;
+  > 169 │ }
+        │ ^
+    170 │ 
+    171 │ .transition-behavior-before-transition {
+  
+
+```
+
+```
+shorthandOverrides.css:171:40 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    169 │ }
+    170 │ 
+  > 171 │ .transition-behavior-before-transition {
+        │                                        ^
+  > 172 │   transition-behavior: allow-discrete;
+  > 173 │   transition: display 1s;
+  > 174 │ }
+        │ ^
+    175 │ 
+    176 │ .text-box-trim-before-text-box {
+  
+
+```
+
+```
+shorthandOverrides.css:176:32 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    174 │ }
+    175 │ 
+  > 176 │ .text-box-trim-before-text-box {
+        │                                ^
+  > 177 │   text-box-trim: trim-both;
+  > 178 │   text-box: normal;
+  > 179 │ }
+        │ ^
+    180 │ 
+    181 │ .text-box-edge-before-text-box {
+  
+
+```
+
+```
+shorthandOverrides.css:181:32 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    179 │ }
+    180 │ 
+  > 181 │ .text-box-edge-before-text-box {
+        │                                ^
+  > 182 │   text-box-edge: initial;
+  > 183 │   text-box: initial;
+  > 184 │ }
+        │ ^
+    185 │ 
+    186 │ .border-block-start-color-before-border-block {
+  
+
+```
+
+```
+shorthandOverrides.css:186:47 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    184 │ }
+    185 │ 
+  > 186 │ .border-block-start-color-before-border-block {
+        │                                               ^
+  > 187 │   border-block-start-color: initial;
+  > 188 │   border-block: initial;
+  > 189 │ }
+        │ ^
+    190 │ 
+    191 │ .border-block-start-style-before-border-block {
+  
+
+```
+
+```
+shorthandOverrides.css:191:47 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    189 │ }
+    190 │ 
+  > 191 │ .border-block-start-style-before-border-block {
+        │                                               ^
+  > 192 │   border-block-start-style: initial;
+  > 193 │   border-block: initial;
+  > 194 │ }
+        │ ^
+    195 │ 
+    196 │ .border-block-start-width-before-border-block {
+  
+
+```
+
+```
+shorthandOverrides.css:196:47 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    194 │ }
+    195 │ 
+  > 196 │ .border-block-start-width-before-border-block {
+        │                                               ^
+  > 197 │   border-block-start-width: initial;
+  > 198 │   border-block: initial;
+  > 199 │ }
+        │ ^
+    200 │ 
+    201 │ .border-block-end-color-before-border-block {
+  
+
+```
+
+```
+shorthandOverrides.css:201:45 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    199 │ }
+    200 │ 
+  > 201 │ .border-block-end-color-before-border-block {
+        │                                             ^
+  > 202 │   border-block-end-color: initial;
+  > 203 │   border-block: initial;
+  > 204 │ }
+        │ ^
+    205 │ 
+    206 │ .border-block-end-style-before-border-block {
+  
+
+```
+
+```
+shorthandOverrides.css:206:45 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    204 │ }
+    205 │ 
+  > 206 │ .border-block-end-style-before-border-block {
+        │                                             ^
+  > 207 │   border-block-end-style: initial;
+  > 208 │   border-block: initial;
+  > 209 │ }
+        │ ^
+    210 │ 
+    211 │ .border-block-end-width-before-border-block {
+  
+
+```
+
+```
+shorthandOverrides.css:211:45 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    209 │ }
+    210 │ 
+  > 211 │ .border-block-end-width-before-border-block {
+        │                                             ^
+  > 212 │   border-block-end-width: initial;
+  > 213 │   border-block: initial;
+  > 214 │ }
+        │ ^
+    215 │ 
+    216 │ .border-inline-start-color-before-border-inline {
+  
+
+```
+
+```
+shorthandOverrides.css:216:49 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    214 │ }
+    215 │ 
+  > 216 │ .border-inline-start-color-before-border-inline {
+        │                                                 ^
+  > 217 │   border-inline-start-color: initial;
+  > 218 │   border-inline: initial;
+  > 219 │ }
+        │ ^
+    220 │ 
+    221 │ .border-inline-start-style-before-border-inline {
+  
+
+```
+
+```
+shorthandOverrides.css:221:49 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    219 │ }
+    220 │ 
+  > 221 │ .border-inline-start-style-before-border-inline {
+        │                                                 ^
+  > 222 │   border-inline-start-style: initial;
+  > 223 │   border-inline: initial;
+  > 224 │ }
+        │ ^
+    225 │ 
+    226 │ .border-inline-start-width-before-border-inline {
+  
+
+```
+
+```
+shorthandOverrides.css:226:49 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    224 │ }
+    225 │ 
+  > 226 │ .border-inline-start-width-before-border-inline {
+        │                                                 ^
+  > 227 │   border-inline-start-width: initial;
+  > 228 │   border-inline: initial;
+  > 229 │ }
+        │ ^
+    230 │ 
+    231 │ .border-inline-end-color-before-border-inline {
+  
+
+```
+
+```
+shorthandOverrides.css:231:47 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    229 │ }
+    230 │ 
+  > 231 │ .border-inline-end-color-before-border-inline {
+        │                                               ^
+  > 232 │   border-inline-end-color: initial;
+  > 233 │   border-inline: initial;
+  > 234 │ }
+        │ ^
+    235 │ 
+    236 │ .border-inline-end-style-before-border-inline {
+  
+
+```
+
+```
+shorthandOverrides.css:236:47 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    234 │ }
+    235 │ 
+  > 236 │ .border-inline-end-style-before-border-inline {
+        │                                               ^
+  > 237 │   border-inline-end-style: initial;
+  > 238 │   border-inline: initial;
+  > 239 │ }
+        │ ^
+    240 │ 
+    241 │ .border-inline-end-width-before-border-inline {
+  
+
+```
+
+```
+shorthandOverrides.css:241:47 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    239 │ }
+    240 │ 
+  > 241 │ .border-inline-end-width-before-border-inline {
+        │                                               ^
+  > 242 │   border-inline-end-width: initial;
+  > 243 │   border-inline: initial;
+  > 244 │ }
+        │ ^
+    245 │ 
+    246 │ .overlapping-logical-borders {
+  
+
+```
+
+```
+shorthandOverrides.css:246:30 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    244 │ }
+    245 │ 
+  > 246 │ .overlapping-logical-borders {
+        │                              ^
+  > 247 │   border-block-start: 1px solid red;
+  > 248 │   border-block-color: blue;
+  > 249 │ }
+        │ ^
+    250 │ 
+    251 │ .overlapping-corner-sides {
+  
+
+```
+
+```
+shorthandOverrides.css:251:27 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    249 │ }
+    250 │ 
+  > 251 │ .overlapping-corner-sides {
+        │                           ^
+  > 252 │   corner-left-shape: bevel;
+  > 253 │   corner-top-shape: round;
+  > 254 │ }
+        │ ^
+    255 │ 
+    256 │ .physical-before-logical-corner {
+  
+
+```
+
+```
+shorthandOverrides.css:256:33 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    254 │ }
+    255 │ 
+  > 256 │ .physical-before-logical-corner {
+        │                                 ^
+  > 257 │   corner-top-left-shape: bevel;
+  > 258 │   corner-start-start-shape: round;
+  > 259 │ }
+        │ ^
+    260 │ 
+    261 │ .physical-before-logical-border {
+  
+
+```
+
+```
+shorthandOverrides.css:261:33 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    259 │ }
+    260 │ 
+  > 261 │ .physical-before-logical-border {
+        │                                 ^
+  > 262 │   border-top: 1px solid red;
+  > 263 │   border-block-color: blue;
+  > 264 │ }
+        │ ^
+    265 │ 
+    266 │ .property-before-all {
+  
+
+```
+
+```
+shorthandOverrides.css:266:22 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    264 │ }
+    265 │ 
+  > 266 │ .property-before-all {
+        │                      ^
+  > 267 │   transition-behavior: allow-discrete;
+  > 268 │   all: initial;
+  > 269 │ }
+        │ ^
+    270 │ 
+    271 │ .prefixed-property-before-all {
+  
+
+```
+
+```
+shorthandOverrides.css:271:31 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    269 │ }
+    270 │ 
+  > 271 │ .prefixed-property-before-all {
+        │                               ^
+  > 272 │   -webkit-line-clamp: 3;
+  > 273 │   all: initial;
+  > 274 │ }
+        │ ^
+    275 │ 
+  
+
+```

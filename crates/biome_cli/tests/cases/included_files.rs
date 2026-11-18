@@ -15,6 +15,56 @@ const UNORGANIZED: &str = r#"import * as something from "../something";
 import { lorem, foom, bar } from "foo";"#;
 
 #[test]
+fn does_not_ignore_project_inside_excluded_ancestor() {
+    for (name, exclusion) in [
+        ("exclusion", "!**/.*/**"),
+        ("forced_exclusion", "!!**/.*/**"),
+    ] {
+        let test_name = format!("does_not_ignore_project_inside_excluded_ancestor_{name}");
+        let mut fs = TemporaryFs::new(&test_name);
+        fs.create_file(
+            "nested/.hidden/a/b/biome.json",
+            &format!(r#"{{ "files": {{ "includes": ["src/**", "{exclusion}"] }} }}"#),
+        );
+        fs.create_file("nested/.hidden/a/b/src/index.js", UNFORMATTED);
+        fs.create_file(
+            "nested/.hidden/a/b/src/.hidden/nested/ignored.js",
+            UNFORMATTED,
+        );
+        fs.append_to_working_directory("nested/.hidden/a/b");
+        let mut console = BufferConsole::default();
+
+        let result = run_cli_with_dyn_fs(
+            Box::new(fs.create_os()),
+            &mut console,
+            Args::from(["check", "--write", fs.cli_path()].as_slice()),
+        );
+
+        assert!(result.is_ok(), "run_cli returned {result:?}");
+
+        let fs = fs.create_mem();
+        assert_file_contents(
+            &fs,
+            Utf8Path::new("nested/.hidden/a/b/src/index.js"),
+            FORMATTED,
+        );
+        assert_file_contents(
+            &fs,
+            Utf8Path::new("nested/.hidden/a/b/src/.hidden/nested/ignored.js"),
+            UNFORMATTED,
+        );
+
+        assert_cli_snapshot(SnapshotPayload::new(
+            module_path!(),
+            &test_name,
+            fs,
+            console,
+            result,
+        ));
+    }
+}
+
+#[test]
 fn does_handle_only_included_files() {
     let mut console = BufferConsole::default();
     let fs = MemoryFileSystem::default();

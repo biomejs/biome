@@ -255,7 +255,10 @@ impl Rule for UseExplicitLengthCheck {
             markup! {
                 "Use "<Emphasis>"."{member_name}" "{code}</Emphasis>" when checking "<Emphasis>"."{member_name}</Emphasis>" is "{type_text}"."
             },
-        ))
+        )
+        .note(markup! {
+            "An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {

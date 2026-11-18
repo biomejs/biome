@@ -1,0 +1,146 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-local-reference.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+const events = ["notify"];
+const prefix = "update";
+let count = 0;
+function validate(payload: string) {
+	return payload.length > 0;
+}
+
+const emit = defineEmits({
+	notify: validate,
+	[`${prefix}:value`]: (value: string) => events.includes(value),
+	submit: () => {
+		count += 1;
+		return true;
+	},
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-local-reference.vue:11:10 lint/nursery/useVueValidDefineEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This defineEmits argument uses a name that is declared in the same <script setup> block.
+  
+    10 │ const emit = defineEmits({
+  > 11 │ 	notify: validate,
+       │ 	        ^^^^^^^^
+    12 │ 	[`${prefix}:value`]: (value: string) => events.includes(value),
+    13 │ 	submit: () => {
+  
+  i The name is declared here.
+  
+    4 │ const prefix = "update";
+    5 │ let count = 0;
+  > 6 │ function validate(payload: string) {
+      │          ^^^^^^^^
+    7 │ 	return payload.length > 0;
+    8 │ }
+  
+  i Vue evaluates the defineEmits argument before the code in <script setup> runs, so this name does not exist yet.
+  
+  i Write the value directly in the argument, import it from another file, or declare it in a separate <script> block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-local-reference.vue:12:6 lint/nursery/useVueValidDefineEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This defineEmits argument uses a name that is declared in the same <script setup> block.
+  
+    10 │ const emit = defineEmits({
+    11 │ 	notify: validate,
+  > 12 │ 	[`${prefix}:value`]: (value: string) => events.includes(value),
+       │ 	    ^^^^^^
+    13 │ 	submit: () => {
+    14 │ 		count += 1;
+  
+  i The name is declared here.
+  
+    2 │ <script setup lang="ts">
+    3 │ const events = ["notify"];
+  > 4 │ const prefix = "update";
+      │       ^^^^^^
+    5 │ let count = 0;
+    6 │ function validate(payload: string) {
+  
+  i Vue evaluates the defineEmits argument before the code in <script setup> runs, so this name does not exist yet.
+  
+  i Write the value directly in the argument, import it from another file, or declare it in a separate <script> block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-local-reference.vue:12:42 lint/nursery/useVueValidDefineEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This defineEmits argument uses a name that is declared in the same <script setup> block.
+  
+    10 │ const emit = defineEmits({
+    11 │ 	notify: validate,
+  > 12 │ 	[`${prefix}:value`]: (value: string) => events.includes(value),
+       │ 	                                        ^^^^^^
+    13 │ 	submit: () => {
+    14 │ 		count += 1;
+  
+  i The name is declared here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup lang="ts">
+  > 3 │ const events = ["notify"];
+      │       ^^^^^^
+    4 │ const prefix = "update";
+    5 │ let count = 0;
+  
+  i Vue evaluates the defineEmits argument before the code in <script setup> runs, so this name does not exist yet.
+  
+  i Write the value directly in the argument, import it from another file, or declare it in a separate <script> block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-local-reference.vue:14:3 lint/nursery/useVueValidDefineEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This defineEmits argument uses a name that is declared in the same <script setup> block.
+  
+    12 │ 	[`${prefix}:value`]: (value: string) => events.includes(value),
+    13 │ 	submit: () => {
+  > 14 │ 		count += 1;
+       │ 		^^^^^
+    15 │ 		return true;
+    16 │ 	},
+  
+  i The name is declared here.
+  
+    3 │ const events = ["notify"];
+    4 │ const prefix = "update";
+  > 5 │ let count = 0;
+      │     ^^^^^
+    6 │ function validate(payload: string) {
+    7 │ 	return payload.length > 0;
+  
+  i Vue evaluates the defineEmits argument before the code in <script setup> runs, so this name does not exist yet.
+  
+  i Write the value directly in the argument, import it from another file, or declare it in a separate <script> block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

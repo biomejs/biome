@@ -9,7 +9,10 @@ use biome_markdown_parser::{
 };
 use biome_markdown_syntax::{MarkdownSyntaxKind, MdRoot};
 use biome_rowan::{AstNode, NodeCache, SyntaxKind, SyntaxSlot};
-use biome_test_utils::{has_bogus_nodes_or_empty_slots, validate_eof_token};
+use biome_test_utils::{
+    has_bogus_nodes_or_empty_slots, validate_borrowed_tokens_with_comments, validate_eof_token,
+    validate_text_trimmed_ranges,
+};
 use std::fmt::Write;
 use std::fs;
 use std::path::Path;
@@ -61,8 +64,14 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     } else {
         MarkdownParserOptions::default()
     };
+    let is_mdx = test_case_path
+        .extension()
+        .is_some_and(|extension| extension == "mdx");
+    let options = options.with_mdx(is_mdx);
     let parsed = parse_markdown_with_cache(&content, &mut NodeCache::default(), options);
     validate_eof_token(parsed.syntax());
+    validate_text_trimmed_ranges(&parsed.syntax());
+    validate_borrowed_tokens_with_comments(&parsed.syntax());
     assert_eq!(
         parsed.syntax().to_string(),
         content,

@@ -88,8 +88,12 @@ fn generate_build_script(categories_and_groups: &BTreeMap<&str, Vec<String>>) ->
 }
 
 /// Generate an analyzer crate's category files, build script, and registry.
+///
+/// `language` is the path to the crate's `biome_rowan::Language` type. Every
+/// generated category declares it, and the groups in that category inherit it.
 fn generate_analyzer_crate(
     crate_name: &str,
+    language: &TokenStream,
     categories: &[&'static str],
     update_registry: fn(BTreeMap<&'static str, TokenStream>) -> Result<()>,
 ) -> Result<()> {
@@ -99,7 +103,7 @@ fn generate_analyzer_crate(
 
     for &category in categories {
         if base_path.join(category).exists() {
-            let groups = generate_category(category, &mut analyzers, &base_path)?;
+            let groups = generate_category(category, language, &mut analyzers, &base_path)?;
             if !groups.is_empty() {
                 categories_and_groups.insert(category, groups);
             }
@@ -116,36 +120,43 @@ fn generate_analyzer_crate(
 pub fn generate_analyzer() -> Result<()> {
     generate_analyzer_crate(
         "biome_js_analyze",
+        &quote!(::biome_js_syntax::JsLanguage),
         &["lint", "assist", "syntax"],
         update_js_registry_builder,
     )?;
     generate_analyzer_crate(
         "biome_json_analyze",
+        &quote!(::biome_json_syntax::JsonLanguage),
         &["lint", "assist"],
         update_json_registry_builder,
     )?;
     generate_analyzer_crate(
         "biome_css_analyze",
+        &quote!(::biome_css_syntax::CssLanguage),
         &["lint", "assist", "syntax"],
         update_css_registry_builder,
     )?;
     generate_analyzer_crate(
         "biome_graphql_analyze",
+        &quote!(::biome_graphql_syntax::GraphqlLanguage),
         &["lint", "assist"],
         update_graphql_registry_builder,
     )?;
     generate_analyzer_crate(
         "biome_html_analyze",
+        &quote!(::biome_html_syntax::HtmlLanguage),
         &["lint", "assist"],
         update_html_registry_builder,
     )?;
     generate_analyzer_crate(
         "biome_markdown_analyze",
+        &quote!(::biome_markdown_syntax::MarkdownLanguage),
         &["lint", "assist"],
         update_markdown_registry_builder,
     )?;
     generate_analyzer_crate(
         "biome_yaml_analyze",
+        &quote!(::biome_yaml_syntax::YamlLanguage),
         &["lint", "assist"],
         update_yaml_registry_builder,
     )?;
@@ -154,6 +165,7 @@ pub fn generate_analyzer() -> Result<()> {
 
 fn generate_category(
     name: &'static str,
+    language: &TokenStream,
     entries: &mut BTreeMap<&'static str, TokenStream>,
     base_path: &Path,
 ) -> Result<Vec<String>> {
@@ -219,6 +231,7 @@ fn generate_category(
         ::biome_analyze::declare_category! {
             pub #category_name {
                 kind: #kind,
+                language: #language,
                 groups: [
                     #( #paths, )*
                 ]

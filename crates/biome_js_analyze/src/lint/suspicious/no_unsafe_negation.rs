@@ -77,7 +77,10 @@ impl Rule for NoUnsafeNegation {
             markup! {
                 "The negation operator is used unsafely on the left side of this binary expression."
             },
-        ))
+        )
+        .note(markup! {
+            "The negation applies only to the left operand, not to the whole expression, so the result is probably not what was intended."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

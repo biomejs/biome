@@ -13,6 +13,7 @@ use biome_rowan::{
 };
 use biome_string_case::StrOnlyExtension;
 use rustc_hash::FxHashMap;
+use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
@@ -47,6 +48,15 @@ impl SemanticModel {
 
     pub fn global_custom_variables(&self) -> GlobalCustomVariables<'_> {
         GlobalCustomVariables { data: &self.data }
+    }
+
+    /// Returns the declarations of the root's own declaration block, such as a `style` attribute
+    /// or the top level of a CSS-in-JS template. A stylesheet has none.
+    pub fn root_declarations(&self) -> impl Iterator<Item = CssModelDeclaration> + '_ {
+        self.data
+            .root_declarations
+            .iter()
+            .map(|declaration| CssModelDeclaration::from_data(self.data.clone(), declaration))
     }
 
     /// Returns declarations that assign values to custom properties.
@@ -98,6 +108,29 @@ impl SemanticModel {
         rule_id.and_then(|id| self.rule(*id))
     }
 
+    /// Returns the declarations of the rule that contains the given range, or the
+    /// [root declarations](Self::root_declarations) when no rule contains it.
+    pub fn get_declarations_by_range(&self, target_range: TextRange) -> Vec<CssModelDeclaration> {
+        match self.get_rule_by_range(target_range) {
+            Some(rule) => rule.declarations,
+            None => self.root_declarations().collect(),
+        }
+    }
+
+    /// Returns the declarations in scope at the given range: those of the rule that contains
+    /// it, then those of each ancestor rule from the innermost outwards, then the
+    /// [root declarations](Self::root_declarations).
+    pub fn get_ancestor_declarations_by_range(
+        &self,
+        target_range: TextRange,
+    ) -> impl Iterator<Item = CssModelDeclaration> + '_ {
+        std::iter::successors(self.get_rule_by_range(target_range), |rule| {
+            rule.parent_id().and_then(|id| self.rule(id))
+        })
+        .flat_map(|rule| rule.declarations)
+        .chain(self.root_declarations())
+    }
+
     /// Returns an iterator over the specificity of all rules in source order.
     pub fn specificity_of_rules(&self) -> impl Iterator<Item = Specificity> + '_ {
         self.data
@@ -106,6 +139,17 @@ impl SemanticModel {
             .filter_map(|id| self.rule(*id))
             .flat_map(|rule| rule.selectors().to_vec())
             .map(|selector| selector.specificity())
+    }
+
+    /// Returns whether the document declares an SCSS `@function` named `name`.
+    ///
+    /// Sass treats `-` and `_` as the same character in function names, so
+    /// `my_function` matches `@function my-function`.
+    pub fn has_scss_function(&self, name: &str) -> bool {
+        self.data
+            .scss_function_names
+            .binary_search_by(|declared| compare_scss_function_names(declared.text(), name))
+            .is_ok()
     }
 
     pub fn is_media_rule(&self, rule: &Rule) -> bool {
@@ -137,7 +181,8 @@ pub(crate) struct SemanticModelData {
     pub(crate) all_rules: Vec<RuleData>,
     /// IDs of top-level rules only
     pub(crate) top_level_rule_ids: Vec<RuleId>,
-    /// Declarations parsed outside a rule, such as declarations in a `style` attribute.
+    /// Declarations parsed outside a rule, such as declarations in a `style` attribute or at the
+    /// top level of a CSS-in-JS template.
     pub(crate) root_declarations: Vec<CssModelDeclarationData>,
     /// Custom property names declared in `:root` or by an `@property` rule.
     ///
@@ -154,6 +199,9 @@ pub(crate) struct SemanticModelData {
     /// Each value indexes the last matching declaration in
     /// [`Self::at_property_rules`].
     pub(crate) last_at_property_by_name: FxHashMap<TokenText, usize>,
+    /// The names of the SCSS `@function` rules declared anywhere in the
+    /// document, sorted by [compare_scss_function_names].
+    pub(crate) scss_function_names: Vec<TokenText>,
     /// Map from text range to RuleId
     pub(crate) range_to_rule_id: BTreeMap<TextRange, RuleId>,
 }
@@ -192,6 +240,7 @@ impl PartialEq for SemanticModel {
                 .iter()
                 .zip(&other.data.at_property_rules)
                 .all(|(this, other)| this.semantic_eq(other, &self_root, &other_root))
+            && self.data.scss_function_names == other.data.scss_function_names
             && self.data.global_custom_variables.len() == other.data.global_custom_variables.len()
             && self.data.global_custom_variables.iter().all(|(key, val)| {
                 other
@@ -208,6 +257,7 @@ impl PartialEq for SemanticModel {
 pub(crate) struct RuleData {
     pub(crate) id: RuleId,
     pub(crate) node: AstPtr<AnyRuleStart>,
+    pub(crate) range: TextRange,
     /// The selectors associated with this rule.
     pub(crate) selectors: Vec<SelectorData>,
     /// The declarations within this rule.
@@ -219,15 +269,6 @@ pub(crate) struct RuleData {
     /// Specificity context of this rule
     /// See https://drafts.csswg.org/selectors-4/#specificity-rules
     pub(crate) specificity: Specificity,
-}
-
-impl RuleData {
-    pub(crate) fn range(&self, css_root: &AnyCssRoot) -> TextRange {
-        self.node
-            .to_node(css_root.syntax())
-            .syntax()
-            .text_trimmed_range()
-    }
 }
 
 /// Represents a CSS rule set, including its selectors, declarations, and nested rules.
@@ -251,14 +292,13 @@ pub struct Rule {
     pub(crate) data: Arc<SemanticModelData>,
     pub(crate) id: RuleId,
     pub(crate) node: AstPtr<AnyRuleStart>,
+    pub(crate) range: TextRange,
     /// The selectors associated with this rule.
     pub(crate) selectors: Vec<Selector>,
     /// The declarations within this rule.
     pub(crate) declarations: Vec<CssModelDeclaration>,
     /// The id of the parent rule
     pub(crate) parent_id: Option<RuleId>,
-    /// The ids of the child rules
-    pub(crate) child_ids: Vec<RuleId>,
     /// Specificity context of this rule
     /// See https://drafts.csswg.org/selectors-4/#specificity-rules
     pub(crate) specificity: Specificity,
@@ -269,7 +309,7 @@ impl PartialEq for Rule {
         self.specificity == other.specificity
             && self.id == other.id
             && self.parent_id == other.parent_id
-            && self.child_ids == other.child_ids
+            && self.child_ids() == other.child_ids()
             && self.selectors.len() == other.selectors.len()
             && self
                 .selectors
@@ -304,10 +344,10 @@ impl Rule {
             data,
             id: rule.id,
             node: rule.node.clone(),
+            range: rule.range,
             selectors,
             declarations,
             parent_id: rule.parent_id,
-            child_ids: rule.child_ids.clone(),
             specificity: rule.specificity,
         }
     }
@@ -321,10 +361,7 @@ impl Rule {
     }
 
     pub fn range(&self, _css_root: &AnyCssRoot) -> TextRange {
-        self.node
-            .to_node(self.data.root().syntax())
-            .syntax()
-            .text_trimmed_range()
+        self.range
     }
 
     pub fn selectors(&self) -> &[Selector] {
@@ -340,7 +377,7 @@ impl Rule {
     }
 
     pub fn child_ids(&self) -> &[RuleId] {
-        &self.child_ids
+        &self.data.all_rules[self.id.index()].child_ids
     }
 
     pub fn specificity(&self) -> Specificity {
@@ -563,6 +600,7 @@ impl std::fmt::Display for ResolvedSelector {
 #[derive(Debug, Clone)]
 pub(crate) struct SelectorData {
     pub(crate) node: AstPtr<AnyCssSelectorLike>,
+    pub(crate) range: TextRange,
     /// The resolved selector, accounting for nesting and `&` references.
     /// For top-level selectors this is the token sequence from the source.
     /// For nested selectors each `&` is replaced by the parent token sequence,
@@ -583,57 +621,59 @@ pub(crate) struct SelectorData {
 #[derive(Debug, Clone)]
 pub struct Selector {
     pub(crate) data: Arc<SemanticModelData>,
-    pub(crate) node: AstPtr<AnyCssSelectorLike>,
-    /// The resolved selector, accounting for nesting and `&` references.
-    /// For top-level selectors this is the token sequence from the source.
-    /// For nested selectors each `&` is replaced by the parent token sequence,
-    /// and a space-literal token is inserted when there is no `&`.
-    pub(crate) resolved: ResolvedSelector,
-    /// The specificity of the selector.
-    pub(crate) specificity: Specificity,
+    rule_id: RuleId,
+    index: usize,
 }
 
 impl Selector {
     fn new(data: Arc<SemanticModelData>, rule_id: RuleId, index: usize) -> Self {
-        let selector = &data.all_rules[rule_id.index()].selectors[index];
-        let node = selector.node.clone();
-        let resolved = selector.resolved.clone();
-        let specificity = selector.specificity;
         Self {
             data,
-            node,
-            resolved,
-            specificity,
+            rule_id,
+            index,
         }
+    }
+
+    fn selector_data(&self) -> &SelectorData {
+        &self.data.all_rules[self.rule_id.index()].selectors[self.index]
     }
 }
 
 impl PartialEq for Selector {
     fn eq(&self, other: &Self) -> bool {
-        self.specificity == other.specificity && self.resolved == other.resolved
+        self.specificity() == other.specificity() && self.resolved() == other.resolved()
     }
 }
 
 impl Selector {
     pub fn node(&self) -> AnyCssSelectorLike {
-        self.node.to_node(self.data.root().syntax())
+        self.selector_data().node.to_node(self.data.root().syntax())
     }
 
     /// Returns the resolved selector, accounting for CSS nesting and `&` references.
+    /// For top-level selectors this is the token sequence from the source.
+    /// For nested selectors each `&` is replaced by the parent token sequence,
+    /// and a space-literal token is inserted when there is no `&`.
     pub fn resolved(&self) -> &ResolvedSelector {
-        &self.resolved
+        &self.selector_data().resolved
     }
 
     pub fn range(&self) -> TextRange {
-        self.node
-            .to_node(self.data.root().syntax())
-            .syntax()
-            .text_trimmed_range()
+        self.selector_data().range
     }
 
     pub fn specificity(&self) -> Specificity {
-        self.specificity
+        self.selector_data().specificity
     }
+}
+
+/// Compares SCSS function names the way Sass does, treating `_` and `-` as
+/// the same character.
+pub(crate) fn compare_scss_function_names(left: &str, right: &str) -> Ordering {
+    let normalize = |byte| if byte == b'_' { b'-' } else { byte };
+    left.bytes()
+        .map(normalize)
+        .cmp(right.bytes().map(normalize))
 }
 
 /// Collects the non-trivia tokens of a selector node as [`CssSyntaxToken`]s.

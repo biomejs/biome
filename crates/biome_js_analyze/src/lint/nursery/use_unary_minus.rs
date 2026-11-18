@@ -9,7 +9,7 @@ use biome_js_syntax::{
     JsPreUpdateOperator, JsSyntaxKind, JsUnaryOperator, OperatorPrecedence, T,
 };
 use biome_parser::{TokenSet, token_set};
-use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_unary_minus::UseUnaryMinusOptions;
 
 use crate::{JsRuleAction, ast_utils::starts_unterminated_statement};
@@ -52,7 +52,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseUnaryMinus {
-        version: "next",
+        version: "2.6.0",
         name: "useUnaryMinus",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-unary-minus").same()],
@@ -141,7 +141,7 @@ impl Rule for UseUnaryMinus {
             && MINUS_TOKENS.contains(previous.kind())
             && previous.text_trimmed_range().end() == first.text_trimmed_range().start()
         {
-            minus = minus.with_leading_trivia([(TriviaPieceKind::Whitespace, " ")]);
+            minus = minus.with_leading_space();
         }
         let replacement: AnyJsExpression = make::js_unary_expression(minus, argument).into();
 

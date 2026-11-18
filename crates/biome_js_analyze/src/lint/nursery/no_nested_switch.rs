@@ -74,7 +74,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoNestedSwitch {
-        version: "next",
+        version: "2.6.0",
         name: "noNestedSwitch",
         language: "js",
         sources: &[RuleSource::EslintSonarJs("no-nested-switch").same()],

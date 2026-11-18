@@ -147,8 +147,9 @@ fn lex_simple_plain() {
     assert_lex!(
         "simple_plain\n",
         FLOW_START:0,
-        PLAIN_LITERAL:13,
+        PLAIN_LITERAL:12,
         FLOW_END:0,
+        NEWLINE:1,
     );
 }
 
@@ -244,8 +245,9 @@ plain token
 "#,
         NEWLINE:1,
         FLOW_START:0,
-        PLAIN_LITERAL:29,
+        PLAIN_LITERAL:28,
         FLOW_END:0,
+        NEWLINE:1,
     );
 }
 
@@ -468,9 +470,9 @@ fn lex_block_map_cant_have_adjacent_value() {
         DOUBLE_QUOTED_LITERAL:5,
         FLOW_END:0,
         FLOW_START:0,
-        // Since this plain token is not in any block scope, it consumes the succeed newline
-        PLAIN_LITERAL:7,
+        PLAIN_LITERAL:6,
         FLOW_END:0,
+        NEWLINE:1,
     );
 }
 
@@ -599,5 +601,24 @@ a:
         FLOW_END:0
         MAPPING_END:0,
         MAPPING_END:0,
+    );
+}
+
+#[test]
+fn lex_plain_key_with_colon_on_next_line_crlf() {
+    assert_lex!(
+        "{ a\r\n  : b }",
+        FLOW_START:0,
+        L_CURLY:1,
+        WHITESPACE:1,
+        PLAIN_LITERAL:1,
+        NEWLINE:2,
+        WHITESPACE:2,
+        COLON:1,
+        WHITESPACE:1,
+        PLAIN_LITERAL:1,
+        WHITESPACE:1,
+        R_CURLY:1,
+        FLOW_END:0,
     );
 }

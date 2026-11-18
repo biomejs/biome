@@ -1,0 +1,80 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import { z } from "zod";
+import { z as schema } from "zod";
+import { "z" as quoted } from "zod";
+import * as zod from "zod";
+import zodDefault from "zod";
+import { z as v4 } from "zod/v4";
+
+z.string().trim().startsWith("asdf");
+schema.string().trim().startsWith("asdf");
+quoted.string().trim().startsWith("asdf");
+zod.string().trim().endsWith("asdf");
+zodDefault.string().trim().endsWith("asdf");
+v4.string().trim().endsWith("asdf");
+
+value.trimStart().startsWith("-");
+value.trimEnd().endsWith("-");
+value.trim().includes("-");
+value.trim().startsWith("-", 1);
+value.trim().endsWith("-", 1);
+value.trim(" ").startsWith("-");
+value.trim().startsWith(prefix);
+value.trim().endsWith(suffix);
+value.trim().startsWith("foo ");
+value.trim().startsWith(`foo `);
+value.trim().endsWith(" foo");
+value.trim().endsWith(` foo`);
+value.trim().startsWith("foo\n");
+value.trim().endsWith("\tfoo");
+value.trim().startsWith("foo\u00a0");
+value.trim().startsWith("foo\u{feff}");
+value.trim().endsWith("\x20foo");
+value.trim().startsWith("-\40");
+value.trim().startsWith("\01");
+value.trim().startsWith("foo" + " ");
+value.trim().startsWith("foo " + "" + "");
+value.trim().endsWith("" + " foo");
+value.trim().startsWith("foo" + bar);
+value.trim().startsWith(`foo${bar}`);
+value.trim().startsWith(tag`foo`);
+value.trim().startsWith(/foo/);
+value.trim().endsWith(Symbol("foo"));
+value.trim().startsWith(cond ? "x" : "x ");
+value.trim().startsWith(...args);
+value.trim().endsWith(...args);
+value.trim().startsWith("-", ...positions);
+value.trim().startsWith?.("-");
+value.trim().endsWith?.("-");
+value.trim?.().startsWith("-");
+value?.trim().startsWith("-");
+value.trim()?.startsWith("-");
+value?.trim()?.startsWith("-");
+value?.bar.trim().startsWith("-");
+value.trim()["startsWith"]("-");
+value["trim"]().startsWith("-");
+trim().startsWith("-");
+value.trim.startsWith("-");
+new value.trim().startsWith("-");
+[].trim().startsWith("-");
+({}).trim().startsWith("-");
+(1).trim().startsWith("-");
+(() => {}).trim().startsWith("-");
+{ const prefix = "foo "; value.trim().startsWith(prefix); }
+{ const suffix = " foo"; value.trim().endsWith(suffix); }
+{ let prefix = "foo"; value.trim().startsWith(prefix); }
+{ const { prefix } = object; value.trim().startsWith(prefix); }
+{ const a = b + ""; const b = a + ""; value.trim().startsWith(a); }
+{ const object = { trim() { return "ok"; } }; object.trim().startsWith("o"); }
+{ const list = []; list.trim().startsWith("-"); }
+{ const number = 1; number.trim().startsWith("-"); }
+{ const undefined = " "; value.trim().startsWith(undefined); }
+class A { #trim() {} method() { this.#trim().startsWith("-"); } }
+
+```

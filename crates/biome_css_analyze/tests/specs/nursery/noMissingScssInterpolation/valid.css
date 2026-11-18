@@ -1,0 +1,5 @@
+/* should not generate diagnostics */
+:root {
+	--gap: $gap;
+	--muted: darken(#fff, 10%);
+}

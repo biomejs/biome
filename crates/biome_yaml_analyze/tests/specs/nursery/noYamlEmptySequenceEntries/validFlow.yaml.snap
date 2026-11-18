@@ -1,0 +1,11 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: validFlow.yaml
+---
+# Input
+```yaml
+# should not generate diagnostics
+items: [a, b, c]
+empty: []
+
+```

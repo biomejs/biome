@@ -101,8 +101,8 @@ build-wasm-bundler-dev:
     --typescript
 
 # Build WASM for bundler target (release)
-build-wasm-bundler:
-  cargo build --lib --target wasm32-unknown-unknown --release -p biome_wasm
+build-wasm-bundler *args='':
+  cargo build --lib --target wasm32-unknown-unknown --release -p biome_wasm {{args}}
   wasm-bindgen target/wasm32-unknown-unknown/release/biome_wasm.wasm \
     --out-dir packages/@biomejs/wasm-bundler \
     --no-demangle \
@@ -122,8 +122,8 @@ build-wasm-node-dev:
     --typescript
 
 # Build WASM for Node.js target (release)
-build-wasm-node:
-  cargo build --lib --target wasm32-unknown-unknown --release -p biome_wasm
+build-wasm-node *args='':
+  cargo build --lib --target wasm32-unknown-unknown --release -p biome_wasm {{args}}
   wasm-bindgen target/wasm32-unknown-unknown/release/biome_wasm.wasm \
     --out-dir packages/@biomejs/wasm-nodejs \
     --no-demangle \

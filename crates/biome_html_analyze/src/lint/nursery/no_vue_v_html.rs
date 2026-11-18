@@ -46,7 +46,7 @@ declare_lint_rule! {
     /// - [Vue `v-html` directive](https://vuejs.org/api/built-in-directives.html#v-html)
     /// - [Vue security guide: HTML injection](https://vuejs.org/guide/best-practices/security.html#html-injection)
     pub NoVueVHtml {
-        version: "next",
+        version: "2.6.0",
         name: "noVueVHtml",
         language: "html",
         recommended: true,

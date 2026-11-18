@@ -207,7 +207,7 @@ where
     }
 
     fn increment_matches(&self, num_matches: usize) {
-        self.push_message(Message::Stats(MessageStat::Matches));
+        self.push_message(Message::Stats(MessageStat::Matches(num_matches)));
         self.matches.fetch_add(num_matches, Ordering::Relaxed);
     }
 
@@ -303,8 +303,12 @@ where
         self.evaluated_paths.pin()
     }
 
-    fn push_diagnostic(&self, error: Error) {
-        self.push_message(error.into());
+    fn push_diagnostic(&self, diagnostic: Error) {
+        let is_traversal_error = diagnostic.severity() >= Severity::Error;
+        self.push_message(Message::Error {
+            diagnostic,
+            is_traversal_error,
+        });
     }
 
     #[instrument(level = "debug", skip(self, biome_path))]

@@ -1,0 +1,15 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+	<Table bgcolor="#ffffff" border="1" />
+	<MyLink name="anchor" />
+	<div :class="{ center: centered }">Content</div>
+</template>
+
+```

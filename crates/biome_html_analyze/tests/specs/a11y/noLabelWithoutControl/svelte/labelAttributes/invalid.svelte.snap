@@ -20,6 +20,8 @@ invalid.svelte:2:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ 
   
+  i Assistive technologies rely on a label being associated with a control to announce it. Without the association, screen reader users cannot tell what the control is for.
+  
   i Consider adding a "for" attribute to the label element or moving the input element to inside the label element.
   
 

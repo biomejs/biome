@@ -427,6 +427,7 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "ScssPartialCombinatorSelector" => {
             lang::ScssPartialCombinatorSelector::KIND_SET.iter().next()
         }
+        "ScssPercentValue" => lang::ScssPercentValue::KIND_SET.iter().next(),
         "ScssPlaceholderSelector" => lang::ScssPlaceholderSelector::KIND_SET.iter().next(),
         "ScssPlainImport" => lang::ScssPlainImport::KIND_SET.iter().next(),
         "ScssReturnAtRule" => lang::ScssReturnAtRule::KIND_SET.iter().next(),

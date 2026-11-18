@@ -28,9 +28,10 @@ importVariants.ts:2:1 lint/style/useConsistentTestIt  FIXABLE  ━━━━━�
   
     1   │ - import·{·xtest·}·from·"@jest/globals";
     2   │ - xtest("disabled",·()·=>·{});
-      1 │ + import·{·xtest·,·xtest·as·xit·}·from·"@jest/globals";
+    3   │ - xtest.each`a·|·b`("table",·()·=>·{});
+      1 │ + import·{·xtest·as·xit·}·from·"@jest/globals";
       2 │ + xit("disabled",·()·=>·{});
-    3 3 │   xtest.each`a | b`("table", () => {});
+      3 │ + xit.each`a·|·b`("table",·()·=>·{});
     4 4 │   
   
 
@@ -52,9 +53,10 @@ importVariants.ts:3:1 lint/style/useConsistentTestIt  FIXABLE  ━━━━━�
   i Safe fix: Use xit instead.
   
     1   │ - import·{·xtest·}·from·"@jest/globals";
-      1 │ + import·{·xtest·,·xtest·as·xit·}·from·"@jest/globals";
-    2 2 │   xtest("disabled", () => {});
+    2   │ - xtest("disabled",·()·=>·{});
     3   │ - xtest.each`a·|·b`("table",·()·=>·{});
+      1 │ + import·{·xtest·as·xit·}·from·"@jest/globals";
+      2 │ + xit("disabled",·()·=>·{});
       3 │ + xit.each`a·|·b`("table",·()·=>·{});
     4 4 │   
   

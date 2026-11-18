@@ -9,6 +9,7 @@ use snap_test::{CliRunResult, TestArgs, assert_cli_snapshot};
 
 use biome_cli::{CliDiagnostic, CliSession, Watcher, biome_command};
 use biome_console::{BufferConsole, Console, ConsoleExt, markup};
+use biome_flags::MemoryEnvironment;
 use biome_fs::{MemoryFileSystem, OsFileSystem};
 use biome_resolver::FsWithResolverProxy;
 use biome_service::App;
@@ -351,6 +352,32 @@ pub(crate) fn run_cli_with_dyn_fs(
     console: &mut dyn Console,
     args: TestArgs,
 ) -> CliRunResult {
+    run_cli_with_session_options(fs, console, args, MemoryEnvironment::default())
+}
+
+/// Like [run_cli], with commands reading environment variables from
+/// `environment` instead of an empty environment.
+pub(crate) fn run_cli_with_environment(
+    fs: MemoryFileSystem,
+    console: &mut dyn Console,
+    args: TestArgs,
+    environment: MemoryEnvironment,
+) -> (MemoryFileSystem, CliRunResult) {
+    let files = fs.files.clone();
+
+    let result = run_cli_with_session_options(Box::new(fs), console, args, environment);
+
+    let fs = MemoryFileSystem::from_files(files);
+
+    (fs, result)
+}
+
+fn run_cli_with_session_options(
+    fs: Box<dyn FsWithResolverProxy>,
+    console: &mut dyn Console,
+    args: TestArgs,
+    environment: MemoryEnvironment,
+) -> CliRunResult {
     use biome_cli::SocketTransport;
     use biome_lsp::ServerFactory;
     use biome_service::{WorkspaceRef, workspace};
@@ -379,6 +406,7 @@ pub(crate) fn run_cli_with_dyn_fs(
     let session = CliSession {
         app,
         watcher_factory: None,
+        environment: Arc::new(environment),
     };
     run_cli_session(session, args)
 }
@@ -400,6 +428,7 @@ pub(crate) fn run_cli_with_watcher_factory(
     let session = CliSession {
         app,
         watcher_factory: Some(watcher_factory),
+        environment: Arc::new(MemoryEnvironment::default()),
     };
     run_cli_session(session, args)
 }
@@ -421,6 +450,7 @@ pub(crate) fn run_cli_with_server_workspace(
     let session = CliSession {
         app,
         watcher_factory: None,
+        environment: Arc::new(MemoryEnvironment::default()),
     };
     let result = run_cli_session(session, args);
 

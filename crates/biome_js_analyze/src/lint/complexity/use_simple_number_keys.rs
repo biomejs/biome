@@ -155,7 +155,10 @@ impl Rule for UseSimpleNumberKeys {
             WrongNumberLiteralName::Octal => "Octal number literal is not allowed here.",
         };
 
-        let diagnostic = RuleDiagnostic::new(rule_category!(), literal.range(), title.to_string());
+        let diagnostic = RuleDiagnostic::new(rule_category!(), literal.range(), title.to_string())
+            .note(markup! {
+                "A number written in this form is converted to a different string key than the literal suggests, which is confusing."
+            });
 
         Some(diagnostic)
     }

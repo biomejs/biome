@@ -1,0 +1,101 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/proseNever/blockquote_multi_paragraph.md
+---
+
+# Input
+
+```md
+> a
+>
+> b
+
+> a
+>
+> - b
+
+> > a
+> >
+> > b
+
+> a
+>
+>
+> b
+
+> a
+>
+> b
+>
+> c
+
+> # heading
+>
+> b
+
+> a
+>
+
+paragraph after a quote with a trailing quote-only line
+
+> - a
+>
+> b
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "formatter": {
+      "proseWrap": "never",
+      "lineWidth": 40,
+      "indentStyle": "space"
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+> a
+>
+> b
+
+> a
+>
+> - b
+
+> > a
+> >
+> > b
+
+> a
+>
+>
+> b
+
+> a
+>
+> b
+>
+> c
+
+> # heading
+>
+> b
+
+> a
+>
+
+paragraph after a quote with a trailing quote-only line
+
+> - a
+>
+> b
+
+```

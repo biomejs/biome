@@ -1,0 +1,21 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: graphql/insignificant_commas.graphql
+---
+
+# Input
+
+```graphql
+, query, WithCommas,($value:Int,){field(arg:$value),}
+
+```
+
+
+# Formatted
+
+```graphql
+query WithCommas($value: Int) {
+	field(arg: $value)
+}
+
+```

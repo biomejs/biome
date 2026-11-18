@@ -1,0 +1,281 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-setup-function.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+import { computed, reactive } from "vue";
+
+export default {
+  setup() {
+    const foo = useFoo();
+    const nested = { inner: {} };
+    const arr = reactive([]);
+    function fn() {}
+    class Klass {}
+
+    const test1 = computed(() => {
+      foo.firstName = "lorem";
+      nested.inner.value = "lorem";
+      return foo.firstName;
+    });
+    const test2 = computed(() => {
+      foo.count += 2;
+      foo.count++;
+      return foo.count;
+    });
+    const test3 = computed(() => foo.something.reverse());
+    const test4 = computed(() => arr.reverse());
+    const test5 = computed({
+      get: () => foo.list.sort(),
+      set: (value) => {
+        foo.list = value;
+      },
+    });
+    const test6 = computed(() => {
+      fn.name = "";
+      Klass.name = "";
+      return true;
+    });
+    const test7 = computed(() => (foo.a = "", true));
+    const test8 = computed(() => Object.assign(foo.data, { extra: "value" }));
+
+    return { test1, test2, test3, test4, test5, test6, test7, test8 };
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-setup-function.vue:14:7 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property test1 changes state.
+  
+    13 │     const test1 = computed(() => {
+  > 14 │       foo.firstName = "lorem";
+       │       ^^^^^^^^^^^^^^^^^^^^^^^
+    15 │       nested.inner.value = "lorem";
+    16 │       return foo.firstName;
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup-function.vue:15:7 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property test1 changes state.
+  
+    13 │     const test1 = computed(() => {
+    14 │       foo.firstName = "lorem";
+  > 15 │       nested.inner.value = "lorem";
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │       return foo.firstName;
+    17 │     });
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup-function.vue:19:7 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property test2 changes state.
+  
+    17 │     });
+    18 │     const test2 = computed(() => {
+  > 19 │       foo.count += 2;
+       │       ^^^^^^^^^^^^^^
+    20 │       foo.count++;
+    21 │       return foo.count;
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup-function.vue:20:7 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property test2 changes state.
+  
+    18 │     const test2 = computed(() => {
+    19 │       foo.count += 2;
+  > 20 │       foo.count++;
+       │       ^^^^^^^^^^^
+    21 │       return foo.count;
+    22 │     });
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup-function.vue:23:34 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property test3 changes state.
+  
+    21 │       return foo.count;
+    22 │     });
+  > 23 │     const test3 = computed(() => foo.something.reverse());
+       │                                  ^^^^^^^^^^^^^^^^^^^^^^^
+    24 │     const test4 = computed(() => arr.reverse());
+    25 │     const test5 = computed({
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup-function.vue:24:34 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property test4 changes state.
+  
+    22 │     });
+    23 │     const test3 = computed(() => foo.something.reverse());
+  > 24 │     const test4 = computed(() => arr.reverse());
+       │                                  ^^^^^^^^^^^^^
+    25 │     const test5 = computed({
+    26 │       get: () => foo.list.sort(),
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup-function.vue:26:18 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property test5 changes state.
+  
+    24 │     const test4 = computed(() => arr.reverse());
+    25 │     const test5 = computed({
+  > 26 │       get: () => foo.list.sort(),
+       │                  ^^^^^^^^^^^^^^^
+    27 │       set: (value) => {
+    28 │         foo.list = value;
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup-function.vue:32:7 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property test6 changes state.
+  
+    30 │     });
+    31 │     const test6 = computed(() => {
+  > 32 │       fn.name = "";
+       │       ^^^^^^^^^^^^
+    33 │       Klass.name = "";
+    34 │       return true;
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup-function.vue:33:7 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property test6 changes state.
+  
+    31 │     const test6 = computed(() => {
+    32 │       fn.name = "";
+  > 33 │       Klass.name = "";
+       │       ^^^^^^^^^^^^^^^
+    34 │       return true;
+    35 │     });
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup-function.vue:36:35 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property test7 changes state.
+  
+    34 │       return true;
+    35 │     });
+  > 36 │     const test7 = computed(() => (foo.a = "", true));
+       │                                   ^^^^^^^^^^
+    37 │     const test8 = computed(() => Object.assign(foo.data, { extra: "value" }));
+    38 │ 
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup-function.vue:37:34 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property test8 changes state.
+  
+    35 │     });
+    36 │     const test7 = computed(() => (foo.a = "", true));
+  > 37 │     const test8 = computed(() => Object.assign(foo.data, { extra: "value" }));
+       │                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ 
+    39 │     return { test1, test2, test3, test4, test5, test6, test7, test8 };
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

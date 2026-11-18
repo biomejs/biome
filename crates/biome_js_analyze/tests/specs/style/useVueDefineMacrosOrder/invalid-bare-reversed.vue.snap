@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-bare-reversed.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+defineEmits([]);
+defineProps({});
+defineModel();
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-bare-reversed.vue:4:1 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i defineProps macro is out of order.
+  
+    2 │ <script setup lang="ts">
+    3 │ defineEmits([]);
+  > 4 │ defineProps({});
+      │ ^^^^^^^^^^^^^^^^
+    5 │ defineModel();
+    6 │ </script>
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder compiler macros.
+  
+    1 1 │   
+    2   │ - defineEmits([]);
+      2 │ + defineModel();
+    3 3 │   defineProps({});
+    4   │ - defineModel();
+      4 │ + defineEmits([]);
+    5 5 │   
+  
+
+```

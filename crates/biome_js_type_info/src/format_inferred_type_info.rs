@@ -9,7 +9,7 @@ use crate::interned_types::{
 };
 use crate::interned_types::{InternedMappedType, MappedTypeKeys};
 use crate::{DestructureField, MappedTypeModifier};
-use biome_formatter::prelude::*;
+use biome_formatter::rowan::prelude::*;
 use biome_formatter::{FormatContext, TransformSourceMap, format_args, write};
 use biome_rowan::Text;
 use std::fmt::Display;
@@ -30,6 +30,7 @@ impl<'db> FormatInferredTypeContext<'db> {
 
 impl<'db> FormatContext for FormatInferredTypeContext<'db> {
     type Options = FormatTypeOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &FormatTypeOptions
@@ -168,6 +169,26 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeData<'db> {
                 ]
             ),
             Self::MappedType(mapped) => write!(f, [mapped]),
+            Self::Extends(extends) => write!(
+                f,
+                [&format_args![
+                    token("("),
+                    extends.check_type(db),
+                    space(),
+                    token("extends"),
+                    space(),
+                    extends.extends_type(db),
+                    space(),
+                    token("?"),
+                    space(),
+                    extends.true_type(db),
+                    space(),
+                    token(":"),
+                    space(),
+                    extends.false_type(db),
+                    token(")")
+                ]]
+            ),
             Self::InstanceOf(instance) => {
                 write!(f, [&format_args![token("instanceof"), space(), instance]])
             }
@@ -852,7 +873,7 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                 ])]
             ),
             Self::Destructure(expr) => match &expr.destructure_field {
-                DestructureField::Index(index) => write!(
+                DestructureField::Index { index, .. } => write!(
                     f,
                     [&format_args![
                         &expr.ty,
@@ -861,7 +882,7 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                         token("]")
                     ]]
                 ),
-                DestructureField::Name(name) => {
+                DestructureField::Name { name, .. } => {
                     write!(f, [&format_args![&expr.ty, token("."), name]])
                 }
                 DestructureField::RestExcept(names) => write!(

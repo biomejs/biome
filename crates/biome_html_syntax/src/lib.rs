@@ -19,7 +19,7 @@ pub use generated::*;
 pub use script_type::*;
 pub use svg::*;
 pub use syntax_node::*;
-pub use tags::{HTML_TAG_NAMES, VOID_ELEMENTS};
+pub use tags::{HTML_TAG_NAMES, MATHML_TAG_NAMES, VOID_ELEMENTS};
 
 use crate::HtmlSyntaxKind::{
     ASTRO_BOGUS_FRONTMATTER, HTML_BOGUS, HTML_BOGUS_ATTRIBUTE, HTML_BOGUS_ELEMENT,
@@ -94,6 +94,10 @@ impl biome_rowan::SyntaxKind for HtmlSyntaxKind {
 
     fn is_trivia(self) -> bool {
         matches!(self, Self::NEWLINE | Self::WHITESPACE)
+    }
+
+    fn is_allowed_before_suppressions(&self) -> bool {
+        *self == Self::UNICODE_BOM
     }
 
     fn to_string(&self) -> Option<&'static str> {

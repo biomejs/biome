@@ -34,12 +34,12 @@ impl biome_deserialize::Merge for AvailabilityTarget {
 }
 
 impl Deserializable for AvailabilityTarget {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        Some(if value.visitable_type()? == DeserializableType::Str {
+        Some(if value.visitable_type(ctx)? == DeserializableType::Str {
             Self::Named(<AvailabilityNamed as Deserializable>::deserialize(
                 ctx, value, name,
             )?)

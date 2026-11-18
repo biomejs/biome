@@ -48,6 +48,8 @@ src/index.js:1:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
   > 1 │ a['b']  =  42;
       │   ^^^
   
+  i A literal key is easier to read, and tools such as type checkers and minifiers can understand the property name.
+  
   i Unsafe fix: Use a literal key instead.
   
   - a['b']··=··42;

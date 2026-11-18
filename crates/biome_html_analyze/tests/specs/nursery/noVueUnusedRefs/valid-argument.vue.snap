@@ -1,0 +1,20 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid-argument.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+export default {
+  mounted() {
+    focusAll(this.$refs);
+  },
+};
+</script>
+
+<template>
+  <input ref="a" />
+</template>
+
+```

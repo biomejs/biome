@@ -1,0 +1,69 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidParameterDecorators.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+declare function decorate(key: unknown): ParameterDecorator;
+
+function makeClass(this: { key: string }) {
+    class DecoratorOnly {
+        method(@decorate(this.key) value: unknown) {
+            return value;
+        }
+    }
+    return DecoratorOnly;
+}
+
+function makeRestClass(this: { key: string }) {
+    class RestDecoratorOnly {
+        method(@decorate(this.key) ...values: unknown[]) {
+            return values;
+        }
+    }
+    return RestDecoratorOnly;
+}
+
+```
+
+_Note: The parser emitted 2 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalidParameterDecorators.ts:6:9 lint/style/useThisInClassMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this to be used by class method method.
+  
+    4 │ function makeClass(this: { key: string }) {
+    5 │     class DecoratorOnly {
+  > 6 │         method(@decorate(this.key) value: unknown) {
+      │         ^^^^^^
+    7 │             return value;
+    8 │         }
+  
+  i Adding functions as class members can be a convenient way to organize code related to a class, but when those functions do not use instance state, it can be misleading to readers. Consider whether static or a module-level function would better communicate the intent of this code.
+  
+  i If this member does not depend on instance state, make it static or move it outside the class.
+  
+
+```
+
+```
+invalidParameterDecorators.ts:15:9 lint/style/useThisInClassMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this to be used by class method method.
+  
+    13 │ function makeRestClass(this: { key: string }) {
+    14 │     class RestDecoratorOnly {
+  > 15 │         method(@decorate(this.key) ...values: unknown[]) {
+       │         ^^^^^^
+    16 │             return values;
+    17 │         }
+  
+  i Adding functions as class members can be a convenient way to organize code related to a class, but when those functions do not use instance state, it can be misleading to readers. Consider whether static or a module-level function would better communicate the intent of this code.
+  
+  i If this member does not depend on instance state, make it static or move it outside the class.
+  
+
+```

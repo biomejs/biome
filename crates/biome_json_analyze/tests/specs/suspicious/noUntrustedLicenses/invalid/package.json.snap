@@ -49,5 +49,7 @@ package.json:7:9 lint/suspicious/noUntrustedLicenses ━━━━━━━━━
   
   i Dependencies without a license field may have unknown legal restrictions.
   
+  i Choose a dependency that specifies a license, or ask its authors to add one.
+  
 
 ```

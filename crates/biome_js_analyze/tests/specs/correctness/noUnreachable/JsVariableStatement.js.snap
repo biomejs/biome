@@ -35,6 +35,12 @@ function JsVariableStatement6() {
         variable2 = initializer();
 }
 
+function JsVariableStatement7() {
+    return;
+    const { a = fallback(), b } = initializer(),
+        [c = fallback()] = initializer();
+}
+
 ```
 
 # Diagnostics
@@ -128,6 +134,31 @@ JsVariableStatement.js:28:5 lint/correctness/noUnreachable ━━━━━━━
        │     ^^^^^^^
     28 │     var variable1 = initializer(),
     29 │         variable2 = initializer();
+  
+
+```
+
+```
+JsVariableStatement.js:34:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+    32 │ function JsVariableStatement7() {
+    33 │     return;
+  > 34 │     const { a = fallback(), b } = initializer(),
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 35 │         [c = fallback()] = initializer();
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ }
+    37 │ 
+  
+  i ... because this statement will return from the function beforehand
+  
+    32 │ function JsVariableStatement7() {
+  > 33 │     return;
+       │     ^^^^^^^
+    34 │     const { a = fallback(), b } = initializer(),
+    35 │         [c = fallback()] = initializer();
   
 
 ```

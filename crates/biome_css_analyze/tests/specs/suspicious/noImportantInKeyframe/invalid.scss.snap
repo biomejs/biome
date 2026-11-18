@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
-assertion_line: 154
 expression: invalid.scss
 ---
 # Input
@@ -19,7 +18,7 @@ expression: invalid.scss
 ```
 invalid.scss:5:16 lint/suspicious/noImportantInKeyframe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using !important within keyframes declaration is completely ignored in some browsers.
+  × Unexpected !important within a keyframes declaration.
   
     3 │   @include frames;
     4 │   to {
@@ -28,7 +27,9 @@ invalid.scss:5:16 lint/suspicious/noImportantInKeyframe ━━━━━━━━
     6 │   }
     7 │ }
   
-  i Consider removing useless !important declaration.
+  i Declarations marked !important inside keyframes are completely ignored in some browsers, so they have no effect there.
+  
+  i Remove the !important annotation and keep the declaration.
   
 
 ```

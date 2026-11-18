@@ -1,0 +1,473 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<div class="flex grid"></div>
+<div class="flex w-full grid"></div>
+<div class='p-2 p-4'></div>
+<div CLASS="m-2 -m-2"></div>
+<div class="text-red-500 text-blue-500/50"></div>
+<div class="flex flex!"></div>
+<div class="hover:flex hover:grid"></div>
+<div class="block inline flex"></div>
+<div class="flex flex grid"></div>
+<div class="text-sm text-lg"></div>
+<div class="bg-linear-to-r bg-linear-to-b"></div>
+<div class="flex [display:grid]"></div>
+<div title="é" class="
+	flex
+	grid
+"></div>
+<div className="flex grid"></div>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:18 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class grid sets the same CSS properties as flex.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div class="flex grid"></div>
+      │                  ^^^^
+    3 │ <div class="flex w-full grid"></div>
+    4 │ <div class='p-2 p-4'></div>
+  
+  i The other class is here.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div class="flex grid"></div>
+      │             ^^^^
+    3 │ <div class="flex w-full grid"></div>
+    4 │ <div class='p-2 p-4'></div>
+  
+  i Only one of these classes takes effect, so the other one does nothing.
+  
+  i Remove the class that you don't need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:3:25 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class grid sets the same CSS properties as flex.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div class="flex grid"></div>
+  > 3 │ <div class="flex w-full grid"></div>
+      │                         ^^^^
+    4 │ <div class='p-2 p-4'></div>
+    5 │ <div CLASS="m-2 -m-2"></div>
+  
+  i The other class is here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div class="flex grid"></div>
+  > 3 │ <div class="flex w-full grid"></div>
+      │             ^^^^
+    4 │ <div class='p-2 p-4'></div>
+    5 │ <div CLASS="m-2 -m-2"></div>
+  
+  i Only one of these classes takes effect, so the other one does nothing.
+  
+  i Remove the class that you don't need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:4:17 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class p-4 sets the same CSS properties as p-2.
+  
+    2 │ <div class="flex grid"></div>
+    3 │ <div class="flex w-full grid"></div>
+  > 4 │ <div class='p-2 p-4'></div>
+      │                 ^^^
+    5 │ <div CLASS="m-2 -m-2"></div>
+    6 │ <div class="text-red-500 text-blue-500/50"></div>
+  
+  i The other class is here.
+  
+    2 │ <div class="flex grid"></div>
+    3 │ <div class="flex w-full grid"></div>
+  > 4 │ <div class='p-2 p-4'></div>
+      │             ^^^
+    5 │ <div CLASS="m-2 -m-2"></div>
+    6 │ <div class="text-red-500 text-blue-500/50"></div>
+  
+  i Only one of these classes takes effect, so the other one does nothing.
+  
+  i Remove the class that you don't need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:5:17 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class -m-2 sets the same CSS properties as m-2.
+  
+    3 │ <div class="flex w-full grid"></div>
+    4 │ <div class='p-2 p-4'></div>
+  > 5 │ <div CLASS="m-2 -m-2"></div>
+      │                 ^^^^
+    6 │ <div class="text-red-500 text-blue-500/50"></div>
+    7 │ <div class="flex flex!"></div>
+  
+  i The other class is here.
+  
+    3 │ <div class="flex w-full grid"></div>
+    4 │ <div class='p-2 p-4'></div>
+  > 5 │ <div CLASS="m-2 -m-2"></div>
+      │             ^^^
+    6 │ <div class="text-red-500 text-blue-500/50"></div>
+    7 │ <div class="flex flex!"></div>
+  
+  i Only one of these classes takes effect, so the other one does nothing.
+  
+  i Remove the class that you don't need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:6:26 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class text-blue-500/50 sets the same CSS properties as text-red-500.
+  
+    4 │ <div class='p-2 p-4'></div>
+    5 │ <div CLASS="m-2 -m-2"></div>
+  > 6 │ <div class="text-red-500 text-blue-500/50"></div>
+      │                          ^^^^^^^^^^^^^^^^
+    7 │ <div class="flex flex!"></div>
+    8 │ <div class="hover:flex hover:grid"></div>
+  
+  i The other class is here.
+  
+    4 │ <div class='p-2 p-4'></div>
+    5 │ <div CLASS="m-2 -m-2"></div>
+  > 6 │ <div class="text-red-500 text-blue-500/50"></div>
+      │             ^^^^^^^^^^^^
+    7 │ <div class="flex flex!"></div>
+    8 │ <div class="hover:flex hover:grid"></div>
+  
+  i Only one of these classes takes effect, so the other one does nothing.
+  
+  i Remove the class that you don't need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:7:18 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class flex! sets the same CSS properties as flex.
+  
+    5 │ <div CLASS="m-2 -m-2"></div>
+    6 │ <div class="text-red-500 text-blue-500/50"></div>
+  > 7 │ <div class="flex flex!"></div>
+      │                  ^^^^^
+    8 │ <div class="hover:flex hover:grid"></div>
+    9 │ <div class="block inline flex"></div>
+  
+  i The other class is here.
+  
+    5 │ <div CLASS="m-2 -m-2"></div>
+    6 │ <div class="text-red-500 text-blue-500/50"></div>
+  > 7 │ <div class="flex flex!"></div>
+      │             ^^^^
+    8 │ <div class="hover:flex hover:grid"></div>
+    9 │ <div class="block inline flex"></div>
+  
+  i Only one of these classes takes effect, so the other one does nothing.
+  
+  i Remove the class that you don't need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:8:24 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class hover:grid sets the same CSS properties as hover:flex.
+  
+     6 │ <div class="text-red-500 text-blue-500/50"></div>
+     7 │ <div class="flex flex!"></div>
+   > 8 │ <div class="hover:flex hover:grid"></div>
+       │                        ^^^^^^^^^^
+     9 │ <div class="block inline flex"></div>
+    10 │ <div class="flex flex grid"></div>
+  
+  i The other class is here.
+  
+     6 │ <div class="text-red-500 text-blue-500/50"></div>
+     7 │ <div class="flex flex!"></div>
+   > 8 │ <div class="hover:flex hover:grid"></div>
+       │             ^^^^^^^^^^
+     9 │ <div class="block inline flex"></div>
+    10 │ <div class="flex flex grid"></div>
+  
+  i Only one of these classes takes effect, so the other one does nothing.
+  
+  i Remove the class that you don't need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:9:19 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class inline sets the same CSS properties as block.
+  
+     7 │ <div class="flex flex!"></div>
+     8 │ <div class="hover:flex hover:grid"></div>
+   > 9 │ <div class="block inline flex"></div>
+       │                   ^^^^^^
+    10 │ <div class="flex flex grid"></div>
+    11 │ <div class="text-sm text-lg"></div>
+  
+  i The other class is here.
+  
+     7 │ <div class="flex flex!"></div>
+     8 │ <div class="hover:flex hover:grid"></div>
+   > 9 │ <div class="block inline flex"></div>
+       │             ^^^^^
+    10 │ <div class="flex flex grid"></div>
+    11 │ <div class="text-sm text-lg"></div>
+  
+  i Only one of these classes takes effect, so the other one does nothing.
+  
+  i Remove the class that you don't need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:9:26 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class flex sets the same CSS properties as block.
+  
+     7 │ <div class="flex flex!"></div>
+     8 │ <div class="hover:flex hover:grid"></div>
+   > 9 │ <div class="block inline flex"></div>
+       │                          ^^^^
+    10 │ <div class="flex flex grid"></div>
+    11 │ <div class="text-sm text-lg"></div>
+  
+  i The other class is here.
+  
+     7 │ <div class="flex flex!"></div>
+     8 │ <div class="hover:flex hover:grid"></div>
+   > 9 │ <div class="block inline flex"></div>
+       │             ^^^^^
+    10 │ <div class="flex flex grid"></div>
+    11 │ <div class="text-sm text-lg"></div>
+  
+  i Only one of these classes takes effect, so the other one does nothing.
+  
+  i Remove the class that you don't need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:10:23 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class grid sets the same CSS properties as flex.
+  
+     8 │ <div class="hover:flex hover:grid"></div>
+     9 │ <div class="block inline flex"></div>
+  > 10 │ <div class="flex flex grid"></div>
+       │                       ^^^^
+    11 │ <div class="text-sm text-lg"></div>
+    12 │ <div class="bg-linear-to-r bg-linear-to-b"></div>
+  
+  i The other class is here.
+  
+     8 │ <div class="hover:flex hover:grid"></div>
+     9 │ <div class="block inline flex"></div>
+  > 10 │ <div class="flex flex grid"></div>
+       │             ^^^^
+    11 │ <div class="text-sm text-lg"></div>
+    12 │ <div class="bg-linear-to-r bg-linear-to-b"></div>
+  
+  i Only one of these classes takes effect, so the other one does nothing.
+  
+  i Remove the class that you don't need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:11:21 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class text-lg sets the same CSS properties as text-sm.
+  
+     9 │ <div class="block inline flex"></div>
+    10 │ <div class="flex flex grid"></div>
+  > 11 │ <div class="text-sm text-lg"></div>
+       │                     ^^^^^^^
+    12 │ <div class="bg-linear-to-r bg-linear-to-b"></div>
+    13 │ <div class="flex [display:grid]"></div>
+  
+  i The other class is here.
+  
+     9 │ <div class="block inline flex"></div>
+    10 │ <div class="flex flex grid"></div>
+  > 11 │ <div class="text-sm text-lg"></div>
+       │             ^^^^^^^
+    12 │ <div class="bg-linear-to-r bg-linear-to-b"></div>
+    13 │ <div class="flex [display:grid]"></div>
+  
+  i Only one of these classes takes effect, so the other one does nothing.
+  
+  i Remove the class that you don't need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:12:28 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class bg-linear-to-b sets the same CSS properties as bg-linear-to-r.
+  
+    10 │ <div class="flex flex grid"></div>
+    11 │ <div class="text-sm text-lg"></div>
+  > 12 │ <div class="bg-linear-to-r bg-linear-to-b"></div>
+       │                            ^^^^^^^^^^^^^^
+    13 │ <div class="flex [display:grid]"></div>
+    14 │ <div title="é" class="
+  
+  i The other class is here.
+  
+    10 │ <div class="flex flex grid"></div>
+    11 │ <div class="text-sm text-lg"></div>
+  > 12 │ <div class="bg-linear-to-r bg-linear-to-b"></div>
+       │             ^^^^^^^^^^^^^^
+    13 │ <div class="flex [display:grid]"></div>
+    14 │ <div title="é" class="
+  
+  i Only one of these classes takes effect, so the other one does nothing.
+  
+  i Remove the class that you don't need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:13:18 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class [display:grid] sets the same CSS properties as flex.
+  
+    11 │ <div class="text-sm text-lg"></div>
+    12 │ <div class="bg-linear-to-r bg-linear-to-b"></div>
+  > 13 │ <div class="flex [display:grid]"></div>
+       │                  ^^^^^^^^^^^^^^
+    14 │ <div title="é" class="
+    15 │ 	flex
+  
+  i The other class is here.
+  
+    11 │ <div class="text-sm text-lg"></div>
+    12 │ <div class="bg-linear-to-r bg-linear-to-b"></div>
+  > 13 │ <div class="flex [display:grid]"></div>
+       │             ^^^^
+    14 │ <div title="é" class="
+    15 │ 	flex
+  
+  i Only one of these classes takes effect, so the other one does nothing.
+  
+  i Remove the class that you don't need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:16:2 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class grid sets the same CSS properties as flex.
+  
+    14 │ <div title="é" class="
+    15 │ 	flex
+  > 16 │ 	grid
+       │ 	^^^^
+    17 │ "></div>
+    18 │ <div className="flex grid"></div>
+  
+  i The other class is here.
+  
+    13 │ <div class="flex [display:grid]"></div>
+    14 │ <div title="é" class="
+  > 15 │ 	flex
+       │ 	^^^^
+    16 │ 	grid
+    17 │ "></div>
+  
+  i Only one of these classes takes effect, so the other one does nothing.
+  
+  i Remove the class that you don't need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:18:22 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class grid sets the same CSS properties as flex.
+  
+    16 │ 	grid
+    17 │ "></div>
+  > 18 │ <div className="flex grid"></div>
+       │                      ^^^^
+    19 │ 
+  
+  i The other class is here.
+  
+    16 │ 	grid
+    17 │ "></div>
+  > 18 │ <div className="flex grid"></div>
+       │                 ^^^^
+    19 │ 
+  
+  i Only one of these classes takes effect, so the other one does nothing.
+  
+  i Remove the class that you don't need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -16,6 +16,8 @@ invalid.jsonc:1:1 lint/suspicious/noUnsafeNegation  FIXABLE  ━━━━━━�
   > 1 │ !1 in [1,2];
       │ ^^^^^^^^^^^
   
+  i The negation applies only to the left operand, not to the whole expression, so the result is probably not what was intended.
+  
   i Unsafe fix: Wrap the expression with a parenthesis
   
     1 │ !(1·in·[1,2]);
@@ -36,6 +38,8 @@ invalid.jsonc:1:10 lint/suspicious/noUnsafeNegation  FIXABLE  ━━━━━━
   
   > 1 │ /**test*/!/** test*/1 instanceof [1,2];
       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The negation applies only to the left operand, not to the whole expression, so the result is probably not what was intended.
   
   i Unsafe fix: Wrap the expression with a parenthesis
   

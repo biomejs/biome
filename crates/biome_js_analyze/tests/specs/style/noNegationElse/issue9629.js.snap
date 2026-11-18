@@ -38,6 +38,8 @@ issue9629.js:2:2 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━
     8 │ 
     9 │ call(
   
+  i A negated condition with an else branch makes the reader reverse the logic twice. Swapping the blocks removes the negation.
+  
   i Safe fix: Invert the condition and the blocks.
   
      1  1 │   const keyName =
@@ -71,6 +73,8 @@ issue9629.js:10:2 lint/style/noNegationElse  FIXABLE  ━━━━━━━━�
        │ 		^^^^^^^^^^^
     13 │ );
     14 │ 
+  
+  i A negated condition with an else branch makes the reader reverse the logic twice. Swapping the blocks removes the negation.
   
   i Safe fix: Invert the condition and the blocks.
   

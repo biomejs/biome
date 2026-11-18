@@ -1,0 +1,8 @@
+// should not generate diagnostics
+[
+  "\ufeffquery { field }",
+  "\ufeff",
+  "\ufeff  query { field }",
+  "\ufeff\nquery { field }",
+  "\ufeff# header\nquery { field }"
+]

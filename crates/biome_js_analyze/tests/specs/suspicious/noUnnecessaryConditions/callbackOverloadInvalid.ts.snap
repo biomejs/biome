@@ -59,5 +59,7 @@ callbackOverloadInvalid.ts:13:12 lint/suspicious/noUnnecessaryConditions ━━�
   
   i The value's type can never be falsy, so this check is redundant.
   
+  i Remove the condition, or check the value you meant to test.
+  
 
 ```

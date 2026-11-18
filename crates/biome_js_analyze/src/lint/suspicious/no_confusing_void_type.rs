@@ -93,12 +93,17 @@ impl Rule for NoConfusingVoidType {
             VoidTypeContext::Union => "inside a union type.",
             VoidTypeContext::Unknown => "outside a return type or a type parameter.",
         };
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            node.range(),
-            markup! {
-            <Emphasis>"void"</Emphasis>" is confusing "{message}},
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup! {
+                <Emphasis>"void"</Emphasis>" is confusing "{message}},
+            )
+            .note(markup! {
+                <Emphasis>"void"</Emphasis>" is meant for the return type of a function. In other positions it is easy to mix up with "<Emphasis>"undefined"</Emphasis>", which makes the type harder to understand."
+            }),
+        )
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

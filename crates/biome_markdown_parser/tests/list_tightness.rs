@@ -30,3 +30,17 @@ fn tracks_list_tightness() {
     assert!(found_tight);
     assert!(found_loose);
 }
+
+#[test]
+fn nested_list_does_not_leak_blank_line_into_following_list() {
+    let source = "- outer\n\n  * nested\n1. x\n";
+    let parse = parse_markdown(source, MarkdownParserOptions::default());
+
+    let following = parse
+        .list_tightness()
+        .iter()
+        .find(|entry| &source[entry.range] == "1. x\n")
+        .expect("the ordered list is recorded");
+
+    assert!(following.is_tight);
+}

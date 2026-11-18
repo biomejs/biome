@@ -226,32 +226,6 @@ Fixed: `scroll-py-2`
 ## Input
 
 ```text
-divide-x-4 divide-y-4
-```
-
-Violations: 1
-- Violation 1
-  nodes: ["divide-x-4", "divide-y-4"]
-  replacements: ["divide"]
-  static replacements: []
-Fixed: `divide-4`
-
-## Input
-
-```text
-rotate-x-45 rotate-y-45
-```
-
-Violations: 1
-- Violation 1
-  nodes: ["rotate-x-45", "rotate-y-45"]
-  replacements: ["rotate"]
-  static replacements: []
-Fixed: `rotate-45`
-
-## Input
-
-```text
 right-4 left-4
 ```
 

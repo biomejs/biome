@@ -1,0 +1,231 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: invalidTags.yaml
+---
+# Input
+```yaml
+# should generate diagnostics
+- !!bool "true": 1
+- !!bool text: 2
+- !<tag:yaml.org,2002:bool> 'false': 3
+- !!bool &anchor yes: 4
+- &other !!bool no: 5
+- !!bool : 6
+- &anchored true: 7
+- flow: { !!bool "true": 8 }
+- ? !!bool |
+    true
+  : 9
+- tagged_mapping: !!map
+    true: 10
+
+```
+
+# Diagnostics
+```
+invalidTags.yaml:2:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is tagged as a boolean.
+  
+    1 │ # should generate diagnostics
+  > 2 │ - !!bool "true": 1
+      │   ^^^^^^
+    3 │ - !!bool text: 2
+    4 │ - !<tag:yaml.org,2002:bool> 'false': 3
+  
+  i Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Remove the boolean tag and use a text key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTags.yaml:3:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is tagged as a boolean.
+  
+    1 │ # should generate diagnostics
+    2 │ - !!bool "true": 1
+  > 3 │ - !!bool text: 2
+      │   ^^^^^^
+    4 │ - !<tag:yaml.org,2002:bool> 'false': 3
+    5 │ - !!bool &anchor yes: 4
+  
+  i Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Remove the boolean tag and use a text key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTags.yaml:4:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is tagged as a boolean.
+  
+    2 │ - !!bool "true": 1
+    3 │ - !!bool text: 2
+  > 4 │ - !<tag:yaml.org,2002:bool> 'false': 3
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ - !!bool &anchor yes: 4
+    6 │ - &other !!bool no: 5
+  
+  i Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Remove the boolean tag and use a text key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTags.yaml:5:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is tagged as a boolean.
+  
+    3 │ - !!bool text: 2
+    4 │ - !<tag:yaml.org,2002:bool> 'false': 3
+  > 5 │ - !!bool &anchor yes: 4
+      │   ^^^^^^
+    6 │ - &other !!bool no: 5
+    7 │ - !!bool : 6
+  
+  i Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Remove the boolean tag and use a text key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTags.yaml:6:10 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is tagged as a boolean.
+  
+    4 │ - !<tag:yaml.org,2002:bool> 'false': 3
+    5 │ - !!bool &anchor yes: 4
+  > 6 │ - &other !!bool no: 5
+      │          ^^^^^^
+    7 │ - !!bool : 6
+    8 │ - &anchored true: 7
+  
+  i Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Remove the boolean tag and use a text key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTags.yaml:7:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is tagged as a boolean.
+  
+    5 │ - !!bool &anchor yes: 4
+    6 │ - &other !!bool no: 5
+  > 7 │ - !!bool : 6
+      │   ^^^^^^
+    8 │ - &anchored true: 7
+    9 │ - flow: { !!bool "true": 8 }
+  
+  i Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Remove the boolean tag and use a text key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTags.yaml:8:13 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+     6 │ - &other !!bool no: 5
+     7 │ - !!bool : 6
+   > 8 │ - &anchored true: 7
+       │             ^^^^
+     9 │ - flow: { !!bool "true": 8 }
+    10 │ - ? !!bool |
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTags.yaml:9:11 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is tagged as a boolean.
+  
+     7 │ - !!bool : 6
+     8 │ - &anchored true: 7
+   > 9 │ - flow: { !!bool "true": 8 }
+       │           ^^^^^^
+    10 │ - ? !!bool |
+    11 │     true
+  
+  i Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Remove the boolean tag and use a text key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTags.yaml:10:5 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is tagged as a boolean.
+  
+     8 │ - &anchored true: 7
+     9 │ - flow: { !!bool "true": 8 }
+  > 10 │ - ? !!bool |
+       │     ^^^^^^
+    11 │     true
+    12 │   : 9
+  
+  i Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Remove the boolean tag and use a text key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTags.yaml:14:5 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    12 │   : 9
+    13 │ - tagged_mapping: !!map
+  > 14 │     true: 10
+       │     ^^^^
+    15 │ 
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

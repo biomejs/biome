@@ -164,6 +164,8 @@ invalid.js:4:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━�
   
   i The value's type can never be falsy, so this check is redundant.
   
+  i Remove the condition, or check the value you meant to test.
+  
 
 ```
 
@@ -180,6 +182,8 @@ invalid.js:8:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━�
     10 │ }
   
   i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
   
 
 ```
@@ -198,6 +202,8 @@ invalid.js:12:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
   
   i The value's type can never be falsy, so this check is redundant.
   
+  i Remove the condition, or check the value you meant to test.
+  
 
 ```
 
@@ -214,6 +220,8 @@ invalid.js:16:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
     18 │ }
   
   i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
   
 
 ```
@@ -232,6 +240,8 @@ invalid.js:20:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
   
   i The value's type can never be falsy, so this check is redundant.
   
+  i Remove the condition, or check the value you meant to test.
+  
 
 ```
 
@@ -247,6 +257,8 @@ invalid.js:25:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
     27 │ }
   
   i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
   
 
 ```
@@ -265,6 +277,8 @@ invalid.js:29:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
   
   i The value's type can never be truthy, so this check is redundant.
   
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
 
 ```
 
@@ -281,6 +295,8 @@ invalid.js:33:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
     35 │ }
   
   i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
   
 
 ```
@@ -299,6 +315,8 @@ invalid.js:37:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
   
   i The value's type can never be truthy, so this check is redundant.
   
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
 
 ```
 
@@ -315,6 +333,8 @@ invalid.js:41:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
     43 │ }
   
   i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
   
 
 ```
@@ -333,6 +353,8 @@ invalid.js:45:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
   
   i The value's type can never be truthy, so this check is redundant.
   
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
 
 ```
 
@@ -348,6 +370,8 @@ invalid.js:51:17 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     53 │ // Unnecessary logical AND short-circuiting
   
   i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
   
 
 ```
@@ -365,6 +389,8 @@ invalid.js:54:17 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be falsy, so this check is redundant.
   
+  i Remove the condition, or check the value you meant to test.
+  
 
 ```
 
@@ -380,6 +406,8 @@ invalid.js:57:17 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     59 │ 
   
   i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
   
 
 ```
@@ -398,6 +426,8 @@ invalid.js:58:17 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be truthy, so this check is redundant.
   
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
 
 ```
 
@@ -413,6 +443,8 @@ invalid.js:61:15 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     63 │ const comp3 = 5 > 3;  // Always true
   
   i The operands' types make the outcome statically known.
+  
+  i Remove the comparison, or compare the values you meant to compare.
   
 
 ```
@@ -431,6 +463,8 @@ invalid.js:62:15 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The operands' types make the outcome statically known.
   
+  i Remove the comparison, or compare the values you meant to compare.
+  
 
 ```
 
@@ -447,6 +481,8 @@ invalid.js:63:15 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     65 │ const comp3 = 1 === 1;  // Always true
   
   i The operands' types make the outcome statically known.
+  
+  i Remove the comparison, or compare the values you meant to compare.
   
 
 ```
@@ -465,6 +501,8 @@ invalid.js:64:15 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The operands' types make the outcome statically known.
   
+  i Remove the comparison, or compare the values you meant to compare.
+  
 
 ```
 
@@ -481,6 +519,8 @@ invalid.js:65:15 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     67 │ 
   
   i The operands' types make the outcome statically known.
+  
+  i Remove the comparison, or compare the values you meant to compare.
   
 
 ```
@@ -499,6 +539,8 @@ invalid.js:66:15 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The operands' types make the outcome statically known.
   
+  i Remove the comparison, or compare the values you meant to compare.
+  
 
 ```
 
@@ -514,6 +556,8 @@ invalid.js:69:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
     71 │   break;
   
   i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
   
 
 ```
@@ -532,6 +576,8 @@ invalid.js:74:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
   
   i The value's type can never be truthy, so this check is redundant.
   
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
 
 ```
 
@@ -549,6 +595,8 @@ invalid.js:81:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be truthy, so this check is redundant.
   
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
 
 ```
 
@@ -564,6 +612,8 @@ invalid.js:84:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
     86 │ }
   
   i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
   
 
 ```
@@ -581,6 +631,8 @@ invalid.js:88:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━━
     90 │ }
   
   i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
   
 
 ```
@@ -674,6 +726,8 @@ invalid.js:98:16 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be falsy, so this check is redundant.
   
+  i Remove the condition, or check the value you meant to test.
+  
 
 ```
 
@@ -690,6 +744,8 @@ invalid.js:99:16 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     101 │ const mixed4 = undefined ?? "default";  // Left side is always nullish
   
   i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
   
 
 ```
@@ -784,6 +840,8 @@ invalid.js:109:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be falsy, so this check is redundant.
   
+  i Remove the condition, or check the value you meant to test.
+  
 
 ```
 
@@ -800,6 +858,8 @@ invalid.js:113:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be truthy, so this check is redundant.
   
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
 
 ```
 
@@ -815,6 +875,8 @@ invalid.js:117:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     119 │     console.log("never runs");
   
   i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
   
 
 ```
@@ -833,6 +895,8 @@ invalid.js:118:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be truthy, so this check is redundant.
   
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
 
 ```
 
@@ -849,6 +913,8 @@ invalid.js:128:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     130 │     break;
   
   i The value passed to switch can never equal this value.
+  
+  i Remove the unreachable case, or change it to a value that the switch expression can have.
   
 
 ```
@@ -867,6 +933,8 @@ invalid.js:135:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be falsy, so this check is redundant.
   
+  i Remove the condition, or check the value you meant to test.
+  
 
 ```
 
@@ -883,6 +951,8 @@ invalid.js:141:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     143 │ }
   
   i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
   
 
 ```

@@ -38,8 +38,8 @@ use biome_configuration::markdown::{
     MarkdownFormatterEnabled, MarkdownLinterEnabled, MarkdownParseCjkFriendlyEmphasis,
     MarkdownParseFrontmatter, MarkdownParseGfm, MarkdownParserConfiguration,
 };
-use biome_db::AnyParsedSource;
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline};
+use biome_formatter::rowan::Printed;
+use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, TrailingNewline};
 use biome_fs::BiomePath;
 #[cfg(feature = "md_embeds")]
 use biome_markdown_analyze::analyze_with_snippets;
@@ -49,6 +49,7 @@ use biome_markdown_formatter::format_node;
 use biome_markdown_parser::{MarkdownParserOptions, parse_markdown_with_cache};
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdRoot};
 use biome_parser::NodeParse;
+use biome_parser::db::AnalyzedSource;
 use biome_rowan::{AstNode, NodeCache};
 use camino::Utf8Path;
 use std::borrow::Cow;
@@ -497,7 +498,7 @@ fn parse(
 
 fn debug_syntax_tree(
     _biome_path: &BiomePath,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     workspace_db: WorkspaceDb,
 ) -> GetSyntaxTreeResult {
     let syntax: MarkdownSyntaxNode = parse.syntax(&workspace_db);
@@ -511,7 +512,7 @@ fn debug_syntax_tree(
 fn debug_formatter_ir(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
@@ -700,7 +701,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
     };
 
-    let action_offset = parsed_source.diagnostic_offset(&workspace_db);
+    let action_offset = parsed_source.diagnostic_offset();
     let file_source = language.to_markdown_file_source().unwrap_or_default();
     analyze(&tree, filter, &analyzer_options, file_source, |signal| {
         if compute_actions {

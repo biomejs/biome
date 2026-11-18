@@ -141,17 +141,26 @@ pub(crate) fn code_actions(
     let position_encoding = session.position_encoding();
 
     let diagnostics = params.context.diagnostics;
-    let content = session
-        .workspace_for_request()
-        .get_file_content(GetFileContentParams {
-            project_key: doc.project_key,
-            path: path.clone(),
-        })?;
-    let offset = match path.extension() {
-        Some("vue") => VueFileHandler::start(content.as_str()),
-        Some("astro") => AstroFileHandler::start(content.as_str()),
-        Some("svelte") => SvelteFileHandler::start(content.as_str()),
-        _ => None,
+    let offset = if file_features.supports_full_html_support() {
+        // The workspace analyzes the whole document, so the cursor range is
+        // already in the coordinates the workspace expects.
+        None
+    } else {
+        // TODO: remove this once legacy HTML-ish support is removed
+        // The workspace analyzes only the script, so the cursor range must be
+        // made relative to the start of the script.
+        let content = session
+            .workspace_for_request()
+            .get_file_content(GetFileContentParams {
+                project_key: doc.project_key,
+                path: path.clone(),
+            })?;
+        match path.extension() {
+            Some("vue") => VueFileHandler::start(content.as_str()),
+            Some("astro") => AstroFileHandler::start(content.as_str()),
+            Some("svelte") => SvelteFileHandler::start(content.as_str()),
+            _ => None,
+        }
     };
 
     let cursor_range = from_proto::text_range(&doc.line_index, params.range, position_encoding)

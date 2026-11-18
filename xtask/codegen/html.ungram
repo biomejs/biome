@@ -937,6 +937,36 @@ HtmlTagName = value_token: (
 	| 'tspan'
 	| 'view'
 	| 'vkern'
+	| 'annotation'
+	| 'annotation-xml'
+	| 'maction'
+	| 'math'
+	| 'merror'
+	| 'mfrac'
+	| 'mi'
+	| 'mmultiscripts'
+	| 'mn'
+	| 'mo'
+	| 'mover'
+	| 'mpadded'
+	| 'mphantom'
+	| 'mprescripts'
+	| 'mroot'
+	| 'mrow'
+	| 'ms'
+	| 'mspace'
+	| 'msqrt'
+	| 'mstyle'
+	| 'msub'
+	| 'msubsup'
+	| 'msup'
+	| 'mtable'
+	| 'mtd'
+	| 'mtext'
+	| 'mtr'
+	| 'munder'
+	| 'munderover'
+	| 'semantics'
 	// vue special components
 	| 'component' // allows `<component :is="...">` dynamic components
 	// catch-alls
@@ -1100,6 +1130,7 @@ AnyVueVForBinding =
 	VueVForIdentifierBinding
 	| AnyVueVForDestructuredBinding
 	| VueVForTupleBinding
+	| VueVForDefaultBinding
 
 AnyVueVForDestructuredBinding =
 	VueVForObjectBinding
@@ -1112,6 +1143,7 @@ AnyVueVForBindingListElement =
 	| VueVForObjectPropertyBinding
 	| AnyVueVForDestructuredBinding
 	| VueVForRestBinding
+	| VueVForDefaultBinding
 
 // <div v-for="item in items" />
 //             ^^^^
@@ -1124,6 +1156,13 @@ VueVForObjectPropertyBinding =
 	property: VueVForIdentifierBinding
 	':'
 	binding: AnyVueVForBinding
+
+// <div v-for="{ foo = fallback } in items" />
+//               ^^^^^^^^^^^^^^
+VueVForDefaultBinding =
+	binding: AnyVueVForBinding
+	'='
+	default: HtmlTextExpression
 
 // <div v-for="{ foo, bar } in items" />
 //             ^^^^^^^^^^^^

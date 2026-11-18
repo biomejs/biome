@@ -90,12 +90,12 @@ impl JsonValue {
 }
 
 impl biome_deserialize::Deserializable for JsonValue {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        match value.visitable_type()? {
+        match value.visitable_type(ctx)? {
             DeserializableType::Array => JsonArray::deserialize(ctx, value, name).map(Self::Array),
             DeserializableType::Bool => bool::deserialize(ctx, value, name).map(Self::Bool),
             DeserializableType::Map => JsonObject::deserialize(ctx, value, name).map(Self::Object),

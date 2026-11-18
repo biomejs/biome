@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-setup.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <button @click="$emit('bar')">Bar</button>
+</template>
+
+<script setup>
+const emit = defineEmits(["foo", "bar"]);
+const setFoo = () => {
+  emit("foo", newFoo);
+};
+</script>
+
+```

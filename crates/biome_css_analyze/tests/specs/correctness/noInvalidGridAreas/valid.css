@@ -12,11 +12,19 @@ a { grid-template-areas: "s s s"
                          "s s s"
                          "v v v"
                          "u u u"; }
-a { grid-template-areas: "s s s"
-                         "a a a"
-                         "v v v"
-                         "u u u"
-                         "a a a"; }
+a { grid-template-areas: "a" "bb"; }
+.a{grid-template-areas:"a" "bb";}
+a { grid-template-areas: "a b" "cc d"; }
+a { grid-template-areas: "a b" "c  d"; }
+a { grid-template-areas: "header header"
+                         "sidebar main"; }
+a { grid-template-areas: "a b"
+                         "a b"; }
+a { grid-template-areas: "a a b"
+                         "a a b"
+                         "c d d"; }
+a { grid-template-areas: "a . ."
+                         ". ... b"; }
 
 /* Do not emit for non grid area properties */
 #carbonads {
@@ -31,3 +39,10 @@ a { grid-template-areas: "s s s"
 /* Do not treat other grid-template-* properties as grid area declarations */
 a { grid-template-rows: "a a" "b b b"; }
 a { grid-templatefoo: "a a" "b b b"; }
+
+/* A sequence of `.` is a cell of its own */
+a { grid-template-areas: "a. b" "c d e"; }
+
+/* Shorthands */
+a { grid-template: "a" 1fr "bb" 1fr / auto; }
+a { grid: "a b" auto "a b" auto / 1fr 1fr; }

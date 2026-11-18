@@ -236,7 +236,10 @@ impl Rule for NoUselessConstructor {
             markup! {
                 "This constructor is unnecessary."
             },
-        ))
+        )
+        .note(markup! {
+            "A constructor that only does what the default constructor already does adds code without changing behavior."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

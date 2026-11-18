@@ -9,7 +9,8 @@ use biome_analyze::{
 use biome_html_syntax::HtmlAttribute;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsxAttribute};
 use biome_rowan::{
-    AstNode, Language, SyntaxNode, TextRange, TokenText, WalkEvent, declare_node_union,
+    AstNode, Language, SyntaxKindSet, SyntaxNode, TextRange, TokenText, WalkEvent,
+    declare_node_union,
 };
 
 /// Syntax nodes that identify where Tailwind classes are supplied.
@@ -151,6 +152,13 @@ impl<N: TailwindClassContextNode + 'static> Visitor for ClassContextVisitor<N> {
                 kind,
             });
         }
+    }
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<Self::Language>>,
+    ) -> Option<SyntaxKindSet<Self::Language>> {
+        Some(N::KIND_SET)
     }
 }
 

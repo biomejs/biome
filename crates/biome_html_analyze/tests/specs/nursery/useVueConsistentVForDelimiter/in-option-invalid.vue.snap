@@ -1,0 +1,42 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: in-option-invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-for="x of xs"></div>
+</template>
+
+```
+
+# Diagnostics
+```
+in-option-invalid.vue:3:17 lint/nursery/useVueConsistentVForDelimiter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  i This v-for uses of instead of in.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-for="x of xs"></div>
+      │                 ^^
+    4 │ </template>
+    5 │ 
+  
+  i Vue treats in and of the same way in v-for, so mixing them makes templates harder to read and search.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use in instead.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2 2 │   <template>
+    3   │ - ··<div·v-for="x·of·xs"></div>
+      3 │ + ··<div·v-for="x·in·xs"></div>
+    4 4 │   </template>
+    5 5 │   
+  
+
+```

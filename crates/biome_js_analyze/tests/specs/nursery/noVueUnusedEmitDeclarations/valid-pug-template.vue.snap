@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-pug-template.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template lang="pug">
+button(@click="$emit('foo')") Foo
+</template>
+
+<script>
+export default {
+  emits: ["foo"],
+};
+</script>
+
+```

@@ -36,7 +36,7 @@ YamlRoot {
                                 value: YamlFlowYamlNode {
                                     properties: YamlPropertyList [],
                                     content: YamlPlainScalar {
-                                        value_token: PLAIN_LITERAL@11..17 "value " [] [],
+                                        value_token: PLAIN_LITERAL@11..17 "value" [] [Whitespace(" ")],
                                     },
                                 },
                             },
@@ -78,7 +78,7 @@ YamlRoot {
                 2: YAML_FLOW_YAML_NODE@11..17
                   0: YAML_PROPERTY_LIST@11..11
                   1: YAML_PLAIN_SCALAR@11..17
-                    0: PLAIN_LITERAL@11..17 "value " [] []
+                    0: PLAIN_LITERAL@11..17 "value" [] [Whitespace(" ")]
             2: R_BRACK@17..18 "]" [] []
         2: FLOW_END@18..18 "" [] []
       4: (empty)

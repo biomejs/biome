@@ -547,9 +547,15 @@ impl eslint_eslint::FlatConfigData {
             let base_no_unused_vars = global_config_object
                 .rules
                 .as_ref()
-                .map(eslint_eslint::Rules::base_no_unused_vars_rules)
-                .unwrap_or_default();
-            for flat_config_object in override_config_objects {
+                .map_or_default(eslint_eslint::Rules::base_no_unused_vars_rules);
+            let base_eqeqeq = global_config_object
+                .rules
+                .as_ref()
+                .and_then(eslint_eslint::Rules::eqeqeq_options);
+            for mut flat_config_object in override_config_objects {
+                if let Some(rules) = &mut flat_config_object.rules {
+                    rules.inherit_eqeqeq_options(base_eqeqeq);
+                }
                 let mut override_pat = biome_config::OverridePattern::default();
                 if let Some(language_options) = flat_config_object.language_options {
                     let globals = language_options.globals.enabled().collect();
@@ -625,6 +631,7 @@ impl eslint_eslint::LegacyConfigData {
         }
         let mut linter = biome_config::LinterConfiguration::default();
         let base_no_unused_vars = self.rules.base_no_unused_vars_rules();
+        let base_eqeqeq = self.rules.eqeqeq_options();
         let mut rules = self
             .rules
             .into_biome_rules(&Default::default(), options, &mut results);
@@ -634,7 +641,8 @@ impl eslint_eslint::LegacyConfigData {
         linter.includes = (!includes.is_empty()).then_some(includes);
         if !self.overrides.is_empty() {
             let mut overrides = biome_config::Overrides::default();
-            for override_elt in self.overrides {
+            for mut override_elt in self.overrides {
+                override_elt.rules.inherit_eqeqeq_options(base_eqeqeq);
                 let mut override_pattern = biome_config::OverridePattern::default();
                 if !override_elt.globals.is_empty() {
                     let globals = override_elt
@@ -802,6 +810,22 @@ fn migrate_eslint_rule(
                 }
             }
         }
+        eslint_eslint::Rule::Eqeqeq(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let group = rules.suspicious.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group
+                    && let Some(rule) = group.no_double_equals.as_mut()
+                {
+                    *rule = biome_config::RuleFixConfiguration::WithOptions(
+                        biome_config::RuleWithFixOptions {
+                            level: rule.level(),
+                            fix: None,
+                            options: conf.into(),
+                        },
+                    );
+                }
+            }
+        }
         eslint_eslint::Rule::FuncStyle(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let severity = conf.severity();
@@ -823,6 +847,26 @@ fn migrate_eslint_rule(
                                 options,
                             },
                         ));
+                }
+            }
+        }
+        eslint_eslint::Rule::MaxDepth(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
+                && let eslint_eslint::RuleConf::Option(severity, rule_options) = conf
+                && let Some(options) = rule_options.into_biome_options()
+            {
+                // An empty ESLint options object keeps the default maximum.
+                if options.max.is_some() {
+                    let group = rules.nursery.get_or_insert_with(Default::default);
+                    if let SeverityOrGroup::Group(group) = group {
+                        group.no_excessive_nested_blocks =
+                            Some(biome_config::RuleConfiguration::WithOptions(
+                                biome_config::RuleWithOptions {
+                                    level: severity.into(),
+                                    options,
+                                },
+                            ));
+                    }
                 }
             }
         }
@@ -1020,6 +1064,24 @@ fn migrate_eslint_rule(
                 restricted_elements.add(
                     eslint_svelte::RestrictedHtmlElement::into_restricted_elements(conf.into_vec()),
                 );
+            }
+        }
+        eslint_eslint::Rule::UnicodeBom(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
+                && let eslint_eslint::RuleConf::Option(severity, bom) = conf
+            {
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.use_consistent_unicode_bom = Some(biome_config::RuleFixConfiguration::WithOptions(
+                        biome_config::RuleWithFixOptions {
+                            level: severity.into(),
+                            fix: None,
+                            options: biome_rule_options::use_consistent_unicode_bom::UseConsistentUnicodeBomOptions {
+                                bom: Some(bom),
+                            },
+                        },
+                    ));
+                }
             }
         }
         eslint_eslint::Rule::JestConsistentTestIt(conf) => {
@@ -1242,6 +1304,25 @@ fn migrate_eslint_rule(
                 _ => None,
             };
             migrate_block_lang(rules, &name, severity, options, opts, results);
+        }
+        eslint_eslint::Rule::VueNoUndefProperties(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let severity = conf.severity();
+                if let eslint_eslint::RuleConf::Option(_, rule_options) = conf
+                    && let Some(rule_options) = rule_options.into_biome_options()
+                {
+                    let group = rules.nursery.get_or_insert_with(Default::default);
+                    if let SeverityOrGroup::Group(group) = group {
+                        group.no_vue_undeclared_properties =
+                            Some(biome_config::RuleConfiguration::WithOptions(
+                                biome_config::RuleWithOptions {
+                                    level: severity.into(),
+                                    options: rule_options,
+                                },
+                            ));
+                    }
+                }
+            }
         }
         eslint_eslint::Rule::SvelteNoUnnecessaryStateWrap(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
@@ -1838,6 +1919,40 @@ mod tests {
                 .get(&EslintRuleName::from_str("svelte/block-lang")),
             Some(&UnsupportedRuleReason::NotApplicable),
         );
+    }
+
+    #[test]
+    fn max_depth_with_unsupported_maximum_is_not_migrated() {
+        let options = MigrationOptions {
+            include_inspired: true,
+            include_nursery: true,
+        };
+        for (rule_conf, is_migrated) in [
+            (r#"["error", 3]"#, true),
+            (r#"["error", 300]"#, false),
+            (r#"["error", { "max": 300 }]"#, false),
+            (r#"["error", { "maximum": 300, "max": 3 }]"#, false),
+        ] {
+            let input = format!(r#"{{ "rules": {{ "max-depth": {rule_conf} }} }}"#);
+            let (config, diagnostics) =
+                biome_deserialize::json::deserialize_from_json_str::<LegacyConfigData>(
+                    &input,
+                    biome_json_parser::JsonParserOptions::default(),
+                    "",
+                )
+                .consume();
+            assert_eq!(diagnostics.is_empty(), is_migrated, "{rule_conf}");
+            let mut results = MigrationResults::default();
+            let rules =
+                config
+                    .unwrap()
+                    .rules
+                    .into_biome_rules(&Default::default(), &options, &mut results);
+            let has_rule = rules
+                .nursery
+                .is_some_and(|nursery| nursery.unwrap_group().no_excessive_nested_blocks.is_some());
+            assert_eq!(has_rule, is_migrated, "{rule_conf}");
+        }
     }
 
     #[test]

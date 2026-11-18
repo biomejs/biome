@@ -30,6 +30,8 @@ invalid.vue:3:2 lint/a11y/noLabelWithoutControl ━━━━━━━━━━�
     4 │ 	<label for="js_id"><input /></label>
     5 │ 	<label for="js_id"><textarea></textarea></label>
   
+  i Assistive technologies rely on a label being associated with a control to announce it. Without the association, screen reader users cannot tell what the control is for.
+  
   i Consider adding an accessible text content to the label element.
   
 
@@ -46,6 +48,8 @@ invalid.vue:4:2 lint/a11y/noLabelWithoutControl ━━━━━━━━━━�
       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │ 	<label for="js_id"><textarea></textarea></label>
     6 │ 	<label></label>
+  
+  i Assistive technologies rely on a label being associated with a control to announce it. Without the association, screen reader users cannot tell what the control is for.
   
   i Consider adding an accessible text content to the label element.
   
@@ -64,6 +68,8 @@ invalid.vue:5:2 lint/a11y/noLabelWithoutControl ━━━━━━━━━━�
     6 │ 	<label></label>
     7 │ 	<label>A label</label>
   
+  i Assistive technologies rely on a label being associated with a control to announce it. Without the association, screen reader users cannot tell what the control is for.
+  
   i Consider adding an accessible text content to the label element.
   
 
@@ -80,6 +86,8 @@ invalid.vue:6:2 lint/a11y/noLabelWithoutControl ━━━━━━━━━━�
       │ 	^^^^^^^^^^^^^^^
     7 │ 	<label>A label</label>
     8 │ 	<div><label></label><input /></div>
+  
+  i Assistive technologies rely on a label being associated with a control to announce it. Without the association, screen reader users cannot tell what the control is for.
   
   i Consider adding an accessible text content to the label element.
   
@@ -100,6 +108,8 @@ invalid.vue:7:2 lint/a11y/noLabelWithoutControl ━━━━━━━━━━�
     8 │ 	<div><label></label><input /></div>
     9 │ 	<div><label>A label</label><input /></div>
   
+  i Assistive technologies rely on a label being associated with a control to announce it. Without the association, screen reader users cannot tell what the control is for.
+  
   i Consider adding a "for" attribute to the label element or moving the input element to inside the label element.
   
 
@@ -116,6 +126,8 @@ invalid.vue:8:7 lint/a11y/noLabelWithoutControl ━━━━━━━━━━�
        │ 	     ^^^^^^^^^^^^^^^
      9 │ 	<div><label>A label</label><input /></div>
     10 │ </template>
+  
+  i Assistive technologies rely on a label being associated with a control to announce it. Without the association, screen reader users cannot tell what the control is for.
   
   i Consider adding an accessible text content to the label element.
   
@@ -135,6 +147,8 @@ invalid.vue:9:7 lint/a11y/noLabelWithoutControl ━━━━━━━━━━�
        │ 	     ^^^^^^^^^^^^^^^^^^^^^^
     10 │ </template>
     11 │ 
+  
+  i Assistive technologies rely on a label being associated with a control to announce it. Without the association, screen reader users cannot tell what the control is for.
   
   i Consider adding a "for" attribute to the label element or moving the input element to inside the label element.
   

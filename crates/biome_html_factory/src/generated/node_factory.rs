@@ -1864,6 +1864,20 @@ pub fn vue_v_for_array_binding(
         ],
     ))
 }
+pub fn vue_v_for_default_binding(
+    binding: AnyVueVForBinding,
+    eq_token: SyntaxToken,
+    default: HtmlTextExpression,
+) -> VueVForDefaultBinding {
+    VueVForDefaultBinding::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_FOR_DEFAULT_BINDING,
+        [
+            Some(SyntaxElement::Node(binding.into_syntax())),
+            Some(SyntaxElement::Token(eq_token)),
+            Some(SyntaxElement::Node(default.into_syntax())),
+        ],
+    ))
+}
 pub fn vue_v_for_identifier_binding(name_token: SyntaxToken) -> VueVForIdentifierBinding {
     VueVForIdentifierBinding::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::VUE_V_FOR_IDENTIFIER_BINDING,

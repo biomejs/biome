@@ -34,6 +34,8 @@ scss-computed-supports.scss:12:18 lint/a11y/useGenericFontNames ━━━━━�
     13 │   }
     14 │ }
   
+  i If none of the listed font families is available, the browser falls back to its default font, which can look very different from the intended design.
+  
   i Consider adding a generic font family as a fallback.
   
   i For examples and more information, see the MDN Web Docs

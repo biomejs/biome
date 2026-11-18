@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-options-api.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+export default {
+  model: {
+    prop: "checked",
+    event: "change",
+  },
+  props: ["checked"],
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-options-api.vue:4:3 lint/nursery/noVueDeprecatedModelDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The model option is deprecated.
+  
+    2 │ /* should generate diagnostics */
+    3 │ export default {
+  > 4 │   model: {
+      │   ^^^^^^^^
+  > 5 │     prop: "checked",
+  > 6 │     event: "change",
+  > 7 │   },
+      │   ^
+    8 │   props: ["checked"],
+    9 │ };
+  
+  i Vue 3 ignores this option. v-model on a component always uses the modelValue prop and the update:modelValue event.
+  
+  i Rename the prop to modelValue and emit update:modelValue, or keep the prop name and use a named v-model such as v-model:checked. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

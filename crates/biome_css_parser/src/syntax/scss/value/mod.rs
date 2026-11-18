@@ -5,6 +5,7 @@ mod interpolated_string;
 mod interpolated_url;
 mod interpolated_value;
 mod parent_selector;
+mod percent;
 
 use crate::parser::CssParser;
 use crate::syntax::parse_error::scss_only_syntax_error;
@@ -38,6 +39,7 @@ pub(crate) use interpolated_value::{
 pub(crate) use parent_selector::{
     is_at_scss_parent_selector_value, parse_scss_parent_selector_value,
 };
+pub(crate) use percent::{is_at_scss_percent_value, parse_scss_percent_value};
 
 pub(crate) const SCSS_BRACKETED_VALUE_EXPRESSION_END_SET: TokenSet<CssSyntaxKind> =
     token_set![T![']'], T![,], T![/]];

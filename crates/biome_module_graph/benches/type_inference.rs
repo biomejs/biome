@@ -113,7 +113,7 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 #[cfg(all(
     any(target_os = "macos", target_os = "linux"),
-    not(target_env = "musl"),
+    not(all(target_env = "musl", target_arch = "aarch64")),
 ))]
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
@@ -438,6 +438,69 @@ fn bench_distinct_selective_promise_queries(bencher: Bencher) {
                 let input = ExpressionTypeInput::new(&*db, *module, *range);
                 divan::black_box(infer_expression_is_promise(&*db, input));
             }
+        });
+}
+
+#[divan::bench(name = "bench_repeated_binding_narrowing")]
+fn bench_repeated_binding_narrowing(bencher: Bencher) {
+    bencher
+        .with_inputs(|| {
+            let variants = (0..32)
+                .map(|index| format!("\"value{index}\""))
+                .collect::<Vec<_>>()
+                .join(" | ");
+            let mut source = format!(
+                "function inspect(value: {variants} | number | null) {{\n\
+                 if (typeof value === \"string\") {{\n"
+            );
+            let ranges = (0..128)
+                .map(|_| {
+                    let start = source.len();
+                    source.push_str("value;\n");
+                    TextRange::at(start.try_into().unwrap(), 5.into())
+                })
+                .collect::<Vec<_>>();
+            source.push_str("}\n}\n");
+            let (db, module) = build_source_db("narrowing.ts", &source);
+            (db, module, ranges)
+        })
+        .bench_local_values(|(db, module, ranges)| {
+            for range in ranges {
+                let input = ExpressionTypeInput::new(&db, module, range);
+                divan::black_box(infer_expression_type(&db, input).expect("read must have a type"));
+            }
+            db
+        });
+}
+
+/// Reads a narrowed variable after each of many `if` statements, so every read
+/// has its own flow point and is solved separately in one large function.
+#[divan::bench(name = "bench_large_root_narrowing")]
+fn bench_large_root_narrowing(bencher: Bencher) {
+    bencher
+        .with_inputs(|| {
+            let mut source = String::from(
+                "function inspect(value: string | number | null, flag: boolean) {\n\
+                 if (value === null) return;\n",
+            );
+            let ranges = (0..256)
+                .map(|_| {
+                    source.push_str("if (flag) {}\n");
+                    let start = source.len();
+                    source.push_str("value;\n");
+                    TextRange::at(start.try_into().unwrap(), 5.into())
+                })
+                .collect::<Vec<_>>();
+            source.push_str("}\n");
+            let (db, module) = build_source_db("large_root.ts", &source);
+            (db, module, ranges)
+        })
+        .bench_local_values(|(db, module, ranges)| {
+            for range in ranges {
+                let input = ExpressionTypeInput::new(&db, module, range);
+                divan::black_box(infer_expression_type(&db, input).expect("read must have a type"));
+            }
+            db
         });
 }
 

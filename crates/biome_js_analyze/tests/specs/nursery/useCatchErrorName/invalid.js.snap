@@ -1,0 +1,1163 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+try {
+} catch (err) {
+	console.log(err);
+}
+
+obj.catch((err) => err);
+
+obj?.catch((err) => err);
+
+obj.then(undefined, (err) => err);
+
+obj.catch(function (err) {
+	console.log(err);
+});
+
+obj.then(undefined, function (err) {
+	console.log(err);
+});
+
+obj.catch(err => ({ err }));
+
+(obj.catch)((err) => {});
+
+obj.catch(function (_) {
+	console.log(_);
+});
+
+try {
+} catch (_) {
+	console.log(_);
+}
+
+// Only the outer `_` is used.
+try {
+} catch (_) {
+	console.log(_);
+	try {
+	} catch (_) {}
+}
+
+// Both `_` are used.
+try {
+} catch (_) {
+	console.log(_);
+	try {
+	} catch (_) {
+		console.log(_);
+	}
+}
+
+// Nested catch clauses are both reported.
+try {
+} catch (anyName) {
+	try {
+	} catch (anyOtherName) {}
+}
+
+foo.then(() => {
+	try {} catch (e) {}
+}).catch((err) => err);
+
+// The arrow function parameter `error` is visible inside the catch clause.
+const handleError1 = (error) => {
+	try {
+		doSomething();
+	} catch (foo) {
+		console.log(foo);
+	}
+};
+
+const handleError2 = (error) => {
+	const error_ = new Error("foo bar");
+	obj.catch((foo) => {});
+};
+
+// Declarations in the block clash with the caught error.
+try {} catch (e) {
+	const error = 1;
+}
+
+try {} catch (e) {
+	let error;
+}
+
+try {} catch (e) {
+	class error {}
+}
+
+try {} catch (e) {
+	function error() {}
+}
+
+obj.catch((e) => {
+	const error = 1;
+});
+
+try {
+} catch (e) {
+	const error = new Error(e);
+	throw error;
+}
+
+// A shadowing variable in a nested block.
+try {
+} catch (e) {
+	{
+		const error = 1;
+		console.log(e);
+	}
+}
+
+// `error` is an undeclared variable here.
+try {
+} catch (e) {
+	console.log(error, e);
+}
+
+obj.then(
+	function error(err) {},
+	function error(err) {},
+);
+
+// Only the first parameter is checked.
+obj.catch(function (other, err) {});
+
+// A parenthesized handler is still the handler.
+obj.catch(((err) => {}));
+
+obj.catch(function (e) {
+	const error = 1;
+});
+
+obj.then(undefined, (e) => {
+	const error = 1;
+});
+
+// `var` declarations in a nested block belong to the whole function.
+obj.catch(function (e) {
+	if (e) {
+		var error = 1;
+	}
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:3:10 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named err instead of error.
+  
+    1 │ /* should generate diagnostics */
+    2 │ try {
+  > 3 │ } catch (err) {
+      │          ^^^
+    4 │ 	console.log(err);
+    5 │ }
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error.
+  
+      1   1 │   /* should generate diagnostics */
+      2   2 │   try {
+      3     │ - }·catch·(err)·{
+      4     │ - → console.log(err);
+          3 │ + }·catch·(error)·{
+          4 │ + → console.log(error);
+      5   5 │   }
+      6   6 │   
+  
+
+```
+
+```
+invalid.js:7:12 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named err instead of error.
+  
+    5 │ }
+    6 │ 
+  > 7 │ obj.catch((err) => err);
+      │            ^^^
+    8 │ 
+    9 │ obj?.catch((err) => err);
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error.
+  
+      5   5 │   }
+      6   6 │   
+      7     │ - obj.catch((err)·=>·err);
+          7 │ + obj.catch((error)·=>·error);
+      8   8 │   
+      9   9 │   obj?.catch((err) => err);
+  
+
+```
+
+```
+invalid.js:9:13 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named err instead of error.
+  
+     7 │ obj.catch((err) => err);
+     8 │ 
+   > 9 │ obj?.catch((err) => err);
+       │             ^^^
+    10 │ 
+    11 │ obj.then(undefined, (err) => err);
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error.
+  
+      7   7 │   obj.catch((err) => err);
+      8   8 │   
+      9     │ - obj?.catch((err)·=>·err);
+          9 │ + obj?.catch((error)·=>·error);
+     10  10 │   
+     11  11 │   obj.then(undefined, (err) => err);
+  
+
+```
+
+```
+invalid.js:11:22 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named err instead of error.
+  
+     9 │ obj?.catch((err) => err);
+    10 │ 
+  > 11 │ obj.then(undefined, (err) => err);
+       │                      ^^^
+    12 │ 
+    13 │ obj.catch(function (err) {
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error.
+  
+      9   9 │   obj?.catch((err) => err);
+     10  10 │   
+     11     │ - obj.then(undefined,·(err)·=>·err);
+         11 │ + obj.then(undefined,·(error)·=>·error);
+     12  12 │   
+     13  13 │   obj.catch(function (err) {
+  
+
+```
+
+```
+invalid.js:13:21 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named err instead of error.
+  
+    11 │ obj.then(undefined, (err) => err);
+    12 │ 
+  > 13 │ obj.catch(function (err) {
+       │                     ^^^
+    14 │ 	console.log(err);
+    15 │ });
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error.
+  
+     11  11 │   obj.then(undefined, (err) => err);
+     12  12 │   
+     13     │ - obj.catch(function·(err)·{
+     14     │ - → console.log(err);
+         13 │ + obj.catch(function·(error)·{
+         14 │ + → console.log(error);
+     15  15 │   });
+     16  16 │   
+  
+
+```
+
+```
+invalid.js:17:31 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named err instead of error.
+  
+    15 │ });
+    16 │ 
+  > 17 │ obj.then(undefined, function (err) {
+       │                               ^^^
+    18 │ 	console.log(err);
+    19 │ });
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error.
+  
+     15  15 │   });
+     16  16 │   
+     17     │ - obj.then(undefined,·function·(err)·{
+     18     │ - → console.log(err);
+         17 │ + obj.then(undefined,·function·(error)·{
+         18 │ + → console.log(error);
+     19  19 │   });
+     20  20 │   
+  
+
+```
+
+```
+invalid.js:21:11 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named err instead of error.
+  
+    19 │ });
+    20 │ 
+  > 21 │ obj.catch(err => ({ err }));
+       │           ^^^
+    22 │ 
+    23 │ (obj.catch)((err) => {});
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error.
+  
+     19  19 │   });
+     20  20 │   
+     21     │ - obj.catch(err·=>·({·err·}));
+         21 │ + obj.catch(error·=>·({·err:·error·}));
+     22  22 │   
+     23  23 │   (obj.catch)((err) => {});
+  
+
+```
+
+```
+invalid.js:23:14 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named err instead of error.
+  
+    21 │ obj.catch(err => ({ err }));
+    22 │ 
+  > 23 │ (obj.catch)((err) => {});
+       │              ^^^
+    24 │ 
+    25 │ obj.catch(function (_) {
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error.
+  
+     21  21 │   obj.catch(err => ({ err }));
+     22  22 │   
+     23     │ - (obj.catch)((err)·=>·{});
+         23 │ + (obj.catch)((error)·=>·{});
+     24  24 │   
+     25  25 │   obj.catch(function (_) {
+  
+
+```
+
+```
+invalid.js:25:21 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named _ instead of error.
+  
+    23 │ (obj.catch)((err) => {});
+    24 │ 
+  > 25 │ obj.catch(function (_) {
+       │                     ^
+    26 │ 	console.log(_);
+    27 │ });
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error.
+  
+     23  23 │   (obj.catch)((err) => {});
+     24  24 │   
+     25     │ - obj.catch(function·(_)·{
+     26     │ - → console.log(_);
+         25 │ + obj.catch(function·(error)·{
+         26 │ + → console.log(error);
+     27  27 │   });
+     28  28 │   
+  
+
+```
+
+```
+invalid.js:30:10 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named _ instead of error.
+  
+    29 │ try {
+  > 30 │ } catch (_) {
+       │          ^
+    31 │ 	console.log(_);
+    32 │ }
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error.
+  
+     28  28 │   
+     29  29 │   try {
+     30     │ - }·catch·(_)·{
+     31     │ - → console.log(_);
+         30 │ + }·catch·(error)·{
+         31 │ + → console.log(error);
+     32  32 │   }
+     33  33 │   
+  
+
+```
+
+```
+invalid.js:36:10 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named _ instead of error.
+  
+    34 │ // Only the outer `_` is used.
+    35 │ try {
+  > 36 │ } catch (_) {
+       │          ^
+    37 │ 	console.log(_);
+    38 │ 	try {
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error.
+  
+     34  34 │   // Only the outer `_` is used.
+     35  35 │   try {
+     36     │ - }·catch·(_)·{
+     37     │ - → console.log(_);
+         36 │ + }·catch·(error)·{
+         37 │ + → console.log(error);
+     38  38 │     try {
+     39  39 │     } catch (_) {}
+  
+
+```
+
+```
+invalid.js:44:10 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named _ instead of error.
+  
+    42 │ // Both `_` are used.
+    43 │ try {
+  > 44 │ } catch (_) {
+       │          ^
+    45 │ 	console.log(_);
+    46 │ 	try {
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error.
+  
+     42  42 │   // Both `_` are used.
+     43  43 │   try {
+     44     │ - }·catch·(_)·{
+     45     │ - → console.log(_);
+         44 │ + }·catch·(error)·{
+         45 │ + → console.log(error);
+     46  46 │     try {
+     47  47 │     } catch (_) {
+  
+
+```
+
+```
+invalid.js:47:11 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named _ instead of error.
+  
+    45 │ 	console.log(_);
+    46 │ 	try {
+  > 47 │ 	} catch (_) {
+       │ 	         ^
+    48 │ 		console.log(_);
+    49 │ 	}
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error.
+  
+     45  45 │     console.log(_);
+     46  46 │     try {
+     47     │ - → }·catch·(_)·{
+     48     │ - → → console.log(_);
+         47 │ + → }·catch·(error)·{
+         48 │ + → → console.log(error);
+     49  49 │     }
+     50  50 │   }
+  
+
+```
+
+```
+invalid.js:54:10 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named anyName instead of error.
+  
+    52 │ // Nested catch clauses are both reported.
+    53 │ try {
+  > 54 │ } catch (anyName) {
+       │          ^^^^^^^
+    55 │ 	try {
+    56 │ 	} catch (anyOtherName) {}
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error.
+  
+     52  52 │   // Nested catch clauses are both reported.
+     53  53 │   try {
+     54     │ - }·catch·(anyName)·{
+         54 │ + }·catch·(error)·{
+     55  55 │   	try {
+     56  56 │   	} catch (anyOtherName) {}
+  
+
+```
+
+```
+invalid.js:56:11 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named anyOtherName instead of error.
+  
+    54 │ } catch (anyName) {
+    55 │ 	try {
+  > 56 │ 	} catch (anyOtherName) {}
+       │ 	         ^^^^^^^^^^^^
+    57 │ }
+    58 │ 
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error.
+  
+     54  54 │   } catch (anyName) {
+     55  55 │     try {
+     56     │ - → }·catch·(anyOtherName)·{}
+         56 │ + → }·catch·(error)·{}
+     57  57 │   }
+     58  58 │   
+  
+
+```
+
+```
+invalid.js:60:16 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named e instead of error.
+  
+    59 │ foo.then(() => {
+  > 60 │ 	try {} catch (e) {}
+       │ 	              ^
+    61 │ }).catch((err) => err);
+    62 │ 
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error.
+  
+     58  58 │   
+     59  59 │   foo.then(() => {
+     60     │ - → try·{}·catch·(e)·{}
+         60 │ + → try·{}·catch·(error)·{}
+     61  61 │   }).catch((err) => err);
+     62  62 │   
+  
+
+```
+
+```
+invalid.js:61:11 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named err instead of error.
+  
+    59 │ foo.then(() => {
+    60 │ 	try {} catch (e) {}
+  > 61 │ }).catch((err) => err);
+       │           ^^^
+    62 │ 
+    63 │ // The arrow function parameter `error` is visible inside the catch clause.
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error.
+  
+     59  59 │   foo.then(() => {
+     60  60 │   	try {} catch (e) {}
+     61     │ - }).catch((err)·=>·err);
+         61 │ + }).catch((error)·=>·error);
+     62  62 │   
+     63  63 │   // The arrow function parameter `error` is visible inside the catch clause.
+  
+
+```
+
+```
+invalid.js:67:11 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named foo instead of error.
+  
+    65 │ 	try {
+    66 │ 		doSomething();
+  > 67 │ 	} catch (foo) {
+       │ 	         ^^^
+    68 │ 		console.log(foo);
+    69 │ 	}
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error_, because the name error is already used here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error_.
+  
+     65  65 │     try {
+     66  66 │       doSomething();
+     67     │ - → }·catch·(foo)·{
+     68     │ - → → console.log(foo);
+         67 │ + → }·catch·(error_)·{
+         68 │ + → → console.log(error_);
+     69  69 │     }
+     70  70 │   };
+  
+
+```
+
+```
+invalid.js:74:13 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named foo instead of error.
+  
+    72 │ const handleError2 = (error) => {
+    73 │ 	const error_ = new Error("foo bar");
+  > 74 │ 	obj.catch((foo) => {});
+       │ 	           ^^^
+    75 │ };
+    76 │ 
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error__, because the name error is already used here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error__.
+  
+     72  72 │   const handleError2 = (error) => {
+     73  73 │     const error_ = new Error("foo bar");
+     74     │ - → obj.catch((foo)·=>·{});
+         74 │ + → obj.catch((error__)·=>·{});
+     75  75 │   };
+     76  76 │   
+  
+
+```
+
+```
+invalid.js:78:15 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named e instead of error.
+  
+    77 │ // Declarations in the block clash with the caught error.
+  > 78 │ try {} catch (e) {
+       │               ^
+    79 │ 	const error = 1;
+    80 │ }
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error_, because the name error is already used here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error_.
+  
+     76  76 │   
+     77  77 │   // Declarations in the block clash with the caught error.
+     78     │ - try·{}·catch·(e)·{
+         78 │ + try·{}·catch·(error_)·{
+     79  79 │   	const error = 1;
+     80  80 │   }
+  
+
+```
+
+```
+invalid.js:82:15 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named e instead of error.
+  
+    80 │ }
+    81 │ 
+  > 82 │ try {} catch (e) {
+       │               ^
+    83 │ 	let error;
+    84 │ }
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error_, because the name error is already used here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error_.
+  
+     80  80 │   }
+     81  81 │   
+     82     │ - try·{}·catch·(e)·{
+         82 │ + try·{}·catch·(error_)·{
+     83  83 │   	let error;
+     84  84 │   }
+  
+
+```
+
+```
+invalid.js:86:15 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named e instead of error.
+  
+    84 │ }
+    85 │ 
+  > 86 │ try {} catch (e) {
+       │               ^
+    87 │ 	class error {}
+    88 │ }
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error_, because the name error is already used here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error_.
+  
+     84  84 │   }
+     85  85 │   
+     86     │ - try·{}·catch·(e)·{
+         86 │ + try·{}·catch·(error_)·{
+     87  87 │   	class error {}
+     88  88 │   }
+  
+
+```
+
+```
+invalid.js:90:15 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named e instead of error.
+  
+    88 │ }
+    89 │ 
+  > 90 │ try {} catch (e) {
+       │               ^
+    91 │ 	function error() {}
+    92 │ }
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error_, because the name error is already used here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error_.
+  
+     88  88 │   }
+     89  89 │   
+     90     │ - try·{}·catch·(e)·{
+         90 │ + try·{}·catch·(error_)·{
+     91  91 │   	function error() {}
+     92  92 │   }
+  
+
+```
+
+```
+invalid.js:94:12 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named e instead of error.
+  
+    92 │ }
+    93 │ 
+  > 94 │ obj.catch((e) => {
+       │            ^
+    95 │ 	const error = 1;
+    96 │ });
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error_, because the name error is already used here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error_.
+  
+     92  92 │   }
+     93  93 │   
+     94     │ - obj.catch((e)·=>·{
+         94 │ + obj.catch((error_)·=>·{
+     95  95 │   	const error = 1;
+     96  96 │   });
+  
+
+```
+
+```
+invalid.js:99:10 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named e instead of error.
+  
+     98 │ try {
+   > 99 │ } catch (e) {
+        │          ^
+    100 │ 	const error = new Error(e);
+    101 │ 	throw error;
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error_, because the name error is already used here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error_.
+  
+     97  97 │   
+     98  98 │   try {
+     99     │ - }·catch·(e)·{
+    100     │ - → const·error·=·new·Error(e);
+         99 │ + }·catch·(error_)·{
+        100 │ + → const·error·=·new·Error(error_);
+    101 101 │     throw error;
+    102 102 │   }
+  
+
+```
+
+```
+invalid.js:106:10 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named e instead of error.
+  
+    104 │ // A shadowing variable in a nested block.
+    105 │ try {
+  > 106 │ } catch (e) {
+        │          ^
+    107 │ 	{
+    108 │ 		const error = 1;
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error_, because the name error is already used here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error_.
+  
+    104 104 │   // A shadowing variable in a nested block.
+    105 105 │   try {
+    106     │ - }·catch·(e)·{
+        106 │ + }·catch·(error_)·{
+    107 107 │     {
+    108 108 │       const error = 1;
+    109     │ - → → console.log(e);
+        109 │ + → → console.log(error_);
+    110 110 │     }
+    111 111 │   }
+  
+
+```
+
+```
+invalid.js:115:10 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named e instead of error.
+  
+    113 │ // `error` is an undeclared variable here.
+    114 │ try {
+  > 115 │ } catch (e) {
+        │          ^
+    116 │ 	console.log(error, e);
+    117 │ }
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error_, because the name error is already used here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error_.
+  
+    113 113 │   // `error` is an undeclared variable here.
+    114 114 │   try {
+    115     │ - }·catch·(e)·{
+    116     │ - → console.log(error,·e);
+        115 │ + }·catch·(error_)·{
+        116 │ + → console.log(error,·error_);
+    117 117 │   }
+    118 118 │   
+  
+
+```
+
+```
+invalid.js:121:17 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named err instead of error.
+  
+    119 │ obj.then(
+    120 │ 	function error(err) {},
+  > 121 │ 	function error(err) {},
+        │ 	               ^^^
+    122 │ );
+    123 │ 
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error_, because the name error is already used here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error_.
+  
+    119 119 │   obj.then(
+    120 120 │     function error(err) {},
+    121     │ - → function·error(err)·{},
+        121 │ + → function·error(error_)·{},
+    122 122 │   );
+    123 123 │   
+  
+
+```
+
+```
+invalid.js:125:21 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named other instead of error.
+  
+    124 │ // Only the first parameter is checked.
+  > 125 │ obj.catch(function (other, err) {});
+        │                     ^^^^^
+    126 │ 
+    127 │ // A parenthesized handler is still the handler.
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error.
+  
+    123 123 │   
+    124 124 │   // Only the first parameter is checked.
+    125     │ - obj.catch(function·(other,·err)·{});
+        125 │ + obj.catch(function·(error,·err)·{});
+    126 126 │   
+    127 127 │   // A parenthesized handler is still the handler.
+  
+
+```
+
+```
+invalid.js:128:13 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named err instead of error.
+  
+    127 │ // A parenthesized handler is still the handler.
+  > 128 │ obj.catch(((err) => {}));
+        │             ^^^
+    129 │ 
+    130 │ obj.catch(function (e) {
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error.
+  
+    126 126 │   
+    127 127 │   // A parenthesized handler is still the handler.
+    128     │ - obj.catch(((err)·=>·{}));
+        128 │ + obj.catch(((error)·=>·{}));
+    129 129 │   
+    130 130 │   obj.catch(function (e) {
+  
+
+```
+
+```
+invalid.js:130:21 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named e instead of error.
+  
+    128 │ obj.catch(((err) => {}));
+    129 │ 
+  > 130 │ obj.catch(function (e) {
+        │                     ^
+    131 │ 	const error = 1;
+    132 │ });
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error_, because the name error is already used here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error_.
+  
+    128 128 │   obj.catch(((err) => {}));
+    129 129 │   
+    130     │ - obj.catch(function·(e)·{
+        130 │ + obj.catch(function·(error_)·{
+    131 131 │   	const error = 1;
+    132 132 │   });
+  
+
+```
+
+```
+invalid.js:134:22 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named e instead of error.
+  
+    132 │ });
+    133 │ 
+  > 134 │ obj.then(undefined, (e) => {
+        │                      ^
+    135 │ 	const error = 1;
+    136 │ });
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error_, because the name error is already used here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error_.
+  
+    132 132 │   });
+    133 133 │   
+    134     │ - obj.then(undefined,·(e)·=>·{
+        134 │ + obj.then(undefined,·(error_)·=>·{
+    135 135 │   	const error = 1;
+    136 136 │   });
+  
+
+```
+
+```
+invalid.js:139:21 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named e instead of error.
+  
+    138 │ // `var` declarations in a nested block belong to the whole function.
+  > 139 │ obj.catch(function (e) {
+        │                     ^
+    140 │ 	if (e) {
+    141 │ 		var error = 1;
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error_, because the name error is already used here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error_.
+  
+    137 137 │   
+    138 138 │   // `var` declarations in a nested block belong to the whole function.
+    139     │ - obj.catch(function·(e)·{
+    140     │ - → if·(e)·{
+        139 │ + obj.catch(function·(error_)·{
+        140 │ + → if·(error_)·{
+    141 141 │       var error = 1;
+    142 142 │     }
+  
+
+```

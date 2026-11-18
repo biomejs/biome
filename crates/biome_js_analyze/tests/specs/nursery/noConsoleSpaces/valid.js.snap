@@ -1,0 +1,79 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+console.log("abc");
+console.log("abc", "def");
+console.log('abc', "def");
+console.log(`abc`, "def");
+console.log(`
+abc
+def
+`);
+
+console.log(' ', "def");
+
+// Exactly one space
+console.log(" ");
+console.log(" ", "b");
+console.log("a", " ");
+console.log(" ", "b", "c");
+console.log("a", " ", "c");
+console.log("a", "b", " ");
+console.log(`a`, ` `, `c`);
+
+// More than one space, or other whitespace
+console.log('  ', "def");
+console.log("abc  ", "def");
+console.log("abc\t", "def");
+console.log("abc\n", "def");
+console.log("  abc", "def");
+console.log(`abc  ${foo}  `, "def");
+
+// The trailing space is escaped
+console.log('a\ ', "def");
+console.log('\ ', "def");
+console.log("a\\\ ", "def");
+console.log(`a\ `, "def");
+
+// Leading space on the first argument, trailing space on the last argument
+console.log(" abc", "def");
+console.log("abc", "def ");
+console.log(` ${foo}`, `${bar} `);
+
+// Templates that start or end with a substitution
+console.log("abc", `${foo} def`);
+console.log(`abc ${foo}`, "def");
+
+console.log();
+console.log("");
+console.log(123);
+console.log(null);
+console.log(undefined);
+console.log(...[" a ", " b "]);
+
+console.dir("abc ", "def");
+
+// Tagged templates
+console.log(tag` a `, tag` b `);
+
+// Not a call
+new console.log(" a ", " b ");
+// Not a member call
+log(" a ", " b ");
+// Computed member
+console["log"](" a ", " b ");
+console[log](" a ", " b ");
+// Not a listed method
+console.foo(" a ", " b ");
+// Not `console`
+foo.log(" a ", " b ");
+lib.console.log(" a ", " b ");
+// Optional chains
+console?.log(" a ", " b ");
+console.log?.(" a ", " b ");
+
+```

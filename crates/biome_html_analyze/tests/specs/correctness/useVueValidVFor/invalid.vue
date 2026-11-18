@@ -12,6 +12,10 @@
 
 <div v-for="(item, { key }) in items"></div>
 
+<div v-for="(item, index = 0) in items"></div>
+
+<div v-for="(item, key, index = 0) in object"></div>
+
 <MyItem v-for="item in items"></MyItem>
 
 <div is="MyItem" v-for="item in items"></div>

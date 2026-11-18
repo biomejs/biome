@@ -3444,6 +3444,18 @@ impl JsSvelteDeclarationRootBuilder {
         ))
     }
 }
+pub fn js_svelte_legacy_const_root(
+    declarator: AnyJsSvelteLegacyConstDeclarator,
+    eof_token: SyntaxToken,
+) -> JsSvelteLegacyConstRoot {
+    JsSvelteLegacyConstRoot::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_SVELTE_LEGACY_CONST_ROOT,
+        [
+            Some(SyntaxElement::Node(declarator.into_syntax())),
+            Some(SyntaxElement::Token(eof_token)),
+        ],
+    ))
+}
 pub fn js_svelte_snippet_root(
     name: AnyJsBinding,
     parameters: JsParameters,
@@ -3765,6 +3777,18 @@ impl JsVariableStatementBuilder {
             ],
         ))
     }
+}
+pub fn js_vue_generic_root(
+    items: AnyJsVueGenericTypeParameters,
+    eof_token: SyntaxToken,
+) -> JsVueGenericRoot {
+    JsVueGenericRoot::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_VUE_GENERIC_ROOT,
+        [
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(eof_token)),
+        ],
+    ))
 }
 pub fn js_vue_slot_props_root(
     parameters: JsParameterList,
@@ -4148,14 +4172,14 @@ impl JsxSelfClosingElementBuilder {
 }
 pub fn jsx_shorthand_attribute(
     l_curly_token: SyntaxToken,
-    name: JsReferenceIdentifier,
+    expression: AnyJsExpression,
     r_curly_token: SyntaxToken,
 ) -> JsxShorthandAttribute {
     JsxShorthandAttribute::unwrap_cast(SyntaxNode::new_detached(
         JsSyntaxKind::JSX_SHORTHAND_ATTRIBUTE,
         [
             Some(SyntaxElement::Token(l_curly_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(expression.into_syntax())),
             Some(SyntaxElement::Token(r_curly_token)),
         ],
     ))

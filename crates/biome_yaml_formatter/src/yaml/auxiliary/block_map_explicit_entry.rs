@@ -2,7 +2,7 @@ use crate::comments::{FormatCommentsSlice, SourceColumn};
 use crate::prelude::*;
 use crate::utils::flow_scalar_has_line_break;
 use crate::yaml::auxiliary::block_map_implicit_entry::FormatEntryValue;
-use crate::yaml::auxiliary::flow_map_implicit_entry::FormatCollectionKeyEntry;
+use crate::yaml::auxiliary::flow_map_implicit_entry::FormatBreakableKeyEntry;
 use biome_formatter::comments::SourceComment;
 use biome_formatter::{format_args, write};
 use biome_rowan::{AstNode, TextSize};
@@ -123,7 +123,7 @@ impl FormatNodeRule<YamlBlockMapExplicitEntry> for FormatYamlBlockMapExplicitEnt
             }
             write!(
                 f,
-                [FormatCollectionKeyEntry {
+                [FormatBreakableKeyEntry {
                     key: &implicit_key,
                     colon_token: colon,
                     value: value_node.clone().into(),

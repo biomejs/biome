@@ -1,0 +1,14 @@
+# should generate diagnostics
+- !!bool "true": 1
+- !!bool text: 2
+- !<tag:yaml.org,2002:bool> 'false': 3
+- !!bool &anchor yes: 4
+- &other !!bool no: 5
+- !!bool : 6
+- &anchored true: 7
+- flow: { !!bool "true": 8 }
+- ? !!bool |
+    true
+  : 9
+- tagged_mapping: !!map
+    true: 10

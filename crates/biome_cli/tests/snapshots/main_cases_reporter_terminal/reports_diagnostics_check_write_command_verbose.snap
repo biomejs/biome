@@ -113,6 +113,8 @@ index.css:3:23 lint/correctness/noUnknownFunction ━━━━━━━━━━
     4 │ 
     5 │ .style {
   
+  i Browsers ignore a declaration that contains an unknown function, so the style is not applied.
+  
   i Use a known function instead.
   
   i See MDN web docs for more details.
@@ -131,6 +133,8 @@ index.css:7:17 lint/correctness/noUnknownFunction ━━━━━━━━━━
       │                 ^^^^^^^^^^^^
     8 │ }
     9 │ 
+  
+  i Browsers ignore a declaration that contains an unknown function, so the style is not applied.
   
   i Use a known function instead.
   

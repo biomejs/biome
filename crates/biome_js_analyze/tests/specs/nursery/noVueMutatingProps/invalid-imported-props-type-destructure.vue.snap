@@ -1,0 +1,85 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-imported-props-type-destructure.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+import type { Props } from "./types";
+
+let { list, user } = defineProps<Props>();
+
+function update() {
+  list.push(1);
+  user.name = "Alice";
+}
+</script>
+
+<template>
+  <button @click="list.pop()">Remove</button>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-imported-props-type-destructure.vue:8:3 lint/nursery/noVueMutatingProps ━━━━━━━━━━━━━━━━━━━━
+
+  × This changes the prop list.
+  
+     7 │ function update() {
+   > 8 │   list.push(1);
+       │   ^^^^
+     9 │   user.name = "Alice";
+    10 │ }
+  
+  i A prop belongs to the parent component. Changing it from the child either fails, or changes the parent's data without the parent knowing.
+  
+  i Emit an event so the parent can change the value, or copy the prop into a local ref() or computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-imported-props-type-destructure.vue:9:3 lint/nursery/noVueMutatingProps ━━━━━━━━━━━━━━━━━━━━
+
+  × This changes the prop user.
+  
+     7 │ function update() {
+     8 │   list.push(1);
+   > 9 │   user.name = "Alice";
+       │   ^^^^
+    10 │ }
+    11 │ </script>
+  
+  i A prop belongs to the parent component. Changing it from the child either fails, or changes the parent's data without the parent knowing.
+  
+  i Emit an event so the parent can change the value, or copy the prop into a local ref() or computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-imported-props-type-destructure.vue:14:19 lint/nursery/noVueMutatingProps ━━━━━━━━━━━━━━━━━━
+
+  × This changes the prop list.
+  
+    13 │ <template>
+  > 14 │   <button @click="list.pop()">Remove</button>
+       │                   ^^^^
+    15 │ </template>
+    16 │ 
+  
+  i A prop belongs to the parent component. Changing it from the child either fails, or changes the parent's data without the parent knowing.
+  
+  i Emit an event so the parent can change the value, or copy the prop into a local ref() or computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

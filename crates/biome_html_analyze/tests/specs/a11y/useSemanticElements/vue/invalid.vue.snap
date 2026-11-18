@@ -71,6 +71,8 @@ invalid.vue:3:6 lint/a11y/useSemanticElements ━━━━━━━━━━━�
     4 │ <div role="radio"></div>
     5 │ <div role="heading"></div>
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -92,6 +94,8 @@ invalid.vue:4:6 lint/a11y/useSemanticElements ━━━━━━━━━━━�
     5 │ <div role="heading"></div>
     6 │ <div role="separator"></div>
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -112,6 +116,8 @@ invalid.vue:5:6 lint/a11y/useSemanticElements ━━━━━━━━━━━�
       │      ^^^^^^^^^^^^^^
     6 │ <div role="separator"></div>
     7 │ <div role="button"></div>
+  
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -139,6 +145,8 @@ invalid.vue:6:6 lint/a11y/useSemanticElements ━━━━━━━━━━━�
     7 │ <div role="button"></div>
     8 │ <div role="article"></div>
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -159,6 +167,8 @@ invalid.vue:7:6 lint/a11y/useSemanticElements ━━━━━━━━━━━�
       │      ^^^^^^^^^^^^^
     8 │ <div role="article"></div>
     9 │ <div role="cell"></div>
+  
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -181,6 +191,8 @@ invalid.vue:8:6 lint/a11y/useSemanticElements ━━━━━━━━━━━�
      9 │ <div role="cell"></div>
     10 │ <div role="columnheader"></div>
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -201,6 +213,8 @@ invalid.vue:9:6 lint/a11y/useSemanticElements ━━━━━━━━━━━�
        │      ^^^^^^^^^^^
     10 │ <div role="columnheader"></div>
     11 │ <div role="figure"></div>
+  
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -223,6 +237,8 @@ invalid.vue:10:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
     11 │ <div role="figure"></div>
     12 │ <div role="form"></div>
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -243,6 +259,8 @@ invalid.vue:11:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
        │      ^^^^^^^^^^^^^
     12 │ <div role="form"></div>
     13 │ <div role="grid"></div>
+  
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -265,6 +283,8 @@ invalid.vue:12:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
     13 │ <div role="grid"></div>
     14 │ <div role="gridcell"></div>
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -285,6 +305,8 @@ invalid.vue:13:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
        │      ^^^^^^^^^^^
     14 │ <div role="gridcell"></div>
     15 │ <div role="group"></div>
+  
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -307,6 +329,8 @@ invalid.vue:14:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
     15 │ <div role="group"></div>
     16 │ <div role="link"></div>
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -328,6 +352,8 @@ invalid.vue:15:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
     16 │ <div role="link"></div>
     17 │ <div role="list"></div>
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -348,6 +374,8 @@ invalid.vue:16:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
        │      ^^^^^^^^^^^
     17 │ <div role="list"></div>
     18 │ <div role="listitem"></div>
+  
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -371,6 +399,8 @@ invalid.vue:17:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
     18 │ <div role="listitem"></div>
     19 │ <div role="navigation"></div>
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -393,6 +423,8 @@ invalid.vue:18:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
     19 │ <div role="navigation"></div>
     20 │ <div role="row"></div>
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -413,6 +445,8 @@ invalid.vue:19:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
        │      ^^^^^^^^^^^^^^^^^
     20 │ <div role="row"></div>
     21 │ <div role="rowgroup"></div>
+  
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -435,6 +469,8 @@ invalid.vue:20:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
     21 │ <div role="rowgroup"></div>
     22 │ <div role="rowheader"></div>
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -455,6 +491,8 @@ invalid.vue:21:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
        │      ^^^^^^^^^^^^^^^
     22 │ <div role="rowheader"></div>
     23 │ <div role="search"></div>
+  
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -479,6 +517,8 @@ invalid.vue:22:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
     23 │ <div role="search"></div>
     24 │ <div role="searchbox"></div>
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -499,6 +539,8 @@ invalid.vue:23:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
        │      ^^^^^^^^^^^^^
     24 │ <div role="searchbox"></div>
     25 │ <div role="table"></div>
+  
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -521,6 +563,8 @@ invalid.vue:24:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
     25 │ <div role="table"></div>
     26 │ <div role="term"></div>
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -541,6 +585,8 @@ invalid.vue:25:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
        │      ^^^^^^^^^^^^
     26 │ <div role="term"></div>
     27 │ <div role="textbox"></div>
+  
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -563,6 +609,8 @@ invalid.vue:26:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
     27 │ <div role="textbox"></div>
     28 │ <div role="generic"></div>
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -583,6 +631,8 @@ invalid.vue:27:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
        │      ^^^^^^^^^^^^^^
     28 │ <div role="generic"></div>
     29 │ <div role="caption"></div>
+  
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -605,6 +655,8 @@ invalid.vue:29:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
        │      ^^^^^^^^^^^^^^
     30 │ <div role="main"></div>
     31 │ <div role="time"></div>
+  
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -629,6 +681,8 @@ invalid.vue:30:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
     31 │ <div role="time"></div>
     32 │ <div role="paragraph"></div>
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -649,6 +703,8 @@ invalid.vue:31:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
        │      ^^^^^^^^^^^
     32 │ <div role="paragraph"></div>
     33 │ <div role="complementary"></div>
+  
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -671,6 +727,8 @@ invalid.vue:32:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
     33 │ <div role="complementary"></div>
     34 │ <div role="blockquote"></div>
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -691,6 +749,8 @@ invalid.vue:33:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
        │      ^^^^^^^^^^^^^^^^^^^^
     34 │ <div role="blockquote"></div>
     35 │ <div role="contentinfo"></div>
+  
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -713,6 +773,8 @@ invalid.vue:34:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
     35 │ <div role="contentinfo"></div>
     36 │ <div role="region"></div>
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -733,6 +795,8 @@ invalid.vue:35:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
        │      ^^^^^^^^^^^^^^^^^^
     36 │ <div role="region"></div>
     37 │ <div role="checkbox" />
+  
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -755,6 +819,8 @@ invalid.vue:36:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
     37 │ <div role="checkbox" />
     38 │ <div role="separator" />
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -775,6 +841,8 @@ invalid.vue:37:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
        │      ^^^^^^^^^^^^^^^
     38 │ <div role="separator" />
     39 │ 
+  
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -797,6 +865,8 @@ invalid.vue:38:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
     39 │ 
     40 │ <!-- Constrained elements: tag matches but required attributes are missing -->
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -816,6 +886,8 @@ invalid.vue:41:8 lint/a11y/useSemanticElements ━━━━━━━━━━━
        │        ^^^^^^^^^^^^^^^
     42 │ <input role="radio" />
     43 │ <input role="searchbox" />
+  
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -838,6 +910,8 @@ invalid.vue:42:8 lint/a11y/useSemanticElements ━━━━━━━━━━━
     43 │ <input role="searchbox" />
     44 │ <input role="textbox" />
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -859,6 +933,8 @@ invalid.vue:43:8 lint/a11y/useSemanticElements ━━━━━━━━━━━
     44 │ <input role="textbox" />
     45 │ <th role="columnheader"></th>
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -879,6 +955,8 @@ invalid.vue:44:8 lint/a11y/useSemanticElements ━━━━━━━━━━━
        │        ^^^^^^^^^^^^^^
     45 │ <th role="columnheader"></th>
     46 │ <th role="rowheader"></th>
+  
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -902,6 +980,8 @@ invalid.vue:45:5 lint/a11y/useSemanticElements ━━━━━━━━━━━
     46 │ <th role="rowheader"></th>
     47 │ <!-- static Vue role bindings that map to semantic elements should also be flagged -->
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -922,6 +1002,8 @@ invalid.vue:46:5 lint/a11y/useSemanticElements ━━━━━━━━━━━
        │     ^^^^^^^^^^^^^^^^
     47 │ <!-- static Vue role bindings that map to semantic elements should also be flagged -->
     48 │ <div :role="'button'"></div>
+  
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -944,6 +1026,8 @@ invalid.vue:48:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
     49 │ <div v-bind:role="'checkbox'"></div>
     50 │ <div :role="'heading'"></div>
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -965,6 +1049,8 @@ invalid.vue:49:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
     50 │ <div :role="'heading'"></div>
     51 │ </template>
   
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
+  
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
@@ -985,6 +1071,8 @@ invalid.vue:50:6 lint/a11y/useSemanticElements ━━━━━━━━━━━
        │      ^^^^^^^^^^^^^^^^^
     51 │ </template>
     52 │ 
+  
+  i Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes.
   
   i For examples and more information, see WAI-ARIA Roles
   

@@ -27,6 +27,8 @@ invalid.svelte:2:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━�
     3 │ <label for="js_id"><input /></label>
     4 │ <label for="js_id"><textarea></textarea></label>
   
+  i Assistive technologies rely on a label being associated with a control to announce it. Without the association, screen reader users cannot tell what the control is for.
+  
   i Consider adding an accessible text content to the label element.
   
 
@@ -43,6 +45,8 @@ invalid.svelte:3:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ <label for="js_id"><textarea></textarea></label>
     5 │ <label></label>
+  
+  i Assistive technologies rely on a label being associated with a control to announce it. Without the association, screen reader users cannot tell what the control is for.
   
   i Consider adding an accessible text content to the label element.
   
@@ -61,6 +65,8 @@ invalid.svelte:4:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━�
     5 │ <label></label>
     6 │ <label>A label</label>
   
+  i Assistive technologies rely on a label being associated with a control to announce it. Without the association, screen reader users cannot tell what the control is for.
+  
   i Consider adding an accessible text content to the label element.
   
 
@@ -77,6 +83,8 @@ invalid.svelte:5:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━�
       │ ^^^^^^^^^^^^^^^
     6 │ <label>A label</label>
     7 │ <div><label></label><input /></div>
+  
+  i Assistive technologies rely on a label being associated with a control to announce it. Without the association, screen reader users cannot tell what the control is for.
   
   i Consider adding an accessible text content to the label element.
   
@@ -97,6 +105,8 @@ invalid.svelte:6:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━�
     7 │ <div><label></label><input /></div>
     8 │ <div><label>A label</label><input /></div>
   
+  i Assistive technologies rely on a label being associated with a control to announce it. Without the association, screen reader users cannot tell what the control is for.
+  
   i Consider adding a "for" attribute to the label element or moving the input element to inside the label element.
   
 
@@ -113,6 +123,8 @@ invalid.svelte:7:6 lint/a11y/noLabelWithoutControl ━━━━━━━━━�
       │      ^^^^^^^^^^^^^^^
     8 │ <div><label>A label</label><input /></div>
     9 │ 
+  
+  i Assistive technologies rely on a label being associated with a control to announce it. Without the association, screen reader users cannot tell what the control is for.
   
   i Consider adding an accessible text content to the label element.
   
@@ -131,6 +143,8 @@ invalid.svelte:8:6 lint/a11y/noLabelWithoutControl ━━━━━━━━━�
   > 8 │ <div><label>A label</label><input /></div>
       │      ^^^^^^^^^^^^^^^^^^^^^^
     9 │ 
+  
+  i Assistive technologies rely on a label being associated with a control to announce it. Without the association, screen reader users cannot tell what the control is for.
   
   i Consider adding a "for" attribute to the label element or moving the input element to inside the label element.
   

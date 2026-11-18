@@ -947,6 +947,7 @@ pub(crate) fn compare_declared_return_type_owned<'db>(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ObjectKind;
     use crate::interned_types::{
         InternedClass, InternedGenericTypeParameter, InternedLiteral, InternedObject,
         InternedTuple, InternedTypeInstance, InternedUnion, TupleElementType, TypeMember,
@@ -965,10 +966,7 @@ mod tests {
 
     #[salsa::db]
     impl biome_db::Db for TestDb {
-        fn parsed_source_for_path(
-            &self,
-            _path: &camino::Utf8Path,
-        ) -> Option<biome_db::ParsedSource> {
+        fn parsed_source_for_path(&self, _path: &camino::Utf8Path) -> Option<biome_db::Source> {
             None
         }
     }
@@ -1046,6 +1044,7 @@ mod tests {
                 ty,
             }]) as Box<[_]>,
             false,
+            ObjectKind::Shape,
         ))
     }
 
@@ -1058,6 +1057,7 @@ mod tests {
                 ty,
             }]) as Box<[_]>,
             false,
+            ObjectKind::Shape,
         ))
     }
 

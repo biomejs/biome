@@ -4,7 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsDeclaration, AnyJsStatement, AnyJsSwitchClause, JsVariableStatement, T, TriviaPieceKind,
+    AnyJsDeclaration, AnyJsStatement, AnyJsSwitchClause, JsVariableStatement, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 use biome_rule_options::no_switch_declarations::NoSwitchDeclarationsOptions;
@@ -96,7 +96,10 @@ impl Rule for NoSwitchDeclarations {
             .children()
             .filter_map(|node| {
                 if JsVariableStatement::can_cast(node.kind()) {
-                    Some(JsVariableStatement::cast(node)?.declaration().ok()?.range())
+                    let declaration = JsVariableStatement::cast(node)?.declaration().ok()?;
+                    // `var` is function-scoped and hoisted with `undefined`, so other clauses
+                    // cannot hit a temporal dead zone.
+                    (!declaration.is_var()).then(|| declaration.range())
                 } else if AnyJsDeclaration::can_cast(node.kind()) {
                     Some(node.text_trimmed_range())
                 } else {
@@ -129,7 +132,7 @@ impl Rule for NoSwitchDeclarations {
         let new_consequent = make::js_statement_list(Some(AnyJsStatement::JsBlockStatement(
             make::js_block_statement(
                 make::token(T!['{'])
-                    .with_leading_trivia(Some((TriviaPieceKind::Whitespace, " ")))
+                    .with_leading_space()
                     .with_trailing_trivia_pieces(colon_token.trailing_trivia().pieces()),
                 consequent.clone(),
                 make::token(T!['}'])

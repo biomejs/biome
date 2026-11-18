@@ -1,0 +1,136 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-options-api.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  emits: {
+    change: (value1, value2) => true,
+    update(value1, value2) {
+      return true;
+    },
+    remove: function (value1, value2, value3) {
+      return true;
+    },
+  },
+  methods: {
+    onChange() {
+      this.$emit("change", value1, value2);
+    },
+    onUpdate() {
+      this.$emit?.("update", value1, value2);
+    },
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-options-api.vue:5:22 lint/nursery/useVueSingleEventPayload ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event change is declared with more than one value.
+  
+    3 │ export default {
+    4 │   emits: {
+  > 5 │     change: (value1, value2) => true,
+      │                      ^^^^^^
+    6 │     update(value1, value2) {
+    7 │       return true;
+  
+  i A listener written inline in a template, such as @change="onChange($event)", can only read the first value through $event. The other values are lost.
+  
+  i Put all the values in one object, and send that object instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:6:20 lint/nursery/useVueSingleEventPayload ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event update is declared with more than one value.
+  
+    4 │   emits: {
+    5 │     change: (value1, value2) => true,
+  > 6 │     update(value1, value2) {
+      │                    ^^^^^^
+    7 │       return true;
+    8 │     },
+  
+  i A listener written inline in a template, such as @change="onChange($event)", can only read the first value through $event. The other values are lost.
+  
+  i Put all the values in one object, and send that object instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:9:31 lint/nursery/useVueSingleEventPayload ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event remove is declared with more than one value.
+  
+     7 │       return true;
+     8 │     },
+   > 9 │     remove: function (value1, value2, value3) {
+       │                               ^^^^^^^^^^^^^^
+    10 │       return true;
+    11 │     },
+  
+  i A listener written inline in a template, such as @change="onChange($event)", can only read the first value through $event. The other values are lost.
+  
+  i Put all the values in one object, and send that object instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:15:36 lint/nursery/useVueSingleEventPayload ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event change is emitted with more than one value.
+  
+    13 │   methods: {
+    14 │     onChange() {
+  > 15 │       this.$emit("change", value1, value2);
+       │                                    ^^^^^^
+    16 │     },
+    17 │     onUpdate() {
+  
+  i A listener written inline in a template, such as @change="onChange($event)", can only read the first value through $event. The other values are lost.
+  
+  i Put all the values in one object, and send that object instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:18:38 lint/nursery/useVueSingleEventPayload ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event update is emitted with more than one value.
+  
+    16 │     },
+    17 │     onUpdate() {
+  > 18 │       this.$emit?.("update", value1, value2);
+       │                                      ^^^^^^
+    19 │     },
+    20 │   },
+  
+  i A listener written inline in a template, such as @change="onChange($event)", can only read the first value through $event. The other values are lost.
+  
+  i Put all the values in one object, and send that object instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

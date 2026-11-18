@@ -8,7 +8,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsRoot, JsAssignmentExpression, JsCallExpression, JsExport, JsLanguage,
     assign_ext::AnyJsMemberAssignment,
 };
-use biome_rowan::{AstNode, Language, TextRange, WalkEvent, declare_node_union};
+use biome_rowan::{AstNode, Language, SyntaxKindSet, TextRange, WalkEvent, declare_node_union};
 use biome_rule_options::no_exports_in_test::NoExportsInTestOptions;
 
 declare_lint_rule! {
@@ -134,6 +134,17 @@ struct AnyExportInTestVisitor {
 
 impl Visitor for AnyExportInTestVisitor {
     type Language = JsLanguage;
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(
+            MaybeExport::KIND_SET
+                .union(JsCallExpression::KIND_SET)
+                .union(AnyJsRoot::KIND_SET),
+        )
+    }
 
     fn visit(
         &mut self,

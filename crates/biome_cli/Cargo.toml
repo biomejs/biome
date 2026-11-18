@@ -66,12 +66,11 @@ indexmap                 = { workspace = true }
 notify                   = { workspace = true }
 papaya                   = { workspace = true }
 path-absolutize          = { workspace = true }
-quick-junit              = "0.6.0"
+quick-junit              = { workspace = true }
 rayon                    = { workspace = true }
 regex                    = { workspace = true }
-reqwest                  = { workspace = true, features = ["blocking", "rustls-tls"] }
 rustc-hash               = { workspace = true }
-self_update              = { version = "0.42.0", default-features = false, features = ["rustls"] }
+self_update              = { workspace = true, features = ["github", "rustls", "ureq"] }
 serde                    = { workspace = true, features = ["derive"] }
 serde_json               = { workspace = true }
 smallvec                 = { workspace = true }
@@ -87,9 +86,10 @@ tokio                    = { workspace = true, features = [
   "time"
 ] }
 tracing                  = { workspace = true }
-tracing-appender         = "0.2.4"
+tracing-appender         = { workspace = true }
 tracing-subscriber       = { workspace = true, features = ["env-filter", "json"] }
-tracing-tree             = "0.4.1"
+tracing-tree             = { workspace = true }
+ureq                     = { workspace = true }
 
 [dev-dependencies]
 biome_css_formatter  = { path = "../biome_css_formatter" }
@@ -100,7 +100,7 @@ biome_json_parser    = { path = "../biome_json_parser" }
 directories          = { workspace = true }
 insta                = { workspace = true }
 regex                = { workspace = true }
-serial_test          = "3.3.1"
+serial_test          = { workspace = true }
 tests_macros         = { workspace = true }
 tokio                = { workspace = true, features = ["io-util"] }
 
@@ -108,14 +108,17 @@ tokio                = { workspace = true, features = ["io-util"] }
 tikv-jemallocator = { workspace = true }
 
 [target."cfg(unix)".dependencies]
-libc  = "0.2.184"
+libc  = { workspace = true }
 tokio = { workspace = true, features = ["process"] }
 
 [target."cfg(windows)".dependencies]
-mimalloc = { workspace = true }
+# Not used directly; pins the allocator version pulled in by mimalloc.
+libmimalloc-sys = { workspace = true }
+mimalloc        = { workspace = true }
 
 [features]
-docgen = ["bpaf/docgen"]
+docgen   = ["bpaf/docgen"]
+unstable = []
 
 [lints]
 workspace = true

@@ -1,0 +1,244 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-factory.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+export default {
+  props: {
+    a: {
+      type: Number,
+      default() {
+        return "";
+      },
+    },
+    b: {
+      type: Object,
+      default() {
+        return "";
+      },
+    },
+    c: {
+      type: Number,
+      default: () => {
+        return "";
+      },
+    },
+    d: { type: Number, default: () => "" },
+    e: { type: Object, default: () => "" },
+    f: { type: String, default: function () { return 123; } },
+    g: { type: Object, default: () => () => ({}) },
+    h: {
+      type: [String, Boolean],
+      default() {
+        switch (kind) {
+          case 1: return 1;
+          case 2: return "";
+          case 3: return {};
+          case 4: return Foo;
+          case 5: return () => {};
+          case 6: return false;
+        }
+        function nested() {
+          return 1;
+        }
+      },
+    },
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-factory.vue:8:16 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function returns a default value for the prop a that doesn't match the type of the prop.
+  
+     6 │       type: Number,
+     7 │       default() {
+   > 8 │         return "";
+       │                ^^
+     9 │       },
+    10 │     },
+  
+  i The prop accepts Number.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-factory.vue:14:16 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function returns a default value for the prop b that doesn't match the type of the prop.
+  
+    12 │       type: Object,
+    13 │       default() {
+  > 14 │         return "";
+       │                ^^
+    15 │       },
+    16 │     },
+  
+  i The prop accepts Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-factory.vue:20:16 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function returns a default value for the prop c that doesn't match the type of the prop.
+  
+    18 │       type: Number,
+    19 │       default: () => {
+  > 20 │         return "";
+       │                ^^
+    21 │       },
+    22 │     },
+  
+  i The prop accepts Number.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-factory.vue:23:39 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function returns a default value for the prop d that doesn't match the type of the prop.
+  
+    21 │       },
+    22 │     },
+  > 23 │     d: { type: Number, default: () => "" },
+       │                                       ^^
+    24 │     e: { type: Object, default: () => "" },
+    25 │     f: { type: String, default: function () { return 123; } },
+  
+  i The prop accepts Number.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-factory.vue:24:39 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function returns a default value for the prop e that doesn't match the type of the prop.
+  
+    22 │     },
+    23 │     d: { type: Number, default: () => "" },
+  > 24 │     e: { type: Object, default: () => "" },
+       │                                       ^^
+    25 │     f: { type: String, default: function () { return 123; } },
+    26 │     g: { type: Object, default: () => () => ({}) },
+  
+  i The prop accepts Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-factory.vue:25:54 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function returns a default value for the prop f that doesn't match the type of the prop.
+  
+    23 │     d: { type: Number, default: () => "" },
+    24 │     e: { type: Object, default: () => "" },
+  > 25 │     f: { type: String, default: function () { return 123; } },
+       │                                                      ^^^
+    26 │     g: { type: Object, default: () => () => ({}) },
+    27 │     h: {
+  
+  i The prop accepts String.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-factory.vue:26:39 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function returns a default value for the prop g that doesn't match the type of the prop.
+  
+    24 │     e: { type: Object, default: () => "" },
+    25 │     f: { type: String, default: function () { return 123; } },
+  > 26 │     g: { type: Object, default: () => () => ({}) },
+       │                                       ^^^^^^^^^^
+    27 │     h: {
+    28 │       type: [String, Boolean],
+  
+  i The prop accepts Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-factory.vue:31:26 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function returns a default value for the prop h that doesn't match the type of the prop.
+  
+    29 │       default() {
+    30 │         switch (kind) {
+  > 31 │           case 1: return 1;
+       │                          ^
+    32 │           case 2: return "";
+    33 │           case 3: return {};
+  
+  i The prop accepts Boolean or String.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-factory.vue:33:26 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function returns a default value for the prop h that doesn't match the type of the prop.
+  
+    31 │           case 1: return 1;
+    32 │           case 2: return "";
+  > 33 │           case 3: return {};
+       │                          ^^
+    34 │           case 4: return Foo;
+    35 │           case 5: return () => {};
+  
+  i The prop accepts Boolean or String.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-factory.vue:35:26 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function returns a default value for the prop h that doesn't match the type of the prop.
+  
+    33 │           case 3: return {};
+    34 │           case 4: return Foo;
+  > 35 │           case 5: return () => {};
+       │                          ^^^^^^^^
+    36 │           case 6: return false;
+    37 │         }
+  
+  i The prop accepts Boolean or String.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

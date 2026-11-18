@@ -1,9 +1,8 @@
 use crate::prelude::*;
+use crate::{Buffer, FormatContext, FormatWithRule};
 use std::cell::OnceCell;
 use std::marker::PhantomData;
 use std::ops::Deref;
-
-use crate::{Buffer, FormatWithRule};
 
 /// Temporarily changes formatter context while preserving an item's formatting rule.
 ///
@@ -36,6 +35,7 @@ impl<Formatted, Options, Context> Format<Context> for FormatWithScopedOptions<Fo
 where
     Formatted: FormatWithRule<Context>,
     Options: FormatScopedOptions<Context, Formatted::Item>,
+    Context: FormatContext,
 {
     #[inline(always)]
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
@@ -51,6 +51,7 @@ impl<Formatted, Options, Context> FormatWithRule<Context>
 where
     Formatted: FormatWithRule<Context>,
     Options: FormatScopedOptions<Context, Formatted::Item>,
+    Context: FormatContext,
 {
     type Item = Formatted::Item;
 
@@ -144,6 +145,7 @@ pub trait MemoizeFormat<Context> {
     fn memoized(self) -> Memoized<Self, Context>
     where
         Self: Sized + Format<Context>,
+        Context: FormatContext,
     {
         Memoized::new(self)
     }
@@ -153,15 +155,16 @@ impl<T, Context> MemoizeFormat<Context> for T where T: Format<Context> {}
 
 /// Memoizes the output of its inner [Format] to avoid re-formatting a potential expensive object.
 #[derive(Debug)]
-pub struct Memoized<F, Context> {
+pub struct Memoized<F, Context: FormatContext> {
     inner: F,
-    memory: OnceCell<FormatResult<Option<FormatElement>>>,
+    memory: OnceCell<FormatResult<Option<FormatElement<Context::Source>>>>,
     options: PhantomData<Context>,
 }
 
 impl<F, Context> Memoized<F, Context>
 where
     F: Format<Context>,
+    Context: FormatContext,
 {
     fn new(inner: F) -> Self {
         Self {
@@ -227,7 +230,10 @@ where
     /// # }
     ///
     /// ```
-    pub fn inspect(&mut self, f: &mut Formatter<Context>) -> FormatResult<&[FormatElement]> {
+    pub fn inspect(
+        &mut self,
+        f: &mut Formatter<Context>,
+    ) -> FormatResult<&[FormatElement<Context::Source>]> {
         let result = self.memory.get_or_init(|| f.intern(&self.inner));
 
         match result.as_ref() {
@@ -242,6 +248,7 @@ where
 impl<F, Context> Format<Context> for Memoized<F, Context>
 where
     F: Format<Context>,
+    Context: FormatContext,
 {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         let result = self.memory.get_or_init(|| f.intern(&self.inner));
@@ -258,7 +265,7 @@ where
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "rowan"))]
 mod tests {
     use super::*;
     use crate::{
@@ -304,6 +311,7 @@ mod tests {
 
     impl FormatContext for TestContext {
         type Options = SimpleFormatOptions;
+        type Source = crate::rowan::RowanSource;
 
         fn options(&self) -> &Self::Options {
             &self.options

@@ -15,14 +15,12 @@ expression: invalid.scss
 
 # Diagnostics
 ```
-invalid.scss:3:23 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:4:5 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Inconsistent cell count in grid areas are not allowed.
   
-    1 │ /* should generate diagnostics */
     2 │ .grid {
-  > 3 │   grid-template-areas:
-      │                       
+    3 │   grid-template-areas:
   > 4 │     "a a"
       │     ^^^^^
     5 │     "b b b";

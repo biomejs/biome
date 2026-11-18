@@ -82,9 +82,17 @@ impl Rule for NoDistractingElements {
     }
 
     fn action(ctx: &RuleContext<Self>, name: &Self::State) -> Option<JsRuleAction> {
-        let element = ctx.query();
+        let element = match ctx.query() {
+            AnyJsxElement::JsxOpeningElement(opening) => {
+                AnyJsxChild::from(opening.parent::<JsxElement>()?)
+            }
+            AnyJsxElement::JsxSelfClosingElement(element) => AnyJsxChild::from(element.clone()),
+        };
+        // Removing the element is only valid when it is a child of another JSX element.
+        // Elsewhere, such as the body of an arrow function, it would leave an empty expression.
+        element.parent::<JsxChildList>()?;
         let mut mutation = ctx.root().begin();
-        mutation.remove_node(element.clone());
+        mutation.remove_node(element);
 
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),

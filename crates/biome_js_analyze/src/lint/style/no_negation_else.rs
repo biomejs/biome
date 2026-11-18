@@ -54,6 +54,8 @@ declare_lint_rule! {
         language: "js",
         sources: &[
             RuleSource::Eslint("no-negated-condition").same(),
+            RuleSource::EslintUnicorn("no-negated-condition").same(),
+            RuleSource::EslintVueJs("no-negated-condition").same(),
             RuleSource::Clippy("if_not_else").same(),
         ],
         recommended: false,
@@ -90,7 +92,10 @@ impl Rule for NoNegationElse {
             markup! {
                 "Invert blocks when performing a negation test."
             },
-        ))
+        )
+        .note(markup! {
+            "A negated condition with an "<Emphasis>"else"</Emphasis>" branch makes the reader reverse the logic twice. Swapping the blocks removes the negation."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

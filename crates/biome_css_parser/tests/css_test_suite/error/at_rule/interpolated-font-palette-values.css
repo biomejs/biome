@@ -1,0 +1,4 @@
+@font-palette-values --palette-#{$name} { font-family: "Bixa"; }
+@font-palette-values --#{$name} { font-family: "Bixa"; }
+@font-palette-values --#{$name}2 { font-family: "Bixa"; }
+.after { color: red; }

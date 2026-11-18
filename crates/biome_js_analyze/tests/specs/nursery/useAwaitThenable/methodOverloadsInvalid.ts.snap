@@ -1,0 +1,125 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: methodOverloadsInvalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+interface ListenOptions { port?: number; host?: string; }
+
+interface Server {
+    listen(options: ListenOptions, callback: (error: Error | null) => void): void;
+    listen(options?: ListenOptions): Promise<string>;
+    close(): Promise<undefined>;
+    close(callback: () => void): undefined;
+}
+
+type Client = {
+    connect(url: string, callback: () => void): void;
+    connect(url: string): Promise<void>;
+};
+
+interface Store<T> {
+    read(key: string, callback: (value: T) => void): void;
+    read(key: string): Promise<T>;
+}
+
+declare const server: Server;
+declare const client: Client;
+declare const store: Store<number>;
+
+// Each call selects the callback overload, which doesn't return a Promise.
+async function awaitCallbackOverloads(): Promise<void> {
+    await server.listen({ port: 0 }, () => {});
+    await server.close(() => {});
+    await client.connect("https://example.com", () => {});
+    await store.read("key", () => {});
+}
+
+```
+
+# Diagnostics
+```
+methodOverloadsInvalid.ts:28:5 lint/nursery/useAwaitThenable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i `await` used on a non-Promise value.
+  
+    26 │ // Each call selects the callback overload, which doesn't return a Promise.
+    27 │ async function awaitCallbackOverloads(): Promise<void> {
+  > 28 │     await server.listen({ port: 0 }, () => {});
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │     await server.close(() => {});
+    30 │     await client.connect("https://example.com", () => {});
+  
+  i This may happen if you accidentally used `await` on a synchronous value.
+  
+  i Please ensure the value is not a custom "thenable" implementation before removing the `await`: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#thenables
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+methodOverloadsInvalid.ts:29:5 lint/nursery/useAwaitThenable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i `await` used on a non-Promise value.
+  
+    27 │ async function awaitCallbackOverloads(): Promise<void> {
+    28 │     await server.listen({ port: 0 }, () => {});
+  > 29 │     await server.close(() => {});
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │     await client.connect("https://example.com", () => {});
+    31 │     await store.read("key", () => {});
+  
+  i This may happen if you accidentally used `await` on a synchronous value.
+  
+  i Please ensure the value is not a custom "thenable" implementation before removing the `await`: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#thenables
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+methodOverloadsInvalid.ts:30:5 lint/nursery/useAwaitThenable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i `await` used on a non-Promise value.
+  
+    28 │     await server.listen({ port: 0 }, () => {});
+    29 │     await server.close(() => {});
+  > 30 │     await client.connect("https://example.com", () => {});
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │     await store.read("key", () => {});
+    32 │ }
+  
+  i This may happen if you accidentally used `await` on a synchronous value.
+  
+  i Please ensure the value is not a custom "thenable" implementation before removing the `await`: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#thenables
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+methodOverloadsInvalid.ts:31:5 lint/nursery/useAwaitThenable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i `await` used on a non-Promise value.
+  
+    29 │     await server.close(() => {});
+    30 │     await client.connect("https://example.com", () => {});
+  > 31 │     await store.read("key", () => {});
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ }
+    33 │ 
+  
+  i This may happen if you accidentally used `await` on a synchronous value.
+  
+  i Please ensure the value is not a custom "thenable" implementation before removing the `await`: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#thenables
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

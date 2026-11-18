@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+new el.removeEventListener("click", () => {});
+el.removeEventListener?.("click", () => {});
+el.notRemoveEventListener("click", () => {});
+el[removeEventListener]("click", () => {});
+el["removeEventListener"]("click", () => {});
+el.removeEventListener("click");
+el.removeEventListener();
+el.removeEventListener(() => {});
+el.removeEventListener(() => {}, "click");
+el.removeEventListener(...["click", () => {}], () => {});
+el.removeEventListener(...args, () => {});
+el.removeEventListener("click", ...[() => {}]);
+window.removeEventListener("click", bind());
+window.removeEventListener("click", handler.notBind());
+window.removeEventListener("click", handler[bind]());
+window.removeEventListener("click", handler.bind?.());
+window.removeEventListener("click", handler?.bind());
+window.removeEventListener(handler);
+class MyComponent {
+	handler() {}
+	disconnectedCallback() {
+		this.removeEventListener("click", this.handler);
+	}
+}
+this.removeEventListener("click", getListener());
+el.removeEventListener("scroll", handler);
+el.removeEventListener("keydown", obj.listener);
+removeEventListener("keyup", () => {});
+removeEventListener("keydown", function () {});
+el.removeEventListener("click", this.handler["other"](this));
+el.removeEventListener("click", this.handler[bind](this));
+el.removeEventListener("click", this.handler?.["bind"](this));
+
+```

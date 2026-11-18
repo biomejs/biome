@@ -7,7 +7,20 @@ use biome_html_syntax::{
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlAttributeSingleTextExpression {
-    compact: bool,
+    layout: HtmlAttributeSingleTextExpressionLayout,
+}
+
+/// Selects how an attribute value such as `{value}` is emitted.
+#[derive(Debug, Clone, Copy, Default, Eq, PartialEq)]
+pub(crate) enum HtmlAttributeSingleTextExpressionLayout {
+    /// Formats both braces and the inner expression.
+    #[default]
+    Normal,
+    /// Consumes the braces and inner expression without emitting them.
+    Remove,
+    /// Consumes the braces and formats only the inner expression, which remains
+    /// the fallback when embedded formatting is unavailable.
+    Unwrap,
 }
 
 impl FormatNodeRule<HtmlAttributeSingleTextExpression> for FormatHtmlAttributeSingleTextExpression {
@@ -22,28 +35,34 @@ impl FormatNodeRule<HtmlAttributeSingleTextExpression> for FormatHtmlAttributeSi
             r_curly_token,
         } = node.as_fields();
 
-        if self.compact {
-            let l_curly_token = l_curly_token?;
-            let r_curly_token = r_curly_token.clone()?;
-            let expression = expression.clone()?;
-            format_removed(&l_curly_token).fmt(f)?;
-            format_removed(&r_curly_token).fmt(f)?;
-            expression
-                .format()
-                .with_options(FormatHtmlTextExpressionOptions {
-                    compact: self.compact,
-                    ..Default::default()
-                })
-                .fmt(f)
-        } else {
-            write!(
+        match self.layout {
+            HtmlAttributeSingleTextExpressionLayout::Normal => write!(
                 f,
                 [
                     l_curly_token.format(),
                     expression.format(),
                     r_curly_token.format()
                 ]
-            )
+            ),
+            HtmlAttributeSingleTextExpressionLayout::Remove
+            | HtmlAttributeSingleTextExpressionLayout::Unwrap => {
+                let l_curly_token = l_curly_token?;
+                let r_curly_token = r_curly_token.clone()?;
+                let expression = expression.clone()?;
+                format_removed(&l_curly_token).fmt(f)?;
+                format_removed(&r_curly_token).fmt(f)?;
+                if self.layout == HtmlAttributeSingleTextExpressionLayout::Remove {
+                    expression
+                        .format()
+                        .with_options(FormatHtmlTextExpressionOptions {
+                            compact: true,
+                            ..Default::default()
+                        })
+                        .fmt(f)
+                } else {
+                    expression.format().fmt(f)
+                }
+            }
         }
     }
 }
@@ -51,10 +70,10 @@ impl FormatNodeRule<HtmlAttributeSingleTextExpression> for FormatHtmlAttributeSi
 impl FormatRuleWithOptions<HtmlAttributeSingleTextExpression>
     for FormatHtmlAttributeSingleTextExpression
 {
-    type Options = bool;
+    type Options = HtmlAttributeSingleTextExpressionLayout;
 
     fn with_options(mut self, options: Self::Options) -> Self {
-        self.compact = options;
+        self.layout = options;
         self
     }
 }

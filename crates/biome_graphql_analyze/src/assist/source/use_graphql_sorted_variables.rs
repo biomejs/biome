@@ -57,7 +57,7 @@ declare_source_rule! {
     /// Sort such variables manually, or put each variable on its own line.
     ///
     pub UseGraphqlSortedVariables {
-        version: "next",
+        version: "2.6.0",
         name: "useGraphqlSortedVariables",
         language: "graphql",
         recommended: false,

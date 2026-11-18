@@ -25,7 +25,7 @@ not-function.js:2:1 lint/correctness/usePlaywrightValidDescribeCallback ━━�
     3 │ test.describe('suite', 123);
     4 │ test.describe.only('suite', {});
   
-  i The second argument to describe must be a function, not a string, number, object, or other type.
+  i The describe callback must be a function, not a string, number, object, or other type.
   
   i Replace the callback with a function expression or arrow function.
   
@@ -44,7 +44,7 @@ not-function.js:3:1 lint/correctness/usePlaywrightValidDescribeCallback ━━�
     4 │ test.describe.only('suite', {});
     5 │ test.describe.skip('suite', null);
   
-  i The second argument to describe must be a function, not a string, number, object, or other type.
+  i The describe callback must be a function, not a string, number, object, or other type.
   
   i Replace the callback with a function expression or arrow function.
   
@@ -63,7 +63,7 @@ not-function.js:4:1 lint/correctness/usePlaywrightValidDescribeCallback ━━�
     5 │ test.describe.skip('suite', null);
     6 │ test.describe.parallel('suite', []);
   
-  i The second argument to describe must be a function, not a string, number, object, or other type.
+  i The describe callback must be a function, not a string, number, object, or other type.
   
   i Replace the callback with a function expression or arrow function.
   
@@ -82,7 +82,7 @@ not-function.js:5:1 lint/correctness/usePlaywrightValidDescribeCallback ━━�
     6 │ test.describe.parallel('suite', []);
     7 │ 
   
-  i The second argument to describe must be a function, not a string, number, object, or other type.
+  i The describe callback must be a function, not a string, number, object, or other type.
   
   i Replace the callback with a function expression or arrow function.
   
@@ -100,7 +100,7 @@ not-function.js:6:1 lint/correctness/usePlaywrightValidDescribeCallback ━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     7 │ 
   
-  i The second argument to describe must be a function, not a string, number, object, or other type.
+  i The describe callback must be a function, not a string, number, object, or other type.
   
   i Replace the callback with a function expression or arrow function.
   

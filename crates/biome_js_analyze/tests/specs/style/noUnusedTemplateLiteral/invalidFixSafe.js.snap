@@ -11,10 +11,12 @@ var foo = `bar`;
 ```
 invalidFixSafe.js:1:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use template literals if interpolation and special-character handling are not needed.
+  ! Unnecessary template literal.
   
   > 1 │ var foo = `bar`;
       │           ^^^^^
+  
+  i A template literal is only needed for interpolation or special-character handling. Without them, a regular string is simpler.
   
   i Safe fix: Replace with string literal
   

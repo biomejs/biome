@@ -1,0 +1,273 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalidNumber.css
+---
+# Input
+```css
+/* should generate diagnostics */
+a { color: oklch(85% 0.17 88); }
+a { color: oklab(86% 0.2 154); }
+a { color: lch(85% 0.17 88); }
+a { color: lab(86% 0.2 154); }
+a { color: oklch(8.5% 0 0); }
+a { color: oklch(100% 0 0); }
+a { color: oklch(0% 0 0); }
+a { color: oklch(85.50% 0 0); }
+a { color: oklch(from red 50% c h); }
+a { color: oklch(5e1% 0 0); }
+
+```
+
+# Diagnostics
+```
+invalidNumber.css:2:18 lint/nursery/useConsistentLightnessNotation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This lightness is written as a percentage instead of a number.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ a { color: oklch(85% 0.17 88); }
+      │                  ^^^
+    3 │ a { color: oklab(86% 0.2 154); }
+    4 │ a { color: lch(85% 0.17 88); }
+  
+  i Writing lightness the same way in every color makes colors easier to read and compare.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use 0.85 instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - a·{·color:·oklch(85%·0.17·88);·}
+        2 │ + a·{·color:·oklch(0.85·0.17·88);·}
+     3  3 │   a { color: oklab(86% 0.2 154); }
+     4  4 │   a { color: lch(85% 0.17 88); }
+  
+
+```
+
+```
+invalidNumber.css:3:18 lint/nursery/useConsistentLightnessNotation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This lightness is written as a percentage instead of a number.
+  
+    1 │ /* should generate diagnostics */
+    2 │ a { color: oklch(85% 0.17 88); }
+  > 3 │ a { color: oklab(86% 0.2 154); }
+      │                  ^^^
+    4 │ a { color: lch(85% 0.17 88); }
+    5 │ a { color: lab(86% 0.2 154); }
+  
+  i Writing lightness the same way in every color makes colors easier to read and compare.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use 0.86 instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   a { color: oklch(85% 0.17 88); }
+     3    │ - a·{·color:·oklab(86%·0.2·154);·}
+        3 │ + a·{·color:·oklab(0.86·0.2·154);·}
+     4  4 │   a { color: lch(85% 0.17 88); }
+     5  5 │   a { color: lab(86% 0.2 154); }
+  
+
+```
+
+```
+invalidNumber.css:4:16 lint/nursery/useConsistentLightnessNotation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This lightness is written as a percentage instead of a number.
+  
+    2 │ a { color: oklch(85% 0.17 88); }
+    3 │ a { color: oklab(86% 0.2 154); }
+  > 4 │ a { color: lch(85% 0.17 88); }
+      │                ^^^
+    5 │ a { color: lab(86% 0.2 154); }
+    6 │ a { color: oklch(8.5% 0 0); }
+  
+  i Writing lightness the same way in every color makes colors easier to read and compare.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use 85 instead.
+  
+    4 │ a·{·color:·lch(85%·0.17·88);·}
+      │                  -            
+
+```
+
+```
+invalidNumber.css:5:16 lint/nursery/useConsistentLightnessNotation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This lightness is written as a percentage instead of a number.
+  
+    3 │ a { color: oklab(86% 0.2 154); }
+    4 │ a { color: lch(85% 0.17 88); }
+  > 5 │ a { color: lab(86% 0.2 154); }
+      │                ^^^
+    6 │ a { color: oklch(8.5% 0 0); }
+    7 │ a { color: oklch(100% 0 0); }
+  
+  i Writing lightness the same way in every color makes colors easier to read and compare.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use 86 instead.
+  
+    5 │ a·{·color:·lab(86%·0.2·154);·}
+      │                  -            
+
+```
+
+```
+invalidNumber.css:6:18 lint/nursery/useConsistentLightnessNotation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This lightness is written as a percentage instead of a number.
+  
+    4 │ a { color: lch(85% 0.17 88); }
+    5 │ a { color: lab(86% 0.2 154); }
+  > 6 │ a { color: oklch(8.5% 0 0); }
+      │                  ^^^^
+    7 │ a { color: oklch(100% 0 0); }
+    8 │ a { color: oklch(0% 0 0); }
+  
+  i Writing lightness the same way in every color makes colors easier to read and compare.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use 0.085 instead.
+  
+     4  4 │   a { color: lch(85% 0.17 88); }
+     5  5 │   a { color: lab(86% 0.2 154); }
+     6    │ - a·{·color:·oklch(8.5%·0·0);·}
+        6 │ + a·{·color:·oklch(0.085·0·0);·}
+     7  7 │   a { color: oklch(100% 0 0); }
+     8  8 │   a { color: oklch(0% 0 0); }
+  
+
+```
+
+```
+invalidNumber.css:7:18 lint/nursery/useConsistentLightnessNotation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This lightness is written as a percentage instead of a number.
+  
+    5 │ a { color: lab(86% 0.2 154); }
+    6 │ a { color: oklch(8.5% 0 0); }
+  > 7 │ a { color: oklch(100% 0 0); }
+      │                  ^^^^
+    8 │ a { color: oklch(0% 0 0); }
+    9 │ a { color: oklch(85.50% 0 0); }
+  
+  i Writing lightness the same way in every color makes colors easier to read and compare.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use 1 instead.
+  
+     5  5 │   a { color: lab(86% 0.2 154); }
+     6  6 │   a { color: oklch(8.5% 0 0); }
+     7    │ - a·{·color:·oklch(100%·0·0);·}
+        7 │ + a·{·color:·oklch(1·0·0);·}
+     8  8 │   a { color: oklch(0% 0 0); }
+     9  9 │   a { color: oklch(85.50% 0 0); }
+  
+
+```
+
+```
+invalidNumber.css:8:18 lint/nursery/useConsistentLightnessNotation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This lightness is written as a percentage instead of a number.
+  
+     6 │ a { color: oklch(8.5% 0 0); }
+     7 │ a { color: oklch(100% 0 0); }
+   > 8 │ a { color: oklch(0% 0 0); }
+       │                  ^^
+     9 │ a { color: oklch(85.50% 0 0); }
+    10 │ a { color: oklch(from red 50% c h); }
+  
+  i Writing lightness the same way in every color makes colors easier to read and compare.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use 0 instead.
+  
+    8 │ a·{·color:·oklch(0%·0·0);·}
+      │                   -        
+
+```
+
+```
+invalidNumber.css:9:18 lint/nursery/useConsistentLightnessNotation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This lightness is written as a percentage instead of a number.
+  
+     7 │ a { color: oklch(100% 0 0); }
+     8 │ a { color: oklch(0% 0 0); }
+   > 9 │ a { color: oklch(85.50% 0 0); }
+       │                  ^^^^^^
+    10 │ a { color: oklch(from red 50% c h); }
+    11 │ a { color: oklch(5e1% 0 0); }
+  
+  i Writing lightness the same way in every color makes colors easier to read and compare.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use 0.855 instead.
+  
+     7  7 │   a { color: oklch(100% 0 0); }
+     8  8 │   a { color: oklch(0% 0 0); }
+     9    │ - a·{·color:·oklch(85.50%·0·0);·}
+        9 │ + a·{·color:·oklch(0.855·0·0);·}
+    10 10 │   a { color: oklch(from red 50% c h); }
+    11 11 │   a { color: oklch(5e1% 0 0); }
+  
+
+```
+
+```
+invalidNumber.css:10:27 lint/nursery/useConsistentLightnessNotation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i This lightness is written as a percentage instead of a number.
+  
+     8 │ a { color: oklch(0% 0 0); }
+     9 │ a { color: oklch(85.50% 0 0); }
+  > 10 │ a { color: oklch(from red 50% c h); }
+       │                           ^^^
+    11 │ a { color: oklch(5e1% 0 0); }
+    12 │ 
+  
+  i Writing lightness the same way in every color makes colors easier to read and compare.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use 0.5 instead.
+  
+     8  8 │   a { color: oklch(0% 0 0); }
+     9  9 │   a { color: oklch(85.50% 0 0); }
+    10    │ - a·{·color:·oklch(from·red·50%·c·h);·}
+       10 │ + a·{·color:·oklch(from·red·0.5·c·h);·}
+    11 11 │   a { color: oklch(5e1% 0 0); }
+    12 12 │   
+  
+
+```
+
+```
+invalidNumber.css:11:18 lint/nursery/useConsistentLightnessNotation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This lightness is written as a percentage instead of a number.
+  
+     9 │ a { color: oklch(85.50% 0 0); }
+    10 │ a { color: oklch(from red 50% c h); }
+  > 11 │ a { color: oklch(5e1% 0 0); }
+       │                  ^^^^
+    12 │ 
+  
+  i Writing lightness the same way in every color makes colors easier to read and compare.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

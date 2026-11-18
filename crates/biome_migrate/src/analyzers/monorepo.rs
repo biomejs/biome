@@ -8,7 +8,7 @@ use biome_json_factory::make::{
     json_boolean_value, json_member, json_member_list, json_member_name, json_string_literal, token,
 };
 use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonRoot, T};
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use std::collections::VecDeque;
 
 declare_migration! {
@@ -68,7 +68,7 @@ impl Rule for Monorepo {
 
         list.push_front(json_member(
             json_member_name(json_string_literal("root")).into(),
-            token(T![:]).with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
+            token(T![:]).with_trailing_space(),
             AnyJsonValue::JsonBooleanValue(json_boolean_value(token(T![false]))),
         ));
 

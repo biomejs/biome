@@ -62,7 +62,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoSvelteUselessDerivedBy {
-        version: "next",
+        version: "2.6.0",
         name: "noSvelteUselessDerivedBy",
         language: "js",
         domains: &[RuleDomain::Svelte],
@@ -231,7 +231,11 @@ fn single_returned_expression(body: &JsFunctionBody) -> Option<AnyJsExpression> 
 /// Returns `true` if `expression` refers to `this`, `arguments`, or `new.target` of the function
 /// that contains it.
 fn uses_function_bindings(expression: &AnyJsExpression) -> bool {
-    let mut preorder = expression.syntax().preorder();
+    let mut preorder = expression.syntax().preorder_of_kinds(
+        AnyThisScope::KIND_SET
+            .union(FUNCTION_BINDING_KINDS)
+            .union(JsReferenceIdentifier::KIND_SET),
+    );
     while let Some(event) = preorder.next() {
         let WalkEvent::Enter(node) = event else {
             continue;

@@ -4,6 +4,7 @@ expression: invalid.css
 ---
 # Input
 ```css
+/* should generate diagnostics */
 a { grid-template-areas: "" }
 a { grid-template-areas: "a a"
                          "b b b"; }
@@ -16,8 +17,6 @@ a { grid-template-areas: "a a a"
                          "c c c"
                          "g g g"
                          "z y a"; }
-a { grid-template-areas: "a a a"
-                         "b b b"; }
 a { grid-template-areas: "a a a"
                          "a . a"; }
 a { grid-template-areas: "o o o ,"
@@ -32,19 +31,35 @@ a { grid-template-areas: "a a a"
 a { grid-template-areas: "a a a"
                          "g f f"
                          "b z a"; }
+a { grid-template-areas: "a" "b c"; }
+a { grid-template-areas: "abc" "d e"; }
+a { grid-template-areas: "a b"
+                         "c  d e"; }
+a { grid-template-areas: "s s s"
+                         "a a a"
+                         "v v v"
+                         "a a a"; }
+a { grid-template-areas: "a b"
+                         "b a"; }
+a { grid-template-areas: "a a a"
+                         ". a a"; }
+a { grid-template-areas: "a.b c" "d e"; }
+a { grid-template: "abc" 1fr "d e" 1fr / auto; }
+a { grid: "a b" auto "b a" auto / 1fr 1fr; }
 
 ```
 
 # Diagnostics
 ```
-invalid.css:1:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:2:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Empty grid areas are not allowed.
   
-  > 1 │ a { grid-template-areas: "" }
-      │                          ^^^
-    2 │ a { grid-template-areas: "a a"
-    3 │                          "b b b"; }
+    1 │ /* should generate diagnostics */
+  > 2 │ a { grid-template-areas: "" }
+      │                          ^^
+    3 │ a { grid-template-areas: "a a"
+    4 │                          "b b b"; }
   
   i Consider adding the cell token within string.
   
@@ -52,15 +67,16 @@ invalid.css:1:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━
 ```
 
 ```
-invalid.css:2:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:3:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Inconsistent cell count in grid areas are not allowed.
   
-    1 │ a { grid-template-areas: "" }
-  > 2 │ a { grid-template-areas: "a a"
+    1 │ /* should generate diagnostics */
+    2 │ a { grid-template-areas: "" }
+  > 3 │ a { grid-template-areas: "a a"
       │                          ^^^^^
-    3 │                          "b b b"; }
-    4 │ a { grid-template-areas: "b b b"
+    4 │                          "b b b"; }
+    5 │ a { grid-template-areas: "b b b"
   
   i Consider adding the same number of cell tokens in each string.
   
@@ -68,18 +84,16 @@ invalid.css:2:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━
 ```
 
 ```
-invalid.css:4:33 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:6:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Empty grid areas are not allowed.
   
-    2 │ a { grid-template-areas: "a a"
-    3 │                          "b b b"; }
-  > 4 │ a { grid-template-areas: "b b b"
-      │                                 
-  > 5 │                          ""; }
+    4 │                          "b b b"; }
+    5 │ a { grid-template-areas: "b b b"
+  > 6 │                          ""; }
       │                          ^^
-    6 │ a { grid-template-areas: "a a a"
-    7 │                          "a b a"; }
+    7 │ a { grid-template-areas: "a a a"
+    8 │                          "a b a"; }
   
   i Consider adding the cell token within string.
   
@@ -87,37 +101,16 @@ invalid.css:4:33 lint/correctness/noInvalidGridAreas ━━━━━━━━━
 ```
 
 ```
-invalid.css:6:33 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:8:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Duplicate filled in rectangle are not allowed.
   
-    4 │ a { grid-template-areas: "b b b"
-    5 │                          ""; }
-  > 6 │ a { grid-template-areas: "a a a"
-      │                                 
-  > 7 │                          "a b a"; }
-      │                          ^^^^^^^
-    8 │ a { grid-template-areas: "a a a"
-    9 │                          "b b b"
-  
-  i Consider removing the duplicated filled-in rectangle: a
-  
-
-```
-
-```
-invalid.css:11:33 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Duplicate filled in rectangle are not allowed.
-  
-     9 │                          "b b b"
-    10 │                          "c c c"
-  > 11 │                          "g g g"
-       │                                 
-  > 12 │                          "z y a"; }
+     6 │                          ""; }
+     7 │ a { grid-template-areas: "a a a"
+   > 8 │                          "a b a"; }
        │                          ^^^^^^^
-    13 │ a { grid-template-areas: "a a a"
-    14 │                          "b b b"; }
+     9 │ a { grid-template-areas: "a a a"
+    10 │                          "b b b"
   
   i Consider removing the duplicated filled-in rectangle: a
   
@@ -125,18 +118,16 @@ invalid.css:11:33 lint/correctness/noInvalidGridAreas ━━━━━━━━�
 ```
 
 ```
-invalid.css:15:33 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:13:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Duplicate filled in rectangle are not allowed.
   
-    13 │ a { grid-template-areas: "a a a"
-    14 │                          "b b b"; }
-  > 15 │ a { grid-template-areas: "a a a"
-       │                                 
-  > 16 │                          "a . a"; }
+    11 │                          "c c c"
+    12 │                          "g g g"
+  > 13 │                          "z y a"; }
        │                          ^^^^^^^
-    17 │ a { grid-template-areas: "o o o ,"
-    18 │                          "p , p p"
+    14 │ a { grid-template-areas: "a a a"
+    15 │                          "a . a"; }
   
   i Consider removing the duplicated filled-in rectangle: a
   
@@ -144,18 +135,33 @@ invalid.css:15:33 lint/correctness/noInvalidGridAreas ━━━━━━━━�
 ```
 
 ```
-invalid.css:17:35 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:15:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Duplicate filled in rectangle are not allowed.
   
-    15 │ a { grid-template-areas: "a a a"
-    16 │                          "a . a"; }
-  > 17 │ a { grid-template-areas: "o o o ,"
-       │                                   
-  > 18 │                          "p , p p"
+    13 │                          "z y a"; }
+    14 │ a { grid-template-areas: "a a a"
+  > 15 │                          "a . a"; }
+       │                          ^^^^^^^
+    16 │ a { grid-template-areas: "o o o ,"
+    17 │                          "p , p p"
+  
+  i Consider removing the duplicated filled-in rectangle: a
+  
+
+```
+
+```
+invalid.css:17:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate filled in rectangle are not allowed.
+  
+    15 │                          "a . a"; }
+    16 │ a { grid-template-areas: "o o o ,"
+  > 17 │                          "p , p p"
        │                          ^^^^^^^^^
-    19 │                          "q q , q"; }
-    20 │ a { grid-template-areas: "s s t t"
+    18 │                          "q q , q"; }
+    19 │ a { grid-template-areas: "s s t t"
   
   i Consider removing the duplicated filled-in rectangle: ,
   
@@ -163,18 +169,16 @@ invalid.css:17:35 lint/correctness/noInvalidGridAreas ━━━━━━━━�
 ```
 
 ```
-invalid.css:21:35 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:21:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Inconsistent cell count in grid areas are not allowed.
   
-    19 │                          "q q , q"; }
-    20 │ a { grid-template-areas: "s s t t"
-  > 21 │                          "s s t t"
-       │                                   
-  > 22 │                          "u v v"
+    19 │ a { grid-template-areas: "s s t t"
+    20 │                          "s s t t"
+  > 21 │                          "u v v"
        │                          ^^^^^^^
-    23 │                          "u u v v"; }
-    24 │ a { grid-template-areas: "a a a"
+    22 │                          "u u v v"; }
+    23 │ a { grid-template-areas: "a a a"
   
   i Consider adding the same number of cell tokens in each string.
   
@@ -182,18 +186,16 @@ invalid.css:21:35 lint/correctness/noInvalidGridAreas ━━━━━━━━�
 ```
 
 ```
-invalid.css:24:33 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:24:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Duplicate filled in rectangle are not allowed.
   
-    22 │                          "u v v"
-    23 │                          "u u v v"; }
-  > 24 │ a { grid-template-areas: "a a a"
-       │                                 
-  > 25 │                          "b z a"; }
+    22 │                          "u u v v"; }
+    23 │ a { grid-template-areas: "a a a"
+  > 24 │                          "b z a"; }
        │                          ^^^^^^^
-    26 │ a { grid-template-areas: "a a a"
-    27 │                          "g f f"
+    25 │ a { grid-template-areas: "a a a"
+    26 │                          "g f f"
   
   i Consider removing the duplicated filled-in rectangle: a
   
@@ -201,19 +203,170 @@ invalid.css:24:33 lint/correctness/noInvalidGridAreas ━━━━━━━━�
 ```
 
 ```
-invalid.css:27:33 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:27:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Duplicate filled in rectangle are not allowed.
   
-    25 │                          "b z a"; }
-    26 │ a { grid-template-areas: "a a a"
-  > 27 │                          "g f f"
-       │                                 
-  > 28 │                          "b z a"; }
+    25 │ a { grid-template-areas: "a a a"
+    26 │                          "g f f"
+  > 27 │                          "b z a"; }
        │                          ^^^^^^^
-    29 │ 
+    28 │ a { grid-template-areas: "a" "b c"; }
+    29 │ a { grid-template-areas: "abc" "d e"; }
   
   i Consider removing the duplicated filled-in rectangle: a
+  
+
+```
+
+```
+invalid.css:28:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Inconsistent cell count in grid areas are not allowed.
+  
+    26 │                          "g f f"
+    27 │                          "b z a"; }
+  > 28 │ a { grid-template-areas: "a" "b c"; }
+       │                          ^^^
+    29 │ a { grid-template-areas: "abc" "d e"; }
+    30 │ a { grid-template-areas: "a b"
+  
+  i Consider adding the same number of cell tokens in each string.
+  
+
+```
+
+```
+invalid.css:29:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Inconsistent cell count in grid areas are not allowed.
+  
+    27 │                          "b z a"; }
+    28 │ a { grid-template-areas: "a" "b c"; }
+  > 29 │ a { grid-template-areas: "abc" "d e"; }
+       │                          ^^^^^
+    30 │ a { grid-template-areas: "a b"
+    31 │                          "c  d e"; }
+  
+  i Consider adding the same number of cell tokens in each string.
+  
+
+```
+
+```
+invalid.css:30:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Inconsistent cell count in grid areas are not allowed.
+  
+    28 │ a { grid-template-areas: "a" "b c"; }
+    29 │ a { grid-template-areas: "abc" "d e"; }
+  > 30 │ a { grid-template-areas: "a b"
+       │                          ^^^^^
+    31 │                          "c  d e"; }
+    32 │ a { grid-template-areas: "s s s"
+  
+  i Consider adding the same number of cell tokens in each string.
+  
+
+```
+
+```
+invalid.css:35:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate filled in rectangle are not allowed.
+  
+    33 │                          "a a a"
+    34 │                          "v v v"
+  > 35 │                          "a a a"; }
+       │                          ^^^^^^^
+    36 │ a { grid-template-areas: "a b"
+    37 │                          "b a"; }
+  
+  i Consider removing the duplicated filled-in rectangle: a
+  
+
+```
+
+```
+invalid.css:37:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate filled in rectangle are not allowed.
+  
+    35 │                          "a a a"; }
+    36 │ a { grid-template-areas: "a b"
+  > 37 │                          "b a"; }
+       │                          ^^^^^
+    38 │ a { grid-template-areas: "a a a"
+    39 │                          ". a a"; }
+  
+  i Consider removing the duplicated filled-in rectangle: b
+  
+
+```
+
+```
+invalid.css:39:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate filled in rectangle are not allowed.
+  
+    37 │                          "b a"; }
+    38 │ a { grid-template-areas: "a a a"
+  > 39 │                          ". a a"; }
+       │                          ^^^^^^^
+    40 │ a { grid-template-areas: "a.b c" "d e"; }
+    41 │ a { grid-template: "abc" 1fr "d e" 1fr / auto; }
+  
+  i Consider removing the duplicated filled-in rectangle: a
+  
+
+```
+
+```
+invalid.css:40:34 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Inconsistent cell count in grid areas are not allowed.
+  
+    38 │ a { grid-template-areas: "a a a"
+    39 │                          ". a a"; }
+  > 40 │ a { grid-template-areas: "a.b c" "d e"; }
+       │                                  ^^^^^
+    41 │ a { grid-template: "abc" 1fr "d e" 1fr / auto; }
+    42 │ a { grid: "a b" auto "b a" auto / 1fr 1fr; }
+  
+  i Consider adding the same number of cell tokens in each string.
+  
+
+```
+
+```
+invalid.css:41:20 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Inconsistent cell count in grid areas are not allowed.
+  
+    39 │                          ". a a"; }
+    40 │ a { grid-template-areas: "a.b c" "d e"; }
+  > 41 │ a { grid-template: "abc" 1fr "d e" 1fr / auto; }
+       │                    ^^^^^
+    42 │ a { grid: "a b" auto "b a" auto / 1fr 1fr; }
+    43 │ 
+  
+  i Consider adding the same number of cell tokens in each string.
+  
+
+```
+
+```
+invalid.css:42:22 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate filled in rectangle are not allowed.
+  
+    40 │ a { grid-template-areas: "a.b c" "d e"; }
+    41 │ a { grid-template: "abc" 1fr "d e" 1fr / auto; }
+  > 42 │ a { grid: "a b" auto "b a" auto / 1fr 1fr; }
+       │                      ^^^^^
+    43 │ 
+  
+  i Consider removing the duplicated filled-in rectangle: b
   
 
 ```

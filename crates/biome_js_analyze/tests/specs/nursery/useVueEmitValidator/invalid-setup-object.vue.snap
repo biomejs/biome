@@ -1,0 +1,63 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-setup-object.vue
+---
+# Input
+```vue
+<script setup>
+/* should generate diagnostics */
+const emit = defineEmits({ foo: null, bar: 1 });
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-setup-object.vue:3:28 lint/nursery/useVueEmitValidator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event foo is declared with a value that turns off validation.
+  
+    1 │ <script setup>
+    2 │ /* should generate diagnostics */
+  > 3 │ const emit = defineEmits({ foo: null, bar: 1 });
+      │                            ^^^^^^^^^
+    4 │ </script>
+    5 │ 
+  
+  i A validator function checks the values passed with the event, and documents what the event sends. In TypeScript, its parameter types also become the types the emit function accepts for this event.
+  
+  i Replace the value with a function that receives the event's values and returns true when they are valid. If the event sends no values, use () => true.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace it with a validator function that accepts no values.
+  
+    1 1 │   
+    2 2 │   /* should generate diagnostics */
+    3   │ - const·emit·=·defineEmits({·foo:·null,·bar:·1·});
+      3 │ + const·emit·=·defineEmits({·foo:·()·=>·true,·bar:·1·});
+    4 4 │   
+  
+
+```
+
+```
+invalid-setup-object.vue:3:39 lint/nursery/useVueEmitValidator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event bar is declared without a validator function.
+  
+    1 │ <script setup>
+    2 │ /* should generate diagnostics */
+  > 3 │ const emit = defineEmits({ foo: null, bar: 1 });
+      │                                       ^^^^^^
+    4 │ </script>
+    5 │ 
+  
+  i A validator function checks the values passed with the event, and documents what the event sends. In TypeScript, its parameter types also become the types the emit function accepts for this event.
+  
+  i Replace the value with a function that receives the event's values and returns true when they are valid. If the event sends no values, use () => true.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,7 +1,7 @@
 use std::{borrow::Cow, cmp::Ordering, ops::Not};
 
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, RuleSuppressions,
     context::RuleContext,
     declare_source_rule,
     utils::{is_separated_list_sorted_by, sorted_separated_list_by},
@@ -13,7 +13,7 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsObjectMember, JsLanguage, JsObjectExpression, JsObjectMemberList, T,
 };
-use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult, SyntaxToken, TriviaPieceKind};
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult, SyntaxToken, WalkEvent};
 use biome_rule_options::use_sorted_keys::{SortOrder, UseSortedKeysOptions};
 use biome_string_case::comparable_token::ComparableToken;
 
@@ -202,6 +202,23 @@ impl Rule for UseSortedKeys {
         }
     }
 
+    fn suppressed_nodes(
+        ctx: &RuleContext<Self>,
+        _state: &Self::State,
+        suppressions: &mut RuleSuppressions<JsLanguage>,
+    ) {
+        for event in ctx
+            .query()
+            .syntax()
+            .preorder_of_kinds(JsObjectMemberList::KIND_SET)
+            .skip(1)
+        {
+            if let WalkEvent::Enter(node) = event {
+                suppressions.suppress_node(node);
+            }
+        }
+    }
+
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         let options = ctx.options();
         let message = if options.group_by_nesting.unwrap_or(false) {
@@ -246,7 +263,7 @@ impl Rule for UseSortedKeys {
                     let name = node.name().map(ComparableToken::new)?;
                     Some((depth, name))
                 },
-                || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                || make::token(T![,]).with_trailing_space(),
                 |(d1, n1), (d2, n2)| d1.cmp(d2).then_with(|| comparator(n1, n2)),
             )
             .ok()?
@@ -254,7 +271,7 @@ impl Rule for UseSortedKeys {
             sorted_separated_list_by(
                 list,
                 |node| node.name().map(ComparableToken::new),
-                || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                || make::token(T![,]).with_trailing_space(),
                 comparator,
             )
             .ok()?
@@ -280,10 +297,7 @@ fn has_multiline_content(
     closing_token: SyntaxResult<SyntaxToken<JsLanguage>>,
 ) -> bool {
     members_first_token.map_or_else(
-        || {
-            closing_token
-                .is_ok_and(|token| token.has_leading_newline())
-        },
+        || closing_token.is_ok_and(|token| token.has_leading_newline()),
         |token| token.has_leading_newline(),
     )
 }

@@ -88,6 +88,8 @@ impl Rule for NoExplicitAny {
                 .to_owned(),
         ).note(markup! {
             <Emphasis>"any"</Emphasis>" disables many type checking rules. Its use should be avoided."
+        }).note(markup! {
+            "Replace "<Emphasis>"any"</Emphasis>" with a specific type. If the type is not known, use "<Emphasis>"unknown"</Emphasis>" and narrow it before using the value."
         });
 
         Some(diagnostic)

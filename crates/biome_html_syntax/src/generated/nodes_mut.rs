@@ -1973,6 +1973,26 @@ impl VueVForArrayBinding {
         )
     }
 }
+impl VueVForDefaultBinding {
+    pub fn with_binding(self, element: AnyVueVForBinding) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_eq_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_default(self, element: HtmlTextExpression) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl VueVForIdentifierBinding {
     pub fn with_name_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(

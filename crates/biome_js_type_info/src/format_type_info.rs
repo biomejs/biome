@@ -1,12 +1,13 @@
 use crate::globals::global_type_name;
 use crate::{
-    CallArgumentType, Class, DestructureField, Function, FunctionParameter,
+    CallArgumentType, Class, DestructureField, ExtendsType, Function, FunctionParameter,
     FunctionParameterBinding, GenericTypeParameter, ImportSymbol, Interface, Literal,
     MergedReference, NamedFunctionParameter, Object, ObjectLiteral, PatternFunctionParameter,
     RawTypeId, ReturnType, TypeData, TypeImportQualifier, TypeInstance, TypeMember, TypeMemberKind,
     TypeReference, TypeReferenceQualifier, TypeofAwaitExpression, TypeofExpression, Union,
 };
-use biome_formatter::prelude::*;
+use biome_formatter::rowan::RowanSource;
+use biome_formatter::rowan::prelude::*;
 use biome_formatter::{
     FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
     SourceMapGeneration, TrailingNewline, TransformSourceMap,
@@ -55,6 +56,7 @@ pub struct FormatTypeContext;
 
 impl FormatContext for FormatTypeContext {
     type Options = FormatTypeOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &FormatTypeOptions
@@ -109,6 +111,7 @@ impl Format<FormatTypeContext> for TypeData {
             Self::TypeOperator(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
             Self::IndexedAccess(ty) => write!(f, [FmtVerbatim(ty.as_ref())]),
             Self::MappedType(ty) => write!(f, [FmtVerbatim(ty.as_ref())]),
+            Self::Extends(ty) => write!(f, [ty.as_ref()]),
             Self::Literal(ty) => write!(f, [&ty.as_ref()]),
             Self::InstanceOf(ty) => write!(
                 f,
@@ -133,6 +136,47 @@ impl Format<FormatTypeContext> for TypeData {
             Self::UnknownKeyword => write!(f, [token("unknown")]),
             Self::VoidKeyword => write!(f, [token("void")]),
         }
+    }
+}
+
+impl Format<FormatTypeContext> for ExtendsType {
+    fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
+        let infer_types = format_with(|f| {
+            if self.infer_types.is_empty() {
+                return Ok(());
+            }
+            write!(f, [space(), token("infer"), space(), token("[")])?;
+            for (index, infer) in self.infer_types.iter().enumerate() {
+                if index > 0 {
+                    write!(f, [token(","), space()])?;
+                }
+                write!(f, [infer])?;
+            }
+            write!(f, [token("]")])
+        });
+        write!(
+            f,
+            [&format_args![
+                token("("),
+                &self.check_type,
+                space(),
+                token("extends"),
+                space(),
+                &self.extends_type,
+                space(),
+                token("?"),
+                space(),
+                &self.true_type,
+                space(),
+                token(":"),
+                space(),
+                &self.false_type,
+                token(")"),
+                infer_types,
+                self.distributive
+                    .then_some(format_args![space(), token("distributive")])
+            ]]
+        )
     }
 }
 
@@ -485,7 +529,7 @@ impl Format<FormatTypeContext> for TypeofExpression {
                 )
             }
             Self::Destructure(destructure) => match &destructure.destructure_field {
-                DestructureField::Index(index) => {
+                DestructureField::Index { index, .. } => {
                     write!(
                         f,
                         [&format_args![
@@ -496,7 +540,7 @@ impl Format<FormatTypeContext> for TypeofExpression {
                         ]]
                     )
                 }
-                DestructureField::Name(name) => {
+                DestructureField::Name { name, .. } => {
                     write!(f, [&format_args![destructure.ty, token("."), name]])
                 }
                 DestructureField::RestExcept(names) => {

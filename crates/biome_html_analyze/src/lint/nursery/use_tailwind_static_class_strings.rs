@@ -43,7 +43,7 @@ declare_lint_rule! {
     /// This rule checks the attributes and functions recognized by the top-level
     /// [`tailwind` configuration](https://biomejs.dev/reference/configuration/#tailwind).
     pub UseTailwindStaticClassStrings {
-        version: "next",
+        version: "2.6.0",
         name: "useTailwindStaticClassStrings",
         language: "html",
         domains: &[RuleDomain::Tailwind],

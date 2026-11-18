@@ -1,0 +1,451 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import { ref, shallowRef } from "vue";
+import * as Vue from "vue";
+import { ref as createRef } from "vue";
+import { useCount } from "./use-count";
+
+const a = ref();
+const b = ref(null);
+const c = ref(undefined);
+const d = shallowRef();
+const e = (ref());
+const f = createRef();
+const g = Vue.ref();
+const h = ref()!;
+
+function useA() {
+	const count = ref();
+	return { count };
+}
+
+function useB() {
+	return {
+		count: ref(),
+	};
+}
+
+let i;
+i = ref();
+
+function untyped(count) {}
+untyped(ref());
+
+useCount(ref());
+
+composable.useCount(ref());
+
+function typedFirst(count: Ref<number | undefined>) {}
+typedFirst(ref(), ref());
+
+function withThis(this: Window, count) {}
+withThis(ref());
+
+const { j } = { j: ref() };
+
+class Store {
+	count = ref();
+}
+
+class OptionalStore {
+	count? = ref();
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:7:11 lint/nursery/useVueTypedRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ref() call creates a ref without a type.
+  
+    5 │ import { useCount } from "./use-count";
+    6 │ 
+  > 7 │ const a = ref();
+      │           ^^^^^
+    8 │ const b = ref(null);
+    9 │ const c = ref(undefined);
+  
+  i Without a type argument, TypeScript can't tell which values the ref is meant to hold, so it can't catch mistakes when the ref is used.
+  
+  i Add a type argument, for example ref<number>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:11 lint/nursery/useVueTypedRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ref() call creates a ref without a type.
+  
+     7 │ const a = ref();
+   > 8 │ const b = ref(null);
+       │           ^^^^^^^^^
+     9 │ const c = ref(undefined);
+    10 │ const d = shallowRef();
+  
+  i Without a type argument, TypeScript can't tell which values the ref is meant to hold, so it can't catch mistakes when the ref is used.
+  
+  i Add a type argument, for example ref<number>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:9:11 lint/nursery/useVueTypedRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ref() call creates a ref without a type.
+  
+     7 │ const a = ref();
+     8 │ const b = ref(null);
+   > 9 │ const c = ref(undefined);
+       │           ^^^^^^^^^^^^^^
+    10 │ const d = shallowRef();
+    11 │ const e = (ref());
+  
+  i Without a type argument, TypeScript can't tell which values the ref is meant to hold, so it can't catch mistakes when the ref is used.
+  
+  i Add a type argument, for example ref<number>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:10:11 lint/nursery/useVueTypedRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This shallowRef() call creates a ref without a type.
+  
+     8 │ const b = ref(null);
+     9 │ const c = ref(undefined);
+  > 10 │ const d = shallowRef();
+       │           ^^^^^^^^^^^^
+    11 │ const e = (ref());
+    12 │ const f = createRef();
+  
+  i Without a type argument, TypeScript can't tell which values the ref is meant to hold, so it can't catch mistakes when the ref is used.
+  
+  i Add a type argument, for example shallowRef<number>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:11:12 lint/nursery/useVueTypedRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ref() call creates a ref without a type.
+  
+     9 │ const c = ref(undefined);
+    10 │ const d = shallowRef();
+  > 11 │ const e = (ref());
+       │            ^^^^^
+    12 │ const f = createRef();
+    13 │ const g = Vue.ref();
+  
+  i Without a type argument, TypeScript can't tell which values the ref is meant to hold, so it can't catch mistakes when the ref is used.
+  
+  i Add a type argument, for example ref<number>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:12:11 lint/nursery/useVueTypedRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ref() call creates a ref without a type.
+  
+    10 │ const d = shallowRef();
+    11 │ const e = (ref());
+  > 12 │ const f = createRef();
+       │           ^^^^^^^^^^^
+    13 │ const g = Vue.ref();
+    14 │ const h = ref()!;
+  
+  i Without a type argument, TypeScript can't tell which values the ref is meant to hold, so it can't catch mistakes when the ref is used.
+  
+  i Add a type argument, for example ref<number>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:13:11 lint/nursery/useVueTypedRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ref() call creates a ref without a type.
+  
+    11 │ const e = (ref());
+    12 │ const f = createRef();
+  > 13 │ const g = Vue.ref();
+       │           ^^^^^^^^^
+    14 │ const h = ref()!;
+    15 │ 
+  
+  i Without a type argument, TypeScript can't tell which values the ref is meant to hold, so it can't catch mistakes when the ref is used.
+  
+  i Add a type argument, for example ref<number>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:14:11 lint/nursery/useVueTypedRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ref() call creates a ref without a type.
+  
+    12 │ const f = createRef();
+    13 │ const g = Vue.ref();
+  > 14 │ const h = ref()!;
+       │           ^^^^^
+    15 │ 
+    16 │ function useA() {
+  
+  i Without a type argument, TypeScript can't tell which values the ref is meant to hold, so it can't catch mistakes when the ref is used.
+  
+  i Add a type argument, for example ref<number>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:16 lint/nursery/useVueTypedRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ref() call creates a ref without a type.
+  
+    16 │ function useA() {
+  > 17 │ 	const count = ref();
+       │ 	              ^^^^^
+    18 │ 	return { count };
+    19 │ }
+  
+  i Without a type argument, TypeScript can't tell which values the ref is meant to hold, so it can't catch mistakes when the ref is used.
+  
+  i Add a type argument, for example ref<number>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:23:10 lint/nursery/useVueTypedRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ref() call creates a ref without a type.
+  
+    21 │ function useB() {
+    22 │ 	return {
+  > 23 │ 		count: ref(),
+       │ 		       ^^^^^
+    24 │ 	};
+    25 │ }
+  
+  i Without a type argument, TypeScript can't tell which values the ref is meant to hold, so it can't catch mistakes when the ref is used.
+  
+  i Add a type argument, for example ref<number>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:28:5 lint/nursery/useVueTypedRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ref() call creates a ref without a type.
+  
+    27 │ let i;
+  > 28 │ i = ref();
+       │     ^^^^^
+    29 │ 
+    30 │ function untyped(count) {}
+  
+  i Without a type argument, TypeScript can't tell which values the ref is meant to hold, so it can't catch mistakes when the ref is used.
+  
+  i Add a type argument, for example ref<number>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:31:9 lint/nursery/useVueTypedRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ref() call creates a ref without a type.
+  
+    30 │ function untyped(count) {}
+  > 31 │ untyped(ref());
+       │         ^^^^^
+    32 │ 
+    33 │ useCount(ref());
+  
+  i Without a type argument, TypeScript can't tell which values the ref is meant to hold, so it can't catch mistakes when the ref is used.
+  
+  i Add a type argument, for example ref<number>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:33:10 lint/nursery/useVueTypedRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ref() call creates a ref without a type.
+  
+    31 │ untyped(ref());
+    32 │ 
+  > 33 │ useCount(ref());
+       │          ^^^^^
+    34 │ 
+    35 │ composable.useCount(ref());
+  
+  i Without a type argument, TypeScript can't tell which values the ref is meant to hold, so it can't catch mistakes when the ref is used.
+  
+  i Add a type argument, for example ref<number>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:35:21 lint/nursery/useVueTypedRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ref() call creates a ref without a type.
+  
+    33 │ useCount(ref());
+    34 │ 
+  > 35 │ composable.useCount(ref());
+       │                     ^^^^^
+    36 │ 
+    37 │ function typedFirst(count: Ref<number | undefined>) {}
+  
+  i Without a type argument, TypeScript can't tell which values the ref is meant to hold, so it can't catch mistakes when the ref is used.
+  
+  i Add a type argument, for example ref<number>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:38:19 lint/nursery/useVueTypedRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ref() call creates a ref without a type.
+  
+    37 │ function typedFirst(count: Ref<number | undefined>) {}
+  > 38 │ typedFirst(ref(), ref());
+       │                   ^^^^^
+    39 │ 
+    40 │ function withThis(this: Window, count) {}
+  
+  i Without a type argument, TypeScript can't tell which values the ref is meant to hold, so it can't catch mistakes when the ref is used.
+  
+  i Add a type argument, for example ref<number>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:41:10 lint/nursery/useVueTypedRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ref() call creates a ref without a type.
+  
+    40 │ function withThis(this: Window, count) {}
+  > 41 │ withThis(ref());
+       │          ^^^^^
+    42 │ 
+    43 │ const { j } = { j: ref() };
+  
+  i Without a type argument, TypeScript can't tell which values the ref is meant to hold, so it can't catch mistakes when the ref is used.
+  
+  i Add a type argument, for example ref<number>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:43:20 lint/nursery/useVueTypedRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ref() call creates a ref without a type.
+  
+    41 │ withThis(ref());
+    42 │ 
+  > 43 │ const { j } = { j: ref() };
+       │                    ^^^^^
+    44 │ 
+    45 │ class Store {
+  
+  i Without a type argument, TypeScript can't tell which values the ref is meant to hold, so it can't catch mistakes when the ref is used.
+  
+  i Add a type argument, for example ref<number>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:46:10 lint/nursery/useVueTypedRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ref() call creates a ref without a type.
+  
+    45 │ class Store {
+  > 46 │ 	count = ref();
+       │ 	        ^^^^^
+    47 │ }
+    48 │ 
+  
+  i Without a type argument, TypeScript can't tell which values the ref is meant to hold, so it can't catch mistakes when the ref is used.
+  
+  i Add a type argument, for example ref<number>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:50:11 lint/nursery/useVueTypedRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ref() call creates a ref without a type.
+  
+    49 │ class OptionalStore {
+  > 50 │ 	count? = ref();
+       │ 	         ^^^^^
+    51 │ }
+    52 │ 
+  
+  i Without a type argument, TypeScript can't tell which values the ref is meant to hold, so it can't catch mistakes when the ref is used.
+  
+  i Add a type argument, for example ref<number>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

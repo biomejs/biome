@@ -25,6 +25,8 @@ invalid.scss:3:16 lint/a11y/useGenericFontNames ━━━━━━━━━━�
     4 │   font: normal 14px/32px Arial;
     5 │ }
   
+  i If none of the listed font families is available, the browser falls back to its default font, which can look very different from the intended design.
+  
   i Consider adding a generic font family as a fallback.
   
   i For examples and more information, see the MDN Web Docs
@@ -48,6 +50,8 @@ invalid.scss:4:26 lint/a11y/useGenericFontNames ━━━━━━━━━━�
       │                          ^^^^^
     5 │ }
     6 │ 
+  
+  i If none of the listed font families is available, the browser falls back to its default font, which can look very different from the intended design.
   
   i Consider adding a generic font family as a fallback.
   

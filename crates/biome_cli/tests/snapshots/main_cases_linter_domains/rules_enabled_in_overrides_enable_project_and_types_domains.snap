@@ -1,0 +1,127 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome check src/index.ts
+```
+
+## `biome.json`
+
+```json
+{
+  "overrides": [
+    {
+      "includes": ["src/**"],
+      "linter": {
+        "rules": {
+          "correctness": { "noUnresolvedImports": "error" },
+          "nursery": { "noFloatingPromises": "error" },
+          "suspicious": { "noConsole": "error" }
+        }
+      }
+    }
+  ]
+}
+```
+
+## `src/index.ts`
+
+```ts
+import { missing } from "./other.ts";
+
+async function load(): Promise<string> {
+	return "data";
+}
+
+export function main(): void {
+	console.log(missing);
+	load();
+}
+
+```
+
+## `src/other.ts`
+
+```ts
+export const other = 1;
+
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+src/index.ts:1:10 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The path ./other.ts has no export named missing.
+  
+  > 1 │ import { missing } from "./other.ts";
+      │          ^^^^^^^
+    2 │ 
+    3 │ async function load(): Promise<string> {
+  
+  i Make sure that the path is correct and that you're importing the right symbol.
+  
+
+```
+
+```block
+src/index.ts:8:2 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't use console.
+  
+     7 │ export function main(): void {
+   > 8 │ 	console.log(missing);
+       │ 	^^^^^^^^^^^
+     9 │ 	load();
+    10 │ }
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+     6  6 │   
+     7  7 │   export function main(): void {
+     8    │ - → console.log(missing);
+     9  8 │     load();
+    10  9 │   }
+  
+
+```
+
+```block
+src/index.ts:9:2 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+     7 │ export function main(): void {
+     8 │ 	console.log(missing);
+   > 9 │ 	load();
+       │ 	^^^^^^^
+    10 │ }
+    11 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 3 errors.
+```

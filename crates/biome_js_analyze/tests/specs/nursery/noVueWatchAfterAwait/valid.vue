@@ -1,0 +1,43 @@
+<!-- should not generate diagnostics -->
+<script lang="ts">
+import { onMounted, watch, watchEffect } from "vue";
+
+export default {
+	async setup() {
+		watch(source, () => {});
+		watchEffect(() => {});
+
+		await doSomething();
+
+		// The returned function can be called to stop the watcher.
+		const a = watchEffect(() => {});
+		const b = watch(source, () => {});
+		const c = watch(source, () => {}) as WatchStopHandle;
+		const d = (watch(source, () => {}));
+		e = watch(source, () => {});
+		register(watch(source, () => {}));
+		const f = {
+			stop: watch(source, () => {}),
+		};
+		const g = [watch(source, () => {})];
+		const h = watch?.(source, () => {});
+		watch(source, () => {})();
+
+		// Not a watcher.
+		onMounted(() => {});
+
+		// Code in a nested function runs when the function is called, not during `setup()`.
+		const start = () => {
+			watch(source, () => {});
+		};
+		function startLater() {
+			watchEffect(() => {});
+		}
+		const handlers = {
+			start() {
+				watch(source, () => {});
+			},
+		};
+	},
+};
+</script>

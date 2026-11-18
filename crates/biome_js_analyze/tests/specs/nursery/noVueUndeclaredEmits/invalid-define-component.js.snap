@@ -1,0 +1,326 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-component.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { defineComponent } from "vue";
+
+export const NoEmitsOption = defineComponent({
+	methods: {
+		close() {
+			this.$emit("close");
+		},
+	},
+});
+
+export const ArrayEmits = defineComponent({
+	emits: ["change"],
+	methods: {
+		close() {
+			this.$emit("close");
+		},
+	},
+});
+
+export const ObjectEmits = defineComponent({
+	emits: { change: null, submit: (value) => true },
+	methods: {
+		close() {
+			this.$emit("close");
+		},
+	},
+});
+
+export const EmptyEmits = defineComponent({
+	emits: [],
+	methods: {
+		close() {
+			this.$emit("close");
+		},
+	},
+});
+
+export const SetupContext = defineComponent({
+	emits: ["change"],
+	setup(props, context) {
+		context.emit("close");
+	},
+});
+
+export const SetupDestructured = defineComponent({
+	emits: ["change"],
+	setup(props, { emit }) {
+		emit("close");
+	},
+});
+
+export const SetupRenamed = defineComponent({
+	emits: ["change"],
+	setup(props, { emit: fire }) {
+		fire("open");
+		fire("close");
+	},
+});
+
+export const Parent = defineComponent({
+	emits: ["parent"],
+	components: {
+		Child: defineComponent({
+			emits: ["child"],
+			methods: {
+				notify() {
+					this.$emit("parent");
+				},
+			},
+		}),
+	},
+	methods: {
+		notify() {
+			this.$emit("child");
+		},
+	},
+});
+
+export const OptionalCall = defineComponent({
+	methods: {
+		close() {
+			this?.$emit?.("close");
+		},
+	},
+});
+
+```
+
+# Diagnostics
+```
+invalid-define-component.js:7:15 lint/nursery/noVueUndeclaredEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event close is emitted, but the component doesn't declare it.
+  
+    5 │ 	methods: {
+    6 │ 		close() {
+  > 7 │ 			this.$emit("close");
+      │ 			           ^^^^^^^
+    8 │ 		},
+    9 │ 	},
+  
+  i Vue also adds a listener for an undeclared event to the root element of the component. If that element sends a native event with the same name, such as click, the listener runs twice.
+  
+  i Add close to the emits option or to the defineEmits() call of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:16:15 lint/nursery/noVueUndeclaredEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event close is emitted, but the component doesn't declare it.
+  
+    14 │ 	methods: {
+    15 │ 		close() {
+  > 16 │ 			this.$emit("close");
+       │ 			           ^^^^^^^
+    17 │ 		},
+    18 │ 	},
+  
+  i Vue also adds a listener for an undeclared event to the root element of the component. If that element sends a native event with the same name, such as click, the listener runs twice.
+  
+  i Add close to the emits option or to the defineEmits() call of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:25:15 lint/nursery/noVueUndeclaredEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event close is emitted, but the component doesn't declare it.
+  
+    23 │ 	methods: {
+    24 │ 		close() {
+  > 25 │ 			this.$emit("close");
+       │ 			           ^^^^^^^
+    26 │ 		},
+    27 │ 	},
+  
+  i Vue also adds a listener for an undeclared event to the root element of the component. If that element sends a native event with the same name, such as click, the listener runs twice.
+  
+  i Add close to the emits option or to the defineEmits() call of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:34:15 lint/nursery/noVueUndeclaredEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event close is emitted, but the component doesn't declare it.
+  
+    32 │ 	methods: {
+    33 │ 		close() {
+  > 34 │ 			this.$emit("close");
+       │ 			           ^^^^^^^
+    35 │ 		},
+    36 │ 	},
+  
+  i Vue also adds a listener for an undeclared event to the root element of the component. If that element sends a native event with the same name, such as click, the listener runs twice.
+  
+  i Add close to the emits option or to the defineEmits() call of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:42:16 lint/nursery/noVueUndeclaredEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event close is emitted, but the component doesn't declare it.
+  
+    40 │ 	emits: ["change"],
+    41 │ 	setup(props, context) {
+  > 42 │ 		context.emit("close");
+       │ 		             ^^^^^^^
+    43 │ 	},
+    44 │ });
+  
+  i Vue also adds a listener for an undeclared event to the root element of the component. If that element sends a native event with the same name, such as click, the listener runs twice.
+  
+  i Add close to the emits option or to the defineEmits() call of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:49:8 lint/nursery/noVueUndeclaredEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event close is emitted, but the component doesn't declare it.
+  
+    47 │ 	emits: ["change"],
+    48 │ 	setup(props, { emit }) {
+  > 49 │ 		emit("close");
+       │ 		     ^^^^^^^
+    50 │ 	},
+    51 │ });
+  
+  i Vue also adds a listener for an undeclared event to the root element of the component. If that element sends a native event with the same name, such as click, the listener runs twice.
+  
+  i Add close to the emits option or to the defineEmits() call of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:56:8 lint/nursery/noVueUndeclaredEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event open is emitted, but the component doesn't declare it.
+  
+    54 │ 	emits: ["change"],
+    55 │ 	setup(props, { emit: fire }) {
+  > 56 │ 		fire("open");
+       │ 		     ^^^^^^
+    57 │ 		fire("close");
+    58 │ 	},
+  
+  i Vue also adds a listener for an undeclared event to the root element of the component. If that element sends a native event with the same name, such as click, the listener runs twice.
+  
+  i Add open to the emits option or to the defineEmits() call of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:57:8 lint/nursery/noVueUndeclaredEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event close is emitted, but the component doesn't declare it.
+  
+    55 │ 	setup(props, { emit: fire }) {
+    56 │ 		fire("open");
+  > 57 │ 		fire("close");
+       │ 		     ^^^^^^^
+    58 │ 	},
+    59 │ });
+  
+  i Vue also adds a listener for an undeclared event to the root element of the component. If that element sends a native event with the same name, such as click, the listener runs twice.
+  
+  i Add close to the emits option or to the defineEmits() call of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:68:17 lint/nursery/noVueUndeclaredEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event parent is emitted, but the component doesn't declare it.
+  
+    66 │ 			methods: {
+    67 │ 				notify() {
+  > 68 │ 					this.$emit("parent");
+       │ 					           ^^^^^^^^
+    69 │ 				},
+    70 │ 			},
+  
+  i Vue also adds a listener for an undeclared event to the root element of the component. If that element sends a native event with the same name, such as click, the listener runs twice.
+  
+  i Add parent to the emits option or to the defineEmits() call of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:75:15 lint/nursery/noVueUndeclaredEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event child is emitted, but the component doesn't declare it.
+  
+    73 │ 	methods: {
+    74 │ 		notify() {
+  > 75 │ 			this.$emit("child");
+       │ 			           ^^^^^^^
+    76 │ 		},
+    77 │ 	},
+  
+  i Vue also adds a listener for an undeclared event to the root element of the component. If that element sends a native event with the same name, such as click, the listener runs twice.
+  
+  i Add child to the emits option or to the defineEmits() call of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:83:18 lint/nursery/noVueUndeclaredEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event close is emitted, but the component doesn't declare it.
+  
+    81 │ 	methods: {
+    82 │ 		close() {
+  > 83 │ 			this?.$emit?.("close");
+       │ 			              ^^^^^^^
+    84 │ 		},
+    85 │ 	},
+  
+  i Vue also adds a listener for an undeclared event to the root element of the component. If that element sends a native event with the same name, such as click, the listener runs twice.
+  
+  i Add close to the emits option or to the defineEmits() call of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

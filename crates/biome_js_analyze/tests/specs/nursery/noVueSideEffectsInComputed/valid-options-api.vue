@@ -1,0 +1,91 @@
+<!-- should not generate diagnostics -->
+<script>
+export default {
+  computed: {
+    copyReversed() {
+      return this.something.slice(0).reverse();
+    },
+    spreadReversed() {
+      return [...this.items].reverse();
+    },
+    sortedKeys() {
+      return Object.keys(this.a).sort();
+    },
+    objectSpread() {
+      return { ...this.a, b: 1 };
+    },
+    localChanges() {
+      const categories = {};
+      this.items.forEach((item) => {
+        categories[item.category] = item;
+      });
+      const list = [];
+      list.push(this.first);
+      list.reverse();
+      return { categories, list };
+    },
+    reassignLocal() {
+      let a;
+      a = this.something;
+      return a;
+    },
+    nestedFunctions() {
+      return {
+        action1() {
+          this.something++;
+        },
+        action2: function () {
+          this.something = 1;
+        },
+      };
+    },
+    returnedHandler() {
+      return () => {
+        this.count++;
+      };
+    },
+    localKeyedByState() {
+      const out = {};
+      out[this.id] = true;
+      return out;
+    },
+    delayedCallback() {
+      return debounce(() => {
+        this.saved = true;
+      }, 300);
+    },
+    readingCallback() {
+      return this.items.map((item) => item.name);
+    },
+    callResult() {
+      return this.something["a"]().reverse();
+    },
+    objectAssignNew() {
+      return Object.assign({}, this.data, { extra: "value" });
+    },
+    arrowIsNotTheComponent: () => this.items.reverse(),
+    withSetter: {
+      get() {
+        return this.firstName;
+      },
+      set(value) {
+        this.firstName = value;
+        this.items.push(value);
+      },
+    },
+    emits() {
+      return this.$emit("change");
+    },
+  },
+  methods: {
+    reverse() {
+      this.items.reverse();
+    },
+  },
+  watch: {
+    value() {
+      this.count++;
+    },
+  },
+};
+</script>

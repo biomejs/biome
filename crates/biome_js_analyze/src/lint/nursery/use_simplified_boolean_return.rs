@@ -96,7 +96,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseSimplifiedBooleanReturn {
-        version: "next",
+        version: "2.6.0",
         name: "useSimplifiedBooleanReturn",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-boolean-return").same()],

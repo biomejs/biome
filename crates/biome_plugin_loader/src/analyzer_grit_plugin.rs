@@ -219,7 +219,8 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
                         category!("plugin"),
                         None::<TextRange>,
                         markup!(<Emphasis>{name}</Emphasis>" errored: "<Error>{error.to_string()}</Error>),
-                    ),
+                    )
+                    .with_severity(Severity::Error),
                     action: None,
                 }],
             },

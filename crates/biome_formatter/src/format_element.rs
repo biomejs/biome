@@ -4,10 +4,9 @@ pub mod tag;
 use crate::format_element::tag::{LabelId, Tag};
 use std::borrow::Cow;
 
-use crate::{IndentWidth, TagKind, TextSize};
-use biome_rowan::TokenText;
-#[cfg(target_pointer_width = "64")]
-use biome_rowan::static_assert;
+use crate::source::Source;
+use crate::{IndentWidth, TagKind};
+use std::convert::Infallible;
 use std::hash::{Hash, Hasher};
 use std::iter::FusedIterator;
 use std::num::NonZeroU32;
@@ -19,14 +18,14 @@ use unicode_width::UnicodeWidthChar;
 ///
 /// Use the helper functions like [crate::builders::space], [crate::builders::soft_line_break] etc. defined in this file to create elements.
 #[derive(Clone, Eq, PartialEq)]
-pub enum FormatElement {
+pub enum FormatElement<S: Source> {
     /// A space token, see [crate::builders::space] for documentation.
     Space,
     HardSpace,
     /// A new line, see [crate::builders::soft_line_break], [crate::builders::hard_line_break],
     /// [crate::builders::literal_line_break_without_parent], and
     /// [crate::builders::soft_line_break_or_space] for documentation.
-    Line(LineMode),
+    Line(LineMode<S::Position>),
 
     /// Forces the parent group to print in expanded mode.
     ExpandParent,
@@ -34,7 +33,7 @@ pub enum FormatElement {
     /// Indicates the position of the elements coming after this element in the source document.
     /// The printer will create a source map entry from this position in the source document to the
     /// formatted position.
-    SourcePosition(TextSize),
+    SourcePosition(S::Position),
 
     /// A ASCII only Token that contains no line breaks or tab characters.
     Token {
@@ -52,7 +51,7 @@ pub enum FormatElement {
     /// Implementing by taking a slice from a `SyntaxToken` to avoid allocating a new string.
     LocatedTokenText {
         /// The token text
-        slice: TokenText,
+        slice: S::Text,
         text_width: TextWidth,
     },
 
@@ -61,15 +60,15 @@ pub enum FormatElement {
         /// There's no need for the text to be mutable, using `Box<str>` safes 8 bytes over `String`.
         text: Box<str>,
         /// The start position of the text in the unformatted source code.
-        source_position: TextSize,
+        source_position: S::Position,
     },
 
     /// Source text with a known source position, used when source-map generation is enabled.
     MappedLocatedTokenText {
         /// The token text
-        slice: TokenText,
+        slice: S::Text,
         /// The start position of the text in the unformatted source code.
-        source_position: TextSize,
+        source_position: S::Position,
     },
 
     /// Prevents that line suffixes move past this boundary. Forces the printer to print any pending
@@ -78,17 +77,17 @@ pub enum FormatElement {
 
     /// An interned format element. Useful when the same content must be emitted multiple times to avoid
     /// deep cloning the IR when using the `best_fitting!` macro or `if_group_fits_on_line` and `if_group_breaks`.
-    Interned(Interned),
+    Interned(Interned<S>),
 
     /// A list of different variants representing the same content. The printer picks the best fitting content.
     /// Line breaks inside of a best fitting don't propagate to parent groups.
-    BestFitting(BestFittingVariants),
+    BestFitting(BestFittingVariants<S>),
 
     /// A [Tag] that marks the start/end of some content to which some special formatting is applied.
-    Tag(Tag),
+    Tag(Tag<S>),
 }
 
-impl std::fmt::Debug for FormatElement {
+impl<S: Source> std::fmt::Debug for FormatElement<S> {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             Self::Space | Self::HardSpace => write!(fmt, "Space"),
@@ -129,7 +128,7 @@ impl std::fmt::Debug for FormatElement {
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub enum LineMode {
+pub enum LineMode<P> {
     /// See [crate::builders::soft_line_break_or_space] for documentation.
     SoftOrSpace,
     /// See [crate::builders::soft_line_break] for documentation.
@@ -141,11 +140,11 @@ pub enum LineMode {
     /// See [crate::builders::literal_line_break_without_parent] for documentation.
     Literal {
         /// Source offset of the represented LF when source maps are enabled.
-        source_position: Option<TextSize>,
+        source_position: Option<P>,
     },
 }
 
-impl LineMode {
+impl<P: Copy> LineMode<P> {
     pub const fn is_hard(&self) -> bool {
         matches!(self, Self::Hard)
     }
@@ -154,12 +153,32 @@ impl LineMode {
         matches!(self, Self::Literal { .. })
     }
 
-    pub(crate) const fn literal_source_position(&self) -> Option<TextSize> {
+    pub(crate) const fn literal_source_position(&self) -> Option<P> {
         match self {
             Self::Literal {
                 source_position, ..
             } => *source_position,
             _ => None,
+        }
+    }
+}
+
+impl LineMode<Infallible> {
+    /// Returns the same mode with the position type `P`.
+    pub(crate) const fn with_position<P>(self) -> LineMode<P> {
+        match self {
+            Self::SoftOrSpace => LineMode::SoftOrSpace,
+            Self::Soft => LineMode::Soft,
+            Self::Hard => LineMode::Hard,
+            Self::Empty => LineMode::Empty,
+            Self::Literal {
+                source_position: None,
+            } => LineMode::Literal {
+                source_position: None,
+            },
+            Self::Literal {
+                source_position: Some(never),
+            } => match never {},
         }
     }
 }
@@ -183,23 +202,23 @@ impl PrintMode {
 }
 
 #[derive(Clone)]
-pub struct Interned(Rc<[FormatElement]>);
+pub struct Interned<S: Source>(Rc<[FormatElement<S>]>);
 
-impl Interned {
-    pub fn new(content: Vec<FormatElement>) -> Self {
+impl<S: Source> Interned<S> {
+    pub fn new(content: Vec<FormatElement<S>>) -> Self {
         Self(content.into())
     }
 }
 
-impl PartialEq for Interned {
+impl<S: Source> PartialEq for Interned<S> {
     fn eq(&self, other: &Self) -> bool {
         Rc::ptr_eq(&self.0, &other.0)
     }
 }
 
-impl Eq for Interned {}
+impl<S: Source> Eq for Interned<S> {}
 
-impl Hash for Interned {
+impl<S: Source> Hash for Interned<S> {
     fn hash<H>(&self, hasher: &mut H)
     where
         H: Hasher,
@@ -208,14 +227,14 @@ impl Hash for Interned {
     }
 }
 
-impl std::fmt::Debug for Interned {
+impl<S: Source> std::fmt::Debug for Interned<S> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.0.fmt(f)
     }
 }
 
-impl Deref for Interned {
-    type Target = [FormatElement];
+impl<S: Source> Deref for Interned<S> {
+    type Target = [FormatElement<S>];
 
     fn deref(&self) -> &Self::Target {
         self.0.deref()
@@ -254,7 +273,7 @@ pub fn normalize_newlines<const N: usize>(text: &str, terminators: [char; N]) ->
     }
 }
 
-impl FormatElement {
+impl<S: Source> FormatElement<S> {
     /// Returns `true` if self is a [FormatElement::Tag]
     pub const fn is_tag(&self) -> bool {
         matches!(self, Self::Tag(_))
@@ -304,7 +323,7 @@ impl FormatElement {
     }
 }
 
-impl FormatElements for FormatElement {
+impl<S: Source> FormatElements<S> for FormatElement<S> {
     fn will_break(&self) -> bool {
         match self {
             Self::ExpandParent => true,
@@ -344,11 +363,11 @@ impl FormatElements for FormatElement {
         }
     }
 
-    fn start_tag(&self, _: TagKind) -> Option<&Tag> {
+    fn start_tag(&self, _: TagKind) -> Option<&Tag<S>> {
         None
     }
 
-    fn end_tag(&self, kind: TagKind) -> Option<&Tag> {
+    fn end_tag(&self, kind: TagKind) -> Option<&Tag<S>> {
         match self {
             Self::Tag(tag) if tag.kind() == kind && tag.is_end() => Some(tag),
             _ => None,
@@ -437,9 +456,9 @@ impl TextWidth {
 /// The first element is the one that takes up the most space horizontally (the most flat),
 /// The last element takes up the least horizontal (most vertical).
 #[derive(Clone, Eq, PartialEq, Debug)]
-pub struct BestFittingVariants(Box<[FormatElement]>);
+pub struct BestFittingVariants<S: Source>(Box<[FormatElement<S>]>);
 
-impl BestFittingVariants {
+impl<S: Source> BestFittingVariants<S> {
     /// Creates a new best fitting IR with the given variants. The method itself isn't unsafe
     /// but it is to discourage people from using it because the printer will panic if
     /// the slice doesn't contain at least the least and most expanded variants.
@@ -449,7 +468,7 @@ impl BestFittingVariants {
     /// ## Safety
     /// The slice must contain at least two variants (each delimited by StartEntry/EndEntry tags).
     #[doc(hidden)]
-    pub unsafe fn from_vec_unchecked(variants: Vec<FormatElement>) -> Self {
+    pub unsafe fn from_vec_unchecked(variants: Vec<FormatElement<S>>) -> Self {
         debug_assert!(
             variants
                 .iter()
@@ -462,7 +481,7 @@ impl BestFittingVariants {
     }
 
     /// Returns the most expanded variant
-    pub fn most_expanded(&self) -> &[FormatElement] {
+    pub fn most_expanded(&self) -> &[FormatElement<S>] {
         debug_assert!(
             self.as_slice()
                 .iter()
@@ -477,11 +496,11 @@ impl BestFittingVariants {
         )
     }
 
-    pub fn as_slice(&self) -> &[FormatElement] {
+    pub fn as_slice(&self) -> &[FormatElement<S>] {
         &self.0
     }
 
-    pub(crate) fn as_slice_mut(&mut self) -> &mut [FormatElement] {
+    pub(crate) fn as_slice_mut(&mut self) -> &mut [FormatElement<S>] {
         &mut self.0
     }
 
@@ -490,7 +509,7 @@ impl BestFittingVariants {
     /// # Panics
     ///
     /// When the number of variants is less than two.
-    pub fn most_flat(&self) -> &[FormatElement] {
+    pub fn most_flat(&self) -> &[FormatElement<S>] {
         debug_assert!(
             self.as_slice()
                 .iter()
@@ -503,29 +522,29 @@ impl BestFittingVariants {
     }
 }
 
-impl Deref for BestFittingVariants {
-    type Target = [FormatElement];
+impl<S: Source> Deref for BestFittingVariants<S> {
+    type Target = [FormatElement<S>];
 
     fn deref(&self) -> &Self::Target {
         self.as_slice()
     }
 }
 
-pub struct BestFittingVariantsIter<'a> {
-    elements: &'a [FormatElement],
+pub struct BestFittingVariantsIter<'a, S: Source> {
+    elements: &'a [FormatElement<S>],
 }
 
-impl<'a> IntoIterator for &'a BestFittingVariants {
-    type Item = &'a [FormatElement];
-    type IntoIter = BestFittingVariantsIter<'a>;
+impl<'a, S: Source> IntoIterator for &'a BestFittingVariants<S> {
+    type Item = &'a [FormatElement<S>];
+    type IntoIter = BestFittingVariantsIter<'a, S>;
 
     fn into_iter(self) -> Self::IntoIter {
         BestFittingVariantsIter { elements: &self.0 }
     }
 }
 
-impl<'a> Iterator for BestFittingVariantsIter<'a> {
-    type Item = &'a [FormatElement];
+impl<'a, S: Source> Iterator for BestFittingVariantsIter<'a, S> {
+    type Item = &'a [FormatElement<S>];
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.elements.first()? {
@@ -555,7 +574,7 @@ impl<'a> Iterator for BestFittingVariantsIter<'a> {
     }
 }
 
-impl<'a> DoubleEndedIterator for BestFittingVariantsIter<'a> {
+impl<S: Source> DoubleEndedIterator for BestFittingVariantsIter<'_, S> {
     fn next_back(&mut self) -> Option<Self::Item> {
         let start_position = self.elements.iter().rposition(|element| {
             matches!(element, FormatElement::Tag(Tag::StartBestFittingEntry))
@@ -567,9 +586,9 @@ impl<'a> DoubleEndedIterator for BestFittingVariantsIter<'a> {
     }
 }
 
-impl FusedIterator for BestFittingVariantsIter<'_> {}
+impl<S: Source> FusedIterator for BestFittingVariantsIter<'_, S> {}
 
-pub trait FormatElements {
+pub trait FormatElements<S: Source> {
     /// Returns true if this [FormatElement] is guaranteed to break across multiple lines by the printer.
     /// This is the case if this format element recursively contains a:
     /// * [crate::builders::empty_line], [crate::builders::hard_line_break], or
@@ -595,12 +614,32 @@ pub trait FormatElements {
     /// Returns the start tag of `kind` if:
     /// * the last element is an end tag of `kind`.
     /// * there's a matching start tag in this document (may not be true if this slice is an interned element and the `start` is in the document storing the interned element).
-    fn start_tag(&self, kind: TagKind) -> Option<&Tag>;
+    fn start_tag(&self, kind: TagKind) -> Option<&Tag<S>>;
 
     /// Returns the end tag if:
     /// * the last element is an end tag of `kind`
-    fn end_tag(&self, kind: TagKind) -> Option<&Tag>;
+    fn end_tag(&self, kind: TagKind) -> Option<&Tag<S>>;
 }
+
+#[cfg(target_pointer_width = "64")]
+const _: () = assert!(std::mem::size_of::<biome_text_size::TextRange>() == 8usize);
+
+#[cfg(target_pointer_width = "64")]
+const _: () = assert!(std::mem::size_of::<crate::format_element::tag::VerbatimKind>() == 8usize);
+
+#[cfg(all(not(debug_assertions), target_pointer_width = "64", feature = "rowan"))]
+const _: () = assert!(
+    std::mem::size_of::<crate::format_element::Tag<crate::rowan::RowanSource>>() == 16usize
+);
+
+// Increasing the size of FormatElement has serious consequences on runtime performance and memory footprint.
+// Is there a more efficient way to encode the data to avoid increasing its size? Can the information
+// be recomputed at a later point in time?
+// You reduced the size of a format element? Excellent work!
+
+#[cfg(all(not(debug_assertions), target_pointer_width = "64", feature = "rowan"))]
+const _: () =
+    assert!(std::mem::size_of::<crate::FormatElement<crate::rowan::RowanSource>>() == 24usize);
 
 #[cfg(test)]
 mod tests {
@@ -638,22 +677,3 @@ mod tests {
         assert_eq!(normalize_newlines("a\u{2029}b", LINE_TERMINATORS), "a\nb");
     }
 }
-
-#[cfg(target_pointer_width = "64")]
-static_assert!(std::mem::size_of::<biome_rowan::TextRange>() == 8usize);
-
-#[cfg(target_pointer_width = "64")]
-static_assert!(std::mem::size_of::<crate::format_element::tag::VerbatimKind>() == 8usize);
-
-#[cfg(not(debug_assertions))]
-#[cfg(target_pointer_width = "64")]
-static_assert!(std::mem::size_of::<crate::format_element::Tag>() == 16usize);
-
-// Increasing the size of FormatElement has serious consequences on runtime performance and memory footprint.
-// Is there a more efficient way to encode the data to avoid increasing its size? Can the information
-// be recomputed at a later point in time?
-// You reduced the size of a format element? Excellent work!
-
-#[cfg(not(debug_assertions))]
-#[cfg(target_pointer_width = "64")]
-static_assert!(std::mem::size_of::<crate::FormatElement>() == 24usize);

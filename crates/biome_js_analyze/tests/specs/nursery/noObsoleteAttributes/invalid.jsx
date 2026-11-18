@@ -1,0 +1,62 @@
+/* should generate diagnostics */
+<a charset="UTF-8" href="/page">Link</a>;
+<link charSet="UTF-8" rel="stylesheet" href="/style.css" />;
+<script charSet="UTF-8" src="/script.js"></script>;
+<a name="anchor">Link</a>;
+<img name="photo" src="/photo.jpg" alt="" />;
+<option name="first">First</option>;
+<table align="center"></table>;
+<div align="left">Content</div>;
+<h1 align="center">Title</h1>;
+<body bgcolor="#ffffff" text="#000000" link="blue"></body>;
+<table bgcolor={color} border="1"></table>;
+<img src="/photo.jpg" alt="" border={0} />;
+<table width="100%" height="200" cellPadding="5" cellSpacing="0"></table>;
+<table cellpadding="5" cellspacing="0"></table>;
+<iframe src="/page" frameBorder="0" scrolling="no"></iframe>;
+<iframe src="/page" frameborder="0" allowtransparency="true" framespacing="0"></iframe>;
+<html manifest="app.appcache"></html>;
+<form accept="image/*"></form>;
+<div contextMenu="menu">Content</div>;
+<div contextmenu="menu">Content</div>;
+<span dropzone="copy">Drop here</span>;
+<custom-element onshow="show()"></custom-element>;
+<area href="/page" hrefLang="en" alt="Page" />;
+<area href="/page" hreflang="en" alt="Page" />;
+<area nohref alt="Nothing" />;
+<li type="square">Item</li>;
+<ul type="disc"></ul>;
+<menu type="context" label="Actions"></menu>;
+<style type="text/css">{css}</style>;
+<script language="javascript"></script>;
+<script htmlFor="window" event="onload"></script>;
+<script for="window"></script>;
+<td nowrap abbr="Short" valign="top" axis="group" scope="row" height="20">Cell</td>;
+<br clear="all" />;
+<hr noshade size="2" color="red" width="50%" />;
+<object classID="clsid:1234" codebase="/plugin" standby="Loading"></object>;
+<object classid="clsid:1234" archive="/a.jar" code="Applet.class" codetype="application/java" declare typemustmatch></object>;
+<meta name="keywords" scheme="ISBN" content="0000" />;
+<img src="/photo.jpg" alt="" longdesc="/description.html" lowsrc="/small.jpg" />;
+<input type="image" src="/map.png" alt="Map" ismap useMap="#map" />;
+<object usemap="#map"></object>;
+<a href="/page" rev="made" urn="urn:example" methods="get" shape="rect" coords="0,0,10,10">Link</a>;
+<table summary="Results" frame="box" rules="all" datapagesize="10" background="/bg.png" bordercolor="red"></table>;
+<div datasrc="#data" datafld="name" dataformatas="text"></div>;
+<pre width="80">Text</pre>;
+<head profile="https://example.com/profile"></head>;
+<html version="-//W3C//DTD HTML 4.01//EN"></html>;
+<link target="_blank" href="/page" />;
+<input type="text" hspace="10" vspace="10" />;
+<tr char="." charoff="2"></tr>;
+<dl compact></dl>;
+<body alink="red" vlink="purple" leftmargin="0" topmargin="0" rightmargin="0" bottommargin="0" marginHeight="0" marginWidth="0"></body>;
+<iframe src="/page" marginheight="0" marginwidth="0"></iframe>;
+<svg>
+	<foreignObject>
+		<table bgcolor="#ffffff"></table>
+	</foreignObject>
+</svg>;
+<svg contextMenu="menu"></svg>;
+<svg contextMenu="menu" />;
+<iframe src="/page" allowTransparency="true"></iframe>;

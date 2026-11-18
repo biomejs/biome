@@ -16,9 +16,12 @@ use biome_js_syntax::{
     JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSetterClassMember,
     JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode, JsTryFinallyStatement, TextRange,
 };
-use biome_rowan::{AstNode, Language, SyntaxNode, Text, WalkEvent, declare_node_union};
+use biome_rowan::{
+    AstNode, Language, SyntaxKindSet, SyntaxNode, Text, WalkEvent, declare_node_union,
+};
 use rustc_hash::FxHashMap;
 use std::ops::{Deref, DerefMut};
+use std::rc::Rc;
 
 use crate::react::components::ReactComponentInfo;
 use biome_diagnostics::Severity;
@@ -502,7 +505,7 @@ fn is_top_level_call(call: &JsCallExpression) -> bool {
 /// early returns are not included in the model. For call sites that are
 /// preceded by multiple early returns, the return statement that we map to is
 /// implementation-defined.
-#[derive(Clone, Default)]
+#[derive(Default)]
 struct EarlyReturnsModel(FxHashMap<JsCallExpression, TextRange>);
 
 impl Deref for EarlyReturnsModel {
@@ -532,6 +535,18 @@ struct EarlyReturnDetectionVisitorStackEntry {
 
 impl Visitor for EarlyReturnDetectionVisitor {
     type Language = JsLanguage;
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(
+            AnyFunctionLike::KIND_SET
+                .union(AnyPropertyAccessor::KIND_SET)
+                .union(JsReturnStatement::KIND_SET)
+                .union(JsCallExpression::KIND_SET),
+        )
+    }
 
     fn visit(
         &mut self,
@@ -569,7 +584,7 @@ impl Visitor for EarlyReturnDetectionVisitor {
     }
 
     fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
-        ctx.services.insert_service(self.early_returns);
+        ctx.services.insert_service(Rc::new(self.early_returns));
     }
 }
 
@@ -586,6 +601,13 @@ struct FunctionCallVisitor;
 
 impl Visitor for FunctionCallVisitor {
     type Language = JsLanguage;
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(JsCallExpression::KIND_SET)
+    }
 
     fn visit(
         &mut self,
@@ -604,7 +626,7 @@ impl Visitor for FunctionCallVisitor {
 }
 
 pub struct FunctionCallServices {
-    early_returns: EarlyReturnsModel,
+    early_returns: Rc<EarlyReturnsModel>,
     semantic_services: SemanticServices,
 }
 
@@ -624,7 +646,7 @@ impl FromServices for FunctionCallServices {
         rule_metadata: &RuleMetadata,
         services: &ServiceBag,
     ) -> Result<Self, ServicesDiagnostic> {
-        let early_returns: &EarlyReturnsModel = services
+        let early_returns: &Rc<EarlyReturnsModel> = services
             .get_service()
             .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["EarlyReturnsModel"]))?;
 

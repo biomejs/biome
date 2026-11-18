@@ -3,13 +3,14 @@ use crate::css_module_info::{CssClassDefinition, CssClassReference, CssModuleVis
 use crate::html_module_info::{HtmlImport, HtmlModuleInfo};
 use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
 use biome_css_syntax::{AnyCssRoot, CssClassSelector};
-use biome_db::ParsedSource;
+use biome_db::Source;
 use biome_html_syntax::{
     AnyHtmlAttributeInitializer, HtmlElement, HtmlRoot, HtmlSelfClosingElement,
 };
 use biome_js_syntax::{AnyJsImportLike, AnyJsRoot};
 use biome_languages::css::EmbeddingStyleApplicability;
 use biome_languages::{CssFileSource, LanguageDb};
+use biome_parser::db::SourceExt;
 use biome_rowan::{AstNode, AstSeparatedList, Text, TextSize, TokenText, WalkEvent};
 use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexSet;
@@ -35,7 +36,7 @@ enum PreparedHtmlSnippet {
 }
 
 /// Collects the parsed roots needed for HTML module resolution.
-pub fn prepare_html_module(db: &dyn LanguageDb, parsed_source: ParsedSource) -> PreparedHtmlModule {
+pub fn prepare_html_module(db: &dyn LanguageDb, parsed_source: Source) -> PreparedHtmlModule {
     let html_root = parsed_source.parsed(db).tree::<HtmlRoot>();
     let snippets = parsed_source
         .snippets(db)
@@ -88,7 +89,8 @@ impl HtmlModuleVisitor {
         // Walk the HTML CST to collect class= references and <link> stylesheets.
         // Void elements like <link> and <meta> parse as HtmlSelfClosingElement;
         // normal elements parse as HtmlElement. Both must be handled.
-        for event in html_root.syntax().preorder() {
+        let kinds = HtmlElement::KIND_SET.union(HtmlSelfClosingElement::KIND_SET);
+        for event in html_root.syntax().preorder_of_kinds(kinds) {
             let WalkEvent::Enter(node) = event else {
                 continue;
             };
@@ -141,7 +143,10 @@ impl HtmlModuleVisitor {
         content_offset: TextSize,
         import_paths: &mut ImportPathMap<HtmlImport>,
     ) {
-        for event in js_root.syntax().preorder() {
+        for event in js_root
+            .syntax()
+            .preorder_of_kinds(AnyJsImportLike::KIND_SET)
+        {
             let WalkEvent::Enter(node) = event else {
                 continue;
             };
@@ -320,7 +325,8 @@ pub(crate) fn collect_css_classes(
     let base_applicability = file_source.embedding_applicability();
     let mut global_depth: u32 = 0;
 
-    for event in css_root.syntax().preorder() {
+    let kinds = AnyCssPseudoClassFunctionSelector::KIND_SET.union(CssClassSelector::KIND_SET);
+    for event in css_root.syntax().preorder_of_kinds(kinds) {
         match event {
             WalkEvent::Enter(node) => {
                 if let Some(pseudo_fn) = AnyCssPseudoClassFunctionSelector::cast(node.clone()) {

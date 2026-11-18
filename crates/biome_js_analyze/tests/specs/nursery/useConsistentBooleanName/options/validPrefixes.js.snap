@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validPrefixes.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+const needsUpdate = true;
+const needs_update = true;
+const NEEDS_UPDATE = true;
+const didUpdate = "yes";
+const isUpdate = true;
+
+```

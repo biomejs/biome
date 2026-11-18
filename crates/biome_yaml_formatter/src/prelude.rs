@@ -7,5 +7,5 @@ pub(crate) use crate::{
     format_removed, format_replaced, verbatim::format_yaml_verbatim_node as format_verbatim_node,
     verbatim::*,
 };
-pub(crate) use biome_formatter::prelude::*;
+pub(crate) use biome_formatter::rowan::prelude::*;
 pub(crate) use biome_rowan::{AstNode as _, AstNodeList as _, AstSeparatedList as _};

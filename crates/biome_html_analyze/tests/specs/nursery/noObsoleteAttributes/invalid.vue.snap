@@ -1,0 +1,57 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+	<table bgcolor="#ffffff"></table>
+	<a name="anchor">Link</a>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:9 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bgcolor attribute on <table> is obsolete.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │ 	<table bgcolor="#ffffff"></table>
+      │ 	       ^^^^^^^^^^^^^^^^^
+    4 │ 	<a name="anchor">Link</a>
+    5 │ </template>
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:5 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The name attribute on <a> is obsolete.
+  
+    2 │ <template>
+    3 │ 	<table bgcolor="#ffffff"></table>
+  > 4 │ 	<a name="anchor">Link</a>
+      │ 	   ^^^^^^^^^^^^^
+    5 │ </template>
+    6 │ 
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use the id attribute instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

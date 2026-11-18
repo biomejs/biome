@@ -1,0 +1,73 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidLayout.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template></template>
+
+<!-- styles -->
+<style>
+.a {}
+</style>
+
+<script>
+export default {}
+</script>
+
+```
+
+# Diagnostics
+```
+invalidLayout.vue:9:1 lint/nursery/useVueBlockOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The <script> block should be above the <style> block.
+  
+     7 │ </style>
+     8 │ 
+   > 9 │ <script>
+       │ ^^^^^^^^
+  > 10 │ export default {}
+  > 11 │ </script>
+       │ ^^^^^^^^^
+    12 │ 
+  
+  i This <style> block should come after it.
+  
+    4 │ <!-- styles -->
+  > 5 │ <style>
+      │ ^^^^^^^
+  > 6 │ .a {}
+  > 7 │ </style>
+      │ ^^^^^^^^
+    8 │ 
+    9 │ <script>
+  
+  i Putting the blocks of every component in the same order makes components easier to read.
+  
+  i This project puts top-level blocks in this order: <script> and <template> in any order, then <style>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the <script> block above the <style> block.
+  
+     3  3 │   
+     4  4 │   <!-- styles -->
+     5    │ - <style>
+     6    │ - .a·{}
+     7    │ - </style>
+        5 │ + <script>
+        6 │ + export·default·{}
+        7 │ + </script>
+     8  8 │   
+     9    │ - <script>
+    10    │ - export·default·{}
+    11    │ - </script>
+        9 │ + <style>
+       10 │ + .a·{}
+       11 │ + </style>
+    12 12 │   
+  
+
+```

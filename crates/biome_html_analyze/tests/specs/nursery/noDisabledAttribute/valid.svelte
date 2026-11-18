@@ -1,0 +1,20 @@
+<!-- should not generate diagnostics -->
+<button disabled={false}>Save</button>
+<button disabled={null}>Save</button>
+<button disabled={undefined}>Save</button>
+<button disabled {...props}>Save</button>
+<button {...props}>Save</button>
+<div role={role} disabled>Save</div>
+<div role="button" {...props} disabled>Save</div>
+<input type={type} disabled />
+<input type="submit" {...props} disabled />
+<Button disabled />
+<svelte:component this={Button} disabled />
+<my-button role="button" disabled>Save</my-button>
+<input {...props} disabled />
+<input type="hidden" disabled={condition} />
+<input type="text" readonly={condition} />
+<textarea disabled={false}></textarea>
+<select disabled={null}></select>
+<option disabled={condition}></option>
+<input {type} disabled />

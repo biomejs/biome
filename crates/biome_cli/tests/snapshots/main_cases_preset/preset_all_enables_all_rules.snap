@@ -49,6 +49,8 @@ test.js:1:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ 
   
+  i A negated condition with an else branch makes the reader reverse the logic twice. Swapping the blocks removes the negation.
+  
   i Safe fix: Invert the condition and the blocks.
   
     1   │ - if·(!cond)·{·f();·}·else·{·g();·}

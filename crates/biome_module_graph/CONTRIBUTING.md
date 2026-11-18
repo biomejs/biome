@@ -44,6 +44,214 @@ module's type table; it does not mean block- or function-scoped source code.
 Start at `src/module_graph.rs`, `src/js_module_info/collector.rs`, and
 `src/db/type_inference/resolver.rs`.
 
+### Flow-sensitive expression reads
+
+An expression lookup can give a variable a more specific type at a particular
+read. For example, after `if (value === null) return`, a variable typed
+`string | null` can be read as `string`. The type stored for the variable's
+declaration does not change.
+
+[`NARROWING.md`](./NARROWING.md) is the reference for what narrowing does: its
+correctness contract, which runtime tests narrow and which do not yet, its
+limits, and where Biome deliberately differs from TypeScript. A change to
+narrowing updates the rows it affects there. This section describes how
+narrowing is built.
+
+An execution root is a body analyzed independently, such as a module,
+function, or method. Each root gets its own graph, and a read never sees facts
+from an enclosing root. Biome uses its semantic model to distinguish variables
+with the same name.
+
+Flow is split like types: collection gathers syntax-only facts, and tracked
+queries do everything that needs a resolved type.
+
+#### Collection
+
+When type inference is enabled, collection (`src/js_module_info/flow.rs`)
+builds a graph of the possible paths through each execution root that tests
+one of its own variables or a path on its own `this`. Its parts live in
+`src/js_module_info/flow/`:
+
+- `scanner.rs` selects roots while the module visitor walks the syntax tree,
+  so collection never walks the whole module again. A root is selected when
+  its own code contains a condition or, in a module with an `asserts`
+  annotation, a standalone call. It also records whether the root's own code
+  uses `this`, so a root whose only subjects are paths on `this` still gets a
+  graph. The scanner rejects a root when its own code contains a `with`
+  statement or bogus syntax, and a root over its node or depth limit. Declaration files (`.d.ts`, `.d.mts`, `.d.cts`, in any letter
+  case) contain no code that runs, so the visitor does not look for roots in
+  them.
+- `builder.rs` builds the graph of one selected root from start, join, and
+  condition nodes. It records the incoming flow point of every reachable read
+  of a subject and, for each condition node, the subjects its guard may
+  narrow. A read of a property path is recorded after its object and key are
+  evaluated. The builder skips class members: methods, accessors,
+  constructors, and static blocks are roots of their own, and TypeScript
+  analyzes a class field that has an initializer apart from the code around
+  the class. It also skips `declare` statements, which never run.
+- The builder models the control flow of blocks, `if`, `while`, `do...while`,
+  `for`, labeled statements, `break`, `continue`, `return`, and `throw`. Any
+  other statement, such as `switch`, `try`, `for...in`, or `for...of`, is an
+  opaque region. The builder evaluates the expressions of a region in source
+  order from the flow point before it, without modelling the branches and
+  jumps inside it, and the next statement continues from the result. For each
+  `break` or `continue` inside the region that targets a statement outside it,
+  the builder adds the point before the region as a predecessor of that
+  target, once per target. Regions keep narrowing sound because only subjects
+  that the root never writes narrow: the state before a region is never
+  narrower than the state at any point inside or after it. Replacing a region
+  with a model of its statement only makes narrowing more precise.
+- `subjects.rs` maps an expression to the subject it reads or tests: a
+  variable or `this`, or a property path that starts at one, such as `o.v`,
+  `a.b.c`, `t[0]`, or `this.#v`. A static member access with a named property
+  or a private name extends a path, and so does an element access whose key
+  spells its property's name: a string
+  literal without escapes, or a decimal integer literal from 0 to 2^53 - 1
+  without leading zeros or separators. JavaScript converts a number key to a
+  string, and such an integer converts to its own digits, so `o["v"]` is the
+  same subject as `o.v`, and `t[0]` the same as `t["0"]`. Any other key, such
+  as `k`, `-0`, or `0x0`, ends the subject. A private name gets a key of its
+  own, so `o.#v` is never the same subject as `o["#v"]`. Parentheses are
+  skipped, and `o?.v` is the same subject as `o.v`. Each root stores its
+  subjects in a table, a path after its prefixes, so the builder and the
+  decomposer give a read and a test of the same subject the same id.
+- `this` is a subject only in a root where `this_can_narrow` in `subjects.rs`
+  holds: where Biome types `this` as TypeScript does and TypeScript narrows
+  its properties as those of a variable. That is a class method or accessor
+  that is not `static` and has no `this` parameter, an object literal method
+  or accessor, or an arrow function whose `this` comes from one of them or
+  from a field initializer, when Biome can name the class or object. A
+  constructor has no `this` subject, and neither does an arrow function whose
+  `this` comes from a constructor. There, TypeScript reads a field without an
+  initializer at its declared type after a test that leaves `undefined`
+  possible (TS2565), and an arrow function called where it is defined
+  continues the constructor's flow. Each root has its own `this`, so a test
+  of `this.v` never reaches a read in a nested function.
+- `guards.rs` decomposes every condition into guards on subjects, combined
+  the way `!`, `&&`, and `||` combine them. For example,
+  `typeof value === "string"` becomes a runtime test of `value`, and
+  `o.v !== null` a runtime test of `o.v`. When the tested operand is part of
+  an optional chain and the test's result shows that the operand is not
+  `undefined`, as the true branch of `x?.y === 1` does, the guard also tests
+  each receiver of the chain that is a subject as not nullish, such as `x`
+  and `x.y` in `x?.y?.z`, combined with the main test as `&&` combines its
+  operands. Which branches narrow the receivers follows TypeScript's
+  `narrowTypeByOptionalChainContainment`: neither outcome of `??` does, for
+  example. Parentheses end a chain, and a test of a chain that starts at a
+  parenthesized optional chain, such as `(x?.y)?.z === 1`, narrows nothing:
+  TypeScript narrows `x.y` there but not `x`, so a read of `x?.y` adds
+  `undefined` back from `x`, while a narrowed path in Biome would keep its
+  narrowed type at that read. A call to a local type-guard
+  function becomes a runtime test of its argument: collection selects the
+  tested argument from the function's collected signature, and inference
+  later resolves only the target of its type predicate. Neither step infers
+  the function's body. For a standalone call to an assertion function,
+  the builder adds a condition node after the call, so the call and its
+  arguments still use the types from before it. `asserts value is T` becomes a
+  runtime test of the argument, as `value is T` does, while `asserts value`
+  decomposes the argument as a condition that holds, so
+  `assert(value !== null)` excludes `null` from `value`.
+  A truthiness test of an aliased condition, a `const` that is not exported,
+  has no type annotation, and binds a name to an initializer, as `ok` in
+  `const ok = x !== null; if (ok)`, also decomposes that initializer and
+  combines it with the test of `ok` as `&&` combines its operands. Inside an
+  inlined initializer, only a test of a variable whose value cannot change
+  between the `const` and the test is kept, following TypeScript's
+  `isConstantReference`: a test of a property path, of `this`, of an exported
+  variable, or of a variable declared by a `let` statement at the top level
+  of a file becomes `Keep`. Inlining stops
+  once five aliased conditions enclose a test, where TypeScript stops too, so
+  a deeper `const` tests only its own truthiness. When decomposition stops
+  early, the subjects that inlined initializers read are mentioned too.
+- `writes.rs` finds the property paths that a root may write. The graph has
+  no write points, so a written path does not narrow anywhere in its root.
+  The scan visits the root's own code, including function and arrow
+  expressions called where they are defined and class static blocks, but not
+  the bodies of other functions, methods, accessors, and constructors, which
+  run only when called. A write cancels the written path and every path that
+  extends it. A write through an element access whose key `subjects.rs`
+  accepts, as in `o["v"] = x`, writes the path that the key names, and a
+  write through any other key, as in `o[k] = x`, cancels every path below its
+  object. Every `this` and `super` along a written target stands for the
+  root's `this`, so `super.v = x` cancels `this.v`.
+
+Collection then keeps only the reads that a runtime test of their subject can
+reach, and only for subjects that can narrow. A variable can narrow when it is
+declared in the root, never written, neither untyped nor annotated `any`, and
+not supplied by a destructuring default, which the declared type ignores. A
+property path can narrow when its variable can, or when it starts at a `this`
+that is a subject, and the write scan finds no write that cancels it; the scan
+runs only when the root reads a tested path.
+Those reads, plus the enclosing expressions that can use a narrowed operand,
+become candidates. A test inside a nested function never reaches reads in the
+enclosing one, and an array or object literal ends the chain of enclosing
+candidates. A root that declares no variable that can narrow and has no `this`
+subject gets no graph.
+Other variable types are resolved only when a candidate read is queried,
+because resolving them can be costly.
+
+#### Tracked solve
+
+Lookups skip flow for any expression that is not a candidate. Guards, the
+subjects each condition may narrow, and reads refer to a subject by its id in
+its root's subject table, so a test and a read of the same subject match. For
+a candidate read of a variable, `infer_flow_binding_baseline` resolves the
+variable's declared type once. For a read of a property path, the declared
+type is the type of the member access at that read, computed from the
+narrowed type of its object when the object has one, as TypeScript types
+property reads. Facts about the variable therefore reach its
+paths only through that member lookup. `infer_flow_subject_states` then
+applies the guards on every path to all reads of the subject in one root in a
+single solve, and `infer_flow_subject_type` takes the result at the read's
+incoming flow point. Both queries take the starting type as part of their
+key, so reads of a subject share one solve when they start from the same
+type.
+
+Complete module inference evaluates flow candidates in its own resolution
+context instead of through `infer_flow_expression_type` and
+`infer_flow_binding_baseline`. When it reaches expressions, that context has
+resolved every raw type of the module, so a variable's declared type, and the
+member access that gives a property path its declared type, read types it
+already holds, while the queries would resolve them again in a fresh context.
+It still solves through `infer_flow_subject_states` and
+`infer_flow_subject_type`. Cycle fallback and the import-depth fallback read
+imports differently from the flow queries, so they keep using the queries.
+
+`src/db/type_inference/flow.rs` applies each runtime test with `narrow_type`
+from `biome_js_type_info`. Where branches meet, or a loop returns to an earlier
+point, it keeps every type still possible on a reachable path. A read on a path
+that no value can take gets type Unknown, not `never`. `flow_expressions.rs`
+uses narrowed operands when inferring member accesses, calls, logical and
+conditional expressions, `await`, the comma operator, and `+`. Complete module
+inference narrows each read as an individual expression query does, from the
+declared type its own context resolved.
+
+#### Caching
+
+Collected flow belongs to the module input, so an edit replaces it together
+with the raw type tables, even when variable declarations and references stay
+the same. Salsa caches the type work: all reads of a variable share the type
+that narrowing starts from, its reads in one root share one narrowing
+calculation, and reads at the same flow point share their result. Lookups and
+complete module inference share the calculation and the results when they
+start from the same type. These caches recompute when the module input
+changes; they do not track edits separately for each function.
+
+#### Work limits
+
+Collection, condition decomposition, and the solve each have work limits. A
+root that exceeds a limit while its flow is collected gets no graph, so its
+reads keep their declared types. The limit on finding the reads that a test
+can reach is spent on variables before property paths; when it runs out on
+paths, the root keeps its graph and only its path reads lose narrowing. If decomposing a condition cannot finish
+within its work limit, the guard makes the result unknown rather than assuming
+the expression is unaffected. When the shared solve exceeds its work limit or
+meets a query cycle, `infer_flow_subject_type` solves the read's point on its
+own, so a read never loses precision because other reads share its root. If
+that solve also exhausts its work limit or a query cycle occurs, the result is
+unknown. Callers must respect that result rather than replace it with a more
+confident answer from raw type information.
+
 ### Analyzer-facing requests
 
 A request is a typed operation used by analyzer rules. It stores module and

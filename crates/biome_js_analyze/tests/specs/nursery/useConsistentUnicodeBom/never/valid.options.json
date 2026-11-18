@@ -1,0 +1,14 @@
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useConsistentUnicodeBom": {
+          "level": "on",
+          "options": {
+            "bom": "never"
+          }
+        }
+      }
+    }
+  }
+}

@@ -75,6 +75,8 @@ check.js:1:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━�
   > 1 │ new Symbol("");
       │ ^^^^^^^^^^^^^^
   
+  i Calling this builtin the wrong way throws a TypeError at runtime.
+  
   i Unsafe fix: Remove new keyword.
   
     1 │ new·Symbol("");

@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: valid-props-variable.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+import { props } from "./props";
+
+export default { props };
+</script>
+
+```

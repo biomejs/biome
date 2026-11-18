@@ -63,19 +63,34 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
        6 │ + → → → "complexity":·{·"noUselessLabel":·"error",·"useLiteralKeys":·"off"·},
        7 │ + → → → "security":·{·"noGlobalEval":·"warn"·},
        8 │ + → → → "style":·{·"useDefaultParameterLast":·"off"·},
-       9 │ + → → → "suspicious":·{·"noDoubleEquals":·"warn",·"useGetterReturn":·"error"·}
-      10 │ + → → },
-      11 │ + → → "includes":·["**",·"**/*.test.js"]
-      12 │ + → },
-      13 │ + → "javascript":·{·"globals":·["var1",·"var2"]·},
-      14 │ + → "overrides":·[
-      15 │ + → → {
-      16 │ + → → → "includes":·["bin/*.js",·"lib/*.js",·"!*.test.js"],
-      17 │ + → → → "linter":·{·"rules":·{·"suspicious":·{·"noDoubleEquals":·"off"·}·}·}
-      18 │ + → → }
-      19 │ + → ]
-      20 │ + }
-      21 │ + 
+       9 │ + → → → "suspicious":·{
+      10 │ + → → → → "noDoubleEquals":·{
+      11 │ + → → → → → "level":·"warn",
+      12 │ + → → → → → "options":·{·"ignoreNull":·false·}
+      13 │ + → → → → },
+      14 │ + → → → → "useGetterReturn":·"error"
+      15 │ + → → → }
+      16 │ + → → },
+      17 │ + → → "includes":·["**",·"**/*.test.js"]
+      18 │ + → },
+      19 │ + → "javascript":·{·"globals":·["var1",·"var2"]·},
+      20 │ + → "overrides":·[
+      21 │ + → → {
+      22 │ + → → → "includes":·["bin/*.js",·"lib/*.js",·"!*.test.js"],
+      23 │ + → → → "linter":·{
+      24 │ + → → → → "rules":·{
+      25 │ + → → → → → "suspicious":·{
+      26 │ + → → → → → → "noDoubleEquals":·{
+      27 │ + → → → → → → → "level":·"off",
+      28 │ + → → → → → → → "options":·{·"ignoreNull":·false·}
+      29 │ + → → → → → → }
+      30 │ + → → → → → }
+      31 │ + → → → → }
+      32 │ + → → → }
+      33 │ + → → }
+      34 │ + → ]
+      35 │ + }
+      36 │ + 
   
 
 ```

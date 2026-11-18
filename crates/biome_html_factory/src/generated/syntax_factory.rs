@@ -1502,6 +1502,36 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                             | T![tspan]
                             | T![view]
                             | T![vkern]
+                            | T![annotation]
+                            | T![annotation_xml]
+                            | T![maction]
+                            | T![math]
+                            | T![merror]
+                            | T![mfrac]
+                            | T![mi]
+                            | T![mmultiscripts]
+                            | T![mn]
+                            | T![mo]
+                            | T![mover]
+                            | T![mpadded]
+                            | T![mphantom]
+                            | T![mprescripts]
+                            | T![mroot]
+                            | T![mrow]
+                            | T![ms]
+                            | T![mspace]
+                            | T![msqrt]
+                            | T![mstyle]
+                            | T![msub]
+                            | T![msubsup]
+                            | T![msup]
+                            | T![mtable]
+                            | T![mtd]
+                            | T![mtext]
+                            | T![mtr]
+                            | T![munder]
+                            | T![munderover]
+                            | T![semantics]
                             | T![component]
                             | HTML_UNKNOWN_TAG
                             | HTML_LITERAL
@@ -3512,6 +3542,39 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                     );
                 }
                 slots.into_node(VUE_V_FOR_ARRAY_BINDING, children)
+            }
+            VUE_V_FOR_DEFAULT_BINDING => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && AnyVueVForBinding::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [=]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && HtmlTextExpression::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        VUE_V_FOR_DEFAULT_BINDING.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(VUE_V_FOR_DEFAULT_BINDING, children)
             }
             VUE_V_FOR_IDENTIFIER_BINDING => {
                 let mut elements = (&children).into_iter();

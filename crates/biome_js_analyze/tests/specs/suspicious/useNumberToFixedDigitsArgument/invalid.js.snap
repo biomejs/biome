@@ -24,6 +24,8 @@ invalid.js:1:31 lint/suspicious/useNumberToFixedDigitsArgument  FIXABLE  ━━�
     2 │ const string2 = number.toFixed(/* comment */);
     3 │ Number(1).toFixed();
   
+  i Without an argument, Number#toFixed() rounds to zero digits after the decimal point, which is easy to overlook.
+  
   i Unsafe fix: Add explicit digits argument to toFixed method.
   
     1 │ const·string1·=·number.toFixed(0);
@@ -41,6 +43,8 @@ invalid.js:2:31 lint/suspicious/useNumberToFixedDigitsArgument  FIXABLE  ━━�
       │                               ^^^^^^^^^^^^^^^
     3 │ Number(1).toFixed();
     4 │ 
+  
+  i Without an argument, Number#toFixed() rounds to zero digits after the decimal point, which is easy to overlook.
   
   i Unsafe fix: Add explicit digits argument to toFixed method.
   
@@ -61,6 +65,8 @@ invalid.js:3:18 lint/suspicious/useNumberToFixedDigitsArgument  FIXABLE  ━━�
     4 │ 
     5 │ // False positive cases
   
+  i Without an argument, Number#toFixed() rounds to zero digits after the decimal point, which is easy to overlook.
+  
   i Unsafe fix: Add explicit digits argument to toFixed method.
   
     3 │ Number(1).toFixed(0);
@@ -77,6 +83,8 @@ invalid.js:6:70 lint/suspicious/useNumberToFixedDigitsArgument  FIXABLE  ━━�
   > 6 │ const bigNumber = new BigNumber(1); const string3 = bigNumber.toFixed();
       │                                                                      ^^
     7 │ 
+  
+  i Without an argument, Number#toFixed() rounds to zero digits after the decimal point, which is easy to overlook.
   
   i Unsafe fix: Add explicit digits argument to toFixed method.
   

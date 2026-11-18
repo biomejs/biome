@@ -1,0 +1,216 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidFarApart.js
+---
+# Input
+```js
+/* should generate diagnostics */
+switch (key) {
+	case 'alpha':
+		break;
+	case `beta`:
+		break;
+	case 'key0':
+		break;
+	case 'key1':
+		break;
+	case 'key2':
+		break;
+	case 'key3':
+		break;
+	case 'key4':
+		break;
+	case 'key5':
+		break;
+	case 'key6':
+		break;
+	case 'key7':
+		break;
+	case 'key8':
+		break;
+	case 'key9':
+		break;
+	case 'key10':
+		break;
+	case 'key11':
+		break;
+	case 'key12':
+		break;
+	case 'key13':
+		break;
+	case 'key14':
+		break;
+	case 'key15':
+		break;
+	case 'key16':
+		break;
+	case 'key17':
+		break;
+	case 'key18':
+		break;
+	case 'key19':
+		break;
+	case 'key20':
+		break;
+	case 'key21':
+		break;
+	case 'key22':
+		break;
+	case 'key23':
+		break;
+	case 'key24':
+		break;
+	case 'key25':
+		break;
+	case 'key26':
+		break;
+	case 'key27':
+		break;
+	case 'key28':
+		break;
+	case 'key29':
+		break;
+	case 'key30':
+		break;
+	case 'key31':
+		break;
+	case 'key32':
+		break;
+	case 'key33':
+		break;
+	case 'key34':
+		break;
+	case 'key35':
+		break;
+	case 'key36':
+		break;
+	case 'key37':
+		break;
+	case 'key38':
+		break;
+	case 'key39':
+		break;
+	case "alpha":
+		break;
+	case `beta`:
+		break;
+	case 'key7':
+		break;
+	case 'alpha':
+		break;
+}
+
+```
+
+# Diagnostics
+```
+invalidFarApart.js:87:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate case label.
+  
+    85 │ 	case 'key39':
+    86 │ 		break;
+  > 87 │ 	case "alpha":
+       │ 	     ^^^^^^^
+    88 │ 		break;
+    89 │ 	case `beta`:
+  
+  i The first similar label is here:
+  
+    1 │ /* should generate diagnostics */
+    2 │ switch (key) {
+  > 3 │ 	case 'alpha':
+      │ 	     ^^^^^^^
+    4 │ 		break;
+    5 │ 	case `beta`:
+  
+  i Only the first matching case is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake.
+  
+  i Remove the duplicate case, or change its value to the one you meant.
+  
+
+```
+
+```
+invalidFarApart.js:89:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate case label.
+  
+    87 │ 	case "alpha":
+    88 │ 		break;
+  > 89 │ 	case `beta`:
+       │ 	     ^^^^^^
+    90 │ 		break;
+    91 │ 	case 'key7':
+  
+  i The first similar label is here:
+  
+    3 │ 	case 'alpha':
+    4 │ 		break;
+  > 5 │ 	case `beta`:
+      │ 	     ^^^^^^
+    6 │ 		break;
+    7 │ 	case 'key0':
+  
+  i Only the first matching case is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake.
+  
+  i Remove the duplicate case, or change its value to the one you meant.
+  
+
+```
+
+```
+invalidFarApart.js:91:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate case label.
+  
+    89 │ 	case `beta`:
+    90 │ 		break;
+  > 91 │ 	case 'key7':
+       │ 	     ^^^^^^
+    92 │ 		break;
+    93 │ 	case 'alpha':
+  
+  i The first similar label is here:
+  
+    19 │ 	case 'key6':
+    20 │ 		break;
+  > 21 │ 	case 'key7':
+       │ 	     ^^^^^^
+    22 │ 		break;
+    23 │ 	case 'key8':
+  
+  i Only the first matching case is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake.
+  
+  i Remove the duplicate case, or change its value to the one you meant.
+  
+
+```
+
+```
+invalidFarApart.js:93:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate case label.
+  
+    91 │ 	case 'key7':
+    92 │ 		break;
+  > 93 │ 	case 'alpha':
+       │ 	     ^^^^^^^
+    94 │ 		break;
+    95 │ }
+  
+  i The first similar label is here:
+  
+    1 │ /* should generate diagnostics */
+    2 │ switch (key) {
+  > 3 │ 	case 'alpha':
+      │ 	     ^^^^^^^
+    4 │ 		break;
+    5 │ 	case `beta`:
+  
+  i Only the first matching case is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake.
+  
+  i Remove the duplicate case, or change its value to the one you meant.
+  
+
+```

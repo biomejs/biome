@@ -1,5 +1,6 @@
 use crate::AsFormat;
 use crate::context::HtmlFormatContext;
+use crate::html::auxiliary::attribute_single_text_expression::HtmlAttributeSingleTextExpressionLayout;
 use biome_formatter::formatter::Formatter;
 use biome_formatter::{Format, FormatResult};
 use biome_html_syntax::{AnyHtmlAttributeInitializer, AnySvelteBindingProperty};
@@ -12,9 +13,14 @@ pub(crate) struct FmtAnyAttributeInitializer {
 impl Format<HtmlFormatContext> for FmtAnyAttributeInitializer {
     fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
         match &self.node {
-            AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(node) => {
-                node.format().with_options(self.compact).fmt(f)
-            }
+            AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(node) => node
+                .format()
+                .with_options(if self.compact {
+                    HtmlAttributeSingleTextExpressionLayout::Remove
+                } else {
+                    HtmlAttributeSingleTextExpressionLayout::Normal
+                })
+                .fmt(f),
             AnyHtmlAttributeInitializer::HtmlString(node) => {
                 node.format().with_options(self.compact).fmt(f)
             }

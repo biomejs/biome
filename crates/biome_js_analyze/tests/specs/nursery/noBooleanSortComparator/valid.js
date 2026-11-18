@@ -1,0 +1,76 @@
+/* should not generate diagnostics */
+array.sort();
+array.toSorted();
+array.sort(compareFunction);
+array.sort((a, b) => a - b);
+array.sort((a, b) => b - a);
+array.sort((a, b) => a.score - b.score);
+array.sort((a, b) => a.localeCompare(b));
+array.toSorted((a, b) => a.localeCompare(b));
+array.sort((a, b) => (a > b ? 1 : -1));
+array.sort((a, b) => (a > b ? 1 : a < b ? -1 : 0));
+array.sort((a, b) => a.foo - b.foo || a.bar - b.bar);
+array.sort((a, b) => Math.random() - 0.5);
+array.sort(...comparators);
+array.sort(...comparators, extraArgument);
+array[sort]((a, b) => a > b);
+array[letMethod]((a, b) => a > b);
+array[filterMethod]((a, b) => a > b);
+array.filter((a, b) => a > b);
+new Set().sort((a, b) => a > b);
+new Map().sort((a, b) => a > b);
+({ sort() {} }).sort((a, b) => a > b);
+(() => {}).sort((a, b) => a > b);
+`text`.sort((a, b) => a > b);
+const collection = new Set();
+collection.sort((a, b) => a > b);
+const object = {};
+object.sort((a, b) => a > b);
+const function_ = () => {};
+function_.sort((a, b) => a > b);
+array.sort(async (a, b) => a > b);
+array.sort(function* (a, b) {
+	return a > b;
+});
+array.sort((a, b) => unknownBoolean);
+array.sort((a, b) => unknownFunction(a, b));
+array.sort((a, b) => a.isBigger(b));
+array.sort((a, b) => notConstBoolean);
+array.sort((a, b) => {
+	if (a > b) {
+		return true;
+	}
+
+	return false;
+});
+array.sort((a, b) => {
+	const difference = a - b;
+	return difference > 0;
+});
+array.sort(Number.isNaN?.bind(Number));
+array.sort(compare);
+array.sort(reassigned);
+array.sort(recursive);
+array.sort(letComparator);
+
+let notConstBoolean = true;
+let letMethod = "sort";
+const filterMethod = "filter";
+function compare(a, b) {
+	return a - b;
+}
+function reassigned(a, b) {
+	return a > b;
+}
+reassigned = (a, b) => a - b;
+function recursive(a, b) {
+	return recursive(a, b);
+}
+let letComparator = (a, b) => a > b;
+
+function shadowed(Boolean, isNaN, Number) {
+	array.sort(Boolean);
+	array.sort(isNaN);
+	array.sort(Number.isNaN);
+	array.sort((a, b) => Boolean(a - b));
+}

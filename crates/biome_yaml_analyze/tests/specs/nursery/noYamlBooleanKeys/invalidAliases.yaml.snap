@@ -1,0 +1,229 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: invalidAliases.yaml
+---
+# Input
+```yaml
+# should generate diagnostics
+plain: &plain true
+tagged: &tagged !!bool "true"
+tagged_mapping: &mapping !!bool
+  key: value
+first_key:
+  &first false: 1
+
+? *plain
+: 2
+? *tagged
+: 3
+? *mapping
+: 4
+flow: { *plain : 5, *first : 6 }
+
+# the alias refers to the closest anchor before it
+again: &again text
+other: &again True
+? *again
+: 7
+
+```
+
+# Diagnostics
+```
+invalidAliases.yaml:7:10 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    5 │   key: value
+    6 │ first_key:
+  > 7 │   &first false: 1
+      │          ^^^^^
+    8 │ 
+    9 │ ? *plain
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAliases.yaml:9:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is an alias to a boolean value.
+  
+     7 │   &first false: 1
+     8 │ 
+   > 9 │ ? *plain
+       │   ^^^^^^
+    10 │ : 2
+    11 │ ? *tagged
+  
+  i The alias refers to the value marked with this anchor.
+  
+    1 │ # should generate diagnostics
+  > 2 │ plain: &plain true
+      │        ^^^^^^
+    3 │ tagged: &tagged !!bool "true"
+    4 │ tagged_mapping: &mapping !!bool
+  
+  i Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Use a text key instead of the alias.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAliases.yaml:11:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is an alias to a boolean value.
+  
+     9 │ ? *plain
+    10 │ : 2
+  > 11 │ ? *tagged
+       │   ^^^^^^^
+    12 │ : 3
+    13 │ ? *mapping
+  
+  i The alias refers to the value marked with this anchor.
+  
+    1 │ # should generate diagnostics
+    2 │ plain: &plain true
+  > 3 │ tagged: &tagged !!bool "true"
+      │         ^^^^^^^
+    4 │ tagged_mapping: &mapping !!bool
+    5 │   key: value
+  
+  i Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Use a text key instead of the alias.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAliases.yaml:13:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is an alias to a boolean value.
+  
+    11 │ ? *tagged
+    12 │ : 3
+  > 13 │ ? *mapping
+       │   ^^^^^^^^
+    14 │ : 4
+    15 │ flow: { *plain : 5, *first : 6 }
+  
+  i The alias refers to the value marked with this anchor.
+  
+    2 │ plain: &plain true
+    3 │ tagged: &tagged !!bool "true"
+  > 4 │ tagged_mapping: &mapping !!bool
+      │                 ^^^^^^^^
+    5 │   key: value
+    6 │ first_key:
+  
+  i Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Use a text key instead of the alias.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAliases.yaml:15:9 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is an alias to a boolean value.
+  
+    13 │ ? *mapping
+    14 │ : 4
+  > 15 │ flow: { *plain : 5, *first : 6 }
+       │         ^^^^^^
+    16 │ 
+    17 │ # the alias refers to the closest anchor before it
+  
+  i The alias refers to the value marked with this anchor.
+  
+    1 │ # should generate diagnostics
+  > 2 │ plain: &plain true
+      │        ^^^^^^
+    3 │ tagged: &tagged !!bool "true"
+    4 │ tagged_mapping: &mapping !!bool
+  
+  i Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Use a text key instead of the alias.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAliases.yaml:15:21 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is an alias to a boolean value.
+  
+    13 │ ? *mapping
+    14 │ : 4
+  > 15 │ flow: { *plain : 5, *first : 6 }
+       │                     ^^^^^^
+    16 │ 
+    17 │ # the alias refers to the closest anchor before it
+  
+  i The alias refers to the value marked with this anchor.
+  
+    5 │   key: value
+    6 │ first_key:
+  > 7 │   &first false: 1
+      │   ^^^^^^
+    8 │ 
+    9 │ ? *plain
+  
+  i Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Use a text key instead of the alias.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAliases.yaml:20:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is an alias to a boolean value.
+  
+    18 │ again: &again text
+    19 │ other: &again True
+  > 20 │ ? *again
+       │   ^^^^^^
+    21 │ : 7
+    22 │ 
+  
+  i The alias refers to the value marked with this anchor.
+  
+    17 │ # the alias refers to the closest anchor before it
+    18 │ again: &again text
+  > 19 │ other: &again True
+       │        ^^^^^^
+    20 │ ? *again
+    21 │ : 7
+  
+  i Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Use a text key instead of the alias.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

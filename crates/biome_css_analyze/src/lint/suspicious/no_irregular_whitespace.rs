@@ -2,9 +2,9 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{AnyCssRule, CssSyntaxNode};
+use biome_css_syntax::{AnyCssRoot, CssSyntaxKind, CssSyntaxNode};
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, Direction, TextRange};
+use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_irregular_whitespace::NoIrregularWhitespaceOptions;
 
 declare_lint_rule! {
@@ -13,6 +13,8 @@ declare_lint_rule! {
     /// Some Unicode and control characters look like spaces but can change how a selector is
     /// parsed. The invalid example contains a vertical tab between the class selectors, so it does
     /// not behave like a normal descendant separator.
+    ///
+    /// Irregular whitespace inside strings and comments is treated as content and is not reported.
     ///
     /// ## Examples
     ///
@@ -43,7 +45,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoIrregularWhitespace {
-    type Query = Ast<AnyCssRule>;
+    type Query = Ast<AnyCssRoot>;
     type State = TextRange;
     type Signals = Box<[Self::State]>;
     type Options = NoIrregularWhitespaceOptions;
@@ -62,7 +64,10 @@ impl Rule for NoIrregularWhitespace {
                 },
             )
             .note(markup! {
-                    "Replace the irregular whitespace with normal whitespaces."
+                "Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find."
+            })
+            .note(markup! {
+                "Replace the irregular whitespace with normal whitespaces."
             }),
         )
     }
@@ -77,21 +82,35 @@ fn is_irregular_whitespace(c: char) -> bool {
 }
 
 fn get_irregular_whitespace(syntax: &CssSyntaxNode) -> Vec<TextRange> {
-    if !syntax
-        .text_with_trivia()
-        .chars()
-        .any(is_irregular_whitespace)
-    {
-        return vec![];
-    }
-
     let mut results = vec![];
-    for token in syntax.descendants_tokens(Direction::Next) {
-        if !token.has_leading_comments()
-            && !token.has_trailing_comments()
-            && token.text().chars().any(is_irregular_whitespace)
+    for token in syntax.borrowed_tokens() {
+        let is_bom = token.kind() == CssSyntaxKind::UNICODE_BOM;
+
+        let is_string = matches!(
+            token.kind(),
+            CssSyntaxKind::CSS_STRING_LITERAL | CssSyntaxKind::SCSS_STRING_CONTENT_LITERAL
+        );
+
+        for piece in token
+            .leading_trivia_pieces()
+            .chain(token.trailing_trivia_pieces())
         {
-            results.push(token.text_range());
+            if !piece.kind().is_comment() && piece.text().chars().any(is_irregular_whitespace) {
+                results.push(piece.text_range());
+            }
+        }
+
+        if is_bom || is_string {
+            continue;
+        }
+
+        let text_range = token.text_range();
+        let text_trimmed_range = token.text_trimmed_range();
+        let start = usize::from(text_trimmed_range.start() - text_range.start());
+        let end = usize::from(text_trimmed_range.end() - text_range.start());
+
+        if token.text()[start..end].chars().any(is_irregular_whitespace) {
+            results.push(text_trimmed_range);
         }
     }
     results

@@ -1,4 +1,3 @@
-use crate::FormatEmbedded;
 use crate::prelude::*;
 use crate::shared::FormatLiteralLines;
 use biome_formatter::write;

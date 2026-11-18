@@ -301,7 +301,7 @@ fn test_aliased_named_reexport_is_found_by_alias() {
     let barrel = db.module_for_path(Utf8Path::new("/src/barrel.ts")).unwrap();
     assert!(matches!(
         find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "renamedSymbol", barrel)),
-        JsExportedSymbolLookup::Found(_)
+        JsExportedSymbolLookup::Found(..)
     ));
     assert_eq!(
         find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "originalName", barrel)),
@@ -383,7 +383,7 @@ fn test_find_symbol_reexported_through_package_self_reference() {
         .unwrap();
     assert!(matches!(
         find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "NextRequest", server)),
-        JsExportedSymbolLookup::Found(_)
+        JsExportedSymbolLookup::Found(..)
     ));
 }
 
@@ -402,7 +402,7 @@ fn test_export_equals_namespace_without_type_inference() {
     for name in ["useState", "useCallback"] {
         assert!(matches!(
             find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, name, module)),
-            JsExportedSymbolLookup::Found(_)
+            JsExportedSymbolLookup::Found(..)
         ));
     }
 }
@@ -632,6 +632,53 @@ fn test_infer_module_types_resolves_imported_exported_type() {
             .values()
             .any(|data| data.ty == InferredTypeData::String)
     );
+}
+
+#[test]
+fn test_infer_module_types_resolves_imported_type_merged_with_value() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/types.ts".into(),
+        r#"
+            export type Foo = string;
+            export const Foo = { name: "foo" } as const;
+
+            export interface Bar {
+                label: string;
+            }
+            export namespace Bar {
+                export const kind = "bar";
+            }
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import { Bar, Foo } from "./types.ts";
+
+            export const value: Foo = "value";
+            export const name = Foo.name;
+
+            export const bar: Bar = { label: "bar" };
+            export const label = bar.label;
+            export const kind = Bar.kind;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/types.ts", "/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    for name in ["value", "name", "label", "kind"] {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} binding type must be inferred"));
+        assert!(
+            is_inferred_string(&db, ty),
+            "{name} must be a string, got {ty:?}"
+        );
+    }
 }
 
 #[test]

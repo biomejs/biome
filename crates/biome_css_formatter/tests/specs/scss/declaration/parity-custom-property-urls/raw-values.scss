@@ -1,0 +1,25 @@
+$asset:mark;
+.icon{
+--literal:url($asset);
+--literal-path:url(/icons/$asset.svg);
+--mixed:url($literal-#{ $asset }.svg);
+--query:url(/icons/$asset.svg?a=1,b=2);
+--payload-comment:url(/*payload*/#{ $asset }.svg);
+--payload-slashes:url(//cdn.example/icon.svg);
+--interpolation-comment:url(/icons/#{/* inside interpolation */ $asset }.svg);
+--fallback:var(--missing,url(/icons/#{ $asset }.svg));
+--function:url(var(--image));
+--literal-expression:url($asset + ".svg");
+--quoted:url("#{$asset}.svg");
+--quoted-expression:url("$asset" + ".svg");
+--empty:url();
+--spaced:url(   /icons/mark.svg   );
+--source:src($asset);
+--after:url(icon.svg)//literal;
+--important:url(icon.svg)!important;
+color:red
+}
+@supports (--image: url(//cdn.example/icon.svg)){
+.supported{--image:url($literal);color:blue}
+}
+.following{color:green}

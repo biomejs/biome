@@ -1,6 +1,8 @@
 //! This is a generated file. Don't modify it by hand! Run 'cargo codegen formatter' to re-generate the file.
 
 pub(crate) mod at_rule;
+pub(crate) mod at_rule_custom_name;
+pub(crate) mod at_rule_dashed_name;
 pub(crate) mod at_rule_declarator;
 pub(crate) mod attr_fallback_value;
 pub(crate) mod attr_name;
@@ -81,6 +83,7 @@ pub(crate) mod media_type_condition;
 pub(crate) mod media_type_name;
 pub(crate) mod media_type_query;
 pub(crate) mod namespace_prefix;
+pub(crate) mod namespace_prefix_name;
 pub(crate) mod namespace_url;
 pub(crate) mod nested_selector;
 pub(crate) mod page_at_rule_block;

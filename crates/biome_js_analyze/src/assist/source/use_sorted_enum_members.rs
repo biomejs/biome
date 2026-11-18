@@ -9,9 +9,7 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyTsEnumMemberName, JsLanguage, T, TsEnumDeclaration, TsEnumMember, TsEnumMemberList,
 };
-use biome_rowan::{
-    AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, TokenText, TriviaPieceKind,
-};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, TokenText};
 use biome_rule_options::use_sorted_enum_members::UseSortedEnumMembersOptions;
 use biome_string_case::comparable_token::ComparableToken;
 
@@ -171,7 +169,7 @@ fn sort_enum_member_list(
     let new_list = sorted_separated_list_by(
         list,
         get_value_definition_key,
-        || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        || make::token(T![,]).with_trailing_space(),
         locale_compare,
     )
     .ok()?;

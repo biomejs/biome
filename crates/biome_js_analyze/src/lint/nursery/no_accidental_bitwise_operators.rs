@@ -71,10 +71,13 @@ declare_lint_rule! {
     /// - If you want to disallow bitwise operators entirely, see [`noBitwiseOperators`](https://biomejs.dev/linter/rules/no-bitwise-operators/).
     ///
     pub NoAccidentalBitwiseOperators {
-        version: "next",
+        version: "2.6.0",
         name: "noAccidentalBitwiseOperators",
         language: "js",
-        sources: &[RuleSource::EslintUnicorn("no-accidental-bitwise-operator").same()],
+        sources: &[
+            RuleSource::EslintUnicorn("no-accidental-bitwise-operator").same(),
+            RuleSource::Oxc("bad-bitwise-operator").same(),
+        ],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,

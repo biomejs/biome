@@ -293,6 +293,9 @@ impl Rule for NoUnnecessaryConditions {
                 )
                 .note(markup! {
                     "The value's type can never be falsy, so this check is redundant."
+                })
+                .note(markup! {
+                    "Remove the condition, or check the value you meant to test."
                 }),
             ),
             IssueKind::AlwaysFalsyCondition(range) => Some(
@@ -305,6 +308,9 @@ impl Rule for NoUnnecessaryConditions {
                 )
                 .note(markup! {
                     "The value's type can never be truthy, so this check is redundant."
+                })
+                .note(markup! {
+                    "Remove the condition and the code it guards, or check the value you meant to test."
                 }),
             ),
             IssueKind::UnnecessaryOptionalChain(node_range, operator_range) => Some(
@@ -332,6 +338,9 @@ impl Rule for NoUnnecessaryConditions {
                 )
                 .note(markup! {
                     "The operands' types make the outcome statically known."
+                })
+                .note(markup! {
+                    "Remove the comparison, or compare the values you meant to compare."
                 }),
             ),
             IssueKind::UnnecessaryCoalescing(node_range, operator_range) => Some(
@@ -359,6 +368,9 @@ impl Rule for NoUnnecessaryConditions {
                 )
                 .note(markup! {
                     "The value passed to "<Emphasis>"switch"</Emphasis>" can never equal this value."
+                })
+                .note(markup! {
+                    "Remove the unreachable "<Emphasis>"case"</Emphasis>", or change it to a value that the "<Emphasis>"switch"</Emphasis>" expression can have."
                 }),
             ),
         }

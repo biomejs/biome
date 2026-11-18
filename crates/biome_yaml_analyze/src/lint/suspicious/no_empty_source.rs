@@ -83,7 +83,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoEmptySource {
-        version: "next",
+        version: "2.6.0",
         name: "noEmptySource",
         language: "yaml",
         sources: &[RuleSource::EslintYml("no-empty-document").same()],
@@ -182,10 +182,7 @@ fn has_content_comments(document: &YamlDocument) -> bool {
         .dashdashdash_token()
         .map_or(TextSize::from(0), |token| token.text_trimmed_range().end());
     let following_token = if document.dotdotdot_token().is_none() {
-        document
-            .syntax()
-            .last_token()
-            .and_then(|token| token.next_token())
+        document.syntax().next_token()
     } else {
         None
     };

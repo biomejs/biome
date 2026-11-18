@@ -21,4 +21,13 @@ expression: valid.scss
   padding: nth(1px 2px, 2);
 }
 
+.declared-later {
+  width: declared-after-use(2);
+  height: declared_after_use(3);
+}
+
+@function declared_after_use($value) {
+  @return $value * 1px;
+}
+
 ```

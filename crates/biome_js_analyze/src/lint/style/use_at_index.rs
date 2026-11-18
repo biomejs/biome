@@ -10,7 +10,7 @@ use biome_js_syntax::{
     JsCallExpression, JsComputedMemberExpression, JsParenthesizedExpression,
     JsStaticMemberExpression, JsUnaryExpression, T,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind, declare_node_union};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, declare_node_union};
 use biome_rule_options::use_at_index::UseAtIndexOptions;
 
 declare_lint_rule! {
@@ -415,16 +415,11 @@ fn make_plus_binary_expression(list: Vec<AnyJsExpression>) -> Option<AnyJsExpres
             .last_trailing_trivia()
             .and_then(|trivia| trivia.last())
             .is_some_and(|piece| piece.is_whitespace() || piece.is_newline());
-        let mut operator =
-            make::token(T![+]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+        let mut operator = make::token(T![+]).with_trailing_space();
         if !has_space_before_operator {
-            operator = operator.with_leading_trivia([(TriviaPieceKind::Whitespace, " ")]);
+            operator = operator.with_leading_space();
         }
-        AnyJsExpression::JsBinaryExpression(make::js_binary_expression(
-            left,
-            operator,
-            right,
-        ))
+        AnyJsExpression::JsBinaryExpression(make::js_binary_expression(left, operator, right))
     })
 }
 
@@ -474,7 +469,9 @@ fn extract_negative_index_expression(
         Some(AnyJsExpression::JsUnaryExpression(
             make::js_unary_expression(
                 make::token(T![-]),
-                overwrap_parentheses_expression(&make_plus_binary_expression(right_list)?.trim_trivia()?)?,
+                overwrap_parentheses_expression(
+                    &make_plus_binary_expression(right_list)?.trim_trivia()?,
+                )?,
             ),
         ))
     }

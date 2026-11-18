@@ -1,0 +1,77 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+a {a
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..2 "a " [] [],
+                },
+                MdxInlineExpression {
+                    l_curly_token: L_CURLY@2..3 "{" [] [],
+                    content: MdxExpressionContent {
+                        value_token: MDX_EXPRESSION_LITERAL@3..4 "a" [] [],
+                    },
+                    r_curly_token: missing (required),
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@4..4 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..4
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..4
+    0: MD_PARAGRAPH@0..4
+      0: MD_INLINE_ITEM_LIST@0..4
+        0: MD_TEXTUAL@0..2
+          0: MD_TEXTUAL_LITERAL@0..2 "a " [] []
+        1: MDX_INLINE_EXPRESSION@2..4
+          0: L_CURLY@2..3 "{" [] []
+          1: MDX_EXPRESSION_CONTENT@3..4
+            0: MDX_EXPRESSION_LITERAL@3..4 "a" [] []
+          2: (empty)
+  3: EOF@4..4 "" [] []
+
+```
+
+## Diagnostics
+
+```
+unclosed_inline_expression_at_end_of_file.mdx:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unclosed expression, expected a closing `}`.
+  
+  > 1 │ a {a
+      │   ^
+  
+  i expression started here
+  
+  > 1 │ a {a
+      │   ^
+  
+  i Add the closing `}`. To write a literal brace in MDX, escape it as `\{`.
+  
+```

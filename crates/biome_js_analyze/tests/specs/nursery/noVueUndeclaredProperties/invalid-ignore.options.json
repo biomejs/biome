@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noVueUndeclaredProperties": {
+          "level": "error",
+          "options": {
+            "ignore": ["i18n"]
+          }
+        }
+      }
+    }
+  }
+}

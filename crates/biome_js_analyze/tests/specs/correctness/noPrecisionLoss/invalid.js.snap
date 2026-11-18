@@ -71,6 +71,8 @@ invalid.js:2:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
   i The value at runtime will be 9007199254740992
   
+  i If the exact value matters, use a BigInt literal, such as 9007199254740993n, or use a smaller number.
+  
 
 ```
 
@@ -87,6 +89,8 @@ invalid.js:3:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
     5 │ var x = -9007199254740993
   
   i The value at runtime will be 9007199254740992
+  
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
   
 
 ```
@@ -105,6 +109,8 @@ invalid.js:4:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
   i The value at runtime will be 9007199254740992
   
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
+  
 
 ```
 
@@ -121,6 +127,8 @@ invalid.js:5:10 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
     7 │ var x = -900719.9254740994
   
   i The value at runtime will be 9007199254740992
+  
+  i If the exact value matters, use a BigInt literal, such as 9007199254740993n, or use a smaller number.
   
 
 ```
@@ -139,6 +147,8 @@ invalid.js:6:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
   i The value at runtime will be 900719.9254740993
   
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
+  
 
 ```
 
@@ -155,6 +165,8 @@ invalid.js:7:10 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
     9 │ var x = 90_0719925_4740.9_93e3
   
   i The value at runtime will be 900719.9254740993
+  
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
   
 
 ```
@@ -173,6 +185,8 @@ invalid.js:8:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
   i The value at runtime will be 9007199254740992
   
+  i If the exact value matters, use a BigInt literal, such as 9007199254740993n, or use a smaller number.
+  
 
 ```
 
@@ -189,6 +203,8 @@ invalid.js:9:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
     11 │ var x = -9_00719_9254_740993
   
   i The value at runtime will be 9007199254740992
+  
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
   
 
 ```
@@ -207,6 +223,8 @@ invalid.js:10:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
   i The value at runtime will be 9007199254740992
   
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
+  
 
 ```
 
@@ -223,6 +241,8 @@ invalid.js:11:10 lint/correctness/noPrecisionLoss ━━━━━━━━━━
     13 │ var x = -900_719.92_5474_0994
   
   i The value at runtime will be 9007199254740992
+  
+  i If the exact value matters, use a BigInt literal, such as 9007199254740993n, or use a smaller number.
   
 
 ```
@@ -241,6 +261,8 @@ invalid.js:12:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
   i The value at runtime will be 900719.9254740993
   
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
+  
 
 ```
 
@@ -257,6 +279,8 @@ invalid.js:13:10 lint/correctness/noPrecisionLoss ━━━━━━━━━━
     15 │ var x = -5123000000000000000000000000001
   
   i The value at runtime will be 900719.9254740993
+  
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
   
 
 ```
@@ -275,6 +299,8 @@ invalid.js:14:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
   i The value at runtime will be 5123000000000000000000000000000
   
+  i If the exact value matters, use a BigInt literal, such as 9007199254740993n, or use a smaller number.
+  
 
 ```
 
@@ -291,6 +317,8 @@ invalid.js:15:10 lint/correctness/noPrecisionLoss ━━━━━━━━━━
     17 │ var x = 17498005798264095394980017816940970922825355447145699491406164851279623993595007385788105416184430592
   
   i The value at runtime will be 5123000000000000000000000000000
+  
+  i If the exact value matters, use a BigInt literal, such as 9007199254740993n, or use a smaller number.
   
 
 ```
@@ -309,6 +337,8 @@ invalid.js:16:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
   i The value at runtime will be 1
   
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
+  
 
 ```
 
@@ -325,6 +355,8 @@ invalid.js:17:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
     19 │ var x = 0b100000000000000000000000000000000000000000000000000001
   
   i The value at runtime will be 17498005798264095000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  
+  i If the exact value matters, use a BigInt literal, such as 9007199254740993n, or use a smaller number.
   
 
 ```
@@ -343,6 +375,8 @@ invalid.js:18:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
   i The value at runtime will be inf
   
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
+  
 
 ```
 
@@ -359,6 +393,8 @@ invalid.js:19:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
     21 │ var x = 0o400000000000000001
   
   i The value at runtime will be 9007199254740992
+  
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
   
 
 ```
@@ -377,6 +413,8 @@ invalid.js:20:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
   i The value at runtime will be 9007199254740992
   
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
+  
 
 ```
 
@@ -393,6 +431,8 @@ invalid.js:21:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
     23 │ var x = 0400000000000000001
   
   i The value at runtime will be 9007199254740992
+  
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
   
 
 ```
@@ -411,6 +451,8 @@ invalid.js:22:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
   i The value at runtime will be 9007199254740992
   
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
+  
 
 ```
 
@@ -427,6 +469,8 @@ invalid.js:23:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
     25 │ var x = 0X20000000000001
   
   i The value at runtime will be 9007199254740992
+  
+  i If the exact value matters, use a BigInt literal, such as 9007199254740993n, or use a smaller number.
   
 
 ```
@@ -445,6 +489,8 @@ invalid.js:24:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
   i The value at runtime will be 9007199254740992
   
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
+  
 
 ```
 
@@ -461,6 +507,8 @@ invalid.js:25:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
     27 │ var x = -5_12300000000000000000000_0000001
   
   i The value at runtime will be 9007199254740992
+  
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
   
 
 ```
@@ -479,6 +527,8 @@ invalid.js:26:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
   i The value at runtime will be 5123000000000000000000000000000
   
+  i If the exact value matters, use a BigInt literal, such as 9007199254740993n, or use a smaller number.
+  
 
 ```
 
@@ -495,6 +545,8 @@ invalid.js:27:10 lint/correctness/noPrecisionLoss ━━━━━━━━━━
     29 │ var x = 174_980057982_640953949800178169_409709228253554471456994_914061648512796239935950073857881054_1618443059_2
   
   i The value at runtime will be 5123000000000000000000000000000
+  
+  i If the exact value matters, use a BigInt literal, such as 9007199254740993n, or use a smaller number.
   
 
 ```
@@ -513,6 +565,8 @@ invalid.js:28:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
   i The value at runtime will be 1
   
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
+  
 
 ```
 
@@ -529,6 +583,8 @@ invalid.js:29:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
     31 │ var x = 0b1_0000000000000000000000000000000000000000000000000000_1
   
   i The value at runtime will be 17498005798264095000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  
+  i If the exact value matters, use a BigInt literal, such as 9007199254740993n, or use a smaller number.
   
 
 ```
@@ -547,6 +603,8 @@ invalid.js:30:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
   i The value at runtime will be inf
   
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
+  
 
 ```
 
@@ -563,6 +621,8 @@ invalid.js:31:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
     33 │ var x = 0o4_00000000000000_001
   
   i The value at runtime will be 9007199254740992
+  
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
   
 
 ```
@@ -581,6 +641,8 @@ invalid.js:32:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
   i The value at runtime will be 9007199254740992
   
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
+  
 
 ```
 
@@ -597,6 +659,8 @@ invalid.js:33:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
     35 │ var x = 0x2_0000000000001
   
   i The value at runtime will be 9007199254740992
+  
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
   
 
 ```
@@ -615,6 +679,8 @@ invalid.js:34:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
   i The value at runtime will be 9007199254740992
   
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
+  
 
 ```
 
@@ -631,6 +697,8 @@ invalid.js:35:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
     37 │ var x = 0x20000000000001;
   
   i The value at runtime will be 9007199254740992
+  
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
   
 
 ```
@@ -649,6 +717,8 @@ invalid.js:36:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
   i The value at runtime will be 9007199254740992
   
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
+  
 
 ```
 
@@ -665,6 +735,8 @@ invalid.js:37:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
     39 │ 
   
   i The value at runtime will be 9007199254740992
+  
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
   
 
 ```
@@ -683,6 +755,8 @@ invalid.js:38:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
   i The value at runtime will be 9007199254740992
   
+  i If the exact value matters, use a BigInt literal, such as 9007199254740993n, or use a smaller number.
+  
 
 ```
 
@@ -698,6 +772,8 @@ invalid.js:41:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
     43 │ var x = 0o2000000000000000000000000000000001;···
   
   i The value at runtime will be 1267650600228229400000000000000
+  
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
   
 
 ```
@@ -716,6 +792,8 @@ invalid.js:42:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
   i The value at runtime will be 1267650600228229400000000000000
   
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
+  
 
 ```
 
@@ -733,6 +811,8 @@ invalid.js:43:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
   i The value at runtime will be 1267650600228229400000000000000
   
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
+  
 
 ```
 
@@ -748,6 +828,8 @@ invalid.js:46:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
     48 │ var x = 0200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000;
   
   i The value at runtime will be inf
+  
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
   
 
 ```
@@ -766,6 +848,8 @@ invalid.js:47:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
   i The value at runtime will be inf
   
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
+  
 
 ```
 
@@ -782,6 +866,8 @@ invalid.js:48:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
   i The value at runtime will be inf
   
+  i If the exact value matters, use a BigInt literal, such as 9007199254740993n, or use a smaller number.
+  
 
 ```
 
@@ -796,6 +882,8 @@ invalid.js:49:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
   i The value at runtime will be inf
+  
+  i Use a value that JavaScript can represent exactly, for example by using fewer digits.
   
 
 ```

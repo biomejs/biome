@@ -300,8 +300,10 @@ pub trait Lexer<'src> {
     }
 
     /// Check if a Grit metavariable starts at the current position.
+    #[inline]
     fn is_metavariable_start(&self) -> bool {
-        metavariable_end(self.metavariable_ranges(), self.position()).is_some()
+        let ranges = self.metavariable_ranges();
+        !ranges.is_empty() && metavariable_end(ranges, self.position()).is_some()
     }
 
     /// Consume the Grit metavariable that starts at the current position.
@@ -797,6 +799,13 @@ impl<'t, Lex: LexerWithCheckpoint<'t>> Iterator for LookaheadIterator<'_, 't, Le
         // because of the diagnostic.
         let checkpoint = lexer.checkpoint();
         debug_assert_eq!(kind, checkpoint.current_kind);
+        // Use the kind `next_token` returned instead of reading it back from the lexer. The
+        // compiler widens that read to cover the neighboring flags, and a load spanning several
+        // separate stores cannot be forwarded from them, which stalls on every lookahead token.
+        let checkpoint = LexerCheckpoint {
+            current_kind: kind,
+            ..checkpoint
+        };
         let lookahead = LookaheadToken::from(&checkpoint);
 
         self.buffered.lookahead.push_back(checkpoint);

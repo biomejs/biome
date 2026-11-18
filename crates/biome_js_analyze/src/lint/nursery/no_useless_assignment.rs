@@ -1,12 +1,10 @@
+use crate::services::control_flow::control_flow_graph;
 use crate::services::semantic::Semantic;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_control_flow::{Instruction, InstructionKind, builder::ROOT_BLOCK_ID};
-use biome_db::AnyParsedSource;
 use biome_diagnostics::Severity;
-use biome_js_control_flow::{
-    AnyJsControlFlowRoot, JsControlFlowGraph, control_flow_model, js_control_flow_model,
-};
+use biome_js_control_flow::{AnyJsControlFlowRoot, JsControlFlowGraph};
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
     AnyJsArrayAssignmentPatternElement, AnyJsAssignmentPattern, AnyJsExpression,
@@ -16,11 +14,10 @@ use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration,
 };
 use biome_languages::javascript::JsEmbeddingKind;
-use biome_languages::{JsFileSource, LanguageDb};
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, NodeOrToken, SyntaxKindSet, WalkEvent};
 use biome_rule_options::no_useless_assignment::NoUselessAssignmentOptions;
 use roaring::RoaringBitmap;
-use std::rc::Rc;
 
 declare_lint_rule! {
     /// Disallow assignments whose value is never read.
@@ -114,7 +111,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUselessAssignment {
-        version: "next",
+        version: "2.6.0",
         name: "noUselessAssignment",
         language: "js",
         sources: &[RuleSource::Eslint("no-useless-assignment").same()],
@@ -141,7 +138,7 @@ impl Rule for NoUselessAssignment {
         ) {
             return Box::default();
         }
-        let Some(cfg) = control_flow_graph(ctx) else {
+        let Some(cfg) = control_flow_graph(ctx, root) else {
             return Box::default();
         };
 
@@ -197,27 +194,15 @@ impl Rule for NoUselessAssignment {
     }
 }
 
-/// Returns the control flow graph of the queried execution root.
-fn control_flow_graph(ctx: &RuleContext<NoUselessAssignment>) -> Option<JsControlFlowGraph> {
-    let root = ctx.query();
-    if let Some(db) = ctx.get_service::<Rc<dyn LanguageDb>>()
-        && let Some(source) = ctx.get_service::<AnyParsedSource>()
-    {
-        js_control_flow_model(db.as_ref(), source).graph(root)
-    } else {
-        // Fix passes and standalone callers analyze trees that are not stored
-        // in the database.
-        control_flow_model(&ctx.root()).graph(root)
-    }
-}
-
 /// Returns the bindings declared by `root`, excluding the ones of nested
 /// execution roots.
 fn declared_bindings(
     root: &AnyJsControlFlowRoot,
     model: &SemanticModel,
 ) -> impl Iterator<Item = Binding> {
-    let mut events = root.syntax().preorder();
+    let mut events = root
+        .syntax()
+        .preorder_of_kinds(AnyJsControlFlowRoot::KIND_SET.union(JsIdentifierBinding::KIND_SET));
     std::iter::from_fn(move || {
         loop {
             let WalkEvent::Enter(node) = events.next()? else {

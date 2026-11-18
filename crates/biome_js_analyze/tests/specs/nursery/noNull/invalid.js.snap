@@ -1,0 +1,1567 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const a = null;
+let b = null;
+var c = 1, d = null, e = 2;
+let f = (null);
+let g = /* comment */ null /* trailing */;
+let { h } = null;
+foo(null);
+foo(bar, null);
+new HttpResponse(null);
+foo([null]);
+foo(bar ?? null);
+foo(...[null]);
+x = null;
+if (foo == null) {}
+if (foo != null) {}
+if (null == foo) {}
+if (null != foo) {}
+function returnsNull() {
+	return null;
+}
+const arrow = () => null;
+const object = { key: null };
+delete null;
+delete ((null));
+delete [null][0];
+new Object.create(null);
+new foo.insertBefore(bar, null);
+create(null);
+insertBefore(bar, null);
+Object["create"](null);
+foo["insertBefore"](bar, null);
+Object[create](null);
+foo[insertBefore](bar, null);
+Object.notCreate(null);
+foo.notInsertBefore(foo, null);
+NotObject.create(null);
+lib.Object.create(null);
+Object.create(...[null]);
+Object.create(null, bar, extraArgument);
+Object.create(null, ...rest);
+Object?.create(null);
+Object.create?.(null);
+foo.insertBefore(null);
+foo.insertBefore(foo, null, bar);
+foo.insertBefore(...[foo], null);
+foo.insertBefore(null, bar);
+foo.insertBefore?.(bar, null);
+Object.create(bar, null);
+useRef?.(null);
+useRef(null, extra);
+React.useRef?.(null);
+React?.useRef(null);
+React.useRef(null, extra);
+
+```
+
+# Diagnostics
+```
+invalid.js:2:11 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const a = null;
+      │           ^^^^
+    3 │ let b = null;
+    4 │ var c = 1, d = null, e = 2;
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - const·a·=·null;
+        2 │ + const·a·=·undefined;
+     3  3 │   let b = null;
+     4  4 │   var c = 1, d = null, e = 2;
+  
+
+```
+
+```
+invalid.js:3:9 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const a = null;
+  > 3 │ let b = null;
+      │         ^^^^
+    4 │ var c = 1, d = null, e = 2;
+    5 │ let f = (null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   const a = null;
+     3    │ - let·b·=·null;
+        3 │ + let·b·=·undefined;
+     4  4 │   var c = 1, d = null, e = 2;
+     5  5 │   let f = (null);
+  
+
+```
+
+```
+invalid.js:4:16 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    2 │ const a = null;
+    3 │ let b = null;
+  > 4 │ var c = 1, d = null, e = 2;
+      │                ^^^^
+    5 │ let f = (null);
+    6 │ let g = /* comment */ null /* trailing */;
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+     2  2 │   const a = null;
+     3  3 │   let b = null;
+     4    │ - var·c·=·1,·d·=·null,·e·=·2;
+        4 │ + var·c·=·1,·d·=·undefined,·e·=·2;
+     5  5 │   let f = (null);
+     6  6 │   let g = /* comment */ null /* trailing */;
+  
+
+```
+
+```
+invalid.js:5:10 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    3 │ let b = null;
+    4 │ var c = 1, d = null, e = 2;
+  > 5 │ let f = (null);
+      │          ^^^^
+    6 │ let g = /* comment */ null /* trailing */;
+    7 │ let { h } = null;
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+     3  3 │   let b = null;
+     4  4 │   var c = 1, d = null, e = 2;
+     5    │ - let·f·=·(null);
+        5 │ + let·f·=·(undefined);
+     6  6 │   let g = /* comment */ null /* trailing */;
+     7  7 │   let { h } = null;
+  
+
+```
+
+```
+invalid.js:6:23 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    4 │ var c = 1, d = null, e = 2;
+    5 │ let f = (null);
+  > 6 │ let g = /* comment */ null /* trailing */;
+      │                       ^^^^
+    7 │ let { h } = null;
+    8 │ foo(null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+     4  4 │   var c = 1, d = null, e = 2;
+     5  5 │   let f = (null);
+     6    │ - let·g·=·/*·comment·*/·null·/*·trailing·*/;
+        6 │ + let·g·=·/*·comment·*/·undefined·/*·trailing·*/;
+     7  7 │   let { h } = null;
+     8  8 │   foo(null);
+  
+
+```
+
+```
+invalid.js:7:13 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    5 │ let f = (null);
+    6 │ let g = /* comment */ null /* trailing */;
+  > 7 │ let { h } = null;
+      │             ^^^^
+    8 │ foo(null);
+    9 │ foo(bar, null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+     5  5 │   let f = (null);
+     6  6 │   let g = /* comment */ null /* trailing */;
+     7    │ - let·{·h·}·=·null;
+        7 │ + let·{·h·}·=·undefined;
+     8  8 │   foo(null);
+     9  9 │   foo(bar, null);
+  
+
+```
+
+```
+invalid.js:8:5 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+     6 │ let g = /* comment */ null /* trailing */;
+     7 │ let { h } = null;
+   > 8 │ foo(null);
+       │     ^^^^
+     9 │ foo(bar, null);
+    10 │ new HttpResponse(null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+     6  6 │   let g = /* comment */ null /* trailing */;
+     7  7 │   let { h } = null;
+     8    │ - foo(null);
+        8 │ + foo(undefined);
+     9  9 │   foo(bar, null);
+    10 10 │   new HttpResponse(null);
+  
+
+```
+
+```
+invalid.js:9:10 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+     7 │ let { h } = null;
+     8 │ foo(null);
+   > 9 │ foo(bar, null);
+       │          ^^^^
+    10 │ new HttpResponse(null);
+    11 │ foo([null]);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+     7  7 │   let { h } = null;
+     8  8 │   foo(null);
+     9    │ - foo(bar,·null);
+        9 │ + foo(bar,·undefined);
+    10 10 │   new HttpResponse(null);
+    11 11 │   foo([null]);
+  
+
+```
+
+```
+invalid.js:10:18 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+     8 │ foo(null);
+     9 │ foo(bar, null);
+  > 10 │ new HttpResponse(null);
+       │                  ^^^^
+    11 │ foo([null]);
+    12 │ foo(bar ?? null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+     8  8 │   foo(null);
+     9  9 │   foo(bar, null);
+    10    │ - new·HttpResponse(null);
+       10 │ + new·HttpResponse(undefined);
+    11 11 │   foo([null]);
+    12 12 │   foo(bar ?? null);
+  
+
+```
+
+```
+invalid.js:11:6 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+     9 │ foo(bar, null);
+    10 │ new HttpResponse(null);
+  > 11 │ foo([null]);
+       │      ^^^^
+    12 │ foo(bar ?? null);
+    13 │ foo(...[null]);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+     9  9 │   foo(bar, null);
+    10 10 │   new HttpResponse(null);
+    11    │ - foo([null]);
+       11 │ + foo([undefined]);
+    12 12 │   foo(bar ?? null);
+    13 13 │   foo(...[null]);
+  
+
+```
+
+```
+invalid.js:12:12 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    10 │ new HttpResponse(null);
+    11 │ foo([null]);
+  > 12 │ foo(bar ?? null);
+       │            ^^^^
+    13 │ foo(...[null]);
+    14 │ x = null;
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    10 10 │   new HttpResponse(null);
+    11 11 │   foo([null]);
+    12    │ - foo(bar·??·null);
+       12 │ + foo(bar·??·undefined);
+    13 13 │   foo(...[null]);
+    14 14 │   x = null;
+  
+
+```
+
+```
+invalid.js:13:9 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    11 │ foo([null]);
+    12 │ foo(bar ?? null);
+  > 13 │ foo(...[null]);
+       │         ^^^^
+    14 │ x = null;
+    15 │ if (foo == null) {}
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    11 11 │   foo([null]);
+    12 12 │   foo(bar ?? null);
+    13    │ - foo(...[null]);
+       13 │ + foo(...[undefined]);
+    14 14 │   x = null;
+    15 15 │   if (foo == null) {}
+  
+
+```
+
+```
+invalid.js:14:5 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    12 │ foo(bar ?? null);
+    13 │ foo(...[null]);
+  > 14 │ x = null;
+       │     ^^^^
+    15 │ if (foo == null) {}
+    16 │ if (foo != null) {}
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    12 12 │   foo(bar ?? null);
+    13 13 │   foo(...[null]);
+    14    │ - x·=·null;
+       14 │ + x·=·undefined;
+    15 15 │   if (foo == null) {}
+    16 16 │   if (foo != null) {}
+  
+
+```
+
+```
+invalid.js:15:12 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    13 │ foo(...[null]);
+    14 │ x = null;
+  > 15 │ if (foo == null) {}
+       │            ^^^^
+    16 │ if (foo != null) {}
+    17 │ if (null == foo) {}
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    13 13 │   foo(...[null]);
+    14 14 │   x = null;
+    15    │ - if·(foo·==·null)·{}
+       15 │ + if·(foo·==·undefined)·{}
+    16 16 │   if (foo != null) {}
+    17 17 │   if (null == foo) {}
+  
+
+```
+
+```
+invalid.js:16:12 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    14 │ x = null;
+    15 │ if (foo == null) {}
+  > 16 │ if (foo != null) {}
+       │            ^^^^
+    17 │ if (null == foo) {}
+    18 │ if (null != foo) {}
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    14 14 │   x = null;
+    15 15 │   if (foo == null) {}
+    16    │ - if·(foo·!=·null)·{}
+       16 │ + if·(foo·!=·undefined)·{}
+    17 17 │   if (null == foo) {}
+    18 18 │   if (null != foo) {}
+  
+
+```
+
+```
+invalid.js:17:5 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    15 │ if (foo == null) {}
+    16 │ if (foo != null) {}
+  > 17 │ if (null == foo) {}
+       │     ^^^^
+    18 │ if (null != foo) {}
+    19 │ function returnsNull() {
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    15 15 │   if (foo == null) {}
+    16 16 │   if (foo != null) {}
+    17    │ - if·(null·==·foo)·{}
+       17 │ + if·(undefined·==·foo)·{}
+    18 18 │   if (null != foo) {}
+    19 19 │   function returnsNull() {
+  
+
+```
+
+```
+invalid.js:18:5 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    16 │ if (foo != null) {}
+    17 │ if (null == foo) {}
+  > 18 │ if (null != foo) {}
+       │     ^^^^
+    19 │ function returnsNull() {
+    20 │ 	return null;
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    16 16 │   if (foo != null) {}
+    17 17 │   if (null == foo) {}
+    18    │ - if·(null·!=·foo)·{}
+       18 │ + if·(undefined·!=·foo)·{}
+    19 19 │   function returnsNull() {
+    20 20 │   	return null;
+  
+
+```
+
+```
+invalid.js:20:9 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    18 │ if (null != foo) {}
+    19 │ function returnsNull() {
+  > 20 │ 	return null;
+       │ 	       ^^^^
+    21 │ }
+    22 │ const arrow = () => null;
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    18 18 │   if (null != foo) {}
+    19 19 │   function returnsNull() {
+    20    │ - → return·null;
+       20 │ + → return·undefined;
+    21 21 │   }
+    22 22 │   const arrow = () => null;
+  
+
+```
+
+```
+invalid.js:22:21 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    20 │ 	return null;
+    21 │ }
+  > 22 │ const arrow = () => null;
+       │                     ^^^^
+    23 │ const object = { key: null };
+    24 │ delete null;
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    20 20 │   	return null;
+    21 21 │   }
+    22    │ - const·arrow·=·()·=>·null;
+       22 │ + const·arrow·=·()·=>·undefined;
+    23 23 │   const object = { key: null };
+    24 24 │   delete null;
+  
+
+```
+
+```
+invalid.js:23:23 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    21 │ }
+    22 │ const arrow = () => null;
+  > 23 │ const object = { key: null };
+       │                       ^^^^
+    24 │ delete null;
+    25 │ delete ((null));
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    21 21 │   }
+    22 22 │   const arrow = () => null;
+    23    │ - const·object·=·{·key:·null·};
+       23 │ + const·object·=·{·key:·undefined·};
+    24 24 │   delete null;
+    25 25 │   delete ((null));
+  
+
+```
+
+```
+invalid.js:24:8 lint/nursery/noNull ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    22 │ const arrow = () => null;
+    23 │ const object = { key: null };
+  > 24 │ delete null;
+       │        ^^^^
+    25 │ delete ((null));
+    26 │ delete [null][0];
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:10 lint/nursery/noNull ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    23 │ const object = { key: null };
+    24 │ delete null;
+  > 25 │ delete ((null));
+       │          ^^^^
+    26 │ delete [null][0];
+    27 │ new Object.create(null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:9 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    24 │ delete null;
+    25 │ delete ((null));
+  > 26 │ delete [null][0];
+       │         ^^^^
+    27 │ new Object.create(null);
+    28 │ new foo.insertBefore(bar, null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    24 24 │   delete null;
+    25 25 │   delete ((null));
+    26    │ - delete·[null][0];
+       26 │ + delete·[undefined][0];
+    27 27 │   new Object.create(null);
+    28 28 │   new foo.insertBefore(bar, null);
+  
+
+```
+
+```
+invalid.js:27:19 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    25 │ delete ((null));
+    26 │ delete [null][0];
+  > 27 │ new Object.create(null);
+       │                   ^^^^
+    28 │ new foo.insertBefore(bar, null);
+    29 │ create(null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    25 25 │   delete ((null));
+    26 26 │   delete [null][0];
+    27    │ - new·Object.create(null);
+       27 │ + new·Object.create(undefined);
+    28 28 │   new foo.insertBefore(bar, null);
+    29 29 │   create(null);
+  
+
+```
+
+```
+invalid.js:28:27 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    26 │ delete [null][0];
+    27 │ new Object.create(null);
+  > 28 │ new foo.insertBefore(bar, null);
+       │                           ^^^^
+    29 │ create(null);
+    30 │ insertBefore(bar, null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    26 26 │   delete [null][0];
+    27 27 │   new Object.create(null);
+    28    │ - new·foo.insertBefore(bar,·null);
+       28 │ + new·foo.insertBefore(bar,·undefined);
+    29 29 │   create(null);
+    30 30 │   insertBefore(bar, null);
+  
+
+```
+
+```
+invalid.js:29:8 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    27 │ new Object.create(null);
+    28 │ new foo.insertBefore(bar, null);
+  > 29 │ create(null);
+       │        ^^^^
+    30 │ insertBefore(bar, null);
+    31 │ Object["create"](null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    27 27 │   new Object.create(null);
+    28 28 │   new foo.insertBefore(bar, null);
+    29    │ - create(null);
+       29 │ + create(undefined);
+    30 30 │   insertBefore(bar, null);
+    31 31 │   Object["create"](null);
+  
+
+```
+
+```
+invalid.js:30:19 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    28 │ new foo.insertBefore(bar, null);
+    29 │ create(null);
+  > 30 │ insertBefore(bar, null);
+       │                   ^^^^
+    31 │ Object["create"](null);
+    32 │ foo["insertBefore"](bar, null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    28 28 │   new foo.insertBefore(bar, null);
+    29 29 │   create(null);
+    30    │ - insertBefore(bar,·null);
+       30 │ + insertBefore(bar,·undefined);
+    31 31 │   Object["create"](null);
+    32 32 │   foo["insertBefore"](bar, null);
+  
+
+```
+
+```
+invalid.js:31:18 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    29 │ create(null);
+    30 │ insertBefore(bar, null);
+  > 31 │ Object["create"](null);
+       │                  ^^^^
+    32 │ foo["insertBefore"](bar, null);
+    33 │ Object[create](null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    29 29 │   create(null);
+    30 30 │   insertBefore(bar, null);
+    31    │ - Object["create"](null);
+       31 │ + Object["create"](undefined);
+    32 32 │   foo["insertBefore"](bar, null);
+    33 33 │   Object[create](null);
+  
+
+```
+
+```
+invalid.js:32:26 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    30 │ insertBefore(bar, null);
+    31 │ Object["create"](null);
+  > 32 │ foo["insertBefore"](bar, null);
+       │                          ^^^^
+    33 │ Object[create](null);
+    34 │ foo[insertBefore](bar, null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    30 30 │   insertBefore(bar, null);
+    31 31 │   Object["create"](null);
+    32    │ - foo["insertBefore"](bar,·null);
+       32 │ + foo["insertBefore"](bar,·undefined);
+    33 33 │   Object[create](null);
+    34 34 │   foo[insertBefore](bar, null);
+  
+
+```
+
+```
+invalid.js:33:16 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    31 │ Object["create"](null);
+    32 │ foo["insertBefore"](bar, null);
+  > 33 │ Object[create](null);
+       │                ^^^^
+    34 │ foo[insertBefore](bar, null);
+    35 │ Object.notCreate(null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    31 31 │   Object["create"](null);
+    32 32 │   foo["insertBefore"](bar, null);
+    33    │ - Object[create](null);
+       33 │ + Object[create](undefined);
+    34 34 │   foo[insertBefore](bar, null);
+    35 35 │   Object.notCreate(null);
+  
+
+```
+
+```
+invalid.js:34:24 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    32 │ foo["insertBefore"](bar, null);
+    33 │ Object[create](null);
+  > 34 │ foo[insertBefore](bar, null);
+       │                        ^^^^
+    35 │ Object.notCreate(null);
+    36 │ foo.notInsertBefore(foo, null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    32 32 │   foo["insertBefore"](bar, null);
+    33 33 │   Object[create](null);
+    34    │ - foo[insertBefore](bar,·null);
+       34 │ + foo[insertBefore](bar,·undefined);
+    35 35 │   Object.notCreate(null);
+    36 36 │   foo.notInsertBefore(foo, null);
+  
+
+```
+
+```
+invalid.js:35:18 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    33 │ Object[create](null);
+    34 │ foo[insertBefore](bar, null);
+  > 35 │ Object.notCreate(null);
+       │                  ^^^^
+    36 │ foo.notInsertBefore(foo, null);
+    37 │ NotObject.create(null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    33 33 │   Object[create](null);
+    34 34 │   foo[insertBefore](bar, null);
+    35    │ - Object.notCreate(null);
+       35 │ + Object.notCreate(undefined);
+    36 36 │   foo.notInsertBefore(foo, null);
+    37 37 │   NotObject.create(null);
+  
+
+```
+
+```
+invalid.js:36:26 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    34 │ foo[insertBefore](bar, null);
+    35 │ Object.notCreate(null);
+  > 36 │ foo.notInsertBefore(foo, null);
+       │                          ^^^^
+    37 │ NotObject.create(null);
+    38 │ lib.Object.create(null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    34 34 │   foo[insertBefore](bar, null);
+    35 35 │   Object.notCreate(null);
+    36    │ - foo.notInsertBefore(foo,·null);
+       36 │ + foo.notInsertBefore(foo,·undefined);
+    37 37 │   NotObject.create(null);
+    38 38 │   lib.Object.create(null);
+  
+
+```
+
+```
+invalid.js:37:18 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    35 │ Object.notCreate(null);
+    36 │ foo.notInsertBefore(foo, null);
+  > 37 │ NotObject.create(null);
+       │                  ^^^^
+    38 │ lib.Object.create(null);
+    39 │ Object.create(...[null]);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    35 35 │   Object.notCreate(null);
+    36 36 │   foo.notInsertBefore(foo, null);
+    37    │ - NotObject.create(null);
+       37 │ + NotObject.create(undefined);
+    38 38 │   lib.Object.create(null);
+    39 39 │   Object.create(...[null]);
+  
+
+```
+
+```
+invalid.js:38:19 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    36 │ foo.notInsertBefore(foo, null);
+    37 │ NotObject.create(null);
+  > 38 │ lib.Object.create(null);
+       │                   ^^^^
+    39 │ Object.create(...[null]);
+    40 │ Object.create(null, bar, extraArgument);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    36 36 │   foo.notInsertBefore(foo, null);
+    37 37 │   NotObject.create(null);
+    38    │ - lib.Object.create(null);
+       38 │ + lib.Object.create(undefined);
+    39 39 │   Object.create(...[null]);
+    40 40 │   Object.create(null, bar, extraArgument);
+  
+
+```
+
+```
+invalid.js:39:19 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    37 │ NotObject.create(null);
+    38 │ lib.Object.create(null);
+  > 39 │ Object.create(...[null]);
+       │                   ^^^^
+    40 │ Object.create(null, bar, extraArgument);
+    41 │ Object.create(null, ...rest);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    37 37 │   NotObject.create(null);
+    38 38 │   lib.Object.create(null);
+    39    │ - Object.create(...[null]);
+       39 │ + Object.create(...[undefined]);
+    40 40 │   Object.create(null, bar, extraArgument);
+    41 41 │   Object.create(null, ...rest);
+  
+
+```
+
+```
+invalid.js:40:15 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    38 │ lib.Object.create(null);
+    39 │ Object.create(...[null]);
+  > 40 │ Object.create(null, bar, extraArgument);
+       │               ^^^^
+    41 │ Object.create(null, ...rest);
+    42 │ Object?.create(null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    38 38 │   lib.Object.create(null);
+    39 39 │   Object.create(...[null]);
+    40    │ - Object.create(null,·bar,·extraArgument);
+       40 │ + Object.create(undefined,·bar,·extraArgument);
+    41 41 │   Object.create(null, ...rest);
+    42 42 │   Object?.create(null);
+  
+
+```
+
+```
+invalid.js:41:15 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    39 │ Object.create(...[null]);
+    40 │ Object.create(null, bar, extraArgument);
+  > 41 │ Object.create(null, ...rest);
+       │               ^^^^
+    42 │ Object?.create(null);
+    43 │ Object.create?.(null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    39 39 │   Object.create(...[null]);
+    40 40 │   Object.create(null, bar, extraArgument);
+    41    │ - Object.create(null,·...rest);
+       41 │ + Object.create(undefined,·...rest);
+    42 42 │   Object?.create(null);
+    43 43 │   Object.create?.(null);
+  
+
+```
+
+```
+invalid.js:42:16 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    40 │ Object.create(null, bar, extraArgument);
+    41 │ Object.create(null, ...rest);
+  > 42 │ Object?.create(null);
+       │                ^^^^
+    43 │ Object.create?.(null);
+    44 │ foo.insertBefore(null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    40 40 │   Object.create(null, bar, extraArgument);
+    41 41 │   Object.create(null, ...rest);
+    42    │ - Object?.create(null);
+       42 │ + Object?.create(undefined);
+    43 43 │   Object.create?.(null);
+    44 44 │   foo.insertBefore(null);
+  
+
+```
+
+```
+invalid.js:43:17 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    41 │ Object.create(null, ...rest);
+    42 │ Object?.create(null);
+  > 43 │ Object.create?.(null);
+       │                 ^^^^
+    44 │ foo.insertBefore(null);
+    45 │ foo.insertBefore(foo, null, bar);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    41 41 │   Object.create(null, ...rest);
+    42 42 │   Object?.create(null);
+    43    │ - Object.create?.(null);
+       43 │ + Object.create?.(undefined);
+    44 44 │   foo.insertBefore(null);
+    45 45 │   foo.insertBefore(foo, null, bar);
+  
+
+```
+
+```
+invalid.js:44:18 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    42 │ Object?.create(null);
+    43 │ Object.create?.(null);
+  > 44 │ foo.insertBefore(null);
+       │                  ^^^^
+    45 │ foo.insertBefore(foo, null, bar);
+    46 │ foo.insertBefore(...[foo], null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    42 42 │   Object?.create(null);
+    43 43 │   Object.create?.(null);
+    44    │ - foo.insertBefore(null);
+       44 │ + foo.insertBefore(undefined);
+    45 45 │   foo.insertBefore(foo, null, bar);
+    46 46 │   foo.insertBefore(...[foo], null);
+  
+
+```
+
+```
+invalid.js:45:23 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    43 │ Object.create?.(null);
+    44 │ foo.insertBefore(null);
+  > 45 │ foo.insertBefore(foo, null, bar);
+       │                       ^^^^
+    46 │ foo.insertBefore(...[foo], null);
+    47 │ foo.insertBefore(null, bar);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    43 43 │   Object.create?.(null);
+    44 44 │   foo.insertBefore(null);
+    45    │ - foo.insertBefore(foo,·null,·bar);
+       45 │ + foo.insertBefore(foo,·undefined,·bar);
+    46 46 │   foo.insertBefore(...[foo], null);
+    47 47 │   foo.insertBefore(null, bar);
+  
+
+```
+
+```
+invalid.js:46:28 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    44 │ foo.insertBefore(null);
+    45 │ foo.insertBefore(foo, null, bar);
+  > 46 │ foo.insertBefore(...[foo], null);
+       │                            ^^^^
+    47 │ foo.insertBefore(null, bar);
+    48 │ foo.insertBefore?.(bar, null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    44 44 │   foo.insertBefore(null);
+    45 45 │   foo.insertBefore(foo, null, bar);
+    46    │ - foo.insertBefore(...[foo],·null);
+       46 │ + foo.insertBefore(...[foo],·undefined);
+    47 47 │   foo.insertBefore(null, bar);
+    48 48 │   foo.insertBefore?.(bar, null);
+  
+
+```
+
+```
+invalid.js:47:18 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    45 │ foo.insertBefore(foo, null, bar);
+    46 │ foo.insertBefore(...[foo], null);
+  > 47 │ foo.insertBefore(null, bar);
+       │                  ^^^^
+    48 │ foo.insertBefore?.(bar, null);
+    49 │ Object.create(bar, null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    45 45 │   foo.insertBefore(foo, null, bar);
+    46 46 │   foo.insertBefore(...[foo], null);
+    47    │ - foo.insertBefore(null,·bar);
+       47 │ + foo.insertBefore(undefined,·bar);
+    48 48 │   foo.insertBefore?.(bar, null);
+    49 49 │   Object.create(bar, null);
+  
+
+```
+
+```
+invalid.js:48:25 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    46 │ foo.insertBefore(...[foo], null);
+    47 │ foo.insertBefore(null, bar);
+  > 48 │ foo.insertBefore?.(bar, null);
+       │                         ^^^^
+    49 │ Object.create(bar, null);
+    50 │ useRef?.(null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    46 46 │   foo.insertBefore(...[foo], null);
+    47 47 │   foo.insertBefore(null, bar);
+    48    │ - foo.insertBefore?.(bar,·null);
+       48 │ + foo.insertBefore?.(bar,·undefined);
+    49 49 │   Object.create(bar, null);
+    50 50 │   useRef?.(null);
+  
+
+```
+
+```
+invalid.js:49:20 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    47 │ foo.insertBefore(null, bar);
+    48 │ foo.insertBefore?.(bar, null);
+  > 49 │ Object.create(bar, null);
+       │                    ^^^^
+    50 │ useRef?.(null);
+    51 │ useRef(null, extra);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    47 47 │   foo.insertBefore(null, bar);
+    48 48 │   foo.insertBefore?.(bar, null);
+    49    │ - Object.create(bar,·null);
+       49 │ + Object.create(bar,·undefined);
+    50 50 │   useRef?.(null);
+    51 51 │   useRef(null, extra);
+  
+
+```
+
+```
+invalid.js:50:10 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    48 │ foo.insertBefore?.(bar, null);
+    49 │ Object.create(bar, null);
+  > 50 │ useRef?.(null);
+       │          ^^^^
+    51 │ useRef(null, extra);
+    52 │ React.useRef?.(null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    48 48 │   foo.insertBefore?.(bar, null);
+    49 49 │   Object.create(bar, null);
+    50    │ - useRef?.(null);
+       50 │ + useRef?.(undefined);
+    51 51 │   useRef(null, extra);
+    52 52 │   React.useRef?.(null);
+  
+
+```
+
+```
+invalid.js:51:8 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    49 │ Object.create(bar, null);
+    50 │ useRef?.(null);
+  > 51 │ useRef(null, extra);
+       │        ^^^^
+    52 │ React.useRef?.(null);
+    53 │ React?.useRef(null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    49 49 │   Object.create(bar, null);
+    50 50 │   useRef?.(null);
+    51    │ - useRef(null,·extra);
+       51 │ + useRef(undefined,·extra);
+    52 52 │   React.useRef?.(null);
+    53 53 │   React?.useRef(null);
+  
+
+```
+
+```
+invalid.js:52:16 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    50 │ useRef?.(null);
+    51 │ useRef(null, extra);
+  > 52 │ React.useRef?.(null);
+       │                ^^^^
+    53 │ React?.useRef(null);
+    54 │ React.useRef(null, extra);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    50 50 │   useRef?.(null);
+    51 51 │   useRef(null, extra);
+    52    │ - React.useRef?.(null);
+       52 │ + React.useRef?.(undefined);
+    53 53 │   React?.useRef(null);
+    54 54 │   React.useRef(null, extra);
+  
+
+```
+
+```
+invalid.js:53:15 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    51 │ useRef(null, extra);
+    52 │ React.useRef?.(null);
+  > 53 │ React?.useRef(null);
+       │               ^^^^
+    54 │ React.useRef(null, extra);
+    55 │ 
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    51 51 │   useRef(null, extra);
+    52 52 │   React.useRef?.(null);
+    53    │ - React?.useRef(null);
+       53 │ + React?.useRef(undefined);
+    54 54 │   React.useRef(null, extra);
+    55 55 │   
+  
+
+```
+
+```
+invalid.js:54:14 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    52 │ React.useRef?.(null);
+    53 │ React?.useRef(null);
+  > 54 │ React.useRef(null, extra);
+       │              ^^^^
+    55 │ 
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    52 52 │   React.useRef?.(null);
+    53 53 │   React?.useRef(null);
+    54    │ - React.useRef(null,·extra);
+       54 │ + React.useRef(undefined,·extra);
+    55 55 │   
+  
+
+```

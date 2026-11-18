@@ -1,0 +1,18 @@
+# should generate diagnostics
+# the tag belongs to the mapping, so the first key is still an unquoted word
+!!map
+true: 1
+---
+# the anchor belongs to the first key
+!!map
+&key false: 2
+other: { *key : 3 }
+---
+# the anchor and the tag belong to the mapping
+&root !!bool
+name: 4
+other: { *root : 5 }
+---
+# the anchor belongs to the mapping that is a sequence item
+- &item
+  TRUE: 6

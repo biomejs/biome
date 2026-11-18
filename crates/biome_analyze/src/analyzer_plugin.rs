@@ -182,7 +182,13 @@ where
 
             let signal = PluginSignal::<L>::new(entry.diagnostic)
                 .with_plugin_action(entry.action)
-                .with_root(node.clone());
+                .with_root(node.clone())
+                .with_suppression(
+                    name.clone().into(),
+                    ctx.root,
+                    ctx.suppression_action,
+                    ctx.options,
+                );
 
             SignalEntry {
                 text_range,
@@ -194,6 +200,10 @@ where
         });
 
         ctx.signal_queue.extend(signals);
+    }
+
+    fn visited_kinds(&self, _: Option<SyntaxKindSet<L>>) -> Option<SyntaxKindSet<L>> {
+        Some(self.query)
     }
 }
 
@@ -295,7 +305,13 @@ where
 
                 let signal = PluginSignal::<L>::new(entry.diagnostic)
                     .with_plugin_action(entry.action)
-                    .with_root(node.clone());
+                    .with_root(node.clone())
+                    .with_suppression(
+                        name.clone().into(),
+                        ctx.root,
+                        ctx.suppression_action,
+                        ctx.options,
+                    );
 
                 SignalEntry {
                     text_range,
@@ -308,5 +324,9 @@ where
 
             ctx.signal_queue.extend(signals);
         }
+    }
+
+    fn visited_kinds(&self, _: Option<SyntaxKindSet<L>>) -> Option<SyntaxKindSet<L>> {
+        Some(self.any_query)
     }
 }

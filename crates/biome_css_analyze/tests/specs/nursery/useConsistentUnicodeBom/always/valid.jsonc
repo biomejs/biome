@@ -1,0 +1,8 @@
+// should not generate diagnostics
+[
+  "\ufeffp { color: red; }",
+  "\ufeff",
+  "\ufeff  p { color: red; }",
+  "\ufeff\np { color: red; }",
+  "\ufeff/* header */\np { color: red; }"
+]

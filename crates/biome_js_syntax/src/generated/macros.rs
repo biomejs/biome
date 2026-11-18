@@ -605,6 +605,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::JsSvelteDeclarationRoot::new_unchecked(node) };
                     $body
                 }
+                $crate::JsSyntaxKind::JS_SVELTE_LEGACY_CONST_ROOT => {
+                    let $pattern = unsafe { $crate::JsSvelteLegacyConstRoot::new_unchecked(node) };
+                    $body
+                }
                 $crate::JsSyntaxKind::JS_SVELTE_SNIPPET_ROOT => {
                     let $pattern = unsafe { $crate::JsSvelteSnippetRoot::new_unchecked(node) };
                     $body
@@ -660,6 +664,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::JsSyntaxKind::JS_VARIABLE_STATEMENT => {
                     let $pattern = unsafe { $crate::JsVariableStatement::new_unchecked(node) };
+                    $body
+                }
+                $crate::JsSyntaxKind::JS_VUE_GENERIC_ROOT => {
+                    let $pattern = unsafe { $crate::JsVueGenericRoot::new_unchecked(node) };
                     $body
                 }
                 $crate::JsSyntaxKind::JS_VUE_SLOT_PROPS_ROOT => {

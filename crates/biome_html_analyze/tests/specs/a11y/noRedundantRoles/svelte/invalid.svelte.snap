@@ -16,13 +16,15 @@ expression: invalid.svelte
 ```
 invalid.svelte:2:10 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the role attribute 'article' on the 'article' element is redundant, because it is implied by its semantics.
+  × Using the role attribute 'article' on the 'article' element is redundant.
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <article role="article"></article>
       │          ^^^^^^^^^^^^^^
     3 │ <button role="button"></button>
     4 │ <h1 role="heading" aria-level="1">title</h1>
+  
+  i The element already has this role because of its semantics, so the attribute has no effect.
   
   i Unsafe fix: Remove the role attribute.
   
@@ -34,7 +36,7 @@ invalid.svelte:2:10 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━�
 ```
 invalid.svelte:3:9 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the role attribute 'button' on the 'button' element is redundant, because it is implied by its semantics.
+  × Using the role attribute 'button' on the 'button' element is redundant.
   
     1 │ <!-- should generate diagnostics -->
     2 │ <article role="article"></article>
@@ -42,6 +44,8 @@ invalid.svelte:3:9 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━
       │         ^^^^^^^^^^^^^
     4 │ <h1 role="heading" aria-level="1">title</h1>
     5 │ <nav role="navigation"></nav>
+  
+  i The element already has this role because of its semantics, so the attribute has no effect.
   
   i Unsafe fix: Remove the role attribute.
   
@@ -53,7 +57,7 @@ invalid.svelte:3:9 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━
 ```
 invalid.svelte:4:5 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the role attribute 'heading' on the 'h1' element is redundant, because it is implied by its semantics.
+  × Using the role attribute 'heading' on the 'h1' element is redundant.
   
     2 │ <article role="article"></article>
     3 │ <button role="button"></button>
@@ -61,6 +65,8 @@ invalid.svelte:4:5 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━
       │     ^^^^^^^^^^^^^^
     5 │ <nav role="navigation"></nav>
     6 │ 
+  
+  i The element already has this role because of its semantics, so the attribute has no effect.
   
   i Unsafe fix: Remove the role attribute.
   
@@ -72,13 +78,15 @@ invalid.svelte:4:5 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━
 ```
 invalid.svelte:5:6 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the role attribute 'navigation' on the 'nav' element is redundant, because it is implied by its semantics.
+  × Using the role attribute 'navigation' on the 'nav' element is redundant.
   
     3 │ <button role="button"></button>
     4 │ <h1 role="heading" aria-level="1">title</h1>
   > 5 │ <nav role="navigation"></nav>
       │      ^^^^^^^^^^^^^^^^^
     6 │ 
+  
+  i The element already has this role because of its semantics, so the attribute has no effect.
   
   i Unsafe fix: Remove the role attribute.
   

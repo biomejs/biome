@@ -45,7 +45,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useSingleVarDeclarator",
         language: "js",
-        sources: &[RuleSource::Eslint("one-var").same()],
+        sources: &[RuleSource::Eslint("one-var").inspired()],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
@@ -68,7 +68,10 @@ impl Rule for UseSingleVarDeclarator {
             rule_category!(),
             node.range(),
             "Declare variables separately",
-        ))
+        )
+        .note(markup! {
+            "Declaring each variable in its own statement makes each declaration easier to find, and a change to one variable only touches one line."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
@@ -128,13 +131,13 @@ impl Rule for UseSingleVarDeclarator {
                                 kind.prepend_trivia_pieces(trim_leading_trivia_pieces(
                                     kind.trailing_trivia().pieces(),
                                 ))
-                                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
+                                .with_trailing_space()
                             } else {
                                 kind
                             }
                         } else {
                             // Add a trailing space if the kind has no trailing trivia.
-                            kind.with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
+                            kind.with_trailing_space()
                         }
                     } else {
                         // For the remaining statements, clone the kind token

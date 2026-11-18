@@ -1,5 +1,6 @@
 use crate::{Binding, BindingId, JsDeclarationKind, Scope, ScopeId, SemanticModel};
-use biome_formatter::prelude::*;
+use biome_formatter::rowan::RowanSource;
+use biome_formatter::rowan::prelude::*;
 use biome_formatter::{
     FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
     SourceMapGeneration, TrailingNewline, TransformSourceMap,
@@ -44,6 +45,7 @@ pub(crate) struct FormatSemanticModelContext;
 
 impl FormatContext for FormatSemanticModelContext {
     type Options = FormatSemanticModelOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &FormatSemanticModelOptions

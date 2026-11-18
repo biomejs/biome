@@ -6,9 +6,9 @@ use biome_analyze::{
 use biome_css_semantic::model::SemanticModel;
 use biome_css_semantic::{db::css_semantic_model, semantic_model};
 use biome_css_syntax::{AnyCssRoot, CssLanguage, CssSyntaxNode, TextRange};
-use biome_db::AnyParsedSource;
 use biome_languages::LanguageDb;
-use biome_rowan::{AstNode, WalkEvent};
+use biome_parser::db::AnalyzedSource;
+use biome_rowan::{AstNode, SyntaxKindSet, WalkEvent};
 use std::rc::Rc;
 
 /// ## Warning
@@ -81,9 +81,9 @@ impl Visitor for SemanticModelBuilderVisitor {
             return;
         }
         if let Some(db) = ctx.services.get_service::<Rc<dyn LanguageDb>>()
-            && let Some(source) = ctx.services.get_service::<AnyParsedSource>()
+            && let Some(source) = ctx.services.get_service::<AnalyzedSource>()
+            && let Some(model) = css_semantic_model(db.as_ref(), source)
         {
-            let model = css_semantic_model(db.as_ref(), source);
             // Semantic equality ignores trivia and locations; diagnostics must
             // still use nodes from the syntax tree being analyzed.
             if model.root().syntax().as_send() == ctx.root.syntax().as_send() {
@@ -95,6 +95,13 @@ impl Visitor for SemanticModelBuilderVisitor {
     }
 
     fn visit(&mut self, _: &WalkEvent<CssSyntaxNode>, _: VisitorContext<CssLanguage>) {}
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<CssLanguage>>,
+    ) -> Option<SyntaxKindSet<CssLanguage>> {
+        Some(SyntaxKindSet::EMPTY)
+    }
 }
 
 pub struct SemanticModelVisitor;
@@ -124,6 +131,13 @@ impl Visitor for SemanticModelVisitor {
 
         let text_range = root.text_range_with_trivia();
         ctx.match_query(SemanticModelEvent(text_range));
+    }
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<CssLanguage>>,
+    ) -> Option<SyntaxKindSet<CssLanguage>> {
+        Some(AnyCssRoot::KIND_SET)
     }
 }
 

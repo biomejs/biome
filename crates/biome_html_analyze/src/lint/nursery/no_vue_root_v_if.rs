@@ -35,7 +35,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueRootVIf {
-        version: "next",
+        version: "2.6.0",
         name: "noVueRootVIf",
         language: "html",
         recommended: true,

@@ -1,0 +1,149 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: invalidMappingProperties.yaml
+---
+# Input
+```yaml
+# should generate diagnostics
+# the tag belongs to the mapping, so the first key is still an unquoted word
+!!map
+true: 1
+---
+# the anchor belongs to the first key
+!!map
+&key false: 2
+other: { *key : 3 }
+---
+# the anchor and the tag belong to the mapping
+&root !!bool
+name: 4
+other: { *root : 5 }
+---
+# the anchor belongs to the mapping that is a sequence item
+- &item
+  TRUE: 6
+
+```
+
+# Diagnostics
+```
+invalidMappingProperties.yaml:4:1 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    2 │ # the tag belongs to the mapping, so the first key is still an unquoted word
+    3 │ !!map
+  > 4 │ true: 1
+      │ ^^^^
+    5 │ ---
+    6 │ # the anchor belongs to the first key
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMappingProperties.yaml:8:6 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+     6 │ # the anchor belongs to the first key
+     7 │ !!map
+   > 8 │ &key false: 2
+       │      ^^^^^
+     9 │ other: { *key : 3 }
+    10 │ ---
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMappingProperties.yaml:9:10 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is an alias to a boolean value.
+  
+     7 │ !!map
+     8 │ &key false: 2
+   > 9 │ other: { *key : 3 }
+       │          ^^^^
+    10 │ ---
+    11 │ # the anchor and the tag belong to the mapping
+  
+  i The alias refers to the value marked with this anchor.
+  
+     6 │ # the anchor belongs to the first key
+     7 │ !!map
+   > 8 │ &key false: 2
+       │ ^^^^
+     9 │ other: { *key : 3 }
+    10 │ ---
+  
+  i Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Use a text key instead of the alias.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMappingProperties.yaml:14:10 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is an alias to a boolean value.
+  
+    12 │ &root !!bool
+    13 │ name: 4
+  > 14 │ other: { *root : 5 }
+       │          ^^^^^
+    15 │ ---
+    16 │ # the anchor belongs to the mapping that is a sequence item
+  
+  i The alias refers to the value marked with this anchor.
+  
+    10 │ ---
+    11 │ # the anchor and the tag belong to the mapping
+  > 12 │ &root !!bool
+       │ ^^^^^
+    13 │ name: 4
+    14 │ other: { *root : 5 }
+  
+  i Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Use a text key instead of the alias.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMappingProperties.yaml:18:3 lint/nursery/noYamlBooleanKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key is a boolean, not text.
+  
+    16 │ # the anchor belongs to the mapping that is a sequence item
+    17 │ - &item
+  > 18 │   TRUE: 6
+       │   ^^^^
+    19 │ 
+  
+  i YAML reads this unquoted word as a boolean value. Tools that read this file can reject boolean keys, or convert them to text that differs from what is written here.
+  
+  i Wrap the key in quotes to keep it as text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

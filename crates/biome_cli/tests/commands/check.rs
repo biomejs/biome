@@ -199,13 +199,14 @@ fn maximum_diagnostics() {
             .iter()
             .filter(|m| m.level == LogLevel::Error)
             .count(),
-        20_usize
+        // 20 diagnostics, the max-diagnostics warning, and the summary
+        22_usize
     );
 
     assert!(
         messages
             .iter()
-            .filter(|m| m.level == LogLevel::Log)
+            .filter(|m| m.level == LogLevel::Error)
             .any(|m| {
                 let content = format!("{:?}", m.content);
                 content.contains("The number of diagnostics exceeds the limit allowed")
@@ -221,6 +222,46 @@ fn maximum_diagnostics() {
         console,
         result,
     ));
+}
+
+#[test]
+fn summary_is_printed_to_stderr() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let file_path = Utf8Path::new("check.js");
+    fs.insert(file_path.into(), NO_DEBUGGER.as_bytes());
+
+    let (_, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    let messages = &console.out_buffer;
+
+    assert!(
+        messages.iter().all(|m| m.level == LogLevel::Error),
+        "expected every message to be printed to stderr: {messages:?}"
+    );
+
+    let error_contents: Vec<_> = messages
+        .iter()
+        .map(|m| markup_to_string(markup! {{m.content}}))
+        .collect();
+
+    assert!(
+        error_contents
+            .iter()
+            .any(|content| content.contains("Skipped") && content.contains("suggested fixes")),
+        "{error_contents:#?}"
+    );
+    assert!(
+        error_contents
+            .iter()
+            .any(|content| content.contains("Checked"))
+    );
 }
 
 #[test]
@@ -1000,6 +1041,38 @@ macro_rules! check_windows_symlink {
             Err(_) => return,
         }
     };
+}
+
+#[test]
+fn missing_path() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let root_path = Utf8PathBuf::from_path_buf(temp_dir())
+        .unwrap()
+        .join("check_missing_path");
+    let missing_path = root_path.join("missing.js");
+
+    let _ = remove_dir_all(&root_path);
+    create_dir(&root_path).unwrap();
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(OsFileSystem::new(root_path.clone())),
+        &mut console,
+        Args::from(["check", missing_path.as_str()].as_slice()),
+    );
+
+    remove_dir_all(root_path).unwrap();
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "missing_path",
+        fs,
+        console,
+        result,
+    ));
 }
 
 #[test]

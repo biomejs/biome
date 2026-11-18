@@ -18,7 +18,7 @@ expression: invalid.css
 ```
 invalid.css:6:16 lint/suspicious/noImportantInKeyframe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using !important within keyframes declaration is completely ignored in some browsers.
+  × Unexpected !important within a keyframes declaration.
   
     4 │   }
     5 │   to {
@@ -27,7 +27,9 @@ invalid.css:6:16 lint/suspicious/noImportantInKeyframe ━━━━━━━━�
     7 │   }
     8 │ }
   
-  i Consider removing useless !important declaration.
+  i Declarations marked !important inside keyframes are completely ignored in some browsers, so they have no effect there.
+  
+  i Remove the !important annotation and keep the declaration.
   
 
 ```
