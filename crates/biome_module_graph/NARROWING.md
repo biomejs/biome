@@ -287,7 +287,7 @@ run over the files that Biome indexes instead. The augmentations in those
 files add members and bases to the types that tests compare. For a
 particular `tsconfig.json`, a read can therefore be narrower than
 TypeScript's when
-[the program leaves out a declaration file with an augmentation](#a-declaration-file-augmentation-that-the-program-leaves-out-still-applies),
+[the program leaves out a file with an augmentation](#an-augmentation-in-a-file-that-the-program-leaves-out-still-applies),
 and a call can select another overload when
 [the program lists two augmenting files in another order than their paths](#overloads-that-augmentations-add-are-tried-in-the-order-of-module-paths).
 A read can also be narrower than TypeScript's over the files that Biome
@@ -709,13 +709,13 @@ indexes instead, in the order of their paths.
 The choices below are where not reading `tsconfig.json` makes a read
 narrower than TypeScript's for a particular `tsconfig.json`.
 
-#### A declaration-file augmentation that the program leaves out still applies
+#### An augmentation in a file that the program leaves out still applies
 
 ```ts
 // shapes.ts
 export interface Cat { kind: "cat" }
 export interface Dog { kind: "dog" }
-// cats.d.ts, which the program leaves out
+// cats.ts, which the program leaves out
 export {};
 declare module "./shapes" { interface Cat { purrs: true } }
 
@@ -723,12 +723,12 @@ pet: Cat | Dog; if (!("purrs" in pet)) pet
 // TypeScript: Cat | Dog. Biome: Dog.
 ```
 
-A declaration file that Biome indexes can be missing from the program, as
-one in another package of a monorepo or one outside the `include` patterns
-of `tsconfig.json`. Biome merges its augmentation, so `Cat` declares `purrs`
-and the false branch of `in` removes `Cat`. The false branches of
-`instanceof` and of type-guard functions remove members in the same way.
-With the augmentation above and
+A file that Biome indexes can be missing from the program, as one in
+another package of a monorepo or one outside the `include` patterns of
+`tsconfig.json`. Biome merges the augmentations of such a file, whether it
+is a declaration file or not, so `Cat` declares `purrs` and the false branch
+of `in` removes `Cat`. The false branches of `instanceof` and of type-guard
+functions remove members in the same way. With the augmentation above and
 `isPurring(v: unknown): v is { purrs: true }`, the false branch of
 `isPurring(pet)` gives `Dog`. With a class `Animal` in `shapes.ts` and
 `declare module "./shapes" { interface Cat extends Animal {} }` in such a
