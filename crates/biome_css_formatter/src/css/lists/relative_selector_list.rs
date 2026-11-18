@@ -13,6 +13,18 @@ impl FormatRule<CssRelativeSelectorList> for FormatCssRelativeSelectorList {
         let mut joiner = f.join_with(&separator);
 
         for formatted in node.format_separated(",") {
+            let relative_selector = formatted.node()?.as_css_relative_selector();
+            // A compound selector without a leading combinator, such as
+            // `&:has(...)` or `.a:not(...)`, can only break inside a functional
+            // pseudo-class, which already indents its own arguments. Adding the
+            // list indent here as well would double-indent those arguments.
+            // This matches how top-level selector lists handle compound selectors.
+            let is_compound_without_combinator = relative_selector.is_some_and(|selector| {
+                selector.combinator().is_none()
+                    && selector
+                        .selector()
+                        .is_ok_and(|selector| selector.as_css_compound_selector().is_some())
+            });
             let has_leading_comments = formatted
                 .node()?
                 .as_css_relative_selector()
@@ -34,8 +46,9 @@ impl FormatRule<CssRelativeSelectorList> for FormatCssRelativeSelectorList {
                 })
                 .is_some_and(|value_token| value_token.has_leading_comments());
 
-            if has_leading_comments {
-                // Computed Selector which contains a leading comments should be formatted without indent.
+            if has_leading_comments || is_compound_without_combinator {
+                // Selectors with leading comments, and compound selectors without a
+                // combinator (see above), are formatted without the list indent.
                 joiner.entry(&group(&formatted));
             } else {
                 // Each selector gets `indent` added in case it breaks over multiple
