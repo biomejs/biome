@@ -440,10 +440,10 @@ fn chains_of_closures_resolve_outward() {
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 // A `let` without an initializer starts with `undefined` where it is
 // declared, but TypeScript assumes it assigned there for a read in a nested
-// function, a closure included, when any code assigns it (a deliberate-choice
-// row of `NARROWING.md`). A `let` that nothing assigns keeps `undefined`, and
-// a read where `undefined` remains, although the declared type lacks it, gets
-// the declared type (TS2454).
+// function, a closure included, when any code assigns it (one of the unsound
+// results that `NARROWING.md` lists as copied). A `let` that nothing assigns
+// keeps `undefined`, and a read where `undefined` remains, although the
+// declared type lacks it, gets the declared type (TS2454).
 #[test]
 fn closures_read_uninitialized_variables_from_their_start() {
     assert_reads(
