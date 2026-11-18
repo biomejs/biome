@@ -4068,6 +4068,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoConvexTopOfHourCronsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoConvexTopOfHourCronsOptions" }
+			]
+		},
+		"NoConvexTopOfHourCronsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoDangerouslySetInnerHtmlConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9633,6 +9643,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noConvexTopOfHourCrons": {
+					"description": "Disallow scheduling Convex cron jobs at the start of the hour.\nSee https://biomejs.dev/linter/rules/no-convex-top-of-hour-crons",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoConvexTopOfHourCronsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDanglingUnderscore": {
 					"description": "Disallow names that start or end with an underscore.\nSee https://biomejs.dev/linter/rules/no-dangling-underscore",
 					"anyOf": [
@@ -13540,6 +13557,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoControlCharactersInRegexOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoConvexTopOfHourCronsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoConvexTopOfHourCronsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
