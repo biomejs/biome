@@ -1519,10 +1519,11 @@ impl VcsIgnoredPatterns {
         path: &Utf8Path,
         is_dir: bool,
     ) -> bool {
-        let root_ignored = {
-            let path = path.strip_prefix(root.path()).unwrap_or(path);
-            root.matched_path_or_any_parents(path, is_dir).is_ignore()
-        };
+        // `matched_path_or_any_parents` panics on paths outside the ignore file's directory.
+        let root_ignored = path.strip_prefix(root.path()).is_ok_and(|stripped_path| {
+            root.matched_path_or_any_parents(stripped_path, is_dir)
+                .is_ignore()
+        });
 
         let nested_ignored = nested.iter().any(|gitignore| {
             if let Ok(stripped_path) = path.strip_prefix(gitignore.path()) {

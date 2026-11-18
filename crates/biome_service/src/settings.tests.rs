@@ -576,6 +576,21 @@ fn vcs_ignore_whitelist_patterns_apply_to_child_paths() {
     assert!(ignored_patterns.is_ignored(Utf8Path::new("repo/tests/file.js"), false, None));
 }
 
+#[test]
+fn vcs_ignore_does_not_match_paths_outside_root() {
+    let ignored_patterns = VcsIgnoredPatterns::Git {
+        root: VcsIgnoredPatterns::git_ignore(Utf8Path::new("/repo"), &["node_modules"]).unwrap(),
+        nested: vec![],
+    };
+
+    assert!(!ignored_patterns.is_ignored(Utf8Path::new("/outside/file.js"), false, None));
+    assert!(!ignored_patterns.is_ignored(
+        Utf8Path::new("/outside/node_modules/file.js"),
+        false,
+        None
+    ));
+}
+
 fn resolve_html_parse_options(
     settings: &Settings,
     parser: &<HtmlLanguage as ServiceLanguage>::ParserSettings,
