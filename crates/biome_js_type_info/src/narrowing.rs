@@ -1243,12 +1243,15 @@ fn narrow_unrelated<'db>(
 /// For a name that instances have, the test narrows as `value instanceof C`
 /// does (see [`narrow_by_instanceof`]), with the instance type of the class.
 /// For a static name, which `is_static` tells, it compares the members of
-/// `ty` with the class itself: in the true branch, a member that is the
+/// `ty` with the class itself. In the true branch, a member that is the
 /// class stays and a member that is another class, an instance, or a
-/// primitive is removed, and the false branch removes the class. A member
-/// that Biome can't compare leaves `ty` unchanged in either branch, and so
-/// does a class whose instance type Biome can't tell. `resolve` resolves
-/// handles as for [`narrow_type`].
+/// primitive is removed. The false branch gives `never` when `ty` is the
+/// class and otherwise keeps `ty`, including a member that is the class, as
+/// TypeScript does: there it removes only the members derived from the
+/// class, and the class itself is not one of them. A member that Biome
+/// can't compare leaves `ty` unchanged in either branch, and so does a class
+/// whose instance type Biome can't tell. `resolve` resolves handles as for
+/// [`narrow_type`].
 pub fn narrow_by_private_name<'db>(
     db: &'db dyn TypeDb,
     ty: InferredTypeData<'db>,
@@ -1280,21 +1283,27 @@ pub fn narrow_by_private_name<'db>(
     ) {
         return if positive { class } else { ty };
     }
+    let class_instance = InferredTypeData::instance_of(db, class, Box::default());
+    if !positive {
+        return match is_same_class(db, ty, class_instance, resolve) {
+            Some(true) => InferredTypeData::NeverKeyword,
+            Some(false) | None => ty,
+        };
+    }
     let mut remaining = MAX_NARROWING_STEPS;
     let Some(members) = union_members(db, ty, &mut remaining) else {
         return ty;
     };
-    let class_instance = InferredTypeData::instance_of(db, class, Box::default());
     let mut kept = Vec::with_capacity(members.len());
     for member in &members {
         let Some(is_class) = is_same_class(db, *member, class_instance, resolve) else {
             return ty;
         };
-        if is_class == positive {
+        if is_class {
             kept.push(*member);
         }
     }
-    if positive && kept.is_empty() {
+    if kept.is_empty() {
         return narrow_unrelated(db, ty, class, resolve).unwrap_or(ty);
     }
     if kept.len() == members.len() {
@@ -2797,18 +2806,27 @@ fn narrow_intersection<'db>(
 /// Returns whether `ty` or a member of it, when it is a union, is a type
 /// parameter or an intersection with one.
 fn refers_to_type_parameter<'db>(db: &'db dyn TypeDb, ty: InferredTypeData<'db>) -> bool {
-    let is_type_parameter = |member: &InferredTypeData<'db>| {
-        referenced_generic(db, *member).is_some()
-            || matches!(member, InferredTypeData::Intersection(intersection)
-                if intersection
-                    .types(db)
-                    .iter()
-                    .any(|operand| referenced_generic(db, *operand).is_some()))
-    };
     match ty {
-        InferredTypeData::Union(union) => union.types(db).iter().any(is_type_parameter),
-        ty => is_type_parameter(&ty),
+        InferredTypeData::Union(union) => union
+            .types(db)
+            .iter()
+            .any(|member| is_type_parameter_or_intersection(db, *member)),
+        ty => is_type_parameter_or_intersection(db, ty),
     }
+}
+
+/// Returns whether `ty` is a type parameter, or an intersection with a type
+/// parameter among its operands, such as the `T & {}` that narrowing gives.
+pub fn is_type_parameter_or_intersection<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+) -> bool {
+    referenced_generic(db, ty).is_some()
+        || matches!(ty, InferredTypeData::Intersection(intersection)
+            if intersection
+                .types(db)
+                .iter()
+                .any(|operand| referenced_generic(db, *operand).is_some()))
 }
 
 /// Returns `ty` with its handles resolved, also those of the members of a
@@ -7093,9 +7111,12 @@ mod tests {
         assert_eq!(narrow(union(db, &[iq, ic]), false, false), ic);
         assert_eq!(narrow(ic, false, true), intersection(db, &[ic, ip]));
         assert_eq!(narrow(InferredTypeData::UnknownKeyword, false, true), ip);
-        // A static name is the class's own.
+        // A static name is the class's own. Where the test fails, the class
+        // goes only when it is the whole type.
         assert_eq!(narrow(union(db, &[p, ic]), true, true), p);
-        assert_eq!(narrow(union(db, &[p, ic]), true, false), ic);
+        let class_or_instance = union(db, &[p, ic]);
+        assert_eq!(narrow(class_or_instance, true, false), class_or_instance);
+        assert_eq!(narrow(p, true, false), InferredTypeData::NeverKeyword);
     }
 
     #[test]

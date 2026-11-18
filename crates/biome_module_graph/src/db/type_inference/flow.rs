@@ -54,10 +54,10 @@ use biome_js_type_info::{
     ImportSymbol, Literal as RawLiteral, NarrowingPredicate, ObjectKind, PropertyTest, RawTypeData,
     RawTypeId, TypeId, TypeReference, TypeofExpression, TypeofImplicitReturnExpression,
     base_literal_type, evolving_array_element, evolving_assigned_type, has_readonly_property,
-    instantiate_intersection_alias, is_narrowing_invariant, may_narrow_by_instanceof,
-    may_narrow_by_property, narrow_by_assignment, narrow_by_constructor, narrow_by_in_operator,
-    narrow_by_instanceof, narrow_by_private_name, narrow_by_property, narrow_by_type_predicate,
-    narrow_type,
+    instantiate_intersection_alias, is_narrowing_invariant, is_type_parameter_or_intersection,
+    may_narrow_by_instanceof, may_narrow_by_property, narrow_by_assignment, narrow_by_constructor,
+    narrow_by_in_operator, narrow_by_instanceof, narrow_by_private_name, narrow_by_property,
+    narrow_by_type_predicate, narrow_type,
 };
 use biome_rowan::{AstNode, NodeOrToken, Text, TextRange, TextSize};
 use rustc_hash::FxHashMap;
@@ -700,6 +700,9 @@ impl<'db> ResolutionCtx<'db, '_> {
             None if calls.is_some() => self.called_binding_baseline(binding)?,
             None => self.flow_binding_baseline(binding)?,
         };
+        if !self.may_change_baseline(read.root, read.subject, baseline) {
+            return declared;
+        }
         let exhaustive = self.exhaustive_switches(read, start);
         let assigned = self.flow_assigned_types(read.root, read.subject);
         let ends = self.ending_calls(read)?;
@@ -950,13 +953,35 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// the root can change `ty`.
     fn subject_baseline(&mut self, read: FlowRead, ty: TypeData<'db>) -> Option<TypeData<'db>> {
         let root = self.js_info.flow.root(read.root)?;
-        if root.is_property_only(read.subject)
+        let baseline = if root.is_property_only(read.subject)
             && self.call_effects(read.root, read.subject).is_none()
         {
             self.property_baseline(ty, root.is_instance_tested(read.subject))
         } else {
             self.narrowing_baseline(ty)
-        }
+        }?;
+        self.may_change_baseline(read.root, read.subject, baseline)
+            .then_some(baseline)
+    }
+
+    /// Returns whether the solve of `subject` in the root at index `root` can
+    /// change `baseline`, the type that its narrowing starts from. It can't
+    /// when `baseline` is `any` and the subject is neither in
+    /// [`RootFlow::any_tested`] nor narrowed by one of its call points,
+    /// because every other runtime test and every write keeps `any`.
+    fn may_change_baseline(
+        &mut self,
+        root: usize,
+        subject: FlowSubjectId,
+        baseline: TypeData<'db>,
+    ) -> bool {
+        baseline != TypeData::AnyKeyword
+            || self
+                .js_info
+                .flow
+                .root(root)
+                .is_some_and(|flow| flow.is_any_tested(subject))
+            || self.call_effects(root, subject).is_some()
     }
 
     /// Returns the type of the variable declared at `binding` at the capture
@@ -1050,7 +1075,11 @@ impl<'db> ResolutionCtx<'db, '_> {
                 } else {
                     self.flow_binding_baseline(binding)?
                 };
-                (baseline, root.is_uninitialized(capture.subject))
+                let uninitialized = root.is_uninitialized(capture.subject);
+                if !self.may_change_baseline(capture.root, capture.subject, baseline) {
+                    return Some((baseline, uninitialized));
+                }
+                (baseline, uninitialized)
             }
         };
         if baseline == TypeData::Unknown {
@@ -1243,6 +1272,9 @@ impl<'db> ResolutionCtx<'db, '_> {
             && root.is_assignment_only(read.subject)
             && !may_narrow_by_assignment(baseline)
         {
+            return None;
+        }
+        if !self.may_change_baseline(read.root, read.subject, baseline) {
             return None;
         }
         let readonly_path =
@@ -2677,14 +2709,48 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }
             }
             FlowGuard::Unmatched(guard) => {
-                let has_unknown = ty == TypeData::UnknownKeyword
-                    || matches!(ty, TypeData::Union(union)
-                        if union.types(self.db).contains(&TypeData::UnknownKeyword));
-                if has_unknown {
-                    ty
+                let members = if let TypeData::Union(union) = ty {
+                    union.types(self.db)
                 } else {
+                    std::slice::from_ref(&ty)
+                };
+                if members.contains(&TypeData::UnknownKeyword) {
+                    return Some(ty);
+                }
+                if !members
+                    .iter()
+                    .any(|member| is_type_parameter_or_intersection(self.db, *member))
+                {
                     return self.apply_guard(root, *guard, solve, ty, remaining);
                 }
+                // Where no case matches, TypeScript removes the members whose
+                // every value a case covers and keeps the others whole. So a
+                // type parameter, or an intersection with one, stays as it is
+                // unless the guard leaves it no value, instead of becoming the
+                // intersection that the guard gives.
+                let mut kept = Vec::with_capacity(members.len());
+                let mut others = Vec::new();
+                for &member in members {
+                    if !is_type_parameter_or_intersection(self.db, member) {
+                        others.push(member);
+                    } else if self.apply_guard(root, *guard, solve, member, remaining)?
+                        != TypeData::NeverKeyword
+                    {
+                        kept.push(member);
+                    }
+                }
+                let removed_type_parameter = kept.len() + others.len() < members.len();
+                if !others.is_empty() {
+                    let others = TypeData::union_from_types(self.db, others);
+                    let narrowed = self.apply_guard(root, *guard, solve, others, remaining)?;
+                    if !removed_type_parameter && narrowed == others {
+                        return Some(ty);
+                    }
+                    kept.push(narrowed);
+                } else if !removed_type_parameter {
+                    return Some(ty);
+                }
+                TypeData::union_from_types(self.db, kept)
             }
             FlowGuard::Call { call, positive } => {
                 return self.apply_call(root, index, *call, *positive, solve, ty, remaining);
@@ -4009,6 +4075,7 @@ mod tests {
             read_points: Default::default(),
             property_only: Default::default(),
             instance_tested: Default::default(),
+            any_tested: Default::default(),
             pattern_elements: Default::default(),
             readonly_tested: Default::default(),
             only_readonly_tested: Default::default(),
