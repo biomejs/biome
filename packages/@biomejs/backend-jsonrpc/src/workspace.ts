@@ -1256,6 +1256,7 @@ export interface JsonParserConfiguration {
 }
 export interface RuleDomains {
 	astro?: RuleDomainValue;
+	convex?: RuleDomainValue;
 	drizzle?: RuleDomainValue;
 	next?: RuleDomainValue;
 	playwright?: RuleDomainValue;

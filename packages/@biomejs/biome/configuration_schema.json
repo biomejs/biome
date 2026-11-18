@@ -12609,6 +12609,7 @@
 			"type": "object",
 			"properties": {
 				"astro": { "$ref": "#/$defs/RuleDomainValue" },
+				"convex": { "$ref": "#/$defs/RuleDomainValue" },
 				"drizzle": { "$ref": "#/$defs/RuleDomainValue" },
 				"next": { "$ref": "#/$defs/RuleDomainValue" },
 				"playwright": { "$ref": "#/$defs/RuleDomainValue" },
