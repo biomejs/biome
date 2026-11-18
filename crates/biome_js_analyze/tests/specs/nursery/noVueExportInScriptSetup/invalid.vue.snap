@@ -1,0 +1,233 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+export * from "foo";
+export * as ns from "foo";
+export default {};
+export class A {}
+export const test = "123";
+export function foo() {}
+const a = 1;
+export { a };
+export { a as b };
+export { fao } from "bar";
+export {};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:1 lint/nursery/noVueExportInScriptSetup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × <script setup> can't contain exports.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup>
+  > 3 │ export * from "foo";
+      │ ^^^^^^^^^^^^^^^^^^^^
+    4 │ export * as ns from "foo";
+    5 │ export default {};
+  
+  i Vue fails to compile a component when its <script setup> block exports a value. Top-level declarations are already available to the template.
+  
+  i Remove the export. To share the value with other modules, move the export to a regular <script> block. To expose it to a parent component, use defineExpose().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:1 lint/nursery/noVueExportInScriptSetup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × <script setup> can't contain exports.
+  
+    2 │ <script setup>
+    3 │ export * from "foo";
+  > 4 │ export * as ns from "foo";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ export default {};
+    6 │ export class A {}
+  
+  i Vue fails to compile a component when its <script setup> block exports a value. Top-level declarations are already available to the template.
+  
+  i Remove the export. To share the value with other modules, move the export to a regular <script> block. To expose it to a parent component, use defineExpose().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:1 lint/nursery/noVueExportInScriptSetup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × <script setup> can't contain exports.
+  
+    3 │ export * from "foo";
+    4 │ export * as ns from "foo";
+  > 5 │ export default {};
+      │ ^^^^^^^^^^^^^^^^^^
+    6 │ export class A {}
+    7 │ export const test = "123";
+  
+  i Vue fails to compile a component when its <script setup> block exports a value. Top-level declarations are already available to the template.
+  
+  i Remove the export. To share the value with other modules, move the export to a regular <script> block. To expose it to a parent component, use defineExpose().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:1 lint/nursery/noVueExportInScriptSetup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × <script setup> can't contain exports.
+  
+    4 │ export * as ns from "foo";
+    5 │ export default {};
+  > 6 │ export class A {}
+      │ ^^^^^^
+    7 │ export const test = "123";
+    8 │ export function foo() {}
+  
+  i Vue fails to compile a component when its <script setup> block exports a value. Top-level declarations are already available to the template.
+  
+  i Remove the export. To share the value with other modules, move the export to a regular <script> block. To expose it to a parent component, use defineExpose().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:1 lint/nursery/noVueExportInScriptSetup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × <script setup> can't contain exports.
+  
+    5 │ export default {};
+    6 │ export class A {}
+  > 7 │ export const test = "123";
+      │ ^^^^^^
+    8 │ export function foo() {}
+    9 │ const a = 1;
+  
+  i Vue fails to compile a component when its <script setup> block exports a value. Top-level declarations are already available to the template.
+  
+  i Remove the export. To share the value with other modules, move the export to a regular <script> block. To expose it to a parent component, use defineExpose().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:1 lint/nursery/noVueExportInScriptSetup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × <script setup> can't contain exports.
+  
+     6 │ export class A {}
+     7 │ export const test = "123";
+   > 8 │ export function foo() {}
+       │ ^^^^^^
+     9 │ const a = 1;
+    10 │ export { a };
+  
+  i Vue fails to compile a component when its <script setup> block exports a value. Top-level declarations are already available to the template.
+  
+  i Remove the export. To share the value with other modules, move the export to a regular <script> block. To expose it to a parent component, use defineExpose().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:1 lint/nursery/noVueExportInScriptSetup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × <script setup> can't contain exports.
+  
+     8 │ export function foo() {}
+     9 │ const a = 1;
+  > 10 │ export { a };
+       │ ^^^^^^^^^^^^^
+    11 │ export { a as b };
+    12 │ export { fao } from "bar";
+  
+  i Vue fails to compile a component when its <script setup> block exports a value. Top-level declarations are already available to the template.
+  
+  i Remove the export. To share the value with other modules, move the export to a regular <script> block. To expose it to a parent component, use defineExpose().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:1 lint/nursery/noVueExportInScriptSetup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × <script setup> can't contain exports.
+  
+     9 │ const a = 1;
+    10 │ export { a };
+  > 11 │ export { a as b };
+       │ ^^^^^^^^^^^^^^^^^^
+    12 │ export { fao } from "bar";
+    13 │ export {};
+  
+  i Vue fails to compile a component when its <script setup> block exports a value. Top-level declarations are already available to the template.
+  
+  i Remove the export. To share the value with other modules, move the export to a regular <script> block. To expose it to a parent component, use defineExpose().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:12:1 lint/nursery/noVueExportInScriptSetup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × <script setup> can't contain exports.
+  
+    10 │ export { a };
+    11 │ export { a as b };
+  > 12 │ export { fao } from "bar";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ export {};
+    14 │ </script>
+  
+  i Vue fails to compile a component when its <script setup> block exports a value. Top-level declarations are already available to the template.
+  
+  i Remove the export. To share the value with other modules, move the export to a regular <script> block. To expose it to a parent component, use defineExpose().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:1 lint/nursery/noVueExportInScriptSetup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × <script setup> can't contain exports.
+  
+    11 │ export { a as b };
+    12 │ export { fao } from "bar";
+  > 13 │ export {};
+       │ ^^^^^^^^^^
+    14 │ </script>
+    15 │ 
+  
+  i Vue fails to compile a component when its <script setup> block exports a value. Top-level declarations are already available to the template.
+  
+  i Remove the export. To share the value with other modules, move the export to a regular <script> block. To expose it to a parent component, use defineExpose().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

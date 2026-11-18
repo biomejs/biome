@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: indexValid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+import { Settings } from "./mergedClassValid";
+import * as settingsModule from "./mergedClassValid";
+
+// A class instance type can also describe primitives that have its members, so
+// these conditions stay uncertain when the class merges with a namespace,
+// whether the type is imported by name or through a namespace import.
+export function describe(settings: Settings) {
+	if (settings) {
+		return settings.theme;
+	}
+	return "unset";
+}
+
+export function describeQualified(settings: settingsModule.Settings) {
+	if (settings) {
+		return settings.theme;
+	}
+	return "unset";
+}
+
+```

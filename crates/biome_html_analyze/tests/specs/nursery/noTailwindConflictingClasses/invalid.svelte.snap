@@ -1,0 +1,130 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<div class="flex grid"></div>
+<div class="hover:flex hover:grid"></div>
+<div class={"p-2 p-4"}></div>
+<div class={clsx("flex grid")}></div>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:2:18 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class grid sets the same CSS properties as flex.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div class="flex grid"></div>
+      │                  ^^^^
+    3 │ <div class="hover:flex hover:grid"></div>
+    4 │ <div class={"p-2 p-4"}></div>
+  
+  i The other class is here.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div class="flex grid"></div>
+      │             ^^^^
+    3 │ <div class="hover:flex hover:grid"></div>
+    4 │ <div class={"p-2 p-4"}></div>
+  
+  i Only one of these classes takes effect, so the other one does nothing.
+  
+  i Remove the class that you don't need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:3:24 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class hover:grid sets the same CSS properties as hover:flex.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div class="flex grid"></div>
+  > 3 │ <div class="hover:flex hover:grid"></div>
+      │                        ^^^^^^^^^^
+    4 │ <div class={"p-2 p-4"}></div>
+    5 │ <div class={clsx("flex grid")}></div>
+  
+  i The other class is here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div class="flex grid"></div>
+  > 3 │ <div class="hover:flex hover:grid"></div>
+      │             ^^^^^^^^^^
+    4 │ <div class={"p-2 p-4"}></div>
+    5 │ <div class={clsx("flex grid")}></div>
+  
+  i Only one of these classes takes effect, so the other one does nothing.
+  
+  i Remove the class that you don't need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:4:18 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class p-4 sets the same CSS properties as p-2.
+  
+    2 │ <div class="flex grid"></div>
+    3 │ <div class="hover:flex hover:grid"></div>
+  > 4 │ <div class={"p-2 p-4"}></div>
+      │                  ^^^
+    5 │ <div class={clsx("flex grid")}></div>
+    6 │ 
+  
+  i The other class is here.
+  
+    2 │ <div class="flex grid"></div>
+    3 │ <div class="hover:flex hover:grid"></div>
+  > 4 │ <div class={"p-2 p-4"}></div>
+      │              ^^^
+    5 │ <div class={clsx("flex grid")}></div>
+    6 │ 
+  
+  i Only one of these classes takes effect, so the other one does nothing.
+  
+  i Remove the class that you don't need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:5:24 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class grid sets the same CSS properties as flex.
+  
+    3 │ <div class="hover:flex hover:grid"></div>
+    4 │ <div class={"p-2 p-4"}></div>
+  > 5 │ <div class={clsx("flex grid")}></div>
+      │                        ^^^^
+    6 │ 
+  
+  i The other class is here.
+  
+    3 │ <div class="hover:flex hover:grid"></div>
+    4 │ <div class={"p-2 p-4"}></div>
+  > 5 │ <div class={clsx("flex grid")}></div>
+      │                   ^^^^
+    6 │ 
+  
+  i Only one of these classes takes effect, so the other one does nothing.
+  
+  i Remove the class that you don't need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

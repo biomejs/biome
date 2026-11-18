@@ -1,0 +1,7 @@
+# should generate diagnostics
+: implicit entry
+? # explicit entry
+: explicit entry
+nested:
+  : nested entry
+?

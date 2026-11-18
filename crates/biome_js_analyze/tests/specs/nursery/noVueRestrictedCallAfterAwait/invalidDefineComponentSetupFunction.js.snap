@@ -1,0 +1,84 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidDefineComponentSetupFunction.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { defineComponent } from "vue";
+import { useI18n } from "vue-i18n";
+
+defineComponent(
+	async (props, context) => {
+		await doSomething();
+		useI18n();
+	},
+	{ props: ["source"] },
+);
+
+defineComponent(
+	async function (props) {
+		await doSomething();
+		useI18n();
+	},
+	{ props: ["source"] },
+);
+
+```
+
+# Diagnostics
+```
+invalidDefineComponentSetupFunction.js:8:3 lint/nursery/noVueRestrictedCallAfterAwait ━━━━━━━━━━━━━━
+
+  × This call to useI18n() from vue-i18n comes after an await in setup().
+  
+     6 │ 	async (props, context) => {
+     7 │ 		await doSomething();
+   > 8 │ 		useI18n();
+       │ 		^^^^^^^^^
+     9 │ 	},
+    10 │ 	{ props: ["source"] },
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component is being set up.
+  
+    5 │ defineComponent(
+    6 │ 	async (props, context) => {
+  > 7 │ 		await doSomething();
+      │ 		^^^^^
+    8 │ 		useI18n();
+    9 │ 	},
+  
+  i This function is listed in the functions option because it needs to know which component is being set up. Call it before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidDefineComponentSetupFunction.js:16:3 lint/nursery/noVueRestrictedCallAfterAwait ━━━━━━━━━━━━━
+
+  × This call to useI18n() from vue-i18n comes after an await in setup().
+  
+    14 │ 	async function (props) {
+    15 │ 		await doSomething();
+  > 16 │ 		useI18n();
+       │ 		^^^^^^^^^
+    17 │ 	},
+    18 │ 	{ props: ["source"] },
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component is being set up.
+  
+    13 │ defineComponent(
+    14 │ 	async function (props) {
+  > 15 │ 		await doSomething();
+       │ 		^^^^^
+    16 │ 		useI18n();
+    17 │ 	},
+  
+  i This function is listed in the functions option because it needs to know which component is being set up. Call it before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

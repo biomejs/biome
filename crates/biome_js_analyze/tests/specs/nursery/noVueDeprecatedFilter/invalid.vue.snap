@@ -1,0 +1,299 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <p>{{ msg | filter }}</p>
+  <p>{{ msg | filter(x) }}</p>
+  <p>{{ msg | filterA | filterB }}</p>
+  <div v-for="msg in messages">{{ msg | filter }}</div>
+  <div v-bind:id="msg | filter"></div>
+  <div v-bind:id="msg | filter(aaa)"></div>
+  <div v-bind:id="msg | filterA | filterB"></div>
+  <div :id="msg | filter"></div>
+  <div :[key]="msg | filter"></div>
+  <div v-bind="attrs | filter"></div>
+  <p>{{ a || b | filter }}</p>
+  <p>{{ ok ? a : b | filter }}</p>
+  <Field :format="value => value | currency"></Field>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:9 lint/nursery/noVueDeprecatedFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expression uses a filter, which Vue 3 no longer supports.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <p>{{ msg | filter }}</p>
+      │         ^^^^^^^^^^^^
+    4 │   <p>{{ msg | filter(x) }}</p>
+    5 │   <p>{{ msg | filterA | filterB }}</p>
+  
+  i Vue 3 reads the | as the bitwise OR operator, so the expression doesn't call the filter.
+  
+  i Call the filter as a function instead, or move the expression into a computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:9 lint/nursery/noVueDeprecatedFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expression uses a filter, which Vue 3 no longer supports.
+  
+    2 │ <template>
+    3 │   <p>{{ msg | filter }}</p>
+  > 4 │   <p>{{ msg | filter(x) }}</p>
+      │         ^^^^^^^^^^^^^^^
+    5 │   <p>{{ msg | filterA | filterB }}</p>
+    6 │   <div v-for="msg in messages">{{ msg | filter }}</div>
+  
+  i Vue 3 reads the | as the bitwise OR operator, so the expression doesn't call the filter.
+  
+  i Call the filter as a function instead, or move the expression into a computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:9 lint/nursery/noVueDeprecatedFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expression uses a filter, which Vue 3 no longer supports.
+  
+    3 │   <p>{{ msg | filter }}</p>
+    4 │   <p>{{ msg | filter(x) }}</p>
+  > 5 │   <p>{{ msg | filterA | filterB }}</p>
+      │         ^^^^^^^^^^^^^^^^^^^^^^^
+    6 │   <div v-for="msg in messages">{{ msg | filter }}</div>
+    7 │   <div v-bind:id="msg | filter"></div>
+  
+  i Vue 3 reads the | as the bitwise OR operator, so the expression doesn't call the filter.
+  
+  i Call the filter as a function instead, or move the expression into a computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:35 lint/nursery/noVueDeprecatedFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expression uses a filter, which Vue 3 no longer supports.
+  
+    4 │   <p>{{ msg | filter(x) }}</p>
+    5 │   <p>{{ msg | filterA | filterB }}</p>
+  > 6 │   <div v-for="msg in messages">{{ msg | filter }}</div>
+      │                                   ^^^^^^^^^^^^
+    7 │   <div v-bind:id="msg | filter"></div>
+    8 │   <div v-bind:id="msg | filter(aaa)"></div>
+  
+  i Vue 3 reads the | as the bitwise OR operator, so the expression doesn't call the filter.
+  
+  i Call the filter as a function instead, or move the expression into a computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:9 lint/nursery/noVueDeprecatedFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expression uses a filter, which Vue 3 no longer supports.
+  
+    11 │   <div :[key]="msg | filter"></div>
+    12 │   <div v-bind="attrs | filter"></div>
+  > 13 │   <p>{{ a || b | filter }}</p>
+       │         ^^^^^^^^^^^^^^^
+    14 │   <p>{{ ok ? a : b | filter }}</p>
+    15 │   <Field :format="value => value | currency"></Field>
+  
+  i Vue 3 reads the | as the bitwise OR operator, so the expression doesn't call the filter.
+  
+  i Call the filter as a function instead, or move the expression into a computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:14:9 lint/nursery/noVueDeprecatedFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expression uses a filter, which Vue 3 no longer supports.
+  
+    12 │   <div v-bind="attrs | filter"></div>
+    13 │   <p>{{ a || b | filter }}</p>
+  > 14 │   <p>{{ ok ? a : b | filter }}</p>
+       │         ^^^^^^^^^^^^^^^^^^^
+    15 │   <Field :format="value => value | currency"></Field>
+    16 │ </template>
+  
+  i Vue 3 reads the | as the bitwise OR operator, so the expression doesn't call the filter.
+  
+  i Call the filter as a function instead, or move the expression into a computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:19 lint/nursery/noVueDeprecatedFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expression uses a filter, which Vue 3 no longer supports.
+  
+    5 │   <p>{{ msg | filterA | filterB }}</p>
+    6 │   <div v-for="msg in messages">{{ msg | filter }}</div>
+  > 7 │   <div v-bind:id="msg | filter"></div>
+      │                   ^^^^^^^^^^^^
+    8 │   <div v-bind:id="msg | filter(aaa)"></div>
+    9 │   <div v-bind:id="msg | filterA | filterB"></div>
+  
+  i Vue 3 reads the | as the bitwise OR operator, so the expression doesn't call the filter.
+  
+  i Call the filter as a function instead, or move the expression into a computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:19 lint/nursery/noVueDeprecatedFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expression uses a filter, which Vue 3 no longer supports.
+  
+     6 │   <div v-for="msg in messages">{{ msg | filter }}</div>
+     7 │   <div v-bind:id="msg | filter"></div>
+   > 8 │   <div v-bind:id="msg | filter(aaa)"></div>
+       │                   ^^^^^^^^^^^^^^^^^
+     9 │   <div v-bind:id="msg | filterA | filterB"></div>
+    10 │   <div :id="msg | filter"></div>
+  
+  i Vue 3 reads the | as the bitwise OR operator, so the expression doesn't call the filter.
+  
+  i Call the filter as a function instead, or move the expression into a computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:19 lint/nursery/noVueDeprecatedFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expression uses a filter, which Vue 3 no longer supports.
+  
+     7 │   <div v-bind:id="msg | filter"></div>
+     8 │   <div v-bind:id="msg | filter(aaa)"></div>
+   > 9 │   <div v-bind:id="msg | filterA | filterB"></div>
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^
+    10 │   <div :id="msg | filter"></div>
+    11 │   <div :[key]="msg | filter"></div>
+  
+  i Vue 3 reads the | as the bitwise OR operator, so the expression doesn't call the filter.
+  
+  i Call the filter as a function instead, or move the expression into a computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:13 lint/nursery/noVueDeprecatedFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expression uses a filter, which Vue 3 no longer supports.
+  
+     8 │   <div v-bind:id="msg | filter(aaa)"></div>
+     9 │   <div v-bind:id="msg | filterA | filterB"></div>
+  > 10 │   <div :id="msg | filter"></div>
+       │             ^^^^^^^^^^^^
+    11 │   <div :[key]="msg | filter"></div>
+    12 │   <div v-bind="attrs | filter"></div>
+  
+  i Vue 3 reads the | as the bitwise OR operator, so the expression doesn't call the filter.
+  
+  i Call the filter as a function instead, or move the expression into a computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:16 lint/nursery/noVueDeprecatedFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expression uses a filter, which Vue 3 no longer supports.
+  
+     9 │   <div v-bind:id="msg | filterA | filterB"></div>
+    10 │   <div :id="msg | filter"></div>
+  > 11 │   <div :[key]="msg | filter"></div>
+       │                ^^^^^^^^^^^^
+    12 │   <div v-bind="attrs | filter"></div>
+    13 │   <p>{{ a || b | filter }}</p>
+  
+  i Vue 3 reads the | as the bitwise OR operator, so the expression doesn't call the filter.
+  
+  i Call the filter as a function instead, or move the expression into a computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:12:16 lint/nursery/noVueDeprecatedFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expression uses a filter, which Vue 3 no longer supports.
+  
+    10 │   <div :id="msg | filter"></div>
+    11 │   <div :[key]="msg | filter"></div>
+  > 12 │   <div v-bind="attrs | filter"></div>
+       │                ^^^^^^^^^^^^^^
+    13 │   <p>{{ a || b | filter }}</p>
+    14 │   <p>{{ ok ? a : b | filter }}</p>
+  
+  i Vue 3 reads the | as the bitwise OR operator, so the expression doesn't call the filter.
+  
+  i Call the filter as a function instead, or move the expression into a computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:15:19 lint/nursery/noVueDeprecatedFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expression uses a filter, which Vue 3 no longer supports.
+  
+    13 │   <p>{{ a || b | filter }}</p>
+    14 │   <p>{{ ok ? a : b | filter }}</p>
+  > 15 │   <Field :format="value => value | currency"></Field>
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ </template>
+    17 │ 
+  
+  i Vue 3 reads the | as the bitwise OR operator, so the expression doesn't call the filter.
+  
+  i Call the filter as a function instead, or move the expression into a computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

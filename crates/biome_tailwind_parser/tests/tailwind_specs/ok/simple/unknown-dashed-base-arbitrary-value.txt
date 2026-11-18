@@ -1,0 +1,1 @@
+foo-bar-[1px] slide-out-to-top-[48%] foo-[48%] foo-bar-(--my-var) foo-bar-baz-[1px]/50 hover:foo-bar-[1px]! -foo-bar-[1px]

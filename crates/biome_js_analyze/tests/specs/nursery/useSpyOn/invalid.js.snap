@@ -1,0 +1,770 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+obj.a = jest.fn(); const test = 10;
+Date['now'] = jest['fn']();
+window[`${name}`] = jest[`fn`]();
+obj['prop' + 1] = jest['fn']();
+obj.one.two = jest.fn();
+obj.a = jest.fn(() => 10,);
+obj.a.b = jest.fn(() => ({})).mockReturnValue('default').mockReturnValueOnce('first call'); test();
+window.fetch = jest.fn(() => ({})).one.two().three().four;
+foo[bar] = jest.fn().mockReturnValue(undefined);
+foo.bar = jest.fn().mockImplementation(baz => baz);
+foo.bar = jest.fn(a => b).mockImplementation(baz => baz);
+Date.now = vi.fn();
+Date.now = vi.fn(() => 10);
+window.fetch = vi.fn().mockResolvedValue(response);
+obj.a = (jest.fn());
+obj.a = (jest.fn()).mockReturnValue(1);
+const value = (obj.a = jest.fn());
+obj.a = jest.fn(...implementations);
+obj.a = jest
+	.fn()
+	.mockReturnValue(1);
+// leading comment
+obj.a = jest.fn(); // trailing comment
+obj.a = /* inner comment */ jest.fn();
+super.method = jest.fn();
+obj[a, b] = jest.fn();
+(obj.a) = jest.fn();
+((obj).a) = vi.fn();
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ obj.a = jest.fn(); const test = 10;
+      │ ^^^^^^^^^^^^^^^^^
+    3 │ Date['now'] = jest['fn']();
+    4 │ window[`${name}`] = jest[`fn`]();
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use jest.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.spyOn() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - obj.a·=·jest.fn();·const·test·=·10;
+        2 │ + jest.spyOn(obj,·"a").mockImplementation();·const·test·=·10;
+     3  3 │   Date['now'] = jest['fn']();
+     4  4 │   window[`${name}`] = jest[`fn`]();
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+    1 │ /* should generate diagnostics */
+    2 │ obj.a = jest.fn(); const test = 10;
+  > 3 │ Date['now'] = jest['fn']();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ window[`${name}`] = jest[`fn`]();
+    5 │ obj['prop' + 1] = jest['fn']();
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use jest.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.spyOn() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   obj.a = jest.fn(); const test = 10;
+     3    │ - Date['now']·=·jest['fn']();
+        3 │ + jest.spyOn(Date,·'now').mockImplementation();
+     4  4 │   window[`${name}`] = jest[`fn`]();
+     5  5 │   obj['prop' + 1] = jest['fn']();
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+    2 │ obj.a = jest.fn(); const test = 10;
+    3 │ Date['now'] = jest['fn']();
+  > 4 │ window[`${name}`] = jest[`fn`]();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ obj['prop' + 1] = jest['fn']();
+    6 │ obj.one.two = jest.fn();
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use jest.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.spyOn() instead.
+  
+     2  2 │   obj.a = jest.fn(); const test = 10;
+     3  3 │   Date['now'] = jest['fn']();
+     4    │ - window[`${name}`]·=·jest[`fn`]();
+        4 │ + jest.spyOn(window,·`${name}`).mockImplementation();
+     5  5 │   obj['prop' + 1] = jest['fn']();
+     6  6 │   obj.one.two = jest.fn();
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+    3 │ Date['now'] = jest['fn']();
+    4 │ window[`${name}`] = jest[`fn`]();
+  > 5 │ obj['prop' + 1] = jest['fn']();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ obj.one.two = jest.fn();
+    7 │ obj.a = jest.fn(() => 10,);
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use jest.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.spyOn() instead.
+  
+     3  3 │   Date['now'] = jest['fn']();
+     4  4 │   window[`${name}`] = jest[`fn`]();
+     5    │ - obj['prop'·+·1]·=·jest['fn']();
+        5 │ + jest.spyOn(obj,·'prop'·+·1).mockImplementation();
+     6  6 │   obj.one.two = jest.fn();
+     7  7 │   obj.a = jest.fn(() => 10,);
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+    4 │ window[`${name}`] = jest[`fn`]();
+    5 │ obj['prop' + 1] = jest['fn']();
+  > 6 │ obj.one.two = jest.fn();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ obj.a = jest.fn(() => 10,);
+    8 │ obj.a.b = jest.fn(() => ({})).mockReturnValue('default').mockReturnValueOnce('first call'); test();
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use jest.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.spyOn() instead.
+  
+     4  4 │   window[`${name}`] = jest[`fn`]();
+     5  5 │   obj['prop' + 1] = jest['fn']();
+     6    │ - obj.one.two·=·jest.fn();
+        6 │ + jest.spyOn(obj.one,·"two").mockImplementation();
+     7  7 │   obj.a = jest.fn(() => 10,);
+     8  8 │   obj.a.b = jest.fn(() => ({})).mockReturnValue('default').mockReturnValueOnce('first call'); test();
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+    5 │ obj['prop' + 1] = jest['fn']();
+    6 │ obj.one.two = jest.fn();
+  > 7 │ obj.a = jest.fn(() => 10,);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ obj.a.b = jest.fn(() => ({})).mockReturnValue('default').mockReturnValueOnce('first call'); test();
+    9 │ window.fetch = jest.fn(() => ({})).one.two().three().four;
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use jest.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.spyOn() instead.
+  
+     5  5 │   obj['prop' + 1] = jest['fn']();
+     6  6 │   obj.one.two = jest.fn();
+     7    │ - obj.a·=·jest.fn(()·=>·10,);
+        7 │ + jest.spyOn(obj,·"a").mockImplementation(()·=>·10);
+     8  8 │   obj.a.b = jest.fn(() => ({})).mockReturnValue('default').mockReturnValueOnce('first call'); test();
+     9  9 │   window.fetch = jest.fn(() => ({})).one.two().three().four;
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+     6 │ obj.one.two = jest.fn();
+     7 │ obj.a = jest.fn(() => 10,);
+   > 8 │ obj.a.b = jest.fn(() => ({})).mockReturnValue('default').mockReturnValueOnce('first call'); test();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ window.fetch = jest.fn(() => ({})).one.two().three().four;
+    10 │ foo[bar] = jest.fn().mockReturnValue(undefined);
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use jest.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.spyOn() instead.
+  
+     6  6 │   obj.one.two = jest.fn();
+     7  7 │   obj.a = jest.fn(() => 10,);
+     8    │ - obj.a.b·=·jest.fn(()·=>·({})).mockReturnValue('default').mockReturnValueOnce('first·call');·test();
+        8 │ + jest.spyOn(obj.a,·"b").mockImplementation(()·=>·({})).mockReturnValue('default').mockReturnValueOnce('first·call');·test();
+     9  9 │   window.fetch = jest.fn(() => ({})).one.two().three().four;
+    10 10 │   foo[bar] = jest.fn().mockReturnValue(undefined);
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+     7 │ obj.a = jest.fn(() => 10,);
+     8 │ obj.a.b = jest.fn(() => ({})).mockReturnValue('default').mockReturnValueOnce('first call'); test();
+   > 9 │ window.fetch = jest.fn(() => ({})).one.two().three().four;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ foo[bar] = jest.fn().mockReturnValue(undefined);
+    11 │ foo.bar = jest.fn().mockImplementation(baz => baz);
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use jest.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.spyOn() instead.
+  
+     7  7 │   obj.a = jest.fn(() => 10,);
+     8  8 │   obj.a.b = jest.fn(() => ({})).mockReturnValue('default').mockReturnValueOnce('first call'); test();
+     9    │ - window.fetch·=·jest.fn(()·=>·({})).one.two().three().four;
+        9 │ + jest.spyOn(window,·"fetch").mockImplementation(()·=>·({})).one.two().three().four;
+    10 10 │   foo[bar] = jest.fn().mockReturnValue(undefined);
+    11 11 │   foo.bar = jest.fn().mockImplementation(baz => baz);
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+     8 │ obj.a.b = jest.fn(() => ({})).mockReturnValue('default').mockReturnValueOnce('first call'); test();
+     9 │ window.fetch = jest.fn(() => ({})).one.two().three().four;
+  > 10 │ foo[bar] = jest.fn().mockReturnValue(undefined);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ foo.bar = jest.fn().mockImplementation(baz => baz);
+    12 │ foo.bar = jest.fn(a => b).mockImplementation(baz => baz);
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use jest.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.spyOn() instead.
+  
+     8  8 │   obj.a.b = jest.fn(() => ({})).mockReturnValue('default').mockReturnValueOnce('first call'); test();
+     9  9 │   window.fetch = jest.fn(() => ({})).one.two().three().four;
+    10    │ - foo[bar]·=·jest.fn().mockReturnValue(undefined);
+       10 │ + jest.spyOn(foo,·bar).mockImplementation().mockReturnValue(undefined);
+    11 11 │   foo.bar = jest.fn().mockImplementation(baz => baz);
+    12 12 │   foo.bar = jest.fn(a => b).mockImplementation(baz => baz);
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+     9 │ window.fetch = jest.fn(() => ({})).one.two().three().four;
+    10 │ foo[bar] = jest.fn().mockReturnValue(undefined);
+  > 11 │ foo.bar = jest.fn().mockImplementation(baz => baz);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ foo.bar = jest.fn(a => b).mockImplementation(baz => baz);
+    13 │ Date.now = vi.fn();
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use jest.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.spyOn() instead.
+  
+     9  9 │   window.fetch = jest.fn(() => ({})).one.two().three().four;
+    10 10 │   foo[bar] = jest.fn().mockReturnValue(undefined);
+    11    │ - foo.bar·=·jest.fn().mockImplementation(baz·=>·baz);
+       11 │ + jest.spyOn(foo,·"bar").mockImplementation(baz·=>·baz);
+    12 12 │   foo.bar = jest.fn(a => b).mockImplementation(baz => baz);
+    13 13 │   Date.now = vi.fn();
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+    10 │ foo[bar] = jest.fn().mockReturnValue(undefined);
+    11 │ foo.bar = jest.fn().mockImplementation(baz => baz);
+  > 12 │ foo.bar = jest.fn(a => b).mockImplementation(baz => baz);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ Date.now = vi.fn();
+    14 │ Date.now = vi.fn(() => 10);
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use jest.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.spyOn() instead.
+  
+    10 10 │   foo[bar] = jest.fn().mockReturnValue(undefined);
+    11 11 │   foo.bar = jest.fn().mockImplementation(baz => baz);
+    12    │ - foo.bar·=·jest.fn(a·=>·b).mockImplementation(baz·=>·baz);
+       12 │ + jest.spyOn(foo,·"bar").mockImplementation(baz·=>·baz);
+    13 13 │   Date.now = vi.fn();
+    14 14 │   Date.now = vi.fn(() => 10);
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+    11 │ foo.bar = jest.fn().mockImplementation(baz => baz);
+    12 │ foo.bar = jest.fn(a => b).mockImplementation(baz => baz);
+  > 13 │ Date.now = vi.fn();
+       │ ^^^^^^^^^^^^^^^^^^
+    14 │ Date.now = vi.fn(() => 10);
+    15 │ window.fetch = vi.fn().mockResolvedValue(response);
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use vi.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use vi.spyOn() instead.
+  
+    11 11 │   foo.bar = jest.fn().mockImplementation(baz => baz);
+    12 12 │   foo.bar = jest.fn(a => b).mockImplementation(baz => baz);
+    13    │ - Date.now·=·vi.fn();
+       13 │ + vi.spyOn(Date,·"now").mockImplementation(()·=>·undefined);
+    14 14 │   Date.now = vi.fn(() => 10);
+    15 15 │   window.fetch = vi.fn().mockResolvedValue(response);
+  
+
+```
+
+```
+invalid.js:14:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+    12 │ foo.bar = jest.fn(a => b).mockImplementation(baz => baz);
+    13 │ Date.now = vi.fn();
+  > 14 │ Date.now = vi.fn(() => 10);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ window.fetch = vi.fn().mockResolvedValue(response);
+    16 │ obj.a = (jest.fn());
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use vi.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use vi.spyOn() instead.
+  
+    12 12 │   foo.bar = jest.fn(a => b).mockImplementation(baz => baz);
+    13 13 │   Date.now = vi.fn();
+    14    │ - Date.now·=·vi.fn(()·=>·10);
+       14 │ + vi.spyOn(Date,·"now").mockImplementation(()·=>·10);
+    15 15 │   window.fetch = vi.fn().mockResolvedValue(response);
+    16 16 │   obj.a = (jest.fn());
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+    13 │ Date.now = vi.fn();
+    14 │ Date.now = vi.fn(() => 10);
+  > 15 │ window.fetch = vi.fn().mockResolvedValue(response);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ obj.a = (jest.fn());
+    17 │ obj.a = (jest.fn()).mockReturnValue(1);
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use vi.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use vi.spyOn() instead.
+  
+    13 13 │   Date.now = vi.fn();
+    14 14 │   Date.now = vi.fn(() => 10);
+    15    │ - window.fetch·=·vi.fn().mockResolvedValue(response);
+       15 │ + vi.spyOn(window,·"fetch").mockImplementation(()·=>·undefined).mockResolvedValue(response);
+    16 16 │   obj.a = (jest.fn());
+    17 17 │   obj.a = (jest.fn()).mockReturnValue(1);
+  
+
+```
+
+```
+invalid.js:16:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+    14 │ Date.now = vi.fn(() => 10);
+    15 │ window.fetch = vi.fn().mockResolvedValue(response);
+  > 16 │ obj.a = (jest.fn());
+       │ ^^^^^^^^^^^^^^^^^^^
+    17 │ obj.a = (jest.fn()).mockReturnValue(1);
+    18 │ const value = (obj.a = jest.fn());
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use jest.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.spyOn() instead.
+  
+    14 14 │   Date.now = vi.fn(() => 10);
+    15 15 │   window.fetch = vi.fn().mockResolvedValue(response);
+    16    │ - obj.a·=·(jest.fn());
+       16 │ + (jest.spyOn(obj,·"a").mockImplementation());
+    17 17 │   obj.a = (jest.fn()).mockReturnValue(1);
+    18 18 │   const value = (obj.a = jest.fn());
+  
+
+```
+
+```
+invalid.js:17:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+    15 │ window.fetch = vi.fn().mockResolvedValue(response);
+    16 │ obj.a = (jest.fn());
+  > 17 │ obj.a = (jest.fn()).mockReturnValue(1);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ const value = (obj.a = jest.fn());
+    19 │ obj.a = jest.fn(...implementations);
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use jest.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.spyOn() instead.
+  
+    15 15 │   window.fetch = vi.fn().mockResolvedValue(response);
+    16 16 │   obj.a = (jest.fn());
+    17    │ - obj.a·=·(jest.fn()).mockReturnValue(1);
+       17 │ + (jest.spyOn(obj,·"a").mockImplementation()).mockReturnValue(1);
+    18 18 │   const value = (obj.a = jest.fn());
+    19 19 │   obj.a = jest.fn(...implementations);
+  
+
+```
+
+```
+invalid.js:18:16 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+    16 │ obj.a = (jest.fn());
+    17 │ obj.a = (jest.fn()).mockReturnValue(1);
+  > 18 │ const value = (obj.a = jest.fn());
+       │                ^^^^^^^^^^^^^^^^^
+    19 │ obj.a = jest.fn(...implementations);
+    20 │ obj.a = jest
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use jest.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.spyOn() instead.
+  
+    16 16 │   obj.a = (jest.fn());
+    17 17 │   obj.a = (jest.fn()).mockReturnValue(1);
+    18    │ - const·value·=·(obj.a·=·jest.fn());
+       18 │ + const·value·=·(jest.spyOn(obj,·"a").mockImplementation());
+    19 19 │   obj.a = jest.fn(...implementations);
+    20 20 │   obj.a = jest
+  
+
+```
+
+```
+invalid.js:19:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+    17 │ obj.a = (jest.fn()).mockReturnValue(1);
+    18 │ const value = (obj.a = jest.fn());
+  > 19 │ obj.a = jest.fn(...implementations);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ obj.a = jest
+    21 │ 	.fn()
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use jest.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.spyOn() instead.
+  
+    17 17 │   obj.a = (jest.fn()).mockReturnValue(1);
+    18 18 │   const value = (obj.a = jest.fn());
+    19    │ - obj.a·=·jest.fn(...implementations);
+       19 │ + jest.spyOn(obj,·"a").mockImplementation(...implementations);
+    20 20 │   obj.a = jest
+    21 21 │   	.fn()
+  
+
+```
+
+```
+invalid.js:20:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+    18 │ const value = (obj.a = jest.fn());
+    19 │ obj.a = jest.fn(...implementations);
+  > 20 │ obj.a = jest
+       │ ^^^^^^^^^^^^
+  > 21 │ 	.fn()
+  > 22 │ 	.mockReturnValue(1);
+       │ 	^^^^^^^^^^^^^^^^^^^
+    23 │ // leading comment
+    24 │ obj.a = jest.fn(); // trailing comment
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use jest.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.spyOn() instead.
+  
+    18 18 │   const value = (obj.a = jest.fn());
+    19 19 │   obj.a = jest.fn(...implementations);
+    20    │ - obj.a·=·jest
+    21    │ - → .fn()
+       20 │ + jest.spyOn(obj,·"a").mockImplementation()
+    22 21 │     .mockReturnValue(1);
+    23 22 │   // leading comment
+  
+
+```
+
+```
+invalid.js:24:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+    22 │ 	.mockReturnValue(1);
+    23 │ // leading comment
+  > 24 │ obj.a = jest.fn(); // trailing comment
+       │ ^^^^^^^^^^^^^^^^^
+    25 │ obj.a = /* inner comment */ jest.fn();
+    26 │ super.method = jest.fn();
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use jest.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.spyOn() instead.
+  
+    22 22 │   	.mockReturnValue(1);
+    23 23 │   // leading comment
+    24    │ - obj.a·=·jest.fn();·//·trailing·comment
+       24 │ + jest.spyOn(obj,·"a").mockImplementation();·//·trailing·comment
+    25 25 │   obj.a = /* inner comment */ jest.fn();
+    26 26 │   super.method = jest.fn();
+  
+
+```
+
+```
+invalid.js:25:1 lint/nursery/useSpyOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+    23 │ // leading comment
+    24 │ obj.a = jest.fn(); // trailing comment
+  > 25 │ obj.a = /* inner comment */ jest.fn();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ super.method = jest.fn();
+    27 │ obj[a, b] = jest.fn();
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use jest.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:1 lint/nursery/useSpyOn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+    24 │ obj.a = jest.fn(); // trailing comment
+    25 │ obj.a = /* inner comment */ jest.fn();
+  > 26 │ super.method = jest.fn();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ obj[a, b] = jest.fn();
+    28 │ (obj.a) = jest.fn();
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use jest.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+    25 │ obj.a = /* inner comment */ jest.fn();
+    26 │ super.method = jest.fn();
+  > 27 │ obj[a, b] = jest.fn();
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    28 │ (obj.a) = jest.fn();
+    29 │ ((obj).a) = vi.fn();
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use jest.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.spyOn() instead.
+  
+    25 25 │   obj.a = /* inner comment */ jest.fn();
+    26 26 │   super.method = jest.fn();
+    27    │ - obj[a,·b]·=·jest.fn();
+       27 │ + jest.spyOn(obj,·(a,·b)).mockImplementation();
+    28 28 │   (obj.a) = jest.fn();
+    29 29 │   ((obj).a) = vi.fn();
+  
+
+```
+
+```
+invalid.js:28:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+    26 │ super.method = jest.fn();
+    27 │ obj[a, b] = jest.fn();
+  > 28 │ (obj.a) = jest.fn();
+       │ ^^^^^^^^^^^^^^^^^^^
+    29 │ ((obj).a) = vi.fn();
+    30 │ 
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use jest.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use jest.spyOn() instead.
+  
+    26 26 │   super.method = jest.fn();
+    27 27 │   obj[a, b] = jest.fn();
+    28    │ - (obj.a)·=·jest.fn();
+       28 │ + jest.spyOn(obj,·"a").mockImplementation();
+    29 29 │   ((obj).a) = vi.fn();
+    30 30 │   
+  
+
+```
+
+```
+invalid.js:29:1 lint/nursery/useSpyOn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment replaces a property with a mock function.
+  
+    27 │ obj[a, b] = jest.fn();
+    28 │ (obj.a) = jest.fn();
+  > 29 │ ((obj).a) = vi.fn();
+       │ ^^^^^^^^^^^^^^^^^^^
+    30 │ 
+  
+  i The original value of the property is lost, so it has to be put back by hand after the test.
+  
+  i Use vi.spyOn() instead, so the original value can be restored with mockRestore() or restoreAllMocks().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use vi.spyOn() instead.
+  
+    27 27 │   obj[a, b] = jest.fn();
+    28 28 │   (obj.a) = jest.fn();
+    29    │ - ((obj).a)·=·vi.fn();
+       29 │ + vi.spyOn((obj),·"a").mockImplementation(()·=>·undefined);
+    30 30 │   
+  
+
+```

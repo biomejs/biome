@@ -51,7 +51,7 @@ declare_lint_rule! {
     ///
     /// - [Vue 3 migration guide: `v-model`](https://v3-migration.vuejs.org/breaking-changes/v-model.html)
     pub NoVueDeprecatedVBindSync {
-        version: "next",
+        version: "2.6.5",
         name: "noVueDeprecatedVBindSync",
         language: "html",
         recommended: true,

@@ -73,7 +73,7 @@ declare_lint_rule! {
     ///
     /// - [Vue `<template>` element](https://vuejs.org/api/built-in-special-elements.html#template)
     pub NoVueUselessTemplateAttributes {
-        version: "next",
+        version: "2.6.5",
         name: "noVueUselessTemplateAttributes",
         language: "html",
         recommended: true,

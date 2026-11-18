@@ -1,0 +1,58 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+type V1 = 1 | 2;
+type V2 = 1 | "1";
+type V3 = true & boolean;
+type V4 = null | undefined;
+type V5 = any | unknown;
+type V6 = { a: string } | { b: string };
+type V7 = { a: string; b: number } | { b: number; a: string };
+type V8 = { a: string | number };
+type V9 = Set<string> | Set<number>;
+type V10 = string[] | number[];
+type V11 = string[][] | string[];
+type V12 = [1, 2, 3] | [1, 2, 4];
+type V13 = [1, 2, 3] | [1, 2, 3, 4];
+type V14 = "A" | string[];
+type V15 = (() => string) | (() => void);
+type V16 = () => string | void;
+type V17 = (arg: string | number) => void;
+type V18 = A | /* comment */ B;
+type V19 = readonly string[] | string[];
+type V20 = (A | B) | (C | D);
+type V21 = (A | B) | (A & B);
+type V22 = Record<string, A | B>;
+type V23 = A & B & C;
+type V24 = (A & B) & (C & D);
+type V25 = `a${string}` | `b${string}`;
+type V26 = keyof A | keyof B;
+type V27 = typeof a | typeof b;
+
+// A different type name is not resolved.
+type A1 = "A";
+type V28 = "A" | A1;
+
+// Parameters that are not optional must list `undefined` to accept it.
+const v29 = (a: string | undefined) => {};
+function v30(a: string | undefined) {}
+
+// Parameter properties also declare a class property.
+class V31 {
+	constructor(private a?: string | undefined) {}
+}
+
+// Optional properties are not parameters.
+interface V32 {
+	a?: string | undefined;
+}
+
+// `undefined` nested in another type is not the type of the parameter.
+function v33(a?: Array<string | undefined>) {}
+function v34(a?: (string | undefined)[]) {}
+
+```

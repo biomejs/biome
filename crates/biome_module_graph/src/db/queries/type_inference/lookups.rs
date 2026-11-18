@@ -6,14 +6,16 @@
 //! without resolving every type collected for the module.
 
 use super::{
-    BindingTypeInput, BindingTypeWithImportBudgetInput, ExpressionTypeInput, LocalTypeInput,
-    LocalTypeWithImportBudgetInput,
+    BindingTypeInput, BindingTypeWithImportBudgetInput, ExpressionTypeInput, FlowSubjectRootInput,
+    FlowSubjectTypeInput, LocalTypeInput, LocalTypeWithImportBudgetInput,
 };
 use crate::ModuleDb;
 use crate::db::type_inference::{
     ImportResolution, ResolutionCtx, find_member_type_on_demand as find_member_type_impl,
-    find_value_member_type_on_demand as find_value_member_type_impl, resolve_local_type_on_demand,
+    find_value_member_type_on_demand as find_value_member_type_impl, flow_binding_baseline,
+    flow_expression_type, flow_subject_states, flow_subject_type, resolve_local_type_on_demand,
 };
+use crate::js_module_info::flow::FlowNodeId;
 use crate::module_graph::ModuleInfoKind;
 use crate::type_inference::profiling::{
     TypeInferenceProfileOrigin, TypeInferenceQueryKind, execute_query,
@@ -53,11 +55,163 @@ pub fn infer_expression_type<'db>(
                 return None;
             }
 
-            let reference = js_info.raw_expressions.get(&expression)?.clone();
+            let reference = js_info.raw_expressions.get(&expression)?;
+            if let Some(ty) = infer_flow_expression_type(db, input) {
+                return Some(ty);
+            }
             let mut ctx = ResolutionCtx::new(db, module, js_info, ImportResolution::on_demand());
-            Some(ctx.resolve(&reference))
+            Some(ctx.resolve(reference))
         },
     )
+}
+
+#[salsa::tracked(returns(copy), cycle_result=infer_expression_type_cycle_result)]
+fn infer_flow_expression_type_impl<'db>(
+    db: &'db dyn ModuleDb,
+    input: ExpressionTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let module = input.module(db);
+    let expression = input.expression(db);
+    execute_query(
+        TypeInferenceQueryKind::Lookups,
+        TypeInferenceProfileOrigin::exact(module, expression),
+        "infer_flow_expression_type_impl",
+        || {
+            let ModuleInfoKind::Js(info) = module.kind(db) else {
+                return None;
+            };
+            if !info.infer_types || !info.raw_expressions.contains_key(&expression) {
+                return None;
+            }
+            flow_expression_type(db, module, info, expression)
+        },
+    )
+}
+
+/// Resolves the type that flow refinement starts from, shared by every read of
+/// a binding.
+///
+/// Returns `None` when the module does not support inference, the binding has
+/// no collected type, or no supported runtime test can change its type. The
+/// last case applies when the type contains `any` or an undetermined
+/// (`Unknown`) member, because either one absorbs the whole union and narrowing
+/// leaves both unchanged; TypeScript's `unknown` can still narrow.
+///
+/// `Unknown` means the type exceeds the refinement budget or a query cycle
+/// passes through this lookup; a relevant test then produces an `Unknown`
+/// override.
+#[salsa::tracked(returns(copy), cycle_result=infer_flow_binding_baseline_cycle_result)]
+pub(crate) fn infer_flow_binding_baseline<'db>(
+    db: &'db dyn ModuleDb,
+    input: BindingTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let module = input.module(db);
+    let range = input.range(db);
+    execute_query(
+        TypeInferenceQueryKind::Lookups,
+        TypeInferenceProfileOrigin::exact(module, range),
+        "infer_flow_binding_baseline",
+        || {
+            let ModuleInfoKind::Js(info) = module.kind(db) else {
+                return None;
+            };
+            if !info.infer_types {
+                return None;
+            }
+            flow_binding_baseline(db, module, info, range)
+        },
+    )
+}
+
+/// Solves one subject at every point where an execution root reads it, so
+/// reads at different points share one walk over the root's flow.
+///
+/// The key carries the type that narrowing starts from, so reads share the
+/// walk only when they start from the same type.
+///
+/// Returns each read point that collection recorded for the subject, sorted
+/// by point, with the subject's type there. The type is `never` at a read
+/// that no path reaches.
+///
+/// Returns `None` for an unavailable root, a subject that the root never
+/// reads, a subject whose type no test can change or whose starting type is
+/// `Unknown`, and when the shared walk exceeds the flow work limit or passes
+/// through a query cycle. [`infer_flow_subject_type`] then solves each point
+/// on its own, so no read loses precision to the shared limit.
+#[salsa::tracked(returns(as_deref), cycle_result=infer_flow_subject_states_cycle_result)]
+pub(crate) fn infer_flow_subject_states<'db>(
+    db: &'db dyn ModuleDb,
+    input: FlowSubjectRootInput<'db>,
+) -> Option<Box<[(FlowNodeId, InferredTypeData<'db>)]>> {
+    let module = input.module(db);
+    execute_query(
+        TypeInferenceQueryKind::Lookups,
+        flow_subject_origin(db, input),
+        "infer_flow_subject_states",
+        || {
+            let ModuleInfoKind::Js(info) = module.kind(db) else {
+                return None;
+            };
+            if !info.infer_types {
+                return None;
+            }
+            flow_subject_states(db, module, info, input)
+        },
+    )
+}
+
+/// Narrows one subject at a collected flow point, shared by its reads there
+/// that start from the same type.
+///
+/// Takes the subject's type at the point from [`infer_flow_subject_states`],
+/// or solves the point on its own when that query has no result.
+///
+/// Returns `None` for unavailable roots or points, a subject whose type no
+/// test can change, or an unchanged type. A starting type of `Unknown`, cycles,
+/// and incomplete flow evaluation return an `Unknown` override rather than
+/// allowing the raw lookup to take over.
+#[salsa::tracked(returns(copy), cycle_result=infer_flow_subject_type_cycle_result)]
+pub(crate) fn infer_flow_subject_type<'db>(
+    db: &'db dyn ModuleDb,
+    input: FlowSubjectTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let states = input.states(db);
+    let module = states.module(db);
+    execute_query(
+        TypeInferenceQueryKind::Lookups,
+        flow_subject_origin(db, states),
+        "infer_flow_subject_type",
+        || {
+            let ModuleInfoKind::Js(info) = module.kind(db) else {
+                return None;
+            };
+            if !info.infer_types {
+                return None;
+            }
+            flow_subject_type(db, module, info, input)
+        },
+    )
+}
+
+/// Attributes the flow queries of a subject to the declaration of the
+/// variable that its path starts at, or to the whole module for a path on
+/// `this` and when collection has no such subject.
+fn flow_subject_origin(
+    db: &dyn ModuleDb,
+    input: FlowSubjectRootInput<'_>,
+) -> TypeInferenceProfileOrigin {
+    let module = input.module(db);
+    let ModuleInfoKind::Js(info) = module.kind(db) else {
+        return TypeInferenceProfileOrigin::document(module);
+    };
+    match info
+        .flow
+        .root(input.root(db))
+        .and_then(|root| root.subject_binding(input.subject(db)))
+    {
+        Some(range) => TypeInferenceProfileOrigin::exact(module, range),
+        None => TypeInferenceProfileOrigin::document(module),
+    }
 }
 
 /// Infers the type collected for one binding range.
@@ -120,7 +274,12 @@ pub(crate) fn infer_binding_type_with_import_budget<'db>(
 ) -> Option<InferredTypeData<'db>> {
     let lookup = input.lookup(db);
     let remaining = input.remaining(db);
-    infer_binding_type_impl(db, lookup, ImportResolution::OnDemand { remaining })
+    execute_query(
+        TypeInferenceQueryKind::Lookups,
+        TypeInferenceProfileOrigin::exact(lookup.module(db), lookup.range(db)),
+        "infer_binding_type_with_import_budget",
+        || infer_binding_type_impl(db, lookup, ImportResolution::OnDemand { remaining }),
+    )
 }
 
 #[salsa::tracked(returns(copy), cycle_result=infer_local_type_with_import_budget_cycle_result)]
@@ -130,7 +289,12 @@ pub(crate) fn infer_local_type_with_import_budget<'db>(
 ) -> Option<InferredTypeData<'db>> {
     let lookup = input.lookup(db);
     let remaining = input.remaining(db);
-    infer_local_type_impl(db, lookup, ImportResolution::OnDemand { remaining })
+    execute_query(
+        TypeInferenceQueryKind::Lookups,
+        TypeInferenceProfileOrigin::document(lookup.module(db)),
+        "infer_local_type_with_import_budget",
+        || infer_local_type_impl(db, lookup, ImportResolution::OnDemand { remaining }),
+    )
 }
 
 fn infer_binding_type_impl<'db>(
@@ -198,6 +362,30 @@ fn infer_expression_type_cycle_result<'db>(
     Some(InferredTypeData::Unknown)
 }
 
+fn infer_flow_binding_baseline_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: BindingTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    Some(InferredTypeData::Unknown)
+}
+
+fn infer_flow_subject_states_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: FlowSubjectRootInput<'db>,
+) -> Option<Box<[(FlowNodeId, InferredTypeData<'db>)]>> {
+    None
+}
+
+fn infer_flow_subject_type_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: FlowSubjectTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    Some(InferredTypeData::Unknown)
+}
+
 fn infer_binding_type_cycle_result<'db>(
     _db: &'db dyn ModuleDb,
     _id: salsa::Id,
@@ -233,6 +421,25 @@ fn infer_local_type_with_import_budget_cycle_result<'db>(
 // #endregion
 
 // #region TYPE HELPERS
+
+/// Returns an occurrence-sensitive result when runtime flow affects an expression.
+///
+/// Expressions that collection did not mark as flow candidates avoid the
+/// occurrence query entirely. `None` preserves the raw lookup path when no
+/// supported refinement applies. Cycles or incomplete flow evaluation return
+/// `Unknown`, not a raw fallback.
+pub(crate) fn infer_flow_expression_type<'db>(
+    db: &'db dyn ModuleDb,
+    input: ExpressionTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let ModuleInfoKind::Js(info) = input.module(db).kind(db) else {
+        return None;
+    };
+    if !info.flow.is_candidate(input.expression(db)) {
+        return None;
+    }
+    infer_flow_expression_type_impl(db, input)
+}
 
 /// Finds a named member on either the class or instance side of `ty`.
 ///

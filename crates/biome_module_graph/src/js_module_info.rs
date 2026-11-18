@@ -1,6 +1,7 @@
 mod binding;
 mod collector;
 mod diagnostics;
+pub(crate) mod flow;
 mod scope;
 pub(crate) use scope::TsBindingReferenceExt;
 mod utils;
@@ -263,6 +264,11 @@ pub struct JsModuleInfoInner {
     /// Whether type inference was enabled when this module info was created
     pub(crate) infer_types: bool,
 
+    /// Syntax-only flow facts used to refine reads after runtime tests.
+    ///
+    /// Empty when type inference is disabled or no test can refine a read.
+    pub(crate) flow: flow::ModuleFlow,
+
     /// CSS class references from JSX `className` or `class` attributes.
     ///
     /// Each entry represents one attribute occurrence (e.g., `className="foo bar"`),
@@ -465,7 +471,10 @@ pub enum JsOwnExport {
 #[derive(Clone, Debug, PartialEq, Hash)]
 pub enum JsExportedSymbolLookup {
     /// The symbol is exported by the module.
-    Found(JsOwnExport),
+    ///
+    /// The [ModuleInfo] is the module that defines the export, which differs
+    /// from the module the lookup started in when the symbol is re-exported.
+    Found(JsOwnExport, ModuleInfo),
     /// Every re-export could be followed and the symbol is not there.
     Missing,
     /// A re-export target could not be resolved, so the symbol may still

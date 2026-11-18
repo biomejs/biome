@@ -67,7 +67,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoPlaywrightUnsafeReferences {
-        version: "next",
+        version: "2.6.5",
         name: "noPlaywrightUnsafeReferences",
         language: "js",
         sources: &[RuleSource::EslintPlaywright("no-unsafe-references").same()],

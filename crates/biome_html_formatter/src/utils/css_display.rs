@@ -9,13 +9,12 @@
 //! - HTML WHATWG spec: <https://html.spec.whatwg.org/multipage/rendering.html#the-css-user-agent-style-sheet-and-presentational-hints>
 
 use crate::HtmlFormatter;
-use crate::utils::metadata::MATHML_ALL_TAGS;
 use biome_html_syntax::{
     AnyHtmlTagName,
     HtmlSyntaxKind::{self, *},
+    MATHML_TAG_NAMES,
 };
 use biome_parser::{TokenSet, token_set};
-use biome_string_case::StrLikeExtension;
 
 const BLOCK_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(
     HTML_KW,
@@ -122,7 +121,8 @@ const BLOCK_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(
     TSPAN_KW,
     USE_KW,
     VIEW_KW
-);
+)
+.union(MATHML_TAG_NAMES);
 
 const INLINE_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(
     IMG_KW,
@@ -349,16 +349,7 @@ impl CssDisplay {
     }
 }
 
-fn get_unknown_css_display(tag_name: &str) -> CssDisplay {
-    let tag_name = tag_name.to_ascii_lowercase_cow();
-    if MATHML_ALL_TAGS.binary_search(&tag_name.as_ref()).is_ok() {
-        CssDisplay::Block
-    } else {
-        CssDisplay::Inline
-    }
-}
-
-fn get_css_display(kind: HtmlSyntaxKind, tag_name: &str) -> CssDisplay {
+fn get_css_display(kind: HtmlSyntaxKind) -> CssDisplay {
     if INLINE_ELEMENTS.contains(kind) {
         CssDisplay::Inline
     } else if BLOCK_ELEMENTS.contains(kind) {
@@ -384,7 +375,8 @@ fn get_css_display(kind: HtmlSyntaxKind, tag_name: &str) -> CssDisplay {
             TR_KW => CssDisplay::TableRow,
             RUBY_KW => CssDisplay::Ruby,
             RB_KW => CssDisplay::RubyBase,
-            HTML_UNKNOWN_TAG => get_unknown_css_display(tag_name),
+            // Custom and unknown elements have no user-agent styles.
+            HTML_UNKNOWN_TAG => CssDisplay::Inline,
             _ => CssDisplay::Inline,
         }
     }
@@ -399,13 +391,7 @@ pub fn get_css_display_from_tag(tag_name: &AnyHtmlTagName) -> CssDisplay {
             let Ok(token) = tag_name.value_token() else {
                 return CssDisplay::Inline;
             };
-            let kind = token.kind();
-            let tag_name = if kind == HTML_UNKNOWN_TAG {
-                token.text_trimmed()
-            } else {
-                ""
-            };
-            get_css_display(kind, tag_name)
+            get_css_display(token.kind())
         }
     }
 }
@@ -414,10 +400,6 @@ pub fn get_css_display_from_tag(tag_name: &AnyHtmlTagName) -> CssDisplay {
 mod tests {
     use super::*;
 
-    fn display(kind: HtmlSyntaxKind) -> CssDisplay {
-        get_css_display(kind, "")
-    }
-
     #[test]
     fn test_block_elements() {
         let block_tags = [
@@ -425,7 +407,7 @@ mod tests {
         ];
         for tag in block_tags {
             assert!(
-                display(tag).is_block_like(),
+                get_css_display(tag).is_block_like(),
                 "Expected '{tag:?}' to be block-like"
             );
         }
@@ -438,7 +420,7 @@ mod tests {
         ];
         for tag in inline_tags {
             assert!(
-                display(tag).is_inline_like(),
+                get_css_display(tag).is_inline_like(),
                 "Expected '{tag:?}' to be inline-like"
             );
         }
@@ -446,7 +428,7 @@ mod tests {
 
     #[test]
     fn test_tr_is_table_like() {
-        assert!(display(TR_KW).is_table_like());
+        assert!(get_css_display(TR_KW).is_table_like());
     }
 
     #[test]
@@ -454,7 +436,7 @@ mod tests {
         let hidden_tags = [HEAD_KW, SCRIPT_KW, STYLE_KW, META_KW, LINK_KW];
         for tag in hidden_tags {
             assert_eq!(
-                display(tag),
+                get_css_display(tag),
                 CssDisplay::None,
                 "Expected '{tag:?}' to be display: none"
             );
@@ -466,7 +448,7 @@ mod tests {
         let form_tags = [BUTTON_KW, INPUT_KW, SELECT_KW, TEXTAREA_KW];
         for tag in form_tags {
             assert_eq!(
-                display(tag),
+                get_css_display(tag),
                 CssDisplay::InlineBlock,
                 "Expected '{tag:?}' to be inline-block"
             );
@@ -475,11 +457,11 @@ mod tests {
 
     #[test]
     fn test_whitespace_sensitive_display_classifications() {
-        assert_eq!(display(MARQUEE_KW), CssDisplay::InlineBlock);
+        assert_eq!(get_css_display(MARQUEE_KW), CssDisplay::InlineBlock);
 
         for tag in [NOSCRIPT_KW, VIDEO_KW, AUDIO_KW, OBJECT_KW] {
             assert_eq!(
-                display(tag),
+                get_css_display(tag),
                 CssDisplay::Inline,
                 "Expected '{tag:?}' to be inline"
             );
@@ -488,40 +470,28 @@ mod tests {
 
     #[test]
     fn test_unknown_elements_default_to_inline() {
-        assert_eq!(
-            get_css_display(HTML_UNKNOWN_TAG, "custom-element"),
-            CssDisplay::Inline
-        );
-        assert_eq!(
-            get_css_display(HTML_UNKNOWN_TAG, "my-component"),
-            CssDisplay::Inline
-        );
-        assert_eq!(
-            get_css_display(HTML_UNKNOWN_TAG, "foreignobject"),
-            CssDisplay::Inline
-        );
+        assert_eq!(get_css_display(HTML_UNKNOWN_TAG), CssDisplay::Inline);
     }
 
     #[test]
     fn test_svg_element_is_block() {
-        assert_eq!(display(IMAGE_KW), CssDisplay::Block);
+        assert_eq!(get_css_display(IMAGE_KW), CssDisplay::Block);
     }
 
     #[test]
     fn test_mathml_elements_are_block() {
-        assert_eq!(
-            get_css_display(HTML_UNKNOWN_TAG, "mfrac"),
-            CssDisplay::Block
-        );
-        assert_eq!(
-            get_css_display(HTML_UNKNOWN_TAG, "ANNOTATION-XML"),
-            CssDisplay::Block
-        );
+        for tag in [MATH_KW, MFRAC_KW, ANNOTATION_XML_KW] {
+            assert_eq!(
+                get_css_display(tag),
+                CssDisplay::Block,
+                "Expected '{tag:?}' to be block"
+            );
+        }
     }
 
     #[test]
     fn test_list_item() {
-        assert_eq!(display(LI_KW), CssDisplay::ListItem);
+        assert_eq!(get_css_display(LI_KW), CssDisplay::ListItem);
         // ListItem is block-like
         assert!(CssDisplay::ListItem.is_block_like());
     }

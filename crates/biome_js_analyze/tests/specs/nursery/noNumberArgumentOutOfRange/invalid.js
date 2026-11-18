@@ -1,0 +1,26 @@
+/* should generate diagnostics */
+var x = 42;
+var s = x.toString(1);
+x.toString(37);
+x.toString(64);
+x.toString(0);
+x.toString(-2);
+x.toString(1.9);
+x.toString(1, 16);
+x.toString((1));
+x.toString(+1);
+x.toString(0x40);
+x.toString(1e400);
+x.toFixed(-1);
+x.toFixed(101);
+x.toExponential(-1);
+x.toExponential(101);
+x.toPrecision(0);
+x.toPrecision(0.5);
+x.toPrecision(101);
+x['toExponential'](101);
+x[`toFixed`](101);
+(x.toFixed)(101);
+x?.toFixed(101);
+x.toFixed?.(101);
+x?.y.toString(1);

@@ -1,0 +1,49 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+<>
+	<button disabled={false}>Save</button>
+	<button disabled={null}>Save</button>
+	<button disabled={undefined}>Save</button>
+	<button disabled {...props}>Save</button>
+	<button {...props}>Save</button>
+	<button aria-disabled="true">Save</button>
+
+	<input type={type} disabled />
+	<input type="submit" {...props} disabled />
+	<input {...props} disabled />
+	<input type="hidden" disabled />
+	<input type="HIDDEN" disabled />
+	<input type="email" readOnly />
+	<input disabled={false} />
+
+	<textarea readOnly />
+	<textarea disabled {...props} />
+	<select aria-disabled="true" />
+	<select disabled={false} />
+	<fieldset disabled={false} />
+
+	<div role={role} disabled>Save</div>
+	<div role="switch button" disabled>Save</div>
+	<div role="textbox" disabled>Save</div>
+	<div role="button" {...props} disabled>Save</div>
+	<div role="button" disabled {...props}>Save</div>
+	<div disabled>Save</div>
+
+	<optgroup disabled />
+	<option disabled />
+	<optgroup role="button" disabled />
+	<option role="button" disabled />
+
+	<Button disabled />
+	<Input disabled />
+	<Form.Button disabled />
+	<form:button disabled />
+	<my-button role="button" disabled />
+</>
+
+```

@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validScriptSetupNested.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+async function load() {
+	await doSomething();
+}
+defineExpose({});
+</script>
+
+```

@@ -53,101 +53,93 @@ pub struct ImportTreeNode {
     pub parent_components: Vec<Self>,
 }
 
-/// Traverses component importers to discover CSS classes visible to them.
+/// Returns the CSS classes that `importer` provides to the modules it imports.
 ///
-/// Modules are visited at most once across the entire traversal. Each eligible
-/// JavaScript importer contributes its static CSS imports. HTML importers
-/// contribute linked, static, and dynamic CSS imports together with classes
-/// from global inline styles.
-pub(crate) struct CssClassTraversal<'db> {
-    db: &'db dyn ModuleDb,
-    visited: FxHashSet<Utf8PathBuf>,
-}
-
-impl<'db> CssClassTraversal<'db> {
-    /// Creates a class traversal with `start` already visited.
-    ///
-    /// Seeding the starting module prevents an import cycle from yielding its
-    /// direct CSS imports a second time.
-    pub(crate) fn new(db: &'db dyn ModuleDb, start: &Utf8Path) -> Self {
-        Self {
-            db,
-            visited: [start.to_path_buf()].into_iter().collect(),
-        }
-    }
-}
-
-impl UpwardTraversalVisitor for CssClassTraversal<'_> {
-    type Branch = ();
-    type Item = CssClassStep;
-
-    fn db(&self) -> &dyn ModuleDb {
-        self.db
-    }
-
-    fn should_visit_importer(
-        &self,
-        imported_path: &Utf8Path,
-        importer: ModuleInfo,
-        _branch: &Self::Branch,
-    ) -> bool {
-        let importer_path = importer.path(self.db);
-        let importer_kind = importer.kind(self.db);
-        !matches!(importer_kind, ModuleInfoKind::Css(_))
-            && !self.visited.contains(importer_path)
-            && imports_path(self.db, importer, imported_path)
-    }
-
-    /// Collects the importer's CSS classes and continues through its importers.
-    ///
-    /// The importer is marked globally visited before traversal continues.
-    fn visit_importer(
-        &mut self,
-        _imported_path: &Utf8Path,
-        importer: ModuleInfo,
-        _branch: &Self::Branch,
-    ) -> Vec<UpwardTraversalAction<Self::Item, Self::Branch>> {
-        let db = self.db;
-        let importer_path = importer.path(db);
-        let importer_kind = importer.kind(db);
-        self.visited.insert(importer_path.to_path_buf());
-
-        let items = match importer_kind {
-            ModuleInfoKind::Js(js_info) => js_info
-                .import_paths
+/// A JavaScript module provides the CSS files it imports statically. An HTML
+/// module provides its linked stylesheets, the CSS files its scripts import,
+/// and the classes of its global inline styles. The global styles step is
+/// returned even when it contains no classes. A CSS module provides nothing.
+pub(crate) fn provided_css_class_steps(
+    db: &dyn ModuleDb,
+    importer: ModuleInfo,
+) -> Vec<CssClassStep> {
+    match importer.kind(db) {
+        ModuleInfoKind::Js(js_info) => js_info
+            .import_paths
+            .iter()
+            .filter(|import| import.kind.is_static())
+            .filter_map(|import_path| {
+                let resolved = import_path.resolve_js(db, importer);
+                css_class_step(db, resolved.path().as_path()?)
+            })
+            .collect(),
+        ModuleInfoKind::Html(html_info) => {
+            let mut items = html_info
+                .imported_stylesheets
                 .iter()
-                .filter(|import| import.kind.is_static())
                 .filter_map(|import_path| {
-                    let resolved = import_path.resolve_js(db, importer);
+                    let resolved = import_path.resolve_css(db, importer);
                     css_class_step(db, resolved.path().as_path()?)
                 })
-                .collect(),
-            ModuleInfoKind::Html(html_info) => {
-                let mut items = html_info
-                    .imported_stylesheets
-                    .iter()
-                    .filter_map(|import_path| {
-                        let resolved = import_path.resolve_css(db, importer);
-                        css_class_step(db, resolved.path().as_path()?)
-                    })
-                    .collect::<Vec<_>>();
-                items.extend(html_info.import_paths.iter().filter_map(|import_path| {
-                    let resolved = import_path.resolve_html(db, importer);
-                    css_class_step(db, resolved.path().as_path()?)
-                }));
-                items.push(CssClassStep {
-                    css_path: importer_path.to_path_buf(),
-                    css_classes: html_info.get_global_styles(),
-                });
-                items
-            }
-            ModuleInfoKind::Css(_) => Vec::new(),
-        };
+                .collect::<Vec<_>>();
+            items.extend(html_info.import_paths.iter().filter_map(|import_path| {
+                let resolved = import_path.resolve_html(db, importer);
+                css_class_step(db, resolved.path().as_path()?)
+            }));
+            items.push(CssClassStep {
+                css_path: importer.path(db).to_path_buf(),
+                css_classes: html_info.get_global_styles(),
+            });
+            items
+        }
+        ModuleInfoKind::Css(_) => Vec::new(),
+    }
+}
 
-        vec![UpwardTraversalAction {
-            items,
-            continue_with: Some(()),
-        }]
+/// Returns whether [provided_css_class_steps] returns at least one step for
+/// `module`.
+pub(crate) fn provides_css_classes(db: &dyn ModuleDb, module: ModuleInfo) -> bool {
+    match module.kind(db) {
+        ModuleInfoKind::Js(js_info) => js_info
+            .import_paths
+            .iter()
+            .filter(|import| import.kind.is_static())
+            .any(|import_path| {
+                import_path
+                    .resolve_js(db, module)
+                    .path()
+                    .as_path()
+                    .is_some_and(|path| db.css_module_info_for_path(path).is_some())
+            }),
+        ModuleInfoKind::Html(_) => true,
+        ModuleInfoKind::Css(_) => false,
+    }
+}
+
+/// Returns the resolved paths that `module` imports and to which it provides
+/// CSS classes.
+///
+/// JavaScript type-only imports are skipped because they don't load the
+/// imported module. CSS modules return no paths: a CSS `@import` doesn't
+/// expose the importing stylesheet to components.
+pub(crate) fn css_class_import_paths(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf8PathBuf> {
+    match module.kind(db) {
+        ModuleInfoKind::Js(info) => js_import_paths_in_source_order(info)
+            .filter_map(|import| import.resolve_js(db, module).path().as_path())
+            .map(Utf8Path::to_path_buf)
+            .collect(),
+        ModuleInfoKind::Html(info) => info
+            .imported_stylesheets
+            .iter()
+            .filter_map(|import| import.resolve_css(db, module).path().as_path())
+            .chain(
+                info.import_paths
+                    .iter()
+                    .filter_map(|import| import.resolve_html(db, module).path().as_path()),
+            )
+            .map(Utf8Path::to_path_buf)
+            .collect(),
+        ModuleInfoKind::Css(_) => Vec::new(),
     }
 }
 

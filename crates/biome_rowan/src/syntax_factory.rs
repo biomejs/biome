@@ -52,7 +52,7 @@ pub trait SyntaxFactory: fmt::Debug {
 
         let kind = if valid { kind } else { kind.to_bogus() };
 
-        RawSyntaxNode::new(kind, children.into_iter().map(Some))
+        RawSyntaxNode::new(kind, &mut children.into_iter().map(Some))
     }
 
     /// Creates a *separated list* syntax node. Validates if the elements are valid, are correctly
@@ -107,11 +107,11 @@ pub trait SyntaxFactory: fmt::Debug {
         }
 
         if !valid {
-            RawSyntaxNode::new(kind.to_bogus(), children.into_iter().map(Some))
+            RawSyntaxNode::new(kind.to_bogus(), &mut children.into_iter().map(Some))
         } else if missing_count > 0 {
             RawSyntaxNode::new(
                 kind,
-                SeparatedListWithMissingNodesOrSeparatorSlotsIterator {
+                &mut SeparatedListWithMissingNodesOrSeparatorSlotsIterator {
                     inner: children.into_iter().peekable(),
                     missing_count,
                     next_node: true,
@@ -119,7 +119,7 @@ pub trait SyntaxFactory: fmt::Debug {
                 },
             )
         } else {
-            RawSyntaxNode::new(kind, children.into_iter().map(Some))
+            RawSyntaxNode::new(kind, &mut children.into_iter().map(Some))
         }
     }
 }
@@ -232,9 +232,12 @@ impl<const COUNT: usize> RawNodeSlots<COUNT> {
     ) -> RawSyntaxNode<K> {
         debug_assert!(self.current_slot == COUNT, "Missing slots");
 
+        // Passing the iterator by reference lets `RawSyntaxNode::new` read it in
+        // place. Moving it copies it with wide loads that cannot be forwarded
+        // from the narrower stores that just built it, which stalls every call.
         RawSyntaxNode::new(
             kind,
-            RawNodeSlotIterator {
+            &mut RawNodeSlotIterator {
                 children: children.into_iter(),
                 slots: self.slots.as_slice().iter(),
             },

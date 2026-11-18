@@ -141,7 +141,7 @@ declare_lint_rule! {
     /// - If you want `Boolean` to be listed first in the type of a prop, see [`useVueBooleanPropTypeFirst`](https://biomejs.dev/linter/rules/use-vue-boolean-prop-type-first/).
     ///
     pub UseVueConsistentBooleanPropStyle {
-        version: "next",
+        version: "2.6.5",
         name: "useVueConsistentBooleanPropStyle",
         language: "html",
         recommended: false,

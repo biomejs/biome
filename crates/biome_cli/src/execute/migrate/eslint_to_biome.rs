@@ -547,8 +547,7 @@ impl eslint_eslint::FlatConfigData {
             let base_no_unused_vars = global_config_object
                 .rules
                 .as_ref()
-                .map(eslint_eslint::Rules::base_no_unused_vars_rules)
-                .unwrap_or_default();
+                .map_or_default(eslint_eslint::Rules::base_no_unused_vars_rules);
             let base_eqeqeq = global_config_object
                 .rules
                 .as_ref()

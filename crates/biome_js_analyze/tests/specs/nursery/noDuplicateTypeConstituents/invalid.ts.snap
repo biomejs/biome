@@ -1,0 +1,1670 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+type I1 = 1 | 1;
+type I2 = true & true;
+type I3 = null | null;
+type I4 = any | any;
+type I5 = { a: string | string };
+type I6 = { a: string } | { a: string };
+type I7 = { a: string; b: number } | { a: string; b: number };
+type I8 = Set<string> | Set<string>;
+type I9 = string[] | string[];
+type I10 = string[][] | string[][];
+type I11 = [1, 2, 3] | [1, 2, 3];
+type I12 = () => string | string;
+type I13 = (arg: string | string) => void;
+type I14 = "A" | "A";
+type I15 = "A" | 'A';
+type I16 = A | B | A;
+type I17 = A | B | A | B;
+type I18 = (A | B) | (A | B);
+type I19 = A | (A | A);
+type I20 = (A | B) | A | B | (A | B);
+type I21 = (number | string) | number | string;
+type I22 = (number & string) & number & string;
+type I23 = number & string & (number & string);
+type I24 = Record<string, A | A>;
+type I25 = (A | B) | ((C | D) & (C | D));
+type I26 = A | (A);
+type I27 =
+	| A
+	| B
+	| A;
+type I28 = Foo<{ a: string }> | Foo<{a:string}>;
+
+// Comments prevent the fix.
+type I29 = A | /* comment */ A;
+
+const i30 = (a?: string | undefined) => {};
+interface I31 {
+	(a?: string | undefined): void;
+}
+type I32 = new (a?: string | undefined) => void;
+function i33(a?: string | undefined) {}
+const i34 = function (a?: string | undefined) {};
+declare function i35(a?: string | undefined): void;
+declare class I36 {
+	f(a?: string | undefined): void;
+}
+interface I37 {
+	f(a?: string | undefined): void;
+	new (a?: string | undefined): void;
+}
+type I38 = (a?: string | (undefined | number)) => void;
+type I39 = (a?: (undefined | number) | string) => void;
+abstract class I40 {
+	abstract f(a?: string | undefined): void;
+}
+function i41(a?: (string | undefined)) {}
+function i42(a?: undefined | undefined) {}
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:15 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ type I1 = 1 | 1;
+      │               ^
+    3 │ type I2 = true & true;
+    4 │ type I3 = null | null;
+  
+  i It is first listed here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ type I1 = 1 | 1;
+      │           ^
+    3 │ type I2 = true & true;
+    4 │ type I3 = null | null;
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    2 │ type·I1·=·1·|·1;
+      │             --- 
+
+```
+
+```
+invalid.ts:3:18 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the intersection type.
+  
+    1 │ /* should generate diagnostics */
+    2 │ type I1 = 1 | 1;
+  > 3 │ type I2 = true & true;
+      │                  ^^^^
+    4 │ type I3 = null | null;
+    5 │ type I4 = any | any;
+  
+  i It is first listed here.
+  
+    1 │ /* should generate diagnostics */
+    2 │ type I1 = 1 | 1;
+  > 3 │ type I2 = true & true;
+      │           ^^^^
+    4 │ type I3 = null | null;
+    5 │ type I4 = any | any;
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    3 │ type·I2·=·true·&·true;
+      │                ------ 
+
+```
+
+```
+invalid.ts:4:18 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    2 │ type I1 = 1 | 1;
+    3 │ type I2 = true & true;
+  > 4 │ type I3 = null | null;
+      │                  ^^^^
+    5 │ type I4 = any | any;
+    6 │ type I5 = { a: string | string };
+  
+  i It is first listed here.
+  
+    2 │ type I1 = 1 | 1;
+    3 │ type I2 = true & true;
+  > 4 │ type I3 = null | null;
+      │           ^^^^
+    5 │ type I4 = any | any;
+    6 │ type I5 = { a: string | string };
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    4 │ type·I3·=·null·|·null;
+      │                ------ 
+
+```
+
+```
+invalid.ts:5:17 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    3 │ type I2 = true & true;
+    4 │ type I3 = null | null;
+  > 5 │ type I4 = any | any;
+      │                 ^^^
+    6 │ type I5 = { a: string | string };
+    7 │ type I6 = { a: string } | { a: string };
+  
+  i It is first listed here.
+  
+    3 │ type I2 = true & true;
+    4 │ type I3 = null | null;
+  > 5 │ type I4 = any | any;
+      │           ^^^
+    6 │ type I5 = { a: string | string };
+    7 │ type I6 = { a: string } | { a: string };
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    5 │ type·I4·=·any·|·any;
+      │               ----- 
+
+```
+
+```
+invalid.ts:6:25 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    4 │ type I3 = null | null;
+    5 │ type I4 = any | any;
+  > 6 │ type I5 = { a: string | string };
+      │                         ^^^^^^
+    7 │ type I6 = { a: string } | { a: string };
+    8 │ type I7 = { a: string; b: number } | { a: string; b: number };
+  
+  i It is first listed here.
+  
+    4 │ type I3 = null | null;
+    5 │ type I4 = any | any;
+  > 6 │ type I5 = { a: string | string };
+      │                ^^^^^^
+    7 │ type I6 = { a: string } | { a: string };
+    8 │ type I7 = { a: string; b: number } | { a: string; b: number };
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    6 │ type·I5·=·{·a:·string·|·string·};
+      │                       ---------  
+
+```
+
+```
+invalid.ts:7:27 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    5 │ type I4 = any | any;
+    6 │ type I5 = { a: string | string };
+  > 7 │ type I6 = { a: string } | { a: string };
+      │                           ^^^^^^^^^^^^^
+    8 │ type I7 = { a: string; b: number } | { a: string; b: number };
+    9 │ type I8 = Set<string> | Set<string>;
+  
+  i It is first listed here.
+  
+    5 │ type I4 = any | any;
+    6 │ type I5 = { a: string | string };
+  > 7 │ type I6 = { a: string } | { a: string };
+      │           ^^^^^^^^^^^^^
+    8 │ type I7 = { a: string; b: number } | { a: string; b: number };
+    9 │ type I8 = Set<string> | Set<string>;
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    7 │ type·I6·=·{·a:·string·}·|·{·a:·string·};
+      │                         --------------- 
+
+```
+
+```
+invalid.ts:8:38 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+     6 │ type I5 = { a: string | string };
+     7 │ type I6 = { a: string } | { a: string };
+   > 8 │ type I7 = { a: string; b: number } | { a: string; b: number };
+       │                                      ^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ type I8 = Set<string> | Set<string>;
+    10 │ type I9 = string[] | string[];
+  
+  i It is first listed here.
+  
+     6 │ type I5 = { a: string | string };
+     7 │ type I6 = { a: string } | { a: string };
+   > 8 │ type I7 = { a: string; b: number } | { a: string; b: number };
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ type I8 = Set<string> | Set<string>;
+    10 │ type I9 = string[] | string[];
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    8 │ type·I7·=·{·a:·string;·b:·number·}·|·{·a:·string;·b:·number·};
+      │                                    -------------------------- 
+
+```
+
+```
+invalid.ts:9:25 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+     7 │ type I6 = { a: string } | { a: string };
+     8 │ type I7 = { a: string; b: number } | { a: string; b: number };
+   > 9 │ type I8 = Set<string> | Set<string>;
+       │                         ^^^^^^^^^^^
+    10 │ type I9 = string[] | string[];
+    11 │ type I10 = string[][] | string[][];
+  
+  i It is first listed here.
+  
+     7 │ type I6 = { a: string } | { a: string };
+     8 │ type I7 = { a: string; b: number } | { a: string; b: number };
+   > 9 │ type I8 = Set<string> | Set<string>;
+       │           ^^^^^^^^^^^
+    10 │ type I9 = string[] | string[];
+    11 │ type I10 = string[][] | string[][];
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    9 │ type·I8·=·Set<string>·|·Set<string>;
+      │                       ------------- 
+
+```
+
+```
+invalid.ts:10:22 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+     8 │ type I7 = { a: string; b: number } | { a: string; b: number };
+     9 │ type I8 = Set<string> | Set<string>;
+  > 10 │ type I9 = string[] | string[];
+       │                      ^^^^^^^^
+    11 │ type I10 = string[][] | string[][];
+    12 │ type I11 = [1, 2, 3] | [1, 2, 3];
+  
+  i It is first listed here.
+  
+     8 │ type I7 = { a: string; b: number } | { a: string; b: number };
+     9 │ type I8 = Set<string> | Set<string>;
+  > 10 │ type I9 = string[] | string[];
+       │           ^^^^^^^^
+    11 │ type I10 = string[][] | string[][];
+    12 │ type I11 = [1, 2, 3] | [1, 2, 3];
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    10 │ type·I9·=·string[]·|·string[];
+       │                    ---------- 
+
+```
+
+```
+invalid.ts:11:25 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+     9 │ type I8 = Set<string> | Set<string>;
+    10 │ type I9 = string[] | string[];
+  > 11 │ type I10 = string[][] | string[][];
+       │                         ^^^^^^^^^^
+    12 │ type I11 = [1, 2, 3] | [1, 2, 3];
+    13 │ type I12 = () => string | string;
+  
+  i It is first listed here.
+  
+     9 │ type I8 = Set<string> | Set<string>;
+    10 │ type I9 = string[] | string[];
+  > 11 │ type I10 = string[][] | string[][];
+       │            ^^^^^^^^^^
+    12 │ type I11 = [1, 2, 3] | [1, 2, 3];
+    13 │ type I12 = () => string | string;
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    11 │ type·I10·=·string[][]·|·string[][];
+       │                       ------------ 
+
+```
+
+```
+invalid.ts:12:24 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    10 │ type I9 = string[] | string[];
+    11 │ type I10 = string[][] | string[][];
+  > 12 │ type I11 = [1, 2, 3] | [1, 2, 3];
+       │                        ^^^^^^^^^
+    13 │ type I12 = () => string | string;
+    14 │ type I13 = (arg: string | string) => void;
+  
+  i It is first listed here.
+  
+    10 │ type I9 = string[] | string[];
+    11 │ type I10 = string[][] | string[][];
+  > 12 │ type I11 = [1, 2, 3] | [1, 2, 3];
+       │            ^^^^^^^^^
+    13 │ type I12 = () => string | string;
+    14 │ type I13 = (arg: string | string) => void;
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    12 │ type·I11·=·[1,·2,·3]·|·[1,·2,·3];
+       │                      ----------- 
+
+```
+
+```
+invalid.ts:13:27 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    11 │ type I10 = string[][] | string[][];
+    12 │ type I11 = [1, 2, 3] | [1, 2, 3];
+  > 13 │ type I12 = () => string | string;
+       │                           ^^^^^^
+    14 │ type I13 = (arg: string | string) => void;
+    15 │ type I14 = "A" | "A";
+  
+  i It is first listed here.
+  
+    11 │ type I10 = string[][] | string[][];
+    12 │ type I11 = [1, 2, 3] | [1, 2, 3];
+  > 13 │ type I12 = () => string | string;
+       │                  ^^^^^^
+    14 │ type I13 = (arg: string | string) => void;
+    15 │ type I14 = "A" | "A";
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    13 │ type·I12·=·()·=>·string·|·string;
+       │                         -------- 
+
+```
+
+```
+invalid.ts:14:27 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    12 │ type I11 = [1, 2, 3] | [1, 2, 3];
+    13 │ type I12 = () => string | string;
+  > 14 │ type I13 = (arg: string | string) => void;
+       │                           ^^^^^^
+    15 │ type I14 = "A" | "A";
+    16 │ type I15 = "A" | 'A';
+  
+  i It is first listed here.
+  
+    12 │ type I11 = [1, 2, 3] | [1, 2, 3];
+    13 │ type I12 = () => string | string;
+  > 14 │ type I13 = (arg: string | string) => void;
+       │                  ^^^^^^
+    15 │ type I14 = "A" | "A";
+    16 │ type I15 = "A" | 'A';
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    14 │ type·I13·=·(arg:·string·|·string)·=>·void;
+       │                         --------          
+
+```
+
+```
+invalid.ts:15:18 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    13 │ type I12 = () => string | string;
+    14 │ type I13 = (arg: string | string) => void;
+  > 15 │ type I14 = "A" | "A";
+       │                  ^^^
+    16 │ type I15 = "A" | 'A';
+    17 │ type I16 = A | B | A;
+  
+  i It is first listed here.
+  
+    13 │ type I12 = () => string | string;
+    14 │ type I13 = (arg: string | string) => void;
+  > 15 │ type I14 = "A" | "A";
+       │            ^^^
+    16 │ type I15 = "A" | 'A';
+    17 │ type I16 = A | B | A;
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    15 │ type·I14·=·"A"·|·"A";
+       │                ----- 
+
+```
+
+```
+invalid.ts:16:18 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    14 │ type I13 = (arg: string | string) => void;
+    15 │ type I14 = "A" | "A";
+  > 16 │ type I15 = "A" | 'A';
+       │                  ^^^
+    17 │ type I16 = A | B | A;
+    18 │ type I17 = A | B | A | B;
+  
+  i It is first listed here.
+  
+    14 │ type I13 = (arg: string | string) => void;
+    15 │ type I14 = "A" | "A";
+  > 16 │ type I15 = "A" | 'A';
+       │            ^^^
+    17 │ type I16 = A | B | A;
+    18 │ type I17 = A | B | A | B;
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    16 │ type·I15·=·"A"·|·'A';
+       │                ----- 
+
+```
+
+```
+invalid.ts:17:20 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    15 │ type I14 = "A" | "A";
+    16 │ type I15 = "A" | 'A';
+  > 17 │ type I16 = A | B | A;
+       │                    ^
+    18 │ type I17 = A | B | A | B;
+    19 │ type I18 = (A | B) | (A | B);
+  
+  i It is first listed here.
+  
+    15 │ type I14 = "A" | "A";
+    16 │ type I15 = "A" | 'A';
+  > 17 │ type I16 = A | B | A;
+       │            ^
+    18 │ type I17 = A | B | A | B;
+    19 │ type I18 = (A | B) | (A | B);
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    17 │ type·I16·=·A·|·B·|·A;
+       │                  --- 
+
+```
+
+```
+invalid.ts:18:20 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    16 │ type I15 = "A" | 'A';
+    17 │ type I16 = A | B | A;
+  > 18 │ type I17 = A | B | A | B;
+       │                    ^
+    19 │ type I18 = (A | B) | (A | B);
+    20 │ type I19 = A | (A | A);
+  
+  i It is first listed here.
+  
+    16 │ type I15 = "A" | 'A';
+    17 │ type I16 = A | B | A;
+  > 18 │ type I17 = A | B | A | B;
+       │            ^
+    19 │ type I18 = (A | B) | (A | B);
+    20 │ type I19 = A | (A | A);
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    18 │ type·I17·=·A·|·B·|·A·|·B;
+       │                  ----    
+
+```
+
+```
+invalid.ts:18:24 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    16 │ type I15 = "A" | 'A';
+    17 │ type I16 = A | B | A;
+  > 18 │ type I17 = A | B | A | B;
+       │                        ^
+    19 │ type I18 = (A | B) | (A | B);
+    20 │ type I19 = A | (A | A);
+  
+  i It is first listed here.
+  
+    16 │ type I15 = "A" | 'A';
+    17 │ type I16 = A | B | A;
+  > 18 │ type I17 = A | B | A | B;
+       │                ^
+    19 │ type I18 = (A | B) | (A | B);
+    20 │ type I19 = A | (A | A);
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    18 │ type·I17·=·A·|·B·|·A·|·B;
+       │                      --- 
+
+```
+
+```
+invalid.ts:19:22 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    17 │ type I16 = A | B | A;
+    18 │ type I17 = A | B | A | B;
+  > 19 │ type I18 = (A | B) | (A | B);
+       │                      ^^^^^^^
+    20 │ type I19 = A | (A | A);
+    21 │ type I20 = (A | B) | A | B | (A | B);
+  
+  i It is first listed here.
+  
+    17 │ type I16 = A | B | A;
+    18 │ type I17 = A | B | A | B;
+  > 19 │ type I18 = (A | B) | (A | B);
+       │             ^^^^^
+    20 │ type I19 = A | (A | A);
+    21 │ type I20 = (A | B) | A | B | (A | B);
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    19 │ type·I18·=·(A·|·B)·|·(A·|·B);
+       │                    --------- 
+
+```
+
+```
+invalid.ts:20:17 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    18 │ type I17 = A | B | A | B;
+    19 │ type I18 = (A | B) | (A | B);
+  > 20 │ type I19 = A | (A | A);
+       │                 ^
+    21 │ type I20 = (A | B) | A | B | (A | B);
+    22 │ type I21 = (number | string) | number | string;
+  
+  i It is first listed here.
+  
+    18 │ type I17 = A | B | A | B;
+    19 │ type I18 = (A | B) | (A | B);
+  > 20 │ type I19 = A | (A | A);
+       │            ^
+    21 │ type I20 = (A | B) | A | B | (A | B);
+    22 │ type I21 = (number | string) | number | string;
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    20 │ type·I19·=·A·|·(A·|·A);
+       │                 ----   
+
+```
+
+```
+invalid.ts:20:21 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    18 │ type I17 = A | B | A | B;
+    19 │ type I18 = (A | B) | (A | B);
+  > 20 │ type I19 = A | (A | A);
+       │                     ^
+    21 │ type I20 = (A | B) | A | B | (A | B);
+    22 │ type I21 = (number | string) | number | string;
+  
+  i It is first listed here.
+  
+    18 │ type I17 = A | B | A | B;
+    19 │ type I18 = (A | B) | (A | B);
+  > 20 │ type I19 = A | (A | A);
+       │            ^
+    21 │ type I20 = (A | B) | A | B | (A | B);
+    22 │ type I21 = (number | string) | number | string;
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    20 │ type·I19·=·A·|·(A·|·A);
+       │                   ---  
+
+```
+
+```
+invalid.ts:21:22 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    19 │ type I18 = (A | B) | (A | B);
+    20 │ type I19 = A | (A | A);
+  > 21 │ type I20 = (A | B) | A | B | (A | B);
+       │                      ^
+    22 │ type I21 = (number | string) | number | string;
+    23 │ type I22 = (number & string) & number & string;
+  
+  i It is first listed here.
+  
+    19 │ type I18 = (A | B) | (A | B);
+    20 │ type I19 = A | (A | A);
+  > 21 │ type I20 = (A | B) | A | B | (A | B);
+       │             ^
+    22 │ type I21 = (number | string) | number | string;
+    23 │ type I22 = (number & string) & number & string;
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    21 │ type·I20·=·(A·|·B)·|·A·|·B·|·(A·|·B);
+       │                    ----              
+
+```
+
+```
+invalid.ts:21:26 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    19 │ type I18 = (A | B) | (A | B);
+    20 │ type I19 = A | (A | A);
+  > 21 │ type I20 = (A | B) | A | B | (A | B);
+       │                          ^
+    22 │ type I21 = (number | string) | number | string;
+    23 │ type I22 = (number & string) & number & string;
+  
+  i It is first listed here.
+  
+    19 │ type I18 = (A | B) | (A | B);
+    20 │ type I19 = A | (A | A);
+  > 21 │ type I20 = (A | B) | A | B | (A | B);
+       │                 ^
+    22 │ type I21 = (number | string) | number | string;
+    23 │ type I22 = (number & string) & number & string;
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    21 │ type·I20·=·(A·|·B)·|·A·|·B·|·(A·|·B);
+       │                        ----          
+
+```
+
+```
+invalid.ts:21:30 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    19 │ type I18 = (A | B) | (A | B);
+    20 │ type I19 = A | (A | A);
+  > 21 │ type I20 = (A | B) | A | B | (A | B);
+       │                              ^^^^^^^
+    22 │ type I21 = (number | string) | number | string;
+    23 │ type I22 = (number & string) & number & string;
+  
+  i It is first listed here.
+  
+    19 │ type I18 = (A | B) | (A | B);
+    20 │ type I19 = A | (A | A);
+  > 21 │ type I20 = (A | B) | A | B | (A | B);
+       │             ^^^^^
+    22 │ type I21 = (number | string) | number | string;
+    23 │ type I22 = (number & string) & number & string;
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    21 │ type·I20·=·(A·|·B)·|·A·|·B·|·(A·|·B);
+       │                            --------- 
+
+```
+
+```
+invalid.ts:22:32 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    20 │ type I19 = A | (A | A);
+    21 │ type I20 = (A | B) | A | B | (A | B);
+  > 22 │ type I21 = (number | string) | number | string;
+       │                                ^^^^^^
+    23 │ type I22 = (number & string) & number & string;
+    24 │ type I23 = number & string & (number & string);
+  
+  i It is first listed here.
+  
+    20 │ type I19 = A | (A | A);
+    21 │ type I20 = (A | B) | A | B | (A | B);
+  > 22 │ type I21 = (number | string) | number | string;
+       │             ^^^^^^
+    23 │ type I22 = (number & string) & number & string;
+    24 │ type I23 = number & string & (number & string);
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    22 │ type·I21·=·(number·|·string)·|·number·|·string;
+       │                              ---------         
+
+```
+
+```
+invalid.ts:22:41 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    20 │ type I19 = A | (A | A);
+    21 │ type I20 = (A | B) | A | B | (A | B);
+  > 22 │ type I21 = (number | string) | number | string;
+       │                                         ^^^^^^
+    23 │ type I22 = (number & string) & number & string;
+    24 │ type I23 = number & string & (number & string);
+  
+  i It is first listed here.
+  
+    20 │ type I19 = A | (A | A);
+    21 │ type I20 = (A | B) | A | B | (A | B);
+  > 22 │ type I21 = (number | string) | number | string;
+       │                      ^^^^^^
+    23 │ type I22 = (number & string) & number & string;
+    24 │ type I23 = number & string & (number & string);
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    22 │ type·I21·=·(number·|·string)·|·number·|·string;
+       │                                       -------- 
+
+```
+
+```
+invalid.ts:23:32 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the intersection type.
+  
+    21 │ type I20 = (A | B) | A | B | (A | B);
+    22 │ type I21 = (number | string) | number | string;
+  > 23 │ type I22 = (number & string) & number & string;
+       │                                ^^^^^^
+    24 │ type I23 = number & string & (number & string);
+    25 │ type I24 = Record<string, A | A>;
+  
+  i It is first listed here.
+  
+    21 │ type I20 = (A | B) | A | B | (A | B);
+    22 │ type I21 = (number | string) | number | string;
+  > 23 │ type I22 = (number & string) & number & string;
+       │             ^^^^^^
+    24 │ type I23 = number & string & (number & string);
+    25 │ type I24 = Record<string, A | A>;
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    23 │ type·I22·=·(number·&·string)·&·number·&·string;
+       │                              ---------         
+
+```
+
+```
+invalid.ts:23:41 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the intersection type.
+  
+    21 │ type I20 = (A | B) | A | B | (A | B);
+    22 │ type I21 = (number | string) | number | string;
+  > 23 │ type I22 = (number & string) & number & string;
+       │                                         ^^^^^^
+    24 │ type I23 = number & string & (number & string);
+    25 │ type I24 = Record<string, A | A>;
+  
+  i It is first listed here.
+  
+    21 │ type I20 = (A | B) | A | B | (A | B);
+    22 │ type I21 = (number | string) | number | string;
+  > 23 │ type I22 = (number & string) & number & string;
+       │                      ^^^^^^
+    24 │ type I23 = number & string & (number & string);
+    25 │ type I24 = Record<string, A | A>;
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    23 │ type·I22·=·(number·&·string)·&·number·&·string;
+       │                                       -------- 
+
+```
+
+```
+invalid.ts:24:31 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the intersection type.
+  
+    22 │ type I21 = (number | string) | number | string;
+    23 │ type I22 = (number & string) & number & string;
+  > 24 │ type I23 = number & string & (number & string);
+       │                               ^^^^^^
+    25 │ type I24 = Record<string, A | A>;
+    26 │ type I25 = (A | B) | ((C | D) & (C | D));
+  
+  i It is first listed here.
+  
+    22 │ type I21 = (number | string) | number | string;
+    23 │ type I22 = (number & string) & number & string;
+  > 24 │ type I23 = number & string & (number & string);
+       │            ^^^^^^
+    25 │ type I24 = Record<string, A | A>;
+    26 │ type I25 = (A | B) | ((C | D) & (C | D));
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    24 │ type·I23·=·number·&·string·&·(number·&·string);
+       │                               ---------        
+
+```
+
+```
+invalid.ts:24:40 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the intersection type.
+  
+    22 │ type I21 = (number | string) | number | string;
+    23 │ type I22 = (number & string) & number & string;
+  > 24 │ type I23 = number & string & (number & string);
+       │                                        ^^^^^^
+    25 │ type I24 = Record<string, A | A>;
+    26 │ type I25 = (A | B) | ((C | D) & (C | D));
+  
+  i It is first listed here.
+  
+    22 │ type I21 = (number | string) | number | string;
+    23 │ type I22 = (number & string) & number & string;
+  > 24 │ type I23 = number & string & (number & string);
+       │                     ^^^^^^
+    25 │ type I24 = Record<string, A | A>;
+    26 │ type I25 = (A | B) | ((C | D) & (C | D));
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    24 │ type·I23·=·number·&·string·&·(number·&·string);
+       │                                      --------  
+
+```
+
+```
+invalid.ts:25:31 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    23 │ type I22 = (number & string) & number & string;
+    24 │ type I23 = number & string & (number & string);
+  > 25 │ type I24 = Record<string, A | A>;
+       │                               ^
+    26 │ type I25 = (A | B) | ((C | D) & (C | D));
+    27 │ type I26 = A | (A);
+  
+  i It is first listed here.
+  
+    23 │ type I22 = (number & string) & number & string;
+    24 │ type I23 = number & string & (number & string);
+  > 25 │ type I24 = Record<string, A | A>;
+       │                           ^
+    26 │ type I25 = (A | B) | ((C | D) & (C | D));
+    27 │ type I26 = A | (A);
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    25 │ type·I24·=·Record<string,·A·|·A>;
+       │                             ---  
+
+```
+
+```
+invalid.ts:26:33 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the intersection type.
+  
+    24 │ type I23 = number & string & (number & string);
+    25 │ type I24 = Record<string, A | A>;
+  > 26 │ type I25 = (A | B) | ((C | D) & (C | D));
+       │                                 ^^^^^^^
+    27 │ type I26 = A | (A);
+    28 │ type I27 =
+  
+  i It is first listed here.
+  
+    24 │ type I23 = number & string & (number & string);
+    25 │ type I24 = Record<string, A | A>;
+  > 26 │ type I25 = (A | B) | ((C | D) & (C | D));
+       │                        ^^^^^
+    27 │ type I26 = A | (A);
+    28 │ type I27 =
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    26 │ type·I25·=·(A·|·B)·|·((C·|·D)·&·(C·|·D));
+       │                               ---------  
+
+```
+
+```
+invalid.ts:27:16 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    25 │ type I24 = Record<string, A | A>;
+    26 │ type I25 = (A | B) | ((C | D) & (C | D));
+  > 27 │ type I26 = A | (A);
+       │                ^^^
+    28 │ type I27 =
+    29 │ 	| A
+  
+  i It is first listed here.
+  
+    25 │ type I24 = Record<string, A | A>;
+    26 │ type I25 = (A | B) | ((C | D) & (C | D));
+  > 27 │ type I26 = A | (A);
+       │            ^
+    28 │ type I27 =
+    29 │ 	| A
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    27 │ type·I26·=·A·|·(A);
+       │              ----- 
+
+```
+
+```
+invalid.ts:31:4 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    29 │ 	| A
+    30 │ 	| B
+  > 31 │ 	| A;
+       │ 	  ^
+    32 │ type I28 = Foo<{ a: string }> | Foo<{a:string}>;
+    33 │ 
+  
+  i It is first listed here.
+  
+    27 │ type I26 = A | (A);
+    28 │ type I27 =
+  > 29 │ 	| A
+       │ 	  ^
+    30 │ 	| B
+    31 │ 	| A;
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    28 28 │   type I27 =
+    29 29 │     | A
+    30    │ - → |·B
+    31    │ - → |·A;
+       30 │ + → |·B;
+    32 31 │   type I28 = Foo<{ a: string }> | Foo<{a:string}>;
+    33 32 │   
+  
+
+```
+
+```
+invalid.ts:32:33 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    30 │ 	| B
+    31 │ 	| A;
+  > 32 │ type I28 = Foo<{ a: string }> | Foo<{a:string}>;
+       │                                 ^^^^^^^^^^^^^^^
+    33 │ 
+    34 │ // Comments prevent the fix.
+  
+  i It is first listed here.
+  
+    30 │ 	| B
+    31 │ 	| A;
+  > 32 │ type I28 = Foo<{ a: string }> | Foo<{a:string}>;
+       │            ^^^^^^^^^^^^^^^^^^
+    33 │ 
+    34 │ // Comments prevent the fix.
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    32 │ type·I28·=·Foo<{·a:·string·}>·|·Foo<{a:string}>;
+       │                               ----------------- 
+
+```
+
+```
+invalid.ts:35:30 lint/nursery/noDuplicateTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    34 │ // Comments prevent the fix.
+  > 35 │ type I29 = A | /* comment */ A;
+       │                              ^
+    36 │ 
+    37 │ const i30 = (a?: string | undefined) => {};
+  
+  i It is first listed here.
+  
+    34 │ // Comments prevent the fix.
+  > 35 │ type I29 = A | /* comment */ A;
+       │            ^
+    36 │ 
+    37 │ const i30 = (a?: string | undefined) => {};
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:37:27 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This undefined is unnecessary because the parameter is optional.
+  
+    35 │ type I29 = A | /* comment */ A;
+    36 │ 
+  > 37 │ const i30 = (a?: string | undefined) => {};
+       │                           ^^^^^^^^^
+    38 │ interface I31 {
+    39 │ 	(a?: string | undefined): void;
+  
+  i A parameter marked with ? already accepts undefined.
+  
+  i Remove undefined from the parameter type.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove undefined.
+  
+    37 │ const·i30·=·(a?:·string·|·undefined)·=>·{};
+       │                         -----------        
+
+```
+
+```
+invalid.ts:39:16 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This undefined is unnecessary because the parameter is optional.
+  
+    37 │ const i30 = (a?: string | undefined) => {};
+    38 │ interface I31 {
+  > 39 │ 	(a?: string | undefined): void;
+       │ 	              ^^^^^^^^^
+    40 │ }
+    41 │ type I32 = new (a?: string | undefined) => void;
+  
+  i A parameter marked with ? already accepts undefined.
+  
+  i Remove undefined from the parameter type.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove undefined.
+  
+    39 │ → (a?:·string·|·undefined):·void;
+       │               -----------        
+
+```
+
+```
+invalid.ts:41:30 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This undefined is unnecessary because the parameter is optional.
+  
+    39 │ 	(a?: string | undefined): void;
+    40 │ }
+  > 41 │ type I32 = new (a?: string | undefined) => void;
+       │                              ^^^^^^^^^
+    42 │ function i33(a?: string | undefined) {}
+    43 │ const i34 = function (a?: string | undefined) {};
+  
+  i A parameter marked with ? already accepts undefined.
+  
+  i Remove undefined from the parameter type.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove undefined.
+  
+    41 │ type·I32·=·new·(a?:·string·|·undefined)·=>·void;
+       │                            -----------          
+
+```
+
+```
+invalid.ts:42:27 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This undefined is unnecessary because the parameter is optional.
+  
+    40 │ }
+    41 │ type I32 = new (a?: string | undefined) => void;
+  > 42 │ function i33(a?: string | undefined) {}
+       │                           ^^^^^^^^^
+    43 │ const i34 = function (a?: string | undefined) {};
+    44 │ declare function i35(a?: string | undefined): void;
+  
+  i A parameter marked with ? already accepts undefined.
+  
+  i Remove undefined from the parameter type.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove undefined.
+  
+    42 │ function·i33(a?:·string·|·undefined)·{}
+       │                         -----------    
+
+```
+
+```
+invalid.ts:43:36 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This undefined is unnecessary because the parameter is optional.
+  
+    41 │ type I32 = new (a?: string | undefined) => void;
+    42 │ function i33(a?: string | undefined) {}
+  > 43 │ const i34 = function (a?: string | undefined) {};
+       │                                    ^^^^^^^^^
+    44 │ declare function i35(a?: string | undefined): void;
+    45 │ declare class I36 {
+  
+  i A parameter marked with ? already accepts undefined.
+  
+  i Remove undefined from the parameter type.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove undefined.
+  
+    43 │ const·i34·=·function·(a?:·string·|·undefined)·{};
+       │                                  -----------     
+
+```
+
+```
+invalid.ts:44:35 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This undefined is unnecessary because the parameter is optional.
+  
+    42 │ function i33(a?: string | undefined) {}
+    43 │ const i34 = function (a?: string | undefined) {};
+  > 44 │ declare function i35(a?: string | undefined): void;
+       │                                   ^^^^^^^^^
+    45 │ declare class I36 {
+    46 │ 	f(a?: string | undefined): void;
+  
+  i A parameter marked with ? already accepts undefined.
+  
+  i Remove undefined from the parameter type.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove undefined.
+  
+    44 │ declare·function·i35(a?:·string·|·undefined):·void;
+       │                                 -----------        
+
+```
+
+```
+invalid.ts:46:17 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This undefined is unnecessary because the parameter is optional.
+  
+    44 │ declare function i35(a?: string | undefined): void;
+    45 │ declare class I36 {
+  > 46 │ 	f(a?: string | undefined): void;
+       │ 	               ^^^^^^^^^
+    47 │ }
+    48 │ interface I37 {
+  
+  i A parameter marked with ? already accepts undefined.
+  
+  i Remove undefined from the parameter type.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove undefined.
+  
+    46 │ → f(a?:·string·|·undefined):·void;
+       │                -----------        
+
+```
+
+```
+invalid.ts:49:17 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This undefined is unnecessary because the parameter is optional.
+  
+    47 │ }
+    48 │ interface I37 {
+  > 49 │ 	f(a?: string | undefined): void;
+       │ 	               ^^^^^^^^^
+    50 │ 	new (a?: string | undefined): void;
+    51 │ }
+  
+  i A parameter marked with ? already accepts undefined.
+  
+  i Remove undefined from the parameter type.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove undefined.
+  
+    49 │ → f(a?:·string·|·undefined):·void;
+       │                -----------        
+
+```
+
+```
+invalid.ts:50:20 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This undefined is unnecessary because the parameter is optional.
+  
+    48 │ interface I37 {
+    49 │ 	f(a?: string | undefined): void;
+  > 50 │ 	new (a?: string | undefined): void;
+       │ 	                  ^^^^^^^^^
+    51 │ }
+    52 │ type I38 = (a?: string | (undefined | number)) => void;
+  
+  i A parameter marked with ? already accepts undefined.
+  
+  i Remove undefined from the parameter type.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove undefined.
+  
+    50 │ → new·(a?:·string·|·undefined):·void;
+       │                   -----------        
+
+```
+
+```
+invalid.ts:52:27 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This undefined is unnecessary because the parameter is optional.
+  
+    50 │ 	new (a?: string | undefined): void;
+    51 │ }
+  > 52 │ type I38 = (a?: string | (undefined | number)) => void;
+       │                           ^^^^^^^^^
+    53 │ type I39 = (a?: (undefined | number) | string) => void;
+    54 │ abstract class I40 {
+  
+  i A parameter marked with ? already accepts undefined.
+  
+  i Remove undefined from the parameter type.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove undefined.
+  
+    52 │ type·I38·=·(a?:·string·|·(undefined·|·number))·=>·void;
+       │                           ------------                 
+
+```
+
+```
+invalid.ts:53:18 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This undefined is unnecessary because the parameter is optional.
+  
+    51 │ }
+    52 │ type I38 = (a?: string | (undefined | number)) => void;
+  > 53 │ type I39 = (a?: (undefined | number) | string) => void;
+       │                  ^^^^^^^^^
+    54 │ abstract class I40 {
+    55 │ 	abstract f(a?: string | undefined): void;
+  
+  i A parameter marked with ? already accepts undefined.
+  
+  i Remove undefined from the parameter type.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove undefined.
+  
+    53 │ type·I39·=·(a?:·(undefined·|·number)·|·string)·=>·void;
+       │                  ------------                          
+
+```
+
+```
+invalid.ts:55:26 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This undefined is unnecessary because the parameter is optional.
+  
+    53 │ type I39 = (a?: (undefined | number) | string) => void;
+    54 │ abstract class I40 {
+  > 55 │ 	abstract f(a?: string | undefined): void;
+       │ 	                        ^^^^^^^^^
+    56 │ }
+    57 │ function i41(a?: (string | undefined)) {}
+  
+  i A parameter marked with ? already accepts undefined.
+  
+  i Remove undefined from the parameter type.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove undefined.
+  
+    55 │ → abstract·f(a?:·string·|·undefined):·void;
+       │                         -----------        
+
+```
+
+```
+invalid.ts:57:28 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This undefined is unnecessary because the parameter is optional.
+  
+    55 │ 	abstract f(a?: string | undefined): void;
+    56 │ }
+  > 57 │ function i41(a?: (string | undefined)) {}
+       │                            ^^^^^^^^^
+    58 │ function i42(a?: undefined | undefined) {}
+    59 │ 
+  
+  i A parameter marked with ? already accepts undefined.
+  
+  i Remove undefined from the parameter type.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove undefined.
+  
+    57 │ function·i41(a?:·(string·|·undefined))·{}
+       │                          -----------     
+
+```
+
+```
+invalid.ts:58:18 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This undefined is unnecessary because the parameter is optional.
+  
+    56 │ }
+    57 │ function i41(a?: (string | undefined)) {}
+  > 58 │ function i42(a?: undefined | undefined) {}
+       │                  ^^^^^^^^^
+    59 │ 
+  
+  i A parameter marked with ? already accepts undefined.
+  
+  i Remove undefined from the parameter type.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove undefined.
+  
+    58 │ function·i42(a?:·undefined·|·undefined)·{}
+       │                  ------------             
+
+```
+
+```
+invalid.ts:58:30 lint/nursery/noDuplicateTypeConstituents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type is already listed in the union type.
+  
+    56 │ }
+    57 │ function i41(a?: (string | undefined)) {}
+  > 58 │ function i42(a?: undefined | undefined) {}
+       │                              ^^^^^^^^^
+    59 │ 
+  
+  i It is first listed here.
+  
+    56 │ }
+    57 │ function i41(a?: (string | undefined)) {}
+  > 58 │ function i42(a?: undefined | undefined) {}
+       │                  ^^^^^^^^^
+    59 │ 
+  
+  i Listing the same type more than once has no effect and makes the type harder to read.
+  
+  i Remove the duplicate type, or replace it with the type you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the duplicate type.
+  
+    58 │ function·i42(a?:·undefined·|·undefined)·{}
+       │                            -----------    
+
+```

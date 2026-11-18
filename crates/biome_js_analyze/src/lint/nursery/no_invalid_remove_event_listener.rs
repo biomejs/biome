@@ -67,7 +67,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoInvalidRemoveEventListener {
-        version: "next",
+        version: "2.6.5",
         name: "noInvalidRemoveEventListener",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-invalid-remove-event-listener").same()],

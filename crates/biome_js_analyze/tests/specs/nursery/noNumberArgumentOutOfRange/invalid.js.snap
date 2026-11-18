@@ -1,0 +1,538 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+var x = 42;
+var s = x.toString(1);
+x.toString(37);
+x.toString(64);
+x.toString(0);
+x.toString(-2);
+x.toString(1.9);
+x.toString(1, 16);
+x.toString((1));
+x.toString(+1);
+x.toString(0x40);
+x.toString(1e400);
+x.toFixed(-1);
+x.toFixed(101);
+x.toExponential(-1);
+x.toExponential(101);
+x.toPrecision(0);
+x.toPrecision(0.5);
+x.toPrecision(101);
+x['toExponential'](101);
+x[`toFixed`](101);
+(x.toFixed)(101);
+x?.toFixed(101);
+x.toFixed?.(101);
+x?.y.toString(1);
+
+```
+
+# Diagnostics
+```
+invalid.js:3:20 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toString() is out of range.
+  
+    1 │ /* should generate diagnostics */
+    2 │ var x = 42;
+  > 3 │ var s = x.toString(1);
+      │                    ^
+    4 │ x.toString(37);
+    5 │ x.toString(64);
+  
+  i toString() throws a RangeError when its first argument is not between 2 and 36.
+  
+  i Pass a number between 2 and 36.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:12 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toString() is out of range.
+  
+    2 │ var x = 42;
+    3 │ var s = x.toString(1);
+  > 4 │ x.toString(37);
+      │            ^^
+    5 │ x.toString(64);
+    6 │ x.toString(0);
+  
+  i toString() throws a RangeError when its first argument is not between 2 and 36.
+  
+  i Pass a number between 2 and 36.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:12 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toString() is out of range.
+  
+    3 │ var s = x.toString(1);
+    4 │ x.toString(37);
+  > 5 │ x.toString(64);
+      │            ^^
+    6 │ x.toString(0);
+    7 │ x.toString(-2);
+  
+  i toString() throws a RangeError when its first argument is not between 2 and 36.
+  
+  i Pass a number between 2 and 36.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:12 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toString() is out of range.
+  
+    4 │ x.toString(37);
+    5 │ x.toString(64);
+  > 6 │ x.toString(0);
+      │            ^
+    7 │ x.toString(-2);
+    8 │ x.toString(1.9);
+  
+  i toString() throws a RangeError when its first argument is not between 2 and 36.
+  
+  i Pass a number between 2 and 36.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:12 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toString() is out of range.
+  
+    5 │ x.toString(64);
+    6 │ x.toString(0);
+  > 7 │ x.toString(-2);
+      │            ^^
+    8 │ x.toString(1.9);
+    9 │ x.toString(1, 16);
+  
+  i toString() throws a RangeError when its first argument is not between 2 and 36.
+  
+  i Pass a number between 2 and 36.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:12 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toString() is out of range.
+  
+     6 │ x.toString(0);
+     7 │ x.toString(-2);
+   > 8 │ x.toString(1.9);
+       │            ^^^
+     9 │ x.toString(1, 16);
+    10 │ x.toString((1));
+  
+  i toString() throws a RangeError when its first argument is not between 2 and 36.
+  
+  i Pass a number between 2 and 36.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:12 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toString() is out of range.
+  
+     7 │ x.toString(-2);
+     8 │ x.toString(1.9);
+   > 9 │ x.toString(1, 16);
+       │            ^
+    10 │ x.toString((1));
+    11 │ x.toString(+1);
+  
+  i toString() throws a RangeError when its first argument is not between 2 and 36.
+  
+  i Pass a number between 2 and 36.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:12 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toString() is out of range.
+  
+     8 │ x.toString(1.9);
+     9 │ x.toString(1, 16);
+  > 10 │ x.toString((1));
+       │            ^^^
+    11 │ x.toString(+1);
+    12 │ x.toString(0x40);
+  
+  i toString() throws a RangeError when its first argument is not between 2 and 36.
+  
+  i Pass a number between 2 and 36.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:12 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toString() is out of range.
+  
+     9 │ x.toString(1, 16);
+    10 │ x.toString((1));
+  > 11 │ x.toString(+1);
+       │            ^^
+    12 │ x.toString(0x40);
+    13 │ x.toString(1e400);
+  
+  i toString() throws a RangeError when its first argument is not between 2 and 36.
+  
+  i Pass a number between 2 and 36.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:12 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toString() is out of range.
+  
+    10 │ x.toString((1));
+    11 │ x.toString(+1);
+  > 12 │ x.toString(0x40);
+       │            ^^^^
+    13 │ x.toString(1e400);
+    14 │ x.toFixed(-1);
+  
+  i toString() throws a RangeError when its first argument is not between 2 and 36.
+  
+  i Pass a number between 2 and 36.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:12 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toString() is out of range.
+  
+    11 │ x.toString(+1);
+    12 │ x.toString(0x40);
+  > 13 │ x.toString(1e400);
+       │            ^^^^^
+    14 │ x.toFixed(-1);
+    15 │ x.toFixed(101);
+  
+  i toString() throws a RangeError when its first argument is not between 2 and 36.
+  
+  i Pass a number between 2 and 36.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:11 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toFixed() is out of range.
+  
+    12 │ x.toString(0x40);
+    13 │ x.toString(1e400);
+  > 14 │ x.toFixed(-1);
+       │           ^^
+    15 │ x.toFixed(101);
+    16 │ x.toExponential(-1);
+  
+  i toFixed() throws a RangeError when its first argument is not between 0 and 100.
+  
+  i Pass a number between 0 and 100.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:11 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toFixed() is out of range.
+  
+    13 │ x.toString(1e400);
+    14 │ x.toFixed(-1);
+  > 15 │ x.toFixed(101);
+       │           ^^^
+    16 │ x.toExponential(-1);
+    17 │ x.toExponential(101);
+  
+  i toFixed() throws a RangeError when its first argument is not between 0 and 100.
+  
+  i Pass a number between 0 and 100.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:17 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toExponential() is out of range.
+  
+    14 │ x.toFixed(-1);
+    15 │ x.toFixed(101);
+  > 16 │ x.toExponential(-1);
+       │                 ^^
+    17 │ x.toExponential(101);
+    18 │ x.toPrecision(0);
+  
+  i toExponential() throws a RangeError when its first argument is not between 0 and 100.
+  
+  i Pass a number between 0 and 100.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:17 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toExponential() is out of range.
+  
+    15 │ x.toFixed(101);
+    16 │ x.toExponential(-1);
+  > 17 │ x.toExponential(101);
+       │                 ^^^
+    18 │ x.toPrecision(0);
+    19 │ x.toPrecision(0.5);
+  
+  i toExponential() throws a RangeError when its first argument is not between 0 and 100.
+  
+  i Pass a number between 0 and 100.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:15 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toPrecision() is out of range.
+  
+    16 │ x.toExponential(-1);
+    17 │ x.toExponential(101);
+  > 18 │ x.toPrecision(0);
+       │               ^
+    19 │ x.toPrecision(0.5);
+    20 │ x.toPrecision(101);
+  
+  i toPrecision() throws a RangeError when its first argument is not between 1 and 100.
+  
+  i Pass a number between 1 and 100.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:15 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toPrecision() is out of range.
+  
+    17 │ x.toExponential(101);
+    18 │ x.toPrecision(0);
+  > 19 │ x.toPrecision(0.5);
+       │               ^^^
+    20 │ x.toPrecision(101);
+    21 │ x['toExponential'](101);
+  
+  i toPrecision() throws a RangeError when its first argument is not between 1 and 100.
+  
+  i Pass a number between 1 and 100.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:15 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toPrecision() is out of range.
+  
+    18 │ x.toPrecision(0);
+    19 │ x.toPrecision(0.5);
+  > 20 │ x.toPrecision(101);
+       │               ^^^
+    21 │ x['toExponential'](101);
+    22 │ x[`toFixed`](101);
+  
+  i toPrecision() throws a RangeError when its first argument is not between 1 and 100.
+  
+  i Pass a number between 1 and 100.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:20 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toExponential() is out of range.
+  
+    19 │ x.toPrecision(0.5);
+    20 │ x.toPrecision(101);
+  > 21 │ x['toExponential'](101);
+       │                    ^^^
+    22 │ x[`toFixed`](101);
+    23 │ (x.toFixed)(101);
+  
+  i toExponential() throws a RangeError when its first argument is not between 0 and 100.
+  
+  i Pass a number between 0 and 100.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:14 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toFixed() is out of range.
+  
+    20 │ x.toPrecision(101);
+    21 │ x['toExponential'](101);
+  > 22 │ x[`toFixed`](101);
+       │              ^^^
+    23 │ (x.toFixed)(101);
+    24 │ x?.toFixed(101);
+  
+  i toFixed() throws a RangeError when its first argument is not between 0 and 100.
+  
+  i Pass a number between 0 and 100.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:13 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toFixed() is out of range.
+  
+    21 │ x['toExponential'](101);
+    22 │ x[`toFixed`](101);
+  > 23 │ (x.toFixed)(101);
+       │             ^^^
+    24 │ x?.toFixed(101);
+    25 │ x.toFixed?.(101);
+  
+  i toFixed() throws a RangeError when its first argument is not between 0 and 100.
+  
+  i Pass a number between 0 and 100.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:12 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toFixed() is out of range.
+  
+    22 │ x[`toFixed`](101);
+    23 │ (x.toFixed)(101);
+  > 24 │ x?.toFixed(101);
+       │            ^^^
+    25 │ x.toFixed?.(101);
+    26 │ x?.y.toString(1);
+  
+  i toFixed() throws a RangeError when its first argument is not between 0 and 100.
+  
+  i Pass a number between 0 and 100.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:13 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toFixed() is out of range.
+  
+    23 │ (x.toFixed)(101);
+    24 │ x?.toFixed(101);
+  > 25 │ x.toFixed?.(101);
+       │             ^^^
+    26 │ x?.y.toString(1);
+    27 │ 
+  
+  i toFixed() throws a RangeError when its first argument is not between 0 and 100.
+  
+  i Pass a number between 0 and 100.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:15 lint/nursery/noNumberArgumentOutOfRange ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument of toString() is out of range.
+  
+    24 │ x?.toFixed(101);
+    25 │ x.toFixed?.(101);
+  > 26 │ x?.y.toString(1);
+       │               ^
+    27 │ 
+  
+  i toString() throws a RangeError when its first argument is not between 2 and 36.
+  
+  i Pass a number between 2 and 36.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -95,7 +95,7 @@ declare_lint_rule! {
     /// - [Vue `v-html` directive](https://vuejs.org/api/built-in-directives.html#v-html)
     /// - [Vue `v-text` directive](https://vuejs.org/api/built-in-directives.html#v-text)
     pub NoVueChildContent {
-        version: "next",
+        version: "2.6.5",
         name: "noVueChildContent",
         language: "html",
         recommended: true,

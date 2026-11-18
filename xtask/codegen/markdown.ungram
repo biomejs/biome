@@ -81,6 +81,9 @@ AnyMdLeafBlock =
 	| MdNewline
 	| MdContinuationIndent
 	| GfmTable
+	| MdxEsmBlock
+	| MdxBlockExpression
+	| MdxJsxBlockTag
 
 AnyMdContainerBlock =
 	MdQuote
@@ -283,6 +286,8 @@ AnyMdInline =
 	| GfmTaskListItem
 	| MdQuotePrefix
 	| MdIndentToken
+	| MdxInlineExpression
+	| MdxJsxInlineTag
 
 
 // *italic*
@@ -470,3 +475,46 @@ GfmTableDelimiterDashList = GfmTableDelimiterDash*
 // -
 // ^
 GfmTableDelimiterDash = '-'
+
+// ==================================
+// MDX
+// ==================================
+
+// import { Chart } from "./chart.js"
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// Top-level `import` and `export` statements, up to the next blank line.
+// The content is JavaScript and is parsed as an embedded snippet.
+MdxEsmBlock = content: 'mdx_esm_literal'
+
+// {props.title}
+// ^^^^^^^^^^^^^
+// An expression that is alone on its line. Spaces and tabs before it are
+// whitespace trivia, because MDX gives them no meaning.
+MdxBlockExpression =
+	l_curly: '{'
+	content: MdxExpressionContent?
+	r_curly: '}'
+
+// Hello, {props.name}!
+//        ^^^^^^^^^^^^
+MdxInlineExpression =
+	l_curly: '{'
+	content: MdxExpressionContent?
+	r_curly: '}'
+
+// The JavaScript between the braces of an expression, parsed as an embedded
+// snippet. An empty expression `{}` has no content.
+MdxExpressionContent = value: 'mdx_expression_literal'
+
+// <Note type="tip">
+// ^^^^^^^^^^^^^^^^^
+// A JSX tag on a line that holds only tags and expressions. Each tag is its
+// own node: an opening tag and its closing tag are siblings around the
+// Markdown between them. The tag is parsed as an embedded JSX snippet.
+// Spaces and tabs before it are whitespace trivia, because MDX gives them no
+// meaning.
+MdxJsxBlockTag = value: 'mdx_jsx_tag_literal'
+
+// Some <Badge>new</Badge> text
+//      ^^^^^^^   ^^^^^^^^
+MdxJsxInlineTag = value: 'mdx_jsx_tag_literal'

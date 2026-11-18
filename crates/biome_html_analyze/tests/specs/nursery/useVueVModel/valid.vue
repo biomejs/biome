@@ -9,6 +9,8 @@
   <my-component @update:foo="bar = $event" />
   <input :value="bar" @update:value="bar = $event" />
   <div :foo="bar" @update:foo="bar = $event"></div>
+  <math :foo="bar" @update:foo="bar = $event"><mi :foo="bar" @update:foo="bar = $event"></mi></math>
+  <annotation-xml :foo="bar" @update:foo="bar = $event"></annotation-xml>
   <my-component :foo="bar" @update:foo.once="bar = $event" />
   <my-component :foo.sync="bar" @update:foo="bar = $event" />
   <my-component :foo="bar" @update:foo="bar = $event; doSomething()" />

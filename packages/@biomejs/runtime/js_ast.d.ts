@@ -1985,6 +1985,17 @@ export interface JsSvelteDeclarationRoot extends JsAstNode {
 	token(field: "semicolonToken" | "eofToken"): JsAstToken | undefined;
 	token(field: string): JsAstToken | undefined;
 }
+export interface JsSvelteLegacyConstRoot extends JsAstNode {
+	readonly kind: "JS_SVELTE_LEGACY_CONST_ROOT";
+	readonly declarator: AnyJsSvelteLegacyConstDeclarator | undefined;
+	withDeclarator(
+		value: AnyJsSvelteLegacyConstDeclarator,
+	): JsSvelteLegacyConstRoot;
+	readonly eofToken: string | undefined;
+	withEofToken(value: JsAstToken): JsSvelteLegacyConstRoot;
+	token(field: "eofToken"): JsAstToken | undefined;
+	token(field: string): JsAstToken | undefined;
+}
 export interface JsSvelteSnippetRoot extends JsAstNode {
 	readonly kind: "JS_SVELTE_SNIPPET_ROOT";
 	readonly name: AnyJsBinding | undefined;
@@ -4194,6 +4205,7 @@ export type AnyJsRoot =
 	| JsModule
 	| JsScript
 	| JsSvelteDeclarationRoot
+	| JsSvelteLegacyConstRoot
 	| JsSvelteSnippetRoot
 	| JsVueGenericRoot
 	| JsVueSlotPropsRoot
@@ -4235,6 +4247,7 @@ export type AnyJsStatement =
 export type AnyJsSvelteDeclaration =
 	| JsBogusVariableDeclaration
 	| JsVariableDeclaration;
+export type AnyJsSvelteLegacyConstDeclarator = JsBogus | JsVariableDeclarator;
 export type AnyJsSwitchClause = JsCaseClause | JsDefaultClause;
 export type AnyJsTemplateElement = JsTemplateChunkElement | JsTemplateElement;
 export type AnyJsVueGenericTypeParameters = JsBogus | TsTypeParameterList;
@@ -4517,6 +4530,7 @@ export interface JsNodeByKind {
 	readonly JS_STRING_LITERAL_EXPRESSION: JsStringLiteralExpression;
 	readonly JS_SUPER_EXPRESSION: JsSuperExpression;
 	readonly JS_SVELTE_DECLARATION_ROOT: JsSvelteDeclarationRoot;
+	readonly JS_SVELTE_LEGACY_CONST_ROOT: JsSvelteLegacyConstRoot;
 	readonly JS_SVELTE_SNIPPET_ROOT: JsSvelteSnippetRoot;
 	readonly JS_SWITCH_STATEMENT: JsSwitchStatement;
 	readonly JS_TEMPLATE_CHUNK_ELEMENT: JsTemplateChunkElement;

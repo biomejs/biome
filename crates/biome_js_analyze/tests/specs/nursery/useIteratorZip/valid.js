@@ -341,6 +341,14 @@ function callback() {
 	}
 }
 
+function aliasedString() {
+	const text = "abc";
+	const names = text;
+	for (let index = 0; index < Math.min(names.length, scores.length); index++) {
+		save(names[index], scores[index]);
+	}
+}
+
 // An array is declared again inside the body.
 function redeclaredVariable() {
 	for (let index = 0; index < Math.min(names.length, scores.length); index++) {

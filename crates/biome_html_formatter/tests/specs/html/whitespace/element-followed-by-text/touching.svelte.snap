@@ -57,8 +57,8 @@ info: whitespace/element-followed-by-text/touching.svelte
 	with enough text to wrap
 </div>
 <div>
-	before<meter value=".5"></meter>
-	after with source whitespace
+	before<meter value=".5"></meter> after
+	with source whitespace
 </div>
 <div>
 	before<img
@@ -87,8 +87,8 @@ info: whitespace/element-followed-by-text/touching.svelte
 	with enough text to wrap
 </div>
 <div>
-	before<meter value=".5"></meter>
-	after with source whitespace
+	before<meter value=".5"></meter> after
+	with source whitespace
 </div>
 <div>
 	before<img

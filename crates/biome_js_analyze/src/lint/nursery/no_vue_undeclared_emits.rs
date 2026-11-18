@@ -98,7 +98,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueUndeclaredEmits {
-        version: "next",
+        version: "2.6.5",
         name: "noVueUndeclaredEmits",
         language: "js",
         recommended: true,

@@ -90,7 +90,7 @@ declare_lint_rule! {
     /// - To choose how length checks are written, see [`useExplicitLengthCheck`](https://biomejs.dev/linter/rules/use-explicit-length-check/).
     ///
     pub NoUselessLengthCheck {
-        version: "next",
+        version: "2.6.5",
         name: "noUselessLengthCheck",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-useless-length-check").same()],

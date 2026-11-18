@@ -1,0 +1,54 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --suppress '--reason=We love Biome' file.js
+```
+
+## `biome.json`
+
+```json
+{
+  "plugins": ["noFoo.grit", "logBar.grit"]
+}
+```
+
+## `file.js`
+
+```js
+// biome-ignore lint/plugin/noFoo: We love Biome
+foo(1);
+bar(2);
+
+```
+
+## `logBar.grit`
+
+```grit
+language js
+
+`bar($args)` where {
+    log(message="Found bar", variable=$args)
+}
+
+```
+
+## `noFoo.grit`
+
+```grit
+language js
+
+`foo($args)` where {
+    register_diagnostic(span=$args, message="Do not call foo", severity="error")
+}
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

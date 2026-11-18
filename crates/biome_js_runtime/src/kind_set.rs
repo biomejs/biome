@@ -139,14 +139,45 @@ impl Category {
         JsNativeError::typ().with_message(message).into()
     }
 
-    fn receiver_error(self) -> boa_engine::JsError {
+    /// The error for calling `set.<method>()` on a value that is not a set of
+    /// this category.
+    fn receiver_error(self, method: &str, argument: &str) -> boa_engine::JsError {
         JsNativeError::typ()
             .with_message(format!(
-                "has() was called on a value that is not a {kind} kind set. Call set.has(element) on a set returned by {}().",
+                "{method}() was called on a value that is not a {kind} kind set. Call set.{method}({argument}) on a set returned by {}().",
                 self.function(),
                 kind = self.name(),
             ))
             .into()
+    }
+
+    /// The error for a `set.union(other)` call whose arguments are not exactly
+    /// one set of this category.
+    fn union_argument_error(
+        self,
+        args: &[JsValue],
+        is_other_category: bool,
+    ) -> boa_engine::JsError {
+        let message = if args.len() != 1 {
+            format!(
+                "set.union() received the wrong number of arguments. Pass exactly one set returned by {}().",
+                self.function()
+            )
+        } else if is_other_category {
+            format!(
+                "set.union() received a {other} kind set, but this is a {kind} kind set. Pass a set returned by {}() instead.",
+                self.function(),
+                other = self.other().name(),
+                kind = self.name(),
+            )
+        } else {
+            format!(
+                "set.union() requires a {kind} kind set, but the argument is not one. Pass a set returned by {}(), not a kind name, array, or plain object.",
+                self.function(),
+                kind = self.name(),
+            )
+        };
+        JsNativeError::typ().with_message(message).into()
     }
 
     /// Returns the category and kind of the `set.has(element)` argument, or
@@ -237,13 +268,17 @@ impl<L: KindSetLanguage> JsNodeKindSet<L> {
             .fold(SyntaxKindSet::EMPTY, |kinds, kind| {
                 kinds.union(SyntaxKindSet::of(kind))
             });
+        Ok(Self::wrap(kinds, context))
+    }
+
+    fn wrap(kinds: SyntaxKindSet<L>, context: &mut Context) -> JsValue {
         let prototype = context
             .get_global_class::<Self>()
             .map(|class| class.prototype());
         let set = Self {
             kinds: Box::new(kinds),
         };
-        Ok(JsObject::from_proto_and_data(prototype, set).into())
+        JsObject::from_proto_and_data(prototype, set).into()
     }
 
     /// Implements `set.has(element)`.
@@ -251,12 +286,31 @@ impl<L: KindSetLanguage> JsNodeKindSet<L> {
     /// Returns `false` for `undefined` and for tokens. Throws for values that
     /// are not Biome nodes or tokens.
     fn has(this: &JsValue, args: &[JsValue], _context: &mut Context) -> JsResult<JsValue> {
-        let kinds = Self::from_value(this).ok_or_else(|| Category::Node.receiver_error())?;
+        let kinds = Self::from_value(this)
+            .ok_or_else(|| Category::Node.receiver_error("has", "element"))?;
         let has = match Category::Node.element_kind::<L>(args)? {
             Some((Category::Node, kind)) => kinds.matches(kind),
             _ => false,
         };
         Ok(has.into())
+    }
+
+    /// Implements `set.union(other)`: returns a new set with the kinds of both
+    /// sets. Throws unless `other` is a set created by `nodeKinds()`.
+    fn union(this: &JsValue, args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
+        let kinds = Self::from_value(this)
+            .ok_or_else(|| Category::Node.receiver_error("union", "other"))?;
+        let other = match args {
+            [other] => Self::from_value(other),
+            _ => None,
+        };
+        let other = other.ok_or_else(|| {
+            let is_token_set = args
+                .first()
+                .is_some_and(|other| JsTokenKindSet::<L>::from_value(other).is_some());
+            Category::Node.union_argument_error(args, is_token_set)
+        })?;
+        Ok(Self::wrap(kinds.union(other), context))
     }
 }
 
@@ -287,13 +341,17 @@ impl<L: KindSetLanguage> JsTokenKindSet<L> {
             .fold(TokenSet::EMPTY, |kinds, kind| {
                 kinds.union(TokenSet::singleton(kind))
             });
+        Ok(Self::wrap(kinds, context))
+    }
+
+    fn wrap(kinds: TokenSet<L::Kind>, context: &mut Context) -> JsValue {
         let prototype = context
             .get_global_class::<Self>()
             .map(|class| class.prototype());
         let set = Self {
             kinds: Box::new(kinds),
         };
-        Ok(JsObject::from_proto_and_data(prototype, set).into())
+        JsObject::from_proto_and_data(prototype, set).into()
     }
 
     /// Implements `set.has(element)`.
@@ -301,12 +359,31 @@ impl<L: KindSetLanguage> JsTokenKindSet<L> {
     /// Returns `false` for `undefined` and for nodes. Throws for values that
     /// are not Biome nodes or tokens.
     fn has(this: &JsValue, args: &[JsValue], _context: &mut Context) -> JsResult<JsValue> {
-        let kinds = Self::from_value(this).ok_or_else(|| Category::Token.receiver_error())?;
+        let kinds = Self::from_value(this)
+            .ok_or_else(|| Category::Token.receiver_error("has", "element"))?;
         let has = match Category::Token.element_kind::<L>(args)? {
             Some((Category::Token, kind)) => kinds.contains(kind),
             _ => false,
         };
         Ok(has.into())
+    }
+
+    /// Implements `set.union(other)`: returns a new set with the kinds of both
+    /// sets. Throws unless `other` is a set created by `tokenKinds()`.
+    fn union(this: &JsValue, args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
+        let kinds = Self::from_value(this)
+            .ok_or_else(|| Category::Token.receiver_error("union", "other"))?;
+        let other = match args {
+            [other] => Self::from_value(other),
+            _ => None,
+        };
+        let other = other.ok_or_else(|| {
+            let is_node_set = args
+                .first()
+                .is_some_and(|other| JsNodeKindSet::<L>::from_value(other).is_some());
+            Category::Token.union_argument_error(args, is_node_set)
+        })?;
+        Ok(Self::wrap(kinds.union(other), context))
     }
 }
 
@@ -314,7 +391,13 @@ impl<L: KindSetLanguage> Class for JsNodeKindSet<L> {
     const NAME: &'static str = "__JsNodeKindSet";
 
     fn init(class: &mut ClassBuilder<'_>) -> JsResult<()> {
-        class.method(js_string!("has"), 1, NativeFunction::from_fn_ptr(Self::has));
+        class
+            .method(js_string!("has"), 1, NativeFunction::from_fn_ptr(Self::has))
+            .method(
+                js_string!("union"),
+                1,
+                NativeFunction::from_fn_ptr(Self::union),
+            );
         Ok(())
     }
 
@@ -333,7 +416,13 @@ impl<L: KindSetLanguage> Class for JsTokenKindSet<L> {
     const NAME: &'static str = "__JsTokenKindSet";
 
     fn init(class: &mut ClassBuilder<'_>) -> JsResult<()> {
-        class.method(js_string!("has"), 1, NativeFunction::from_fn_ptr(Self::has));
+        class
+            .method(js_string!("has"), 1, NativeFunction::from_fn_ptr(Self::has))
+            .method(
+                js_string!("union"),
+                1,
+                NativeFunction::from_fn_ptr(Self::union),
+            );
         Ok(())
     }
 

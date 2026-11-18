@@ -24,3 +24,8 @@ type NotFlag = number;
 type NumberComparator = (a: number, b: number) => number;
 declare const numberComparator: (a: number, b: number) => number;
 declare let optionalFlag: boolean | undefined;
+
+type Collection = Set<number> | Map<number, number> | undefined;
+function aliasedUnion(collection: Collection) {
+	collection!.sort((a, b) => a > b);
+}

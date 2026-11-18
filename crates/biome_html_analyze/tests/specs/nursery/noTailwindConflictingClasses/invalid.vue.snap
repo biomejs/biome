@@ -1,0 +1,136 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+	<div class="flex grid"></div>
+	<div class="hover:flex hover:grid"></div>
+	<div :class="'p-2 p-4'"></div>
+	<div :class="{ 'flex grid': isActive }"></div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:19 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class grid sets the same CSS properties as flex.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │ 	<div class="flex grid"></div>
+      │ 	                 ^^^^
+    4 │ 	<div class="hover:flex hover:grid"></div>
+    5 │ 	<div :class="'p-2 p-4'"></div>
+  
+  i The other class is here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │ 	<div class="flex grid"></div>
+      │ 	            ^^^^
+    4 │ 	<div class="hover:flex hover:grid"></div>
+    5 │ 	<div :class="'p-2 p-4'"></div>
+  
+  i Only one of these classes takes effect, so the other one does nothing.
+  
+  i Remove the class that you don't need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:25 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class hover:grid sets the same CSS properties as hover:flex.
+  
+    2 │ <template>
+    3 │ 	<div class="flex grid"></div>
+  > 4 │ 	<div class="hover:flex hover:grid"></div>
+      │ 	                       ^^^^^^^^^^
+    5 │ 	<div :class="'p-2 p-4'"></div>
+    6 │ 	<div :class="{ 'flex grid': isActive }"></div>
+  
+  i The other class is here.
+  
+    2 │ <template>
+    3 │ 	<div class="flex grid"></div>
+  > 4 │ 	<div class="hover:flex hover:grid"></div>
+      │ 	            ^^^^^^^^^^
+    5 │ 	<div :class="'p-2 p-4'"></div>
+    6 │ 	<div :class="{ 'flex grid': isActive }"></div>
+  
+  i Only one of these classes takes effect, so the other one does nothing.
+  
+  i Remove the class that you don't need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:20 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class p-4 sets the same CSS properties as p-2.
+  
+    3 │ 	<div class="flex grid"></div>
+    4 │ 	<div class="hover:flex hover:grid"></div>
+  > 5 │ 	<div :class="'p-2 p-4'"></div>
+      │ 	                  ^^^
+    6 │ 	<div :class="{ 'flex grid': isActive }"></div>
+    7 │ </template>
+  
+  i The other class is here.
+  
+    3 │ 	<div class="flex grid"></div>
+    4 │ 	<div class="hover:flex hover:grid"></div>
+  > 5 │ 	<div :class="'p-2 p-4'"></div>
+      │ 	              ^^^
+    6 │ 	<div :class="{ 'flex grid': isActive }"></div>
+    7 │ </template>
+  
+  i Only one of these classes takes effect, so the other one does nothing.
+  
+  i Remove the class that you don't need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:23 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class grid sets the same CSS properties as flex.
+  
+    4 │ 	<div class="hover:flex hover:grid"></div>
+    5 │ 	<div :class="'p-2 p-4'"></div>
+  > 6 │ 	<div :class="{ 'flex grid': isActive }"></div>
+      │ 	                     ^^^^
+    7 │ </template>
+    8 │ 
+  
+  i The other class is here.
+  
+    4 │ 	<div class="hover:flex hover:grid"></div>
+    5 │ 	<div :class="'p-2 p-4'"></div>
+  > 6 │ 	<div :class="{ 'flex grid': isActive }"></div>
+      │ 	                ^^^^
+    7 │ </template>
+    8 │ 
+  
+  i Only one of these classes takes effect, so the other one does nothing.
+  
+  i Remove the class that you don't need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

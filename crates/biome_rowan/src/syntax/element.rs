@@ -1,5 +1,5 @@
 use crate::syntax::SyntaxTrivia;
-use crate::{Language, NodeOrToken, SyntaxNode, SyntaxToken, cursor};
+use crate::{Language, NodeOrToken, SyntaxNode, SyntaxToken, SyntaxTriviaPiece, cursor};
 use biome_text_size::{TextRange, TextSize};
 use std::iter;
 use std::ptr::NonNull;
@@ -69,6 +69,76 @@ impl<L: Language> SyntaxElement<L> {
             Self::Token(it) => it.parent(),
         };
         iter::successors(first, SyntaxNode::parent)
+    }
+
+    /// Returns the topmost node of the tree containing this element.
+    ///
+    /// Returns `None` if this element is a detached token.
+    pub fn tree_top(&self) -> Option<SyntaxNode<L>> {
+        match self {
+            Self::Node(it) => Some(it.tree_top()),
+            Self::Token(it) => it.tree_top(),
+        }
+    }
+
+    /// Returns the leftmost token in this element's subtree.
+    pub fn first_token(&self) -> Option<SyntaxToken<L>> {
+        match self {
+            Self::Node(it) => it.first_token(),
+            Self::Token(it) => Some(it.clone()),
+        }
+    }
+
+    /// Returns the rightmost token in this element's subtree.
+    pub fn last_token(&self) -> Option<SyntaxToken<L>> {
+        match self {
+            Self::Node(it) => it.last_token(),
+            Self::Token(it) => Some(it.clone()),
+        }
+    }
+
+    /// Returns the token immediately after this element.
+    ///
+    /// For a node, the search starts after its entire subtree.
+    pub fn next_token(&self) -> Option<SyntaxToken<L>> {
+        match self {
+            Self::Node(it) => it.next_token(),
+            Self::Token(it) => it.next_token(),
+        }
+    }
+
+    /// Returns the token immediately before this element.
+    ///
+    /// For a node, the search starts before its entire subtree.
+    pub fn prev_token(&self) -> Option<SyntaxToken<L>> {
+        match self {
+            Self::Node(it) => it.prev_token(),
+            Self::Token(it) => it.prev_token(),
+        }
+    }
+
+    /// Returns the trivia before this element's first token, in source order.
+    ///
+    /// Returns an empty iterator if this element is a tokenless node.
+    pub fn trivia_before(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = SyntaxTriviaPiece<L>> + Clone + use<L> {
+        self.first_token()
+            .map(|token| token.trivia_before())
+            .into_iter()
+            .flatten()
+    }
+
+    /// Returns the trivia after this element's last token, in source order.
+    ///
+    /// Returns an empty iterator if this element is a tokenless node.
+    pub fn trivia_after(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = SyntaxTriviaPiece<L>> + Clone + use<L> {
+        self.last_token()
+            .map(|token| token.trivia_after())
+            .into_iter()
+            .flatten()
     }
 
     pub fn next_sibling_or_token(&self) -> Option<Self> {

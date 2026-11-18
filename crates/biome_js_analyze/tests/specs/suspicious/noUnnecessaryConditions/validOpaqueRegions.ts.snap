@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validOpaqueRegions.ts
+---
+# Input
+```ts
+// should not generate diagnostics
+// TypeScript types `value` as `string | null` at each optional chain: the
+// `break` leaves the first loop while `value` is `null`, and the `continue`
+// reaches the test of the second loop while `value` is `null`.
+
+declare function check(): boolean;
+
+function breakOutOfTry(value: string | null) {
+	while (value === null) {
+		try {
+			if (check()) {
+				break;
+			}
+		} finally {
+		}
+	}
+	return value?.length;
+}
+
+function continueOutOfSwitch(value: string | null) {
+	do {
+		if (value === null) {
+			switch (check()) {
+				case true:
+					continue;
+			}
+			return;
+		}
+	} while (check());
+	return value?.length;
+}
+
+```

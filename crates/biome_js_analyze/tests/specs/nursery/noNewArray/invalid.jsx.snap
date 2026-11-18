@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+const a = new Array(<div />);
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:11 lint/nursery/noNewArray  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This new Array() call has a single argument, so its result depends on whether the argument is a number.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const a = new Array(<div />);
+      │           ^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i With a number, new Array() creates an empty array of that length. With any other value, it creates an array that holds the value.
+  
+  i Use an array literal such as [value] to create an array that holds the value, or Array.from({ length }) to create an array of a given length.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an array literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·a·=·new·Array(<div·/>);
+      2 │ + const·a·=·[<div·/>];
+    3 3 │   
+  
+
+```

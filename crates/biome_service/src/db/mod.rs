@@ -11,7 +11,7 @@ use crate::WorkspaceError;
 use crate::projects::{NestedPath, ProjectDb, ProjectInput, ProjectKey};
 use crate::settings::{Settings, SettingsIdentity, VcsIgnoredPatterns};
 pub(crate) use crate::workspace::views::ViewId;
-use crate::workspace::views::{ClientId, Views};
+use crate::workspace::views::{ClientId, Views, new_views_map};
 use biome_configuration::Configuration;
 use biome_configuration::vcs::VcsClientKind;
 use biome_db::Source;
@@ -37,6 +37,7 @@ use papaya::{Compute, HashMap, Operation};
 use parking_lot::Mutex;
 use salsa::{Setter, Storage};
 use std::convert::Infallible;
+use std::hash::RandomState;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::RwLock;
@@ -485,7 +486,7 @@ impl WorkspaceDb {
         settings_queries: Arc<SettingsQueryCache>,
     ) -> Self {
         let db = Self {
-            files: Arc::default(),
+            files: Arc::new(new_views_map(RandomState::default())),
             retained_files: Arc::default(),
             node_caches: Arc::default(),
             #[cfg(feature = "module_graph")]

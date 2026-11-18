@@ -69,7 +69,7 @@ declare_lint_rule! {
     /// - If you want to report `await` on any value that isn't a promise, using type information, see [`useAwaitThenable`](https://biomejs.dev/linter/rules/use-await-thenable/).
     ///
     pub NoUselessAwait {
-        version: "next",
+        version: "2.6.5",
         name: "noUselessAwait",
         language: "js",
         recommended: false,

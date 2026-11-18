@@ -116,7 +116,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoExcessiveNestedBlocks {
-        version: "next",
+        version: "2.6.5",
         name: "noExcessiveNestedBlocks",
         language: "js",
         sources: &[RuleSource::Eslint("max-depth").same()],

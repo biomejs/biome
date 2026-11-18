@@ -1,0 +1,18 @@
+/* should not generate diagnostics */
+function parameter(arguments) { arguments.map(() => {}); }
+function constInFunction() { const arguments = []; arguments.map(() => {}); }
+function letInBlock() { { let arguments = []; arguments.map(() => {}); } }
+function varWithValue() { var arguments = []; arguments.map(() => {}); }
+function parameterAndVar(arguments) { var arguments; arguments.map(() => {}); }
+function varThenVarWithValue() { var arguments; var arguments = []; arguments.map(() => {}); }
+function varWithValueThenVar() { var arguments = []; var arguments; arguments.map(() => {}); }
+function forOf() { for (var arguments of [[]]) arguments.map(() => {}); }
+function forIn() { for (var arguments in {}) arguments.map(() => {}); }
+function nestedFunctionDeclaration() { function arguments() {} arguments.map(() => {}); }
+const arrowWithVar = () => { var arguments; arguments.map(() => {}); };
+function arrowWithOwnVar() { return () => { var arguments; arguments.map(() => {}); }; }
+var arguments;
+arguments.map(() => {});
+const arrowAtTopLevel = () => arguments.map(() => {});
+function computedMethodName(arguments) { return { [arguments.at(0)]() {}, get [arguments.at(1)]() { return 0; } }; }
+class ComputedClassMember { [arguments.at(0)]() {} }

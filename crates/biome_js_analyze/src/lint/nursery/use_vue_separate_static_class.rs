@@ -78,7 +78,7 @@ declare_lint_rule! {
     /// </template>
     /// ```
     pub UseVueSeparateStaticClass {
-        version: "next",
+        version: "2.6.5",
         name: "useVueSeparateStaticClass",
         language: "js",
         recommended: true,

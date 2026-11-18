@@ -93,7 +93,7 @@ declare_lint_rule! {
     /// - If you want getters and setters for the same property to be next to each other, see [`useGroupedAccessorPairs`](https://biomejs.dev/linter/rules/use-grouped-accessor-pairs/).
     ///
     pub UseAccessorPairs {
-        version: "next",
+        version: "2.6.5",
         name: "useAccessorPairs",
         language: "js",
         recommended: false,

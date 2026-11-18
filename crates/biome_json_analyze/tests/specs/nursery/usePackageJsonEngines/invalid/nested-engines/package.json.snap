@@ -1,0 +1,42 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+	"name": "my-package",
+	"devEngines": {
+		"runtime": {
+			"name": "node",
+			"version": ">=20"
+		}
+	},
+	"publishConfig": {
+		"engines": {
+			"node": ">=20"
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+package.json:1:1 lint/nursery/usePackageJsonEngines ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This package.json file is missing the engines field.
+  
+  > 1 │ {
+      │ ^
+    2 │ 	"name": "my-package",
+    3 │ 	"devEngines": {
+  
+  i The engines field tells package managers which versions of Node.js and other tools the package works with. Without it, the package can be installed with an unsupported version and no warning is shown.
+  
+  i Add an engines field that lists the supported versions, for example "engines": { "node": ">=20" }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

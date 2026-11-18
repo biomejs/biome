@@ -74,7 +74,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoMismatchedMapKey {
-        version: "next",
+        version: "2.6.5",
         name: "noMismatchedMapKey",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-mismatched-map-key").inspired()],

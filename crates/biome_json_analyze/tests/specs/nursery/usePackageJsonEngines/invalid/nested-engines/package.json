@@ -1,0 +1,14 @@
+{
+	"name": "my-package",
+	"devEngines": {
+		"runtime": {
+			"name": "node",
+			"version": ">=20"
+		}
+	},
+	"publishConfig": {
+		"engines": {
+			"node": ">=20"
+		}
+	}
+}

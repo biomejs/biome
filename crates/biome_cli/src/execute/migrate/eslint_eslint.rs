@@ -1125,7 +1125,7 @@ impl MaxStatementsOptions {
         self,
         top_level_options: Option<MaxStatementsTopLevelOptions>,
     ) -> biome_rule_options::no_excessive_statements_per_function::NoExcessiveStatementsPerFunctionOptions
-    {
+{
         biome_rule_options::no_excessive_statements_per_function::NoExcessiveStatementsPerFunctionOptions {
             max: self.max,
             ignore_top_level_functions: top_level_options

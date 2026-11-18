@@ -99,6 +99,186 @@ pub(crate) fn list_nesting_too_deep(
     .with_hint("Reduce nesting depth. Additional levels will be treated as content.")
 }
 
+/// MDX expression without its closing brace.
+///
+/// ```mdx
+/// {props.title
+/// ^ expected closing }
+/// ```
+#[cfg(feature = "lang_mdx")]
+pub(crate) fn unclosed_mdx_expression(
+    p: &MarkdownParser,
+    opening_range: TextRange,
+) -> ParseDiagnostic {
+    p.err_builder(
+        "Unclosed expression, expected a closing `}`.",
+        opening_range,
+    )
+    .with_detail(opening_range, "expression started here")
+    .with_hint("Add the closing `}`. To write a literal brace in MDX, escape it as `\\{`.")
+}
+
+/// A line right after an MDX ESM block that isn't part of its statements.
+///
+/// The error points at the last line of the block, and its detail at the
+/// offending line.
+///
+/// ```mdx
+/// import {Chart} from "./chart.js"
+/// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected a blank line after this line
+/// # Title
+/// ```
+#[cfg(feature = "lang_mdx")]
+pub(crate) fn missing_blank_line_after_mdx_esm(
+    p: &MarkdownParser,
+    last_line: TextRange,
+    next_line: TextRange,
+) -> ParseDiagnostic {
+    p.err_builder(
+        "Expected a blank line after the `import` and `export` statements.",
+        last_line,
+    )
+    .with_detail(
+        next_line,
+        "this line isn't part of an `import` or `export` statement",
+    )
+    .with_hint(
+        "MDX reads the lines after `import` and `export` as JavaScript up to the next blank line. Add a blank line before this line.",
+    )
+}
+
+/// MDX `<` followed by a character that can't start a JSX tag.
+///
+/// ```mdx
+/// 1<2 or <!-- comment -->
+///  ^     ^ expected a tag name
+/// ```
+#[cfg(feature = "lang_mdx")]
+pub(crate) fn invalid_mdx_tag_start(
+    p: &MarkdownParser,
+    range: TextRange,
+    character: char,
+    comment: bool,
+) -> ParseDiagnostic {
+    let hint = if comment {
+        "MDX doesn't support HTML comments. Write a comment as `{/* text */}` instead."
+    } else {
+        "To write a literal `<` in MDX, escape it as `\\<` or put a space after it."
+    };
+    p.err_builder(
+        format!("Unexpected character `{character}` after `<`, expected a tag name, `/`, or `>`."),
+        range,
+    )
+    .with_hint(hint)
+}
+
+/// MDX JSX tag whose name isn't a JSX name, such as `<https://example.com>`.
+#[cfg(feature = "lang_mdx")]
+pub(crate) fn invalid_mdx_tag_name(
+    p: &MarkdownParser,
+    range: TextRange,
+    character: char,
+    name: &str,
+) -> ParseDiagnostic {
+    p.err_builder(
+        format!("Unexpected character `{character}` in the tag name `{name}`."),
+        range,
+    )
+    .with_hint(
+        "A tag name is a JavaScript name, optionally joined with `.` or a single `:`. To write a literal `<` in MDX, escape it as `\\<`.",
+    )
+}
+
+/// MDX JSX tag without its closing `>`.
+#[cfg(feature = "lang_mdx")]
+pub(crate) fn unclosed_mdx_tag(p: &MarkdownParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Unclosed tag, expected a closing `>`.", range)
+        .with_detail(range, "tag started here")
+        .with_hint("Add the closing `>`. To write a literal `<` in MDX, escape it as `\\<`.")
+}
+
+/// MDX closing tag with attributes, such as `</Note type="tip">`.
+#[cfg(feature = "lang_mdx")]
+pub(crate) fn mdx_closing_tag_with_attributes(
+    p: &MarkdownParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    p.err_builder("Unexpected attribute in a closing tag.", range)
+        .with_hint("Move the attributes to the opening tag.")
+}
+
+/// MDX closing tag that is also self-closing, such as `</Note/>`.
+#[cfg(feature = "lang_mdx")]
+pub(crate) fn mdx_self_closing_closing_tag(
+    p: &MarkdownParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    p.err_builder("Unexpected `/` at the end of a closing tag.", range)
+        .with_hint("A tag is either a closing tag or self-closing. Remove one of the slashes.")
+}
+
+/// MDX attribute whose value is an element, such as `icon=<Icon />`.
+#[cfg(feature = "lang_mdx")]
+pub(crate) fn mdx_element_attribute_value(p: &MarkdownParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Unexpected element as an attribute value.", range)
+        .with_hint("Wrap the element in braces, as in `icon={<Icon />}`.")
+}
+
+/// MDX closing tag that doesn't match the innermost open tag.
+///
+/// Tag pairing is checked on the finished tree, so this diagnostic and the
+/// two after it don't take the parser.
+///
+/// ```mdx
+/// <Note><Tip></Note>
+///      ^^^^^ the open tag is here
+///           ^^^^^^^ expected `</Tip>`
+/// ```
+#[cfg(feature = "lang_mdx")]
+pub(crate) fn mismatched_mdx_closing_tag(
+    closing: &str,
+    range: TextRange,
+    opening: &str,
+    opening_range: TextRange,
+) -> ParseDiagnostic {
+    ParseDiagnostic::new(
+        format!("Unexpected closing tag `{closing}`, expected the closing tag of `{opening}`."),
+        range,
+    )
+    .with_detail(opening_range, "the open tag is here")
+}
+
+/// MDX closing tag without any open tag before it, such as `</Note>` at the
+/// start of a block.
+#[cfg(feature = "lang_mdx")]
+pub(crate) fn unexpected_mdx_closing_tag(closing: &str, range: TextRange) -> ParseDiagnostic {
+    ParseDiagnostic::new(
+        format!("Unexpected closing tag `{closing}`, there is no open tag to close."),
+        range,
+    )
+    .with_hint("Remove the closing tag, or add its opening tag before it.")
+}
+
+/// MDX open tag that is still open at the end of its block or paragraph.
+/// `in_paragraph` tells which of the two the tag is in.
+#[cfg(feature = "lang_mdx")]
+pub(crate) fn unclosed_mdx_element(
+    opening: &str,
+    range: TextRange,
+    in_paragraph: bool,
+) -> ParseDiagnostic {
+    let place = if in_paragraph {
+        "its paragraph"
+    } else {
+        "its block"
+    };
+    ParseDiagnostic::new(
+        format!("Expected a closing tag for `{opening}` before the end of {place}."),
+        range,
+    )
+    .with_hint("Add the closing tag, or make the tag self-closing with `/>`.")
+}
+
 /// Parser made no progress while parsing a block.
 pub(crate) fn parse_any_block_no_progress(p: &MarkdownParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder("Parser made no progress while parsing a block.", range)

@@ -1,0 +1,10 @@
+# should generate diagnostics
+fruits:
+  - apple
+  -
+  - banana
+matrix:
+  - - a
+    -
+  -
+    -

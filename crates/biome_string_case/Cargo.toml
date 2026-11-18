@@ -17,10 +17,10 @@ name    = "case_insensitive_search"
 
 [dependencies]
 biome_rowan = { workspace = true, optional = true }
-caseless    = "0.2.2"
+caseless    = { workspace = true }
 
 [dev-dependencies]
-divan = { package = "codspeed-divan-compat", version = "=5.0.1" }
+divan = { workspace = true }
 
 [features]
 biome_rowan = ["dep:biome_rowan"]

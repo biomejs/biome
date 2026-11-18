@@ -124,7 +124,7 @@ declare_lint_rule! {
     /// - If you want to enforce hyphenated prop names in templates, see [`useVueHyphenatedAttributes`](https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes/).
     ///
     pub UseVueConsistentPropNameCasing {
-        version: "next",
+        version: "2.6.5",
         name: "useVueConsistentPropNameCasing",
         language: "js",
         recommended: true,

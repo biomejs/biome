@@ -1,0 +1,91 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+function consume(values: number[]) {
+	for (const value of [...(values as number[])]) {
+		values.pop();
+	}
+}
+Object.fromEntries([...(values! satisfies Iterable<[string, number]>)]);
+new [...Array.of(1)]!.constructor(2);
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:22 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because for...of accepts any iterable.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function consume(values: number[]) {
+  > 3 │ 	for (const value of [...(values as number[])]) {
+      │ 	                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 		values.pop();
+    5 │ 	}
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i Keep the copy if the loop changes the iterable while it runs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    3 │ → for·(const·value·of·[...(values·as·number[])])·{
+      │                       ----                    -   
+
+```
+
+```
+invalid.ts:7:20 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because Object.fromEntries() accepts any iterable.
+  
+    5 │ 	}
+    6 │ }
+  > 7 │ Object.fromEntries([...(values! satisfies Iterable<[string, number]>)]);
+      │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ new [...Array.of(1)]!.constructor(2);
+    9 │ 
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    7 │ Object.fromEntries([...(values!·satisfies·Iterable<[string,·number]>)]);
+      │                    ----                                              -  
+
+```
+
+```
+invalid.ts:8:5 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    6 │ }
+    7 │ Object.fromEntries([...(values! satisfies Iterable<[string, number]>)]);
+  > 8 │ new [...Array.of(1)]!.constructor(2);
+      │     ^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    6 6 │   }
+    7 7 │   Object.fromEntries([...(values! satisfies Iterable<[string, number]>)]);
+    8   │ - new·[...Array.of(1)]!.constructor(2);
+      8 │ + new·(Array.of(1))!.constructor(2);
+    9 9 │   
+  
+
+```

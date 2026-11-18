@@ -1,0 +1,7 @@
+/* should not generate diagnostics */
+<div className="text-green-600 bg-success flex" />;
+<div className="text-green-5000 inline-flex float" />;
+<div className="mt-4 md:mt-4 w-1 w-1/3 order-1" />;
+<div className="hover:p-4 group-focus:p-4 darker:p-4" />;
+<div title="bg-green-500 float-left" />;
+<div className="[float:left]" />;

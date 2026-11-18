@@ -56,7 +56,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUnnecessaryStringTrim {
-        version: "next",
+        version: "2.6.5",
         name: "noUnnecessaryStringTrim",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-unnecessary-string-trim").same()],

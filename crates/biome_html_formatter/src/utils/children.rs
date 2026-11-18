@@ -165,7 +165,7 @@ impl HtmlChild {
 
 /// A debug helper for displaying a sequence of [HtmlChild] in a more human readable way. Can be activated in debug builds by setting `DEBUG_HTML_FORMATTER_CHILDREN=1` in the environment variables.
 ///
-/// This exists because just dbg! printing the the children can be very verbose, and its hard to tell what CssDisplay each element has, which is often the most important part when debugging whitespace sensitivity issues.
+/// This exists because just dbg! printing the children can be very verbose, and its hard to tell what CssDisplay each element has, which is often the most important part when debugging whitespace sensitivity issues.
 #[cfg(debug_assertions)]
 pub(crate) struct DisplayHtmlChildSequence<'a>(&'a [HtmlChild]);
 
@@ -264,12 +264,18 @@ where
     I: IntoIterator<Item = AnyHtmlElement>,
 {
     let mut builder = HtmlSplitChildrenBuilder::new();
+    let mut children = children.into_iter().peekable();
 
     if let Some(opening_r_angle) = opening_r_angle {
+        // The comments in the trailing trivia of the opening token are leading comments of the
+        // first child, so the verbatim output of a suppressed first child prints them.
+        let is_first_child_suppressed = children
+            .peek()
+            .is_some_and(|child| f.comments().is_suppressed(child.syntax()));
         push_trivia_children(
             &mut builder,
             &opening_r_angle.trailing_trivia(),
-            false,
+            is_first_child_suppressed,
             f.comments(),
         );
     }

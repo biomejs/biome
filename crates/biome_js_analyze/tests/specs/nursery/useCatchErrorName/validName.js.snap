@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validName.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+try {} catch (exception) {}
+try {} catch (exception__) {}
+try {} catch (descriptiveException) {}
+try {} catch (descriptive_exception__) {}
+obj.catch((exception) => {});
+obj.then(undefined, function (exception) {});
+
+```

@@ -69,7 +69,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueDefaultExport {
-        version: "next",
+        version: "2.6.5",
         name: "useVueDefaultExport",
         language: "js",
         recommended: false,

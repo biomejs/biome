@@ -73,7 +73,7 @@ declare_lint_rule! {
     /// - [Svelte stores](https://svelte.dev/docs/svelte/stores)
     /// - [`svelte/store`](https://svelte.dev/docs/svelte/svelte-store)
     pub UseSvelteStoreInitialValue {
-        version: "next",
+        version: "2.6.5",
         name: "useSvelteStoreInitialValue",
         language: "js",
         domains: &[RuleDomain::Svelte],

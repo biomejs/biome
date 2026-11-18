@@ -1,0 +1,964 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+a.charAt(4) === 'aa';
+a.charAt(4) === '/n';
+a.charAt(3) === '/t';
+a.charAt(4) === 'ac';
+a.charAt(822) !== 'foo';
+a.charAt(4) == 'ab';
+a.charAt(4) != 'ab';
+'ab' === a.charAt(4);
+a.charAt(4) === '\n\n';
+a.charAt(4) === '\x41b';
+a.b.charAt(4) === 'ab';
+"abc".at(0) === "ab";
+"abc".at(-1) !== "ab";
+"abc"[0] === "ab";
+"abc"["0"] === "ab";
+"abc"[10] === "ab";
+"abc"["9007199254740991"] === "ab";
+"abc".charAt(0) === `ab`;
+("abc".charAt(0)) === "ab";
+"abc".charAt(0) === ("ab");
+"abc".charAt(0) === "😀";
+"abc".charAt(0) === "\u{1F600}";
+"abc".charAt(0) === "\uD83D\uDE00";
+{
+	const value = "abc";
+	value[0] === "ab";
+}
+{
+	const value = "abc";
+	value.at(0) === "ab";
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ a.charAt(4) === 'aa';
+      │ ^^^^^^^^^^^^^^^^^^^^
+    3 │ a.charAt(4) === '/n';
+    4 │ a.charAt(3) === '/t';
+  
+  i This expression returns one character at most.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ a.charAt(4) === 'aa';
+      │ ^^^^^^^^^^^
+    3 │ a.charAt(4) === '/n';
+    4 │ a.charAt(3) === '/t';
+  
+  i But this string has more than one character.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ a.charAt(4) === 'aa';
+      │                 ^^^^
+    3 │ a.charAt(4) === '/n';
+    4 │ a.charAt(3) === '/t';
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    1 │ /* should generate diagnostics */
+    2 │ a.charAt(4) === 'aa';
+  > 3 │ a.charAt(4) === '/n';
+      │ ^^^^^^^^^^^^^^^^^^^^
+    4 │ a.charAt(3) === '/t';
+    5 │ a.charAt(4) === 'ac';
+  
+  i This expression returns one character at most.
+  
+    1 │ /* should generate diagnostics */
+    2 │ a.charAt(4) === 'aa';
+  > 3 │ a.charAt(4) === '/n';
+      │ ^^^^^^^^^^^
+    4 │ a.charAt(3) === '/t';
+    5 │ a.charAt(4) === 'ac';
+  
+  i But this string has more than one character.
+  
+    1 │ /* should generate diagnostics */
+    2 │ a.charAt(4) === 'aa';
+  > 3 │ a.charAt(4) === '/n';
+      │                 ^^^^
+    4 │ a.charAt(3) === '/t';
+    5 │ a.charAt(4) === 'ac';
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    2 │ a.charAt(4) === 'aa';
+    3 │ a.charAt(4) === '/n';
+  > 4 │ a.charAt(3) === '/t';
+      │ ^^^^^^^^^^^^^^^^^^^^
+    5 │ a.charAt(4) === 'ac';
+    6 │ a.charAt(822) !== 'foo';
+  
+  i This expression returns one character at most.
+  
+    2 │ a.charAt(4) === 'aa';
+    3 │ a.charAt(4) === '/n';
+  > 4 │ a.charAt(3) === '/t';
+      │ ^^^^^^^^^^^
+    5 │ a.charAt(4) === 'ac';
+    6 │ a.charAt(822) !== 'foo';
+  
+  i But this string has more than one character.
+  
+    2 │ a.charAt(4) === 'aa';
+    3 │ a.charAt(4) === '/n';
+  > 4 │ a.charAt(3) === '/t';
+      │                 ^^^^
+    5 │ a.charAt(4) === 'ac';
+    6 │ a.charAt(822) !== 'foo';
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    3 │ a.charAt(4) === '/n';
+    4 │ a.charAt(3) === '/t';
+  > 5 │ a.charAt(4) === 'ac';
+      │ ^^^^^^^^^^^^^^^^^^^^
+    6 │ a.charAt(822) !== 'foo';
+    7 │ a.charAt(4) == 'ab';
+  
+  i This expression returns one character at most.
+  
+    3 │ a.charAt(4) === '/n';
+    4 │ a.charAt(3) === '/t';
+  > 5 │ a.charAt(4) === 'ac';
+      │ ^^^^^^^^^^^
+    6 │ a.charAt(822) !== 'foo';
+    7 │ a.charAt(4) == 'ab';
+  
+  i But this string has more than one character.
+  
+    3 │ a.charAt(4) === '/n';
+    4 │ a.charAt(3) === '/t';
+  > 5 │ a.charAt(4) === 'ac';
+      │                 ^^^^
+    6 │ a.charAt(822) !== 'foo';
+    7 │ a.charAt(4) == 'ab';
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always true.
+  
+    4 │ a.charAt(3) === '/t';
+    5 │ a.charAt(4) === 'ac';
+  > 6 │ a.charAt(822) !== 'foo';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ a.charAt(4) == 'ab';
+    8 │ a.charAt(4) != 'ab';
+  
+  i This expression returns one character at most.
+  
+    4 │ a.charAt(3) === '/t';
+    5 │ a.charAt(4) === 'ac';
+  > 6 │ a.charAt(822) !== 'foo';
+      │ ^^^^^^^^^^^^^
+    7 │ a.charAt(4) == 'ab';
+    8 │ a.charAt(4) != 'ab';
+  
+  i But this string has more than one character.
+  
+    4 │ a.charAt(3) === '/t';
+    5 │ a.charAt(4) === 'ac';
+  > 6 │ a.charAt(822) !== 'foo';
+      │                   ^^^^^
+    7 │ a.charAt(4) == 'ab';
+    8 │ a.charAt(4) != 'ab';
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    5 │ a.charAt(4) === 'ac';
+    6 │ a.charAt(822) !== 'foo';
+  > 7 │ a.charAt(4) == 'ab';
+      │ ^^^^^^^^^^^^^^^^^^^
+    8 │ a.charAt(4) != 'ab';
+    9 │ 'ab' === a.charAt(4);
+  
+  i This expression returns one character at most.
+  
+    5 │ a.charAt(4) === 'ac';
+    6 │ a.charAt(822) !== 'foo';
+  > 7 │ a.charAt(4) == 'ab';
+      │ ^^^^^^^^^^^
+    8 │ a.charAt(4) != 'ab';
+    9 │ 'ab' === a.charAt(4);
+  
+  i But this string has more than one character.
+  
+    5 │ a.charAt(4) === 'ac';
+    6 │ a.charAt(822) !== 'foo';
+  > 7 │ a.charAt(4) == 'ab';
+      │                ^^^^
+    8 │ a.charAt(4) != 'ab';
+    9 │ 'ab' === a.charAt(4);
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always true.
+  
+     6 │ a.charAt(822) !== 'foo';
+     7 │ a.charAt(4) == 'ab';
+   > 8 │ a.charAt(4) != 'ab';
+       │ ^^^^^^^^^^^^^^^^^^^
+     9 │ 'ab' === a.charAt(4);
+    10 │ a.charAt(4) === '\n\n';
+  
+  i This expression returns one character at most.
+  
+     6 │ a.charAt(822) !== 'foo';
+     7 │ a.charAt(4) == 'ab';
+   > 8 │ a.charAt(4) != 'ab';
+       │ ^^^^^^^^^^^
+     9 │ 'ab' === a.charAt(4);
+    10 │ a.charAt(4) === '\n\n';
+  
+  i But this string has more than one character.
+  
+     6 │ a.charAt(822) !== 'foo';
+     7 │ a.charAt(4) == 'ab';
+   > 8 │ a.charAt(4) != 'ab';
+       │                ^^^^
+     9 │ 'ab' === a.charAt(4);
+    10 │ a.charAt(4) === '\n\n';
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+     7 │ a.charAt(4) == 'ab';
+     8 │ a.charAt(4) != 'ab';
+   > 9 │ 'ab' === a.charAt(4);
+       │ ^^^^^^^^^^^^^^^^^^^^
+    10 │ a.charAt(4) === '\n\n';
+    11 │ a.charAt(4) === '\x41b';
+  
+  i This expression returns one character at most.
+  
+     7 │ a.charAt(4) == 'ab';
+     8 │ a.charAt(4) != 'ab';
+   > 9 │ 'ab' === a.charAt(4);
+       │          ^^^^^^^^^^^
+    10 │ a.charAt(4) === '\n\n';
+    11 │ a.charAt(4) === '\x41b';
+  
+  i But this string has more than one character.
+  
+     7 │ a.charAt(4) == 'ab';
+     8 │ a.charAt(4) != 'ab';
+   > 9 │ 'ab' === a.charAt(4);
+       │ ^^^^
+    10 │ a.charAt(4) === '\n\n';
+    11 │ a.charAt(4) === '\x41b';
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+     8 │ a.charAt(4) != 'ab';
+     9 │ 'ab' === a.charAt(4);
+  > 10 │ a.charAt(4) === '\n\n';
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    11 │ a.charAt(4) === '\x41b';
+    12 │ a.b.charAt(4) === 'ab';
+  
+  i This expression returns one character at most.
+  
+     8 │ a.charAt(4) != 'ab';
+     9 │ 'ab' === a.charAt(4);
+  > 10 │ a.charAt(4) === '\n\n';
+       │ ^^^^^^^^^^^
+    11 │ a.charAt(4) === '\x41b';
+    12 │ a.b.charAt(4) === 'ab';
+  
+  i But this string has more than one character.
+  
+     8 │ a.charAt(4) != 'ab';
+     9 │ 'ab' === a.charAt(4);
+  > 10 │ a.charAt(4) === '\n\n';
+       │                 ^^^^^^
+    11 │ a.charAt(4) === '\x41b';
+    12 │ a.b.charAt(4) === 'ab';
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+     9 │ 'ab' === a.charAt(4);
+    10 │ a.charAt(4) === '\n\n';
+  > 11 │ a.charAt(4) === '\x41b';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ a.b.charAt(4) === 'ab';
+    13 │ "abc".at(0) === "ab";
+  
+  i This expression returns one character at most.
+  
+     9 │ 'ab' === a.charAt(4);
+    10 │ a.charAt(4) === '\n\n';
+  > 11 │ a.charAt(4) === '\x41b';
+       │ ^^^^^^^^^^^
+    12 │ a.b.charAt(4) === 'ab';
+    13 │ "abc".at(0) === "ab";
+  
+  i But this string has more than one character.
+  
+     9 │ 'ab' === a.charAt(4);
+    10 │ a.charAt(4) === '\n\n';
+  > 11 │ a.charAt(4) === '\x41b';
+       │                 ^^^^^^^
+    12 │ a.b.charAt(4) === 'ab';
+    13 │ "abc".at(0) === "ab";
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    10 │ a.charAt(4) === '\n\n';
+    11 │ a.charAt(4) === '\x41b';
+  > 12 │ a.b.charAt(4) === 'ab';
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    13 │ "abc".at(0) === "ab";
+    14 │ "abc".at(-1) !== "ab";
+  
+  i This expression returns one character at most.
+  
+    10 │ a.charAt(4) === '\n\n';
+    11 │ a.charAt(4) === '\x41b';
+  > 12 │ a.b.charAt(4) === 'ab';
+       │ ^^^^^^^^^^^^^
+    13 │ "abc".at(0) === "ab";
+    14 │ "abc".at(-1) !== "ab";
+  
+  i But this string has more than one character.
+  
+    10 │ a.charAt(4) === '\n\n';
+    11 │ a.charAt(4) === '\x41b';
+  > 12 │ a.b.charAt(4) === 'ab';
+       │                   ^^^^
+    13 │ "abc".at(0) === "ab";
+    14 │ "abc".at(-1) !== "ab";
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    11 │ a.charAt(4) === '\x41b';
+    12 │ a.b.charAt(4) === 'ab';
+  > 13 │ "abc".at(0) === "ab";
+       │ ^^^^^^^^^^^^^^^^^^^^
+    14 │ "abc".at(-1) !== "ab";
+    15 │ "abc"[0] === "ab";
+  
+  i This expression returns one character at most.
+  
+    11 │ a.charAt(4) === '\x41b';
+    12 │ a.b.charAt(4) === 'ab';
+  > 13 │ "abc".at(0) === "ab";
+       │ ^^^^^^^^^^^
+    14 │ "abc".at(-1) !== "ab";
+    15 │ "abc"[0] === "ab";
+  
+  i But this string has more than one character.
+  
+    11 │ a.charAt(4) === '\x41b';
+    12 │ a.b.charAt(4) === 'ab';
+  > 13 │ "abc".at(0) === "ab";
+       │                 ^^^^
+    14 │ "abc".at(-1) !== "ab";
+    15 │ "abc"[0] === "ab";
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always true.
+  
+    12 │ a.b.charAt(4) === 'ab';
+    13 │ "abc".at(0) === "ab";
+  > 14 │ "abc".at(-1) !== "ab";
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    15 │ "abc"[0] === "ab";
+    16 │ "abc"["0"] === "ab";
+  
+  i This expression returns one character at most.
+  
+    12 │ a.b.charAt(4) === 'ab';
+    13 │ "abc".at(0) === "ab";
+  > 14 │ "abc".at(-1) !== "ab";
+       │ ^^^^^^^^^^^^
+    15 │ "abc"[0] === "ab";
+    16 │ "abc"["0"] === "ab";
+  
+  i But this string has more than one character.
+  
+    12 │ a.b.charAt(4) === 'ab';
+    13 │ "abc".at(0) === "ab";
+  > 14 │ "abc".at(-1) !== "ab";
+       │                  ^^^^
+    15 │ "abc"[0] === "ab";
+    16 │ "abc"["0"] === "ab";
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    13 │ "abc".at(0) === "ab";
+    14 │ "abc".at(-1) !== "ab";
+  > 15 │ "abc"[0] === "ab";
+       │ ^^^^^^^^^^^^^^^^^
+    16 │ "abc"["0"] === "ab";
+    17 │ "abc"[10] === "ab";
+  
+  i This expression returns one character at most.
+  
+    13 │ "abc".at(0) === "ab";
+    14 │ "abc".at(-1) !== "ab";
+  > 15 │ "abc"[0] === "ab";
+       │ ^^^^^^^^
+    16 │ "abc"["0"] === "ab";
+    17 │ "abc"[10] === "ab";
+  
+  i But this string has more than one character.
+  
+    13 │ "abc".at(0) === "ab";
+    14 │ "abc".at(-1) !== "ab";
+  > 15 │ "abc"[0] === "ab";
+       │              ^^^^
+    16 │ "abc"["0"] === "ab";
+    17 │ "abc"[10] === "ab";
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    14 │ "abc".at(-1) !== "ab";
+    15 │ "abc"[0] === "ab";
+  > 16 │ "abc"["0"] === "ab";
+       │ ^^^^^^^^^^^^^^^^^^^
+    17 │ "abc"[10] === "ab";
+    18 │ "abc"["9007199254740991"] === "ab";
+  
+  i This expression returns one character at most.
+  
+    14 │ "abc".at(-1) !== "ab";
+    15 │ "abc"[0] === "ab";
+  > 16 │ "abc"["0"] === "ab";
+       │ ^^^^^^^^^^
+    17 │ "abc"[10] === "ab";
+    18 │ "abc"["9007199254740991"] === "ab";
+  
+  i But this string has more than one character.
+  
+    14 │ "abc".at(-1) !== "ab";
+    15 │ "abc"[0] === "ab";
+  > 16 │ "abc"["0"] === "ab";
+       │                ^^^^
+    17 │ "abc"[10] === "ab";
+    18 │ "abc"["9007199254740991"] === "ab";
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    15 │ "abc"[0] === "ab";
+    16 │ "abc"["0"] === "ab";
+  > 17 │ "abc"[10] === "ab";
+       │ ^^^^^^^^^^^^^^^^^^
+    18 │ "abc"["9007199254740991"] === "ab";
+    19 │ "abc".charAt(0) === `ab`;
+  
+  i This expression returns one character at most.
+  
+    15 │ "abc"[0] === "ab";
+    16 │ "abc"["0"] === "ab";
+  > 17 │ "abc"[10] === "ab";
+       │ ^^^^^^^^^
+    18 │ "abc"["9007199254740991"] === "ab";
+    19 │ "abc".charAt(0) === `ab`;
+  
+  i But this string has more than one character.
+  
+    15 │ "abc"[0] === "ab";
+    16 │ "abc"["0"] === "ab";
+  > 17 │ "abc"[10] === "ab";
+       │               ^^^^
+    18 │ "abc"["9007199254740991"] === "ab";
+    19 │ "abc".charAt(0) === `ab`;
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    16 │ "abc"["0"] === "ab";
+    17 │ "abc"[10] === "ab";
+  > 18 │ "abc"["9007199254740991"] === "ab";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ "abc".charAt(0) === `ab`;
+    20 │ ("abc".charAt(0)) === "ab";
+  
+  i This expression returns one character at most.
+  
+    16 │ "abc"["0"] === "ab";
+    17 │ "abc"[10] === "ab";
+  > 18 │ "abc"["9007199254740991"] === "ab";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ "abc".charAt(0) === `ab`;
+    20 │ ("abc".charAt(0)) === "ab";
+  
+  i But this string has more than one character.
+  
+    16 │ "abc"["0"] === "ab";
+    17 │ "abc"[10] === "ab";
+  > 18 │ "abc"["9007199254740991"] === "ab";
+       │                               ^^^^
+    19 │ "abc".charAt(0) === `ab`;
+    20 │ ("abc".charAt(0)) === "ab";
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    17 │ "abc"[10] === "ab";
+    18 │ "abc"["9007199254740991"] === "ab";
+  > 19 │ "abc".charAt(0) === `ab`;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ ("abc".charAt(0)) === "ab";
+    21 │ "abc".charAt(0) === ("ab");
+  
+  i This expression returns one character at most.
+  
+    17 │ "abc"[10] === "ab";
+    18 │ "abc"["9007199254740991"] === "ab";
+  > 19 │ "abc".charAt(0) === `ab`;
+       │ ^^^^^^^^^^^^^^^
+    20 │ ("abc".charAt(0)) === "ab";
+    21 │ "abc".charAt(0) === ("ab");
+  
+  i But this string has more than one character.
+  
+    17 │ "abc"[10] === "ab";
+    18 │ "abc"["9007199254740991"] === "ab";
+  > 19 │ "abc".charAt(0) === `ab`;
+       │                     ^^^^
+    20 │ ("abc".charAt(0)) === "ab";
+    21 │ "abc".charAt(0) === ("ab");
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    18 │ "abc"["9007199254740991"] === "ab";
+    19 │ "abc".charAt(0) === `ab`;
+  > 20 │ ("abc".charAt(0)) === "ab";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ "abc".charAt(0) === ("ab");
+    22 │ "abc".charAt(0) === "😀";
+  
+  i This expression returns one character at most.
+  
+    18 │ "abc"["9007199254740991"] === "ab";
+    19 │ "abc".charAt(0) === `ab`;
+  > 20 │ ("abc".charAt(0)) === "ab";
+       │  ^^^^^^^^^^^^^^^
+    21 │ "abc".charAt(0) === ("ab");
+    22 │ "abc".charAt(0) === "😀";
+  
+  i But this string has more than one character.
+  
+    18 │ "abc"["9007199254740991"] === "ab";
+    19 │ "abc".charAt(0) === `ab`;
+  > 20 │ ("abc".charAt(0)) === "ab";
+       │                       ^^^^
+    21 │ "abc".charAt(0) === ("ab");
+    22 │ "abc".charAt(0) === "😀";
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    19 │ "abc".charAt(0) === `ab`;
+    20 │ ("abc".charAt(0)) === "ab";
+  > 21 │ "abc".charAt(0) === ("ab");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ "abc".charAt(0) === "😀";
+    23 │ "abc".charAt(0) === "\u{1F600}";
+  
+  i This expression returns one character at most.
+  
+    19 │ "abc".charAt(0) === `ab`;
+    20 │ ("abc".charAt(0)) === "ab";
+  > 21 │ "abc".charAt(0) === ("ab");
+       │ ^^^^^^^^^^^^^^^
+    22 │ "abc".charAt(0) === "😀";
+    23 │ "abc".charAt(0) === "\u{1F600}";
+  
+  i But this string has more than one character.
+  
+    19 │ "abc".charAt(0) === `ab`;
+    20 │ ("abc".charAt(0)) === "ab";
+  > 21 │ "abc".charAt(0) === ("ab");
+       │                      ^^^^
+    22 │ "abc".charAt(0) === "😀";
+    23 │ "abc".charAt(0) === "\u{1F600}";
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    20 │ ("abc".charAt(0)) === "ab";
+    21 │ "abc".charAt(0) === ("ab");
+  > 22 │ "abc".charAt(0) === "😀";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ "abc".charAt(0) === "\u{1F600}";
+    24 │ "abc".charAt(0) === "\uD83D\uDE00";
+  
+  i This expression returns one character at most.
+  
+    20 │ ("abc".charAt(0)) === "ab";
+    21 │ "abc".charAt(0) === ("ab");
+  > 22 │ "abc".charAt(0) === "😀";
+       │ ^^^^^^^^^^^^^^^
+    23 │ "abc".charAt(0) === "\u{1F600}";
+    24 │ "abc".charAt(0) === "\uD83D\uDE00";
+  
+  i But this string has more than one character.
+  
+    20 │ ("abc".charAt(0)) === "ab";
+    21 │ "abc".charAt(0) === ("ab");
+  > 22 │ "abc".charAt(0) === "😀";
+       │                     ^^^^
+    23 │ "abc".charAt(0) === "\u{1F600}";
+    24 │ "abc".charAt(0) === "\uD83D\uDE00";
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    21 │ "abc".charAt(0) === ("ab");
+    22 │ "abc".charAt(0) === "😀";
+  > 23 │ "abc".charAt(0) === "\u{1F600}";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ "abc".charAt(0) === "\uD83D\uDE00";
+    25 │ {
+  
+  i This expression returns one character at most.
+  
+    21 │ "abc".charAt(0) === ("ab");
+    22 │ "abc".charAt(0) === "😀";
+  > 23 │ "abc".charAt(0) === "\u{1F600}";
+       │ ^^^^^^^^^^^^^^^
+    24 │ "abc".charAt(0) === "\uD83D\uDE00";
+    25 │ {
+  
+  i But this string has more than one character.
+  
+    21 │ "abc".charAt(0) === ("ab");
+    22 │ "abc".charAt(0) === "😀";
+  > 23 │ "abc".charAt(0) === "\u{1F600}";
+       │                     ^^^^^^^^^^^
+    24 │ "abc".charAt(0) === "\uD83D\uDE00";
+    25 │ {
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    22 │ "abc".charAt(0) === "😀";
+    23 │ "abc".charAt(0) === "\u{1F600}";
+  > 24 │ "abc".charAt(0) === "\uD83D\uDE00";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ {
+    26 │ 	const value = "abc";
+  
+  i This expression returns one character at most.
+  
+    22 │ "abc".charAt(0) === "😀";
+    23 │ "abc".charAt(0) === "\u{1F600}";
+  > 24 │ "abc".charAt(0) === "\uD83D\uDE00";
+       │ ^^^^^^^^^^^^^^^
+    25 │ {
+    26 │ 	const value = "abc";
+  
+  i But this string has more than one character.
+  
+    22 │ "abc".charAt(0) === "😀";
+    23 │ "abc".charAt(0) === "\u{1F600}";
+  > 24 │ "abc".charAt(0) === "\uD83D\uDE00";
+       │                     ^^^^^^^^^^^^^^
+    25 │ {
+    26 │ 	const value = "abc";
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:2 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    25 │ {
+    26 │ 	const value = "abc";
+  > 27 │ 	value[0] === "ab";
+       │ 	^^^^^^^^^^^^^^^^^
+    28 │ }
+    29 │ {
+  
+  i This expression returns one character at most.
+  
+    25 │ {
+    26 │ 	const value = "abc";
+  > 27 │ 	value[0] === "ab";
+       │ 	^^^^^^^^
+    28 │ }
+    29 │ {
+  
+  i But this string has more than one character.
+  
+    25 │ {
+    26 │ 	const value = "abc";
+  > 27 │ 	value[0] === "ab";
+       │ 	             ^^^^
+    28 │ }
+    29 │ {
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:2 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    29 │ {
+    30 │ 	const value = "abc";
+  > 31 │ 	value.at(0) === "ab";
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    32 │ }
+    33 │ 
+  
+  i This expression returns one character at most.
+  
+    29 │ {
+    30 │ 	const value = "abc";
+  > 31 │ 	value.at(0) === "ab";
+       │ 	^^^^^^^^^^^
+    32 │ }
+    33 │ 
+  
+  i But this string has more than one character.
+  
+    29 │ {
+    30 │ 	const value = "abc";
+  > 31 │ 	value.at(0) === "ab";
+       │ 	                ^^^^
+    32 │ }
+    33 │ 
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

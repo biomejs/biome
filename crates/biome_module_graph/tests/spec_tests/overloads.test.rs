@@ -198,3 +198,80 @@ fn test_infer_module_types_substitutes_callback_returns_through_type_aliases_on_
         &fs,
     );
 }
+
+#[test]
+fn test_infer_module_types_selects_method_overloads_of_interfaces_and_object_types_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            interface Server {
+                listen(port: number, callback: () => void): number;
+                listen(port?: number): string;
+            }
+
+            type Client = {
+                connect(url: string, callback: () => void): number;
+                connect(url: string): string;
+            };
+
+            interface Store<T> {
+                read(key: string, callback: (value: T) => void): number;
+                read(key: string): T;
+            }
+
+            interface Plugin {
+                start?(callback: () => void): number;
+                start?(): string;
+            }
+
+            declare const server: Server;
+            declare const client: Client;
+            declare const store: Store<string>;
+            declare const plugin: Plugin;
+
+            export const listening = server.listen(0);
+            export const listeningWithCallback = server.listen(0, () => {});
+            export const connected = client.connect("url");
+            export const read = store.read("key");
+            export const started = plugin.start?.();
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let binding_ty = |name: &str| {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} binding type must be inferred"));
+        inferred.resolve_type(&db, ty)
+    };
+
+    // The first overload requires a callback, so a call without one selects
+    // the second overload.
+    assert!(is_inferred_string(&db, binding_ty("listening")));
+    assert!(is_inferred_number(&db, binding_ty("listeningWithCallback")));
+    assert!(is_inferred_string(&db, binding_ty("connected")));
+    assert!(is_inferred_string(&db, binding_ty("read")));
+
+    // An optional method is optional as a whole, so its overloads stay
+    // selectable and the optional call adds `undefined` to the result.
+    let InferredTypeData::Union(started) = binding_ty("started") else {
+        panic!("started binding type must be inferred as a union");
+    };
+    assert!(
+        started
+            .types(&db)
+            .iter()
+            .any(|ty| is_inferred_string(&db, *ty))
+    );
+    assert!(started.types(&db).contains(&InferredTypeData::Undefined));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_selects_method_overloads_of_interfaces_and_object_types_on_build",
+        &db,
+        &fs,
+    );
+}

@@ -1,0 +1,76 @@
+/* should generate diagnostics */
+array.splice(index, 1, element);
+array.splice(index, 1.0, element);
+array.splice(index, 1.5, element);
+array.splice(index, 0x1, element);
+array.splice(index, +1, element);
+array.items.splice(index, 1, element);
+this.items.splice(index, 1, element);
+array.splice(/* comment */ index, 1, element);
+const removed = array.splice(index, 1, element);
+array.splice(-1, 1, element);
+array.splice(-1, 0, element);
+array.splice(-1, 0.5, element);
+array.splice(- 1, 0, element);
+array.splice(-1, +0, element);
+array.splice(-1, -0, element);
+array.splice(-1, 0b0, element);
+array.splice(-1.5, 0, element);
+array.splice(- - -1, 0, element);
+array.splice(-(-(-1)), 0, element);
+array.toSpliced(index, 1, element);
+array.toSpliced(index, 1.0, element);
+array.toSpliced(index, 1.5, element);
+(array || other).toSpliced(index, 1, element);
+const result = array.toSpliced(index, 1, element);
+array.toSpliced(-1, 1, element);
+array.toSpliced(-1.5, 1, element);
+array.toSpliced(array.length, 1, element);
+array.toSpliced(-1, 0, element);
+array.toSpliced(-1.5, 0.5, element);
+// Only some indexes refer to the same element when used with brackets.
+array.splice(1, 1, element);
+array.splice(NaN, 1, element);
+array.splice(1.5, 1, element);
+array.splice(true, 1, element);
+array.splice(null, 1, element);
+array.splice(undefined, 1, element);
+array.splice(Infinity, 1, element);
+array.splice('1', 1, element);
+array.splice('0', 1, element);
+array.splice('1.5', 1, element);
+array.splice('abc', 1, element);
+array.splice('', 1, element);
+array.splice('01', 1, element);
+array.splice(`1`, 1, element);
+array.splice(``, 1, element);
+array.splice(1e21, 1, element);
+array.splice(index + 1, 1, element);
+array.splice(index, 1, (first, second));
+array.toSpliced(0, 1, (first, second));
+array.toSpliced((0, 1), 1, element);
+// The receiver is read once.
+getArray().splice(index, 1, element);
+array?.items.splice(index, 1, element);
+// Parentheses around the callee.
+(array.splice)(0, 1, element);
+(array.toSpliced)(0, 1, element);
+if (flag) {} else(array.splice)(0, 1, element);
+// Comments.
+(array /* keep */).splice(0, 1, element);
+array.splice(0, 1, element /* keep */);
+array.splice(index, /* discard */ 1, element);
+array.splice(index, 1 /* discard */, element);
+array./* keep */toSpliced(index, 1, element);
+array.toSpliced(index, /* describes the delete count */ 1, element);
+array.toSpliced(index, 1 /* discard */, element);
+array.toSpliced(index, 1, /* keep */ element);
+array.splice(/* keep */ -1, 0, element);
+array.splice(-1 /* discard */, 0, element);
+array.splice(-/* discard */1, 0, element);
+array /* discard */ .splice(-1, 0, element);
+// The element changes the array.
+array.splice(-1, 0, array.pop());
+array.splice(-1, 0, delete array[0]);
+array.splice(-1, 0, value++);
+array.splice(-1, 0, -value);

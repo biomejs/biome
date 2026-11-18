@@ -1,0 +1,452 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+if (process.env.NODE_ENV === 'DEVELOPMENT') {
+	require('debug');
+}
+var x; if (y) { x = require('debug'); }
+var x2; if (y) { x2 = require('debug').baz; }
+function f() { require('y') }
+try { require('x'); } catch (e) { console.log(e); }
+var getModule = x => require(x);
+var weird = (x => require(x))('weird')
+switch(x) { case '1': require('1'); break; }
+{ require('block'); }
+class A { static { require('static-block'); } }
+var obj = { key: require('y') };
+var arr = [require('y')];
+var both = a || require('y');
+var seq = (a, require('y'));
+var inst = new Foo(require('y'));
+var tagged = require('y')`template`;
+var { withDefault = require('y') } = obj;
+for (const item of require('y')) {}
+label: require('y');
+export const exported = require('y');
+
+```
+
+# Diagnostics
+```
+invalid.js:3:2 lint/nursery/useTopLevelRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This require() call isn't directly part of a top-level statement.
+  
+    1 │ /* should generate diagnostics */
+    2 │ if (process.env.NODE_ENV === 'DEVELOPMENT') {
+  > 3 │ 	require('debug');
+      │ 	^^^^^^^^^^^^^^^^
+    4 │ }
+    5 │ var x; if (y) { x = require('debug'); }
+  
+  i Modules loaded inside functions, blocks, or other expressions make it hard to see what the file depends on, and can be loaded at unexpected times.
+  
+  i Load the module in a top-level declaration, for example const name = require("module"), and use that variable here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:21 lint/nursery/useTopLevelRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This require() call isn't directly part of a top-level statement.
+  
+    3 │ 	require('debug');
+    4 │ }
+  > 5 │ var x; if (y) { x = require('debug'); }
+      │                     ^^^^^^^^^^^^^^^^
+    6 │ var x2; if (y) { x2 = require('debug').baz; }
+    7 │ function f() { require('y') }
+  
+  i Modules loaded inside functions, blocks, or other expressions make it hard to see what the file depends on, and can be loaded at unexpected times.
+  
+  i Load the module in a top-level declaration, for example const name = require("module"), and use that variable here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:23 lint/nursery/useTopLevelRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This require() call isn't directly part of a top-level statement.
+  
+    4 │ }
+    5 │ var x; if (y) { x = require('debug'); }
+  > 6 │ var x2; if (y) { x2 = require('debug').baz; }
+      │                       ^^^^^^^^^^^^^^^^
+    7 │ function f() { require('y') }
+    8 │ try { require('x'); } catch (e) { console.log(e); }
+  
+  i Modules loaded inside functions, blocks, or other expressions make it hard to see what the file depends on, and can be loaded at unexpected times.
+  
+  i Load the module in a top-level declaration, for example const name = require("module"), and use that variable here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:16 lint/nursery/useTopLevelRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This require() call isn't directly part of a top-level statement.
+  
+    5 │ var x; if (y) { x = require('debug'); }
+    6 │ var x2; if (y) { x2 = require('debug').baz; }
+  > 7 │ function f() { require('y') }
+      │                ^^^^^^^^^^^^
+    8 │ try { require('x'); } catch (e) { console.log(e); }
+    9 │ var getModule = x => require(x);
+  
+  i Modules loaded inside functions, blocks, or other expressions make it hard to see what the file depends on, and can be loaded at unexpected times.
+  
+  i Load the module in a top-level declaration, for example const name = require("module"), and use that variable here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:7 lint/nursery/useTopLevelRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This require() call isn't directly part of a top-level statement.
+  
+     6 │ var x2; if (y) { x2 = require('debug').baz; }
+     7 │ function f() { require('y') }
+   > 8 │ try { require('x'); } catch (e) { console.log(e); }
+       │       ^^^^^^^^^^^^
+     9 │ var getModule = x => require(x);
+    10 │ var weird = (x => require(x))('weird')
+  
+  i Modules loaded inside functions, blocks, or other expressions make it hard to see what the file depends on, and can be loaded at unexpected times.
+  
+  i Load the module in a top-level declaration, for example const name = require("module"), and use that variable here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:22 lint/nursery/useTopLevelRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This require() call isn't directly part of a top-level statement.
+  
+     7 │ function f() { require('y') }
+     8 │ try { require('x'); } catch (e) { console.log(e); }
+   > 9 │ var getModule = x => require(x);
+       │                      ^^^^^^^^^^
+    10 │ var weird = (x => require(x))('weird')
+    11 │ switch(x) { case '1': require('1'); break; }
+  
+  i Modules loaded inside functions, blocks, or other expressions make it hard to see what the file depends on, and can be loaded at unexpected times.
+  
+  i Load the module in a top-level declaration, for example const name = require("module"), and use that variable here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:19 lint/nursery/useTopLevelRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This require() call isn't directly part of a top-level statement.
+  
+     8 │ try { require('x'); } catch (e) { console.log(e); }
+     9 │ var getModule = x => require(x);
+  > 10 │ var weird = (x => require(x))('weird')
+       │                   ^^^^^^^^^^
+    11 │ switch(x) { case '1': require('1'); break; }
+    12 │ { require('block'); }
+  
+  i Modules loaded inside functions, blocks, or other expressions make it hard to see what the file depends on, and can be loaded at unexpected times.
+  
+  i Load the module in a top-level declaration, for example const name = require("module"), and use that variable here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:23 lint/nursery/useTopLevelRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This require() call isn't directly part of a top-level statement.
+  
+     9 │ var getModule = x => require(x);
+    10 │ var weird = (x => require(x))('weird')
+  > 11 │ switch(x) { case '1': require('1'); break; }
+       │                       ^^^^^^^^^^^^
+    12 │ { require('block'); }
+    13 │ class A { static { require('static-block'); } }
+  
+  i Modules loaded inside functions, blocks, or other expressions make it hard to see what the file depends on, and can be loaded at unexpected times.
+  
+  i Load the module in a top-level declaration, for example const name = require("module"), and use that variable here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:3 lint/nursery/useTopLevelRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This require() call isn't directly part of a top-level statement.
+  
+    10 │ var weird = (x => require(x))('weird')
+    11 │ switch(x) { case '1': require('1'); break; }
+  > 12 │ { require('block'); }
+       │   ^^^^^^^^^^^^^^^^
+    13 │ class A { static { require('static-block'); } }
+    14 │ var obj = { key: require('y') };
+  
+  i Modules loaded inside functions, blocks, or other expressions make it hard to see what the file depends on, and can be loaded at unexpected times.
+  
+  i Load the module in a top-level declaration, for example const name = require("module"), and use that variable here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:20 lint/nursery/useTopLevelRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This require() call isn't directly part of a top-level statement.
+  
+    11 │ switch(x) { case '1': require('1'); break; }
+    12 │ { require('block'); }
+  > 13 │ class A { static { require('static-block'); } }
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ var obj = { key: require('y') };
+    15 │ var arr = [require('y')];
+  
+  i Modules loaded inside functions, blocks, or other expressions make it hard to see what the file depends on, and can be loaded at unexpected times.
+  
+  i Load the module in a top-level declaration, for example const name = require("module"), and use that variable here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:18 lint/nursery/useTopLevelRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This require() call isn't directly part of a top-level statement.
+  
+    12 │ { require('block'); }
+    13 │ class A { static { require('static-block'); } }
+  > 14 │ var obj = { key: require('y') };
+       │                  ^^^^^^^^^^^^
+    15 │ var arr = [require('y')];
+    16 │ var both = a || require('y');
+  
+  i Modules loaded inside functions, blocks, or other expressions make it hard to see what the file depends on, and can be loaded at unexpected times.
+  
+  i Load the module in a top-level declaration, for example const name = require("module"), and use that variable here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:12 lint/nursery/useTopLevelRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This require() call isn't directly part of a top-level statement.
+  
+    13 │ class A { static { require('static-block'); } }
+    14 │ var obj = { key: require('y') };
+  > 15 │ var arr = [require('y')];
+       │            ^^^^^^^^^^^^
+    16 │ var both = a || require('y');
+    17 │ var seq = (a, require('y'));
+  
+  i Modules loaded inside functions, blocks, or other expressions make it hard to see what the file depends on, and can be loaded at unexpected times.
+  
+  i Load the module in a top-level declaration, for example const name = require("module"), and use that variable here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:17 lint/nursery/useTopLevelRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This require() call isn't directly part of a top-level statement.
+  
+    14 │ var obj = { key: require('y') };
+    15 │ var arr = [require('y')];
+  > 16 │ var both = a || require('y');
+       │                 ^^^^^^^^^^^^
+    17 │ var seq = (a, require('y'));
+    18 │ var inst = new Foo(require('y'));
+  
+  i Modules loaded inside functions, blocks, or other expressions make it hard to see what the file depends on, and can be loaded at unexpected times.
+  
+  i Load the module in a top-level declaration, for example const name = require("module"), and use that variable here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:15 lint/nursery/useTopLevelRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This require() call isn't directly part of a top-level statement.
+  
+    15 │ var arr = [require('y')];
+    16 │ var both = a || require('y');
+  > 17 │ var seq = (a, require('y'));
+       │               ^^^^^^^^^^^^
+    18 │ var inst = new Foo(require('y'));
+    19 │ var tagged = require('y')`template`;
+  
+  i Modules loaded inside functions, blocks, or other expressions make it hard to see what the file depends on, and can be loaded at unexpected times.
+  
+  i Load the module in a top-level declaration, for example const name = require("module"), and use that variable here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:20 lint/nursery/useTopLevelRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This require() call isn't directly part of a top-level statement.
+  
+    16 │ var both = a || require('y');
+    17 │ var seq = (a, require('y'));
+  > 18 │ var inst = new Foo(require('y'));
+       │                    ^^^^^^^^^^^^
+    19 │ var tagged = require('y')`template`;
+    20 │ var { withDefault = require('y') } = obj;
+  
+  i Modules loaded inside functions, blocks, or other expressions make it hard to see what the file depends on, and can be loaded at unexpected times.
+  
+  i Load the module in a top-level declaration, for example const name = require("module"), and use that variable here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:14 lint/nursery/useTopLevelRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This require() call isn't directly part of a top-level statement.
+  
+    17 │ var seq = (a, require('y'));
+    18 │ var inst = new Foo(require('y'));
+  > 19 │ var tagged = require('y')`template`;
+       │              ^^^^^^^^^^^^
+    20 │ var { withDefault = require('y') } = obj;
+    21 │ for (const item of require('y')) {}
+  
+  i Modules loaded inside functions, blocks, or other expressions make it hard to see what the file depends on, and can be loaded at unexpected times.
+  
+  i Load the module in a top-level declaration, for example const name = require("module"), and use that variable here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:21 lint/nursery/useTopLevelRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This require() call isn't directly part of a top-level statement.
+  
+    18 │ var inst = new Foo(require('y'));
+    19 │ var tagged = require('y')`template`;
+  > 20 │ var { withDefault = require('y') } = obj;
+       │                     ^^^^^^^^^^^^
+    21 │ for (const item of require('y')) {}
+    22 │ label: require('y');
+  
+  i Modules loaded inside functions, blocks, or other expressions make it hard to see what the file depends on, and can be loaded at unexpected times.
+  
+  i Load the module in a top-level declaration, for example const name = require("module"), and use that variable here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:20 lint/nursery/useTopLevelRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This require() call isn't directly part of a top-level statement.
+  
+    19 │ var tagged = require('y')`template`;
+    20 │ var { withDefault = require('y') } = obj;
+  > 21 │ for (const item of require('y')) {}
+       │                    ^^^^^^^^^^^^
+    22 │ label: require('y');
+    23 │ export const exported = require('y');
+  
+  i Modules loaded inside functions, blocks, or other expressions make it hard to see what the file depends on, and can be loaded at unexpected times.
+  
+  i Load the module in a top-level declaration, for example const name = require("module"), and use that variable here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:8 lint/nursery/useTopLevelRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This require() call isn't directly part of a top-level statement.
+  
+    20 │ var { withDefault = require('y') } = obj;
+    21 │ for (const item of require('y')) {}
+  > 22 │ label: require('y');
+       │        ^^^^^^^^^^^^
+    23 │ export const exported = require('y');
+    24 │ 
+  
+  i Modules loaded inside functions, blocks, or other expressions make it hard to see what the file depends on, and can be loaded at unexpected times.
+  
+  i Load the module in a top-level declaration, for example const name = require("module"), and use that variable here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:25 lint/nursery/useTopLevelRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This require() call isn't directly part of a top-level statement.
+  
+    21 │ for (const item of require('y')) {}
+    22 │ label: require('y');
+  > 23 │ export const exported = require('y');
+       │                         ^^^^^^^^^^^^
+    24 │ 
+  
+  i Modules loaded inside functions, blocks, or other expressions make it hard to see what the file depends on, and can be loaded at unexpected times.
+  
+  i Load the module in a top-level declaration, for example const name = require("module"), and use that variable here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

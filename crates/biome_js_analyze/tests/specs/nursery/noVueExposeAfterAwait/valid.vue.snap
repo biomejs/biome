@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+export default {
+	async setup(props, { expose }) {
+		expose({});
+		await doSomething();
+	},
+};
+</script>
+
+```

@@ -41,7 +41,7 @@ declare_lint_rule! {
     ///
     /// - [Vue 3 migration guide: `v-on.native` modifier removed](https://v3-migration.vuejs.org/breaking-changes/v-on-native-modifier-removed.html)
     pub NoVueDeprecatedVOnNativeModifier {
-        version: "next",
+        version: "2.6.5",
         name: "noVueDeprecatedVOnNativeModifier",
         language: "html",
         recommended: true,

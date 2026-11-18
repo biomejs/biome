@@ -107,7 +107,7 @@ pub(crate) fn code_fix_to_lsp(
         .rule_name
         .as_ref()
         .filter(|_| action.category.matches("quickfix"))
-        .map(|(group_name, rule_name)| {
+        .map_or_default(|(group_name, rule_name)| {
             diagnostics
                 .iter()
                 .filter_map(|d| {
@@ -128,8 +128,7 @@ pub(crate) fn code_fix_to_lsp(
                     }
                 })
                 .collect()
-        })
-        .unwrap_or_default();
+        });
 
     let kind = action.category.to_str().into_owned();
 

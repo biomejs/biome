@@ -1,0 +1,110 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ignoreBooleanCoercionShadowed.ts
+---
+# Input
+```ts
+// Tests for ignoreBooleanCoercion: true
+// `Boolean` is declared in this module, so it is not the global built-in and
+// every case below SHOULD generate a diagnostic.
+
+function Boolean(value: unknown): boolean {
+	return !!value;
+}
+
+declare const a: string | null;
+declare const b: string;
+
+const r1 = Boolean(a || 'default');
+
+const r2 = Boolean(a || b || 'default');
+
+const r3 = Boolean((a || 'default'));
+
+declare let assigned: string | null;
+const r4 = Boolean(assigned ||= 'default');
+
+```
+
+# Diagnostics
+```
+ignoreBooleanCoercionShadowed.ts:12:22 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    10 │ declare const b: string;
+    11 │ 
+  > 12 │ const r1 = Boolean(a || 'default');
+       │                      ^^
+    13 │ 
+    14 │ const r2 = Boolean(a || b || 'default');
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreBooleanCoercionShadowed.ts:14:22 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    12 │ const r1 = Boolean(a || 'default');
+    13 │ 
+  > 14 │ const r2 = Boolean(a || b || 'default');
+       │                      ^^
+    15 │ 
+    16 │ const r3 = Boolean((a || 'default'));
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreBooleanCoercionShadowed.ts:16:23 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    14 │ const r2 = Boolean(a || b || 'default');
+    15 │ 
+  > 16 │ const r3 = Boolean((a || 'default'));
+       │                       ^^
+    17 │ 
+    18 │ declare let assigned: string | null;
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreBooleanCoercionShadowed.ts:19:29 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    18 │ declare let assigned: string | null;
+  > 19 │ const r4 = Boolean(assigned ||= 'default');
+       │                             ^^^
+    20 │ 
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

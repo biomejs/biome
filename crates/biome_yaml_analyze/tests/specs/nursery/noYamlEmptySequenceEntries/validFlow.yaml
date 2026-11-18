@@ -1,0 +1,3 @@
+# should not generate diagnostics
+items: [a, b, c]
+empty: []

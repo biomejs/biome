@@ -10,12 +10,16 @@ use crate::interned_types::{
     ProjectedKey, ReturnType, TypeData, TypeDb, TypeMember, TypeMemberKind,
     requires_escape_handling,
 };
+use crate::type_relation::TypeResolver;
 use crate::type_transform::TypeSubstitution;
 use crate::{MappedTypeModifier, TypeOperator};
 use biome_rowan::Text;
 use rustc_hash::FxHashSet;
 
 const MAX_PROJECTION_MEMBERS: usize = 1024;
+
+/// Maximum number of interfaces whose members are collected for one `keyof`.
+const MAX_KEYOF_INTERFACES: usize = 64;
 
 /// Returns every member of an object, or `None` if the list may be incomplete.
 ///
@@ -38,7 +42,7 @@ fn complete_object_members<'db>(
     (members.len() <= MAX_PROJECTION_MEMBERS).then_some(members)
 }
 
-/// Builds a union of the names of an object's properties.
+/// Builds a union of the names of the properties of an object or interface.
 ///
 /// For example, the keys of this object form the type `"A" | "B" | "C"`:
 ///
@@ -47,12 +51,79 @@ fn complete_object_members<'db>(
 /// type Letter = keyof typeof values;
 /// ```
 ///
+/// The keys of an interface include those of the interfaces it extends, so
+/// `keyof Child` is `"A" | "C"`:
+///
+/// ```ts
+/// interface Parent { C: number }
+/// interface Child extends Parent { A: number }
+/// ```
+///
+/// The keys don't depend on type arguments, so an instance of a generic
+/// interface has the keys of its declaration. `resolve` resolves the handles
+/// of the operand and of the extended interfaces, which are not normalized
+/// with the operand.
+///
 /// Returns `None` if the object has uncollected or inherited members, numeric or
 /// computed keys, names requiring escape handling, or more than 1024 members.
-/// Reporting only the keys we know would incorrectly describe the whole object.
-pub(crate) fn keyof<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> Option<TypeData<'db>> {
-    let members = complete_object_members(db, ty)?;
-    let mut keys = Vec::with_capacity(members.len());
+/// An interface is subject to the same limits, and must extend only
+/// interfaces, at most 64 in total. Built-in interfaces and classes are not
+/// supported. Reporting only the keys we know would incorrectly describe the
+/// whole object.
+pub(crate) fn keyof<'db>(
+    db: &'db dyn TypeDb,
+    ty: TypeData<'db>,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> Option<TypeData<'db>> {
+    let ty = declaration(db, ty, resolve);
+    let mut keys = Vec::new();
+    if let TypeData::Interface(interface) = ty {
+        let mut pending = Vec::from([interface]);
+        let mut seen = FxHashSet::default();
+        while let Some(interface) = pending.pop() {
+            if !seen.insert(interface) {
+                continue;
+            }
+            if seen.len() > MAX_KEYOF_INTERFACES {
+                return None;
+            }
+            push_keys(db, interface.members(db), &mut keys)?;
+            if keys.len() > MAX_PROJECTION_MEMBERS {
+                return None;
+            }
+            for parent in interface.extends(db).iter().rev() {
+                let TypeData::Interface(parent) = declaration(db, *parent, resolve) else {
+                    return None;
+                };
+                pending.push(parent);
+            }
+        }
+    } else {
+        push_keys(db, complete_object_members(db, ty)?, &mut keys)?;
+    }
+    Some(TypeData::union_from_types(db, keys))
+}
+
+/// Returns the declaration that `ty` refers to or is an instance of.
+fn declaration<'db>(
+    db: &'db dyn TypeDb,
+    ty: TypeData<'db>,
+    resolve: &mut TypeResolver<'db, '_>,
+) -> TypeData<'db> {
+    match resolve(ty) {
+        TypeData::InstanceOf(instance) => resolve(instance.ty(db)),
+        ty => ty,
+    }
+}
+
+/// Appends the string literal type of each member's key to `keys`.
+///
+/// Returns `None` if a member's key can't be written as a string literal type.
+fn push_keys<'db>(
+    db: &'db dyn TypeDb,
+    members: &[TypeMember<'db>],
+    keys: &mut Vec<TypeData<'db>>,
+) -> Option<()> {
     for member in members {
         match member.projected_key() {
             ProjectedKey::Name(name) => keys.push(string_literal(db, name)),
@@ -60,7 +131,7 @@ pub(crate) fn keyof<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> Option<TypeD
             ProjectedKey::Unsupported => return None,
         }
     }
-    Some(TypeData::union_from_types(db, keys))
+    Some(())
 }
 
 fn string_literal<'db>(db: &'db dyn TypeDb, name: &Text) -> TypeData<'db> {

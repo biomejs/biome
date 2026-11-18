@@ -118,7 +118,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueUselessVBind {
-        version: "next",
+        version: "2.6.5",
         name: "noVueUselessVBind",
         language: "html",
         recommended: false,

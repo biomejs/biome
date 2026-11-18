@@ -329,6 +329,45 @@ impl GreenNodeData {
         slots.splice(range, replace_with);
         GreenNode::new(self.kind(), slots)
     }
+
+    /// Returns a copy of this node in which each slot named in `edits` is
+    /// replaced with the elements of its replacement, which may be empty to
+    /// remove the slot.
+    ///
+    /// `edits` is expected in ascending slot order. An edit is ignored if its
+    /// index is not greater than the index of an earlier edit, or if it is past
+    /// the last slot. For edits in ascending order without duplicates that
+    /// only name existing slots, the result is the same as calling
+    /// [Self::splice_slots] once per edit in descending order, but the slots
+    /// are copied only once.
+    #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
+    pub(crate) fn splice_many_slots<E, R>(&self, edits: E) -> GreenNode
+    where
+        E: IntoIterator<Item = (usize, R)>,
+        R: IntoIterator<Item = Option<GreenElement>>,
+    {
+        let mut edits = edits.into_iter().peekable();
+        let mut slots = Vec::with_capacity(self.slice().len());
+
+        for (index, slot) in self.slots().enumerate() {
+            // Skip the edits of slots that were already passed
+            while edits
+                .next_if(|(edit_index, _)| *edit_index < index)
+                .is_some()
+            {}
+            if let Some((_, replacement)) = edits.next_if(|(edit_index, _)| *edit_index == index) {
+                slots.extend(replacement);
+            } else {
+                slots.push(match slot {
+                    Slot::Empty { .. } => None,
+                    Slot::Node { node, .. } => Some(NodeOrToken::Node(node.clone())),
+                    Slot::Token { token, .. } => Some(NodeOrToken::Token(token.clone())),
+                });
+            }
+        }
+
+        GreenNode::new(self.kind(), slots)
+    }
 }
 
 impl ops::Deref for GreenNode {
@@ -352,31 +391,7 @@ impl GreenNode {
         I: IntoIterator<Item = Option<GreenElement>>,
         I::IntoIter: ExactSizeIterator,
     {
-        let mut text_len: TextSize = 0.into();
-        let mut flags = GreenElementFlags::default();
-        let slots = slots.into_iter().map(|el| {
-            let rel_offset = text_len;
-            match el {
-                Some(el) => {
-                    text_len += el.text_len();
-                    match &el {
-                        NodeOrToken::Node(node) => {
-                            flags.insert(node.flags());
-                        }
-                        NodeOrToken::Token(token) => {
-                            flags.insert(token.flags());
-                        }
-                    }
-                    match el {
-                        NodeOrToken::Node(node) => Slot::Node { rel_offset, node },
-                        NodeOrToken::Token(token) => Slot::Token { rel_offset, token },
-                    }
-                }
-                None => Slot::Empty { rel_offset },
-            }
-        });
-
-        let data = ThinArc::from_header_and_iter(
+        let data = ThinArc::from_header_and_iter_with(
             GreenNodeHead {
                 kind,
                 flags: GreenElementFlags::default(),
@@ -384,19 +399,24 @@ impl GreenNode {
                 #[cfg(feature = "countme")]
                 _c: countme::Count::new(),
             },
-            slots,
+            slots.into_iter(),
+            |head, el| {
+                let rel_offset = head.text_len;
+                match el {
+                    Some(NodeOrToken::Node(node)) => {
+                        head.text_len += node.text_len();
+                        head.flags.insert(node.flags());
+                        Slot::Node { rel_offset, node }
+                    }
+                    Some(NodeOrToken::Token(token)) => {
+                        head.text_len += token.text_len();
+                        head.flags.insert(token.flags());
+                        Slot::Token { rel_offset, token }
+                    }
+                    None => Slot::Empty { rel_offset },
+                }
+            },
         );
-
-        // XXX: fix up aggregate data after construction, because we can't
-        // iterate `slots` twice.
-        let data = {
-            let mut data = Arc::from_thin(data);
-            debug_assert!(data.is_unique());
-            let head = &mut Arc::get_mut(&mut data).unwrap().header;
-            head.text_len = text_len;
-            head.flags = flags;
-            Arc::into_thin(data)
-        };
 
         Self { ptr: data }
     }
@@ -436,7 +456,7 @@ impl Slot {
         }
     }
     #[inline]
-    fn rel_range(&self) -> TextRange {
+    pub(crate) fn rel_range(&self) -> TextRange {
         let text_len = match self.as_ref() {
             None => TextSize::from(0),
             Some(element) => element.text_len(),
@@ -610,6 +630,8 @@ impl FusedIterator for Children<'_> {}
 
 #[cfg(test)]
 mod tests {
+    use crate::TextSize;
+    use crate::green::node::Slot;
     use crate::green::{GreenElement, GreenTrivia};
     use crate::raw_language::{RawLanguageKind, RawSyntaxTreeBuilder};
     use crate::{GreenNode, GreenToken, RawSyntaxKind, TextRange, TriviaPiece, TriviaPieceKind};
@@ -736,6 +758,36 @@ mod tests {
     }
 
     #[test]
+    fn slot_offsets_and_text_len() {
+        let token = |text: &str| GreenElement::Token(GreenToken::new_raw(RawSyntaxKind(1), text));
+        let node = GreenNode::new(
+            RawSyntaxKind(0),
+            [
+                Some(token("ab")),
+                None,
+                Some(GreenElement::Node(GreenNode::new(
+                    RawSyntaxKind(2),
+                    [Some(token("c"))],
+                ))),
+                Some(token("")),
+                Some(token("def")),
+            ],
+        );
+
+        assert_eq!(node.kind(), RawSyntaxKind(0));
+        assert_eq!(node.text_len(), TextSize::from(6));
+        assert_eq!(
+            node.slots().map(Slot::rel_offset).collect::<Vec<_>>(),
+            [0, 2, 2, 3, 3].map(TextSize::from)
+        );
+        assert!(matches!(node.slice()[1], Slot::Empty { .. }));
+        assert!(matches!(node.slice()[2], Slot::Node { .. }));
+        let mut text = String::new();
+        node.write_source_text(&mut text);
+        assert_eq!(text, "abcdef");
+    }
+
+    #[test]
     fn propagates_trivia_flags() {
         let comment_token = GreenToken::with_trivia(
             RawSyntaxKind(0),
@@ -768,5 +820,27 @@ mod tests {
         );
         assert!(root.has_comments());
         assert!(root.has_skipped());
+    }
+
+    #[test]
+    fn splice_many_slots_ignores_out_of_order_and_out_of_range_edits() {
+        let root = build_test_list();
+        let token = |text| {
+            Some(GreenElement::Token(GreenToken::new_raw(
+                RawSyntaxKind(0),
+                text,
+            )))
+        };
+
+        let spliced = root.splice_many_slots([
+            (0, vec![token("x")]),
+            (0, vec![token("y")]),
+            (2, vec![]),
+            (1, vec![token("z")]),
+            (3, vec![token("w")]),
+        ]);
+
+        assert_eq!(spliced.slots().len(), 2);
+        assert_eq!(spliced.to_string(), "x∅");
     }
 }

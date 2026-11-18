@@ -1,0 +1,26 @@
+{
+	"linter": {
+		"rules": {
+			"nursery": {
+				"noTailwindRestrictedClasses": {
+					"level": "error",
+					"options": {
+						"classes": {
+							"text-green-500": "Use the success color from the design system.",
+							"bg-green-500": { "message": "Use the success color.", "use": "bg-success" },
+							"float-*": "Use flexbox or grid for layout.",
+							"-mt-4": "Avoid negative margins.",
+							"w-1/2": { "use": "w-half" },
+							"order-none": {}
+						},
+						"variants": {
+							"dark": "This project does not support dark mode.",
+							"group-hover:": { "use": "group-focus" },
+							"[*]": "Add a named variant instead."
+						}
+					}
+				}
+			}
+		}
+	}
+}

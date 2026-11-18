@@ -2378,9 +2378,8 @@ CssRoot {
                                         CssCustomPropertyDelimiter {
                                             value: HASH@1892..1893 "#" [] [],
                                         },
-                                        CssRegularDimension {
-                                            value_token: CSS_NUMBER_LITERAL@1893..1895 "12" [] [],
-                                            unit_token: IDENT@1895..1897 "px" [] [],
+                                        CssCustomIdentifier {
+                                            value_token: IDENT@1893..1897 "12px" [] [],
                                         },
                                     ],
                                 },
@@ -4173,9 +4172,8 @@ CssRoot {
                       0: IDENT@1887..1892 "ABCG" [] [Whitespace(" ")]
                     4: CSS_CUSTOM_PROPERTY_DELIMITER@1892..1893
                       0: HASH@1892..1893 "#" [] []
-                    5: CSS_REGULAR_DIMENSION@1893..1897
-                      0: CSS_NUMBER_LITERAL@1893..1895 "12" [] []
-                      1: IDENT@1895..1897 "px" [] []
+                    5: CSS_CUSTOM_IDENTIFIER@1893..1897
+                      0: IDENT@1893..1897 "12px" [] []
               1: (empty)
             1: SEMICOLON@1897..1898 ";" [] []
           39: CSS_DECLARATION_WITH_SEMICOLON@1898..1921

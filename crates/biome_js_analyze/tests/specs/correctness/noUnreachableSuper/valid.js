@@ -19,3 +19,6 @@ class B extends A {
         super.method();
     }
 }
+class SuperInParameterDefault extends A {
+    constructor(value = super()) {}
+}

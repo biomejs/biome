@@ -70,7 +70,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueRenderReturn {
-        version: "next",
+        version: "2.6.5",
         name: "useVueRenderReturn",
         language: "js",
         recommended: true,
@@ -88,13 +88,8 @@ impl Rule for UseVueRenderReturn {
     type Options = UseVueRenderReturnOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let range = ctx.query().render_range()?;
-        let member = ctx
-            .root()
-            .syntax()
-            .covering_element(range)
-            .ancestors()
-            .find_map(AnyJsObjectMember::cast)?;
+        let render = ctx.query().render_node()?;
+        let member = AnyJsObjectMember::cast(ctx.vue_model().node(&render)?)?;
         let (name, function) = match member {
             AnyJsObjectMember::JsMethodObjectMember(method) => (
                 method.name().ok()?,

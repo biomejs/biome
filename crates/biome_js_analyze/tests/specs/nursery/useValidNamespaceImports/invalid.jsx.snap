@@ -1,0 +1,76 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+import * as Names from "./validNamedExports.js";
+
+const element = <Names.e />;
+const nested = <Names.deep.missing />;
+const withChildren = <Names.missing>text</Names.missing>;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:4:24 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace Names has no export named e.
+  
+    2 │ import * as Names from "./validNamedExports.js";
+    3 │ 
+  > 4 │ const element = <Names.e />;
+      │                        ^
+    5 │ const nested = <Names.deep.missing />;
+    6 │ const withChildren = <Names.missing>text</Names.missing>;
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:5:28 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace Names.deep has no export named missing.
+  
+    4 │ const element = <Names.e />;
+  > 5 │ const nested = <Names.deep.missing />;
+      │                            ^^^^^^^
+    6 │ const withChildren = <Names.missing>text</Names.missing>;
+    7 │ 
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:6:29 lint/nursery/useValidNamespaceImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The namespace Names has no export named missing.
+  
+    4 │ const element = <Names.e />;
+    5 │ const nested = <Names.deep.missing />;
+  > 6 │ const withChildren = <Names.missing>text</Names.missing>;
+      │                             ^^^^^^^
+    7 │ 
+  
+  i Reading a name that a module doesn't export gives undefined.
+  
+  i Check the spelling of the name, or export it from the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

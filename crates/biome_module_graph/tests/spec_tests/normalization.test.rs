@@ -88,6 +88,15 @@ fn test_normalize_type_projections() {
         declare const negativeBigintElement: [-1n, 2n][number];
         type Recursive = Recursive[number];
         declare const recursiveElement: Recursive;
+        interface Shape { A: number; B?: string; method(): void; (): void }
+        declare const interfaceKey: keyof Shape;
+        declare const inheritedInterfaceKey: keyof Child;
+        interface Box<T> { value: T }
+        interface NumberBox extends Box<number> { size: number }
+        declare const genericInterfaceKey: keyof Box<number>;
+        declare const inheritedGenericInterfaceKey: keyof NumberBox;
+        interface Shadowing extends Parent { C: string }
+        declare const shadowingInterfaceKey: keyof Shadowing;
     "#,
     );
     let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
@@ -140,6 +149,14 @@ fn test_normalize_type_projections() {
         ("negativeConstElement", "number: -1 | number: 2"),
         ("negativeBigintElement", "unknown"),
         ("recursiveElement", "unknown"),
+        ("interfaceKey", "string: A | string: B | string: method"),
+        ("inheritedInterfaceKey", "string: A | string: C"),
+        ("genericInterfaceKey", "string: value"),
+        (
+            "inheritedGenericInterfaceKey",
+            "string: size | string: value",
+        ),
+        ("shadowingInterfaceKey", "string: C"),
     ] {
         let ty = projected_binding(&db, module, name);
         assert_eq!(format_inferred_type(&db, ty), expected, "{name}");
@@ -871,4 +888,735 @@ fn test_mapped_types_exceeding_projection_budget_stay_unevaluated() {
             format_inferred_type(&db, ty)
         );
     }
+}
+
+#[test]
+fn test_normalize_conditional_types() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        type IsString<T> = T extends string ? "yes" : "no";
+        type Unwrap<T> = T extends Promise<infer U> ? U : T;
+        type MyExclude<T, U> = T extends U ? never : T;
+        type MyReturnType<F> = F extends (...args: any) => infer R ? R : never;
+        type MyParameters<F> = F extends (...args: infer P) => any ? P : never;
+        type First<T> = T extends [infer H, ...unknown[]] ? H : never;
+        type Tail<T> = T extends [unknown, ...infer R] ? R : never;
+        type NonDistributive<T> = [T] extends [string] ? "yes" : "no";
+        type Deep<T> = T extends Promise<infer U> ? Deep<U> : T;
+        type HasThen<T> = T extends { then: unknown } ? true : false;
+        type ElementOf<T> = T extends (infer E)[] ? E : never;
+        type Literal = IsString<"x">;
+        declare function callback(input: string, count?: number): boolean;
+        declare function pending<T>(value: IsString<T>): void;
+        declare const literal: IsString<"x">;
+        declare const aliased: Literal;
+        declare const unwrapped: Unwrap<Promise<number>>;
+        declare const inline: string extends string ? 1 : 2;
+        declare const distributed: Unwrap<Promise<number> | string>;
+        declare const excluded: MyExclude<"a" | "b" | "c", "a">;
+        declare const returned: MyReturnType<typeof callback>;
+        declare const parameters: MyParameters<typeof callback>;
+        declare const first: First<[1, 2, 3]>;
+        declare const tail: Tail<[1, 2, 3]>;
+        declare const nonDistributive: NonDistributive<"a" | "b">;
+        declare const nonDistributiveMixed: NonDistributive<"a" | 1>;
+        declare const deep: Deep<Promise<Promise<string>>>;
+        declare const hasThen: HasThen<{ then: number }>;
+        declare const hasNoThen: HasThen<{ other: number }>;
+        declare const element: ElementOf<string[]>;
+        declare const union: IsString<number | "x">;
+        declare const never: IsString<never>;
+        declare const any: IsString<any>;
+        declare const boolean: IsString<boolean>;
+        declare const arrayIsPromise: number[] extends Promise<any> ? 1 : 2;
+        declare const arrayIsThenable: number[] extends { then: any } ? 1 : 2;
+        declare const promiseIsThenable: Promise<string> extends { then: any } ? 1 : 2;
+        declare const nested: IsString<"x"> | 5;
+        declare const libExclude: Exclude<"a" | "b" | "c", "a" | "b">;
+        declare const libExtract: Extract<"a" | 1 | true, string | number>;
+        declare const libReturnType: ReturnType<typeof callback>;
+        declare const libParameters: Parameters<typeof callback>;
+        declare const libAwaited: Awaited<Promise<Promise<number>>>;
+        declare const libAwaitedPlain: Awaited<string>;
+        declare const libAwaitedUnion: Awaited<Promise<number> | string>;
+        interface Tables { a: { id: string }; b: { id: string } }
+        type HasTable<K> = K extends keyof Tables ? "yes" : "no";
+        declare const keyOfInterface: HasTable<"b">;
+        declare const notKeyOfInterface: HasTable<"c">;
+        declare const keysOfInterface: HasTable<"a" | "c">;
+        interface Named { value: keyof { 1: number } }
+        interface Other { other: number }
+        declare const sameDeclaration: Named extends Named ? "yes" : "no";
+        declare const excludedDeclaration: Exclude<Named | Other, Named>;
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    db.clear_salsa_events();
+    for (name, expected) in [
+        ("literal", "string: yes"),
+        ("aliased", "string: yes"),
+        ("unwrapped", "number"),
+        ("inline", "number: 1"),
+        ("distributed", "number | string"),
+        ("excluded", "string: b | string: c"),
+        ("returned", "boolean"),
+        ("parameters", "[input: string,\ncount: number | undefined?]"),
+        ("first", "number: 1"),
+        ("tail", "[number: 2,\nnumber: 3]"),
+        ("nonDistributive", "string: yes"),
+        ("nonDistributiveMixed", "string: no"),
+        ("deep", "string"),
+        ("hasThen", "bool: true"),
+        ("hasNoThen", "bool: false"),
+        ("element", "string"),
+        ("union", "string: no | string: yes"),
+        ("never", "never"),
+        ("any", "string: yes | string: no"),
+        ("boolean", "string: no"),
+        ("arrayIsPromise", "number: 2"),
+        ("arrayIsThenable", "number: 2"),
+        ("promiseIsThenable", "number: 1"),
+        ("nested", "string: yes | number: 5"),
+        ("libExclude", "string: c"),
+        ("libExtract", "string: a | number: 1"),
+        ("libReturnType", "boolean"),
+        (
+            "libParameters",
+            "[input: string,\ncount: number | undefined?]",
+        ),
+        ("libAwaited", "number"),
+        ("libAwaitedPlain", "string"),
+        ("libAwaitedUnion", "number | string"),
+        ("keyOfInterface", "string: yes"),
+        ("notKeyOfInterface", "string: no"),
+        ("keysOfInterface", "string: yes | string: no"),
+        ("sameDeclaration", "string: yes"),
+        (
+            "excludedDeclaration",
+            "interface \"Other\" {\n  extends: []\n  type_args: []\n  members: [\"other\": number]\n}",
+        ),
+    ] {
+        let ty = projected_binding(&db, module, name);
+        assert_eq!(format_inferred_type(&db, ty), expected, "{name}");
+    }
+
+    // The check type is generic, so neither branch can be selected yet.
+    let ty = projected_binding(&db, module, "value");
+    assert!(
+        format_inferred_type(&db, ty).contains("extends"),
+        "{}",
+        format_inferred_type(&db, ty)
+    );
+    assert_function_query_was_not_run(&db, infer_module_types, module, &db.take_salsa_events());
+}
+
+/// Asserts the normalized type of each binding in `source`, and that each
+/// binding in `unevaluated` still contains a conditional type. The bindings
+/// must be computed without inferring the types of the whole module.
+///
+/// Every mismatch is reported at once, so one run shows all failing cases.
+fn assert_conditional_results(source: &str, expected: &[(&str, &str)], unevaluated: &[&str]) {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), source);
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    db.clear_salsa_events();
+
+    let format_binding = |name| format_inferred_type(&db, projected_binding(&db, module, name));
+    let mut mismatches = Vec::new();
+    for (name, expected) in expected {
+        let actual = format_binding(name);
+        if actual != *expected {
+            mismatches.push(format!("{name}: expected `{expected}`, got `{actual}`"));
+        }
+    }
+    for name in unevaluated {
+        let actual = format_binding(name);
+        if !actual.contains("extends") {
+            mismatches.push(format!("{name}: expected unevaluated, got `{actual}`"));
+        }
+    }
+    assert!(mismatches.is_empty(), "\n{}", mismatches.join("\n"));
+    assert_function_query_was_not_run(&db, infer_module_types, module, &db.take_salsa_events());
+}
+
+#[test]
+fn test_conditional_infer_candidates_follow_variance() {
+    assert_conditional_results(
+        r#"
+        type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
+        type Contra<T> = T extends { a: (x: infer U) => void; b: (x: infer U) => void } ? U : never;
+        type Co<T> = T extends { a: infer U; b: infer U } ? U : never;
+        type Mixed<T> = T extends { a: infer U; b: (x: infer U) => void } ? U : never;
+        type Callback<T> = T extends (cb: (x: infer U) => void) => void ? U : never;
+        type MethodParams<T> = T extends { a(x: infer U): void; b(x: infer U): void } ? U : never;
+        declare const intersected: UnionToIntersection<{ a: 1 } | { b: 2 }> extends { a: 1 } ? "yes" : "no";
+        declare const intersectedBoth: UnionToIntersection<{ a: 1 } | { b: 2 }> extends { b: 2 } ? "yes" : "no";
+        declare const contraPrimitives: Contra<{ a: (x: string) => void; b: (x: number) => void }>;
+        declare const contraSame: Contra<{ a: (x: string) => void; b: (x: string) => void }>;
+        declare const co: Co<{ a: string; b: number }>;
+        declare const mixed: Mixed<{ a: string; b: (x: number) => void }>;
+        declare const callback: Callback<(cb: (x: string) => void) => void>;
+        declare const method: MethodParams<{ a(x: string): void; b(x: number): void }>;
+        declare const inferUnion: (string | undefined) extends (infer U) | undefined ? U : never;
+        declare const inferUnionReordered: (string | undefined) extends undefined | (infer U) ? U : never;
+        "#,
+        &[
+            ("intersected", "string: yes"),
+            ("intersectedBoth", "string: yes"),
+            ("contraPrimitives", "never"),
+            ("contraSame", "string"),
+            ("co", "string | number"),
+            ("mixed", "never"),
+            ("callback", "string"),
+            ("method", "string | number"),
+            ("inferUnion", "string"),
+            ("inferUnionReordered", "string"),
+        ],
+        &[],
+    );
+}
+
+#[test]
+fn test_conditional_infers_from_every_assignable_union_member() {
+    assert_conditional_results(
+        r#"
+        type Payload<T> = T extends { data: infer P } | { error: infer P } ? P : never;
+        type Checked<T> = T extends { c: infer U; b: 2 } | { a: infer U } ? U : "none";
+        type OptionalB<T> = T extends { c: infer U; b?: 2 } | { a: infer U } ? U : "none";
+        declare const both: Payload<{ data: string; error: Promise<void> }>;
+        declare const dataOnly: Payload<{ data: string }>;
+        declare const missingMember: Checked<{ a: 1; c: "x" }>;
+        declare const mismatchedMember: Checked<{ a: 1; c: "x"; b: 3 }>;
+        declare const optionalMember: OptionalB<{ a: 1; c: "x" }>;
+        "#,
+        &[
+            ("both", "string | instanceof Promise<void>"),
+            ("dataOnly", "string"),
+            ("missingMember", "number: 1"),
+            ("mismatchedMember", "number: 1"),
+            ("optionalMember", "string: x | number: 1"),
+        ],
+        &[],
+    );
+}
+
+#[test]
+fn test_conditional_infers_bare_union_member_from_unmatched_sources() {
+    assert_conditional_results(
+        r#"
+        type Strip<T> = T extends (infer U) | undefined ? U : never;
+        declare const identicalSource: string extends string | (infer U) ? U : never;
+        declare const literalOfPrimitive: "a" extends string | (infer U) ? U : never;
+        declare const unionWithIdentical: (string | number) extends string | (infer U) ? U : never;
+        declare const unionWithLiteral: ("a" | number) extends string | (infer U) ? U : never;
+        declare const unionOfLiterals: ("a" | "b") extends "a" | (infer U) ? U : never;
+        declare const booleanSource: boolean extends true | (infer U) ? U : never;
+        declare const allIdentical: (string | undefined) extends string | undefined | (infer U) ? U : never;
+        declare const bigintLiteral: (1n | string) extends bigint | (infer U) ? U : never;
+        declare const lowPriority: [string, number] extends [string | (infer U), infer U] ? U : never;
+        declare const normalPriority: [number, string] extends [string | (infer U), infer U] ? U : never;
+        declare const inferredElsewhere: Promise<number> extends Promise<infer U> | (infer U) ? U : never;
+        declare const inferredMember: { a: 1 } extends { a: infer V } | (infer U) ? V : never;
+        declare const constraintRejects: string extends undefined | (infer U extends number) ? U : "no";
+        declare const constraintFallback: string extends string | (infer U extends number) ? U : "no";
+        declare const distributive: Strip<string | undefined>;
+        declare const objectSubtype: ({ a: 1; b: 2 } | number) extends { a: 1 } | (infer U) ? U : never;
+        declare const severalBare: string extends (infer A) | (infer B) ? A : never;
+        "#,
+        &[
+            ("identicalSource", "string"),
+            ("literalOfPrimitive", "string: a"),
+            ("unionWithIdentical", "number"),
+            ("unionWithLiteral", "number"),
+            ("unionOfLiterals", "string: b"),
+            ("booleanSource", "bool: false"),
+            ("allIdentical", "string | undefined"),
+            ("bigintLiteral", "bigint: 1n | string"),
+            ("lowPriority", "number"),
+            ("normalPriority", "number | string"),
+            ("inferredElsewhere", "number"),
+            ("inferredMember", "number: 1"),
+            ("constraintRejects", "string: no"),
+            ("constraintFallback", "number"),
+            ("distributive", "string | undefined"),
+            ("severalBare", "string"),
+        ],
+        // Whether TypeScript treats two object types as identical isn't
+        // modeled, and the identical ones don't take part in inference.
+        &["objectSubtype"],
+    );
+}
+
+#[test]
+fn test_intersection_of_primitives_keeps_the_narrower_type() {
+    assert_conditional_results(
+        r#"
+        declare const stringLiteral: string & "a";
+        declare const literalString: "a" & string;
+        declare const booleanLiteral: boolean & true;
+        declare const sameValue: 1 & 1.0;
+        declare const twoLiterals: "a" & "b";
+        declare const crossKind: "a" & number;
+        declare const twoPrimitives: string & number;
+        declare const wrapped: [string & "a"] extends [never] ? 1 : 2;
+        declare const wrappedNever: ["a" & "b"] extends [never] ? 1 : 2;
+        declare const templateLiteral: [`a${string}` & "ab"] extends [never] ? 1 : 2;
+        "#,
+        &[
+            ("stringLiteral", "string: a"),
+            ("literalString", "string: a"),
+            ("booleanLiteral", "bool: true"),
+            ("sameValue", "number: 1"),
+            ("twoLiterals", "never"),
+            ("crossKind", "never"),
+            ("twoPrimitives", "never"),
+            ("wrapped", "number: 2"),
+            ("wrappedNever", "number: 1"),
+        ],
+        // Whether a string matches a template literal type isn't evaluated.
+        &["templateLiteral"],
+    );
+}
+
+#[test]
+fn test_conditional_compares_literal_values() {
+    assert_conditional_results(
+        r#"
+        declare const numberSpelling: 1 extends 1.0 ? "yes" : "no";
+        declare const hexNumber: 0x10 extends 16 ? "yes" : "no";
+        declare const exponent: 1e3 extends 1000 ? "yes" : "no";
+        declare const separators: 1_000 extends 1000 ? "yes" : "no";
+        declare const negativeZero: -0 extends 0 ? "yes" : "no";
+        declare const differentNumbers: 1 extends 2 ? "yes" : "no";
+        declare const hexBigInt: 0x10n extends 16n ? "yes" : "no";
+        declare const differentBigInts: 1n extends 2n ? "yes" : "no";
+        declare const differentStrings: "a" extends "b" ? "yes" : "no";
+        declare const escapedString: "\u0061" extends "a" ? "yes" : "no";
+        "#,
+        &[
+            ("numberSpelling", "string: yes"),
+            ("hexNumber", "string: yes"),
+            ("exponent", "string: yes"),
+            ("separators", "string: yes"),
+            ("negativeZero", "string: yes"),
+            ("differentNumbers", "string: no"),
+            ("hexBigInt", "string: yes"),
+            ("differentBigInts", "string: no"),
+            ("differentStrings", "string: no"),
+        ],
+        // Escape sequences in string literal types aren't decoded.
+        &["escapedString"],
+    );
+}
+
+#[test]
+fn test_conditional_optional_targets_accept_undefined() {
+    assert_conditional_results(
+        r#"
+        declare const optionalElement: [undefined] extends [string?] ? "yes" : "no";
+        declare const optionalNamedElement: [undefined] extends [x?: string] ? "yes" : "no";
+        declare const optionalElementNull: [null] extends [string?] ? "yes" : "no";
+        declare const optionalMember: { a: undefined } extends { a?: string } ? "yes" : "no";
+        declare const optionalBuiltinMember: { value: undefined } extends TypedPropertyDescriptor<string> ? "yes" : "no";
+        declare const inferOptionalMember: { a?: string } extends { a?: infer U } ? U : never;
+        declare const inferOptionalElement: [string?] extends [(infer U)?] ? U : never;
+        "#,
+        &[
+            ("optionalElement", "string: yes"),
+            ("optionalNamedElement", "string: yes"),
+            ("optionalElementNull", "string: no"),
+            ("optionalMember", "string: yes"),
+            ("optionalBuiltinMember", "string: yes"),
+            ("inferOptionalMember", "string"),
+            ("inferOptionalElement", "string"),
+        ],
+        &[],
+    );
+}
+
+#[test]
+fn test_conditional_with_generic_source_function() {
+    assert_conditional_results(
+        r#"
+        declare function id<T extends string>(x: T): T;
+        declare function wrap<T extends string>(cb: (x: T) => void): void;
+        declare const erasedMatch: typeof id extends (x: string) => string ? "yes" : "no";
+        declare const erasedReturnType: ReturnType<typeof id>;
+        declare const erasedReturn: typeof id extends (x: "a") => "a" ? "yes" : "no";
+        declare const erasedCallback: typeof wrap extends (cb: (x: "a") => void) => void ? "yes" : "no";
+        "#,
+        &[
+            ("erasedMatch", "string: yes"),
+            ("erasedReturnType", "string"),
+        ],
+        // TypeScript instantiates the source's type parameters from the
+        // target, which replacing them with their constraints can't match.
+        &["erasedReturn", "erasedCallback"],
+    );
+}
+
+#[test]
+fn test_conditional_compares_builtin_members() {
+    assert_conditional_results(
+        r#"
+        declare const builtinInvariant: TypedPropertyDescriptor<"a"> extends TypedPropertyDescriptor<string> ? "yes" : "no";
+        declare const builtinInvariantInfer: TypedPropertyDescriptor<"a"> extends TypedPropertyDescriptor<infer U> ? U : never;
+        declare const mapCovariant: Map<"a", 1> extends Map<string, number> ? "yes" : "no";
+        declare const mapCovariantReverse: Map<string, number> extends Map<"a", number> ? "yes" : "no";
+        declare const setCovariant: Set<"a"> extends Set<string> ? "yes" : "no";
+        declare const mapInfer: Map<string, number> extends Map<string, infer V> ? V : never;
+        declare const promiseThenUnknown: Promise<number> extends { then: unknown } ? "yes" : "no";
+        declare const defaultedArguments: IteratorObject<1> extends IteratorObject<1, string> ? "yes" : "no";
+        declare const promiseThenMismatch: Promise<number> extends { then(cb: (v: string) => void): any } ? "yes" : "no";
+        declare const promiseThenParameters: Parameters<Promise<number>["then"]>;
+        "#,
+        &[
+            ("builtinInvariant", "string: no"),
+            ("builtinInvariantInfer", "string: a"),
+            ("mapCovariant", "string: yes"),
+            ("mapCovariantReverse", "string: no"),
+            ("setCovariant", "string: yes"),
+            ("mapInfer", "number"),
+            ("promiseThenUnknown", "string: yes"),
+        ],
+        &[
+            // Iterator members use symbol keys, which can't be compared.
+            "defaultedArguments",
+            // The generated signatures of `Promise` methods are simplified.
+            "promiseThenMismatch",
+            "promiseThenParameters",
+        ],
+    );
+}
+
+#[test]
+fn test_conditional_member_lookup_through_diamond_inheritance() {
+    // Every level extends two interfaces that both extend the next level.
+    let mut source = String::from("interface L6 { shared: 1 }\n");
+    for level in (0..6).rev() {
+        let next = level + 1;
+        source.push_str(&format!(
+            "interface L{level}A extends L{next} {{}}\n\
+             interface L{level}B extends L{next} {{}}\n\
+             interface L{level} extends L{level}A, L{level}B {{}}\n"
+        ));
+    }
+    source.push_str(
+        r#"
+        declare const inherited: L0 extends { shared: 1 } ? "yes" : "no";
+        declare const missing: L0 extends { missing: 1 } ? "yes" : "no";
+        "#,
+    );
+    assert_conditional_results(
+        &source,
+        &[("inherited", "string: yes"), ("missing", "string: no")],
+        &[],
+    );
+}
+
+#[test]
+fn test_conditional_with_generic_extends_type() {
+    assert_conditional_results(
+        r#"
+        type IsAny<T> = 0 extends 1 & T ? true : false;
+        type IsUnknown<T> = unknown extends T ? true : false;
+        declare function pending<T>(value: IsAny<T>): void;
+        declare const isAnyAny: IsAny<any>;
+        declare const isAnyNumber: IsAny<number>;
+        declare const isAnyString: IsAny<string>;
+        declare const isAnyUnknown: IsAny<unknown>;
+        declare const isUnknownUnknown: IsUnknown<unknown>;
+        declare const isUnknownString: IsUnknown<string>;
+        declare const isUnknownAny: IsUnknown<any>;
+        "#,
+        &[
+            ("isAnyAny", "bool: true"),
+            ("isAnyNumber", "bool: false"),
+            ("isAnyString", "bool: false"),
+            ("isAnyUnknown", "bool: false"),
+            ("isUnknownUnknown", "bool: true"),
+            ("isUnknownString", "bool: false"),
+            ("isUnknownAny", "bool: true"),
+        ],
+        &["value"],
+    );
+}
+
+#[test]
+fn test_conditional_distribution_over_boolean_and_parentheses() {
+    assert_conditional_results(
+        r#"
+        type IsTrue<T> = T extends true ? "yes" : "no";
+        type Paren<T> = (T) extends string ? "y" : "n";
+        type DoubleParen<T> = ((T)) extends string ? "y" : "n";
+        declare const isTrueBoolean: IsTrue<boolean>;
+        declare const isTrueMixed: IsTrue<boolean | string>;
+        declare const isTrueTrue: IsTrue<true>;
+        declare const isTrueFalse: IsTrue<false>;
+        declare const extractBoolean: Extract<boolean, true>;
+        declare const excludeBoolean: Exclude<boolean, true>;
+        declare const paren: Paren<string | number>;
+        declare const doubleParen: DoubleParen<string | number>;
+        declare const nonDistributiveBoolean: [boolean] extends [true] ? "yes" : "no";
+        "#,
+        &[
+            ("isTrueBoolean", "string: yes | string: no"),
+            ("isTrueMixed", "string: yes | string: no"),
+            ("isTrueTrue", "string: yes"),
+            ("isTrueFalse", "string: no"),
+            ("extractBoolean", "bool: true"),
+            ("excludeBoolean", "bool: false"),
+            ("paren", "string: y | string: n"),
+            ("doubleParen", "string: y | string: n"),
+            ("nonDistributiveBoolean", "string: no"),
+        ],
+        &[],
+    );
+}
+
+#[test]
+fn test_conditional_compares_generics_and_methods_by_variance() {
+    assert_conditional_results(
+        r#"
+        interface Sink<T> { accept: (x: T) => void }
+        interface Producer<T> { read: () => T }
+        interface Invariant<T> { get: () => T; set: (x: T) => void }
+        interface MethodSink<T> { accept(x: T): void }
+        interface Phantom<T> { name: string }
+        interface MSource { handle(x: "a"): void }
+        interface MTarget { handle(x: string): void }
+        interface PSource { handle: (x: "a") => void }
+        interface PTarget { handle: (x: string) => void }
+        interface Pair<A, B> { first: () => A; second: () => B }
+        type ProducedBy<T> = T extends Producer<infer U> ? U : never;
+        type SecondOf<T> = T extends Pair<"a", infer U> ? U : never;
+        declare const contravariant: Sink<"a"> extends Sink<string> ? "yes" : "no";
+        declare const contravariantReverse: Sink<string> extends Sink<"a"> ? "yes" : "no";
+        declare const covariant: Producer<"a"> extends Producer<string> ? "yes" : "no";
+        declare const covariantReverse: Producer<string> extends Producer<"a"> ? "yes" : "no";
+        declare const invariant: Invariant<"a"> extends Invariant<string> ? "yes" : "no";
+        declare const methodSink: MethodSink<"a"> extends MethodSink<string> ? "yes" : "no";
+        declare const methodSinkReverse: MethodSink<string> extends MethodSink<"a"> ? "yes" : "no";
+        declare const methodSinkUnrelated: MethodSink<number> extends MethodSink<string> ? "yes" : "no";
+        declare const phantom: Phantom<1> extends Phantom<string> ? "yes" : "no";
+        declare const methodBivariance: MSource extends MTarget ? "yes" : "no";
+        declare const methodBivarianceReverse: MTarget extends MSource ? "yes" : "no";
+        declare const propertyContravariant: PSource extends PTarget ? "yes" : "no";
+        declare const produced: ProducedBy<Producer<number>>;
+        declare const secondOf: SecondOf<Pair<"a", number>>;
+        declare const secondOfMismatch: SecondOf<Pair<"b", number>>;
+        "#,
+        &[
+            ("contravariant", "string: no"),
+            ("contravariantReverse", "string: yes"),
+            ("covariant", "string: yes"),
+            ("covariantReverse", "string: no"),
+            ("invariant", "string: no"),
+            ("methodSink", "string: yes"),
+            ("methodSinkReverse", "string: yes"),
+            ("methodSinkUnrelated", "string: no"),
+            ("phantom", "string: yes"),
+            ("methodBivariance", "string: yes"),
+            ("methodBivarianceReverse", "string: yes"),
+            ("propertyContravariant", "string: no"),
+            ("produced", "number"),
+            ("secondOf", "number"),
+            ("secondOfMismatch", "never"),
+        ],
+        &[],
+    );
+}
+
+#[test]
+fn test_conditional_object_assignability_rules() {
+    assert_conditional_results(
+        r#"
+        interface Named { value: number }
+        class Private1 { private x = 1 }
+        class Private2 { private x = 1 }
+        class Base { v = 1 }
+        class Child extends Base {}
+        declare const weak: { a: number } extends { b?: string } ? "yes" : "no";
+        declare const weakCommon: { a: number; b: string } extends { b?: string } ? "yes" : "no";
+        declare const weakEmptySource: {} extends { b?: string } ? "yes" : "no";
+        declare const weakIntersection: { a: number } extends { a: number } & { b?: string } ? "yes" : "no";
+        declare const weakIntersectionInterface: { value: number } extends Named & { b?: string } ? "yes" : "no";
+        declare const notWeakRequired: { a: number } extends { a: number; b?: string } ? "yes" : "no";
+        declare const objectMember: { a: 1 } extends { toString(): string } ? "yes" : "no";
+        declare const interfaceObjectMember: Named extends { valueOf(): Object } ? "yes" : "no";
+        declare const objectMemberMismatch: { a: 1 } extends { toString(): number } ? "yes" : "no";
+        declare const unknownEmpty: unknown extends {} ? "yes" : "no";
+        declare const unknownString: unknown extends string ? "yes" : "no";
+        declare const unknownObject: unknown extends object ? "yes" : "no";
+        declare const unknownUnknown: unknown extends unknown ? "yes" : "no";
+        declare const unknownUnion: unknown extends string | unknown ? "yes" : "no";
+        declare const unknownNullable: unknown extends {} | null | undefined ? "yes" : "no";
+        declare const unknownNullableWider: unknown extends string | {} | null | undefined ? "yes" : "no";
+        declare const unknownNullableVoid: unknown extends {} | null | void ? "yes" : "no";
+        declare const unknownObjectNullable: unknown extends Object | null | undefined ? "yes" : "no";
+        declare const stringPromise: string extends Promise<any> ? "yes" : "no";
+        declare const numberPromise: number extends Promise<any> ? "yes" : "no";
+        declare const stringArray: string extends string[] ? "yes" : "no";
+        declare const stringIterable: string extends Iterable<string> ? "yes" : "no";
+        declare const stringArrayLike: string extends ArrayLike<string> ? "yes" : "no";
+        declare const stringObject: string extends Object ? "yes" : "no";
+        declare const stringWrapper: string extends String ? "yes" : "no";
+        declare const privateNominal: Private2 extends Private1 ? "yes" : "no";
+        declare const childOfBase: Child extends Base ? "yes" : "no";
+        declare const sameClass: Base extends Base ? "yes" : "no";
+        declare const builtinClass: Promise<"a"> extends Promise<string> ? "yes" : "no";
+        "#,
+        &[
+            ("weak", "string: no"),
+            ("weakCommon", "string: yes"),
+            ("weakEmptySource", "string: yes"),
+            ("weakIntersection", "string: yes"),
+            ("notWeakRequired", "string: yes"),
+            ("objectMember", "string: yes"),
+            ("interfaceObjectMember", "string: yes"),
+            ("objectMemberMismatch", "string: no"),
+            ("unknownEmpty", "string: no"),
+            ("unknownString", "string: no"),
+            ("unknownObject", "string: no"),
+            ("unknownUnknown", "string: yes"),
+            ("unknownUnion", "string: yes"),
+            ("unknownNullable", "string: yes"),
+            ("unknownNullableWider", "string: yes"),
+            ("unknownNullableVoid", "string: no"),
+            ("unknownObjectNullable", "string: no"),
+            ("stringPromise", "string: no"),
+            ("numberPromise", "string: no"),
+            ("stringArray", "string: no"),
+            ("stringObject", "string: yes"),
+            ("stringWrapper", "string: yes"),
+            ("childOfBase", "string: yes"),
+            ("sameClass", "string: yes"),
+            ("builtinClass", "string: yes"),
+        ],
+        &[
+            // A weak member is only checked against the whole intersection.
+            "weakIntersectionInterface",
+            // Symbol keys and index signatures can't be compared.
+            "stringIterable",
+            "stringArrayLike",
+            // Member accessibility isn't modeled.
+            "privateNominal",
+        ],
+    );
+}
+
+#[test]
+fn test_conditional_compares_constructor_parameters() {
+    assert_conditional_results(
+        r#"
+        class Foo { constructor(public x: string) {} }
+        class NoConstructor {}
+        class Derived extends Foo {}
+        declare const ctorMismatch: (new (x: string) => Foo) extends (new (x: number) => Foo) ? "yes" : "no";
+        declare const ctorMatch: (new (x: string) => Foo) extends (new (x: string) => Foo) ? "yes" : "no";
+        declare const ctorFewer: (new () => Foo) extends (new (x: string) => Foo) ? "yes" : "no";
+        declare const ctorMore: (new (x: string) => Foo) extends (new () => Foo) ? "yes" : "no";
+        declare const classMismatch: typeof Foo extends (new (x: number) => any) ? "yes" : "no";
+        declare const classMatch: typeof Foo extends (new (x: string) => any) ? "yes" : "no";
+        declare const classMore: typeof Foo extends (new () => any) ? "yes" : "no";
+        declare const classNoConstructor: typeof NoConstructor extends (new () => any) ? "yes" : "no";
+        declare const parameters: ConstructorParameters<typeof Foo>;
+        declare const parametersNone: ConstructorParameters<typeof NoConstructor>;
+        declare const parametersDerived: ConstructorParameters<typeof Derived>;
+        declare const instance: InstanceType<typeof Foo> extends Foo ? "yes" : "no";
+        "#,
+        &[
+            ("ctorMismatch", "string: no"),
+            ("ctorMatch", "string: yes"),
+            ("ctorFewer", "string: yes"),
+            ("ctorMore", "string: no"),
+            ("classMismatch", "string: no"),
+            ("classMatch", "string: yes"),
+            ("classMore", "string: no"),
+            ("classNoConstructor", "string: yes"),
+            ("parameters", "[x: string]"),
+            ("parametersNone", "[]"),
+            ("parametersDerived", "[x: string]"),
+            ("instance", "string: yes"),
+        ],
+        &[],
+    );
+}
+
+#[test]
+fn test_conditional_nested_in_generic_alias_body() {
+    assert_conditional_results(
+        r#"
+        type Inner<T> = T extends string ? "s" : "n";
+        type Outer<T> = Inner<T>;
+        type Outer2<T> = Outer<T>;
+        type InUnion<T> = (T extends string ? 1 : 2) | undefined;
+        type InTuple<T> = [T extends string ? 1 : 2];
+        type InPromise<T> = Promise<T extends string ? 1 : 2>;
+        type TwoArgs<A, B> = Inner<B> | A;
+        declare function pending<T>(value: Outer<T>): void;
+        declare const outer: Outer<string>;
+        declare const outer2: Outer2<number>;
+        declare const outerUnion: Outer<string | number>;
+        declare const inUnion: InUnion<string>;
+        declare const inTuple: InTuple<string>;
+        declare const inPromise: Awaited<InPromise<string>>;
+        declare const twoArgs: TwoArgs<1, string>;
+        "#,
+        &[
+            ("outer", "string: s"),
+            ("outer2", "string: n"),
+            ("outerUnion", "string: s | string: n"),
+            ("inUnion", "number: 1 | undefined"),
+            ("inTuple", "[number: 1]"),
+            ("inPromise", "number: 1"),
+            ("twoArgs", "string: s | number: 1"),
+        ],
+        &["value"],
+    );
+}
+
+#[test]
+fn test_expressions_select_the_branch_of_a_conditional_operand() {
+    assert_conditional_results(
+        r#"
+        declare const nullable: { p: number } | (true extends true ? null : null);
+        export const optional = nullable?.p;
+        declare const tuples: [string] | (true extends true ? [number] : [boolean]);
+        export const indexed = tuples[0];
+        declare const shape: true extends true ? { a: number; b: string } : { a: boolean };
+        export const { a, ...rest } = shape;
+        declare const big: true extends true ? bigint : number;
+        export const negated = -big;
+        export const inverted = ~big;
+        declare const plainBig: bigint;
+        export const negatedPlain = -plainBig;
+        declare const partial: Partial<string extends string ? { a: number } : { b: number }>;
+        declare const picked: Pick<{ a: number; b: string }, true extends true ? "a" : "b">;
+        "#,
+        &[
+            ("optional", "number | undefined"),
+            ("indexed", "string | number"),
+            (
+                "rest",
+                "Object {\n  prototype: No prototype\n  members: [\"b\": string]\n}",
+            ),
+            ("negated", "BigInt"),
+            ("inverted", "BigInt"),
+            ("negatedPlain", "BigInt"),
+            (
+                "partial",
+                "Object {\n  prototype: No prototype\n  members: [\"a\"?: number | undefined]\n}",
+            ),
+            (
+                "picked",
+                "Object {\n  prototype: No prototype\n  members: [\"a\": number]\n}",
+            ),
+        ],
+        &[],
+    );
 }

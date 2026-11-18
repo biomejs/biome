@@ -188,7 +188,7 @@ declare_lint_rule! {
     /// - [Vue style guide: directive shorthands](https://vuejs.org/style-guide/rules-strongly-recommended.html#directive-shorthands)
     /// - [Vue slots](https://vuejs.org/guide/components/slots.html)
     pub UseVueConsistentVSlotStyle {
-        version: "next",
+        version: "2.6.5",
         name: "useVueConsistentVSlotStyle",
         language: "html",
         recommended: true,

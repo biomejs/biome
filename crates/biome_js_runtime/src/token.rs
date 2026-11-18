@@ -84,7 +84,27 @@ impl Class for JsAstToken {
         class
             .accessor(js_string!("kind"), Some(kind), None, Attribute::ENUMERABLE)
             .accessor(js_string!("text"), Some(text), None, Attribute::ENUMERABLE)
-            .accessor(js_string!("parent"), Some(parent), None, Attribute::empty());
+            .accessor(js_string!("parent"), Some(parent), None, Attribute::empty())
+            .method(
+                js_string!("leadingTrivia"),
+                0,
+                NativeFunction::from_fn_ptr(Self::leading_trivia),
+            )
+            .method(
+                js_string!("trailingTrivia"),
+                0,
+                NativeFunction::from_fn_ptr(Self::trailing_trivia),
+            )
+            .method(
+                js_string!("leadingComments"),
+                0,
+                NativeFunction::from_fn_ptr(Self::leading_comments),
+            )
+            .method(
+                js_string!("trailingComments"),
+                0,
+                NativeFunction::from_fn_ptr(Self::trailing_comments),
+            );
         Ok(())
     }
 

@@ -1,0 +1,253 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidStatementStart.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const selected = new Set();
+const other = new Set();
+
+previous()
+new Set(condition ? selected : other).union(other)
+
+previous()
+new Set((condition ? selected : other).union(other))
+
+const functionExpression = function () {}
+new Set(condition ? selected : other).union(other)
+
+const classExpression = class {}
+new Set(condition ? selected : other).union(other)
+
+const arrowFunction = () => {}
+new Set(condition ? selected : other).union(other)
+
+function functionDeclaration() {}
+new Set(condition ? selected : other).union(other)
+
+class ClassDeclaration {}
+new Set(condition ? selected : other).union(other)
+
+const functionExpressionBeforeTrue = function() {}
+new Set(true ? selected : other).union(other)
+
+const classExpressionBeforeTrue = class {}
+new Set(true ? selected : other).union(other)
+
+previous()
+new Set(selected.union(other))
+
+```
+
+# Diagnostics
+```
+invalidStatementStart.js:6:1 lint/nursery/noUselessSetConstruction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    5 │ previous()
+  > 6 │ new Set(condition ? selected : other).union(other)
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ previous()
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidStatementStart.js:9:1 lint/nursery/noUselessSetConstruction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+     8 │ previous()
+   > 9 │ new Set((condition ? selected : other).union(other))
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ const functionExpression = function () {}
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidStatementStart.js:12:1 lint/nursery/noUselessSetConstruction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    11 │ const functionExpression = function () {}
+  > 12 │ new Set(condition ? selected : other).union(other)
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ const classExpression = class {}
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidStatementStart.js:15:1 lint/nursery/noUselessSetConstruction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    14 │ const classExpression = class {}
+  > 15 │ new Set(condition ? selected : other).union(other)
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ const arrowFunction = () => {}
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidStatementStart.js:18:1 lint/nursery/noUselessSetConstruction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    17 │ const arrowFunction = () => {}
+  > 18 │ new Set(condition ? selected : other).union(other)
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 
+    20 │ function functionDeclaration() {}
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidStatementStart.js:21:1 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    20 │ function functionDeclaration() {}
+  > 21 │ new Set(condition ? selected : other).union(other)
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ 
+    23 │ class ClassDeclaration {}
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    21 │ new·Set(condition·?·selected·:·other).union(other)
+       │ -------                                           
+
+```
+
+```
+invalidStatementStart.js:24:1 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    23 │ class ClassDeclaration {}
+  > 24 │ new Set(condition ? selected : other).union(other)
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ 
+    26 │ const functionExpressionBeforeTrue = function() {}
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    24 │ new·Set(condition·?·selected·:·other).union(other)
+       │ -------                                           
+
+```
+
+```
+invalidStatementStart.js:27:1 lint/nursery/noUselessSetConstruction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    26 │ const functionExpressionBeforeTrue = function() {}
+  > 27 │ new Set(true ? selected : other).union(other)
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ 
+    29 │ const classExpressionBeforeTrue = class {}
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidStatementStart.js:30:1 lint/nursery/noUselessSetConstruction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    29 │ const classExpressionBeforeTrue = class {}
+  > 30 │ new Set(true ? selected : other).union(other)
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ 
+    32 │ previous()
+  
+  i The method doesn't change the Set it is called on. Copying the Set first only takes extra time and memory.
+  
+  i Call the method on the original Set instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidStatementStart.js:33:1 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    32 │ previous()
+  > 33 │ new Set(selected.union(other))
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ 
+  
+  i The method already returns a new Set. Copying it only takes extra time and memory.
+  
+  i Use the Set that the method returns instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    33 │ new·Set(selected.union(other))
+       │ --------                    - 
+
+```

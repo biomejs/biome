@@ -4,6 +4,10 @@
 
 [  spaced  ](#link)
 
+somethong [ fff   ](   f) ssss
+
+somethong [    ](   f) ssss
+
 [link](https://example.com "title")
 
 [link](https://example.com "")
