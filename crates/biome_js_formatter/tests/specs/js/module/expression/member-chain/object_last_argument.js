@@ -40,7 +40,8 @@ reply.code(409).send({
 	code: "DUPLICATE_EMAIL",
 });
 
-// Every line of the expanded chain fits, so the chain is expanded.
+// The chain doesn't fit on one line, and the last group fits on its own line,
+// so the chain is expanded.
 const value = something.someMethodCall().anotherMethodCall().finalCall({ a: 1, b: 2 });
 
 // The last group fits on its own line, so the chain is expanded although

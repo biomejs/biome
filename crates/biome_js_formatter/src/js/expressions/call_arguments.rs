@@ -666,11 +666,12 @@ fn write_grouped_arguments(
         && !grouped_breaks
         && matches!(group_layout, GroupedCallArgumentLayout::GroupedLastArgument)
     {
-        // What the `grouped_breaks` branch below writes, `expand_parent`
-        // followed by the middle variant, without the best fitting around
-        // the variant. Member chains print the hugged layout in flat mode,
-        // where a best fitting prints its first variant, so the other
-        // variants would never be selected.
+        // Stores `expand_parent` followed by the middle variant, without the
+        // best fitting that the `grouped_breaks` branch below wraps around it.
+        // Member chains print the stored layout inside a flat `best_fitting!`
+        // variant. In flat mode, the fits check measures a nested best fitting
+        // by its most flat variant, and the printer prints that variant once
+        // the check passes, so the middle variant would never be used.
         let middle_variant = middle_variant_with_spaces
             .as_deref()
             .unwrap_or(&middle_variant_no_spaces);

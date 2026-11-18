@@ -324,8 +324,9 @@ impl MemberChain {
         false
     }
 
-    /// Returns `true` if the chain can use the hugged layout, which keeps the
-    /// chain on one line and breaks only the last argument of its last call:
+    /// Returns `true` if the chain should try the hugged layout, which keeps
+    /// the chain on one line and breaks only the last argument of its last
+    /// call:
     ///
     /// ```js
     /// reply.code(409).send({
@@ -340,11 +341,17 @@ impl MemberChain {
     /// object, which adds that line break. The second formatting then keeps the
     /// chain on one line.
     ///
+    /// Even if it returns `true`, the chain uses the hugged layout only if the
+    /// last call can format its arguments that way and the first line of the
+    /// layout fits.
+    ///
     /// The last argument must be a non-empty object, or an arrow function
-    /// whose body is one, possibly wrapped in parentheses, `as`, `satisfies`,
-    /// `<T>`, or `!`. Neither the argument list nor the last argument may have
-    /// comments attached, and `should_group_last_argument` must accept the
-    /// arguments. The comments in the body explain the remaining conditions.
+    /// whose body is a non-empty object. Parentheses, `as`, `satisfies`,
+    /// `<T>`, and `!` around the object are ignored. `should_group_last_argument`
+    /// must also accept the arguments, and it has its own rules for these
+    /// wrappers. The argument list must have no comments attached, and the
+    /// last argument no leading or trailing comments. The comments in the body
+    /// explain the remaining conditions.
     fn can_hug_last_argument(&self, f: &JsFormatter) -> bool {
         if f.options().expand() != Expand::Auto {
             return false;
@@ -598,13 +605,16 @@ impl Format<JsFormatContext> for MemberChain {
     }
 }
 
-/// Formats the expanded layout of a member chain as a `best_fitting!` variant
-/// that fits if the line of the last group fits.
+/// Formats a member chain in its expanded layout and excludes the head and the
+/// leading tail groups from the fits check, so only the line of the last group
+/// decides whether the layout fits.
 ///
-/// It prints the same as `format_expanded`, the most expanded variant in
-/// `MemberChain::fmt`, under the conditions that
-/// [MemberChain::can_hug_last_argument] checks. That's why the head and the
-/// leading groups are excluded from the fits check.
+/// `MemberChain::fmt` tries it as a `best_fitting!` variant before the hugged
+/// layout. [MemberChain::can_hug_last_argument] allows that only if the last
+/// group prints the same in flat and expanded mode, so this variant prints the
+/// same as the expanded chain that the printer uses when no variant fits. It
+/// also requires the excluded lines to be no wider than the first line of the
+/// hugged layout, so they fit whenever the hugged layout fits.
 struct FormatExpandedLastLine<'a>(&'a MemberChain);
 
 impl Format<JsFormatContext> for FormatExpandedLastLine<'_> {

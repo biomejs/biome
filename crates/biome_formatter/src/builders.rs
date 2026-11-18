@@ -769,8 +769,8 @@ impl<Context: FormatContext> Format<Context> for LineSuffixBoundary {
 /// the line where `content` ends doesn't fit. A group around it can print flat
 /// even if `content` is wider than the print width, and groups inside
 /// `content` then print flat too, unless they must expand. Fits checks of
-/// [`fill`](Formatter::fill) entries ignore `skip_fits_check`, because an entry
-/// must fit on one line.
+/// [`fill`](Formatter::fill) entries ignore `skip_fits_check`, so a fill still
+/// uses the width of each entry to decide where to wrap.
 ///
 /// In a [`best_fitting!`](crate::best_fitting) variant, use it for lines that
 /// print the same as in the most expanded variant, which the printer prints
