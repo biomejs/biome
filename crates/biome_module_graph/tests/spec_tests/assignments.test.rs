@@ -282,9 +282,10 @@ fn assignments_keep_type_parameters_that_biome_cant_compare() {
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below the expected type.
 // A call to a local function without a return annotation reduces by the
 // return type that Biome infers from the function's body, which has the
-// `undefined` of an end that the function can reach. A function expression
-// called where it is defined, and `typeof`, which Biome types as one kind,
-// give the declared type.
+// `undefined` of an end that the function can reach, also through a `const`
+// that holds the call's result. A function expression called where it is
+// defined, and `typeof`, which Biome types as one kind, give the declared
+// type.
 #[test]
 fn calls_to_local_functions_keep_the_undefined_of_a_reachable_end() {
     assert_reads(
@@ -297,6 +298,7 @@ fn calls_to_local_functions_keep_the_undefined_of_a_reachable_end() {
         function v4(y: string) { let k: "string" | "number" = "number"; k = typeof y; /*typeof*/k; }
         function v5() { let x: number | undefined = c ? g1() : 2; /*branch*/x; }
         async function v7() { let x: number | undefined; x = await k1(); /*awaited*/x; async function k1() { if (c) return 1; } }
+        function v8() { let x: number | undefined = 0; const y = g1(); x = y; /*held*/x; }
         "#,
         &[
             ("declaration", "x", &["number", "undefined"]),
@@ -305,6 +307,7 @@ fn calls_to_local_functions_keep_the_undefined_of_a_reachable_end() {
             ("typeof", "k", &["string: number", "string: string"]),
             ("branch", "x", &["number", "undefined"]),
             ("awaited", "x", &["number", "undefined"]),
+            ("held", "x", &["number", "undefined"]),
         ],
     );
 }

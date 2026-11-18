@@ -725,6 +725,8 @@ fn evolving_variables_take_the_types_of_writes_in_other_scopes() {
         function t94() { let x = null; if (c) { x = { k: store.load() }; } /*t94*/x; }
         function t95() { let x = null; label: { x = store.load(); } /*t95*/x; }
         function t93() { let x = undefined; if (c) { x = store.load(); } x = undefined; /*t93*/x; }
+        function find(found: boolean) { if (found) return 1; }
+        function t96() { let x = null; if (c) { x = find(c); } if (x !== null) { /*t96*/x; } }
         "#,
         &[
             ("t32", "x", &["null", "number"]),
@@ -773,6 +775,7 @@ fn evolving_variables_take_the_types_of_writes_in_other_scopes() {
             ),
             ("t95", "x", &["number"]),
             ("t93", "x", &["undefined"]),
+            ("t96", "x", &["number", "undefined"]),
         ],
     );
 }

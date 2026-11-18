@@ -64,3 +64,19 @@ function stop() {
 	}
 }
 timer = setTimeout(stop, 1);
+
+// A local function that can reach its end returns `undefined` there, so the
+// variable can still be `undefined` after the test of `null`.
+function find(found: boolean) {
+	if (found) return 1;
+}
+
+function searched() {
+	let match = null;
+	if (enabled) {
+		match = find(enabled);
+	}
+	if (match !== null) {
+		match?.toFixed();
+	}
+}
