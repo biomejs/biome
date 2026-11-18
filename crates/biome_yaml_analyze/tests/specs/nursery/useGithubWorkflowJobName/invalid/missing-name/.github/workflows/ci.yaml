@@ -1,0 +1,15 @@
+# should generate diagnostics
+name: CI
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Hello"
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Hello"
+  call:
+    uses: ./.github/workflows/reusable.yml
