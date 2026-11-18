@@ -11098,6 +11098,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useGithubWorkflowName": {
+					"description": "Require a name for GitHub Actions workflows.\nSee https://biomejs.dev/linter/rules/use-github-workflow-name",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseGithubWorkflowNameConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGlobalRegexInMatchAll": {
 					"description": "Require regular expressions passed to matchAll() to have the g flag.\nSee https://biomejs.dev/linter/rules/use-global-regex-in-match-all",
 					"anyOf": [
@@ -12611,6 +12618,7 @@
 				"astro": { "$ref": "#/$defs/RuleDomainValue" },
 				"convex": { "$ref": "#/$defs/RuleDomainValue" },
 				"drizzle": { "$ref": "#/$defs/RuleDomainValue" },
+				"gitHub": { "$ref": "#/$defs/RuleDomainValue" },
 				"next": { "$ref": "#/$defs/RuleDomainValue" },
 				"playwright": { "$ref": "#/$defs/RuleDomainValue" },
 				"project": { "$ref": "#/$defs/RuleDomainValue" },
@@ -19053,6 +19061,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseGithubWorkflowNameOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseGithubWorkflowNameOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseGlobalRegexInMatchAllOptions": {
 			"type": "object",
 			"properties": {
@@ -24977,6 +24994,16 @@
 			]
 		},
 		"UseGetterReturnOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseGithubWorkflowNameConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseGithubWorkflowNameOptions" }
+			]
+		},
+		"UseGithubWorkflowNameOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
