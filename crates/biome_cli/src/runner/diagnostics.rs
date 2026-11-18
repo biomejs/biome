@@ -1,5 +1,5 @@
 use biome_diagnostics::{
-    Advices, Category, Diagnostic, DiagnosticExt, DiagnosticTags, Error, Visit,
+    Advices, Category, Diagnostic, DiagnosticExt, DiagnosticTags, Error, Visit, category,
 };
 use biome_diagnostics::{IoError, StdError};
 use biome_text_edit::TextEdit;
@@ -63,7 +63,7 @@ pub(crate) struct PanicDiagnostic {
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
-    category = "files/missingHandler",
+    category = "fs/missingHandler",
     message = "Biome doesn't know how to process this file",
 	severity = Warning,
     tags(VERBOSE)
@@ -143,7 +143,12 @@ pub(crate) trait ResultIoExt: ResultExt {
 
 impl<T> ResultIoExt for io::Result<T> {
     fn with_file_path(self, file_path: String) -> Result<Self::Result, Error> {
-        self.map_err(|error| IoError::from(error).with_file_path(file_path))
+        self.map_err(|error| {
+            IoError::from(error)
+                .with_category(category!("fs/io"))
+                .with_file_path(file_path)
+                .with_tags(DiagnosticTags::INTERNAL)
+        })
     }
 }
 

@@ -1,0 +1,7 @@
+error: proc-macro derive panicked
+ --> tests/macros/list_literal.rs:3:19
+  |
+3 | #[derive(Default, Deserializable)]
+  |                   ^^^^^^^^^^^^^^
+  |
+  = help: message: Could not parse field attributes: Error("Literals are not allowed")

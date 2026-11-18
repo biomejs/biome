@@ -57,3 +57,15 @@ suite('my suite', () => {
   it('does something', () => {});
   beforeEach(() => {});
 });
+
+// Hook after test in a describe block with a mode
+test.describe.serial('serial suite', () => {
+  test('does something', () => {});
+  test.beforeEach(() => {});
+});
+
+// Hook after test in a conditional describe block
+describe.skipIf(isCI)('conditional suite', () => {
+  it('does something', () => {});
+  beforeEach(() => {});
+});

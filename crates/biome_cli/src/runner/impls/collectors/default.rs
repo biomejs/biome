@@ -19,6 +19,9 @@ pub(crate) struct DefaultCollector {
     /// Mutable reference to a boolean flag tracking whether the console thread
     /// printed any error-level message
     errors: AtomicU32,
+    /// Counts hard failures before file processing, distinguishing failed inputs
+    /// from unmatched inputs.
+    traversal_errors: AtomicU32,
     /// Mutable reference to a boolean flag tracking whether the console thread
     /// printed any warnings-level message
     warnings: AtomicU32,
@@ -54,6 +57,7 @@ impl DefaultCollector {
     pub(crate) fn new(working_directory: Option<&Utf8Path>) -> Self {
         Self {
             errors: AtomicU32::new(0),
+            traversal_errors: AtomicU32::new(0),
             warnings: AtomicU32::new(0),
             infos: AtomicU32::new(0),
             remaining_diagnostics: AtomicU32::new(0),
@@ -94,6 +98,10 @@ impl DefaultCollector {
 
     fn errors(&self) -> u32 {
         self.errors.load(Ordering::Relaxed)
+    }
+
+    fn traversal_errors(&self) -> u32 {
+        self.traversal_errors.load(Ordering::Relaxed)
     }
 
     fn warnings(&self) -> u32 {
@@ -170,15 +178,21 @@ impl Collector for DefaultCollector {
                     self.errors.fetch_add(1, Ordering::Relaxed);
                 }
 
-                Message::Error(mut err) => {
+                Message::Error {
+                    diagnostic: mut err,
+                    is_traversal_error,
+                } => {
                     let location = err.location();
+                    if is_traversal_error {
+                        self.errors.fetch_add(1, Ordering::Relaxed);
+                        self.traversal_errors.fetch_add(1, Ordering::Relaxed);
+                    }
                     if self.should_skip_diagnostic(err.severity(), err.tags()) {
                         continue;
                     }
-                    if err.severity() == Severity::Warning {
+                    if !is_traversal_error && err.severity() == Severity::Warning {
                         self.warnings.fetch_add(1, Ordering::Relaxed);
-                    }
-                    if err.severity() == Severity::Information {
+                    } else if err.severity() == Severity::Information {
                         self.infos.fetch_add(1, Ordering::Relaxed);
                     }
                     if let Some(Resource::File(file_path)) = location.resource.as_ref() {
@@ -341,6 +355,7 @@ impl Collector for DefaultCollector {
 
     fn result(self, duration: Duration) -> Self::Result {
         let errors = self.errors();
+        let traversal_errors = self.traversal_errors();
         let warnings = self.warnings();
         let infos = self.infos();
         let suggested_fixes_skipped = self.skipped_fixes();
@@ -356,6 +371,7 @@ impl Collector for DefaultCollector {
             duration,
             scanner_duration: None,
             errors,
+            traversal_errors,
             warnings,
             infos,
             suggested_fixes_skipped,
@@ -375,6 +391,7 @@ pub(crate) struct CollectorSummary {
     // We skip it during testing because the time isn't predictable
     pub scanner_duration: Option<Duration>,
     pub errors: u32,
+    pub traversal_errors: u32,
     pub warnings: u32,
     pub infos: u32,
     pub suggested_fixes_skipped: u32,

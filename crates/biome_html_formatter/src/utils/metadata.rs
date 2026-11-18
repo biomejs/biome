@@ -762,41 +762,6 @@ pub static SVG_ALL_TAGS: &[&str] = &[
     "view",
 ];
 
-pub static MATHML_ALL_TAGS: &[&str] = &[
-    "annotation",
-    "annotation-xml",
-    "maction",
-    "math",
-    "menclose",
-    "merror",
-    "mfenced",
-    "mfrac",
-    "mi",
-    "mmultiscripts",
-    "mn",
-    "mo",
-    "mover",
-    "mpadded",
-    "mphantom",
-    "mprescripts",
-    "mroot",
-    "mrow",
-    "ms",
-    "mspace",
-    "msqrt",
-    "mstyle",
-    "msub",
-    "msubsup",
-    "msup",
-    "mtable",
-    "mtd",
-    "mtext",
-    "mtr",
-    "munder",
-    "munderover",
-    "semantics",
-];
-
 const CANONICAL_HTML_TAGS: TokenSet<HtmlSyntaxKind> = token_set!(
     A_KW,
     ABBR_KW,
@@ -1154,16 +1119,6 @@ mod tests {
             let mut sorted = SVG_ALL_TAGS.to_vec();
             sorted.sort_unstable();
             panic!("SVG tags array is not sorted. Here it is sorted {sorted:?}");
-        }
-    }
-
-    // Enforce this invariant to allow for binary search.
-    #[test]
-    fn mathml_all_tags_is_sorted() {
-        if !MATHML_ALL_TAGS.is_sorted() {
-            let mut sorted = MATHML_ALL_TAGS.to_vec();
-            sorted.sort_unstable();
-            panic!("MathML tags array is not sorted. Here it is sorted {sorted:?}");
         }
     }
 

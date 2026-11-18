@@ -12,8 +12,8 @@ use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind, SvelteFi
 use biome_rowan::SyntaxKind;
 use biome_service::settings::Settings;
 use biome_test_utils::{
-    grit_metavariable_ranges, has_bogus_nodes_or_empty_slots, validate_eof_token,
-    validate_text_trimmed_ranges,
+    grit_metavariable_ranges, has_bogus_nodes_or_empty_slots,
+    validate_borrowed_tokens_with_comments, validate_eof_token, validate_text_trimmed_ranges,
 };
 use camino::Utf8Path;
 use std::fmt::Write;
@@ -91,6 +91,13 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             file_kind: SvelteFileKind::Component,
             embedding_kind: SvelteEmbeddingKind::Expression,
         });
+    } else if file_name.contains(".svelte_const.") {
+        file_source = file_source.with_embedding_kind(JsEmbeddingKind::Svelte {
+            is_module_script: false,
+            is_class_attribute: false,
+            file_kind: SvelteFileKind::Component,
+            embedding_kind: SvelteEmbeddingKind::LegacyConst,
+        });
     } else if file_name.contains(".svelte_declaration.") {
         file_source = file_source.with_embedding_kind(JsEmbeddingKind::Svelte {
             is_module_script: false,
@@ -143,6 +150,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let parsed = parse_with_metavariables(&content, file_source, options, &metavariables);
     validate_eof_token(parsed.syntax());
     validate_text_trimmed_ranges(&parsed.syntax());
+    validate_borrowed_tokens_with_comments(&parsed.syntax());
 
     let formatted_ast = format!("{:#?}", parsed.tree());
 

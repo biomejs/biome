@@ -691,6 +691,13 @@ impl Drop for TypeInferenceQueryProfileGuard {
     }
 }
 
+/// Runs `operation`, the body of a tracked query, and records it in the
+/// active profile.
+///
+/// Without an active profile, the query costs one flag check. The profiling
+/// state lives in [`execute_recorded_query`], so it occupies stack only while
+/// a profile records. Lookups that follow an import chain nest one query per
+/// import, and test builds would otherwise reserve that state on every level.
 #[track_caller]
 pub(crate) fn execute_query<T>(
     kind: TypeInferenceQueryKind,
@@ -701,6 +708,16 @@ pub(crate) fn execute_query<T>(
     if !is_recording() {
         return operation();
     }
+    execute_recorded_query(kind, location, symbol, operation)
+}
+
+#[track_caller]
+fn execute_recorded_query<T>(
+    kind: TypeInferenceQueryKind,
+    location: TypeInferenceProfileOrigin,
+    symbol: &'static str,
+    operation: impl FnOnce() -> T,
+) -> T {
     let Some(request) = current_request() else {
         return operation();
     };

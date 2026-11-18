@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-function-type-and-template-literal.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+const emit = defineEmits<(e: "change" | "save", value: string) => void>();
+emit(`change`, "a");
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-function-type-and-template-literal.vue:3:41 lint/nursery/noVueUnusedEmitDeclarations ━━━━━━━━━━
+
+  ! The event save is declared but never emitted.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup lang="ts">
+  > 3 │ const emit = defineEmits<(e: "change" | "save", value: string) => void>();
+      │                                         ^^^^^^
+    4 │ emit(`change`, "a");
+    5 │ </script>
+  
+  i Other components can listen for this event, but their listeners are never called.
+  
+  i Remove the declaration, or emit the event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

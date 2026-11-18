@@ -9,7 +9,7 @@ use std::{
     mem,
 };
 
-use biome_diagnostics::{DiagnosticExt, Error, IoError, Severity};
+use biome_diagnostics::{DiagnosticExt, Error, IoError, Severity, category};
 use camino::{Utf8DirEntry, Utf8Path, Utf8PathBuf};
 use path_absolutize::Absolutize;
 use rayon::{Scope, scope};
@@ -208,7 +208,15 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
         let file_type = match path.metadata() {
             Ok(meta) => meta.file_type(),
             Err(err) => {
-                ctx.push_diagnostic(IoError::from(err).with_file_path(path.to_string()));
+                ctx.interner().intern_path(path.clone());
+                ctx.push_diagnostic(Error::from(FileSystemDiagnostic {
+                    path: path.to_string(),
+                    severity: Severity::Error,
+                    error_kind: FsErrorKind::CantReadFile,
+                    source: Some(Error::from(
+                        IoError::from(err).with_category(category!("fs/io")),
+                    )),
+                }));
                 return;
             }
         };
@@ -233,7 +241,11 @@ fn handle_dir<'scope>(
     let iter = match path.read_dir_utf8() {
         Ok(iter) => iter,
         Err(err) => {
-            ctx.push_diagnostic(IoError::from(err).with_file_path(path.to_string()));
+            ctx.push_diagnostic(
+                IoError::from(err)
+                    .with_category(category!("fs/io"))
+                    .with_file_path(path.to_string()),
+            );
             return;
         }
     };
@@ -242,7 +254,11 @@ fn handle_dir<'scope>(
         match entry {
             Ok(entry) => handle_dir_entry(scope, ctx, entry, origin_path.clone()),
             Err(err) => {
-                ctx.push_diagnostic(IoError::from(err).with_file_path(path.to_string()));
+                ctx.push_diagnostic(
+                    IoError::from(err)
+                        .with_category(category!("fs/io"))
+                        .with_file_path(path.to_string()),
+                );
             }
         }
     }
@@ -261,7 +277,11 @@ fn handle_dir_entry<'scope>(
     let file_type = match entry.file_type() {
         Ok(file_type) => file_type,
         Err(err) => {
-            ctx.push_diagnostic(IoError::from(err).with_file_path(path.to_string()));
+            ctx.push_diagnostic(
+                IoError::from(err)
+                    .with_category(category!("fs/io"))
+                    .with_file_path(path.to_string()),
+            );
             return;
         }
     };
@@ -413,7 +433,9 @@ fn path_kind_from_metadata(
             path: path.to_string(),
             severity: Severity::Error,
             error_kind: FsErrorKind::CantReadFile,
-            source: Some(Error::from(IoError::from(error))),
+            source: Some(Error::from(
+                IoError::from(error).with_category(category!("fs/io")),
+            )),
         }),
     }
 }

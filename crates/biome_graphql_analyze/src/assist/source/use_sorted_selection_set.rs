@@ -1,7 +1,7 @@
 use crate::GraphqlRuleAction;
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
-    declare_source_rule,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, RuleSuppressions,
+    context::RuleContext, declare_source_rule,
 };
 use biome_console::markup;
 use biome_graphql_syntax::{
@@ -10,6 +10,7 @@ use biome_graphql_syntax::{
 };
 use biome_rowan::{
     AstNode, AstNodeList, BatchMutation, BatchMutationExt, NodeOrToken, SyntaxNode, TokenText,
+    WalkEvent,
 };
 use biome_rule_options::use_sorted_selection_set::UseSortedSelectionSetOptions;
 use biome_string_case::comparable_token::ComparableToken;
@@ -90,6 +91,23 @@ impl Rule for UseSortedSelectionSet {
             None
         } else {
             Some(())
+        }
+    }
+
+    fn suppressed_nodes(
+        ctx: &RuleContext<Self>,
+        _state: &Self::State,
+        suppressions: &mut RuleSuppressions<GraphqlLanguage>,
+    ) {
+        for event in ctx
+            .query()
+            .syntax()
+            .preorder_of_kinds(GraphqlSelectionSet::KIND_SET)
+            .skip(1)
+        {
+            if let WalkEvent::Enter(node) = event {
+                suppressions.suppress_node(node);
+            }
         }
     }
 

@@ -182,7 +182,13 @@ where
 
             let signal = PluginSignal::<L>::new(entry.diagnostic)
                 .with_plugin_action(entry.action)
-                .with_root(node.clone());
+                .with_root(node.clone())
+                .with_suppression(
+                    name.clone().into(),
+                    ctx.root,
+                    ctx.suppression_action,
+                    ctx.options,
+                );
 
             SignalEntry {
                 text_range,
@@ -299,7 +305,13 @@ where
 
                 let signal = PluginSignal::<L>::new(entry.diagnostic)
                     .with_plugin_action(entry.action)
-                    .with_root(node.clone());
+                    .with_root(node.clone())
+                    .with_suppression(
+                        name.clone().into(),
+                        ctx.root,
+                        ctx.suppression_action,
+                        ctx.options,
+                    );
 
                 SignalEntry {
                     text_range,

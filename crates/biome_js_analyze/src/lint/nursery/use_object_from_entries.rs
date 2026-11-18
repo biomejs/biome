@@ -19,7 +19,10 @@ use biome_rowan::{
 };
 use biome_rule_options::use_object_from_entries::UseObjectFromEntriesOptions;
 
-use crate::{JsRuleAction, services::semantic::Semantic};
+use crate::{
+    JsRuleAction, services::semantic::Semantic,
+    utils::indexed_collection::TYPED_ARRAY_CONSTRUCTORS,
+};
 
 declare_lint_rule! {
     /// Enforce using `Object.fromEntries()` to build an object from a list of key-value pairs.
@@ -287,24 +290,6 @@ pub enum UseObjectFromEntriesState {
 
 /// Helper functions that are always reported, in addition to the configured ones.
 const BUILT_IN_PAIRS_FUNCTIONS: &[&str] = &["_.fromPairs", "lodash.fromPairs"];
-
-/// Typed array constructors. A typed array holds numbers, so it can't hold key-value pairs.
-///
-/// Sorted for binary search.
-const TYPED_ARRAY_CONSTRUCTORS: &[&str] = &[
-    "BigInt64Array",
-    "BigUint64Array",
-    "Float16Array",
-    "Float32Array",
-    "Float64Array",
-    "Int16Array",
-    "Int32Array",
-    "Int8Array",
-    "Uint16Array",
-    "Uint32Array",
-    "Uint8Array",
-    "Uint8ClampedArray",
-];
 
 /// How many variables [`is_typed_array`] follows to find where a value comes from.
 const MAX_ALIAS_DEPTH: usize = 4;
@@ -942,21 +927,4 @@ fn object_from_entries_call(pairs: AnyJsExpression) -> JsCallExpression {
         ),
     )
     .build()
-}
-
-#[cfg(test)]
-mod tests {
-    use super::TYPED_ARRAY_CONSTRUCTORS;
-
-    #[test]
-    fn typed_array_constructors_are_sorted() {
-        for pair in TYPED_ARRAY_CONSTRUCTORS.windows(2) {
-            assert!(
-                pair[0] < pair[1],
-                "{} should come after {}",
-                pair[0],
-                pair[1]
-            );
-        }
-    }
 }

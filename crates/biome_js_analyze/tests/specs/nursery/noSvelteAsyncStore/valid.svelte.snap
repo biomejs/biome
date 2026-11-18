@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script>
+	import { writable } from "svelte/store";
+
+	const user = writable(null, (set) => {
+		fetchUser().then(set);
+	});
+</script>
+
+<p>{$user}</p>
+
+```

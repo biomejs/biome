@@ -1,0 +1,16 @@
+.a {
+	composes: 1px;
+}
+
+.b {
+	composes: var(--x);
+}
+
+.c {
+	composes: a from url("./x.css");
+}
+
+.d {
+	composes: 1px;
+	color: red;
+}

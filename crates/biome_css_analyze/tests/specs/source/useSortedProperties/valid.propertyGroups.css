@@ -1,0 +1,30 @@
+/* should not generate diagnostics */
+div {
+  & { color: blue; }
+  color: red;
+}
+
+.conditional {
+  @media (width > 100px) { color: blue; }
+  color: red;
+}
+
+.sorted-groups {
+  display: block;
+  color: red;
+  & { color: blue; }
+  display: flex;
+  color: green;
+}
+
+.shorthand-boundary {
+  margin-top: 1px;
+  & { color: blue; }
+  margin: 2px;
+}
+
+.empty-declaration {
+  display: block;
+  ;
+  color: red;
+}

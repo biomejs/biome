@@ -5,13 +5,15 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsImportClause, AnyJsMemberExpression, AnyTsType, JsCallExpression,
+    AnyJsExpression, AnyJsImportClause, AnyJsMemberExpression, JsCallExpression,
     binding_ext::AnyJsBindingDeclaration,
 };
-use biome_rowan::{AstNode, AstSeparatedList};
+use biome_rowan::AstNode;
 use biome_rule_options::no_array_for_each::NoArrayForEachOptions;
 
-use crate::services::semantic::Semantic;
+use crate::{
+    services::semantic::Semantic, utils::indexed_collection::is_known_non_indexed_collection,
+};
 
 declare_lint_rule! {
     /// Disallow the `forEach()` method in favor of `for...of` loops.
@@ -102,7 +104,7 @@ impl Rule for NoArrayForEach {
         let model = ctx.model();
         if is_library_receiver(&receiver)
             || is_strict_callbag_basics_namespace(&receiver, model)
-            || is_known_non_array(&receiver, model, MAX_RESOLUTION_DEPTH)
+            || is_known_non_indexed_collection(&receiver, model)
         {
             return None;
         }
@@ -133,23 +135,6 @@ impl Rule for NoArrayForEach {
         )
     }
 }
-
-/// How many variables and type aliases [`is_known_non_array`] follows before giving up.
-const MAX_RESOLUTION_DEPTH: u8 = 5;
-
-/// Names of built-in types and constructors whose values have a `forEach()` method but are not
-/// arrays, sorted.
-const NON_ARRAY_TYPE_NAMES: &[&str] = &[
-    "FormData",
-    "Headers",
-    "Map",
-    "ReadonlyMap",
-    "ReadonlySet",
-    "Set",
-    "URLSearchParams",
-    "WeakMap",
-    "WeakSet",
-];
 
 const STRICT_CALLBAG_BASICS: &str = "strict-callbag-basics";
 
@@ -207,134 +192,4 @@ fn is_strict_callbag_basics_namespace(receiver: &AnyJsExpression, model: &Semant
         .and_then(AnyJsImportClause::cast)
         .and_then(|clause| clause.source().ok()?.inner_string_text().ok())
         .is_some_and(|source| source.text() == STRICT_CALLBAG_BASICS)
-}
-
-/// Returns `true` if `expression` is known not to be an array: a `new Map()` or similar
-/// constructor call, or a variable whose type annotation or `const` initial value is one.
-///
-/// Returns `false` when the value can't be determined, including after following
-/// `depth` variables or type aliases.
-fn is_known_non_array(expression: &AnyJsExpression, model: &SemanticModel, depth: u8) -> bool {
-    let Some(expression) = expression.clone().omit_type_wrappers() else {
-        return false;
-    };
-    match expression {
-        AnyJsExpression::JsNewExpression(new) => new
-            .callee()
-            .ok()
-            .and_then(|callee| callee.as_js_reference_identifier())
-            .is_some_and(|callee| {
-                model.binding(&callee).is_none()
-                    && callee.value_token().is_ok_and(|name| {
-                        NON_ARRAY_TYPE_NAMES
-                            .binary_search(&name.text_trimmed())
-                            .is_ok()
-                    })
-            }),
-        AnyJsExpression::JsIdentifierExpression(identifier) => {
-            let Some(depth) = depth.checked_sub(1) else {
-                return false;
-            };
-            let Some(declaration) = identifier
-                .name()
-                .ok()
-                .and_then(|reference| model.binding(&reference))
-                .and_then(|binding| binding.tree().declaration())
-            else {
-                return false;
-            };
-            let annotation = match &declaration {
-                AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => declarator
-                    .variable_annotation()
-                    .and_then(|annotation| annotation.type_annotation().ok().flatten()),
-                AnyJsBindingDeclaration::JsFormalParameter(parameter) => {
-                    parameter.type_annotation()
-                }
-                _ => None,
-            };
-            if let Some(annotation) = annotation {
-                return annotation
-                    .ty()
-                    .is_ok_and(|ty| is_non_array_type(&ty, model, depth));
-            }
-            let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) = declaration else {
-                return false;
-            };
-            declarator
-                .declaration()
-                .is_some_and(|declaration| declaration.is_const())
-                && declarator
-                    .initializer()
-                    .and_then(|initializer| initializer.expression().ok())
-                    .is_some_and(|value| is_known_non_array(&value, model, depth))
-        }
-        _ => false,
-    }
-}
-
-/// Returns `true` if `ty` names a built-in type that is not an array, such as `Map<K, V>`, or a
-/// union whose members all are, apart from `null` and `undefined`. Type aliases declared in the
-/// file are followed up to `depth` times.
-fn is_non_array_type(ty: &AnyTsType, model: &SemanticModel, depth: u8) -> bool {
-    match ty {
-        AnyTsType::TsReferenceType(reference) => {
-            let Some(name) = reference
-                .name()
-                .ok()
-                .and_then(|name| name.as_js_reference_identifier().cloned())
-            else {
-                return false;
-            };
-            let Some(binding) = model.binding(&name) else {
-                return name.value_token().is_ok_and(|name| {
-                    NON_ARRAY_TYPE_NAMES
-                        .binary_search(&name.text_trimmed())
-                        .is_ok()
-                });
-            };
-            let Some(depth) = depth.checked_sub(1) else {
-                return false;
-            };
-            let Some(AnyJsBindingDeclaration::TsTypeAliasDeclaration(alias)) =
-                binding.tree().declaration()
-            else {
-                return false;
-            };
-            alias
-                .ty()
-                .is_ok_and(|ty| is_non_array_type(&ty, model, depth))
-        }
-        AnyTsType::TsUnionType(union) => {
-            let mut has_non_array = false;
-            for member in union.types().iter() {
-                match member {
-                    Ok(AnyTsType::TsNullLiteralType(_) | AnyTsType::TsUndefinedType(_)) => {}
-                    Ok(member) if is_non_array_type(&member, model, depth) => has_non_array = true,
-                    _ => return false,
-                }
-            }
-            has_non_array
-        }
-        AnyTsType::TsParenthesizedType(parenthesized) => parenthesized
-            .ty()
-            .is_ok_and(|inner| is_non_array_type(&inner, model, depth)),
-        _ => false,
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::NON_ARRAY_TYPE_NAMES;
-
-    #[test]
-    fn non_array_type_names_sorted() {
-        for pair in NON_ARRAY_TYPE_NAMES.windows(2) {
-            assert!(
-                pair[0] < pair[1],
-                "{} must come before {}",
-                pair[1],
-                pair[0]
-            );
-        }
-    }
 }

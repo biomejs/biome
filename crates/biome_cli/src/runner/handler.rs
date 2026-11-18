@@ -190,7 +190,7 @@ pub(crate) fn miss_handler_err(
         })
         .unwrap_or(biome_path.to_string());
     ctx.push_diagnostic(
-        err.with_category(category!("files/missingHandler"))
+        err.with_category(category!("fs/missingHandler"))
             .with_file_path(file_path)
             .with_tags(DiagnosticTags::VERBOSE),
     );

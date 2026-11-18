@@ -1,0 +1,143 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+{/* micromark-extension-mdxjs-esm: statements that span lines */}
+import a
+from "a"
+// a comment between statements
+import b from "b" // a trailing comment
+
+export function f()
+{
+  return 1
+}
+
+export const sum =
+  1 + 2
+
+# Hello
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdxBlockExpression {
+            l_curly_token: L_CURLY@0..1 "{" [] [],
+            content: MdxExpressionContent {
+                value_token: MDX_EXPRESSION_LITERAL@1..64 "/* micromark-extension-mdxjs-esm: statements that span lines */" [] [],
+            },
+            r_curly_token: R_CURLY@64..65 "}" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@65..66 "\n" [] [],
+        },
+        MdxEsmBlock {
+            content_token: MDX_ESM_LITERAL@66..155 "import a\nfrom \"a\"\n// a comment between statements\nimport b from \"b\" // a trailing comment" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@155..156 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@156..157 "\n" [] [],
+        },
+        MdxEsmBlock {
+            content_token: MDX_ESM_LITERAL@157..191 "export function f()\n{\n  return 1\n}" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@191..192 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@192..193 "\n" [] [],
+        },
+        MdxEsmBlock {
+            content_token: MDX_ESM_LITERAL@193..219 "export const sum =\n  1 + 2" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@219..220 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@220..221 "\n" [] [],
+        },
+        MdHeader {
+            indent: MdIndentTokenList [],
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@221..222 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@222..228 " Hello" [] [],
+                    },
+                ],
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@228..229 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@229..229 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..229
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..229
+    0: MDX_BLOCK_EXPRESSION@0..65
+      0: L_CURLY@0..1 "{" [] []
+      1: MDX_EXPRESSION_CONTENT@1..64
+        0: MDX_EXPRESSION_LITERAL@1..64 "/* micromark-extension-mdxjs-esm: statements that span lines */" [] []
+      2: R_CURLY@64..65 "}" [] []
+    1: MD_NEWLINE@65..66
+      0: NEWLINE@65..66 "\n" [] []
+    2: MDX_ESM_BLOCK@66..155
+      0: MDX_ESM_LITERAL@66..155 "import a\nfrom \"a\"\n// a comment between statements\nimport b from \"b\" // a trailing comment" [] []
+    3: MD_NEWLINE@155..156
+      0: NEWLINE@155..156 "\n" [] []
+    4: MD_NEWLINE@156..157
+      0: NEWLINE@156..157 "\n" [] []
+    5: MDX_ESM_BLOCK@157..191
+      0: MDX_ESM_LITERAL@157..191 "export function f()\n{\n  return 1\n}" [] []
+    6: MD_NEWLINE@191..192
+      0: NEWLINE@191..192 "\n" [] []
+    7: MD_NEWLINE@192..193
+      0: NEWLINE@192..193 "\n" [] []
+    8: MDX_ESM_BLOCK@193..219
+      0: MDX_ESM_LITERAL@193..219 "export const sum =\n  1 + 2" [] []
+    9: MD_NEWLINE@219..220
+      0: NEWLINE@219..220 "\n" [] []
+    10: MD_NEWLINE@220..221
+      0: NEWLINE@220..221 "\n" [] []
+    11: MD_HEADER@221..228
+      0: MD_INDENT_TOKEN_LIST@221..221
+      1: MD_HASH_LIST@221..222
+        0: MD_HASH@221..222
+          0: HASH@221..222 "#" [] []
+      2: MD_PARAGRAPH@222..228
+        0: MD_INLINE_ITEM_LIST@222..228
+          0: MD_TEXTUAL@222..228
+            0: MD_TEXTUAL_LITERAL@222..228 " Hello" [] []
+      3: MD_HASH_LIST@228..228
+    12: MD_NEWLINE@228..229
+      0: NEWLINE@228..229 "\n" [] []
+  3: EOF@229..229 "" [] []
+
+```

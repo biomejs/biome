@@ -1,0 +1,412 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+withSpaces.replaceAll(/\s+/, ",");
+withSpaces.replaceAll(/\s+/i, ",");
+withSpaces.replaceAll(new RegExp("\\s+"), ",");
+withSpaces.replaceAll(new RegExp("\\s+", "i"), ",");
+withSpaces.replaceAll(RegExp("\\s+", "i"), ",");
+withSpaces.replaceAll(new RegExp(`\\s+`), ",");
+withSpaces.replaceAll(new RegExp(`${prefix}\\s+`), ",");
+withSpaces.replaceAll(new RegExp(/\s+/i), ",");
+withSpaces.replaceAll(new RegExp(), ",");
+withSpaces.replaceAll(new RegExp, ",");
+withSpaces.replaceAll(new globalThis.RegExp("\\s+"), ",");
+withSpaces?.replaceAll(/\s+/, ",");
+withSpaces["replaceAll"](/\s+/, ",");
+(withSpaces.replaceAll)((/\s+/), ",");
+
+const literal = /\s+/;
+withSpaces.replaceAll(literal, ",");
+
+const constructed = new RegExp("\\s+", "i");
+withSpaces.replaceAll(constructed, ",");
+
+let neverReassigned = /\s+/;
+withSpaces.replaceAll(neverReassigned, ",");
+
+```
+
+# Diagnostics
+```
+invalid.js:2:23 lint/nursery/useGlobalRegexInReplaceAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regular expression passed to replaceAll() is missing the g flag.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ withSpaces.replaceAll(/\s+/, ",");
+      │                       ^^^^^
+    3 │ withSpaces.replaceAll(/\s+/i, ",");
+    4 │ withSpaces.replaceAll(new RegExp("\\s+"), ",");
+  
+  i When replaceAll() receives a regular expression without the g (global) flag, it throws a TypeError instead of replacing text.
+  
+  i Add the g flag to the regular expression, or use replace() to replace only the first match.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:23 lint/nursery/useGlobalRegexInReplaceAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regular expression passed to replaceAll() is missing the g flag.
+  
+    1 │ /* should generate diagnostics */
+    2 │ withSpaces.replaceAll(/\s+/, ",");
+  > 3 │ withSpaces.replaceAll(/\s+/i, ",");
+      │                       ^^^^^^
+    4 │ withSpaces.replaceAll(new RegExp("\\s+"), ",");
+    5 │ withSpaces.replaceAll(new RegExp("\\s+", "i"), ",");
+  
+  i When replaceAll() receives a regular expression without the g (global) flag, it throws a TypeError instead of replacing text.
+  
+  i Add the g flag to the regular expression, or use replace() to replace only the first match.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:23 lint/nursery/useGlobalRegexInReplaceAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regular expression passed to replaceAll() is missing the g flag.
+  
+    2 │ withSpaces.replaceAll(/\s+/, ",");
+    3 │ withSpaces.replaceAll(/\s+/i, ",");
+  > 4 │ withSpaces.replaceAll(new RegExp("\\s+"), ",");
+      │                       ^^^^^^^^^^^^^^^^^^
+    5 │ withSpaces.replaceAll(new RegExp("\\s+", "i"), ",");
+    6 │ withSpaces.replaceAll(RegExp("\\s+", "i"), ",");
+  
+  i When replaceAll() receives a regular expression without the g (global) flag, it throws a TypeError instead of replacing text.
+  
+  i Add the g flag to the regular expression, or use replace() to replace only the first match.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:23 lint/nursery/useGlobalRegexInReplaceAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regular expression passed to replaceAll() is missing the g flag.
+  
+    3 │ withSpaces.replaceAll(/\s+/i, ",");
+    4 │ withSpaces.replaceAll(new RegExp("\\s+"), ",");
+  > 5 │ withSpaces.replaceAll(new RegExp("\\s+", "i"), ",");
+      │                       ^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ withSpaces.replaceAll(RegExp("\\s+", "i"), ",");
+    7 │ withSpaces.replaceAll(new RegExp(`\\s+`), ",");
+  
+  i When replaceAll() receives a regular expression without the g (global) flag, it throws a TypeError instead of replacing text.
+  
+  i Add the g flag to the regular expression, or use replace() to replace only the first match.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:23 lint/nursery/useGlobalRegexInReplaceAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regular expression passed to replaceAll() is missing the g flag.
+  
+    4 │ withSpaces.replaceAll(new RegExp("\\s+"), ",");
+    5 │ withSpaces.replaceAll(new RegExp("\\s+", "i"), ",");
+  > 6 │ withSpaces.replaceAll(RegExp("\\s+", "i"), ",");
+      │                       ^^^^^^^^^^^^^^^^^^^
+    7 │ withSpaces.replaceAll(new RegExp(`\\s+`), ",");
+    8 │ withSpaces.replaceAll(new RegExp(`${prefix}\\s+`), ",");
+  
+  i When replaceAll() receives a regular expression without the g (global) flag, it throws a TypeError instead of replacing text.
+  
+  i Add the g flag to the regular expression, or use replace() to replace only the first match.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:23 lint/nursery/useGlobalRegexInReplaceAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regular expression passed to replaceAll() is missing the g flag.
+  
+    5 │ withSpaces.replaceAll(new RegExp("\\s+", "i"), ",");
+    6 │ withSpaces.replaceAll(RegExp("\\s+", "i"), ",");
+  > 7 │ withSpaces.replaceAll(new RegExp(`\\s+`), ",");
+      │                       ^^^^^^^^^^^^^^^^^^
+    8 │ withSpaces.replaceAll(new RegExp(`${prefix}\\s+`), ",");
+    9 │ withSpaces.replaceAll(new RegExp(/\s+/i), ",");
+  
+  i When replaceAll() receives a regular expression without the g (global) flag, it throws a TypeError instead of replacing text.
+  
+  i Add the g flag to the regular expression, or use replace() to replace only the first match.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:23 lint/nursery/useGlobalRegexInReplaceAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regular expression passed to replaceAll() is missing the g flag.
+  
+     6 │ withSpaces.replaceAll(RegExp("\\s+", "i"), ",");
+     7 │ withSpaces.replaceAll(new RegExp(`\\s+`), ",");
+   > 8 │ withSpaces.replaceAll(new RegExp(`${prefix}\\s+`), ",");
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ withSpaces.replaceAll(new RegExp(/\s+/i), ",");
+    10 │ withSpaces.replaceAll(new RegExp(), ",");
+  
+  i When replaceAll() receives a regular expression without the g (global) flag, it throws a TypeError instead of replacing text.
+  
+  i Add the g flag to the regular expression, or use replace() to replace only the first match.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:23 lint/nursery/useGlobalRegexInReplaceAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regular expression passed to replaceAll() is missing the g flag.
+  
+     7 │ withSpaces.replaceAll(new RegExp(`\\s+`), ",");
+     8 │ withSpaces.replaceAll(new RegExp(`${prefix}\\s+`), ",");
+   > 9 │ withSpaces.replaceAll(new RegExp(/\s+/i), ",");
+       │                       ^^^^^^^^^^^^^^^^^^
+    10 │ withSpaces.replaceAll(new RegExp(), ",");
+    11 │ withSpaces.replaceAll(new RegExp, ",");
+  
+  i When replaceAll() receives a regular expression without the g (global) flag, it throws a TypeError instead of replacing text.
+  
+  i Add the g flag to the regular expression, or use replace() to replace only the first match.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:23 lint/nursery/useGlobalRegexInReplaceAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regular expression passed to replaceAll() is missing the g flag.
+  
+     8 │ withSpaces.replaceAll(new RegExp(`${prefix}\\s+`), ",");
+     9 │ withSpaces.replaceAll(new RegExp(/\s+/i), ",");
+  > 10 │ withSpaces.replaceAll(new RegExp(), ",");
+       │                       ^^^^^^^^^^^^
+    11 │ withSpaces.replaceAll(new RegExp, ",");
+    12 │ withSpaces.replaceAll(new globalThis.RegExp("\\s+"), ",");
+  
+  i When replaceAll() receives a regular expression without the g (global) flag, it throws a TypeError instead of replacing text.
+  
+  i Add the g flag to the regular expression, or use replace() to replace only the first match.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:23 lint/nursery/useGlobalRegexInReplaceAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regular expression passed to replaceAll() is missing the g flag.
+  
+     9 │ withSpaces.replaceAll(new RegExp(/\s+/i), ",");
+    10 │ withSpaces.replaceAll(new RegExp(), ",");
+  > 11 │ withSpaces.replaceAll(new RegExp, ",");
+       │                       ^^^^^^^^^^
+    12 │ withSpaces.replaceAll(new globalThis.RegExp("\\s+"), ",");
+    13 │ withSpaces?.replaceAll(/\s+/, ",");
+  
+  i When replaceAll() receives a regular expression without the g (global) flag, it throws a TypeError instead of replacing text.
+  
+  i Add the g flag to the regular expression, or use replace() to replace only the first match.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:23 lint/nursery/useGlobalRegexInReplaceAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regular expression passed to replaceAll() is missing the g flag.
+  
+    10 │ withSpaces.replaceAll(new RegExp(), ",");
+    11 │ withSpaces.replaceAll(new RegExp, ",");
+  > 12 │ withSpaces.replaceAll(new globalThis.RegExp("\\s+"), ",");
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ withSpaces?.replaceAll(/\s+/, ",");
+    14 │ withSpaces["replaceAll"](/\s+/, ",");
+  
+  i When replaceAll() receives a regular expression without the g (global) flag, it throws a TypeError instead of replacing text.
+  
+  i Add the g flag to the regular expression, or use replace() to replace only the first match.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:24 lint/nursery/useGlobalRegexInReplaceAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regular expression passed to replaceAll() is missing the g flag.
+  
+    11 │ withSpaces.replaceAll(new RegExp, ",");
+    12 │ withSpaces.replaceAll(new globalThis.RegExp("\\s+"), ",");
+  > 13 │ withSpaces?.replaceAll(/\s+/, ",");
+       │                        ^^^^^
+    14 │ withSpaces["replaceAll"](/\s+/, ",");
+    15 │ (withSpaces.replaceAll)((/\s+/), ",");
+  
+  i When replaceAll() receives a regular expression without the g (global) flag, it throws a TypeError instead of replacing text.
+  
+  i Add the g flag to the regular expression, or use replace() to replace only the first match.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:26 lint/nursery/useGlobalRegexInReplaceAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regular expression passed to replaceAll() is missing the g flag.
+  
+    12 │ withSpaces.replaceAll(new globalThis.RegExp("\\s+"), ",");
+    13 │ withSpaces?.replaceAll(/\s+/, ",");
+  > 14 │ withSpaces["replaceAll"](/\s+/, ",");
+       │                          ^^^^^
+    15 │ (withSpaces.replaceAll)((/\s+/), ",");
+    16 │ 
+  
+  i When replaceAll() receives a regular expression without the g (global) flag, it throws a TypeError instead of replacing text.
+  
+  i Add the g flag to the regular expression, or use replace() to replace only the first match.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:26 lint/nursery/useGlobalRegexInReplaceAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regular expression passed to replaceAll() is missing the g flag.
+  
+    13 │ withSpaces?.replaceAll(/\s+/, ",");
+    14 │ withSpaces["replaceAll"](/\s+/, ",");
+  > 15 │ (withSpaces.replaceAll)((/\s+/), ",");
+       │                          ^^^^^
+    16 │ 
+    17 │ const literal = /\s+/;
+  
+  i When replaceAll() receives a regular expression without the g (global) flag, it throws a TypeError instead of replacing text.
+  
+  i Add the g flag to the regular expression, or use replace() to replace only the first match.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:23 lint/nursery/useGlobalRegexInReplaceAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regular expression passed to replaceAll() is missing the g flag.
+  
+    17 │ const literal = /\s+/;
+  > 18 │ withSpaces.replaceAll(literal, ",");
+       │                       ^^^^^^^
+    19 │ 
+    20 │ const constructed = new RegExp("\\s+", "i");
+  
+  i The regular expression is created here.
+  
+    15 │ (withSpaces.replaceAll)((/\s+/), ",");
+    16 │ 
+  > 17 │ const literal = /\s+/;
+       │                 ^^^^^
+    18 │ withSpaces.replaceAll(literal, ",");
+    19 │ 
+  
+  i When replaceAll() receives a regular expression without the g (global) flag, it throws a TypeError instead of replacing text.
+  
+  i Add the g flag to the regular expression, or use replace() to replace only the first match.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:23 lint/nursery/useGlobalRegexInReplaceAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regular expression passed to replaceAll() is missing the g flag.
+  
+    20 │ const constructed = new RegExp("\\s+", "i");
+  > 21 │ withSpaces.replaceAll(constructed, ",");
+       │                       ^^^^^^^^^^^
+    22 │ 
+    23 │ let neverReassigned = /\s+/;
+  
+  i The regular expression is created here.
+  
+    18 │ withSpaces.replaceAll(literal, ",");
+    19 │ 
+  > 20 │ const constructed = new RegExp("\\s+", "i");
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ withSpaces.replaceAll(constructed, ",");
+    22 │ 
+  
+  i When replaceAll() receives a regular expression without the g (global) flag, it throws a TypeError instead of replacing text.
+  
+  i Add the g flag to the regular expression, or use replace() to replace only the first match.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:23 lint/nursery/useGlobalRegexInReplaceAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regular expression passed to replaceAll() is missing the g flag.
+  
+    23 │ let neverReassigned = /\s+/;
+  > 24 │ withSpaces.replaceAll(neverReassigned, ",");
+       │                       ^^^^^^^^^^^^^^^
+    25 │ 
+  
+  i The regular expression is created here.
+  
+    21 │ withSpaces.replaceAll(constructed, ",");
+    22 │ 
+  > 23 │ let neverReassigned = /\s+/;
+       │                       ^^^^^
+    24 │ withSpaces.replaceAll(neverReassigned, ",");
+    25 │ 
+  
+  i When replaceAll() receives a regular expression without the g (global) flag, it throws a TypeError instead of replacing text.
+  
+  i Add the g flag to the regular expression, or use replace() to replace only the first match.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

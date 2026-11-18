@@ -79,22 +79,21 @@ fn fmt_diagnostic<D: Diagnostic + ?Sized>(
     let title = {
         diagnostic
             .category()
-            .map(|category| category.name())
-            .unwrap_or_default()
+            .map_or_default(|category| category.name())
     };
 
     fmt.write_str(
-        format! {
+        format!(
             "::{} title={},file={},line={},endLine={},col={},endColumn={}::{}",
             command, // constant, doesn't need escaping
-            title, // the diagnostic category
+            title,   // the diagnostic category
             escape_property(file_name_unescaped),
-            start.line_number, // integer, doesn't need escaping
-            end.line_number, // integer, doesn't need escaping
+            start.line_number,   // integer, doesn't need escaping
+            end.line_number,     // integer, doesn't need escaping
             start.column_number, // integer, doesn't need escaping
-            end.column_number, // integer, doesn't need escaping
+            end.column_number,   // integer, doesn't need escaping
             message.map_or_else(String::new, escape_data),
-        }
+        )
         .as_str(),
     )?;
 

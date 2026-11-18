@@ -803,7 +803,9 @@ impl ProseItemCollector {
                 | AnyMdInline::MdInlineHtml(_)
                 | AnyMdInline::MdEntityReference(_)
                 | AnyMdInline::GfmStrikethrough(_)
-                | AnyMdInline::GfmTaskListItem(_) => {
+                | AnyMdInline::GfmTaskListItem(_)
+                | AnyMdInline::MdxInlineExpression(_)
+                | AnyMdInline::MdxJsxInlineTag(_) => {
                     self.current_word_group.push(ProseAtom::InlineElement(item));
                 }
 

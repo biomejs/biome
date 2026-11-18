@@ -83,9 +83,9 @@ $icons: (
 	/* keep blank */
 
 	cal-week-group: (
-			left: 1,
-			top: 169,
-		),
+		left: 1,
+		top: 169,
+	),
 );
 
 @if true {

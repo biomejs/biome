@@ -1,0 +1,117 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+"".matchAll(/a/ as RegExp);
+"".matchAll(<RegExp>/a/);
+
+const pattern1: RegExp = /a/;
+"".matchAll(pattern1);
+
+const pattern2 = /a/ satisfies RegExp;
+"".matchAll(pattern2);
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:13 lint/nursery/useGlobalRegexInMatchAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The regular expression passed to matchAll() is missing the g flag.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ "".matchAll(/a/ as RegExp);
+      │             ^^^^^^^^^^^^^
+    3 │ "".matchAll(<RegExp>/a/);
+    4 │ 
+  
+  i matchAll() throws a TypeError when it receives a regular expression without the g (global) flag.
+  
+  i Add the g flag to the regular expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:13 lint/nursery/useGlobalRegexInMatchAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The regular expression passed to matchAll() is missing the g flag.
+  
+    1 │ /* should generate diagnostics */
+    2 │ "".matchAll(/a/ as RegExp);
+  > 3 │ "".matchAll(<RegExp>/a/);
+      │             ^^^^^^^^^^^
+    4 │ 
+    5 │ const pattern1: RegExp = /a/;
+  
+  i matchAll() throws a TypeError when it receives a regular expression without the g (global) flag.
+  
+  i Add the g flag to the regular expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:6:13 lint/nursery/useGlobalRegexInMatchAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The regular expression passed to matchAll() is missing the g flag.
+  
+    5 │ const pattern1: RegExp = /a/;
+  > 6 │ "".matchAll(pattern1);
+      │             ^^^^^^^^
+    7 │ 
+    8 │ const pattern2 = /a/ satisfies RegExp;
+  
+  i The regular expression is created here.
+  
+    3 │ "".matchAll(<RegExp>/a/);
+    4 │ 
+  > 5 │ const pattern1: RegExp = /a/;
+      │                          ^^^
+    6 │ "".matchAll(pattern1);
+    7 │ 
+  
+  i matchAll() throws a TypeError when it receives a regular expression without the g (global) flag.
+  
+  i Add the g flag to the regular expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:9:13 lint/nursery/useGlobalRegexInMatchAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The regular expression passed to matchAll() is missing the g flag.
+  
+     8 │ const pattern2 = /a/ satisfies RegExp;
+   > 9 │ "".matchAll(pattern2);
+       │             ^^^^^^^^
+    10 │ 
+  
+  i The regular expression is created here.
+  
+     6 │ "".matchAll(pattern1);
+     7 │ 
+   > 8 │ const pattern2 = /a/ satisfies RegExp;
+       │                  ^^^
+     9 │ "".matchAll(pattern2);
+    10 │ 
+  
+  i matchAll() throws a TypeError when it receives a regular expression without the g (global) flag.
+  
+  i Add the g flag to the regular expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

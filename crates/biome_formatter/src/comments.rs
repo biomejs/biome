@@ -797,13 +797,12 @@ pub trait CommentStyle: Default {
             match suppression.kind {
                 SuppressionKind::Classic => kind = Some(SuppressionKind::Classic),
                 SuppressionKind::All => {
-                    if comment
-                        .enclosing_node()
-                        .ancestors()
-                        .last()
-                        .is_some_and(|root| {
-                            comment.piece().text_range().end() <= root.text_trimmed_range().start()
-                        })
+                    if comment.piece().text_range().end()
+                        <= comment
+                            .enclosing_node()
+                            .tree_top()
+                            .text_trimmed_range()
+                            .start()
                     {
                         return Some(SuppressionKind::All);
                     }

@@ -1,0 +1,87 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+let total: number = 0;
+
+async function addAsType(getAmount: () => Promise<number>) {
+	(total as number) += await getAmount();
+}
+
+async function addNonNull(getAmount: () => Promise<number>) {
+	total! = total + (await getAmount());
+}
+
+class Counter {
+	constructor(private readonly state: { count: number }) {}
+
+	async increment(state: { count: number }) {
+		state.count = state.count + (await Promise.resolve(1));
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:5:2 lint/nursery/useAtomicUpdates ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i total may be reassigned based on an outdated value of total.
+  
+    4 │ async function addAsType(getAmount: () => Promise<number>) {
+  > 5 │ 	(total as number) += await getAmount();
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ }
+    7 │ 
+  
+  i This function reads total, then pauses at an await or yield before this assignment. Other code can change total during the pause, and this assignment would overwrite that change.
+  
+  i Store the result of the await or yield in a local variable first, then read total and assign the new value without pausing in between.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:9:2 lint/nursery/useAtomicUpdates ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i total may be reassigned based on an outdated value of total.
+  
+     8 │ async function addNonNull(getAmount: () => Promise<number>) {
+   > 9 │ 	total! = total + (await getAmount());
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ }
+    11 │ 
+  
+  i This function reads total, then pauses at an await or yield before this assignment. Other code can change total during the pause, and this assignment would overwrite that change.
+  
+  i Store the result of the await or yield in a local variable first, then read total and assign the new value without pausing in between.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:16:3 lint/nursery/useAtomicUpdates ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i state.count may be assigned based on an outdated state of state.
+  
+    15 │ 	async increment(state: { count: number }) {
+  > 16 │ 		state.count = state.count + (await Promise.resolve(1));
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 	}
+    18 │ }
+  
+  i This function reads state, then pauses at an await or yield before this assignment. Other code can change state during the pause, and this assignment would overwrite that change.
+  
+  i Store the result of the await or yield in a local variable first, then read state and assign the new value without pausing in between.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,250 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+require("../" + name);
+require(`../${name}`);
+require(name);
+require(name());
+require(name + "foo", "bar");
+require(`foo${x}`);
+var foo = require(`foo${x}`);
+require(String.raw`foo`);
+require(...names);
+(require)(name);
+require?.(name);
+
+```
+
+# Diagnostics
+```
+invalid.js:2:9 lint/nursery/noDynamicRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The module name passed to require() isn't a fixed string.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ require("../" + name);
+      │         ^^^^^^^^^^^^
+    3 │ require(`../${name}`);
+    4 │ require(name);
+  
+  i When the module name is built while the program runs, tools can't tell which file gets loaded, so they can't check that it exists or find where it's used.
+  
+  i Write the module name as a string, such as "./module".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:9 lint/nursery/noDynamicRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The module name passed to require() isn't a fixed string.
+  
+    1 │ /* should generate diagnostics */
+    2 │ require("../" + name);
+  > 3 │ require(`../${name}`);
+      │         ^^^^^^^^^^^^
+    4 │ require(name);
+    5 │ require(name());
+  
+  i When the module name is built while the program runs, tools can't tell which file gets loaded, so they can't check that it exists or find where it's used.
+  
+  i Write the module name as a string, such as "./module".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:9 lint/nursery/noDynamicRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The module name passed to require() isn't a fixed string.
+  
+    2 │ require("../" + name);
+    3 │ require(`../${name}`);
+  > 4 │ require(name);
+      │         ^^^^
+    5 │ require(name());
+    6 │ require(name + "foo", "bar");
+  
+  i When the module name is built while the program runs, tools can't tell which file gets loaded, so they can't check that it exists or find where it's used.
+  
+  i Write the module name as a string, such as "./module".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:9 lint/nursery/noDynamicRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The module name passed to require() isn't a fixed string.
+  
+    3 │ require(`../${name}`);
+    4 │ require(name);
+  > 5 │ require(name());
+      │         ^^^^^^
+    6 │ require(name + "foo", "bar");
+    7 │ require(`foo${x}`);
+  
+  i When the module name is built while the program runs, tools can't tell which file gets loaded, so they can't check that it exists or find where it's used.
+  
+  i Write the module name as a string, such as "./module".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:9 lint/nursery/noDynamicRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The module name passed to require() isn't a fixed string.
+  
+    4 │ require(name);
+    5 │ require(name());
+  > 6 │ require(name + "foo", "bar");
+      │         ^^^^^^^^^^^^
+    7 │ require(`foo${x}`);
+    8 │ var foo = require(`foo${x}`);
+  
+  i When the module name is built while the program runs, tools can't tell which file gets loaded, so they can't check that it exists or find where it's used.
+  
+  i Write the module name as a string, such as "./module".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:9 lint/nursery/noDynamicRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The module name passed to require() isn't a fixed string.
+  
+    5 │ require(name());
+    6 │ require(name + "foo", "bar");
+  > 7 │ require(`foo${x}`);
+      │         ^^^^^^^^^
+    8 │ var foo = require(`foo${x}`);
+    9 │ require(String.raw`foo`);
+  
+  i When the module name is built while the program runs, tools can't tell which file gets loaded, so they can't check that it exists or find where it's used.
+  
+  i Write the module name as a string, such as "./module".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:19 lint/nursery/noDynamicRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The module name passed to require() isn't a fixed string.
+  
+     6 │ require(name + "foo", "bar");
+     7 │ require(`foo${x}`);
+   > 8 │ var foo = require(`foo${x}`);
+       │                   ^^^^^^^^^
+     9 │ require(String.raw`foo`);
+    10 │ require(...names);
+  
+  i When the module name is built while the program runs, tools can't tell which file gets loaded, so they can't check that it exists or find where it's used.
+  
+  i Write the module name as a string, such as "./module".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:9 lint/nursery/noDynamicRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The module name passed to require() isn't a fixed string.
+  
+     7 │ require(`foo${x}`);
+     8 │ var foo = require(`foo${x}`);
+   > 9 │ require(String.raw`foo`);
+       │         ^^^^^^^^^^^^^^^
+    10 │ require(...names);
+    11 │ (require)(name);
+  
+  i When the module name is built while the program runs, tools can't tell which file gets loaded, so they can't check that it exists or find where it's used.
+  
+  i Write the module name as a string, such as "./module".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:9 lint/nursery/noDynamicRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The module name passed to require() isn't a fixed string.
+  
+     8 │ var foo = require(`foo${x}`);
+     9 │ require(String.raw`foo`);
+  > 10 │ require(...names);
+       │         ^^^^^^^^
+    11 │ (require)(name);
+    12 │ require?.(name);
+  
+  i When the module name is built while the program runs, tools can't tell which file gets loaded, so they can't check that it exists or find where it's used.
+  
+  i Write the module name as a string, such as "./module".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:11 lint/nursery/noDynamicRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The module name passed to require() isn't a fixed string.
+  
+     9 │ require(String.raw`foo`);
+    10 │ require(...names);
+  > 11 │ (require)(name);
+       │           ^^^^
+    12 │ require?.(name);
+    13 │ 
+  
+  i When the module name is built while the program runs, tools can't tell which file gets loaded, so they can't check that it exists or find where it's used.
+  
+  i Write the module name as a string, such as "./module".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:11 lint/nursery/noDynamicRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The module name passed to require() isn't a fixed string.
+  
+    10 │ require(...names);
+    11 │ (require)(name);
+  > 12 │ require?.(name);
+       │           ^^^^
+    13 │ 
+  
+  i When the module name is built while the program runs, tools can't tell which file gets loaded, so they can't check that it exists or find where it's used.
+  
+  i Write the module name as a string, such as "./module".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

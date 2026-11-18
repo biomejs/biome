@@ -74,7 +74,7 @@ impl std::hash::Hash for BiomePath {
 impl BiomePath {
     pub fn new(path_to_file: impl Into<Utf8PathBuf>) -> Self {
         let path = path_to_file.into();
-        let kind = path.file_name().map(Self::priority).unwrap_or_default();
+        let kind = path.file_name().map_or_default(Self::priority);
         Self {
             path,
             kind,
@@ -85,7 +85,7 @@ impl BiomePath {
 
     pub fn new_with_kind(path_to_file: impl Into<Utf8PathBuf>, path_kind: PathKind) -> Self {
         let path = path_to_file.into();
-        let kind = path.file_name().map(Self::priority).unwrap_or_default();
+        let kind = path.file_name().map_or_default(Self::priority);
         Self {
             path,
             kind,
@@ -96,7 +96,7 @@ impl BiomePath {
 
     pub fn new_written(path_to_file: impl Into<Utf8PathBuf>) -> Self {
         let path = path_to_file.into();
-        let kind = path.file_name().map(Self::priority).unwrap_or_default();
+        let kind = path.file_name().map_or_default(Self::priority);
         Self {
             path,
             kind,

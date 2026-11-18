@@ -2,10 +2,10 @@ use biome_rowan::SyntaxKind;
 use std::marker::PhantomData;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct TokenSet<K: SyntaxKind>([u128; 3], PhantomData<K>);
+pub struct TokenSet<K: SyntaxKind>([u128; 4], PhantomData<K>);
 
 impl<K: SyntaxKind> TokenSet<K> {
-    pub const EMPTY: Self = Self([0; 3], PhantomData);
+    pub const EMPTY: Self = Self([0; 4], PhantomData);
 
     pub fn singleton(kind: K) -> Self {
         unsafe { Self::from_raw(kind.to_raw().0) }
@@ -17,6 +17,7 @@ impl<K: SyntaxKind> TokenSet<K> {
                 self.0[0] | other.0[0],
                 self.0[1] | other.0[1],
                 self.0[2] | other.0[2],
+                self.0[3] | other.0[3],
             ],
             PhantomData,
         )
@@ -29,6 +30,7 @@ impl<K: SyntaxKind> TokenSet<K> {
             0..=127 => self.0[0] & mask(kind)[0] != 0,
             128..=255 => self.0[1] & mask(kind)[1] != 0,
             256..=383 => self.0[2] & mask(kind)[2] != 0,
+            384..=511 => self.0[3] & mask(kind)[3] != 0,
             _ => false,
         }
     }
@@ -45,12 +47,13 @@ impl<K: SyntaxKind> TokenSet<K> {
     }
 }
 
-const fn mask(kind: u16) -> [u128; 3] {
+const fn mask(kind: u16) -> [u128; 4] {
     let num = kind as usize;
     match num {
-        0..=127 => [1u128 << num, 0, 0],
-        128..=255 => [0, 1u128 << (num - 128), 0],
-        256..=383 => [0, 0, 1u128 << (num - 256)],
+        0..=127 => [1u128 << num, 0, 0, 0],
+        128..=255 => [0, 1u128 << (num - 128), 0, 0],
+        256..=383 => [0, 0, 1u128 << (num - 256), 0],
+        384..=511 => [0, 0, 0, 1u128 << (num - 384)],
         _ => panic!("TokenKind limit exceeded"),
     }
 }
@@ -79,11 +82,13 @@ mod tests {
         Kind255 = 255,
         Kind256 = 256,
         Kind383 = 383,
+        Kind384 = 384,
+        Kind511 = 511,
     }
 
     impl SyntaxKind for TestKind {
         const TOMBSTONE: Self = Self::Kind0;
-        const EOF: Self = Self::Kind383;
+        const EOF: Self = Self::Kind511;
 
         fn to_raw(&self) -> RawSyntaxKind {
             RawSyntaxKind(*self as u16)
@@ -126,64 +131,91 @@ mod tests {
     #[test]
     fn test_mask_first_128() {
         // lower limit test
-        let [a, b, c] = mask(0);
+        let [a, b, c, d] = mask(0);
 
         assert!(a.count_ones() == 1);
         assert!(a.trailing_zeros() == 0);
         assert_eq!(b, 0);
         assert_eq!(c, 0);
+        assert_eq!(d, 0);
 
         // upper limit test
-        let [a, b, c] = mask(127);
+        let [a, b, c, d] = mask(127);
 
         assert!(a.count_ones() == 1);
         assert!(a.trailing_zeros() == u128::BITS - 1);
         assert_eq!(b, 0);
         assert_eq!(c, 0);
+        assert_eq!(d, 0);
     }
 
     #[test]
     fn test_mask_second_128() {
         // lower limit test
-        let [a, b, c] = mask(128);
+        let [a, b, c, d] = mask(128);
 
         assert_eq!(a, 0);
         assert!(b.count_ones() == 1);
         assert!(b.trailing_zeros() == 0);
         assert_eq!(c, 0);
+        assert_eq!(d, 0);
 
         // upper limit test
-        let [a, b, c] = mask(255);
+        let [a, b, c, d] = mask(255);
 
         assert_eq!(a, 0);
         assert!(b.count_ones() == 1);
         assert!(b.trailing_zeros() == u128::BITS - 1);
         assert_eq!(c, 0);
+        assert_eq!(d, 0);
     }
 
     #[test]
     fn test_mask_third_128() {
         // lower limit test
-        let [a, b, c] = mask(256);
+        let [a, b, c, d] = mask(256);
 
         assert_eq!(a, 0);
         assert_eq!(b, 0);
         assert!(c.count_ones() == 1);
         assert!(c.trailing_zeros() == 0);
+        assert_eq!(d, 0);
 
         // upper limit test
-        let [a, b, c] = mask(383);
+        let [a, b, c, d] = mask(383);
 
         assert_eq!(a, 0);
         assert_eq!(b, 0);
         assert!(c.count_ones() == 1);
         assert!(c.trailing_zeros() == u128::BITS - 1);
+        assert_eq!(d, 0);
+    }
+
+    #[test]
+    fn test_mask_fourth_128() {
+        // lower limit test
+        let [a, b, c, d] = mask(384);
+
+        assert_eq!(a, 0);
+        assert_eq!(b, 0);
+        assert_eq!(c, 0);
+        assert!(d.count_ones() == 1);
+        assert!(d.trailing_zeros() == 0);
+
+        // upper limit test
+        let [a, b, c, d] = mask(511);
+
+        assert_eq!(a, 0);
+        assert_eq!(b, 0);
+        assert_eq!(c, 0);
+        assert!(d.count_ones() == 1);
+        assert!(d.trailing_zeros() == u128::BITS - 1);
     }
 
     #[test]
     #[should_panic(expected = "TokenKind limit exceeded")]
     fn test_mask_out_of_range() {
-        mask(384);
+        mask(512);
     }
 
     #[test]
@@ -194,22 +226,27 @@ mod tests {
 
         let set = TokenSet::singleton(TestKind::Kind0)
             .union(TokenSet::singleton(TestKind::Kind128))
-            .union(TokenSet::singleton(TestKind::Kind383));
+            .union(TokenSet::singleton(TestKind::Kind383))
+            .union(TokenSet::singleton(TestKind::Kind511));
 
         assert!(set.contains(TestKind::Kind0));
         assert!(set.contains(TestKind::Kind128));
         assert!(set.contains(TestKind::Kind383));
+        assert!(set.contains(TestKind::Kind511));
 
         assert!(!set.contains(TestKind::Kind127));
         assert!(!set.contains(TestKind::Kind255));
         assert!(!set.contains(TestKind::Kind256));
+        assert!(!set.contains(TestKind::Kind384));
 
         let set = TokenSet::singleton(TestKind::Kind0)
             .union(TokenSet::singleton(TestKind::Kind127))
             .union(TokenSet::singleton(TestKind::Kind128))
             .union(TokenSet::singleton(TestKind::Kind255))
             .union(TokenSet::singleton(TestKind::Kind256))
-            .union(TokenSet::singleton(TestKind::Kind383));
+            .union(TokenSet::singleton(TestKind::Kind383))
+            .union(TokenSet::singleton(TestKind::Kind384))
+            .union(TokenSet::singleton(TestKind::Kind511));
 
         assert!(set.contains(TestKind::Kind0));
         assert!(set.contains(TestKind::Kind127));
@@ -217,5 +254,7 @@ mod tests {
         assert!(set.contains(TestKind::Kind255));
         assert!(set.contains(TestKind::Kind256));
         assert!(set.contains(TestKind::Kind383));
+        assert!(set.contains(TestKind::Kind384));
+        assert!(set.contains(TestKind::Kind511));
     }
 }

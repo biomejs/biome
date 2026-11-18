@@ -1,0 +1,355 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+const a = !array.some(element => element!.enabled);
+const b = !array.some(element => (element as Item).enabled);
+const c = !array.some(element => (element satisfies Item).enabled);
+const d = !array.some(element => element as unknown);
+const e = !array.some(element => element satisfies unknown);
+const f = !array.some(element => <boolean>element);
+const g = !foo.every(x => x.b)!;
+const h = !(foo.every(x => x.b) as boolean);
+const i = !(foo.every(x => x.b) satisfies boolean);
+function typedArray(array: Int8Array) {
+	return !array.some(element => test(element));
+}
+function* yields(array: unknown[]) {
+	yield <boolean>!
+		array.every(value => value);
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:18 lint/nursery/noNegatedArrayPredicate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of some() is negated with !.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const a = !array.some(element => element!.enabled);
+      │                  ^^^^
+    3 │ const b = !array.some(element => (element as Item).enabled);
+    4 │ const c = !array.some(element => (element satisfies Item).enabled);
+  
+  i Negating the whole call hides the condition that is actually checked. Calling every() with a negated callback function gives the same result and is easier to read.
+  
+  i Remove the ! before the call, use every() instead, and negate the value that the callback function returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use every() with a negated callback function.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - const·a·=·!array.some(element·=>·element!.enabled);
+        2 │ + const·a·=·array.every(element·=>·!element!.enabled);
+     3  3 │   const b = !array.some(element => (element as Item).enabled);
+     4  4 │   const c = !array.some(element => (element satisfies Item).enabled);
+  
+
+```
+
+```
+invalid.ts:3:18 lint/nursery/noNegatedArrayPredicate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of some() is negated with !.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const a = !array.some(element => element!.enabled);
+  > 3 │ const b = !array.some(element => (element as Item).enabled);
+      │                  ^^^^
+    4 │ const c = !array.some(element => (element satisfies Item).enabled);
+    5 │ const d = !array.some(element => element as unknown);
+  
+  i Negating the whole call hides the condition that is actually checked. Calling every() with a negated callback function gives the same result and is easier to read.
+  
+  i Remove the ! before the call, use every() instead, and negate the value that the callback function returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use every() with a negated callback function.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   const a = !array.some(element => element!.enabled);
+     3    │ - const·b·=·!array.some(element·=>·(element·as·Item).enabled);
+        3 │ + const·b·=·array.every(element·=>·!(element·as·Item).enabled);
+     4  4 │   const c = !array.some(element => (element satisfies Item).enabled);
+     5  5 │   const d = !array.some(element => element as unknown);
+  
+
+```
+
+```
+invalid.ts:4:18 lint/nursery/noNegatedArrayPredicate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of some() is negated with !.
+  
+    2 │ const a = !array.some(element => element!.enabled);
+    3 │ const b = !array.some(element => (element as Item).enabled);
+  > 4 │ const c = !array.some(element => (element satisfies Item).enabled);
+      │                  ^^^^
+    5 │ const d = !array.some(element => element as unknown);
+    6 │ const e = !array.some(element => element satisfies unknown);
+  
+  i Negating the whole call hides the condition that is actually checked. Calling every() with a negated callback function gives the same result and is easier to read.
+  
+  i Remove the ! before the call, use every() instead, and negate the value that the callback function returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use every() with a negated callback function.
+  
+     2  2 │   const a = !array.some(element => element!.enabled);
+     3  3 │   const b = !array.some(element => (element as Item).enabled);
+     4    │ - const·c·=·!array.some(element·=>·(element·satisfies·Item).enabled);
+        4 │ + const·c·=·array.every(element·=>·!(element·satisfies·Item).enabled);
+     5  5 │   const d = !array.some(element => element as unknown);
+     6  6 │   const e = !array.some(element => element satisfies unknown);
+  
+
+```
+
+```
+invalid.ts:5:18 lint/nursery/noNegatedArrayPredicate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of some() is negated with !.
+  
+    3 │ const b = !array.some(element => (element as Item).enabled);
+    4 │ const c = !array.some(element => (element satisfies Item).enabled);
+  > 5 │ const d = !array.some(element => element as unknown);
+      │                  ^^^^
+    6 │ const e = !array.some(element => element satisfies unknown);
+    7 │ const f = !array.some(element => <boolean>element);
+  
+  i Negating the whole call hides the condition that is actually checked. Calling every() with a negated callback function gives the same result and is easier to read.
+  
+  i Remove the ! before the call, use every() instead, and negate the value that the callback function returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use every() with a negated callback function.
+  
+     3  3 │   const b = !array.some(element => (element as Item).enabled);
+     4  4 │   const c = !array.some(element => (element satisfies Item).enabled);
+     5    │ - const·d·=·!array.some(element·=>·element·as·unknown);
+        5 │ + const·d·=·array.every(element·=>·!(element·as·unknown));
+     6  6 │   const e = !array.some(element => element satisfies unknown);
+     7  7 │   const f = !array.some(element => <boolean>element);
+  
+
+```
+
+```
+invalid.ts:6:18 lint/nursery/noNegatedArrayPredicate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of some() is negated with !.
+  
+    4 │ const c = !array.some(element => (element satisfies Item).enabled);
+    5 │ const d = !array.some(element => element as unknown);
+  > 6 │ const e = !array.some(element => element satisfies unknown);
+      │                  ^^^^
+    7 │ const f = !array.some(element => <boolean>element);
+    8 │ const g = !foo.every(x => x.b)!;
+  
+  i Negating the whole call hides the condition that is actually checked. Calling every() with a negated callback function gives the same result and is easier to read.
+  
+  i Remove the ! before the call, use every() instead, and negate the value that the callback function returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use every() with a negated callback function.
+  
+     4  4 │   const c = !array.some(element => (element satisfies Item).enabled);
+     5  5 │   const d = !array.some(element => element as unknown);
+     6    │ - const·e·=·!array.some(element·=>·element·satisfies·unknown);
+        6 │ + const·e·=·array.every(element·=>·!(element·satisfies·unknown));
+     7  7 │   const f = !array.some(element => <boolean>element);
+     8  8 │   const g = !foo.every(x => x.b)!;
+  
+
+```
+
+```
+invalid.ts:7:18 lint/nursery/noNegatedArrayPredicate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of some() is negated with !.
+  
+    5 │ const d = !array.some(element => element as unknown);
+    6 │ const e = !array.some(element => element satisfies unknown);
+  > 7 │ const f = !array.some(element => <boolean>element);
+      │                  ^^^^
+    8 │ const g = !foo.every(x => x.b)!;
+    9 │ const h = !(foo.every(x => x.b) as boolean);
+  
+  i Negating the whole call hides the condition that is actually checked. Calling every() with a negated callback function gives the same result and is easier to read.
+  
+  i Remove the ! before the call, use every() instead, and negate the value that the callback function returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use every() with a negated callback function.
+  
+     5  5 │   const d = !array.some(element => element as unknown);
+     6  6 │   const e = !array.some(element => element satisfies unknown);
+     7    │ - const·f·=·!array.some(element·=>·<boolean>element);
+        7 │ + const·f·=·array.every(element·=>·!<boolean>element);
+     8  8 │   const g = !foo.every(x => x.b)!;
+     9  9 │   const h = !(foo.every(x => x.b) as boolean);
+  
+
+```
+
+```
+invalid.ts:8:16 lint/nursery/noNegatedArrayPredicate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of every() is negated with !.
+  
+     6 │ const e = !array.some(element => element satisfies unknown);
+     7 │ const f = !array.some(element => <boolean>element);
+   > 8 │ const g = !foo.every(x => x.b)!;
+       │                ^^^^^
+     9 │ const h = !(foo.every(x => x.b) as boolean);
+    10 │ const i = !(foo.every(x => x.b) satisfies boolean);
+  
+  i Negating the whole call hides the condition that is actually checked. Calling some() with a negated callback function gives the same result and is easier to read.
+  
+  i Remove the ! before the call, use some() instead, and negate the value that the callback function returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use some() with a negated callback function.
+  
+     6  6 │   const e = !array.some(element => element satisfies unknown);
+     7  7 │   const f = !array.some(element => <boolean>element);
+     8    │ - const·g·=·!foo.every(x·=>·x.b)!;
+        8 │ + const·g·=·foo.some(x·=>·!x.b)!;
+     9  9 │   const h = !(foo.every(x => x.b) as boolean);
+    10 10 │   const i = !(foo.every(x => x.b) satisfies boolean);
+  
+
+```
+
+```
+invalid.ts:9:17 lint/nursery/noNegatedArrayPredicate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of every() is negated with !.
+  
+     7 │ const f = !array.some(element => <boolean>element);
+     8 │ const g = !foo.every(x => x.b)!;
+   > 9 │ const h = !(foo.every(x => x.b) as boolean);
+       │                 ^^^^^
+    10 │ const i = !(foo.every(x => x.b) satisfies boolean);
+    11 │ function typedArray(array: Int8Array) {
+  
+  i Negating the whole call hides the condition that is actually checked. Calling some() with a negated callback function gives the same result and is easier to read.
+  
+  i Remove the ! before the call, use some() instead, and negate the value that the callback function returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use some() with a negated callback function.
+  
+     7  7 │   const f = !array.some(element => <boolean>element);
+     8  8 │   const g = !foo.every(x => x.b)!;
+     9    │ - const·h·=·!(foo.every(x·=>·x.b)·as·boolean);
+        9 │ + const·h·=·(foo.some(x·=>·!x.b)·as·boolean);
+    10 10 │   const i = !(foo.every(x => x.b) satisfies boolean);
+    11 11 │   function typedArray(array: Int8Array) {
+  
+
+```
+
+```
+invalid.ts:10:17 lint/nursery/noNegatedArrayPredicate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of every() is negated with !.
+  
+     8 │ const g = !foo.every(x => x.b)!;
+     9 │ const h = !(foo.every(x => x.b) as boolean);
+  > 10 │ const i = !(foo.every(x => x.b) satisfies boolean);
+       │                 ^^^^^
+    11 │ function typedArray(array: Int8Array) {
+    12 │ 	return !array.some(element => test(element));
+  
+  i Negating the whole call hides the condition that is actually checked. Calling some() with a negated callback function gives the same result and is easier to read.
+  
+  i Remove the ! before the call, use some() instead, and negate the value that the callback function returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use some() with a negated callback function.
+  
+     8  8 │   const g = !foo.every(x => x.b)!;
+     9  9 │   const h = !(foo.every(x => x.b) as boolean);
+    10    │ - const·i·=·!(foo.every(x·=>·x.b)·satisfies·boolean);
+       10 │ + const·i·=·(foo.some(x·=>·!x.b)·satisfies·boolean);
+    11 11 │   function typedArray(array: Int8Array) {
+    12 12 │   	return !array.some(element => test(element));
+  
+
+```
+
+```
+invalid.ts:12:16 lint/nursery/noNegatedArrayPredicate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of some() is negated with !.
+  
+    10 │ const i = !(foo.every(x => x.b) satisfies boolean);
+    11 │ function typedArray(array: Int8Array) {
+  > 12 │ 	return !array.some(element => test(element));
+       │ 	              ^^^^
+    13 │ }
+    14 │ function* yields(array: unknown[]) {
+  
+  i Negating the whole call hides the condition that is actually checked. Calling every() with a negated callback function gives the same result and is easier to read.
+  
+  i Remove the ! before the call, use every() instead, and negate the value that the callback function returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use every() with a negated callback function.
+  
+    10 10 │   const i = !(foo.every(x => x.b) satisfies boolean);
+    11 11 │   function typedArray(array: Int8Array) {
+    12    │ - → return·!array.some(element·=>·test(element));
+       12 │ + → return·array.every(element·=>·!test(element));
+    13 13 │   }
+    14 14 │   function* yields(array: unknown[]) {
+  
+
+```
+
+```
+invalid.ts:16:9 lint/nursery/noNegatedArrayPredicate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of every() is negated with !.
+  
+    14 │ function* yields(array: unknown[]) {
+    15 │ 	yield <boolean>!
+  > 16 │ 		array.every(value => value);
+       │ 		      ^^^^^
+    17 │ }
+    18 │ 
+  
+  i Negating the whole call hides the condition that is actually checked. Calling some() with a negated callback function gives the same result and is easier to read.
+  
+  i Remove the ! before the call, use some() instead, and negate the value that the callback function returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use some() with a negated callback function.
+  
+    13 13 │   }
+    14 14 │   function* yields(array: unknown[]) {
+    15    │ - → yield·<boolean>!
+    16    │ - → → array.every(value·=>·value);
+       15 │ + → yield·<boolean>array.some(value·=>·!value);
+    17 16 │   }
+    18 17 │   
+  
+
+```

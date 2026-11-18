@@ -1,0 +1,330 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: propertyGroups.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+.variables {
+  $color: red;
+  color: $color;
+  display: block;
+  $color: blue;
+  color: $color;
+  display: flex;
+}
+
+.assignments {
+  $size: 10px;
+  width: $size;
+  $size: 20px;
+  height: $size;
+}
+
+.statements {
+  color: red;
+  display: block;
+  @include theme;
+  @if true { color: blue; }
+  color: green;
+  display: flex;
+}
+
+.nesting-declaration {
+  color: red;
+  display: block;
+  font: { size: 12px; }
+  color: green;
+  display: flex;
+}
+
+.shorthand-boundary {
+  margin-top: 1px;
+  display: block;
+  $size: 2px;
+  margin: $size;
+  display: flex;
+}
+
+.line-comment {
+  color: red;
+  display: block; // Display comment.
+  $color: blue;
+  color: $color;
+  display: flex;
+}
+
+@mixin frames {
+  color: red;
+  display: block;
+  0% { opacity: 0; }
+  color: blue;
+  display: flex;
+}
+
+@keyframes variables {
+  to {
+    $color: red;
+    color: $color;
+    display: block;
+    $color: blue;
+    color: $color;
+    display: flex;
+  }
+}
+
+```
+
+# Diagnostics
+```
+propertyGroups.scss:2:12 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+     1 │ /* should generate diagnostics */
+   > 2 │ .variables {
+       │            ^
+   > 3 │   $color: red;
+   > 4 │   color: $color;
+        ...
+   > 8 │   display: flex;
+   > 9 │ }
+       │ ^
+    10 │ 
+    11 │ .assignments {
+  
+  i Safe fix: Sort these properties
+  
+     2  2 │   .variables {
+     3  3 │     $color: red;
+     4    │ - ··color:·$color;
+     5    │ - ··display:·block;
+        4 │ + ··display:·block;
+        5 │ + ··color:·$color;
+     6  6 │     $color: blue;
+     7    │ - ··color:·$color;
+     8    │ - ··display:·flex;
+        7 │ + ··display:·flex;
+        8 │ + ··color:·$color;
+     9  9 │   }
+    10 10 │   
+  
+
+```
+
+```
+propertyGroups.scss:18:13 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    16 │ }
+    17 │ 
+  > 18 │ .statements {
+       │             ^
+  > 19 │   color: red;
+        ...
+  > 24 │   display: flex;
+  > 25 │ }
+       │ ^
+    26 │ 
+    27 │ .nesting-declaration {
+  
+  i Safe fix: Sort these properties
+  
+    17 17 │   
+    18 18 │   .statements {
+    19    │ - ··color:·red;
+    20    │ - ··display:·block;
+       19 │ + ··display:·block;
+       20 │ + ··color:·red;
+    21 21 │     @include theme;
+    22 22 │     @if true { color: blue; }
+    23    │ - ··color:·green;
+    24    │ - ··display:·flex;
+       23 │ + ··display:·flex;
+       24 │ + ··color:·green;
+    25 25 │   }
+    26 26 │   
+  
+
+```
+
+```
+propertyGroups.scss:27:22 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    25 │ }
+    26 │ 
+  > 27 │ .nesting-declaration {
+       │                      ^
+  > 28 │   color: red;
+        ...
+  > 32 │   display: flex;
+  > 33 │ }
+       │ ^
+    34 │ 
+    35 │ .shorthand-boundary {
+  
+  i Safe fix: Sort these properties
+  
+    26 26 │   
+    27 27 │   .nesting-declaration {
+    28    │ - ··color:·red;
+    29    │ - ··display:·block;
+       28 │ + ··display:·block;
+       29 │ + ··color:·red;
+    30 30 │     font: { size: 12px; }
+    31    │ - ··color:·green;
+    32    │ - ··display:·flex;
+       31 │ + ··display:·flex;
+       32 │ + ··color:·green;
+    33 33 │   }
+    34 34 │   
+  
+
+```
+
+```
+propertyGroups.scss:35:21 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    33 │ }
+    34 │ 
+  > 35 │ .shorthand-boundary {
+       │                     ^
+  > 36 │   margin-top: 1px;
+        ...
+  > 40 │   display: flex;
+  > 41 │ }
+       │ ^
+    42 │ 
+    43 │ .line-comment {
+  
+  i Safe fix: Sort these properties
+  
+    34 34 │   
+    35 35 │   .shorthand-boundary {
+    36    │ - ··margin-top:·1px;
+    37    │ - ··display:·block;
+       36 │ + ··display:·block;
+       37 │ + ··margin-top:·1px;
+    38 38 │     $size: 2px;
+    39    │ - ··margin:·$size;
+    40    │ - ··display:·flex;
+       39 │ + ··display:·flex;
+       40 │ + ··margin:·$size;
+    41 41 │   }
+    42 42 │   
+  
+
+```
+
+```
+propertyGroups.scss:43:15 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    41 │ }
+    42 │ 
+  > 43 │ .line-comment {
+       │               ^
+  > 44 │   color: red;
+        ...
+  > 48 │   display: flex;
+  > 49 │ }
+       │ ^
+    50 │ 
+    51 │ @mixin frames {
+  
+  i Safe fix: Sort these properties
+  
+    42 42 │   
+    43 43 │   .line-comment {
+    44    │ - ··color:·red;
+    45    │ - ··display:·block;·//·Display·comment.
+    46    │ - ··$color:·blue;
+    47    │ - ··color:·$color;
+    48    │ - ··display:·flex;
+       44 │ + ··display:·block;·//·Display·comment.
+       45 │ + ··color:·red;
+       46 │ + ··$color:·blue;
+       47 │ + ··display:·flex;
+       48 │ + ··color:·$color;
+    49 49 │   }
+    50 50 │   
+  
+
+```
+
+```
+propertyGroups.scss:51:15 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    49 │ }
+    50 │ 
+  > 51 │ @mixin frames {
+       │               ^
+  > 52 │   color: red;
+        ...
+  > 56 │   display: flex;
+  > 57 │ }
+       │ ^
+    58 │ 
+    59 │ @keyframes variables {
+  
+  i Safe fix: Sort these properties
+  
+    50 50 │   
+    51 51 │   @mixin frames {
+    52    │ - ··color:·red;
+    53    │ - ··display:·block;
+       52 │ + ··display:·block;
+       53 │ + ··color:·red;
+    54 54 │     0% { opacity: 0; }
+    55    │ - ··color:·blue;
+    56    │ - ··display:·flex;
+       55 │ + ··display:·flex;
+       56 │ + ··color:·blue;
+    57 57 │   }
+    58 58 │   
+  
+
+```
+
+```
+propertyGroups.scss:60:6 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    59 │ @keyframes variables {
+  > 60 │   to {
+       │      ^
+  > 61 │     $color: red;
+        ...
+  > 66 │     display: flex;
+  > 67 │   }
+       │   ^
+    68 │ }
+    69 │ 
+  
+  i Safe fix: Sort these properties
+  
+    60 60 │     to {
+    61 61 │       $color: red;
+    62    │ - ····color:·$color;
+    63    │ - ····display:·block;
+       62 │ + ····display:·block;
+       63 │ + ····color:·$color;
+    64 64 │       $color: blue;
+    65    │ - ····color:·$color;
+    66    │ - ····display:·flex;
+       65 │ + ····display:·flex;
+       66 │ + ····color:·$color;
+    67 67 │     }
+    68 68 │   }
+  
+
+```

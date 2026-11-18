@@ -4527,6 +4527,117 @@ const Bar = styled(Component)`
 }
 
 #[test]
+fn format_js_with_embedded_css_attrs() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = r#"const Foo = styled.div.attrs({ role: "button" })`
+  display:
+    flex;
+`;
+
+const Bar = styled(Component).attrs(() => ({ role: "button" }))`
+  display:
+    flex;
+`;
+
+const Baz = foo.bar.attrs({})`
+  display:
+    flex;
+`;
+
+const Qux = styled.div.withConfig({}).attrs({})`
+  display:
+    flex;
+`;
+
+const Quux = styled(Component).attrs({}).attrs({})`
+  display:
+    flex;
+`;
+
+const Corge = graphql.a.b()`
+  query { a }
+`;
+
+const Grault = graphql(A).b()`
+  query { a }
+`;"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code(), @r#"
+    const Foo = styled.div.attrs({ role: "button" })`
+    	display: flex;
+    `;
+
+    const Bar = styled(Component).attrs(() => ({ role: "button" }))`
+    	display: flex;
+    `;
+
+    const Baz = foo.bar.attrs({})`
+      display:
+        flex;
+    `;
+
+    const Qux = styled.div.withConfig({}).attrs({})`
+      display:
+        flex;
+    `;
+
+    const Quux = styled(Component).attrs({}).attrs({})`
+      display:
+        flex;
+    `;
+
+    const Corge = graphql.a.b()`
+      query { a }
+    `;
+
+    const Grault = graphql(A).b()`
+      query { a }
+    `;
+    "#);
+}
+
+#[test]
 fn format_js_with_embedded_css_with_interpolations() {
     const FILE_PATH: &str = "/project/file.js";
     const FILE_CONTENT: &str = r#"const Button = styled.button`
@@ -7288,6 +7399,7 @@ export const useLet = defineRule({
         "const prefix = 'λ';\n/* café */\nvar /* keep */ café = '漢'; // suffix\n";
     const FIXED_CONTENT: &str =
         "const prefix = 'λ';\n/* café */\nlet /* keep */ renamed = '漢'; // suffix\n";
+    const SUPPRESSED_CONTENT: &str = "const prefix = 'λ';\n/* café */\n// biome-ignore lint/plugin/useLet: <explanation>\nvar /* keep */ café = '漢'; // suffix\n";
 
     for (kind, applicability) in [
         ("safe", Applicability::Always),
@@ -7344,8 +7456,21 @@ export const useLet = defineRule({
             &FILE_CONTENT[diagnostic.location().span.unwrap()],
             "var /* keep */ café = '漢'"
         );
-        assert_eq!(actions.len(), 1);
-        let suggestion = actions[0].suggestion.as_ref().unwrap();
+        let [fix, inline_suppression, top_level_suppression] = actions.as_slice() else {
+            panic!("{kind}: {actions:?}");
+        };
+        assert!(fix.category.matches("quickfix.biome.plugin"));
+        assert!(
+            inline_suppression
+                .category
+                .matches("quickfix.suppressRule.inline.biome")
+        );
+        assert!(
+            top_level_suppression
+                .category
+                .matches("quickfix.suppressRule.topLevel.biome")
+        );
+        let suggestion = fix.suggestion.as_ref().unwrap();
         assert_eq!(suggestion.applicability, applicability);
         assert_eq!(suggestion.msg, biome_console::markup!("Use let").to_owned());
         assert_eq!(
@@ -7374,14 +7499,18 @@ export const useLet = defineRule({
                 .unwrap();
             let applies = mode == FixFileMode::SafeAndUnsafeFixes
                 || (mode == FixFileMode::SafeFixes && kind == "safe");
-            assert_eq!(
-                result.code,
-                if applies { FIXED_CONTENT } else { FILE_CONTENT },
-                "{kind}: {mode:?}"
-            );
+            let suppresses = mode == FixFileMode::ApplySuppressions;
+            let expected_code = if applies {
+                FIXED_CONTENT
+            } else if suppresses {
+                SUPPRESSED_CONTENT
+            } else {
+                FILE_CONTENT
+            };
+            assert_eq!(result.code, expected_code, "{kind}: {mode:?}");
             assert_eq!(
                 result.actions.len(),
-                usize::from(applies),
+                usize::from(applies || suppresses),
                 "{kind}: {mode:?}"
             );
             assert_eq!(

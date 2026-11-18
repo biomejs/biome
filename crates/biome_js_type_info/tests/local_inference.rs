@@ -44,6 +44,28 @@ fn infer_type_of_indexed_access_preserves_operands() {
 }
 
 #[test]
+fn infer_type_of_conditional_type_preserves_operands() {
+    const CODE: &str = "type Unwrap<T> = T extends Promise<infer U extends string> ? [U] : [T] extends [string] ? 1 : 2;";
+    let root = parse_ts(CODE);
+    let declaration = root
+        .syntax()
+        .descendants()
+        .find_map(TsTypeAliasDeclaration::cast)
+        .unwrap();
+    let mut collector = TestTypeCollector::default();
+    let ty =
+        TypeData::from_ts_type_alias_declaration(&mut collector, ScopeId::GLOBAL, &declaration)
+            .unwrap();
+    assert!(matches!(ty, TypeData::InstanceOf(_)));
+    assert_type_data_snapshot(
+        CODE,
+        &ty,
+        &collector,
+        "infer_type_of_conditional_type_preserves_operands",
+    );
+}
+
+#[test]
 fn infer_type_of_object_member_expression() {
     const CODE: &str = r#"foo.bar"#;
 

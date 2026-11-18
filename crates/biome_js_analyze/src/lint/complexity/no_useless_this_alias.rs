@@ -11,7 +11,8 @@ use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
     AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, JsArrowFunctionExpression,
     JsAssignmentExpression, JsExpressionStatement, JsIdentifierBinding, JsIdentifierExpression,
-    JsThisExpression, JsVariableDeclaration, JsVariableDeclarator, JsVariableStatement, T,
+    JsInitializerClause, JsPropertyClassMember, JsThisExpression, JsVariableDeclaration,
+    JsVariableDeclarator, JsVariableStatement, T,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::no_useless_this_alias::NoUselessThisAliasOptions;
@@ -108,6 +109,13 @@ impl Rule for NoUselessThisAlias {
                 .syntax()
                 .ancestors()
                 .skip(1)
+                // Field initializers have their own `this`, unlike computed property names.
+                .take_while(|node| {
+                    !(JsInitializerClause::can_cast(node.kind())
+                        && node.parent().is_some_and(|parent| {
+                            JsPropertyClassMember::can_cast(parent.kind())
+                        }))
+                })
                 .filter(|x| !JsArrowFunctionExpression::can_cast(x.kind()))
                 .find_map(AnyJsControlFlowRoot::cast)?;
             if this_scope != current_this_scope {

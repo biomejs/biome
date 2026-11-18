@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validDefineComponentSetupArgument.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import { defineComponent, onMounted } from "vue";
+
+// Vue runs `sharedSetup` and ignores the `setup` option.
+defineComponent(sharedSetup, {
+	async setup() {
+		await doSomething();
+		onMounted(() => {});
+	},
+});
+
+```

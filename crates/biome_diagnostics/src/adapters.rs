@@ -52,27 +52,36 @@ impl<T: std::fmt::Display> fmt::Display for AsConsoleDisplay<'_, T> {
 #[derive(Debug)]
 pub struct IoError {
     error: io::Error,
+    category: &'static Category,
+}
+
+#[cfg(feature = "std")]
+impl IoError {
+    /// Sets the category used to classify the I/O error.
+    pub fn with_category(mut self, category: &'static Category) -> Self {
+        self.category = category;
+        self
+    }
 }
 
 #[cfg(feature = "std")]
 impl From<io::Error> for IoError {
     fn from(error: io::Error) -> Self {
-        Self { error }
+        Self {
+            error,
+            category: category!("internalError/io"),
+        }
     }
 }
 
 #[cfg(feature = "std")]
 impl Diagnostic for IoError {
     fn category(&self) -> Option<&'static Category> {
-        Some(category!("internalError/io"))
+        Some(self.category)
     }
 
     fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(fmt, "{}", self.error)
-    }
-
-    fn tags(&self) -> crate::DiagnosticTags {
-        crate::DiagnosticTags::INTERNAL
     }
 
     fn message(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
@@ -213,5 +222,17 @@ impl Diagnostic for NotifyError {
 impl From<notify::Error> for NotifyError {
     fn from(error: notify::Error) -> Self {
         Self { error }
+    }
+}
+
+#[cfg(all(test, feature = "std"))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn io_error_category_can_be_changed() {
+        let diagnostic = IoError::from(io::Error::other("error")).with_category(category!("fs/io"));
+
+        assert_eq!(diagnostic.category(), Some(category!("fs/io")));
     }
 }

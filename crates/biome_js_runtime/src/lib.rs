@@ -10,6 +10,7 @@ mod semantic;
 mod source;
 mod token;
 mod traversal;
+mod trivia;
 
 pub use context::{JsExecContext, JsPluginRule};
 pub use module_loader::JsModuleLoader;

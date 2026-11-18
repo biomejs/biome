@@ -87,12 +87,8 @@ impl Rule for UseVueEmitsValidatorReturn {
     type Options = UseVueEmitsValidatorReturnOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let range = ctx.query().validator_range()?;
-        let root = ctx.root();
-        if !root.syntax().text_range_with_trivia().contains_range(range) {
-            return None;
-        }
-        let function = AnyFunctionLike::cast(root.syntax().covering_element(range).into_node()?)?;
+        let validator = ctx.query().validator_node()?;
+        let function = AnyFunctionLike::cast(ctx.vue_model().node(&validator)?)?;
         let body = match function.body().ok()? {
             AnyJsFunctionBody::AnyJsExpression(expression) => {
                 return is_falsy(&expression).then_some(ValidatorReturns::OnlyFalsyValues);

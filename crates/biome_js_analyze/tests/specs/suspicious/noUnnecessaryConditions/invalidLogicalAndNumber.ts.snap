@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidLogicalAndNumber.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// `count && 1` is `number` when `count` is falsy, because `NaN` and `-0` are
+// falsy numbers too, so it is never `null`.
+
+function compare(count: number) {
+	return (count && 1) === null;
+}
+
+```
+
+# Diagnostics
+```
+invalidLogicalAndNumber.ts:6:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison always has the same result.
+  
+    5 │ function compare(count: number) {
+  > 6 │ 	return (count && 1) === null;
+      │ 	       ^^^^^^^^^^^^^^^^^^^^^
+    7 │ }
+    8 │ 
+  
+  i The operands' types make the outcome statically known.
+  
+  i Remove the comparison, or compare the values you meant to compare.
+  
+
+```

@@ -1,0 +1,223 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.tsx
+---
+# Input
+```tsx
+/* should generate diagnostics */
+
+class TypeWrappers extends React.Component<Props, State> {
+	update() {
+		this.state!.foo = "bar";
+		(this.state as any).foo = "bar";
+		(this.state satisfies State).foo = "bar";
+		(this.state.foo as string) = "bar";
+		this.state.foo! = "bar";
+	}
+}
+
+class Generic<T, U extends T> extends React.Component<Props<T>, State<U>> {
+	public override update(): void {
+		this.state.foo = "bar";
+	}
+}
+
+class TypedDelete extends React.Component<Props, State> {
+	update() {
+		delete this.state!.foo;
+		delete (this.state as any).foo;
+		delete (this.state.foo as any);
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.tsx:5:3 lint/nursery/noReactDirectStateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code changes this.state directly.
+  
+    3 │ class TypeWrappers extends React.Component<Props, State> {
+    4 │ 	update() {
+  > 5 │ 		this.state!.foo = "bar";
+      │ 		^^^^^^^^^^^^^^^
+    6 │ 		(this.state as any).foo = "bar";
+    7 │ 		(this.state satisfies State).foo = "bar";
+  
+  i React does not render the component again after a direct change, and a later setState() call can overwrite it.
+  
+  i Call this.setState() instead. Only assign to this.state directly in the constructor, to set the initial state.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:6:3 lint/nursery/noReactDirectStateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code changes this.state directly.
+  
+    4 │ 	update() {
+    5 │ 		this.state!.foo = "bar";
+  > 6 │ 		(this.state as any).foo = "bar";
+      │ 		^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 		(this.state satisfies State).foo = "bar";
+    8 │ 		(this.state.foo as string) = "bar";
+  
+  i React does not render the component again after a direct change, and a later setState() call can overwrite it.
+  
+  i Call this.setState() instead. Only assign to this.state directly in the constructor, to set the initial state.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:7:3 lint/nursery/noReactDirectStateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code changes this.state directly.
+  
+    5 │ 		this.state!.foo = "bar";
+    6 │ 		(this.state as any).foo = "bar";
+  > 7 │ 		(this.state satisfies State).foo = "bar";
+      │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 		(this.state.foo as string) = "bar";
+    9 │ 		this.state.foo! = "bar";
+  
+  i React does not render the component again after a direct change, and a later setState() call can overwrite it.
+  
+  i Call this.setState() instead. Only assign to this.state directly in the constructor, to set the initial state.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:8:4 lint/nursery/noReactDirectStateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code changes this.state directly.
+  
+     6 │ 		(this.state as any).foo = "bar";
+     7 │ 		(this.state satisfies State).foo = "bar";
+   > 8 │ 		(this.state.foo as string) = "bar";
+       │ 		 ^^^^^^^^^^^^^^
+     9 │ 		this.state.foo! = "bar";
+    10 │ 	}
+  
+  i React does not render the component again after a direct change, and a later setState() call can overwrite it.
+  
+  i Call this.setState() instead. Only assign to this.state directly in the constructor, to set the initial state.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:9:3 lint/nursery/noReactDirectStateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code changes this.state directly.
+  
+     7 │ 		(this.state satisfies State).foo = "bar";
+     8 │ 		(this.state.foo as string) = "bar";
+   > 9 │ 		this.state.foo! = "bar";
+       │ 		^^^^^^^^^^^^^^
+    10 │ 	}
+    11 │ }
+  
+  i React does not render the component again after a direct change, and a later setState() call can overwrite it.
+  
+  i Call this.setState() instead. Only assign to this.state directly in the constructor, to set the initial state.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:15:3 lint/nursery/noReactDirectStateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code changes this.state directly.
+  
+    13 │ class Generic<T, U extends T> extends React.Component<Props<T>, State<U>> {
+    14 │ 	public override update(): void {
+  > 15 │ 		this.state.foo = "bar";
+       │ 		^^^^^^^^^^^^^^
+    16 │ 	}
+    17 │ }
+  
+  i React does not render the component again after a direct change, and a later setState() call can overwrite it.
+  
+  i Call this.setState() instead. Only assign to this.state directly in the constructor, to set the initial state.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:21:3 lint/nursery/noReactDirectStateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code changes this.state directly.
+  
+    19 │ class TypedDelete extends React.Component<Props, State> {
+    20 │ 	update() {
+  > 21 │ 		delete this.state!.foo;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^
+    22 │ 		delete (this.state as any).foo;
+    23 │ 		delete (this.state.foo as any);
+  
+  i React does not render the component again after a direct change, and a later setState() call can overwrite it.
+  
+  i Call this.setState() instead. Only assign to this.state directly in the constructor, to set the initial state.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:22:3 lint/nursery/noReactDirectStateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code changes this.state directly.
+  
+    20 │ 	update() {
+    21 │ 		delete this.state!.foo;
+  > 22 │ 		delete (this.state as any).foo;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ 		delete (this.state.foo as any);
+    24 │ 	}
+  
+  i React does not render the component again after a direct change, and a later setState() call can overwrite it.
+  
+  i Call this.setState() instead. Only assign to this.state directly in the constructor, to set the initial state.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:23:3 lint/nursery/noReactDirectStateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code changes this.state directly.
+  
+    21 │ 		delete this.state!.foo;
+    22 │ 		delete (this.state as any).foo;
+  > 23 │ 		delete (this.state.foo as any);
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 	}
+    25 │ }
+  
+  i React does not render the component again after a direct change, and a later setState() call can overwrite it.
+  
+  i Call this.setState() instead. Only assign to this.state directly in the constructor, to set the initial state.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

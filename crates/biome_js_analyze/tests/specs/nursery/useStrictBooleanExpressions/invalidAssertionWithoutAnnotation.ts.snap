@@ -1,0 +1,63 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAssertionWithoutAnnotation.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// TypeScript ignores assertion functions declared as variables without a type
+// annotation (TS2775), so `value` keeps its declared type after the call.
+const assertDefined = (value: unknown): asserts value => {
+	if (!Boolean(value)) {
+		throw new Error();
+	}
+};
+
+function check(value: string | undefined) {
+	assertDefined(value);
+	if (value) {}
+}
+
+```
+
+# Diagnostics
+```
+invalidAssertionWithoutAnnotation.ts:11:16 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable string.
+  
+    10 │ function check(value: string | undefined) {
+  > 11 │ 	assertDefined(value);
+       │ 	              ^^^^^
+    12 │ 	if (value) {}
+    13 │ }
+  
+  i This check treats empty strings and nullish values alike.
+  
+  i Check for nullish values and empty strings explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAssertionWithoutAnnotation.ts:12:6 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable string.
+  
+    10 │ function check(value: string | undefined) {
+    11 │ 	assertDefined(value);
+  > 12 │ 	if (value) {}
+       │ 	    ^^^^^
+    13 │ }
+    14 │ 
+  
+  i This check treats empty strings and nullish values alike.
+  
+  i Check for nullish values and empty strings explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -49,6 +49,10 @@ pub struct TailwindUtility {
     pub properties: Box<[Text]>,
     /// The number of declarations in the rule, including nested rules.
     pub declaration_count: usize,
+    /// The property names of the rule's declarations, custom properties
+    /// included, in source order, or `None` when the rule holds more than
+    /// plain declarations, such as a nested rule or `@apply`.
+    pub declared_properties: Option<Box<[Text]>>,
 }
 
 /// A utility declared with `@utility <name>-*`, such as
@@ -60,6 +64,9 @@ pub struct TailwindFunctionalUtility {
     pub name: Text,
     /// The declarations of the rule, including nested rules, in source order.
     pub declarations: Box<[TailwindUtilityDeclaration]>,
+    /// Whether the rule holds only plain declarations, with no nested rule or
+    /// at-rule such as `@apply`.
+    pub has_only_declarations: bool,
 }
 
 /// A declaration of a [TailwindFunctionalUtility].
@@ -231,10 +238,30 @@ impl TailwindUtility {
                 properties.push(property_name.syntax().text_trimmed().to_string().into());
             }
         }
+        let declared_properties = has_only_declarations(block).then(|| {
+            block
+                .syntax()
+                .descendants()
+                .filter_map(CssDeclaration::cast)
+                .filter_map(|declaration| match declaration.property().ok()? {
+                    AnyCssProperty::CssGenericProperty(property) => Some(
+                        property
+                            .name()
+                            .ok()?
+                            .syntax()
+                            .text_trimmed()
+                            .to_string()
+                            .into(),
+                    ),
+                    _ => None,
+                })
+                .collect()
+        });
         Self {
             name: name.syntax().text_trimmed().to_string().into(),
             properties: properties.into_boxed_slice(),
             declaration_count,
+            declared_properties,
         }
     }
 }
@@ -273,8 +300,43 @@ impl TailwindFunctionalUtility {
         Self {
             name: name.syntax().text_trimmed().to_string().into(),
             declarations,
+            has_only_declarations: has_only_declarations(block),
         }
     }
+}
+
+/// Whether `block` holds only plain declarations, with no nested rule or
+/// at-rule such as `@apply`, and no declaration inside a value, such as
+/// `--x: 1` in `if(style(--x: 1): red)`.
+fn has_only_declarations(block: &AnyCssDeclarationOrRuleBlock) -> bool {
+    let AnyCssDeclarationOrRuleBlock::CssDeclarationOrRuleBlock(block) = block else {
+        return false;
+    };
+    let mut declaration_count = 0;
+    for item in block.items() {
+        match item {
+            AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(declaration) => {
+                let is_plain = declaration
+                    .declaration()
+                    .and_then(|declaration| declaration.property())
+                    .is_ok_and(|property| {
+                        matches!(property, AnyCssProperty::CssGenericProperty(_))
+                    });
+                if !is_plain {
+                    return false;
+                }
+                declaration_count += 1;
+            }
+            AnyCssDeclarationOrRule::CssEmptyDeclaration(_) => {}
+            _ => return false,
+        }
+    }
+    block
+        .syntax()
+        .descendants()
+        .filter_map(CssDeclaration::cast)
+        .count()
+        == declaration_count
 }
 
 impl TailwindValueFunction {

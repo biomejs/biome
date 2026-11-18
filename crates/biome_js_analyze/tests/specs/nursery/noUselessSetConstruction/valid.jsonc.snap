@@ -1,0 +1,1227 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsonc
+---
+# Input
+```cjs
+/* should not generate diagnostics */
+unknown.union(new Set(unknownOther))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(other)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set([1, 2]))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(records))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(records.values()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(records.entries()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(other.entries()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(unknown))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(unknown.keys()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); unknown.union(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); records.union(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(records.keys()).union(other)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).union(unknown)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).union((selected.clear(), other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).union(new Set([selected.clear()]))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected?.union(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union?.(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected["union"](new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(other), extra)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(...[new Set(other)])
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(...other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(other, extra))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(other.keys(extra)))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(other?.keys()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(other.keys?.()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+unknown.intersection(new Set(unknownOther))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(other)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(new Set([1, 2]))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(new Set(records))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(new Set(records.values()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(new Set(records.entries()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(new Set(other.entries()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(new Set(unknown))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(new Set(unknown.keys()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); unknown.intersection(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); records.intersection(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(records.keys()).intersection(other)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).intersection(unknown)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).intersection((selected.clear(), other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).intersection(new Set([selected.clear()]))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected?.intersection(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection?.(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected["intersection"](new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(new Set(other), extra)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(...[new Set(other)])
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(new Set(...other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(new Set(other, extra))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(new Set(other.keys(extra)))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(new Set(other?.keys()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.intersection(new Set(other.keys?.()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+unknown.difference(new Set(unknownOther))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(other)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(new Set([1, 2]))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(new Set(records))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(new Set(records.values()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(new Set(records.entries()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(new Set(other.entries()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(new Set(unknown))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(new Set(unknown.keys()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); unknown.difference(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); records.difference(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(records.keys()).difference(other)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).difference(unknown)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).difference((selected.clear(), other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).difference(new Set([selected.clear()]))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected?.difference(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference?.(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected["difference"](new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(new Set(other), extra)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(...[new Set(other)])
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(new Set(...other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(new Set(other, extra))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(new Set(other.keys(extra)))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(new Set(other?.keys()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.difference(new Set(other.keys?.()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+unknown.symmetricDifference(new Set(unknownOther))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(other)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(new Set([1, 2]))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(new Set(records))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(new Set(records.values()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(new Set(records.entries()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(new Set(other.entries()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(new Set(unknown))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(new Set(unknown.keys()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); unknown.symmetricDifference(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); records.symmetricDifference(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(records.keys()).symmetricDifference(other)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).symmetricDifference(unknown)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).symmetricDifference((selected.clear(), other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).symmetricDifference(new Set([selected.clear()]))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected?.symmetricDifference(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference?.(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected["symmetricDifference"](new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(new Set(other), extra)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(...[new Set(other)])
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(new Set(...other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(new Set(other, extra))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(new Set(other.keys(extra)))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(new Set(other?.keys()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.symmetricDifference(new Set(other.keys?.()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+unknown.isSubsetOf(new Set(unknownOther))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(other)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(new Set([1, 2]))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(new Set(records))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(new Set(records.values()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(new Set(records.entries()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(new Set(other.entries()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(new Set(unknown))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(new Set(unknown.keys()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); unknown.isSubsetOf(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); records.isSubsetOf(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(records.keys()).isSubsetOf(other)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).isSubsetOf(unknown)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).isSubsetOf((selected.clear(), other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).isSubsetOf(new Set([selected.clear()]))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected?.isSubsetOf(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf?.(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected["isSubsetOf"](new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(new Set(other), extra)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(...[new Set(other)])
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(new Set(...other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(new Set(other, extra))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(new Set(other.keys(extra)))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(new Set(other?.keys()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSubsetOf(new Set(other.keys?.()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+unknown.isSupersetOf(new Set(unknownOther))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(other)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(new Set([1, 2]))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(new Set(records))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(new Set(records.values()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(new Set(records.entries()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(new Set(other.entries()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(new Set(unknown))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(new Set(unknown.keys()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); unknown.isSupersetOf(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); records.isSupersetOf(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(records.keys()).isSupersetOf(other)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).isSupersetOf(unknown)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).isSupersetOf((selected.clear(), other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).isSupersetOf(new Set([selected.clear()]))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected?.isSupersetOf(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf?.(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected["isSupersetOf"](new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(new Set(other), extra)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(...[new Set(other)])
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(new Set(...other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(new Set(other, extra))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(new Set(other.keys(extra)))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(new Set(other?.keys()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isSupersetOf(new Set(other.keys?.()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+unknown.isDisjointFrom(new Set(unknownOther))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(other)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(new Set([1, 2]))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(new Set(records))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(new Set(records.values()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(new Set(records.entries()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(new Set(other.entries()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(new Set(unknown))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(new Set(unknown.keys()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); unknown.isDisjointFrom(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); records.isDisjointFrom(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(records.keys()).isDisjointFrom(other)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).isDisjointFrom(unknown)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).isDisjointFrom((selected.clear(), other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).isDisjointFrom(new Set([selected.clear()]))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected?.isDisjointFrom(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom?.(new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected["isDisjointFrom"](new Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(new Set(other), extra)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(...[new Set(other)])
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(new Set(...other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(new Set(other, extra))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(new Set(other.keys(extra)))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(new Set(other?.keys()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.isDisjointFrom(new Set(other.keys?.()))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.isSubsetOf(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.isSupersetOf(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.isDisjointFrom(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(other)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).add(3)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected).has(3)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(other).unrelated)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.union)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(unknown.union(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(records.union(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.union())
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.union(other, extra))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected?.union(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.union?.(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected["union"](other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); new Set(selected.union(other), extra)
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new WeakSet(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(Set(other))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set())
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(null))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set(customSetLike))
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const Set = CustomSet; const selected = new Set(); selected.union(new Set(selected));
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+class CustomSet extends Set {} const selected = new CustomSet(); new Set(selected.union(other));
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+let selected = new Set(); new Set(selected.union(other));
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const [other] = new Set([[2, 3]]); const selected = new Set([1, 2]); selected.union(new Set(other));
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const [...other] = new Set([2, 3]); const selected = new Set([1, 2]); selected.union(new Set(other));
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const [records] = new Map([[2, 3]]); const selected = new Set([1, 2]); selected.intersection(new Set(records.keys()));
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const {missing: other = [2, 3]} = new Set(); const selected = new Set([1, 2]); selected.union(new Set(other));
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); selected.union(new Set([...other])); selected.intersection(new Set(records.keys().toArray())); new Set(new Set([...selected, ...other]));
+```

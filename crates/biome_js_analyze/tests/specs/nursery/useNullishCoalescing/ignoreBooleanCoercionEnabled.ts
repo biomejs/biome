@@ -39,3 +39,14 @@ assignPlain ||= 'default';
 
 // Inside a non-Boolean call: SHOULD generate a diagnostic.
 const r7 = identity(a || 'default');
+
+// Boolean shadowed by a parameter: SHOULD generate a diagnostic.
+function shadowedByParameter(Boolean: (value: unknown) => boolean) {
+	return Boolean(a || 'default');
+}
+
+// Boolean shadowed by a local binding: SHOULD generate a diagnostic.
+function shadowedByLocal() {
+	const Boolean = (value: unknown) => !!value;
+	return Boolean(a || 'default');
+}

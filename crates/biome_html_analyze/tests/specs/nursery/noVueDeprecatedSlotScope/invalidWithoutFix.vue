@@ -33,4 +33,7 @@
   <component :is="list">
     <template slot-scope="{a}">{{ a }}</template>
   </component>
+  <math>
+    <template slot-scope="{a}">{{ a }}</template>
+  </math>
 </template>

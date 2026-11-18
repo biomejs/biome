@@ -1,0 +1,37 @@
+/* should not generate diagnostics */
+Buffer.alloc(5);
+Buffer.allocUnsafe(5);
+Buffer.from([1, 2, 3]);
+Buffer.alloc(res.body.amount);
+Buffer.from(res.body.values);
+Buffer.isBuffer(value);
+new Uint8Array(5);
+foo.Buffer(5);
+new foo.Buffer(5);
+
+function localBuffer(Buffer) {
+	new Buffer(5);
+	Buffer(5);
+}
+
+{
+	class Buffer {}
+	new Buffer();
+}
+
+const NotBuffer = require("other").Buffer;
+new NotBuffer(5);
+const { Buffer: OtherBuffer } = require("other");
+new OtherBuffer(5);
+const { from } = require("buffer");
+from([1, 2, 3]);
+const nested = require("buffer").Buffer.from;
+nested([1, 2, 3]);
+
+function shadowProcess(process) {
+	new (process.getBuiltinModule("buffer").Buffer)(5);
+}
+
+function shadowGlobal(global) {
+	new global.Buffer(5);
+}

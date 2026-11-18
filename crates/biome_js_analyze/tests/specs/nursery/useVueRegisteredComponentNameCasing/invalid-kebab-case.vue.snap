@@ -1,0 +1,131 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-kebab-case.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+export default {
+  components: {
+    FooBar,
+    "my-component": MyComponent,
+    TodoItem: todoItem,
+    fooBaz,
+    sideBar: SideBar,
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-kebab-case.vue:5:5 lint/nursery/useVueRegisteredComponentNameCasing  FIXABLE  ━━━━━━━━━━━━━━
+
+  × The component name FooBar isn't in kebab-case.
+  
+    3 │ export default {
+    4 │   components: {
+  > 5 │     FooBar,
+      │     ^^^^^^
+    6 │     "my-component": MyComponent,
+    7 │     TodoItem: todoItem,
+  
+  i Using one naming style for all registered components makes them easier to find and to use.
+  
+  i Rename the component to kebab-case.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to foo-bar.
+  
+    5 │ ····"foo-bar":·FooBar,
+      │     +++++++++++       
+
+```
+
+```
+invalid-kebab-case.vue:7:5 lint/nursery/useVueRegisteredComponentNameCasing  FIXABLE  ━━━━━━━━━━━━━━
+
+  × The component name TodoItem isn't in kebab-case.
+  
+    5 │     FooBar,
+    6 │     "my-component": MyComponent,
+  > 7 │     TodoItem: todoItem,
+      │     ^^^^^^^^
+    8 │     fooBaz,
+    9 │     sideBar: SideBar,
+  
+  i Using one naming style for all registered components makes them easier to find and to use.
+  
+  i Rename the component to kebab-case.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to todo-item.
+  
+     5  5 │       FooBar,
+     6  6 │       "my-component": MyComponent,
+     7    │ - ····TodoItem:·todoItem,
+        7 │ + ····"todo-item":·todoItem,
+     8  8 │       fooBaz,
+     9  9 │       sideBar: SideBar,
+  
+
+```
+
+```
+invalid-kebab-case.vue:8:5 lint/nursery/useVueRegisteredComponentNameCasing  FIXABLE  ━━━━━━━━━━━━━━
+
+  × The component name fooBaz isn't in kebab-case.
+  
+     6 │     "my-component": MyComponent,
+     7 │     TodoItem: todoItem,
+   > 8 │     fooBaz,
+       │     ^^^^^^
+     9 │     sideBar: SideBar,
+    10 │   },
+  
+  i Using one naming style for all registered components makes them easier to find and to use.
+  
+  i Rename the component to kebab-case.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to foo-baz.
+  
+    8 │ ····"foo-baz":·fooBaz,
+      │     +++++++++++       
+
+```
+
+```
+invalid-kebab-case.vue:9:5 lint/nursery/useVueRegisteredComponentNameCasing  FIXABLE  ━━━━━━━━━━━━━━
+
+  × The component name sideBar isn't in kebab-case.
+  
+     7 │     TodoItem: todoItem,
+     8 │     fooBaz,
+   > 9 │     sideBar: SideBar,
+       │     ^^^^^^^
+    10 │   },
+    11 │ };
+  
+  i Using one naming style for all registered components makes them easier to find and to use.
+  
+  i Rename the component to kebab-case.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to side-bar.
+  
+     7  7 │       TodoItem: todoItem,
+     8  8 │       fooBaz,
+     9    │ - ····sideBar:·SideBar,
+        9 │ + ····"side-bar":·SideBar,
+    10 10 │     },
+    11 11 │   };
+  
+
+```

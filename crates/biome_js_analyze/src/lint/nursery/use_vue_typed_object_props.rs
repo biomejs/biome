@@ -6,11 +6,11 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsArrayElement, AnyJsExpression, AnyJsRoot, JsObjectExpression, JsObjectMemberList,
+    AnyJsArrayElement, AnyJsExpression, JsObjectExpression, JsObjectMemberList,
     JsPropertyObjectMember, JsSyntaxKind,
 };
 use biome_languages::JsFileSource;
-use biome_rowan::{AstNode, AstSeparatedList, NodeOrToken, TextRange};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use biome_rule_options::use_vue_typed_object_props::UseVueTypedObjectPropsOptions;
 use biome_vue_semantic::PropForm;
 
@@ -91,8 +91,9 @@ impl Rule for UseVueTypedObjectProps {
         }
         let prop = ctx.query();
         let Some(runtime_type) = prop
-            .runtime_type_range()
-            .and_then(|range| expression_at(&ctx.root(), range))
+            .runtime_type_node()
+            .and_then(|runtime_type| ctx.vue_model().node(&runtime_type))
+            .and_then(AnyJsExpression::cast)
         else {
             return Box::default();
         };
@@ -168,19 +169,6 @@ impl biome_console::fmt::Display for UntypedConstructor {
             Self::Array => "Array",
         })
     }
-}
-
-/// Returns the expression in `root` whose range is exactly `range`.
-fn expression_at(root: &AnyJsRoot, range: TextRange) -> Option<AnyJsExpression> {
-    let start = match root.syntax().covering_element(range) {
-        NodeOrToken::Node(node) => node,
-        NodeOrToken::Token(token) => token.parent()?,
-    };
-    start
-        .ancestors()
-        .take_while(|node| node.text_trimmed_range() == range)
-        .filter_map(AnyJsExpression::cast)
-        .last()
 }
 
 /// Returns `true` when `runtime_type` is the `type` member of a prop options object that is

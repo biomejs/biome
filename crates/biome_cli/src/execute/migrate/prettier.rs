@@ -4,7 +4,7 @@ use crate::diagnostics::MigrationDiagnostic;
 use anyhow::{Context, Error};
 use biome_configuration::html::HtmlFormatterConfiguration;
 use biome_configuration::javascript::JsFormatterConfiguration;
-use biome_configuration::markdown::MarkdownFormatterConfiguration;
+use biome_configuration::markdown::{MarkdownFormatterConfiguration, MarkdownParserConfiguration};
 use biome_configuration::{HtmlConfiguration, MarkdownConfiguration};
 use biome_console::{Console, ConsoleExt, markup};
 use biome_deserialize::json::deserialize_from_json_str;
@@ -324,7 +324,16 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
 
         result.javascript = Some(js_config);
         result.html = Some(html_config);
-        result.markdown = value.embedded_language_formatting.map(Into::into);
+        result.markdown = Some(MarkdownConfiguration {
+            parser: Some(MarkdownParserConfiguration {
+                // Prettier parses YAML frontmatter in Markdown, but Biome does not by default.
+                frontmatter: Some(true.into()),
+                ..Default::default()
+            }),
+            ..value
+                .embedded_language_formatting
+                .map_or_default(Into::into)
+        });
         if !value.overrides.is_empty() {
             let mut overrides = biome_configuration::Overrides::default();
             for override_elt in value.overrides {
@@ -615,6 +624,31 @@ mod tests {
             configuration.embedded_language_formatting,
             Some(EmbeddedLanguageFormatting::Off)
         );
+    }
+
+    #[test]
+    fn migrate_markdown_frontmatter() {
+        for (embedded_language_formatting, expected_format_embeds) in [
+            (None, None),
+            (Some(EmbeddedLanguageFormatting::Auto), Some(true.into())),
+            (Some(EmbeddedLanguageFormatting::Off), Some(false.into())),
+        ] {
+            let configuration =
+                biome_configuration::Configuration::try_from(PrettierConfiguration {
+                    embedded_language_formatting,
+                    ..Default::default()
+                })
+                .unwrap();
+            let markdown = configuration.markdown.unwrap();
+
+            assert_eq!(markdown.parser.unwrap().frontmatter, Some(true.into()));
+            assert_eq!(
+                markdown
+                    .formatter
+                    .and_then(|formatter| formatter.format_embeds),
+                expected_format_embeds
+            );
+        }
     }
 
     #[test]

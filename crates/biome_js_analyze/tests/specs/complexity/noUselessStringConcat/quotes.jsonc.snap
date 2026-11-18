@@ -31,25 +31,6 @@ quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━�
 const s = 'a"${' + 'b}"';
 ```
 
-# Diagnostics
-```
-quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Useless string concatenation.
-  
-  > 1 │ const s = 'a"${' + 'b}"';
-      │           ^^^^^^^^^^^^^^
-  
-  i Consider turning the expression into a single string to improve readability and runtime performance.
-  
-  i Safe fix: Remove the useless concatenation
-  
-  - const·s·=·'a"${'·+·'b}"';
-  + const·s·=·"a\"${b}\"";
-  
-
-```
-
 # Input
 ```cjs
 const s = 'a' + '"b';
@@ -417,19 +398,19 @@ const s = foo + 'a' + 'b"' + 'c';
 
 # Diagnostics
 ```
-quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+quotes.jsonc:1:17 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Useless string concatenation.
   
   > 1 │ const s = foo + 'a' + 'b"' + 'c';
-      │           ^^^^^^^^^^^^^^^^^^^^^^
+      │                 ^^^^^^^^^^^^^^^^
   
   i Consider turning the expression into a single string to improve readability and runtime performance.
   
   i Safe fix: Remove the useless concatenation
   
   - const·s·=·foo·+·'a'·+·'b"'·+·'c';
-  + const·s·=·foo·+·'a'·+·"b\"c";
+  + const·s·=·foo·+·"ab\"c";
   
 
 ```
@@ -441,19 +422,19 @@ const s = (foo + 'a') + ('b"' + 'c');
 
 # Diagnostics
 ```
-quotes.jsonc:1:26 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Useless string concatenation.
   
   > 1 │ const s = (foo + 'a') + ('b"' + 'c');
-      │                          ^^^^^^^^^^
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^
   
   i Consider turning the expression into a single string to improve readability and runtime performance.
   
   i Safe fix: Remove the useless concatenation
   
   - const·s·=·(foo·+·'a')·+·('b"'·+·'c');
-  + const·s·=·(foo·+·'a')·+·("b\"c");
+  + const·s·=·foo·+·"ab\"c";
   
 
 ```

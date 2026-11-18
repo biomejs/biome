@@ -16,9 +16,9 @@ use biome_js_syntax::{
     AnyJsExportClause, AnyJsExpression, AnyJsIdentifierReference, AnyJsModuleItem,
     AnyJsObjectAssignmentPatternMember, AnyJsObjectBindingPatternMember, AnyJsObjectMember,
     AnyJsParameter, AnyJsRoot, AnyJsStatement, AnyJsVueGenericTypeParameters,
-    AnyTsIdentifierBinding, AnyTsType, JsAssignmentExpression, JsCallExpression, JsExport,
-    JsIdentifierAssignment, JsImport, JsModuleItemList, JsParameterList, JsReferenceIdentifier,
-    JsStaticMemberExpression, JsSvelteDeclarationRoot, JsSvelteSnippetRoot, JsSyntaxToken,
+    AnyTsIdentifierBinding, AnyTsType, JsCallExpression, JsExport, JsIdentifierAssignment,
+    JsImport, JsModuleItemList, JsParameterList, JsReferenceIdentifier, JsStaticMemberExpression,
+    JsSvelteDeclarationRoot, JsSvelteLegacyConstRoot, JsSvelteSnippetRoot, JsSyntaxToken,
     JsVariableStatement, JsxReferenceIdentifier,
 };
 use biome_languages::html::HtmlVariant;
@@ -183,7 +183,7 @@ fn collect_embedded_bindings(
         builder.visit_vue_html_root(&html_root, snippets);
         builder.has_unknown_vue_directive_options |= has_external_script_element(&html_root);
     } else if host_file_source.is_svelte() {
-        builder.visit_svelte_html_root(&html_root);
+        builder.visit_svelte_html_root(&html_root, snippets);
     }
 
     for snippet in snippets {
@@ -286,7 +286,7 @@ fn collect_embedded_references(
         .is_some_and(|s| s.is_svelte());
 
     let mut builder = EmbeddedReferencesBuilder::new();
-    let generic_names: Vec<_> = vue_generic_parameter_names(snippets)
+    let generic_names: Vec<_> = generic_parameter_names(snippets)
         .map(|token| token.token_text_trimmed())
         .collect();
 
@@ -337,11 +337,9 @@ fn build_type_references(builder: &EmbeddedReferencesBuilder) -> Vec<EmbeddedTyp
         .collect()
 }
 
-/// Returns the name tokens of the type parameters declared by the `generic` attribute of a
-/// Vue `<script setup>`.
-///
-/// A `generic` attribute that fails to parse declares no names.
-fn vue_generic_parameter_names<'a>(
+/// Returns the names declared by Vue `generic` and Svelte `generics`
+/// attributes. An attribute that fails to parse declares no names.
+fn generic_parameter_names<'a>(
     snippets: &'a [EmbeddedSnippet],
 ) -> impl Iterator<Item = JsSyntaxToken> + 'a {
     snippets
@@ -350,7 +348,7 @@ fn vue_generic_parameter_names<'a>(
             snippet
                 .file_source
                 .to_js_file_source()
-                .is_some_and(|source| source.is_vue_generics_list())
+                .is_some_and(|source| source.is_generics_list())
         })
         .filter_map(|snippet| {
             let root = snippet.parse.tree::<AnyJsRoot>();
@@ -529,12 +527,12 @@ impl EmbeddedBindingsBuilder {
             }
         }
 
-        for token in vue_generic_parameter_names(snippets) {
+        for token in generic_parameter_names(snippets) {
             self.register_type_only_binding(token.text_trimmed_range(), token.token_text_trimmed());
         }
     }
 
-    fn visit_svelte_html_root(&mut self, root: &HtmlRoot) {
+    fn visit_svelte_html_root(&mut self, root: &HtmlRoot, snippets: &[EmbeddedSnippet]) {
         for node in root.syntax().descendants() {
             let Some(block) = AnySvelteBlock::cast_ref(&node) else {
                 continue;
@@ -571,6 +569,10 @@ impl EmbeddedBindingsBuilder {
                     }
                 }
             }
+        }
+
+        for token in generic_parameter_names(snippets) {
+            self.register_type_only_binding(token.text_trimmed_range(), token.token_text_trimmed());
         }
     }
 
@@ -746,8 +748,8 @@ impl EmbeddedBindingsBuilder {
 
         let kinds = JsModuleItemList::KIND_SET
             .union(JsCallExpression::KIND_SET)
-            .union(JsAssignmentExpression::KIND_SET)
             .union(JsSvelteSnippetRoot::KIND_SET)
+            .union(JsSvelteLegacyConstRoot::KIND_SET)
             .union(JsSvelteDeclarationRoot::KIND_SET);
 
         for event in root.syntax().preorder_of_kinds(kinds) {
@@ -767,10 +769,6 @@ impl EmbeddedBindingsBuilder {
                             // TODO: Angular support
                             HtmlVariant::Angular => {}
                         }
-                    } else if let Some(assign) = JsAssignmentExpression::cast_ref(&node)
-                        && host_file_source.is_svelte()
-                    {
-                        self.visit_svelte_const_assignment(&assign, embed_block_kind);
                     } else if let Some(root) = JsSvelteSnippetRoot::cast_ref(&node)
                         && host_file_source.is_svelte()
                     {
@@ -779,6 +777,10 @@ impl EmbeddedBindingsBuilder {
                         && host_file_source.is_svelte()
                     {
                         self.visit_svelte_declaration(&root, embed_block_kind);
+                    } else if let Some(root) = JsSvelteLegacyConstRoot::cast_ref(&node)
+                        && host_file_source.is_svelte()
+                    {
+                        self.visit_svelte_legacy_const_declaration(&root, embed_block_kind);
                     }
                 }
                 WalkEvent::Leave(_) => {}
@@ -787,21 +789,6 @@ impl EmbeddedBindingsBuilder {
 
         self.is_vue_source = previous_is_vue_source;
         self.is_vue_setup = previous_is_vue_setup;
-    }
-
-    fn visit_svelte_const_assignment(
-        &mut self,
-        assign: &JsAssignmentExpression,
-        embed_block_kind: Option<&EmbeddedBlockKind>,
-    ) -> Option<()> {
-        let EmbeddedBlockKind::Svelte(SvelteBlockKind::Const) = embed_block_kind? else {
-            return None;
-        };
-        let left = assign.left().ok()?;
-        let ident = left.as_any_js_assignment()?.as_js_identifier_assignment()?;
-        let token = ident.name_token().ok()?;
-        self.register_binding(token.text_trimmed_range(), token.token_text_trimmed());
-        Some(())
     }
 
     fn visit_svelte_snippet_declaration(
@@ -866,6 +853,19 @@ impl EmbeddedBindingsBuilder {
         }
 
         Some(())
+    }
+
+    fn visit_svelte_legacy_const_declaration(
+        &mut self,
+        root: &JsSvelteLegacyConstRoot,
+        embed_block_kind: Option<&EmbeddedBlockKind>,
+    ) -> Option<()> {
+        let EmbeddedBlockKind::Svelte(SvelteBlockKind::Const) = embed_block_kind? else {
+            return None;
+        };
+        let declarator = root.declarator().ok()?;
+        let declarator = declarator.as_js_variable_declarator()?;
+        self.visit_any_js_binding_pattern(&declarator.id().ok()?)
     }
 
     fn visit_svelte_block_call_expressions(

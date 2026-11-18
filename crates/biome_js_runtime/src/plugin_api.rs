@@ -1,19 +1,34 @@
 use crate::ast::JsAstNode;
 use crate::kind_set::{JsNodeKindSet, JsTokenKindSet};
 use crate::mutation::{JsMutation, create_mutation};
-use crate::token::factory_token;
+use crate::token::{JsAstToken, factory_token};
+use crate::trivia::JsTriviaPiece;
 use biome_analyze::{PluginActionData, PluginDiagnosticEntry, RuleDiagnostic};
 use biome_diagnostics::{Applicability, Severity, category};
 use biome_js_syntax::{JsLanguage, JsSyntaxNode};
+use biome_text_size::TextRange;
 use boa_engine::module::SyntheticModuleInitializer;
 use boa_engine::object::builtins::JsArray;
-use boa_engine::object::{FunctionObjectBuilder, ObjectInitializer};
+use boa_engine::object::{FunctionObjectBuilder, JsObject, ObjectInitializer};
 use boa_engine::property::Attribute;
 use boa_engine::{
     Context, JsNativeError, JsResult, JsString, JsValue, Module, NativeFunction, js_string,
 };
 use std::cell::RefCell;
 use std::rc::Rc;
+
+fn boolean_option(object: &JsObject, name: &str, context: &mut Context) -> JsResult<bool> {
+    let value = object.get(JsString::from(name), context)?;
+    if value.is_undefined() {
+        Ok(false)
+    } else {
+        value.as_boolean().ok_or_else(|| {
+            JsNativeError::typ()
+                .with_message(format!("The `{name}` query option must be a boolean."))
+                .into()
+        })
+    }
+}
 
 pub(crate) struct JsPluginApi {
     diagnostics: Rc<RefCell<Vec<PluginDiagnosticEntry>>>,
@@ -35,23 +50,36 @@ impl JsPluginApi {
         // SAFETY: The closure doesn't capture any GC-managed values.
         let register_diagnostic = FunctionObjectBuilder::new(context.realm(), unsafe {
             NativeFunction::from_closure(move |_this, args, context| {
-                let (node, severity, message, fix) = match args {
-                    [node, severity, message] => (node, severity, message, None),
-                    [node, severity, message, fix] => (node, severity, message, Some(fix)),
+                let (target, severity, message, fix) = match args {
+                    [target, severity, message] => (target, severity, message, None),
+                    [target, severity, message, fix] => (target, severity, message, Some(fix)),
                     _ => return Err(JsNativeError::typ()
                         .with_message(
-                            "registerDiagnostic() requires a node, severity, and message, with an optional fourth fix argument. Call registerDiagnostic(node, severity, message, fix).",
+                            "registerDiagnostic() requires a node, token, or trivia piece, a severity, and a message, with an optional fourth fix argument. Call registerDiagnostic(element, severity, message, fix).",
                         )
                         .into()),
                 };
 
-                let Some(node) = JsAstNode::from_value(node) else {
+                let Some((range, root)) = Self::diagnostic_target(target) else {
                     return Err(JsNativeError::typ()
                         .with_message(
-                            "The first argument to registerDiagnostic() is not a Biome node. Pass the node supplied to run() or a node reached through its fields or traversal methods.",
+                            "The first argument to registerDiagnostic() is not a Biome node, token, or trivia piece. Pass the node supplied to run(), or a node, token, or trivia piece reached from it.",
                         )
                         .into());
                 };
+                // A token or trivia piece outside the analyzed source, such as one
+                // created with factory.token(), has no range in that source.
+                let is_node = target
+                    .as_object()
+                    .is_some_and(|object| object.downcast_ref::<JsAstNode>().is_some());
+                if !is_node
+                    && let Some(source) = source.borrow().as_ref()
+                    && root.as_ref() != Some(source)
+                {
+                    return Err(JsNativeError::typ()
+                        .with_message("The diagnostic's token or trivia piece does not belong to the source being analyzed. Pass a token or trivia piece read from that source, not one created with factory.token() or read from an updated node.")
+                        .into());
+                }
 
                 let severity =
                     match severity.to_string(context)?.to_std_string_lossy().as_str() {
@@ -69,7 +97,7 @@ impl JsPluginApi {
 
                 let diagnostic = RuleDiagnostic::new(
                     category!("plugin"),
-                    node.node.text_trimmed_range(),
+                    range,
                     message.to_string(context)?.to_std_string_lossy(),
                 )
                 .with_severity(severity);
@@ -78,7 +106,7 @@ impl JsPluginApi {
                     Some(fix) => {
                         let source = source.borrow().clone().ok_or_else(|| JsNativeError::typ()
                             .with_message("A code fix can only be reported while Biome is analyzing source code. Call registerDiagnostic() with the fix from run()."))?;
-                        Self::code_fix(node, fix, &source, context)?
+                        Self::code_fix(root, fix, &source, context)?
                     }
                     None => None,
                 };
@@ -99,12 +127,12 @@ impl JsPluginApi {
         .name("ast")
         .build();
 
-        let semantic = FunctionObjectBuilder::new(
+        let grit = FunctionObjectBuilder::new(
             context.realm(),
-            NativeFunction::from_fn_ptr(Self::semantic_query),
+            NativeFunction::from_fn_ptr(Self::grit_query),
         )
         .length(1)
-        .name("semantic")
+        .name("grit")
         .build();
 
         let define_rule = FunctionObjectBuilder::new(
@@ -150,7 +178,7 @@ impl JsPluginApi {
             &[
                 js_string!("registerDiagnostic"),
                 js_string!("ast"),
-                js_string!("semantic"),
+                js_string!("grit"),
                 js_string!("defineRule"),
                 js_string!("createMutation"),
                 js_string!("factory"),
@@ -162,7 +190,7 @@ impl JsPluginApi {
                  (
                     register_diagnostic,
                     ast,
-                    semantic,
+                    grit,
                     define_rule,
                     create_mutation,
                     factory,
@@ -175,7 +203,7 @@ impl JsPluginApi {
                         register_diagnostic.clone().into(),
                     )?;
                     module.set_export(&js_string!("ast"), ast.clone().into())?;
-                    module.set_export(&js_string!("semantic"), semantic.clone().into())?;
+                    module.set_export(&js_string!("grit"), grit.clone().into())?;
                     module.set_export(&js_string!("defineRule"), define_rule.clone().into())?;
                     module.set_export(
                         &js_string!("createMutation"),
@@ -188,7 +216,7 @@ impl JsPluginApi {
                 (
                     register_diagnostic,
                     ast,
-                    semantic,
+                    grit,
                     define_rule,
                     create_mutation,
                     factory,
@@ -202,28 +230,80 @@ impl JsPluginApi {
         )
     }
 
-    /// Implements `ast(...kinds)`: builds an AST query object from syntax kind names.
+    /// Implements `ast(...kinds, options)`: builds an AST query object from syntax kind names.
     fn ast_query(_this: &JsValue, args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
         Self::node_query("ast", args, context)
     }
 
-    fn semantic_query(
-        _this: &JsValue,
-        args: &[JsValue],
-        context: &mut Context,
-    ) -> JsResult<JsValue> {
-        Self::node_query("semantic", args, context)
+    /// Implements `grit(pattern, options)`: builds a Grit query object from a pattern string.
+    fn grit_query(_this: &JsValue, args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
+        let (pattern, options) = match args {
+            [pattern] => (pattern, None),
+            [pattern, options] if options.is_undefined() => (pattern, None),
+            [pattern, options] => {
+                let Some(options) = options.as_object() else {
+                    return Err(JsNativeError::typ()
+                        .with_message("grit() options must be an object. Pass { semantic: true } as the second argument.")
+                        .into());
+                };
+                (pattern, Some(options))
+            }
+            _ => {
+                return Err(JsNativeError::typ()
+                    .with_message("grit() requires one Grit pattern string and an optional options object. Pass grit(\"`console.log($args)`\", { semantic: true }).")
+                    .into());
+            }
+        };
+        let Some(pattern) = pattern.as_string() else {
+            return Err(JsNativeError::typ()
+                .with_message("grit() requires a Grit pattern string. Pass a string such as \"`console.log($args)`\", not a node or other value.")
+                .into());
+        };
+        let requires_semantic = match options.as_ref() {
+            Some(options) => boolean_option(options, "semantic", context)?,
+            None => false,
+        };
+
+        let query = ObjectInitializer::new(context)
+            .property(
+                js_string!("type"),
+                JsString::from("grit"),
+                Attribute::ENUMERABLE,
+            )
+            .property(
+                js_string!("pattern"),
+                JsValue::from(pattern.clone()),
+                Attribute::ENUMERABLE,
+            )
+            .property(
+                js_string!("requiresSemantic"),
+                JsValue::from(requires_semantic),
+                Attribute::ENUMERABLE,
+            )
+            .build();
+
+        Ok(query.into())
     }
 
     fn node_query(query_type: &str, args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
-        if args.is_empty() {
+        let (kinds_args, options) = match args.split_last() {
+            Some((last, rest)) if last.is_undefined() => (rest, None),
+            Some((last, rest)) if last.as_object().is_some() => (rest, last.as_object()),
+            _ => (args, None),
+        };
+        let requires_semantic = match options.as_ref() {
+            Some(options) => boolean_option(options, "semantic", context)?,
+            None => false,
+        };
+
+        if kinds_args.is_empty() {
             return Err(JsNativeError::typ()
                 .with_message(format!("{query_type}() requires at least one node kind. Pass a kind from JsNodeByKind, such as {query_type}(\"JS_CALL_EXPRESSION\")."))
                 .into());
         }
 
-        let mut kinds = Vec::with_capacity(args.len());
-        for arg in args {
+        let mut kinds = Vec::with_capacity(kinds_args.len());
+        for arg in kinds_args {
             let Some(kind) = arg.as_string() else {
                 return Err(JsNativeError::typ()
                     .with_message(format!("{query_type}() requires node kind names as strings. Pass names such as \"JS_CALL_EXPRESSION\", not node objects."))
@@ -248,6 +328,11 @@ impl JsPluginApi {
                 Attribute::ENUMERABLE,
             )
             .property(js_string!("kinds"), kinds, Attribute::ENUMERABLE)
+            .property(
+                js_string!("requiresSemantic"),
+                JsValue::from(requires_semantic),
+                Attribute::ENUMERABLE,
+            )
             .build();
 
         Ok(query.into())
@@ -275,7 +360,7 @@ impl JsPluginApi {
         {
             return Err(JsNativeError::typ()
                 .with_message(
-                    "The rule's query property must be a query object. Set it to ast(...) or semantic(...) with the node kinds the rule should inspect.",
+                    "The rule's query property must be a query object. Set it to ast(...) or grit(...) with the nodes the rule should inspect.",
                 )
                 .into());
         }
@@ -293,8 +378,24 @@ impl JsPluginApi {
         Ok(rule.clone())
     }
 
+    /// Returns the range a diagnostic on `value` highlights, and the root of
+    /// the tree containing it. Detached tokens and trivia have no root.
+    fn diagnostic_target(value: &JsValue) -> Option<(TextRange, Option<JsSyntaxNode>)> {
+        if let Some(JsAstNode { node }) = JsAstNode::from_value(value) {
+            return Some((node.text_trimmed_range(), Some(node.tree_top())));
+        }
+        let (range, token) = if let Some(JsAstToken { token }) = JsAstToken::from_value(value) {
+            (token.text_trimmed_range(), token)
+        } else {
+            let JsTriviaPiece { piece, .. } = JsTriviaPiece::from_value(value)?;
+            (piece.text_range(), piece.token())
+        };
+        let root = token.parent().map(|parent| parent.tree_top());
+        Some((range, root))
+    }
+
     fn code_fix(
-        node: JsAstNode,
+        root: Option<JsSyntaxNode>,
         fix: &JsValue,
         source: &JsSyntaxNode,
         context: &mut Context,
@@ -331,9 +432,9 @@ impl JsPluginApi {
                 ))
                 .into());
         };
-        if node.node.ancestors().last().as_ref() != Some(source) {
+        if root.as_ref() != Some(source) {
             return Err(JsNativeError::typ()
-                .with_message("The diagnostic's node does not belong to the source being analyzed. Pass a node from that source to registerDiagnostic().")
+                .with_message("The diagnostic's target does not belong to the source being analyzed. Pass a node, token, or trivia piece from that source to registerDiagnostic().")
                 .into());
         }
 

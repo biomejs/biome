@@ -1,0 +1,53 @@
+/* should not generate diagnostics */
+promise.finally(() => {});
+promise.finally(() => cleanup());
+promise.finally(function () {});
+promise.finally(async function* () {});
+promise.finally();
+promise.finally(undefined);
+promise.finally(cleanupFromElsewhere);
+promise.finally(object.cleanup);
+promise.then(async () => {});
+promise.catch(async () => {});
+finalizer(async () => {});
+promise.notFinally(async () => {});
+promise[method](async () => {});
+promise.finally(() => {}, async () => {});
+
+const syncCleanup = () => {};
+promise.finally(syncCleanup);
+
+let reassignableCleanup = async () => {};
+promise.finally(reassignableCleanup);
+
+var varCleanup = async () => {};
+promise.finally(varCleanup);
+
+async function* generatorCleanup() {}
+promise.finally(generatorCleanup);
+
+const generatorExpressionCleanup = async function* () {};
+promise.finally(generatorExpressionCleanup);
+
+const spreadCleanup = async () => {};
+promise.finally(...[spreadCleanup]);
+
+const { destructuredCleanup } = { destructuredCleanup: async () => {} };
+promise.finally(destructuredCleanup);
+
+function outer(shadowedCleanup) {
+	promise.finally(shadowedCleanup);
+}
+async function shadowedCleanup() {}
+
+promise.finally(() => {
+	return asyncCleanup().catch((error) => {
+		logCleanupError(error);
+	});
+});
+
+let reassignableMethod = "finally";
+promise[reassignableMethod](async () => {});
+
+const otherMethod = "then";
+promise[otherMethod](async () => {});

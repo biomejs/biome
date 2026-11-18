@@ -8,9 +8,8 @@ use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, JsClassDeclaration,
     JsFunctionBody, JsFunctionDeclaration, JsLanguage, JsMethodObjectMember, JsReturnStatement,
-    JsSyntaxNode,
 };
-use biome_rowan::{AstNode, NodeOrToken, SyntaxKindSet, TextRange, WalkEvent, declare_node_union};
+use biome_rowan::{AstNode, SyntaxKindSet, TextRange, WalkEvent, declare_node_union};
 use biome_rule_options::use_vue_valid_default_prop::UseVueValidDefaultPropOptions;
 use biome_vue_semantic::{DefaultSource, Prop, PropType, TypeSet};
 
@@ -127,7 +126,6 @@ impl Rule for UseVueValidDefaultProp {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let component = ctx.query();
-        let root = ctx.root();
         let model = ctx.model();
         let mut signals = Vec::new();
         for prop in component.props().chain(component.models()) {
@@ -137,7 +135,10 @@ impl Rule for UseVueValidDefaultProp {
                 continue;
             }
             for default in prop.defaults() {
-                let Some(value) = AnyDefaultValue::from_range(root.syntax(), default.range())
+                let Some(value) = ctx
+                    .vue_model()
+                    .node(&default)
+                    .and_then(AnyDefaultValue::cast)
                 else {
                     continue;
                 };
@@ -251,24 +252,6 @@ declare_node_union! {
     /// The syntax a default value can be written with: an expression, or a method such as
     /// `default() { return []; }`.
     pub AnyDefaultValue = AnyJsExpression | JsMethodObjectMember
-}
-
-impl AnyDefaultValue {
-    /// Returns the default value whose range is exactly `range`.
-    fn from_range(root: &JsSyntaxNode, range: TextRange) -> Option<Self> {
-        if !root.text_range_with_trivia().contains_range(range) {
-            return None;
-        }
-        let start = match root.covering_element(range) {
-            NodeOrToken::Node(node) => node,
-            NodeOrToken::Token(token) => token.parent()?,
-        };
-        start
-            .ancestors()
-            .skip_while(|node| node.text_trimmed_range() != range)
-            .take_while(|node| node.text_trimmed_range() == range)
-            .find_map(Self::cast)
-    }
 }
 
 /// Returns the range and the problem of each part of a default value that doesn't match
