@@ -1,4 +1,5 @@
-use biome_tailwind_logic::use_tailwind_sorted_classes::{TailwindDesignSystem, sort_class_list};
+use biome_tailwind_logic::tailwind_v4::TailwindDesignSystem;
+use biome_tailwind_logic::use_tailwind_sorted_classes::sort_class_list;
 use biome_tailwind_parser::parse_tailwind;
 use json_comments::StripComments;
 

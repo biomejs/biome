@@ -1,22 +1,40 @@
-//! Syntax-only flow facts that let type inference refine variable reads.
+//! Syntax-only flow facts that let type inference narrow reads of variables
+//! and their property paths.
 //!
-//! Collection records, for each execution root that tests one of its own
-//! variables, a graph of possible paths whose conditions are already
-//! decomposed into guards on semantic bindings. It also records the incoming
+//! Collection records a graph of possible paths for each execution root that
+//! tests one of its own variables or a property path that starts at one of
+//! them or at the root's `this`. The graph's conditions are already
+//! decomposed into guards on subjects. Collection also records the incoming
 //! path of every read such a guard can reach. Type inference later applies the
 //! guards to resolved types without inspecting syntax again.
+//!
+//! A subject is what a runtime test checks and a read narrows: a variable, or
+//! a property path that starts at a variable or at `this`, such as `o.v`,
+//! `a.b.c`, `t[0]`, or `this.#cache`. Guards and reads refer to a subject by
+//! its id in the root's subject table, so a test and a read of the same subject
+//! match without comparing syntax.
 //!
 //! An execution root is a body analyzed independently, such as a module,
 //! function, or method. Only `let`, `const`, and parameter bindings that are
 //! never reassigned and are read in the root that declares them participate,
-//! so refinements cannot cross closure boundaries. The graph does not
-//! invalidate facts on writes or calls, which is why written bindings are
+//! so refinements cannot cross closure boundaries. Each root has its own
+//! `this`. Paths on it narrow only where Biome types `this` as TypeScript
+//! does: in class methods and accessors that are not `static`, in object
+//! literal methods and accessors, and in arrow functions inside them or inside
+//! the initializer of a field that is not `static`.
+//! [`subjects::this_can_narrow`] has the full rule. A property path narrows
+//! only when its variable or `this` does and the root never writes the path,
+//! one of its prefixes, or any property of one of its prefixes through a key
+//! that does not spell the property's name, such as `o[k]`. The graph does not
+//! invalidate facts on writes or calls, which is why written subjects are
 //! excluded.
 
 mod builder;
 mod expressions;
 mod guards;
 mod scanner;
+mod subjects;
+mod writes;
 
 pub(crate) use expressions::AnyFlowExpression;
 pub(crate) use guards::{FlowGuard, FlowTest, guard_signature};
@@ -26,18 +44,170 @@ use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::{JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
     JsArrayBindingPatternElement, JsIdentifierBinding, JsObjectBindingPatternProperty,
-    JsObjectBindingPatternShorthandProperty, JsSyntaxKind,
+    JsObjectBindingPatternShorthandProperty, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode,
+    JsThisExpression,
 };
 use biome_js_type_info::{RawTypeData, TypeReference, is_raw_narrowing_invariant};
-use biome_rowan::{AstNode, AstPtr, TextRange};
+use biome_rowan::{AstNode, AstPtr, Text, TextRange};
 use builder::{BuiltRoot, build_root};
 use guards::GuardFunctions;
 use rustc_hash::{FxHashMap, FxHashSet};
+use writes::WrittenPaths;
 
 /// Index of a node in [`RootFlow::nodes`].
 ///
 /// Construction gives up on a root before its node count exceeds this type.
 pub(crate) type FlowNodeId = u32;
+
+/// Index of a subject in [`RootFlow::subjects`].
+pub(crate) type FlowSubjectId = u32;
+
+/// What a runtime test checks and a read narrows within one execution root.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub(crate) enum FlowSubject {
+    /// The variable declared at this range.
+    Binding(TextRange),
+    /// The `this` of the execution root. A table stores it only for a root
+    /// where paths on `this` can narrow, which are listed on
+    /// [`subjects::this_can_narrow`].
+    This,
+    /// The property `key` of the subject `object`, as in `o.v` or `o["v"]`.
+    ///
+    /// A table stores `object` before its members, so `object` is always a
+    /// smaller id than the member.
+    Member {
+        object: FlowSubjectId,
+        key: PropertyKey,
+    },
+}
+
+/// The property that a step of a subject's path reads.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub(crate) enum PropertyKey {
+    /// A property named by an identifier with its escapes decoded, or by an
+    /// element access key that spells the property's name. `o.v`, `o.\u0076`,
+    /// and `o["v"]` read the same property, and so do `t[0]` and `t["0"]`.
+    Name(Text),
+    /// A private name, such as `#v` in `o.#v`, without its `#` and with its
+    /// escapes decoded. It never matches a [`Self::Name`]. So `o["#v"]` reads
+    /// the property named `#v`, a different subject from `o.#v`.
+    Private(Text),
+}
+
+/// Returns the subject that the path of `subject` starts at, a
+/// [`FlowSubject::Binding`] or [`FlowSubject::This`], given the `subjects` of
+/// its root, each at the index of its id.
+///
+/// Returns `None` when `subjects` has no such subject.
+fn subject_root(subjects: &[FlowSubject], mut subject: FlowSubjectId) -> Option<&FlowSubject> {
+    loop {
+        match subjects.get(subject as usize)? {
+            root @ (FlowSubject::Binding(_) | FlowSubject::This) => return Some(root),
+            FlowSubject::Member { object, .. } => {
+                if *object >= subject {
+                    return None;
+                }
+                subject = *object;
+            }
+        }
+    }
+}
+
+/// The subjects of one execution root under construction, each stored once.
+///
+/// The builder records reads and the condition decomposer records runtime
+/// tests through the same table, so a read and a test of the same subject get
+/// the same id. A table made with [`Default`] stores no [`FlowSubject::This`].
+#[derive(Default)]
+struct FlowSubjectTable {
+    subjects: Vec<FlowSubject>,
+    ids: FxHashMap<FlowSubject, FlowSubjectId>,
+    /// The execution root whose `this` can be a subject, or `None` when paths
+    /// on the root's `this` cannot narrow.
+    this_root: Option<JsSyntaxNode>,
+}
+
+impl FlowSubjectTable {
+    /// Returns an empty table for the execution root `root`. The table stores
+    /// the root's `this` only when `this_can_narrow` is true.
+    fn new(root: &AnyJsControlFlowRoot, this_can_narrow: bool) -> Self {
+        Self {
+            this_root: this_can_narrow.then(|| root.syntax().clone()),
+            ..Self::default()
+        }
+    }
+
+    /// Returns the id of `subject`, or `None` when the table does not store it.
+    fn get(&self, subject: &FlowSubject) -> Option<FlowSubjectId> {
+        self.ids.get(subject).copied()
+    }
+
+    /// Returns the subjects, each at the index of its id.
+    fn as_slice(&self) -> &[FlowSubject] {
+        &self.subjects
+    }
+
+    /// Returns the id of the variable that `reference` refers to, adding the
+    /// variable to the table on first use.
+    ///
+    /// Returns `None` when `reference` refers to no declaration, as a global
+    /// does, or when the table has used every [`FlowSubjectId`].
+    fn reference(
+        &mut self,
+        model: &SemanticModel,
+        reference: &JsReferenceIdentifier,
+    ) -> Option<FlowSubjectId> {
+        let binding = model.binding(reference)?;
+        self.intern(FlowSubject::Binding(binding.range()))
+    }
+
+    /// Returns the id of the `this` that `expression` reads, adding it to the
+    /// table on first use.
+    ///
+    /// Returns `None` when the table's root cannot narrow its `this`, when the
+    /// table has used every [`FlowSubjectId`], and for a `this` in the
+    /// decorators or `extends` clause of a class inside the root, or in the
+    /// computed key of an object literal method or accessor inside it. That
+    /// `this` is the root's own, but Biome types it as an instance of the
+    /// class or as the object.
+    fn this(&mut self, expression: &JsThisExpression) -> Option<FlowSubjectId> {
+        let root = self.this_root.as_ref()?;
+        let in_member_owner = expression
+            .syntax()
+            .ancestors()
+            .take_while(|node| node != root)
+            .any(|node| {
+                matches!(
+                    node.kind(),
+                    JsSyntaxKind::JS_CLASS_DECLARATION
+                        | JsSyntaxKind::JS_CLASS_EXPRESSION
+                        | JsSyntaxKind::JS_CLASS_EXPORT_DEFAULT_DECLARATION
+                        | JsSyntaxKind::JS_METHOD_OBJECT_MEMBER
+                        | JsSyntaxKind::JS_GETTER_OBJECT_MEMBER
+                        | JsSyntaxKind::JS_SETTER_OBJECT_MEMBER
+                )
+            });
+        if in_member_owner {
+            return None;
+        }
+        self.intern(FlowSubject::This)
+    }
+
+    fn intern(&mut self, subject: FlowSubject) -> Option<FlowSubjectId> {
+        if let Some(id) = self.ids.get(&subject) {
+            return Some(*id);
+        }
+        let id = FlowSubjectId::try_from(self.subjects.len()).ok()?;
+        self.subjects.push(subject.clone());
+        self.ids.insert(subject, id);
+        Some(id)
+    }
+
+    /// Returns the subjects, each at the index of its id.
+    fn into_subjects(self) -> Vec<FlowSubject> {
+        self.subjects
+    }
+}
 
 /// Limits the graph steps spent deciding which reads a test can reach in one
 /// execution root. Like other construction limits, exceeding it leaves the
@@ -64,15 +234,34 @@ pub(crate) enum FlowNode {
 pub(crate) struct RootFlow {
     pub(crate) nodes: Box<[FlowNode]>,
     pub(crate) guards: Box<[FlowGuard]>,
-    /// The points of each binding's reads, sorted and without duplicates.
-    pub(crate) read_points: FxHashMap<TextRange, Box<[FlowNodeId]>>,
+    /// The subjects that guards and reads refer to, each at the index of its
+    /// id.
+    pub(crate) subjects: Box<[FlowSubject]>,
+    /// The points of each subject's reads, sorted and without duplicates.
+    pub(crate) read_points: FxHashMap<FlowSubjectId, Box<[FlowNodeId]>>,
 }
 
 impl RootFlow {
-    /// Returns the points where the root reads `binding`, sorted, or an empty
+    /// Returns the points where the root reads `subject`, sorted, or an empty
     /// slice when it keeps no read of it.
-    pub(crate) fn read_points(&self, binding: TextRange) -> &[FlowNodeId] {
-        self.read_points.get(&binding).map_or(&[], |points| points)
+    pub(crate) fn read_points(&self, subject: FlowSubjectId) -> &[FlowNodeId] {
+        self.read_points.get(&subject).map_or(&[], |points| points)
+    }
+
+    pub(crate) fn subject(&self, subject: FlowSubjectId) -> Option<&FlowSubject> {
+        self.subjects.get(subject as usize)
+    }
+
+    /// Returns the range of the variable that the path of `subject` starts
+    /// at, which is the variable itself for a [`FlowSubject::Binding`].
+    ///
+    /// Returns `None` for `this` and a path on it, and when the root has no
+    /// such subject.
+    pub(crate) fn subject_binding(&self, subject: FlowSubjectId) -> Option<TextRange> {
+        match subject_root(&self.subjects, subject)? {
+            FlowSubject::Binding(range) => Some(*range),
+            FlowSubject::This | FlowSubject::Member { .. } => None,
+        }
     }
 }
 
@@ -83,8 +272,8 @@ pub(crate) struct FlowRead {
     pub(crate) root: usize,
     /// The flow that reaches the read, before evaluating it.
     pub(crate) point: FlowNodeId,
-    /// Range of the binding the read refers to.
-    pub(crate) binding: TextRange,
+    /// The subject the read refers to, in its root's subject table.
+    pub(crate) subject: FlowSubjectId,
 }
 
 /// Flow facts for one module.
@@ -135,7 +324,12 @@ impl ModuleFlow {
             functions: GuardFunctions::new(raw_types, raw_binding_types),
         };
         for selected in roots.selected() {
-            collector.add_root(&mut flow, &selected.root, roots.bindings(selected));
+            collector.add_root(
+                &mut flow,
+                &selected.root,
+                roots.bindings(selected),
+                selected.has_this,
+            );
         }
         flow
     }
@@ -151,7 +345,8 @@ impl ModuleFlow {
         self.candidates.get(&range)
     }
 
-    /// Returns the flow of the identifier read at `range`.
+    /// Returns the flow of the read at `range`, an identifier or a member
+    /// expression.
     pub(crate) fn read(&self, range: TextRange) -> Option<FlowRead> {
         self.reads.get(&range).copied()
     }
@@ -170,66 +365,100 @@ struct RootCollector<'a> {
 }
 
 impl RootCollector<'_> {
+    /// Collects the flow of `root`, which declares `bindings` in its own code
+    /// and uses `this` there when `has_this` is true.
     fn add_root(
         &mut self,
         flow: &mut ModuleFlow,
         root: &AnyJsControlFlowRoot,
         bindings: &[JsIdentifierBinding],
+        has_this: bool,
     ) {
         let eligible: FxHashSet<TextRange> = bindings
             .iter()
             .filter_map(|binding| self.eligible_range(binding))
             .collect();
-        // Only bindings declared by the root itself can narrow in it, so
-        // without one the graph would keep no reads.
-        if eligible.is_empty() {
+        let this_can_narrow = has_this && subjects::this_can_narrow(root);
+        // Only bindings declared by the root itself and its own `this` can
+        // narrow in it, so without either the graph would keep no reads.
+        if eligible.is_empty() && !this_can_narrow {
             return;
         }
         let Some(BuiltRoot {
             nodes,
             guards,
+            subjects,
             mentions,
             reads,
-        }) = build_root(root, self.model, &mut self.functions)
+        }) = build_root(root, self.model, &mut self.functions, this_can_narrow)
         else {
             return;
         };
-        let tested: FxHashSet<TextRange> = mentions.iter().map(|(_, binding)| *binding).collect();
+        let tested: FxHashSet<FlowSubjectId> =
+            mentions.iter().map(|(_, subject)| *subject).collect();
+        let is_path = |subject: FlowSubjectId| {
+            matches!(
+                subjects.as_slice().get(subject as usize),
+                Some(FlowSubject::Member { .. })
+            )
+        };
+        // Scanning for writes visits the whole root, so it runs only when a
+        // path could narrow.
+        let written = reads
+            .iter()
+            .any(|read| tested.contains(&read.subject) && is_path(read.subject))
+            .then(|| WrittenPaths::new(root, self.model, &subjects));
+        let narrowable: FxHashSet<FlowSubjectId> = tested
+            .iter()
+            .copied()
+            .filter(|subject| {
+                // The table stores `this` only when it can narrow.
+                subject_root(subjects.as_slice(), *subject).is_some_and(|root| match root {
+                    FlowSubject::Binding(binding) => eligible.contains(binding),
+                    FlowSubject::This => true,
+                    FlowSubject::Member { .. } => false,
+                }) && written
+                    .as_ref()
+                    .is_none_or(|written| !written.cancels(subjects.as_slice(), *subject))
+            })
+            .collect();
         let reads: Vec<_> = reads
             .into_iter()
-            .filter(|read| tested.contains(&read.binding) && eligible.contains(&read.binding))
+            .filter(|read| narrowable.contains(&read.subject))
             .collect();
         if reads.is_empty() {
             return;
         }
 
-        let Some(reachable) = self.reachable_from_tests(&nodes, &mentions, &reads) else {
+        let Some(reachable) =
+            self.reachable_from_tests(&nodes, subjects.as_slice(), &mentions, &reads)
+        else {
             return;
         };
         let index = flow.roots.len();
         let mut read_points: FxHashMap<_, Vec<_>> = FxHashMap::default();
         for read in reads {
-            if !reachable.contains(&(read.binding, read.point)) {
+            if !reachable.contains(&(read.subject, read.point)) {
                 continue;
             }
             read_points
-                .entry(read.binding)
+                .entry(read.subject)
                 .or_default()
                 .push(read.point);
-            let identifier = AnyFlowExpression::JsIdentifierExpression(read.identifier);
+            let expression = read.expression;
             flow.candidates
-                .insert(identifier.range(), AstPtr::new(&identifier));
+                .insert(expression.range(), AstPtr::new(&expression));
             flow.candidates.extend(
-                identifier
+                expression
                     .evaluated_ancestors()
                     .map(|ancestor| (ancestor.range(), AstPtr::new(&ancestor))),
             );
             flow.reads.insert(
-                identifier.range(),
+                expression.range(),
                 FlowRead {
                     root: index,
                     point: read.point,
-                    binding: read.binding,
+                    subject: read.subject,
                 },
             );
         }
@@ -237,12 +466,13 @@ impl RootCollector<'_> {
             flow.roots.push(RootFlow {
                 nodes: nodes.into_boxed_slice(),
                 guards: guards.into_boxed_slice(),
+                subjects: subjects.into_subjects().into_boxed_slice(),
                 read_points: read_points
                     .into_iter()
-                    .map(|(binding, mut points)| {
+                    .map(|(subject, mut points)| {
                         points.sort_unstable();
                         points.dedup();
-                        (binding, points.into_boxed_slice())
+                        (subject, points.into_boxed_slice())
                     })
                     .collect(),
             });
@@ -280,16 +510,20 @@ impl RootCollector<'_> {
         Some(range)
     }
 
-    /// Returns the `(binding, point)` pairs that a test of the binding can
+    /// Returns the `(subject, point)` pairs that a test of the subject can
     /// reach, including the test itself.
     ///
-    /// Returns `None` when the root's work limit is spent.
+    /// Returns `None` when the root's work limit runs out on a variable. When
+    /// it runs out on a property path, the result keeps only the pairs of
+    /// variables. Variables are walked first, so property paths never take the
+    /// work limit from a variable.
     fn reachable_from_tests(
         &self,
         nodes: &[FlowNode],
-        mentions: &[(FlowNodeId, TextRange)],
+        subjects: &[FlowSubject],
+        mentions: &[(FlowNodeId, FlowSubjectId)],
         reads: &[builder::BuiltRead],
-    ) -> Option<FxHashSet<(TextRange, FlowNodeId)>> {
+    ) -> Option<FxHashSet<(FlowSubjectId, FlowNodeId)>> {
         let mut successors = vec![Vec::new(); nodes.len()];
         for (index, node) in (0..).zip(nodes) {
             match node {
@@ -304,22 +538,37 @@ impl RootCollector<'_> {
                 }
             }
         }
-        let bindings: FxHashSet<TextRange> = reads.iter().map(|read| read.binding).collect();
+        let is_path = |subject: FlowSubjectId| {
+            matches!(
+                subjects.get(subject as usize),
+                Some(FlowSubject::Member { .. })
+            )
+        };
+        let mut read_subjects: Vec<FlowSubjectId> = reads.iter().map(|read| read.subject).collect();
+        read_subjects.sort_unstable_by_key(|subject| (is_path(*subject), *subject));
+        read_subjects.dedup();
         let mut reachable = FxHashSet::default();
         let mut remaining = self.relevance_budget;
-        for binding in bindings {
+        'subjects: for subject in read_subjects {
             let mut seen = vec![false; nodes.len()];
             let mut pending: Vec<FlowNodeId> = mentions
                 .iter()
-                .filter(|(_, mentioned)| *mentioned == binding)
+                .filter(|(_, mentioned)| *mentioned == subject)
                 .map(|(node, _)| *node)
                 .collect();
             while let Some(node) = pending.pop() {
-                remaining = remaining.checked_sub(1)?;
+                let Some(left) = remaining.checked_sub(1) else {
+                    if !is_path(subject) {
+                        return None;
+                    }
+                    reachable.retain(|(subject, _)| !is_path(*subject));
+                    break 'subjects;
+                };
+                remaining = left;
                 if std::mem::replace(&mut seen[node as usize], true) {
                     continue;
                 }
-                reachable.insert((binding, node));
+                reachable.insert((subject, node));
                 pending.extend(&successors[node as usize]);
             }
         }
@@ -477,6 +726,98 @@ mod tests {
             0,
         );
         assert!(!flow.is_candidate(read));
+    }
+
+    #[test]
+    fn a_budget_spent_on_paths_keeps_the_variables() {
+        const SOURCE: &str = "function f(x: string | null, o: { v: string | null }) { if (x !== null && o.v !== null) { /*x*/x; /*v*/o.v; } }";
+        let info = module(SOURCE);
+        let (x, v) = (marked(SOURCE, "x", "x"), marked(SOURCE, "v", "o.v"));
+        assert!(info.flow.is_candidate(x) && info.flow.is_candidate(v));
+        let collect = |budget| {
+            let mut roots = super::FlowRootScanner::default();
+            for event in info.semantic_model.root().syntax().preorder() {
+                match event {
+                    WalkEvent::Enter(node) => roots.enter(&node),
+                    WalkEvent::Leave(node) => roots.leave(&node),
+                }
+            }
+            super::ModuleFlow::collect_with_relevance_budget(
+                roots,
+                &info.semantic_model,
+                &info.raw_types,
+                &info.raw_binding_types,
+                budget,
+            )
+        };
+        // The smallest budget that keeps the variable leaves nothing for the
+        // path, so collection drops the path and keeps the variable.
+        let budget = (0..1024)
+            .find(|budget| collect(*budget).is_candidate(x))
+            .unwrap();
+        let flow = collect(budget);
+        assert!(!flow.is_candidate(v));
+        assert!(!collect(budget - 1).is_candidate(x));
+    }
+
+    #[test]
+    fn paths_on_this_narrow_outside_constructors_and_static_members() {
+        const SOURCE: &str = r#"
+            class K {
+                x: string | null = null;
+                static s: string | null = null;
+                m() { if (this.x) { /*method*/this.x; } }
+                constructor() {
+                    if (this.x) { /*constructor*/this.x; }
+                    const g = () => { if (this.x) { /*arrow*/this.x; } };
+                }
+                static n() { if (this.s) { /*static*/this.s; } }
+                static { if (this.s) { /*block*/this.s; } }
+                f = () => { if (this.x) { /*field*/this.x; } };
+            }
+        "#;
+        let info = module(SOURCE);
+        for (marker, expression, expected) in [
+            ("method", "this.x", true),
+            ("constructor", "this.x", false),
+            ("arrow", "this.x", false),
+            ("static", "this.s", false),
+            ("block", "this.s", false),
+            ("field", "this.x", true),
+        ] {
+            assert_eq!(
+                info.flow.is_candidate(marked(SOURCE, marker, expression)),
+                expected,
+                "{marker}"
+            );
+        }
+    }
+
+    #[test]
+    fn written_and_deleted_paths_are_not_reads() {
+        const SOURCE: &str = r#"
+            function f(o: { v: { w: string | null } | null; n: number | null }) {
+                if (o.v !== null && o.n !== null) {
+                    /*object*/o.v.w = null;
+                    o.n += 1;
+                    delete /*deleted*/o.n;
+                    /*after*/o.n;
+                }
+            }
+        "#;
+        let info = module(SOURCE);
+        for (marker, expression, expected) in [
+            ("object", "o.v", true),
+            ("object", "o.v.w", false),
+            ("deleted", "o.n", false),
+            ("after", "o.n", false),
+        ] {
+            assert_eq!(
+                info.flow.is_candidate(marked(SOURCE, marker, expression)),
+                expected,
+                "{marker}: {expression}"
+            );
+        }
     }
 
     #[test]

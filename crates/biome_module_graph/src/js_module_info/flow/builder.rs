@@ -2,7 +2,8 @@ use super::guards::{
     DecomposedCondition, FlowGuard, FlowOutcome, GuardFunctions, decompose_assertion,
     decompose_condition,
 };
-use super::{FlowNode, FlowNodeId};
+use super::subjects::subject_of;
+use super::{AnyFlowExpression, FlowNode, FlowNodeId, FlowSubjectId, FlowSubjectTable};
 use biome_js_control_flow::{AnyJsControlFlowRoot, is_truthy_literal};
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
@@ -10,7 +11,7 @@ use biome_js_syntax::{
     JsDoWhileStatement, JsForStatement, JsIdentifierExpression, JsIfStatement, JsSyntaxNode,
     JsWhileStatement, T,
 };
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, TokenText};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TokenText};
 
 const MAX_SYNTAX_NODES: usize = 16_384;
 /// Limits how deeply syntax can nest below the execution root that gets flow.
@@ -21,16 +22,19 @@ const MAX_FLOW_NODES: usize = 65_536;
 pub(super) struct BuiltRoot {
     pub(super) nodes: Vec<FlowNode>,
     pub(super) guards: Vec<FlowGuard>,
-    /// Condition nodes paired with each binding their guard may refine.
-    pub(super) mentions: Vec<(FlowNodeId, TextRange)>,
-    /// Reachable reads of local bindings with their incoming flow.
+    /// The subjects that guards, mentions, and reads refer to.
+    pub(super) subjects: FlowSubjectTable,
+    /// Condition nodes paired with each subject their guard may narrow.
+    pub(super) mentions: Vec<(FlowNodeId, FlowSubjectId)>,
+    /// Reachable reads of subjects with their incoming flow.
     pub(super) reads: Vec<BuiltRead>,
 }
 
 pub(super) struct BuiltRead {
-    pub(super) identifier: JsIdentifierExpression,
+    /// The identifier or member expression that reads the subject.
+    pub(super) expression: AnyFlowExpression,
     pub(super) point: FlowNodeId,
-    pub(super) binding: TextRange,
+    pub(super) subject: FlowSubjectId,
 }
 
 /// Marks a root whose syntax or control flow narrowing does not support.
@@ -39,6 +43,10 @@ struct Unsupported;
 type Build<T> = Result<T, Unsupported>;
 
 /// Builds the flow of `root`, excluding nested execution roots.
+///
+/// Records reads and runtime tests of paths on `this`, such as `this.v`, only
+/// when `this_can_narrow` is true. The caller computes it for `root` with
+/// [`this_can_narrow`].
 ///
 /// `root` must be selected by a [`FlowRootScanner`], which rejects the roots
 /// that the builder cannot build, such as a root with a `with` statement.
@@ -55,8 +63,8 @@ type Build<T> = Result<T, Unsupported>;
 /// A condition inside a region narrows only the rest of the expression that
 /// contains it, as in `x && x.length`. Each `break` or `continue` that leaves
 /// the region joins its target with the flow before the region. Because only
-/// variables that are never written narrow, the flow before a region is never
-/// narrower than the real flow at any point inside or after it.
+/// subjects that the root never writes narrow, the flow before a region is
+/// never narrower than the real flow at any point inside or after it.
 ///
 /// Returns `None` for inputs exceeding construction limits. Like the statement
 /// control-flow graph, it also returns `None` when any statement, including
@@ -64,10 +72,12 @@ type Build<T> = Result<T, Unsupported>;
 /// an `if` test.
 ///
 /// [`FlowRootScanner`]: super::FlowRootScanner
+/// [`this_can_narrow`]: super::subjects::this_can_narrow
 pub(super) fn build_root(
     root: &AnyJsControlFlowRoot,
     model: &SemanticModel,
     functions: &mut GuardFunctions,
+    this_can_narrow: bool,
 ) -> Option<BuiltRoot> {
     if !has_complete_statements(root) {
         return None;
@@ -77,6 +87,7 @@ pub(super) fn build_root(
         functions,
         nodes: vec![FlowNode::Start],
         guards: Vec::new(),
+        subjects: FlowSubjectTable::new(root, this_can_narrow),
         mentions: Vec::new(),
         reads: Vec::new(),
         jumps: Vec::new(),
@@ -87,6 +98,7 @@ pub(super) fn build_root(
     Some(BuiltRoot {
         nodes: builder.nodes,
         guards: builder.guards,
+        subjects: builder.subjects,
         mentions: builder.mentions,
         reads: builder.reads,
     })
@@ -319,7 +331,8 @@ struct RootBuilder<'a, 'raw> {
     functions: &'a mut GuardFunctions<'raw>,
     nodes: Vec<FlowNode>,
     guards: Vec<FlowGuard>,
-    mentions: Vec<(FlowNodeId, TextRange)>,
+    subjects: FlowSubjectTable,
+    mentions: Vec<(FlowNodeId, FlowSubjectId)>,
     reads: Vec<BuiltRead>,
     jumps: Vec<JumpTarget>,
     /// The incoming flow of the next statement, or `None` when unreachable.
@@ -401,6 +414,7 @@ impl RootBuilder<'_, '_> {
                         &expression,
                         self.model,
                         self.functions,
+                        &mut self.subjects,
                         &mut self.guards,
                     ) {
                         Some(condition) => self.push_condition(flow, condition)?,
@@ -667,20 +681,37 @@ impl RootBuilder<'_, '_> {
             return Ok(incoming);
         }
         if let Some(identifier) = JsIdentifierExpression::cast_ref(node) {
-            if let Some(binding) = identifier
+            if let Some(subject) = identifier
                 .name()
                 .ok()
-                .and_then(|name| self.model.binding(&name))
+                .and_then(|name| self.subjects.reference(self.model, &name))
             {
                 self.reads.push(BuiltRead {
-                    identifier,
+                    expression: AnyFlowExpression::JsIdentifierExpression(identifier),
                     point: incoming,
-                    binding: binding.range(),
+                    subject,
                 });
             }
             return Ok(incoming);
         }
         match AnyJsExpression::cast_ref(node) {
+            // The object and the key are evaluated before the property is read.
+            Some(
+                expression @ (AnyJsExpression::JsStaticMemberExpression(_)
+                | AnyJsExpression::JsComputedMemberExpression(_)),
+            ) => {
+                let flow = self.children(node, incoming, depth)?;
+                if let Some(subject) = subject_of(&expression, self.model, &mut self.subjects)
+                    && let Some(expression) = AnyFlowExpression::cast(expression.into_syntax())
+                {
+                    self.reads.push(BuiltRead {
+                        expression,
+                        point: flow,
+                        subject,
+                    });
+                }
+                Ok(flow)
+            }
             Some(AnyJsExpression::JsLogicalExpression(logical)) => {
                 let left = logical.left().map_err(|_| Unsupported)?;
                 let right = logical.right().map_err(|_| Unsupported)?;
@@ -708,14 +739,23 @@ impl RootBuilder<'_, '_> {
                 let negative = self.evaluate(alternate.syntax(), negative, depth + 1)?;
                 self.push(FlowNode::Join(vec![positive, negative]))
             }
-            _ => {
-                let mut flow = incoming;
-                for child in node.children() {
-                    flow = self.evaluate(&child, flow, depth + 1)?;
-                }
-                Ok(flow)
-            }
+            _ => self.children(node, incoming, depth),
         }
+    }
+
+    /// Evaluates the children of `node`, which lies at `depth`, in source
+    /// order from `incoming`, and returns the flow after them.
+    fn children(
+        &mut self,
+        node: &JsSyntaxNode,
+        incoming: FlowNodeId,
+        depth: usize,
+    ) -> Build<FlowNodeId> {
+        let mut flow = incoming;
+        for child in node.children() {
+            flow = self.evaluate(&child, flow, depth + 1)?;
+        }
+        Ok(flow)
     }
 
     fn condition(
@@ -729,6 +769,7 @@ impl RootBuilder<'_, '_> {
             outcome,
             self.model,
             self.functions,
+            &mut self.subjects,
             &mut self.guards,
         );
         self.push_condition(antecedent, condition)
@@ -748,7 +789,7 @@ impl RootBuilder<'_, '_> {
             condition
                 .mentions
                 .into_iter()
-                .map(|binding| (node, binding)),
+                .map(|subject| (node, subject)),
         );
         Ok(node)
     }
@@ -792,12 +833,12 @@ impl RootBuilder<'_, '_> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::js_module_info::flow::FlowTest;
+    use crate::js_module_info::flow::{FlowSubject, FlowTest, PropertyKey};
     use biome_js_parser::{JsParserOptions, parse};
     use biome_js_semantic::{SemanticModelOptions, semantic_model};
     use biome_js_syntax::JsSyntaxKind;
     use biome_languages::JsFileSource;
-    use biome_rowan::TextSize;
+    use biome_rowan::{TextRange, TextSize};
     use rustc_hash::FxHashMap;
 
     struct Built {
@@ -812,7 +853,10 @@ mod tests {
         build_parsed(source, kind)
     }
 
-    /// Builds like [`build`], also accepting sources with syntax errors.
+    /// Builds like [`build`], also accepting sources with syntax errors, and
+    /// records paths on `this` where [`this_can_narrow`] holds.
+    ///
+    /// [`this_can_narrow`]: super::super::subjects::this_can_narrow
     fn build_parsed(source: &str, kind: JsSyntaxKind) -> Built {
         let parsed = parse(source, JsFileSource::ts(), JsParserOptions::default());
         let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
@@ -829,6 +873,7 @@ mod tests {
                 &root,
                 &model,
                 &mut GuardFunctions::new(&[], &raw_binding_types),
+                super::super::subjects::this_can_narrow(&root),
             ),
         }
     }
@@ -857,7 +902,7 @@ mod tests {
             self.root()
                 .reads
                 .iter()
-                .find(|read| read.identifier.range() == range)
+                .find(|read| read.expression.range() == range)
                 .map(|read| read.point)
         }
 
@@ -898,12 +943,11 @@ mod tests {
             match &self.root().guards[guard] {
                 FlowGuard::Keep | FlowGuard::Incomplete => {}
                 FlowGuard::Test {
-                    binding,
+                    subject,
                     test,
                     positive,
                 } => {
-                    let name =
-                        &self.source[usize::from(binding.start())..usize::from(binding.end())];
+                    let name = self.subject_name(*subject);
                     let test = match test {
                         FlowTest::Truthy => "Truthy",
                         FlowTest::Nullish => "Nullish",
@@ -916,6 +960,26 @@ mod tests {
                     self.facts(*left, facts);
                     self.facts(*right, facts);
                 }
+            }
+        }
+    }
+
+    impl Built {
+        /// Returns the source of the variable that `subject` starts at, or
+        /// `this`, followed by the names along its path, as in `o.v` or
+        /// `this.#w`.
+        fn subject_name(&self, subject: FlowSubjectId) -> String {
+            match &self.root().subjects.as_slice()[subject as usize] {
+                FlowSubject::Binding(binding) => self.source[*binding].to_owned(),
+                FlowSubject::This => "this".to_owned(),
+                FlowSubject::Member {
+                    object,
+                    key: PropertyKey::Name(name),
+                } => format!("{}.{name}", self.subject_name(*object)),
+                FlowSubject::Member {
+                    object,
+                    key: PropertyKey::Private(name),
+                } => format!("{}.#{name}", self.subject_name(*object)),
             }
         }
     }
@@ -1087,6 +1151,27 @@ mod tests {
         let built = function("function f(x, y) { if (y) x?.read(x); after(x); }");
         assert_eq!(built.paths("x", 2), [vec!["y:Truthy".to_owned()]]);
         assert_eq!(built.paths("x", 3).len(), 2);
+    }
+
+    #[test]
+    fn property_paths_are_read_and_tested_like_variables() {
+        let built =
+            function("function f(o) { if (o.v) read(o.v.w, (o).v); if (o?.v == null) read(o.v); }");
+        assert!(contains(&built.paths("o.v", 1), "o.v:Truthy"));
+        assert!(contains(&built.paths("o.v.w", 0), "o.v:Truthy"));
+        assert!(contains(&built.paths("(o).v", 0), "o.v:Truthy"));
+        assert!(contains(&built.paths("o.v", 2), "o.v:Nullish"));
+    }
+
+    #[test]
+    fn paths_on_this_are_read_and_tested_where_this_can_narrow() {
+        const SOURCE: &str = "class K { #w; m() { if (this.v) read(this.v); if (this.#w) read(this.#w); } constructor() { if (this.v) read(this.v); } }";
+        let method = build(SOURCE, JsSyntaxKind::JS_METHOD_CLASS_MEMBER);
+        assert!(contains(&method.paths("this.v", 1), "this.v:Truthy"));
+        assert!(contains(&method.paths("this.#w", 1), "this.#w:Truthy"));
+        let constructor = build(SOURCE, JsSyntaxKind::JS_CONSTRUCTOR_CLASS_MEMBER);
+        assert_eq!(constructor.point("this.v", 3), None);
+        assert!(constructor.root().mentions.is_empty());
     }
 
     #[test]

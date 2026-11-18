@@ -36,6 +36,8 @@ use salsa::plumbing::{AsId, FromId};
 use std::collections::BTreeMap;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
+#[path = "spec_tests/aliased_conditions.test.rs"]
+mod aliased_conditions;
 #[path = "spec_tests/assertions.test.rs"]
 mod assertions;
 #[path = "spec_tests/callback_parameters.test.rs"]
@@ -78,6 +80,8 @@ mod normalization;
 mod overloads;
 #[path = "spec_tests/promises.test.rs"]
 mod promises;
+#[path = "spec_tests/property_narrowing.test.rs"]
+mod property_narrowing;
 #[path = "spec_tests/queries.test.rs"]
 mod queries;
 #[path = "spec_tests/requests.test.rs"]

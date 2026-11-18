@@ -5,13 +5,14 @@ use super::ResolutionCtx;
 use super::flow::MAX_FLOW_TYPE_STEPS;
 use crate::db::queries::{ExpressionTypeInput, infer_flow_expression_type};
 use crate::js_module_info::flow::AnyFlowExpression;
-use biome_js_syntax::{AnyJsCallArgument, AnyJsExpression, JsLogicalOperator};
+use biome_js_syntax::{AnyJsCallArgument, AnyJsExpression, AnyJsName, JsLogicalOperator};
 use biome_js_type_info::{
     NarrowingPredicate, RawTypeData, RawTypeId, TypeReference, TypeofExpression, falsy_values,
     interned_types::{Literal, TypeData},
     narrow_type,
 };
 use biome_rowan::{AstNode, AstSeparatedList};
+use std::borrow::Cow;
 
 /// Limits how many [evaluated ancestors](AnyFlowExpression::evaluated_ancestors)
 /// an evaluated expression may have.
@@ -47,35 +48,66 @@ impl<'db> ResolutionCtx<'db, '_> {
                 self.flow_operand(&parenthesized.expression().ok()?)
             }
             AnyFlowExpression::JsStaticMemberExpression(member) => {
-                let object = self.flow_operand(&member.object().ok()?)?;
-                let name = member.member().ok()?.value_token().ok()?;
-                let result = self
-                    .resolve_static_member_expression(object, name.text_trimmed())
-                    .unwrap_or(TypeData::Unknown);
-                Some(if member.is_optional_chain() {
-                    self.optional_chain_result(object, result)
-                } else {
-                    result
-                })
+                let object = self.flow_operand(&member.object().ok()?);
+                // The declared type of a property path is the type of this
+                // access, computed on the object's narrowed type when the
+                // object has one.
+                let declared = match object {
+                    Some(object) => {
+                        let name = member.member().ok()?;
+                        let token = name.value_token().ok()?;
+                        // Class members store a private name with its `#`.
+                        let name = if matches!(name, AnyJsName::JsPrivateName(_)) {
+                            Cow::Owned(format!("#{}", token.text_trimmed()))
+                        } else {
+                            Cow::Borrowed(token.text_trimmed())
+                        };
+                        let result = self
+                            .resolve_static_member_expression(object, &name)
+                            .unwrap_or(TypeData::Unknown);
+                        if member.is_optional_chain() {
+                            self.optional_chain_result(object, result)
+                        } else {
+                            result
+                        }
+                    }
+                    None if self.js_info.flow.read(member.range()).is_some() => {
+                        self.raw_operand(&AnyJsExpression::from(member.clone()))?
+                    }
+                    None => return None,
+                };
+                match self.narrow_path(member.range(), declared) {
+                    Some(narrowed) => Some(narrowed),
+                    None => object.is_some().then_some(declared),
+                }
             }
             AnyFlowExpression::JsComputedMemberExpression(member) => {
                 let object_expression = member.object().ok()?;
                 let member_expression = member.member().ok()?;
                 let object = self.flow_operand(&object_expression);
                 let key = self.flow_operand(&member_expression);
-                if object.is_none() && key.is_none() {
-                    return None;
-                }
-                let object = object.or_else(|| self.raw_operand(&object_expression))?;
-                let key = key.or_else(|| self.raw_operand(&member_expression))?;
-                let result = self
-                    .resolve_computed_member_expression(object, key)
-                    .unwrap_or(TypeData::Unknown);
-                Some(if member.is_optional_chain() {
-                    self.optional_chain_result(object, result)
+                // The declared type of a property path with a literal key is
+                // the type of this access, computed on the narrowed types of
+                // the object and the key when they have them.
+                let declared = if object.is_none() && key.is_none() {
+                    self.js_info.flow.read(member.range())?;
+                    self.raw_operand(&AnyJsExpression::from(member.clone()))?
                 } else {
-                    result
-                })
+                    let object = object.or_else(|| self.raw_operand(&object_expression))?;
+                    let key = key.or_else(|| self.raw_operand(&member_expression))?;
+                    let result = self
+                        .resolve_computed_member_expression(object, key)
+                        .unwrap_or(TypeData::Unknown);
+                    if member.is_optional_chain() {
+                        self.optional_chain_result(object, result)
+                    } else {
+                        result
+                    }
+                };
+                match self.narrow_path(member.range(), declared) {
+                    Some(narrowed) => Some(narrowed),
+                    None => (object.is_some() || key.is_some()).then_some(declared),
+                }
             }
             AnyFlowExpression::JsLogicalExpression(logical) => {
                 let left_expression = logical.left().ok()?;

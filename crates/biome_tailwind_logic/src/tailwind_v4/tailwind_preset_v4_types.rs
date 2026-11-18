@@ -28,7 +28,7 @@ pub enum NamedValueType {
 }
 
 // CSS data types (from infer-data-type.ts). Bracketed arbitrary values use
-// AST predicates — see sort_v4::resolve_arbitrary_branch.
+// AST predicates — see candidate::resolve_arbitrary_branch.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[repr(u8)]
 pub enum CssDataType {
@@ -229,7 +229,9 @@ pub struct VariantEntry {
 #[derive(Copy, Clone)]
 pub struct UtilityEntry {
     /// Index into `SIGNATURE_POOL` — the ascending property-order
-    /// indices this utility's declarations touch.
+    /// indices this utility's declarations touch. Utilities share an
+    /// index only when they set the same properties under the same
+    /// selectors and at-rules.
     pub sig: u16,
     /// Total declaration count, Tailwind's tie-break after the
     /// signature (wider utilities sort first).

@@ -1,0 +1,321 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidIndexSignature.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+type Basic = Record<string, any>;
+
+type WithGeneric<T> = Record<string, T>;
+
+type InGeneric = Generic<Record<string, any>>;
+
+type UnionKey = Record<string | number, any>;
+
+type ComputedKey = Record<Exclude<"a" | "b" | "c", "a">, any>;
+
+type NumberKey = Record<number, any>;
+
+type SymbolKey = Record<symbol, any>;
+
+function parameter(arg: Record<string, any>) {}
+
+function returnType(): Record<string, any> {}
+
+type CommentInRecord = Record<string, /* preserve me */ number>;
+
+interface Extending extends Record<string, any> {}
+
+class Implementing implements Record<string, any> {}
+
+```
+
+# Diagnostics
+```
+invalidIndexSignature.ts:2:14 lint/nursery/useConsistentIndexedObjectStyle  FIXABLE  ━━━━━━━━━━━━━━━
+
+  i Use an index signature instead of the Record type.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ type Basic = Record<string, any>;
+      │              ^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ type WithGeneric<T> = Record<string, T>;
+  
+  i Using one style for object types with arbitrary keys makes the code easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an index signature.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - type·Basic·=·Record<string,·any>;
+        2 │ + type·Basic·=·{·[key:·string]:·any·};
+     3  3 │   
+     4  4 │   type WithGeneric<T> = Record<string, T>;
+  
+
+```
+
+```
+invalidIndexSignature.ts:4:23 lint/nursery/useConsistentIndexedObjectStyle  FIXABLE  ━━━━━━━━━━━━━━━
+
+  i Use an index signature instead of the Record type.
+  
+    2 │ type Basic = Record<string, any>;
+    3 │ 
+  > 4 │ type WithGeneric<T> = Record<string, T>;
+      │                       ^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ type InGeneric = Generic<Record<string, any>>;
+  
+  i Using one style for object types with arbitrary keys makes the code easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an index signature.
+  
+     2  2 │   type Basic = Record<string, any>;
+     3  3 │   
+     4    │ - type·WithGeneric<T>·=·Record<string,·T>;
+        4 │ + type·WithGeneric<T>·=·{·[key:·string]:·T·};
+     5  5 │   
+     6  6 │   type InGeneric = Generic<Record<string, any>>;
+  
+
+```
+
+```
+invalidIndexSignature.ts:6:26 lint/nursery/useConsistentIndexedObjectStyle  FIXABLE  ━━━━━━━━━━━━━━━
+
+  i Use an index signature instead of the Record type.
+  
+    4 │ type WithGeneric<T> = Record<string, T>;
+    5 │ 
+  > 6 │ type InGeneric = Generic<Record<string, any>>;
+      │                          ^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ type UnionKey = Record<string | number, any>;
+  
+  i Using one style for object types with arbitrary keys makes the code easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an index signature.
+  
+     4  4 │   type WithGeneric<T> = Record<string, T>;
+     5  5 │   
+     6    │ - type·InGeneric·=·Generic<Record<string,·any>>;
+        6 │ + type·InGeneric·=·Generic<{·[key:·string]:·any·}>;
+     7  7 │   
+     8  8 │   type UnionKey = Record<string | number, any>;
+  
+
+```
+
+```
+invalidIndexSignature.ts:8:17 lint/nursery/useConsistentIndexedObjectStyle ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an index signature instead of the Record type.
+  
+     6 │ type InGeneric = Generic<Record<string, any>>;
+     7 │ 
+   > 8 │ type UnionKey = Record<string | number, any>;
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ type ComputedKey = Record<Exclude<"a" | "b" | "c", "a">, any>;
+  
+  i Using one style for object types with arbitrary keys makes the code easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIndexSignature.ts:10:20 lint/nursery/useConsistentIndexedObjectStyle ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an index signature instead of the Record type.
+  
+     8 │ type UnionKey = Record<string | number, any>;
+     9 │ 
+  > 10 │ type ComputedKey = Record<Exclude<"a" | "b" | "c", "a">, any>;
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ type NumberKey = Record<number, any>;
+  
+  i Using one style for object types with arbitrary keys makes the code easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIndexSignature.ts:12:18 lint/nursery/useConsistentIndexedObjectStyle  FIXABLE  ━━━━━━━━━━━━━━
+
+  i Use an index signature instead of the Record type.
+  
+    10 │ type ComputedKey = Record<Exclude<"a" | "b" | "c", "a">, any>;
+    11 │ 
+  > 12 │ type NumberKey = Record<number, any>;
+       │                  ^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ type SymbolKey = Record<symbol, any>;
+  
+  i Using one style for object types with arbitrary keys makes the code easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an index signature.
+  
+    10 10 │   type ComputedKey = Record<Exclude<"a" | "b" | "c", "a">, any>;
+    11 11 │   
+    12    │ - type·NumberKey·=·Record<number,·any>;
+       12 │ + type·NumberKey·=·{·[key:·number]:·any·};
+    13 13 │   
+    14 14 │   type SymbolKey = Record<symbol, any>;
+  
+
+```
+
+```
+invalidIndexSignature.ts:14:18 lint/nursery/useConsistentIndexedObjectStyle  FIXABLE  ━━━━━━━━━━━━━━
+
+  i Use an index signature instead of the Record type.
+  
+    12 │ type NumberKey = Record<number, any>;
+    13 │ 
+  > 14 │ type SymbolKey = Record<symbol, any>;
+       │                  ^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ function parameter(arg: Record<string, any>) {}
+  
+  i Using one style for object types with arbitrary keys makes the code easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an index signature.
+  
+    12 12 │   type NumberKey = Record<number, any>;
+    13 13 │   
+    14    │ - type·SymbolKey·=·Record<symbol,·any>;
+       14 │ + type·SymbolKey·=·{·[key:·symbol]:·any·};
+    15 15 │   
+    16 16 │   function parameter(arg: Record<string, any>) {}
+  
+
+```
+
+```
+invalidIndexSignature.ts:16:25 lint/nursery/useConsistentIndexedObjectStyle  FIXABLE  ━━━━━━━━━━━━━━
+
+  i Use an index signature instead of the Record type.
+  
+    14 │ type SymbolKey = Record<symbol, any>;
+    15 │ 
+  > 16 │ function parameter(arg: Record<string, any>) {}
+       │                         ^^^^^^^^^^^^^^^^^^^
+    17 │ 
+    18 │ function returnType(): Record<string, any> {}
+  
+  i Using one style for object types with arbitrary keys makes the code easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an index signature.
+  
+    14 14 │   type SymbolKey = Record<symbol, any>;
+    15 15 │   
+    16    │ - function·parameter(arg:·Record<string,·any>)·{}
+       16 │ + function·parameter(arg:·{·[key:·string]:·any·})·{}
+    17 17 │   
+    18 18 │   function returnType(): Record<string, any> {}
+  
+
+```
+
+```
+invalidIndexSignature.ts:18:24 lint/nursery/useConsistentIndexedObjectStyle  FIXABLE  ━━━━━━━━━━━━━━
+
+  i Use an index signature instead of the Record type.
+  
+    16 │ function parameter(arg: Record<string, any>) {}
+    17 │ 
+  > 18 │ function returnType(): Record<string, any> {}
+       │                        ^^^^^^^^^^^^^^^^^^^
+    19 │ 
+    20 │ type CommentInRecord = Record<string, /* preserve me */ number>;
+  
+  i Using one style for object types with arbitrary keys makes the code easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an index signature.
+  
+    16 16 │   function parameter(arg: Record<string, any>) {}
+    17 17 │   
+    18    │ - function·returnType():·Record<string,·any>·{}
+       18 │ + function·returnType():·{·[key:·string]:·any·}·{}
+    19 19 │   
+    20 20 │   type CommentInRecord = Record<string, /* preserve me */ number>;
+  
+
+```
+
+```
+invalidIndexSignature.ts:20:24 lint/nursery/useConsistentIndexedObjectStyle ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an index signature instead of the Record type.
+  
+    18 │ function returnType(): Record<string, any> {}
+    19 │ 
+  > 20 │ type CommentInRecord = Record<string, /* preserve me */ number>;
+       │                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ interface Extending extends Record<string, any> {}
+  
+  i Using one style for object types with arbitrary keys makes the code easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIndexSignature.ts:22:29 lint/nursery/useConsistentIndexedObjectStyle ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an index signature instead of the Record type.
+  
+    20 │ type CommentInRecord = Record<string, /* preserve me */ number>;
+    21 │ 
+  > 22 │ interface Extending extends Record<string, any> {}
+       │                             ^^^^^^^^^^^^^^^^^^^
+    23 │ 
+    24 │ class Implementing implements Record<string, any> {}
+  
+  i Using one style for object types with arbitrary keys makes the code easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIndexSignature.ts:24:31 lint/nursery/useConsistentIndexedObjectStyle ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an index signature instead of the Record type.
+  
+    22 │ interface Extending extends Record<string, any> {}
+    23 │ 
+  > 24 │ class Implementing implements Record<string, any> {}
+       │                               ^^^^^^^^^^^^^^^^^^^
+    25 │ 
+  
+  i Using one style for object types with arbitrary keys makes the code easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

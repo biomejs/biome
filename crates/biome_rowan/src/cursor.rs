@@ -52,7 +52,7 @@ use std::{iter, ops};
 pub(crate) use trivia::{SyntaxTrivia, SyntaxTriviaPiecesIterator};
 
 use crate::cursor::node::Siblings;
-use crate::cursor::node_rc::NodeRc;
+use crate::cursor::node_rc::{NodeRc, OwnedOrShared};
 pub(crate) use crate::cursor::token::SyntaxToken;
 use crate::green::{self, GreenElement, GreenNodeData, GreenTokenData};
 use crate::{
@@ -294,12 +294,12 @@ impl NodeData {
 
 impl NodeRc {
     fn into_green(self) -> GreenElement {
-        match Self::try_unwrap(self) {
-            Ok(data) => match data.kind {
+        match Self::into_data(self) {
+            OwnedOrShared::Owned(data) => match data.kind {
                 NodeKind::Root { green } => green,
                 NodeKind::Child { green, .. } => green.to_owned(),
             },
-            Err(ptr) => ptr.green().to_owned(),
+            OwnedOrShared::Shared(ptr) => ptr.green().to_owned(),
         }
     }
 
@@ -322,7 +322,7 @@ impl NodeRc {
     /// Return a clone of this node with the specified range of slots replaced
     /// with the elements of the provided iterator
     #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
-    fn splice_slots<R, I>(mut self, range: R, replace_with: I) -> Self
+    fn splice_slots<R, I>(self, range: R, replace_with: I) -> Self
     where
         R: ops::RangeBounds<usize>,
         I: Iterator<Item = Option<green::GreenElement>>,
@@ -332,6 +332,11 @@ impl NodeRc {
             NodeOrToken::Token(_) => panic!("called splice_slots on a token node"),
         };
 
+        self.into_root_with_green(green)
+    }
+
+    /// Returns a root node holding `green`.
+    fn into_root_with_green(mut self, green: GreenElement) -> Self {
         // Try to reuse the underlying memory allocation if self is the only
         // outstanding reference to this NodeData
         match self.get_mut() {

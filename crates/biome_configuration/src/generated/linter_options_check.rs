@@ -1600,6 +1600,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::no_tailwind_arbitrary_value::NoTailwindArbitraryValueOptions,
         >(),
     ));
+    result.push(("nursery", "noTailwindConflictingClasses", TypeId::of::<biome_rule_options::no_tailwind_conflicting_classes::NoTailwindConflictingClassesOptions>()));
     result.push((
         "nursery",
         "noTailwindLegacyUtilities",
@@ -1924,6 +1925,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noUselessBind",
+        TypeId::of::<biome_rule_options::no_useless_bind::NoUselessBindOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noUselessCall",
         TypeId::of::<biome_rule_options::no_useless_call::NoUselessCallOptions>(),
     ));
@@ -2205,6 +2211,12 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "correctness",
         "noVueDuplicateKeys",
         TypeId::of::<biome_rule_options::no_vue_duplicate_keys::NoVueDuplicateKeysOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noVueDuplicateVElseIf",
+        TypeId::of::<biome_rule_options::no_vue_duplicate_v_else_if::NoVueDuplicateVElseIfOptions>(
+        ),
     ));
     result.push((
         "nursery",
@@ -2634,6 +2646,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::use_consistent_heading_level::UseConsistentHeadingLevelOptions,
         >(),
     ));
+    result.push(("nursery", "useConsistentIndexedObjectStyle", TypeId::of::<biome_rule_options::use_consistent_indexed_object_style::UseConsistentIndexedObjectStyleOptions>()));
     result.push((
         "nursery",
         "useConsistentJsonFileRead",

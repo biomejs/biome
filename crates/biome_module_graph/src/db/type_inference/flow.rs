@@ -2,16 +2,20 @@
 //!
 //! Collection records the incoming flow of each refinable read and the guards
 //! that the conditions of its execution root apply (see
-//! [`crate::js_module_info::flow`]). This module resolves the read's binding
-//! type and applies those guards along every path that reaches the read.
+//! [`crate::js_module_info::flow`]). This module resolves the type that the
+//! read's subject starts from and applies those guards along every path that
+//! reaches the read. A variable starts from its declared type. The declared
+//! type of a property path at a read is the type of the member access there,
+//! given the narrowed type of its object, as TypeScript types property reads.
 
 use super::{ImportResolution, ResolutionCtx, resolve_local_type_on_demand};
 use crate::db::queries::{
-    BindingTypeInput, FlowBindingRootInput, FlowBindingTypeInput, infer_flow_binding_baseline,
-    infer_flow_binding_states, infer_flow_binding_type,
+    BindingTypeInput, FlowSubjectRootInput, FlowSubjectTypeInput, infer_flow_binding_baseline,
+    infer_flow_subject_states, infer_flow_subject_type,
 };
 use crate::js_module_info::flow::{
-    FlowGuard, FlowNode, FlowNodeId, FlowTest, RootFlow, guard_signature,
+    FlowGuard, FlowNode, FlowNodeId, FlowSubject, FlowSubjectId, FlowTest, RootFlow,
+    guard_signature,
 };
 use crate::{JsModuleInfo, ModuleDb, ModuleInfo};
 use biome_js_syntax::JsIdentifierExpression;
@@ -44,21 +48,25 @@ pub(in crate::db) fn flow_binding_baseline<'db>(
     info: &JsModuleInfo,
     range: TextRange,
 ) -> Option<TypeData<'db>> {
+    // The declared type is resolved from the raw binding type, not through a
+    // declaration query, because declaration queries can erase a cyclic
+    // object's shape. The raw type still lets flow detect an impossible branch
+    // and return an unknown override.
     let reference = info.raw_binding_types.get(&range)?;
     let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
     let declared = ctx.resolve(reference);
     ctx.narrowing_baseline(declared)
 }
 
-pub(in crate::db) fn flow_binding_states<'db>(
+pub(in crate::db) fn flow_subject_states<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
     info: &JsModuleInfo,
-    input: FlowBindingRootInput<'db>,
+    input: FlowSubjectRootInput<'db>,
 ) -> Option<Box<[(FlowNodeId, TypeData<'db>)]>> {
     let root = info.flow.root(input.root(db))?;
-    let binding = input.binding(db);
-    let points = root.read_points(binding.range(db));
+    let subject = input.subject(db);
+    let points = root.read_points(subject);
     if points.is_empty() {
         return None;
     }
@@ -67,15 +75,15 @@ pub(in crate::db) fn flow_binding_states<'db>(
         return None;
     }
     let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
-    let states = ctx.solve_binding(root, points, binding.range(db), baseline)?;
+    let states = ctx.solve_subject(root, points, subject, baseline)?;
     Some(points.iter().copied().zip(states).collect())
 }
 
-pub(in crate::db) fn flow_binding_type<'db>(
+pub(in crate::db) fn flow_subject_type<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
     info: &JsModuleInfo,
-    input: FlowBindingTypeInput<'db>,
+    input: FlowSubjectTypeInput<'db>,
 ) -> Option<TypeData<'db>> {
     let states = input.states(db);
     let root = info.flow.root(states.root(db))?;
@@ -83,12 +91,11 @@ pub(in crate::db) fn flow_binding_type<'db>(
     if point as usize >= root.nodes.len() {
         return None;
     }
-    let binding = states.binding(db);
     let baseline = states.baseline(db)?;
     if baseline == TypeData::Unknown {
         return Some(TypeData::Unknown);
     }
-    let shared = infer_flow_binding_states(db, states).and_then(|states| {
+    let shared = infer_flow_subject_states(db, states).and_then(|states| {
         let index = states
             .binary_search_by_key(&point, |(point, _)| *point)
             .ok()?;
@@ -98,7 +105,7 @@ pub(in crate::db) fn flow_binding_type<'db>(
         Some(narrowed) => narrowed,
         None => {
             let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
-            match ctx.solve_binding(root, &[point], binding.range(db), baseline) {
+            match ctx.solve_subject(root, &[point], states.subject(db), baseline) {
                 Some(states) => states[0],
                 None => return Some(TypeData::Unknown),
             }
@@ -290,22 +297,34 @@ impl<'db> ResolutionCtx<'db, '_> {
         self.local_flow.is_some()
     }
 
+    /// Returns the narrowed type of the variable read at `identifier`.
+    ///
+    /// Returns `None` when collection kept no flow for the read, when no
+    /// runtime test can change the variable's type, or when narrowing leaves
+    /// it unchanged.
     pub(super) fn narrow_reference(
         &mut self,
         identifier: &JsIdentifierExpression,
     ) -> Option<TypeData<'db>> {
-        let read = self.js_info.flow.read(identifier.range())?;
-        let binding = BindingTypeInput::new(self.db, self.module, read.binding);
-        let baseline = if self.evaluates_flow_locally() {
-            self.local_binding_baseline(read.binding)
-        } else {
-            infer_flow_binding_baseline(self.db, binding)
+        let info = self.js_info;
+        let read = info.flow.read(identifier.range())?;
+        let &FlowSubject::Binding(binding) = info.flow.root(read.root)?.subject(read.subject)?
+        else {
+            return None;
         };
-        infer_flow_binding_type(
-            self.db,
-            FlowBindingTypeInput::new(
+        let baseline = if self.evaluates_flow_locally() {
+            self.local_binding_baseline(binding)
+        } else {
+            infer_flow_binding_baseline(
                 self.db,
-                FlowBindingRootInput::new(self.db, binding, read.root, baseline),
+                BindingTypeInput::new(self.db, self.module, binding),
+            )
+        };
+        infer_flow_subject_type(
+            self.db,
+            FlowSubjectTypeInput::new(
+                self.db,
+                FlowSubjectRootInput::new(self.db, self.module, read.root, read.subject, baseline),
                 read.point,
             ),
         )
@@ -318,6 +337,9 @@ impl<'db> ResolutionCtx<'db, '_> {
         if let Some(baseline) = self.local_flow.as_ref()?.baselines.get(&binding) {
             return *baseline;
         }
+        // The declared type is resolved from the raw binding type, not through
+        // a declaration query, so a cyclic object keeps its shape, as in
+        // `flow_binding_baseline`.
         let baseline = self
             .js_info
             .raw_binding_types
@@ -334,7 +356,32 @@ impl<'db> ResolutionCtx<'db, '_> {
         baseline
     }
 
-    /// Returns the type that narrowing of a binding whose declared type is
+    /// Returns the narrowed type of the property path read by the member
+    /// expression at `member`, given its `declared` type there: the type of
+    /// the member access with its object's narrowed type.
+    ///
+    /// Returns `None` when collection kept no flow for the read, when no
+    /// runtime test can change `declared`, or when narrowing leaves it
+    /// unchanged. Reads of the same path with equal declared types share one
+    /// solve.
+    pub(super) fn narrow_path(
+        &mut self,
+        member: TextRange,
+        declared: TypeData<'db>,
+    ) -> Option<TypeData<'db>> {
+        let read = self.js_info.flow.read(member)?;
+        let baseline = self.narrowing_baseline(declared);
+        infer_flow_subject_type(
+            self.db,
+            FlowSubjectTypeInput::new(
+                self.db,
+                FlowSubjectRootInput::new(self.db, self.module, read.root, read.subject, baseline),
+                read.point,
+            ),
+        )
+    }
+
+    /// Returns the type that narrowing of a subject whose declared type is
     /// `declared` starts from: `declared` with its unions, aliases, and
     /// `typeof` types flattened.
     ///
@@ -342,10 +389,6 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// contains `any` or an undetermined member, and `Unknown` when flattening
     /// exceeds its work limit.
     fn narrowing_baseline(&mut self, declared: TypeData<'db>) -> Option<TypeData<'db>> {
-        // The declared type is resolved from the raw binding type, not through
-        // a declaration query: declaration queries can erase a cyclic object's
-        // shape, while the raw type still lets flow detect an impossible
-        // branch and return an unknown override.
         match self.flow_baseline(declared) {
             Some(baseline) if is_narrowing_invariant(baseline) => None,
             Some(baseline) => Some(baseline),
@@ -353,18 +396,18 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
-    /// Returns the type of `binding` at each of `points`, given its `baseline`
+    /// Returns the type of `subject` at each of `points`, given its `baseline`
     /// type at the root's start, or `None` when the walk or the solve exceeds
     /// the flow work limit.
-    fn solve_binding(
+    fn solve_subject(
         &mut self,
         root: &RootFlow,
         points: &[FlowNodeId],
-        binding: TextRange,
+        subject: FlowSubjectId,
         baseline: TypeData<'db>,
     ) -> Option<Vec<TypeData<'db>>> {
         let reaching = ReachingFlow::new(root, points)?;
-        let states = self.solve_flow(root, &reaching, binding, baseline)?;
+        let states = self.solve_flow(root, &reaching, subject, baseline)?;
         Some(
             reaching
                 .points
@@ -412,14 +455,14 @@ impl<'db> ResolutionCtx<'db, '_> {
         None
     }
 
-    /// Returns the type of `binding` at every node of `reaching`, given its
+    /// Returns the type of `subject` at every node of `reaching`, given its
     /// `baseline` type at the root's start, or `None` when the solve exceeds
     /// the flow work limit.
     fn solve_flow(
         &mut self,
         root: &RootFlow,
         reaching: &ReachingFlow,
-        binding: TextRange,
+        subject: FlowSubjectId,
         baseline: TypeData<'db>,
     ) -> Option<Vec<TypeData<'db>>> {
         let count = reaching.nodes.len();
@@ -461,7 +504,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     if incoming == TypeData::NeverKeyword {
                         incoming
                     } else {
-                        self.apply_guard(root, *guard, binding, incoming, &mut remaining)?
+                        self.apply_guard(root, *guard, subject, incoming, &mut remaining)?
                     }
                 }
             };
@@ -478,13 +521,13 @@ impl<'db> ResolutionCtx<'db, '_> {
         Some(states)
     }
 
-    /// Returns the type of `binding` after the guard at `guard` holds, given
+    /// Returns the type of `subject` after the guard at `guard` holds, given
     /// its incoming type `ty`, or `None` when the flow work limit runs out.
     fn apply_guard(
         &mut self,
         root: &RootFlow,
         guard: usize,
-        binding: TextRange,
+        subject: FlowSubjectId,
         ty: TypeData<'db>,
         remaining: &mut usize,
     ) -> Option<TypeData<'db>> {
@@ -496,11 +539,11 @@ impl<'db> ResolutionCtx<'db, '_> {
             FlowGuard::Keep => ty,
             FlowGuard::Incomplete => TypeData::Unknown,
             FlowGuard::Test {
-                binding: tested,
+                subject: tested,
                 test,
                 positive,
             } => {
-                if *tested != binding {
+                if *tested != subject {
                     return Some(ty);
                 }
                 match self.test_predicate(*test) {
@@ -513,11 +556,11 @@ impl<'db> ResolutionCtx<'db, '_> {
                 right,
                 sequential,
             } => {
-                let left = self.apply_guard(root, *left, binding, ty, remaining)?;
+                let left = self.apply_guard(root, *left, subject, ty, remaining)?;
                 let right = self.apply_guard(
                     root,
                     *right,
-                    binding,
+                    subject,
                     if *sequential { left } else { ty },
                     remaining,
                 )?;
@@ -612,6 +655,7 @@ mod tests {
                 },
             ]),
             guards: Box::from([FlowGuard::Keep]),
+            subjects: Box::default(),
             read_points: Default::default(),
         };
         let reaching = ReachingFlow::new(&root, &[2]).unwrap();

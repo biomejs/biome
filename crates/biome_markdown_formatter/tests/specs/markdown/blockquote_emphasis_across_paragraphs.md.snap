@@ -1,0 +1,45 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/blockquote_emphasis_across_paragraphs.md
+---
+
+# Input
+
+```md
+> a ___, b
+>
+> c 20__.
+
+> > a ___, b
+> >
+> > c 20__.
+
+> - a ___, b
+>
+>   c 20__.
+
+> a ___, b
+> c 20__.
+
+```
+
+
+# Formatted
+
+```md
+> a ___, b
+>
+> c 20__.
+
+> > a ___, b
+> >
+> > c 20__.
+
+> - a ___, b
+>
+>   c 20__.
+
+> a _**, b
+> c 20**.
+
+```

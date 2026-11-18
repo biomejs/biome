@@ -1256,6 +1256,7 @@ export interface JsonParserConfiguration {
 }
 export interface RuleDomains {
 	astro?: RuleDomainValue;
+	convex?: RuleDomainValue;
 	drizzle?: RuleDomainValue;
 	next?: RuleDomainValue;
 	playwright?: RuleDomainValue;
@@ -3463,6 +3464,11 @@ export interface Nursery {
 	 */
 	noTailwindArbitraryValue?: NoTailwindArbitraryValueConfiguration;
 	/**
+	 * Disallow Tailwind CSS classes that set the same CSS properties on an element.
+	 * See https://biomejs.dev/linter/rules/no-tailwind-conflicting-classes
+	 */
+	noTailwindConflictingClasses?: NoTailwindConflictingClassesConfiguration;
+	/**
 	 * Disallow Tailwind CSS utility classes that Tailwind CSS only keeps for backward compatibility.
 	 * See https://biomejs.dev/linter/rules/no-tailwind-legacy-utilities
 	 */
@@ -3592,6 +3598,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/no-useless-await
 	 */
 	noUselessAwait?: NoUselessAwaitConfiguration;
+	/**
+	 * Disallow unnecessary .bind() calls on functions.
+	 * See https://biomejs.dev/linter/rules/no-useless-bind
+	 */
+	noUselessBind?: NoUselessBindConfiguration;
 	/**
 	 * Disallow unnecessary .call() and .apply().
 	 * See https://biomejs.dev/linter/rules/no-useless-call
@@ -3777,6 +3788,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-v-on-native-modifier
 	 */
 	noVueDeprecatedVOnNativeModifier?: NoVueDeprecatedVOnNativeModifierConfiguration;
+	/**
+	 * Disallow duplicate conditions in v-if / v-else-if chains.
+	 * See https://biomejs.dev/linter/rules/no-vue-duplicate-v-else-if
+	 */
+	noVueDuplicateVElseIf?: NoVueDuplicateVElseIfConfiguration;
 	/**
 	 * Limit the number of props a Vue component can declare.
 	 * See https://biomejs.dev/linter/rules/no-vue-excessive-props
@@ -4057,6 +4073,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/use-consistent-heading-level
 	 */
 	useConsistentHeadingLevel?: UseConsistentHeadingLevelConfiguration;
+	/**
+	 * Require a consistent style for object types with arbitrary keys.
+	 * See https://biomejs.dev/linter/rules/use-consistent-indexed-object-style
+	 */
+	useConsistentIndexedObjectStyle?: UseConsistentIndexedObjectStyleConfiguration;
 	/**
 	 * Enforce a consistent way of reading JSON files before passing them to JSON.parse().
 	 * See https://biomejs.dev/linter/rules/use-consistent-json-file-read
@@ -7097,6 +7118,9 @@ export type NoSyncMethodsConfiguration =
 export type NoTailwindArbitraryValueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTailwindArbitraryValueOptions;
+export type NoTailwindConflictingClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTailwindConflictingClassesOptions;
 export type NoTailwindLegacyUtilitiesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTailwindLegacyUtilitiesOptions;
@@ -7175,6 +7199,9 @@ export type NoUselessAssignmentConfiguration =
 export type NoUselessAwaitConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessAwaitOptions;
+export type NoUselessBindConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessBindOptions;
 export type NoUselessCallConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessCallOptions;
@@ -7286,6 +7313,9 @@ export type NoVueDeprecatedVIsConfiguration =
 export type NoVueDeprecatedVOnNativeModifierConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedVOnNativeModifierOptions;
+export type NoVueDuplicateVElseIfConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDuplicateVElseIfOptions;
 export type NoVueExcessivePropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueExcessivePropsOptions;
@@ -7454,6 +7484,9 @@ export type UseConsistentFunctionStyleConfiguration =
 export type UseConsistentHeadingLevelConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentHeadingLevelOptions;
+export type UseConsistentIndexedObjectStyleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentIndexedObjectStyleOptions;
 export type UseConsistentJsonFileReadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentJsonFileReadOptions;
@@ -10417,6 +10450,10 @@ export interface RuleWithNoTailwindArbitraryValueOptions {
 	level: RulePlainConfiguration;
 	options?: NoTailwindArbitraryValueOptions;
 }
+export interface RuleWithNoTailwindConflictingClassesOptions {
+	level: RulePlainConfiguration;
+	options?: NoTailwindConflictingClassesOptions;
+}
 export interface RuleWithNoTailwindLegacyUtilitiesOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -10544,6 +10581,14 @@ export interface RuleWithNoUselessAwaitOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoUselessAwaitOptions;
+}
+export interface RuleWithNoUselessBindOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoUselessBindOptions;
 }
 export interface RuleWithNoUselessCallOptions {
 	level: RulePlainConfiguration;
@@ -10748,6 +10793,10 @@ export interface RuleWithNoVueDeprecatedVIsOptions {
 export interface RuleWithNoVueDeprecatedVOnNativeModifierOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedVOnNativeModifierOptions;
+}
+export interface RuleWithNoVueDuplicateVElseIfOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueDuplicateVElseIfOptions;
 }
 export interface RuleWithNoVueExcessivePropsOptions {
 	level: RulePlainConfiguration;
@@ -11020,6 +11069,14 @@ export interface RuleWithUseConsistentFunctionStyleOptions {
 export interface RuleWithUseConsistentHeadingLevelOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentHeadingLevelOptions;
+}
+export interface RuleWithUseConsistentIndexedObjectStyleOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseConsistentIndexedObjectStyleOptions;
 }
 export interface RuleWithUseConsistentJsonFileReadOptions {
 	/**
@@ -13947,6 +14004,7 @@ export interface NoTailwindArbitraryValueOptions {
 	 */
 	allowedClasses?: string[];
 }
+export type NoTailwindConflictingClassesOptions = {};
 export type NoTailwindLegacyUtilitiesOptions = {};
 export interface NoTailwindRawColorsOptions {
 	/**
@@ -14028,6 +14086,7 @@ export type NoUnsafeUnaryMinusOptions = {};
 export type NoUnusedClassesOptions = {};
 export type NoUselessAssignmentOptions = {};
 export type NoUselessAwaitOptions = {};
+export type NoUselessBindOptions = {};
 export type NoUselessCallOptions = {};
 export type NoUselessDateGetTimeOptions = {};
 export type NoUselessFallbackInSpreadOptions = {};
@@ -14096,6 +14155,7 @@ export type NoVueDeprecatedSlotScopeOptions = {};
 export type NoVueDeprecatedVBindSyncOptions = {};
 export type NoVueDeprecatedVIsOptions = {};
 export type NoVueDeprecatedVOnNativeModifierOptions = {};
+export type NoVueDuplicateVElseIfOptions = {};
 export interface NoVueExcessivePropsOptions {
 	/**
 	 * The maximum number of props a component can declare.
@@ -14265,6 +14325,12 @@ export interface UseConsistentFunctionStyleOptions {
 	style?: FunctionStyle;
 }
 export type UseConsistentHeadingLevelOptions = {};
+export interface UseConsistentIndexedObjectStyleOptions {
+	/**
+	 * The style that object types with arbitrary keys must use.
+	 */
+	style?: IndexedObjectStyle;
+}
 export interface UseConsistentJsonFileReadOptions {
 	/**
 	 * Whether JSON files should be read as strings or as `Buffer`s before they are passed to `JSON.parse()`.
@@ -15622,6 +15688,7 @@ export type FontWeightNotation = "numeric" | "namedWherePossible";
  * The required form for function definitions: `"expression"` or `"declaration"`.
  */
 export type FunctionStyle = "expression" | "declaration";
+export type IndexedObjectStyle = "record" | "indexSignature";
 export type JsonFileReadAs = "string" | "buffer";
 export type LightnessNotation = "percentage" | "number";
 export type NormalizationForm = "NFC" | "NFD" | "NFKC" | "NFKD";
@@ -16288,6 +16355,7 @@ export type Category =
 	| "lint/nursery/noSvelteUselessDerivedBy"
 	| "lint/nursery/noSyncMethods"
 	| "lint/nursery/noTailwindArbitraryValue"
+	| "lint/nursery/noTailwindConflictingClasses"
 	| "lint/nursery/noTailwindLegacyUtilities"
 	| "lint/nursery/noTailwindRawColors"
 	| "lint/nursery/noTailwindRestrictedClasses"
@@ -16315,6 +16383,7 @@ export type Category =
 	| "lint/nursery/noUselessAssignment"
 	| "lint/nursery/noUselessAwait"
 	| "lint/nursery/noUselessBackrefInRegex"
+	| "lint/nursery/noUselessBind"
 	| "lint/nursery/noUselessCall"
 	| "lint/nursery/noUselessDateGetTime"
 	| "lint/nursery/noUselessFallbackInSpread"
@@ -16352,6 +16421,7 @@ export type Category =
 	| "lint/nursery/noVueDeprecatedVBindSync"
 	| "lint/nursery/noVueDeprecatedVIs"
 	| "lint/nursery/noVueDeprecatedVOnNativeModifier"
+	| "lint/nursery/noVueDuplicateVElseIf"
 	| "lint/nursery/noVueExcessiveProps"
 	| "lint/nursery/noVueExportInScriptSetup"
 	| "lint/nursery/noVueExposeAfterAwait"
@@ -16411,6 +16481,7 @@ export type Category =
 	| "lint/nursery/useConsistentFontWeightNotation"
 	| "lint/nursery/useConsistentFunctionStyle"
 	| "lint/nursery/useConsistentHeadingLevel"
+	| "lint/nursery/useConsistentIndexedObjectStyle"
 	| "lint/nursery/useConsistentJsonFileRead"
 	| "lint/nursery/useConsistentLightnessNotation"
 	| "lint/nursery/useConsistentObjectDefinition"

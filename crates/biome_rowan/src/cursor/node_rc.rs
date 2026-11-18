@@ -1,23 +1,29 @@
-//! Reference-counted handles to red nodes, allocated from a per-thread pool.
+//! Reference-counted handles to red nodes, with a per-thread pool that reuses
+//! their memory.
 //!
-//! Traversals create and drop red nodes ([NodeData]) at a high rate, nearly
-//! always in last-in, first-out order: a walk allocates a child, inspects it,
-//! and drops it before moving to the next one. Going through the global
-//! allocator for each of them costs more than the bookkeeping the node needs,
-//! so the block of a freed node goes on a stack owned by the current thread,
-//! and the next node allocated on that thread takes it back.
+//! A red node ([NodeData]) gives a green node a parent and an absolute offset.
+//! Traversals and accessors create red nodes on demand and drop them soon
+//! after, so walking large trees allocates and frees red nodes at a high rate.
+//! Calling the global allocator for each red node costs more than creating the
+//! node itself. The pool serves most red-node allocations without that call.
 //!
-//! The pool holds at most [MAX_POOLED] blocks per thread; blocks freed beyond
-//! that go back to the global allocator, so the memory a thread retains is
-//! bounded no matter how many nodes it frees at once. Every block, pooled or
-//! not, is allocated with the global allocator and the layout of [NodeBox], so
-//! a block can always be returned to the global allocator directly. That is
-//! what happens when the pool is not available: during and after the
-//! destruction of the thread's locals, which also frees the pooled blocks.
+//! Dropping a node puts its memory block on a stack owned by the current
+//! thread, and the next red node created on that thread takes the most
+//! recently freed block. Taking or returning a block is a single pop or push.
+//!
+//! Each thread keeps at most [MAX_POOLED] blocks. Blocks freed beyond that
+//! limit go straight back to the global allocator, so the memory a thread
+//! retains stays bounded however many nodes it frees at once.
+//!
+//! Every block, pooled or not, comes from the global allocator with the layout
+//! of [NodeBox], so any block can be returned to the global allocator
+//! directly. That happens when the pool is full, and when the pool is
+//! unavailable because the thread's locals are being destroyed or are already
+//! gone. Destroying a pool frees the blocks it holds.
 //!
 //! Red nodes are `!Send`, so a block is normally freed on the thread that
-//! allocated it. Nothing relies on that: a block freed on another thread joins
-//! that thread's pool.
+//! allocated it. The pool does not rely on this. A block freed on another
+//! thread joins the freeing thread's pool.
 
 use super::NodeData;
 use std::alloc::{Layout, alloc, dealloc, handle_alloc_error};
@@ -28,28 +34,23 @@ use std::panic::{RefUnwindSafe, UnwindSafe};
 use std::ptr::NonNull;
 use std::{fmt, process};
 
-/// Maximum number of free blocks a thread keeps for reuse.
+/// Maximum number of free blocks each thread keeps for reuse.
 ///
-/// The cap trades reuse against retained memory. Most frees come one at a
-/// time as a walk moves on, but some come in bursts of thousands, such as
-/// dropping a collection of nodes or unwinding a long ancestor chain. Blocks
-/// freed beyond the cap go back to the global allocator, and the allocations
-/// that follow miss the pool until it refills.
+/// The limit trades memory for speed. A larger limit lets the pool serve more
+/// allocations without calling the global allocator. The difference matters
+/// most after a burst of frees, such as dropping a large collection of nodes.
+/// A smaller pool fills up during the burst and returns the extra blocks to
+/// the global allocator, so the allocations that follow miss the pool.
 ///
-/// Share of red-node allocations served from the pool when linting the VS
-/// Code repository (`src`, pinned to 4 CPUs):
+/// In exchange, a larger limit makes each thread retain more memory. A thread
+/// that has freed any red node holds an array of `MAX_POOLED` pointers, and a
+/// full pool also holds `MAX_POOLED` blocks. The global allocator cannot reuse
+/// pooled blocks for other allocations.
 ///
-/// | Cap    | Default rules | 50 rules |
-/// | -----: | ------------: | -------: |
-/// | 64     | 92.2%         | 81.3%    |
-/// | 1024   | 96.3%         | 89.2%    |
-/// | 8192   | 99.1%         | 97.4%    |
-/// | 65536  | 99.9%         | 99.6%    |
-///
-/// 8192 is where the gain flattens. A full pool holds 320 KiB of blocks plus a
-/// 64 KiB slot array per thread. Larger caps are not free: peak memory in the
-/// same runs grew with the cap, by about 25 MiB at 8192 and 37 MiB at 65536,
-/// more than the pooled blocks themselves account for.
+/// The value is an educated guess from local tests on a large codebase. In
+/// those tests, limits above this value barely increased the share of
+/// allocations the pool served, while peak memory kept growing. The value may
+/// change as more machines and workloads are measured.
 const MAX_POOLED: u32 = 8192;
 
 /// The heap allocation behind a [NodeRc]: the reference count and the node.
@@ -65,6 +66,16 @@ struct NodeBox {
 /// dropped. Like `Rc`, the handle is neither `Send` nor `Sync`.
 pub(super) struct NodeRc {
     ptr: NonNull<NodeBox>,
+}
+
+/// Represents the outcome of moving a node out of its [NodeRc]. The move
+/// succeeds only when no other handle to the node exists.
+pub(super) enum OwnedOrShared {
+    /// Holds the node. No handle to the node remains, and the block that held
+    /// the node is back in the pool or the global allocator.
+    Owned(NodeData),
+    /// Holds the handle unchanged, because other handles to the node exist.
+    Shared(NodeRc),
 }
 
 impl NodeRc {
@@ -88,10 +99,12 @@ impl NodeRc {
         unsafe { &self.ptr.as_ref().count }
     }
 
-    /// Returns the node if this is its only handle, and the handle otherwise.
-    pub(super) fn try_unwrap(this: Self) -> Result<NodeData, Self> {
+    /// Moves the node out of its block, releases the block, and returns
+    /// [OwnedOrShared::Owned] if `this` is the only handle to the node.
+    /// Otherwise, returns `this` unchanged in [OwnedOrShared::Shared].
+    pub(super) fn into_data(this: Self) -> OwnedOrShared {
         if this.count().get() != 1 {
-            return Err(this);
+            return OwnedOrShared::Shared(this);
         }
 
         let this = ManuallyDrop::new(this);
@@ -100,7 +113,7 @@ impl NodeRc {
         unsafe {
             let data = (&raw const (*this.ptr.as_ptr()).data).read();
             release(this.ptr);
-            Ok(data)
+            OwnedOrShared::Owned(data)
         }
     }
 
@@ -126,6 +139,10 @@ impl NodeRc {
     ///
     /// The count of the box behind `ptr` must be zero, and no handle to it may
     /// be used afterwards.
+    // `drop_slow` stays out of line so that each place that drops a handle
+    // inlines only the decrement and test in `Drop::drop`, not this loop. It is
+    // not `#[cold]` because every red node freed by dropping its last handle
+    // passes through here, so it runs about as often as allocation does.
     #[inline(never)]
     unsafe fn drop_slow(mut ptr: NonNull<NodeBox>) {
         loop {

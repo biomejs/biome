@@ -214,7 +214,8 @@ impl SyntaxNodeText {
 /// part of the range that each token covers, in source order.
 ///
 /// Unlike [SyntaxNodeTokenWithRanges], it allocates no red node or token per
-/// token, and it skips subtrees that end before the range starts.
+/// token, and it skips the children that end before the range starts without
+/// visiting them.
 struct GreenChunks<'a> {
     range: TextRange,
     /// For each node the walk has entered, outermost first: its children that
@@ -228,8 +229,25 @@ impl<'a> GreenChunks<'a> {
     fn new(node: &'a GreenNodeData, offset: TextSize, range: TextRange) -> Self {
         Self {
             range,
-            pending_children: vec![(node.slice().iter(), offset)],
+            pending_children: vec![(Self::children_from(node, offset, range.start()), offset)],
         }
+    }
+
+    /// Returns the children of `node`, whose text starts at `offset`, that a
+    /// range starting at `start` can overlap. A node that starts before
+    /// `start` drops the children that end at or before it, which a binary
+    /// search finds because child ends never decrease.
+    fn children_from(
+        node: &'a GreenNodeData,
+        offset: TextSize,
+        start: TextSize,
+    ) -> slice::Iter<'a, Slot> {
+        let slots = node.slice();
+        if offset >= start {
+            return slots.iter();
+        }
+        let first = slots.partition_point(|slot| offset + slot.rel_range().end() <= start);
+        slots[first..].iter()
     }
 }
 
@@ -264,9 +282,8 @@ impl<'a> Iterator for GreenChunks<'a> {
                     }
                 }
                 Slot::Node { node, .. } => {
-                    if start + node.text_len() > self.range.start() {
-                        self.pending_children.push((node.slice().iter(), start));
-                    }
+                    let children = Self::children_from(node, start, self.range.start());
+                    self.pending_children.push((children, start));
                 }
                 Slot::Empty { .. } => {}
             }
@@ -755,9 +772,9 @@ mod tests {
     /// Text of the tree that [build_edge_case_tree] returns.
     const EDGE_CASE_TEXT: &str = "  é界ab é界😀xy ";
 
-    /// Builds a tree with zero-width tokens and nodes, trivia, characters of
-    /// two to four bytes, a node whose only token is trivia, and the same
-    /// subtree at two offsets, which the node cache stores once.
+    /// Builds a tree with zero-width tokens and nodes, an empty slot, trivia,
+    /// characters of two to four bytes, a node whose only token is trivia, and
+    /// the same subtree at two offsets, which the node cache stores once.
     fn build_edge_case_tree() -> SyntaxNode<RawLanguage> {
         let whitespace = [TriviaPiece::whitespace(1)];
         let mut builder = RawSyntaxTreeBuilder::new();
@@ -778,6 +795,9 @@ mod tests {
         shared_subtree(&mut builder);
 
         builder.token(RawLanguageKind::STRING_TOKEN, "ab");
+        // A literal without a token holds an empty slot.
+        builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+        builder.finish_node();
         builder.start_node(RawLanguageKind::BOGUS);
         builder.finish_node();
         shared_subtree(&mut builder);
