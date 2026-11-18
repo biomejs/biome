@@ -236,8 +236,12 @@ impl<'db> InternedExtendsType<'db> {
 ///   have no `BigInt` wrapper.
 /// - `target` has more than 64 members, or members that can't be listed.
 ///
-/// Members that the project adds to a wrapper through `declare global` aren't
-/// seen, so a `target` that requires one gives `NotAssignable`.
+/// The wrapper includes the interfaces that the project merges into it
+/// through `declare global` blocks and through the top-level interfaces of
+/// declaration files without imports or exports. Biome doesn't index the
+/// top-level interfaces of a TypeScript file that isn't a declaration file,
+/// so a `target` that requires a member added only there gives
+/// `NotAssignable`.
 pub(crate) fn primitive_can_satisfy<'db>(
     db: &'db dyn TypeDb,
     kind: TypeofKind,
