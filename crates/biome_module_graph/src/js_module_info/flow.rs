@@ -612,9 +612,11 @@ pub(crate) struct RootFlow {
     /// [`FlowTest::Instanceof`] applies to `x` in `x instanceof Date`, a
     /// comparison of `x.constructor`, and calls to type-guard functions whose
     /// targets have only object types, as `isFoo(x)` with `x is Foo`. A test
-    /// of a property narrows only a union with two object types, and the
-    /// others only a type with an object type or `unknown`, so these subjects
-    /// need no solve when their declared type is not one. Every
+    /// of a property narrows only a union with two object types. The other
+    /// tests narrow only a type with a member other than `null`, `undefined`,
+    /// and the primitives, such as an object type, a type parameter,
+    /// `unknown`, or `any`. So these subjects need no solve when their
+    /// declared type is neither. Every
     /// [`FlowSubject::Pattern`] with reads is one. A call point doesn't count
     /// as a test here, because inference starts a read from the whole
     /// declared type when one of the subject's call points narrows.
