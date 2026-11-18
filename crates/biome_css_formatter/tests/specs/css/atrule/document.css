@@ -22,3 +22,10 @@
 		}
 	}
 }
+
+.form-control > select {
+	@-moz-document url-prefix() {--padding-inline-start:var(--inset-base);
+		color:red;
+		> option { color: blue }
+	}
+}

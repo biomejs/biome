@@ -909,7 +909,7 @@ impl CssDeclarationWithSemicolonBuilder {
 pub fn css_document_at_rule(
     document_token: SyntaxToken,
     matchers: CssDocumentMatcherList,
-    block: AnyCssRuleBlock,
+    block: AnyCssConditionalBlock,
 ) -> CssDocumentAtRule {
     CssDocumentAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_DOCUMENT_AT_RULE,
