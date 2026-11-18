@@ -14,7 +14,7 @@ let nullish: Nullish = null;
 nullish || Promise.reject("logical operator bypass");
 nullish ?? Promise.reject("logical operator bypass");
 
-let either: Truthy | Nullish = 1;
+declare let either: Truthy | Nullish;
 either && Promise.reject("logical operator bypass");
 either || Promise.reject("logical operator bypass");
 either ?? Promise.reject("logical operator bypass");
