@@ -1,0 +1,66 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: ci.yaml
+---
+# Input
+```yaml
+# should generate diagnostics
+name: CI
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Hello"
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Hello"
+  call:
+    uses: ./.github/workflows/reusable.yml
+
+```
+
+# Diagnostics
+```
+ci.yaml:5:3 lint/nursery/useGithubWorkflowJobName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This job doesn't have a name.
+  
+    3 │ on: push
+    4 │ jobs:
+  > 5 │   build:
+      │   ^^^^^
+    6 │     runs-on: ubuntu-latest
+    7 │     steps:
+  
+  i Without a name, GitHub shows the job ID in the workflow run and in pull request checks, which makes jobs harder to understand.
+  
+  i Add a name key to the job that describes what it does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ci.yaml:14:3 lint/nursery/useGithubWorkflowJobName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This job doesn't have a name.
+  
+    12 │     steps:
+    13 │       - run: echo "Hello"
+  > 14 │   call:
+       │   ^^^^
+    15 │     uses: ./.github/workflows/reusable.yml
+    16 │ 
+  
+  i Without a name, GitHub shows the job ID in the workflow run and in pull request checks, which makes jobs harder to understand.
+  
+  i Add a name key to the job that describes what it does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

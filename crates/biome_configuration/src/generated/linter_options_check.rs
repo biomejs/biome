@@ -2872,6 +2872,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useGithubWorkflowJobName",
+        TypeId::of::<
+            biome_rule_options::use_github_workflow_job_name::UseGithubWorkflowJobNameOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "useGithubWorkflowName",
         TypeId::of::<biome_rule_options::use_github_workflow_name::UseGithubWorkflowNameOptions>(),
     ));
