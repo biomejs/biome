@@ -408,6 +408,50 @@ fn test_export_equals_namespace_without_type_inference() {
 }
 
 #[test]
+fn test_export_equals_namespace_with_const_members() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/node_modules/react/index.d.ts".into(),
+        r#"
+            export = React;
+            export as namespace React;
+            declare namespace React {
+                interface ExoticComponent<P = {}> {
+                    (props: P): null;
+                }
+                type ReactNode = string | number | null | undefined;
+                function useState(): void;
+                const StrictMode: ExoticComponent<{ children?: ReactNode | undefined }>;
+                const Fragment: ExoticComponent<{ children?: ReactNode | undefined }>;
+                const version: string;
+            }
+        "#,
+    );
+    let db = build_js_db(
+        &fs,
+        &[BiomePath::new("/node_modules/react/index.d.ts")],
+        false,
+    );
+    let module = db
+        .module_for_path(Utf8Path::new("/node_modules/react/index.d.ts"))
+        .unwrap();
+    for name in ["useState", "StrictMode", "Fragment", "version"] {
+        assert!(
+            matches!(
+                find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, name, module)),
+                JsExportedSymbolLookup::Found(..)
+            ),
+            "`{name}` should be exported through `export =`"
+        );
+    }
+    // Type parameters of members aren't members of the namespace.
+    assert!(!matches!(
+        find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "P", module)),
+        JsExportedSymbolLookup::Found(..)
+    ));
+}
+
+#[test]
 fn test_namespace_import_preserves_members_above_export_step_limit() {
     let fs = MemoryFileSystem::default();
     let exports = (0..1025)
