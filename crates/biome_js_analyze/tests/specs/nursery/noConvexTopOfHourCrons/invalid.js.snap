@@ -1,0 +1,404 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+crons.hourly("cleanup", { minuteUTC: 0 }, internal.tasks.cleanup);
+crons.daily("report", { hourUTC: 9, minuteUTC: 0 }, internal.tasks.report);
+crons.weekly("digest", { dayOfWeek: "monday", hourUTC: 9, minuteUTC: 0 }, internal.tasks.digest);
+crons.monthly("invoice", { day: 1, hourUTC: 9, minuteUTC: 0 }, internal.tasks.invoice);
+crons.hourly("quoted key", { "minuteUTC": 0 }, internal.tasks.cleanup);
+crons.hourly("zero float", { minuteUTC: 0.0 }, internal.tasks.cleanup);
+crons.hourly("parenthesized", ({ minuteUTC: (0) }), internal.tasks.cleanup);
+(crons.hourly)("parenthesized callee", { minuteUTC: 0 }, internal.tasks.cleanup);
+crons?.hourly("optional call", { minuteUTC: 0 }, internal.tasks.cleanup);
+crons.cron("nightly", "0 3 * * *", internal.tasks.nightly);
+crons.cron("every hour", "0 * * * *", internal.tasks.hourly);
+crons.cron("list", "0,30 * * * *", internal.tasks.halfHourly);
+crons.cron("list with zero last", "15,0 * * * *", internal.tasks.list);
+crons.cron("range", "0-5 * * * *", internal.tasks.range);
+crons.cron("step from zero", "0/30 * * * *", internal.tasks.step);
+crons.cron("padded zero", "00 12 * * *", internal.tasks.padded);
+crons.cron("extra whitespace", "  0   3 * * 1  ", internal.tasks.whitespace);
+crons.cron("template", `0 3 * * *`, internal.tasks.template);
+
+```
+
+# Diagnostics
+```
+invalid.js:2:27 lint/nursery/noConvexTopOfHourCrons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This cron job runs at the start of the hour.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ crons.hourly("cleanup", { minuteUTC: 0 }, internal.tasks.cleanup);
+      │                           ^^^^^^^^^^^^
+    3 │ crons.daily("report", { hourUTC: 9, minuteUTC: 0 }, internal.tasks.report);
+    4 │ crons.weekly("digest", { dayOfWeek: "monday", hourUTC: 9, minuteUTC: 0 }, internal.tasks.digest);
+  
+  i Many apps receive the most traffic and scheduled work at minute :00, so a job that runs at that time is more likely to hit your app's limits.
+  
+  i Remove minuteUTC to let Convex pick a minute and spread the runs across the hour, or set it to a minute other than 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:37 lint/nursery/noConvexTopOfHourCrons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This cron job runs at the start of the hour.
+  
+    1 │ /* should generate diagnostics */
+    2 │ crons.hourly("cleanup", { minuteUTC: 0 }, internal.tasks.cleanup);
+  > 3 │ crons.daily("report", { hourUTC: 9, minuteUTC: 0 }, internal.tasks.report);
+      │                                     ^^^^^^^^^^^^
+    4 │ crons.weekly("digest", { dayOfWeek: "monday", hourUTC: 9, minuteUTC: 0 }, internal.tasks.digest);
+    5 │ crons.monthly("invoice", { day: 1, hourUTC: 9, minuteUTC: 0 }, internal.tasks.invoice);
+  
+  i Many apps receive the most traffic and scheduled work at minute :00, so a job that runs at that time is more likely to hit your app's limits.
+  
+  i Remove minuteUTC to let Convex pick a minute and spread the runs across the hour, or set it to a minute other than 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:59 lint/nursery/noConvexTopOfHourCrons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This cron job runs at the start of the hour.
+  
+    2 │ crons.hourly("cleanup", { minuteUTC: 0 }, internal.tasks.cleanup);
+    3 │ crons.daily("report", { hourUTC: 9, minuteUTC: 0 }, internal.tasks.report);
+  > 4 │ crons.weekly("digest", { dayOfWeek: "monday", hourUTC: 9, minuteUTC: 0 }, internal.tasks.digest);
+      │                                                           ^^^^^^^^^^^^
+    5 │ crons.monthly("invoice", { day: 1, hourUTC: 9, minuteUTC: 0 }, internal.tasks.invoice);
+    6 │ crons.hourly("quoted key", { "minuteUTC": 0 }, internal.tasks.cleanup);
+  
+  i Many apps receive the most traffic and scheduled work at minute :00, so a job that runs at that time is more likely to hit your app's limits.
+  
+  i Remove minuteUTC to let Convex pick a minute and spread the runs across the hour, or set it to a minute other than 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:48 lint/nursery/noConvexTopOfHourCrons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This cron job runs at the start of the hour.
+  
+    3 │ crons.daily("report", { hourUTC: 9, minuteUTC: 0 }, internal.tasks.report);
+    4 │ crons.weekly("digest", { dayOfWeek: "monday", hourUTC: 9, minuteUTC: 0 }, internal.tasks.digest);
+  > 5 │ crons.monthly("invoice", { day: 1, hourUTC: 9, minuteUTC: 0 }, internal.tasks.invoice);
+      │                                                ^^^^^^^^^^^^
+    6 │ crons.hourly("quoted key", { "minuteUTC": 0 }, internal.tasks.cleanup);
+    7 │ crons.hourly("zero float", { minuteUTC: 0.0 }, internal.tasks.cleanup);
+  
+  i Many apps receive the most traffic and scheduled work at minute :00, so a job that runs at that time is more likely to hit your app's limits.
+  
+  i Remove minuteUTC to let Convex pick a minute and spread the runs across the hour, or set it to a minute other than 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:30 lint/nursery/noConvexTopOfHourCrons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This cron job runs at the start of the hour.
+  
+    4 │ crons.weekly("digest", { dayOfWeek: "monday", hourUTC: 9, minuteUTC: 0 }, internal.tasks.digest);
+    5 │ crons.monthly("invoice", { day: 1, hourUTC: 9, minuteUTC: 0 }, internal.tasks.invoice);
+  > 6 │ crons.hourly("quoted key", { "minuteUTC": 0 }, internal.tasks.cleanup);
+      │                              ^^^^^^^^^^^^^^
+    7 │ crons.hourly("zero float", { minuteUTC: 0.0 }, internal.tasks.cleanup);
+    8 │ crons.hourly("parenthesized", ({ minuteUTC: (0) }), internal.tasks.cleanup);
+  
+  i Many apps receive the most traffic and scheduled work at minute :00, so a job that runs at that time is more likely to hit your app's limits.
+  
+  i Remove minuteUTC to let Convex pick a minute and spread the runs across the hour, or set it to a minute other than 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:30 lint/nursery/noConvexTopOfHourCrons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This cron job runs at the start of the hour.
+  
+    5 │ crons.monthly("invoice", { day: 1, hourUTC: 9, minuteUTC: 0 }, internal.tasks.invoice);
+    6 │ crons.hourly("quoted key", { "minuteUTC": 0 }, internal.tasks.cleanup);
+  > 7 │ crons.hourly("zero float", { minuteUTC: 0.0 }, internal.tasks.cleanup);
+      │                              ^^^^^^^^^^^^^^
+    8 │ crons.hourly("parenthesized", ({ minuteUTC: (0) }), internal.tasks.cleanup);
+    9 │ (crons.hourly)("parenthesized callee", { minuteUTC: 0 }, internal.tasks.cleanup);
+  
+  i Many apps receive the most traffic and scheduled work at minute :00, so a job that runs at that time is more likely to hit your app's limits.
+  
+  i Remove minuteUTC to let Convex pick a minute and spread the runs across the hour, or set it to a minute other than 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:34 lint/nursery/noConvexTopOfHourCrons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This cron job runs at the start of the hour.
+  
+     6 │ crons.hourly("quoted key", { "minuteUTC": 0 }, internal.tasks.cleanup);
+     7 │ crons.hourly("zero float", { minuteUTC: 0.0 }, internal.tasks.cleanup);
+   > 8 │ crons.hourly("parenthesized", ({ minuteUTC: (0) }), internal.tasks.cleanup);
+       │                                  ^^^^^^^^^^^^^^
+     9 │ (crons.hourly)("parenthesized callee", { minuteUTC: 0 }, internal.tasks.cleanup);
+    10 │ crons?.hourly("optional call", { minuteUTC: 0 }, internal.tasks.cleanup);
+  
+  i Many apps receive the most traffic and scheduled work at minute :00, so a job that runs at that time is more likely to hit your app's limits.
+  
+  i Remove minuteUTC to let Convex pick a minute and spread the runs across the hour, or set it to a minute other than 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:42 lint/nursery/noConvexTopOfHourCrons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This cron job runs at the start of the hour.
+  
+     7 │ crons.hourly("zero float", { minuteUTC: 0.0 }, internal.tasks.cleanup);
+     8 │ crons.hourly("parenthesized", ({ minuteUTC: (0) }), internal.tasks.cleanup);
+   > 9 │ (crons.hourly)("parenthesized callee", { minuteUTC: 0 }, internal.tasks.cleanup);
+       │                                          ^^^^^^^^^^^^
+    10 │ crons?.hourly("optional call", { minuteUTC: 0 }, internal.tasks.cleanup);
+    11 │ crons.cron("nightly", "0 3 * * *", internal.tasks.nightly);
+  
+  i Many apps receive the most traffic and scheduled work at minute :00, so a job that runs at that time is more likely to hit your app's limits.
+  
+  i Remove minuteUTC to let Convex pick a minute and spread the runs across the hour, or set it to a minute other than 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:34 lint/nursery/noConvexTopOfHourCrons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This cron job runs at the start of the hour.
+  
+     8 │ crons.hourly("parenthesized", ({ minuteUTC: (0) }), internal.tasks.cleanup);
+     9 │ (crons.hourly)("parenthesized callee", { minuteUTC: 0 }, internal.tasks.cleanup);
+  > 10 │ crons?.hourly("optional call", { minuteUTC: 0 }, internal.tasks.cleanup);
+       │                                  ^^^^^^^^^^^^
+    11 │ crons.cron("nightly", "0 3 * * *", internal.tasks.nightly);
+    12 │ crons.cron("every hour", "0 * * * *", internal.tasks.hourly);
+  
+  i Many apps receive the most traffic and scheduled work at minute :00, so a job that runs at that time is more likely to hit your app's limits.
+  
+  i Remove minuteUTC to let Convex pick a minute and spread the runs across the hour, or set it to a minute other than 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:23 lint/nursery/noConvexTopOfHourCrons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This cron job runs at the start of the hour.
+  
+     9 │ (crons.hourly)("parenthesized callee", { minuteUTC: 0 }, internal.tasks.cleanup);
+    10 │ crons?.hourly("optional call", { minuteUTC: 0 }, internal.tasks.cleanup);
+  > 11 │ crons.cron("nightly", "0 3 * * *", internal.tasks.nightly);
+       │                       ^^^^^^^^^^^
+    12 │ crons.cron("every hour", "0 * * * *", internal.tasks.hourly);
+    13 │ crons.cron("list", "0,30 * * * *", internal.tasks.halfHourly);
+  
+  i Many apps receive the most traffic and scheduled work at minute :00, so a job that runs at that time is more likely to hit your app's limits.
+  
+  i Use hourly() or daily() without minuteUTC to let Convex pick a minute, use interval() if the job doesn't need to follow the clock, or use a minute other than 0 in the cron expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:26 lint/nursery/noConvexTopOfHourCrons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This cron job runs at the start of the hour.
+  
+    10 │ crons?.hourly("optional call", { minuteUTC: 0 }, internal.tasks.cleanup);
+    11 │ crons.cron("nightly", "0 3 * * *", internal.tasks.nightly);
+  > 12 │ crons.cron("every hour", "0 * * * *", internal.tasks.hourly);
+       │                          ^^^^^^^^^^^
+    13 │ crons.cron("list", "0,30 * * * *", internal.tasks.halfHourly);
+    14 │ crons.cron("list with zero last", "15,0 * * * *", internal.tasks.list);
+  
+  i Many apps receive the most traffic and scheduled work at minute :00, so a job that runs at that time is more likely to hit your app's limits.
+  
+  i Use hourly() or daily() without minuteUTC to let Convex pick a minute, use interval() if the job doesn't need to follow the clock, or use a minute other than 0 in the cron expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:20 lint/nursery/noConvexTopOfHourCrons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This cron job runs at the start of the hour.
+  
+    11 │ crons.cron("nightly", "0 3 * * *", internal.tasks.nightly);
+    12 │ crons.cron("every hour", "0 * * * *", internal.tasks.hourly);
+  > 13 │ crons.cron("list", "0,30 * * * *", internal.tasks.halfHourly);
+       │                    ^^^^^^^^^^^^^^
+    14 │ crons.cron("list with zero last", "15,0 * * * *", internal.tasks.list);
+    15 │ crons.cron("range", "0-5 * * * *", internal.tasks.range);
+  
+  i Many apps receive the most traffic and scheduled work at minute :00, so a job that runs at that time is more likely to hit your app's limits.
+  
+  i Use hourly() or daily() without minuteUTC to let Convex pick a minute, use interval() if the job doesn't need to follow the clock, or use a minute other than 0 in the cron expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:35 lint/nursery/noConvexTopOfHourCrons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This cron job runs at the start of the hour.
+  
+    12 │ crons.cron("every hour", "0 * * * *", internal.tasks.hourly);
+    13 │ crons.cron("list", "0,30 * * * *", internal.tasks.halfHourly);
+  > 14 │ crons.cron("list with zero last", "15,0 * * * *", internal.tasks.list);
+       │                                   ^^^^^^^^^^^^^^
+    15 │ crons.cron("range", "0-5 * * * *", internal.tasks.range);
+    16 │ crons.cron("step from zero", "0/30 * * * *", internal.tasks.step);
+  
+  i Many apps receive the most traffic and scheduled work at minute :00, so a job that runs at that time is more likely to hit your app's limits.
+  
+  i Use hourly() or daily() without minuteUTC to let Convex pick a minute, use interval() if the job doesn't need to follow the clock, or use a minute other than 0 in the cron expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:21 lint/nursery/noConvexTopOfHourCrons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This cron job runs at the start of the hour.
+  
+    13 │ crons.cron("list", "0,30 * * * *", internal.tasks.halfHourly);
+    14 │ crons.cron("list with zero last", "15,0 * * * *", internal.tasks.list);
+  > 15 │ crons.cron("range", "0-5 * * * *", internal.tasks.range);
+       │                     ^^^^^^^^^^^^^
+    16 │ crons.cron("step from zero", "0/30 * * * *", internal.tasks.step);
+    17 │ crons.cron("padded zero", "00 12 * * *", internal.tasks.padded);
+  
+  i Many apps receive the most traffic and scheduled work at minute :00, so a job that runs at that time is more likely to hit your app's limits.
+  
+  i Use hourly() or daily() without minuteUTC to let Convex pick a minute, use interval() if the job doesn't need to follow the clock, or use a minute other than 0 in the cron expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:30 lint/nursery/noConvexTopOfHourCrons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This cron job runs at the start of the hour.
+  
+    14 │ crons.cron("list with zero last", "15,0 * * * *", internal.tasks.list);
+    15 │ crons.cron("range", "0-5 * * * *", internal.tasks.range);
+  > 16 │ crons.cron("step from zero", "0/30 * * * *", internal.tasks.step);
+       │                              ^^^^^^^^^^^^^^
+    17 │ crons.cron("padded zero", "00 12 * * *", internal.tasks.padded);
+    18 │ crons.cron("extra whitespace", "  0   3 * * 1  ", internal.tasks.whitespace);
+  
+  i Many apps receive the most traffic and scheduled work at minute :00, so a job that runs at that time is more likely to hit your app's limits.
+  
+  i Use hourly() or daily() without minuteUTC to let Convex pick a minute, use interval() if the job doesn't need to follow the clock, or use a minute other than 0 in the cron expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:27 lint/nursery/noConvexTopOfHourCrons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This cron job runs at the start of the hour.
+  
+    15 │ crons.cron("range", "0-5 * * * *", internal.tasks.range);
+    16 │ crons.cron("step from zero", "0/30 * * * *", internal.tasks.step);
+  > 17 │ crons.cron("padded zero", "00 12 * * *", internal.tasks.padded);
+       │                           ^^^^^^^^^^^^^
+    18 │ crons.cron("extra whitespace", "  0   3 * * 1  ", internal.tasks.whitespace);
+    19 │ crons.cron("template", `0 3 * * *`, internal.tasks.template);
+  
+  i Many apps receive the most traffic and scheduled work at minute :00, so a job that runs at that time is more likely to hit your app's limits.
+  
+  i Use hourly() or daily() without minuteUTC to let Convex pick a minute, use interval() if the job doesn't need to follow the clock, or use a minute other than 0 in the cron expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:32 lint/nursery/noConvexTopOfHourCrons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This cron job runs at the start of the hour.
+  
+    16 │ crons.cron("step from zero", "0/30 * * * *", internal.tasks.step);
+    17 │ crons.cron("padded zero", "00 12 * * *", internal.tasks.padded);
+  > 18 │ crons.cron("extra whitespace", "  0   3 * * 1  ", internal.tasks.whitespace);
+       │                                ^^^^^^^^^^^^^^^^^
+    19 │ crons.cron("template", `0 3 * * *`, internal.tasks.template);
+    20 │ 
+  
+  i Many apps receive the most traffic and scheduled work at minute :00, so a job that runs at that time is more likely to hit your app's limits.
+  
+  i Use hourly() or daily() without minuteUTC to let Convex pick a minute, use interval() if the job doesn't need to follow the clock, or use a minute other than 0 in the cron expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:24 lint/nursery/noConvexTopOfHourCrons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This cron job runs at the start of the hour.
+  
+    17 │ crons.cron("padded zero", "00 12 * * *", internal.tasks.padded);
+    18 │ crons.cron("extra whitespace", "  0   3 * * 1  ", internal.tasks.whitespace);
+  > 19 │ crons.cron("template", `0 3 * * *`, internal.tasks.template);
+       │                        ^^^^^^^^^^^
+    20 │ 
+  
+  i Many apps receive the most traffic and scheduled work at minute :00, so a job that runs at that time is more likely to hit your app's limits.
+  
+  i Use hourly() or daily() without minuteUTC to let Convex pick a minute, use interval() if the job doesn't need to follow the clock, or use a minute other than 0 in the cron expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
