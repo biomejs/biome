@@ -559,12 +559,13 @@ pub(crate) fn instance_types<'db>(
 /// A class or an interface is derived from a class or an interface when its
 /// `extends` clauses lead to the same declaration, whatever their type
 /// arguments, so `Box<string>` is derived from `Box`. An instance of a class
-/// is not derived from an interface that the class implements. Arrays and
-/// tuples are derived from `Array`, every object type is derived from `{}`,
-/// and every object type other than `{}` is derived from `Object`. Nothing is
-/// derived from a type literal, a function type, a primitive, `object`, or
-/// another type without a declaration, and none of these is derived from a
-/// class or an interface.
+/// is not derived from an interface that the class implements. Arrays,
+/// tuples, and types derived from `ReadonlyArray`, such as
+/// `ReadonlyArray<string>`, are derived from `Array`. Every object type is
+/// derived from `{}`, and every object type other than `{}` is derived from
+/// `Object`. Nothing is derived from a type literal, a function type, a
+/// primitive, `object`, or another type without a declaration, and none of
+/// these is derived from a class or an interface.
 ///
 /// Biome identifies a declaration by the contents that it collects and by
 /// the handle that names it when Biome reaches it through one, as for a class
@@ -3633,10 +3634,11 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
     }
 
     /// Returns whether the `extends` clauses of the class or interface
-    /// `source` lead to the declaration `target`, or `None` when Biome can't
-    /// tell, as when a parent doesn't resolve or the walk exceeds its work
-    /// limit. `depth` limits the nesting of the walk, and `visited` holds the
-    /// declarations already walked, which the walk doesn't enter again.
+    /// `source` lead to the declaration `target`, or to `ReadonlyArray` when
+    /// `target` is `Array`. Returns `None` when Biome can't tell, as when a
+    /// parent doesn't resolve or the walk exceeds its work limit. `depth`
+    /// limits the nesting of the walk, and `visited` holds the declarations
+    /// already walked, which the walk doesn't enter again.
     fn declaration_derives(
         &mut self,
         source: Declaration<'db>,
@@ -3649,6 +3651,11 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         }
         self.remaining_steps = self.remaining_steps.checked_sub(1)?;
         if self.is_same_declaration(source, target)? {
+            return Some(true);
+        }
+        // Neither `Array` nor `ReadonlyArray` extends the other, but every
+        // readonly array is an `Array` at runtime.
+        if target.data.is_array_class(self.db) && source.data.is_readonly_array_interface(self.db) {
             return Some(true);
         }
         if !visited.insert(source.data) {
