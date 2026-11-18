@@ -2767,10 +2767,12 @@ impl RootBuilder<'_, '_> {
     /// Records reads and branches while evaluating `node` from `incoming`, and
     /// returns the flow after it.
     ///
-    /// Expressions are evaluated in the order in which JavaScript runs them. A
-    /// destructuring assignment evaluates its right operand before its
-    /// pattern. Any other node evaluates its children in source order, which
-    /// is the order in which they run.
+    /// Expressions are evaluated in the order in which JavaScript runs them,
+    /// except a destructuring assignment. It evaluates its pattern, defaults
+    /// included, before its right operand, as TypeScript's binder does,
+    /// although JavaScript runs the right operand first, and writes its
+    /// targets after the right operand. Any other node evaluates its children
+    /// in source order, which is the order in which they run.
     ///
     /// A part that runs only on some paths starts from the condition under
     /// which it runs, as in TypeScript. The right operand of `&&`, `||`, and
@@ -4010,8 +4012,10 @@ impl RootBuilder<'_, '_> {
         }
     }
 
-    /// Evaluates the initializer of `declarator`, then its binding pattern,
-    /// from `incoming`, and returns the flow after them.
+    /// Evaluates the binding pattern of `declarator`, defaults included, then
+    /// its initializer, from `incoming`, as TypeScript's binder orders a
+    /// declaration, and returns the flow after them. The writes of the
+    /// declared variables follow the initializer.
     fn declarator(
         &mut self,
         declarator: &JsVariableDeclarator,
@@ -4207,8 +4211,9 @@ impl RootBuilder<'_, '_> {
 
     /// Evaluates `pattern`, the binding pattern of a declaration, a
     /// parameter, or a `catch` clause, from `incoming` and returns the flow
-    /// after it. `incoming` is the flow after the value that `pattern`
-    /// destructures, and `pattern` lies at `depth`.
+    /// after it, before any variable that it declares is written. `pattern`
+    /// lies at `depth`. A declaration evaluates its pattern before its
+    /// initializer, so `incoming` is then the flow before the initializer.
     ///
     /// The elements run in source order. Each element evaluates its computed
     /// key, then its default, then its nested pattern. A default runs only
