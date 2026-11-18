@@ -1,0 +1,3 @@
+# should not generate diagnostics
+name: 2024
+on: push
